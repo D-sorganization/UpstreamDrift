@@ -485,6 +485,384 @@ class ModalShaftModel(ShaftModel):
         return self.get_state()
 
 
+class FiniteElementShaftModel(ShaftModel):
+    """Finite element beam model for shaft dynamics.
+
+    Implements Euler-Bernoulli beam elements with:
+    - Distributed stiffness (varying EI along shaft)
+    - Consistent mass matrix
+    - Rayleigh damping
+    - Cantilevered boundary conditions
+
+    Issue #756: Full FE implementation for cross-engine shaft modeling.
+    """
+
+    def __init__(self, n_elements: int = 10) -> None:
+        """Initialize FE shaft model.
+
+        Args:
+            n_elements: Number of finite elements
+        """
+        self.n_elements = n_elements
+        self.n_nodes = n_elements + 1
+        self.n_dof = 2 * self.n_nodes  # 2 DOF per node (deflection, rotation)
+
+        self.properties: ShaftProperties | None = None
+        self.elements: list[BeamElement] = []
+
+        # Global matrices
+        self.K: np.ndarray = np.zeros((1, 1))  # Stiffness
+        self.M: np.ndarray = np.zeros((1, 1))  # Mass
+        self.C: np.ndarray = np.zeros((1, 1))  # Damping
+
+        # State vectors (reduced DOF after boundary conditions)
+        self.u = np.zeros(1)  # Displacement
+        self.v = np.zeros(1)  # Velocity
+        self.a = np.zeros(1)  # Acceleration
+        self.f_ext = np.zeros(1)  # External forces
+
+        self.time = 0.0
+        self.n_free_dof = 0
+
+        logger.info(f"FiniteElementShaftModel created with {n_elements} elements")
+
+    def initialize(self, properties: ShaftProperties) -> None:
+        """Initialize model and assemble system matrices.
+
+        Builds global stiffness, mass, and damping matrices from
+        element contributions. Applies cantilevered BC at butt end.
+
+        Args:
+            properties: Shaft properties
+        """
+        self.properties = properties
+        self._create_elements()
+        self._assemble_matrices()
+        self._apply_boundary_conditions()
+
+        logger.info(
+            f"FE shaft initialized: {self.n_elements} elements, "
+            f"{self.n_free_dof} free DOFs"
+        )
+
+    def _create_elements(self) -> None:
+        """Create beam elements from shaft properties."""
+        if self.properties is None:
+            return
+
+        self.elements = []
+        L_total = self.properties.length
+        L_elem = L_total / self.n_elements
+
+        # Get EI and mass profiles
+        EI = compute_EI_profile(self.properties)
+        mass = compute_mass_profile(self.properties)
+
+        for i in range(self.n_elements):
+            # Element center position for property interpolation
+            x_center = (i + 0.5) * L_elem
+
+            # Interpolate properties at element center
+            x_stations = self.properties.station_positions
+            EI_elem = float(np.interp(x_center, x_stations, EI))
+            mass_elem = float(np.interp(x_center, x_stations, mass))
+
+            self.elements.append(
+                BeamElement(
+                    node_i=i,
+                    node_j=i + 1,
+                    length=L_elem,
+                    EI=EI_elem,
+                    mass_per_length=mass_elem,
+                    damping=self.properties.damping_ratio,
+                )
+            )
+
+    def _element_stiffness_matrix(self, element: BeamElement) -> np.ndarray:
+        """Compute 4x4 element stiffness matrix for Euler-Bernoulli beam.
+
+        K_e = EI/L³ * [12    6L   -12   6L  ]
+                     [6L    4L²  -6L   2L² ]
+                     [-12  -6L   12   -6L  ]
+                     [6L    2L²  -6L   4L² ]
+
+        Args:
+            element: Beam element
+
+        Returns:
+            4x4 stiffness matrix
+        """
+        EI = element.EI
+        L = element.length
+        L2 = L * L
+        L3 = L * L * L
+
+        k = EI / L3 * np.array([
+            [12,    6*L,   -12,    6*L  ],
+            [6*L,   4*L2,  -6*L,   2*L2 ],
+            [-12,  -6*L,   12,    -6*L  ],
+            [6*L,   2*L2,  -6*L,   4*L2 ],
+        ])
+
+        return k
+
+    def _element_mass_matrix(self, element: BeamElement) -> np.ndarray:
+        """Compute 4x4 consistent mass matrix for Euler-Bernoulli beam.
+
+        M_e = μL/420 * [156    22L   54    -13L  ]
+                       [22L    4L²   13L   -3L²  ]
+                       [54     13L   156   -22L  ]
+                       [-13L  -3L²  -22L   4L²   ]
+
+        Args:
+            element: Beam element
+
+        Returns:
+            4x4 mass matrix
+        """
+        mu = element.mass_per_length
+        L = element.length
+        L2 = L * L
+
+        m = mu * L / 420 * np.array([
+            [156,    22*L,   54,    -13*L  ],
+            [22*L,   4*L2,   13*L,  -3*L2  ],
+            [54,     13*L,   156,   -22*L  ],
+            [-13*L, -3*L2,  -22*L,   4*L2  ],
+        ])
+
+        return m
+
+    def _assemble_matrices(self) -> None:
+        """Assemble global stiffness and mass matrices."""
+        n_dof = self.n_dof
+        self.K = np.zeros((n_dof, n_dof))
+        self.M = np.zeros((n_dof, n_dof))
+
+        for element in self.elements:
+            # Element DOF indices: [w_i, θ_i, w_j, θ_j]
+            dof_i = [2 * element.node_i, 2 * element.node_i + 1]
+            dof_j = [2 * element.node_j, 2 * element.node_j + 1]
+            dofs = dof_i + dof_j
+
+            k_e = self._element_stiffness_matrix(element)
+            m_e = self._element_mass_matrix(element)
+
+            # Assemble into global matrices
+            for ii, i in enumerate(dofs):
+                for jj, j in enumerate(dofs):
+                    self.K[i, j] += k_e[ii, jj]
+                    self.M[i, j] += m_e[ii, jj]
+
+        # Rayleigh damping: C = α*M + β*K
+        # Using typical values for structural damping
+        alpha = 0.1  # Mass proportional
+        beta = 0.0001  # Stiffness proportional
+        self.C = alpha * self.M + beta * self.K
+
+    def _apply_boundary_conditions(self) -> None:
+        """Apply cantilevered boundary conditions at butt end (node 0).
+
+        Fixed at butt: w(0) = 0, θ(0) = 0
+        Free DOFs are indices 2, 3, ..., n_dof-1
+        """
+        # Remove first two DOFs (node 0 is fixed)
+        fixed_dofs = [0, 1]
+        free_dofs = [i for i in range(self.n_dof) if i not in fixed_dofs]
+        self.n_free_dof = len(free_dofs)
+
+        # Extract submatrices for free DOFs
+        self.K = self.K[np.ix_(free_dofs, free_dofs)]
+        self.M = self.M[np.ix_(free_dofs, free_dofs)]
+        self.C = self.C[np.ix_(free_dofs, free_dofs)]
+
+        # Initialize state vectors
+        self.u = np.zeros(self.n_free_dof)
+        self.v = np.zeros(self.n_free_dof)
+        self.a = np.zeros(self.n_free_dof)
+        self.f_ext = np.zeros(self.n_free_dof)
+
+    def get_state(self) -> ShaftState:
+        """Get current shaft deformation state.
+
+        Returns:
+            ShaftState with deflections, velocities, and rotations
+        """
+        # Reconstruct full DOF vector (with zeros for fixed DOFs)
+        u_full = np.zeros(self.n_dof)
+        v_full = np.zeros(self.n_dof)
+
+        u_full[2:] = self.u  # Free DOFs start at index 2
+        v_full[2:] = self.v
+
+        # Extract deflections and rotations at nodes
+        deflections = u_full[0::2]  # Even indices are deflections
+        rotations = u_full[1::2]  # Odd indices are rotations
+        velocities = v_full[0::2]  # Velocity of deflections
+
+        return ShaftState(
+            deflections=deflections,
+            velocities=velocities,
+            rotations=rotations,
+            timestamp=self.time,
+        )
+
+    def apply_load(
+        self,
+        position: float,
+        force: np.ndarray,
+        moment: np.ndarray | None = None,
+    ) -> None:
+        """Apply external load at specified position.
+
+        Args:
+            position: Position along shaft from butt end [m]
+            force: Force vector [Fx, Fy, Fz] - Fy used as transverse
+            moment: Optional moment vector [Mx, My, Mz]
+        """
+        if self.properties is None:
+            return
+
+        L_total = self.properties.length
+        L_elem = L_total / self.n_elements
+
+        # Find nearest node to load position
+        node_idx = int(np.clip(position / L_elem, 0, self.n_nodes - 1))
+
+        # Map to free DOF index (node 0 is fixed)
+        if node_idx == 0:
+            return  # Cannot apply load at fixed end
+
+        free_dof_idx = 2 * node_idx - 2  # -2 because first 2 DOFs are removed
+
+        # Apply transverse force (assume force[1] is transverse)
+        if free_dof_idx < self.n_free_dof:
+            self.f_ext[free_dof_idx] = force[1] if len(force) > 1 else force[0]
+
+        # Apply moment if provided
+        if moment is not None and free_dof_idx + 1 < self.n_free_dof:
+            self.f_ext[free_dof_idx + 1] = moment[2] if len(moment) > 2 else moment[0]
+
+    def step(self, dt: float) -> ShaftState:
+        """Advance simulation by dt using Newmark-beta integration.
+
+        Uses average acceleration method (β=1/4, γ=1/2) for stability.
+
+        Args:
+            dt: Time step [s]
+
+        Returns:
+            Updated shaft state
+        """
+        self.time += dt
+
+        # Newmark-beta parameters
+        beta = 0.25
+        gamma = 0.5
+
+        # Effective stiffness matrix
+        K_eff = self.K + gamma / (beta * dt) * self.C + 1 / (beta * dt**2) * self.M
+
+        # Effective force vector
+        f_eff = (
+            self.f_ext
+            + self.M @ (
+                1 / (beta * dt**2) * self.u
+                + 1 / (beta * dt) * self.v
+                + (1 / (2 * beta) - 1) * self.a
+            )
+            + self.C @ (
+                gamma / (beta * dt) * self.u
+                + (gamma / beta - 1) * self.v
+                + dt * (gamma / (2 * beta) - 1) * self.a
+            )
+        )
+
+        # Solve for new displacement
+        try:
+            u_new = np.linalg.solve(K_eff, f_eff)
+        except np.linalg.LinAlgError:
+            logger.warning("FE solve failed, using pseudo-inverse")
+            u_new = np.linalg.lstsq(K_eff, f_eff, rcond=None)[0]
+
+        # Update velocity and acceleration
+        a_new = (
+            1 / (beta * dt**2) * (u_new - self.u)
+            - 1 / (beta * dt) * self.v
+            - (1 / (2 * beta) - 1) * self.a
+        )
+        v_new = self.v + dt * ((1 - gamma) * self.a + gamma * a_new)
+
+        self.u = u_new
+        self.v = v_new
+        self.a = a_new
+
+        # Clear external forces after step
+        self.f_ext = np.zeros(self.n_free_dof)
+
+        return self.get_state()
+
+    def compute_natural_frequencies(self, n_modes: int = 5) -> list[float]:
+        """Compute natural frequencies via eigenvalue analysis.
+
+        Solves generalized eigenvalue problem: K*φ = ω²*M*φ
+
+        Args:
+            n_modes: Number of modes to compute
+
+        Returns:
+            List of natural frequencies [Hz]
+        """
+        from scipy.linalg import eigh
+
+        # Solve generalized eigenvalue problem
+        eigenvalues, _ = eigh(self.K, self.M)
+
+        # Convert to frequencies
+        frequencies = []
+        for w2 in eigenvalues[:n_modes]:
+            if w2 > 0:
+                omega = np.sqrt(w2)
+                freq = omega / (2 * np.pi)
+                frequencies.append(float(freq))
+
+        return frequencies
+
+    def compute_static_solution(self, load_position: float, load_force: float) -> ShaftState:
+        """Compute static deflection under point load.
+
+        Args:
+            load_position: Position from butt end [m]
+            load_force: Transverse load [N]
+
+        Returns:
+            Static equilibrium state
+        """
+        # Save current state
+        u_saved = self.u.copy()
+        v_saved = self.v.copy()
+        f_saved = self.f_ext.copy()
+
+        # Apply load
+        self.apply_load(load_position, np.array([0, load_force, 0]))
+
+        # Solve K*u = f
+        try:
+            self.u = np.linalg.solve(self.K, self.f_ext)
+        except np.linalg.LinAlgError:
+            self.u = np.linalg.lstsq(self.K, self.f_ext, rcond=None)[0]
+
+        self.v = np.zeros(self.n_free_dof)
+        state = self.get_state()
+
+        # Restore original state
+        self.u = u_saved
+        self.v = v_saved
+        self.f_ext = f_saved
+
+        return state
+
+
 def compute_static_deflection(
     properties: ShaftProperties,
     load_position: float,
@@ -527,12 +905,14 @@ def compute_static_deflection(
 def create_shaft_model(
     model_type: ShaftFlexModel,
     properties: ShaftProperties | None = None,
+    n_elements: int = 10,
 ) -> ShaftModel:
     """Factory function to create shaft model.
 
     Args:
         model_type: Type of shaft model
         properties: Shaft properties (uses default if None)
+        n_elements: Number of elements for FE model (default 10)
 
     Returns:
         Initialized shaft model
@@ -545,10 +925,10 @@ def create_shaft_model(
         model = RigidShaftModel()
     elif model_type == ShaftFlexModel.MODAL:
         model = ModalShaftModel()
+    elif model_type == ShaftFlexModel.FINITE_ELEMENT:
+        model = FiniteElementShaftModel(n_elements=n_elements)
     else:
-        # Finite element not yet fully implemented
-        logger.warning("FE model not fully implemented, using modal")
-        model = ModalShaftModel()
+        raise ValueError(f"Unknown shaft model type: {model_type}")
 
     model.initialize(properties)
     return model
