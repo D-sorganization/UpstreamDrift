@@ -1,11 +1,11 @@
 [project]
-name = "golf-suite"
-version = "2.0.0"
+name = "upstream-drift"
+version = "2.1.0"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
-keywords = ["golf", "biomechanics", "simulation", "physics", "mujoco"]
+keywords = ["golf", "biomechanics", "simulation", "physics", "mujoco", "urdf"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
@@ -26,30 +26,37 @@ dependencies = [
 
     # Default physics engine (lightweight, cross-platform)
     "mujoco>=3.3.0,<4.0.0",
+
+    # Shared tools (URDF generation, signal processing)
+    # Install from local path: pip install -e ../Tools[urdf]
+    # Or from GitHub: pip install git+https://github.com/D-sorganization/Tools.git[urdf]
 ]
 
 [project.optional-dependencies]
 # Additional physics engines
 drake = ["drake>=1.22.0"]
 pinocchio = ["pin>=2.6.0", "meshcat>=0.3.0"]
-all-engines = ["golf-suite[drake,pinocchio]"]
+all-engines = ["upstream-drift[drake,pinocchio]"]
 
 # Analysis extras
 analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]
+
+# URDF generation tools (from shared Tools repo)
+urdf = ["trimesh>=4.0.0", "PyYAML>=6.0", "defusedxml>=0.7.0"]
 
 # Development
 dev = ["pytest>=8.0.0", "ruff>=0.1.0", "mypy>=1.8.0", "build"]
 
 # Everything
-all = ["golf-suite[all-engines,analysis,dev]"]
+all = ["upstream-drift[all-engines,analysis,urdf,dev]"]
 
 [project.scripts]
-golf-suite = "launch_golf_suite:main"
+upstream-drift = "launch_golf_suite:main"
 
 [project.urls]
-Homepage = "https://github.com/D-sorganization/Golf_Modeling_Suite"
-Documentation = "https://golf-suite.readthedocs.io"
-Repository = "https://github.com/D-sorganization/Golf_Modeling_Suite"
+Homepage = "https://github.com/D-sorganization/UpstreamDrift"
+Documentation = "https://upstream-drift.readthedocs.io"
+Repository = "https://github.com/D-sorganization/UpstreamDrift"
 
 [build-system]
 requires = ["hatchling"]
