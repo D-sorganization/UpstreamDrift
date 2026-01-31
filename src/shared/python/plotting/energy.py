@@ -226,7 +226,7 @@ def plot_power_analysis(
     indices = joint_indices or list(range(min(n_joints, 6)))  # Limit to 6 for clarity
     names = joint_names or [f"Joint {i}" for i in indices]
 
-    for i, (idx, name) in enumerate(zip(indices, names)):
+    for i, (idx, name) in enumerate(zip(indices, names, strict=False)):
         if idx < n_joints:
             color = config.colors.get_color(i)
             ax.plot(times, powers[:, idx], label=name, color=color)
@@ -301,7 +301,7 @@ def plot_cumulative_work(
     indices = joint_indices or list(range(min(n_joints, 6)))
     names = joint_names or [f"Joint {i}" for i in indices]
 
-    for i, (idx, name) in enumerate(zip(indices, names)):
+    for i, (idx, name) in enumerate(zip(indices, names, strict=False)):
         if idx < n_joints:
             color = config.colors.get_color(i)
             ax.plot(times, work[:, idx], label=name, color=color)
