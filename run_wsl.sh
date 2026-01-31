@@ -1,11 +1,11 @@
 #!/bin/bash
-# Run Golf Modeling Suite from WSL2 with full Pinocchio/Drake/MuJoCo support
+# Run UpstreamDrift from WSL2 with full Pinocchio/Drake/MuJoCo support
 #
 # Usage from Windows:
-#   wsl -d Ubuntu-22.04 -- bash /mnt/c/Users/diete/Repositories/Golf_Modeling_Suite/run_wsl.sh
+#   wsl -d Ubuntu-22.04 -- bash /mnt/c/Users/diete/Repositories/UpstreamDrift/run_wsl.sh
 #
 # Or from WSL terminal:
-#   bash /mnt/c/Users/diete/Repositories/Golf_Modeling_Suite/run_wsl.sh
+#   bash /mnt/c/Users/diete/Repositories/UpstreamDrift/run_wsl.sh
 
 set -e
 
@@ -17,7 +17,7 @@ conda activate golf_suite
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 
 # Set up project path
-PROJECT_DIR="/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
+PROJECT_DIR="/mnt/c/Users/diete/Repositories/UpstreamDrift"
 cd "$PROJECT_DIR"
 export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
 
@@ -25,7 +25,7 @@ export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
 export DISPLAY="${DISPLAY:-:0}"
 
 echo "=========================================="
-echo "  Golf Modeling Suite (WSL2 Environment)"
+echo "  UpstreamDrift (WSL2 Environment)"
 echo "=========================================="
 echo ""
 echo "Python:     $(python --version 2>&1 | cut -d' ' -f2)"

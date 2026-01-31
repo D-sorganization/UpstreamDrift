@@ -952,7 +952,7 @@ class AIAssistantPanel(QWidget):
         self._set_status("Indexing codebase...")
 
         # Safer: use CWD if it's the repo root, or try to find it.
-        # Let's assume repo root is .../Golf_Modeling_Suite
+        # Let's assume repo root is .../UpstreamDrift
         # and we want to index 'src'.
 
         repo_root = Path(__file__).resolve().parent  # gui
