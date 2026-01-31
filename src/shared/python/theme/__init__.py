@@ -1,4 +1,4 @@
-"""Unified theme system for Golf Modeling Suite.
+"""Unified theme system for UpstreamDrift.
 
 This package provides a consistent, sophisticated visual identity across
 all components of the application:
@@ -6,6 +6,7 @@ all components of the application:
 - Colors: Unified color palette for UI and data visualization
 - Typography: Cross-platform font stacks and sizing
 - Matplotlib: Professional plot styling
+- ThemeManager: Dynamic theme switching (Light/Dark/High Contrast)
 
 Usage:
     from shared.python.theme import Colors, Sizes, apply_golf_suite_style
@@ -19,6 +20,11 @@ Usage:
     # Create styled fonts
     from shared.python.theme import get_display_font
     label.setFont(get_display_font(size=16))
+
+    # Dynamic theme switching
+    from shared.python.theme import ThemeManager, ThemePreset
+    manager = ThemeManager.instance()
+    manager.set_theme(ThemePreset.DARK)
 """
 
 from .colors import (
@@ -35,6 +41,18 @@ from .matplotlib_style import (
     create_styled_figure,
     get_chart_color,
     style_for_export,
+)
+from .theme_manager import (
+    DARK_THEME,
+    HIGH_CONTRAST_THEME,
+    LIGHT_THEME,
+    THEME_PRESETS,
+    ThemeColors,
+    ThemeManager,
+    ThemePreset,
+    get_current_colors,
+    get_theme_manager,
+    set_theme,
 )
 from .typography import (
     CSS_FONT_DISPLAY,
@@ -80,4 +98,15 @@ __all__ = [
     "create_styled_figure",
     "get_chart_color",
     "style_for_export",
+    # Theme Manager
+    "DARK_THEME",
+    "HIGH_CONTRAST_THEME",
+    "LIGHT_THEME",
+    "THEME_PRESETS",
+    "ThemeColors",
+    "ThemeManager",
+    "ThemePreset",
+    "get_current_colors",
+    "get_theme_manager",
+    "set_theme",
 ]
