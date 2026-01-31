@@ -4,7 +4,9 @@ import math
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import QPointF, Qt, QTimer
+import xml.etree.ElementTree as ET
+
+from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
@@ -36,7 +38,17 @@ class VisualizationWidget(QWidget):
 
     This widget provides a container for the visualization backend.
     Uses MuJoCo viewer when available, falls back to simple grid view.
+
+    Signals:
+        object_clicked: Emitted when a link/joint is clicked in the 3D view.
+            Args: (component_type: str, component_name: str)
+        selection_changed: Emitted when selection changes.
+            Args: (component_name: str or None)
     """
+
+    # Signals for click-to-highlight feature
+    object_clicked = pyqtSignal(str, str)  # component_type, component_name
+    selection_changed = pyqtSignal(object)  # component_name or None
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the visualization widget.
@@ -49,6 +61,9 @@ class VisualizationWidget(QWidget):
         self.urdf_path: str | None = None
         self.use_mujoco = MUJOCO_AVAILABLE
         self.mujoco_widget: MuJoCoViewerWidget | None = None  # type: ignore[assignment]
+        self._link_names: list[str] = []  # Cache of link names for selection
+        self._joint_names: list[str] = []  # Cache of joint names
+        self._selected_object: str | None = None
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -72,14 +87,16 @@ class VisualizationWidget(QWidget):
         # Info Label (below the 3D view)
         self.info_label = QLabel("No URDF content loaded")
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.info_label.setStyleSheet("""
+        self.info_label.setStyleSheet(
+            """
             QLabel {
                 background-color: #f5f5f5;
                 color: #333;
                 padding: 5px;
                 border-top: 1px solid #ddd;
             }
-        """)
+        """
+        )
         layout.addWidget(self.info_label)
 
     def update_visualization(
@@ -93,6 +110,9 @@ class VisualizationWidget(QWidget):
         """
         self.urdf_content = urdf_content
         self.urdf_path = urdf_path
+
+        # Parse component names for click-to-highlight feature
+        self._parse_urdf_components(urdf_content)
 
         # Update the status text
         if urdf_content.strip():
@@ -143,6 +163,75 @@ class VisualizationWidget(QWidget):
             self.gl_widget.reset_view()
         logger.info("View reset requested")
 
+    def _parse_urdf_components(self, urdf_content: str) -> None:
+        """Parse URDF content to extract link and joint names for selection.
+
+        Args:
+            urdf_content: URDF XML string to parse.
+        """
+        self._link_names = []
+        self._joint_names = []
+
+        if not urdf_content.strip():
+            return
+
+        try:
+            root = ET.fromstring(urdf_content)
+            for child in root:
+                name = child.get("name", "")
+                if child.tag == "link" and name:
+                    self._link_names.append(name)
+                elif child.tag == "joint" and name:
+                    self._joint_names.append(name)
+            logger.debug(
+                f"Parsed {len(self._link_names)} links and {len(self._joint_names)} joints"
+            )
+        except ET.ParseError as e:
+            logger.warning(f"Failed to parse URDF for component names: {e}")
+
+    def select_object(self, name: str | None) -> None:
+        """Select an object by name and highlight it.
+
+        Args:
+            name: Name of the link or joint to select, or None to clear selection.
+        """
+        self._selected_object = name
+        self.selection_changed.emit(name)
+
+        if name:
+            # Determine if it's a link or joint
+            if name in self._link_names:
+                self.object_clicked.emit("link", name)
+                logger.info(f"Selected link: {name}")
+            elif name in self._joint_names:
+                self.object_clicked.emit("joint", name)
+                logger.info(f"Selected joint: {name}")
+
+        # Update visualization to show highlight
+        if self.use_mujoco and self.mujoco_widget:
+            # MuJoCo viewer can highlight specific geoms/bodies
+            if hasattr(self.mujoco_widget, "highlight_body"):
+                self.mujoco_widget.highlight_body(name)
+        elif hasattr(self, "gl_widget"):
+            self.gl_widget.set_highlighted_object(name)
+            self.gl_widget.update()
+
+    def get_link_names(self) -> list[str]:
+        """Get list of link names in the current URDF.
+
+        Returns:
+            List of link names.
+        """
+        return self._link_names.copy()
+
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names in the current URDF.
+
+        Returns:
+            List of joint names.
+        """
+        return self._joint_names.copy()
+
 
 class Simple3DVisualizationWidget(QOpenGLWidget):
     """Simple OpenGL-based 3D visualization widget using QPainter.
@@ -150,7 +239,13 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
     This serves as a lightweight fallback viewer when full 3D engines
     (like MuJoCo) are not available. It renders a 3D grid and axes
     using 2D QPainter operations with manual projection.
+
+    Signals:
+        object_clicked: Emitted when user clicks to select an object.
     """
+
+    # Signal for click-to-highlight
+    object_clicked = pyqtSignal(str)  # object name
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the 3D visualization widget.
@@ -167,11 +262,24 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
         # Mouse interaction
         self.last_mouse_pos: QPointF | None = None
+        self._is_dragging = False
+
+        # Highlighted object for click-to-highlight
+        self._highlighted_object: str | None = None
 
         # Timer for animation
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(16)  # ~60 FPS
+
+    def set_highlighted_object(self, name: str | None) -> None:
+        """Set the currently highlighted object.
+
+        Args:
+            name: Name of object to highlight, or None to clear.
+        """
+        self._highlighted_object = name
+        self.update()
 
     def initializeGL(self) -> None:
         """Initialize OpenGL.
@@ -284,6 +392,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         """
         if event is not None and event.button() == Qt.MouseButton.LeftButton:
             self.last_mouse_pos = event.position()
+            self._is_dragging = False  # Will become True if mouse moves significantly
 
     def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse move events.
@@ -294,6 +403,10 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         if event is not None and self.last_mouse_pos is not None:
             dx = event.position().x() - self.last_mouse_pos.x()
             dy = event.position().y() - self.last_mouse_pos.y()
+
+            # If moved more than 3 pixels, consider it a drag
+            if abs(dx) > 3 or abs(dy) > 3:
+                self._is_dragging = True
 
             self.camera_rotation_y += dx * 0.5
             self.camera_rotation_x += dy * 0.5
@@ -307,11 +420,19 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
     def mouseReleaseEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse release events.
 
+        Emits object_clicked signal if this was a click (not a drag).
+
         Args:
             event: Mouse event.
         """
         if event is not None:
+            # If not dragging, treat as a click for selection
+            if not self._is_dragging and event.button() == Qt.MouseButton.LeftButton:
+                # In the fallback grid view, we can't do proper ray-casting
+                # so just emit a general click event for UI feedback
+                self.object_clicked.emit("")
             self.last_mouse_pos = None
+            self._is_dragging = False
 
     def wheelEvent(self, event: QWheelEvent | None) -> None:
         """Handle wheel events for zooming.
