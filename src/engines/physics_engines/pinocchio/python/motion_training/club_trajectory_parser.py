@@ -112,7 +112,7 @@ class ClubTrajectory:
         face_pos = (1 - alpha) * f0.club_face_position + alpha * f1.club_face_position
 
         # SLERP-like interpolation for rotations (simplified)
-        # Note: Using nearest-neighbor for rotation; proper SLERP would improve smoothness
+        # Note: Using nearest-neighbor for rotation; SLERP would improve this
         grip_rot = f0.grip_rotation
         face_rot = f0.club_face_rotation
 

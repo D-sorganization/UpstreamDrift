@@ -175,12 +175,12 @@ class CharacterBuildResult:
         if self.mesh_result and options.generate_meshes:
             mesh_dir = output_dir / options.mesh_subdirectory
 
-            for seg_name, src_path in self.mesh_result.mesh_paths.items():
+            for _seg_name, src_path in self.mesh_result.mesh_paths.items():
                 if src_path and src_path.exists():
                     dst_path = mesh_dir / "visual" / src_path.name
                     shutil.copy2(src_path, dst_path)
 
-            for seg_name, src_path in self.mesh_result.collision_paths.items():
+            for _seg_name, src_path in self.mesh_result.collision_paths.items():
                 if src_path and src_path.exists():
                     dst_path = mesh_dir / "collision" / src_path.name
                     shutil.copy2(src_path, dst_path)

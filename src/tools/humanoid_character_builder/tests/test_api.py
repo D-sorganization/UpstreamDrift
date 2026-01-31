@@ -66,7 +66,7 @@ class TestCharacterBuilder:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test.urdf"
-            urdf = builder.generate_urdf(params, output_path=output_path)
+            _ = builder.generate_urdf(params, output_path=output_path)
 
             assert output_path.exists()
 

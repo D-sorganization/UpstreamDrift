@@ -496,7 +496,7 @@ class HumanoidURDFGenerator:
         # Create intermediate links for composite joints
         parent = joint_def.parent_segment
 
-        for i, (axis, suffix) in enumerate(zip(axes, suffixes)):
+        for i, (axis, suffix) in enumerate(zip(axes, suffixes, strict=True)):
             is_last = i == len(axes) - 1
             child = joint_def.child_segment if is_last else f"{joint_name}{suffix}_link"
 
