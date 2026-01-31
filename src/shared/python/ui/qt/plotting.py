@@ -16,7 +16,6 @@ except ImportError:
         raise ImportError("Qt backend for matplotlib not available") from e
 
 from matplotlib.figure import Figure
-from PyQt6.QtWidgets import QWidget
 
 
 class MplCanvas(FigureCanvasQTAgg):
