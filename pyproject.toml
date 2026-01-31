@@ -80,6 +80,7 @@ target-version = "py311"
 # Exclude third-party model files (legacy Python 2 scripts from OpenSim)
 exclude = [
     "src/shared/models/opensim/opensim-models/**",
+    "shared/models/opensim/opensim-models/**",
 ]
 
 [tool.ruff.lint]
@@ -93,6 +94,7 @@ target-version = ["py311"]
 exclude = '''
 /(
     src/shared/models/opensim/opensim-models
+  | shared/models/opensim/opensim-models
 )/
 '''
 

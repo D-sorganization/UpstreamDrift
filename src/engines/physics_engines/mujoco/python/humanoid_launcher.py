@@ -58,7 +58,7 @@ from src.shared.python.logging_config import (  # noqa: E402
     get_logger,
 )
 from src.shared.python.path_utils import get_repo_root  # noqa: E402
-from src.shared.python.process_worker import ProcessWorker  # noqa: E402
+from src.shared.python.ui.qt.process_worker import ProcessWorker  # noqa: E402
 
 # Use centralized availability flag
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
@@ -744,7 +744,9 @@ class HumanoidLauncher(QMainWindow):
     def open_signal_toolkit(self) -> None:
         """Open signal processing toolkit dialog."""
         try:
-            from src.shared.python.signal_toolkit.widget import SignalToolkitWidget
+            from src.shared.python.ui.qt.widgets.signal_toolkit_widget import (
+                SignalToolkitWidget,
+            )
         except ImportError as e:
             QMessageBox.warning(
                 self,
