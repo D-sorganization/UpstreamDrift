@@ -30,26 +30,26 @@ from src.shared.python.plotting.base import (
 
 # Import configuration
 from src.shared.python.plotting.config import (
+    DARK_THEME,
+    DEFAULT_CONFIG,
+    LIGHT_THEME,
     ColorScheme,
     PlotConfig,
-    DEFAULT_CONFIG,
-    DARK_THEME,
-    LIGHT_THEME,
-)
-
-# Import kinematics functions
-from src.shared.python.plotting.kinematics import (
-    plot_joint_positions,
-    plot_joint_velocities,
-    plot_club_head_speed,
-    plot_phase_diagram,
 )
 
 # Import energy functions
 from src.shared.python.plotting.energy import (
-    plot_energy_overview,
     plot_energy_breakdown,
+    plot_energy_overview,
     plot_power_analysis,
+)
+
+# Import kinematics functions
+from src.shared.python.plotting.kinematics import (
+    plot_club_head_speed,
+    plot_joint_positions,
+    plot_joint_velocities,
+    plot_phase_diagram,
 )
 
 # Import main plotter class from core module

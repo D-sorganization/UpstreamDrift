@@ -18,7 +18,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from src.shared.python.plotting.base import RecorderInterface
-from src.shared.python.plotting.config import PlotConfig, DEFAULT_CONFIG
+from src.shared.python.plotting.config import DEFAULT_CONFIG, PlotConfig
 
 if TYPE_CHECKING:
     pass

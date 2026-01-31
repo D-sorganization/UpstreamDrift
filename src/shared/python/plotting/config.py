@@ -61,7 +61,7 @@ class ColorScheme:
     )
 
     @classmethod
-    def light(cls) -> "ColorScheme":
+    def light(cls) -> ColorScheme:
         """Create light theme color scheme."""
         return cls(
             background="#ffffff",
@@ -70,7 +70,7 @@ class ColorScheme:
         )
 
     @classmethod
-    def dark(cls) -> "ColorScheme":
+    def dark(cls) -> ColorScheme:
         """Create dark theme color scheme."""
         return cls(
             primary="#0A84FF",
@@ -149,12 +149,12 @@ class PlotConfig:
     show_grid: bool = True
 
     @classmethod
-    def default(cls) -> "PlotConfig":
+    def default(cls) -> PlotConfig:
         """Create default plot configuration."""
         return cls()
 
     @classmethod
-    def publication(cls) -> "PlotConfig":
+    def publication(cls) -> PlotConfig:
         """Create configuration suitable for publication.
 
         Higher DPI, larger fonts, thicker lines.
@@ -172,7 +172,7 @@ class PlotConfig:
         )
 
     @classmethod
-    def presentation(cls) -> "PlotConfig":
+    def presentation(cls) -> PlotConfig:
         """Create configuration for presentations.
 
         Larger elements for visibility at a distance.

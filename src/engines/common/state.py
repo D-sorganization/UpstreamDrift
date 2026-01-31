@@ -19,7 +19,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 import numpy as np
 
@@ -75,7 +75,7 @@ class SimulationState:
     step_count: int = 0
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def copy(self) -> "SimulationState":
+    def copy(self) -> SimulationState:
         """Create a deep copy of the state."""
         return SimulationState(
             q=self.q.copy(),

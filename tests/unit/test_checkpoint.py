@@ -12,7 +12,6 @@ import pytest
 
 from src.shared.python.checkpoint import (
     CheckpointManager,
-    Checkpointable,
     StateCheckpoint,
 )
 
@@ -277,9 +276,7 @@ class TestCheckpointManager:
         assert checkpoint_id is not None
         assert engine.time == 0.0  # Should be at first checkpoint
 
-    def test_statistics(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_statistics(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test statistics reporting."""
         manager.save(engine)
         manager.save(engine, tag="tagged")

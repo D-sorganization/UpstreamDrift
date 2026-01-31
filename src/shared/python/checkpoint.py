@@ -81,7 +81,7 @@ class StateCheckpoint:
         timestamp: float,
         step_count: int = 0,
         metadata: dict[str, Any] | None = None,
-    ) -> "StateCheckpoint":
+    ) -> StateCheckpoint:
         """Create a new checkpoint with auto-generated ID and checksum.
 
         Args:
@@ -130,8 +130,12 @@ class StateCheckpoint:
             True if checksum matches
         """
         state_bytes = pickle.dumps(
-            (self.engine_type, np.array(self.q).tobytes(),
-             np.array(self.v).tobytes(), self.timestamp)
+            (
+                self.engine_type,
+                np.array(self.q).tobytes(),
+                np.array(self.v).tobytes(),
+                self.timestamp,
+            )
         )
         expected = hashlib.sha256(state_bytes).hexdigest()[:16]
         return expected == self.checksum
@@ -152,7 +156,7 @@ class StateCheckpoint:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "StateCheckpoint":
+    def from_dict(cls, data: dict[str, Any]) -> StateCheckpoint:
         """Create from dictionary."""
         return cls(
             id=data["id"],

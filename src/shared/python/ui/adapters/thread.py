@@ -78,7 +78,7 @@ class BackgroundWorker(ABC):
     def cancel(self) -> None:
         """Request cancellation of the task."""
 
-    def on_complete(self, callback: Callable[[Any], None]) -> "BackgroundWorker":
+    def on_complete(self, callback: Callable[[Any], None]) -> BackgroundWorker:
         """Set callback for successful completion.
 
         Args:
@@ -90,7 +90,7 @@ class BackgroundWorker(ABC):
         self._on_complete = callback
         return self
 
-    def on_error(self, callback: Callable[[Exception], None]) -> "BackgroundWorker":
+    def on_error(self, callback: Callable[[Exception], None]) -> BackgroundWorker:
         """Set callback for errors.
 
         Args:
@@ -102,9 +102,7 @@ class BackgroundWorker(ABC):
         self._on_error = callback
         return self
 
-    def on_progress(
-        self, callback: Callable[[int, str], None]
-    ) -> "BackgroundWorker":
+    def on_progress(self, callback: Callable[[int, str], None]) -> BackgroundWorker:
         """Set callback for progress updates.
 
         Args:
@@ -219,7 +217,7 @@ class QtWorker(BackgroundWorker):
         super().__init__(target, args, kwargs)
 
         try:
-            from PyQt6.QtCore import QThread, pyqtSignal, QObject
+            from PyQt6.QtCore import QThread, pyqtSignal
 
             class WorkerThread(QThread):
                 """Inner QThread implementation."""
@@ -256,9 +254,7 @@ class QtWorker(BackgroundWorker):
             self._qthread.error_signal.connect(self._handle_error)
 
         except ImportError as e:
-            raise RuntimeError(
-                "Qt not available. Use ThreadWorker instead."
-            ) from e
+            raise RuntimeError("Qt not available. Use ThreadWorker instead.") from e
 
     def _handle_complete(self, result: Any) -> None:
         """Handle completion signal from Qt thread."""

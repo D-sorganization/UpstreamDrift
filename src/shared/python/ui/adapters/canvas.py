@@ -142,7 +142,6 @@ class HeadlessCanvas(CanvasAdapter):
     def refresh(self) -> None:
         """Refresh is a no-op for headless canvas."""
         # No display to refresh
-        pass
 
     def to_array(self) -> np.ndarray:
         """Render figure to numpy array.
@@ -235,11 +234,15 @@ def is_qt_available() -> bool:
     """
     try:
         try:
-            from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg  # noqa: F401
+            from matplotlib.backends.backend_qtagg import (  # noqa: F401
+                FigureCanvasQTAgg,
+            )
 
             return True
         except ImportError:
-            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg  # noqa: F401
+            from matplotlib.backends.backend_qt5agg import (  # noqa: F401
+                FigureCanvasQTAgg,
+            )
 
             return True
     except ImportError:

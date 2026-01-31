@@ -20,7 +20,7 @@ from typing import Protocol
 
 import numpy as np
 
-from src.shared.python.contracts import precondition, postcondition
+from src.shared.python.contracts import postcondition, precondition
 
 
 @dataclass(frozen=True)
@@ -40,7 +40,7 @@ class AirProperties:
     pressure: float = 101325.0  # Pa (1 atm)
 
     @classmethod
-    def from_altitude(cls, altitude_m: float) -> "AirProperties":
+    def from_altitude(cls, altitude_m: float) -> AirProperties:
         """Create air properties for a given altitude using ISA model.
 
         Args:

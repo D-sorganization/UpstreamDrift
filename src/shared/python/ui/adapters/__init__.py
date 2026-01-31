@@ -21,8 +21,8 @@ enabling headless operation and easier testing.
 
 from src.shared.python.ui.adapters.canvas import (
     CanvasAdapter,
-    get_canvas_adapter,
     HeadlessCanvas,
+    get_canvas_adapter,
 )
 from src.shared.python.ui.adapters.thread import (
     BackgroundWorker,

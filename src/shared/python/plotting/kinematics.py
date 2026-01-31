@@ -19,10 +19,10 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from src.shared.python.plotting.base import RecorderInterface
-from src.shared.python.plotting.config import PlotConfig, DEFAULT_CONFIG
+from src.shared.python.plotting.config import DEFAULT_CONFIG, PlotConfig
 
 if TYPE_CHECKING:
-    from matplotlib.lines import Line2D
+    pass
 
 
 def plot_joint_positions(
@@ -190,9 +190,7 @@ def plot_joint_accelerations(
     for i, (idx, name) in enumerate(zip(indices, names)):
         if idx < n_joints:
             color = config.colors.get_color(i)
-            ax.plot(
-                times, np.rad2deg(accelerations[:, idx]), label=name, color=color
-            )
+            ax.plot(times, np.rad2deg(accelerations[:, idx]), label=name, color=color)
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Acceleration [deg/s²]")
@@ -249,9 +247,7 @@ def plot_club_head_speed(
         peak_idx = np.argmax(speeds_mph)
         peak_time = times[peak_idx]
         peak_speed = speeds_mph[peak_idx]
-        ax.axhline(
-            peak_speed, color=config.colors.secondary, linestyle="--", alpha=0.5
-        )
+        ax.axhline(peak_speed, color=config.colors.secondary, linestyle="--", alpha=0.5)
         ax.annotate(
             f"Peak: {peak_speed:.1f} mph",
             xy=(peak_time, peak_speed),
@@ -408,8 +404,24 @@ def plot_phase_diagram(
     ax.plot(pos, vel, color=config.colors.primary, alpha=0.3, linewidth=0.5)
 
     # Mark start and end
-    ax.scatter(pos[0], vel[0], color=config.colors.tertiary, s=100, marker="o", label="Start", zorder=5)
-    ax.scatter(pos[-1], vel[-1], color=config.colors.quaternary, s=100, marker="s", label="End", zorder=5)
+    ax.scatter(
+        pos[0],
+        vel[0],
+        color=config.colors.tertiary,
+        s=100,
+        marker="o",
+        label="Start",
+        zorder=5,
+    )
+    ax.scatter(
+        pos[-1],
+        vel[-1],
+        color=config.colors.quaternary,
+        s=100,
+        marker="s",
+        label="End",
+        zorder=5,
+    )
 
     fig.colorbar(scatter, ax=ax, label="Time [s]")
 

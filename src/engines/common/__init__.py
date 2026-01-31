@@ -16,11 +16,11 @@ Usage:
     )
 """
 
-from src.engines.common.physics import BallPhysics, AerodynamicsCalculator
+from src.engines.common.physics import AerodynamicsCalculator, BallPhysics
 from src.engines.common.state import (
-    StateManager,
     EngineStateMixin,
     ForceAccumulator,
+    StateManager,
 )
 
 __all__ = [
