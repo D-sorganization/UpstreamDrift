@@ -26,6 +26,9 @@ export interface EngineStatus {
     capabilities: string[];
 }
 
+// Maximum number of frames to keep in history to prevent memory leaks
+const MAX_FRAMES_HISTORY = 1000;
+
 export async function fetchEngines(): Promise<EngineStatus[]> {
   const response = await fetch('/api/engines');
   if (!response.ok) {
@@ -41,19 +44,28 @@ export function useSimulation(engineType: string) {
   const [currentFrame, setCurrentFrame] = useState<SimulationFrame | null>(null);
   const [frames, setFrames] = useState<SimulationFrame[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
+  // Track if component is mounted to prevent state updates after unmount
+  const isMountedRef = useRef(true);
 
   const start = useCallback((config: SimulationConfig = {}) => {
+    // Close any existing WebSocket connection before creating a new one
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
     // Determine WS protocol based on current connection
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host; // e.g. localhost:3000 or localhost:8000
     // If running in dev via proxy, this works. If built static, works if same origin.
     // We'll trust the proxy config or relative path.
     const wsUrl = `${protocol}//${host}/api/ws/simulate/${engineType}`;
-    
+
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
+      if (!isMountedRef.current) return;
       setIsRunning(true);
       setFrames([]);
       ws.send(JSON.stringify({
@@ -68,9 +80,10 @@ export function useSimulation(engineType: string) {
     };
 
     ws.onmessage = (event) => {
+      if (!isMountedRef.current) return;
       try {
           const data = JSON.parse(event.data);
-    
+
           if (data.status === 'complete' || data.status === 'stopped') {
             setIsRunning(false);
             return;
@@ -79,10 +92,17 @@ export function useSimulation(engineType: string) {
               setIsPaused(true);
               return;
           }
-    
+
           if (data.frame !== undefined) {
             setCurrentFrame(data);
-            setFrames(prev => [...prev, data]);
+            // Limit frames history to prevent unbounded memory growth
+            setFrames(prev => {
+              const newFrames = [...prev, data];
+              if (newFrames.length > MAX_FRAMES_HISTORY) {
+                return newFrames.slice(-MAX_FRAMES_HISTORY);
+              }
+              return newFrames;
+            });
           }
       } catch (err) {
           console.error("WS Parse Error", err);
@@ -91,32 +111,55 @@ export function useSimulation(engineType: string) {
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      setIsRunning(false);
+      if (isMountedRef.current) {
+        setIsRunning(false);
+      }
     };
 
     ws.onclose = () => {
-      setIsRunning(false);
+      if (isMountedRef.current) {
+        setIsRunning(false);
+      }
     };
   }, [engineType]);
 
   const stop = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ action: 'stop' }));
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ action: 'stop' }));
+    }
+    // Close the WebSocket connection after sending stop
+    if (ws) {
+      ws.close();
+      wsRef.current = null;
+    }
   }, []);
 
   const pause = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ action: 'pause' }));
-    setIsPaused(true);
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ action: 'pause' }));
+      setIsPaused(true);
+    }
   }, []);
 
   const resume = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ action: 'resume' }));
-    setIsPaused(false);
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ action: 'resume' }));
+      setIsPaused(false);
+    }
   }, []);
 
-  // Cleanup on unmount
+  // Track mounted state and cleanup on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
-      wsRef.current?.close();
+      isMountedRef.current = false;
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
     };
   }, []);
 

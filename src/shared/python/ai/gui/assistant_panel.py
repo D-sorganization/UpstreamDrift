@@ -702,6 +702,15 @@ class AIAssistantPanel(QWidget):
             self._save_history()
 
         self._current_assistant_message = None
+        # Disconnect signals before clearing worker reference to prevent memory leaks
+        if self._current_worker:
+            try:
+                self._current_worker.chunk_received.disconnect(self._on_stream_chunk)
+                self._current_worker.finished.disconnect(self._on_stream_finished)
+                self._current_worker.error.disconnect(self._on_stream_error)
+            except (TypeError, RuntimeError):
+                # Signals may already be disconnected
+                pass
         self._current_worker = None
 
     def _on_stream_error(self, error: str) -> None:
@@ -717,6 +726,15 @@ class AIAssistantPanel(QWidget):
             self._current_assistant_message.append_content(f"\n\n⚠️ **Error:** {error}")
 
         self._current_assistant_message = None
+        # Disconnect signals before clearing worker reference to prevent memory leaks
+        if self._current_worker:
+            try:
+                self._current_worker.chunk_received.disconnect(self._on_stream_chunk)
+                self._current_worker.finished.disconnect(self._on_stream_finished)
+                self._current_worker.error.disconnect(self._on_stream_error)
+            except (TypeError, RuntimeError):
+                # Signals may already be disconnected
+                pass
         self._current_worker = None
 
     def _add_message_to_ui(
@@ -792,6 +810,15 @@ class AIAssistantPanel(QWidget):
             if item is not None:
                 widget = item.widget()
                 if widget is not None:
+                    # Disconnect any signals before deletion to prevent memory leaks
+                    if isinstance(widget, MessageWidget):
+                        try:
+                            doc = widget._content_label.document()
+                            if doc is not None:
+                                doc.contentsChanged.disconnect(widget._adjust_height)
+                        except (TypeError, RuntimeError, AttributeError):
+                            # Signal may not be connected or attribute missing
+                            pass
                     widget.deleteLater()
 
         # Reset context

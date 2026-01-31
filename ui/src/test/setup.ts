@@ -27,8 +27,9 @@ class MockWebSocket {
     }, 0);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   send(_data: string) {
-    // Mock send
+    // Mock send - data intentionally unused in mock
   }
 
   close() {

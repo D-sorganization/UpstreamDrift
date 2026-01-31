@@ -83,6 +83,7 @@ class ProcessWorker(QThread):
             )
 
             # Read stdout in real-time
+            stderr_output = ""
             if self.process.stdout:
                 for line in iter(self.process.stdout.readline, ""):
                     if self._stop_event.is_set():
@@ -90,30 +91,43 @@ class ProcessWorker(QThread):
                     if line:
                         self.log_signal.emit(line.strip())
 
-            # Wait for completion
-            stdout, stderr = self.process.communicate()
+            # Read any remaining stderr (don't use communicate() after manual stdout read)
+            if self.process.stderr:
+                stderr_output = self.process.stderr.read()
+                if stderr_output:
+                    for line in stderr_output.splitlines():
+                        self.log_signal.emit(f"STDERR: {line}")
 
-            # Process remaining output
-            if stdout:
-                for line in stdout.splitlines():
-                    self.log_signal.emit(line.strip())
-
-            if stderr:
-                for line in stderr.splitlines():
-                    self.log_signal.emit(f"STDERR: {line}")
+            # Wait for process to complete
+            self.process.wait()
 
             return_code = self.process.returncode
-            self.finished_signal.emit(return_code, stderr if stderr else "")
+            self.finished_signal.emit(return_code, stderr_output)
 
         except Exception as e:
             self.log_signal.emit(f"Error starting process: {e}")
             self.finished_signal.emit(-1, str(e))
         finally:
-            if self.process and self.process.poll() is None:
+            if self.process:
+                # Ensure process is terminated if still running
+                if self.process.poll() is None:
+                    try:
+                        self.process.terminate()
+                        self.process.wait(timeout=5)
+                    except Exception as e:
+                        self.log_signal.emit(f"Error terminating process: {e}")
+                        try:
+                            self.process.kill()
+                        except Exception:
+                            pass
+                # Close file handles to prevent resource leaks
                 try:
-                    self.process.terminate()
-                except Exception as e:
-                    self.log_signal.emit(f"Error terminating process: {e}")
+                    if self.process.stdout:
+                        self.process.stdout.close()
+                    if self.process.stderr:
+                        self.process.stderr.close()
+                except Exception:
+                    pass
 
     def stop(self) -> None:
         """Stop the process."""
