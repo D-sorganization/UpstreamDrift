@@ -144,8 +144,8 @@ class MatlabLauncher(QMainWindow):
             return
 
         try:
-            if os.name == "nt":
-                os.startfile(full_path)
+            if sys.platform == "win32":
+                os.startfile(full_path)  # type: ignore[attr-defined]
             elif sys.platform == "darwin":
                 subprocess.run(["open", str(full_path)], check=True)
             else:

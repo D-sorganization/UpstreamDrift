@@ -125,7 +125,7 @@ except ImportError:
 CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
 
-if os.name == "nt":
+if sys.platform == "win32":
     try:
         CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
         CREATE_NEW_CONSOLE = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
@@ -1351,7 +1351,7 @@ python "{wsl_path}" {' '.join(args or [])}
                 # On Windows, create a new console window
                 subprocess.Popen(
                     cmd,
-                    creationflags=CREATE_NEW_CONSOLE,
+                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
                 )
             else:
                 subprocess.Popen(cmd)
@@ -2309,7 +2309,7 @@ Expected tiles: {summary['expected_tiles']}
                     cmd_str,
                     cwd=str(cwd),
                     env=env,
-                    creationflags=CREATE_NEW_CONSOLE,
+                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
                 )
             else:
                 process = subprocess.Popen(
@@ -2425,7 +2425,7 @@ python -m {module_name}
             if os.name == "nt":
                 subprocess.Popen(
                     cmd,
-                    creationflags=CREATE_NEW_CONSOLE,
+                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
                 )
             else:
                 subprocess.Popen(cmd)
