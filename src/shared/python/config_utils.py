@@ -117,7 +117,7 @@ def load_yaml_config(
         config = load_yaml_config("settings.yaml", default={"theme": "dark"})
     """
     try:
-        import yaml
+        import yaml  # type: ignore[import-untyped]
     except ImportError:
         logger.warning("PyYAML not installed, cannot load YAML config")
         return default.copy() if default else {}

@@ -38,7 +38,7 @@ from .error_utils import (
 from .error_utils import IOError as IOUtilsError
 
 if YAML_AVAILABLE:
-    import yaml
+    import yaml  # type: ignore[import-untyped]
 
 
 # Re-export for backwards compatibility

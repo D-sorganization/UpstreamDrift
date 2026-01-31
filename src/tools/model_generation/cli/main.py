@@ -267,7 +267,7 @@ def cmd_info(args: argparse.Namespace) -> int:
 
     # Calculate statistics
     total_mass = sum(link.inertia.mass for link in model.links)
-    joint_types = {}
+    joint_types: dict[str, int] = {}
     for j in model.joints:
         jt = j.joint_type.value
         joint_types[jt] = joint_types.get(jt, 0) + 1

@@ -647,8 +647,10 @@ class JointManipulatorWidget(QWidget):
         # Clear existing sliders
         while self.sliders_layout.count() > 1:  # Keep the stretch
             item = self.sliders_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            if item is not None:
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
 
         # Add sliders for movable joints
         filter_mode = self.filter_combo.currentText()

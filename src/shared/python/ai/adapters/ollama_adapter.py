@@ -22,12 +22,15 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.logging_config import get_logger
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.config import (
+    DEFAULT_OLLAMA_HOST,
+    DEFAULT_OLLAMA_MODEL,
+    DEFAULT_OLLAMA_TIMEOUT,
+    get_ollama_host,
+    get_ollama_model,
+    get_ollama_timeout,
+)
 from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
@@ -41,13 +44,17 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
+from src.shared.python.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = get_logger(__name__)
 
-# Default Ollama configuration
-OLLAMA_DEFAULT_HOST = "http://localhost:11434"
-OLLAMA_DEFAULT_MODEL = "llama3.1:8b"
-OLLAMA_DEFAULT_TIMEOUT = 120.0  # [s] - Local models can be slow
+# Backwards compatibility aliases
+OLLAMA_DEFAULT_HOST = DEFAULT_OLLAMA_HOST
+OLLAMA_DEFAULT_MODEL = DEFAULT_OLLAMA_MODEL
+OLLAMA_DEFAULT_TIMEOUT = DEFAULT_OLLAMA_TIMEOUT
 
 
 class OllamaAdapter(BaseAgentAdapter):
@@ -79,20 +86,25 @@ class OllamaAdapter(BaseAgentAdapter):
 
     def __init__(
         self,
-        host: str = OLLAMA_DEFAULT_HOST,
-        model: str = OLLAMA_DEFAULT_MODEL,
-        timeout: float = OLLAMA_DEFAULT_TIMEOUT,
+        host: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
     ) -> None:
         """Initialize Ollama adapter.
 
+        Configuration is loaded from environment variables if not provided:
+            - OLLAMA_HOST: Server URL (default: http://localhost:11434)
+            - OLLAMA_MODEL: Model name (default: llama3.1:8b)
+            - OLLAMA_TIMEOUT: Timeout in seconds (default: 120.0)
+
         Args:
-            host: Ollama server URL. Default: http://localhost:11434
-            model: Model name to use. Default: llama3.1:8b
-            timeout: Request timeout [s]. Default: 120.0
+            host: Ollama server URL. Uses OLLAMA_HOST env var or default.
+            model: Model name to use. Uses OLLAMA_MODEL env var or default.
+            timeout: Request timeout [s]. Uses OLLAMA_TIMEOUT env var or default.
         """
-        self._host = host.rstrip("/")
-        self._model = model
-        self._timeout = timeout
+        self._host = (host or get_ollama_host()).rstrip("/")
+        self._model = model or get_ollama_model()
+        self._timeout = timeout if timeout is not None else get_ollama_timeout()
         self._client: Any = None  # Lazy-loaded httpx client
 
         logger.info(

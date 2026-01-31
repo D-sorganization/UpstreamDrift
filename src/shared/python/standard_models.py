@@ -8,7 +8,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from src.shared.python.common_utils import GolfModelingError
 from src.shared.python.constants import DEG_TO_RAD

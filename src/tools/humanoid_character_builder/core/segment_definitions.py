@@ -672,8 +672,8 @@ def get_children(segment_name: str) -> list[str]:
 
 def get_segment_chain(segment_name: str) -> list[str]:
     """Get chain from root to specified segment."""
-    chain = []
-    current = segment_name
+    chain: list[str] = []
+    current: str | None = segment_name
     while current is not None:
         chain.insert(0, current)
         segment = HUMANOID_SEGMENTS.get(current)

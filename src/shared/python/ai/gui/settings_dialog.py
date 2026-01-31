@@ -33,6 +33,11 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ai.config import (
+    DEFAULT_OLLAMA_HOST,
+    DEFAULT_OLLAMA_MODEL,
+    get_ollama_host,
+)
 from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -125,9 +130,9 @@ class AISettings:
     """
 
     provider: AIProvider = AIProvider.OLLAMA
-    model: str = "llama3.1:8b"
+    model: str = DEFAULT_OLLAMA_MODEL
     expertise_level: int = 1
-    ollama_host: str = "http://localhost:11434"
+    ollama_host: str = DEFAULT_OLLAMA_HOST
     streaming_enabled: bool = True
     rag_enabled: bool = True
     api_keys: dict[AIProvider, str] = field(default_factory=dict)
@@ -155,11 +160,13 @@ class AISettings:
         except KeyError:
             provider = AIProvider.OLLAMA
 
+        # Use environment variable as fallback for ollama_host
+        default_host = get_ollama_host()
         return cls(
             provider=provider,
-            model=settings.value(KEY_MODEL, "llama3.1:8b"),
+            model=settings.value(KEY_MODEL, DEFAULT_OLLAMA_MODEL),
             expertise_level=int(settings.value(KEY_EXPERTISE, 1)),
-            ollama_host=settings.value(KEY_OLLAMA_HOST, "http://localhost:11434"),
+            ollama_host=settings.value(KEY_OLLAMA_HOST, default_host),
             streaming_enabled=settings.value(KEY_STREAMING, True, type=bool),
             rag_enabled=settings.value(KEY_RAG_ENABLED, True, type=bool),
         )
@@ -317,7 +324,7 @@ class ProviderConfigWidget(QWidget):
         else:
             # Ollama host configuration
             host_layout = QFormLayout()
-            self._host_input = QLineEdit("http://localhost:11434")
+            self._host_input = QLineEdit(get_ollama_host())
             host_layout.addRow("Ollama Host:", self._host_input)
             layout.addLayout(host_layout)
 
@@ -422,7 +429,7 @@ class ProviderConfigWidget(QWidget):
         """Get Ollama host if applicable."""
         if hasattr(self, "_host_input"):
             return str(self._host_input.text().strip())
-        return "http://localhost:11434"
+        return get_ollama_host()
 
 
 class AISettingsDialog(QDialog):

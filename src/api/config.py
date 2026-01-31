@@ -45,3 +45,42 @@ def get_cors_origins() -> list[str]:
     if env_value:
         return [origin.strip() for origin in env_value.split(",") if origin.strip()]
     return DEFAULT_CORS_ORIGINS.copy()
+
+
+# Server configuration
+DEFAULT_SERVER_HOST = "0.0.0.0"
+DEFAULT_SERVER_PORT = 8000
+
+
+def get_server_host() -> str:
+    """Get server host from environment or default.
+
+    Environment Variable:
+        API_HOST: Server bind address (default: 0.0.0.0)
+
+    Returns:
+        Server host address.
+    """
+    return os.getenv("API_HOST", DEFAULT_SERVER_HOST)
+
+
+def get_server_port() -> int:
+    """Get server port from environment or default.
+
+    Environment Variable:
+        API_PORT: Server port (default: 8000)
+
+    Returns:
+        Server port number.
+
+    Raises:
+        ValueError: If API_PORT is not a valid integer.
+    """
+    port_str = os.getenv("API_PORT", str(DEFAULT_SERVER_PORT))
+    try:
+        port = int(port_str)
+        if not (1 <= port <= 65535):
+            raise ValueError(f"Port must be between 1 and 65535, got {port}")
+        return port
+    except ValueError as e:
+        raise ValueError(f"Invalid API_PORT value: {port_str!r}") from e

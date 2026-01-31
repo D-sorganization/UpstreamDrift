@@ -48,6 +48,12 @@ class URDFEditorWindow(QMainWindow):
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the URDF editor window."""
         super().__init__(parent)
+
+    def _show_status(self, message: str) -> None:
+        """Show a message in the status bar."""
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage(message)
         self.current_file: Path | None = None
         self.urdf_content: str = ""
         self._is_modified: bool = False
@@ -282,9 +288,9 @@ class URDFEditorWindow(QMainWindow):
     def _on_validation_changed(self, is_valid: bool, errors: list[str]) -> None:
         """Handle validation status change."""
         if is_valid:
-            self.statusBar().showMessage("URDF is valid")
+            self._show_status("URDF is valid")
         else:
-            self.statusBar().showMessage(f"Validation errors: {len(errors)}")
+            self._show_status(f"Validation errors: {len(errors)}")
 
     def _on_frankenstein_update(self) -> None:
         """Handle Frankenstein editor update."""
@@ -426,7 +432,7 @@ class URDFEditorWindow(QMainWindow):
         self.code_editor.set_content(self.urdf_content)
         self._update_title()
         self._update_preview()
-        self.statusBar().showMessage("New URDF created")
+        self._show_status("New URDF created")
 
     def open_urdf(self) -> None:
         """Open a URDF file."""
@@ -469,7 +475,7 @@ class URDFEditorWindow(QMainWindow):
             # Add to library for reference
             self.component_library.load_urdf_to_library(file_path)
 
-            self.statusBar().showMessage(f"Loaded: {file_path.name}")
+            self._show_status(f"Loaded: {file_path.name}")
             logger.info(f"Loaded URDF: {file_path}")
             return True
 
@@ -509,7 +515,7 @@ class URDFEditorWindow(QMainWindow):
             self._is_modified = False
 
             self._update_title()
-            self.statusBar().showMessage(f"Saved: {file_path.name}")
+            self._show_status(f"Saved: {file_path.name}")
             logger.info(f"Saved URDF: {file_path}")
 
         except Exception as e:

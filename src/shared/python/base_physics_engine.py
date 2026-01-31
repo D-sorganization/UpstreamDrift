@@ -332,14 +332,20 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         Returns:
             StateCheckpoint object containing engine state and timestamp.
         """
-        engine_state_dict = {}
+        import numpy as np
+
+        engine_state_dict: dict[str, Any] = {}
         timestamp = 0.0
+        q = np.array([])
+        v = np.array([])
 
         if self.state:
             timestamp = self.state.time
+            q = self.state.q.copy()
+            v = self.state.v.copy()
             engine_state_dict = {
-                "q": self.state.q.copy(),
-                "v": self.state.v.copy(),
+                "q": q,
+                "v": v,
                 "a": self.state.a.copy(),
                 "tau": self.state.tau.copy(),
                 "t": self.state.time,
@@ -349,12 +355,17 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             try:
                 timestamp = self.get_time()
                 engine_state_dict = self.get_full_state()
+                q = engine_state_dict.get("q", np.array([]))
+                v = engine_state_dict.get("v", np.array([]))
             except (NotImplementedError, AttributeError):
                 pass
 
-        return StateCheckpoint(
-            timestamp=timestamp,
+        return StateCheckpoint.create(
+            engine_type=self.__class__.__name__,
             engine_state=engine_state_dict,
+            q=q,
+            v=v,
+            timestamp=timestamp,
         )
 
     @require_state(lambda self: self._is_initialized, "initialized")

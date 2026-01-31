@@ -268,12 +268,9 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
                 error_message="MakeHuman not found. Please install MakeHuman or provide path.",
             )
 
-        # TODO: Implement MakeHuman integration
-        # This would involve:
-        # 1. Convert BodyParameters to MakeHuman modifier values
-        # 2. Run MakeHuman in scripted mode to generate mesh
-        # 3. Export mesh and segment by vertex groups
-        # 4. Return paths to generated files
+        # MakeHuman integration not yet implemented (see GitHub issue #979)
+        # Requires: converting BodyParameters to MakeHuman modifiers,
+        # running scripted mode, exporting mesh segments
 
         logger.warning(
             "MakeHuman integration not yet implemented. "
@@ -358,7 +355,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                 error_message="smplx package not installed. Install with: pip install smplx",
             )
 
-        # TODO: Implement SMPL-X integration
+        # SMPL-X integration not yet implemented (see GitHub issue #980)
         logger.warning(
             "SMPL-X integration not yet implemented. "
             "Falling back to primitive meshes."

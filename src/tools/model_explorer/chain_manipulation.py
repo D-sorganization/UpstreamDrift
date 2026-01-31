@@ -252,8 +252,8 @@ class ChainVisualizer(QGraphicsView):
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the visualizer."""
         super().__init__(parent)
-        self.scene = QGraphicsScene(self)
-        self.setScene(self.scene)
+        self._graphics_scene = QGraphicsScene(self)
+        self.setScene(self._graphics_scene)
         self.tree: KinematicTree | None = None
         self.node_items: dict[str, QGraphicsEllipseItem] = {}
 
@@ -269,7 +269,7 @@ class ChainVisualizer(QGraphicsView):
 
     def _render_tree(self) -> None:
         """Render the kinematic tree."""
-        self.scene.clear()
+        self._graphics_scene.clear()
         self.node_items.clear()
 
         if self.tree is None or self.tree.root is None:
@@ -285,7 +285,7 @@ class ChainVisualizer(QGraphicsView):
                 x2, y2 = positions[name]
                 line = QGraphicsLineItem(x1, y1, x2, y2)
                 line.setPen(QColor("#888888"))
-                self.scene.addItem(line)
+                self._graphics_scene.addItem(line)
 
         # Draw nodes
         for name, (x, y) in positions.items():
@@ -293,7 +293,9 @@ class ChainVisualizer(QGraphicsView):
             self._draw_node(node, x, y)
 
         # Fit view
-        self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+        self.fitInView(
+            self._graphics_scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio
+        )
 
     def _calculate_positions(self) -> dict[str, tuple[float, float]]:
         """Calculate node positions using a simple tree layout."""
@@ -349,7 +351,7 @@ class ChainVisualizer(QGraphicsView):
         ellipse.setBrush(color)
         ellipse.setPen(QColor("#333333"))
         ellipse.setData(0, node.name)
-        self.scene.addItem(ellipse)
+        self._graphics_scene.addItem(ellipse)
         self.node_items[node.name] = ellipse
 
         # Draw label
@@ -358,7 +360,7 @@ class ChainVisualizer(QGraphicsView):
         font = text.font()
         font.setPointSize(8)
         text.setFont(font)
-        self.scene.addItem(text)
+        self._graphics_scene.addItem(text)
 
     def mousePressEvent(self, event: Any) -> None:
         """Handle mouse press for node selection."""
@@ -383,6 +385,8 @@ class ChainVisualizer(QGraphicsView):
 
 class InsertSegmentDialog(QDialog):
     """Dialog for inserting a new segment into the chain."""
+
+    reparent_list: QListWidget | None
 
     def __init__(
         self,
@@ -551,6 +555,7 @@ class ChainManipulationWidget(QWidget):
         super().__init__(parent)
         self.tree = KinematicTree()
         self.urdf_content: str = ""
+        self.selected_node: str | None = None
         self._setup_ui()
         self._connect_signals()
 
@@ -672,6 +677,7 @@ class ChainManipulationWidget(QWidget):
 
     def _on_node_selected(self, name: str) -> None:
         """Handle node selection."""
+        self.selected_node = name
         node = self.tree.nodes.get(name)
         if node:
             info = f"Selected: {name}"

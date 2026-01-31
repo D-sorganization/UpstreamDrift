@@ -56,6 +56,10 @@ class ManualBuilder(BaseURDFBuilder):
         result = builder.build()
     """
 
+    # Inherited from BaseURDFBuilder but redeclared for mypy
+    _links: list[Link]
+    _joints: list[Joint]
+
     def __init__(
         self,
         robot_name: str = "robot",

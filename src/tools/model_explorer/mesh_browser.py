@@ -228,14 +228,14 @@ class MeshBrowserPanel(QWidget):
         layout = QVBoxLayout(self)
 
         # Header
-        header = QHBoxLayout()
+        header_layout = QHBoxLayout()
         self.title_label = QLabel(self.title)
         self.title_label.setStyleSheet("font-weight: bold;")
-        header.addWidget(self.title_label)
+        header_layout.addWidget(self.title_label)
 
         self.load_btn = QPushButton("Load URDF")
-        header.addWidget(self.load_btn)
-        layout.addLayout(header)
+        header_layout.addWidget(self.load_btn)
+        layout.addLayout(header_layout)
 
         # File info
         self.file_label = QLabel("No file loaded")
@@ -391,6 +391,9 @@ class MeshBrowserPanel(QWidget):
 
 class CopyMeshDialog(QDialog):
     """Dialog for configuring mesh copy operation."""
+
+    copy_file_check: QCheckBox | None
+    mesh_subdir_edit: QLineEdit | None
 
     def __init__(
         self,

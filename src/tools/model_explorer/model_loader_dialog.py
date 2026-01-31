@@ -35,7 +35,7 @@ try:
     from src.shared.python.logging_config import get_logger
 except ImportError:
 
-    def get_logger(name: str) -> logging.Logger:
+    def get_logger(name: str | None = None) -> logging.Logger:
         return logging.getLogger(name)
 
 
@@ -373,7 +373,10 @@ class ModelLoaderDialog(QDialog):
         rename_action = menu.addAction("Rename")
         delete_action = menu.addAction("Delete")
 
-        action = menu.exec(self.imported_tree.viewport().mapToGlobal(pos))
+        viewport = self.imported_tree.viewport()
+        if viewport is None:
+            return
+        action = menu.exec(viewport.mapToGlobal(pos))
 
         model_path = item.data(0, Qt.ItemDataRole.UserRole + 1)
 
