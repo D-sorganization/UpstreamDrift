@@ -65,7 +65,7 @@ def plot_joint_positions(
     indices = joint_indices or list(range(n_joints))
     names = joint_names or [f"Joint {i}" for i in indices]
 
-    for i, (idx, name) in enumerate(zip(indices, names)):
+    for i, (idx, name) in enumerate(zip(indices, names, strict=False)):
         if idx < n_joints:
             color = config.colors.get_color(i)
             ax.plot(times, np.rad2deg(positions[:, idx]), label=name, color=color)
@@ -119,7 +119,7 @@ def plot_joint_velocities(
     indices = joint_indices or list(range(n_joints))
     names = joint_names or [f"Joint {i}" for i in indices]
 
-    for i, (idx, name) in enumerate(zip(indices, names)):
+    for i, (idx, name) in enumerate(zip(indices, names, strict=False)):
         if idx < n_joints:
             color = config.colors.get_color(i)
             ax.plot(times, np.rad2deg(velocities[:, idx]), label=name, color=color)
@@ -187,7 +187,7 @@ def plot_joint_accelerations(
     indices = joint_indices or list(range(n_joints))
     names = joint_names or [f"Joint {i}" for i in indices]
 
-    for i, (idx, name) in enumerate(zip(indices, names)):
+    for i, (idx, name) in enumerate(zip(indices, names, strict=False)):
         if idx < n_joints:
             color = config.colors.get_color(i)
             ax.plot(times, np.rad2deg(accelerations[:, idx]), label=name, color=color)

@@ -260,6 +260,7 @@ class GolfLauncher(QMainWindow):
         self.docker_available = (
             startup_results.docker_available if startup_results else False
         )
+        self.docker_checker: DockerCheckThread | None = None
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
