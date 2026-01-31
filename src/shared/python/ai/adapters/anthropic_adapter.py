@@ -22,12 +22,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.logging_config import get_logger
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.config import (
+    DEFAULT_ANTHROPIC_MAX_TOKENS,
+    DEFAULT_ANTHROPIC_MODEL,
+    DEFAULT_ANTHROPIC_TIMEOUT,
+    get_anthropic_model,
+    get_anthropic_timeout,
+)
 from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
@@ -42,17 +44,12 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
+from src.shared.python.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = get_logger(__name__)
-
-# Import centralized configuration
-from src.shared.python.ai.config import (
-    DEFAULT_ANTHROPIC_MAX_TOKENS,
-    DEFAULT_ANTHROPIC_MODEL,
-    DEFAULT_ANTHROPIC_TIMEOUT,
-    get_anthropic_model,
-    get_anthropic_timeout,
-)
 
 # Backwards compatibility aliases
 ANTHROPIC_DEFAULT_MODEL = DEFAULT_ANTHROPIC_MODEL

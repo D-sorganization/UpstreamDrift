@@ -22,12 +22,15 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.logging_config import get_logger
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.config import (
+    DEFAULT_OPENAI_MAX_TOKENS,
+    DEFAULT_OPENAI_MODEL,
+    DEFAULT_OPENAI_TIMEOUT,
+    get_openai_model,
+    get_openai_organization,
+    get_openai_timeout,
+)
 from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
@@ -42,18 +45,12 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
+from src.shared.python.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = get_logger(__name__)
-
-# Import centralized configuration
-from src.shared.python.ai.config import (
-    DEFAULT_OPENAI_MAX_TOKENS,
-    DEFAULT_OPENAI_MODEL,
-    DEFAULT_OPENAI_TIMEOUT,
-    get_openai_model,
-    get_openai_organization,
-    get_openai_timeout,
-)
 
 # Backwards compatibility aliases
 OPENAI_DEFAULT_MODEL = DEFAULT_OPENAI_MODEL
