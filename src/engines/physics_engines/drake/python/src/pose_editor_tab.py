@@ -23,14 +23,14 @@ _project_root = (
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.pose_editor.core import (
+from src.shared.python.logging_config import get_logger  # noqa: E402
+from src.shared.python.pose_editor.core import (  # noqa: E402
     BasePoseEditor,
     JointInfo,
     JointType,
 )
-from src.shared.python.pose_editor.library import PoseLibrary, StoredPose
-from src.shared.python.pose_editor.widgets import (
+from src.shared.python.pose_editor.library import PoseLibrary, StoredPose  # noqa: E402
+from src.shared.python.pose_editor.widgets import (  # noqa: E402
     GravityControlWidget,
     JointSliderWidget,
     PoseLibraryWidget,
@@ -241,7 +241,6 @@ class DrakePoseEditor(BasePoseEditor):
         if self._plant is None or self._context is None:
             return 0.0
 
-        joint = self._plant.get_joint(JointIndex(joint_index))
         positions = self._plant.GetPositions(self._context)
 
         # Find position index for this joint
