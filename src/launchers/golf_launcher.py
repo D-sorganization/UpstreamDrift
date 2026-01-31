@@ -1343,7 +1343,7 @@ except Exception as e:
         else:
             wsl_path = script_path.replace("\\", "/")
 
-        project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
+        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
 
         # Build the WSL command
         wsl_cmd = f"""
@@ -2420,7 +2420,7 @@ Expected tiles: {summary['expected_tiles']}
             module_name: Python module name to run with -m flag
             cwd: Optional working directory (Windows Path)
         """
-        project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
+        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
 
         # Determine working directory
         work_dir = project_dir

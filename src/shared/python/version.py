@@ -1,14 +1,14 @@
-"""Version information for Golf Modeling Suite."""
+"""Version information for UpstreamDrift."""
 
 __version__ = "1.0.0"
 __version_info__ = (1, 0, 0)
 
-__title__ = "Golf Modeling Suite"
-__description__ = "Professional biomechanical analysis platform for golf swing modeling"
-__author__ = "Golf Modeling Suite Team"
-__author_email__ = "support@golfmodelingsuite.com"
+__title__ = "UpstreamDrift"
+__description__ = "Professional biomechanical analysis platform for physics-based modeling"
+__author__ = "UpstreamDrift Team"
+__author_email__ = "support@upstreamdrift.dev"
 __license__ = "MIT"
-__url__ = "https://github.com/D-sorganization/Golf_Modeling_Suite"
+__url__ = "https://github.com/D-sorganization/UpstreamDrift"
 
 # Build information
 __build_date__ = "2026-01-12"

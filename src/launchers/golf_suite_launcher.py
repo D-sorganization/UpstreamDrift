@@ -45,11 +45,11 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.resize(400, 300)
 
         # Paths - UPDATED FOR GOLF_MODELING_SUITE
-        # Script location: Golf_Modeling_Suite/launchers/golf_suite_launcher.py
-        # Root: Golf_Modeling_Suite/
+        # Script location: UpstreamDrift/launchers/golf_suite_launcher.py
+        # Root: UpstreamDrift/
 
         self.script_dir = Path(__file__).parent.resolve()
-        # launchers/ -> Golf_Modeling_Suite/
+        # launchers/ -> UpstreamDrift/
         self.suite_root = self.script_dir.parent
 
         # Define paths to the GUI scripts in the new structure

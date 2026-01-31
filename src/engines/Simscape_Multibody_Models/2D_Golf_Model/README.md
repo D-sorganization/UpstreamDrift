@@ -52,7 +52,7 @@ Compared to 3D model:
 
 ```matlab
 % Navigate to model directory
-cd /path/to/Golf_Modeling_Suite/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab
+cd /path/to/UpstreamDrift/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab
 
 % Open Simulink model
 open_system('golf_swing_2d.slx')

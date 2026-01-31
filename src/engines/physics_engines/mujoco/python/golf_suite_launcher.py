@@ -153,7 +153,7 @@ class GolfLauncher(QtWidgets.QMainWindow):
                 "robotics_env:latest",
                 # Command inside container
                 "python",
-                "Golf_Modeling_Suite/engines/physics_engines/drake/python/src/golf_gui.py",
+                "UpstreamDrift/engines/physics_engines/drake/python/src/golf_gui.py",
             ]
         )
 
