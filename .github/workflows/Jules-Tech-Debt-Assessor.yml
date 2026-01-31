@@ -15,7 +15,7 @@ on:
         default: '10'
         type: string
   schedule:
-    - cron: "0 13 * * 0"  # Weekly on Sunday at 5 AM PST / 1 PM UTC
+    - cron: "0 8 */3 * *"  # Weekly on Sunday at 5 AM PST / 1 PM UTC
 
 permissions:
   contents: write
