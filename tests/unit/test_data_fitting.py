@@ -289,10 +289,12 @@ class TestConvertPosesToMarkers:
 
     def test_basic_conversion(self):
         """Test basic pose to marker conversion."""
-        keypoints = np.array([
-            [0.5, 0.3],  # left_shoulder
-            [0.7, 0.3],  # right_shoulder
-        ])
+        keypoints = np.array(
+            [
+                [0.5, 0.3],  # left_shoulder
+                [0.7, 0.3],  # right_shoulder
+            ]
+        )
         keypoint_names = ["left_shoulder", "right_shoulder"]
 
         markers, names = convert_poses_to_markers(keypoints, keypoint_names)
@@ -314,10 +316,12 @@ class TestConvertPosesToMarkers:
 
     def test_filter_by_target(self):
         """Test filtering to specific target markers."""
-        keypoints = np.array([
-            [0.5, 0.3, 0.0],
-            [0.7, 0.3, 0.0],
-        ])
+        keypoints = np.array(
+            [
+                [0.5, 0.3, 0.0],
+                [0.7, 0.3, 0.0],
+            ]
+        )
         keypoint_names = ["left_shoulder", "right_shoulder"]
         target = ["LSHO"]
 
