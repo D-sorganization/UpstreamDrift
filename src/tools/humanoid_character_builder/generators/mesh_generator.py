@@ -299,7 +299,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
         # Height is handled by overall scale
         # MakeHuman default is ~1.68m, adjust proportionally
-        height_scale = params.height_m / 1.68
+        _height_scale = params.height_m / 1.68  # Reserved for future MakeHuman API use
 
         # Gender (MakeHuman: 0 = female, 1 = male)
         modifiers["macrodetails/Gender"] = params.get_effective_gender_factor()

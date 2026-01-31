@@ -2,9 +2,8 @@
 
 import math
 import sys
-from pathlib import Path
-
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
