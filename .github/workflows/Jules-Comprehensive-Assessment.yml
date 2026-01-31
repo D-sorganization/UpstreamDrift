@@ -2,7 +2,7 @@ name: Jules Comprehensive Assessment
 
 on:
   schedule:
-    - cron: "0 10 */3 * *"  # Every 3 days at 5 AM PST (10 UTC) - cost optimized
+    - cron: "0 8 */3 * *"  # Every 3 days at 5 AM PST (10 UTC) - cost optimized
   workflow_dispatch:
 
 permissions:

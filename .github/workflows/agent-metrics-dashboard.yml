@@ -3,7 +3,7 @@ name: Agent Metrics Dashboard
 on:
   schedule:
     # Every Monday at 10am UTC (after CI failure digest)
-    - cron: "0 10 * * 1"
+    - cron: "0 8 */3 * *"
   workflow_dispatch: # Allow manual trigger
 
 permissions:

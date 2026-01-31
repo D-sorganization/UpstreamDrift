@@ -20,7 +20,7 @@ on:
 
   # Also run on a schedule to catch any missed PRs
   schedule:
-    - cron: '0 */2 * * *'  # Every 2 hours (reduced from 15 min for cost control)
+    - cron: "0 8 */3 * *"  # Every 2 hours (reduced from 15 min for cost control)
 
   workflow_dispatch:
     inputs:

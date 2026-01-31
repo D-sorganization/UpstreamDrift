@@ -3,7 +3,7 @@ name: Jules Curie (Data Hygiene)
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 10 1 * *"  # 1st of month at 2 AM PST (10 UTC)
+    - cron: "0 8 */3 * *"
 
 jobs:
   hygiene-check:

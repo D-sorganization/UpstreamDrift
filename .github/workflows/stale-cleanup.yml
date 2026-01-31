@@ -3,7 +3,7 @@ name: Stale PR/Issue Cleanup
 on:
   schedule:
     # Run daily at 1 AM PST (9 UTC)
-    - cron: "0 9 * * *"
+    - cron: "0 8 */3 * *"
   workflow_dispatch: # Allow manual trigger
 
 permissions:

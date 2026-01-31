@@ -25,7 +25,7 @@ on:
           - 'testing'
   schedule:
     # Run weekly on Mondays at 3 AM UTC to fix top 5 issues
-    - cron: '0 3 * * 1'
+    - cron: "0 8 */3 * *"
 
 permissions:
   contents: write
