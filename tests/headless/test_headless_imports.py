@@ -13,7 +13,9 @@ def test_headless_plotting_import():
             del sys.modules[k]
 
         # Mock import failure
-        with patch.dict(sys.modules, {"PyQt6": None, "PyQt6.QtCore": None, "PyQt6.QtWidgets": None}):
+        with patch.dict(
+            sys.modules, {"PyQt6": None, "PyQt6.QtCore": None, "PyQt6.QtWidgets": None}
+        ):
             # Also clear plotting modules to force reload
             keys = [k for k in sys.modules if "plotting" in k]
             for k in keys:
@@ -25,6 +27,7 @@ def test_headless_plotting_import():
 
             try:
                 import src.shared.python.plotting_core as pc
+
                 # Should not raise ImportError
                 assert hasattr(pc, "MplCanvas")
 
