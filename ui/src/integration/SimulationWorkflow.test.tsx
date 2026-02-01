@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { screen, fireEvent, waitFor, within } from '@testing-library/dom';
+import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Use actual components - don't mock the internal ones for integration tests
@@ -115,8 +115,8 @@ vi.mock('@react-three/drei', () => ({
 }));
 
 vi.mock('three', () => ({
-  Group: class {},
-  Mesh: class {},
+  Group: class { },
+  Mesh: class { },
 }));
 
 // Mock fetch for API calls
