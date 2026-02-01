@@ -19,6 +19,11 @@ from typing import TYPE_CHECKING, Any
 # Add current directory to path so we can import ui_components if needed locally
 sys.path.append(str(Path(__file__).parent))
 
+from src.launchers.launcher_model_handlers import ModelHandlerRegistry
+from src.launchers.launcher_process_manager import (
+    ProcessManager,
+    start_vcxsrv,
+)
 from src.launchers.ui_components import (
     ASSETS_DIR,
     AsyncStartupWorker,
@@ -144,69 +149,8 @@ logger = get_logger(__name__)
 REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
 
 # VcXsrv paths for Windows X11 support
-VCXSRV_PATHS = [
-    Path("C:/Program Files/VcXsrv/vcxsrv.exe"),
-    Path("C:/Program Files (x86)/VcXsrv/vcxsrv.exe"),
-]
-
-
-def _is_vcxsrv_running() -> bool:
-    """Check if VcXsrv X server is running on Windows."""
-    if os.name != "nt":
-        return True  # Not needed on Linux/Mac
-    try:
-        result = subprocess.run(
-            ["tasklist", "/FI", "IMAGENAME eq vcxsrv.exe"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        return "vcxsrv.exe" in result.stdout.lower()
-    except Exception:
-        return False
-
-
-def _start_vcxsrv() -> bool:
-    """Auto-start VcXsrv with Docker-compatible settings.
-
-    Returns:
-        True if VcXsrv was started or is already running, False otherwise.
-    """
-    if os.name != "nt":
-        return True  # Not needed on Linux/Mac
-
-    if _is_vcxsrv_running():
-        logger.info("VcXsrv is already running")
-        return True
-
-    # Find VcXsrv executable
-    vcxsrv_path = None
-    for path in VCXSRV_PATHS:
-        if path.exists():
-            vcxsrv_path = path
-            break
-
-    if not vcxsrv_path:
-        logger.warning("VcXsrv not found. Docker GUI apps may not work.")
-        return False
-
-    try:
-        # Start VcXsrv with settings for Docker:
-        # :0 = display 0
-        # -multiwindow = each X window gets its own Windows window
-        # -clipboard = enable clipboard sharing
-        # -wgl = use Windows OpenGL
-        # -ac = disable access control (allows Docker connections)
-        subprocess.Popen(
-            [str(vcxsrv_path), ":0", "-multiwindow", "-clipboard", "-wgl", "-ac"],
-            creationflags=CREATE_NO_WINDOW,
-        )
-        logger.info("VcXsrv X server started automatically")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to start VcXsrv: {e}")
-        return False
-
+# VcXsrv functions moved to launcher_process_manager.py
+# Imports: is_vcxsrv_running, start_vcxsrv
 
 CONFIG_DIR = REPOS_ROOT / ".kiro" / "launcher"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
@@ -265,9 +209,12 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[str, subprocess.Popen] = (
-            {}
-        )  # Track running instances
+
+        # Initialize process and model managers (extracted from god class)
+        self.process_manager = ProcessManager(REPOS_ROOT)
+        self.model_handler_registry = ModelHandlerRegistry()
+        # Keep backwards-compatible reference
+        self.running_processes = self.process_manager.running_processes
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
@@ -2159,7 +2106,7 @@ Expected tiles: {summary['expected_tiles']}
         try:
             # Auto-start VcXsrv on Windows for GUI support
             if os.name == "nt":
-                if not _start_vcxsrv():
+                if not start_vcxsrv():
                     response = QMessageBox.question(
                         self,
                         "X Server Not Available",

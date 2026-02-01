@@ -12,8 +12,11 @@ from src.shared.python.impact_model import (
     GOLF_BALL_MASS,
     GOLF_BALL_RADIUS,
     FiniteTimeImpactModel,
+    ImpactEvent,
     ImpactModelType,
     ImpactParameters,
+    ImpactRecorder,
+    ImpactSolverAPI,
     PreImpactState,
     RigidBodyImpactModel,
     SpringDamperImpactModel,
@@ -310,3 +313,299 @@ class TestImpactModelFactory:
         """Factory should create finite-time model."""
         model = create_impact_model(ImpactModelType.FINITE_TIME)
         assert isinstance(model, FiniteTimeImpactModel)
+
+
+# =============================================================================
+# Engine Integration Tests (Issue #758)
+# =============================================================================
+
+
+class TestImpactRecorder:
+    """Tests for impact event recording (Issue #758)."""
+
+    @pytest.fixture
+    def pre_state(self) -> PreImpactState:
+        """Create sample pre-impact state."""
+        return PreImpactState(
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_angular_velocity=np.zeros(3),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            ball_position=np.zeros(3),
+            ball_velocity=np.zeros(3),
+            ball_angular_velocity=np.zeros(3),
+        )
+
+    def test_record_impact(self, pre_state: PreImpactState) -> None:
+        """Should record impact event."""
+        recorder = ImpactRecorder()
+        model = RigidBodyImpactModel()
+        params = ImpactParameters()
+
+        post_state = model.solve(pre_state, params)
+        event = recorder.record_impact(0.5, pre_state, post_state, params)
+
+        assert event.impact_id == 0
+        assert event.timestamp == 0.5
+        assert len(recorder.events) == 1
+
+    def test_increments_impact_id(self, pre_state: PreImpactState) -> None:
+        """Should increment impact ID for each event."""
+        recorder = ImpactRecorder()
+        model = RigidBodyImpactModel()
+        params = ImpactParameters()
+        post_state = model.solve(pre_state, params)
+
+        event1 = recorder.record_impact(0.1, pre_state, post_state, params)
+        event2 = recorder.record_impact(0.2, pre_state, post_state, params)
+
+        assert event1.impact_id == 0
+        assert event2.impact_id == 1
+
+    def test_export_to_dict(self, pre_state: PreImpactState) -> None:
+        """Should export events as dictionary."""
+        recorder = ImpactRecorder()
+        model = RigidBodyImpactModel()
+        params = ImpactParameters()
+        post_state = model.solve(pre_state, params)
+
+        recorder.record_impact(0.1, pre_state, post_state, params)
+
+        data = recorder.export_to_dict()
+
+        assert "num_impacts" in data
+        assert "events" in data
+        assert "summary" in data
+        assert data["num_impacts"] == 1
+
+    def test_get_summary(self, pre_state: PreImpactState) -> None:
+        """Should compute summary statistics."""
+        recorder = ImpactRecorder()
+        model = RigidBodyImpactModel()
+        params = ImpactParameters()
+        post_state = model.solve(pre_state, params)
+
+        recorder.record_impact(0.1, pre_state, post_state, params)
+        recorder.record_impact(0.2, pre_state, post_state, params)
+
+        summary = recorder.get_summary()
+
+        assert summary["num_impacts"] == 2
+        assert "mean_ball_speed" in summary
+        assert "max_ball_speed" in summary
+
+    def test_reset_clears_events(self, pre_state: PreImpactState) -> None:
+        """Reset should clear all events."""
+        recorder = ImpactRecorder()
+        model = RigidBodyImpactModel()
+        params = ImpactParameters()
+        post_state = model.solve(pre_state, params)
+
+        recorder.record_impact(0.1, pre_state, post_state, params)
+        assert len(recorder.events) == 1
+
+        recorder.reset()
+        assert len(recorder.events) == 0
+
+
+class TestImpactSolverAPI:
+    """Tests for engine-agnostic impact solver API (Issue #758)."""
+
+    def test_solve_impact_basic(self) -> None:
+        """Should solve basic impact."""
+        solver = ImpactSolverAPI()
+
+        post = solver.solve_impact(
+            timestamp=0.0,
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+        )
+
+        assert post.ball_velocity[0] > 0
+        assert len(solver.recorder.events) == 1
+
+    def test_solve_impact_no_record(self) -> None:
+        """Should not record when record=False."""
+        solver = ImpactSolverAPI()
+
+        solver.solve_impact(
+            timestamp=0.0,
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            record=False,
+        )
+
+        assert len(solver.recorder.events) == 0
+
+    def test_solve_with_gear_effect(self) -> None:
+        """Should add gear effect spin for offset impact."""
+        solver = ImpactSolverAPI()
+
+        post = solver.solve_with_gear_effect(
+            timestamp=0.0,
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            impact_offset=np.array([0.02, 0.0]),  # Toe hit
+        )
+
+        # Should have non-zero spin from gear effect
+        assert np.linalg.norm(post.ball_angular_velocity) > 0
+        # Should record impact location
+        np.testing.assert_allclose(post.impact_location, [0.02, 0.0])
+
+    def test_get_energy_report(self) -> None:
+        """Should generate energy balance report."""
+        solver = ImpactSolverAPI()
+
+        solver.solve_impact(
+            timestamp=0.0,
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+        )
+
+        report = solver.get_energy_report()
+
+        assert "impacts" in report
+        assert "total_ke_pre" in report
+        assert "total_energy_lost" in report
+        assert len(report["impacts"]) == 1
+
+    def test_validate_cor_behavior(self) -> None:
+        """Should validate COR within tolerance."""
+        solver = ImpactSolverAPI(params=ImpactParameters(cor=0.78))
+
+        # Run several impacts
+        for i in range(5):
+            solver.solve_impact(
+                timestamp=i * 0.1,
+                clubhead_velocity=np.array([40.0 + i, 0.0, 0.0]),
+                clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            )
+
+        result = solver.validate_cor_behavior(tolerance=0.1)
+
+        assert "valid" in result
+        assert "measured_cor_mean" in result
+        assert "deviation" in result
+
+    def test_validate_spin_behavior(self) -> None:
+        """Should validate spin within physical limits."""
+        solver = ImpactSolverAPI()
+
+        solver.solve_impact(
+            timestamp=0.0,
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+        )
+
+        result = solver.validate_spin_behavior(max_spin_rpm=10000)
+
+        assert "valid" in result
+        assert "max_observed_rpm" in result
+
+    def test_different_model_types(self) -> None:
+        """Should work with different impact model types."""
+        for model_type in [
+            ImpactModelType.RIGID_BODY,
+            ImpactModelType.FINITE_TIME,
+        ]:
+            solver = ImpactSolverAPI(model_type=model_type)
+
+            post = solver.solve_impact(
+                timestamp=0.0,
+                clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+                clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            )
+
+            assert post.ball_velocity[0] > 0
+
+    def test_reset_clears_state(self) -> None:
+        """Reset should clear recorder."""
+        solver = ImpactSolverAPI()
+
+        solver.solve_impact(
+            timestamp=0.0,
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+        )
+
+        assert len(solver.recorder.events) == 1
+
+        solver.reset()
+
+        assert len(solver.recorder.events) == 0
+
+
+class TestImpactEventDataclass:
+    """Tests for ImpactEvent dataclass."""
+
+    def test_event_contains_all_data(self) -> None:
+        """ImpactEvent should contain complete impact data."""
+        pre_state = PreImpactState(
+            clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+            clubhead_angular_velocity=np.zeros(3),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            ball_position=np.zeros(3),
+            ball_velocity=np.zeros(3),
+            ball_angular_velocity=np.zeros(3),
+        )
+
+        model = RigidBodyImpactModel()
+        params = ImpactParameters()
+        post_state = model.solve(pre_state, params)
+        energy = validate_energy_balance(pre_state, post_state, params)
+
+        event = ImpactEvent(
+            timestamp=0.5,
+            pre_state=pre_state,
+            post_state=post_state,
+            energy_balance=energy,
+            impact_id=0,
+            model_type=ImpactModelType.RIGID_BODY,
+        )
+
+        assert event.timestamp == 0.5
+        assert event.impact_id == 0
+        assert event.model_type == ImpactModelType.RIGID_BODY
+        assert "total_ke_pre" in event.energy_balance
+
+
+class TestCORValidation:
+    """Tests for COR validation accuracy (Issue #758)."""
+
+    @pytest.mark.parametrize("cor", [0.6, 0.7, 0.78, 0.85])
+    def test_cor_matches_parameter(self, cor: float) -> None:
+        """Measured COR should approximately match parameter."""
+        solver = ImpactSolverAPI(params=ImpactParameters(cor=cor))
+
+        for _ in range(3):
+            solver.solve_impact(
+                timestamp=0.0,
+                clubhead_velocity=np.array([40.0, 0.0, 0.0]),
+                clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            )
+
+        result = solver.validate_cor_behavior(tolerance=0.15)
+
+        # Measured COR should be within tolerance of expected
+        assert result["deviation"] < 0.15
+
+
+class TestSpinValidation:
+    """Tests for spin validation (Issue #758)."""
+
+    def test_realistic_spin_rates(self) -> None:
+        """Spin rates should be in realistic range for golf."""
+        solver = ImpactSolverAPI()
+
+        # Typical driver impact
+        solver.solve_impact(
+            timestamp=0.0,
+            clubhead_velocity=np.array([45.0, 0.0, 0.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+        )
+
+        result = solver.validate_spin_behavior(max_spin_rpm=10000)
+
+        assert result["valid"]
+        # Driver backspin typically 2000-3000 RPM
+        assert result["max_observed_rpm"] < 10000

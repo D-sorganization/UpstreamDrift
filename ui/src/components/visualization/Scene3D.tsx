@@ -158,6 +158,12 @@ export function Scene3D({ engine: _engine, frame, frames }: Props) {
   // If a full reset is needed when switching engines, consider resetting frame/frames state
   // in the parent component instead of remounting the entire Canvas.
   return (
+    <div
+      role="img"
+      aria-label="3D golf swing simulation visualization. Use mouse to rotate view, scroll to zoom."
+      tabIndex={0}
+      className="w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+    >
     <Canvas
       camera={{ position: [3, 2, 3], fov: 50 }}
       className="bg-gray-900 w-full h-full"
@@ -189,5 +195,6 @@ export function Scene3D({ engine: _engine, frame, frames }: Props) {
 
       <Environment preset="studio" />
     </Canvas>
+    </div>
   );
 }
