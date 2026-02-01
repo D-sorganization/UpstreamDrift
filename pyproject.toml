@@ -27,6 +27,9 @@ dependencies = [
     # Default physics engine (lightweight, cross-platform)
     "mujoco>=3.3.0,<4.0.0",
 
+    # Safe expression evaluation (replaces eval())
+    "simpleeval>=1.0.0",
+
     # Shared tools (URDF generation, signal processing)
     # Install from local path: pip install -e ../Tools[urdf]
     # Or from GitHub: pip install git+https://github.com/D-sorganization/Tools.git[urdf]
