@@ -1,138 +1,90 @@
 #!/usr/bin/env python3
 """
 Unified MuJoCo Launcher
+
 Hub for accessing MuJoCo Humanoid Simulation and Analysis Dashboard.
+Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
 import subprocess
 import sys
-from pathlib import Path
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import (
-    QApplication,
-    QFrame,
-    QLabel,
-    QMainWindow,
-    QMessageBox,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
-
-REPO_ROOT = Path(__file__).parent.parent.parent.resolve()
-
-MODES = [
-    {
-        "name": "Humanoid Simulation",
-        "desc": "Full-body biomechanics simulation with muscle dynamics.",
-        "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
-        "icon": "🏃",
-    },
-    {
-        "name": "Analysis Dashboard",
-        "desc": "Real-time plotting, video analysis, and data visualization.",
-        "module": "mujoco_humanoid_golf",  # Launch as module for dashboard
-        "cwd_suffix": "src/engines/physics_engines/mujoco/python",
-        "icon": "📊",
-    },
-]
+from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher
 
 
-class MujocoUnifiedLauncher(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("MuJoCo Unified Interface")
-        self.resize(500, 350)
-        self.init_ui()
+class MujocoUnifiedLauncher(BaseLauncher):
+    """Launcher for MuJoCo simulation modes."""
 
-    def init_ui(self):
-        central = QWidget()
-        self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
-        layout.setSpacing(20)
-        layout.setContentsMargins(40, 40, 40, 40)
+    WINDOW_TITLE = "MuJoCo Golf Engine"
+    WINDOW_WIDTH = 500
+    WINDOW_HEIGHT = 350
+    GRID_COLUMNS = 1  # Vertical layout
 
-        # Header
-        lbl_title = QLabel("MuJoCo Golf Engine")
-        lbl_title.setFont(QFont("Segoe UI", 20, QFont.Weight.Bold))
-        lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(lbl_title)
+    def get_items(self) -> list[LaunchItem]:
+        """Return the list of MuJoCo launch modes."""
+        return [
+            LaunchItem(
+                name="🏃 Humanoid Simulation",
+                description="Full-body biomechanics simulation with muscle dynamics.",
+                path="src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
+                item_type="tool",
+                action=lambda: self._launch_python_script(
+                    "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+                ),
+            ),
+            LaunchItem(
+                name="📊 Analysis Dashboard",
+                description="Real-time plotting, video analysis, and data visualization.",
+                item_type="tool",
+                action=lambda: self._launch_python_module(
+                    "mujoco_humanoid_golf",
+                    cwd_suffix="src/engines/physics_engines/mujoco/python",
+                ),
+            ),
+        ]
 
-        lbl_sub = QLabel("Select simulation mode:")
-        lbl_sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_sub.setStyleSheet("color: #666;")
-        layout.addWidget(lbl_sub)
+    def _launch_python_script(self, relative_path: str) -> None:
+        """Launch a Python script in a new process.
 
-        # Buttons
-        for mode in MODES:
-            btn_frame = QFrame()
-            btn_frame.setStyleSheet(
-                """
-                QFrame {
-                    background-color: #f8f9fa;
-                    border: 1px solid #e9ecef;
-                    border-radius: 8px;
-                }
-                QFrame:hover {
-                    background-color: #e2e6ea;
-                    border-color: #adb5bd;
-                }
-            """
-            )
-            frame_layout = QVBoxLayout(btn_frame)
+        Args:
+            relative_path: Path relative to REPO_ROOT
+        """
+        script_path = REPO_ROOT / relative_path
+        if not script_path.exists():
+            self.show_error("Script Not Found", f"Script not found:\n{script_path}")
+            return
 
-            btn = QPushButton(f"{mode['icon']}  {mode['name']}")
-            btn.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-            btn.setStyleSheet(
-                "text-align: left; border: none; background: transparent;"
-            )
-            # Pass mode dict to handler
-            btn.clicked.connect(lambda checked, _m=mode: self.launch_mode(_m))
-
-            desc = QLabel(mode["desc"])
-            desc.setStyleSheet(
-                "color: #555; font-size: 11px; margin-left: 28px; border: none; background: transparent;"
-            )
-
-            frame_layout.addWidget(btn)
-            frame_layout.addWidget(desc)
-            layout.addWidget(btn_frame)
-
-        layout.addStretch()
-
-    def launch_mode(self, mode):
         try:
-            cmd = [sys.executable]
-            cwd = REPO_ROOT
-
-            if "path" in mode:
-                script_path = REPO_ROOT / mode["path"]
-                if not script_path.exists():
-                    QMessageBox.critical(
-                        self, "Error", f"Script not found:\n{script_path}"
-                    )
-                    return
-                cmd.append(str(script_path))
-            elif "module" in mode:
-                cmd.extend(["-m", mode["module"]])
-                if "cwd_suffix" in mode:
-                    cwd = REPO_ROOT / mode["cwd_suffix"]
-
-            # Launch
-            subprocess.Popen(cmd, cwd=cwd)
-
+            subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT)
         except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+            self.show_error("Launch Error", str(e))
+
+    def _launch_python_module(
+        self, module_name: str, cwd_suffix: str | None = None
+    ) -> None:
+        """Launch a Python module in a new process.
+
+        Args:
+            module_name: Name of the module to run (e.g., "mujoco_humanoid_golf")
+            cwd_suffix: Optional path suffix for working directory
+        """
+        cwd = REPO_ROOT
+        if cwd_suffix:
+            cwd = REPO_ROOT / cwd_suffix
+
+        try:
+            subprocess.Popen(
+                [sys.executable, "-m", module_name],
+                cwd=cwd,
+            )
+        except Exception as e:
+            self.show_error("Launch Error", str(e))
 
 
-def main():
-    app = QApplication(sys.argv)
-    window = MujocoUnifiedLauncher()
-    window.show()
-    sys.exit(app.exec())
+def main() -> int:
+    """Entry point for the MuJoCo launcher."""
+    return run_launcher(MujocoUnifiedLauncher)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
