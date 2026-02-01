@@ -12,7 +12,6 @@ import pytest
 # Note: pythonpath is configured in pytest.ini to include the parent directory
 try:
     from pydrake.multibody.tree import SpatialInertia
-
     from python.src.drake_golf_model import (
         GolfModelParams,
         SegmentParams,

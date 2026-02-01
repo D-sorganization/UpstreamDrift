@@ -307,13 +307,11 @@ def my_function():
     def test_check_file_clean_code(self, tmp_path: Path) -> None:
         """Test checking a file with no issues."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def my_function() -> int:
     '''A well-formed function.'''
     return 42
-"""
-        )
+""")
 
         issues = quality_check.check_file(test_file)
 
