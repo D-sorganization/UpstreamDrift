@@ -24,7 +24,6 @@ from src.launchers.launcher_process_manager import (
     ProcessManager,
     start_vcxsrv,
 )
-from src.shared.python.subprocess_utils import kill_process_tree
 from src.launchers.ui_components import (
     ASSETS_DIR,
     AsyncStartupWorker,
@@ -38,6 +37,7 @@ from src.launchers.ui_components import (
     StartupResults,
 )
 from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.subprocess_utils import kill_process_tree
 
 if TYPE_CHECKING:
     from src.shared.python.ui import ToastManager
