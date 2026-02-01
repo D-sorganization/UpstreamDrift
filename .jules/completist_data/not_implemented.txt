@@ -13,9 +13,12 @@
 ./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
-./.claude/skills/lint.md:30:   - Search for `NotImplementedError` that should be implemented
-./.claude/skills/lint.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./.claude/skills/lint/SKILL.md:30:   - Search for `NotImplementedError` that should be implemented
+./.claude/skills/lint/SKILL.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
 ./scripts/analyze_completist_data.py:201:        "NotImplementedError": 4,
+./.agent/skills/lint/SKILL.md:33:   - Search for `NotImplementedError` that should be implemented
+./.agent/skills/lint/SKILL.md:37:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./.agent/workflows/lint.md:36:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
 ./tests/integration/test_physics_interfaces.py:56:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:57:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
 ./tests/integration/test_physics_interfaces.py:99:        except NotImplementedError:
@@ -27,31 +30,33 @@
 ./src/engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
 ./src/tools/model_generation/converters/format_utils.py:161:    raise NotImplementedError(
 ./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/shared/python/club_data/display.py:474:        raise NotImplementedError("Subclasses must implement render()")
 ./src/shared/python/flight_models.py:158:        raise NotImplementedError()
 ./src/shared/python/flight_models.py:163:        raise NotImplementedError()
 ./src/shared/python/flight_models.py:168:        raise NotImplementedError()
 ./src/shared/python/flight_models.py:174:        raise NotImplementedError()
 ./src/shared/python/impact_model.py:147:        raise NotImplementedError()
-./src/shared/python/interfaces.py:58:        raise NotImplementedError()
-./src/shared/python/interfaces.py:83:        raise NotImplementedError()
-./src/shared/python/interfaces.py:104:        raise NotImplementedError()
-./src/shared/python/interfaces.py:120:        raise NotImplementedError()
-./src/shared/python/interfaces.py:142:        raise NotImplementedError()
-./src/shared/python/interfaces.py:162:        raise NotImplementedError()
-./src/shared/python/interfaces.py:184:        raise NotImplementedError()
-./src/shared/python/interfaces.py:207:        raise NotImplementedError()
-./src/shared/python/interfaces.py:228:        raise NotImplementedError()
-./src/shared/python/interfaces.py:246:        raise NotImplementedError()
-./src/shared/python/interfaces.py:304:        raise NotImplementedError()
-./src/shared/python/interfaces.py:323:        raise NotImplementedError()
-./src/shared/python/interfaces.py:342:        raise NotImplementedError()
-./src/shared/python/interfaces.py:368:        raise NotImplementedError()
-./src/shared/python/interfaces.py:391:        raise NotImplementedError()
-./src/shared/python/interfaces.py:442:        raise NotImplementedError()
-./src/shared/python/interfaces.py:476:        raise NotImplementedError()
-./src/shared/python/interfaces.py:530:        raise NotImplementedError()
-./src/shared/python/interfaces.py:582:        raise NotImplementedError()
-./src/shared/python/interfaces.py:665:        raise NotImplementedError()
-./src/shared/python/interfaces.py:679:        raise NotImplementedError()
-./src/shared/python/interfaces.py:688:        raise NotImplementedError()
+./src/shared/python/base_physics_engine.py:360:            except (NotImplementedError, AttributeError):
+./src/shared/python/interfaces.py:60:        raise NotImplementedError()
+./src/shared/python/interfaces.py:85:        raise NotImplementedError()
+./src/shared/python/interfaces.py:106:        raise NotImplementedError()
+./src/shared/python/interfaces.py:122:        raise NotImplementedError()
+./src/shared/python/interfaces.py:144:        raise NotImplementedError()
+./src/shared/python/interfaces.py:164:        raise NotImplementedError()
+./src/shared/python/interfaces.py:186:        raise NotImplementedError()
+./src/shared/python/interfaces.py:209:        raise NotImplementedError()
+./src/shared/python/interfaces.py:230:        raise NotImplementedError()
+./src/shared/python/interfaces.py:248:        raise NotImplementedError()
+./src/shared/python/interfaces.py:306:        raise NotImplementedError()
+./src/shared/python/interfaces.py:325:        raise NotImplementedError()
+./src/shared/python/interfaces.py:344:        raise NotImplementedError()
+./src/shared/python/interfaces.py:370:        raise NotImplementedError()
+./src/shared/python/interfaces.py:393:        raise NotImplementedError()
+./src/shared/python/interfaces.py:444:        raise NotImplementedError()
+./src/shared/python/interfaces.py:478:        raise NotImplementedError()
+./src/shared/python/interfaces.py:532:        raise NotImplementedError()
+./src/shared/python/interfaces.py:584:        raise NotImplementedError()
+./src/shared/python/interfaces.py:667:        raise NotImplementedError()
+./src/shared/python/interfaces.py:681:        raise NotImplementedError()
+./src/shared/python/interfaces.py:690:        raise NotImplementedError()
 ./src/shared/python/signal_toolkit/io.py:543:        raise NotImplementedError(msg)
