@@ -229,9 +229,7 @@ async def startup_event() -> None:
             )
             video_pipeline = VideoPosePipeline(video_config)
         except ImportError as e:
-            logger.info(
-                "MediaPipe not installed, video features disabled: %s", e
-            )
+            logger.info("MediaPipe not installed, video features disabled: %s", e)
             video_pipeline = None
         except OSError as e:
             logger.warning(
@@ -239,9 +237,7 @@ async def startup_event() -> None:
             )
             video_pipeline = None
         except RuntimeError as e:
-            logger.warning(
-                "Video pipeline runtime initialization failed: %s", e
-            )
+            logger.warning("Video pipeline runtime initialization failed: %s", e)
             video_pipeline = None
 
         core_routes.configure(engine_manager)

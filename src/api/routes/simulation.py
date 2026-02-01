@@ -45,9 +45,7 @@ async def run_simulation(request: SimulationRequest) -> SimulationResponse:
     except TimeoutError as exc:
         if _logger:
             _logger.warning("Simulation timeout: %s", exc)
-        raise HTTPException(
-            status_code=504, detail="Simulation timed out"
-        ) from exc
+        raise HTTPException(status_code=504, detail="Simulation timed out") from exc
     except ValueError as exc:
         if _logger:
             _logger.warning("Invalid simulation parameters: %s", exc)
