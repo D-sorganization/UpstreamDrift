@@ -836,18 +836,20 @@ class StatisticalAnalyzer(
                 torques = self.joint_torques[:n_samples, :n_joints]
                 velocities = self.joint_velocities[:n_samples, :n_joints]
                 power = torques * velocities
-                pos_power = np.maximum(power, 0)
+                # Fix for Issue #014: Include eccentric work (negative power)
+                # Efficiency should reflect total metabolic cost, which includes braking.
+                abs_power = np.abs(power)
 
-                # Integrate positive power across time for each joint
+                # Integrate absolute power across time for each joint
                 if hasattr(np, "trapezoid"):
                     # NumPy 2.0+
                     total_work = float(
-                        np.trapezoid(pos_power, dx=self.dt, axis=0).sum()
+                        np.trapezoid(abs_power, dx=self.dt, axis=0).sum()
                     )
                 else:
                     # Older NumPy
                     trapz_func = getattr(np, "trapz")  # noqa: B009
-                    total_work = float(trapz_func(pos_power, dx=self.dt, axis=0).sum())
+                    total_work = float(trapz_func(abs_power, dx=self.dt, axis=0).sum())
             else:
                 total_work = 0.0
 
@@ -2005,15 +2007,26 @@ class StatisticalAnalyzer(
         peak_jerk = float(np.max(np.abs(jerk)))
         rms_jerk = float(np.sqrt(np.mean(jerk**2)))
 
-        # Dimensionless Jerk (Log dimensionless jerk)
-        # LDJ = - ln( integral(j^2 dt) * D^5 / A^2 )
-        # Normalized by movement duration D and amplitude A (peak-to-peak pos or vel range)
-        # Here we use a simpler dimensionless form: (RMS Jerk * Duration^2) / Peak Velocity
-        # Or standard: Integral(j^2) * D^5 / L^2
-        # Let's return RMS normalized by peak accel?
-        # A common simple metric is Peak Jerk / Peak Accel
-        peak_acc = float(np.max(np.abs(accel)))
-        dim_jerk = peak_jerk / peak_acc if peak_acc > 1e-6 else 0.0
+        # Dimensionless Jerk
+        # Fix for Issue #042: Correct units for dimensionless jerk.
+        # Formula: DJ = (Jerk_rms * Duration^2) / Peak Velocity
+        # Dimensions: [L/T^3] * [T^2] / [L/T] = [L/T] / [L/T] = 1 (Dimensionless)
+
+        # Get peak velocity for normalization
+        if (hasattr(self, "joint_velocities") and
+            self.joint_velocities is not None and
+            joint_idx < self.joint_velocities.shape[1]):
+            vel = self.joint_velocities[:, joint_idx]
+            peak_vel = float(np.max(np.abs(vel)))
+        else:
+            # Fallback if velocity not available (approximate from accel integration?)
+            # Or just use 1.0 to avoid error, but return 0.0 for metric
+            peak_vel = 0.0
+
+        if peak_vel > 1e-6 and self.duration > 0:
+            dim_jerk = (rms_jerk * (self.duration ** 2)) / peak_vel
+        else:
+            dim_jerk = 0.0
 
         return JerkMetrics(
             peak_jerk=peak_jerk,

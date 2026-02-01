@@ -13,9 +13,10 @@ from __future__ import annotations
 import subprocess
 import sys
 import tempfile
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+import defusedxml.ElementTree as ET
 
 import numpy as np
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
