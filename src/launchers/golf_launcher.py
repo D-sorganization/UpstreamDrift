@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 # Add current directory to path so we can import ui_components if needed locally
 sys.path.append(str(Path(__file__).parent))
 
+from src.launchers.docker_manager import DockerLauncher
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import (
     ProcessManager,
@@ -214,6 +215,7 @@ class GolfLauncher(QMainWindow):
         # Initialize process and model managers (extracted from god class)
         self.process_manager = ProcessManager(REPOS_ROOT)
         self.model_handler_registry = ModelHandlerRegistry()
+        self.docker_launcher = DockerLauncher(REPOS_ROOT)
         # Keep backwards-compatible reference
         self.running_processes = self.process_manager.running_processes
         self.available_models: dict[str, Any] = {}
@@ -2055,7 +2057,11 @@ Expected tiles: {summary['expected_tiles']}
         self._launch_script_process("OpenPose", script, REPOS_ROOT)
 
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
-        """Launch the model in a Docker container."""
+        """Launch the model in a Docker container.
+
+        Delegates to DockerLauncher for container orchestration while
+        handling UI feedback (prompts, status updates, error dialogs).
+        """
         try:
             # Auto-start VcXsrv on Windows for GUI support
             if os.name == "nt":
@@ -2073,104 +2079,39 @@ Expected tiles: {summary['expected_tiles']}
                         return
 
             # Check if Docker image exists
-            docker_image = "robotics_env:latest"
-            try:
-                check_result = subprocess.run(
-                    ["docker", "image", "inspect", docker_image],
-                    capture_output=True,
-                    timeout=10,
+            if not self.docker_launcher.check_image_exists():
+                QMessageBox.warning(
+                    self,
+                    "Docker Image Not Found",
+                    f"The Docker image '{self.docker_launcher.image_name}' is not available.\n\n"
+                    "Build it first using:\n"
+                    "  docker build -t robotics_env .\n\n"
+                    "Or use the Environment dialog to build.",
                 )
-                if check_result.returncode != 0:
-                    QMessageBox.warning(
-                        self,
-                        "Docker Image Not Found",
-                        f"The Docker image '{docker_image}' is not available.\n\n"
-                        "Build it first using:\n"
-                        "  docker build -t robotics_env .\n\n"
-                        "Or use the Environment dialog to build.",
-                    )
-                    return
-            except Exception as e:
-                logger.warning(f"Failed to check Docker image: {e}")
+                return
 
-            # Construct Docker command - no -it for GUI apps
-            cmd = [
-                "docker",
-                "run",
-                "--rm",
-                "-v",
-                f"{REPOS_ROOT}:/workspace",
-                "-e",
-                "PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python",
-            ]
-
-            # Display configuration for GUI apps
-            if os.name == "nt":  # Windows
-                cmd.extend(
-                    [
-                        "-e",
-                        "DISPLAY=host.docker.internal:0",
-                        "-e",
-                        "MUJOCO_GL=glfw",
-                        "-e",
-                        "PYOPENGL_PLATFORM=glx",
-                        "-e",
-                        "QT_QPA_PLATFORM=xcb",
-                    ]
-                )
-            else:  # Linux
-                disp = os.environ.get("DISPLAY", ":0")
-                cmd.extend(
-                    [
-                        "-e",
-                        f"DISPLAY={disp}",
-                        "-v",
-                        "/tmp/.X11-unix:/tmp/.X11-unix",
-                    ]
-                )
-
-            # GPU Support
-            if self.chk_gpu.isChecked():
-                cmd.extend(["--gpus=all"])
-
-            # Port mapping for MeshCat (Drake/Pinocchio)
-            if model.type in ("drake", "pinocchio"):
-                cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])
-
-            # Working Directory
-            work_dir = (
-                f"/workspace/{repo_path.parent.relative_to(REPOS_ROOT).as_posix()}"
+            # Launch container via DockerLauncher
+            use_gpu = hasattr(self, "chk_gpu") and self.chk_gpu.isChecked()
+            process = self.docker_launcher.launch_container(
+                model_type=model.type,
+                model_name=model.name,
+                repo_path=repo_path,
+                use_gpu=use_gpu,
             )
-            cmd.extend(["-w", work_dir])
 
-            # Python command - determine correct launch command based on model type
-            if model.type == "drake":
-                cmd.extend(
-                    [
-                        docker_image,
-                        "python",
-                        "-m",
-                        "src.drake_gui_app",
-                    ]
-                )
-            elif model.type == "pinocchio":
-                cmd.extend([docker_image, "python", "pinocchio_golf/gui.py"])
-            elif model.type in ("custom_humanoid", "custom_dashboard"):
-                # MuJoCo humanoid models
-                cmd.extend([docker_image, "python", repo_path.name])
+            if process:
+                self.running_processes[model.name] = process
+                self.show_toast(f"{model.name} Launched (Docker)", "success")
+                self.lbl_status.setText(f"● {model.name} Running (Docker)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
             else:
-                cmd.extend([docker_image, "python", repo_path.name])
-
-            logger.info(f"Docker Launch: {' '.join(cmd)}")
-
-            process = subprocess.Popen(
-                cmd,
-                creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0,
-            )
-            self.running_processes[model.name] = process
-            self.show_toast(f"{model.name} Launched (Docker)", "success")
-            self.lbl_status.setText(f"● {model.name} Running (Docker)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+                self.lbl_status.setText("● Docker Error")
+                self.lbl_status.setStyleSheet("color: #FF375F;")
+                QMessageBox.critical(
+                    self,
+                    "Docker Launch Error",
+                    f"Failed to launch {model.name} in Docker",
+                )
 
         except Exception as e:
             logger.error(f"Failed to launch Docker container: {e}")
