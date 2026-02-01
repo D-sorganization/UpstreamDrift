@@ -126,7 +126,9 @@ class DockerLauncher:
     and model-specific launch commands.
     """
 
-    def __init__(self, repo_root: Path, image_name: str = "robotics_env:latest") -> None:
+    def __init__(
+        self, repo_root: Path, image_name: str = "robotics_env:latest"
+    ) -> None:
         """Initialize the Docker launcher.
 
         Args:
@@ -136,6 +138,7 @@ class DockerLauncher:
         self.repo_root = repo_root
         self.image_name = image_name
         from src.shared.python.logging_config import get_logger
+
         self.logger = get_logger(__name__)
 
     def check_image_exists(self) -> bool:
@@ -183,18 +186,28 @@ class DockerLauncher:
 
         # Display configuration for GUI apps
         if os.name == "nt":  # Windows
-            cmd.extend([
-                "-e", "DISPLAY=host.docker.internal:0",
-                "-e", "MUJOCO_GL=glfw",
-                "-e", "PYOPENGL_PLATFORM=glx",
-                "-e", "QT_QPA_PLATFORM=xcb",
-            ])
+            cmd.extend(
+                [
+                    "-e",
+                    "DISPLAY=host.docker.internal:0",
+                    "-e",
+                    "MUJOCO_GL=glfw",
+                    "-e",
+                    "PYOPENGL_PLATFORM=glx",
+                    "-e",
+                    "QT_QPA_PLATFORM=xcb",
+                ]
+            )
         else:  # Linux
             disp = os.environ.get("DISPLAY", ":0")
-            cmd.extend([
-                "-e", f"DISPLAY={disp}",
-                "-v", "/tmp/.X11-unix:/tmp/.X11-unix",
-            ])
+            cmd.extend(
+                [
+                    "-e",
+                    f"DISPLAY={disp}",
+                    "-v",
+                    "/tmp/.X11-unix:/tmp/.X11-unix",
+                ]
+            )
 
         # GPU Support
         if use_gpu:
@@ -205,7 +218,9 @@ class DockerLauncher:
             cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])
 
         # Working Directory
-        work_dir = f"/workspace/{repo_path.parent.relative_to(self.repo_root).as_posix()}"
+        work_dir = (
+            f"/workspace/{repo_path.parent.relative_to(self.repo_root).as_posix()}"
+        )
         cmd.extend(["-w", work_dir])
 
         # Python command - determine correct launch command based on model type
