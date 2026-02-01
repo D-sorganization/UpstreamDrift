@@ -37,6 +37,7 @@ from src.launchers.ui_components import (
     StartupResults,
 )
 from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.subprocess_utils import kill_process_tree
 
 if TYPE_CHECKING:
     from src.shared.python.ui import ToastManager
@@ -773,12 +774,15 @@ except Exception as e:
                 self.docker_checker.wait(1000)
             self.docker_checker = None
 
-        # Terminate running processes
+        # Terminate running processes using kill_process_tree for proper cleanup
         for key, process in list(self.running_processes.items()):
             if process.poll() is None:
                 logger.info(f"Terminating child process: {key}")
                 try:
-                    process.terminate()
+                    # Use kill_process_tree to ensure terminal and all children close
+                    if not kill_process_tree(process.pid):
+                        # Fallback to direct termination
+                        process.terminate()
                 except Exception as e:
                     logger.error(f"Failed to terminate {key}: {e}")
 
