@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EngineSelector } from './EngineSelector';
 
@@ -179,7 +180,7 @@ describe('EngineSelector', () => {
 
       await waitFor(() => {
         const radios = screen.getAllByRole('radio');
-        radios.forEach(radio => {
+        radios.forEach((radio) => {
           expect(radio).toBeDisabled();
         });
       });
