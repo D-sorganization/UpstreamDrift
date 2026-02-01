@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useSimulation, fetchEngines, type SimulationFrame, type ConnectionStatus } from './client';
+import { renderHook, act } from '@testing-library/react';
+import { useSimulation, fetchEngines, type SimulationFrame } from './client';
 
 // Create a controllable mock WebSocket
 class MockWebSocket {
@@ -344,7 +344,7 @@ describe('useSimulation hook', () => {
     });
 
     it('handles malformed JSON gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -488,7 +488,7 @@ describe('useSimulation hook', () => {
 
   describe('reconnection', () => {
     it('attempts reconnection on unexpected close', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -519,7 +519,7 @@ describe('useSimulation hook', () => {
     });
 
     it('uses exponential backoff for reconnection', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -571,8 +571,8 @@ describe('useSimulation hook', () => {
     // involves async callbacks that are difficult to coordinate with vi.advanceTimersByTime
     // The core reconnection functionality is tested by other tests in this suite
     it.skip('sets status to failed after max attempts', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      const consoleErrSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+      const consoleErrSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -692,7 +692,7 @@ describe('useSimulation hook', () => {
     });
 
     it('clears reconnection timeout on unmount', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
       const { result, unmount } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -721,7 +721,7 @@ describe('useSimulation hook', () => {
     });
 
     it('does not update state after unmount', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const { result, unmount } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
