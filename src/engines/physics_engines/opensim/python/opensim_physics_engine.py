@@ -594,9 +594,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             a_ztcf = np.array([udot.get(i) for i in range(n_u)])
 
             # Restore state and controls
-            # Restore controls first?
-            # self.set_control(controls_saved) # Need to convert Vector back to array if using set_control
-            # Or directly set:
             self._model.updControls(self._state).update(controls_saved)
 
             self.set_state(q_saved, v_saved)

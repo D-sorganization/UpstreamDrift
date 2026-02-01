@@ -30,11 +30,6 @@ References:
 - Nesbit (2005) A three dimensional kinematic and kinetic study of the golf swing
 """
 
-# Import when modules are implemented
-# from .swing_optimizer import SwingOptimizer, OptimizationResult
-# from .parametric_swing import ParametricSwingGenerator, SwingParameters
-# from .swing_synthesis import SwingSynthesizer, TargetBallFlight
-
 __all__ = [
     "SwingOptimizer",
     "OptimizationObjective",

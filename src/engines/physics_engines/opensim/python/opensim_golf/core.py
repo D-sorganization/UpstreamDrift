@@ -233,15 +233,8 @@ class GolfSwingModel:
             # Step simulation
             self._manager.setInitialTime(current_time)
             self._manager.setFinalTime(current_time + self.dt)
-
-            # integrate returns the state (usually) or updates internal state?
-            # In OpenSim 4.0: manager.integrate(finalTime) returns bool
-            # It updates the state passed to initialize()
             self._manager.integrate(current_time + self.dt)
             current_time += self.dt
-
-            # If using older API or different wrapper, we might need to fetch state
-            # self._state = self._manager.getState()
 
         return SimulationResult(
             time=time_arr,

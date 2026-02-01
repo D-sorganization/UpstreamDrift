@@ -486,8 +486,6 @@ class GenericPhysicsRecorder:
 
             # Set state for computation (without advancing time)
             self.engine.set_state(q, v)
-            # Apply recorded torque for consistent state?
-            # self.engine.set_control(tau) # Important for ZVCF which uses current tau
             self.engine.set_control(tau)
 
             # Need to force update

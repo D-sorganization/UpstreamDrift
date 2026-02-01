@@ -1419,8 +1419,6 @@ python "{wsl_path}" {' '.join(args or [])}
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
-        # Legacy method kept for reference but unused given DraggableModelCard
-        # If any old references exist, they should be updated.
         return QFrame()
 
     def launch_model_direct(self, model_id: str) -> None:

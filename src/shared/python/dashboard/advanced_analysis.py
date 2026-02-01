@@ -379,9 +379,6 @@ class CorrelationTab(QtWidgets.QWidget):
         btn_refresh.clicked.connect(self.update_plot)
         layout.addWidget(btn_refresh)
 
-        # Do not update automatically on init to save time, or do it once
-        # self.update_plot()
-
     def update_plot(self) -> None:
         self.ax.clear()
 
