@@ -9,6 +9,14 @@ interface Props {
   onResume: () => void;
 }
 
+// Extracted button styles to reduce duplication and ensure consistency
+const buttonStyles = {
+  base: 'flex items-center justify-center gap-2 font-semibold py-2 px-4 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900',
+  primary: 'flex-1 bg-green-600 hover:bg-green-700 text-white focus:ring-green-400',
+  warning: 'flex-1 bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-400',
+  danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-400',
+};
+
 export function SimulationControls({ isRunning, isPaused, onStart, onStop, onPause, onResume }: Props) {
   return (
     <div
@@ -20,37 +28,37 @@ export function SimulationControls({ isRunning, isPaused, onStart, onStop, onPau
         <button
           onClick={onStart}
           aria-label="Start simulation"
-          className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+          className={`${buttonStyles.base} ${buttonStyles.primary}`}
         >
           <Play size={20} aria-hidden="true" />
           Start
         </button>
       ) : (
         <>
-            {isPaused ? (
-                 <button
-                    onClick={onResume}
-                    aria-label="Resume simulation"
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900"
-                >
-                    <Play size={20} aria-hidden="true" />
-                    Resume
-                </button>
-            ) : (
-                 <button
-                    onClick={onPause}
-                    aria-label="Pause simulation"
-                    className="flex-1 flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-gray-900"
-                >
-                    <Pause size={20} aria-hidden="true" />
-                    Pause
-                </button>
-            )}
+          {isPaused ? (
+            <button
+              onClick={onResume}
+              aria-label="Resume simulation"
+              className={`${buttonStyles.base} ${buttonStyles.primary}`}
+            >
+              <Play size={20} aria-hidden="true" />
+              Resume
+            </button>
+          ) : (
+            <button
+              onClick={onPause}
+              aria-label="Pause simulation"
+              className={`${buttonStyles.base} ${buttonStyles.warning}`}
+            >
+              <Pause size={20} aria-hidden="true" />
+              Pause
+            </button>
+          )}
 
           <button
             onClick={onStop}
             aria-label="Stop simulation"
-            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className={`${buttonStyles.base} ${buttonStyles.danger}`}
           >
             <Square size={20} aria-hidden="true" />
             Stop
