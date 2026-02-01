@@ -201,14 +201,16 @@ class KinematicSequenceAnalyzer:
                 correct_pairs = 0
 
                 # Create a map of name -> time for easy lookup
-                peak_map = {p.name: p.time for p in peaks}
+                # Reuse existing peak_map if available (it stores SegmentPeak objects)
+                # If not, ensure we use a separate variable name to avoid MyPy type confusion
+                peak_times = {p.name: p.time for p in peaks}
 
                 import itertools
 
                 for s1, s2 in itertools.combinations(relevant_expected, 2):
-                    if s1 in peak_map and s2 in peak_map:
+                    if s1 in peak_times and s2 in peak_times:
                         total_pairs += 1
-                        if peak_map[s1] < peak_map[s2]:
+                        if peak_times[s1] < peak_times[s2]:
                             correct_pairs += 1
 
                 if total_pairs > 0:
