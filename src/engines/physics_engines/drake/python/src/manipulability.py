@@ -7,20 +7,19 @@ from dataclasses import dataclass
 
 import numpy as np
 
+# Import from centralized availability module (DRY compliance)
+from src.shared.python.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
-# Try to import Drake. If failing, we define dummies or rely on user env.
-try:
+# Try to import Drake types for actual usage
+if DRAKE_AVAILABLE:
     from pydrake.all import (
         BodyIndex,
         Context,
         JacobianWrtVariable,
         MultibodyPlant,
     )
-
-    DRAKE_AVAILABLE = True
-except ImportError:
-    DRAKE_AVAILABLE = False
+else:
     # Dummies for type checking
     MultibodyPlant = object
     Context = object

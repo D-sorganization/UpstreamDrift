@@ -8,16 +8,12 @@ from pathlib import Path
 import numpy as np  # noqa: TID253
 import numpy.typing as npt  # noqa: TID253
 
+from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
-try:
+if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
-
-    PINOCCHIO_AVAILABLE = True
-except ImportError:
-    PINOCCHIO_AVAILABLE = False
-
-    # Define dummy pin module to allow import without pinocchio
+else:
     # Define dummy pin module to allow import without pinocchio
     class DummyPin:
         """Dummy class to prevent NameError when Pinocchio is missing.
@@ -58,7 +54,8 @@ except ImportError:
                 )
                 raise ImportError(msg)
 
-    pin = DummyPin()
+    pin = DummyPin()  # type: ignore[assignment]
+
 logger = get_logger(__name__)
 
 
