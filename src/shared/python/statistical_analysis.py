@@ -2013,11 +2013,9 @@ class StatisticalAnalyzer(
         # Dimensions: [L/T^3] * [T^2] / [L/T] = [L/T] / [L/T] = 1 (Dimensionless)
 
         # Get peak velocity for normalization
-        if (
-            hasattr(self, "joint_velocities")
-            and self.joint_velocities is not None
-            and joint_idx < self.joint_velocities.shape[1]
-        ):
+        if (hasattr(self, "joint_velocities") and
+            self.joint_velocities is not None and
+            joint_idx < self.joint_velocities.shape[1]):
             vel = self.joint_velocities[:, joint_idx]
             peak_vel = float(np.max(np.abs(vel)))
         else:
@@ -2026,7 +2024,7 @@ class StatisticalAnalyzer(
             peak_vel = 0.0
 
         if peak_vel > 1e-6 and self.duration > 0:
-            dim_jerk = (rms_jerk * (self.duration**2)) / peak_vel
+            dim_jerk = (rms_jerk * (self.duration ** 2)) / peak_vel
         else:
             dim_jerk = 0.0
 

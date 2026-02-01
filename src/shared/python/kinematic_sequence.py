@@ -122,9 +122,7 @@ class KinematicSequenceAnalyzer:
                     if proximal_name in peak_map:
                         proximal_peak = peak_map[proximal_name]
                         if proximal_peak.peak_velocity > 1e-6:
-                            current_peak.speed_gain = (
-                                current_peak.peak_velocity / proximal_peak.peak_velocity
-                            )
+                            current_peak.speed_gain = current_peak.peak_velocity / proximal_peak.peak_velocity
 
                 # Deceleration Rate (Slope post-peak)
                 # Calculate slope over next 20-50ms or until velocity drops significantly
