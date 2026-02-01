@@ -1280,55 +1280,6 @@ except Exception as e:
                 "color: #FFD60A; font-weight: bold; margin-left: 10px;"
             )
 
-    def _launch_in_wsl(self, script_path: str, args: list[str] | None = None) -> None:
-        """Launch a script in WSL2 Ubuntu environment.
-
-        Args:
-            script_path: Path to the Python script (Windows path will be converted)
-            args: Optional list of arguments to pass to the script
-        """
-        # Convert Windows path to WSL path
-        if script_path.startswith("C:") or script_path.startswith("c:"):
-            wsl_path = script_path.replace("\\", "/")
-            wsl_path = "/mnt/c" + wsl_path[2:]
-        else:
-            wsl_path = script_path.replace("\\", "/")
-
-        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
-
-        # Build the WSL command
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{project_dir}"
-python "{wsl_path}" {' '.join(args or [])}
-"""
-
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching in WSL: {script_path}")
-            if os.name == "nt":
-                # On Windows, create a new console window
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                subprocess.Popen(cmd)
-
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(f"Launched in WSL: {Path(script_path).name}", "success")
-        except Exception as e:
-            logger.error(f"Failed to launch in WSL: {e}")
-            QMessageBox.critical(
-                self,
-                "WSL Launch Error",
-                f"Failed to launch in WSL:\n{e}",
-            )
-
     def _open_ai_settings(self) -> None:
         """Open the AI settings dialog."""
         if not AI_AVAILABLE:
@@ -2262,44 +2213,36 @@ Expected tiles: {summary['expected_tiles']}
         allowing users to see the error message.
 
         If WSL mode is enabled, launches the script in WSL2 Ubuntu environment.
+
+        Delegates to ProcessManager for the actual subprocess handling.
         """
         # Check if WSL mode is enabled
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
-            self._launch_in_wsl(str(script_path))
-            self.lbl_status.setText(f"● {name} Running (WSL)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            success = self.process_manager.launch_in_wsl(str(script_path))
+            if success:
+                self.lbl_status.setText(f"● {name} Running (WSL)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.show_toast(f"{name} Launched in WSL", "success")
+            else:
+                QMessageBox.critical(
+                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                )
             return
 
-        try:
-            env = self._get_subprocess_env()
+        # Delegate to ProcessManager with keep_terminal_open=True for error visibility
+        process = self.process_manager.launch_script(
+            name, script_path, cwd, keep_terminal_open=True
+        )
 
-            if os.name == "nt":
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=env,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                process = subprocess.Popen(
-                    [sys.executable, str(script_path)],
-                    cwd=str(cwd),
-                    env=env,
-                )
-
-            self.running_processes[name] = process
+        if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
-
-        except Exception as e:
-            logger.error(f"Failed to launch {name}: {e}")
+        else:
             QMessageBox.critical(
-                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
+                self, "Launch Error", f"Failed to launch {name}"
             )
 
     def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:
@@ -2307,110 +2250,37 @@ Expected tiles: {summary['expected_tiles']}
 
         Similar to _launch_script_process but uses -m to run a module.
         If WSL mode is enabled, launches in WSL2 Ubuntu environment.
+
+        Delegates to ProcessManager for the actual subprocess handling.
         """
         # Check if WSL mode is enabled
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
             # For WSL, we run the module using python -m
-            self._launch_module_in_wsl(module_name, cwd)
-            self.lbl_status.setText(f"● {name} Running (WSL)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            success = self.process_manager.launch_module_in_wsl(module_name, cwd)
+            if success:
+                self.lbl_status.setText(f"● {name} Running (WSL)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.show_toast(f"{name} Launched in WSL", "success")
+            else:
+                QMessageBox.critical(
+                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                )
             return
 
-        try:
-            env = self._get_subprocess_env()
+        # Delegate to ProcessManager with keep_terminal_open=True for error visibility
+        process = self.process_manager.launch_module(
+            name, module_name, cwd, keep_terminal_open=True
+        )
 
-            # Ensure PYTHONPATH is set correctly for Windows
-            if os.name == "nt":
-                current_pythonpath = env.get("PYTHONPATH", "")
-                repo_root_str = str(REPOS_ROOT)
-                src_dir_str = str(REPOS_ROOT / "src")
-
-                paths_to_add = []
-                if repo_root_str not in current_pythonpath:
-                    paths_to_add.append(repo_root_str)
-                if src_dir_str not in current_pythonpath:
-                    paths_to_add.append(src_dir_str)
-
-                if paths_to_add:
-                    env["PYTHONPATH"] = f"{';'.join(paths_to_add)};{current_pythonpath}"
-
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=env,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                process = subprocess.Popen(
-                    [sys.executable, "-m", module_name],
-                    cwd=str(cwd),
-                    env=env,
-                )
-
-            self.running_processes[name] = process
+        if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
-
-        except Exception as e:
-            logger.error(f"Failed to launch {name}: {e}")
+        else:
             QMessageBox.critical(
-                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
-            )
-
-    def _launch_module_in_wsl(self, module_name: str, cwd: Path | None = None) -> None:
-        """Launch a Python module in WSL2 Ubuntu environment.
-
-        Args:
-            module_name: Python module name to run with -m flag
-            cwd: Optional working directory (Windows Path)
-        """
-        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
-
-        # Determine working directory
-        work_dir = project_dir
-        if cwd:
-            # Convert Windows path to WSL path
-            s_cwd = str(cwd)
-            if len(s_cwd) > 1 and s_cwd[1] == ":":
-                drive = s_cwd[0].lower()
-                path_part = s_cwd[2:].replace("\\", "/")
-                work_dir = f"/mnt/{drive}{path_part}"
-
-        # Build the WSL command
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{work_dir}"
-python -m {module_name}
-"""
-
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching module in WSL: {module_name}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                subprocess.Popen(cmd)
-
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(f"Launched in WSL: {module_name}", "success")
-        except Exception as e:
-            logger.error(f"Failed to launch module in WSL: {e}")
-            QMessageBox.critical(
-                self,
-                "WSL Launch Error",
-                f"Failed to launch module in WSL:\n{e}",
+                self, "Launch Error", f"Failed to launch {name}"
             )
 
     def open_layout_manager(self) -> None:

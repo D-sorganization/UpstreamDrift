@@ -91,6 +91,7 @@ class ProcessManager:
         script_path: Path,
         cwd: Path,
         env: dict[str, str] | None = None,
+        keep_terminal_open: bool = False,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python script as a subprocess.
 
@@ -99,6 +100,8 @@ class ProcessManager:
             script_path: Path to the Python script.
             cwd: Working directory for the process.
             env: Optional environment variables.
+            keep_terminal_open: If True, keep terminal open on script exit/error
+                               (uses cmd /k with pause). Default False.
 
         Returns:
             The process object if successful, None otherwise.
@@ -107,8 +110,12 @@ class ProcessManager:
             process_env = env or self.get_subprocess_env()
 
             if os.name == "nt":
-                # Use cmd /c to close terminal when process exits
-                cmd_str = f'cmd /c ""{sys.executable}" "{script_path}""'
+                if keep_terminal_open:
+                    # Use cmd /k with & pause to keep terminal open on error
+                    cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
+                else:
+                    # Use cmd /c to close terminal when process exits
+                    cmd_str = f'cmd /c ""{sys.executable}" "{script_path}""'
                 process = subprocess.Popen(
                     cmd_str,
                     cwd=str(cwd),
@@ -136,6 +143,7 @@ class ProcessManager:
         module_name: str,
         cwd: Path,
         env: dict[str, str] | None = None,
+        keep_terminal_open: bool = False,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python module as a subprocess.
 
@@ -144,6 +152,8 @@ class ProcessManager:
             module_name: Python module name (for -m flag).
             cwd: Working directory for the process.
             env: Optional environment variables.
+            keep_terminal_open: If True, keep terminal open on script exit/error
+                               (uses cmd /k with pause). Default False.
 
         Returns:
             The process object if successful, None otherwise.
@@ -168,8 +178,12 @@ class ProcessManager:
                         f"{';'.join(paths_to_add)};{current_pythonpath}"
                     )
 
-                # Use cmd /c to close terminal when process exits
-                cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
+                if keep_terminal_open:
+                    # Use cmd /k with & pause to keep terminal open on error
+                    cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+                else:
+                    # Use cmd /c to close terminal when process exits
+                    cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
                 process = subprocess.Popen(
                     cmd_str,
                     cwd=str(cwd),
