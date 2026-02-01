@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 # Add current directory to path so we can import ui_components if needed locally
 sys.path.append(str(Path(__file__).parent))
 
+from src.launchers.docker_manager import DockerLauncher
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import (
     ProcessManager,
@@ -214,6 +215,7 @@ class GolfLauncher(QMainWindow):
         # Initialize process and model managers (extracted from god class)
         self.process_manager = ProcessManager(REPOS_ROOT)
         self.model_handler_registry = ModelHandlerRegistry()
+        self.docker_launcher = DockerLauncher(REPOS_ROOT)
         # Keep backwards-compatible reference
         self.running_processes = self.process_manager.running_processes
         self.available_models: dict[str, Any] = {}
@@ -858,8 +860,7 @@ except Exception as e:
         overlay_btn = QPushButton("Overlay")
         overlay_btn.setCheckable(True)
         overlay_btn.clicked.connect(self._toggle_overlay)
-        overlay_btn.setStyleSheet(
-            """
+        overlay_btn.setStyleSheet("""
             QPushButton {
                 background-color: #444; color: white; border: none;
                 padding: 5px 10px; border-radius: 4px;
@@ -868,8 +869,7 @@ except Exception as e:
                 background-color: #007ACC;
             }
             QPushButton:hover { background-color: #555; }
-        """
-        )
+        """)
         top_bar.addWidget(overlay_btn)
 
         # Docker mode toggle
@@ -920,8 +920,7 @@ except Exception as e:
         self.btn_modify_layout.setChecked(False)
         self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
         self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
-        self.btn_modify_layout.setStyleSheet(
-            """
+        self.btn_modify_layout.setStyleSheet("""
             QPushButton {
                 background-color: #444444;
                 color: #cccccc;
@@ -931,8 +930,7 @@ except Exception as e:
                 background-color: #007acc;
                 color: white;
             }
-            """
-        )
+            """)
         top_bar.addWidget(self.btn_modify_layout)
 
         self.btn_customize_tiles = QPushButton("Edit Tiles")
@@ -954,8 +952,7 @@ except Exception as e:
 
         btn_diagnostics = QPushButton("Diagnostics")
         btn_diagnostics.setToolTip("Run diagnostics to troubleshoot launcher issues")
-        btn_diagnostics.setStyleSheet(
-            """
+        btn_diagnostics.setStyleSheet("""
             QPushButton {
                 background-color: #6f42c1;
                 color: white;
@@ -966,14 +963,12 @@ except Exception as e:
             QPushButton:hover {
                 background-color: #7c4dff;
             }
-        """
-        )
+        """)
         btn_diagnostics.clicked.connect(self.open_diagnostics)
         top_bar.addWidget(btn_diagnostics)
 
         btn_bug = QPushButton("Report Bug")
-        btn_bug.setStyleSheet(
-            """
+        btn_bug.setStyleSheet("""
             QPushButton {
                 background-color: #d32f2f;
                 color: white;
@@ -984,8 +979,7 @@ except Exception as e:
             QPushButton:hover {
                 background-color: #b71c1c;
             }
-        """
-        )
+        """)
         btn_bug.setToolTip("Report a bug via email")
         btn_bug.clicked.connect(self._report_bug)
         top_bar.addWidget(btn_bug)
@@ -996,8 +990,7 @@ except Exception as e:
             self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
             self.btn_ai.setCheckable(True)
             self.btn_ai.clicked.connect(self.toggle_ai_assistant)
-            self.btn_ai.setStyleSheet(
-                """
+            self.btn_ai.setStyleSheet("""
                 QPushButton {
                     background-color: #1976d2;
                     color: white;
@@ -1011,8 +1004,7 @@ except Exception as e:
                 QPushButton:checked {
                     background-color: #0d47a1;
                 }
-                """
-            )
+                """)
             top_bar.addWidget(self.btn_ai)
 
             # Setup AI Dock Widget (Hidden by default)
@@ -1051,8 +1043,7 @@ except Exception as e:
         self.btn_launch.setEnabled(False)
         self.btn_launch.setFixedHeight(50)
         self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        self.btn_launch.setStyleSheet(
-            """
+        self.btn_launch.setStyleSheet("""
             QPushButton {
                 background-color: #2da44e;
                 color: white;
@@ -1066,8 +1057,7 @@ except Exception as e:
             QPushButton:hover:!disabled {
                 background-color: #2c974b;
             }
-            """
-        )
+            """)
         self.btn_launch.clicked.connect(self.launch_simulation)
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
         bottom_bar.addWidget(self.btn_launch)
@@ -1278,55 +1268,6 @@ except Exception as e:
             self.lbl_execution_mode.setText("Mode: Local (Windows)")
             self.lbl_execution_mode.setStyleSheet(
                 "color: #FFD60A; font-weight: bold; margin-left: 10px;"
-            )
-
-    def _launch_in_wsl(self, script_path: str, args: list[str] | None = None) -> None:
-        """Launch a script in WSL2 Ubuntu environment.
-
-        Args:
-            script_path: Path to the Python script (Windows path will be converted)
-            args: Optional list of arguments to pass to the script
-        """
-        # Convert Windows path to WSL path
-        if script_path.startswith("C:") or script_path.startswith("c:"):
-            wsl_path = script_path.replace("\\", "/")
-            wsl_path = "/mnt/c" + wsl_path[2:]
-        else:
-            wsl_path = script_path.replace("\\", "/")
-
-        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
-
-        # Build the WSL command
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{project_dir}"
-python "{wsl_path}" {' '.join(args or [])}
-"""
-
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching in WSL: {script_path}")
-            if os.name == "nt":
-                # On Windows, create a new console window
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                subprocess.Popen(cmd)
-
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(f"Launched in WSL: {Path(script_path).name}", "success")
-        except Exception as e:
-            logger.error(f"Failed to launch in WSL: {e}")
-            QMessageBox.critical(
-                self,
-                "WSL Launch Error",
-                f"Failed to launch in WSL:\n{e}",
             )
 
     def _open_ai_settings(self) -> None:
@@ -1597,18 +1538,15 @@ python "{wsl_path}" {' '.join(args or [])}
         # Update visual selection state
         for mid, card in self.model_cards.items():
             if mid == model_id:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #383838;
                         border: 2px solid #0A84FF;
                         border-radius: 12px;
                     }
-                    """
-                )
+                    """)
             else:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #2D2D2D;
                         border: 1px solid #3A3A3A;
@@ -1618,8 +1556,7 @@ python "{wsl_path}" {' '.join(args or [])}
                         background-color: #333333;
                         border: 1px solid #555555;
                     }
-                    """
-                )
+                    """)
 
         # Update launch button
         model = self._get_model(model_id)
@@ -1635,15 +1572,13 @@ python "{wsl_path}" {' '.join(args or [])}
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")
             self.btn_launch.setEnabled(False)
-            self.btn_launch.setStyleSheet(
-                """
+            self.btn_launch.setStyleSheet("""
                 QPushButton {
                     background-color: #3a3a3a;
                     color: #888888;
                     border-radius: 6px;
                 }
-                """
-            )
+                """)
             return
 
         name = model_name or self.selected_model
@@ -1655,23 +1590,20 @@ python "{wsl_path}" {' '.join(args or [])}
         if model and getattr(model, "requires_docker", False):
             if not self.docker_available:
                 self.btn_launch.setText("! Docker Required")
-                self.btn_launch.setStyleSheet(
-                    """
+                self.btn_launch.setStyleSheet("""
                     QPushButton {
                         background-color: #3a3a3a;
                         color: #ff453a;
                         border: 2px solid #ff453a;
                         border-radius: 6px;
                     }
-                    """
-                )
+                    """)
                 self.btn_launch.setEnabled(False)
                 return
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
-        self.btn_launch.setStyleSheet(
-            """
+        self.btn_launch.setStyleSheet("""
             QPushButton {
                 background-color: #2da44e;
                 color: white;
@@ -1681,8 +1613,7 @@ python "{wsl_path}" {' '.join(args or [])}
             QPushButton:hover {
                 background-color: #2c974b;
             }
-            """
-        )
+            """)
 
     def _get_engine_type(self, model_type: str) -> _EngineType:
         """Map model type to EngineType."""
@@ -1704,8 +1635,7 @@ python "{wsl_path}" {' '.join(args or [])}
     def apply_styles(self) -> None:
         """Apply custom stylesheets."""
         # Global dark theme
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QMainWindow {
                 background-color: #1E1E1E;
             }
@@ -1735,8 +1665,7 @@ python "{wsl_path}" {' '.join(args or [])}
             QPushButton:hover {
                 background-color: #3E3E42;
             }
-            """
-        )
+            """)
 
     def check_docker(self) -> None:
         """Start the docker check thread."""
@@ -1969,21 +1898,19 @@ Expected tiles: {summary['expected_tiles']}
             if repo_path:
                 abs_repo_path = REPOS_ROOT / repo_path
 
-                # Route to appropriate custom launcher based on model type
-                if model.type == "custom_humanoid":
-                    self._custom_launch_humanoid(abs_repo_path)
-                elif model.type == "custom_dashboard":
-                    self._custom_launch_comprehensive(abs_repo_path)
-                elif model.type == "drake":
-                    self._custom_launch_drake(abs_repo_path)
-                elif model.type == "pinocchio":
-                    self._custom_launch_pinocchio(abs_repo_path)
-                elif model.type == "opensim":
-                    self._custom_launch_opensim(abs_repo_path)
-                elif model.type == "myosim":
-                    self._custom_launch_myosim(abs_repo_path)
-                elif model.type == "openpose":
-                    self._custom_launch_openpose(abs_repo_path)
+                # Try to use the handler registry first (cleaner, extensible approach)
+                handler = self.model_handler_registry.get_handler(model.type)
+                if handler:
+                    success = handler.launch(model, REPOS_ROOT, self.process_manager)
+                    if success:
+                        self.show_toast(f"{model.name} Launched", "success")
+                        self.lbl_status.setText(f"● {model.name} Running")
+                        self.lbl_status.setStyleSheet("color: #30D158;")
+                    else:
+                        self.show_toast(f"Failed to launch {model.name}", "error")
+                        self.lbl_status.setText("● Launch Error")
+                        self.lbl_status.setStyleSheet("color: #FF375F;")
+                # Fallback for MJCF and unknown types
                 elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
                     self._launch_generic_mjcf(abs_repo_path)
                 else:
@@ -2038,97 +1965,12 @@ Expected tiles: {summary['expected_tiles']}
         except Exception as e:
             raise RuntimeError(f"Failed to launch MJCF: {e}") from e
 
-    def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
-        """Launch the MuJoCo humanoid GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Humanoid launcher not found: {script}"
-            )
-            return
-        logger.info(f"Launching MuJoCo Humanoid: {script}")
-        self._launch_script_process("MuJoCo Humanoid", script, REPOS_ROOT)
-
-    def _custom_launch_comprehensive(self, abs_repo_path: Path) -> None:
-        """Launch the comprehensive MuJoCo dashboard directly."""
-        python_dir = REPOS_ROOT / "src/engines/physics_engines/mujoco/python"
-        if not python_dir.exists():
-            QMessageBox.critical(
-                self, "Error", f"MuJoCo Python directory not found: {python_dir}"
-            )
-            return
-        logger.info(f"Launching MuJoCo Dashboard from {python_dir}")
-        # Dashboard runs as a module from its directory
-        self._launch_module_process(
-            "MuJoCo Dashboard", "mujoco_humanoid_golf", python_dir
-        )
-
-    def _custom_launch_drake(self, abs_repo_path: Path) -> None:
-        """Launch the Drake GUI directly."""
-        script = (
-            REPOS_ROOT / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(self, "Error", f"Drake GUI not found: {script}")
-            return
-        logger.info(f"Launching Drake GUI: {script}")
-        self._launch_script_process("Drake", script, REPOS_ROOT)
-
-    def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
-        """Launch the Pinocchio GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Pinocchio GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching Pinocchio GUI: {script}")
-        self._launch_script_process("Pinocchio", script, REPOS_ROOT)
-
-    def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
-        """Launch the OpenSim GUI directly."""
-        script = (
-            REPOS_ROOT / "src/engines/physics_engines/opensim/python/opensim_gui.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"OpenSim GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching OpenSim GUI: {script}")
-        self._launch_script_process("OpenSim", script, REPOS_ROOT)
-
-    def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
-        """Launch the MyoSim GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(self, "Error", f"MyoSim script not found: {script}")
-            return
-        logger.info(f"Launching MyoSim: {script}")
-        self._launch_script_process("MyoSim", script, REPOS_ROOT)
-
-    def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
-        """Launch the OpenPose GUI directly."""
-        script = REPOS_ROOT / "src/shared/python/pose_estimation/openpose_gui.py"
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"OpenPose GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching OpenPose GUI: {script}")
-        self._launch_script_process("OpenPose", script, REPOS_ROOT)
-
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
-        """Launch the model in a Docker container."""
+        """Launch the model in a Docker container.
+
+        Delegates to DockerLauncher for container orchestration while
+        handling UI feedback (prompts, status updates, error dialogs).
+        """
         try:
             # Auto-start VcXsrv on Windows for GUI support
             if os.name == "nt":
@@ -2146,104 +1988,39 @@ Expected tiles: {summary['expected_tiles']}
                         return
 
             # Check if Docker image exists
-            docker_image = "robotics_env:latest"
-            try:
-                check_result = subprocess.run(
-                    ["docker", "image", "inspect", docker_image],
-                    capture_output=True,
-                    timeout=10,
+            if not self.docker_launcher.check_image_exists():
+                QMessageBox.warning(
+                    self,
+                    "Docker Image Not Found",
+                    f"The Docker image '{self.docker_launcher.image_name}' is not available.\n\n"
+                    "Build it first using:\n"
+                    "  docker build -t robotics_env .\n\n"
+                    "Or use the Environment dialog to build.",
                 )
-                if check_result.returncode != 0:
-                    QMessageBox.warning(
-                        self,
-                        "Docker Image Not Found",
-                        f"The Docker image '{docker_image}' is not available.\n\n"
-                        "Build it first using:\n"
-                        "  docker build -t robotics_env .\n\n"
-                        "Or use the Environment dialog to build.",
-                    )
-                    return
-            except Exception as e:
-                logger.warning(f"Failed to check Docker image: {e}")
+                return
 
-            # Construct Docker command - no -it for GUI apps
-            cmd = [
-                "docker",
-                "run",
-                "--rm",
-                "-v",
-                f"{REPOS_ROOT}:/workspace",
-                "-e",
-                "PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python",
-            ]
-
-            # Display configuration for GUI apps
-            if os.name == "nt":  # Windows
-                cmd.extend(
-                    [
-                        "-e",
-                        "DISPLAY=host.docker.internal:0",
-                        "-e",
-                        "MUJOCO_GL=glfw",
-                        "-e",
-                        "PYOPENGL_PLATFORM=glx",
-                        "-e",
-                        "QT_QPA_PLATFORM=xcb",
-                    ]
-                )
-            else:  # Linux
-                disp = os.environ.get("DISPLAY", ":0")
-                cmd.extend(
-                    [
-                        "-e",
-                        f"DISPLAY={disp}",
-                        "-v",
-                        "/tmp/.X11-unix:/tmp/.X11-unix",
-                    ]
-                )
-
-            # GPU Support
-            if self.chk_gpu.isChecked():
-                cmd.extend(["--gpus=all"])
-
-            # Port mapping for MeshCat (Drake/Pinocchio)
-            if model.type in ("drake", "pinocchio"):
-                cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])
-
-            # Working Directory
-            work_dir = (
-                f"/workspace/{repo_path.parent.relative_to(REPOS_ROOT).as_posix()}"
+            # Launch container via DockerLauncher
+            use_gpu = hasattr(self, "chk_gpu") and self.chk_gpu.isChecked()
+            process = self.docker_launcher.launch_container(
+                model_type=model.type,
+                model_name=model.name,
+                repo_path=repo_path,
+                use_gpu=use_gpu,
             )
-            cmd.extend(["-w", work_dir])
 
-            # Python command - determine correct launch command based on model type
-            if model.type == "drake":
-                cmd.extend(
-                    [
-                        docker_image,
-                        "python",
-                        "-m",
-                        "src.drake_gui_app",
-                    ]
-                )
-            elif model.type == "pinocchio":
-                cmd.extend([docker_image, "python", "pinocchio_golf/gui.py"])
-            elif model.type in ("custom_humanoid", "custom_dashboard"):
-                # MuJoCo humanoid models
-                cmd.extend([docker_image, "python", repo_path.name])
+            if process:
+                self.running_processes[model.name] = process
+                self.show_toast(f"{model.name} Launched (Docker)", "success")
+                self.lbl_status.setText(f"● {model.name} Running (Docker)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
             else:
-                cmd.extend([docker_image, "python", repo_path.name])
-
-            logger.info(f"Docker Launch: {' '.join(cmd)}")
-
-            process = subprocess.Popen(
-                cmd,
-                creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0,
-            )
-            self.running_processes[model.name] = process
-            self.show_toast(f"{model.name} Launched (Docker)", "success")
-            self.lbl_status.setText(f"● {model.name} Running (Docker)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+                self.lbl_status.setText("● Docker Error")
+                self.lbl_status.setStyleSheet("color: #FF375F;")
+                QMessageBox.critical(
+                    self,
+                    "Docker Launch Error",
+                    f"Failed to launch {model.name} in Docker",
+                )
 
         except Exception as e:
             logger.error(f"Failed to launch Docker container: {e}")
@@ -2262,156 +2039,71 @@ Expected tiles: {summary['expected_tiles']}
         allowing users to see the error message.
 
         If WSL mode is enabled, launches the script in WSL2 Ubuntu environment.
+
+        Delegates to ProcessManager for the actual subprocess handling.
         """
         # Check if WSL mode is enabled
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
-            self._launch_in_wsl(str(script_path))
-            self.lbl_status.setText(f"● {name} Running (WSL)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            success = self.process_manager.launch_in_wsl(str(script_path))
+            if success:
+                self.lbl_status.setText(f"● {name} Running (WSL)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.show_toast(f"{name} Launched in WSL", "success")
+            else:
+                QMessageBox.critical(
+                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                )
             return
 
-        try:
-            env = self._get_subprocess_env()
+        # Delegate to ProcessManager with keep_terminal_open=True for error visibility
+        process = self.process_manager.launch_script(
+            name, script_path, cwd, keep_terminal_open=True
+        )
 
-            if os.name == "nt":
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=env,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                process = subprocess.Popen(
-                    [sys.executable, str(script_path)],
-                    cwd=str(cwd),
-                    env=env,
-                )
-
-            self.running_processes[name] = process
+        if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
-
-        except Exception as e:
-            logger.error(f"Failed to launch {name}: {e}")
-            QMessageBox.critical(
-                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
-            )
+        else:
+            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
     def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:
         """Helper to launch python module with error visibility.
 
         Similar to _launch_script_process but uses -m to run a module.
         If WSL mode is enabled, launches in WSL2 Ubuntu environment.
+
+        Delegates to ProcessManager for the actual subprocess handling.
         """
         # Check if WSL mode is enabled
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
             # For WSL, we run the module using python -m
-            self._launch_module_in_wsl(module_name, cwd)
-            self.lbl_status.setText(f"● {name} Running (WSL)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            success = self.process_manager.launch_module_in_wsl(module_name, cwd)
+            if success:
+                self.lbl_status.setText(f"● {name} Running (WSL)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.show_toast(f"{name} Launched in WSL", "success")
+            else:
+                QMessageBox.critical(
+                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                )
             return
 
-        try:
-            env = self._get_subprocess_env()
+        # Delegate to ProcessManager with keep_terminal_open=True for error visibility
+        process = self.process_manager.launch_module(
+            name, module_name, cwd, keep_terminal_open=True
+        )
 
-            # Ensure PYTHONPATH is set correctly for Windows
-            if os.name == "nt":
-                current_pythonpath = env.get("PYTHONPATH", "")
-                repo_root_str = str(REPOS_ROOT)
-                src_dir_str = str(REPOS_ROOT / "src")
-
-                paths_to_add = []
-                if repo_root_str not in current_pythonpath:
-                    paths_to_add.append(repo_root_str)
-                if src_dir_str not in current_pythonpath:
-                    paths_to_add.append(src_dir_str)
-
-                if paths_to_add:
-                    env["PYTHONPATH"] = f"{';'.join(paths_to_add)};{current_pythonpath}"
-
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=env,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                process = subprocess.Popen(
-                    [sys.executable, "-m", module_name],
-                    cwd=str(cwd),
-                    env=env,
-                )
-
-            self.running_processes[name] = process
+        if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
-
-        except Exception as e:
-            logger.error(f"Failed to launch {name}: {e}")
-            QMessageBox.critical(
-                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
-            )
-
-    def _launch_module_in_wsl(self, module_name: str, cwd: Path | None = None) -> None:
-        """Launch a Python module in WSL2 Ubuntu environment.
-
-        Args:
-            module_name: Python module name to run with -m flag
-            cwd: Optional working directory (Windows Path)
-        """
-        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
-
-        # Determine working directory
-        work_dir = project_dir
-        if cwd:
-            # Convert Windows path to WSL path
-            s_cwd = str(cwd)
-            if len(s_cwd) > 1 and s_cwd[1] == ":":
-                drive = s_cwd[0].lower()
-                path_part = s_cwd[2:].replace("\\", "/")
-                work_dir = f"/mnt/{drive}{path_part}"
-
-        # Build the WSL command
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{work_dir}"
-python -m {module_name}
-"""
-
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching module in WSL: {module_name}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                subprocess.Popen(cmd)
-
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(f"Launched in WSL: {module_name}", "success")
-        except Exception as e:
-            logger.error(f"Failed to launch module in WSL: {e}")
-            QMessageBox.critical(
-                self,
-                "WSL Launch Error",
-                f"Failed to launch module in WSL:\n{e}",
-            )
+        else:
+            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
     def open_layout_manager(self) -> None:
         """Open the layout customization dialog."""
@@ -2426,27 +2118,23 @@ python -m {module_name}
         self.layout_edit_mode = checked
         if checked:
             self.btn_modify_layout.setText("🔓 Edit Mode On")
-            self.btn_modify_layout.setStyleSheet(
-                """
+            self.btn_modify_layout.setStyleSheet("""
                 QPushButton {
                     background-color: #007acc;
                     color: white;
                     border: 1px solid #0099ff;
                 }
-                """
-            )
+                """)
             self.btn_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
         else:
             self.btn_modify_layout.setText("🔒 Layout Locked")
-            self.btn_modify_layout.setStyleSheet(
-                """
+            self.btn_modify_layout.setStyleSheet("""
                 QPushButton {
                     background-color: #444444;
                     color: #cccccc;
                 }
-                """
-            )
+                """)
             self.btn_customize_tiles.setEnabled(False)
 
         # Update all cards to accept/reject drops
