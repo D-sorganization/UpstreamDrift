@@ -76,6 +76,9 @@ export function useSimulation(engineType: string) {
     }
   }, []);
 
+  // Use a ref to hold the connect function to handle recursion
+  const connectRef = useRef<((config: SimulationConfig) => void) | null>(null);
+
   const connect = useCallback((config: SimulationConfig = {}) => {
     // Store config for potential reconnection
     pendingConfigRef.current = config;
@@ -172,7 +175,8 @@ export function useSimulation(engineType: string) {
         reconnectTimeoutRef.current = setTimeout(() => {
           if (isMountedRef.current) {
             reconnectAttemptsRef.current++;
-            connect(pendingConfigRef.current || {});
+            // Use ref to call connect recursively
+            connectRef.current?.(pendingConfigRef.current || {});
           }
         }, delay);
       } else {
@@ -182,6 +186,11 @@ export function useSimulation(engineType: string) {
       }
     };
   }, [engineType, getReconnectDelay]);
+
+  // Update the ref whenever connect changes
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const start = useCallback((config: SimulationConfig = {}) => {
     // Reset reconnection state when starting fresh
