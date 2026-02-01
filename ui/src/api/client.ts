@@ -76,6 +76,10 @@ export function useSimulation(engineType: string) {
     }
   }, []);
 
+  // Ref to store connect function for reconnection logic (avoids circular reference)
+  const connectRef = useRef<((config: SimulationConfig) => void) | null>(null);
+
+
   const connect = useCallback((config: SimulationConfig = {}) => {
     // Store config for potential reconnection
     pendingConfigRef.current = config;
@@ -170,9 +174,9 @@ export function useSimulation(engineType: string) {
         setConnectionStatus('reconnecting');
 
         reconnectTimeoutRef.current = setTimeout(() => {
-          if (isMountedRef.current) {
+          if (isMountedRef.current && connectRef.current) {
             reconnectAttemptsRef.current++;
-            connect(pendingConfigRef.current || {});
+            connectRef.current(pendingConfigRef.current || {});
           }
         }, delay);
       } else {
@@ -182,6 +186,11 @@ export function useSimulation(engineType: string) {
       }
     };
   }, [engineType, getReconnectDelay]);
+
+  // Sync connectRef with latest connect function (in effect, not during render)
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const start = useCallback((config: SimulationConfig = {}) => {
     // Reset reconnection state when starting fresh
