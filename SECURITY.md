@@ -80,6 +80,7 @@ export ENVIRONMENT="production"
 ```
 
 Generate secure secret keys:
+
 ```bash
 # Linux/macOS
 python3 -c "import secrets; print(secrets.token_urlsafe(64))"
@@ -104,6 +105,7 @@ openssl rand -base64 64
 ### API Key Management
 
 **Creating API Keys** (Admin only):
+
 ```python
 import secrets
 api_key = f"gms_{secrets.token_urlsafe(32)}"
@@ -111,6 +113,7 @@ api_key = f"gms_{secrets.token_urlsafe(32)}"
 ```
 
 **Best Practices**:
+
 - Rotate API keys every 90 days
 - Use separate keys for different applications
 - Revoke unused keys immediately
@@ -120,12 +123,56 @@ api_key = f"gms_{secrets.token_urlsafe(32)}"
 ### File Upload Security
 
 If you add file upload functionality:
+
 - Validate file types (whitelist, not blacklist)
 - Scan uploads with antivirus
 - Store uploads outside web root
 - Generate random filenames
 - Set size limits
-- Check for malware signatures
+
+## Known Vulnerability Exceptions
+
+The following CVEs are currently ignored in our security scanning with documented mitigations:
+
+### CVE-2024-23342 (ecdsa)
+
+| Field | Value |
+|-------|-------|
+| **Status** | Ignored |
+| **Severity** | Medium |
+| **Affected Package** | `ecdsa` (transitive dependency) |
+| **Reason** | No upstream fix available as of 2026-01-31 |
+| **Review Date** | 2026-03-01 |
+
+**Mitigation:**
+
+- ECDSA is not used in any authentication or signature verification paths
+- All cryptographic operations use established libraries (cryptography, PyNaCl)
+- Will upgrade when upstream releases patch
+
+### CVE-2026-0994 (protobuf)
+
+| Field | Value |
+|-------|-------|
+| **Status** | Ignored |
+| **Severity** | Medium |
+| **Affected Package** | `protobuf` (transitive from dm_control) |
+| **Reason** | Cannot update independently; dependency of dm_control physics engine |
+| **Review Date** | Next dm_control release |
+
+**Mitigation:**
+
+- Protobuf inputs are trusted internal data only
+- No user-supplied protobuf parsing
+- dm_control is used in sandboxed simulation environment
+- Monitor dm_control releases for protobuf update
+
+### Exception Review Process
+
+1. **Monthly Review:** All exceptions are reviewed on the first of each month
+2. **Upgrade Check:** Check if upstream fixes are available
+3. **Risk Assessment:** Re-evaluate if usage patterns have changed
+4. **Documentation Update:** Update this file with review results
 
 ## Known Security Considerations
 
@@ -142,10 +189,12 @@ If you add file upload functionality:
 ### Expression Evaluation
 
 **SECURE** (Use these):
+
 - `simpleeval` library (already in dependencies)
 - Validated mathematical expressions only
 
 **INSECURE** (Never use):
+
 - `eval()` or `exec()` on user input
 - Code from archive directory
 
@@ -211,6 +260,7 @@ pip-audit
 ### Manual Security Review
 
 Before major releases:
+
 1. Review all authentication/authorization code
 2. Check for hardcoded secrets
 3. Verify input validation on all endpoints
@@ -222,7 +272,7 @@ Before major releases:
 
 For security concerns: [Maintainer contact information]
 
-For general issues: https://github.com/dieterolson/UpstreamDrift/issues
+For general issues: <https://github.com/dieterolson/UpstreamDrift/issues>
 
 ---
 
