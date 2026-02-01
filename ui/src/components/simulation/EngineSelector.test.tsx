@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EngineSelector } from './EngineSelector';
@@ -11,9 +11,9 @@ vi.mock('@/api/client', () => ({
 import { fetchEngines } from '@/api/client';
 
 const mockEngines = [
-  { name: 'mujoco', available: true, loaded: true },
-  { name: 'drake', available: true, loaded: false },
-  { name: 'pinocchio', available: false, loaded: false },
+  { name: 'mujoco', available: true, loaded: true, capabilities: ['rigid_body', 'contact'] },
+  { name: 'drake', available: true, loaded: false, capabilities: ['rigid_body', 'optimization'] },
+  { name: 'pinocchio', available: false, loaded: false, capabilities: ['rigid_body'] },
 ];
 
 const createWrapper = () => {
