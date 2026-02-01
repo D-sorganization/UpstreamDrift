@@ -42,11 +42,30 @@ async def run_simulation(request: SimulationRequest) -> SimulationResponse:
     try:
         result = await _simulation_service.run_simulation(request)
         return result
-    except Exception as exc:
+    except TimeoutError as exc:
         if _logger:
-            _logger.error("Simulation error: %s", exc)
+            _logger.warning("Simulation timeout: %s", exc)
+        raise HTTPException(
+            status_code=504, detail="Simulation timed out"
+        ) from exc
+    except ValueError as exc:
+        if _logger:
+            _logger.warning("Invalid simulation parameters: %s", exc)
+        raise HTTPException(
+            status_code=400, detail=f"Invalid parameters: {str(exc)}"
+        ) from exc
+    except RuntimeError as exc:
+        if _logger:
+            _logger.error("Simulation runtime error: %s", exc)
         raise HTTPException(
             status_code=500, detail=f"Simulation failed: {str(exc)}"
+        ) from exc
+    except Exception as exc:
+        # Log unexpected errors with full traceback for debugging
+        if _logger:
+            _logger.exception("Unexpected simulation error: %s", exc)
+        raise HTTPException(
+            status_code=500, detail="Internal simulation error"
         ) from exc
 
 

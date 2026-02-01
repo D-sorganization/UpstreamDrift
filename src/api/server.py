@@ -228,9 +228,19 @@ async def startup_event() -> None:
                 enable_temporal_smoothing=True,
             )
             video_pipeline = VideoPosePipeline(video_config)
-        except Exception as e:
+        except ImportError as e:
+            logger.info(
+                "MediaPipe not installed, video features disabled: %s", e
+            )
+            video_pipeline = None
+        except OSError as e:
             logger.warning(
-                f"Video pipeline initialization failed (video features disabled): {e}"
+                "Video pipeline failed to initialize (camera/device issue): %s", e
+            )
+            video_pipeline = None
+        except RuntimeError as e:
+            logger.warning(
+                "Video pipeline runtime initialization failed: %s", e
             )
             video_pipeline = None
 
@@ -243,8 +253,17 @@ async def startup_event() -> None:
 
         logger.info("Golf Modeling Suite API started successfully")
 
+    except OSError as e:
+        logger.error("Database or file system error during initialization: %s", e)
+        raise
+    except ImportError as e:
+        logger.error("Missing required dependency: %s", e)
+        raise
+    except RuntimeError as e:
+        logger.error("Engine initialization failed: %s", e)
+        raise
     except Exception as e:
-        logger.error(f"Failed to initialize API: {e}")
+        logger.exception("Unexpected error during API initialization: %s", e)
         raise
 
 
