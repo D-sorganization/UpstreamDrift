@@ -187,7 +187,7 @@ class MyoConverter:
 
         # Validate XML structure
         try:
-            import xml.etree.ElementTree as ET
+            import defusedxml.ElementTree as ET
 
             tree = ET.parse(osim_file)
             root = tree.getroot()

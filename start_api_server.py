@@ -73,7 +73,7 @@ def setup_api_environment() -> tuple[str, int]:
     _validate_security()
 
     # Network config
-    host = os.getenv("API_HOST", "0.0.0.0")
+    host = os.getenv("API_HOST", "127.0.0.1")
     port = int(os.getenv("API_PORT", "8000"))
 
     return host, port

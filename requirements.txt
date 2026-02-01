@@ -58,3 +58,4 @@ mujoco>=3.0.0
 #
 # See docs/wsl_setup.md for detailed instructions.
 # ============================================================================
+defusedxml>=0.7.1
