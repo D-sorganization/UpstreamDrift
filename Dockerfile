@@ -52,6 +52,7 @@ RUN pip install --no-cache-dir \
     qpsolvers \
     osqp \
     && pip install --upgrade setuptools wheel urllib3 brotli requests \
+    && rm -rf /opt/conda/lib/ruby \
     && echo "Physics engines and robotics packages installed successfully"
 
 
