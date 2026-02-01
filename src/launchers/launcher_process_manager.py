@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from src.shared.python.logging_config import get_logger
+from src.shared.python.subprocess_utils import kill_process_tree
 
 if TYPE_CHECKING:
     from subprocess import Popen
@@ -106,8 +107,8 @@ class ProcessManager:
             process_env = env or self.get_subprocess_env()
 
             if os.name == "nt":
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
+                # Use cmd /c to close terminal when process exits
+                cmd_str = f'cmd /c ""{sys.executable}" "{script_path}""'
                 process = subprocess.Popen(
                     cmd_str,
                     cwd=str(cwd),
@@ -167,8 +168,8 @@ class ProcessManager:
                         f"{';'.join(paths_to_add)};{current_pythonpath}"
                     )
 
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+                # Use cmd /c to close terminal when process exits
+                cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
                 process = subprocess.Popen(
                     cmd_str,
                     cwd=str(cwd),
@@ -301,12 +302,15 @@ python -m {module_name}
             try:
                 if proc.poll() is None:  # Process is still running
                     logger.info(f"Terminating process: {name}")
-                    proc.terminate()
-                    try:
-                        proc.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        logger.warning(f"Force killing process: {name}")
-                        proc.kill()
+                    # Use kill_process_tree to ensure terminal and all children close
+                    if not kill_process_tree(proc.pid):
+                        # Fallback to direct termination
+                        proc.terminate()
+                        try:
+                            proc.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            logger.warning(f"Force killing process: {name}")
+                            proc.kill()
             except Exception as e:
                 logger.error(f"Error terminating {name}: {e}")
 
