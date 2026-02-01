@@ -73,7 +73,8 @@ class MoCapLauncher(QMainWindow):
         # Buttons
         for app in APPS:
             btn_frame = QFrame()
-            btn_frame.setStyleSheet("""
+            btn_frame.setStyleSheet(
+                """
                 QFrame {
                     background-color: #f8f9fa;
                     border: 1px solid #e9ecef;
@@ -83,7 +84,8 @@ class MoCapLauncher(QMainWindow):
                     background-color: #e2e6ea;
                     border-color: #adb5bd;
                 }
-            """)
+            """
+            )
             frame_layout = QVBoxLayout(btn_frame)
 
             btn = QPushButton(f"{app['icon']}  {app['name']}")
