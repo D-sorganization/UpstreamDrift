@@ -1,4 +1,3 @@
-
 name: Convert Review Comments to Issues
 
 # Converts PR review comments (from Copilot, Cursor, Jules, etc.) into GitHub Issues
@@ -15,11 +14,11 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'Specific PR to process (leave empty for all open PRs)'
+        description: "Specific PR to process (leave empty for all open PRs)"
         required: false
         type: string
       archive_only:
-        description: 'Only archive to markdown, do not create issues'
+        description: "Only archive to markdown, do not create issues"
         required: false
         default: false
         type: boolean
@@ -103,7 +102,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ARCHIVE_ONLY: ${{ inputs.archive_only || 'false' }}
         run: |
-          python3 << 'PYEOF'
+          # Write Python script to temp file to avoid YAML heredoc issues
+          cat > /tmp/process_comments.py << 'SCRIPT_EOF'
           import json
           import os
           import subprocess
@@ -207,29 +207,29 @@ jobs:
 
                       issue_body = f"""## Review Comment from {source}
 
-**Source PR:** #{pr_num} - {pr_title}
-**File:** `{file_path}` (line {line})
-**Original Comment:** {html_url}
+          Source PR: #{pr_num} - {pr_title}
+          File: `{file_path}` (line {line})
+          Original Comment: {html_url}
 
----
+          ---
 
-### Feedback
+          ### Feedback
 
-{body}
+          {body}
 
----
+          ---
 
-### Context
+          ### Context
 
-- **PR Author:** @{pr_author}
-- **Branch:** `{pr_branch}`
-- **Reviewed by:** {author}
-- **Date:** {created_at}
+          - PR Author: @{pr_author}
+          - Branch: `{pr_branch}`
+          - Reviewed by: {author}
+          - Date: {created_at}
 
----
+          ---
 
-*This issue was auto-generated from a PR review comment.*
-"""
+          This issue was auto-generated from a PR review comment.
+          """
 
                       # Create the issue
                       try:
@@ -278,9 +278,10 @@ jobs:
                       f.write(f"## {source} ({len(comments)} comments)\n\n")
                       for c in comments:
                           f.write(f"### PR #{c['pr_number']}: {c['file']}:{c['line']}\n\n")
-                          f.write(f"**Actionable:** {'Yes' if c['is_actionable'] else 'No'}\n")
-                          f.write(f"**Has Suggestion:** {'Yes' if c['has_suggestion'] else 'No'}\n\n")
-                          f.write(f"```\n{c['body'][:500]}{'...' if len(c['body']) > 500 else ''}\n```\n\n")
+                          f.write(f"Actionable: {'Yes' if c['is_actionable'] else 'No'}\n")
+                          f.write(f"Has Suggestion: {'Yes' if c['has_suggestion'] else 'No'}\n\n")
+                          body_preview = c['body'][:500] + ('...' if len(c['body']) > 500 else '')
+                          f.write(f"```\n{body_preview}\n```\n\n")
                           f.write(f"[View on GitHub]({c['url']})\n\n---\n\n")
 
               print(f"Archived {len(archived_comments)} comments to {archive_md}")
@@ -297,7 +298,9 @@ jobs:
           with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
               f.write(f"archived_count={len(archived_comments)}\n")
               f.write(f"created_count={len(created_issues)}\n")
-          PYEOF
+          SCRIPT_EOF
+
+          python3 /tmp/process_comments.py
 
       - name: Commit Archive
         env:

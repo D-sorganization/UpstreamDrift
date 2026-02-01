@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 50  # Get recent history for comparison
+          fetch-depth: 50 # Get recent history for comparison
 
       - name: Find Related Jules PRs
         id: find
@@ -120,14 +120,19 @@ jobs:
 
             echo "Closing PR #$PR_NUM: $PR_TITLE"
 
-            gh pr close "$PR_NUM" --comment "Auto-closed: This PR has been superseded by changes merged to main.
+            # Create comment body in temp file to avoid YAML parsing issues
+            cat > /tmp/pr_comment.txt << COMMENT_EOF
+          Auto-closed: This PR has been superseded by changes merged to main.
 
-**Superseding commit**: $COMMIT_SHA
-**Commit message**: $COMMIT_MSG_SHORT
+          Superseding commit: $COMMIT_SHA
+          Commit message: $COMMIT_MSG_SHORT
 
-The changes in this PR overlap significantly with what was just merged. If this PR still contains valuable changes not covered by the merge, you can reopen it.
+          The changes in this PR overlap significantly with what was just merged. If this PR still contains valuable changes not covered by the merge, you can reopen it.
 
-To prevent auto-closure, add the \`jules-keep\` label."
+          To prevent auto-closure, add the jules-keep label.
+          COMMENT_EOF
+
+            gh pr close "$PR_NUM" --comment "$(cat /tmp/pr_comment.txt)"
 
             # Delete the branch
             gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$PR_BRANCH" 2>/dev/null || true
