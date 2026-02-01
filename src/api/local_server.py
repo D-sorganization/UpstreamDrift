@@ -390,8 +390,7 @@ def print_server_info(host: str, port: int):
     CYAN = "\033[38;5;51m"
     RESET = "\033[0m"
 
-    print(
-        f"""
+    print(f"""
 {CYAN}    ┌─────────────────────────────────────────────────────────┐
     │              Golf Modeling Suite - Local Server         │
     ├─────────────────────────────────────────────────────────┤
@@ -401,8 +400,7 @@ def print_server_info(host: str, port: int):
     │  Mode: LOCAL (no auth required)                         │
     │  Press Ctrl+C to stop.                                  │
     └─────────────────────────────────────────────────────────┘{RESET}
-    """
-    )
+    """)
 
 
 def main():

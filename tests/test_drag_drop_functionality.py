@@ -14,9 +14,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
-from src.shared.python.gui_utils import get_qapp
-
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 from src.shared.python.path_utils import setup_import_paths
 
 # Setup import paths for testing
