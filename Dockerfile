@@ -5,7 +5,7 @@
 FROM continuumio/miniconda3:24.11.1-0 AS builder
 
 # System dependencies for building
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     git \
     build-essential \
     cmake \
@@ -61,7 +61,7 @@ FROM continuumio/miniconda3:24.11.1-0 AS runtime
 # - GL libraries for MuJoCo/Visualization
 # - FFmpeg for video processing (OpenPose inputs)
 # - curl for health checks
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     libgl1-mesa-dev \
     libgl1-mesa-glx \
     libosmesa6-dev \
