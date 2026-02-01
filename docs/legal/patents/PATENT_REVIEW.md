@@ -11,7 +11,7 @@
 | Area | Patent(s) / Assignee | Our Implementation | Risk Level | Mitigation |
 |------|----------------------|-------------------|------------|------------|
 | **Kinematic Sequence** | **TPI (Titleist)**, **K-Motion**<br>Methods for analyzing proximal-to-distal sequencing | `KinematicSequenceAnalyzer` in `shared/python/kinematic_sequence.py`. Explicitly checks order: Pelvis -> Thorax -> Arm -> Club. | **HIGH** | Rename "Kinematic Sequence" to "Segment Timing". Use relative timing gaps instead of absolute efficiency score. **Legal Review Required.** |
-| **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `SwingComparator.compute_kinematic_similarity` in `shared/python/swing_comparison.py`. Uses `100 / (1 + DTW_dist)` formula. | **HIGH** | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance). |
+| **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `SwingComparator.compute_kinematic_similarity` in `shared/python/swing_comparison.py`. Uses `100 * exp(-dist)` formula. | **HIGH** | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance). |
 | **Swing DNA** | **Mizuno** (Trademark/Method)<br>Club fitting based on specific metric vector | `SwingProfileMetrics` in `shared/python/statistical_analysis.py`. Visualization as Radar Chart. | **REMEDIATED** | Renamed to "Swing Profile". Metrics changed to: Speed, Sequence, Stability, Efficiency, Power (distinct from Mizuno's). |
 
 ### Medium Risk Areas
@@ -30,20 +30,30 @@
 
 ### `shared/python/kinematic_sequence.py`
 *   **Risk**: `KinematicSequenceAnalyzer.analyze`
+*   **Location**: Line 56-60 (Default Order)
 *   **Finding**: Logic explicitly defines `expected_order = ["Pelvis", "Torso", "Arm", "Club"]`. This specific order check is the core claim of several TPI patents.
 *   **Action**: Avoid binary "Efficiency" scoring based on this order. Present data as raw timing charts without "Good/Bad" judgment based on TPI norms.
 
 ### `shared/python/swing_comparison.py`
 *   **Risk**: `compute_kinematic_similarity`
-*   **Finding**: Uses Dynamic Time Warping (DTW) to normalize temporal differences and generate a similarity score (0-100).
+*   **Location**: Line 135-140 (DTW Scoring)
+*   **Finding**: Uses Dynamic Time Warping (DTW) to normalize temporal differences and generate a similarity score using `score = SIMILARITY_SCORE_CONSTANT * np.exp(-norm_dist)`.
 *   **Context**: Zepp and K-Motion have patents on "comparing user motion to pro motion using time-warping".
 *   **Action**: Isolate this logic. Consider making it an optional plugin or replacing with "Key Position Analysis" (P1-P10 positions).
 
 ### `shared/python/impact_model.py`
 *   **Risk**: `compute_gear_effect_spin`
-*   **Finding**: Uses hardcoded scalars `h_scale=100.0`, `v_scale=50.0`.
+*   **Location**: Line 125-126 (`ImpactParameters`)
+*   **Finding**: Uses hardcoded scalars `gear_effect_h_scale=100.0`, `gear_effect_v_scale=50.0`.
 *   **Context**: "Magic numbers" suggest empirical tuning against a reference (likely TrackMan).
 *   **Action**: Validate these constants against open literature (e.g., Cochran & Stobbs) to establish independent derivation.
+
+### `shared/python/statistical_analysis.py`
+*   **Risk**: `efficiency_score`
+*   **Location**: Lines 582-613
+*   **Finding**: Calculates efficiency as `peak_ke / total_work`.
+*   **Context**: This is distinct from TPI's "Kinematic Sequence Efficiency" (sequencing order).
+*   **Action**: Safe to keep, but ensure UI clearly distinguishes it from "Sequence Efficiency".
 
 ## 3. Trademark Concerns
 
@@ -73,7 +83,7 @@
 
 ## 6. Change Log
 
-*   **2026-01-26**: Initial comprehensive review.
-    *   Confirmed remediation of "Swing DNA" in UI code.
-    *   Flagged "Kinematic Sequence" and "DTW Scoring" as Critical/High risks.
-    *   Identified "Gear Effect" constants as potential IP leakage (Trade Secret/Copyright).
+*   **2026-01-26**: Updated with specific code locations.
+    *   Identified exact lines for TPI order check in `kinematic_sequence.py`.
+    *   Identified DTW scoring formula in `swing_comparison.py`.
+    *   Flagged empirical constants in `impact_model.py`.
