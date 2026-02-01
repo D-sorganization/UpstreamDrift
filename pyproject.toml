@@ -147,3 +147,22 @@ module = [
     "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.*",
 ]
 ignore_errors = true
+
+[tool.pytest.ini_options]
+# Consolidated pytest configuration (replaces duplicate pytest.ini files)
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --strict-markers --strict-config"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "requires_gl: Tests needing OpenGL/moderngl or a display",
+    "slow_numba: Tests that require numba JIT or are heavy",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
