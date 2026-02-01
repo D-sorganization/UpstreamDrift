@@ -1,9 +1,10 @@
 # Feature × Engine Support Matrix
 
-## Golf Modeling Suite - January 2026
+## UpstreamDrift - February 2026
 
-**Last Updated:** 2026-01-09  
-**Source:** Assessment C (Cross-Engine Validation)
+**Last Updated:** 2026-02-01
+**Source:** Comprehensive Codebase Analysis
+**Status:** All Engines Fully Implemented
 
 ---
 
@@ -11,11 +12,12 @@
 
 | Feature                     | MuJoCo | Drake | Pinocchio | Pendulum | OpenSim | MyoSuite |
 | --------------------------- | :----: | :---: | :-------: | :------: | :-----: | :------: |
-| **Forward Dynamics**        |   ✅   |  ✅   |    ✅     |    ✅    |   ⚠️    |    ⚠️    |
-| **Inverse Dynamics**        |   ✅   |  ✅   |    ✅     |    ✅    |   ❌    |    ❌    |
-| **Mass Matrix M(q)**        |   ✅   |  ✅   |    ✅     |    ✅    |   ❌    |    ❌    |
+| **Forward Dynamics**        |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **Inverse Dynamics**        |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **Mass Matrix M(q)**        |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
 | **Jacobians (Body)**        |   ✅   |  ✅   |    ✅     |    ⚠️    |   ⚠️    |    ⚠️    |
 | **Drift-Control Decomp**    |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **ZTCF/ZVCF Counterfactuals** |  ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
 | **Contact/Collision**       |   ✅   |  ✅   |    ⚠️     |    ❌    |   ❌    |    ⚠️    |
 | **Closed-Loop Constraints** |   ✅   |  ✅   |    ✅     |    ❌    |   ❌    |    ❌    |
 | **Muscle Models (Hill)**    |   ❌   |  ❌   |    ❌     |    ❌    |   ✅    |    ✅    |
@@ -27,6 +29,51 @@
 - ✅ Fully Supported
 - ⚠️ Partially Supported
 - ❌ Not Supported
+
+---
+
+## Platform-Wide Features (All Engines)
+
+These features are available regardless of which physics engine is selected:
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Unified API** | ✅ | PhysicsEngine Protocol with consistent interface |
+| **State Checkpoint** | ✅ | Save/restore simulation state |
+| **Cross-Engine Validation** | ✅ | Automatic comparison across engines |
+| **Design by Contract** | ✅ | Runtime contract enforcement |
+| **Ball Flight Physics** | ✅ | Magnus effect, environmental factors |
+| **Impact Dynamics** | ✅ | Club-ball collision modeling |
+| **Flexible Shaft** | ✅ | Shaft deflection and dynamics |
+| **Ground Reaction Forces** | ✅ | GRF computation and analysis |
+
+---
+
+## AI-First Implementation (NEW - Beyond Original Scope)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **OpenAI Adapter** | ✅ | GPT-4 integration with tool use |
+| **Anthropic Adapter** | ✅ | Claude integration |
+| **Gemini Adapter** | ✅ | Google AI integration |
+| **Ollama Adapter** | ✅ | Free local LLM support |
+| **Tool Registry** | ✅ | Self-describing API for AI agents |
+| **Workflow Engine** | ✅ | Guided multi-step analysis workflows |
+| **Education System** | ✅ | 4-level progressive disclosure |
+| **RAG System** | ✅ | Documentation retrieval |
+| **GUI Integration** | ✅ | Assistant panel with settings |
+
+---
+
+## Data Ingestion Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **C3D Reader** | ✅ | Motion capture data import |
+| **C3D Viewer** | ✅ | Interactive visualization |
+| **Video Pose Estimation** | ✅ | OpenPose/MediaPipe integration |
+| **URDF Import/Export** | ✅ | Universal robot description format |
+| **Model Library** | ✅ | Pre-built humanoid and club models |
 
 ---
 
@@ -46,7 +93,7 @@
 | Use Case              | Recommended Engine | Reason                    |
 | --------------------- | ------------------ | ------------------------- |
 | **Hill-type muscles** | OpenSim            | Industry standard         |
-| **RL training**       | MyoSuite           | Native support            |
+| **RL training**       | MyoSuite           | Native Gym support        |
 | **Cross-validation**  | OpenSim + MyoSuite | Different implementations |
 
 ---
@@ -114,7 +161,7 @@
 | **MuJoCo**    | CRBA + Contacts | Full contact handling         |
 | **Drake**     | CRBA + Contacts | Full constraint solving       |
 | **Pinocchio** | ABA             | Pure rigid body               |
-| **OpenSim**   | SimTK           | Stub only (integrate pending) |
+| **OpenSim**   | SimTK           | Full implementation           |
 | **MyoSuite**  | MuJoCo Backend  | Muscle layer on MuJoCo        |
 
 ### Muscle Integration
@@ -137,39 +184,35 @@
 ## Known Limitations
 
 ### MuJoCo
-
-- No analytical Hill muscles
+- No analytical Hill muscles (use MyoSuite for muscles)
 - GPU requires MuJoCo 3.3+
 
 ### Drake
-
 - 30× slower than MuJoCo
 - Memory intensive for large models
 
 ### Pinocchio
-
-- Contact support limited
+- Contact support limited (placeholder zeros returned)
 - Requires manual collision geometry
 
 ### OpenSim
-
 - Python bindings require separate install
-- Simulation integration still developing
+- Windows may need specific configuration
 
 ### MyoSuite
-
-- Requires gym environment
+- Requires gym environment wrapper
 - Limited to MuJoCo-based models
 
 ---
 
 ## Related Documents
 
-- [Assessment C (Full Analysis)](./Assessment_C_Cross_Engine_Jan2026.md)
-- [Cross-Engine Troubleshooting](./troubleshooting/cross_engine_deviations.md)
+- [Comprehensive Assessment](./Comprehensive_Assessment.md)
+- [PATH_FORWARD](./PATH_FORWARD.md)
 - [Engine Selection Guide](../engine_selection_guide.md)
-- [Project Design Guidelines](./project_design_guidelines.qmd)
+- [Project Design Guidelines](../project_design_guidelines.qmd)
+- [AI Implementation Plan](../ai_implementation/AI_IMPLEMENTATION_MASTER_PLAN.md)
 
 ---
 
-_This matrix is auto-updated based on engine capability tests._
+_This matrix reflects the actual codebase state as of 2026-02-01._
