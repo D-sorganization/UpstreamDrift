@@ -48,7 +48,7 @@ def get_cors_origins() -> list[str]:
 
 
 # Server configuration
-DEFAULT_SERVER_HOST = "0.0.0.0"
+DEFAULT_SERVER_HOST = "127.0.0.1"
 DEFAULT_SERVER_PORT = 8000
 
 
@@ -56,7 +56,7 @@ def get_server_host() -> str:
     """Get server host from environment or default.
 
     Environment Variable:
-        API_HOST: Server bind address (default: 0.0.0.0)
+        API_HOST: Server bind address (default: 127.0.0.1)
 
     Returns:
         Server host address.
