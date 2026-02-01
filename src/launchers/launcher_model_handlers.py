@@ -37,7 +37,7 @@ class ModelHandler(Protocol):
 class HumanoidMuJoCoHandler:
     """Handler for launching MuJoCo humanoid golf simulations."""
 
-    MODEL_TYPES = {"humanoid_mujoco", "humanoid"}
+    MODEL_TYPES = {"humanoid_mujoco", "humanoid", "custom_humanoid"}
 
     def can_handle(self, model_type: str) -> bool:
         """Check if this handler supports the model type."""
@@ -75,7 +75,7 @@ class HumanoidMuJoCoHandler:
 class ComprehensiveModelHandler:
     """Handler for launching the comprehensive golf model."""
 
-    MODEL_TYPES = {"comprehensive", "comprehensive_mujoco"}
+    MODEL_TYPES = {"comprehensive", "comprehensive_mujoco", "custom_dashboard"}
 
     def can_handle(self, model_type: str) -> bool:
         """Check if this handler supports the model type."""
@@ -259,6 +259,42 @@ class MyoSimHandler:
         return process is not None
 
 
+class OpenPoseHandler:
+    """Handler for launching OpenPose pose estimation GUI."""
+
+    MODEL_TYPES = {"openpose", "pose_estimation"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Launch the OpenPose GUI.
+
+        Args:
+            model: Model configuration object.
+            repo_path: Path to the repository root.
+            process_manager: Process manager for subprocess handling.
+
+        Returns:
+            True if launch succeeded, False otherwise.
+        """
+        script_path = repo_path / "src/shared/python/pose_estimation/openpose_gui.py"
+        cwd = repo_path
+
+        process = process_manager.launch_script(
+            name="OpenPose",
+            script_path=script_path,
+            cwd=cwd,
+        )
+        return process is not None
+
+
 class ModelHandlerRegistry:
     """Registry for model launch handlers.
 
@@ -275,6 +311,7 @@ class ModelHandlerRegistry:
             PinocchioHandler(),
             OpenSimHandler(),
             MyoSimHandler(),
+            OpenPoseHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:

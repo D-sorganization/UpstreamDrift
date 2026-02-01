@@ -1898,21 +1898,19 @@ Expected tiles: {summary['expected_tiles']}
             if repo_path:
                 abs_repo_path = REPOS_ROOT / repo_path
 
-                # Route to appropriate custom launcher based on model type
-                if model.type == "custom_humanoid":
-                    self._custom_launch_humanoid(abs_repo_path)
-                elif model.type == "custom_dashboard":
-                    self._custom_launch_comprehensive(abs_repo_path)
-                elif model.type == "drake":
-                    self._custom_launch_drake(abs_repo_path)
-                elif model.type == "pinocchio":
-                    self._custom_launch_pinocchio(abs_repo_path)
-                elif model.type == "opensim":
-                    self._custom_launch_opensim(abs_repo_path)
-                elif model.type == "myosim":
-                    self._custom_launch_myosim(abs_repo_path)
-                elif model.type == "openpose":
-                    self._custom_launch_openpose(abs_repo_path)
+                # Try to use the handler registry first (cleaner, extensible approach)
+                handler = self.model_handler_registry.get_handler(model.type)
+                if handler:
+                    success = handler.launch(model, REPOS_ROOT, self.process_manager)
+                    if success:
+                        self.show_toast(f"{model.name} Launched", "success")
+                        self.lbl_status.setText(f"● {model.name} Running")
+                        self.lbl_status.setStyleSheet("color: #30D158;")
+                    else:
+                        self.show_toast(f"Failed to launch {model.name}", "error")
+                        self.lbl_status.setText("● Launch Error")
+                        self.lbl_status.setStyleSheet("color: #FF375F;")
+                # Fallback for MJCF and unknown types
                 elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
                     self._launch_generic_mjcf(abs_repo_path)
                 else:
@@ -1966,95 +1964,6 @@ Expected tiles: {summary['expected_tiles']}
 
         except Exception as e:
             raise RuntimeError(f"Failed to launch MJCF: {e}") from e
-
-    def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
-        """Launch the MuJoCo humanoid GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Humanoid launcher not found: {script}"
-            )
-            return
-        logger.info(f"Launching MuJoCo Humanoid: {script}")
-        self._launch_script_process("MuJoCo Humanoid", script, REPOS_ROOT)
-
-    def _custom_launch_comprehensive(self, abs_repo_path: Path) -> None:
-        """Launch the comprehensive MuJoCo dashboard directly."""
-        python_dir = REPOS_ROOT / "src/engines/physics_engines/mujoco/python"
-        if not python_dir.exists():
-            QMessageBox.critical(
-                self, "Error", f"MuJoCo Python directory not found: {python_dir}"
-            )
-            return
-        logger.info(f"Launching MuJoCo Dashboard from {python_dir}")
-        # Dashboard runs as a module from its directory
-        self._launch_module_process(
-            "MuJoCo Dashboard", "mujoco_humanoid_golf", python_dir
-        )
-
-    def _custom_launch_drake(self, abs_repo_path: Path) -> None:
-        """Launch the Drake GUI directly."""
-        script = (
-            REPOS_ROOT / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(self, "Error", f"Drake GUI not found: {script}")
-            return
-        logger.info(f"Launching Drake GUI: {script}")
-        self._launch_script_process("Drake", script, REPOS_ROOT)
-
-    def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
-        """Launch the Pinocchio GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Pinocchio GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching Pinocchio GUI: {script}")
-        self._launch_script_process("Pinocchio", script, REPOS_ROOT)
-
-    def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
-        """Launch the OpenSim GUI directly."""
-        script = (
-            REPOS_ROOT / "src/engines/physics_engines/opensim/python/opensim_gui.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"OpenSim GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching OpenSim GUI: {script}")
-        self._launch_script_process("OpenSim", script, REPOS_ROOT)
-
-    def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
-        """Launch the MyoSim GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(self, "Error", f"MyoSim script not found: {script}")
-            return
-        logger.info(f"Launching MyoSim: {script}")
-        self._launch_script_process("MyoSim", script, REPOS_ROOT)
-
-    def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
-        """Launch the OpenPose GUI directly."""
-        script = REPOS_ROOT / "src/shared/python/pose_estimation/openpose_gui.py"
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"OpenPose GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching OpenPose GUI: {script}")
-        self._launch_script_process("OpenPose", script, REPOS_ROOT)
 
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
         """Launch the model in a Docker container.
