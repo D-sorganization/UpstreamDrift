@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-01-29
+**Last Updated**: 2026-02-01
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -21,6 +21,11 @@ This document serves as the central registry for scientific research topics, tec
   - *Data Needed*: Force plate data (Vertical, A-P, M-L forces) and clubhead speed.
   - *Outcome*: Efficiency ratio to guide strength vs. technique training.
 
+- **Center of Pressure (CoP) Patterns**: Categorize foot pressure patterns (e.g., "Linear", "Heel-to-Toe", "Back-Foot") and correlate them with swing styles and power sources.
+  - *Data Needed*: Force plate CoP coordinates ($x(t), y(t)$) throughout the swing.
+  - *Outcome*: Classification algorithm linking ground interaction style to club delivery metrics.
+  - *Ref*: Ball, K., & Best, R. (2007). "Centre of pressure patterns in golf swings."
+
 ## 2. Ball Flight Physics
 
 ### Aerodynamics
@@ -32,6 +37,11 @@ This document serves as the central registry for scientific research topics, tec
 - **Environmental Gradient Modeling**: Model wind shear (boundary layer) and air density changes with altitude. Ball flight apex can reach 30m+, where wind speed significantly differs from ground level.
   - *Data Needed*: Wind profile power law exponents.
   - *Outcome*: Improved accuracy for high-launching shots.
+
+- **Variable Aerodynamic Coefficients**: Implement dynamic Lift ($C_L$) and Drag ($C_D$) coefficients that vary with Reynolds number ($Re$) and Spin Ratio ($S$). Constant coefficients fail to capture the "drag crisis" or low-speed behavior.
+  - *Data Needed*: $C_L$ and $C_D$ surfaces as functions of $Re$ and $S$.
+  - *Outcome*: High-fidelity trajectory simulation across all ball speeds (driver vs. wedge).
+  - *Ref*: Bearman, P. W., & Harvey, J. K. (1976). "Golf ball aerodynamics."
 
 ### Trajectory
 - **Bounce and Roll Physics**: Implement a rigid-body collision model for the ball-ground interaction, accounting for turf compliance (COR), friction, and slope.
@@ -55,6 +65,11 @@ This document serves as the central registry for scientific research topics, tec
   - *Data Needed*: EI profiles (flexural stiffness) along the shaft.
   - *Outcome*: Algorithm to match shaft profiles to swing speed/tempo for optimal launch conditions.
 
+- **Shaft Droop & Lead Deflection**: Model the "droop" (vertical bending) and "lead" (forward bending) caused by the clubhead's center of gravity offset (CG bias). This alters the dynamic lie and loft at impact compared to static measurements.
+  - *Data Needed*: Clubhead CG coordinates relative to the hosel; Shaft stiffness matrices.
+  - *Outcome*: Accurate prediction of impact position and dynamic face angle.
+  - *Ref*: Mather, J. S. B. (2000). "The role of the shaft in the golf swing."
+
 ## 4. Statistical Methods
 
 ### Analytics
@@ -67,12 +82,20 @@ This document serves as the central registry for scientific research topics, tec
   - *Data Needed*: Series of $(x, y)$ impact coordinates on the clubface.
   - *Outcome*: Visual tool to assess ball striking consistency.
 
+- **Monte Carlo Strategy Engine**: Simulate thousands of shots from a specific lie using a dispersion model (covariance matrix) to calculate expected strokes-to-hole for various aim lines.
+  - *Data Needed*: Shot dispersion statistics (ellipses) by club and lie condition.
+  - *Outcome*: Optimal aim lines (Risk/Reward analysis) for course management.
+
 ## 5. Simulation Technology
 
 ### Physics Engine
 - **Finite Element Impact**: Implement a simplified Finite Element (FE) or discrete element model for the clubface to generate a Coefficient of Restitution (COR) map, rather than a single scalar COR.
   - *Data Needed*: Material properties (Young's Modulus, Poisson's ratio) and face thickness profile.
   - *Outcome*: Accurate smash factor prediction across the entire face (Variable Face Thickness modeling).
+
+- **Doppler Radar Emulation**: Simulate the raw radial velocity data seen by radar launch monitors (e.g., TrackMan) to study the difference between "measured" and "actual" impact parameters (e.g., Spin Loft vs. Dynamic Loft).
+  - *Data Needed*: Relative velocity vectors of clubhead geometric center vs. radar origin.
+  - *Outcome*: Synthetic validation environment for launch monitor algorithms.
 
 ## 6. Control Theory
 
@@ -81,6 +104,11 @@ This document serves as the central registry for scientific research topics, tec
   - *Data Needed*: Target kinematic sequence (angular positions/velocities).
   - *Outcome*: Control inputs for a robotic swing device or biomechanical simulation.
 
+- **Neuromuscular Noise Modeling**: Introduce signal-dependent noise into muscle torque actuators ($\sigma \propto u$) to simulate human motor variability. This reproduces the "speed-accuracy tradeoff" (Fitts's Law).
+  - *Data Needed*: Noise scaling constants for different muscle groups.
+  - *Outcome*: Realistic dispersion patterns generated from biomechanical simulations.
+  - *Ref*: Harris, C. M., & Wolpert, D. M. (1998). "Signal-dependent noise determines motor planning."
+
 ---
 
 ## Workflow Log
@@ -88,3 +116,4 @@ This document serves as the central registry for scientific research topics, tec
 | Date | Topic Added | Category | Status |
 |------|-------------|----------|--------|
 | 2026-01-29 | Initial Population of Research Ideas | All | Active |
+| 2026-02-01 | Added CoP, Aero Coeffs, Shaft Droop, Monte Carlo, Radar, Noise | All | Active |
