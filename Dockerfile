@@ -51,6 +51,7 @@ RUN pip install --no-cache-dir \
     pin-pink \
     qpsolvers \
     osqp \
+    && pip install --upgrade setuptools wheel urllib3 brotli requests \
     && echo "Physics engines and robotics packages installed successfully"
 
 
