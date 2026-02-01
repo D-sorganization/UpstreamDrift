@@ -4,8 +4,7 @@ These tests verify that the API endpoints used by the frontend work correctly,
 ensuring the contract between frontend and backend is maintained.
 """
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -134,7 +133,10 @@ class TestSimulationWebSocketProtocol:
             "frame": 42,
             "time": 0.84,
             "state": {"qpos": [0.1, 0.2, 0.3]},
-            "analysis": {"joint_angles": [0.5, 0.3, 0.2, 0.1], "velocities": [0.1, 0.2]},
+            "analysis": {
+                "joint_angles": [0.5, 0.3, 0.2, 0.1],
+                "velocities": [0.1, 0.2],
+            },
         }
 
         # Required fields
@@ -217,8 +219,10 @@ class TestSimulationResponseFormat:
         model_fields = SimulationResponse.model_fields
 
         # At minimum, frontend expects status and potentially results
-        assert "status" in model_fields or "success" in model_fields or hasattr(
-            SimulationResponse, "__annotations__"
+        assert (
+            "status" in model_fields
+            or "success" in model_fields
+            or hasattr(SimulationResponse, "__annotations__")
         )
 
 
