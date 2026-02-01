@@ -34,7 +34,6 @@ def mock_golf_launcher():
 def test_init(mock_qapp, mock_golf_launcher):
     launcher = UnifiedLauncher()
     assert launcher is not None
-    # We no longer instantiate GolfLauncher in __init__
 
 
 def test_init_no_pyqt():
