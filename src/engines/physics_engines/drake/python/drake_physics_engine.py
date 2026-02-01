@@ -205,15 +205,6 @@ class DrakePhysicsEngine(PhysicsEngine):
             logger.warning("set_control called on uninitialized engine")
             return
 
-        # We need to set the actuation input port.
-        # This requires fixing the input port to the plant in the diagram.
-        # If we didn't export the input port, we can't set it easily.
-        # In `__init__`, we should have exported the actuation input.
-
-        # Assuming we can access the input port:
-        # self.plant.get_actuation_input_port().FixValue(self.plant_context, u)
-        # But input ports are "Fixed" in a Context.
-
         self.plant.get_actuation_input_port().FixValue(self.plant_context, u)
 
     def get_time(self) -> float:
