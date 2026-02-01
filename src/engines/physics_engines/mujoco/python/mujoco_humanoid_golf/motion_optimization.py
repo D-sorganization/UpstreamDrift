@@ -689,7 +689,9 @@ class MotionPrimitiveLibrary:
         Args:
             filename: Input filename (.npz)
         """
-        data = np.load(filename, allow_pickle=True)
+        # Security: Explicitly disable pickle to prevent arbitrary code execution
+        # This file format only contains numpy arrays and JSON strings
+        data = np.load(filename, allow_pickle=False)
 
         for key in data:
             if key == "metadata":
