@@ -8,9 +8,9 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
-from src.shared.python.gui_utils import get_qapp
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
 # Mark all tests in this file as integration tests
