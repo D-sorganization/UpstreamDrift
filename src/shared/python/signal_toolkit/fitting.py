@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy import optimize
+from simpleeval import EvalWithCompoundTypes
 
 from src.shared.python.signal_toolkit.core import Signal
 
@@ -648,11 +649,11 @@ class CustomFunctionFitter:
                 ["a", "f", "b", "c"]
             )
         """
-        # Build the function dynamically
-        # Note: This uses eval which should only be used with trusted input
+        # Build the function dynamically using simpleeval for safe evaluation
         import numpy as np_module
 
-        safe_dict = {
+        # Safe functions available in expressions
+        safe_functions = {
             "sin": np_module.sin,
             "cos": np_module.cos,
             "tan": np_module.tan,
@@ -661,16 +662,27 @@ class CustomFunctionFitter:
             "log10": np_module.log10,
             "sqrt": np_module.sqrt,
             "abs": np_module.abs,
+        }
+
+        # Safe constants
+        safe_names = {
             "pi": np_module.pi,
             "e": np_module.e,
         }
 
         def custom_func(t: np.ndarray, *args: float) -> np.ndarray:
-            local_dict = dict(safe_dict)
-            local_dict["t"] = t
+            # Build evaluation context with parameters
+            names = dict(safe_names)
+            names["t"] = t
             for name, val in zip(param_names, args, strict=False):
-                local_dict[name] = val
-            return eval(expression, {"__builtins__": {}}, local_dict)  # noqa: S307
+                names[name] = val
+
+            # Use simpleeval for safe expression evaluation
+            evaluator = EvalWithCompoundTypes(
+                functions=safe_functions,
+                names=names,
+            )
+            return evaluator.eval(expression)
 
         return cls(custom_func, param_names, expression)
 
