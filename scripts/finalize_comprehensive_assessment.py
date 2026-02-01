@@ -20,7 +20,6 @@ logger = setup_script_logging(__name__)
 
 DOCS_DIR = _REPO_ROOT / "docs" / "assessments"
 COMPLETIST_REPORT = DOCS_DIR / "completist" / "COMPLETIST_LATEST.md"
-PRAGMATIC_REPORT = DOCS_DIR / "pragmatic_programmer" / "review_2026-01-31.json"
 SUMMARY_JSON = DOCS_DIR / "assessment_summary.json"
 OUTPUT_MD = DOCS_DIR / "Comprehensive_Assessment.md"
 
@@ -34,10 +33,21 @@ def load_general_data():
 
 
 def load_pragmatic_data():
-    if not PRAGMATIC_REPORT.exists():
-        logger.warning(f"Pragmatic report not found: {PRAGMATIC_REPORT}")
+    pragmatic_dir = DOCS_DIR / "pragmatic_programmer"
+    if not pragmatic_dir.exists():
+        logger.warning(f"Pragmatic directory not found: {pragmatic_dir}")
         return {"issues": []}
-    with open(PRAGMATIC_REPORT) as f:
+
+    # Find the latest review JSON file
+    json_files = sorted(list(pragmatic_dir.glob("review_*.json")))
+    if not json_files:
+        logger.warning("No pragmatic review JSON files found.")
+        return {"issues": []}
+
+    latest_report = json_files[-1]
+    logger.info(f"Loading pragmatic data from: {latest_report}")
+
+    with open(latest_report) as f:
         return json.load(f)
 
 

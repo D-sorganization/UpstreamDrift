@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-31T08:12:17.854427",
+  "timestamp": "2026-02-01T08:12:07.783281",
   "overall_score": 7.17,
   "category_scores": {
     "A": {
@@ -96,12 +96,12 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Found 175 test files in tests/ directory.",
+      "description": "Found 179 test files in tests/ directory.",
       "source": "Assessment_C_Test_Coverage"
     },
     {
       "severity": "MAJOR",
-      "description": "Found 1479 try blocks and 0 bare except blocks.",
+      "description": "Found 1530 try blocks and 0 bare except blocks.",
       "source": "Assessment_D_Error_Handling"
     },
     {
@@ -111,7 +111,7 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Potential hardcoded secrets found in 79 files (needs verification).",
+      "description": "Potential hardcoded secrets found in 81 files (needs verification).",
       "source": "Assessment_F_Security"
     },
     {
@@ -121,7 +121,7 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Found 59 GitHub Actions workflows.",
+      "description": "Found 60 GitHub Actions workflows.",
       "source": "Assessment_H_CICD"
     },
     {
@@ -146,7 +146,7 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Found 1809 logging calls and 1481 print calls.",
+      "description": "Found 1896 logging calls and 1481 print calls.",
       "source": "Assessment_L_Logging"
     },
     {
@@ -161,7 +161,7 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Average complexity (branches/func): 1.26",
+      "description": "Average complexity (branches/func): 1.23",
       "source": "Assessment_O_Maintainability"
     }
   ],
