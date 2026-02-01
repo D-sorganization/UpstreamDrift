@@ -63,6 +63,56 @@ project_name/
 - Use `unittest` or `pytest`.
 - Write unit tests for individual functions and integration tests for workflows.
 
+### 4. Test-Driven Development (TDD) - RED, GREEN, REFACTOR
+
+**MANDATORY**: All new code must follow the Test-Driven Development methodology:
+
+1. **🔴 RED - Write a Failing Test First**
+   - Before writing any production code, write a unit test that defines the new functionality or behavior.
+   - The test MUST fail initially because the production code has not yet been written.
+   - This ensures you understand the requirements before implementation.
+
+2. **🟢 GREEN - Make the Test Pass**
+   - Write the **minimal** amount of production code necessary to make the failing test pass.
+   - The goal is purely to pass the test, not to write perfect or optimized code.
+   - Resist the temptation to add features not covered by tests.
+
+3. **🔵 REFACTOR - Clean Up the Code**
+   - Once the test passes, clean up the newly written code:
+     - Remove duplication
+     - Rename variables for clarity
+     - Extract functions/methods
+     - Improve structure
+   - Ensure all existing tests continue to pass after refactoring.
+   - This step prevents "technical debt" from accumulating.
+
+**Benefits of TDD:**
+
+- Forces clear thinking about requirements before implementation
+- Produces comprehensive test coverage as a byproduct
+- Results in modular, testable code by design
+- Catches bugs early when they're cheapest to fix
+
+**Example Workflow:**
+
+```python
+# 1. RED: Write failing test
+def test_calculate_distance():
+    result = calculate_distance(0, 0, 3, 4)
+    assert result == 5.0  # Test fails - function doesn't exist
+
+# 2. GREEN: Write minimal code to pass
+def calculate_distance(x1, y1, x2, y2):
+    return ((x2-x1)**2 + (y2-y1)**2) ** 0.5  # Test passes
+
+# 3. REFACTOR: Improve code quality
+import math
+
+def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
+    """Calculate Euclidean distance between two points."""
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+```
+
 ---
 
 ## 🔢 MATLAB Coding Standards
@@ -172,9 +222,9 @@ Use **Conventional Commits** format:
 
 If sensitive data is accidentally committed:
 
-1.  **Stop** immediately.
-2.  Use `git filter-branch` or BFG Repo-Cleaner to remove the file from history.
-3.  Force push only if necessary and coordinated with the team.
+1. **Stop** immediately.
+2. Use `git filter-branch` or BFG Repo-Cleaner to remove the file from history.
+3. Force push only if necessary and coordinated with the team.
 
 ---
 
@@ -215,7 +265,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Quality Assessment Reporter
 **Workflow:** `.github/workflows/Jules-Assessment-Generator.yml`
-**Schedule:** Midnight PST (0 8 * * * UTC)
+**Schedule:** Midnight PST (0 8 ** * UTC)
 **Capabilities:**
 
 - **Read:** Entire codebase for quality analysis
@@ -226,7 +276,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Code Quality Enforcer
 **Workflow:** `.github/workflows/Jules-Code-Quality-Reviewer.yml`
-**Schedule:** 12:30 AM PST (30 8 * * * UTC)
+**Schedule:** 12:30 AM PST (30 8 ** * UTC)
 **Capabilities:**
 
 - **Read:** Linting results, type check outputs
@@ -237,7 +287,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Incomplete Implementation Hunter
 **Workflow:** `.github/workflows/Jules-Completist.yml`
-**Schedule:** 1:00 AM PST (0 9 * * * UTC)
+**Schedule:** 1:00 AM PST (0 9 ** * UTC)
 **Capabilities:**
 
 - **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
@@ -248,7 +298,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Documentation Maintainer
 **Workflow:** `.github/workflows/Jules-Documentation-Auditor.yml`
-**Schedule:** 1:30 AM PST (30 9 * * * UTC)
+**Schedule:** 1:30 AM PST (30 9 ** * UTC)
 **Capabilities:**
 
 - **Read:** Code and existing documentation
@@ -259,7 +309,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Security Scanner
 **Workflow:** `.github/workflows/Jules-Sentinel.yml`
-**Schedule:** 2:30 AM PST (30 10 * * * UTC)
+**Schedule:** 2:30 AM PST (30 10 ** * UTC)
 **Capabilities:**
 
 - **Read:** Codebase for security vulnerabilities (OWASP Top 10)
@@ -270,7 +320,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Code Improvement Specialist
 **Workflow:** `.github/workflows/Jules-Auto-Refactor.yml`
-**Schedule:** 3:00 AM PST (0 11 * * * UTC)
+**Schedule:** 3:00 AM PST (0 11 ** * UTC)
 **Capabilities:**
 
 - **Read:** Codebase for DRY violations, code smells
@@ -281,7 +331,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** GitHub Issue Worker
 **Workflow:** `.github/workflows/Jules-Issue-Resolver.yml`
-**Schedule:** 3:30 AM PST (30 11 * * * UTC)
+**Schedule:** 3:30 AM PST (30 11 ** * UTC)
 **Capabilities:**
 
 - **Read:** Open GitHub issues with appropriate labels
@@ -292,7 +342,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Pull Request Merger
 **Workflow:** `.github/workflows/Jules-PR-Compiler.yml`
-**Schedule:** 4:00 AM PST (0 12 * * * UTC)
+**Schedule:** 4:00 AM PST (0 12 ** * UTC)
 **Capabilities:**
 
 - **Read:** All open PRs from automation
@@ -303,7 +353,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Merge Conflict Resolver
 **Workflow:** `.github/workflows/Jules-Auto-Rebase.yml`
-**Schedule:** 5:00 AM PST (0 13 * * * UTC)
+**Schedule:** 5:00 AM PST (0 13 ** * UTC)
 **Capabilities:**
 
 - **Read:** PR branches, main branch
@@ -314,30 +364,33 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 ## 🛠️ GitHub CLI & Workflow Reference
 
-Always use Github CLI for making pull requests. 
-Whenever you finish a task for the user, push it to remote. 
-NEVER try to use GitKraken or anything other than Github CLI for Pull request creation. 
+Always use Github CLI for making pull requests.
+Whenever you finish a task for the user, push it to remote.
+NEVER try to use GitKraken or anything other than Github CLI for Pull request creation.
 All pull requests should be verified to pass the ruff, black, and mypy requirements in the ci / cd pipeline before they are created.
 
-### For PR Creation:
+### For PR Creation
+
 - Always check if PR already exists first using `gh pr list --state open`
 - Use simple, concise titles and descriptions for initial creation
 - Wrap GitHub CLI commands in powershell `-Command "..."`
 - Use single quotes inside double quotes for string parameters
 
-### For PR Management:
+### For PR Management
+
 - Use `gh pr view [number]` to get PR details and status
 - Use `gh pr checks [number]` to see CI/CD status
 - Use `gh run list --branch [branch-name]` to see workflow runs
 - Check for failing checks and address them systematically
 
-### For CI/CD Issue Resolution:
+### For CI/CD Issue Resolution
+
 - Identify failing checks using `gh pr checks`
 - Examine workflow run logs using `gh run view [run-id]`
 - Make fixes on the same branch and push to update the PR
 - Verify fixes by checking updated CI status
 
-### Command Templates for Future Use:
+### Command Templates for Future Use
 
 ```bash
 # Create PR:
@@ -360,7 +413,7 @@ powershell -Command "gh run view [RUN_ID]"
 
 ## 🔍 Pre-Commit Quality Checks (MANDATORY)
 
-### Before Creating ANY PR:
+### Before Creating ANY PR
 
 **CRITICAL**: All code MUST pass linting checks locally before pushing. Failing to do so wastes CI resources and blocks PRs.
 
@@ -376,14 +429,14 @@ mypy .                          # Type checking (if configured)
 ruff check . && echo "✓ All checks passed"
 ```
 
-### Common Python Linting Issues to Avoid:
+### Common Python Linting Issues to Avoid
 
 1. **Trailing whitespace on blank lines** (W293) - Use editor setting to strip trailing whitespace
 2. **Unsorted imports** (I001) - Run `ruff check --fix` to auto-sort
 3. **Line too long** (E501) - Break long lines, especially in data structures
 4. **Missing type hints** - Add type annotations to function signatures
 
-### Workflow/YAML Validation:
+### Workflow/YAML Validation
 
 Before modifying GitHub Actions workflows, validate syntax:
 
@@ -399,9 +452,10 @@ actionlint .github/workflows/
 
 ## ⚠️ Shell Scripting in Workflows (CRITICAL)
 
-### Common Pitfalls to Avoid:
+### Common Pitfalls to Avoid
 
 1. **Unquoted variables with spaces**:
+
    ```bash
    # ❌ WRONG - breaks if TARGET contains spaces
    basename $TARGET
@@ -411,6 +465,7 @@ actionlint .github/workflows/
    ```
 
 2. **jq null coalescing operator**:
+
    ```bash
    # ❌ WRONG - // gets misinterpreted by shell
    jq 'first // "default"'
@@ -420,6 +475,7 @@ actionlint .github/workflows/
    ```
 
 3. **Heredocs in YAML**:
+
    ```yaml
    # ✅ CORRECT - use literal block scalar for multi-line
    run: |
@@ -428,7 +484,7 @@ actionlint .github/workflows/
      EOF
    ```
 
-### Testing Workflow Changes:
+### Testing Workflow Changes
 
 Before pushing workflow changes:
 
@@ -437,12 +493,11 @@ Before pushing workflow changes:
 3. **Check for unquoted variables** that might contain spaces
 4. **Review jq expressions** for shell quoting issues
 
-### Reference Documentation:
+### Reference Documentation
 
 See `Repository_Management/workflow-fixes/` for documented fixes and patterns to avoid.
 
 ---
-
 
 ### 🔄 Workflow & Automation Governance
 
@@ -452,8 +507,9 @@ The **GitHub Issue Tracker** is the primary authority for tasking and gap remedi
 
 ---
 
-
 ### 📂 Repository Decluttering & Organization
-To maintain a clean repository root, all development-related documentation (summaries, plans, analysis reports, technical debt assessments, etc.) MUST be stored in the `docs/development/` directory. 
+
+To maintain a clean repository root, all development-related documentation (summaries, plans, analysis reports, technical debt assessments, etc.) MUST be stored in the `docs/development/` directory.
+
 - **DO NOT** create new `.md` files in the root unless they are critical project-wide files (e.g., README, AGENTS, CHANGELOG).
 - Prefer creating issues for task tracking rather than temporary markdown files.
