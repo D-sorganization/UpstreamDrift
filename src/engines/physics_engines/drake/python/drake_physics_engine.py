@@ -3,6 +3,14 @@
 Wraps pydrake.multibody to provide a compliant PhysicsEngine interface.
 
 Refactored to use shared engine availability module (DRY principle).
+
+Design by Contract:
+    Preconditions:
+        - step/forward/reset: Engine must be finalized
+        - compute_* methods: Engine must be finalized
+
+    Postconditions:
+        - compute_* methods: Results must be finite arrays
 """
 
 from __future__ import annotations
@@ -11,6 +19,7 @@ from typing import Any, cast
 
 import numpy as np
 
+from src.shared.python.contracts import check_finite, postcondition, precondition
 from src.shared.python.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
@@ -70,6 +79,11 @@ class DrakePhysicsEngine(PhysicsEngine):
         self.simulator: analysis.Simulator | None = None
 
     @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has been finalized and is ready for simulation."""
+        return self._is_finalized and self.plant_context is not None
+
+    @property
     def model_name(self) -> str:
         """Return the name of the currently loaded model."""
         return self.model_name_str
@@ -121,6 +135,7 @@ class DrakePhysicsEngine(PhysicsEngine):
 
         self._ensure_finalized()
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
         """Reset the simulation to its initial state."""
         if self.context and self.plant_context and self.simulator:
@@ -138,6 +153,9 @@ class DrakePhysicsEngine(PhysicsEngine):
         else:
             logger.warning("Attempted to reset Drake engine before initialization.")
 
+    @precondition(
+        lambda self, dt=None: self.is_initialized, "Engine must be initialized"
+    )
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
         self._ensure_finalized()
@@ -150,6 +168,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         step_size = dt if dt is not None else self.plant.time_step()
         self.simulator.AdvanceTo(current_time + step_size)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without advancing time."""
         if not self.plant_context:
@@ -258,6 +277,8 @@ class DrakePhysicsEngine(PhysicsEngine):
 
     # -------- Dynamics Interface --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q)."""
         if not self.plant_context:
@@ -266,6 +287,8 @@ class DrakePhysicsEngine(PhysicsEngine):
         M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
         return cast(np.ndarray, M)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q)."""
         if not self.plant_context:
@@ -282,6 +305,8 @@ class DrakePhysicsEngine(PhysicsEngine):
         )
         return cast(np.ndarray, forces)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
         if not self.plant_context:
@@ -292,6 +317,8 @@ class DrakePhysicsEngine(PhysicsEngine):
             np.ndarray, self.plant.CalcGravityGeneralizedForces(self.plant_context)
         )
 
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
         if not self.plant_context:
