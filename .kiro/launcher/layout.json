@@ -1,21 +1,11 @@
 {
   "model_order": [
-    "mujoco_humanoid",
-    "mujoco_dashboard",
     "drake_golf",
     "pinocchio_golf",
     "opensim_golf",
-    "myosim_suite",
-    "urdf_generator",
-    "openpose_analysis",
-    "c3d_viewer",
-    "shot_tracer",
-    "matlab_golf_gui",
-    "matlab_dataset_gui",
-    "simscape_2d",
-    "simscape_3d"
+    "myosim_suite"
   ],
-  "selected_model": "mujoco_dashboard",
+  "selected_model": "pinocchio_golf",
   "window_geometry": {
     "x": 0,
     "y": 19,

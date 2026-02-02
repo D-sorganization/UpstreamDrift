@@ -11,7 +11,7 @@ on:
         type: string
   # Schedule disabled - orchestrated by Jules-Control-Tower.yml
   # schedule:
-  #   - cron: "30 0 * * *"  # Daily at 12:30 AM UTC (matches Control Tower)
+  #   - cron: "0 0 */3 * *"  # Daily at 12:30 AM UTC (matches Control Tower)
 
 permissions:
   contents: write

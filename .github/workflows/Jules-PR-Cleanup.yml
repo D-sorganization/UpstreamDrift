@@ -5,21 +5,21 @@ name: Jules PR Cleanup
 
 on:
   schedule:
-    - cron: "0 8 */3 * *" # Weekly on Sundays at 5 AM PST (13 UTC)
+    - cron: "0 0 */3 * *"  # Weekly on Sundays at 5 AM PST (13 UTC)
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run - show what would be closed without acting"
+        description: 'Dry run - show what would be closed without acting'
         required: false
-        default: "true"
+        default: 'true'
         type: choice
         options:
-          - "true"
-          - "false"
+          - 'true'
+          - 'false'
       max_age_days:
-        description: "Close PRs older than this many days"
+        description: 'Close PRs older than this many days'
         required: false
-        default: "7"
+        default: '7'
         type: string
 
 permissions:
@@ -113,19 +113,13 @@ jobs:
               echo "[DRY RUN] Would close PR #$PR_NUM: $PR_TITLE"
             else
               echo "Closing PR #$PR_NUM: $PR_TITLE"
+              gh pr close "$PR_NUM" --comment "Auto-closed: Stale Jules-generated PR with failing CI.
 
-              # Create comment body in temp file to avoid YAML parsing issues
-              cat > /tmp/cleanup_comment.txt << CLEANUP_EOF
-          Auto-closed: Stale Jules-generated PR with failing CI.
+If this PR is still needed, you can:
+1. Reopen it and push new commits
+2. Add the \`jules-keep\` label to prevent auto-closure
 
-          If this PR is still needed, you can:
-          1. Reopen it and push new commits
-          2. Add the jules-keep label to prevent auto-closure
-
-          This cleanup runs weekly to prevent PR accumulation.
-          CLEANUP_EOF
-
-              gh pr close "$PR_NUM" --comment "$(cat /tmp/cleanup_comment.txt)"
+This cleanup runs weekly to prevent PR accumulation."
 
               # Also delete the branch
               gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$PR_BRANCH" 2>/dev/null || true
