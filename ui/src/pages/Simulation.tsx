@@ -1,22 +1,64 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSimulation } from '@/api/client';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
+import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
 import { Scene3D } from '@/components/visualization/Scene3D';
-// import { LivePlot } from '../components/analysis/LivePlot'; // To be implemented
+import { LivePlot } from '@/components/analysis/LivePlot';
+import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
+import { useToast } from '@/components/ui/Toast';
 
 export function SimulationPage() {
   const [selectedEngine, setSelectedEngine] = useState<string>('mujoco');
+  const [parameters, setParameters] = useState<SimulationParameters>({
+    duration: 3.0,
+    timestep: 0.002,
+    liveAnalysis: true,
+    gpuAcceleration: false,
+  });
+  const { showSuccess, showError, showInfo } = useToast();
+
   const {
     isRunning,
     isPaused,
     currentFrame,
     frames,
+    connectionStatus,
     start,
     stop,
     pause,
     resume
   } = useSimulation(selectedEngine);
+
+  // Handle parameter changes
+  const handleParameterChange = useCallback((params: SimulationParameters) => {
+    setParameters(params);
+  }, []);
+
+  // Start simulation with current parameters
+  const handleStart = useCallback(() => {
+    start({
+      duration: parameters.duration,
+      timestep: parameters.timestep,
+      live_analysis: parameters.liveAnalysis,
+    });
+    showInfo(`Starting ${selectedEngine} simulation...`);
+  }, [start, parameters, selectedEngine, showInfo]);
+
+  // Handle stop
+  const handleStop = useCallback(() => {
+    stop();
+    showInfo('Simulation stopped');
+  }, [stop, showInfo]);
+
+  // Show toast on connection status changes
+  useEffect(() => {
+    if (connectionStatus === 'connected') {
+      showSuccess('Connected to simulation server');
+    } else if (connectionStatus === 'failed') {
+      showError('Connection failed. Please check the server.');
+    }
+  }, [connectionStatus, showSuccess, showError]);
 
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">
@@ -24,8 +66,13 @@ export function SimulationPage() {
       <aside className="w-80 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto flex-shrink-0 z-10">
         <h2 className="text-xl font-bold text-white mb-6">Golf Suite</h2>
 
+        {/* Connection Status */}
+        <div className="mb-4">
+          <ConnectionStatus status={connectionStatus} />
+        </div>
+
         <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Simulation</h3>
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Physics Engine</h3>
             <EngineSelector
             value={selectedEngine}
             onChange={setSelectedEngine}
@@ -33,14 +80,21 @@ export function SimulationPage() {
             />
         </div>
 
-        {/* <ParameterPanel engine={selectedEngine} /> */}
+        {/* Parameter Panel */}
+        <div className="mb-6 border-t border-gray-700 pt-4">
+          <ParameterPanel
+            engine={selectedEngine}
+            disabled={isRunning}
+            onChange={handleParameterChange}
+          />
+        </div>
 
         <div className="mt-auto pt-6 border-t border-gray-700">
             <SimulationControls
             isRunning={isRunning}
             isPaused={isPaused}
-            onStart={() => start()} // Can pass config here
-            onStop={stop}
+            onStart={handleStart}
+            onStop={handleStop}
             onPause={pause}
             onResume={resume}
             />
@@ -73,12 +127,10 @@ export function SimulationPage() {
           </div>
         </div>
 
-        {/* Bottom: Live Analysis (Placeholder) */}
-        {/* 
-        <div className="h-64 bg-gray-800 border-t border-gray-700">
-          <LivePlot data={currentFrame?.analysis} />
-        </div> 
-        */}
+        {/* Bottom: Live Analysis Charts */}
+        <div className="h-64 bg-gray-800 border-t border-gray-700 p-2">
+          <LivePlot frames={frames} maxPoints={200} />
+        </div>
       </main>
 
       {/* Right Sidebar - Live Data */}

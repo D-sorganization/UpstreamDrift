@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // Mock the useSimulation hook
 const mockSimulation = {
@@ -30,6 +31,33 @@ vi.mock('@/components/visualization/Scene3D', () => ({
   ),
 }));
 
+// Mock LivePlot
+vi.mock('@/components/analysis/LivePlot', () => ({
+  LivePlot: () => <div data-testid="live-plot-mock">LivePlot Mock</div>,
+}));
+
+// Mock ParameterPanel
+vi.mock('@/components/simulation/ParameterPanel', () => ({
+  ParameterPanel: ({ engine, onChange }: { engine: string; disabled?: boolean; onChange: (params: unknown) => void }) => {
+    // Call onChange immediately with default params to simulate component behavior
+    onChange({ duration: 3.0, timestep: 0.002, liveAnalysis: true, gpuAcceleration: false });
+    return (
+      <div data-testid="parameter-panel-mock" data-engine={engine}>
+        ParameterPanel Mock
+      </div>
+    );
+  },
+}));
+
+// Mock ConnectionStatus
+vi.mock('@/components/ui/ConnectionStatus', () => ({
+  ConnectionStatus: ({ status }: { status: string }) => (
+    <div data-testid="connection-status-mock" data-status={status}>
+      Connection: {status}
+    </div>
+  ),
+}));
+
 import { SimulationPage } from './Simulation';
 import { useSimulation, fetchEngines } from '@/api/client';
 import type { SimulationFrame } from '@/api/client';
@@ -47,7 +75,9 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{children}</ToastProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -74,7 +104,7 @@ describe('SimulationPage', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Golf Suite')).toBeInTheDocument();
-      expect(screen.getByText('Simulation')).toBeInTheDocument();
+      expect(screen.getByText('Physics Engine')).toBeInTheDocument();
       expect(screen.getByText('Live Analysis')).toBeInTheDocument();
     });
 
