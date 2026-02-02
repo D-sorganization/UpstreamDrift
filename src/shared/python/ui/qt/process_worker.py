@@ -4,11 +4,14 @@ This module provides a reusable QThread-based worker for executing shell command
 capturing output in real-time, and handling process termination.
 """
 
+import logging
 import subprocess
 import threading
 from typing import Any
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+
+logger = logging.getLogger(__name__)
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QThread, pyqtSignal
@@ -118,16 +121,16 @@ class ProcessWorker(QThread):
                         self.log_signal.emit(f"Error terminating process: {e}")
                         try:
                             self.process.kill()
-                        except Exception:
-                            pass
+                        except Exception as kill_err:
+                            logger.debug("Failed to kill process: %s", kill_err)
                 # Close file handles to prevent resource leaks
                 try:
                     if self.process.stdout:
                         self.process.stdout.close()
                     if self.process.stderr:
                         self.process.stderr.close()
-                except Exception:
-                    pass
+                except Exception as close_err:
+                    logger.debug("Failed to close process handles: %s", close_err)
 
     def stop(self) -> None:
         """Stop the process."""

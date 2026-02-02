@@ -3,10 +3,10 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'LICENSE'
-      - '.gitignore'
+      - "docs/**"
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
@@ -88,7 +88,7 @@ jobs:
   tests:
     needs: quality-gate
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # Prevent runaway tests - hard cutoff
+    timeout-minutes: 20 # Prevent runaway tests - hard cutoff
     strategy:
       matrix:
         python: ["3.11"]
@@ -119,6 +119,8 @@ jobs:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
+          # Install PyQt6 first (required by pytest-qt)
+          pip install PyQt6
           # Install test dependencies if not already installed
           pip install pytest pytest-cov pytest-mock pytest-qt pytest-timeout pytest-xdist
           # Run tests with:
