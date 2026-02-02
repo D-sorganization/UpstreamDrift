@@ -17,7 +17,7 @@ on:
           - 'false'
           - 'true'
   schedule:
-    - cron: "0 8 */3 * *"  # Daily at 3 AM UTC
+    - cron: "0 0 * * 0,4"  # Daily at 3 AM UTC
 
 permissions:
   contents: write

@@ -16,7 +16,7 @@ on:
           - equipment
           - statistics
   schedule:
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4"  # Tuesdays and Fridays at 2 AM UTC (within midnight-4 AM window)
 
 permissions:
   contents: write
