@@ -1,7 +1,7 @@
 """Tests for AI module components to improve coverage."""
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 class TestAIAdapterBase(unittest.TestCase):
@@ -22,7 +22,6 @@ class TestAIAdapterBase(unittest.TestCase):
         """Test that adapter registry is a singleton."""
         try:
             from src.shared.python.ai.adapters import (
-                AIAdapterRegistry,
                 get_adapter_registry,
             )
 
@@ -103,14 +102,18 @@ class TestAssistantPanel(unittest.TestCase):
     def test_assistant_panel_import(self) -> None:
         """Test that assistant panel can be imported."""
         try:
-            from src.shared.python.ai.gui.assistant_panel import AIAssistantPanel  # noqa: F401
+            from src.shared.python.ai.gui.assistant_panel import (  # noqa: F401
+                AIAssistantPanel,
+            )
         except ImportError:
             self.skipTest("PyQt6 not available for assistant panel")
 
     def test_settings_dialog_import(self) -> None:
         """Test that settings dialog can be imported."""
         try:
-            from src.shared.python.ai.gui.settings_dialog import AISettingsDialog  # noqa: F401
+            from src.shared.python.ai.gui.settings_dialog import (  # noqa: F401
+                AISettingsDialog,
+            )
         except ImportError:
             self.skipTest("PyQt6 not available for settings dialog")
 

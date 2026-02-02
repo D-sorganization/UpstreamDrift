@@ -116,9 +116,7 @@ class PhysicsValidator:
         # Create scratch data for validation (doesn't modify original)
         self._scratch_data = mujoco.MjData(model)
 
-    def compute_kinetic_energy(
-        self, qpos: np.ndarray, qvel: np.ndarray
-    ) -> float:
+    def compute_kinetic_energy(self, qpos: np.ndarray, qvel: np.ndarray) -> float:
         """Compute kinetic energy: KE = 0.5 * q̇ᵀ M(q) q̇.
 
         Args:

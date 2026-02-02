@@ -6,7 +6,6 @@ for the optimized analytical RNE methods implemented in Phase 1.
 
 import time
 import unittest
-from unittest.mock import MagicMock, patch
 
 import numpy as np
 
