@@ -1,8 +1,11 @@
 import { SimulationPage } from './pages/Simulation';
+import { ToastProvider } from './components/ui/Toast';
 
 function App() {
   return (
-    <SimulationPage />
+    <ToastProvider>
+      <SimulationPage />
+    </ToastProvider>
   );
 }
 
