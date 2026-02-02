@@ -8,6 +8,12 @@ from typing import Any, cast  # noqa: F401
 import mujoco
 import numpy as np
 
+from src.shared.python.contracts import (
+    PreconditionError,
+    check_finite,
+    postcondition,
+    precondition,
+)
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
 from src.shared.python.security_utils import validate_path
@@ -27,7 +33,20 @@ ALLOWED_MODEL_DIRS = [
 class MuJoCoPhysicsEngine(PhysicsEngine):
     """Encapsulates MuJoCo model, data, and simulation control.
 
-    Implements the shared PhysicsEngine protocol.
+    Implements the shared PhysicsEngine protocol with Design by Contract.
+
+    Design by Contract:
+        Preconditions:
+            - step/forward/reset: Engine must be initialized (model loaded)
+            - set_state: q and v dimensions must match model
+            - set_control: u dimension must match model.nu
+
+        Postconditions:
+            - compute_* methods: Results must be finite arrays
+            - get_state: Returns valid (q, v) tuple
+
+        Invariants:
+            - If model is not None, data is also not None
     """
 
     def __init__(self) -> None:
@@ -35,6 +54,11 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         self.model: mujoco.MjModel | None = None
         self.data: mujoco.MjData | None = None
         self.xml_path: str | None = None
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has a loaded model."""
+        return self.model is not None and self.data is not None
 
     @property
     def model_name(self) -> str:
@@ -91,6 +115,9 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
     def get_data(self) -> mujoco.MjData | None:
         return self.data
 
+    @precondition(
+        lambda self, dt=None: self.is_initialized, "Engine must be initialized"
+    )
     def step(self, dt: float | None = None) -> None:
         """Step the simulation forward."""
         if self.model is not None and self.data is not None:
@@ -103,11 +130,13 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             else:
                 mujoco.mj_step(self.model, self.data)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without stepping time."""
         if self.model is not None and self.data is not None:
             mujoco.mj_forward(self.model, self.data)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
         """Reset simulation state to initial configuration."""
         if self.model is not None and self.data is not None:
@@ -195,6 +224,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q)."""
         if self.model is None or self.data is None:
@@ -210,6 +241,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         mujoco.mj_fullM(self.model, M, self.data.qM)
         return M
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q, qdot) + g(q)."""
         if self.data is None:
@@ -217,6 +250,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         # This is populated after mj_forward/mj_step
         return cast(np.ndarray, self.data.qfrc_bias.copy())
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
         if self.model is None or self.data is None:
@@ -228,14 +263,19 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         grav_arr = cast(np.ndarray, qfrc_grav)
         return grav_arr.copy()
 
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics result must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics: tau = ID(q, qdot, qacc)."""
         if self.model is None or self.data is None:
             return np.array([])
 
         if len(qacc) != self.model.nv:
-            logger.error("Dimension mismatch for qacc")
-            return np.array([])
+            raise PreconditionError(
+                f"qacc dimension mismatch: got {len(qacc)}, expected {self.model.nv}",
+                function_name="compute_inverse_dynamics",
+                parameter="qacc",
+            )
 
         # Copy qacc to data
         self.data.qacc[:] = qacc
@@ -247,6 +287,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
     # -------- Section F: Drift-Control Decomposition --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Drift acceleration must contain finite values")
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive (drift) acceleration with zero control inputs.
 
@@ -258,6 +300,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         """
         return self.compute_affine_drift()
 
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.
 
