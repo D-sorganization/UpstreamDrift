@@ -9,7 +9,6 @@ Features:
 
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import sys
@@ -20,6 +19,10 @@ from typing import TYPE_CHECKING, Any
 sys.path.append(str(Path(__file__).parent))
 
 from src.launchers.docker_manager import DockerLauncher
+from src.launchers.launcher_layout_manager import (
+    LayoutManager,
+    compute_centered_geometry,
+)
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import (
     ProcessManager,
@@ -249,6 +252,18 @@ class GolfLauncher(QMainWindow):
                 self.engine_manager = None
 
         self._build_available_models()
+
+        # Initialize layout manager (extracted from god class)
+        self.layout_manager = LayoutManager(
+            config_file=LAYOUT_CONFIG_FILE,
+            available_models=self.available_models,
+            get_model_func=self._get_model,
+            create_card_func=lambda model: DraggableModelCard(model, self),
+        )
+        # Keep backward-compatible references
+        self.model_cards = self.layout_manager.model_cards
+        self.model_order = self.layout_manager.model_order
+
         self._initialize_model_order()
 
         self.init_ui()
@@ -472,104 +487,44 @@ except Exception as e:
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
         logger.debug("Initializing model order...")
-
-        default_ids = [
-            "mujoco_unified",
-            "drake_golf",
-            "pinocchio_golf",
-            "opensim_golf",
-            "myosim_suite",
-            "matlab_unified",
-            "motion_capture",
-            "model_explorer",
-        ]
-
-        # Check which default IDs are available
-        available_ids = []
-        missing_ids = []
-        for model_id in default_ids:
-            if model_id in self.available_models:
-                available_ids.append(model_id)
-            else:
-                missing_ids.append(model_id)
-
-        self.model_order = available_ids
-
-        # Log diagnostic information
-        logger.info(
-            f"Model order initialized with {len(self.model_order)} of {len(default_ids)} tiles"
-        )
-        if missing_ids:
-            logger.warning(f"Missing models from defaults: {missing_ids}")
-            logger.warning(f"Available model IDs: {list(self.available_models.keys())}")
+        self.layout_manager.initialize_model_order()
+        # Keep backward-compatible reference in sync
+        self.model_order = self.layout_manager.model_order
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
-        try:
-            # Ensure config directory exists
-            CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-
-            layout_data = {
-                "model_order": self.model_order,
-                "selected_model": self.selected_model,
-                "window_geometry": {
-                    "x": self.x(),
-                    "y": self.y(),
-                    "width": self.width(),
-                    "height": self.height(),
-                },
-                "options": {
-                    "live_visualization": (
-                        self.chk_live.isChecked() if hasattr(self, "chk_live") else True
-                    ),
-                    "gpu_acceleration": (
-                        self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
-                    ),
-                    "docker_mode": (
-                        self.chk_docker.isChecked()
-                        if hasattr(self, "chk_docker")
-                        else False
-                    ),
-                },
-            }
-
-            with open(LAYOUT_CONFIG_FILE, "w", encoding="utf-8") as f:
-                json.dump(layout_data, f, indent=2)
-
-            logger.info(f"Layout saved to {LAYOUT_CONFIG_FILE}")
-
-        except Exception as e:
-            logger.error(f"Failed to save layout: {e}")
+        window_state = {
+            "selected_model": self.selected_model,
+            "geometry": {
+                "x": self.x(),
+                "y": self.y(),
+                "width": self.width(),
+                "height": self.height(),
+            },
+            "options": {
+                "live_visualization": (
+                    self.chk_live.isChecked() if hasattr(self, "chk_live") else True
+                ),
+                "gpu_acceleration": (
+                    self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
+                ),
+                "docker_mode": (
+                    self.chk_docker.isChecked()
+                    if hasattr(self, "chk_docker")
+                    else False
+                ),
+            },
+        }
+        self.layout_manager.save_layout(window_state)
 
     def _sync_model_cards(self) -> None:
         """Ensure widgets match the current model order."""
-
-        # Remove cards that are no longer selected
-        for model_id in list(self.model_cards.keys()):
-            if model_id not in self.model_order:
-                widget = self.model_cards.pop(model_id)
-                widget.setParent(None)
-                widget.deleteLater()
-
-        # Create cards for any newly added models
-        for model_id in self.model_order:
-            if model_id not in self.model_cards:
-                model = self._get_model(model_id)
-                if model:
-                    self.model_cards[model_id] = DraggableModelCard(model, self)
+        self.layout_manager.sync_model_cards()
 
     def _apply_model_selection(self, selected_ids: list[str]) -> None:
         """Apply a new set of selected models from the layout dialog."""
-
-        ordered_selection = [
-            model_id for model_id in self.model_order if model_id in selected_ids
-        ]
-
-        for model_id in selected_ids:
-            if model_id not in ordered_selection and model_id in self.available_models:
-                ordered_selection.append(model_id)
-
-        self.model_order = ordered_selection
+        self.layout_manager.apply_model_selection(selected_ids)
+        self.model_order = self.layout_manager.model_order
         self._sync_model_cards()
         self._rebuild_grid()
         self._save_layout()
@@ -577,11 +532,6 @@ except Exception as e:
         if self.selected_model not in self.model_order:
             self.selected_model = self.model_order[0] if self.model_order else None
 
-        # Copilot AI Review Change:
-        # Start with the existing model_order filtered to the newly selected IDs so
-        # that previously selected models keep their relative positions in the grid.
-        # ordered_selection already handled this by iterating self.model_order first.
-        # Append any newly selected models (not already in model_order) to the end.
         self.update_launch_button()
 
     def _get_model(self, model_id: str) -> Any | None:
@@ -609,126 +559,73 @@ except Exception as e:
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
-        try:
-            if not LAYOUT_CONFIG_FILE.exists():
-                logger.info("No saved layout found, using default")
-                self._rebuild_grid()  # Still need to build grid with defaults
-                return
+        layout_data = self.layout_manager.load_layout()
 
-            with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
-                layout_data = json.load(f)
+        if layout_data is None:
+            self._rebuild_grid()
+            return
 
-            # Restore model order if valid
-            saved_order = [
-                model_id
-                for model_id in layout_data.get("model_order", [])
-                if model_id in self.available_models
-            ]
-            if saved_order:
-                self.model_order = saved_order
-                self._sync_model_cards()
-                self._rebuild_grid()
-                logger.info("Model layout restored from saved configuration")
+        # Keep backward-compatible reference in sync
+        self.model_order = self.layout_manager.model_order
+        self._sync_model_cards()
 
-            # Restore window geometry
-            geo = layout_data.get("window_geometry", {})
-            if geo:
-                # Ensure window title bar is visible (y >= 30)
-                # And center if it looks weird
-                x = geo.get("x", 100)
-                y = geo.get("y", 100)
-                w = geo.get("width", 1280)
-                h = geo.get("height", 800)
-
-                # Clamp Y to avoid being off-screen top
-                if y < 30:
-                    y = 50
-
-                self.setGeometry(x, y, w, h)
-            else:
-                self._center_window()
-
-            # Restore options
-            options = layout_data.get("options", {})
-            if hasattr(self, "chk_live"):
-                self.chk_live.setChecked(options.get("live_visualization", True))
-            if hasattr(self, "chk_gpu"):
-                self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
-            if hasattr(self, "chk_docker"):
-                # Only restore Docker mode if Docker is available
-                saved_docker = options.get("docker_mode", False)
-                if saved_docker and self.docker_available:
-                    self.chk_docker.setChecked(True)
-
-            # Restore selected model
-            saved_selection = layout_data.get("selected_model")
-            if saved_selection and saved_selection in self.model_cards:
-                self.select_model(saved_selection)
-
-            self._rebuild_grid()  # Use _rebuild_grid as it exists
-            logger.info("Layout loaded successfully")
-
-        except Exception as e:
-            logger.error(f"Failed to load layout: {e}")
-            self._rebuild_grid()  # Still build grid with defaults on error
+        # Restore window geometry
+        geo = layout_data.get("window_geometry", {})
+        if geo:
+            x = geo.get("x", 100)
+            y = geo.get("y", 100)
+            w = geo.get("width", 1280)
+            h = geo.get("height", 800)
+            # Clamp Y to avoid being off-screen top
+            if y < 30:
+                y = 50
+            self.setGeometry(x, y, w, h)
+        else:
             self._center_window()
+
+        # Restore options
+        options = layout_data.get("options", {})
+        if hasattr(self, "chk_live"):
+            self.chk_live.setChecked(options.get("live_visualization", True))
+        if hasattr(self, "chk_gpu"):
+            self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
+        if hasattr(self, "chk_docker"):
+            # Only restore Docker mode if Docker is available
+            saved_docker = options.get("docker_mode", False)
+            if saved_docker and self.docker_available:
+                self.chk_docker.setChecked(True)
+
+        # Restore selected model
+        saved_selection = layout_data.get("selected_model")
+        if saved_selection and saved_selection in self.model_cards:
+            self.select_model(saved_selection)
+
+        self._rebuild_grid()
+        logger.info("Layout loaded successfully")
 
     def _center_window(self) -> None:
         """Center the window on the primary screen."""
         screen = QApplication.primaryScreen()
         if screen:
             screen_geo = screen.availableGeometry()
-            # Ensure width is treated as int, handling potential Mock objects from tests
-            current_width = self.width()
-            if hasattr(current_width, "return_value"):  # Handle MagicMock
-                current_width = 1280
-            width = (
-                int(current_width) if isinstance(current_width, int | float) else 1280
+            # Extract values, handling Mock objects from tests
+            screen_x = self._safe_int(screen_geo.x(), 0)
+            screen_y = self._safe_int(screen_geo.y(), 0)
+            screen_width = self._safe_int(screen_geo.width(), 1920)
+            screen_height = self._safe_int(screen_geo.height(), 1080)
+            w = max(self._safe_int(self.width(), 1280), 100)
+            h = max(self._safe_int(self.height(), 800), 100)
+
+            x, y, w, h = compute_centered_geometry(
+                screen_width, screen_height, w, h, screen_x, screen_y
             )
-
-            w = width if width > 100 else 1280
-
-            # Ensure height is treated as int, handling potential Mock objects from tests
-            current_height = self.height()
-            if hasattr(current_height, "return_value"):  # Handle MagicMock
-                current_height = 800
-            height = (
-                int(current_height) if isinstance(current_height, int | float) else 800
-            )
-            h = height if height > 100 else 800
-
-            # Handle Mock objects for screen geometry
-            screen_x = screen_geo.x()
-            if hasattr(screen_x, "return_value"):
-                screen_x = 0
-            screen_x = int(screen_x) if isinstance(screen_x, int | float) else 0
-
-            screen_y = screen_geo.y()
-            if hasattr(screen_y, "return_value"):
-                screen_y = 0
-            screen_y = int(screen_y) if isinstance(screen_y, int | float) else 0
-
-            screen_width = screen_geo.width()
-            if hasattr(screen_width, "return_value"):
-                screen_width = 1920
-            screen_width = (
-                int(screen_width) if isinstance(screen_width, int | float) else 1920
-            )
-
-            screen_height = screen_geo.height()
-            if hasattr(screen_height, "return_value"):
-                screen_height = 1080
-            screen_height = (
-                int(screen_height) if isinstance(screen_height, int | float) else 1080
-            )
-
-            x = screen_x + (screen_width - w) // 2
-            y = screen_y + (screen_height - h) // 2
-
-            # Ensure not too high
-            y = max(y, 50)
-
             self.setGeometry(x, y, w, h)
+
+    def _safe_int(self, value: Any, default: int) -> int:
+        """Safely convert a value to int, handling Mock objects from tests."""
+        if hasattr(value, "return_value"):  # Handle MagicMock
+            return default
+        return int(value) if isinstance(value, int | float) else default
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout.
@@ -1284,79 +1181,19 @@ except Exception as e:
 
     def _swap_models(self, source_id: str, target_id: str) -> None:
         """Swap two models in the grid layout."""
-        if not self.layout_edit_mode:
-            return
-
-        try:
-            idx1 = self.model_order.index(source_id)
-            idx2 = self.model_order.index(target_id)
-
-            # Swap in list
-            self.model_order[idx1], self.model_order[idx2] = (
-                self.model_order[idx2],
-                self.model_order[idx1],
-            )
-
-            # Rebuild grid
+        if self.layout_manager.swap_models(source_id, target_id):
+            self.model_order = self.layout_manager.model_order
             self._rebuild_grid()
-
-            # Save layout
             self._save_layout()
-
-        except ValueError:
-            pass  # ID not found
 
     def update_search_filter(self, text: str) -> None:
         """Update the search filter and rebuild grid."""
-        self.current_filter_text = text.lower()
+        self.layout_manager.update_search_filter(text)
         self._rebuild_grid()
 
     def _rebuild_grid(self) -> None:
         """Rebuild the grid layout based on current model order."""
-        # Clean current layout
-        while self.grid_layout.count():
-            item = self.grid_layout.takeAt(0)
-            if item:
-                widget = item.widget()
-                if widget:
-                    widget.setParent(None)
-
-        # Filter models if search is active
-        filtered_order = []
-        for model_id in self.model_order:
-            if not self.current_filter_text:
-                filtered_order.append(model_id)
-                continue
-
-            model = self._get_model(model_id)
-            if not model:
-                continue
-
-            # Search in name, id, and description
-            search_content = f"{model.name} {model.id} {model.description}".lower()
-            if self.current_filter_text in search_content:
-                filtered_order.append(model_id)
-
-        # Get or create widgets
-        widgets = []
-        for model_id in filtered_order:
-            if model_id not in self.model_cards:
-                model = self._get_model(model_id)
-                if model:
-                    self.model_cards[model_id] = DraggableModelCard(model, self)
-
-            if model_id in self.model_cards:
-                widgets.append(self.model_cards[model_id])
-
-        # Add to grid
-        row = 0
-        col = 0
-        for widget in widgets:
-            self.grid_layout.addWidget(widget, row, col)
-            col += 1
-            if col >= GRID_COLUMNS:
-                col = 0
-                row += 1
+        self.layout_manager.rebuild_grid(self.grid_layout)
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
@@ -2116,6 +1953,7 @@ Expected tiles: {summary['expected_tiles']}
     def toggle_layout_mode(self, checked: bool) -> None:
         """Toggle tile editing mode."""
         self.layout_edit_mode = checked
+        self.layout_manager.set_edit_mode(checked)
         if checked:
             self.btn_modify_layout.setText("🔓 Edit Mode On")
             self.btn_modify_layout.setStyleSheet("""
@@ -2136,10 +1974,6 @@ Expected tiles: {summary['expected_tiles']}
                 }
                 """)
             self.btn_customize_tiles.setEnabled(False)
-
-        # Update all cards to accept/reject drops
-        for card in self.model_cards.values():
-            card.setAcceptDrops(checked)
 
     def _setup_context_help(self) -> None:
         """Setup context help dock."""
