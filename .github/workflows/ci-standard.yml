@@ -113,16 +113,13 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - run: pip install -e .[dev]
+      - run: pip install -e ".[dev,gui-test]"
       - name: Run Tests
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
-          # Install PyQt6 first (required by pytest-qt)
-          pip install PyQt6
-          # Install test dependencies if not already installed
-          pip install pytest pytest-cov pytest-mock pytest-qt pytest-timeout pytest-xdist
+          # Dependencies are now installed via pyproject.toml optional deps
           # Run tests with:
           # - Parallel execution (-n auto)
           # - 60 second timeout per test
