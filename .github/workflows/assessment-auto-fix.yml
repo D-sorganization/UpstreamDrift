@@ -4,28 +4,28 @@ on:
   workflow_dispatch:
     inputs:
       max_fixes:
-        description: "Maximum number of issues to fix in one run (1-10)"
+        description: 'Maximum number of issues to fix in one run (1-10)'
         required: false
-        default: "5"
+        default: '5'
         type: choice
         options:
-          - "1"
-          - "5"
-          - "10"
+          - '1'
+          - '5'
+          - '10'
       focus_area:
-        description: "Focus area for fixes"
+        description: 'Focus area for fixes'
         required: false
-        default: "all"
+        default: 'all'
         type: choice
         options:
-          - "all"
-          - "code-quality"
-          - "security"
-          - "documentation"
-          - "testing"
+          - 'all'
+          - 'code-quality'
+          - 'security'
+          - 'documentation'
+          - 'testing'
   schedule:
     # Run weekly on Mondays at 3 AM UTC to fix top 5 issues
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4"
 
 permissions:
   contents: write
@@ -33,7 +33,7 @@ permissions:
   pull-requests: write
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: '3.11'
 
 jobs:
   analyze-assessment-issues:
@@ -113,17 +113,17 @@ jobs:
               text = (issue.get('title', '') + ' ' + issue.get('body', '')).lower()
 
               for category, patterns in fix_patterns.items():
-                  for pattern_config in patterns:
-                      if re.search(pattern_config['pattern'], text, re.IGNORECASE):
-                          score = (5 - pattern_config['priority']) * 10 + (5 - pattern_config['effort'])
-                          categorized[category].append({
-                              'number': issue['number'],
-                              'title': issue['title'],
-                              'score': score,
-                              'priority': pattern_config['priority'],
-                              'effort': pattern_config['effort']
-                          })
-                          break
+              for pattern_config in patterns:
+                  if re.search(pattern_config['pattern'], text, re.IGNORECASE):
+                      score = (5 - pattern_config['priority']) * 10 + (5 - pattern_config['effort'])
+                      categorized[category].append({
+                          'number': issue['number'],
+                          'title': issue['title'],
+                          'score': score,
+                          'priority': pattern_config['priority'],
+                          'effort': pattern_config['effort']
+                      })
+                      break
 
           # Sort each category by score
           for category in categorized:
@@ -425,8 +425,8 @@ jobs:
 
           ### Clone the Repository
           \`\`\`bash
-          git clone https://github.com/D-sorganization/UpstreamDrift.git
-          cd UpstreamDrift
+          git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
+          cd Golf_Modeling_Suite
           git lfs install && git lfs pull
           \`\`\`
 
@@ -600,13 +600,7 @@ jobs:
 
   summary:
     name: Generate Summary Report
-    needs:
-      [
-        analyze-assessment-issues,
-        auto-fix-code-quality,
-        create-test-coverage-fix-pr,
-        create-documentation-pr,
-      ]
+    needs: [analyze-assessment-issues, auto-fix-code-quality, create-test-coverage-fix-pr, create-documentation-pr]
     runs-on: ubuntu-latest
     if: always()
     steps:

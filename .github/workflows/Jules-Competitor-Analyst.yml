@@ -4,7 +4,7 @@ on:
   workflow_call:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 */3 * *"  # Weekly on Mondays at 2 AM UTC (within midnight-4 AM window)
+    - cron: "0 0 * * 0,4"  # Weekly on Mondays at 2 AM UTC (within midnight-4 AM window)
 
 permissions:
   contents: write

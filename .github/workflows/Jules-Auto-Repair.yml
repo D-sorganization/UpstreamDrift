@@ -26,13 +26,13 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to repair'
+        description: "Branch to repair"
         required: true
         type: string
       max_iterations:
-        description: 'Maximum repair iterations'
+        description: "Maximum repair iterations"
         required: false
-        default: '5'
+        default: "5"
         type: string
 
 permissions:
@@ -133,7 +133,7 @@ jobs:
       - uses: actions/setup-python@v5
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Tools
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
