@@ -3,7 +3,7 @@ name: Weekly CI Failure Digest
 on:
   schedule:
     # Every Monday at 9am UTC
-    - cron: "0 0 */3 * *"
+    - cron: "0 0 * * 0,4"
   workflow_dispatch: # Allow manual trigger
 
 permissions:
