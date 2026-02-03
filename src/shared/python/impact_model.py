@@ -882,7 +882,9 @@ class ImpactSolverAPI:
             ),
         }
 
-    def validate_cor_behavior(self, tolerance: float = 0.05) -> dict[str, bool | float | str | int]:
+    def validate_cor_behavior(
+        self, tolerance: float = 0.05
+    ) -> dict[str, bool | float | str | int]:
         """Validate COR behavior across recorded impacts.
 
         Issue #758: Tests validate COR and spin behavior within tolerance.
@@ -928,7 +930,9 @@ class ImpactSolverAPI:
             "num_samples": len(measured_cors),
         }
 
-    def validate_spin_behavior(self, max_spin_rpm: float = 10000) -> dict[str, bool | float | str | int]:
+    def validate_spin_behavior(
+        self, max_spin_rpm: float = 10000
+    ) -> dict[str, bool | float | str | int]:
         """Validate spin behavior is within physical limits.
 
         Issue #758: Tests validate COR and spin behavior within tolerance.
