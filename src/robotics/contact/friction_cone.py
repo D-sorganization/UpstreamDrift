@@ -45,9 +45,7 @@ class FrictionCone:
             raise ValueError(f"num_sides must be >= 3, got {self.num_sides}")
 
         # Ensure normal is unit vector
-        object.__setattr__(
-            self, "normal", np.asarray(self.normal, dtype=np.float64)
-        )
+        object.__setattr__(self, "normal", np.asarray(self.normal, dtype=np.float64))
         norm = np.linalg.norm(self.normal)
         if norm < 1e-10:
             raise ValueError("Normal vector cannot be zero")
@@ -339,7 +337,9 @@ def _project_to_cone_surface(
     edge_dir = np.cos(cone_angle) * cone.normal + np.sin(cone_angle) * t_dir
 
     # Project force onto this direction
-    proj = np.dot(np.array([f_n, f_t_mag]), np.array([np.cos(cone_angle), np.sin(cone_angle)]))
+    proj = np.dot(
+        np.array([f_n, f_t_mag]), np.array([np.cos(cone_angle), np.sin(cone_angle)])
+    )
 
     if proj <= 0:
         return np.zeros(3)

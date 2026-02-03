@@ -58,9 +58,7 @@ class QPProblem:
         if self.H.shape != (n, n):
             raise ValueError(f"H must be square, got {self.H.shape}")
         if self.g.shape != (n,):
-            raise ValueError(
-                f"g shape {self.g.shape} doesn't match H dimension {n}"
-            )
+            raise ValueError(f"g shape {self.g.shape} doesn't match H dimension {n}")
 
         # Validate equality constraints
         if self.A_eq is not None:
@@ -167,7 +165,8 @@ class ScipyQPSolver(QPSolver):
     def _check_available(self) -> bool:
         """Check if scipy is available."""
         try:
-            from scipy.optimize import minimize
+            pass
+
             return True
         except ImportError:
             return False
@@ -221,32 +220,48 @@ class ScipyQPSolver(QPSolver):
         constraints = []
 
         if problem.A_eq is not None and problem.b_eq is not None:
-            constraints.append({
-                "type": "eq",
-                "fun": lambda x, A=problem.A_eq, b=problem.b_eq: A @ x - b,
-                "jac": lambda x, A=problem.A_eq: A,
-            })
+            constraints.append(
+                {
+                    "type": "eq",
+                    "fun": lambda x, A=problem.A_eq, b=problem.b_eq: A @ x - b,
+                    "jac": lambda x, A=problem.A_eq: A,
+                }
+            )
 
         if problem.A_ineq is not None:
-            lb = problem.lb_ineq if problem.lb_ineq is not None else -np.inf * np.ones(problem.n_ineq)
-            ub = problem.ub_ineq if problem.ub_ineq is not None else np.inf * np.ones(problem.n_ineq)
+            lb = (
+                problem.lb_ineq
+                if problem.lb_ineq is not None
+                else -np.inf * np.ones(problem.n_ineq)
+            )
+            ub = (
+                problem.ub_ineq
+                if problem.ub_ineq is not None
+                else np.inf * np.ones(problem.n_ineq)
+            )
 
             # Convert to standard form: lb <= Ax <= ub
             # scipy needs: c(x) >= 0, so we add two constraints:
             # Ax - lb >= 0 and ub - Ax >= 0
             for i in range(problem.n_ineq):
                 if lb[i] > -1e10:
-                    constraints.append({
-                        "type": "ineq",
-                        "fun": lambda x, A=problem.A_ineq, lb=lb, i=i: A[i] @ x - lb[i],
-                        "jac": lambda x, A=problem.A_ineq, i=i: A[i],
-                    })
+                    constraints.append(
+                        {
+                            "type": "ineq",
+                            "fun": lambda x, A=problem.A_ineq, lb=lb, i=i: A[i] @ x
+                            - lb[i],
+                            "jac": lambda x, A=problem.A_ineq, i=i: A[i],
+                        }
+                    )
                 if ub[i] < 1e10:
-                    constraints.append({
-                        "type": "ineq",
-                        "fun": lambda x, A=problem.A_ineq, ub=ub, i=i: ub[i] - A[i] @ x,
-                        "jac": lambda x, A=problem.A_ineq, i=i: -A[i],
-                    })
+                    constraints.append(
+                        {
+                            "type": "ineq",
+                            "fun": lambda x, A=problem.A_ineq, ub=ub, i=i: ub[i]
+                            - A[i] @ x,
+                            "jac": lambda x, A=problem.A_ineq, i=i: -A[i],
+                        }
+                    )
 
         try:
             result = minimize(
@@ -325,10 +340,12 @@ class NullspaceQPSolver(QPSolver):
             # KKT system:
             # [H  A^T] [x]   [-g]
             # [A  0  ] [λ] = [b ]
-            KKT = np.block([
-                [H, A.T],
-                [A, np.zeros((m, m))],
-            ])
+            KKT = np.block(
+                [
+                    [H, A.T],
+                    [A, np.zeros((m, m))],
+                ]
+            )
 
             rhs = np.concatenate([-g, b])
 

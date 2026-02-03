@@ -13,46 +13,46 @@ from enum import Enum, auto
 class GaitType(Enum):
     """Type of locomotion gait."""
 
-    STAND = auto()      # Static standing
-    WALK = auto()       # Normal walking
-    TROT = auto()       # Trot gait (diagonal pairs)
-    RUN = auto()        # Running with flight phase
-    CRAWL = auto()      # Slow, stable crawl
-    BOUND = auto()      # Bounding gait
-    GALLOP = auto()     # Galloping
+    STAND = auto()  # Static standing
+    WALK = auto()  # Normal walking
+    TROT = auto()  # Trot gait (diagonal pairs)
+    RUN = auto()  # Running with flight phase
+    CRAWL = auto()  # Slow, stable crawl
+    BOUND = auto()  # Bounding gait
+    GALLOP = auto()  # Galloping
 
 
 class GaitPhase(Enum):
     """Phase within a gait cycle."""
 
-    DOUBLE_SUPPORT = auto()   # Both feet on ground
-    LEFT_SUPPORT = auto()     # Left foot only on ground
-    RIGHT_SUPPORT = auto()    # Right foot only on ground
-    FLIGHT = auto()           # Both feet off ground (running)
-    LEFT_SWING = auto()       # Left leg swinging
-    RIGHT_SWING = auto()      # Right leg swinging
+    DOUBLE_SUPPORT = auto()  # Both feet on ground
+    LEFT_SUPPORT = auto()  # Left foot only on ground
+    RIGHT_SUPPORT = auto()  # Right foot only on ground
+    FLIGHT = auto()  # Both feet off ground (running)
+    LEFT_SWING = auto()  # Left leg swinging
+    RIGHT_SWING = auto()  # Right leg swinging
 
 
 class LegState(Enum):
     """State of an individual leg."""
 
-    STANCE = auto()           # Foot on ground, supporting
-    SWING = auto()            # Foot in air, swinging
-    EARLY_CONTACT = auto()    # Just touched down
-    LATE_CONTACT = auto()     # About to lift off
-    LOADING = auto()          # Weight shifting onto leg
-    UNLOADING = auto()        # Weight shifting off leg
+    STANCE = auto()  # Foot on ground, supporting
+    SWING = auto()  # Foot in air, swinging
+    EARLY_CONTACT = auto()  # Just touched down
+    LATE_CONTACT = auto()  # About to lift off
+    LOADING = auto()  # Weight shifting onto leg
+    UNLOADING = auto()  # Weight shifting off leg
 
 
 class SupportState(Enum):
     """Support configuration for bipedal robot."""
 
-    DOUBLE_SUPPORT_LEFT_LEADING = auto()   # Both feet, weight on left
+    DOUBLE_SUPPORT_LEFT_LEADING = auto()  # Both feet, weight on left
     DOUBLE_SUPPORT_RIGHT_LEADING = auto()  # Both feet, weight on right
-    DOUBLE_SUPPORT_CENTERED = auto()       # Both feet, weight centered
-    SINGLE_SUPPORT_LEFT = auto()           # Left foot only
-    SINGLE_SUPPORT_RIGHT = auto()          # Right foot only
-    FLIGHT = auto()                        # No ground contact
+    DOUBLE_SUPPORT_CENTERED = auto()  # Both feet, weight centered
+    SINGLE_SUPPORT_LEFT = auto()  # Left foot only
+    SINGLE_SUPPORT_RIGHT = auto()  # Right foot only
+    FLIGHT = auto()  # No ground contact
 
 
 @dataclass

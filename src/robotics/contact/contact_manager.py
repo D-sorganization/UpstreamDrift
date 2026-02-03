@@ -379,8 +379,7 @@ def _graham_scan(points: NDArray[np.float64]) -> NDArray[np.float64]:
     start_idx = 0
     for i in range(1, n):
         if points[i, 1] < points[start_idx, 1] or (
-            points[i, 1] == points[start_idx, 1]
-            and points[i, 0] < points[start_idx, 0]
+            points[i, 1] == points[start_idx, 1] and points[i, 0] < points[start_idx, 0]
         ):
             start_idx = i
 
@@ -390,7 +389,7 @@ def _graham_scan(points: NDArray[np.float64]) -> NDArray[np.float64]:
     def sort_key(idx: int) -> tuple[float, float]:
         p = points[idx]
         angle = np.arctan2(p[1] - start[1], p[0] - start[0])
-        dist = np.sqrt((p[0] - start[0])**2 + (p[1] - start[1])**2)
+        dist = np.sqrt((p[0] - start[0]) ** 2 + (p[1] - start[1]) ** 2)
         return (float(angle), float(dist))
 
     sorted_indices = sorted(range(n), key=sort_key)

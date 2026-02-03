@@ -619,9 +619,7 @@ class WholeBodyController:
                 status=qp_solution.status,
             )
 
-        return self._extract_solution_from_x(
-            qp_solution.x, n_v, n_contact_vars, M, nle
-        )
+        return self._extract_solution_from_x(qp_solution.x, n_v, n_contact_vars, M, nle)
 
     def _extract_solution_from_x(
         self,

@@ -20,9 +20,9 @@ from numpy.typing import NDArray
 class TaskType(Enum):
     """Type of task constraint."""
 
-    EQUALITY = auto()      # A @ x = b (hard equality)
-    INEQUALITY = auto()    # lb <= A @ x <= ub
-    SOFT = auto()          # Minimize ||A @ x - b||^2_W (soft objective)
+    EQUALITY = auto()  # A @ x = b (hard equality)
+    INEQUALITY = auto()  # lb <= A @ x <= ub
+    SOFT = auto()  # Minimize ||A @ x - b||^2_W (soft objective)
 
 
 @dataclass
@@ -66,9 +66,7 @@ class Task:
         self.target = np.asarray(self.target, dtype=np.float64)
 
         if self.jacobian.ndim != 2:
-            raise ValueError(
-                f"Jacobian must be 2D, got {self.jacobian.ndim}D"
-            )
+            raise ValueError(f"Jacobian must be 2D, got {self.jacobian.ndim}D")
 
         self._task_dim = self.jacobian.shape[0]
         self._config_dim = self.jacobian.shape[1]
@@ -91,9 +89,7 @@ class Task:
         # Validate bounds for inequality tasks
         if self.task_type == TaskType.INEQUALITY:
             if self.lower_bound is None and self.upper_bound is None:
-                raise ValueError(
-                    "Inequality task must have at least one bound"
-                )
+                raise ValueError("Inequality task must have at least one bound")
 
         # Validate finite values
         if not np.all(np.isfinite(self.jacobian)):
@@ -135,11 +131,7 @@ class Task:
         Returns:
             Desired task-space acceleration for error correction.
         """
-        return (
-            self.target
-            + self.gain_p * position_error
-            + self.gain_d * velocity_error
-        )
+        return self.target + self.gain_p * position_error + self.gain_d * velocity_error
 
 
 def create_com_task(
@@ -236,7 +228,11 @@ def create_posture_task(
     jacobian = np.eye(n_v)[mask]
 
     # Handle quaternion joints (n_q > n_v case)
-    q_error = q_target[:n_v] - q_current[:n_v] if len(q_current) > n_v else q_target - q_current
+    q_error = (
+        q_target[:n_v] - q_current[:n_v]
+        if len(q_current) > n_v
+        else q_target - q_current
+    )
     v_target = np.zeros(n_v)
 
     error_p = q_error[mask]

@@ -44,7 +44,7 @@ class IMUSensorConfig:
 
     sensor_id: str = "imu"
     accel_range: float = 160.0  # ~16g
-    gyro_range: float = 35.0   # ~2000 deg/s
+    gyro_range: float = 35.0  # ~2000 deg/s
     accel_noise_std: float = 0.01
     gyro_noise_std: float = 0.001
     accel_bias_drift: float = 0.0001
@@ -193,13 +193,9 @@ class IMUSensor:
         angular_vel = np.asarray(angular_vel, dtype=np.float64)
 
         if linear_accel.shape != (3,):
-            raise ValueError(
-                f"linear_accel must be (3,), got {linear_accel.shape}"
-            )
+            raise ValueError(f"linear_accel must be (3,), got {linear_accel.shape}")
         if angular_vel.shape != (3,):
-            raise ValueError(
-                f"angular_vel must be (3,), got {angular_vel.shape}"
-            )
+            raise ValueError(f"angular_vel must be (3,), got {angular_vel.shape}")
 
         # Apply noise
         noisy_accel = self._accel_noise.apply(linear_accel)
@@ -264,12 +260,14 @@ class IMUSensor:
         half_angle = 0.5 * omega_mag * dt
         axis = angular_vel / omega_mag
 
-        dq = np.array([
-            np.cos(half_angle),
-            axis[0] * np.sin(half_angle),
-            axis[1] * np.sin(half_angle),
-            axis[2] * np.sin(half_angle),
-        ])
+        dq = np.array(
+            [
+                np.cos(half_angle),
+                axis[0] * np.sin(half_angle),
+                axis[1] * np.sin(half_angle),
+                axis[2] * np.sin(half_angle),
+            ]
+        )
 
         # Quaternion multiplication: q_new = q * dq
         self._orientation = _quaternion_multiply(self._orientation, dq)
@@ -326,12 +324,14 @@ def _quaternion_multiply(
     w1, x1, y1, z1 = q1
     w2, x2, y2, z2 = q2
 
-    return np.array([
-        w1*w2 - x1*x2 - y1*y2 - z1*z2,
-        w1*x2 + x1*w2 + y1*z2 - z1*y2,
-        w1*y2 - x1*z2 + y1*w2 + z1*x2,
-        w1*z2 + x1*y2 - y1*x2 + z1*w2,
-    ])
+    return np.array(
+        [
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        ]
+    )
 
 
 def _quaternion_inverse(q: NDArray[np.float64]) -> NDArray[np.float64]:

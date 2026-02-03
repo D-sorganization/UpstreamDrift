@@ -81,11 +81,13 @@ def _skew_symmetric(v: NDArray[np.float64]) -> NDArray[np.float64]:
     Returns:
         Skew-symmetric matrix (3, 3) such that skew(v) @ u = v x u.
     """
-    return np.array([
-        [0, -v[2], v[1]],
-        [v[2], 0, -v[0]],
-        [-v[1], v[0], 0],
-    ])
+    return np.array(
+        [
+            [0, -v[2], v[1]],
+            [v[2], 0, -v[0]],
+            [-v[1], v[0], 0],
+        ]
+    )
 
 
 def check_force_closure(

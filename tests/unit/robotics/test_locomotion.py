@@ -13,29 +13,27 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
-from src.robotics.locomotion.gait_types import (
-    GaitType,
-    GaitPhase,
-    LegState,
-    SupportState,
-    GaitParameters,
-    create_walk_parameters,
-    create_run_parameters,
-    create_stand_parameters,
-)
-from src.robotics.locomotion.zmp_computer import (
-    ZMPComputer,
-    ZMPResult,
-)
-from src.robotics.locomotion.gait_state_machine import (
-    GaitStateMachine,
-    GaitState,
-    GaitEvent,
-)
 from src.robotics.locomotion.footstep_planner import (
     Footstep,
     FootstepPlan,
     FootstepPlanner,
+)
+from src.robotics.locomotion.gait_state_machine import (
+    GaitEvent,
+    GaitState,
+    GaitStateMachine,
+)
+from src.robotics.locomotion.gait_types import (
+    GaitParameters,
+    GaitPhase,
+    GaitType,
+    SupportState,
+    create_run_parameters,
+    create_stand_parameters,
+    create_walk_parameters,
+)
+from src.robotics.locomotion.zmp_computer import (
+    ZMPComputer,
 )
 
 
@@ -220,12 +218,14 @@ class TestZMPComputer:
         zmp = ZMPComputer(engine)
 
         # ZMP at origin with small support polygon
-        support = np.array([
-            [-0.1, -0.1],
-            [0.1, -0.1],
-            [0.1, 0.1],
-            [-0.1, 0.1],
-        ])
+        support = np.array(
+            [
+                [-0.1, -0.1],
+                [0.1, -0.1],
+                [0.1, 0.1],
+                [-0.1, 0.1],
+            ]
+        )
 
         result = zmp.compute_zmp(
             com_position=np.array([0.0, 0.0, 0.9]),
@@ -242,12 +242,14 @@ class TestZMPComputer:
         zmp = ZMPComputer(engine)
 
         # Large acceleration to push ZMP outside
-        support = np.array([
-            [-0.05, -0.05],
-            [0.05, -0.05],
-            [0.05, 0.05],
-            [-0.05, 0.05],
-        ])
+        support = np.array(
+            [
+                [-0.05, -0.05],
+                [0.05, -0.05],
+                [0.05, 0.05],
+                [-0.05, 0.05],
+            ]
+        )
 
         result = zmp.compute_zmp(
             com_position=np.array([0.0, 0.0, 0.9]),
@@ -289,12 +291,14 @@ class TestZMPComputer:
         engine = MockHumanoidEngine()
         zmp = ZMPComputer(engine)
 
-        support = np.array([
-            [-0.1, -0.1],
-            [0.1, -0.1],
-            [0.1, 0.1],
-            [-0.1, 0.1],
-        ])
+        support = np.array(
+            [
+                [-0.1, -0.1],
+                [0.1, -0.1],
+                [0.1, 0.1],
+                [-0.1, 0.1],
+            ]
+        )
 
         # Point at center
         margin = zmp.compute_stability_margin(
@@ -477,7 +481,7 @@ class TestFootstep:
         """Test yaw extraction from orientation."""
         # 90 degree rotation around z
         yaw = np.pi / 2
-        orient = np.array([np.cos(yaw/2), 0, 0, np.sin(yaw/2)])
+        orient = np.array([np.cos(yaw / 2), 0, 0, np.sin(yaw / 2)])
 
         step = Footstep(
             position=np.zeros(3),
@@ -516,7 +520,9 @@ class TestFootstepPlan:
         """Test iterating over plan."""
         footsteps = [
             Footstep(np.zeros(3), np.array([1, 0, 0, 0]), "left", step_index=0),
-            Footstep(np.array([0.3, 0, 0]), np.array([1, 0, 0, 0]), "right", step_index=1),
+            Footstep(
+                np.array([0.3, 0, 0]), np.array([1, 0, 0, 0]), "right", step_index=1
+            ),
         ]
         plan = FootstepPlan(footsteps=footsteps)
 
@@ -595,7 +601,9 @@ class TestFootstepPlanner:
 
         # Steps should progress forward
         for i in range(1, len(plan.footsteps)):
-            assert plan.footsteps[i].position[0] > plan.footsteps[i-1].position[0] - 0.1
+            assert (
+                plan.footsteps[i].position[0] > plan.footsteps[i - 1].position[0] - 0.1
+            )
 
     def test_plan_from_velocity_with_rotation(self) -> None:
         """Test planning with rotational velocity."""
@@ -647,7 +655,7 @@ class TestFootstepPlanner:
         # Check step lengths are limited
         for i in range(1, len(plan.footsteps)):
             step_length = np.linalg.norm(
-                plan.footsteps[i].position[:2] - plan.footsteps[i-1].position[:2]
+                plan.footsteps[i].position[:2] - plan.footsteps[i - 1].position[:2]
             )
             # Allow some margin for lateral offset
             assert step_length < 0.8

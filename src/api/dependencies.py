@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from .services.simulation_service import SimulationService
 
 
-def get_engine_manager(request: Request) -> "EngineManager":
+def get_engine_manager(request: Request) -> EngineManager:
     """Retrieve the EngineManager from app state.
 
     Args:
@@ -35,13 +35,11 @@ def get_engine_manager(request: Request) -> "EngineManager":
     """
     manager = getattr(request.app.state, "engine_manager", None)
     if manager is None:
-        raise HTTPException(
-            status_code=503, detail="Engine manager not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Engine manager not initialized")
     return manager
 
 
-def get_simulation_service(request: Request) -> "SimulationService":
+def get_simulation_service(request: Request) -> SimulationService:
     """Retrieve the SimulationService from app state.
 
     Args:
@@ -61,7 +59,7 @@ def get_simulation_service(request: Request) -> "SimulationService":
     return service
 
 
-def get_analysis_service(request: Request) -> "AnalysisService":
+def get_analysis_service(request: Request) -> AnalysisService:
     """Retrieve the AnalysisService from app state.
 
     Args:
@@ -75,13 +73,11 @@ def get_analysis_service(request: Request) -> "AnalysisService":
     """
     service = getattr(request.app.state, "analysis_service", None)
     if service is None:
-        raise HTTPException(
-            status_code=503, detail="Analysis service not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Analysis service not initialized")
     return service
 
 
-def get_video_pipeline(request: Request) -> "VideoPosePipeline":
+def get_video_pipeline(request: Request) -> VideoPosePipeline:
     """Retrieve the VideoPosePipeline from app state.
 
     Args:
@@ -116,9 +112,7 @@ def get_task_manager(request: Request) -> Any:
     """
     manager = getattr(request.app.state, "task_manager", None)
     if manager is None:
-        raise HTTPException(
-            status_code=503, detail="Task manager not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Task manager not initialized")
     return manager
 
 

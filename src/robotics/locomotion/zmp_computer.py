@@ -145,12 +145,14 @@ class ZMPComputer:
 
         # ZMP calculation
         # Include angular momentum contribution
-        zmp_x = com_position[0] - z_rel * (
-            com_acceleration[0] + angular_momentum_rate[1] / mass
-        ) / denom
-        zmp_y = com_position[1] - z_rel * (
-            com_acceleration[1] - angular_momentum_rate[0] / mass
-        ) / denom
+        zmp_x = (
+            com_position[0]
+            - z_rel * (com_acceleration[0] + angular_momentum_rate[1] / mass) / denom
+        )
+        zmp_y = (
+            com_position[1]
+            - z_rel * (com_acceleration[1] - angular_momentum_rate[0] / mass) / denom
+        )
         zmp_z = self._ground_height
 
         zmp = np.array([zmp_x, zmp_y, zmp_z])
@@ -300,12 +302,14 @@ class ZMPComputer:
         """
         if support_polygon is None:
             # Default small support polygon
-            support_polygon = np.array([
-                [-0.1, -0.1],
-                [0.1, -0.1],
-                [0.1, 0.1],
-                [-0.1, 0.1],
-            ])
+            support_polygon = np.array(
+                [
+                    [-0.1, -0.1],
+                    [0.1, -0.1],
+                    [0.1, 0.1],
+                    [-0.1, 0.1],
+                ]
+            )
 
         if len(support_polygon) < 3:
             return False, -1.0
@@ -353,9 +357,7 @@ class ZMPComputer:
 
         for i in range(n):
             j = (i + 1) % n
-            dist = self._point_to_segment_distance(
-                point, polygon[i], polygon[j]
-            )
+            dist = self._point_to_segment_distance(point, polygon[i], polygon[j])
             min_dist = min(min_dist, dist)
 
         return min_dist

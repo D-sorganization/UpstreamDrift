@@ -71,11 +71,25 @@ class Footstep:
     def _quat_to_rot(self, q: NDArray[np.float64]) -> NDArray[np.float64]:
         """Convert quaternion to rotation matrix."""
         w, x, y, z = q
-        return np.array([
-            [1 - 2*y*y - 2*z*z, 2*x*y - 2*w*z, 2*x*z + 2*w*y],
-            [2*x*y + 2*w*z, 1 - 2*x*x - 2*z*z, 2*y*z - 2*w*x],
-            [2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y],
-        ])
+        return np.array(
+            [
+                [
+                    1 - 2 * y * y - 2 * z * z,
+                    2 * x * y - 2 * w * z,
+                    2 * x * z + 2 * w * y,
+                ],
+                [
+                    2 * x * y + 2 * w * z,
+                    1 - 2 * x * x - 2 * z * z,
+                    2 * y * z - 2 * w * x,
+                ],
+                [
+                    2 * x * z - 2 * w * y,
+                    2 * y * z + 2 * w * x,
+                    1 - 2 * x * x - 2 * y * y,
+                ],
+            ]
+        )
 
 
 @dataclass
@@ -92,12 +106,8 @@ class FootstepPlan:
 
     footsteps: list[Footstep] = field(default_factory=list)
     parameters: GaitParameters = field(default_factory=GaitParameters)
-    start_position: NDArray[np.float64] = field(
-        default_factory=lambda: np.zeros(3)
-    )
-    goal_position: NDArray[np.float64] = field(
-        default_factory=lambda: np.zeros(3)
-    )
+    start_position: NDArray[np.float64] = field(default_factory=lambda: np.zeros(3))
+    goal_position: NDArray[np.float64] = field(default_factory=lambda: np.zeros(3))
     total_duration: float = 0.0
 
     def __len__(self) -> int:
@@ -298,7 +308,9 @@ class FootstepPlanner:
             # Clamp to limits
             step_x = np.clip(step_x, -self._max_step_length, self._max_step_length)
             step_y = np.clip(step_y, -self._max_step_width, self._max_step_width)
-            step_yaw = np.clip(step_yaw, -self._max_step_rotation, self._max_step_rotation)
+            step_yaw = np.clip(
+                step_yaw, -self._max_step_rotation, self._max_step_rotation
+            )
 
             # Update orientation
             yaw += step_yaw / 2  # Half rotation during step
@@ -322,11 +334,13 @@ class FootstepPlanner:
                 offset_x = sin_yaw * lateral_offset
                 offset_y = -cos_yaw * lateral_offset
 
-            foot_pos = np.array([
-                pos[0] + offset_x,
-                pos[1] + offset_y,
-                pos[2],
-            ])
+            foot_pos = np.array(
+                [
+                    pos[0] + offset_x,
+                    pos[1] + offset_y,
+                    pos[2],
+                ]
+            )
 
             # Complete rotation
             yaw += step_yaw / 2
@@ -402,11 +416,13 @@ class FootstepPlanner:
                 offset_x = sin_yaw * lateral_offset
                 offset_y = -cos_yaw * lateral_offset
 
-            foot_pos = np.array([
-                current_position[0] + offset_x,
-                current_position[1] + offset_y,
-                current_position[2],
-            ])
+            foot_pos = np.array(
+                [
+                    current_position[0] + offset_x,
+                    current_position[1] + offset_y,
+                    current_position[2],
+                ]
+            )
 
             orientation = self._yaw_to_quat(yaw)
             footstep = Footstep(
@@ -471,11 +487,13 @@ class FootstepPlanner:
                 offset_x = sin_yaw * lateral_offset
                 offset_y = -cos_yaw * lateral_offset
 
-            foot_pos = np.array([
-                pos_on_path[0] + offset_x,
-                pos_on_path[1] + offset_y,
-                pos_on_path[2],
-            ])
+            foot_pos = np.array(
+                [
+                    pos_on_path[0] + offset_x,
+                    pos_on_path[1] + offset_y,
+                    pos_on_path[2],
+                ]
+            )
 
             orientation = self._yaw_to_quat(yaw)
             footstep = Footstep(
@@ -492,12 +510,14 @@ class FootstepPlanner:
 
     def _yaw_to_quat(self, yaw: float) -> NDArray[np.float64]:
         """Convert yaw angle to quaternion [w, x, y, z]."""
-        return np.array([
-            np.cos(yaw / 2),
-            0.0,
-            0.0,
-            np.sin(yaw / 2),
-        ])
+        return np.array(
+            [
+                np.cos(yaw / 2),
+                0.0,
+                0.0,
+                np.sin(yaw / 2),
+            ]
+        )
 
     def _normalize_angle(self, angle: float) -> float:
         """Normalize angle to [-pi, pi]."""

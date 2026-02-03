@@ -25,14 +25,14 @@ from src.robotics.locomotion.gait_types import (
 class GaitEvent(Enum):
     """Events that trigger gait transitions."""
 
-    STEP_COMPLETE = auto()      # Current step finished
-    FOOT_CONTACT = auto()       # Foot touched ground
-    FOOT_LIFTOFF = auto()       # Foot left ground
-    BALANCE_LOST = auto()       # Balance criterion violated
-    STOP_REQUESTED = auto()     # Stop command received
-    START_REQUESTED = auto()    # Start walking command
-    SPEED_CHANGE = auto()       # Velocity command changed
-    EMERGENCY_STOP = auto()     # Emergency stop triggered
+    STEP_COMPLETE = auto()  # Current step finished
+    FOOT_CONTACT = auto()  # Foot touched ground
+    FOOT_LIFTOFF = auto()  # Foot left ground
+    BALANCE_LOST = auto()  # Balance criterion violated
+    STOP_REQUESTED = auto()  # Stop command received
+    START_REQUESTED = auto()  # Start walking command
+    SPEED_CHANGE = auto()  # Velocity command changed
+    EMERGENCY_STOP = auto()  # Emergency stop triggered
 
 
 @dataclass

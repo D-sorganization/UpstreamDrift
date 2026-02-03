@@ -11,20 +11,20 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_equal
+from numpy.testing import assert_allclose
 
-from src.robotics.core.types import ContactState, ContactType
 from src.robotics.contact.friction_cone import (
     FrictionCone,
-    linearize_friction_cone,
     compute_friction_cone_constraint,
+    linearize_friction_cone,
     project_to_friction_cone,
 )
 from src.robotics.contact.grasp_analysis import (
-    compute_grasp_matrix,
     check_force_closure,
+    compute_grasp_matrix,
     compute_grasp_quality,
 )
+from src.robotics.core.types import ContactState
 
 
 class TestContactState:
@@ -268,15 +268,17 @@ class TestLinearizeFrictionCone:
 
         # Test several points that should be inside
         inside_forces = [
-            np.array([0, 0, 100]),      # Pure normal
-            np.array([10, 0, 100]),     # Small tangential
-            np.array([0, 10, 100]),     # Small tangential other direction
+            np.array([0, 0, 100]),  # Pure normal
+            np.array([10, 0, 100]),  # Small tangential
+            np.array([0, 10, 100]),  # Small tangential other direction
         ]
 
         for f in inside_forces:
             # Should satisfy A @ f <= b (approximately, due to linearization)
             violations = A @ f - b
-            assert np.all(violations <= 1e-6), f"Force {f} should be inside linearized cone"
+            assert np.all(
+                violations <= 1e-6
+            ), f"Force {f} should be inside linearized cone"
 
     def test_compute_friction_cone_constraint(self) -> None:
         """Test compute_friction_cone_constraint returns complete info."""
@@ -371,22 +373,26 @@ class TestGraspAnalysis:
 
         contacts = []
         for i, angle in enumerate(angles):
-            pos = np.array([
-                radius * np.cos(angle),
-                radius * np.sin(angle),
-                0.0,
-            ])
+            pos = np.array(
+                [
+                    radius * np.cos(angle),
+                    radius * np.sin(angle),
+                    0.0,
+                ]
+            )
             normal = -pos / np.linalg.norm(pos)
 
-            contacts.append(ContactState(
-                contact_id=i,
-                body_a=f"finger{i}",
-                body_b="object",
-                position=pos,
-                normal=normal,
-                normal_force=10.0,
-                friction_coefficient=0.5,
-            ))
+            contacts.append(
+                ContactState(
+                    contact_id=i,
+                    body_a=f"finger{i}",
+                    body_b="object",
+                    position=pos,
+                    normal=normal,
+                    normal_force=10.0,
+                    friction_coefficient=0.5,
+                )
+            )
 
         return contacts
 
@@ -405,9 +411,7 @@ class TestGraspAnalysis:
         )
         assert G.shape == (6, 6)
 
-    def test_force_closure_simple_grasp(
-        self, simple_grasp: list[ContactState]
-    ) -> None:
+    def test_force_closure_simple_grasp(self, simple_grasp: list[ContactState]) -> None:
         """Test force closure check for simple grasp."""
         # Two opposing fingers with friction should have force closure
         has_closure, quality = check_force_closure(simple_grasp)
@@ -456,9 +460,7 @@ class TestGraspAnalysis:
         )
         assert 0 <= isotropy <= 1
 
-    def test_grasp_quality_volume(
-        self, three_finger_grasp: list[ContactState]
-    ) -> None:
+    def test_grasp_quality_volume(self, three_finger_grasp: list[ContactState]) -> None:
         """Test grasp volume metric."""
         volume = compute_grasp_quality(
             three_finger_grasp,
@@ -466,9 +468,7 @@ class TestGraspAnalysis:
         )
         assert volume > 0
 
-    def test_invalid_metric_raises(
-        self, simple_grasp: list[ContactState]
-    ) -> None:
+    def test_invalid_metric_raises(self, simple_grasp: list[ContactState]) -> None:
         """Test that invalid metric raises ValueError."""
         with pytest.raises(ValueError, match="Unknown metric"):
             compute_grasp_quality(simple_grasp, metric="invalid")
@@ -485,12 +485,14 @@ class TestContactManagerIntegration:
         )
 
         # Square contact pattern
-        points = np.array([
-            [0.1, 0.1],
-            [0.1, -0.1],
-            [-0.1, 0.1],
-            [-0.1, -0.1],
-        ])
+        points = np.array(
+            [
+                [0.1, 0.1],
+                [0.1, -0.1],
+                [-0.1, 0.1],
+                [-0.1, -0.1],
+            ]
+        )
 
         hull = _convex_hull_2d(points)
 
@@ -507,11 +509,13 @@ class TestContactManagerIntegration:
         """Test point in polygon for triangle."""
         from src.robotics.contact.contact_manager import _point_in_polygon
 
-        triangle = np.array([
-            [0, 0],
-            [1, 0],
-            [0.5, 1],
-        ])
+        triangle = np.array(
+            [
+                [0, 0],
+                [1, 0],
+                [0.5, 1],
+            ]
+        )
 
         # Inside
         assert _point_in_polygon(np.array([0.5, 0.3]), triangle) is True

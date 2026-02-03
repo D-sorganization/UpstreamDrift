@@ -10,16 +10,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_equal
+from numpy.testing import assert_allclose
 
-from src.robotics.sensing.noise_models import (
-    GaussianNoise,
-    BrownianNoise,
-    QuantizationNoise,
-    BandwidthLimitedNoise,
-    CompositeNoise,
-    create_realistic_sensor_noise,
-)
 from src.robotics.sensing.force_torque_sensor import (
     ForceTorqueSensor,
     ForceTorqueSensorConfig,
@@ -31,6 +23,14 @@ from src.robotics.sensing.imu_sensor import (
     IMUSensorConfig,
     create_ideal_imu,
     create_realistic_imu,
+)
+from src.robotics.sensing.noise_models import (
+    BandwidthLimitedNoise,
+    BrownianNoise,
+    CompositeNoise,
+    GaussianNoise,
+    QuantizationNoise,
+    create_realistic_sensor_noise,
 )
 
 
@@ -372,7 +372,7 @@ class TestIMUSensor:
         imu = IMUSensor()
 
         # Set to 90 degree rotation around z
-        q = np.array([np.cos(np.pi/4), 0, 0, np.sin(np.pi/4)])
+        q = np.array([np.cos(np.pi / 4), 0, 0, np.sin(np.pi / 4)])
         imu.set_orientation(q)
 
         assert_allclose(imu.orientation, q)
@@ -416,7 +416,7 @@ class TestIMUSensor:
         assert_allclose(gravity, [0, 0, -9.81], atol=1e-10)
 
         # After 90 degree rotation around y, gravity should be in -x
-        q = np.array([np.cos(np.pi/4), 0, np.sin(np.pi/4), 0])
+        q = np.array([np.cos(np.pi / 4), 0, np.sin(np.pi / 4), 0])
         imu.set_orientation(q)
 
         gravity = imu.get_gravity_in_sensor_frame()

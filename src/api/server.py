@@ -248,9 +248,7 @@ async def startup_event() -> None:
         # TODO: Remove these once all routes are migrated to Depends()
         core_routes.configure(engine_manager)
         engine_routes.configure(engine_manager, logger)
-        simulation_routes.configure(
-            app.state.simulation_service, active_tasks, logger
-        )
+        simulation_routes.configure(app.state.simulation_service, active_tasks, logger)
         analysis_routes.configure(app.state.analysis_service, logger)
         video_routes.configure(video_pipeline, active_tasks, logger)
         export_routes.configure(active_tasks)

@@ -12,26 +12,25 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
+from src.robotics.control.whole_body.qp_solver import (
+    NullspaceQPSolver,
+    QPProblem,
+    QPSolver,
+    ScipyQPSolver,
+    create_default_solver,
+)
 from src.robotics.control.whole_body.task import (
     Task,
     TaskType,
     create_com_task,
-    create_posture_task,
-    create_ee_task,
     create_contact_constraint,
-)
-from src.robotics.control.whole_body.qp_solver import (
-    QPProblem,
-    QPSolution,
-    QPSolver,
-    ScipyQPSolver,
-    NullspaceQPSolver,
-    create_default_solver,
+    create_ee_task,
+    create_posture_task,
 )
 from src.robotics.control.whole_body.wbc_controller import (
-    WholeBodyController,
     WBCConfig,
     WBCSolution,
+    WholeBodyController,
 )
 
 

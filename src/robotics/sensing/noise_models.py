@@ -120,9 +120,7 @@ class BrownianNoise(NoiseModel):
         self._current_bias += drift
 
         # Clip to max bias
-        self._current_bias = np.clip(
-            self._current_bias, -self.max_bias, self.max_bias
-        )
+        self._current_bias = np.clip(self._current_bias, -self.max_bias, self.max_bias)
 
         return signal + self._current_bias
 
@@ -166,7 +164,6 @@ class QuantizationNoise(NoiseModel):
 
     def reset(self) -> None:
         """No state to reset."""
-        pass
 
 
 @dataclass

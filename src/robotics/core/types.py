@@ -21,58 +21,58 @@ from numpy.typing import NDArray
 class ContactType(Enum):
     """Type of contact between bodies."""
 
-    POINT = auto()      # Single point contact
-    LINE = auto()       # Edge/line contact
-    PATCH = auto()      # Surface/patch contact (e.g., foot)
-    SOFT = auto()       # Soft/deformable contact
+    POINT = auto()  # Single point contact
+    LINE = auto()  # Edge/line contact
+    PATCH = auto()  # Surface/patch contact (e.g., foot)
+    SOFT = auto()  # Soft/deformable contact
 
 
 class FrictionConeType(Enum):
     """Friction cone approximation method."""
 
-    EXACT = auto()           # Second-order cone (exact)
-    LINEARIZED_4 = auto()    # 4-sided pyramid approximation
-    LINEARIZED_8 = auto()    # 8-sided pyramid approximation
-    LINEARIZED_16 = auto()   # 16-sided pyramid approximation
+    EXACT = auto()  # Second-order cone (exact)
+    LINEARIZED_4 = auto()  # 4-sided pyramid approximation
+    LINEARIZED_8 = auto()  # 8-sided pyramid approximation
+    LINEARIZED_16 = auto()  # 16-sided pyramid approximation
 
 
 class TaskPriority(Enum):
     """Priority levels for whole-body control tasks."""
 
-    HARD_CONSTRAINT = 0      # Must be satisfied (contact, dynamics)
-    SAFETY = 1               # Safety constraints (joint limits)
-    PRIMARY = 2              # Primary objective (CoM tracking)
-    SECONDARY = 3            # Secondary objective (posture)
-    TERTIARY = 4             # Tertiary objective (regularization)
+    HARD_CONSTRAINT = 0  # Must be satisfied (contact, dynamics)
+    SAFETY = 1  # Safety constraints (joint limits)
+    PRIMARY = 2  # Primary objective (CoM tracking)
+    SECONDARY = 3  # Secondary objective (posture)
+    TERTIARY = 4  # Tertiary objective (regularization)
 
 
 class ControlMode(Enum):
     """Control modes for robot actuation."""
 
-    TORQUE = auto()          # Direct torque control
-    POSITION = auto()        # Position control
-    VELOCITY = auto()        # Velocity control
-    IMPEDANCE = auto()       # Impedance control
-    ADMITTANCE = auto()      # Admittance control
-    HYBRID = auto()          # Hybrid force/position
+    TORQUE = auto()  # Direct torque control
+    POSITION = auto()  # Position control
+    VELOCITY = auto()  # Velocity control
+    IMPEDANCE = auto()  # Impedance control
+    ADMITTANCE = auto()  # Admittance control
+    HYBRID = auto()  # Hybrid force/position
 
 
 class GaitPhase(Enum):
     """Phases of a walking gait cycle."""
 
     DOUBLE_SUPPORT = auto()  # Both feet on ground
-    LEFT_SWING = auto()      # Left foot swinging
-    RIGHT_SWING = auto()     # Right foot swinging
-    FLIGHT = auto()          # Both feet in air (running)
+    LEFT_SWING = auto()  # Left foot swinging
+    RIGHT_SWING = auto()  # Right foot swinging
+    FLIGHT = auto()  # Both feet in air (running)
 
 
 class SupportState(Enum):
     """Support state for balance control."""
 
-    DOUBLE = auto()          # Double support
-    LEFT_SINGLE = auto()     # Left foot only
-    RIGHT_SINGLE = auto()    # Right foot only
-    FLIGHT = auto()          # No ground contact
+    DOUBLE = auto()  # Double support
+    LEFT_SINGLE = auto()  # Left foot only
+    RIGHT_SINGLE = auto()  # Right foot only
+    FLIGHT = auto()  # No ground contact
 
 
 @dataclass(frozen=True)
@@ -109,9 +109,7 @@ class ContactState:
     normal: NDArray[np.float64]
     penetration: float = 0.0
     normal_force: float = 0.0
-    friction_force: NDArray[np.float64] = field(
-        default_factory=lambda: np.zeros(3)
-    )
+    friction_force: NDArray[np.float64] = field(default_factory=lambda: np.zeros(3))
     friction_coefficient: float = 0.5
     contact_type: ContactType = ContactType.POINT
     is_active: bool = True
@@ -122,9 +120,7 @@ class ContactState:
         object.__setattr__(
             self, "position", np.asarray(self.position, dtype=np.float64)
         )
-        object.__setattr__(
-            self, "normal", np.asarray(self.normal, dtype=np.float64)
-        )
+        object.__setattr__(self, "normal", np.asarray(self.normal, dtype=np.float64))
         object.__setattr__(
             self, "friction_force", np.asarray(self.friction_force, dtype=np.float64)
         )
@@ -200,7 +196,8 @@ class ContactState:
             penetration=self.penetration,
             normal_force=normal_force,
             friction_force=(
-                friction_force.copy() if friction_force is not None
+                friction_force.copy()
+                if friction_force is not None
                 else self.friction_force.copy()
             ),
             friction_coefficient=self.friction_coefficient,
@@ -243,9 +240,7 @@ class TaskDescriptor:
         object.__setattr__(
             self, "jacobian", np.asarray(self.jacobian, dtype=np.float64)
         )
-        object.__setattr__(
-            self, "target", np.asarray(self.target, dtype=np.float64)
-        )
+        object.__setattr__(self, "target", np.asarray(self.target, dtype=np.float64))
 
         if self.weight is not None:
             object.__setattr__(
@@ -304,9 +299,7 @@ class FootstepTarget:
         if self.position.shape != (3,):
             raise ValueError(f"position must be (3,), got {self.position.shape}")
         if self.orientation.shape != (4,):
-            raise ValueError(
-                f"orientation must be (4,), got {self.orientation.shape}"
-            )
+            raise ValueError(f"orientation must be (4,), got {self.orientation.shape}")
         if self.foot not in ("left", "right"):
             raise ValueError(f"foot must be 'left' or 'right', got '{self.foot}'")
         if self.timing < 0:
@@ -392,9 +385,7 @@ class ForceTorqueReading(SensorReading):
 
     def __post_init__(self) -> None:
         """Validate reading."""
-        object.__setattr__(
-            self, "wrench", np.asarray(self.wrench, dtype=np.float64)
-        )
+        object.__setattr__(self, "wrench", np.asarray(self.wrench, dtype=np.float64))
         if self.wrench.shape != (6,):
             raise ValueError(f"wrench must be (6,), got {self.wrench.shape}")
 
@@ -443,8 +434,7 @@ class IMUReading(SensorReading):
             )
         if self.angular_velocity.shape != (3,):
             raise ValueError(
-                f"angular_velocity must be (3,), "
-                f"got {self.angular_velocity.shape}"
+                f"angular_velocity must be (3,), " f"got {self.angular_velocity.shape}"
             )
 
         if self.orientation is not None:
