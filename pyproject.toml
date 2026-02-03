@@ -137,11 +137,7 @@ exclude = [
     "src/api/",
     "src/launchers/",
     "src/engines/common/",
-    "src/shared/python/checkpoint.py",
-    "src/shared/python/base_physics_engine.py",
-    # Additional files with numpy/dict typing issues (pre-existing)
-    "src/shared/python/impact_model.py",
-    "src/shared/python/flexible_shaft.py",
+    # Additional directories with complex typing issues (pre-existing)
     "src/shared/python/pose_editor/",
     "src/shared/python/ai/gui/",
     "src/engines/physics_engines/pinocchio/python/pinocchio_golf/pose_editor_tab.py",
