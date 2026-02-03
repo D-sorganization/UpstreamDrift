@@ -265,9 +265,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to compute gravity forces: {e}")
             return np.array([])
 
-    @precondition(
-        lambda self, qacc: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         if not self._model or not self._state:
@@ -488,9 +486,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         return a_drift
 
-    @precondition(
-        lambda self, tau: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques/muscles.
