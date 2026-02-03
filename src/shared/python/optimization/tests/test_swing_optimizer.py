@@ -67,7 +67,7 @@ def basic_config():
     """Basic optimization config for fast testing."""
     return OptimizationConfig(
         objectives={OptimizationObjective.CLUBHEAD_VELOCITY: 1.0},
-        constraints={OptimizationConstraint.JOINT_LIMITS},
+        constraints=[OptimizationConstraint.JOINT_LIMITS],
         n_nodes=10,  # Reduced for faster tests
         max_iterations=5,  # Minimal iterations for unit tests
     )
@@ -168,10 +168,10 @@ def test_optimization_config_custom_objectives():
 def test_optimization_config_constraints():
     """Test OptimizationConfig accepts constraints."""
     config = OptimizationConfig(
-        constraints={
+        constraints=[
             OptimizationConstraint.JOINT_LIMITS,
             OptimizationConstraint.TORQUE_LIMITS,
-        }
+        ]
     )
     assert OptimizationConstraint.JOINT_LIMITS in config.constraints
     assert OptimizationConstraint.TORQUE_LIMITS in config.constraints
@@ -226,16 +226,17 @@ def test_optimizer_lever_length(default_golfer, default_club, basic_config):
 
 def test_swing_trajectory_creation():
     """Test SwingTrajectory can be created with valid data."""
-    n_joints = 7
     n_nodes = 20
     trajectory = SwingTrajectory(
         time=np.linspace(0, 0.3, n_nodes),
-        joint_angles=np.zeros((n_nodes, n_joints)),
-        joint_velocities=np.zeros((n_nodes, n_joints)),
-        joint_torques=np.zeros((n_nodes, n_joints)),
+        joint_angles={"shoulder": np.zeros(n_nodes), "elbow": np.zeros(n_nodes)},
+        joint_velocities={"shoulder": np.zeros(n_nodes), "elbow": np.zeros(n_nodes)},
+        joint_torques={"shoulder": np.zeros(n_nodes), "elbow": np.zeros(n_nodes)},
+        clubhead_position=np.zeros((n_nodes, 3)),
+        clubhead_velocity=np.zeros((n_nodes, 3)),
     )
     assert trajectory.time.shape == (n_nodes,)
-    assert trajectory.joint_angles.shape == (n_nodes, n_joints)
+    assert "shoulder" in trajectory.joint_angles
 
 
 # =============================================================================
@@ -256,8 +257,8 @@ def test_optimizer_result_has_trajectory(default_golfer, default_club, basic_con
     """Test optimization result contains a trajectory."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
-    assert result.optimal_trajectory is not None
-    assert isinstance(result.optimal_trajectory, SwingTrajectory)
+    assert result.trajectory is not None
+    assert isinstance(result.trajectory, SwingTrajectory)
 
 
 @pytest.mark.slow
@@ -274,10 +275,11 @@ def test_optimizer_respects_joint_limits(default_golfer, default_club, basic_con
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
 
-    if result.optimal_trajectory is not None:
-        angles = result.optimal_trajectory.joint_angles
+    if result.trajectory is not None:
+        angles = result.trajectory.joint_angles
         # Check angles are within reasonable bounds (allowing some tolerance)
-        assert np.all(np.abs(angles) < 5.0)  # Radians
+        for joint_name, joint_angles in angles.items():
+            assert np.all(np.abs(joint_angles) < 5.0), f"Joint {joint_name} exceeds limits"
 
 
 @pytest.mark.slow
