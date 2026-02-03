@@ -3,7 +3,11 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from src.shared.python.dashboard.widgets import FrequencyAnalysisDialog, LivePlotWidget
+from src.shared.python.dashboard.widgets import (
+    ControlPanel,
+    FrequencyAnalysisDialog,
+    LivePlotWidget,
+)
 from src.shared.python.interfaces import RecorderInterface
 
 
@@ -132,8 +136,6 @@ def test_frequency_analysis_dialog(app):
 # =============================================================================
 # ControlPanel Tests
 # =============================================================================
-
-from src.shared.python.dashboard.widgets import ControlPanel
 
 
 @pytest.fixture
