@@ -60,6 +60,7 @@ jobs:
       # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
       - name: Security Audit
         run: |
+          pip install --upgrade pip  # Upgrade pip to latest to fix CVE-2026-1703
           pip install pip-audit
           # Ignore CVEs with no fix version available presently:
           # - CVE-2024-23342 (ecdsa): No fix version available
