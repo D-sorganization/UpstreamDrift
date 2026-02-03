@@ -109,6 +109,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Hook is tightly coupled to ToastProvider - standard React pattern
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast(): ToastContextType {
   const context = useContext(ToastContext);
   if (!context) {

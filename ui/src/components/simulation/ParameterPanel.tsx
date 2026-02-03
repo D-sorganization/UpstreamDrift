@@ -45,6 +45,8 @@ export function ParameterPanel({ engine, disabled, onChange }: Props) {
   const [gpuAcceleration, setGpuAcceleration] = useState(false);
 
   // Update defaults when engine changes
+  // This pattern intentionally sets state from props for initialization
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const defaults = ENGINE_DEFAULTS[engine.toLowerCase()] || {};
     setDuration(defaults.duration ?? 3.0);
