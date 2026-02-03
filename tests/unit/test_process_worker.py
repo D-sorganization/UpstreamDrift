@@ -16,10 +16,10 @@ pytestmark = skip_if_unavailable("pyqt6")
 def mock_pyqt6():
     """Provide ProcessWorker with mocked signals for testing."""
     # Clear any cached module to ensure fresh import
-    if "src.shared.python.process_worker" in sys.modules:
-        del sys.modules["src.shared.python.process_worker"]
+    if "src.shared.python.ui.qt.process_worker" in sys.modules:
+        del sys.modules["src.shared.python.ui.qt.process_worker"]
 
-    from src.shared.python.process_worker import ProcessWorker
+    from src.shared.python.ui.qt.process_worker import ProcessWorker
 
     yield ProcessWorker
 

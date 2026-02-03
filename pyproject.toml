@@ -59,6 +59,8 @@ dev = [
     # Required for tests that import common_utils and model_explorer
     "pandas>=2.0.0",
     "defusedxml>=0.7.0",
+    # Required for plotting tests
+    "matplotlib>=3.8.0",
 ]
 
 # GUI testing (requires PyQt6)
