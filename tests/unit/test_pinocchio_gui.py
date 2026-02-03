@@ -43,13 +43,13 @@ class TestPinocchioGUI:
         # Use patch for everything that might cause import errors or runtime errors
         with (
             patch(
-                "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"
+                "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"
             ),
             patch(
-                "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"
+                "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"
             ),
             patch(
-                "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
+                "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
             ) as mock_urdf,
         ):
             mock_urdf.return_value.exists.return_value = False
@@ -75,7 +75,7 @@ class TestPinocchioGUI:
         mock_gui.data = MagicMock()
 
         with patch(
-            "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
+            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
         ) as MockAnalyzer:
             mock_gui._ensure_analyzer_initialized()
 
@@ -87,7 +87,7 @@ class TestPinocchioGUI:
         mock_gui.analyzer = existing_analyzer
 
         with patch(
-            "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
+            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
         ) as MockAnalyzer:
             mock_gui._ensure_analyzer_initialized()
 

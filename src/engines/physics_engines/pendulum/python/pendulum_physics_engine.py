@@ -169,9 +169,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
         g1, g2 = self.dynamics.gravity_vector(self.state.theta1, self.state.theta2)
         return np.array([g1, g2])
 
-    @precondition(
-        lambda self, qacc: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
@@ -199,9 +197,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
         a_drift = np.linalg.solve(M, -bias)
         return a_drift
 
-    @precondition(
-        lambda self, tau: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.

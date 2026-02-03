@@ -281,9 +281,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         # Not easily exposed separately in basic bindings without extra calc
         return np.array([])
 
-    @precondition(
-        lambda self, qacc: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         # Requires calling mj_inverse
@@ -363,9 +361,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to compute drift acceleration: {e}")
             return np.array([])
 
-    @precondition(
-        lambda self, tau: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from muscle activations.

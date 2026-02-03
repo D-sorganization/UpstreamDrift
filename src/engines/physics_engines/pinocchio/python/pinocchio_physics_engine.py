@@ -267,9 +267,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             np.ndarray, pin.computeGeneralizedGravity(self.model, self.data, self.q)
         )
 
-    @precondition(
-        lambda self, qacc: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
@@ -370,9 +368,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
         return cast(np.ndarray, a_drift)
 
-    @precondition(
-        lambda self, tau: self.is_initialized, "Engine must be initialized"
-    )
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.

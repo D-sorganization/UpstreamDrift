@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 export interface SimulationParameters {
   duration: number;
@@ -38,18 +38,27 @@ const ENGINE_DEFAULTS: Record<string, Partial<SimulationParameters>> = {
   },
 };
 
+function getEngineDefaults(engine: string): { duration: number; timestep: number } {
+  const defaults = ENGINE_DEFAULTS[engine.toLowerCase()] || {};
+  return {
+    duration: defaults.duration ?? 3.0,
+    timestep: defaults.timestep ?? 0.002,
+  };
+}
+
 export function ParameterPanel({ engine, disabled, onChange }: Props) {
-  const [duration, setDuration] = useState(3.0);
-  const [timestep, setTimestep] = useState(0.002);
+  const engineDefaults = useMemo(() => getEngineDefaults(engine), [engine]);
+
+  const [duration, setDuration] = useState(engineDefaults.duration);
+  const [timestep, setTimestep] = useState(engineDefaults.timestep);
   const [liveAnalysis, setLiveAnalysis] = useState(true);
   const [gpuAcceleration, setGpuAcceleration] = useState(false);
 
-  // Update defaults when engine changes
+  // Reset values when engine changes
   useEffect(() => {
-    const defaults = ENGINE_DEFAULTS[engine.toLowerCase()] || {};
-    setDuration(defaults.duration ?? 3.0);
-    setTimestep(defaults.timestep ?? 0.002);
-  }, [engine]);
+    setDuration(engineDefaults.duration);
+    setTimestep(engineDefaults.timestep);
+  }, [engineDefaults]);
 
   // Notify parent of parameter changes
   const notifyChange = useCallback(() => {
