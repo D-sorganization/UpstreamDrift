@@ -5,33 +5,50 @@ Welcome to the Golf Modeling Suite tutorial series!
 ## Tutorial Series
 
 ### Beginner Level
-1. **[Getting Started](content/01_getting_started.md)** ⭐ START HERE
+
+1. **[Getting Started](content/01_getting_started.md)** - START HERE
    - Installation and first simulation
    - Time: 30 minutes
 
-2. **[Loading C3D Motion Capture Data](content/02_placeholder.md)** 🚧 In Progress
+2. **[Your First Simulation](content/02_first_simulation.md)**
+   - Load models, configure parameters, run simulation
    - Time: 45 minutes
-
-3. **[Parameter Sweep Analysis](content/03_placeholder.md)** 🚧 In Progress
-   - Time: 30 minutes
 
 ### Intermediate Level
-4. **[Cross-Engine Comparison](content/04_placeholder.md)** 🚧 In Progress
-   - Time: 45 minutes
+
+1. **[Engine Comparison](content/03_engine_comparison.md)**
+   - Run simulations across multiple physics engines
+   - Cross-engine validation and consistency checking
+   - Time: 60 minutes
+
+2. **[Video Analysis](content/04_video_analysis.md)**
+   - Extract poses from video using MediaPipe
+   - Map video markers to biomechanical model
+   - Time: 75 minutes
 
 ## Tutorial Format
 
 Each tutorial includes:
-- ⏱️ Estimated time to complete
-- 📚 Learning objectives
-- 🔧 Step-by-step instructions
-- 🐛 Troubleshooting tips
-- ➡️ Next steps
+
+- Estimated time to complete
+- Learning objectives
+- Step-by-step instructions
+- Complete code examples
+- Troubleshooting tips
+- Next steps
+
+## Prerequisites
+
+All tutorials assume:
+
+- Python 3.11+ installed
+- Golf Modeling Suite installed (see Tutorial 1)
+- Basic Python knowledge
 
 ## Contributing
 
-Help us create tutorials! See [Contributing Guide](../development/contributing.md).
+Help us improve tutorials! See [Contributing Guide](../development/contributing.md).
 
 ---
 
-🤖 Auto-generated tutorial structure as part of #525
+Last updated: 2026-02-03

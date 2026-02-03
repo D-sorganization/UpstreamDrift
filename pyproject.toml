@@ -175,6 +175,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "requires_gl: Tests needing OpenGL/moderngl or a display",
+    "headless_safe: marks tests verified to work in headless mode",
     "slow_numba: Tests that require numba JIT or are heavy",
     "asyncio: marks tests as async tests",
     "benchmark: marks tests as performance benchmarks",
