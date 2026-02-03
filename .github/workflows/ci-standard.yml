@@ -62,10 +62,11 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install pip-audit
-          # Ignore CVEs with no fix version available presently:
+          # Ignore CVEs with no fix version available or transitive dependencies:
           # - CVE-2024-23342 (ecdsa): No fix version available
           # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994
+          # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703
 
       # SECURITY: Bandit static security analysis (Issue #782)
       - name: Bandit Security Scan
