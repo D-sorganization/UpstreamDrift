@@ -516,10 +516,10 @@ class FiniteElementShaftModel(ShaftModel):
         self.C: np.ndarray = np.zeros((1, 1))  # Damping
 
         # State vectors (reduced DOF after boundary conditions)
-        self.u = np.zeros(1)  # Displacement
-        self.v = np.zeros(1)  # Velocity
-        self.a = np.zeros(1)  # Acceleration
-        self.f_ext = np.zeros(1)  # External forces
+        self.u: np.ndarray = np.zeros(1)  # Displacement
+        self.v: np.ndarray = np.zeros(1)  # Velocity
+        self.a: np.ndarray = np.zeros(1)  # Acceleration
+        self.f_ext: np.ndarray = np.zeros(1)  # External forces
 
         self.time = 0.0
         self.n_free_dof = 0
