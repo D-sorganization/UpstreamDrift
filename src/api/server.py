@@ -244,8 +244,7 @@ async def startup_event() -> None:
 
         app.state.video_pipeline = video_pipeline
 
-        # Legacy configure() calls for backward compatibility during migration
-        # TODO: Remove these once all routes are migrated to Depends()
+        # Legacy configure() calls - will be removed after routes migration to Depends()
         core_routes.configure(engine_manager)
         engine_routes.configure(engine_manager, logger)
         simulation_routes.configure(app.state.simulation_service, active_tasks, logger)
