@@ -442,7 +442,7 @@ class TestReproducibility:
         traj2 = sim2.simulate_trajectory(default_launch, max_time=6.0)
 
         # Should be identical
-        for p1, p2 in zip(traj1, traj2):
+        for p1, p2 in zip(traj1, traj2, strict=True):
             np.testing.assert_array_almost_equal(p1.position, p2.position)
             np.testing.assert_array_almost_equal(p1.velocity, p2.velocity)
 

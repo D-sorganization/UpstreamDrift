@@ -43,10 +43,6 @@ from src.shared.python.physics_constants import (
     SPIN_DECAY_RATE_S,
 )
 
-# Type alias for numpy arrays
-NDArrayFloat = np.ndarray
-
-
 # =============================================================================
 # Configuration Classes
 # =============================================================================
@@ -142,9 +138,7 @@ class WindConfig:
         gradient_factor: Wind speed increase per 10m altitude
     """
 
-    base_velocity: NDArrayFloat = field(
-        default_factory=lambda: np.array([0.0, 0.0, 0.0])
-    )
+    base_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     gusts_enabled: bool = False
     gust_intensity: float = 0.3
     gust_frequency: float = 0.1  # Hz
@@ -159,7 +153,7 @@ class WindConfig:
         return float(np.linalg.norm(self.base_velocity))
 
     @property
-    def direction(self) -> NDArrayFloat:
+    def direction(self) -> np.ndarray:
         """Get normalized wind direction."""
         speed = self.speed
         if speed < 1e-10:
@@ -224,9 +218,9 @@ class DragModel:
 
     def calculate(
         self,
-        velocity: NDArrayFloat,
+        velocity: np.ndarray,
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
-    ) -> NDArrayFloat:
+    ) -> np.ndarray:
         """Calculate drag force.
 
         Args:
@@ -248,7 +242,7 @@ class DragModel:
 
     def get_effective_coefficient(
         self,
-        velocity: NDArrayFloat,
+        velocity: np.ndarray,
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
     ) -> float:
         """Get drag coefficient, optionally corrected for Reynolds number.
@@ -326,10 +320,10 @@ class LiftModel:
 
     def calculate(
         self,
-        velocity: NDArrayFloat,
-        spin: NDArrayFloat,
+        velocity: np.ndarray,
+        spin: np.ndarray,
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
-    ) -> NDArrayFloat:
+    ) -> np.ndarray:
         """Calculate lift force from spin.
 
         Args:
@@ -407,10 +401,10 @@ class MagnusModel:
 
     def calculate(
         self,
-        velocity: NDArrayFloat,
-        spin: NDArrayFloat,
+        velocity: np.ndarray,
+        spin: np.ndarray,
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
-    ) -> NDArrayFloat:
+    ) -> np.ndarray:
         """Calculate Magnus force.
 
         Args:
@@ -474,7 +468,7 @@ class WindGust:
         self,
         start_time: float,
         duration: float,
-        peak_velocity: NDArrayFloat,
+        peak_velocity: np.ndarray,
     ) -> None:
         """Initialize gust event.
 
@@ -492,7 +486,7 @@ class WindGust:
         """Get gust end time."""
         return self.start_time + self.duration
 
-    def get_velocity_at(self, t: float) -> NDArrayFloat:
+    def get_velocity_at(self, t: float) -> np.ndarray:
         """Get gust velocity at time t.
 
         Uses a sinusoidal envelope for smooth transitions.
@@ -542,8 +536,8 @@ class TurbulenceModel:
     def get_perturbation(
         self,
         t: float,
-        position: NDArrayFloat,
-    ) -> NDArrayFloat:
+        position: np.ndarray,
+    ) -> np.ndarray:
         """Get turbulence perturbation at given time and position.
 
         Args:
@@ -606,8 +600,8 @@ class WindModel:
     def get_wind_at(
         self,
         t: float,
-        position: NDArrayFloat,
-    ) -> NDArrayFloat:
+        position: np.ndarray,
+    ) -> np.ndarray:
         """Get wind velocity at given time and position.
 
         Args:
@@ -635,7 +629,7 @@ class WindModel:
 
         return wind
 
-    def _get_gust_contribution(self, t: float) -> NDArrayFloat:
+    def _get_gust_contribution(self, t: float) -> np.ndarray:
         """Get contribution from active gusts and possibly spawn new ones.
 
         Args:
@@ -926,12 +920,12 @@ class AerodynamicsEngine:
 
     def compute_forces(
         self,
-        velocity: NDArrayFloat,
-        spin: NDArrayFloat,
+        velocity: np.ndarray,
+        spin: np.ndarray,
         t: float = 0.0,
-        position: NDArrayFloat | None = None,
+        position: np.ndarray | None = None,
         resample: bool = False,
-    ) -> dict[str, NDArrayFloat]:
+    ) -> dict[str, np.ndarray]:
         """Compute all aerodynamic forces.
 
         Args:
@@ -989,13 +983,13 @@ class AerodynamicsEngine:
 
     def compute_acceleration(
         self,
-        velocity: NDArrayFloat,
-        spin: NDArrayFloat,
+        velocity: np.ndarray,
+        spin: np.ndarray,
         mass: float,
         t: float = 0.0,
-        position: NDArrayFloat | None = None,
+        position: np.ndarray | None = None,
         resample: bool = False,
-    ) -> NDArrayFloat:
+    ) -> np.ndarray:
         """Compute acceleration from aerodynamic forces.
 
         Args:
@@ -1014,9 +1008,9 @@ class AerodynamicsEngine:
 
     def compute_spin_decay(
         self,
-        spin: NDArrayFloat,
+        spin: np.ndarray,
         dt: float,
-    ) -> NDArrayFloat:
+    ) -> np.ndarray:
         """Compute spin decay over time step.
 
         Spin decays exponentially due to air resistance.

@@ -13,9 +13,16 @@ Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from src.shared.python.aerodynamics import (
+        AerodynamicsConfig,
+        RandomizationConfig,
+        WindConfig,
+    )
 
 from src.shared.python.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
 from src.shared.python.engine_availability import NUMBA_AVAILABLE
@@ -840,7 +847,6 @@ class EnhancedBallFlightSimulator:
         )
 
         results = []
-        base_sim = BallFlightSimulator(self.ball, environment=self.environment)
 
         for i in range(n_samples):
             # Create new randomizer with different seed for each run
