@@ -20,32 +20,32 @@ Design by Contract:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-import json
 
 import numpy as np
 
-from src.engines.physics_engines.putting_green.python.turf_properties import (
-    TurfProperties,
-    GrassType,
-)
-from src.engines.physics_engines.putting_green.python.green_surface import (
-    GreenSurface,
-    SlopeRegion,
-)
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
     BallRollPhysics,
     BallState,
     RollMode,
 )
+from src.engines.physics_engines.putting_green.python.green_surface import (
+    GreenSurface,
+    SlopeRegion,
+)
 from src.engines.physics_engines.putting_green.python.putter_stroke import (
     PutterStroke,
     StrokeParameters,
 )
-from src.shared.python.physics_constants import GOLF_BALL_MASS_KG, GOLF_BALL_RADIUS_M
+from src.engines.physics_engines.putting_green.python.turf_properties import (
+    GrassType,
+    TurfProperties,
+)
 from src.shared.python.checkpoint import StateCheckpoint
+from src.shared.python.physics_constants import GOLF_BALL_RADIUS_M
 
 
 @dataclass
@@ -225,7 +225,7 @@ class PuttingGreenSimulator:
         """
         filepath = Path(path)
 
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         self._load_from_data(data)
@@ -270,12 +270,14 @@ class PuttingGreenSimulator:
             # Load slope regions
             if "slopes" in green_data:
                 for s in green_data["slopes"]:
-                    self.green.add_slope_region(SlopeRegion(
-                        center=np.array(s["center"]),
-                        radius=s["radius"],
-                        slope_direction=np.array(s["direction"]),
-                        slope_magnitude=s["magnitude"],
-                    ))
+                    self.green.add_slope_region(
+                        SlopeRegion(
+                            center=np.array(s["center"]),
+                            radius=s["radius"],
+                            slope_direction=np.array(s["direction"]),
+                            slope_magnitude=s["magnitude"],
+                        )
+                    )
 
         # Update physics
         self._physics = BallRollPhysics(
@@ -358,12 +360,13 @@ class PuttingGreenSimulator:
             self._trajectory["positions"].append(self._ball_state.position.copy())
             self._trajectory["velocities"].append(self._ball_state.velocity.copy())
             self._trajectory["times"].append(self._time)
-            self._trajectory["modes"].append(self._physics.determine_roll_mode(self._ball_state))
+            self._trajectory["modes"].append(
+                self._physics.determine_roll_mode(self._ball_state)
+            )
 
     def forward(self) -> None:
         """Compute kinematics without advancing time."""
         # Just update derived quantities
-        pass
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get current state (position, velocity)."""
@@ -435,13 +438,14 @@ class PuttingGreenSimulator:
         # Simulate
         holed = False
         while (
-            self._time < self.config.max_simulation_time
-            and self._ball_state.is_moving
+            self._time < self.config.max_simulation_time and self._ball_state.is_moving
         ):
             self.step()
 
             # Check for hole
-            if self.green.is_in_hole(self._ball_state.position, self._ball_state.velocity):
+            if self.green.is_in_hole(
+                self._ball_state.position, self._ball_state.velocity
+            ):
                 holed = True
                 break
 
@@ -564,7 +568,9 @@ class PuttingGreenSimulator:
         A = np.pi * r**2
 
         # Relative velocity
-        relative_v = self._wind_direction * self._wind_speed - self._ball_state.velocity[:2]
+        relative_v = (
+            self._wind_direction * self._wind_speed - self._ball_state.velocity[:2]
+        )
         rel_speed = np.linalg.norm(relative_v)
 
         if rel_speed < 0.1:
@@ -580,9 +586,7 @@ class PuttingGreenSimulator:
         """Enable practice mode with feedback."""
         self._practice_mode = True
 
-    def simulate_with_feedback(
-        self, stroke_params: StrokeParameters
-    ) -> dict[str, Any]:
+    def simulate_with_feedback(self, stroke_params: StrokeParameters) -> dict[str, Any]:
         """Simulate putt with practice feedback.
 
         Args:
@@ -646,10 +650,14 @@ class PuttingGreenSimulator:
 
             angle_var = np.random.normal(0, direction_variance_deg * np.pi / 180)
             cos_a, sin_a = np.cos(angle_var), np.sin(angle_var)
-            direction = np.array([
-                cos_a * stroke_params.direction[0] - sin_a * stroke_params.direction[1],
-                sin_a * stroke_params.direction[0] + cos_a * stroke_params.direction[1],
-            ])
+            direction = np.array(
+                [
+                    cos_a * stroke_params.direction[0]
+                    - sin_a * stroke_params.direction[1],
+                    sin_a * stroke_params.direction[0]
+                    + cos_a * stroke_params.direction[1],
+                ]
+            )
 
             varied_params = StrokeParameters(
                 speed=speed,
@@ -664,9 +672,7 @@ class PuttingGreenSimulator:
         return results
 
     # Aim assist
-    def compute_aim_line(
-        self, ball_position: np.ndarray
-    ) -> dict[str, Any]:
+    def compute_aim_line(self, ball_position: np.ndarray) -> dict[str, Any]:
         """Compute aim line accounting for break.
 
         Args:
@@ -686,8 +692,7 @@ class PuttingGreenSimulator:
         # Recommended speed
         distance = np.linalg.norm(target - ball_position)
         avg_slope = np.dot(
-            break_info["average_slope"],
-            (target - ball_position) / (distance + 1e-10)
+            break_info["average_slope"], (target - ball_position) / (distance + 1e-10)
         )
         recommended_speed = self.putter.estimate_required_speed(
             distance, self.green.turf.stimp_rating, slope_percent=avg_slope * 100

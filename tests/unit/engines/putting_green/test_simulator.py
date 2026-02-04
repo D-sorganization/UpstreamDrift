@@ -6,12 +6,19 @@ putting green simulator engine that implements the PhysicsEngine protocol.
 
 from __future__ import annotations
 
-import pytest
-import numpy as np
-from pathlib import Path
-import tempfile
 import json
+import tempfile
 
+import numpy as np
+import pytest
+
+from src.engines.physics_engines.putting_green.python.green_surface import (
+    GreenSurface,
+    SlopeRegion,
+)
+from src.engines.physics_engines.putting_green.python.putter_stroke import (
+    StrokeParameters,
+)
 from src.engines.physics_engines.putting_green.python.simulator import (
     PuttingGreenSimulator,
     SimulationConfig,
@@ -19,16 +26,6 @@ from src.engines.physics_engines.putting_green.python.simulator import (
 )
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
-    GrassType,
-)
-from src.engines.physics_engines.putting_green.python.green_surface import (
-    GreenSurface,
-    SlopeRegion,
-)
-from src.engines.physics_engines.putting_green.python.ball_roll_physics import BallState
-from src.engines.physics_engines.putting_green.python.putter_stroke import (
-    PutterStroke,
-    StrokeParameters,
 )
 
 
@@ -140,7 +137,9 @@ class TestPuttingGreenSimulator:
         # Time should be 0
         assert simulator.get_time() == 0.0
 
-    def test_step_advances_time(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_step_advances_time(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """Step should advance simulation time."""
         configured_simulator.set_ball_position(np.array([5.0, 10.0]))
         configured_simulator.set_ball_velocity(np.array([2.0, 0.0]))
@@ -238,9 +237,7 @@ class TestPuttingGreenSimulator:
         final_vel = result.velocities[-1]
         assert np.linalg.norm(final_vel) < 0.01
 
-    def test_detect_hole_in(
-        self, configured_simulator: PuttingGreenSimulator
-    ) -> None:
+    def test_detect_hole_in(self, configured_simulator: PuttingGreenSimulator) -> None:
         """Should detect when ball goes in hole."""
         # Ball position close to hole, aimed at hole
         configured_simulator.set_ball_position(np.array([14.0, 10.0]))
@@ -381,7 +378,9 @@ class TestPuttingGreenSimulatorPhysicsInterface:
         assert drift.shape == (2,)
         assert np.all(np.isfinite(drift))
 
-    def test_compute_control_acceleration(self, simulator: PuttingGreenSimulator) -> None:
+    def test_compute_control_acceleration(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Should compute control acceleration from applied force."""
         tau = np.array([0.1, 0.0])  # Applied force
 
@@ -402,9 +401,7 @@ class TestPuttingGreenSimulatorIO:
 
     def test_load_from_path(self, simulator: PuttingGreenSimulator) -> None:
         """Should load green configuration from file."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             config = {
                 "green": {
                     "width": 25.0,
@@ -459,9 +456,7 @@ class TestPuttingGreenSimulatorIO:
 
     def test_load_topographical_csv(self, simulator: PuttingGreenSimulator) -> None:
         """Should load topographical data from CSV."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".csv", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             # Write CSV with x, y, elevation columns
             f.write("x,y,elevation\n")
             for x in np.linspace(0, 20, 10):
@@ -481,9 +476,7 @@ class TestPuttingGreenSimulatorIO:
         # This would require rasterio, so we just check the method exists
         assert hasattr(simulator, "load_topographical_data")
 
-    def test_export_simulation_result(
-        self, simulator: PuttingGreenSimulator
-    ) -> None:
+    def test_export_simulation_result(self, simulator: PuttingGreenSimulator) -> None:
         """Should export simulation result to file."""
         simulator.set_ball_position(np.array([5.0, 10.0]))
         stroke_params = StrokeParameters(

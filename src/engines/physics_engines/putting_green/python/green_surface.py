@@ -17,9 +17,9 @@ Design by Contract:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from scipy import interpolate, ndimage
@@ -320,7 +320,9 @@ class GreenSurface:
         # a = g * sin(theta) ≈ g * slope for small slopes
         return -GRAVITY_M_S2 * slope
 
-    def is_in_hole(self, position: np.ndarray, velocity: np.ndarray | None = None) -> bool:
+    def is_in_hole(
+        self, position: np.ndarray, velocity: np.ndarray | None = None
+    ) -> bool:
         """Check if ball position is in the hole.
 
         A ball is considered holed if:
@@ -369,12 +371,14 @@ class GreenSurface:
             height: Maximum height of ridge [m]
             width: Width of ridge influence [m]
         """
-        self._ridges.append({
-            "start": np.array(start[:2]),
-            "end": np.array(end[:2]),
-            "height": height,
-            "width": width,
-        })
+        self._ridges.append(
+            {
+                "start": np.array(start[:2]),
+                "end": np.array(end[:2]),
+                "height": height,
+                "width": width,
+            }
+        )
 
     def add_depression(
         self,
@@ -389,11 +393,13 @@ class GreenSurface:
             radius: Radius of depression [m]
             depth: Maximum depth [m]
         """
-        self._depressions.append({
-            "center": np.array(center[:2]),
-            "radius": radius,
-            "depth": depth,
-        })
+        self._depressions.append(
+            {
+                "center": np.array(center[:2]),
+                "radius": radius,
+                "depth": depth,
+            }
+        )
 
     def _ridge_elevation(self, position: np.ndarray, ridge: dict[str, Any]) -> float:
         """Compute elevation contribution from a ridge."""
@@ -471,7 +477,11 @@ class GreenSurface:
         putt_dir = end - start
         putt_len = np.linalg.norm(putt_dir)
         if putt_len < 1e-10:
-            return {"total_break": 0.0, "break_direction": np.zeros(2), "average_slope": np.zeros(2)}
+            return {
+                "total_break": 0.0,
+                "break_direction": np.zeros(2),
+                "average_slope": np.zeros(2),
+            }
 
         putt_dir_norm = putt_dir / putt_len
         perp_dir = np.array([-putt_dir_norm[1], putt_dir_norm[0]])
@@ -598,18 +608,22 @@ class GreenSurface:
                 turf=TurfProperties.create_preset("tournament_fast"),
             )
             # Add multiple subtle slopes
-            green.add_slope_region(SlopeRegion(
-                center=np.array([8.0, 8.0]),
-                radius=6.0,
-                slope_direction=np.array([1.0, 0.5]),
-                slope_magnitude=0.02,
-            ))
-            green.add_slope_region(SlopeRegion(
-                center=np.array([17.0, 17.0]),
-                radius=5.0,
-                slope_direction=np.array([-0.5, 1.0]),
-                slope_magnitude=0.015,
-            ))
+            green.add_slope_region(
+                SlopeRegion(
+                    center=np.array([8.0, 8.0]),
+                    radius=6.0,
+                    slope_direction=np.array([1.0, 0.5]),
+                    slope_magnitude=0.02,
+                )
+            )
+            green.add_slope_region(
+                SlopeRegion(
+                    center=np.array([17.0, 17.0]),
+                    radius=5.0,
+                    slope_direction=np.array([-0.5, 1.0]),
+                    slope_magnitude=0.015,
+                )
+            )
             green.add_depression(
                 center=np.array([12.0, 12.0]),
                 radius=3.0,
@@ -625,12 +639,14 @@ class GreenSurface:
                 turf=TurfProperties.create_preset("augusta_like"),
             )
             # Add severe tier
-            green.add_slope_region(SlopeRegion(
-                center=np.array([10.0, 10.0]),
-                radius=8.0,
-                slope_direction=np.array([1.0, 0.0]),
-                slope_magnitude=0.05,  # 5% slope
-            ))
+            green.add_slope_region(
+                SlopeRegion(
+                    center=np.array([10.0, 10.0]),
+                    radius=8.0,
+                    slope_direction=np.array([1.0, 0.0]),
+                    slope_magnitude=0.05,  # 5% slope
+                )
+            )
             green.add_ridge(
                 start=np.array([5.0, 15.0]),
                 end=np.array([15.0, 15.0]),
@@ -695,14 +711,18 @@ class GreenSurface:
         import csv
 
         points = []
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             reader = csv.DictReader(f)
             for row in reader:
-                points.append(ContourPoint(
-                    x=float(row.get("x", row.get("X", 0))),
-                    y=float(row.get("y", row.get("Y", 0))),
-                    elevation=float(row.get("elevation", row.get("z", row.get("Z", 0)))),
-                ))
+                points.append(
+                    ContourPoint(
+                        x=float(row.get("x", row.get("X", 0))),
+                        y=float(row.get("y", row.get("Y", 0))),
+                        elevation=float(
+                            row.get("elevation", row.get("z", row.get("Z", 0)))
+                        ),
+                    )
+                )
 
         self.set_contour_points(points)
 
@@ -710,7 +730,7 @@ class GreenSurface:
         """Load topography from JSON file."""
         import json
 
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         # Load contour points if present
@@ -724,12 +744,14 @@ class GreenSurface:
         # Load slope regions if present
         if "slopes" in data:
             for s in data["slopes"]:
-                self.add_slope_region(SlopeRegion(
-                    center=np.array(s["center"]),
-                    radius=s["radius"],
-                    slope_direction=np.array(s["direction"]),
-                    slope_magnitude=s["magnitude"],
-                ))
+                self.add_slope_region(
+                    SlopeRegion(
+                        center=np.array(s["center"]),
+                        radius=s["radius"],
+                        slope_direction=np.array(s["direction"]),
+                        slope_magnitude=s["magnitude"],
+                    )
+                )
 
         # Load hole position if present
         if "hole_position" in data:
@@ -740,7 +762,9 @@ class GreenSurface:
         try:
             import rasterio  # type: ignore
         except ImportError:
-            raise ImportError("rasterio required for GeoTIFF support. Install with: pip install rasterio")
+            raise ImportError(
+                "rasterio required for GeoTIFF support. Install with: pip install rasterio"
+            )
 
         with rasterio.open(filepath) as src:
             heightmap = src.read(1)

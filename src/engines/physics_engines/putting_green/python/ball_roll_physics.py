@@ -24,20 +24,20 @@ References:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.putting_green.python.green_surface import GreenSurface
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
-from src.engines.physics_engines.putting_green.python.green_surface import GreenSurface
 from src.shared.python.physics_constants import (
-    GRAVITY_M_S2,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
+    GRAVITY_M_S2,
 )
 
 
@@ -183,7 +183,9 @@ class BallRollPhysics:
             rolling_spin = np.dot(state.spin, spin_axis)
 
             # Check if close to pure rolling
-            spin_error = abs(rolling_spin - expected_spin) / (abs(expected_spin) + 1e-10)
+            spin_error = abs(rolling_spin - expected_spin) / (
+                abs(expected_spin) + 1e-10
+            )
 
             if spin_error < self.SPIN_VELOCITY_RATIO_TOLERANCE:
                 return RollMode.ROLLING
@@ -236,10 +238,12 @@ class BallRollPhysics:
         # Friction opposes the slip velocity (contact point velocity)
         # For sliding: slip = v - ω × r
         # In 2D: slip_x = v_x + ω_y * r, slip_y = v_y - ω_x * r
-        slip_velocity = np.array([
-            state.velocity[0] + state.spin[1] * self.ball_radius,
-            state.velocity[1] - state.spin[0] * self.ball_radius,
-        ])
+        slip_velocity = np.array(
+            [
+                state.velocity[0] + state.spin[1] * self.ball_radius,
+                state.velocity[1] - state.spin[0] * self.ball_radius,
+            ]
+        )
 
         slip_speed = np.linalg.norm(slip_velocity)
         if slip_speed < 1e-10:
@@ -305,7 +309,9 @@ class BallRollPhysics:
         target_spin = -spin_axis * (speed / self.ball_radius)
 
         # Exponential approach to target (with friction-dependent rate)
-        decay_rate = self.turf.effective_friction * GRAVITY_M_S2 / self.ball_radius * 5.0
+        decay_rate = (
+            self.turf.effective_friction * GRAVITY_M_S2 / self.ball_radius * 5.0
+        )
         alpha = 1.0 - np.exp(-decay_rate * dt)
 
         new_spin = state.spin + alpha * (target_spin - state.spin)
@@ -427,7 +433,9 @@ class BallRollPhysics:
     def _step_rk4(self, state: BallState, dt: float) -> BallState:
         """4th-order Runge-Kutta integration."""
 
-        def derivatives(pos: np.ndarray, vel: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        def derivatives(
+            pos: np.ndarray, vel: np.ndarray
+        ) -> tuple[np.ndarray, np.ndarray]:
             temp_state = BallState(pos, vel, state.spin)
             accel = self.compute_total_acceleration(temp_state)
             return vel, accel

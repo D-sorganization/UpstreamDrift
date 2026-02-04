@@ -6,15 +6,17 @@ module for handling slopes, undulations, and surface contours.
 
 from __future__ import annotations
 
-import pytest
 import numpy as np
+import pytest
 
 from src.engines.physics_engines.putting_green.python.green_surface import (
+    ContourPoint,
     GreenSurface,
     SlopeRegion,
-    ContourPoint,
 )
-from src.engines.physics_engines.putting_green.python.turf_properties import TurfProperties
+from src.engines.physics_engines.putting_green.python.turf_properties import (
+    TurfProperties,
+)
 
 
 class TestContourPoint:
@@ -168,7 +170,9 @@ class TestGreenSurface:
         assert gradient.shape == (2,)
         assert np.all(np.isfinite(gradient))
 
-    def test_gravitational_acceleration_on_slope(self, sloped_green: GreenSurface) -> None:
+    def test_gravitational_acceleration_on_slope(
+        self, sloped_green: GreenSurface
+    ) -> None:
         """Should compute gravitational acceleration from slope."""
         pos = np.array([10.0, 10.0])
         g_accel = sloped_green.get_gravitational_acceleration(pos)

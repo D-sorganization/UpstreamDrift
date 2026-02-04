@@ -9,36 +9,31 @@ These tests verify that all components work together correctly:
 
 from __future__ import annotations
 
-import pytest
-import numpy as np
-import tempfile
 import json
-from pathlib import Path
+import tempfile
 
-from src.engines.physics_engines.putting_green.python.turf_properties import (
-    TurfProperties,
-    GrassType,
-    TurfCondition,
+import numpy as np
+import pytest
+
+from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+    BallRollPhysics,
+    BallState,
 )
 from src.engines.physics_engines.putting_green.python.green_surface import (
     GreenSurface,
     SlopeRegion,
-    ContourPoint,
-)
-from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-    BallRollPhysics,
-    BallState,
-    RollMode,
 )
 from src.engines.physics_engines.putting_green.python.putter_stroke import (
     PutterStroke,
-    StrokeParameters,
     PutterType,
+    StrokeParameters,
 )
 from src.engines.physics_engines.putting_green.python.simulator import (
     PuttingGreenSimulator,
     SimulationConfig,
-    SimulationResult,
+)
+from src.engines.physics_engines.putting_green.python.turf_properties import (
+    TurfProperties,
 )
 
 
@@ -70,7 +65,9 @@ class TestEndToEndPutting:
         green.set_hole_position(np.array([15.0, 10.0]))
         return PuttingGreenSimulator(green=green)
 
-    def test_straight_putt_to_hole(self, tournament_simulator: PuttingGreenSimulator) -> None:
+    def test_straight_putt_to_hole(
+        self, tournament_simulator: PuttingGreenSimulator
+    ) -> None:
         """Test a straight putt that should go in the hole."""
         tournament_simulator.set_ball_position(np.array([5.0, 10.0]))
 
@@ -84,7 +81,9 @@ class TestEndToEndPutting:
         result = tournament_simulator.simulate_putt(stroke)
 
         # Ball should reach near the hole (within reason for speed estimation)
-        distance_from_hole = np.linalg.norm(result.final_position - np.array([15.0, 10.0]))
+        distance_from_hole = np.linalg.norm(
+            result.final_position - np.array([15.0, 10.0])
+        )
         assert distance_from_hole < 1.0  # Within 1 meter is reasonable
 
     def test_putt_with_break(self, sloped_simulator: PuttingGreenSimulator) -> None:
@@ -104,7 +103,9 @@ class TestEndToEndPutting:
         # Ball should have curved due to slope (y position changed)
         assert result.final_position[1] != 10.0
 
-    def test_ball_stops_eventually(self, tournament_simulator: PuttingGreenSimulator) -> None:
+    def test_ball_stops_eventually(
+        self, tournament_simulator: PuttingGreenSimulator
+    ) -> None:
         """Test that ball always stops within reasonable time."""
         tournament_simulator.set_ball_position(np.array([5.0, 10.0]))
 
@@ -124,7 +125,9 @@ class TestEndToEndPutting:
         # Simulation should not have hit time limit
         assert result.duration < 20.0
 
-    def test_holed_putt_detection(self, tournament_simulator: PuttingGreenSimulator) -> None:
+    def test_holed_putt_detection(
+        self, tournament_simulator: PuttingGreenSimulator
+    ) -> None:
         """Test detection of holed putt."""
         # Position close to hole
         tournament_simulator.set_ball_position(np.array([14.0, 10.0]))
@@ -141,7 +144,9 @@ class TestEndToEndPutting:
         # Should detect as holed
         assert result.holed
 
-    def test_miss_putt_not_holed(self, tournament_simulator: PuttingGreenSimulator) -> None:
+    def test_miss_putt_not_holed(
+        self, tournament_simulator: PuttingGreenSimulator
+    ) -> None:
         """Test that missed putt is not detected as holed."""
         tournament_simulator.set_ball_position(np.array([5.0, 5.0]))
 

@@ -21,10 +21,10 @@ Design by Contract:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
-import json
 
 import numpy as np
 from scipy import interpolate, ndimage
@@ -388,14 +388,16 @@ class TopographyData:
         import csv
 
         points = []
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             reader = csv.DictReader(f)
             for row in reader:
                 # Try different column name conventions
                 x = float(row.get("x", row.get("X", row.get("easting", 0))))
                 y = float(row.get("y", row.get("Y", row.get("northing", 0))))
                 z = float(
-                    row.get("elevation", row.get("z", row.get("Z", row.get("height", 0))))
+                    row.get(
+                        "elevation", row.get("z", row.get("Z", row.get("height", 0)))
+                    )
                 )
                 points.append(ElevationPoint(x=x, y=y, z=z))
 
@@ -411,7 +413,7 @@ class TopographyData:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from JSON file."""
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         # Check for different JSON structures
@@ -521,7 +523,9 @@ class TopographyData:
         """Save to CSV file."""
         import csv
 
-        heightmap = self._heightmap if self._heightmap is not None else self.to_heightmap()
+        heightmap = (
+            self._heightmap if self._heightmap is not None else self.to_heightmap()
+        )
         ny, nx = heightmap.shape
 
         x_coords = np.linspace(self._bounds.min_x, self._bounds.max_x, nx)
@@ -536,7 +540,9 @@ class TopographyData:
 
     def _save_json(self, filepath: Path) -> None:
         """Save to JSON file."""
-        heightmap = self._heightmap if self._heightmap is not None else self.to_heightmap()
+        heightmap = (
+            self._heightmap if self._heightmap is not None else self.to_heightmap()
+        )
 
         data = {
             "bounds": {
@@ -581,7 +587,9 @@ class TopographyData:
         Returns:
             Dictionary with min, max, mean, std elevation
         """
-        heightmap = self._heightmap if self._heightmap is not None else self.to_heightmap(50)
+        heightmap = (
+            self._heightmap if self._heightmap is not None else self.to_heightmap(50)
+        )
 
         return {
             "min_elevation": float(np.min(heightmap)),

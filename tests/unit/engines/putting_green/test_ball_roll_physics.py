@@ -6,16 +6,18 @@ physics including sliding, rolling, spin decay, and energy conservation.
 
 from __future__ import annotations
 
-import pytest
 import numpy as np
+import pytest
 
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
     BallRollPhysics,
     BallState,
     RollMode,
 )
-from src.engines.physics_engines.putting_green.python.turf_properties import TurfProperties
 from src.engines.physics_engines.putting_green.python.green_surface import GreenSurface
+from src.engines.physics_engines.putting_green.python.turf_properties import (
+    TurfProperties,
+)
 
 
 class TestRollMode:
@@ -235,7 +237,9 @@ class TestBallRollPhysics:
     def test_slope_accelerates_ball(self, physics_with_green: BallRollPhysics) -> None:
         """Ball on slope should accelerate downhill."""
         # Add a slope to the green
-        from src.engines.physics_engines.putting_green.python.green_surface import SlopeRegion
+        from src.engines.physics_engines.putting_green.python.green_surface import (
+            SlopeRegion,
+        )
 
         physics_with_green.green.add_slope_region(
             SlopeRegion(

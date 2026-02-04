@@ -10,8 +10,8 @@ Following Pragmatic Programmer principles:
 
 from __future__ import annotations
 
-import pytest
 import numpy as np
+import pytest
 
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     GrassType,
@@ -82,7 +82,10 @@ class TestTurfProperties:
         fast_green = TurfProperties(stimp_rating=12)
 
         # Faster green = lower friction
-        assert fast_green.rolling_friction_coefficient < slow_green.rolling_friction_coefficient
+        assert (
+            fast_green.rolling_friction_coefficient
+            < slow_green.rolling_friction_coefficient
+        )
 
     def test_grass_type_affects_properties(self) -> None:
         """Different grass types should have different default properties."""
@@ -200,8 +203,13 @@ class TestTurfProperties:
         stimp_12 = TurfProperties(stimp_rating=12)
 
         # Verify approximate inverse relationship
-        assert stimp_8.rolling_friction_coefficient > stimp_10.rolling_friction_coefficient
-        assert stimp_10.rolling_friction_coefficient > stimp_12.rolling_friction_coefficient
+        assert (
+            stimp_8.rolling_friction_coefficient > stimp_10.rolling_friction_coefficient
+        )
+        assert (
+            stimp_10.rolling_friction_coefficient
+            > stimp_12.rolling_friction_coefficient
+        )
 
     def test_effective_velocity_with_grain(self, default_turf: TurfProperties) -> None:
         """Ball velocity should be modified by grain effect."""

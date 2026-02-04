@@ -10,30 +10,30 @@ This module follows the Pragmatic Programmer principles:
 - Tracer Bullets: Minimal viable implementation first
 """
 
-from src.engines.physics_engines.putting_green.python.turf_properties import (
-    GrassType,
-    TurfCondition,
-    TurfProperties,
-)
-from src.engines.physics_engines.putting_green.python.green_surface import (
-    GreenSurface,
-    SlopeRegion,
-    ContourPoint,
-)
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
     BallRollPhysics,
     BallState,
     RollMode,
 )
+from src.engines.physics_engines.putting_green.python.green_surface import (
+    ContourPoint,
+    GreenSurface,
+    SlopeRegion,
+)
 from src.engines.physics_engines.putting_green.python.putter_stroke import (
     PutterStroke,
-    StrokeParameters,
     PutterType,
+    StrokeParameters,
 )
 from src.engines.physics_engines.putting_green.python.simulator import (
     PuttingGreenSimulator,
     SimulationConfig,
     SimulationResult,
+)
+from src.engines.physics_engines.putting_green.python.turf_properties import (
+    GrassType,
+    TurfCondition,
+    TurfProperties,
 )
 
 __all__ = [

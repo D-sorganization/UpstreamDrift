@@ -19,15 +19,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
 
 import numpy as np
 
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import BallState
 from src.shared.python.physics_constants import (
+    DEG_TO_RAD,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
-    DEG_TO_RAD,
 )
 
 
@@ -106,10 +105,12 @@ class StrokeParameters:
         effective_angle = self.face_angle * 0.8 * DEG_TO_RAD
         cos_a, sin_a = np.cos(effective_angle), np.sin(effective_angle)
 
-        return np.array([
-            cos_a * self.direction[0] - sin_a * self.direction[1],
-            sin_a * self.direction[0] + cos_a * self.direction[1],
-        ])
+        return np.array(
+            [
+                cos_a * self.direction[0] - sin_a * self.direction[1],
+                sin_a * self.direction[0] + cos_a * self.direction[1],
+            ]
+        )
 
     @classmethod
     def from_backstroke_length(

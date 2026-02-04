@@ -128,7 +128,9 @@ class TurfProperties:
         """Validate and normalize properties."""
         # Validate stimp rating
         if not 1 <= self.stimp_rating <= 15:
-            raise ValueError(f"stimp_rating must be between 1 and 15, got {self.stimp_rating}")
+            raise ValueError(
+                f"stimp_rating must be between 1 and 15, got {self.stimp_rating}"
+            )
 
         # Normalize grain direction
         grain_mag = np.linalg.norm(self.grain_direction)

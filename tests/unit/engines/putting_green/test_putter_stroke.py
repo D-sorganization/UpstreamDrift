@@ -6,15 +6,15 @@ interaction including strike, energy transfer, and different putter types.
 
 from __future__ import annotations
 
-import pytest
 import numpy as np
+import pytest
 
+from src.engines.physics_engines.putting_green.python.ball_roll_physics import BallState
 from src.engines.physics_engines.putting_green.python.putter_stroke import (
     PutterStroke,
-    StrokeParameters,
     PutterType,
+    StrokeParameters,
 )
-from src.engines.physics_engines.putting_green.python.ball_roll_physics import BallState
 
 
 class TestPutterType:
@@ -272,7 +272,10 @@ class TestPutterStroke:
         soft_insert = PutterStroke(insert_type="polymer")
 
         # Metal typically has higher COR
-        assert metal_face.coefficient_of_restitution > soft_insert.coefficient_of_restitution
+        assert (
+            metal_face.coefficient_of_restitution
+            > soft_insert.coefficient_of_restitution
+        )
 
     def test_compute_launch_velocity(self, putter: PutterStroke) -> None:
         """Should compute launch velocity from impact parameters."""
