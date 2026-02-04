@@ -704,9 +704,6 @@ class MeshLoader:
         with open(path) as f:
             gltf = json.load(f)
 
-        vertices: list[MeshVertex] = []
-        faces: list[MeshFace] = []
-
         # This is a simplified implementation
         # Full GLTF loading requires proper accessor/buffer handling
         logger.warning("Basic GLTF loading - some features may not be supported")
@@ -754,11 +751,11 @@ class MeshLoader:
                 faces=faces,
             )
 
-        except ImportError:
+        except ImportError as e:
             raise MeshLoadError(
                 "FBX loading requires trimesh library: pip install trimesh[easy]",
                 str(path),
-            )
+            ) from e
 
     def _load_collada(self, path: Path) -> LoadedMesh:
         """Load COLLADA (.dae) format mesh.
@@ -792,8 +789,10 @@ class MeshLoader:
                 faces=faces,
             )
 
-        except ImportError:
-            raise MeshLoadError("COLLADA loading requires trimesh library", str(path))
+        except ImportError as e:
+            raise MeshLoadError(
+                "COLLADA loading requires trimesh library", str(path)
+            ) from e
 
     def _load_ply(self, path: Path) -> LoadedMesh:
         """Load PLY format mesh.
@@ -821,5 +820,7 @@ class MeshLoader:
                 faces=faces,
             )
 
-        except ImportError:
-            raise MeshLoadError("PLY loading requires trimesh library", str(path))
+        except ImportError as e:
+            raise MeshLoadError(
+                "PLY loading requires trimesh library", str(path)
+            ) from e

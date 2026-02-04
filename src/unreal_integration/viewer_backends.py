@@ -347,8 +347,14 @@ class MeshcatBackend(ViewerBackend):
             config: Viewer configuration.
         """
         super().__init__(config)
-        self._vis = None
+        self._vis: Any = None
         self._object_counter = 0
+
+    @property
+    def _visualizer(self) -> Any:
+        """Get the meshcat visualizer, asserting it's initialized."""
+        assert self._vis is not None, "Meshcat visualizer not initialized"
+        return self._vis
 
     def initialize(self) -> None:
         """Initialize Meshcat visualizer."""
@@ -366,13 +372,12 @@ class MeshcatBackend(ViewerBackend):
             self._geometry = g
             self._transformations = tf
 
-            # Set background color
-            bg = self.config.background_color
             # Meshcat doesn't have direct background color setting,
             # but we store it for reference
+            self._background_color = self.config.background_color
 
             self._is_initialized = True
-            logger.info(f"Meshcat backend initialized at {self._vis.url()}")
+            logger.info(f"Meshcat backend initialized at {self._visualizer.url()}")
 
         except ImportError as e:
             logger.error(f"Failed to import meshcat: {e}")
@@ -423,7 +428,7 @@ class MeshcatBackend(ViewerBackend):
         )
 
         # Add to scene
-        self._vis[name].set_object(geom, material)
+        self._visualizer[name].set_object(geom, material)
 
         # Apply transform
         self._apply_transform(name, position, rotation, scale)
@@ -511,7 +516,7 @@ class MeshcatBackend(ViewerBackend):
         if position is not None:
             T[:3, 3] = position.to_numpy()
 
-        self._vis[name].set_transform(T)
+        self._visualizer[name].set_transform(T)
 
     def remove_object(self, name: str) -> bool:
         """Remove object from Meshcat scene."""
@@ -519,7 +524,7 @@ class MeshcatBackend(ViewerBackend):
             return False
 
         if name in self._objects:
-            self._vis[name].delete()
+            self._visualizer[name].delete()
             del self._objects[name]
             return True
         return False
@@ -530,7 +535,7 @@ class MeshcatBackend(ViewerBackend):
             return
 
         for name in list(self._objects.keys()):
-            self._vis[name].delete()
+            self._visualizer[name].delete()
         self._objects.clear()
 
     def render(self) -> np.ndarray | None:
@@ -545,7 +550,7 @@ class MeshcatBackend(ViewerBackend):
     def url(self) -> str | None:
         """Get Meshcat viewer URL."""
         if self._vis is not None:
-            return str(self._vis.url())
+            return str(self._visualizer.url())
         return None
 
 
@@ -650,8 +655,8 @@ def create_viewer(
     if isinstance(backend_type, str):
         try:
             backend_type = BackendType[backend_type.upper()]
-        except KeyError:
-            raise ValueError(f"Unknown backend type: {backend_type}")
+        except KeyError as e:
+            raise ValueError(f"Unknown backend type: {backend_type}") from e
 
     if config is None:
         config = ViewerConfig(backend_type=backend_type)

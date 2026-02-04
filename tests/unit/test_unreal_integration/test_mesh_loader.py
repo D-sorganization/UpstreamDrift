@@ -537,7 +537,7 @@ class TestMeshLoaderGLTF:
         gltf_content["buffers"][0]["uri"] = "minimal.bin"
         gltf_file.write_text(json.dumps(gltf_content))
 
-        loader = MeshLoader()
+        _loader = MeshLoader()  # noqa: F841 - validates loader can be created
         # Note: Full GLTF loading requires trimesh or pygltflib
         # This test validates the structure
 

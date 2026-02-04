@@ -407,6 +407,9 @@ class TestSkeletonMapperContracts:
             scale_factor=-1.0,  # Invalid negative scale
         )
         # Negative scale should be caught or handled gracefully
+        # Verify the mapping was created (it allows negative scales for mirroring)
+        assert mapping.source_bone == "source"
+        assert mapping.target_bone == "target"
 
 
 class TestSkeletonMapperInterpolation:

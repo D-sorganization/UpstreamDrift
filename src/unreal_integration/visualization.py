@@ -551,7 +551,7 @@ class HUDDataProvider:
         full_hud = self.get_hud_data(metrics)
         compact: dict[str, str] = {}
 
-        for key, panel in full_hud.get("panels", {}).items():
+        for _key, panel in full_hud.get("panels", {}).items():
             compact[panel["label"]] = self.format_value(panel)
 
         return compact
