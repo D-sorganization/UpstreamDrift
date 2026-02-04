@@ -585,9 +585,9 @@ class EnhancedBallFlightSimulator:
         self,
         ball: BallProperties | None = None,
         environment: EnvironmentalConditions | None = None,
-        aero_config: "AerodynamicsConfig | None" = None,
-        wind_config: "WindConfig | None" = None,
-        randomization_config: "RandomizationConfig | None" = None,
+        aero_config: AerodynamicsConfig | None = None,
+        wind_config: WindConfig | None = None,
+        randomization_config: RandomizationConfig | None = None,
         seed: int | None = None,
     ) -> None:
         """Initialize enhanced simulator.
@@ -621,9 +621,11 @@ class EnhancedBallFlightSimulator:
         self._wind_model = WindModel(self.wind_config, seed=seed)
 
         # Initialize randomizer
-        self._randomizer = EnvironmentRandomizer(
-            self.randomization_config, seed=seed
-        ) if self.randomization_config.enabled else None
+        self._randomizer = (
+            EnvironmentRandomizer(self.randomization_config, seed=seed)
+            if self.randomization_config.enabled
+            else None
+        )
 
         # Initialize aerodynamics engine
         self._aero_engine = AerodynamicsEngine(
@@ -668,7 +670,11 @@ class EnhancedBallFlightSimulator:
         spin = launch.spin_axis * omega
 
         # Gravity acceleration
-        gravity_acc = np.array([0.0, 0.0, -self.environment.gravity]) if include_gravity else np.zeros(3)
+        gravity_acc = (
+            np.array([0.0, 0.0, -self.environment.gravity])
+            if include_gravity
+            else np.zeros(3)
+        )
 
         # Run simulation
         trajectory = []
@@ -683,24 +689,26 @@ class EnhancedBallFlightSimulator:
 
             # Total acceleration
             gravity_force = self.ball.mass * gravity_acc
-            total_force = aero_forces['total'] + gravity_force
+            total_force = aero_forces["total"] + gravity_force
             acceleration = total_force / self.ball.mass
 
             # Store trajectory point
             forces = {
-                'gravity': gravity_force,
-                'drag': aero_forces['drag'],
-                'lift': aero_forces['lift'],
-                'magnus': aero_forces['magnus'],
+                "gravity": gravity_force,
+                "drag": aero_forces["drag"],
+                "lift": aero_forces["lift"],
+                "magnus": aero_forces["magnus"],
             }
 
-            trajectory.append(TrajectoryPoint(
-                time=t,
-                position=position.copy(),
-                velocity=velocity.copy(),
-                acceleration=acceleration.copy(),
-                forces=forces,
-            ))
+            trajectory.append(
+                TrajectoryPoint(
+                    time=t,
+                    position=position.copy(),
+                    velocity=velocity.copy(),
+                    acceleration=acceleration.copy(),
+                    forces=forces,
+                )
+            )
 
             # Check termination (ball hit ground)
             if position[2] < 0 and t > 0:
@@ -740,17 +748,24 @@ class EnhancedBallFlightSimulator:
         Returns:
             Tuple of (new_position, new_velocity, spin)
         """
-        def derivatives(p: np.ndarray, v: np.ndarray, time: float) -> tuple[np.ndarray, np.ndarray]:
+
+        def derivatives(
+            p: np.ndarray, v: np.ndarray, time: float
+        ) -> tuple[np.ndarray, np.ndarray]:
             aero_forces = self._aero_engine.compute_forces(v, spin, t=time, position=p)
             gravity_force = self.ball.mass * gravity_acc
-            total_force = aero_forces['total'] + gravity_force
+            total_force = aero_forces["total"] + gravity_force
             accel = total_force / self.ball.mass
             return v, accel
 
         # RK4 coefficients
         k1_v, k1_a = derivatives(pos, vel, t)
-        k2_v, k2_a = derivatives(pos + 0.5 * dt * k1_v, vel + 0.5 * dt * k1_a, t + 0.5 * dt)
-        k3_v, k3_a = derivatives(pos + 0.5 * dt * k2_v, vel + 0.5 * dt * k2_a, t + 0.5 * dt)
+        k2_v, k2_a = derivatives(
+            pos + 0.5 * dt * k1_v, vel + 0.5 * dt * k1_a, t + 0.5 * dt
+        )
+        k3_v, k3_a = derivatives(
+            pos + 0.5 * dt * k2_v, vel + 0.5 * dt * k2_a, t + 0.5 * dt
+        )
         k4_v, k4_a = derivatives(pos + dt * k3_v, vel + dt * k3_a, t + dt)
 
         # Update state
@@ -793,8 +808,8 @@ class EnhancedBallFlightSimulator:
         traj_without = no_aero_sim.simulate_trajectory(launch, max_time, dt)
 
         return {
-            'with_aero': traj_with,
-            'without_aero': traj_without,
+            "with_aero": traj_with,
+            "without_aero": traj_without,
         }
 
     def monte_carlo_simulation(
@@ -853,7 +868,7 @@ class EnhancedBallFlightSimulator:
 
             # Analyze
             analysis = self.analyze_trajectory(traj)
-            analysis['run'] = i
+            analysis["run"] = i
             results.append(analysis)
 
         return results

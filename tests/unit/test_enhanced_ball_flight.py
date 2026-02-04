@@ -33,7 +33,6 @@ from src.shared.python.ball_flight_physics import (
     LaunchConditions,
 )
 
-
 # =============================================================================
 # Fixtures
 # =============================================================================
@@ -146,7 +145,7 @@ class TestAerodynamicsToggle:
 
         # Check drag is non-zero in middle of flight
         mid_point = traj[len(traj) // 2]
-        drag_magnitude = np.linalg.norm(mid_point.forces['drag'])
+        drag_magnitude = np.linalg.norm(mid_point.forces["drag"])
         assert drag_magnitude > 0
 
     def test_aero_off_no_drag(
@@ -160,7 +159,7 @@ class TestAerodynamicsToggle:
 
         # All drag forces should be zero
         for point in traj:
-            drag_magnitude = np.linalg.norm(point.forces['drag'])
+            drag_magnitude = np.linalg.norm(point.forces["drag"])
             assert drag_magnitude == pytest.approx(0.0)
 
     def test_aero_toggle_affects_distance(
@@ -195,9 +194,9 @@ class TestAerodynamicsToggle:
         traj = sim_drag.simulate_trajectory(default_launch, max_time=1.0)
 
         point = traj[len(traj) // 2]
-        assert np.linalg.norm(point.forces['drag']) > 0
-        assert np.linalg.norm(point.forces['lift']) == pytest.approx(0.0)
-        assert np.linalg.norm(point.forces['magnus']) == pytest.approx(0.0)
+        assert np.linalg.norm(point.forces["drag"]) > 0
+        assert np.linalg.norm(point.forces["lift"]) == pytest.approx(0.0)
+        assert np.linalg.norm(point.forces["magnus"]) == pytest.approx(0.0)
 
 
 # =============================================================================
@@ -291,10 +290,10 @@ class TestComparisonMethod:
         sim = EnhancedBallFlightSimulator()
         result = sim.simulate_with_comparison(default_launch, max_time=6.0)
 
-        assert 'with_aero' in result
-        assert 'without_aero' in result
-        assert len(result['with_aero']) > 0
-        assert len(result['without_aero']) > 0
+        assert "with_aero" in result
+        assert "without_aero" in result
+        assert len(result["with_aero"]) > 0
+        assert len(result["without_aero"]) > 0
 
     def test_comparison_shows_drag_effect(
         self,
@@ -304,8 +303,8 @@ class TestComparisonMethod:
         sim = EnhancedBallFlightSimulator()
         result = sim.simulate_with_comparison(default_launch, max_time=8.0)
 
-        carry_with = sim.calculate_carry_distance(result['with_aero'])
-        carry_without = sim.calculate_carry_distance(result['without_aero'])
+        carry_with = sim.calculate_carry_distance(result["with_aero"])
+        carry_without = sim.calculate_carry_distance(result["without_aero"])
 
         # Significant difference expected
         assert carry_without > carry_with * 1.1  # At least 10% more
@@ -333,9 +332,7 @@ class TestMonteCarlo:
             seed=42,
         )
 
-        results = sim.monte_carlo_simulation(
-            default_launch, n_samples=10, max_time=6.0
-        )
+        results = sim.monte_carlo_simulation(default_launch, n_samples=10, max_time=6.0)
 
         assert len(results) == 10
 
@@ -360,11 +357,9 @@ class TestMonteCarlo:
             seed=42,
         )
 
-        results = sim.monte_carlo_simulation(
-            default_launch, n_samples=20, max_time=6.0
-        )
+        results = sim.monte_carlo_simulation(default_launch, n_samples=20, max_time=6.0)
 
-        carries = [r['carry_distance'] for r in results]
+        carries = [r["carry_distance"] for r in results]
 
         # Should have variation
         assert max(carries) != min(carries)
@@ -377,15 +372,13 @@ class TestMonteCarlo:
         rand_config = RandomizationConfig(enabled=True, air_density_variance=0.05)
         sim = EnhancedBallFlightSimulator(randomization_config=rand_config, seed=42)
 
-        results = sim.monte_carlo_simulation(
-            default_launch, n_samples=5, max_time=6.0
-        )
+        results = sim.monte_carlo_simulation(default_launch, n_samples=5, max_time=6.0)
 
         for result in results:
-            assert 'carry_distance' in result
-            assert 'max_height' in result
-            assert 'flight_time' in result
-            assert 'run' in result
+            assert "carry_distance" in result
+            assert "max_height" in result
+            assert "flight_time" in result
+            assert "run" in result
 
 
 # =============================================================================
@@ -405,12 +398,12 @@ class TestAnalysisMethods:
         traj = sim.simulate_trajectory(default_launch, max_time=6.0)
         analysis = sim.analyze_trajectory(traj)
 
-        assert 'carry_distance' in analysis
-        assert 'max_height' in analysis
-        assert 'flight_time' in analysis
-        assert 'landing_angle' in analysis
-        assert 'apex_time' in analysis
-        assert 'trajectory_points' in analysis
+        assert "carry_distance" in analysis
+        assert "max_height" in analysis
+        assert "flight_time" in analysis
+        assert "landing_angle" in analysis
+        assert "apex_time" in analysis
+        assert "trajectory_points" in analysis
 
     def test_realistic_driver_metrics(
         self,
@@ -422,10 +415,10 @@ class TestAnalysisMethods:
         analysis = sim.analyze_trajectory(traj)
 
         # Reasonable ranges for a 70 m/s driver shot
-        assert 100 < analysis['carry_distance'] < 300  # meters
-        assert 10 < analysis['max_height'] < 60  # meters
-        assert 3 < analysis['flight_time'] < 10  # seconds
-        assert 20 < analysis['landing_angle'] < 70  # degrees
+        assert 100 < analysis["carry_distance"] < 300  # meters
+        assert 10 < analysis["max_height"] < 60  # meters
+        assert 3 < analysis["flight_time"] < 10  # seconds
+        assert 20 < analysis["landing_angle"] < 70  # degrees
 
 
 # =============================================================================

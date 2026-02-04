@@ -599,8 +599,8 @@ class WindModel:
             intensity=self.config.turbulence_intensity,
             seed=seed,
         )
-        self._last_gust_time = -float('inf')
-        self._last_check_time = -float('inf')
+        self._last_gust_time = -float("inf")
+        self._last_check_time = -float("inf")
         self._dt_accumulator = 0.0  # Accumulate time for probabilistic spawning
 
     def get_wind_at(
@@ -694,7 +694,9 @@ class WindModel:
 
             # Random direction perturbation
             base_speed = self.config.speed
-            gust_speed = base_speed * self.config.gust_intensity * self._rng.uniform(0.5, 1.5)
+            gust_speed = (
+                base_speed * self.config.gust_intensity * self._rng.uniform(0.5, 1.5)
+            )
 
             # Gust direction: mostly aligned with base wind, some random deviation
             base_dir = self.config.direction
@@ -782,7 +784,9 @@ class EnvironmentRandomizer:
         if not self.config.enabled or self.config.temperature_variance <= 0:
             return base_temperature
 
-        return float(self._rng.normal(base_temperature, self.config.temperature_variance))
+        return float(
+            self._rng.normal(base_temperature, self.config.temperature_variance)
+        )
 
     def randomize_wind_config(self, base_config: WindConfig) -> WindConfig:
         """Randomize wind configuration.
@@ -812,11 +816,13 @@ class EnvironmentRandomizer:
             angle = float(self._rng.normal(0, self.config.wind_direction_variance))
             cos_a, sin_a = math.cos(angle), math.sin(angle)
             # Rotate in xy-plane
-            new_dir = np.array([
-                cos_a * base_dir[0] - sin_a * base_dir[1],
-                sin_a * base_dir[0] + cos_a * base_dir[1],
-                base_dir[2],
-            ])
+            new_dir = np.array(
+                [
+                    cos_a * base_dir[0] - sin_a * base_dir[1],
+                    sin_a * base_dir[0] + cos_a * base_dir[1],
+                    base_dir[2],
+                ]
+            )
         else:
             new_dir = base_dir
 
@@ -853,9 +859,11 @@ class EnvironmentRandomizer:
         return EnvironmentSnapshot(
             air_density=self.randomize_air_density(base_air_density),
             temperature=self.randomize_temperature(base_temperature),
-            wind_config=self.randomize_wind_config(base_wind_config)
-            if base_wind_config
-            else None,
+            wind_config=(
+                self.randomize_wind_config(base_wind_config)
+                if base_wind_config
+                else None
+            ),
         )
 
 
@@ -966,15 +974,17 @@ class AerodynamicsEngine:
             lift = self._lift.calculate(rel_velocity, spin, self._current_air_density)
 
         if self.config.is_magnus_active():
-            magnus = self._magnus.calculate(rel_velocity, spin, self._current_air_density)
+            magnus = self._magnus.calculate(
+                rel_velocity, spin, self._current_air_density
+            )
 
         total = drag + lift + magnus
 
         return {
-            'drag': drag,
-            'lift': lift,
-            'magnus': magnus,
-            'total': total,
+            "drag": drag,
+            "lift": lift,
+            "magnus": magnus,
+            "total": total,
         }
 
     def compute_acceleration(
@@ -1000,7 +1010,7 @@ class AerodynamicsEngine:
             Acceleration vector [m/s^2]
         """
         forces = self.compute_forces(velocity, spin, t, position, resample)
-        return forces['total'] / mass
+        return forces["total"] / mass
 
     def compute_spin_decay(
         self,

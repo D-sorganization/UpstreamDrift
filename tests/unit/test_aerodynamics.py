@@ -15,7 +15,6 @@ Following Pragmatic Programmer principles:
 
 from __future__ import annotations
 
-import math
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -30,9 +29,9 @@ from src.shared.python.aerodynamics import (
     MagnusModel,
     RandomizationConfig,
     TurbulenceModel,
+    WindConfig,
     WindGust,
     WindModel,
-    WindConfig,
 )
 
 if TYPE_CHECKING:
@@ -190,9 +189,7 @@ class TestAerodynamicsConfig:
 class TestDragModel:
     """Tests for drag force model."""
 
-    def test_drag_opposes_motion(
-        self, typical_velocity: NDArray[np.floating]
-    ) -> None:
+    def test_drag_opposes_motion(self, typical_velocity: NDArray[np.floating]) -> None:
         """Test drag force opposes velocity direction."""
         model = DragModel()
         drag = model.calculate(typical_velocity, air_density=1.225)
@@ -257,7 +254,8 @@ class TestLiftModel:
     """Tests for lift force model."""
 
     def test_lift_perpendicular_to_velocity(
-        self, typical_velocity: NDArray[np.floating],
+        self,
+        typical_velocity: NDArray[np.floating],
         typical_spin: NDArray[np.floating],
     ) -> None:
         """Test lift is perpendicular to velocity."""
@@ -283,9 +281,7 @@ class TestLiftModel:
         """Test zero spin produces zero lift."""
         model = LiftModel()
         lift = model.calculate(
-            np.array([50.0, 0.0, 0.0]),
-            np.zeros(3),
-            air_density=1.225
+            np.array([50.0, 0.0, 0.0]), np.zeros(3), air_density=1.225
         )
         np.testing.assert_array_almost_equal(lift, np.zeros(3))
 
@@ -297,8 +293,12 @@ class TestLiftModel:
         low_spin = np.array([0.0, -100.0, 0.0])  # Low spin
         high_spin = np.array([0.0, -300.0, 0.0])  # High spin
 
-        lift_low = np.linalg.norm(model.calculate(velocity, low_spin, air_density=1.225))
-        lift_high = np.linalg.norm(model.calculate(velocity, high_spin, air_density=1.225))
+        lift_low = np.linalg.norm(
+            model.calculate(velocity, low_spin, air_density=1.225)
+        )
+        lift_high = np.linalg.norm(
+            model.calculate(velocity, high_spin, air_density=1.225)
+        )
 
         assert lift_high > lift_low
 
@@ -347,7 +347,9 @@ class TestMagnusModel:
         model_high = MagnusModel(coefficient=0.35)
 
         mag_low = np.linalg.norm(model_low.calculate(velocity, spin, air_density=1.225))
-        mag_high = np.linalg.norm(model_high.calculate(velocity, spin, air_density=1.225))
+        mag_high = np.linalg.norm(
+            model_high.calculate(velocity, spin, air_density=1.225)
+        )
 
         assert mag_high > mag_low
 
@@ -362,24 +364,17 @@ class TestWindConfig:
 
     def test_default_no_wind(self, default_wind_config: WindConfig) -> None:
         """Test default is zero wind."""
-        np.testing.assert_array_equal(
-            default_wind_config.base_velocity,
-            np.zeros(3)
-        )
+        np.testing.assert_array_equal(default_wind_config.base_velocity, np.zeros(3))
 
     def test_wind_direction_normalized(self) -> None:
         """Test wind direction is normalized."""
-        config = WindConfig(
-            base_velocity=np.array([10.0, 5.0, 0.0])
-        )
+        config = WindConfig(base_velocity=np.array([10.0, 5.0, 0.0]))
         direction = config.direction
         assert np.linalg.norm(direction) == pytest.approx(1.0)
 
     def test_wind_speed_property(self) -> None:
         """Test wind speed calculation."""
-        config = WindConfig(
-            base_velocity=np.array([3.0, 4.0, 0.0])  # 3-4-5 triangle
-        )
+        config = WindConfig(base_velocity=np.array([3.0, 4.0, 0.0]))  # 3-4-5 triangle
         assert config.speed == pytest.approx(5.0)
 
 
@@ -416,7 +411,9 @@ class TestWindModel:
         model = WindModel(config, seed=42)
 
         # Sample at different times
-        winds = [model.get_wind_at(t=t, position=np.zeros(3)) for t in np.linspace(0, 10, 20)]
+        winds = [
+            model.get_wind_at(t=t, position=np.zeros(3)) for t in np.linspace(0, 10, 20)
+        ]
 
         # Should have variation
         wind_speeds = [np.linalg.norm(w) for w in winds]
@@ -684,8 +681,8 @@ class TestEnvironmentRandomizer:
 
         # Snapshot should have consistent values
         assert snapshot.air_density == snapshot.air_density  # Same on re-access
-        assert hasattr(snapshot, 'air_density')
-        assert hasattr(snapshot, 'temperature')
+        assert hasattr(snapshot, "air_density")
+        assert hasattr(snapshot, "temperature")
 
 
 # =============================================================================
@@ -705,14 +702,14 @@ class TestAerodynamicsEngine:
         """Test engine computes all force components."""
         forces = default_engine.compute_forces(typical_velocity, typical_spin)
 
-        assert 'drag' in forces
-        assert 'lift' in forces
-        assert 'magnus' in forces
-        assert 'total' in forces
+        assert "drag" in forces
+        assert "lift" in forces
+        assert "magnus" in forces
+        assert "total" in forces
 
         # Total should be sum of components
-        expected_total = forces['drag'] + forces['lift'] + forces['magnus']
-        np.testing.assert_array_almost_equal(forces['total'], expected_total)
+        expected_total = forces["drag"] + forces["lift"] + forces["magnus"]
+        np.testing.assert_array_almost_equal(forces["total"], expected_total)
 
     def test_disabled_config_zero_forces(
         self,
@@ -725,7 +722,7 @@ class TestAerodynamicsEngine:
 
         forces = engine.compute_forces(typical_velocity, typical_spin)
 
-        np.testing.assert_array_almost_equal(forces['total'], np.zeros(3))
+        np.testing.assert_array_almost_equal(forces["total"], np.zeros(3))
 
     def test_individual_force_toggles(
         self,
@@ -742,9 +739,9 @@ class TestAerodynamicsEngine:
         engine = AerodynamicsEngine(config)
         forces = engine.compute_forces(typical_velocity, typical_spin)
 
-        assert np.linalg.norm(forces['drag']) > 0
-        np.testing.assert_array_almost_equal(forces['lift'], np.zeros(3))
-        np.testing.assert_array_almost_equal(forces['magnus'], np.zeros(3))
+        assert np.linalg.norm(forces["drag"]) > 0
+        np.testing.assert_array_almost_equal(forces["lift"], np.zeros(3))
+        np.testing.assert_array_almost_equal(forces["magnus"], np.zeros(3))
 
     def test_wind_affects_relative_velocity(
         self,
@@ -757,10 +754,12 @@ class TestAerodynamicsEngine:
         engine_with_wind = AerodynamicsEngine(wind_model=wind_model)
 
         forces_no_wind = engine_no_wind.compute_forces(typical_velocity, typical_spin)
-        forces_with_wind = engine_with_wind.compute_forces(typical_velocity, typical_spin)
+        forces_with_wind = engine_with_wind.compute_forces(
+            typical_velocity, typical_spin
+        )
 
         # Forces should differ
-        assert not np.allclose(forces_no_wind['drag'], forces_with_wind['drag'])
+        assert not np.allclose(forces_no_wind["drag"], forces_with_wind["drag"])
 
     def test_compute_acceleration(
         self,
@@ -772,9 +771,11 @@ class TestAerodynamicsEngine:
         mass = 0.0459  # kg
 
         forces = default_engine.compute_forces(typical_velocity, typical_spin)
-        accel = default_engine.compute_acceleration(typical_velocity, typical_spin, mass)
+        accel = default_engine.compute_acceleration(
+            typical_velocity, typical_spin, mass
+        )
 
-        expected_accel = forces['total'] / mass
+        expected_accel = forces["total"] / mass
         np.testing.assert_array_almost_equal(accel, expected_accel)
 
     def test_spin_decay_computation(self, default_engine: AerodynamicsEngine) -> None:
@@ -792,12 +793,8 @@ class TestAerodynamicsEngine:
         initial_spin = np.array([0.0, -260.0, 0.0])
         dt = 0.5
 
-        slow_decay = AerodynamicsEngine(
-            AerodynamicsConfig(spin_decay_rate=0.02)
-        )
-        fast_decay = AerodynamicsEngine(
-            AerodynamicsConfig(spin_decay_rate=0.2)
-        )
+        slow_decay = AerodynamicsEngine(AerodynamicsConfig(spin_decay_rate=0.02))
+        fast_decay = AerodynamicsEngine(AerodynamicsConfig(spin_decay_rate=0.2))
 
         spin_slow = slow_decay.compute_spin_decay(initial_spin, dt)
         spin_fast = fast_decay.compute_spin_decay(initial_spin, dt)
@@ -826,7 +823,7 @@ class TestAerodynamicsEngine:
         ]
 
         # Should have variation
-        drag_mags = [np.linalg.norm(f['drag']) for f in forces_samples]
+        drag_mags = [np.linalg.norm(f["drag"]) for f in forces_samples]
         assert min(drag_mags) != max(drag_mags)
 
 
@@ -864,7 +861,9 @@ class TestAerodynamicsIntegration:
         dt = 0.01
 
         # Step
-        accel = engine.compute_acceleration(velocity, spin, mass, t=0.0, position=position)
+        accel = engine.compute_acceleration(
+            velocity, spin, mass, t=0.0, position=position
+        )
         new_velocity = velocity + accel * dt
         new_position = position + new_velocity * dt
         new_spin = engine.compute_spin_decay(spin, dt)
@@ -911,4 +910,4 @@ class TestAerodynamicsIntegration:
         forces2 = engine2.compute_forces(velocity, spin)
 
         # Should be identical
-        np.testing.assert_array_almost_equal(forces1['total'], forces2['total'])
+        np.testing.assert_array_almost_equal(forces1["total"], forces2["total"])
