@@ -420,7 +420,7 @@ class PoseTransform:
 
         # Extract rotation (assume no skew)
         rot = matrix[:3, :3].copy()
-        scale = np.linalg.norm(rot[:, 0])
+        scale = float(np.linalg.norm(rot[:, 0]))
         rot = rot / scale
 
         # Convert rotation matrix to quaternion

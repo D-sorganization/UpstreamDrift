@@ -263,18 +263,18 @@ class ForceVectorRenderer:
             )
             vertices.append(point)
 
-        vertices = np.array(vertices)
+        vertices_array = np.array(vertices)
 
         # Get color
         color = self.config.force_color_map.get("torque", (1.0, 0.5, 0.0, 1.0))
         if force.color is not None:
             color = force.color
 
-        colors = np.tile(color, (len(vertices), 1))
+        colors = np.tile(color, (len(vertices_array), 1))
 
         return RenderData(
             visualization_type=VisualizationType.TORQUE_RING,
-            vertices=vertices,
+            vertices=vertices_array,
             colors=colors,
             metadata={
                 "magnitude": force.magnitude,
@@ -341,7 +341,7 @@ class TrajectoryRenderer:
                 else:
                     colors.append((0.0, 0.5, 1.0, 1.0))
 
-        colors = np.array(colors)
+        colors_array = np.array(colors)
 
         viz_type = (
             VisualizationType.TRAJECTORY_RIBBON
@@ -352,7 +352,7 @@ class TrajectoryRenderer:
         return RenderData(
             visualization_type=viz_type,
             vertices=vertices,
-            colors=colors,
+            colors=colors_array,
             metadata={
                 "point_count": len(points),
                 "line_width": self.config.trajectory_width,
