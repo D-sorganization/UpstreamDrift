@@ -489,7 +489,7 @@ def _sphere_sphere_distance(
         return -(sphere_a.radius + sphere_b.radius), sphere_a.center, sphere_b.center
 
     direction = diff / center_dist
-    distance = center_dist - sphere_a.radius - sphere_b.radius
+    distance = float(center_dist - sphere_a.radius - sphere_b.radius)
 
     point_a = sphere_a.center + sphere_a.radius * direction
     point_b = sphere_b.center - sphere_b.radius * direction
@@ -516,7 +516,7 @@ def _sphere_capsule_distance(
         return distance, sphere.center, closest_on_axis
 
     direction = diff / center_dist
-    distance = center_dist - sphere.radius - capsule.radius
+    distance = float(center_dist - sphere.radius - capsule.radius)
 
     point_sphere = sphere.center - sphere.radius * direction
     point_capsule = closest_on_axis + capsule.radius * direction
@@ -543,7 +543,7 @@ def _capsule_capsule_distance(
         return distance, closest_a, closest_b
 
     direction = diff / center_dist
-    distance = center_dist - cap_a.radius - cap_b.radius
+    distance = float(center_dist - cap_a.radius - cap_b.radius)
 
     point_a = closest_a + cap_a.radius * direction
     point_b = closest_b - cap_b.radius * direction
@@ -633,7 +633,7 @@ def _gjk_distance(
             if len(simplex) == 0:
                 # Return distance between supports
                 diff = support_b - support_a
-                dist = np.linalg.norm(diff)
+                dist = float(np.linalg.norm(diff))
                 return dist, support_a, support_b
 
         simplex.append(support)
