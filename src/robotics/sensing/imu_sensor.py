@@ -434,6 +434,9 @@ def create_realistic_imu(
         IMUSensorConfig(
             sensor_id=sensor_id,
             seed=seed,
-            **params,
+            accel_noise_std=params["accel_noise_std"],
+            gyro_noise_std=params["gyro_noise_std"],
+            accel_bias_drift=params["accel_bias_drift"],
+            gyro_bias_drift=params["gyro_bias_drift"],
         )
     )
