@@ -35,7 +35,6 @@ class RRTConfig(PlannerConfig):
     """
 
 
-
 @dataclass
 class TreeNode:
     """Node in the RRT tree.
