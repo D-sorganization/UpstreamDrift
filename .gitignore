@@ -11,6 +11,7 @@ env/
 .coverage.*
 build/
 dist/
+uv.lock
 
 # MATLAB/Simulink
 *.asv
