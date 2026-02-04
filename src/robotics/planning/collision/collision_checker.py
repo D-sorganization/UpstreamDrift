@@ -21,7 +21,6 @@ from src.robotics.planning.collision.collision_types import (
 )
 from src.robotics.planning.collision.geometric_primitives import (
     GeometricPrimitive,
-    Sphere,
     compute_primitive_distance,
 )
 
@@ -318,9 +317,7 @@ class CollisionChecker:
         max_a = max_a + margin
 
         # Check overlap
-        return bool(
-            np.all(max_a >= min_b) and np.all(max_b >= min_a)
-        )
+        return bool(np.all(max_a >= min_b) and np.all(max_b >= min_a))
 
     def compute_distance(
         self,

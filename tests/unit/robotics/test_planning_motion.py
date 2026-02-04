@@ -13,7 +13,6 @@ import numpy as np
 import pytest
 
 from src.robotics.planning.motion import (
-    MotionPlanner,
     PlannerConfig,
     PlannerResult,
     PlannerStatus,
@@ -22,7 +21,6 @@ from src.robotics.planning.motion import (
     RRTStarConfig,
     RRTStarPlanner,
 )
-
 
 # =============================================================================
 # Mock Collision Checker for Testing
@@ -220,7 +218,9 @@ class TestRRTPlanner:
         assert result.success
         assert len(result.path) >= 2
         assert np.allclose(result.path[0], q_start)
-        assert np.linalg.norm(result.path[-1] - q_goal) <= planner._config.goal_tolerance
+        assert (
+            np.linalg.norm(result.path[-1] - q_goal) <= planner._config.goal_tolerance
+        )
 
     def test_plan_invalid_start(self, collision_checker: MockCollisionChecker) -> None:
         """Test planning with invalid start configuration."""

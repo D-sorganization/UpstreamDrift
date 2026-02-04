@@ -16,26 +16,26 @@ Example:
 
 from __future__ import annotations
 
-from src.robotics.planning.collision.collision_types import (
-    CollisionPair,
-    CollisionQueryType,
-    CollisionResult,
-    DistanceResult,
-    CollisionQuery,
-)
 from src.robotics.planning.collision.collision_checker import (
     CollisionChecker,
     CollisionCheckerConfig,
 )
+from src.robotics.planning.collision.collision_types import (
+    CollisionPair,
+    CollisionQuery,
+    CollisionQueryType,
+    CollisionResult,
+    DistanceResult,
+)
 from src.robotics.planning.collision.geometric_primitives import (
-    GeometricPrimitive,
-    Sphere,
     Box,
     Capsule,
-    Cylinder,
     ConvexHull,
-    compute_primitive_distance,
+    Cylinder,
+    GeometricPrimitive,
+    Sphere,
     check_primitive_collision,
+    compute_primitive_distance,
 )
 
 __all__ = [

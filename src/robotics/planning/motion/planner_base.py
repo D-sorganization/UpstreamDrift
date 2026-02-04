@@ -112,7 +112,7 @@ class PlannerResult:
 class CollisionCheckerProtocol(Protocol):
     """Protocol for collision checkers used by planners."""
 
-    def check_collision(self, q: np.ndarray) -> "CollisionResultProtocol":
+    def check_collision(self, q: np.ndarray) -> CollisionResultProtocol:
         """Check if configuration is in collision."""
         ...
 

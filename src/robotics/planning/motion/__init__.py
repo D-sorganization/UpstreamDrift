@@ -23,8 +23,8 @@ from src.robotics.planning.motion.planner_base import (
     PlannerResult,
     PlannerStatus,
 )
-from src.robotics.planning.motion.rrt import RRTPlanner, RRTConfig
-from src.robotics.planning.motion.rrt_star import RRTStarPlanner, RRTStarConfig
+from src.robotics.planning.motion.rrt import RRTConfig, RRTPlanner
+from src.robotics.planning.motion.rrt_star import RRTStarConfig, RRTStarPlanner
 
 __all__ = [
     # Base

@@ -29,7 +29,6 @@ from src.robotics.planning.collision import (
     compute_primitive_distance,
 )
 
-
 # =============================================================================
 # Mock Engine for Testing
 # =============================================================================
@@ -640,7 +639,11 @@ class TestCollisionChecker:
         result = checker.compute_distance(q)
 
         # Should return some distance (bodies are separated)
-        assert result.distance > 0 or result.distance == float("inf") or result.closest_pair is None
+        assert (
+            result.distance > 0
+            or result.distance == float("inf")
+            or result.closest_pair is None
+        )
 
     def test_compute_distance_with_environment(
         self,

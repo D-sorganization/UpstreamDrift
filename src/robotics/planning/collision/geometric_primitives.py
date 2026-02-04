@@ -181,7 +181,9 @@ class Box(GeometricPrimitive):
         # Support in local frame
         local_support = np.sign(local_dir) * self.half_extents
         # Handle zero components
-        local_support = np.where(np.abs(local_dir) < 1e-10, self.half_extents, local_support)
+        local_support = np.where(
+            np.abs(local_dir) < 1e-10, self.half_extents, local_support
+        )
         # Transform back to world
         return self.rotation @ local_support + self.center
 

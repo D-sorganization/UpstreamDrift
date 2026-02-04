@@ -256,9 +256,12 @@ class RRTStarPlanner(MotionPlanner):
             space_vol = 1.0
 
         # Compute gamma
-        gamma = self._config.rewire_factor * 2 * (1 + 1 / d) ** (1 / d) * (
-            space_vol / unit_ball_vol
-        ) ** (1 / d)
+        gamma = (
+            self._config.rewire_factor
+            * 2
+            * (1 + 1 / d) ** (1 / d)
+            * (space_vol / unit_ball_vol) ** (1 / d)
+        )
 
         # Compute radius
         radius = min(
