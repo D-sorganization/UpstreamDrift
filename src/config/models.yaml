@@ -60,6 +60,13 @@ models:
     type: "special_app"
     path: "src/tools/urdf_generator/launch_urdf_generator.py"
 
+  - id: "putting_green"
+    name: "Putting Green"
+    description: "Realistic putting green simulation with ball rolling physics"
+    type: "putting_green"
+    path: "src/engines/physics_engines/putting_green/python/simulator.py"
+    engine_type: "putting_green"
+
   # =============================================================================
   # ARCHIVED / HIDDEN / LEGACY entries preserved below (commented or type: hidden if supported)
   # For now we just don't list them in the Launcher `default_ids` but keeping them structured here
