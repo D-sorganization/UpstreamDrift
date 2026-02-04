@@ -1,13 +1,14 @@
 # =============================================================================
-# Fleet-Wide Pre-commit Configuration
+# Fleet-Wide Pre-commit Configuration (Polyglot)
 # =============================================================================
+# Supports: Python, JavaScript/TypeScript, React, HTML, CSS, C++
+#
 # Fast checks on every commit (<15 seconds)
-# Slower checks (mypy, bandit, tests) on pre-push only
+# Slower checks (mypy, tests) on pre-push only
 #
 # EXCEPTIONS:
-# - Documentation-only changes (.md, .rst) skip Python checks
-# - Workflow changes (.github/) skip Python checks
-# - Config changes (.yml, .yaml, .json) only run prettier
+# - Documentation-only changes (.md, .rst) skip code checks
+# - Workflow changes (.github/) skip code checks
 #
 # Installation:
 #   pip install pre-commit
@@ -16,89 +17,167 @@
 # =============================================================================
 
 repos:
-  # -------------------------------------------------------------------------
-  # Stage 1: Code Formatting (auto-fix) - PYTHON FILES ONLY
-  # -------------------------------------------------------------------------
+  # ===========================================================================
+  # PYTHON CHECKS
+  # ===========================================================================
 
   # Ruff - Fast Python linter with auto-fix
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff
-        name: "ruff (lint + fix)"
+        name: "ruff (Python lint + fix)"
         args: ["--fix", "--exit-non-zero-on-fix"]
         types: [python]
-        # Skip for docs-only or workflow-only changes
         exclude: ^(\.github/|docs/|.*\.md$)
 
       - id: ruff-format
-        name: "ruff format"
+        name: "ruff format (Python)"
         types: [python]
         exclude: ^(\.github/|docs/|.*\.md$)
 
-  # Black - Python code formatter
+  # Black - Python code formatter (backup)
   - repo: https://github.com/psf/black
     rev: 26.1.0
     hooks:
       - id: black
-        name: "black (format)"
+        name: "black (Python format)"
         language_version: python3.11
         types: [python]
         exclude: ^(\.github/|docs/|.*\.md$)
 
-  # -------------------------------------------------------------------------
-  # Stage 2: Quick Quality Checks - PYTHON FILES ONLY
-  # -------------------------------------------------------------------------
+  # ===========================================================================
+  # JAVASCRIPT / TYPESCRIPT / REACT CHECKS
+  # ===========================================================================
+
+  # ESLint - JavaScript/TypeScript linter
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.19.0
+    hooks:
+      - id: eslint
+        name: "eslint (JS/TS/React)"
+        types_or: [javascript, jsx, ts, tsx]
+        args: ["--fix", "--max-warnings=0"]
+        additional_dependencies:
+          - eslint@9.19.0
+          - eslint-plugin-react@7.37.4
+          - eslint-plugin-react-hooks@5.1.0
+          - "@typescript-eslint/parser@8.22.0"
+          - "@typescript-eslint/eslint-plugin@8.22.0"
+        exclude: ^(\.github/|docs/|node_modules/|dist/|build/)
+
+  # ===========================================================================
+  # HTML / CSS CHECKS
+  # ===========================================================================
+
+  # HTMLHint - HTML linter
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-markup
+    rev: v1.0.1
+    hooks:
+      - id: rst-linter
+        name: "RST linter"
+        types: [rst]
+        exclude: ^(\.github/|node_modules/)
+
+  # Stylelint - CSS/SCSS linter
+  - repo: https://github.com/awebdeveloper/pre-commit-stylelint
+    rev: 0.0.2
+    hooks:
+      - id: stylelint
+        name: "stylelint (CSS/SCSS)"
+        types_or: [css, scss]
+        args: ["--fix"]
+        additional_dependencies:
+          - stylelint@16.2.1
+          - stylelint-config-standard@36.0.0
+        exclude: ^(\.github/|node_modules/|dist/|build/)
+
+  # ===========================================================================
+  # C++ CHECKS
+  # ===========================================================================
+
+  # Clang-format - C/C++ formatter
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v19.1.7
+    hooks:
+      - id: clang-format
+        name: "clang-format (C/C++)"
+        types_or: [c, c++]
+        args: ["-i", "--style=file"]
+        exclude: ^(\.github/|docs/|third_party/)
+
+  # ===========================================================================
+  # UNIVERSAL FORMATTING (All Languages)
+  # ===========================================================================
+
+  # Prettier - Format YAML, JSON, Markdown, HTML, CSS, JS (lightweight)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: "prettier (yaml/json/md/html/css)"
+        types_or: [yaml, markdown, json, html, css, javascript]
+        exclude: '(\.py|\.m|package-lock\.json|\.ipynb|node_modules/)$'
+        args: ["--write"]
+
+  # ===========================================================================
+  # QUALITY CHECKS (All Languages)
+  # ===========================================================================
 
   - repo: local
     hooks:
-      # Prevent wildcard imports
+      # Prevent wildcard imports (Python)
       - id: no-wildcard-imports
-        name: "no wildcard imports"
+        name: "no wildcard imports (Python)"
         entry: "from .* import \\*"
         language: pygrep
         types: [python]
         exclude: ^(archive/|legacy/|experimental/|tests/|\.github/)
 
-      # Check for debug statements
+      # Check for debug statements (Python)
       - id: no-debug-statements
-        name: "no debug statements"
+        name: "no debug statements (Python)"
         entry: "(?:^|\\s)(breakpoint\\(|import pdb|pdb\\.set_trace)"
         language: pygrep
         types: [python]
         exclude: ^(tests/|archive/|legacy/|\.github/)
 
-      # Check for print statements in src (should use logging)
+      # Check for print statements in src (Python)
       - id: no-print-in-src
-        name: "no print() in src (use logging)"
+        name: "no print() in src (Python)"
         entry: "^\\s*print\\("
         language: pygrep
         files: ^src/
+        types: [python]
         exclude: ^(src/.*/__main__\.py|tests/|\.github/)
 
-  # -------------------------------------------------------------------------
-  # Stage 3: Config File Formatting - ALWAYS RUNS
-  # -------------------------------------------------------------------------
+      # Check for console.log in src (JavaScript)
+      - id: no-console-log
+        name: "no console.log in src (JS)"
+        entry: "console\\.(log|debug|info)\\("
+        language: pygrep
+        types_or: [javascript, jsx, ts, tsx]
+        files: ^src/
+        exclude: ^(tests/|\.github/|node_modules/)
 
-  # Prettier - Format YAML, JSON, Markdown (lightweight, always runs)
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        name: "prettier (yaml/json/md)"
-        types_or: [yaml, markdown, json]
-        exclude: '(\.py|\.m|package-lock\.json|\.ipynb)$'
+      # Check for debugger statements (JavaScript)
+      - id: no-debugger
+        name: "no debugger (JS)"
+        entry: "^\\s*debugger"
+        language: pygrep
+        types_or: [javascript, jsx, ts, tsx]
+        exclude: ^(tests/|\.github/|node_modules/)
 
-  # -------------------------------------------------------------------------
-  # Stage 4: Pre-push Hooks (Slower - PYTHON FILES ONLY)
-  # -------------------------------------------------------------------------
+  # ===========================================================================
+  # PRE-PUSH HOOKS (Slower - run before push only)
+  # ===========================================================================
 
-  # MyPy - Type checking (pre-push only, Python only)
+  # MyPy - Python type checking (pre-push only)
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
       - id: mypy
-        name: "mypy (type check)"
+        name: "mypy (Python type check)"
         stages: [pre-push]
         additional_dependencies:
           - types-requests
@@ -120,28 +199,26 @@ repos:
             \.github/
           )
 
-  # Bandit - Security scanning (pre-push only, Python only)
+  # Bandit - Python security scanning (pre-push only)
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.7
     hooks:
       - id: bandit
-        name: "bandit (security scan)"
+        name: "bandit (Python security)"
         stages: [pre-push]
-        args: ["-r", ".", "-ll", "-ii", "-x", "tests/,archive/,legacy/,.github/"]
+        args: ["-r", ".", "-ll", "-ii", "-x", "tests/,archive/,legacy/,.github/,node_modules/"]
         pass_filenames: false
-        # Only run if Python files changed
         types: [python]
 
-  # Pytest - Unit tests (pre-push only)
+  # Pytest - Python unit tests (pre-push only)
   - repo: local
     hooks:
       - id: pytest-unit
-        name: "pytest (unit tests)"
+        name: "pytest (Python tests)"
         stages: [pre-push]
         entry: python -m pytest tests/unit -x -q --tb=short -m "not slow and not integration"
         language: system
         pass_filenames: false
-        # Only run if Python files changed
         types: [python]
 
 # =============================================================================
@@ -150,6 +227,7 @@ repos:
 
 default_language_version:
   python: python3.11
+  node: "20.11.0"
 
 # Files to always exclude from all hooks
 exclude: |
@@ -167,13 +245,16 @@ exclude: |
     venv/|
     build/|
     dist/|
-    .*\.egg-info/
+    .*\.egg-info/|
+    \.next/|
+    coverage/|
+    third_party/
   )
 
 # Don't fail fast - run all hooks
 fail_fast: false
 
-# CI configuration (for pre-commit.ci if used)
+# CI configuration
 ci:
   autofix_commit_msg: "style: auto-fix from pre-commit hooks"
   autofix_prs: true
