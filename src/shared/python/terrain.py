@@ -744,6 +744,39 @@ class TerrainRegion:
         material_name = TERRAIN_MATERIAL_MAP.get(self.terrain_type, "rough")
         return MATERIALS[material_name]
 
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize region to dictionary."""
+        result: dict[str, Any] = {
+            "terrain_type": self.terrain_type.name.lower(),
+            "shape_type": self.shape_type,
+            "shape_data": self.shape_data,
+        }
+        if self.material is not None:
+            result["material"] = {
+                "name": self.material.name,
+                "friction": self.material.friction_coefficient,
+                "restitution": self.material.restitution,
+            }
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> TerrainRegion:
+        """Deserialize region from dictionary."""
+        material = None
+        if "material" in data:
+            mat = data["material"]
+            material = SurfaceMaterial(
+                name=mat["name"],
+                friction_coefficient=mat["friction"],
+                restitution=mat["restitution"],
+            )
+        return cls(
+            terrain_type=TerrainType[data["terrain_type"].upper()],
+            shape_type=data["shape_type"],
+            shape_data=data["shape_data"],
+            material=material,
+        )
+
 
 @dataclass
 class Terrain:
@@ -871,7 +904,7 @@ class TerrainConfig:
             name=terrain.name,
             elevation_config=terrain.elevation.to_dict(),
             patches_config=[p.to_dict() for p in terrain.patches],
-            regions_config=[],  # TODO: Add region serialization
+            regions_config=[r.to_dict() for r in terrain.regions],
             default_type=terrain.default_type.name.lower(),
         )
 
@@ -879,12 +912,14 @@ class TerrainConfig:
         """Create terrain from config."""
         elevation = ElevationMap.from_dict(self.elevation_config)
         patches = [TerrainPatch.from_dict(p) for p in self.patches_config]
+        regions = [TerrainRegion.from_dict(r) for r in self.regions_config]
         default_type = TerrainType[self.default_type.upper()]
 
         return Terrain(
             name=self.name,
             elevation=elevation,
             patches=patches,
+            regions=regions,
             default_type=default_type,
         )
 
