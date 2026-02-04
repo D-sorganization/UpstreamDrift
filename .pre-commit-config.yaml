@@ -1,67 +1,182 @@
-# Pre-commit.ci configuration (Issue #767)
-ci:
-  autofix_prs: true
-  autofix_commit_msg: "style: auto-fix pre-commit hooks"
-  autoupdate_branch: ""
-  autoupdate_commit_msg: "chore: update pre-commit hooks"
-  autoupdate_schedule: weekly
-  skip: [pip-audit, no-todos-fixmes]  # Skip hooks that need full env or are slow
+# =============================================================================
+# Fleet-Wide Pre-commit Configuration
+# =============================================================================
+# Fast checks on every commit (<15 seconds)
+# Slower checks (mypy, bandit, tests) on pre-push only
+#
+# EXCEPTIONS:
+# - Documentation-only changes (.md, .rst) skip Python checks
+# - Workflow changes (.github/) skip Python checks
+# - Config changes (.yml, .yaml, .json) only run prettier
+#
+# Installation:
+#   pip install pre-commit
+#   pre-commit install
+#   pre-commit install --hook-type pre-push
+# =============================================================================
 
 repos:
-  # Standard pre-commit hooks
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
-      - id: end-of-file-fixer
-      - id: check-yaml
-        args: [--unsafe]
-      - id: check-added-large-files
-        args: ["--maxkb=1000"]
-      - id: check-merge-conflict
-      - id: detect-private-key
+  # -------------------------------------------------------------------------
+  # Stage 1: Code Formatting (auto-fix) - PYTHON FILES ONLY
+  # -------------------------------------------------------------------------
 
-  # Code formatting (Issue #780: align with CI)
-  - repo: https://github.com/psf/black
-    rev: 25.12.0
-    hooks:
-      - id: black
-
-  # Linting (Issue #780: align with CI)
+  # Ruff - Fast Python linter with auto-fix
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff
-        args: [--fix]
+        name: "ruff (lint + fix)"
+        args: ["--fix", "--exit-non-zero-on-fix"]
+        types: [python]
+        # Skip for docs-only or workflow-only changes
+        exclude: ^(\.github/|docs/|.*\.md$)
 
-  # Type checking
+      - id: ruff-format
+        name: "ruff format"
+        types: [python]
+        exclude: ^(\.github/|docs/|.*\.md$)
+
+  # Black - Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 26.1.0
+    hooks:
+      - id: black
+        name: "black (format)"
+        language_version: python3.11
+        types: [python]
+        exclude: ^(\.github/|docs/|.*\.md$)
+
+  # -------------------------------------------------------------------------
+  # Stage 2: Quick Quality Checks - PYTHON FILES ONLY
+  # -------------------------------------------------------------------------
+
+  - repo: local
+    hooks:
+      # Prevent wildcard imports
+      - id: no-wildcard-imports
+        name: "no wildcard imports"
+        entry: "from .* import \\*"
+        language: pygrep
+        types: [python]
+        exclude: ^(archive/|legacy/|experimental/|tests/|\.github/)
+
+      # Check for debug statements
+      - id: no-debug-statements
+        name: "no debug statements"
+        entry: "(?:^|\\s)(breakpoint\\(|import pdb|pdb\\.set_trace)"
+        language: pygrep
+        types: [python]
+        exclude: ^(tests/|archive/|legacy/|\.github/)
+
+      # Check for print statements in src (should use logging)
+      - id: no-print-in-src
+        name: "no print() in src (use logging)"
+        entry: "^\\s*print\\("
+        language: pygrep
+        files: ^src/
+        exclude: ^(src/.*/__main__\.py|tests/|\.github/)
+
+  # -------------------------------------------------------------------------
+  # Stage 3: Config File Formatting - ALWAYS RUNS
+  # -------------------------------------------------------------------------
+
+  # Prettier - Format YAML, JSON, Markdown (lightweight, always runs)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: "prettier (yaml/json/md)"
+        types_or: [yaml, markdown, json]
+        exclude: '(\.py|\.m|package-lock\.json|\.ipynb)$'
+
+  # -------------------------------------------------------------------------
+  # Stage 4: Pre-push Hooks (Slower - PYTHON FILES ONLY)
+  # -------------------------------------------------------------------------
+
+  # MyPy - Type checking (pre-push only, Python only)
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
+        name: "mypy (type check)"
+        stages: [pre-push]
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+          - pydantic
         args: [--ignore-missing-imports]
+        types: [python]
+        files: ^src/
+        exclude: |
+          (?x)^(
+            src/matlab/|
+            src/javascript/|
+            src/archive/|
+            src/legacy/|
+            src/experimental/|
+            __pycache__/|
+            \.pytest_cache/|
+            \.venv/|
+            \.github/
+          )
 
-  # Security: Dependency vulnerability scanning (Issue #780: align with CI)
-  - repo: https://github.com/pypa/pip-audit
-    rev: v2.7.3
+  # Bandit - Security scanning (pre-push only, Python only)
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.7
     hooks:
-      - id: pip-audit
-        args: [--ignore-vuln, CVE-2024-23342]
+      - id: bandit
+        name: "bandit (security scan)"
+        stages: [pre-push]
+        args: ["-r", ".", "-ll", "-ii", "-x", "tests/,archive/,legacy/,.github/"]
+        pass_filenames: false
+        # Only run if Python files changed
+        types: [python]
 
-  # TODO/FIXME detection (Issue #780: align with CI placeholder checks)
+  # Pytest - Unit tests (pre-push only)
   - repo: local
     hooks:
-      - id: no-todos-fixmes
-        name: Check for TODO/FIXME
-        entry: >
-          bash -c 'if grep -rn --include="*.py" -E "TODO|FIXME"
-          --exclude-dir=".git" --exclude-dir=".mypy_cache"
-          --exclude-dir=".ruff_cache" --exclude-dir="__pycache__"
-          --exclude-dir="archive" --exclude-dir="tests" . 2>/dev/null; then
-          echo "ERROR: Found TODO/FIXME placeholders. Create GitHub issues instead.";
-          exit 1; fi'
+      - id: pytest-unit
+        name: "pytest (unit tests)"
+        stages: [pre-push]
+        entry: python -m pytest tests/unit -x -q --tb=short -m "not slow and not integration"
         language: system
         pass_filenames: false
+        # Only run if Python files changed
         types: [python]
+
+# =============================================================================
+# Global Settings
+# =============================================================================
+
+default_language_version:
+  python: python3.11
+
+# Files to always exclude from all hooks
+exclude: |
+  (?x)^(
+    archive/|
+    legacy/|
+    experimental/|
+    \.git/|
+    __pycache__/|
+    \.mypy_cache/|
+    \.ruff_cache/|
+    \.pytest_cache/|
+    node_modules/|
+    \.venv/|
+    venv/|
+    build/|
+    dist/|
+    .*\.egg-info/
+  )
+
+# Don't fail fast - run all hooks
+fail_fast: false
+
+# CI configuration (for pre-commit.ci if used)
+ci:
+  autofix_commit_msg: "style: auto-fix from pre-commit hooks"
+  autofix_prs: true
+  autoupdate_branch: "main"
+  autoupdate_commit_msg: "chore: update pre-commit hooks"
+  skip: [pytest-unit, bandit, mypy]  # Skip slow hooks in CI
