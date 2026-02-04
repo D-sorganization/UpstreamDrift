@@ -221,6 +221,30 @@ repos:
         pass_filenames: false
         types: [python]
 
+
+  # Semgrep - Free local security + code quality scanning (pre-push)
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.102.0
+    hooks:
+      - id: semgrep
+        name: "semgrep (security + quality)"
+        stages: [pre-push]
+        args: ["--config", "auto", "--error", "--quiet"]
+        types: [python]
+        exclude: ^(tests/|archive/|legacy/|experimental/|\.github/)
+
+  # Radon - Cyclomatic complexity check (pre-push)
+  - repo: https://github.com/rubik/radon
+    rev: v6.0.1
+    hooks:
+      - id: radon
+        name: "radon (complexity check)"
+        stages: [pre-push]
+        args: ["cc", "--min", "C", "--show-complexity", "--total-average"]
+        types: [python]
+        files: ^src/
+        exclude: ^(tests/|archive/|legacy/|experimental/)
+
 # =============================================================================
 # Global Settings
 # =============================================================================
@@ -260,4 +284,4 @@ ci:
   autofix_prs: true
   autoupdate_branch: "main"
   autoupdate_commit_msg: "chore: update pre-commit hooks"
-  skip: [pytest-unit, bandit, mypy]  # Skip slow hooks in CI
+  skip: [pytest-unit, bandit, mypy, semgrep, radon]  # Skip slow hooks in CI
