@@ -246,12 +246,12 @@ class MultiRobotSystem:
 
     def __init__(self) -> None:
         """Initialize multi-robot system."""
-        self._robots: dict[str, "PhysicsEngineProtocol"] = {}
+        self._robots: dict[str, PhysicsEngineProtocol] = {}
         self._robot_poses: dict[str, NDArray[np.floating]] = {}
         self._coordinator = TaskCoordinator()
 
     @property
-    def robots(self) -> dict[str, "PhysicsEngineProtocol"]:
+    def robots(self) -> dict[str, PhysicsEngineProtocol]:
         """Get robot dictionary."""
         return self._robots
 
@@ -263,7 +263,7 @@ class MultiRobotSystem:
     def add_robot(
         self,
         robot_id: str,
-        engine: "PhysicsEngineProtocol",
+        engine: PhysicsEngineProtocol,
         base_pose: NDArray[np.floating],
     ) -> None:
         """Add a robot to the system.
@@ -291,7 +291,7 @@ class MultiRobotSystem:
             return True
         return False
 
-    def get_robot(self, robot_id: str) -> "PhysicsEngineProtocol | None":
+    def get_robot(self, robot_id: str) -> PhysicsEngineProtocol | None:
         """Get a robot by ID.
 
         Args:
@@ -379,9 +379,7 @@ class MultiRobotSystem:
         Returns:
             Dictionary mapping robot IDs to assigned tasks.
         """
-        allocation: dict[str, list[Task]] = {
-            robot_id: [] for robot_id in self._robots
-        }
+        allocation: dict[str, list[Task]] = {robot_id: [] for robot_id in self._robots}
 
         # Add tasks to coordinator
         for task in tasks:

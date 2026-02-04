@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -155,7 +155,6 @@ class DeformableObject(ABC):
         Args:
             dt: Timestep in seconds.
         """
-        pass
 
     @abstractmethod
     def compute_internal_forces(self) -> NDArray[np.floating]:
@@ -164,7 +163,6 @@ class DeformableObject(ABC):
         Returns:
             Internal force vectors (N, 3).
         """
-        pass
 
     def reset(self) -> None:
         """Reset to rest configuration."""
@@ -260,7 +258,10 @@ class SoftBody(DeformableObject):
         lam = (
             self._material.youngs_modulus
             * self._material.poisson_ratio
-            / ((1 + self._material.poisson_ratio) * (1 - 2 * self._material.poisson_ratio))
+            / (
+                (1 + self._material.poisson_ratio)
+                * (1 - 2 * self._material.poisson_ratio)
+            )
         )
 
         for i, tet in enumerate(self._tetrahedra):
@@ -347,9 +348,7 @@ class Cable(DeformableObject):
 
         if rest_lengths is None:
             # Compute from initial mesh
-            self._rest_lengths = np.linalg.norm(
-                np.diff(mesh, axis=0), axis=1
-            )
+            self._rest_lengths = np.linalg.norm(np.diff(mesh, axis=0), axis=1)
         else:
             self._rest_lengths = rest_lengths
 
@@ -517,17 +516,13 @@ class Cloth(DeformableObject):
                 # Horizontal
                 if x < self._width - 1:
                     idx2 = node_idx(x + 1, y)
-                    rest = np.linalg.norm(
-                        self._rest_mesh[idx] - self._rest_mesh[idx2]
-                    )
+                    rest = np.linalg.norm(self._rest_mesh[idx] - self._rest_mesh[idx2])
                     springs.append((idx, idx2, rest, "stretch"))
 
                 # Vertical
                 if y < self._height - 1:
                     idx2 = node_idx(x, y + 1)
-                    rest = np.linalg.norm(
-                        self._rest_mesh[idx] - self._rest_mesh[idx2]
-                    )
+                    rest = np.linalg.norm(self._rest_mesh[idx] - self._rest_mesh[idx2])
                     springs.append((idx, idx2, rest, "stretch"))
 
         # Shear springs (diagonal)
@@ -537,17 +532,13 @@ class Cloth(DeformableObject):
 
                 # Diagonal 1
                 idx2 = node_idx(x + 1, y + 1)
-                rest = np.linalg.norm(
-                    self._rest_mesh[idx] - self._rest_mesh[idx2]
-                )
+                rest = np.linalg.norm(self._rest_mesh[idx] - self._rest_mesh[idx2])
                 springs.append((idx, idx2, rest, "shear"))
 
                 # Diagonal 2
                 idx1 = node_idx(x + 1, y)
                 idx2 = node_idx(x, y + 1)
-                rest = np.linalg.norm(
-                    self._rest_mesh[idx1] - self._rest_mesh[idx2]
-                )
+                rest = np.linalg.norm(self._rest_mesh[idx1] - self._rest_mesh[idx2])
                 springs.append((idx1, idx2, rest, "shear"))
 
         # Bend springs (skip one node)
@@ -558,17 +549,13 @@ class Cloth(DeformableObject):
                 # Horizontal bend
                 if x < self._width - 2:
                     idx2 = node_idx(x + 2, y)
-                    rest = np.linalg.norm(
-                        self._rest_mesh[idx] - self._rest_mesh[idx2]
-                    )
+                    rest = np.linalg.norm(self._rest_mesh[idx] - self._rest_mesh[idx2])
                     springs.append((idx, idx2, rest, "bend"))
 
                 # Vertical bend
                 if y < self._height - 2:
                     idx2 = node_idx(x, y + 2)
-                    rest = np.linalg.norm(
-                        self._rest_mesh[idx] - self._rest_mesh[idx2]
-                    )
+                    rest = np.linalg.norm(self._rest_mesh[idx] - self._rest_mesh[idx2])
                     springs.append((idx, idx2, rest, "bend"))
 
         return springs

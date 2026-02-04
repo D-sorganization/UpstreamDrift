@@ -9,15 +9,15 @@ This module provides multi-robot simulation and coordination:
 
 from __future__ import annotations
 
-from src.research.multi_robot.system import (
-    MultiRobotSystem,
-    Task,
-    TaskCoordinator,
-)
 from src.research.multi_robot.coordination import (
     CooperativeManipulation,
     FormationConfig,
     FormationController,
+)
+from src.research.multi_robot.system import (
+    MultiRobotSystem,
+    Task,
+    TaskCoordinator,
 )
 
 __all__ = [

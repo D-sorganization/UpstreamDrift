@@ -49,7 +49,7 @@ class CentroidalMPC(ModelPredictiveController):
 
     def __init__(
         self,
-        model: "PhysicsEngineProtocol",
+        model: PhysicsEngineProtocol,
         horizon: int = 30,
         dt: float = 0.02,
         n_contacts: int = 2,
@@ -90,11 +90,19 @@ class CentroidalMPC(ModelPredictiveController):
     def _setup_default_cost(self) -> None:
         """Setup default locomotion cost function."""
         # State cost: track reference CoM position and velocity
-        Q = np.diag([
-            100, 100, 100,  # CoM position
-            10, 10, 10,     # CoM velocity
-            1, 1, 1,        # Angular momentum
-        ])
+        Q = np.diag(
+            [
+                100,
+                100,
+                100,  # CoM position
+                10,
+                10,
+                10,  # CoM velocity
+                1,
+                1,
+                1,  # Angular momentum
+            ]
+        )
 
         # Control cost: minimize contact forces
         R = np.eye(self._n_u) * 0.001
@@ -176,10 +184,12 @@ class CentroidalMPC(ModelPredictiveController):
             A_normal = np.zeros((1, self._n_u))
             A_normal[0, i * 3 + 2] = -1  # -f_z <= 0
 
-            self.add_constraint(Constraint(
-                B=A_normal,
-                ub=np.zeros(1),
-            ))
+            self.add_constraint(
+                Constraint(
+                    B=A_normal,
+                    ub=np.zeros(1),
+                )
+            )
 
             # |f_x| <= mu * f_z, |f_y| <= mu * f_z
             # Linearized: -mu*f_z <= f_x <= mu*f_z
@@ -190,10 +200,12 @@ class CentroidalMPC(ModelPredictiveController):
                 A_friction[1, i * 3 + j] = -1
                 A_friction[1, i * 3 + 2] = -self._friction_coef
 
-                self.add_constraint(Constraint(
-                    B=A_friction,
-                    ub=np.zeros(2),
-                ))
+                self.add_constraint(
+                    Constraint(
+                        B=A_friction,
+                        ub=np.zeros(2),
+                    )
+                )
 
     def set_gait_reference(
         self,
@@ -230,7 +242,7 @@ class WholeBodyMPC(ModelPredictiveController):
 
     def __init__(
         self,
-        model: "PhysicsEngineProtocol",
+        model: PhysicsEngineProtocol,
         horizon: int = 10,
         dt: float = 0.01,
     ) -> None:
@@ -254,10 +266,12 @@ class WholeBodyMPC(ModelPredictiveController):
         # State cost: track joint positions and velocities
         Q_pos = np.eye(self._n_x // 2) * 10
         Q_vel = np.eye(self._n_x // 2) * 1
-        Q = np.block([
-            [Q_pos, np.zeros((self._n_x // 2, self._n_x // 2))],
-            [np.zeros((self._n_x // 2, self._n_x // 2)), Q_vel],
-        ])
+        Q = np.block(
+            [
+                [Q_pos, np.zeros((self._n_x // 2, self._n_x // 2))],
+                [np.zeros((self._n_x // 2, self._n_x // 2)), Q_vel],
+            ]
+        )
 
         # Control cost: minimize torques
         R = np.eye(self._n_u) * 0.001
@@ -318,11 +332,13 @@ class WholeBodyMPC(ModelPredictiveController):
         A = np.zeros((n_q, self._n_x))
         A[:, :n_q] = np.eye(n_q)
 
-        self.add_constraint(Constraint(
-            A=A,
-            lb=lower_limits,
-            ub=upper_limits,
-        ))
+        self.add_constraint(
+            Constraint(
+                A=A,
+                lb=lower_limits,
+                ub=upper_limits,
+            )
+        )
 
     def add_torque_limit_constraints(
         self,
@@ -337,11 +353,13 @@ class WholeBodyMPC(ModelPredictiveController):
 
         B = np.eye(self._n_u)
 
-        self.add_constraint(Constraint(
-            B=B,
-            lb=-torque_limits,
-            ub=torque_limits,
-        ))
+        self.add_constraint(
+            Constraint(
+                B=B,
+                lb=-torque_limits,
+                ub=torque_limits,
+            )
+        )
 
     def solve_with_ee_tracking(
         self,

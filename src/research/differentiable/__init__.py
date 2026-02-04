@@ -9,8 +9,8 @@ This module provides differentiable physics for gradient-based optimization:
 from __future__ import annotations
 
 from src.research.differentiable.engine import (
-    DifferentiableEngine,
     ContactDifferentiableEngine,
+    DifferentiableEngine,
 )
 
 __all__ = [

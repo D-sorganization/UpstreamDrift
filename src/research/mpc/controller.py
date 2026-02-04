@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -172,7 +172,7 @@ class ModelPredictiveController:
 
     def __init__(
         self,
-        model: "PhysicsEngineProtocol",
+        model: PhysicsEngineProtocol,
         horizon: int = 20,
         dt: float = 0.01,
     ) -> None:
@@ -414,7 +414,11 @@ class ModelPredictiveController:
         d = []
 
         # Terminal cost gradient and Hessian
-        Vx = 2 * self._cost.P @ X[-1] if self._cost.P is not None else np.zeros(self._n_x)
+        Vx = (
+            2 * self._cost.P @ X[-1]
+            if self._cost.P is not None
+            else np.zeros(self._n_x)
+        )
         Vxx = 2 * self._cost.P if self._cost.P is not None else np.eye(self._n_x) * 0.01
 
         for k in range(self.horizon - 1, -1, -1):
@@ -422,8 +426,16 @@ class ModelPredictiveController:
             A, B = self._dynamics_linearize(X[k], U[k])
 
             # Cost gradients
-            x_err = X[k] - (self._cost.x_ref[k] if self._cost.x_ref is not None and self._cost.x_ref.ndim > 1 else np.zeros(self._n_x))
-            u_err = U[k] - (self._cost.u_ref[k] if self._cost.u_ref is not None and self._cost.u_ref.ndim > 1 else np.zeros(self._n_u))
+            x_err = X[k] - (
+                self._cost.x_ref[k]
+                if self._cost.x_ref is not None and self._cost.x_ref.ndim > 1
+                else np.zeros(self._n_x)
+            )
+            u_err = U[k] - (
+                self._cost.u_ref[k]
+                if self._cost.u_ref is not None and self._cost.u_ref.ndim > 1
+                else np.zeros(self._n_u)
+            )
 
             lx = 2 * self._cost.Q @ x_err
             lu = 2 * self._cost.R @ u_err

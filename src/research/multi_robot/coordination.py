@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -34,7 +34,7 @@ class FormationConfig:
         cls,
         n_robots: int,
         spacing: float = 1.0,
-    ) -> "FormationConfig":
+    ) -> FormationConfig:
         """Create a line formation.
 
         Args:
@@ -55,7 +55,7 @@ class FormationConfig:
         cls,
         n_robots: int,
         radius: float = 2.0,
-    ) -> "FormationConfig":
+    ) -> FormationConfig:
         """Create a circular formation.
 
         Args:
@@ -79,7 +79,7 @@ class FormationConfig:
         n_robots: int,
         spacing: float = 1.5,
         angle: float = 0.5,  # radians
-    ) -> "FormationConfig":
+    ) -> FormationConfig:
         """Create a wedge/V formation.
 
         Args:
@@ -221,11 +221,25 @@ class FormationController:
             3x3 rotation matrix.
         """
         w, x, y, z = quat
-        return np.array([
-            [1 - 2*y*y - 2*z*z, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
-            [2*x*y + 2*z*w, 1 - 2*x*x - 2*z*z, 2*y*z - 2*x*w],
-            [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y],
-        ])
+        return np.array(
+            [
+                [
+                    1 - 2 * y * y - 2 * z * z,
+                    2 * x * y - 2 * z * w,
+                    2 * x * z + 2 * y * w,
+                ],
+                [
+                    2 * x * y + 2 * z * w,
+                    1 - 2 * x * x - 2 * z * z,
+                    2 * y * z - 2 * x * w,
+                ],
+                [
+                    2 * x * z - 2 * y * w,
+                    2 * y * z + 2 * x * w,
+                    1 - 2 * x * x - 2 * y * y,
+                ],
+            ]
+        )
 
     def set_formation(self, formation: FormationConfig) -> None:
         """Change the formation.
@@ -253,8 +267,7 @@ class FormationController:
 
         leader_pos = leader_pose[:3]
         leader_quat = (
-            leader_pose[3:7] if len(leader_pose) >= 7
-            else np.array([1, 0, 0, 0])
+            leader_pose[3:7] if len(leader_pose) >= 7 else np.array([1, 0, 0, 0])
         )
         R = self._quat_to_rotation(leader_quat)
 
@@ -282,7 +295,7 @@ class CooperativeManipulation:
 
     def __init__(
         self,
-        robots: list["PhysicsEngineProtocol"],
+        robots: list[PhysicsEngineProtocol],
         object_model: str | None = None,
     ) -> None:
         """Initialize cooperative manipulation.
@@ -318,8 +331,7 @@ class CooperativeManipulation:
             # Default: normals pointing inward to object center
             center = np.mean(grasp_points, axis=0)
             self._grasp_normals = [
-                (center - p) / np.linalg.norm(center - p)
-                for p in grasp_points
+                (center - p) / np.linalg.norm(center - p) for p in grasp_points
             ]
         else:
             self._grasp_normals = grasp_normals
@@ -343,17 +355,30 @@ class CooperativeManipulation:
 
         object_pos = object_pose[:3]
         object_quat = (
-            object_pose[3:7] if len(object_pose) >= 7
-            else np.array([1, 0, 0, 0])
+            object_pose[3:7] if len(object_pose) >= 7 else np.array([1, 0, 0, 0])
         )
 
         # Rotation matrix
         w, x, y, z = object_quat
-        R = np.array([
-            [1 - 2*y*y - 2*z*z, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
-            [2*x*y + 2*z*w, 1 - 2*x*x - 2*z*z, 2*y*z - 2*x*w],
-            [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y],
-        ])
+        R = np.array(
+            [
+                [
+                    1 - 2 * y * y - 2 * z * z,
+                    2 * x * y - 2 * z * w,
+                    2 * x * z + 2 * y * w,
+                ],
+                [
+                    2 * x * y + 2 * z * w,
+                    1 - 2 * x * x - 2 * z * z,
+                    2 * y * z - 2 * x * w,
+                ],
+                [
+                    2 * x * z - 2 * y * w,
+                    2 * y * z + 2 * x * w,
+                    1 - 2 * x * x - 2 * y * y,
+                ],
+            ]
+        )
 
         for i in range(n_contacts):
             # Contact point in world frame
@@ -361,14 +386,16 @@ class CooperativeManipulation:
             r = contact_world - object_pos
 
             # Force contribution
-            G[:3, i*3:(i+1)*3] = np.eye(3)
+            G[:3, i * 3 : (i + 1) * 3] = np.eye(3)
 
             # Torque contribution (cross product matrix)
-            G[3:6, i*3:(i+1)*3] = np.array([
-                [0, -r[2], r[1]],
-                [r[2], 0, -r[0]],
-                [-r[1], r[0], 0],
-            ])
+            G[3:6, i * 3 : (i + 1) * 3] = np.array(
+                [
+                    [0, -r[2], r[1]],
+                    [r[2], 0, -r[0]],
+                    [-r[1], r[0], 0],
+                ]
+            )
 
         return G
 
@@ -400,9 +427,7 @@ class CooperativeManipulation:
             f_optimal = np.zeros(3 * n_contacts)
 
         # Split into per-contact forces
-        forces = [
-            f_optimal[i*3:(i+1)*3] for i in range(n_contacts)
-        ]
+        forces = [f_optimal[i * 3 : (i + 1) * 3] for i in range(n_contacts)]
 
         return forces
 
@@ -436,11 +461,13 @@ class CooperativeManipulation:
         pos_end = object_goal_pose[:3]
 
         quat_start = (
-            object_current_pose[3:7] if len(object_current_pose) >= 7
+            object_current_pose[3:7]
+            if len(object_current_pose) >= 7
             else np.array([1, 0, 0, 0])
         )
         quat_end = (
-            object_goal_pose[3:7] if len(object_goal_pose) >= 7
+            object_goal_pose[3:7]
+            if len(object_goal_pose) >= 7
             else np.array([1, 0, 0, 0])
         )
 
@@ -508,11 +535,25 @@ class CooperativeManipulation:
     ) -> NDArray[np.floating]:
         """Convert quaternion to rotation matrix."""
         w, x, y, z = quat
-        return np.array([
-            [1 - 2*y*y - 2*z*z, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
-            [2*x*y + 2*z*w, 1 - 2*x*x - 2*z*z, 2*y*z - 2*x*w],
-            [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y],
-        ])
+        return np.array(
+            [
+                [
+                    1 - 2 * y * y - 2 * z * z,
+                    2 * x * y - 2 * z * w,
+                    2 * x * z + 2 * y * w,
+                ],
+                [
+                    2 * x * y + 2 * z * w,
+                    1 - 2 * x * x - 2 * z * z,
+                    2 * y * z - 2 * x * w,
+                ],
+                [
+                    2 * x * z - 2 * y * w,
+                    2 * y * z + 2 * x * w,
+                    1 - 2 * x * x - 2 * y * y,
+                ],
+            ]
+        )
 
     def check_force_closure(
         self,

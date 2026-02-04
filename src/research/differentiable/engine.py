@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -57,7 +58,7 @@ class DifferentiableEngine:
 
     def __init__(
         self,
-        engine: "PhysicsEngineProtocol",
+        engine: PhysicsEngineProtocol,
         backend: str = "numpy",
     ) -> None:
         """Initialize differentiable engine.
@@ -170,9 +171,7 @@ class DifferentiableEngine:
                 controls_plus = controls.copy()
                 controls_plus[t, i] += eps
 
-                traj_plus = self.simulate_trajectory(
-                    initial_state, controls_plus, dt
-                )
+                traj_plus = self.simulate_trajectory(initial_state, controls_plus, dt)
                 loss_plus = loss_fn(traj_plus)
 
                 gradient[t, i] = (loss_plus - baseline_loss) / eps
@@ -355,9 +354,7 @@ class DifferentiableEngine:
                 controls = controls - learning_rate * gradient
 
         # Final trajectory with best controls
-        optimal_trajectory = self.simulate_trajectory(
-            initial_state, best_controls, dt
-        )
+        optimal_trajectory = self.simulate_trajectory(initial_state, best_controls, dt)
 
         return OptimizationResult(
             success=best_loss < 0.1,
@@ -382,7 +379,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
 
     def __init__(
         self,
-        engine: "PhysicsEngineProtocol",
+        engine: PhysicsEngineProtocol,
         contact_method: str = "smoothed",
         smoothing_factor: float = 0.01,
     ) -> None:
@@ -436,9 +433,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
             # Stochastic gradient with single sample
             noise = np.random.randn(*controls.shape) * self.smoothing_factor
             controls_noisy = controls + noise
-            return super().compute_gradient(
-                initial_state, controls_noisy, loss_fn, dt
-            )
+            return super().compute_gradient(initial_state, controls_noisy, loss_fn, dt)
 
         else:
             # Standard smoothed gradient
@@ -477,9 +472,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
             return float(final_error + contact_penalty)
 
         # Optimize with contact-aware smoothing
-        result = self.optimize_trajectory(
-            initial_state, goal_state, horizon, dt
-        )
+        result = self.optimize_trajectory(initial_state, goal_state, horizon, dt)
 
         self.smoothing_factor = original_smoothing
         return result
