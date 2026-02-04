@@ -127,9 +127,7 @@ class HumanState:
     """
 
     position: NDArray[np.floating]
-    velocity: NDArray[np.floating] = field(
-        default_factory=lambda: np.zeros(3)
-    )
+    velocity: NDArray[np.floating] = field(default_factory=lambda: np.zeros(3))
     bounding_box: NDArray[np.floating] = field(
         default_factory=lambda: np.array([0.5, 0.3, 1.7])
     )
@@ -167,7 +165,7 @@ class CollisionAvoidance:
 
     def __init__(
         self,
-        robot_model: "PhysicsEngineProtocol",
+        robot_model: PhysicsEngineProtocol,
         safety_distance: float = 0.1,
     ) -> None:
         """Initialize collision avoidance.
@@ -223,7 +221,7 @@ class CollisionAvoidance:
 
     def get_link_positions(
         self,
-        state: "RobotState",
+        state: RobotState,
     ) -> dict[str, NDArray[np.floating]]:
         """Get positions of robot links.
 
@@ -252,7 +250,7 @@ class CollisionAvoidance:
 
     def compute_repulsive_field(
         self,
-        state: "RobotState",
+        state: RobotState,
     ) -> NDArray[np.floating]:
         """Compute artificial potential field repulsion.
 
@@ -291,9 +289,11 @@ class CollisionAvoidance:
                         magnitude = self._max_repulsion
                     else:
                         # Inverse square repulsion
-                        magnitude = self._repulsion_gain * (
-                            1 / distance - 1 / self._repulsion_distance
-                        ) / (distance**2)
+                        magnitude = (
+                            self._repulsion_gain
+                            * (1 / distance - 1 / self._repulsion_distance)
+                            / (distance**2)
+                        )
                         magnitude = min(magnitude, self._max_repulsion)
 
                     # Get repulsion direction
@@ -301,9 +301,13 @@ class CollisionAvoidance:
 
                     # Map to joint space (simplified - use Jacobian for full)
                     # For now, distribute to all joints
-                    repulsion += gradient[:n_joints] if n_joints <= 3 else (
-                        np.concatenate([gradient, np.zeros(n_joints - 3)])
-                    ) * magnitude / len(link_positions)
+                    repulsion += (
+                        gradient[:n_joints]
+                        if n_joints <= 3
+                        else (np.concatenate([gradient, np.zeros(n_joints - 3)]))
+                        * magnitude
+                        / len(link_positions)
+                    )
 
         return repulsion
 
@@ -357,7 +361,7 @@ class CollisionAvoidance:
 
     def get_safe_velocity_scaling(
         self,
-        state: "RobotState",
+        state: RobotState,
     ) -> float:
         """Compute safe velocity scaling based on obstacles.
 
@@ -400,7 +404,7 @@ class CollisionAvoidance:
         else:
             return 1.0
 
-    def get_minimum_distance(self, state: "RobotState") -> float:
+    def get_minimum_distance(self, state: RobotState) -> float:
         """Get minimum distance to any obstacle.
 
         Args:

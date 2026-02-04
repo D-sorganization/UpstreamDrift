@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 
     from src.deployment.realtime import RealTimeController
     from src.engines.protocols import PhysicsEngineProtocol
-    from src.robotics.contact import ContactState
 
 
 class AnomalyType(Enum):
@@ -80,8 +79,8 @@ class DigitalTwin:
 
     def __init__(
         self,
-        sim_engine: "PhysicsEngineProtocol",
-        real_interface: "RealTimeController",
+        sim_engine: PhysicsEngineProtocol,
+        real_interface: RealTimeController,
     ) -> None:
         """Initialize digital twin.
 
@@ -97,6 +96,7 @@ class DigitalTwin:
 
         # State estimation
         from src.deployment.digital_twin.estimator import StateEstimator
+
         self._state_estimator = StateEstimator()
 
     @property
@@ -303,21 +303,25 @@ class DigitalTwin:
             for sensor_name, wrench in real_state.ft_wrenches.items():
                 force_mag = np.linalg.norm(wrench[:3])
                 if force_mag > 1.0:  # Contact threshold
-                    contacts.append({
-                        "sensor": sensor_name,
-                        "force": wrench[:3].tolist(),
-                        "torque": wrench[3:].tolist(),
-                        "magnitude": float(force_mag),
-                    })
+                    contacts.append(
+                        {
+                            "sensor": sensor_name,
+                            "force": wrench[:3].tolist(),
+                            "torque": wrench[3:].tolist(),
+                            "magnitude": float(force_mag),
+                        }
+                    )
 
         # Estimate from contact states
         if real_state.contact_states:
             for i, in_contact in enumerate(real_state.contact_states):
                 if in_contact:
-                    contacts.append({
-                        "contact_id": i,
-                        "in_contact": True,
-                    })
+                    contacts.append(
+                        {
+                            "contact_id": i,
+                            "in_contact": True,
+                        }
+                    )
 
         return contacts
 
@@ -371,8 +375,7 @@ class DigitalTwin:
 
         current_time = real_state.timestamp
         return [
-            a for a in self._anomaly_history
-            if current_time - a.timestamp <= max_age
+            a for a in self._anomaly_history if current_time - a.timestamp <= max_age
         ]
 
     def clear_anomaly_history(self) -> None:

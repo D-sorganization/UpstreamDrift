@@ -9,12 +9,12 @@ This module provides digital twin capabilities:
 
 from __future__ import annotations
 
+from src.deployment.digital_twin.estimator import StateEstimator
 from src.deployment.digital_twin.twin import (
     AnomalyReport,
     AnomalyType,
     DigitalTwin,
 )
-from src.deployment.digital_twin.estimator import StateEstimator
 
 __all__ = [
     "DigitalTwin",

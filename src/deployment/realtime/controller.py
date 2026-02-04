@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -183,17 +184,14 @@ class RealTimeController:
         """Connect via ROS2."""
         # ROS2 connection would be implemented here
         # For now, placeholder for integration
-        pass
 
     def _connect_udp(self) -> None:
         """Connect via UDP socket."""
         # UDP socket connection would be implemented here
-        pass
 
     def _connect_ethercat(self) -> None:
         """Connect via EtherCAT."""
         # EtherCAT connection would be implemented here
-        pass
 
     def disconnect(self) -> None:
         """Safely disconnect from robot."""
@@ -332,9 +330,7 @@ class RealTimeController:
             )
 
         # Real hardware reading would be implemented per protocol
-        raise NotImplementedError(
-            f"State reading not implemented for {self.comm_type}"
-        )
+        raise NotImplementedError(f"State reading not implemented for {self.comm_type}")
 
     def _send_command(self, command: ControlCommand) -> None:
         """Send control command to robot.

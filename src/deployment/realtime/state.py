@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -178,9 +178,7 @@ class ControlCommand:
             if self.position_targets is None:
                 raise ValueError("Impedance mode requires position_targets")
             if self.stiffness is None or self.damping is None:
-                raise ValueError(
-                    "Impedance mode requires stiffness and damping"
-                )
+                raise ValueError("Impedance mode requires stiffness and damping")
 
         return True
 
@@ -190,7 +188,7 @@ class ControlCommand:
         timestamp: float,
         positions: NDArray[np.floating],
         feedforward: NDArray[np.floating] | None = None,
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Create a position control command.
 
         Args:
@@ -213,7 +211,7 @@ class ControlCommand:
         cls,
         timestamp: float,
         torques: NDArray[np.floating],
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Create a torque control command.
 
         Args:
@@ -237,7 +235,7 @@ class ControlCommand:
         stiffness: NDArray[np.floating],
         damping: NDArray[np.floating],
         feedforward: NDArray[np.floating] | None = None,
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Create an impedance control command.
 
         Args:

@@ -88,7 +88,7 @@ class StateEstimator:
 
     def update(
         self,
-        robot_state: "RobotState",
+        robot_state: RobotState,
         dt: float | None = None,
     ) -> dict[str, NDArray[np.floating]]:
         """Update state estimate with new measurement.
@@ -119,10 +119,12 @@ class StateEstimator:
         self._covariance = F @ self._covariance @ F.T + self._Q
 
         # Measurement
-        z = np.concatenate([
-            robot_state.joint_positions,
-            robot_state.joint_velocities,
-        ])
+        z = np.concatenate(
+            [
+                robot_state.joint_positions,
+                robot_state.joint_velocities,
+            ]
+        )
 
         # Outlier rejection
         z = self._reject_outliers(z)
@@ -143,8 +145,7 @@ class StateEstimator:
         if self.config.use_velocity_filter:
             alpha = self.config.velocity_filter_alpha
             self._filtered_velocity = (
-                alpha * estimated_velocity
-                + (1 - alpha) * self._filtered_velocity
+                alpha * estimated_velocity + (1 - alpha) * self._filtered_velocity
             )
             estimated_velocity = self._filtered_velocity
 

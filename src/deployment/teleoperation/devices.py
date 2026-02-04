@@ -103,7 +103,6 @@ class BaseInputDevice(ABC):
 
     def set_force_feedback(self, wrench: NDArray[np.floating]) -> None:
         """Set force feedback (no-op for devices without haptics)."""
-        pass
 
     def get_buttons(self) -> dict[str, bool]:
         """Get button states."""
@@ -112,7 +111,6 @@ class BaseInputDevice(ABC):
     @abstractmethod
     def update(self) -> None:
         """Update device state (poll hardware)."""
-        pass
 
 
 class SpaceMouseInput(BaseInputDevice):
@@ -148,7 +146,6 @@ class SpaceMouseInput(BaseInputDevice):
 
         # Actual implementation would read from device
         # This is a placeholder for the interface
-        pass
 
     def set_sensitivity(self, sensitivity: float) -> None:
         """Set input sensitivity.
@@ -201,7 +198,6 @@ class VRControllerInput(BaseInputDevice):
             return
 
         # Actual implementation would poll VR API
-        pass
 
     def get_gripper_state(self) -> float:
         """Get gripper from trigger value."""
@@ -258,7 +254,6 @@ class HapticDeviceInput(BaseInputDevice):
             return
 
         # Actual implementation would use device API
-        pass
 
     def set_force_feedback(self, wrench: NDArray[np.floating]) -> None:
         """Set haptic force feedback.
@@ -274,7 +269,6 @@ class HapticDeviceInput(BaseInputDevice):
         force = np.clip(force, -self._max_force, self._max_force)
 
         # Actual implementation would send to device
-        pass
 
     def set_workspace_scale(self, scale: float) -> None:
         """Set workspace scaling factor.
@@ -319,18 +313,15 @@ class KeyboardMouseInput(BaseInputDevice):
             return
 
         # Compute velocity from key states
-        vx = (
-            self._key_velocity * (1 if self._buttons["forward"] else 0)
-            - self._key_velocity * (1 if self._buttons["backward"] else 0)
-        )
-        vy = (
-            self._key_velocity * (1 if self._buttons["left"] else 0)
-            - self._key_velocity * (1 if self._buttons["right"] else 0)
-        )
-        vz = (
-            self._key_velocity * (1 if self._buttons["up"] else 0)
-            - self._key_velocity * (1 if self._buttons["down"] else 0)
-        )
+        vx = self._key_velocity * (
+            1 if self._buttons["forward"] else 0
+        ) - self._key_velocity * (1 if self._buttons["backward"] else 0)
+        vy = self._key_velocity * (
+            1 if self._buttons["left"] else 0
+        ) - self._key_velocity * (1 if self._buttons["right"] else 0)
+        vz = self._key_velocity * (
+            1 if self._buttons["up"] else 0
+        ) - self._key_velocity * (1 if self._buttons["down"] else 0)
 
         self._twist[:3] = [vx, vy, vz]
 

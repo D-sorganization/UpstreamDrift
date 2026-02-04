@@ -9,15 +9,15 @@ This module provides safety monitoring and enforcement:
 
 from __future__ import annotations
 
-from src.deployment.safety.monitor import (
-    SafetyLimits,
-    SafetyMonitor,
-    SafetyStatus,
-)
 from src.deployment.safety.collision import (
     CollisionAvoidance,
     HumanState,
     Obstacle,
+)
+from src.deployment.safety.monitor import (
+    SafetyLimits,
+    SafetyMonitor,
+    SafetyStatus,
 )
 
 __all__ = [

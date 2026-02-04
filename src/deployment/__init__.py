@@ -12,6 +12,11 @@ Phase 4 of the Robotics Expansion Proposal.
 
 from __future__ import annotations
 
+from src.deployment.digital_twin import (
+    AnomalyReport,
+    DigitalTwin,
+    StateEstimator,
+)
 from src.deployment.realtime import (
     ControlCommand,
     ControlMode,
@@ -19,11 +24,6 @@ from src.deployment.realtime import (
     RobotConfig,
     RobotState,
     TimingStatistics,
-)
-from src.deployment.digital_twin import (
-    AnomalyReport,
-    DigitalTwin,
-    StateEstimator,
 )
 from src.deployment.safety import (
     CollisionAvoidance,

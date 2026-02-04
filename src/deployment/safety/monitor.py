@@ -74,7 +74,7 @@ class SafetyLimits:
     joint_limits_upper: NDArray[np.floating] | None = None
 
     @classmethod
-    def from_config(cls, robot_config: "RobotConfig") -> "SafetyLimits":
+    def from_config(cls, robot_config: RobotConfig) -> SafetyLimits:
         """Create safety limits from robot configuration.
 
         Args:
@@ -119,7 +119,7 @@ class SafetyMonitor:
 
     def __init__(
         self,
-        robot_config: "RobotConfig",
+        robot_config: RobotConfig,
         limits: SafetyLimits | None = None,
     ) -> None:
         """Initialize safety monitor.
@@ -134,7 +134,7 @@ class SafetyMonitor:
         self._human_nearby = False
         self._emergency_stop = False
 
-    def check_state(self, state: "RobotState") -> SafetyStatus:
+    def check_state(self, state: RobotState) -> SafetyStatus:
         """Check if current state is safe.
 
         Args:
@@ -174,10 +174,7 @@ class SafetyMonitor:
         # Check for approaching limits (warnings)
         if self.limits.joint_limits_upper is not None:
             margin = 0.1  # 0.1 rad margin
-            near_upper = (
-                state.joint_positions
-                > self.limits.joint_limits_upper - margin
-            )
+            near_upper = state.joint_positions > self.limits.joint_limits_upper - margin
             if np.any(near_upper):
                 joints = list(np.where(near_upper)[0])
                 warnings.append(f"Approaching upper limit on joints {joints}")
@@ -205,7 +202,7 @@ class SafetyMonitor:
             speed_override=self._speed_override,
         )
 
-    def check_command(self, command: "ControlCommand") -> SafetyStatus:
+    def check_command(self, command: ControlCommand) -> SafetyStatus:
         """Check if command would result in safe state.
 
         Args:
@@ -234,9 +231,7 @@ class SafetyMonitor:
                 )
                 if np.any(lower_violation):
                     joints = list(np.where(lower_violation)[0])
-                    violations.append(
-                        f"Position target below limit on joints {joints}"
-                    )
+                    violations.append(f"Position target below limit on joints {joints}")
 
             if self.limits.joint_limits_upper is not None:
                 upper_violation = (
@@ -244,9 +239,7 @@ class SafetyMonitor:
                 )
                 if np.any(upper_violation):
                     joints = list(np.where(upper_violation)[0])
-                    violations.append(
-                        f"Position target above limit on joints {joints}"
-                    )
+                    violations.append(f"Position target above limit on joints {joints}")
 
         # Determine status
         if violations:
@@ -269,9 +262,9 @@ class SafetyMonitor:
 
     def compute_safe_command(
         self,
-        desired: "ControlCommand",
-        state: "RobotState",
-    ) -> "ControlCommand":
+        desired: ControlCommand,
+        state: RobotState,
+    ) -> ControlCommand:
         """Modify command to ensure safety.
 
         Args:
@@ -281,30 +274,36 @@ class SafetyMonitor:
         Returns:
             Safe control command.
         """
-        from src.deployment.realtime import ControlCommand, ControlMode
+        from src.deployment.realtime import ControlCommand
 
         # Start with desired command
         safe_command = ControlCommand(
             timestamp=desired.timestamp,
             mode=desired.mode,
-            position_targets=desired.position_targets.copy()
-            if desired.position_targets is not None
-            else None,
-            velocity_targets=desired.velocity_targets.copy()
-            if desired.velocity_targets is not None
-            else None,
-            torque_commands=desired.torque_commands.copy()
-            if desired.torque_commands is not None
-            else None,
-            feedforward_torque=desired.feedforward_torque.copy()
-            if desired.feedforward_torque is not None
-            else None,
-            stiffness=desired.stiffness.copy()
-            if desired.stiffness is not None
-            else None,
-            damping=desired.damping.copy()
-            if desired.damping is not None
-            else None,
+            position_targets=(
+                desired.position_targets.copy()
+                if desired.position_targets is not None
+                else None
+            ),
+            velocity_targets=(
+                desired.velocity_targets.copy()
+                if desired.velocity_targets is not None
+                else None
+            ),
+            torque_commands=(
+                desired.torque_commands.copy()
+                if desired.torque_commands is not None
+                else None
+            ),
+            feedforward_torque=(
+                desired.feedforward_torque.copy()
+                if desired.feedforward_torque is not None
+                else None
+            ),
+            stiffness=(
+                desired.stiffness.copy() if desired.stiffness is not None else None
+            ),
+            damping=desired.damping.copy() if desired.damping is not None else None,
         )
 
         # Apply speed override
@@ -339,7 +338,7 @@ class SafetyMonitor:
 
     def get_stopping_distance(
         self,
-        state: "RobotState",
+        state: RobotState,
         body: str,
     ) -> float:
         """Compute minimum stopping distance for a body.

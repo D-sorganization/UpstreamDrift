@@ -40,12 +40,8 @@ class WorkspaceMapping:
         rate_limit: Maximum velocity limit.
     """
 
-    leader_frame: NDArray[np.floating] = field(
-        default_factory=lambda: np.eye(4)
-    )
-    follower_frame: NDArray[np.floating] = field(
-        default_factory=lambda: np.eye(4)
-    )
+    leader_frame: NDArray[np.floating] = field(default_factory=lambda: np.eye(4))
+    follower_frame: NDArray[np.floating] = field(default_factory=lambda: np.eye(4))
     position_scale: float = 1.0
     rotation_scale: float = 1.0
     deadband: float = 0.001
@@ -70,8 +66,8 @@ class TeleoperationInterface:
 
     def __init__(
         self,
-        robot: "PhysicsEngineProtocol",
-        input_device: "InputDevice",
+        robot: PhysicsEngineProtocol,
+        input_device: InputDevice,
     ) -> None:
         """Initialize teleoperation interface.
 
@@ -147,7 +143,7 @@ class TeleoperationInterface:
         """Disengage clutch (disable motion)."""
         self._clutch_engaged = False
 
-    def update(self) -> "ControlCommand":
+    def update(self) -> ControlCommand:
         """Process input and generate control command.
 
         Returns:
@@ -208,7 +204,7 @@ class TeleoperationInterface:
         self,
         device_pose: NDArray[np.floating],
         gripper: float,
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Compute position control command.
 
         Args:
@@ -222,9 +218,7 @@ class TeleoperationInterface:
 
         # Compute position delta from reference
         if self._reference_pose is not None:
-            delta_pos = (
-                device_pose[:3] - self._reference_pose[:3]
-            ) * self._scaling
+            delta_pos = (device_pose[:3] - self._reference_pose[:3]) * self._scaling
 
             # Apply deadband
             delta_norm = np.linalg.norm(delta_pos)
@@ -274,7 +268,7 @@ class TeleoperationInterface:
         self,
         device_twist: NDArray[np.floating],
         gripper: float,
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Compute velocity control command.
 
         Args:
@@ -317,7 +311,7 @@ class TeleoperationInterface:
         self,
         device_twist: NDArray[np.floating],
         gripper: float,
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Compute wrench/torque control command.
 
         Args:
@@ -353,7 +347,7 @@ class TeleoperationInterface:
         self,
         device_pose: NDArray[np.floating],
         gripper: float,
-    ) -> "ControlCommand":
+    ) -> ControlCommand:
         """Compute impedance control command.
 
         Args:
@@ -414,7 +408,7 @@ class TeleoperationInterface:
             "gripper_commands": [],
         }
 
-    def stop_demonstration_recording(self) -> "Demonstration":
+    def stop_demonstration_recording(self) -> Demonstration:
         """Stop recording and return demonstration.
 
         Returns:

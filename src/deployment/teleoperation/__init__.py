@@ -9,16 +9,16 @@ This module provides teleoperation capabilities:
 
 from __future__ import annotations
 
-from src.deployment.teleoperation.interface import (
-    TeleoperationInterface,
-    TeleoperationMode,
-)
 from src.deployment.teleoperation.devices import (
     HapticDeviceInput,
     InputDevice,
     KeyboardMouseInput,
     SpaceMouseInput,
     VRControllerInput,
+)
+from src.deployment.teleoperation.interface import (
+    TeleoperationInterface,
+    TeleoperationMode,
 )
 
 __all__ = [
