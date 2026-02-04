@@ -653,7 +653,7 @@ def _gjk_distance(
             t = np.dot(ao, ab) / (np.dot(ab, ab) + 1e-10)
             t = np.clip(t, 0.0, 1.0)
             closest = simplex[0] + t * ab
-            dist = np.linalg.norm(closest)
+            dist = float(np.linalg.norm(closest))
             if dist < 1e-6:
                 # Origin very close to simplex (collision)
                 return 0.0, support_a, support_b
@@ -666,7 +666,7 @@ def _gjk_distance(
             t = np.dot(ao, ab) / (np.dot(ab, ab) + 1e-10)
             t = np.clip(t, 0.0, 1.0)
             closest = simplex[0] + t * ab
-            dist = np.linalg.norm(closest)
+            dist = float(np.linalg.norm(closest))
             if dist < 1e-6:
                 return 0.0, support_a, support_b
             direction = -closest / dist
