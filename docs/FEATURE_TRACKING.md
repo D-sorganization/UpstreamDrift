@@ -1,7 +1,7 @@
 # UpstreamDrift Feature Tracking Diagram
 
 > **Last Updated:** 2026-02-03
-> **Version:** 2.1.0
+> **Version:** 2.2.0
 > **Purpose:** Central reference for tracking all features, their status, and relationships
 
 ---
@@ -477,7 +477,98 @@ EDUCATIONAL                       STANDARD                           RESEARCH
 
 ---
 
-## 10. Documentation
+## 10. Robotics Expansion (New in v2.2)
+
+### Robotics Architecture Overview
+
+```
+                           ROBOTICS EXPANSION MODULES
+                                      │
+       ┌──────────────────────────────┼──────────────────────────────┐
+       │                              │                              │
+       ▼                              ▼                              ▼
+┌─────────────┐              ┌─────────────┐              ┌─────────────┐
+│  LEARNING   │              │ DEPLOYMENT  │              │  RESEARCH   │
+│ (Phase 3)   │              │  (Phase 4)  │              │  (Phase 5)  │
+└──────┬──────┘              └──────┬──────┘              └──────┬──────┘
+       │                            │                            │
+  ┌────┼────┐                  ┌────┼────┐                  ┌────┼────┐
+  ▼    ▼    ▼                  ▼    ▼    ▼                  ▼    ▼    ▼
+┌───┐┌───┐┌───┐            ┌───┐┌───┐┌───┐            ┌───┐┌───┐┌───┐
+│RL ││Im.││S2R│            │RT ││DT ││Tel│            │MPC││Dif││MRS│
+│Env││Lrn││   │            │Ctl││   ││eop│            │   ││Phy││   │
+└───┘└───┘└───┘            └───┘└───┘└───┘            └───┘└───┘└───┘
+[x]  [x]  [x]              [x]  [x]  [x]              [x]  [x]  [x]
+```
+
+### Phase 3: Learning and Adaptation (PR #1077)
+
+| Feature | Status | Module | Description |
+|---------|--------|--------|-------------|
+| **Reinforcement Learning Environments** | | | |
+| Gymnasium Base Environment | `[x]` | `learning/rl/base_env.py` | Wrapper for physics engines |
+| HumanoidWalkEnv | `[x]` | `learning/rl/humanoid_envs.py` | Bipedal walking task |
+| HumanoidStandEnv | `[x]` | `learning/rl/humanoid_envs.py` | Balance maintenance |
+| ManipulationPickPlaceEnv | `[x]` | `learning/rl/manipulation_envs.py` | Pick-and-place task |
+| DualArmManipulationEnv | `[x]` | `learning/rl/manipulation_envs.py` | Bimanual coordination |
+| **Imitation Learning** | | | |
+| Demonstration Dataset | `[x]` | `learning/imitation/dataset.py` | Record/load demonstrations |
+| Behavior Cloning | `[x]` | `learning/imitation/learners.py` | Supervised learning |
+| DAgger | `[x]` | `learning/imitation/learners.py` | Dataset aggregation |
+| GAIL | `[x]` | `learning/imitation/learners.py` | Adversarial imitation |
+| **Sim-to-Real Transfer** | | | |
+| Domain Randomization | `[x]` | `learning/sim2real/domain_randomization.py` | Parameter variation |
+| System Identification | `[x]` | `learning/sim2real/system_identification.py` | Real robot calibration |
+| Motion Retargeting | `[x]` | `learning/retargeting/retargeter.py` | Cross-embodiment transfer |
+
+### Phase 4: Industrial Deployment (PR #1078)
+
+| Feature | Status | Module | Description |
+|---------|--------|--------|-------------|
+| **Real-Time Control** | | | |
+| RealTimeController | `[x]` | `deployment/realtime/controller.py` | High-frequency control loop |
+| EtherCAT Integration | `[x]` | `deployment/realtime/controller.py` | Industrial protocol support |
+| ROS2 Integration | `[x]` | `deployment/realtime/controller.py` | ROS2 middleware |
+| UDP Protocol | `[x]` | `deployment/realtime/controller.py` | Low-latency communication |
+| **Digital Twin** | | | |
+| DigitalTwin | `[x]` | `deployment/digital_twin/twin.py` | Synchronized simulation |
+| StateEstimator | `[x]` | `deployment/digital_twin/estimator.py` | Kalman filtering |
+| Anomaly Detection | `[x]` | `deployment/digital_twin/twin.py` | Drift/spike detection |
+| **Safety Systems** | | | |
+| SafetyMonitor | `[x]` | `deployment/safety/monitor.py` | ISO 10218-1 / TS 15066 |
+| CollisionAvoidance | `[x]` | `deployment/safety/collision.py` | Potential field methods |
+| Human Safety Zones | `[x]` | `deployment/safety/collision.py` | Proximity monitoring |
+| **Teleoperation** | | | |
+| TeleoperationInterface | `[x]` | `deployment/teleoperation/interface.py` | Multi-device support |
+| SpaceMouseInput | `[x]` | `deployment/teleoperation/devices.py` | 6-DOF input device |
+| VRControllerInput | `[x]` | `deployment/teleoperation/devices.py` | VR controller support |
+| HapticDeviceInput | `[x]` | `deployment/teleoperation/devices.py` | Force feedback |
+
+### Phase 5: Advanced Research (PR #1079)
+
+| Feature | Status | Module | Description |
+|---------|--------|--------|-------------|
+| **Model Predictive Control** | | | |
+| iLQR Solver | `[x]` | `research/mpc/controller.py` | Trajectory optimization |
+| CentroidalMPC | `[x]` | `research/mpc/specialized.py` | Locomotion planning |
+| WholeBodyMPC | `[x]` | `research/mpc/specialized.py` | Full-body control |
+| **Differentiable Physics** | | | |
+| DifferentiableEngine | `[x]` | `research/differentiable/engine.py` | Gradient-based optimization |
+| Contact Smoothing | `[x]` | `research/differentiable/engine.py` | Gradient through contacts |
+| Multi-Backend Support | `[x]` | `research/differentiable/engine.py` | JAX, PyTorch, custom |
+| **Deformable Objects** | | | |
+| SoftBody (FEM) | `[x]` | `research/deformable/objects.py` | Finite element method |
+| Cable Dynamics | `[x]` | `research/deformable/objects.py` | Mass-spring/catenary |
+| Cloth Simulation | `[x]` | `research/deformable/objects.py` | Bending + collision |
+| **Multi-Robot Systems** | | | |
+| MultiRobotSystem | `[x]` | `research/multi_robot/system.py` | Coordinated control |
+| FormationController | `[x]` | `research/multi_robot/coordination.py` | Line/circle/wedge |
+| CooperativeManipulation | `[x]` | `research/multi_robot/coordination.py` | Grasp matrices |
+| Load Sharing | `[x]` | `research/multi_robot/coordination.py` | Optimal force distribution |
+
+---
+
+## 11. Documentation
 
 ### Documentation Coverage
 
@@ -541,8 +632,8 @@ EDUCATIONAL                       STANDARD                           RESEARCH
 
 | Feature | Priority | Status | Target |
 |---------|----------|--------|--------|
-| Enhanced Motion Primitives | High | `[ ]` | v2.2 |
-| RL Training Pipeline | Medium | `[ ]` | v2.2 |
+| Enhanced Motion Primitives | High | `[~]` | v2.2 |
+| RL Training Pipeline | Medium | `[x]` | v2.2 |
 | Cloud Deployment Guide | Medium | `[ ]` | v2.2 |
 
 ### Medium-Term (Future Releases)
