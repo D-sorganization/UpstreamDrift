@@ -761,10 +761,10 @@ class GreenSurface:
         """Load topography from GeoTIFF file."""
         try:
             import rasterio  # type: ignore
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "rasterio required for GeoTIFF support. Install with: pip install rasterio"
-            )
+            ) from err
 
         with rasterio.open(filepath) as src:
             heightmap = src.read(1)

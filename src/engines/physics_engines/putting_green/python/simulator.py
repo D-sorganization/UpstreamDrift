@@ -534,7 +534,6 @@ class PuttingGreenSimulator:
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-velocity counterfactual."""
-        temp_state = BallState(q, np.zeros(2), self._ball_state.spin)
         return self._physics.compute_slope_acceleration(q)
 
     # Real-time mode

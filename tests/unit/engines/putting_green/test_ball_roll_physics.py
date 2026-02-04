@@ -315,7 +315,6 @@ class TestBallRollPhysics:
         assert len(trajectory["times"]) > 1
 
         # Ball should have stopped
-        final_pos = trajectory["positions"][-1]
         final_vel = trajectory["velocities"][-1]
         assert np.linalg.norm(final_vel) < 0.01
 

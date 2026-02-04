@@ -176,6 +176,8 @@ class TurfProperties:
         base_friction = 0.196 / self.stimp_rating
 
         # Adjust for height of cut (longer grass = more friction)
+        # Note: height_of_cut_mm is guaranteed non-None after __post_init__
+        assert self.height_of_cut_mm is not None
         height_factor = 1.0 + 0.05 * (self.height_of_cut_mm - 3.0) / 2.0
 
         return base_friction * height_factor
@@ -262,6 +264,8 @@ class TurfProperties:
 
         # Apply small cross-grain velocity component
         # Effect is proportional to grain strength and inversely to speed
+        # Note: grain_strength is guaranteed non-None after __post_init__
+        assert self.grain_strength is not None
         curve_amount = self.grain_strength * 0.01 / (1.0 + speed)
         return velocity + curve_amount * cross_grain * speed
 
