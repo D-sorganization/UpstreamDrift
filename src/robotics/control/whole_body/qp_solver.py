@@ -378,7 +378,7 @@ class NullspaceQPSolver(QPSolver):
         else:
             # Unconstrained: solve H @ x = -g
             try:
-                x = np.linalg.solve(H, -g)
+                x = np.asarray(np.linalg.solve(H, -g), dtype=np.float64)
                 cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
 
                 solve_time = time.perf_counter() - start_time
