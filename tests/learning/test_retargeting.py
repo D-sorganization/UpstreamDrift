@@ -17,11 +17,13 @@ class TestSkeletonConfig:
             name="test",
             joint_names=["root", "joint1", "joint2"],
             parent_indices=[-1, 0, 1],
-            joint_offsets=np.array([
-                [0, 0, 0],
-                [0, 0, 1],
-                [0, 0, 1],
-            ]),
+            joint_offsets=np.array(
+                [
+                    [0, 0, 0],
+                    [0, 0, 1],
+                    [0, 0, 1],
+                ]
+            ),
         )
 
         assert skeleton.n_joints == 3
@@ -89,9 +91,7 @@ class TestSkeletonConfig:
 class TestMotionRetargeter:
     """Tests for MotionRetargeter."""
 
-    def create_simple_skeleton(
-        self, name: str, n_joints: int = 5
-    ) -> "SkeletonConfig":
+    def create_simple_skeleton(self, name: str, n_joints: int = 5) -> SkeletonConfig:
         """Create a simple test skeleton."""
         from src.learning.retargeting import SkeletonConfig
 
@@ -212,8 +212,6 @@ class TestMotionRetargeter:
         marker_positions = np.random.randn(n_frames, n_markers, 3)
         marker_names = ["LSHO", "RSHO", "LELB", "RELB", "LWRI"]
 
-        target_motion = retargeter.retarget_from_mocap(
-            marker_positions, marker_names
-        )
+        target_motion = retargeter.retarget_from_mocap(marker_positions, marker_names)
 
         assert target_motion.shape == (n_frames, target.n_joints)

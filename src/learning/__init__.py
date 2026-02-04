@@ -11,6 +11,18 @@ Phase 3 of the Robotics Expansion Proposal.
 
 from __future__ import annotations
 
+from src.learning.imitation import (
+    GAIL,
+    BehaviorCloning,
+    DAgger,
+    Demonstration,
+    DemonstrationDataset,
+    ImitationLearner,
+)
+from src.learning.retargeting import (
+    MotionRetargeter,
+    SkeletonConfig,
+)
 from src.learning.rl import (
     ActionConfig,
     DualArmManipulationEnv,
@@ -22,22 +34,10 @@ from src.learning.rl import (
     RoboticsGymEnv,
     TaskConfig,
 )
-from src.learning.imitation import (
-    BehaviorCloning,
-    DAgger,
-    Demonstration,
-    DemonstrationDataset,
-    GAIL,
-    ImitationLearner,
-)
 from src.learning.sim2real import (
     DomainRandomizationConfig,
     DomainRandomizer,
     SystemIdentifier,
-)
-from src.learning.retargeting import (
-    MotionRetargeter,
-    SkeletonConfig,
 )
 
 __all__ = [

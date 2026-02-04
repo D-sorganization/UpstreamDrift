@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -90,7 +91,7 @@ class ImitationLearner(ABC):
         action_space: spaces.Box,
         config: TrainingConfig | None = None,
         device: str = "cpu",
-    ) -> "ImitationLearner":
+    ) -> ImitationLearner:
         """Create learner from Gymnasium spaces.
 
         Args:
@@ -121,7 +122,6 @@ class ImitationLearner(ABC):
         Returns:
             Training history with loss curves.
         """
-        pass
 
     @abstractmethod
     def predict(
@@ -138,7 +138,6 @@ class ImitationLearner(ABC):
         Returns:
             Predicted action.
         """
-        pass
 
     @abstractmethod
     def save(self, path: str | Path) -> None:
@@ -147,7 +146,6 @@ class ImitationLearner(ABC):
         Args:
             path: Path to save file.
         """
-        pass
 
     @abstractmethod
     def load(self, path: str | Path) -> None:
@@ -156,7 +154,6 @@ class ImitationLearner(ABC):
         Args:
             path: Path to load file.
         """
-        pass
 
     def get_training_history(self) -> dict[str, list[float]]:
         """Get training history.
@@ -195,17 +192,21 @@ class BehaviorCloning(ImitationLearner):
         input_dim = self.observation_dim
 
         for hidden_dim in self.config.hidden_sizes:
-            layers.append({
-                "W": np.random.randn(input_dim, hidden_dim) * 0.01,
-                "b": np.zeros(hidden_dim),
-            })
+            layers.append(
+                {
+                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
+                    "b": np.zeros(hidden_dim),
+                }
+            )
             input_dim = hidden_dim
 
         # Output layer
-        layers.append({
-            "W": np.random.randn(input_dim, self.action_dim) * 0.01,
-            "b": np.zeros(self.action_dim),
-        })
+        layers.append(
+            {
+                "W": np.random.randn(input_dim, self.action_dim) * 0.01,
+                "b": np.zeros(self.action_dim),
+            }
+        )
 
         self._policy = layers
 
@@ -505,7 +506,7 @@ class DAgger(ImitationLearner):
             if beta_schedule == "linear":
                 beta = 1.0 - iteration / iterations
             else:
-                beta = 0.5 ** iteration
+                beta = 0.5**iteration
 
             # Collect trajectories
             new_demos = []
@@ -627,16 +628,20 @@ class GAIL(ImitationLearner):
         input_dim = self.observation_dim
 
         for hidden_dim in self.config.hidden_sizes:
-            policy_layers.append({
-                "W": np.random.randn(input_dim, hidden_dim) * 0.01,
-                "b": np.zeros(hidden_dim),
-            })
+            policy_layers.append(
+                {
+                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
+                    "b": np.zeros(hidden_dim),
+                }
+            )
             input_dim = hidden_dim
 
-        policy_layers.append({
-            "W": np.random.randn(input_dim, self.action_dim) * 0.01,
-            "b": np.zeros(self.action_dim),
-        })
+        policy_layers.append(
+            {
+                "W": np.random.randn(input_dim, self.action_dim) * 0.01,
+                "b": np.zeros(self.action_dim),
+            }
+        )
         self._policy = policy_layers
 
         # Build discriminator (state-action -> [0, 1])
@@ -644,16 +649,20 @@ class GAIL(ImitationLearner):
         input_dim = self.observation_dim + self.action_dim
 
         for hidden_dim in self.config.hidden_sizes:
-            disc_layers.append({
-                "W": np.random.randn(input_dim, hidden_dim) * 0.01,
-                "b": np.zeros(hidden_dim),
-            })
+            disc_layers.append(
+                {
+                    "W": np.random.randn(input_dim, hidden_dim) * 0.01,
+                    "b": np.zeros(hidden_dim),
+                }
+            )
             input_dim = hidden_dim
 
-        disc_layers.append({
-            "W": np.random.randn(input_dim, 1) * 0.01,
-            "b": np.zeros(1),
-        })
+        disc_layers.append(
+            {
+                "W": np.random.randn(input_dim, 1) * 0.01,
+                "b": np.zeros(1),
+            }
+        )
         self._discriminator = disc_layers
 
     def _forward_policy(self, x: NDArray[np.floating]) -> NDArray[np.floating]:

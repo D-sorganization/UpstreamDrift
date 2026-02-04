@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -114,53 +114,89 @@ class SkeletonConfig:
         return chain
 
     @classmethod
-    def create_humanoid(cls) -> "SkeletonConfig":
+    def create_humanoid(cls) -> SkeletonConfig:
         """Create a standard humanoid skeleton configuration.
 
         Returns:
             Humanoid skeleton config.
         """
         joint_names = [
-            "pelvis", "spine_1", "spine_2", "spine_3", "neck", "head",
-            "left_hip", "left_knee", "left_ankle", "left_foot",
-            "right_hip", "right_knee", "right_ankle", "right_foot",
-            "left_shoulder", "left_elbow", "left_wrist", "left_hand",
-            "right_shoulder", "right_elbow", "right_wrist", "right_hand",
+            "pelvis",
+            "spine_1",
+            "spine_2",
+            "spine_3",
+            "neck",
+            "head",
+            "left_hip",
+            "left_knee",
+            "left_ankle",
+            "left_foot",
+            "right_hip",
+            "right_knee",
+            "right_ankle",
+            "right_foot",
+            "left_shoulder",
+            "left_elbow",
+            "left_wrist",
+            "left_hand",
+            "right_shoulder",
+            "right_elbow",
+            "right_wrist",
+            "right_hand",
         ]
 
         parent_indices = [
-            -1, 0, 1, 2, 3, 4,  # Spine chain
-            0, 6, 7, 8,  # Left leg
-            0, 10, 11, 12,  # Right leg
-            3, 14, 15, 16,  # Left arm
-            3, 18, 19, 20,  # Right arm
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4,  # Spine chain
+            0,
+            6,
+            7,
+            8,  # Left leg
+            0,
+            10,
+            11,
+            12,  # Right leg
+            3,
+            14,
+            15,
+            16,  # Left arm
+            3,
+            18,
+            19,
+            20,  # Right arm
         ]
 
         # Approximate T-pose offsets (in meters)
-        joint_offsets = np.array([
-            [0, 0, 0],  # pelvis (root)
-            [0, 0, 0.1],  # spine_1
-            [0, 0, 0.1],  # spine_2
-            [0, 0, 0.1],  # spine_3
-            [0, 0, 0.1],  # neck
-            [0, 0, 0.1],  # head
-            [0.1, 0, 0],  # left_hip
-            [0, 0, -0.4],  # left_knee
-            [0, 0, -0.4],  # left_ankle
-            [0, 0.1, 0],  # left_foot
-            [-0.1, 0, 0],  # right_hip
-            [0, 0, -0.4],  # right_knee
-            [0, 0, -0.4],  # right_ankle
-            [0, 0.1, 0],  # right_foot
-            [0.15, 0, 0],  # left_shoulder
-            [0.3, 0, 0],  # left_elbow
-            [0.25, 0, 0],  # left_wrist
-            [0.1, 0, 0],  # left_hand
-            [-0.15, 0, 0],  # right_shoulder
-            [-0.3, 0, 0],  # right_elbow
-            [-0.25, 0, 0],  # right_wrist
-            [-0.1, 0, 0],  # right_hand
-        ])
+        joint_offsets = np.array(
+            [
+                [0, 0, 0],  # pelvis (root)
+                [0, 0, 0.1],  # spine_1
+                [0, 0, 0.1],  # spine_2
+                [0, 0, 0.1],  # spine_3
+                [0, 0, 0.1],  # neck
+                [0, 0, 0.1],  # head
+                [0.1, 0, 0],  # left_hip
+                [0, 0, -0.4],  # left_knee
+                [0, 0, -0.4],  # left_ankle
+                [0, 0.1, 0],  # left_foot
+                [-0.1, 0, 0],  # right_hip
+                [0, 0, -0.4],  # right_knee
+                [0, 0, -0.4],  # right_ankle
+                [0, 0.1, 0],  # right_foot
+                [0.15, 0, 0],  # left_shoulder
+                [0.3, 0, 0],  # left_elbow
+                [0.25, 0, 0],  # left_wrist
+                [0.1, 0, 0],  # left_hand
+                [-0.15, 0, 0],  # right_shoulder
+                [-0.3, 0, 0],  # right_elbow
+                [-0.25, 0, 0],  # right_wrist
+                [-0.1, 0, 0],  # right_hand
+            ]
+        )
 
         semantic_labels = {
             "pelvis": "pelvis",
@@ -186,9 +222,7 @@ class SkeletonConfig:
             "right_hand": "right_hand",
         }
 
-        end_effectors = [
-            "head", "left_hand", "right_hand", "left_foot", "right_foot"
-        ]
+        end_effectors = ["head", "left_hand", "right_hand", "left_foot", "right_foot"]
 
         return cls(
             name="humanoid",
@@ -387,11 +421,13 @@ class MotionRetargeter:
 
                 # Simplified: assume z-axis rotation
                 c, s = np.cos(angle), np.sin(angle)
-                rotation = np.array([
-                    [c, -s, 0],
-                    [s, c, 0],
-                    [0, 0, 1],
-                ])
+                rotation = np.array(
+                    [
+                        [c, -s, 0],
+                        [s, c, 0],
+                        [0, 0, 1],
+                    ]
+                )
 
                 position = rotation @ position + offset
 
@@ -584,21 +620,17 @@ class MotionRetargeter:
                 parent_idx = self.target.get_joint_index(chain[-2])
                 joint_idx = self.target.get_joint_index(chain[-1])
 
-                parent_offset = np.linalg.norm(
-                    self.target.joint_offsets[parent_idx]
-                )
-                joint_offset = np.linalg.norm(
-                    self.target.joint_offsets[joint_idx]
-                )
+                parent_offset = np.linalg.norm(self.target.joint_offsets[parent_idx])
+                joint_offset = np.linalg.norm(self.target.joint_offsets[joint_idx])
 
                 # Distance to target
                 dist = np.linalg.norm(target_pos)
 
                 if parent_offset + joint_offset > 0:
                     # Law of cosines for elbow angle
-                    cos_angle = (
-                        parent_offset**2 + joint_offset**2 - dist**2
-                    ) / (2 * parent_offset * joint_offset + 1e-6)
+                    cos_angle = (parent_offset**2 + joint_offset**2 - dist**2) / (
+                        2 * parent_offset * joint_offset + 1e-6
+                    )
                     cos_angle = np.clip(cos_angle, -1, 1)
                     angles[parent_idx] = np.arccos(cos_angle)
 

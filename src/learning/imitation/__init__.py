@@ -10,10 +10,10 @@ from __future__ import annotations
 
 from src.learning.imitation.dataset import Demonstration, DemonstrationDataset
 from src.learning.imitation.learners import (
-    ImitationLearner,
+    GAIL,
     BehaviorCloning,
     DAgger,
-    GAIL,
+    ImitationLearner,
 )
 
 __all__ = [

@@ -263,24 +263,27 @@ class SystemIdentifier:
                     continue
 
                 # Build initial state
-                initial_state = np.concatenate([
-                    demo.joint_positions[0],
-                    demo.joint_velocities[0],
-                ])
+                initial_state = np.concatenate(
+                    [
+                        demo.joint_positions[0],
+                        demo.joint_velocities[0],
+                    ]
+                )
 
                 # Build real trajectory
-                real_traj = np.concatenate([
-                    demo.joint_positions,
-                    demo.joint_velocities,
-                ], axis=1)
+                real_traj = np.concatenate(
+                    [
+                        demo.joint_positions,
+                        demo.joint_velocities,
+                    ],
+                    axis=1,
+                )
 
                 # Compute dt from timestamps
                 dt = float(np.mean(np.diff(demo.timestamps)))
 
                 # Simulate
-                sim_traj = self._simulate_trajectory(
-                    initial_state, demo.actions, dt
-                )
+                sim_traj = self._simulate_trajectory(initial_state, demo.actions, dt)
 
                 # Compute error
                 total_error += self._compute_trajectory_error(sim_traj, real_traj)
@@ -362,9 +365,7 @@ class SystemIdentifier:
         # Per-joint errors
         for j in range(n_dof):
             metrics[f"joint_{j}_position_mse"] = float(np.mean(diff[:, j] ** 2))
-            metrics[f"joint_{j}_velocity_mse"] = float(
-                np.mean(diff[:, n_dof + j] ** 2)
-            )
+            metrics[f"joint_{j}_velocity_mse"] = float(np.mean(diff[:, n_dof + j] ** 2))
 
         return metrics
 
@@ -383,10 +384,9 @@ class SystemIdentifier:
             Validation metrics.
         """
         # Apply identified parameters
-        param_vector = np.array([
-            identified_params.get(name, 1.0)
-            for name in self.param_bounds.keys()
-        ])
+        param_vector = np.array(
+            [identified_params.get(name, 1.0) for name in self.param_bounds.keys()]
+        )
         self._apply_params(param_vector)
 
         # Compute errors on test set
@@ -395,15 +395,20 @@ class SystemIdentifier:
             if demo.actions is None:
                 continue
 
-            initial_state = np.concatenate([
-                demo.joint_positions[0],
-                demo.joint_velocities[0],
-            ])
+            initial_state = np.concatenate(
+                [
+                    demo.joint_positions[0],
+                    demo.joint_velocities[0],
+                ]
+            )
 
-            real_traj = np.concatenate([
-                demo.joint_positions,
-                demo.joint_velocities,
-            ], axis=1)
+            real_traj = np.concatenate(
+                [
+                    demo.joint_positions,
+                    demo.joint_velocities,
+                ],
+                axis=1,
+            )
 
             dt = float(np.mean(np.diff(demo.timestamps)))
             sim_traj = self._simulate_trajectory(initial_state, demo.actions, dt)

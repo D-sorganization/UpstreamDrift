@@ -84,7 +84,7 @@ class TestDemonstration:
 class TestDemonstrationDataset:
     """Tests for DemonstrationDataset."""
 
-    def create_demo(self, n_frames: int = 50, n_joints: int = 7) -> "Demonstration":
+    def create_demo(self, n_frames: int = 50, n_joints: int = 7) -> Demonstration:
         """Helper to create a demonstration."""
         from src.learning.imitation import Demonstration
 

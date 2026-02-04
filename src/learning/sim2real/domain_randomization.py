@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -266,9 +266,7 @@ class DomainRandomizer:
         delayed_action = self._action_buffer.pop(0)
         return self._apply_action_noise(delayed_action)
 
-    def _apply_action_noise(
-        self, action: NDArray[np.floating]
-    ) -> NDArray[np.floating]:
+    def _apply_action_noise(self, action: NDArray[np.floating]) -> NDArray[np.floating]:
         """Apply action noise.
 
         Args:
@@ -333,9 +331,7 @@ class DomainRandomizer:
         """
         return self._current_randomization.copy()
 
-    def sample_randomization_batch(
-        self, batch_size: int
-    ) -> list[dict[str, Any]]:
+    def sample_randomization_batch(self, batch_size: int) -> list[dict[str, Any]]:
         """Sample a batch of randomization configurations.
 
         Useful for parallel environment training.

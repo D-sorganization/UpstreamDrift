@@ -19,7 +19,6 @@ except ImportError:
 
 from src.learning.rl.configs import (
     ActionConfig,
-    ActionMode,
     ObservationConfig,
     RewardConfig,
     TaskConfig,
@@ -164,9 +163,7 @@ class RoboticsGymEnv:
             Tuple of (observation, reward, terminated, truncated, info).
         """
         # Process action
-        processed_action = self.action_config.process_action(
-            action, self._prev_action
-        )
+        processed_action = self.action_config.process_action(action, self._prev_action)
 
         # Apply action to simulation
         self._apply_action(processed_action)
@@ -261,12 +258,10 @@ class RoboticsGymEnv:
         Args:
             action: Processed action to apply.
         """
-        pass
 
     @abstractmethod
     def _step_simulation(self) -> None:
         """Advance the simulation by one timestep."""
-        pass
 
     @abstractmethod
     def _get_observation(self) -> NDArray[np.floating]:
@@ -275,7 +270,6 @@ class RoboticsGymEnv:
         Returns:
             Observation array.
         """
-        pass
 
     @abstractmethod
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
@@ -287,7 +281,6 @@ class RoboticsGymEnv:
         Returns:
             Reward value.
         """
-        pass
 
     @abstractmethod
     def _check_termination(self) -> bool:
@@ -296,7 +289,6 @@ class RoboticsGymEnv:
         Returns:
             True if episode should terminate.
         """
-        pass
 
     @abstractmethod
     def _reset_simulation(self, options: dict[str, Any] | None) -> None:
@@ -305,7 +297,6 @@ class RoboticsGymEnv:
         Args:
             options: Reset options.
         """
-        pass
 
     def _compute_potential(self) -> float:
         """Compute potential function for reward shaping.

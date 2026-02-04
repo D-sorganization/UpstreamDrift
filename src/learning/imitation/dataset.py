@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -89,7 +89,7 @@ class Demonstration:
             frame["ee_pose"] = self.end_effector_poses[idx]
         return frame
 
-    def subsample(self, factor: int) -> "Demonstration":
+    def subsample(self, factor: int) -> Demonstration:
         """Subsample demonstration by a factor.
 
         Args:
@@ -140,7 +140,7 @@ class Demonstration:
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Demonstration":
+    def from_dict(cls, data: dict[str, Any]) -> Demonstration:
         """Create demonstration from dictionary.
 
         Args:
@@ -219,7 +219,7 @@ class DemonstrationDataset:
         """
         self.demonstrations.extend(demos)
 
-    def filter_successful(self) -> "DemonstrationDataset":
+    def filter_successful(self) -> DemonstrationDataset:
         """Return dataset with only successful demonstrations.
 
         Returns:
@@ -228,7 +228,7 @@ class DemonstrationDataset:
         successful = [d for d in self.demonstrations if d.success]
         return DemonstrationDataset(successful)
 
-    def filter_by_task(self, task_id: str) -> "DemonstrationDataset":
+    def filter_by_task(self, task_id: str) -> DemonstrationDataset:
         """Return dataset with only demonstrations for a specific task.
 
         Args:
@@ -268,14 +268,18 @@ class DemonstrationDataset:
 
             n = demo.n_frames
             for i in range(n - 1):
-                state = np.concatenate([
-                    demo.joint_positions[i],
-                    demo.joint_velocities[i],
-                ])
-                next_state = np.concatenate([
-                    demo.joint_positions[i + 1],
-                    demo.joint_velocities[i + 1],
-                ])
+                state = np.concatenate(
+                    [
+                        demo.joint_positions[i],
+                        demo.joint_velocities[i],
+                    ]
+                )
+                next_state = np.concatenate(
+                    [
+                        demo.joint_positions[i + 1],
+                        demo.joint_velocities[i + 1],
+                    ]
+                )
                 states.append(state)
                 actions.append(demo.actions[i])
                 next_states.append(next_state)
@@ -302,7 +306,7 @@ class DemonstrationDataset:
         noise_std: float = 0.01,
         num_augmentations: int = 5,
         rng: np.random.Generator | None = None,
-    ) -> "DemonstrationDataset":
+    ) -> DemonstrationDataset:
         """Augment demonstrations with noise.
 
         Args:
@@ -365,7 +369,7 @@ class DemonstrationDataset:
             json.dump(data, f, indent=2)
 
     @classmethod
-    def load(cls, path: str | Path) -> "DemonstrationDataset":
+    def load(cls, path: str | Path) -> DemonstrationDataset:
         """Load dataset from disk.
 
         Args:
@@ -375,19 +379,17 @@ class DemonstrationDataset:
             Loaded dataset.
         """
         path = Path(path)
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
 
-        demonstrations = [
-            Demonstration.from_dict(d) for d in data["demonstrations"]
-        ]
+        demonstrations = [Demonstration.from_dict(d) for d in data["demonstrations"]]
         return cls(demonstrations)
 
     def sample(
         self,
         n: int,
         rng: np.random.Generator | None = None,
-    ) -> "DemonstrationDataset":
+    ) -> DemonstrationDataset:
         """Random sample of demonstrations.
 
         Args:
@@ -414,9 +416,7 @@ class DemonstrationDataset:
         if not self.demonstrations:
             return {"n_demonstrations": 0}
 
-        all_positions = np.concatenate(
-            [d.joint_positions for d in self.demonstrations]
-        )
+        all_positions = np.concatenate([d.joint_positions for d in self.demonstrations])
         all_velocities = np.concatenate(
             [d.joint_velocities for d in self.demonstrations]
         )

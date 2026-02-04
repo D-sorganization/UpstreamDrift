@@ -436,11 +436,13 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         obs_parts.append(self.task_config.target_position)
 
         # Grasp states
-        grasp_state = np.array([
-            float(self._left_grasped),
-            float(self._right_grasped),
-            float(self._object_lifted),
-        ])
+        grasp_state = np.array(
+            [
+                float(self._left_grasped),
+                float(self._right_grasped),
+                float(self._object_lifted),
+            ]
+        )
         obs_parts.append(grasp_state)
 
         return np.concatenate(obs_parts).astype(np.float32)

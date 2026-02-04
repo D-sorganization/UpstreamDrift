@@ -126,8 +126,7 @@ class ActionConfig:
         # Smooth
         if self.smoothing_alpha > 0 and prev_action is not None:
             action = (
-                self.smoothing_alpha * prev_action
-                + (1 - self.smoothing_alpha) * action
+                self.smoothing_alpha * prev_action + (1 - self.smoothing_alpha) * action
             )
         return action
 
