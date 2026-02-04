@@ -26,6 +26,7 @@ Usage:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
@@ -36,10 +37,8 @@ from src.unreal_integration.data_models import (
     ForceVector,
     SwingMetrics,
     TrajectoryPoint,
-    Vector3,
 )
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -196,17 +195,16 @@ class ForceVectorRenderer:
         endpoint = origin + direction * arrow_length
 
         # Create arrow geometry (simplified - line + cone)
-        vertices = np.array([
-            origin,
-            endpoint - direction * arrow_head_length,  # Shaft end
-            endpoint,  # Tip
-        ])
+        vertices = np.array(
+            [
+                origin,
+                endpoint - direction * arrow_head_length,  # Shaft end
+                endpoint,  # Tip
+            ]
+        )
 
         # Get color
-        color = self.config.force_color_map.get(
-            force.force_type,
-            (0.0, 1.0, 0.0, 1.0)
-        )
+        color = self.config.force_color_map.get(force.force_type, (0.0, 1.0, 0.0, 1.0))
         if force.color is not None:
             color = force.color
 
@@ -260,7 +258,9 @@ class ForceVectorRenderer:
         vertices = []
         for i in range(arc_segments + 1):
             angle = arc_angle * i / arc_segments
-            point = origin + arc_radius * (np.cos(angle) * perp1 + np.sin(angle) * perp2)
+            point = origin + arc_radius * (
+                np.cos(angle) * perp1 + np.sin(angle) * perp2
+            )
             vertices.append(point)
 
         vertices = np.array(vertices)
@@ -343,7 +343,11 @@ class TrajectoryRenderer:
 
         colors = np.array(colors)
 
-        viz_type = VisualizationType.TRAJECTORY_RIBBON if as_ribbon else VisualizationType.TRAJECTORY_LINE
+        viz_type = (
+            VisualizationType.TRAJECTORY_RIBBON
+            if as_ribbon
+            else VisualizationType.TRAJECTORY_LINE
+        )
 
         return RenderData(
             visualization_type=viz_type,
@@ -352,7 +356,9 @@ class TrajectoryRenderer:
             metadata={
                 "point_count": len(points),
                 "line_width": self.config.trajectory_width,
-                "total_time": points[-1].time - points[0].time if len(points) > 1 else 0,
+                "total_time": (
+                    points[-1].time - points[0].time if len(points) > 1 else 0
+                ),
             },
         )
 
@@ -381,12 +387,14 @@ class TrajectoryRenderer:
         if landing_marker and points:
             landing_point = points[-1].position.to_numpy()
             marker_vertices = np.array([landing_point])
-            results.append(RenderData(
-                visualization_type=VisualizationType.TRAJECTORY_LINE,
-                vertices=marker_vertices,
-                colors=np.array([[1.0, 1.0, 0.0, 1.0]]),  # Yellow
-                metadata={"marker_type": "landing", "radius": 0.2},
-            ))
+            results.append(
+                RenderData(
+                    visualization_type=VisualizationType.TRAJECTORY_LINE,
+                    vertices=marker_vertices,
+                    colors=np.array([[1.0, 1.0, 0.0, 1.0]]),  # Yellow
+                    metadata={"marker_type": "landing", "radius": 0.2},
+                )
+            )
 
         return results
 
@@ -410,7 +418,11 @@ class HUDDataProvider:
         self.units = units
         self._conversion_factors = {
             "metric": {"speed": 1.0, "distance": 1.0, "angle": 1.0},
-            "imperial": {"speed": 2.237, "distance": 1.094, "angle": 1.0},  # m/s to mph, m to yards
+            "imperial": {
+                "speed": 2.237,
+                "distance": 1.094,
+                "angle": 1.0,
+            },  # m/s to mph, m to yards
         }
 
     def get_hud_data(

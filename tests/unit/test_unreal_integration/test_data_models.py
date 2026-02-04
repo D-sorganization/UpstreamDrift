@@ -7,22 +7,21 @@ from __future__ import annotations
 
 import json
 import math
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from src.unreal_integration.data_models import (
+    BallState,
     ClubState,
+    EnvironmentState,
     ForceVector,
     JointState,
+    Quaternion,
     SwingMetrics,
+    TrajectoryPoint,
     UnrealDataFrame,
     Vector3,
-    Quaternion,
-    TrajectoryPoint,
-    BallState,
-    EnvironmentState,
 )
 
 

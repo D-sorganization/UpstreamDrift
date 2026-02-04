@@ -34,15 +34,16 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Callable
+from typing import Any
 
 from src.unreal_integration.data_models import UnrealDataFrame
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -532,7 +533,9 @@ class UnrealStreamingServer:
             # In a real implementation, this would start the WebSocket server
             # For now, we just transition to RUNNING
             self._state = StreamingState.RUNNING
-            logger.info(f"Streaming server started on {self.config.host}:{self.config.port}")
+            logger.info(
+                f"Streaming server started on {self.config.host}:{self.config.port}"
+            )
         except Exception as e:
             self._state = StreamingState.ERROR
             logger.error(f"Failed to start streaming server: {e}")

@@ -7,21 +7,19 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
 from src.unreal_integration.mesh_loader import (
-    MeshLoader,
     LoadedMesh,
-    MeshFormat,
-    MeshVertex,
+    MeshBone,
     MeshFace,
+    MeshFormat,
+    MeshLoader,
     MeshMaterial,
     MeshSkeleton,
-    MeshBone,
-    MeshLoadError,
+    MeshVertex,
     UnsupportedFormatError,
 )
 
@@ -213,7 +211,9 @@ class TestMeshSkeleton:
         """Test bone lookup by name."""
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
-            MeshBone(name="shoulder_L", index=1, parent_index=0, local_transform=np.eye(4)),
+            MeshBone(
+                name="shoulder_L", index=1, parent_index=0, local_transform=np.eye(4)
+            ),
         ]
         skeleton = MeshSkeleton(bones=bones)
         assert skeleton.get_bone("shoulder_L") is not None
@@ -224,8 +224,12 @@ class TestMeshSkeleton:
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
             MeshBone(name="spine", index=1, parent_index=0, local_transform=np.eye(4)),
-            MeshBone(name="shoulder_L", index=2, parent_index=1, local_transform=np.eye(4)),
-            MeshBone(name="shoulder_R", index=3, parent_index=1, local_transform=np.eye(4)),
+            MeshBone(
+                name="shoulder_L", index=2, parent_index=1, local_transform=np.eye(4)
+            ),
+            MeshBone(
+                name="shoulder_R", index=3, parent_index=1, local_transform=np.eye(4)
+            ),
         ]
         skeleton = MeshSkeleton(bones=bones)
         children = skeleton.get_children(1)  # Children of spine
@@ -282,7 +286,9 @@ class TestLoadedMesh:
         """Test mesh with skeleton."""
         vertices = [MeshVertex(position=np.array([0.0, 0.0, 0.0]))]
         faces = [MeshFace(indices=np.array([0, 0, 0]))]
-        bones = [MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4))]
+        bones = [
+            MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4))
+        ]
         skeleton = MeshSkeleton(bones=bones)
 
         mesh = LoadedMesh(
@@ -446,8 +452,11 @@ f 1/1 2/2 3/3
 
         # Modify file - add a 4th vertex
         import time
+
         time.sleep(0.1)  # Ensure different mtime
-        obj_file.write_text("v 0.0 0.0 0.0\nv 1.0 0.0 0.0\nv 0.0 1.0 0.0\nv 1.0 1.0 0.0\nf 1 2 3\nf 2 4 3")
+        obj_file.write_text(
+            "v 0.0 0.0 0.0\nv 1.0 0.0 0.0\nv 0.0 1.0 0.0\nv 1.0 1.0 0.0\nf 1 2 3\nf 2 4 3"
+        )
 
         # Should reload and have more vertices
         mesh2 = loader.load(str(obj_file))
@@ -478,12 +487,16 @@ class TestMeshLoaderGLTF:
             "scene": 0,
             "scenes": [{"nodes": [0]}],
             "nodes": [{"mesh": 0}],
-            "meshes": [{
-                "primitives": [{
-                    "attributes": {"POSITION": 0},
-                    "indices": 1,
-                }]
-            }],
+            "meshes": [
+                {
+                    "primitives": [
+                        {
+                            "attributes": {"POSITION": 0},
+                            "indices": 1,
+                        }
+                    ]
+                }
+            ],
             "accessors": [
                 {
                     "bufferView": 0,
@@ -498,7 +511,7 @@ class TestMeshLoaderGLTF:
                     "componentType": 5123,  # UNSIGNED_SHORT
                     "count": 3,
                     "type": "SCALAR",
-                }
+                },
             ],
             "bufferViews": [
                 {"buffer": 0, "byteOffset": 0, "byteLength": 36},
@@ -512,8 +525,9 @@ class TestMeshLoaderGLTF:
 
         # Create binary buffer
         import struct
-        vertices = struct.pack('<9f', 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0)
-        indices = struct.pack('<3H', 0, 1, 2)
+
+        vertices = struct.pack("<9f", 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0)
+        indices = struct.pack("<3H", 0, 1, 2)
         buffer_data = vertices + indices
 
         bin_file = tmp_path / "minimal.bin"
@@ -531,7 +545,6 @@ class TestMeshLoaderGLTF:
         """Test loading GLTF with skeleton."""
         # This would test skeleton loading from GLTF
         # Actual implementation depends on trimesh/pygltflib
-        pass
 
 
 class TestMeshLoaderContracts:

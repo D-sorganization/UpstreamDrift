@@ -42,28 +42,28 @@ Usage:
 # Import with graceful fallback for missing dependencies
 try:
     from src.unreal_integration.data_models import (
+        BallState,
         ClubState,
+        EnvironmentState,
         ForceVector,
         JointState,
+        Quaternion,
         SwingMetrics,
+        TrajectoryPoint,
         UnrealDataFrame,
         Vector3,
-        Quaternion,
-        TrajectoryPoint,
-        BallState,
-        EnvironmentState,
     )
 except ImportError as e:
     raise ImportError(f"Failed to import data_models: {e}") from e
 
 try:
     from src.unreal_integration.streaming import (
-        StreamingConfig,
-        UnrealStreamingServer,
-        StreamingState,
-        ControlMessage,
         ControlAction,
+        ControlMessage,
         FrameBuffer,
+        StreamingConfig,
+        StreamingState,
+        UnrealStreamingServer,
     )
 except ImportError as e:
     raise ImportError(f"Failed to import streaming: {e}") from e
@@ -71,13 +71,13 @@ except ImportError as e:
 try:
     from src.unreal_integration.mesh_loader import (
         LoadedMesh,
-        MeshLoader,
-        MeshFormat,
-        MeshVertex,
+        MeshBone,
         MeshFace,
+        MeshFormat,
+        MeshLoader,
         MeshMaterial,
         MeshSkeleton,
-        MeshBone,
+        MeshVertex,
     )
 except ImportError as e:
     raise ImportError(f"Failed to import mesh_loader: {e}") from e
@@ -85,10 +85,10 @@ except ImportError as e:
 try:
     from src.unreal_integration.skeleton_mapper import (
         BoneMapping,
-        SkeletonMapper,
-        SkeletonType,
         MappingProfile,
         PoseTransform,
+        SkeletonMapper,
+        SkeletonType,
     )
 except ImportError as e:
     raise ImportError(f"Failed to import skeleton_mapper: {e}") from e
@@ -96,10 +96,10 @@ except ImportError as e:
 try:
     from src.unreal_integration.visualization import (
         ForceVectorRenderer,
-        TrajectoryRenderer,
         HUDDataProvider,
-        VisualizationConfig,
         RenderData,
+        TrajectoryRenderer,
+        VisualizationConfig,
         VisualizationType,
     )
 except ImportError as e:
@@ -107,24 +107,24 @@ except ImportError as e:
 
 try:
     from src.unreal_integration.vr_interaction import (
+        VRControllerHand,
         VRControllerState,
+        VRGesture,
         VRHeadsetState,
         VRInteractionManager,
-        VRLocomotionMode,
-        VRControllerHand,
         VRInteractionMode,
-        VRGesture,
+        VRLocomotionMode,
     )
 except ImportError as e:
     raise ImportError(f"Failed to import vr_interaction: {e}") from e
 
 try:
     from src.unreal_integration.viewer_backends import (
-        ViewerBackend,
+        BackendType,
         MeshcatBackend,
         MockBackend,
+        ViewerBackend,
         ViewerConfig,
-        BackendType,
         create_viewer,
     )
 except ImportError as e:

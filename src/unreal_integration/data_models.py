@@ -84,7 +84,6 @@ class Vector3:
     def __post_init__(self) -> None:
         """Post-initialization hook for optional validation."""
         # Validation is opt-in via factory methods
-        pass
 
     @classmethod
     def from_numpy(cls, arr: np.ndarray, validate: bool = False) -> Vector3:
@@ -131,12 +130,16 @@ class Vector3:
         """Create zero vector."""
         return cls(x=0.0, y=0.0, z=0.0)
 
-    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, validate: bool = False) -> Vector3:
+    def __new__(
+        cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, validate: bool = False
+    ) -> Vector3:
         """Create new Vector3 with optional validation."""
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0, validate: bool = False) -> None:
+    def __init__(
+        self, x: float = 0.0, y: float = 0.0, z: float = 0.0, validate: bool = False
+    ) -> None:
         """Initialize Vector3.
 
         Args:
@@ -180,7 +183,7 @@ class Vector3:
         Returns:
             Euclidean length of vector.
         """
-        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def normalized(self) -> Vector3:
         """Return normalized (unit length) vector.
@@ -278,14 +281,26 @@ class Quaternion:
     y: float = 0.0
     z: float = 0.0
 
-    def __new__(cls, w: float = 1.0, x: float = 0.0, y: float = 0.0, z: float = 0.0,
-                validate: bool = False) -> Quaternion:
+    def __new__(
+        cls,
+        w: float = 1.0,
+        x: float = 0.0,
+        y: float = 0.0,
+        z: float = 0.0,
+        validate: bool = False,
+    ) -> Quaternion:
         """Create new Quaternion."""
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, w: float = 1.0, x: float = 0.0, y: float = 0.0, z: float = 0.0,
-                 validate: bool = False) -> None:
+    def __init__(
+        self,
+        w: float = 1.0,
+        x: float = 0.0,
+        y: float = 0.0,
+        z: float = 0.0,
+        validate: bool = False,
+    ) -> None:
         """Initialize Quaternion.
 
         Args:
@@ -317,7 +332,9 @@ class Quaternion:
         return cls(w=1.0, x=0.0, y=0.0, z=0.0)
 
     @classmethod
-    def from_euler(cls, roll: float, pitch: float, yaw: float, validate: bool = False) -> Quaternion:
+    def from_euler(
+        cls, roll: float, pitch: float, yaw: float, validate: bool = False
+    ) -> Quaternion:
         """Create quaternion from Euler angles (roll, pitch, yaw).
 
         Uses ZYX convention (yaw-pitch-roll).
@@ -407,7 +424,7 @@ class Quaternion:
         Returns:
             Magnitude of quaternion.
         """
-        return math.sqrt(self.w ** 2 + self.x ** 2 + self.y ** 2 + self.z ** 2)
+        return math.sqrt(self.w**2 + self.x**2 + self.y**2 + self.z**2)
 
     def normalized(self) -> Quaternion:
         """Return normalized quaternion.
@@ -471,20 +488,35 @@ class JointState:
 
     def __post_init__(self) -> None:
         """Post-initialization validation."""
-        pass
 
-    def __new__(cls, name: str, position: Vector3, rotation: Quaternion,
-                velocity: Vector3 | None = None, angular_velocity: Vector3 | None = None,
-                joint_angle: float | None = None, joint_velocity: float | None = None,
-                parent_name: str | None = None, validate: bool = False) -> JointState:
+    def __new__(
+        cls,
+        name: str,
+        position: Vector3,
+        rotation: Quaternion,
+        velocity: Vector3 | None = None,
+        angular_velocity: Vector3 | None = None,
+        joint_angle: float | None = None,
+        joint_velocity: float | None = None,
+        parent_name: str | None = None,
+        validate: bool = False,
+    ) -> JointState:
         """Create new JointState with optional validation."""
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, name: str, position: Vector3, rotation: Quaternion,
-                 velocity: Vector3 | None = None, angular_velocity: Vector3 | None = None,
-                 joint_angle: float | None = None, joint_velocity: float | None = None,
-                 parent_name: str | None = None, validate: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        position: Vector3,
+        rotation: Quaternion,
+        velocity: Vector3 | None = None,
+        angular_velocity: Vector3 | None = None,
+        joint_angle: float | None = None,
+        joint_velocity: float | None = None,
+        parent_name: str | None = None,
+        validate: bool = False,
+    ) -> None:
         """Initialize JointState.
 
         Args:
@@ -548,7 +580,11 @@ class JointState:
             position=Vector3.from_dict(d["position"]),
             rotation=Quaternion.from_dict(d["rotation"]),
             velocity=Vector3.from_dict(d["velocity"]) if "velocity" in d else None,
-            angular_velocity=Vector3.from_dict(d["angular_velocity"]) if "angular_velocity" in d else None,
+            angular_velocity=(
+                Vector3.from_dict(d["angular_velocity"])
+                if "angular_velocity" in d
+                else None
+            ),
             joint_angle=d.get("joint_angle"),
             joint_velocity=d.get("joint_velocity"),
             parent_name=d.get("parent_name"),
@@ -587,18 +623,32 @@ class ForceVector:
     color: tuple[float, float, float, float] | None = None
     scale_factor: float = 1.0
 
-    def __new__(cls, origin: Vector3, direction: Vector3, magnitude: float,
-                force_type: str = "force", joint_name: str | None = None,
-                color: tuple[float, float, float, float] | None = None,
-                scale_factor: float = 1.0, validate: bool = False) -> ForceVector:
+    def __new__(
+        cls,
+        origin: Vector3,
+        direction: Vector3,
+        magnitude: float,
+        force_type: str = "force",
+        joint_name: str | None = None,
+        color: tuple[float, float, float, float] | None = None,
+        scale_factor: float = 1.0,
+        validate: bool = False,
+    ) -> ForceVector:
         """Create new ForceVector with optional validation."""
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, origin: Vector3, direction: Vector3, magnitude: float,
-                 force_type: str = "force", joint_name: str | None = None,
-                 color: tuple[float, float, float, float] | None = None,
-                 scale_factor: float = 1.0, validate: bool = False) -> None:
+    def __init__(
+        self,
+        origin: Vector3,
+        direction: Vector3,
+        magnitude: float,
+        force_type: str = "force",
+        joint_name: str | None = None,
+        color: tuple[float, float, float, float] | None = None,
+        scale_factor: float = 1.0,
+        validate: bool = False,
+    ) -> None:
         """Initialize ForceVector.
 
         Args:
@@ -754,7 +804,11 @@ class ClubState:
         return cls(
             head_position=Vector3.from_dict(d["head_position"]),
             head_velocity=Vector3.from_dict(d["head_velocity"]),
-            head_acceleration=Vector3.from_dict(d["head_acceleration"]) if "head_acceleration" in d else None,
+            head_acceleration=(
+                Vector3.from_dict(d["head_acceleration"])
+                if "head_acceleration" in d
+                else None
+            ),
             shaft_flex=d.get("shaft_flex"),
             face_angle=d.get("face_angle"),
             loft_angle=d.get("loft_angle"),
@@ -881,7 +935,7 @@ class BallState:
         Returns:
             Launch angle (angle from horizontal).
         """
-        horizontal_speed = math.sqrt(self.velocity.x ** 2 + self.velocity.y ** 2)
+        horizontal_speed = math.sqrt(self.velocity.x**2 + self.velocity.y**2)
         if horizontal_speed == 0:
             return 90.0 if self.velocity.z > 0 else -90.0
         return math.degrees(math.atan2(self.velocity.z, horizontal_speed))
@@ -1078,22 +1132,36 @@ class UnrealDataFrame:
     trajectory: list[TrajectoryPoint] | None = None
     environment: EnvironmentState | None = None
 
-    def __new__(cls, timestamp: float, frame_number: int, joints: dict[str, JointState],
-                forces: list[ForceVector] | None = None, club: ClubState | None = None,
-                ball: BallState | None = None, metrics: SwingMetrics | None = None,
-                trajectory: list[TrajectoryPoint] | None = None,
-                environment: EnvironmentState | None = None,
-                validate: bool = False) -> UnrealDataFrame:
+    def __new__(
+        cls,
+        timestamp: float,
+        frame_number: int,
+        joints: dict[str, JointState],
+        forces: list[ForceVector] | None = None,
+        club: ClubState | None = None,
+        ball: BallState | None = None,
+        metrics: SwingMetrics | None = None,
+        trajectory: list[TrajectoryPoint] | None = None,
+        environment: EnvironmentState | None = None,
+        validate: bool = False,
+    ) -> UnrealDataFrame:
         """Create new UnrealDataFrame with optional validation."""
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, timestamp: float, frame_number: int, joints: dict[str, JointState],
-                 forces: list[ForceVector] | None = None, club: ClubState | None = None,
-                 ball: BallState | None = None, metrics: SwingMetrics | None = None,
-                 trajectory: list[TrajectoryPoint] | None = None,
-                 environment: EnvironmentState | None = None,
-                 validate: bool = False) -> None:
+    def __init__(
+        self,
+        timestamp: float,
+        frame_number: int,
+        joints: dict[str, JointState],
+        forces: list[ForceVector] | None = None,
+        club: ClubState | None = None,
+        ball: BallState | None = None,
+        metrics: SwingMetrics | None = None,
+        trajectory: list[TrajectoryPoint] | None = None,
+        environment: EnvironmentState | None = None,
+        validate: bool = False,
+    ) -> None:
         """Initialize UnrealDataFrame.
 
         Args:
@@ -1182,12 +1250,22 @@ class UnrealDataFrame:
             name: JointState.from_dict(js_dict)
             for name, js_dict in d.get("joints", {}).items()
         }
-        forces = [ForceVector.from_dict(f) for f in d.get("forces", [])] if "forces" in d else None
+        forces = (
+            [ForceVector.from_dict(f) for f in d.get("forces", [])]
+            if "forces" in d
+            else None
+        )
         club = ClubState.from_dict(d["club"]) if "club" in d else None
         ball = BallState.from_dict(d["ball"]) if "ball" in d else None
         metrics = SwingMetrics.from_dict(d["metrics"]) if "metrics" in d else None
-        trajectory = [TrajectoryPoint.from_dict(tp) for tp in d.get("trajectory", [])] if "trajectory" in d else None
-        environment = EnvironmentState.from_dict(d["environment"]) if "environment" in d else None
+        trajectory = (
+            [TrajectoryPoint.from_dict(tp) for tp in d.get("trajectory", [])]
+            if "trajectory" in d
+            else None
+        )
+        environment = (
+            EnvironmentState.from_dict(d["environment"]) if "environment" in d else None
+        )
 
         return cls(
             timestamp=float(d["timestamp"]),
@@ -1258,11 +1336,15 @@ class UnrealDataFrame:
                             z=float(q[i * 3 + 2]) if i * 3 + 2 < len(q) else 0.0,
                         ),
                         rotation=Quaternion.identity(),
-                        velocity=Vector3(
-                            x=float(v[i * 3]) if i * 3 < len(v) else 0.0,
-                            y=float(v[i * 3 + 1]) if i * 3 + 1 < len(v) else 0.0,
-                            z=float(v[i * 3 + 2]) if i * 3 + 2 < len(v) else 0.0,
-                        ) if len(v) > i * 3 + 2 else None,
+                        velocity=(
+                            Vector3(
+                                x=float(v[i * 3]) if i * 3 < len(v) else 0.0,
+                                y=float(v[i * 3 + 1]) if i * 3 + 1 < len(v) else 0.0,
+                                z=float(v[i * 3 + 2]) if i * 3 + 2 < len(v) else 0.0,
+                            )
+                            if len(v) > i * 3 + 2
+                            else None
+                        ),
                     )
 
         return cls(

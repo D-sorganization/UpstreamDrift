@@ -8,49 +8,45 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.unreal_integration.visualization import (
-    VisualizationConfig,
-    VisualizationType,
-    ForceVectorRenderer,
-    TrajectoryRenderer,
-    HUDDataProvider,
-    RenderData,
-)
 from src.unreal_integration.data_models import (
     ForceVector,
-    TrajectoryPoint,
-    SwingMetrics,
-    Vector3,
     Quaternion,
-)
-from src.unreal_integration.vr_interaction import (
-    VRInteractionManager,
-    VRControllerState,
-    VRHeadsetState,
-    VRLocomotionMode,
-    VRControllerHand,
-    VRButtonState,
-    VRInteractionMode,
-    VRGesture,
-    VRInteractionEvent,
-)
-from src.unreal_integration.viewer_backends import (
-    ViewerConfig,
-    BackendType,
-    CameraState,
-    MockBackend,
-    create_viewer,
+    SwingMetrics,
+    TrajectoryPoint,
+    Vector3,
 )
 from src.unreal_integration.mesh_loader import (
     LoadedMesh,
-    MeshVertex,
     MeshFace,
+    MeshVertex,
 )
-
+from src.unreal_integration.viewer_backends import (
+    BackendType,
+    CameraState,
+    MockBackend,
+    ViewerConfig,
+    create_viewer,
+)
+from src.unreal_integration.visualization import (
+    ForceVectorRenderer,
+    HUDDataProvider,
+    RenderData,
+    TrajectoryRenderer,
+    VisualizationConfig,
+    VisualizationType,
+)
+from src.unreal_integration.vr_interaction import (
+    VRControllerHand,
+    VRControllerState,
+    VRHeadsetState,
+    VRInteractionManager,
+    VRLocomotionMode,
+)
 
 # ============================================================================
 # Visualization Tests
 # ============================================================================
+
 
 class TestVisualizationConfig:
     """Tests for VisualizationConfig."""
@@ -165,7 +161,9 @@ class TestTrajectoryRenderer:
         """Test rendering trajectory as line."""
         renderer = TrajectoryRenderer()
         points = [
-            TrajectoryPoint(time=float(i) * 0.1, position=Vector3(x=float(i), y=0.0, z=0.0))
+            TrajectoryPoint(
+                time=float(i) * 0.1, position=Vector3(x=float(i), y=0.0, z=0.0)
+            )
             for i in range(10)
         ]
         result = renderer.render(points)
@@ -176,7 +174,9 @@ class TestTrajectoryRenderer:
         """Test rendering trajectory as ribbon."""
         renderer = TrajectoryRenderer()
         points = [
-            TrajectoryPoint(time=float(i) * 0.1, position=Vector3(x=float(i), y=0.0, z=0.0))
+            TrajectoryPoint(
+                time=float(i) * 0.1, position=Vector3(x=float(i), y=0.0, z=0.0)
+            )
             for i in range(10)
         ]
         result = renderer.render(points, as_ribbon=True)
@@ -267,6 +267,7 @@ class TestHUDDataProvider:
 # ============================================================================
 # VR Interaction Tests
 # ============================================================================
+
 
 class TestVRControllerState:
     """Tests for VRControllerState."""
@@ -421,6 +422,7 @@ class TestVRInteractionManager:
 # Viewer Backend Tests
 # ============================================================================
 
+
 class TestViewerConfig:
     """Tests for ViewerConfig."""
 
@@ -447,7 +449,9 @@ class TestCameraState:
         """Test default camera state."""
         camera = CameraState()
         assert camera.fov == 45.0
-        assert camera.position.x != 0 or camera.position.y != 0 or camera.position.z != 0
+        assert (
+            camera.position.x != 0 or camera.position.y != 0 or camera.position.z != 0
+        )
 
 
 class TestMockBackend:

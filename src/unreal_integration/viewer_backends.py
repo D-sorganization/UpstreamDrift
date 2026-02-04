@@ -28,17 +28,17 @@ Usage:
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Protocol
+from typing import Any
 
 import numpy as np
 
-from src.unreal_integration.data_models import Vector3, Quaternion
+from src.unreal_integration.data_models import Quaternion, Vector3
 from src.unreal_integration.mesh_loader import LoadedMesh
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -376,7 +376,9 @@ class MeshcatBackend(ViewerBackend):
 
         except ImportError as e:
             logger.error(f"Failed to import meshcat: {e}")
-            raise RuntimeError("Meshcat not available. Install with: pip install meshcat") from e
+            raise RuntimeError(
+                "Meshcat not available. Install with: pip install meshcat"
+            ) from e
 
     def shutdown(self) -> None:
         """Shutdown Meshcat visualizer."""
@@ -484,11 +486,25 @@ class MeshcatBackend(ViewerBackend):
         if rotation is not None:
             q = rotation
             # Rotation matrix from quaternion
-            rot = np.array([
-                [1 - 2*q.y*q.y - 2*q.z*q.z, 2*q.x*q.y - 2*q.z*q.w, 2*q.x*q.z + 2*q.y*q.w],
-                [2*q.x*q.y + 2*q.z*q.w, 1 - 2*q.x*q.x - 2*q.z*q.z, 2*q.y*q.z - 2*q.x*q.w],
-                [2*q.x*q.z - 2*q.y*q.w, 2*q.y*q.z + 2*q.x*q.w, 1 - 2*q.x*q.x - 2*q.y*q.y],
-            ])
+            rot = np.array(
+                [
+                    [
+                        1 - 2 * q.y * q.y - 2 * q.z * q.z,
+                        2 * q.x * q.y - 2 * q.z * q.w,
+                        2 * q.x * q.z + 2 * q.y * q.w,
+                    ],
+                    [
+                        2 * q.x * q.y + 2 * q.z * q.w,
+                        1 - 2 * q.x * q.x - 2 * q.z * q.z,
+                        2 * q.y * q.z - 2 * q.x * q.w,
+                    ],
+                    [
+                        2 * q.x * q.z - 2 * q.y * q.w,
+                        2 * q.y * q.z + 2 * q.x * q.w,
+                        1 - 2 * q.x * q.x - 2 * q.y * q.y,
+                    ],
+                ]
+            )
             T[:3, :3] = rot @ T[:3, :3]
 
         # Apply translation

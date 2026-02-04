@@ -27,13 +27,13 @@ Usage:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
 
 import numpy as np
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -46,7 +46,6 @@ MIXAMO_TO_PHYSICS_MAP: dict[str, str] = {
     # Root
     "mixamorig:Hips": "pelvis",
     "Hips": "pelvis",
-
     # Spine
     "mixamorig:Spine": "lumbar",
     "mixamorig:Spine1": "thorax_lower",
@@ -54,13 +53,11 @@ MIXAMO_TO_PHYSICS_MAP: dict[str, str] = {
     "Spine": "lumbar",
     "Spine1": "thorax_lower",
     "Spine2": "thorax_upper",
-
     # Head
     "mixamorig:Neck": "neck",
     "mixamorig:Head": "head",
     "Neck": "neck",
     "Head": "head",
-
     # Left Arm
     "mixamorig:LeftShoulder": "left_clavicle",
     "mixamorig:LeftArm": "left_shoulder",
@@ -70,7 +67,6 @@ MIXAMO_TO_PHYSICS_MAP: dict[str, str] = {
     "LeftArm": "left_shoulder",
     "LeftForeArm": "left_elbow",
     "LeftHand": "left_wrist",
-
     # Right Arm
     "mixamorig:RightShoulder": "right_clavicle",
     "mixamorig:RightArm": "right_shoulder",
@@ -80,7 +76,6 @@ MIXAMO_TO_PHYSICS_MAP: dict[str, str] = {
     "RightArm": "right_shoulder",
     "RightForeArm": "right_elbow",
     "RightHand": "right_wrist",
-
     # Left Leg
     "mixamorig:LeftUpLeg": "left_hip",
     "mixamorig:LeftLeg": "left_knee",
@@ -90,7 +85,6 @@ MIXAMO_TO_PHYSICS_MAP: dict[str, str] = {
     "LeftLeg": "left_knee",
     "LeftFoot": "left_ankle",
     "LeftToeBase": "left_toe",
-
     # Right Leg
     "mixamorig:RightUpLeg": "right_hip",
     "mixamorig:RightLeg": "right_knee",
@@ -100,7 +94,6 @@ MIXAMO_TO_PHYSICS_MAP: dict[str, str] = {
     "RightLeg": "right_knee",
     "RightFoot": "right_ankle",
     "RightToeBase": "right_toe",
-
     # Fingers (simplified)
     "mixamorig:LeftHandIndex1": "left_index",
     "mixamorig:RightHandIndex1": "right_index",
@@ -111,34 +104,28 @@ UNREAL_MANNEQUIN_TO_PHYSICS_MAP: dict[str, str] = {
     # Root
     "pelvis": "pelvis",
     "root": "pelvis",
-
     # Spine
     "spine_01": "lumbar",
     "spine_02": "thorax_lower",
     "spine_03": "thorax_upper",
-
     # Head
     "neck_01": "neck",
     "head": "head",
-
     # Left Arm
     "clavicle_l": "left_clavicle",
     "upperarm_l": "left_shoulder",
     "lowerarm_l": "left_elbow",
     "hand_l": "left_wrist",
-
     # Right Arm
     "clavicle_r": "right_clavicle",
     "upperarm_r": "right_shoulder",
     "lowerarm_r": "right_elbow",
     "hand_r": "right_wrist",
-
     # Left Leg
     "thigh_l": "left_hip",
     "calf_l": "left_knee",
     "foot_l": "left_ankle",
     "ball_l": "left_toe",
-
     # Right Leg
     "thigh_r": "right_hip",
     "calf_r": "right_knee",
@@ -392,11 +379,25 @@ class PoseTransform:
         w, x, y, z = self.rotation
 
         # Rotation matrix from quaternion
-        rot = np.array([
-            [1 - 2*y*y - 2*z*z, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
-            [2*x*y + 2*z*w, 1 - 2*x*x - 2*z*z, 2*y*z - 2*x*w],
-            [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y],
-        ])
+        rot = np.array(
+            [
+                [
+                    1 - 2 * y * y - 2 * z * z,
+                    2 * x * y - 2 * z * w,
+                    2 * x * z + 2 * y * w,
+                ],
+                [
+                    2 * x * y + 2 * z * w,
+                    1 - 2 * x * x - 2 * z * z,
+                    2 * y * z - 2 * x * w,
+                ],
+                [
+                    2 * x * z - 2 * y * w,
+                    2 * y * z + 2 * x * w,
+                    1 - 2 * x * x - 2 * y * y,
+                ],
+            ]
+        )
 
         # Build 4x4 matrix
         matrix = np.eye(4)
@@ -547,7 +548,9 @@ class SkeletonMapper:
         mapping = self.profile.get_reverse_mapping(target_bone)
         return mapping.source_bone if mapping else None
 
-    def apply_pose(self, source_pose: dict[str, PoseTransform]) -> dict[str, PoseTransform]:
+    def apply_pose(
+        self, source_pose: dict[str, PoseTransform]
+    ) -> dict[str, PoseTransform]:
         """Apply pose mapping from source to target skeleton.
 
         Args:
@@ -577,12 +580,16 @@ class SkeletonMapper:
                 # Convert offset from degrees to radians
                 offset_rad = np.radians(mapping.rotation_offset)
                 offset_quat = self._euler_to_quaternion(*offset_rad)
-                new_rotation = self._quaternion_multiply(transform.rotation, offset_quat)
+                new_rotation = self._quaternion_multiply(
+                    transform.rotation, offset_quat
+                )
             else:
                 new_rotation = transform.rotation
 
             # Apply position offset and scale
-            new_position = transform.position * mapping.scale_factor + mapping.position_offset
+            new_position = (
+                transform.position * mapping.scale_factor + mapping.position_offset
+            )
 
             target_pose[mapping.target_bone] = PoseTransform(
                 position=new_position,
@@ -618,12 +625,14 @@ class SkeletonMapper:
 
             # Create rotation quaternion from axis-angle
             half_angle = angle / 2.0
-            quat = np.array([
-                np.cos(half_angle),
-                axis[0] * np.sin(half_angle),
-                axis[1] * np.sin(half_angle),
-                axis[2] * np.sin(half_angle),
-            ])
+            quat = np.array(
+                [
+                    np.cos(half_angle),
+                    axis[0] * np.sin(half_angle),
+                    axis[1] * np.sin(half_angle),
+                    axis[2] * np.sin(half_angle),
+                ]
+            )
 
             bone_rotations[mapping.source_bone] = quat
 
@@ -641,10 +650,7 @@ class SkeletonMapper:
         if self.profile is None:
             return source_bones
 
-        return [
-            bone for bone in source_bones
-            if not self.profile.has_mapping(bone)
-        ]
+        return [bone for bone in source_bones if not self.profile.has_mapping(bone)]
 
     def interpolate_poses(
         self,
@@ -745,12 +751,14 @@ class SkeletonMapper:
         cr = np.cos(roll * 0.5)
         sr = np.sin(roll * 0.5)
 
-        return np.array([
-            cr * cp * cy + sr * sp * sy,  # w
-            sr * cp * cy - cr * sp * sy,  # x
-            cr * sp * cy + sr * cp * sy,  # y
-            cr * cp * sy - sr * sp * cy,  # z
-        ])
+        return np.array(
+            [
+                cr * cp * cy + sr * sp * sy,  # w
+                sr * cp * cy - cr * sp * sy,  # x
+                cr * sp * cy + sr * cp * sy,  # y
+                cr * cp * sy - sr * sp * cy,  # z
+            ]
+        )
 
     @staticmethod
     def _quaternion_multiply(q1: np.ndarray, q2: np.ndarray) -> np.ndarray:
@@ -766,9 +774,11 @@ class SkeletonMapper:
         w1, x1, y1, z1 = q1
         w2, x2, y2, z2 = q2
 
-        return np.array([
-            w1*w2 - x1*x2 - y1*y2 - z1*z2,
-            w1*x2 + x1*w2 + y1*z2 - z1*y2,
-            w1*y2 - x1*z2 + y1*w2 + z1*x2,
-            w1*z2 + x1*y2 - y1*x2 + z1*w2,
-        ])
+        return np.array(
+            [
+                w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+                w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+                w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+                w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+            ]
+        )

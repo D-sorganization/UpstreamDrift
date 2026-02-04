@@ -30,23 +30,23 @@ Usage:
 from __future__ import annotations
 
 import json
-import os
+import logging
 import struct
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
-import logging
 logger = logging.getLogger(__name__)
 
 
 class MeshLoadError(Exception):
     """Exception raised when mesh loading fails."""
 
-    def __init__(self, message: str, path: str | None = None, cause: Exception | None = None):
+    def __init__(
+        self, message: str, path: str | None = None, cause: Exception | None = None
+    ):
         super().__init__(message)
         self.path = path
         self.cause = cause
@@ -344,7 +344,9 @@ class LoadedMesh:
         """
         if not self.has_normals:
             return None
-        return np.array([v.normal if v.normal is not None else [0, 0, 0] for v in self.vertices])
+        return np.array(
+            [v.normal if v.normal is not None else [0, 0, 0] for v in self.vertices]
+        )
 
     def get_uvs_array(self) -> np.ndarray | None:
         """Get UVs as numpy array.
@@ -473,7 +475,9 @@ class MeshLoader:
             if self.enable_cache:
                 self._cache[path] = (path_obj.stat().st_mtime, mesh)
 
-            logger.info(f"Loaded mesh: {path} ({mesh.vertex_count} vertices, {mesh.face_count} faces)")
+            logger.info(
+                f"Loaded mesh: {path} ({mesh.vertex_count} vertices, {mesh.face_count} faces)"
+            )
             return mesh
 
         except UnsupportedFormatError:
@@ -496,7 +500,7 @@ class MeshLoader:
         normals: list[np.ndarray] = []
         uvs: list[np.ndarray] = []
 
-        with open(path, "r") as f:
+        with open(path) as f:
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -507,9 +511,13 @@ class MeshLoader:
                     continue
 
                 if parts[0] == "v":  # Vertex position
-                    positions.append(np.array([float(parts[1]), float(parts[2]), float(parts[3])]))
+                    positions.append(
+                        np.array([float(parts[1]), float(parts[2]), float(parts[3])])
+                    )
                 elif parts[0] == "vn":  # Vertex normal
-                    normals.append(np.array([float(parts[1]), float(parts[2]), float(parts[3])]))
+                    normals.append(
+                        np.array([float(parts[1]), float(parts[2]), float(parts[3])])
+                    )
                 elif parts[0] == "vt":  # Texture coordinate
                     uvs.append(np.array([float(parts[1]), float(parts[2])]))
                 elif parts[0] == "f":  # Face
@@ -529,8 +537,16 @@ class MeshLoader:
                         # Create vertex
                         vertex = MeshVertex(
                             position=positions[v_idx],
-                            normal=normals[vn_idx] if vn_idx is not None and vn_idx < len(normals) else None,
-                            uv=uvs[vt_idx] if vt_idx is not None and vt_idx < len(uvs) else None,
+                            normal=(
+                                normals[vn_idx]
+                                if vn_idx is not None and vn_idx < len(normals)
+                                else None
+                            ),
+                            uv=(
+                                uvs[vt_idx]
+                                if vt_idx is not None and vt_idx < len(uvs)
+                                else None
+                            ),
                         )
                         vertices.append(vertex)
                         face_indices.append(len(vertices) - 1)
@@ -574,10 +590,12 @@ class MeshLoader:
                     face_indices = []
                     for _ in range(3):
                         vertex = struct.unpack("<3f", f.read(12))
-                        vertices.append(MeshVertex(
-                            position=np.array(vertex),
-                            normal=normal_arr,
-                        ))
+                        vertices.append(
+                            MeshVertex(
+                                position=np.array(vertex),
+                                normal=normal_arr,
+                            )
+                        )
                         face_indices.append(len(vertices) - 1)
 
                     faces.append(MeshFace(indices=np.array(face_indices)))
@@ -586,7 +604,7 @@ class MeshLoader:
                     f.read(2)
         else:
             # ASCII STL parsing
-            with open(path, "r") as f:
+            with open(path) as f:
                 current_normal = None
                 face_vertices: list[int] = []
 
@@ -594,13 +612,19 @@ class MeshLoader:
                     line = line.strip()
                     if line.startswith("facet normal"):
                         parts = line.split()
-                        current_normal = np.array([float(parts[2]), float(parts[3]), float(parts[4])])
+                        current_normal = np.array(
+                            [float(parts[2]), float(parts[3]), float(parts[4])]
+                        )
                     elif line.startswith("vertex"):
                         parts = line.split()
-                        vertices.append(MeshVertex(
-                            position=np.array([float(parts[1]), float(parts[2]), float(parts[3])]),
-                            normal=current_normal,
-                        ))
+                        vertices.append(
+                            MeshVertex(
+                                position=np.array(
+                                    [float(parts[1]), float(parts[2]), float(parts[3])]
+                                ),
+                                normal=current_normal,
+                            )
+                        )
                         face_vertices.append(len(vertices) - 1)
                     elif line.startswith("endfacet"):
                         if len(face_vertices) == 3:
@@ -625,6 +649,7 @@ class MeshLoader:
         # Try to use trimesh if available
         try:
             import trimesh
+
             scene = trimesh.load(str(path))
 
             # Handle scene vs mesh
@@ -643,15 +668,16 @@ class MeshLoader:
             vertices = [
                 MeshVertex(
                     position=mesh_data.vertices[i],
-                    normal=mesh_data.vertex_normals[i] if hasattr(mesh_data, 'vertex_normals') else None,
+                    normal=(
+                        mesh_data.vertex_normals[i]
+                        if hasattr(mesh_data, "vertex_normals")
+                        else None
+                    ),
                 )
                 for i in range(len(mesh_data.vertices))
             ]
 
-            faces = [
-                MeshFace(indices=face)
-                for face in mesh_data.faces
-            ]
+            faces = [MeshFace(indices=face) for face in mesh_data.faces]
 
             return LoadedMesh(
                 name=path.stem,
@@ -675,7 +701,7 @@ class MeshLoader:
         if path.suffix.lower() == ".glb":
             raise MeshLoadError("GLB loading requires trimesh library", str(path))
 
-        with open(path, "r") as f:
+        with open(path) as f:
             gltf = json.load(f)
 
         vertices: list[MeshVertex] = []
@@ -707,6 +733,7 @@ class MeshLoader:
         # Try to use trimesh/pyfbx if available
         try:
             import trimesh
+
             mesh = trimesh.load(str(path))
 
             if isinstance(mesh, trimesh.Scene):
@@ -716,14 +743,10 @@ class MeshLoader:
                 mesh = meshes[0]
 
             vertices = [
-                MeshVertex(position=mesh.vertices[i])
-                for i in range(len(mesh.vertices))
+                MeshVertex(position=mesh.vertices[i]) for i in range(len(mesh.vertices))
             ]
 
-            faces = [
-                MeshFace(indices=face)
-                for face in mesh.faces
-            ]
+            faces = [MeshFace(indices=face) for face in mesh.faces]
 
             return LoadedMesh(
                 name=path.stem,
@@ -734,7 +757,7 @@ class MeshLoader:
         except ImportError:
             raise MeshLoadError(
                 "FBX loading requires trimesh library: pip install trimesh[easy]",
-                str(path)
+                str(path),
             )
 
     def _load_collada(self, path: Path) -> LoadedMesh:
@@ -748,6 +771,7 @@ class MeshLoader:
         """
         try:
             import trimesh
+
             mesh = trimesh.load(str(path))
 
             if isinstance(mesh, trimesh.Scene):
@@ -757,14 +781,10 @@ class MeshLoader:
                 mesh = meshes[0]
 
             vertices = [
-                MeshVertex(position=mesh.vertices[i])
-                for i in range(len(mesh.vertices))
+                MeshVertex(position=mesh.vertices[i]) for i in range(len(mesh.vertices))
             ]
 
-            faces = [
-                MeshFace(indices=face)
-                for face in mesh.faces
-            ]
+            faces = [MeshFace(indices=face) for face in mesh.faces]
 
             return LoadedMesh(
                 name=path.stem,
@@ -773,10 +793,7 @@ class MeshLoader:
             )
 
         except ImportError:
-            raise MeshLoadError(
-                "COLLADA loading requires trimesh library",
-                str(path)
-            )
+            raise MeshLoadError("COLLADA loading requires trimesh library", str(path))
 
     def _load_ply(self, path: Path) -> LoadedMesh:
         """Load PLY format mesh.
@@ -789,17 +806,14 @@ class MeshLoader:
         """
         try:
             import trimesh
+
             mesh = trimesh.load(str(path))
 
             vertices = [
-                MeshVertex(position=mesh.vertices[i])
-                for i in range(len(mesh.vertices))
+                MeshVertex(position=mesh.vertices[i]) for i in range(len(mesh.vertices))
             ]
 
-            faces = [
-                MeshFace(indices=face)
-                for face in mesh.faces
-            ]
+            faces = [MeshFace(indices=face) for face in mesh.faces]
 
             return LoadedMesh(
                 name=path.stem,
@@ -808,7 +822,4 @@ class MeshLoader:
             )
 
         except ImportError:
-            raise MeshLoadError(
-                "PLY loading requires trimesh library",
-                str(path)
-            )
+            raise MeshLoadError("PLY loading requires trimesh library", str(path))

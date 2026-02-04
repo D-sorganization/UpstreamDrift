@@ -9,14 +9,14 @@ import numpy as np
 import pytest
 
 from src.unreal_integration.skeleton_mapper import (
-    SkeletonMapper,
-    SkeletonType,
+    MIXAMO_TO_PHYSICS_MAP,
+    MUJOCO_HUMANOID_JOINTS,
+    UNREAL_MANNEQUIN_TO_PHYSICS_MAP,
     BoneMapping,
     MappingProfile,
     PoseTransform,
-    MIXAMO_TO_PHYSICS_MAP,
-    UNREAL_MANNEQUIN_TO_PHYSICS_MAP,
-    MUJOCO_HUMANOID_JOINTS,
+    SkeletonMapper,
+    SkeletonType,
 )
 
 
@@ -304,24 +304,51 @@ class TestPredefinedMappings:
     def test_mixamo_mapping_completeness(self):
         """Test Mixamo mapping covers major bones."""
         required_bones = [
-            "Hips", "Spine", "Head",
-            "LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand",
-            "RightShoulder", "RightArm", "RightForeArm", "RightHand",
-            "LeftUpLeg", "LeftLeg", "LeftFoot",
-            "RightUpLeg", "RightLeg", "RightFoot",
+            "Hips",
+            "Spine",
+            "Head",
+            "LeftShoulder",
+            "LeftArm",
+            "LeftForeArm",
+            "LeftHand",
+            "RightShoulder",
+            "RightArm",
+            "RightForeArm",
+            "RightHand",
+            "LeftUpLeg",
+            "LeftLeg",
+            "LeftFoot",
+            "RightUpLeg",
+            "RightLeg",
+            "RightFoot",
         ]
         for bone in required_bones:
             # Check with or without mixamorig prefix
-            assert bone in MIXAMO_TO_PHYSICS_MAP or f"mixamorig:{bone}" in MIXAMO_TO_PHYSICS_MAP
+            assert (
+                bone in MIXAMO_TO_PHYSICS_MAP
+                or f"mixamorig:{bone}" in MIXAMO_TO_PHYSICS_MAP
+            )
 
     def test_unreal_mannequin_mapping_completeness(self):
         """Test Unreal Mannequin mapping covers major bones."""
         required_bones = [
-            "pelvis", "spine_01", "head",
-            "clavicle_l", "upperarm_l", "lowerarm_l", "hand_l",
-            "clavicle_r", "upperarm_r", "lowerarm_r", "hand_r",
-            "thigh_l", "calf_l", "foot_l",
-            "thigh_r", "calf_r", "foot_r",
+            "pelvis",
+            "spine_01",
+            "head",
+            "clavicle_l",
+            "upperarm_l",
+            "lowerarm_l",
+            "hand_l",
+            "clavicle_r",
+            "upperarm_r",
+            "lowerarm_r",
+            "hand_r",
+            "thigh_l",
+            "calf_l",
+            "foot_l",
+            "thigh_r",
+            "calf_r",
+            "foot_r",
         ]
         for bone in required_bones:
             assert bone in UNREAL_MANNEQUIN_TO_PHYSICS_MAP
@@ -329,11 +356,21 @@ class TestPredefinedMappings:
     def test_mujoco_humanoid_joints(self):
         """Test MuJoCo humanoid joint list."""
         required_joints = [
-            "pelvis", "abdomen", "thorax",
-            "right_shoulder", "right_elbow", "right_wrist",
-            "left_shoulder", "left_elbow", "left_wrist",
-            "right_hip", "right_knee", "right_ankle",
-            "left_hip", "left_knee", "left_ankle",
+            "pelvis",
+            "abdomen",
+            "thorax",
+            "right_shoulder",
+            "right_elbow",
+            "right_wrist",
+            "left_shoulder",
+            "left_elbow",
+            "left_wrist",
+            "right_hip",
+            "right_knee",
+            "right_ankle",
+            "left_hip",
+            "left_knee",
+            "left_ankle",
         ]
         for joint in required_joints:
             assert joint in MUJOCO_HUMANOID_JOINTS
