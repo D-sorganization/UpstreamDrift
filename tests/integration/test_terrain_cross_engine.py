@@ -133,7 +133,6 @@ class TestTerrainConsistency:
     def test_contact_parameters_vary_by_terrain(self, mixed_terrain: Terrain) -> None:
         """Contact parameters should vary by terrain type."""
         # Get contact params at different locations
-        tee_params = mixed_terrain.get_contact_params(10.0, 50.0)
         fairway_params = mixed_terrain.get_contact_params(50.0, 50.0)
         bunker_params = mixed_terrain.get_contact_params(65.0, 50.0)
         green_params = mixed_terrain.get_contact_params(90.0, 50.0)

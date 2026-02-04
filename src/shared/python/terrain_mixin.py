@@ -14,7 +14,6 @@ Usage:
 
 from __future__ import annotations
 
-from abc import ABC
 from typing import Any, Protocol
 
 import numpy as np
@@ -38,7 +37,7 @@ class HasPosition(Protocol):
         ...
 
 
-class TerrainMixin(ABC):
+class TerrainMixin:
     """Mixin class that adds terrain support to physics engines.
 
     This mixin provides:

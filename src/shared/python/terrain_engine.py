@@ -714,11 +714,9 @@ class TerrainGeometryGenerator:
         material = self.terrain.get_material(elev.width / 2, elev.length / 2)
         friction = material.friction_coefficient
 
-        # Generate heightfield data as space-separated values
-        # MuJoCo expects row-major order with values in [0, 1]
-        normalized = (elev.data - h_min) / h_range if h_range > 0 else elev.data * 0
-
         # Create XML
+        # Note: Heightfield data would be written separately to a binary file
+        # and referenced here. This generates the XML structure.
         xml_parts = [
             "<asset>",
             f'  <hfield name="{name}_hfield" nrow="{n_rows}" ncol="{n_cols}" size="{elev.width/2} {elev.length/2} {h_range} 0.1"/>',
