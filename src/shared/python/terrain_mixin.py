@@ -445,7 +445,7 @@ class TerrainAwareSimulation:
             energy_remaining = energy["remaining_energy"]
         else:
             energy_absorbed = 0.0
-            energy_remaining = 0.5 * ball_mass * np.linalg.norm(impact_velocity) ** 2
+            energy_remaining = float(0.5 * ball_mass * np.linalg.norm(impact_velocity) ** 2)
 
         # Estimate bounce velocity
         rebound_v_normal = v_normal_mag * material.restitution

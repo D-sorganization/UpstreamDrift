@@ -653,10 +653,10 @@ class TerrainGeometryGenerator:
                 z = elev.data[j, i]
                 vertices.append([x, y, z])
 
-        vertices = np.array(vertices)
+        vertices_array = np.array(vertices)
 
         # Generate triangles (2 per grid cell)
-        triangles = []
+        triangles: list[tuple[int, int, int]] = []
         for j in range(n_rows - 1):
             for i in range(n_cols - 1):
                 # Vertex indices for this cell
@@ -669,7 +669,7 @@ class TerrainGeometryGenerator:
                 triangles.append((v00, v10, v11))
                 triangles.append((v00, v11, v01))
 
-        return vertices, triangles
+        return vertices_array, triangles
 
     def generate_mujoco_hfield(self) -> tuple[np.ndarray, tuple[float, float]]:
         """Generate MuJoCo heightfield data.
