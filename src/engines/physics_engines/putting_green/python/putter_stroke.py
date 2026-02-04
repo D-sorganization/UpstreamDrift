@@ -319,7 +319,7 @@ class PutterStroke:
         v_transfer = (m1 * params.speed * (1 + e)) / (m1 + m2)
 
         # Off-center impact reduces velocity
-        impact_offset = np.linalg.norm(params.impact_location)
+        impact_offset = float(np.linalg.norm(params.impact_location))
         efficiency = self._compute_impact_efficiency(impact_offset)
 
         ball_speed = v_transfer * efficiency

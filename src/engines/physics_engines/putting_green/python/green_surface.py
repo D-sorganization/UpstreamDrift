@@ -76,7 +76,7 @@ class SlopeRegion:
     def contains(self, position: np.ndarray) -> bool:
         """Check if position is within region."""
         distance = np.linalg.norm(position[:2] - self.center[:2])
-        return distance <= self.radius
+        return bool(distance <= self.radius)
 
     def get_weight(self, position: np.ndarray) -> float:
         """Get influence weight at position (0-1)."""
@@ -86,7 +86,7 @@ class SlopeRegion:
 
         # Smooth falloff
         normalized_dist = distance / self.radius
-        return 1.0 - normalized_dist ** (1.0 / (1.0 - self.falloff + 0.1))
+        return float(1.0 - normalized_dist ** (1.0 / (1.0 - self.falloff + 0.1)))
 
 
 class GreenSurface:

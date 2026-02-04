@@ -368,7 +368,7 @@ class BallRollPhysics:
         spin_mag = np.linalg.norm(state.spin)
         rotational = 0.5 * self._moment_of_inertia * spin_mag**2
 
-        return translational + rotational
+        return float(translational + rotational)
 
     def step(self, state: BallState, dt: float) -> BallState:
         """Advance ball state by one time step.

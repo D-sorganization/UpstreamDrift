@@ -689,7 +689,7 @@ class PuttingGreenSimulator:
         aim_point = target - break_info["break_direction"] * break_info["total_break"]
 
         # Recommended speed
-        distance = np.linalg.norm(target - ball_position)
+        distance = float(np.linalg.norm(target - ball_position))
         avg_slope = np.dot(
             break_info["average_slope"], (target - ball_position) / (distance + 1e-10)
         )

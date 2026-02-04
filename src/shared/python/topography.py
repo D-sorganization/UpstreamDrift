@@ -482,8 +482,8 @@ class TopographyData:
             else:
                 heightmap = img
         else:
-            img = Image.open(filepath).convert("L")
-            heightmap = np.array(img) / 255.0  # Normalize to 0-1
+            pil_img = Image.open(filepath).convert("L")
+            heightmap = np.array(pil_img) / 255.0  # Normalize to 0-1
 
         if width is not None:
             self._bounds.max_x = self._bounds.min_x + width
