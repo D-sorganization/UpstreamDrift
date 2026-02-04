@@ -111,7 +111,10 @@ class TestSurfaceMaterial:
         assert "tee" in MATERIALS
 
         # Bunker should have higher friction (sand)
-        assert MATERIALS["bunker"].friction_coefficient > MATERIALS["fairway"].friction_coefficient
+        assert (
+            MATERIALS["bunker"].friction_coefficient
+            > MATERIALS["fairway"].friction_coefficient
+        )
 
         # Green should have lower grass
         assert MATERIALS["green"].grass_height_m < MATERIALS["fairway"].grass_height_m
@@ -342,7 +345,9 @@ class TestTerrain:
         elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
         patches = [
             TerrainPatch(TerrainType.FAIRWAY, 0.0, 100.0, 0.0, 100.0),
-            TerrainPatch(TerrainType.GREEN, 80.0, 100.0, 40.0, 60.0),  # Overlaps fairway
+            TerrainPatch(
+                TerrainType.GREEN, 80.0, 100.0, 40.0, 60.0
+            ),  # Overlaps fairway
         ]
 
         terrain = Terrain(name="Test", elevation=elevation, patches=patches)

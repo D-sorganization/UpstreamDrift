@@ -32,7 +32,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from scipy import ndimage
 
 from src.shared.python.logging_config import get_logger
 from src.shared.python.physics_constants import GRAVITY_M_S2
@@ -441,9 +440,13 @@ class ElevationMap:
     def _check_bounds(self, x: float, y: float) -> None:
         """Check if coordinates are within bounds."""
         if x < self.origin_x or x > self.origin_x + self.width:
-            raise ValueError(f"X coordinate {x} out of bounds [{self.origin_x}, {self.origin_x + self.width}]")
+            raise ValueError(
+                f"X coordinate {x} out of bounds [{self.origin_x}, {self.origin_x + self.width}]"
+            )
         if y < self.origin_y or y > self.origin_y + self.length:
-            raise ValueError(f"Y coordinate {y} out of bounds [{self.origin_y}, {self.origin_y + self.length}]")
+            raise ValueError(
+                f"Y coordinate {y} out of bounds [{self.origin_y}, {self.origin_y + self.length}]"
+            )
 
     def get_elevation(self, x: float, y: float) -> float:
         """Get interpolated elevation at a point.
@@ -508,14 +511,18 @@ class ElevationMap:
 
         # Central differences where possible
         if ix > 0 and ix < n_cols - 1:
-            dzdx = (self.data[iy, ix + 1] - self.data[iy, ix - 1]) / (2 * self.resolution)
+            dzdx = (self.data[iy, ix + 1] - self.data[iy, ix - 1]) / (
+                2 * self.resolution
+            )
         elif ix == 0:
             dzdx = (self.data[iy, ix + 1] - self.data[iy, ix]) / self.resolution
         else:
             dzdx = (self.data[iy, ix] - self.data[iy, ix - 1]) / self.resolution
 
         if iy > 0 and iy < n_rows - 1:
-            dzdy = (self.data[iy + 1, ix] - self.data[iy - 1, ix]) / (2 * self.resolution)
+            dzdy = (self.data[iy + 1, ix] - self.data[iy - 1, ix]) / (
+                2 * self.resolution
+            )
         elif iy == 0:
             dzdy = (self.data[iy + 1, ix] - self.data[iy, ix]) / self.resolution
         else:
@@ -710,7 +717,9 @@ class TerrainRegion:
         return False
 
     @staticmethod
-    def _point_in_polygon(x: float, y: float, vertices: list[tuple[float, float]]) -> bool:
+    def _point_in_polygon(
+        x: float, y: float, vertices: list[tuple[float, float]]
+    ) -> bool:
         """Ray casting algorithm for point-in-polygon test."""
         n = len(vertices)
         inside = False
@@ -720,7 +729,9 @@ class TerrainRegion:
             xi, yi = vertices[i]
             xj, yj = vertices[j]
 
-            if ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / (yj - yi + 1e-10) + xi):
+            if ((yi > y) != (yj > y)) and (
+                x < (xj - xi) * (y - yi) / (yj - yi + 1e-10) + xi
+            ):
                 inside = not inside
             j = i
 

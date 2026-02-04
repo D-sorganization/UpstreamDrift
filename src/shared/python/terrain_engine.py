@@ -20,20 +20,17 @@ Design by Contract:
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Any, Protocol
 
 import numpy as np
 
 from src.shared.python.logging_config import get_logger
-from src.shared.python.physics_constants import GRAVITY_M_S2
 from src.shared.python.terrain import (
-    ElevationMap,
-    Terrain,
-    TerrainType,
     MATERIALS,
     TERRAIN_MATERIAL_MAP,
+    Terrain,
+    TerrainType,
 )
 
 logger = get_logger(__name__)
@@ -615,9 +612,9 @@ class CompressibleTurfModel:
             "kinetic_energy": kinetic_energy,
             "absorbed_energy": absorbed_energy,
             "remaining_energy": max(0.0, remaining_energy),
-            "energy_absorption_ratio": absorbed_energy / kinetic_energy
-            if kinetic_energy > 0
-            else 0.0,
+            "energy_absorption_ratio": (
+                absorbed_energy / kinetic_energy if kinetic_energy > 0 else 0.0
+            ),
         }
 
 
@@ -723,15 +720,15 @@ class TerrainGeometryGenerator:
 
         # Create XML
         xml_parts = [
-            f'<asset>',
+            "<asset>",
             f'  <hfield name="{name}_hfield" nrow="{n_rows}" ncol="{n_cols}" size="{elev.width/2} {elev.length/2} {h_range} 0.1"/>',
-            f'</asset>',
-            f'<worldbody>',
+            "</asset>",
+            "<worldbody>",
             f'  <geom name="{name}" type="hfield" hfield="{name}_hfield" pos="{elev.width/2} {elev.length/2} {h_min}" friction="{friction} 0.005 0.0001"/>',
-            f'</worldbody>',
+            "</worldbody>",
         ]
 
-        return '\n'.join(xml_parts)
+        return "\n".join(xml_parts)
 
     def generate_urdf_collision(self, name: str = "terrain") -> str:
         """Generate URDF collision geometry for terrain.
@@ -749,14 +746,14 @@ class TerrainGeometryGenerator:
         h_max = float(elev.data.max())
         h_min = float(elev.data.min())
 
-        xml = f'''<link name="{name}">
+        xml = f"""<link name="{name}">
   <collision>
     <origin xyz="{elev.width/2} {elev.length/2} {(h_max+h_min)/2}" rpy="0 0 0"/>
     <geometry>
       <box size="{elev.width} {elev.length} {h_max - h_min + 0.1}"/>
     </geometry>
   </collision>
-</link>'''
+</link>"""
 
         return xml
 
@@ -781,7 +778,7 @@ def apply_terrain_to_engine(
     height = terrain.elevation.get_elevation(x, y)
     material = terrain.get_material(x, y)
 
-    if hasattr(engine, 'set_ground_properties'):
+    if hasattr(engine, "set_ground_properties"):
         engine.set_ground_properties(
             height=height,
             friction=material.friction_coefficient,
@@ -844,8 +841,8 @@ def validate_terrain(
 def register_terrain_parameters() -> None:
     """Register terrain-related parameters with the physics registry."""
     from src.shared.python.physics_parameters import (
-        PhysicsParameter,
         ParameterCategory,
+        PhysicsParameter,
         get_parameter_registry,
     )
 

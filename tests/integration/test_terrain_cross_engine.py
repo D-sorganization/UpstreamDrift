@@ -6,9 +6,6 @@ Follows Pragmatic Programmer principles for orthogonal, well-tested code.
 
 from __future__ import annotations
 
-import math
-from typing import Any
-
 import numpy as np
 import pytest
 
@@ -74,8 +71,7 @@ class TestTerrainConsistency:
         """Elevation queries should be consistent."""
         # Query same point multiple times
         heights = [
-            sloped_terrain.elevation.get_elevation(50.0, 50.0)
-            for _ in range(10)
+            sloped_terrain.elevation.get_elevation(50.0, 50.0) for _ in range(10)
         ]
 
         # All should be identical
@@ -93,7 +89,9 @@ class TestTerrainConsistency:
         for x, y in test_points:
             normal = sloped_terrain.elevation.get_normal(x, y)
             magnitude = np.linalg.norm(normal)
-            assert abs(magnitude - 1.0) < 1e-6, f"Normal at ({x}, {y}) not unit: {magnitude}"
+            assert (
+                abs(magnitude - 1.0) < 1e-6
+            ), f"Normal at ({x}, {y}) not unit: {magnitude}"
 
     def test_gradient_consistency(self, sloped_terrain: Terrain) -> None:
         """Gradient should be consistent with elevation differences."""
@@ -303,14 +301,21 @@ class TestCompressibleTurfPhysics:
 
         impact_velocity = np.array([10.0, 0.0, -30.0])
 
-        bunker_energy = bunker_turf.compute_energy_absorption(50.0, 50.0, impact_velocity)
+        bunker_energy = bunker_turf.compute_energy_absorption(
+            50.0, 50.0, impact_velocity
+        )
         green_energy = green_turf.compute_energy_absorption(50.0, 50.0, impact_velocity)
 
-        assert bunker_energy["energy_absorption_ratio"] > green_energy["energy_absorption_ratio"]
+        assert (
+            bunker_energy["energy_absorption_ratio"]
+            > green_energy["energy_absorption_ratio"]
+        )
 
     def test_lie_quality_varies_by_terrain(self) -> None:
         """Lie quality should vary by terrain type."""
-        fairway_terrain = create_flat_terrain("Fairway", 100.0, 100.0, TerrainType.FAIRWAY)
+        fairway_terrain = create_flat_terrain(
+            "Fairway", 100.0, 100.0, TerrainType.FAIRWAY
+        )
         rough_terrain = create_flat_terrain("Rough", 100.0, 100.0, TerrainType.ROUGH)
 
         fairway_turf = CompressibleTurfModel(fairway_terrain)

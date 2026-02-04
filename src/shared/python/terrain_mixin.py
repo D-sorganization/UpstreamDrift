@@ -90,7 +90,9 @@ class TerrainMixin(ABC):
         if use_compressible_turf:
             self._turf_model = CompressibleTurfModel(terrain)
 
-        logger.info(f"Terrain set: {terrain.name} (compressible={use_compressible_turf})")
+        logger.info(
+            f"Terrain set: {terrain.name} (compressible={use_compressible_turf})"
+        )
 
     def enable_terrain(self, enabled: bool = True) -> None:
         """Enable or disable terrain contact.
@@ -210,7 +212,9 @@ class TerrainMixin(ABC):
             return np.zeros(3)
 
         if self._use_compressible_turf and self._turf_model is not None:
-            return self._turf_model.compute_turf_contact_force(x, y, z, radius, velocity)
+            return self._turf_model.compute_turf_contact_force(
+                x, y, z, radius, velocity
+            )
         elif self._contact_model is not None:
             return self._contact_model.compute_contact_force(x, y, z, radius, velocity)
 
@@ -239,9 +243,7 @@ class TerrainMixin(ABC):
         if not self._terrain_enabled or self._contact_model is None:
             return np.zeros(3)
 
-        return self._contact_model.compute_friction_force(
-            x, y, z, radius, velocity
-        )
+        return self._contact_model.compute_friction_force(x, y, z, radius, velocity)
 
     def is_on_terrain(
         self,
