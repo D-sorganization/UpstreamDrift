@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.learning.retargeting import SkeletonConfig
+
 
 class TestSkeletonConfig:
     """Tests for SkeletonConfig."""
@@ -93,8 +95,6 @@ class TestMotionRetargeter:
 
     def create_simple_skeleton(self, name: str, n_joints: int = 5) -> SkeletonConfig:
         """Create a simple test skeleton."""
-        from src.learning.retargeting import SkeletonConfig
-
         return SkeletonConfig(
             name=name,
             joint_names=[f"joint_{i}" for i in range(n_joints)],

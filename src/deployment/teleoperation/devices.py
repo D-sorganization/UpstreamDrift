@@ -101,6 +101,7 @@ class BaseInputDevice(ABC):
         """Get gripper state."""
         return self._gripper
 
+    @abstractmethod
     def set_force_feedback(self, wrench: NDArray[np.floating]) -> None:
         """Set force feedback (no-op for devices without haptics)."""
 

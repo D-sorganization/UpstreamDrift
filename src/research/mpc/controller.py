@@ -362,7 +362,7 @@ class ModelPredictiveController:
         converged = False
         prev_cost = float("inf")
 
-        for iteration in range(self._max_iterations):
+        for iteration in range(self._max_iterations):  # noqa: B007
             # Backward pass - compute gains
             K, d = self._backward_pass(X, U)
 

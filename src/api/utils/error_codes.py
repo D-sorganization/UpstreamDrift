@@ -21,7 +21,7 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import HTTPException
@@ -30,7 +30,7 @@ from fastapi.responses import JSONResponse
 from .tracing import get_request_id, get_trace_context
 
 
-class ErrorCategory(str, Enum):
+class ErrorCategory(StrEnum):
     """Error category codes."""
 
     GENERAL = "GEN"  # General errors
@@ -44,7 +44,7 @@ class ErrorCategory(str, Enum):
     SYSTEM = "SYS"  # System/infrastructure errors
 
 
-class ErrorCode(str, Enum):
+class ErrorCode(StrEnum):
     """Standardized error codes for the API.
 
     Format: GMS-{CATEGORY}-{NUMBER}

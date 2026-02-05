@@ -638,7 +638,7 @@ class Cloth(DeformableObject):
             attachment_nodes: Node indices to attach.
             body_positions: Positions of attachment points on body.
         """
-        for node_idx, body_pos in zip(attachment_nodes, body_positions):
+        for node_idx, body_pos in zip(attachment_nodes, body_positions, strict=False):
             self._mesh[node_idx] = body_pos
             self._velocities[node_idx] = 0
             self._fixed_nodes.add(node_idx)

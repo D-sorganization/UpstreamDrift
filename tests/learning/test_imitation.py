@@ -8,6 +8,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.learning.imitation import Demonstration
+
 
 class TestDemonstration:
     """Tests for Demonstration dataclass."""
@@ -86,8 +88,6 @@ class TestDemonstrationDataset:
 
     def create_demo(self, n_frames: int = 50, n_joints: int = 7) -> Demonstration:
         """Helper to create a demonstration."""
-        from src.learning.imitation import Demonstration
-
         return Demonstration(
             timestamps=np.arange(n_frames) * 0.01,
             joint_positions=np.random.randn(n_frames, n_joints),

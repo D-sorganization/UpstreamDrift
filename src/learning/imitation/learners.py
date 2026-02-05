@@ -327,7 +327,7 @@ class BehaviorCloning(ImitationLearner):
         history = {"train_loss": [], "val_loss": []}
         lr = self.config.learning_rate
 
-        for epoch in range(self.config.epochs):
+        for _epoch in range(self.config.epochs):
             # Shuffle training data
             perm = np.random.permutation(len(train_obs))
             train_obs = train_obs[perm]
@@ -345,7 +345,7 @@ class BehaviorCloning(ImitationLearner):
                 gradients = self._backward(batch_obs, batch_act)
 
                 # Update weights
-                for layer, grad in zip(self._policy, gradients):
+                for layer, grad in zip(self._policy, gradients, strict=False):
                     layer["W"] -= lr * (
                         grad["W"] + self.config.weight_decay * layer["W"]
                     )
@@ -712,7 +712,7 @@ class GAIL(ImitationLearner):
         history = {"discriminator_loss": [], "policy_loss": []}
         lr = self.config.learning_rate
 
-        for epoch in range(self.config.epochs):
+        for _epoch in range(self.config.epochs):
             # Generate policy data (self-play would go here)
             # For simplicity, we just use noise-perturbed expert data
             noise = np.random.randn(*expert_states.shape) * 0.1
@@ -730,10 +730,10 @@ class GAIL(ImitationLearner):
             )
 
             # Update discriminator (simplified gradient)
-            expert_grad = expert_preds - 1  # gradient towards 1
-            policy_grad = policy_preds  # gradient towards 0
+            # expert_grad = expert_preds - 1  # gradient towards 1
+            # policy_grad = policy_preds  # gradient towards 0
 
-            for i, layer in enumerate(self._discriminator):
+            for _i, layer in enumerate(self._discriminator):
                 # Simplified update
                 layer["W"] -= lr * 0.01 * layer["W"]
                 layer["b"] -= lr * 0.01 * layer["b"]

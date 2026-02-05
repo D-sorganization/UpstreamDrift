@@ -295,7 +295,7 @@ class SystemIdentifier:
         best_error = objective(best_params)
         converged = False
 
-        for iteration in range(max_iterations):
+        for iteration in range(max_iterations):  # noqa: B007
             improved = False
 
             for i in range(n_params):

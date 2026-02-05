@@ -84,15 +84,15 @@ class TestErrorMetadata:
 
         for code, metadata in ERROR_METADATA.items():
             status = metadata.get("status_code")
-            assert (
-                status in valid_status_codes
-            ), f"Invalid status code {status} for {code}"
+            assert status in valid_status_codes, (
+                f"Invalid status code {status} for {code}"
+            )
 
     def test_messages_are_non_empty_strings(self):
         """Test that all messages are non-empty strings."""
         from src.api.utils.error_codes import ERROR_METADATA
 
-        for code, metadata in ERROR_METADATA.items():
+        for _code, metadata in ERROR_METADATA.items():
             message = metadata.get("message")
             assert isinstance(message, str)
             assert len(message) > 0
@@ -119,9 +119,9 @@ class TestErrorMetadata:
             expected_category = code_to_category.get(code_prefix)
 
             if expected_category:
-                assert (
-                    metadata.get("category") == expected_category
-                ), f"Category mismatch for {code}"
+                assert metadata.get("category") == expected_category, (
+                    f"Category mismatch for {code}"
+                )
 
 
 class TestAPIErrorContract:
@@ -219,10 +219,9 @@ class TestAPIError:
         """Test that to_dict omits request_id when empty."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
-        with (
-            patch("src.api.utils.error_codes.get_request_id", return_value=""),
-            patch("src.api.utils.error_codes.get_trace_context", return_value=None),
-        ):
+        with patch(
+            "src.api.utils.error_codes.get_request_id", return_value=""
+        ), patch("src.api.utils.error_codes.get_trace_context", return_value=None):
             error = APIError(
                 code=ErrorCode.INTERNAL_ERROR,
                 message="Test",
@@ -270,13 +269,10 @@ class TestAPIError:
             correlation_id="cor_test456",
         )
 
-        with (
-            patch(
-                "src.api.utils.error_codes.get_request_id", return_value="req_test123"
-            ),
-            patch(
-                "src.api.utils.error_codes.get_trace_context", return_value=mock_context
-            ),
+        with patch(
+            "src.api.utils.error_codes.get_request_id", return_value="req_test123"
+        ), patch(
+            "src.api.utils.error_codes.get_trace_context", return_value=mock_context
         ):
             error = APIError(
                 code=ErrorCode.INTERNAL_ERROR,

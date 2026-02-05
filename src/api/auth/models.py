@@ -1,7 +1,7 @@
 """Authentication and user models for Golf Modeling Suite API."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, EmailStr, Field
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     Base = DeclarativeMeta
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     """User roles for role-based access control."""
 
     FREE = "free"
@@ -37,7 +37,7 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 
-class SubscriptionStatus(str, Enum):
+class SubscriptionStatus(StrEnum):
     """Subscription status options."""
 
     ACTIVE = "active"
