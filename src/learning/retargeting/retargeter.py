@@ -82,7 +82,7 @@ class SkeletonConfig:
         try:
             return self.joint_names.index(name)
         except ValueError:
-            raise ValueError(f"Joint '{name}' not found in skeleton")
+            raise ValueError(f"Joint '{name}' not found in skeleton") from None
 
     def get_semantic_joint(self, semantic_name: str) -> str | None:
         """Get joint name from semantic label.

@@ -295,7 +295,7 @@ class SystemIdentifier:
         best_error = objective(best_params)
         converged = False
 
-        for iteration in range(max_iterations):
+        for _iteration in range(max_iterations):
             improved = False
 
             for i in range(n_params):
@@ -326,7 +326,7 @@ class SystemIdentifier:
         return IdentificationResult(
             identified_params=identified,
             residual_error=best_error,
-            iterations=iteration + 1,
+            iterations=_iteration + 1,
             converged=converged,
         )
 

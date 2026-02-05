@@ -14,6 +14,7 @@ from src.learning.imitation.learners import (
     BehaviorCloning,
     DAgger,
     ImitationLearner,
+    TrainingConfig,
 )
 
 __all__ = [
@@ -23,4 +24,5 @@ __all__ = [
     "BehaviorCloning",
     "DAgger",
     "GAIL",
+    "TrainingConfig",
 ]
