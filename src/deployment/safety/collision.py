@@ -278,7 +278,7 @@ class CollisionAvoidance:
         link_positions = self.get_link_positions(state)
 
         # Compute repulsion for each link
-        for link_name, link_pos in link_positions.items():
+        for _link_name, link_pos in link_positions.items():
             for obstacle in obstacles:
                 distance = obstacle.get_distance(link_pos)
 

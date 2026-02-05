@@ -343,7 +343,7 @@ class DomainRandomizer:
             List of randomization dictionaries.
         """
         configs = []
-        for i in range(batch_size):
+        for _i in range(batch_size):
             config = self.randomize(seed=self._rng.integers(0, 2**31))
             configs.append(config)
             self.reset_to_nominal()

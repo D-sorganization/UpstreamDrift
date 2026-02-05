@@ -1,6 +1,6 @@
-./.github/workflows/ci-standard.yml:40:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
-./.github/workflows/ci-standard.yml:45:              | xargs -0 grep -nE "TODO|FIXME" || true
-./.github/workflows/ci-standard.yml:49:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+./.github/workflows/ci-standard.yml:47:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+./.github/workflows/ci-standard.yml:52:              | xargs -0 grep -nE "TODO|FIXME" || true
+./.github/workflows/ci-standard.yml:56:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
 ./.github/workflows/Jules-Conflict-Fix.yml:31:              ATTEMPTS=$(gh pr view $PR --json comments --jq '[.comments[] | select(.body | contains("conflict resolution attempt"))] | length')
 ./.github/workflows/Jules-Conflict-Fix.yml:34:              ATTEMPTS=${ATTEMPTS:-0}
 ./.github/workflows/Jules-Conflict-Fix.yml:36:              if [ "$ATTEMPTS" -gt 3 ]; then
@@ -34,17 +34,41 @@
 ./.github/workflows/Jules-PR-AutoFix.yml:212:              echo "Found TODO/FIXME in: $TODO_FILES"
 ./.github/workflows/Jules-PR-AutoFix.yml:213:              # For now, just report - complex TODO resolution requires AI
 ./.github/workflows/Jules-PR-AutoFix.yml:335:          **Iterations used:** $ITERATIONS / ${{ env.MAX_FIX_ATTEMPTS }}
+./.github/workflows/Jules-Auto-Refactor.yml:17:                  echo "TODO: Implement DRY refactoring, code cleanup, and style fixes."
 ./.github/workflows/Jules-Auto-Repair.yml:45:  MAX_REPAIR_ATTEMPTS: 5
 ./.github/workflows/Jules-Auto-Repair.yml:115:          MAX_ATTEMPTS="${{ inputs.max_iterations || env.MAX_REPAIR_ATTEMPTS }}"
 ./.github/workflows/Jules-Auto-Repair.yml:117:          if [ "$REPAIR_COUNT" -ge "$MAX_ATTEMPTS" ]; then
 ./.github/workflows/Jules-Auto-Repair.yml:118:            echo "::warning::Max repair attempts ($MAX_ATTEMPTS) reached. Manual intervention required."
 ./.github/workflows/Jules-Auto-Repair.yml:121:            REMAINING=$((MAX_ATTEMPTS - REPAIR_COUNT))
 ./.github/workflows/Jules-Auto-Repair.yml:426:          **Iterations:** $ITERATIONS / ${{ env.MAX_REPAIR_ATTEMPTS }}
+./.github/workflows/Jules-Auto-Rebase.yml:17:                  echo "TODO: Implement automatic rebase of stale PRs onto main."
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
-./.claude/skills/lint.md:3:description: Run linting tools (ruff, black, mypy) and fix placeholder/TODO statements
-./.claude/skills/lint.md:29:   - Search for `TODO`, `FIXME`, `XXX`, `HACK` comments
-./.claude/skills/lint.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./AGENTS.md:293:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
+./.claude/skills/issues-10-sequential/SKILL.md:96:| 1 | #XXX - Title | #YYY | Merged |
+./.claude/skills/issues-10-sequential/SKILL.md:97:| 2 | #XXX - Title | #YYY | Merged |
+./.claude/skills/issues-5-combined/SKILL.md:63:- #XXX: <brief description>
+./.claude/skills/issues-5-combined/SKILL.md:64:- #XXX: <brief description>
+./.claude/skills/issues-5-combined/SKILL.md:65:- #XXX: <brief description>
+./.claude/skills/issues-5-combined/SKILL.md:66:- #XXX: <brief description>
+./.claude/skills/issues-5-combined/SKILL.md:67:- #XXX: <brief description>
+./.claude/skills/issues-5-combined/SKILL.md:69:Closes #XXX, closes #XXX, closes #XXX, closes #XXX, closes #XXX
+./.claude/skills/issues-5-combined/SKILL.md:84:| #XXX | Title | Brief fix description |
+./.claude/skills/issues-5-combined/SKILL.md:85:| #XXX | Title | Brief fix description |
+./.claude/skills/issues-5-combined/SKILL.md:86:| #XXX | Title | Brief fix description |
+./.claude/skills/issues-5-combined/SKILL.md:87:| #XXX | Title | Brief fix description |
+./.claude/skills/issues-5-combined/SKILL.md:88:| #XXX | Title | Brief fix description |
+./.claude/skills/issues-5-combined/SKILL.md:95:Closes #XXX, closes #XXX, closes #XXX, closes #XXX, closes #XXX"
+./.claude/skills/issues-5-combined/SKILL.md:140:| #XXX | Title | Fixed |
+./.claude/skills/issues-5-combined/SKILL.md:141:| #XXX | Title | Fixed |
+./.claude/skills/issues-5-combined/SKILL.md:142:| #XXX | Title | Fixed |
+./.claude/skills/issues-5-combined/SKILL.md:143:| #XXX | Title | Fixed |
+./.claude/skills/issues-5-combined/SKILL.md:144:| #XXX | Title | Fixed |
+./.claude/skills/lint/SKILL.md:3:description: Run linting tools (ruff, black, mypy) and fix placeholder/TODO statements
+./.claude/skills/lint/SKILL.md:29:   - Search for `TODO`, `FIXME`, `XXX`, `HACK` comments
+./.claude/skills/lint/SKILL.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./.claude/skills/update-issues/SKILL.md:132:| #XXX | Title | High | assessment.md |
+./.claude/skills/update-issues/SKILL.md:137:| #XXX | Title | Fixed in commit abc123 |
+./.claude/skills/update-issues/SKILL.md:142:| Description | #XXX |
 ./scripts/analyze_completist_data.py:105:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 ./scripts/analyze_completist_data.py:113:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
 ./scripts/analyze_completist_data.py:127:        if marker_item["type"] == "TODO":
@@ -56,6 +80,43 @@
 ./scripts/pragmatic_programmer_review.py:206:            if "TODO" in content:
 ./scripts/pragmatic_programmer_review.py:216:                "title": f"High TODO count ({len(todos)})",
 ./scripts/pragmatic_programmer_review.py:219:                "recommendation": "Review TODOs",
+./scripts/setup_hooks.py:106:  - quality-check (no TODOs/FIXMEs)
+./.agent/skills/issues-10-sequential/SKILL.md:96:| 1 | #XXX - Title | #YYY | Merged |
+./.agent/skills/issues-10-sequential/SKILL.md:97:| 2 | #XXX - Title | #YYY | Merged |
+./.agent/skills/issues-5-combined/SKILL.md:63:- #XXX: <brief description>
+./.agent/skills/issues-5-combined/SKILL.md:64:- #XXX: <brief description>
+./.agent/skills/issues-5-combined/SKILL.md:65:- #XXX: <brief description>
+./.agent/skills/issues-5-combined/SKILL.md:66:- #XXX: <brief description>
+./.agent/skills/issues-5-combined/SKILL.md:67:- #XXX: <brief description>
+./.agent/skills/issues-5-combined/SKILL.md:69:Closes #XXX, closes #XXX, closes #XXX, closes #XXX, closes #XXX
+./.agent/skills/issues-5-combined/SKILL.md:84:| #XXX | Title | Brief fix description |
+./.agent/skills/issues-5-combined/SKILL.md:85:| #XXX | Title | Brief fix description |
+./.agent/skills/issues-5-combined/SKILL.md:86:| #XXX | Title | Brief fix description |
+./.agent/skills/issues-5-combined/SKILL.md:87:| #XXX | Title | Brief fix description |
+./.agent/skills/issues-5-combined/SKILL.md:88:| #XXX | Title | Brief fix description |
+./.agent/skills/issues-5-combined/SKILL.md:95:Closes #XXX, closes #XXX, closes #XXX, closes #XXX, closes #XXX"
+./.agent/skills/issues-5-combined/SKILL.md:140:| #XXX | Title | Fixed |
+./.agent/skills/issues-5-combined/SKILL.md:141:| #XXX | Title | Fixed |
+./.agent/skills/issues-5-combined/SKILL.md:142:| #XXX | Title | Fixed |
+./.agent/skills/issues-5-combined/SKILL.md:143:| #XXX | Title | Fixed |
+./.agent/skills/issues-5-combined/SKILL.md:144:| #XXX | Title | Fixed |
+./.agent/skills/lint/SKILL.md:3:description: Run linting tools (ruff, black, mypy) and fix placeholder/TODO statements
+./.agent/skills/lint/SKILL.md:32:   - Search for `TODO`, `FIXME`, `XXX`, `HACK` comments
+./.agent/skills/lint/SKILL.md:37:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./.agent/skills/update-issues/SKILL.md:132:| #XXX | Title | High | assessment.md |
+./.agent/skills/update-issues/SKILL.md:137:| #XXX | Title | Fixed in commit abc123 |
+./.agent/skills/update-issues/SKILL.md:142:| Description | #XXX |
+./.agent/workflows/issues-5-combined.md:44:   Closes #XXX, closes #XXX, closes #XXX, closes #XXX, closes #XXX
+./.agent/workflows/lint.md:2:description: Run linting tools (ruff, black, mypy) and fix placeholder/TODO statements
+./.agent/workflows/lint.md:36:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./reports/bandit.json:12391:      "code": "192         \"\"\"Test standard temperature.\"\"\"\n193         assert TEMPERATURE_C == 20.0\n194         # Should be reasonable room temperature\n",
+./reports/bandit.json:12411:      "code": "194         # Should be reasonable room temperature\n195         assert 15.0 <= TEMPERATURE_C <= 25.0\n196 \n",
+./tests/unit/api/test_error_codes.py:36:        """Postcondition: All codes follow GMS-XXX-NNN format."""
+./ui/package-lock.json:6082:      "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==",
+./ui/src/api/client.ts:33:const MAX_RECONNECT_ATTEMPTS = 5;
+./ui/src/api/client.ts:170:      if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+./ui/src/api/client.ts:172:        console.log(`WebSocket closed unexpectedly. Reconnecting in ${Math.round(delay)}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
+./ui/src/api/useSimulation.test.ts:582:      // We need to go through MAX_RECONNECT_ATTEMPTS (5) reconnection attempts
 ./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp:30:        // TODO: Add Code to Begin Model here
 ./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp:90:        // TODO: Set the coordinate properties
 ./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/skeleton.cpp:15:        // TODO: Add Code to Begin Model here
@@ -112,8 +173,6 @@
 ./src/api/utils/error_codes.py:106:    # System Errors (GMS-SYS-XXX)
 ./src/tools/matlab_utilities/scripts/matlab_quality_check.py:77:            (r"\bHACK\b", "HACK comment found"),
 ./src/tools/matlab_utilities/scripts/matlab_quality_check.py:78:            (r"\bXXX\b", "XXX comment found"),
-./src/tools/humanoid_character_builder/generators/mesh_generator.py:271:        # TODO: Implement MakeHuman integration
-./src/tools/humanoid_character_builder/generators/mesh_generator.py:361:        # TODO: Implement SMPL-X integration
 ./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp:30:        // TODO: Add Code to Begin Model here
 ./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp:90:        // TODO: Set the coordinate properties
 ./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/skeleton.cpp:15:        // TODO: Add Code to Begin Model here
@@ -132,7 +191,3 @@
 ./src/shared/python/physics_constants.py:131:TEMPERATURE_C = PhysicalConstant(20.0, "C", "Standard", "Standard temperature")
 ./src/shared/python/theme/typography.py:83:    XXXL: ClassVar[int] = 32
 ./src/shared/tools/human-gazebo/legacy/control/src/HumanGazeboControlModule.cpp:131:  //TODO read the joint names list and then put then in the control board options
-./.pre-commit-config.yaml:53:  # TODO/FIXME detection (Issue #780: align with CI placeholder checks)
-./.pre-commit-config.yaml:57:        name: Check for TODO/FIXME
-./.pre-commit-config.yaml:59:          bash -c 'if grep -rn --include="*.py" -E "TODO|FIXME"
-./.pre-commit-config.yaml:63:          echo "ERROR: Found TODO/FIXME placeholders. Create GitHub issues instead.";

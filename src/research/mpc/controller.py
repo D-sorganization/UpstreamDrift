@@ -362,7 +362,7 @@ class ModelPredictiveController:
         converged = False
         prev_cost = float("inf")
 
-        for iteration in range(self._max_iterations):
+        for _iteration in range(self._max_iterations):
             # Backward pass - compute gains
             K, d = self._backward_pass(X, U)
 
@@ -392,7 +392,7 @@ class ModelPredictiveController:
             optimal_controls=U,
             cost=prev_cost,
             solve_time=solve_time,
-            iterations=iteration + 1,
+            iterations=_iteration + 1,
             constraint_violations=max_violation,
         )
 
