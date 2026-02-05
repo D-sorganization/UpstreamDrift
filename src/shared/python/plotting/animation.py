@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib import animation as mpl_animation
 from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -122,7 +121,9 @@ class SwingAnimator:
                 if len(t) > len(times):
                     times = np.asarray(t)
         if len(times) == 0:
-            ax.text2D(0.5, 0.5, "No trajectory data", transform=ax.transAxes, ha="center")
+            ax.text2D(
+                0.5, 0.5, "No trajectory data", transform=ax.transAxes, ha="center"
+            )
             return mpl_animation.FuncAnimation(fig, lambda _: [], frames=1)
 
         n_frames = len(times)
@@ -133,8 +134,12 @@ class SwingAnimator:
                 pts = np.asarray(pts)
                 if pts.ndim == 2 and pts.shape[1] >= 3:
                     ax.plot(
-                        pts[:, 0], pts[:, 1], pts[:, 2],
-                        color=cfg.desired_color, alpha=0.4, linewidth=1.5,
+                        pts[:, 0],
+                        pts[:, 1],
+                        pts[:, 2],
+                        color=cfg.desired_color,
+                        alpha=0.4,
+                        linewidth=1.5,
                         label=f"{name} desired",
                     )
 
@@ -142,7 +147,9 @@ class SwingAnimator:
         lines: dict[str, Any] = {}
         points: dict[str, Any] = {}
         for name in body_data:
-            (line,) = ax.plot([], [], [], linewidth=1.5, color=cfg.actual_color, label=name)
+            (line,) = ax.plot(
+                [], [], [], linewidth=1.5, color=cfg.actual_color, label=name
+            )
             (pt,) = ax.plot([], [], [], "o", markersize=5, color=cfg.actual_color)
             lines[name] = line
             points[name] = pt
@@ -174,7 +181,11 @@ class SwingAnimator:
             return artists
 
         anim = mpl_animation.FuncAnimation(
-            fig, _update, frames=n_frames, interval=cfg.effective_interval, blit=False,
+            fig,
+            _update,
+            frames=n_frames,
+            interval=cfg.effective_interval,
+            blit=False,
         )
         return anim
 
@@ -222,7 +233,11 @@ class SwingAnimator:
             return link_lines
 
         return mpl_animation.FuncAnimation(
-            fig, _update, frames=n_frames, interval=cfg.effective_interval, blit=False,
+            fig,
+            _update,
+            frames=n_frames,
+            interval=cfg.effective_interval,
+            blit=False,
         )
 
     def create_vector_field_animation(
@@ -253,8 +268,14 @@ class SwingAnimator:
             times = np.arange(n_frames, dtype=float)
 
         quiver = ax.quiver(
-            [0], [0], [0], [0], [0], [0],
-            color=cfg.actual_color, arrow_length_ratio=0.15,
+            [0],
+            [0],
+            [0],
+            [0],
+            [0],
+            [0],
+            color=cfg.actual_color,
+            arrow_length_ratio=0.15,
         )
         time_text = ax.text2D(0.02, 0.95, "", transform=ax.transAxes)
 
@@ -271,15 +292,24 @@ class SwingAnimator:
             p = positions[frame]
             v = vectors[frame] * cfg.vector_scale
             quiver = ax.quiver(
-                [p[0]], [p[1]], [p[2]],
-                [v[0]], [v[1]], [v[2]],
-                color=cfg.actual_color, arrow_length_ratio=0.15,
+                [p[0]],
+                [p[1]],
+                [p[2]],
+                [v[0]],
+                [v[1]],
+                [v[2]],
+                color=cfg.actual_color,
+                arrow_length_ratio=0.15,
             )
             time_text.set_text(f"t = {times[frame]:.3f} s")
             return [quiver, time_text]
 
         return mpl_animation.FuncAnimation(
-            fig, _update, frames=n_frames, interval=cfg.effective_interval, blit=False,
+            fig,
+            _update,
+            frames=n_frames,
+            interval=cfg.effective_interval,
+            blit=False,
         )
 
     # ----- convenience save wrapper -----

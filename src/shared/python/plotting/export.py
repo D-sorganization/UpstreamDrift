@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -47,6 +47,7 @@ class ExportConfig:
 # ---------------------------------------------------------------------------
 # Figure export
 # ---------------------------------------------------------------------------
+
 
 def export_figure(
     fig: Figure,
@@ -92,6 +93,7 @@ def export_figure(
 # Data export
 # ---------------------------------------------------------------------------
 
+
 def export_plot_data(
     data: dict[str, Any],
     name: str,
@@ -119,7 +121,7 @@ def export_plot_data(
         payload: dict[str, Any] = {}
         if config.include_metadata:
             payload["_meta"] = {
-                "exported_at": datetime.now(tz=timezone.utc).isoformat(),
+                "exported_at": datetime.now(tz=UTC).isoformat(),
                 "source": "UpstreamDrift",
             }
         for key, val in data.items():
@@ -149,10 +151,7 @@ def export_plot_data(
             writer.writerow(list(columns.keys()))
             for row in range(max_rows):
                 writer.writerow(
-                    [
-                        columns[k][row] if row < len(columns[k]) else ""
-                        for k in columns
-                    ]
+                    [columns[k][row] if row < len(columns[k]) else "" for k in columns]
                 )
     else:
         raise ValueError(f"Unsupported export format: {fmt!r}")
@@ -163,6 +162,7 @@ def export_plot_data(
 # ---------------------------------------------------------------------------
 # Batch export helper
 # ---------------------------------------------------------------------------
+
 
 def export_all_figures(
     figures: dict[str, Figure],

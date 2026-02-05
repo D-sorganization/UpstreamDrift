@@ -13,7 +13,6 @@ from typing import Any
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
-
 # ---------------------------------------------------------------------------
 # Color scheme for professional plots
 # ---------------------------------------------------------------------------

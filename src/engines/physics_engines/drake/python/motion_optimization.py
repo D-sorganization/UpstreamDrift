@@ -304,9 +304,11 @@ class DrakeMotionOptimizer:
             optimal_trajectory=optimal_trajectory,
             optimal_cost=float(opt_result.fun),
             iterations=opt_result.nit if hasattr(opt_result, "nit") else 0,
-            convergence_message=opt_result.message
-            if hasattr(opt_result, "message")
-            else str(opt_result.get("message", "Unknown")),
+            convergence_message=(
+                opt_result.message
+                if hasattr(opt_result, "message")
+                else str(opt_result.get("message", "Unknown"))
+            ),
             objective_values=objective_values,
             constraint_violations=constraint_violations,
         )

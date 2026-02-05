@@ -8,7 +8,6 @@ accelerations along body paths.
 from __future__ import annotations
 
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
 from src.shared.python.plotting.renderers.base import BaseRenderer
@@ -67,8 +66,12 @@ class VectorOverlayRenderer(BaseRenderer):
 
         ax = fig.add_subplot(111, projection="3d")
         ax.quiver(
-            p[:, 0], p[:, 1], p[:, 2],
-            f[:, 0], f[:, 1], f[:, 2],
+            p[:, 0],
+            p[:, 1],
+            p[:, 2],
+            f[:, 0],
+            f[:, 1],
+            f[:, 2],
             color=self.colors.get("quaternary", "red"),
             arrow_length_ratio=0.15,
             linewidth=1.2,
@@ -135,8 +138,12 @@ class VectorOverlayRenderer(BaseRenderer):
         ax = fig.add_subplot(111, projection="3d")
         for i in range(len(joint_positions)):
             ax.quiver(
-                joint_positions[i, 0], joint_positions[i, 1], joint_positions[i, 2],
-                vectors[i, 0], vectors[i, 1], vectors[i, 2],
+                joint_positions[i, 0],
+                joint_positions[i, 1],
+                joint_positions[i, 2],
+                vectors[i, 0],
+                vectors[i, 1],
+                vectors[i, 2],
                 color=colours[i],
                 arrow_length_ratio=0.2,
                 linewidth=1.5,
@@ -181,15 +188,23 @@ class VectorOverlayRenderer(BaseRenderer):
         # Trajectory line
         if times is not None:
             scatter = ax.scatter(
-                positions[:, 0], positions[:, 1], positions[:, 2],
-                c=np.asarray(times), cmap="viridis", s=3, label=trajectory_label,
+                positions[:, 0],
+                positions[:, 1],
+                positions[:, 2],
+                c=np.asarray(times),
+                cmap="viridis",
+                s=3,
+                label=trajectory_label,
             )
             fig.colorbar(scatter, ax=ax, label="Time (s)", shrink=0.6)
         else:
             ax.plot(
-                positions[:, 0], positions[:, 1], positions[:, 2],
+                positions[:, 0],
+                positions[:, 1],
+                positions[:, 2],
                 color=self.colors.get("primary", "#1f77b4"),
-                linewidth=1.5, label=trajectory_label,
+                linewidth=1.5,
+                label=trajectory_label,
             )
 
         # Vector arrows
@@ -197,8 +212,12 @@ class VectorOverlayRenderer(BaseRenderer):
         p = positions[idx]
         v = vectors[idx] * scale
         ax.quiver(
-            p[:, 0], p[:, 1], p[:, 2],
-            v[:, 0], v[:, 1], v[:, 2],
+            p[:, 0],
+            p[:, 1],
+            p[:, 2],
+            v[:, 0],
+            v[:, 1],
+            v[:, 2],
             color=self.colors.get("quaternary", "red"),
             arrow_length_ratio=0.12,
             linewidth=0.8,
@@ -211,7 +230,8 @@ class VectorOverlayRenderer(BaseRenderer):
         ax.set_zlabel("Z (m)")
         ax.set_title(
             f"{trajectory_label} with {vector_label} Vectors",
-            fontsize=14, fontweight="bold",
+            fontsize=14,
+            fontweight="bold",
         )
         ax.legend(loc="upper right", fontsize=9)
         fig.tight_layout()
@@ -246,12 +266,22 @@ class VectorOverlayRenderer(BaseRenderer):
         ax = fig.add_subplot(111, projection="3d")
 
         ax.plot(
-            actual[:, 0], actual[:, 1], actual[:, 2],
-            color="#FF4500", linewidth=2.0, label=label_actual,
+            actual[:, 0],
+            actual[:, 1],
+            actual[:, 2],
+            color="#FF4500",
+            linewidth=2.0,
+            label=label_actual,
         )
         ax.plot(
-            desired[:, 0], desired[:, 1], desired[:, 2],
-            color="#00CED1", linewidth=2.0, linestyle="--", label=label_desired, alpha=0.7,
+            desired[:, 0],
+            desired[:, 1],
+            desired[:, 2],
+            color="#00CED1",
+            linewidth=2.0,
+            linestyle="--",
+            label=label_desired,
+            alpha=0.7,
         )
 
         # Error lines connecting corresponding points
@@ -262,12 +292,18 @@ class VectorOverlayRenderer(BaseRenderer):
                     [actual[i, 0], desired[i, 0]],
                     [actual[i, 1], desired[i, 1]],
                     [actual[i, 2], desired[i, 2]],
-                    color="gray", linewidth=0.5, alpha=0.4,
+                    color="gray",
+                    linewidth=0.5,
+                    alpha=0.4,
                 )
 
         # Start / end markers
-        ax.scatter(*actual[0, :3], color="#FF4500", s=60, marker="o", zorder=5, label="Start")
-        ax.scatter(*actual[-1, :3], color="#FF4500", s=60, marker="s", zorder=5, label="End")
+        ax.scatter(
+            *actual[0, :3], color="#FF4500", s=60, marker="o", zorder=5, label="Start"
+        )
+        ax.scatter(
+            *actual[-1, :3], color="#FF4500", s=60, marker="s", zorder=5, label="End"
+        )
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
@@ -315,8 +351,12 @@ class VectorOverlayRenderer(BaseRenderer):
 
         ax = fig.add_subplot(111, projection="3d")
         ax.quiver(
-            p[:, 0], p[:, 1], p[:, 2],
-            f[:, 0], f[:, 1], f[:, 2],
+            p[:, 0],
+            p[:, 1],
+            p[:, 2],
+            f[:, 0],
+            f[:, 1],
+            f[:, 2],
             color="#228B22",
             arrow_length_ratio=0.12,
             linewidth=1.0,
@@ -324,8 +364,13 @@ class VectorOverlayRenderer(BaseRenderer):
             label="GRF",
         )
         ax.plot(
-            cop[:, 0], cop[:, 1], cop[:, 2],
-            color="#228B22", linewidth=0.8, alpha=0.5, label="CoP path",
+            cop[:, 0],
+            cop[:, 1],
+            cop[:, 2],
+            color="#228B22",
+            linewidth=0.8,
+            alpha=0.5,
+            label="CoP path",
         )
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")

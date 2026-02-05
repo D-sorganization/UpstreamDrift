@@ -476,8 +476,10 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         """
         original_smoothing = self.smoothing_factor
 
-        schedule = contact_schedule[:horizon] if len(contact_schedule) >= horizon else (
-            contact_schedule + [False] * (horizon - len(contact_schedule))
+        schedule = (
+            contact_schedule[:horizon]
+            if len(contact_schedule) >= horizon
+            else (contact_schedule + [False] * (horizon - len(contact_schedule)))
         )
 
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
@@ -509,7 +511,9 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         for iteration in range(100):
             for t in range(horizon):
                 if t < len(schedule) and schedule[t]:
-                    self.smoothing_factor = original_smoothing * contact_smoothing_multiplier
+                    self.smoothing_factor = (
+                        original_smoothing * contact_smoothing_multiplier
+                    )
                 else:
                     self.smoothing_factor = original_smoothing
 
@@ -526,7 +530,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
                 break
 
             m = beta1 * m + (1 - beta1) * gradient
-            v = beta2 * v + (1 - beta2) * (gradient ** 2)
+            v = beta2 * v + (1 - beta2) * (gradient**2)
             m_hat = m / (1 - beta1 ** (iteration + 1))
             v_hat = v / (1 - beta2 ** (iteration + 1))
             controls = controls - lr * m_hat / (np.sqrt(v_hat) + eps_adam)

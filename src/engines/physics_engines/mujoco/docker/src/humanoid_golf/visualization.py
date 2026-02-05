@@ -130,6 +130,7 @@ class ForceVisualizer:
 # Native MuJoCo geometry helpers (mjvGeom population)
 # ---------------------------------------------------------------------------
 
+
 def _init_arrow_geom(
     geom: Any,
     start: np.ndarray,
@@ -214,6 +215,7 @@ def _init_sphere_geom(
 # Public overlay entry point
 # ---------------------------------------------------------------------------
 
+
 def add_visualization_overlays(
     viewer: Any,
     physics: Any,
@@ -234,7 +236,6 @@ def add_visualization_overlays(
             ``tracer_bodies``, ``force_scale``, ``torque_scale``.
         tracer: ``TrajectoryTracer`` instance accumulating body paths.
     """
-    import mujoco
 
     show_forces = config.get("show_contact_forces", True)
     show_torques = config.get("show_joint_torques", True)
@@ -282,9 +283,7 @@ def add_visualization_overlays(
             # Normal force (red)
             g = _add_geom()
             if g is not None:
-                _init_arrow_geom(
-                    g, start, end, 0.005, FORCE_COLORS["contact_normal"]
-                )
+                _init_arrow_geom(g, start, end, 0.005, FORCE_COLORS["contact_normal"])
 
             # Friction force (orange, perpendicular indicator)
             if contact["friction_force"] > 0.05:
@@ -362,14 +361,13 @@ def add_visualization_overlays(
                 if g is None:
                     break
                 end_k = min(k + step, len(desired) - 1)
-                _init_line_geom(
-                    g, desired[k], desired[end_k], 0.003, desired_color
-                )
+                _init_line_geom(g, desired[k], desired[end_k], 0.003, desired_color)
 
 
 # ---------------------------------------------------------------------------
 # Standalone geometry factories (for external consumers)
 # ---------------------------------------------------------------------------
+
 
 def create_force_arrow_geom(
     position: np.ndarray,
