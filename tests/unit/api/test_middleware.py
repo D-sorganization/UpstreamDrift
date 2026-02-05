@@ -3,7 +3,7 @@
 These tests verify the middleware using Design by Contract principles.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import Request
@@ -171,7 +171,9 @@ class TestValidateUploadSizeContract:
 class TestValidateUploadSize:
     """Functional tests for validate_upload_size middleware."""
 
-    async def test_allows_request_without_content_length(self, mock_request, mock_response):
+    async def test_allows_request_without_content_length(
+        self, mock_request, mock_response
+    ):
         """Test allowing requests without Content-Length header."""
         from src.api.middleware.upload_limits import validate_upload_size
 
