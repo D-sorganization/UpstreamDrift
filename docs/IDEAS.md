@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-02-01
+**Last Updated**: 2026-02-13
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -26,6 +26,17 @@ This document serves as the central registry for scientific research topics, tec
   - *Outcome*: Classification algorithm linking ground interaction style to club delivery metrics.
   - *Ref*: Ball, K., & Best, R. (2007). "Centre of pressure patterns in golf swings."
 
+### Energy & Coordination
+- **Inter-segmental Power Flow**: Calculate the flow of energy between body segments using joint power analysis ($P = M \cdot \omega$). Positive power indicates energy generation, while negative power indicates absorption or transfer via the kinetic chain.
+  - *Data Needed*: Inverse dynamics output (Net Joint Moments) and angular velocities.
+  - *Outcome*: Quantify "Kinetic Chain" efficiency and identify energy blockages.
+  - *Ref*: Winter, D. A. (2009). "Biomechanics and Motor Control of Human Movement."
+
+- **Muscle Synergy Identification**: Use Non-negative Matrix Factorization (NNMF) on EMG or simulated muscle activations to identify low-dimensional motor primitives (synergies) that control complex movements.
+  - *Data Needed*: Time-series activation data from multiple muscle groups.
+  - *Outcome*: Understanding of motor control strategies and coordination complexity.
+  - *Ref*: d'Avella, A., et al. (2003). "Combinations of muscle synergies in the construction of a natural motor behavior."
+
 ## 2. Ball Flight Physics
 
 ### Aerodynamics
@@ -48,6 +59,14 @@ This document serves as the central registry for scientific research topics, tec
   - *Data Needed*: Coefficients of restitution and friction for various turf types (fairway, green, rough).
   - *Outcome*: Prediction of total distance (Carry + Roll).
 
+- **Trajectory Optimization**: Implement an optimizer (e.g., SQP or Genetic Algorithm) to find the optimal Launch Angle and Spin Rate for a given Ball Speed and Environmental Condition to maximize Carry or Total Distance.
+  - *Data Needed*: Ball Flight Simulator and bounds for launch conditions.
+  - *Outcome*: "Optimal Flight" recommendations for fitting.
+
+- **Lie-Dependent Spin Generation**: Model the reduction in friction and spin generation caused by grass entrapment (Flyer Lie) or wet conditions.
+  - *Data Needed*: Empirical friction coefficients for different lie conditions (fairway, rough, wet).
+  - *Outcome*: Accurate prediction of "flyers" and run-out from rough.
+
 ## 3. Equipment Science
 
 ### Club Dynamics
@@ -56,10 +75,18 @@ This document serves as the central registry for scientific research topics, tec
   - *Outcome*: Analysis of dynamic face closure rates.
   - *Ref*:  MacKenzie, S. J., & Sprigings, E. J. (2009). "A three-dimensional forward dynamics model of the golf swing."
 
+- **Coupled Bending-Torsion Shaft Model**: Extend the flexible shaft model to include torsional degrees of freedom and the coupling between bending and torsion (especially for non-axisymmetric shafts or off-axis loading).
+  - *Data Needed*: Polar Moment of Inertia ($J$) and Shear Modulus ($G$) profiles.
+  - *Outcome*: Analysis of dynamic face closure variability due to shaft twist.
+
 - **Clubhead MOI Tensor**: Replace point-mass clubhead approximations with a full 3D Moment of Inertia tensor. This is critical for accurately predicting the gear effect on off-center hits.
   - *Data Needed*: CAD-derived MOI tensors ($I_{xx}, I_{yy}, I_{zz}, I_{xy}, \dots$) for standard clubheads.
   - *Outcome*: Accurate prediction of ball start line and spin axis tilt for toe/heel strikes.
   - *Ref*: United States Golf Association (USGA) Technical Protocols.
+
+- **Full Rigid Body Impact**: Implement a full 3D rigid body collision model using the Clubhead Inertia Tensor ($I_{club}$) instead of a point mass approximation. This naturally captures gear effect physics without empirical factors.
+  - *Data Needed*: Full Inertia Tensor ($I_{xx}, I_{yy}, I_{zz}, I_{xy}, \dots$) and CG location.
+  - *Outcome*: Physics-based prediction of gear effect and sweet spot sensitivity.
 
 - **Kick Point Optimization**: Analyze shaft EI profiles to determine the dynamic "kick point" and its effect on dynamic loft.
   - *Data Needed*: EI profiles (flexural stiffness) along the shaft.
@@ -86,6 +113,14 @@ This document serves as the central registry for scientific research topics, tec
   - *Data Needed*: Shot dispersion statistics (ellipses) by club and lie condition.
   - *Outcome*: Optimal aim lines (Risk/Reward analysis) for course management.
 
+- **Bayesian Parameter Estimation**: Use Bayesian inference (MCMC or Variational Inference) to estimate biomechanical parameters (e.g., max isometric force, tendon slack length) from motion capture data, providing uncertainty bounds.
+  - *Data Needed*: Motion data and priors for physiological parameters.
+  - *Outcome*: Personalized musculoskeletal models with confidence intervals.
+
+- **Causal Discovery**: Apply causal inference algorithms (e.g., PC algorithm) to observational swing data to distinguish between correlations (e.g., "early extension is linked to slice") and causal chains.
+  - *Data Needed*: Large dataset of swing metrics and outcomes.
+  - *Outcome*: Identification of root causes vs. symptoms in swing faults.
+
 ## 5. Simulation Technology
 
 ### Physics Engine
@@ -96,6 +131,10 @@ This document serves as the central registry for scientific research topics, tec
 - **Doppler Radar Emulation**: Simulate the raw radial velocity data seen by radar launch monitors (e.g., TrackMan) to study the difference between "measured" and "actual" impact parameters (e.g., Spin Loft vs. Dynamic Loft).
   - *Data Needed*: Relative velocity vectors of clubhead geometric center vs. radar origin.
   - *Outcome*: Synthetic validation environment for launch monitor algorithms.
+
+- **Neural ODE Surrogate Models**: Train Neural Ordinary Differential Equations (Neural ODEs) to approximate the physics engine's output. This allows for differentiable simulation and drastically faster execution for real-time applications.
+  - *Data Needed*: Large dataset of physics engine simulations (Input-Output pairs).
+  - *Outcome*: Real-time trajectory prediction on mobile devices.
 
 ## 6. Control Theory
 
@@ -117,3 +156,4 @@ This document serves as the central registry for scientific research topics, tec
 |------|-------------|----------|--------|
 | 2026-01-29 | Initial Population of Research Ideas | All | Active |
 | 2026-02-01 | Added CoP, Aero Coeffs, Shaft Droop, Monte Carlo, Radar, Noise | All | Active |
+| 2026-02-13 | Added Power Flow, Muscle Synergy, Trajectory Opt, Flyer Lie, Rigid Impact, Bayesian, Causal, Neural ODE | All | Active |
