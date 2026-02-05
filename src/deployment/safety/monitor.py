@@ -211,8 +211,8 @@ class SafetyMonitor:
         Returns:
             Safety status.
         """
-        violations = []
-        warnings = []
+        violations: list[str] = []
+        warnings: list[str] = []
 
         # Check torque limits
         if command.torque_commands is not None:

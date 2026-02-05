@@ -719,10 +719,10 @@ class TerrainGeometryGenerator:
         # and referenced here. This generates the XML structure.
         xml_parts = [
             "<asset>",
-            f'  <hfield name="{name}_hfield" nrow="{n_rows}" ncol="{n_cols}" size="{elev.width/2} {elev.length/2} {h_range} 0.1"/>',
+            f'  <hfield name="{name}_hfield" nrow="{n_rows}" ncol="{n_cols}" size="{elev.width / 2} {elev.length / 2} {h_range} 0.1"/>',
             "</asset>",
             "<worldbody>",
-            f'  <geom name="{name}" type="hfield" hfield="{name}_hfield" pos="{elev.width/2} {elev.length/2} {h_min}" friction="{friction} 0.005 0.0001"/>',
+            f'  <geom name="{name}" type="hfield" hfield="{name}_hfield" pos="{elev.width / 2} {elev.length / 2} {h_min}" friction="{friction} 0.005 0.0001"/>',
             "</worldbody>",
         ]
 
@@ -746,7 +746,7 @@ class TerrainGeometryGenerator:
 
         xml = f"""<link name="{name}">
   <collision>
-    <origin xyz="{elev.width/2} {elev.length/2} {(h_max+h_min)/2}" rpy="0 0 0"/>
+    <origin xyz="{elev.width / 2} {elev.length / 2} {(h_max + h_min) / 2}" rpy="0 0 0"/>
     <geometry>
       <box size="{elev.width} {elev.length} {h_max - h_min + 0.1}"/>
     </geometry>

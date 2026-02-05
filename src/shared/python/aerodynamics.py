@@ -559,7 +559,7 @@ class TurbulenceModel:
                 )
 
         # Normalize and scale
-        perturbation = perturbation / len(self._freqs) * self.intensity
+        perturbation = perturbation / len(self._freqs) * self.intensity  # type: ignore[assignment]
 
         return perturbation
 

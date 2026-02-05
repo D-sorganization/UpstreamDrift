@@ -477,8 +477,7 @@ def validate_input_files(
 
         if extensions and path.suffix not in extensions:
             raise argparse.ArgumentTypeError(
-                f"Invalid file type: {path.suffix}. "
-                f"Allowed: {', '.join(extensions)}"
+                f"Invalid file type: {path.suffix}. Allowed: {', '.join(extensions)}"
             )
 
         result.append(path)

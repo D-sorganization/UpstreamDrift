@@ -439,7 +439,7 @@ class WholeBodyController:
             qp_solution = self._solver.solve(problem)
 
             if qp_solution.success and qp_solution.x is not None:
-                x_solution = qp_solution.x
+                x_solution = qp_solution.x  # type: ignore[assignment]
 
         # Extract final solution
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)

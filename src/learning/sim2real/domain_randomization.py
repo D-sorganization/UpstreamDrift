@@ -196,13 +196,17 @@ class DomainRandomizer:
 
         # Randomize delays
         if self.config.randomize_delays:
-            self._action_delay = self._rng.integers(
-                self.config.action_delay_range[0],
-                self.config.action_delay_range[1] + 1,
+            self._action_delay = int(
+                self._rng.integers(
+                    self.config.action_delay_range[0],
+                    self.config.action_delay_range[1] + 1,
+                )
             )
-            self._observation_delay = self._rng.integers(
-                self.config.observation_delay_range[0],
-                self.config.observation_delay_range[1] + 1,
+            self._observation_delay = int(
+                self._rng.integers(
+                    self.config.observation_delay_range[0],
+                    self.config.observation_delay_range[1] + 1,
+                )
             )
             randomization["action_delay"] = self._action_delay
             randomization["observation_delay"] = self._observation_delay
@@ -344,7 +348,7 @@ class DomainRandomizer:
         """
         configs = []
         for _i in range(batch_size):
-            config = self.randomize(seed=self._rng.integers(0, 2**31))
+            config = self.randomize(seed=int(self._rng.integers(0, 2**31)))
             configs.append(config)
             self.reset_to_nominal()
         return configs

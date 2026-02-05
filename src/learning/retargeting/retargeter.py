@@ -104,7 +104,7 @@ class SkeletonConfig:
         Returns:
             List of joint names from root to end.
         """
-        chain = []
+        chain: list[str] = []
         idx = self.get_joint_index(end_joint)
 
         while idx >= 0:
@@ -296,7 +296,7 @@ class MotionRetargeter:
             target_len = np.linalg.norm(self.target.joint_offsets[target_idx])
 
             if source_len > 1e-6:
-                scales[target_joint] = target_len / source_len
+                scales[target_joint] = float(target_len / source_len)
             else:
                 scales[target_joint] = 1.0
 
@@ -433,7 +433,7 @@ class MotionRetargeter:
 
             positions[ee_name] = position
 
-        return positions
+        return positions  # type: ignore[return-value]
 
     def _optimize_frame(
         self,
