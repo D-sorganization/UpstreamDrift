@@ -17,9 +17,11 @@ import numpy as np
 from src.shared.python.engine_availability import (
     C3D_AVAILABLE,
     EZC3D_AVAILABLE,
-    SCIPY_AVAILABLE,
 )
 from src.shared.python.engine_availability import HDF5_AVAILABLE as H5PY_AVAILABLE
+from src.shared.python.engine_availability import (
+    SCIPY_AVAILABLE,
+)
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
