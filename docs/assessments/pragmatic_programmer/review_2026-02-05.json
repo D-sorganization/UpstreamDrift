@@ -1,0 +1,932 @@
+{
+  "timestamp": "2026-02-05T00:47:29.820243",
+  "repository": "UpstreamDrift",
+  "files_analyzed": 1151,
+  "issues": [
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/launch_golf_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/tests/unit/test_engine_manager.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/launch_golf_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/tests/unit/test_engine_manager.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/launch_golf_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/tests/unit/test_engine_manager.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/ball_flight_physics.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/start_api_server.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/baseline_assessments.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/start_api_server.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/conftest.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/launch_model_explorer.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/setup_golf_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/playground_experiments/humanoid_cm_demo.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 5 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/migrate_api_keys.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/setup_golf_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/playground_experiments/humanoid_cm_demo.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/playground_experiments/mocapact_demo.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/matlab_utilities/scripts/matlab_quality_check.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/02_parameter_sweeps.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_wiffle_main.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/test_improved_visualization.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/01_basic_simulation.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/playground_experiments/humanoid_cm_demo.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/playground_experiments/mocapact_demo.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 8 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/03_injury_risk_tutorial.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/pendulum_models/tools/code_quality_check.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/drake/tools/code_quality_check.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/03_injury_risk_tutorial.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/launch_model_explorer.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/motion_training_demo.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/launchers/assets/optimize_assets.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/motion_training_demo.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/pinocchio/python/motion_training/training_pipeline.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/motion_training_demo.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/pinocchio/python/motion_training/training_pipeline.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/examples/motion_training_demo.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 51 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/api/diagnostics.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/api/local_server.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/api/utils/tracing.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 5 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 4 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 5 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 5 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/refactor_dry_orthogonality.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/analyze_completist_data.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/apply_quick_fixes.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/assess_repository.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 4 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/apply_quick_fixes.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/assess_repository.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/finalize_comprehensive_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/pragmatic_programmer_review.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 6 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/apply_quick_fixes.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/assess_repository.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/create_issues_from_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/finalize_comprehensive_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/create_issues_from_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/create_issues_from_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/create_issues_from_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/finalize_comprehensive_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/finalize_comprehensive_assessment.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/assessment/constants.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/assessment/constants.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/assessment/constants.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/assessment/constants.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/assessment/constants.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/generate_assessment_summary.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/assessment/constants.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/show_physics_parameters.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/validate_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/verify_physics.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/show_physics_parameters.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/validate_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/verify_physics.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/show_physics_parameters.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/validate_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/verify_physics.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 3 locations",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/show_physics_parameters.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/validate_suite.py",
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/scripts/verify_physics.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: analyze_simscape_data",
+      "description": "Length 54 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/analyze_simscape_data.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: create_control_panel",
+      "description": "Length 120 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: setup_sim_tab",
+      "description": "Length 83 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: __init__",
+      "description": "Length 57 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 108 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/polynomial_generator.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: show_advanced_plots_dialog",
+      "description": "Length 94 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: __init__",
+      "description": "Length 62 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 220 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 189 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/manipulation_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 74 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/controls_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: __init__",
+      "description": "Length 87 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/controls_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: setup_sim_tab",
+      "description": "Length 78 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 66 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/pinocchio/python/pinocchio_golf/pose_editor_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 113 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 155 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 68 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/engines/physics_engines/drake/python/src/pose_editor_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: __init__",
+      "description": "Length 63 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/chain_manipulation.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: __init__",
+      "description": "Length 60 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/end_effector_manager.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_geometry_tab",
+      "description": "Length 55 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/segment_panel.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_menu_bar",
+      "description": "Length 79 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/main_window.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_menu_bar",
+      "description": "Length 71 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/urdf_editor_window.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 55 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/model_loader_dialog.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 65 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_explorer/joint_manipulator.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: create_parser",
+      "description": "Length 70 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/tools/model_generation/cli/main.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 104 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/launchers/golf_suite_launcher.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _create_controls_panel",
+      "description": "Length 77 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/launchers/shot_tracer.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_top_bar",
+      "description": "Length 75 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/launchers/golf_launcher.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: init_ui",
+      "description": "Length 87 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/launchers/_archive/golf_launcher_pre_refactor_ce85e6ec.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: __init__",
+      "description": "Length 105 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/dashboard/widgets.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _create_generation_tab",
+      "description": "Length 54 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/ui/qt/widgets/signal_toolkit_widget.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _create_calculus_tab",
+      "description": "Length 57 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/ui/qt/widgets/signal_toolkit_widget.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 126 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/club_data/club_data_tab.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 98 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/club_data/display.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "ORTHOGONALITY",
+      "severity": "MAJOR",
+      "title": "God function: _setup_ui",
+      "description": "Length 68 > 50 lines",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/pose_editor/widgets.py"
+      ],
+      "recommendation": "Split function"
+    },
+    {
+      "principle": "REVERSIBILITY",
+      "severity": "MAJOR",
+      "title": "Hardcoded API Key",
+      "description": "Secrets in code",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/tests/test_ai_adapters.py"
+      ],
+      "recommendation": "Use env vars"
+    },
+    {
+      "principle": "REVERSIBILITY",
+      "severity": "MAJOR",
+      "title": "Hardcoded API Key",
+      "description": "Secrets in code",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/ai/adapters/openai_adapter.py"
+      ],
+      "recommendation": "Use env vars"
+    },
+    {
+      "principle": "REVERSIBILITY",
+      "severity": "MAJOR",
+      "title": "Hardcoded API Key",
+      "description": "Secrets in code",
+      "files": [
+        "/home/runner/work/UpstreamDrift/UpstreamDrift/src/shared/python/ai/adapters/anthropic_adapter.py"
+      ],
+      "recommendation": "Use env vars"
+    }
+  ]
+}
