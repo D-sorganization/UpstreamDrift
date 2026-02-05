@@ -327,7 +327,7 @@ class BehaviorCloning(ImitationLearner):
         history = {"train_loss": [], "val_loss": []}
         lr = self.config.learning_rate
 
-        for epoch in range(self.config.epochs):
+        for _epoch in range(self.config.epochs):
             # Shuffle training data
             perm = np.random.permutation(len(train_obs))
             train_obs = train_obs[perm]
@@ -345,7 +345,7 @@ class BehaviorCloning(ImitationLearner):
                 gradients = self._backward(batch_obs, batch_act)
 
                 # Update weights
-                for layer, grad in zip(self._policy, gradients):
+                for layer, grad in zip(self._policy, gradients, strict=True):
                     layer["W"] -= lr * (
                         grad["W"] + self.config.weight_decay * layer["W"]
                     )
@@ -424,7 +424,7 @@ class BehaviorCloning(ImitationLearner):
         self.observation_dim = int(data["observation_dim"])
         self.action_dim = int(data["action_dim"])
 
-        layers_data = data["layers"].item()
+        layers_data = data["layers"].tolist()
         self._policy = [
             {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
             for layer in layers_data
@@ -712,7 +712,7 @@ class GAIL(ImitationLearner):
         history = {"discriminator_loss": [], "policy_loss": []}
         lr = self.config.learning_rate
 
-        for epoch in range(self.config.epochs):
+        for _epoch in range(self.config.epochs):
             # Generate policy data (self-play would go here)
             # For simplicity, we just use noise-perturbed expert data
             noise = np.random.randn(*expert_states.shape) * 0.1
@@ -730,10 +730,10 @@ class GAIL(ImitationLearner):
             )
 
             # Update discriminator (simplified gradient)
-            expert_grad = expert_preds - 1  # gradient towards 1
-            policy_grad = policy_preds  # gradient towards 0
+            # expert_grad = expert_preds - 1  # gradient towards 1
+            # policy_grad = policy_preds  # gradient towards 0
 
-            for i, layer in enumerate(self._discriminator):
+            for _i, layer in enumerate(self._discriminator):
                 # Simplified update
                 layer["W"] -= lr * 0.01 * layer["W"]
                 layer["b"] -= lr * 0.01 * layer["b"]
@@ -796,7 +796,7 @@ class GAIL(ImitationLearner):
 
         disc_output = self._forward_discriminator(state, action)
         # Reward is -log(1 - D(s,a))
-        return float(-np.log(1 - disc_output + 1e-8))
+        return (-np.log(1 - disc_output + 1e-8)).item()
 
     def save(self, path: str | Path) -> None:
         """Save GAIL networks."""
@@ -823,13 +823,13 @@ class GAIL(ImitationLearner):
         self.observation_dim = int(data["observation_dim"])
         self.action_dim = int(data["action_dim"])
 
-        policy_data = data["policy"].item()
+        policy_data = data["policy"].tolist()
         self._policy = [
             {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
             for layer in policy_data
         ]
 
-        disc_data = data["discriminator"].item()
+        disc_data = data["discriminator"].tolist()
         self._discriminator = [
             {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
             for layer in disc_data

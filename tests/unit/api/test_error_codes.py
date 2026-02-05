@@ -92,7 +92,7 @@ class TestErrorMetadata:
         """Test that all messages are non-empty strings."""
         from src.api.utils.error_codes import ERROR_METADATA
 
-        for code, metadata in ERROR_METADATA.items():
+        for _code, metadata in ERROR_METADATA.items():
             message = metadata.get("message")
             assert isinstance(message, str)
             assert len(message) > 0
