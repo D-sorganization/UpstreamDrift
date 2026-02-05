@@ -363,7 +363,7 @@ def convert_to_dataframe(
     df = pd.DataFrame(data)
 
     if time is not None:
-        df.index = time
+        df.index = time  # type: ignore[assignment]
         df.index.name = "time"
 
     return df

@@ -178,7 +178,7 @@ repos:
     hooks:
       - id: mypy
         name: "mypy (Python type check)"
-        stages: [pre-push]
+        stages: [push]
         additional_dependencies:
           - types-requests
           - types-PyYAML
@@ -205,7 +205,7 @@ repos:
     hooks:
       - id: bandit
         name: "bandit (Python security)"
-        stages: [pre-push]
+        stages: [push]
         args: ["-r", ".", "-ll", "-ii", "-x", "tests/,archive/,legacy/,.github/,node_modules/"]
         pass_filenames: false
         types: [python]
@@ -215,7 +215,7 @@ repos:
     hooks:
       - id: pytest-unit
         name: "pytest (Python tests)"
-        stages: [pre-push]
+        stages: [push]
         entry: python -m pytest tests/unit -x -q --tb=short -m "not slow and not integration"
         language: system
         pass_filenames: false
@@ -228,7 +228,7 @@ repos:
     hooks:
       - id: semgrep
         name: "semgrep (security + quality)"
-        stages: [pre-push]
+        stages: [push]
         args: ["--config", "auto", "--error", "--quiet"]
         types: [python]
         exclude: ^(tests/|archive/|legacy/|experimental/|\.github/)
@@ -239,7 +239,7 @@ repos:
     hooks:
       - id: radon
         name: "radon (complexity check)"
-        stages: [pre-push]
+        stages: [push]
         args: ["cc", "--min", "C", "--show-complexity", "--total-average"]
         types: [python]
         files: ^src/

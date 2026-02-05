@@ -497,7 +497,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         ):
             left_vel = self.engine.get_left_ee_velocity()[:3]
             right_vel = self.engine.get_right_ee_velocity()[:3]
-            vel_diff = np.linalg.norm(left_vel - right_vel)
+            vel_diff = np.linalg.norm(left_vel - right_vel)  # type: ignore[assignment]
             reward -= 0.1 * vel_diff
 
         # Energy penalty

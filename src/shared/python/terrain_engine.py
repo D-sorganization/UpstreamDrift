@@ -609,10 +609,10 @@ class CompressibleTurfModel:
         remaining_energy = kinetic_energy - absorbed_energy
 
         return {
-            "kinetic_energy": kinetic_energy,
-            "absorbed_energy": absorbed_energy,
-            "remaining_energy": max(0.0, remaining_energy),
-            "energy_absorption_ratio": (
+            "kinetic_energy": float(kinetic_energy),
+            "absorbed_energy": float(absorbed_energy),
+            "remaining_energy": float(max(0.0, remaining_energy)),
+            "energy_absorption_ratio": float(
                 absorbed_energy / kinetic_energy if kinetic_energy > 0 else 0.0
             ),
         }
