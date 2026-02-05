@@ -30,6 +30,7 @@ def mock_engine_manager():
 def analysis_service(mock_engine_manager):
     """Create an analysis service instance."""
     from src.api.services.analysis_service import AnalysisService
+
     return AnalysisService(mock_engine_manager)
 
 
@@ -39,6 +40,7 @@ class TestAnalysisServiceContract:
     def test_instantiates(self, mock_engine_manager):
         """Postcondition: AnalysisService can be instantiated."""
         from src.api.services.analysis_service import AnalysisService
+
         service = AnalysisService(mock_engine_manager)
         assert service is not None
 
@@ -78,9 +80,15 @@ class TestAnalyzeKinematicsInternal:
         from src.api.services.analysis_service import AnalysisService
 
         mock_engine = MagicMock()
-        mock_engine.get_joint_positions = MagicMock(return_value=np.array([0.1, 0.2, 0.3]))
-        mock_engine.get_joint_velocities = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
-        mock_engine.get_joint_accelerations = MagicMock(return_value=np.array([0.5, 1.0, 1.5]))
+        mock_engine.get_joint_positions = MagicMock(
+            return_value=np.array([0.1, 0.2, 0.3])
+        )
+        mock_engine.get_joint_velocities = MagicMock(
+            return_value=np.array([1.0, 2.0, 3.0])
+        )
+        mock_engine.get_joint_accelerations = MagicMock(
+            return_value=np.array([0.5, 1.0, 1.5])
+        )
         mock_engine.get_state = MagicMock(return_value={"time": 0.5})
 
         service = AnalysisService(mock_engine_manager)
@@ -123,7 +131,9 @@ class TestAnalyzeKineticsInternal:
 
         mock_engine = MagicMock()
         mock_engine.get_joint_torques = MagicMock(return_value=np.array([10.0, 20.0]))
-        mock_engine.get_actuator_forces = MagicMock(return_value=np.array([100.0, 200.0]))
+        mock_engine.get_actuator_forces = MagicMock(
+            return_value=np.array([100.0, 200.0])
+        )
 
         service = AnalysisService(mock_engine_manager)
         request = AnalysisRequest(
