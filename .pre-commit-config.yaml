@@ -234,16 +234,18 @@ repos:
         exclude: ^(tests/|archive/|legacy/|experimental/|\.github/)
 
   # Radon - Cyclomatic complexity check (pre-push)
-  - repo: https://github.com/rubik/radon
-    rev: v6.0.1
+  # Note: Using local hook since rubik/radon doesn't provide pre-commit hooks
+  - repo: local
     hooks:
       - id: radon
         name: "radon (complexity check)"
         stages: [pre-push]
-        args: ["cc", "--min", "C", "--show-complexity", "--total-average"]
+        entry: python -m radon cc --min C --show-complexity --total-average
+        language: system
         types: [python]
         files: ^src/
         exclude: ^(tests/|archive/|legacy/|experimental/)
+        pass_filenames: true
 
 # =============================================================================
 # Global Settings
