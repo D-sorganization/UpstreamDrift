@@ -208,18 +208,14 @@ class VisualizationTab(QtWidgets.QWidget):
         swing_group = QtWidgets.QGroupBox("Swing Plane & Trajectory")
         swing_layout = QtWidgets.QVBoxLayout(swing_group)
 
-        self.show_swing_plane_cb = QtWidgets.QCheckBox(
-            "Show Instantaneous Swing Plane"
-        )
+        self.show_swing_plane_cb = QtWidgets.QCheckBox("Show Instantaneous Swing Plane")
         self.show_swing_plane_cb.setToolTip(
             "Display the real-time swing plane fitted from clubhead trajectory (Blue)"
         )
         self.show_swing_plane_cb.stateChanged.connect(self.on_swing_plane_changed)
         swing_layout.addWidget(self.show_swing_plane_cb)
 
-        self.show_club_trajectory_cb = QtWidgets.QCheckBox(
-            "Show Club Trajectory Path"
-        )
+        self.show_club_trajectory_cb = QtWidgets.QCheckBox("Show Club Trajectory Path")
         self.show_club_trajectory_cb.setToolTip(
             "Display the recorded clubhead trajectory as a 3D polyline (Green)"
         )
@@ -246,9 +242,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.tracked_body_combo.setToolTip(
             "Body name to track for trajectory and swing plane"
         )
-        self.tracked_body_combo.currentTextChanged.connect(
-            self.on_tracked_body_changed
-        )
+        self.tracked_body_combo.currentTextChanged.connect(self.on_tracked_body_changed)
         body_track_layout.addWidget(self.tracked_body_combo, stretch=1)
         swing_layout.addLayout(body_track_layout)
 
