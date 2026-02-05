@@ -300,10 +300,11 @@ class ThemeManager:
 
     def __init__(self) -> None:
         """Initialize the theme manager."""
-        self._current_preset = ThemePreset.DARK
+        self._current_preset: ThemePreset | None = ThemePreset.DARK
         self._current_theme = DARK_THEME
-        self._theme_changed_callbacks = []
+        self._theme_changed_callbacks: list[Callable[[ThemeColors], None]] = []
         self._qt_signal: pyqtSignal | None = None
+        self._fleet_theme_name: str | None = None
 
     @classmethod
     def instance(cls) -> "ThemeManager":
@@ -318,8 +319,8 @@ class ThemeManager:
         return self._current_theme
 
     @property
-    def preset(self) -> ThemePreset:
-        """Get current theme preset."""
+    def preset(self) -> ThemePreset | None:
+        """Get current theme preset, or None if using a fleet theme."""
         return self._current_preset
 
     @property
@@ -336,11 +337,12 @@ class ThemeManager:
         Emits:
             theme_changed signal with new ThemeColors
         """
-        if preset == self._current_preset:
+        if preset == self._current_preset and self._fleet_theme_name is None:
             return
 
         self._current_preset = preset
         self._current_theme = THEME_PRESETS[preset]
+        self._fleet_theme_name = None  # Clear fleet theme when using preset
 
         # Notify all callbacks
         for callback in self._theme_changed_callbacks:
@@ -367,6 +369,60 @@ class ThemeManager:
         """
         if callback in self._theme_changed_callbacks:
             self._theme_changed_callbacks.remove(callback)
+
+    def set_fleet_theme(self, theme_name: str) -> None:
+        """Set theme from the fleet-wide theme system.
+
+        This allows using any of the 13 fleet-wide themes (Light, Dark,
+        Slate Gray, Ocean Blue, Forest Green, Monokai, Dracula, One Dark,
+        Gitpod Dark, MS Word, MS Excel, Legal Pad, High Contrast).
+
+        Args:
+            theme_name: Name of the fleet theme to apply
+
+        Raises:
+            KeyError: If theme_name is not found in fleet themes
+            ImportError: If fleet theme system is not available
+        """
+        from .fleet_adapter import fleet_to_theme_colors, is_fleet_available
+
+        if not is_fleet_available():
+            raise ImportError(
+                "Fleet theme system not available. "
+                "Run 'git submodule update --init --recursive' to enable."
+            )
+
+        # Convert fleet theme to ThemeColors and apply
+        self._current_theme = fleet_to_theme_colors(theme_name)
+        self._current_preset = None  # Clear preset when using fleet theme
+        self._fleet_theme_name = theme_name
+
+        # Notify all callbacks
+        for callback in self._theme_changed_callbacks:
+            callback(self._current_theme)
+
+        # Emit Qt signal if available
+        if self._qt_signal is not None:
+            self._qt_signal.emit(self._current_theme)  # type: ignore[attr-defined]
+
+    def get_available_fleet_themes(self) -> list[str]:
+        """Get list of available fleet-wide theme names.
+
+        Returns:
+            List of theme names, or empty list if fleet system unavailable
+        """
+        from .fleet_adapter import get_fleet_theme_names, is_fleet_available
+
+        if not is_fleet_available():
+            return []
+        return get_fleet_theme_names()
+
+    @property
+    def theme_name(self) -> str:
+        """Get the current theme name (works for both preset and fleet themes)."""
+        if hasattr(self, "_fleet_theme_name") and self._fleet_theme_name:
+            return self._fleet_theme_name
+        return self._current_theme.name
 
     def get_stylesheet(self) -> str:
         """Generate a Qt stylesheet for the current theme.
