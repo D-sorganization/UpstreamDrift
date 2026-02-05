@@ -1,7 +1,7 @@
 # =============================================================================
 # Fleet-Wide Pre-commit Configuration (Polyglot)
 # =============================================================================
-# Supports: Python, JavaScript/TypeScript, React, HTML, CSS, C++
+# Supports: Python, JavaScript/TypeScript, React, HTML, CSS, C++, Rust
 # CROSS-PLATFORM: Works on Windows, Linux, and macOS
 # - Uses `language: python` instead of `language: system` for local hooks
 # - Avoids shell-specific commands that fail on Windows
@@ -108,6 +108,20 @@ repos:
         types_or: [c, c++]
         args: ["-i", "--style=file"]
         exclude: ^(\.github/|docs/|third_party/)
+
+  # ===========================================================================
+  # RUST CHECKS (Tauri desktop apps)
+  # ===========================================================================
+
+  # Rustfmt - Rust code formatter (skips if no .rs files)
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
+        name: "rustfmt (Rust format)"
+      - id: cargo-check
+        name: "cargo check (Rust)"
+        stages: [pre-push]
 
   # ===========================================================================
   # UNIVERSAL FORMATTING (All Languages)
@@ -281,6 +295,7 @@ exclude: |
     venv/|
     build/|
     dist/|
+    target/|
     .*\.egg-info/|
     \.next/|
     coverage/|
@@ -296,4 +311,4 @@ ci:
   autofix_prs: true
   autoupdate_branch: "main"
   autoupdate_commit_msg: "chore: update pre-commit hooks"
-  skip: [pytest-unit, bandit, mypy, semgrep, radon]  # Skip slow hooks in CI
+  skip: [pytest-unit, bandit, mypy, semgrep, radon, fmt, cargo-check]  # Skip slow hooks in CI
