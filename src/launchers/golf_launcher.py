@@ -1558,17 +1558,17 @@ except Exception as e:
             status_emoji = "✅" if summary["status"] == "healthy" else "⚠️"
 
             text = f"""
-{status_emoji} Status: {summary['status'].upper()}
+{status_emoji} Status: {summary["status"].upper()}
 
-Checks: {summary['passed']} passed, {summary['failed']} failed, {summary['warnings']} warnings
+Checks: {summary["passed"]} passed, {summary["failed"]} failed, {summary["warnings"]} warnings
 
 Runtime State:
-• Available models: {results['runtime_state']['available_models_count']}
-• Model order (tiles): {results['runtime_state']['model_order_count']}
-• Model cards: {results['runtime_state']['model_cards_count']}
-• Registry loaded: {results['runtime_state']['registry_loaded']}
+• Available models: {results["runtime_state"]["available_models_count"]}
+• Model order (tiles): {results["runtime_state"]["model_order_count"]}
+• Model cards: {results["runtime_state"]["model_cards_count"]}
+• Registry loaded: {results["runtime_state"]["registry_loaded"]}
 
-Expected tiles: {summary['expected_tiles']}
+Expected tiles: {summary["expected_tiles"]}
 """
 
             # Add check details

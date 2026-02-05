@@ -115,7 +115,7 @@ class StateEstimator:
         F[n : 2 * n, 2 * n :] = np.eye(n) * dt
 
         # Prediction step
-        self._state = F @ self._state
+        self._state = F @ self._state  # type: ignore[assignment]
         self._covariance = F @ self._covariance @ F.T + self._Q
 
         # Measurement
@@ -137,7 +137,7 @@ class StateEstimator:
         K = self._covariance @ self._H.T @ np.linalg.inv(S)
 
         # Update
-        self._state = self._state + K @ y
+        self._state = self._state + K @ y  # type: ignore[assignment]
         self._covariance = (np.eye(3 * n) - K @ self._H) @ self._covariance
 
         # Apply velocity filter
@@ -145,7 +145,7 @@ class StateEstimator:
         if self.config.use_velocity_filter:
             alpha = self.config.velocity_filter_alpha
             self._filtered_velocity = (
-                alpha * estimated_velocity + (1 - alpha) * self._filtered_velocity
+                alpha * estimated_velocity + (1 - alpha) * self._filtered_velocity  # type: ignore[assignment]
             )
             estimated_velocity = self._filtered_velocity
 
@@ -198,7 +198,7 @@ class StateEstimator:
             self._state[n : 2 * n] = velocity
 
         self._covariance = np.eye(3 * n) * 0.1
-        self._filtered_velocity = self._state[n : 2 * n].copy()
+        self._filtered_velocity = self._state[n : 2 * n].copy()  # type: ignore[assignment]
         self._position_history.clear()
         self._velocity_history.clear()
 

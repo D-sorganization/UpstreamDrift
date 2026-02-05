@@ -6,8 +6,8 @@ pipeline for swing analysis.
 """
 
 import logging
+from collections.abc import Callable, Generator
 from pathlib import Path
-from typing import Generator, Optional
 
 import cv2
 import numpy as np
@@ -37,15 +37,15 @@ class VideoProcessor:
 
     SUPPORTED_FORMATS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 
-    def __init__(self, video_path: Optional[str] = None):
+    def __init__(self, video_path: str | None = None):
         """
         Initialize the video processor.
 
         Args:
             video_path: Path to the video file (optional, can be set later).
         """
-        self.video_path: Optional[Path] = None
-        self._cap: Optional[cv2.VideoCapture] = None
+        self.video_path: Path | None = None
+        self._cap: cv2.VideoCapture | None = None
         self._fps: float = 30.0
         self._frame_count: int = 0
         self._width: int = 0
@@ -131,7 +131,7 @@ class VideoProcessor:
         """Check if a video is currently loaded."""
         return self._cap is not None and self._cap.isOpened()
 
-    def get_frame(self, frame_number: int) -> Optional[np.ndarray]:
+    def get_frame(self, frame_number: int) -> np.ndarray | None:
         """
         Get a specific frame by number.
 
@@ -147,12 +147,12 @@ class VideoProcessor:
         if frame_number < 0 or frame_number >= self._frame_count:
             return None
 
-        self._cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
-        ret, frame = self._cap.read()
+        self._cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)  # type: ignore[union-attr]
+        ret, frame = self._cap.read()  # type: ignore[union-attr]
 
         return frame if ret else None
 
-    def get_frame_at_time(self, time_ms: float) -> Optional[np.ndarray]:
+    def get_frame_at_time(self, time_ms: float) -> np.ndarray | None:
         """
         Get frame at a specific timestamp.
 
@@ -168,7 +168,7 @@ class VideoProcessor:
     def iterate_frames(
         self,
         start_frame: int = 0,
-        end_frame: Optional[int] = None,
+        end_frame: int | None = None,
         step: int = 1,
     ) -> Generator[tuple[np.ndarray, int, float], None, None]:
         """
@@ -188,11 +188,11 @@ class VideoProcessor:
         end = end_frame if end_frame is not None else self._frame_count
         end = min(end, self._frame_count)
 
-        self._cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+        self._cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)  # type: ignore[union-attr]
 
         for frame_num in range(start_frame, end, step):
-            self._cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
-            ret, frame = self._cap.read()
+            self._cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)  # type: ignore[union-attr]
+            ret, frame = self._cap.read()  # type: ignore[union-attr]
 
             if not ret:
                 break
@@ -202,12 +202,12 @@ class VideoProcessor:
 
     def extract_poses(
         self,
-        estimator: Optional[PoseEstimator] = None,
+        estimator: PoseEstimator | None = None,
         start_frame: int = 0,
-        end_frame: Optional[int] = None,
+        end_frame: int | None = None,
         step: int = 1,
         min_confidence: float = 0.5,
-        progress_callback: Optional[callable] = None,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> list[PoseFrame]:
         """
         Extract pose data from all frames.
@@ -232,15 +232,13 @@ class VideoProcessor:
             estimator.initialize()
 
         poses = []
-        total_frames = (
-            (end_frame or self._frame_count) - start_frame
-        ) // step
+        total_frames = ((end_frame or self._frame_count) - start_frame) // step
 
         try:
             for i, (frame, frame_num, timestamp) in enumerate(
                 self.iterate_frames(start_frame, end_frame, step)
             ):
-                pose = estimator.process_frame(frame, frame_num, timestamp)
+                pose = estimator.process_frame(frame, frame_num, timestamp)  # type: ignore[union-attr]
 
                 if pose and pose.confidence >= min_confidence:
                     poses.append(pose)
@@ -249,12 +247,10 @@ class VideoProcessor:
                     progress_callback(i + 1, total_frames)
 
         finally:
-            if own_estimator:
+            if own_estimator and estimator is not None:
                 estimator.close()
 
-        logger.info(
-            f"Extracted {len(poses)} valid poses from {total_frames} frames"
-        )
+        logger.info(f"Extracted {len(poses)} valid poses from {total_frames} frames")
         return poses
 
     def export_frame(
@@ -292,7 +288,7 @@ class VideoProcessor:
         self,
         output_path: str,
         start_frame: int = 0,
-        end_frame: Optional[int] = None,
+        end_frame: int | None = None,
         codec: str = "mp4v",
     ) -> bool:
         """
@@ -311,7 +307,7 @@ class VideoProcessor:
             return False
 
         try:
-            fourcc = cv2.VideoWriter_fourcc(*codec)
+            fourcc = cv2.VideoWriter_fourcc(*codec)  # type: ignore[attr-defined]
             out = cv2.VideoWriter(
                 output_path,
                 fourcc,
@@ -350,6 +346,6 @@ class VideoProcessor:
         """Return frame count."""
         return self._frame_count
 
-    def __getitem__(self, frame_number: int) -> Optional[np.ndarray]:
+    def __getitem__(self, frame_number: int) -> np.ndarray | None:
         """Get frame by index."""
         return self.get_frame(frame_number)

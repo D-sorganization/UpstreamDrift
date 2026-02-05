@@ -7,7 +7,6 @@ for consistent data exchange between Python backend and JavaScript frontend.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 
 class SwingPhase(Enum):
@@ -188,7 +187,7 @@ class SwingIssue:
     detected_at: int  # frame number
     measurement_value: float
     expected_range: tuple[float, float]
-    drill_recommendation: Optional[str] = None
+    drill_recommendation: str | None = None
 
 
 @dataclass
@@ -209,7 +208,7 @@ class SwingPositionMetrics:
     frame_number: int
     timestamp: float
     angles: BodyAngles
-    velocities: Optional[BodyVelocities] = None
+    velocities: BodyVelocities | None = None
     confidence: float = 1.0
 
 
@@ -233,10 +232,10 @@ class SwingAnalysis:
     phases: list[PhaseTransition] = field(default_factory=list)
 
     # Key positions
-    address_metrics: Optional[SwingPositionMetrics] = None
-    top_metrics: Optional[SwingPositionMetrics] = None
-    impact_metrics: Optional[SwingPositionMetrics] = None
-    finish_metrics: Optional[SwingPositionMetrics] = None
+    address_metrics: SwingPositionMetrics | None = None
+    top_metrics: SwingPositionMetrics | None = None
+    impact_metrics: SwingPositionMetrics | None = None
+    finish_metrics: SwingPositionMetrics | None = None
 
     # Dynamic metrics
     tempo: TempoMetrics = field(default_factory=TempoMetrics)
@@ -255,7 +254,7 @@ class SwingAnalysis:
 
         def convert(obj):
             if dataclasses.is_dataclass(obj):
-                return {k: convert(v) for k, v in dataclasses.asdict(obj).items()}
+                return {k: convert(v) for k, v in dataclasses.asdict(obj).items()}  # type: ignore[arg-type]
             if isinstance(obj, Enum):
                 return obj.value
             if isinstance(obj, list):

@@ -230,6 +230,7 @@ class CentroidalMPC(ModelPredictiveController):
             x_ref[k, 3:6] = vel
             x_ref[k, 6:9] = 0  # Zero angular momentum
 
+        assert self._cost is not None, "Cost function not initialized"
         self._cost.x_ref = x_ref
 
 
@@ -311,6 +312,7 @@ class WholeBodyMPC(ModelPredictiveController):
             target_velocities = np.zeros(n_q)
 
         x_ref = np.concatenate([target_positions, target_velocities])
+        assert self._cost is not None, "Cost function not initialized"
         self._cost.x_ref = x_ref
 
     def add_joint_limit_constraints(

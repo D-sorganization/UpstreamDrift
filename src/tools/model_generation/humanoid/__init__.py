@@ -49,8 +49,7 @@ except ImportError:
 
     def _not_available(*args, **kwargs):
         raise ImportError(
-            "humanoid_character_builder not available. "
-            "Ensure it is in the Python path."
+            "humanoid_character_builder not available. Ensure it is in the Python path."
         )
 
     # Create stubs

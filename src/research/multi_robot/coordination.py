@@ -491,7 +491,7 @@ class CooperativeManipulation:
                 trajectories[i][t, :3] = ee_pos
                 trajectories[i][t, 3:7] = object_quat
 
-        return trajectories
+        return trajectories  # type: ignore[return-value]
 
     def _slerp(
         self,

@@ -494,11 +494,11 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
 
         checks_html += f"""
         <div style="border: 1px solid {color}; border-radius: 8px; padding: 12px; margin: 8px 0; background: #1e1e1e;">
-            <h4 style="margin: 0 0 8px 0; color: {color};">{icon} {check.get('name', 'Unknown')}</h4>
-            <p style="margin: 0 0 8px 0; color: #ccc;">{check.get('message', '')}</p>
+            <h4 style="margin: 0 0 8px 0; color: {color};">{icon} {check.get("name", "Unknown")}</h4>
+            <p style="margin: 0 0 8px 0; color: #ccc;">{check.get("message", "")}</p>
             <details style="color: #888;">
-                <summary style="cursor: pointer;">Details ({check.get('duration_ms', 0):.2f}ms)</summary>
-                <pre style="background: #0d0d0d; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 12px;">{_format_details(check.get('details', {}))}</pre>
+                <summary style="cursor: pointer;">Details ({check.get("duration_ms", 0):.2f}ms)</summary>
+                <pre style="background: #0d0d0d; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 12px;">{_format_details(check.get("details", {}))}</pre>
             </details>
         </div>
         """
@@ -558,19 +558,19 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
 
             <div class="summary">
                 <div class="stat">
-                    <div class="stat-value" style="color: {status_color};">{summary.get('status', 'unknown').upper()}</div>
+                    <div class="stat-value" style="color: {status_color};">{summary.get("status", "unknown").upper()}</div>
                     <div class="stat-label">System Status</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" style="color: #28a745;">{summary.get('passed', 0)}</div>
+                    <div class="stat-value" style="color: #28a745;">{summary.get("passed", 0)}</div>
                     <div class="stat-label">Passed</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" style="color: #dc3545;">{summary.get('failed', 0)}</div>
+                    <div class="stat-value" style="color: #dc3545;">{summary.get("failed", 0)}</div>
                     <div class="stat-label">Failed</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" style="color: #ffc107;">{summary.get('warnings', 0)}</div>
+                    <div class="stat-value" style="color: #ffc107;">{summary.get("warnings", 0)}</div>
                     <div class="stat-label">Warnings</div>
                 </div>
             </div>
@@ -584,7 +584,7 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
             </ul>
 
             <p style="color: #666; text-align: center; margin-top: 30px;">
-                Generated at {summary.get('timestamp', 'unknown')} |
+                Generated at {summary.get("timestamp", "unknown")} |
                 <a href="/api/diagnostics" style="color: #0a84ff;">JSON View</a> |
                 <a href="/api/docs" style="color: #0a84ff;">API Docs</a>
             </p>

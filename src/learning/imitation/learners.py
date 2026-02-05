@@ -271,7 +271,7 @@ class BehaviorCloning(ImitationLearner):
             activations.append(x)
 
         # Backward pass
-        gradients = []
+        gradients: list[dict[str, NDArray[np.floating]]] = []
         predictions = activations[-1]
         delta = 2 * (predictions - actions) / batch_size  # MSE gradient
 
@@ -324,7 +324,7 @@ class BehaviorCloning(ImitationLearner):
         val_act = actions[val_idx] if n_val > 0 else train_act[:100]
 
         # Training loop
-        history = {"train_loss": [], "val_loss": []}
+        history: dict[str, list[float]] = {"train_loss": [], "val_loss": []}
         lr = self.config.learning_rate
 
         for _epoch in range(self.config.epochs):
@@ -410,7 +410,7 @@ class BehaviorCloning(ImitationLearner):
                 for layer in self._policy
             ],
         }
-        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})
+        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})  # type: ignore[arg-type]
 
     def load(self, path: str | Path) -> None:
         """Load policy from disk.
@@ -496,7 +496,7 @@ class DAgger(ImitationLearner):
         if self._aggregated_dataset is None:
             raise ValueError("Must call train() first with initial dataset")
 
-        results = {
+        results: dict[str, list] = {
             "iteration_rewards": [],
             "dataset_size": [],
         }
@@ -617,8 +617,8 @@ class GAIL(ImitationLearner):
     ) -> None:
         """Initialize GAIL learner."""
         super().__init__(observation_dim, action_dim, config, device)
-        self._policy = None
-        self._discriminator = None
+        self._policy: list[dict[str, NDArray[np.floating]]] = []
+        self._discriminator: list[dict[str, NDArray[np.floating]]] = []
         self._build_networks()
 
     def _build_networks(self) -> None:
@@ -642,7 +642,7 @@ class GAIL(ImitationLearner):
                 "b": np.zeros(self.action_dim),
             }
         )
-        self._policy = policy_layers
+        self._policy = policy_layers  # type: ignore[assignment]
 
         # Build discriminator (state-action -> [0, 1])
         disc_layers = []
@@ -663,7 +663,7 @@ class GAIL(ImitationLearner):
                 "b": np.zeros(1),
             }
         )
-        self._discriminator = disc_layers
+        self._discriminator = disc_layers  # type: ignore[assignment]
 
     def _forward_policy(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through policy network."""
@@ -709,7 +709,7 @@ class GAIL(ImitationLearner):
         if len(expert_states) == 0:
             raise ValueError("Dataset has no state-action pairs")
 
-        history = {"discriminator_loss": [], "policy_loss": []}
+        history: dict[str, list[float]] = {"discriminator_loss": [], "policy_loss": []}
         lr = self.config.learning_rate
 
         for _epoch in range(self.config.epochs):
@@ -813,7 +813,7 @@ class GAIL(ImitationLearner):
                 for layer in self._discriminator
             ],
         }
-        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})
+        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})  # type: ignore[arg-type]
 
     def load(self, path: str | Path) -> None:
         """Load GAIL networks."""

@@ -339,7 +339,7 @@ class MJCFConverter:
         if geometry.geometry_type == GeometryType.BOX:
             size = geometry.dimensions
             # MuJoCo uses half-sizes
-            half_size = f"{size[0]/2:.6g} {size[1]/2:.6g} {size[2]/2:.6g}"
+            half_size = f"{size[0] / 2:.6g} {size[1] / 2:.6g} {size[2] / 2:.6g}"
             return f'{indent}<geom type="box" size="{half_size}" pos="{pos_str}"/>'
 
         elif geometry.geometry_type == GeometryType.CYLINDER:
@@ -347,7 +347,7 @@ class MJCFConverter:
             # MuJoCo cylinder: radius and half-length
             return (
                 f'{indent}<geom type="cylinder" '
-                f'size="{radius:.6g} {length/2:.6g}" pos="{pos_str}"/>'
+                f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
             )
 
         elif geometry.geometry_type == GeometryType.SPHERE:
@@ -358,7 +358,7 @@ class MJCFConverter:
             radius, length = geometry.dimensions
             return (
                 f'{indent}<geom type="capsule" '
-                f'size="{radius:.6g} {length/2:.6g}" pos="{pos_str}"/>'
+                f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
             )
 
         elif geometry.geometry_type == GeometryType.MESH:

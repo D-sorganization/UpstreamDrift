@@ -107,7 +107,8 @@ class VideoPosePipeline:
                     f"Unknown estimator type: {self.config.estimator_type}"
                 )
 
-            self.estimator.load_model()
+            if self.estimator is not None:
+                self.estimator.load_model()
             logger.info(f"Loaded {self.config.estimator_type} estimator")
 
         except Exception as e:

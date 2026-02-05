@@ -116,7 +116,7 @@ class TestCoriolisPerformance(unittest.TestCase):
         self.assertLess(
             rne_time,
             0.05,  # 50 iterations should take < 50ms
-            f"RNE computation took {rne_time*1000:.1f}ms for 50 iterations",
+            f"RNE computation took {rne_time * 1000:.1f}ms for 50 iterations",
         )
 
 

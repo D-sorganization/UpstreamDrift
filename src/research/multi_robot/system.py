@@ -404,7 +404,7 @@ class MultiRobotSystem:
             for robot_id in available_robots:
                 if task.target_position is not None:
                     robot_pos = self._robot_poses[robot_id][:3]
-                    distance = np.linalg.norm(task.target_position - robot_pos)
+                    distance = float(np.linalg.norm(task.target_position - robot_pos))
                     if distance < best_distance:
                         best_distance = distance
                         best_robot = robot_id
@@ -440,6 +440,6 @@ class MultiRobotSystem:
             if hasattr(engine, "get_joint_velocities"):
                 robot_state["joint_velocities"] = engine.get_joint_velocities().tolist()
 
-            state["robot_states"][robot_id] = robot_state
+            state["robot_states"][robot_id] = robot_state  # type: ignore[index]
 
         return state

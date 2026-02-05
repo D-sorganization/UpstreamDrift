@@ -364,10 +364,10 @@ class ModelPredictiveController:
 
         for _iteration in range(self._max_iterations):
             # Backward pass - compute gains
-            K, d = self._backward_pass(X, U)
+            K, d = self._backward_pass(X, U, self._cost)
 
             # Forward pass - apply controls with line search
-            X_new, U_new, cost = self._forward_pass(X, U, K, d)
+            X_new, U_new, cost = self._forward_pass(X, U, K, d, self._cost)
 
             # Check convergence
             cost_reduction = prev_cost - cost
@@ -400,26 +400,24 @@ class ModelPredictiveController:
         self,
         X: NDArray[np.floating],
         U: NDArray[np.floating],
+        cost: CostFunction,
     ) -> tuple[list[NDArray[np.floating]], list[NDArray[np.floating]]]:
         """Backward pass of iLQR to compute feedback gains.
 
         Args:
             X: State trajectory.
             U: Control trajectory.
+            cost: Cost function specification.
 
         Returns:
             Tuple of (gains K, feedforward d).
         """
-        K = []
-        d = []
+        K: list[NDArray[np.floating]] = []
+        d: list[NDArray[np.floating]] = []
 
         # Terminal cost gradient and Hessian
-        Vx = (
-            2 * self._cost.P @ X[-1]
-            if self._cost.P is not None
-            else np.zeros(self._n_x)
-        )
-        Vxx = 2 * self._cost.P if self._cost.P is not None else np.eye(self._n_x) * 0.01
+        Vx = 2 * cost.P @ X[-1] if cost.P is not None else np.zeros(self._n_x)
+        Vxx = 2 * cost.P if cost.P is not None else np.eye(self._n_x) * 0.01
 
         for k in range(self.horizon - 1, -1, -1):
             # Linearize dynamics
@@ -427,20 +425,20 @@ class ModelPredictiveController:
 
             # Cost gradients
             x_err = X[k] - (
-                self._cost.x_ref[k]
-                if self._cost.x_ref is not None and self._cost.x_ref.ndim > 1
+                cost.x_ref[k]
+                if cost.x_ref is not None and cost.x_ref.ndim > 1
                 else np.zeros(self._n_x)
             )
             u_err = U[k] - (
-                self._cost.u_ref[k]
-                if self._cost.u_ref is not None and self._cost.u_ref.ndim > 1
+                cost.u_ref[k]
+                if cost.u_ref is not None and cost.u_ref.ndim > 1
                 else np.zeros(self._n_u)
             )
 
-            lx = 2 * self._cost.Q @ x_err
-            lu = 2 * self._cost.R @ u_err
-            lxx = 2 * self._cost.Q
-            luu = 2 * self._cost.R
+            lx = 2 * cost.Q @ x_err
+            lu = 2 * cost.R @ u_err
+            lxx = 2 * cost.Q
+            luu = 2 * cost.R
             lux = np.zeros((self._n_u, self._n_x))
 
             # Q-function approximation
@@ -473,6 +471,7 @@ class ModelPredictiveController:
         U: NDArray[np.floating],
         K: list[NDArray[np.floating]],
         d: list[NDArray[np.floating]],
+        cost: CostFunction,
     ) -> tuple[NDArray[np.floating], NDArray[np.floating], float]:
         """Forward pass with line search.
 
@@ -495,19 +494,19 @@ class ModelPredictiveController:
             U_new = np.zeros_like(U)
             X_new[0] = X[0]
 
-            for k in range(self.horizon):
+            for k in range(self.horizon):  # type: ignore[assignment]
                 dx = X_new[k] - X[k]
                 U_new[k] = U[k] + alpha * d[k] + K[k] @ dx
                 X_new[k + 1] = self._dynamics(X_new[k], U_new[k])
 
             # Compute cost
-            cost = 0.0
+            total_cost = 0.0
             for k in range(self.horizon):
-                cost += self._cost.evaluate_running_cost(X_new[k], U_new[k], k)
-            cost += self._cost.evaluate_terminal_cost(X_new[-1])
+                total_cost += cost.evaluate_running_cost(X_new[k], U_new[k], k)
+            total_cost += cost.evaluate_terminal_cost(X_new[-1])
 
-            if cost < best_cost:
-                best_cost = cost
+            if total_cost < best_cost:
+                best_cost = total_cost
                 best_X = X_new
                 best_U = U_new
 

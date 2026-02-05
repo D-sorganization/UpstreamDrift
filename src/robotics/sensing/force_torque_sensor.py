@@ -245,9 +245,9 @@ class ForceTorqueSensor:
                            Uses last reading if None.
         """
         if current_wrench is not None:
-            self._tare_offset = np.asarray(current_wrench, dtype=np.float64)
+            self._tare_offset = np.asarray(current_wrench, dtype=np.float64)  # type: ignore[assignment]
         elif self._last_reading is not None:
-            self._tare_offset = self._last_reading.copy()
+            self._tare_offset = self._last_reading.copy()  # type: ignore[assignment]
         else:
             self._tare_offset = np.zeros(6)
 
@@ -289,7 +289,7 @@ class ForceTorqueSensor:
         # Using r = (f x tau) / |f|^2 as approximation
         r = np.cross(force, torque) / (force_mag**2)
 
-        return r
+        return r  # type: ignore[return-value]
 
 
 def create_ideal_sensor(sensor_id: str = "ideal_ft") -> ForceTorqueSensor:
