@@ -2005,6 +2005,14 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
+    # Apply plot theme for matplotlib visualizations
+    try:
+        from shared.python.plot_theme import apply_plot_theme
+
+        apply_plot_theme(settings_app="GolfModelingSuite")
+    except ImportError:
+        logger.debug("Plot theme module not available")
+
     # Show splash
     splash = GolfSplashScreen()
     splash.show()
