@@ -76,9 +76,9 @@ class TestLoggerUtils:
         logger_utils.set_seeds(42)  # Reset to same seed
         second_value = np.random.random()
 
-        assert first_value == second_value, (
-            "Seed setting should produce reproducible results"
-        )
+        assert (
+            first_value == second_value
+        ), "Seed setting should produce reproducible results"
 
     def test_set_seeds_custom(self) -> None:
         """Test setting seeds with custom value."""
@@ -94,9 +94,9 @@ class TestLoggerUtils:
         logger_utils.set_seeds(custom_seed)
         second_value = np.random.random()
 
-        assert first_value == second_value, (
-            "Custom seed should produce reproducible results"
-        )
+        assert (
+            first_value == second_value
+        ), "Custom seed should produce reproducible results"
 
     def test_get_logger(self) -> None:
         """Test getting a logger instance."""
@@ -112,9 +112,9 @@ class TestLoggerUtils:
         root_logger = logging.getLogger()
         # After setup_logging, there should be at least one handler
         # or the logging level should be configured
-        assert root_logger.level != logging.NOTSET or len(root_logger.handlers) > 0, (
-            "setup_logging should configure the logging system"
-        )
+        assert (
+            root_logger.level != logging.NOTSET or len(root_logger.handlers) > 0
+        ), "setup_logging should configure the logging system"
 
 
 class TestNegativeCases:
