@@ -17,6 +17,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.dashboard.widgets import LivePlotWidget
 from src.shared.python.logging_config import get_logger
+from src.shared.python.ui.overlay import OverlayWidget
 
 from ...advanced_gui_methods import AdvancedGuiMethodsMixin
 from ...grip_modelling_tab import GripModellingTab
@@ -88,6 +89,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Left: Simulation view
         self.sim_widget = MuJoCoSimWidget(width=900, height=700, fps=60)
         main_splitter.addWidget(self.sim_widget)
+
+        # Overlay widget for simulation controls (REC, PAUSE, etc.)
+        self.overlay = OverlayWidget(self.sim_widget)
+        self.overlay.rec_btn.clicked.connect(self._on_overlay_rec_toggled)
+        self.overlay.pause_btn.clicked.connect(self._on_overlay_pause_clicked)
 
         # Right: Tabbed interface for controls and analysis
         self.tab_widget = QtWidgets.QTabWidget()
@@ -247,6 +253,12 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         if key == QtCore.Qt.Key.Key_R:
             if hasattr(self.controls_tab, "reset_btn"):
                 self.controls_tab.reset_btn.click()
+            return
+
+        # O key: Toggle overlay
+        if key == QtCore.Qt.Key.Key_O:
+            if hasattr(self, "overlay"):
+                self.overlay.toggle()
             return
 
         # H key: Toggle help panel
@@ -445,6 +457,24 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             self.visualization_tab.update_camera_sliders()
 
     # -------- Interactive manipulation event handlers --------
+
+    def _on_overlay_rec_toggled(self, checked: bool) -> None:
+        """Handle overlay REC button toggle."""
+        recorder = self.sim_widget.get_recorder()
+        if checked:
+            recorder.start_recording()
+            self.overlay.status_label.setText("RECORDING")
+        else:
+            recorder.stop_recording()
+            self.overlay.status_label.setText("Recording Stopped")
+
+    def _on_overlay_pause_clicked(self) -> None:
+        """Handle overlay PAUSE button click."""
+        self.sim_widget.set_running(not self.sim_widget.running)
+        if self.sim_widget.running:
+            self.overlay.pause_btn.setText("\u23f8 PAUSE")
+        else:
+            self.overlay.pause_btn.setText("\u25b6 PLAY")
 
     def update_body_lists(self) -> None:
         """Update body selection combo boxes."""
