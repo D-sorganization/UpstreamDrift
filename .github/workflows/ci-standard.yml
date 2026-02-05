@@ -195,10 +195,18 @@ jobs:
       - name: Build Check
         run: npm run build
 
+  # =============================================================================
+  # MATLAB TESTS - DISABLED BY DEFAULT
+  # =============================================================================
+  # This job requires a MATLAB license which is NOT available in GitHub CI.
+  # DO NOT enable (remove 'if: false') unless you have configured MATLAB licensing.
+  # To enable: set 'if: true' and configure matlab-actions.
+  # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
+  # =============================================================================
   matlab-tests:
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: false
+    if: false  # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -209,10 +217,15 @@ jobs:
             addpath('matlab');
             run_all
 
+  # =============================================================================
+  # ARDUINO BUILD - DISABLED BY DEFAULT
+  # =============================================================================
+  # No Arduino components in this project - disabled.
+  # =============================================================================
   arduino-build:
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: false # Disabled - no Arduino components in this project
+    if: false  # DISABLED - No Arduino components in this project
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -221,3 +234,4 @@ jobs:
       - name: Verify Build
         working-directory: ./arduino
         run: pio run -e uno
+
