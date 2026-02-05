@@ -482,8 +482,8 @@ class TestAllExports:
 
     def test_all_exports_importable(self):
         """Test that all __all__ exports are importable."""
-        from src.api.utils.tracing import __all__
         import src.api.utils.tracing as tracing
+        from src.api.utils.tracing import __all__
 
         for name in __all__:
             assert hasattr(tracing, name), f"Missing export: {name}"
