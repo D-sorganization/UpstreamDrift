@@ -1,105 +1,95 @@
 """Enhanced visualization module for MuJoCo humanoid golf simulation.
 
 This module provides:
-- Force and torque visualization overlays
-- Trajectory tracers that persist through simulation
-- Real-time data display
+- Force and torque visualization overlays rendered via MuJoCo's native
+  ``mjv_initGeom`` API so arrows, traces, and labels appear in the 3-D
+  viewer without an extra rendering back-end.
+- Trajectory tracers that persist through simulation.
+- Desired-vs-actual trajectory comparison overlays.
+- Real-time data display helpers.
 """
 
+from __future__ import annotations
+
 from collections import deque
+from typing import Any
 
 import numpy as np
 
 
+# ---------------------------------------------------------------------------
+# Trajectory recording
+# ---------------------------------------------------------------------------
 class TrajectoryTracer:
     """Manages trajectory traces for bodies in the simulation."""
 
-    def __init__(self, max_points=1000):
-        """Initialize trajectory tracer.
-
-        Args:
-            max_points: Maximum number of points to store per body
-        """
-        self.traces = {}  # body_name -> deque of (x, y, z) positions
+    def __init__(self, max_points: int = 1000) -> None:
+        self.traces: dict[str, deque] = {}
         self.max_points = max_points
+        self._desired_traces: dict[str, list[np.ndarray]] = {}
 
-    def add_point(self, body_name, position):
-        """Add a point to a body's trajectory.
-
-        Args:
-            body_name: Name of the body
-            position: 3D position (x, y, z)
-        """
+    def add_point(self, body_name: str, position: np.ndarray) -> None:
         if body_name not in self.traces:
             self.traces[body_name] = deque(maxlen=self.max_points)
+        self.traces[body_name].append(np.asarray(position, dtype=np.float64).copy())
 
-        self.traces[body_name].append(position.copy())
-
-    def get_trace(self, body_name):
-        """Get trajectory trace for a body.
-
-        Args:
-            body_name: Name of the body
-
-        Returns:
-            List of positions or empty list if no trace exists
-        """
+    def get_trace(self, body_name: str) -> list[np.ndarray]:
         return list(self.traces.get(body_name, []))
 
-    def clear(self, body_name=None):
-        """Clear traces.
+    def set_desired_trajectory(
+        self, body_name: str, positions: list[np.ndarray] | np.ndarray
+    ) -> None:
+        """Register a *desired* trajectory for overlay comparison.
 
         Args:
-            body_name: Specific body to clear, or None to clear all
+            body_name: Body whose desired path is being stored.
+            positions: Sequence of (3,) world-frame positions.
         """
+        self._desired_traces[body_name] = [
+            np.asarray(p, dtype=np.float64) for p in positions
+        ]
+
+    def get_desired_trace(self, body_name: str) -> list[np.ndarray]:
+        return list(self._desired_traces.get(body_name, []))
+
+    def clear(self, body_name: str | None = None) -> None:
         if body_name:
             self.traces.pop(body_name, None)
+            self._desired_traces.pop(body_name, None)
         else:
             self.traces.clear()
+            self._desired_traces.clear()
 
 
+# ---------------------------------------------------------------------------
+# Force / torque data extraction
+# ---------------------------------------------------------------------------
 class ForceVisualizer:
-    """Visualizes forces and torques in the simulation."""
+    """Extracts force and torque data from MuJoCo simulation state."""
 
-    def __init__(self, physics):
-        """Initialize force visualizer.
-
-        Args:
-            physics: MuJoCo physics object
-        """
+    def __init__(self, physics: Any) -> None:
         self.physics = physics
         self.model = physics.model
         self.data = physics.data
 
-    def get_contact_forces(self):
-        """Get all contact forces in the simulation.
-
-        Returns:
-            List of dicts with contact force information
-        """
+    def get_contact_forces(self) -> list[dict]:
+        """Return per-contact dicts with position, normal, magnitudes."""
         import mujoco
 
-        contacts = []
-
+        contacts: list[dict] = []
         for i in range(self.data.ncon):
             contact = self.data.contact[i]
-
-            # Get contact force
             force = np.zeros(6)
             mujoco.mj_contactForce(self.model, self.data, i, force)
 
-            # Get body names
-            geom1 = contact.geom1
-            geom2 = contact.geom2
+            geom1, geom2 = contact.geom1, contact.geom2
             body1_id = self.model.geom_bodyid[geom1]
             body2_id = self.model.geom_bodyid[geom2]
 
-            # Get body names safely
             try:
                 body1_name = self.model.body(body1_id).name
             except Exception:
                 body1_name = f"body_{body1_id}"
-
             try:
                 body2_name = self.model.body(body2_id).name
             except Exception:
@@ -108,157 +98,307 @@ class ForceVisualizer:
             contacts.append(
                 {
                     "position": contact.pos.copy(),
-                    "normal": contact.frame[:3].copy(),  # Contact normal
-                    "normal_force": force[0],  # Normal component
-                    "friction_force": np.linalg.norm(force[1:3]),  # Tangential
+                    "normal": contact.frame[:3].copy(),
+                    "normal_force": force[0],
+                    "friction_force": np.linalg.norm(force[1:3]),
                     "total_force": np.linalg.norm(force[:3]),
                     "body1": body1_name,
                     "body2": body2_name,
                 }
             )
-
         return contacts
 
-    def get_joint_torques(self):
-        """Get joint torques for all actuators.
-
-        Returns:
-            Dict mapping actuator names to torque values
-        """
-        torques = {}
-
+    def get_joint_torques(self) -> dict[str, float]:
+        """Return actuator_name -> torque mapping."""
+        torques: dict[str, float] = {}
         for i in range(self.model.nu):
             try:
-                actuator_name = self.model.actuator(i).name
+                name = self.model.actuator(i).name
             except Exception:
-                actuator_name = f"actuator_{i}"
-
-            torques[actuator_name] = self.data.actuator_force[i]
-
+                name = f"actuator_{i}"
+            torques[name] = float(self.data.actuator_force[i])
         return torques
 
-    def get_center_of_mass(self):
-        """Get center of mass position and velocity.
-
-        Returns:
-            Dict with COM position and velocity
-        """
+    def get_center_of_mass(self) -> dict[str, np.ndarray]:
         return {
             "position": self.data.subtree_com[0].copy(),
-            "velocity": self.data.cvel[0][:3].copy(),  # Linear velocity only
+            "velocity": self.data.cvel[0][:3].copy(),
         }
 
 
-def add_visualization_overlays(viewer, physics, config, tracer):
-    """Add visualization overlays to the MuJoCo viewer.
+# ---------------------------------------------------------------------------
+# Native MuJoCo geometry helpers (mjvGeom population)
+# ---------------------------------------------------------------------------
+
+def _init_arrow_geom(
+    geom: Any,
+    start: np.ndarray,
+    end: np.ndarray,
+    radius: float,
+    rgba: np.ndarray | list[float],
+) -> None:
+    """Populate a ``mjvGeom`` as a capsule (arrow shaft) from *start* to *end*.
+
+    Uses ``mujoco.mjv_initGeom`` which is available in MuJoCo >= 2.3.
+    """
+    import mujoco
+
+    start = np.asarray(start, dtype=np.float64)
+    end = np.asarray(end, dtype=np.float64)
+    diff = end - start
+    length = float(np.linalg.norm(diff))
+    if length < 1e-8:
+        return
+
+    midpoint = (start + end) / 2.0
+    direction = diff / length
+
+    # Build rotation matrix whose z-axis aligns with *direction*.
+    z = direction
+    if abs(z[0]) < 0.9:
+        x = np.cross(z, np.array([1.0, 0.0, 0.0]))
+    else:
+        x = np.cross(z, np.array([0.0, 1.0, 0.0]))
+    x /= np.linalg.norm(x)
+    y = np.cross(z, x)
+
+    rot = np.column_stack([x, y, z]).flatten()  # row-major 3x3
+
+    size = np.array([radius, radius, length / 2.0])
+    rgba_arr = np.array(rgba[:4], dtype=np.float32)
+
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_CAPSULE,
+        size,
+        midpoint,
+        rot,
+        rgba_arr,
+    )
+
+
+def _init_line_geom(
+    geom: Any,
+    p0: np.ndarray,
+    p1: np.ndarray,
+    radius: float,
+    rgba: np.ndarray | list[float],
+) -> None:
+    """Populate a ``mjvGeom`` as a thin cylinder between two points."""
+    _init_arrow_geom(geom, p0, p1, radius, rgba)
+
+
+def _init_sphere_geom(
+    geom: Any,
+    pos: np.ndarray,
+    radius: float,
+    rgba: np.ndarray | list[float],
+) -> None:
+    """Populate a ``mjvGeom`` as a sphere at *pos*."""
+    import mujoco
+
+    size = np.array([radius, 0.0, 0.0])
+    rot = np.eye(3).flatten()
+    rgba_arr = np.array(rgba[:4], dtype=np.float32)
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_SPHERE,
+        size,
+        np.asarray(pos, dtype=np.float64),
+        rot,
+        rgba_arr,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Public overlay entry point
+# ---------------------------------------------------------------------------
+
+def add_visualization_overlays(
+    viewer: Any,
+    physics: Any,
+    config: dict,
+    tracer: TrajectoryTracer,
+) -> None:
+    """Render force arrows, torque indicators, and trajectory traces into
+    a live MuJoCo viewer by appending ``mjvGeom`` objects to the viewer's
+    scene (``viewer.user_scn`` or ``viewer.scn``).
 
     Args:
-        viewer: MuJoCo viewer object
-        physics: Physics object
-        config: Configuration dict
-        tracer: TrajectoryTracer instance
+        viewer: MuJoCo viewer (``mujoco.viewer`` handle) that exposes a
+            writable ``user_scn`` (preferred) or ``scn`` attribute.
+        physics: Physics wrapper exposing ``.model`` / ``.data``.
+        config: Dict controlling which overlays are active.  Recognised
+            keys: ``show_contact_forces``, ``show_joint_torques``,
+            ``show_tracers``, ``show_desired_trajectory``,
+            ``tracer_bodies``, ``force_scale``, ``torque_scale``.
+        tracer: ``TrajectoryTracer`` instance accumulating body paths.
     """
+    import mujoco
 
-    # Get visualization options
     show_forces = config.get("show_contact_forces", True)
     show_torques = config.get("show_joint_torques", True)
     show_tracers = config.get("show_tracers", True)
-    tracer_bodies = config.get("tracer_bodies", [])
+    show_desired = config.get("show_desired_trajectory", True)
+    tracer_bodies: list[str] = config.get("tracer_bodies", [])
+    force_scale: float = config.get("force_scale", 0.01)
+    torque_scale: float = config.get("torque_scale", 0.005)
 
     visualizer = ForceVisualizer(physics)
 
-    # Update trajectory traces
+    # Resolve scene to append custom geoms
+    scene = getattr(viewer, "user_scn", None) or getattr(viewer, "scn", None)
+    if scene is None:
+        return
+
+    # ---- Record current positions for traced bodies ----
     if show_tracers:
         for body_name in tracer_bodies:
             try:
                 body_id = physics.model.body(body_name).id
-                body_pos = physics.data.xpos[body_id].copy()
-                tracer.add_point(body_name, body_pos)
+                tracer.add_point(body_name, physics.data.xpos[body_id].copy())
             except Exception:
-                pass  # Body doesn't exist
+                pass
 
-    # Add contact force arrows
+    # Helper: safely add a geom
+    def _add_geom() -> Any | None:
+        if scene.ngeom >= scene.maxgeom:
+            return None
+        g = scene.geoms[scene.ngeom]
+        scene.ngeom += 1
+        return g
+
+    # ---- Contact force arrows ----
     if show_forces:
         contacts = visualizer.get_contact_forces()
         for contact in contacts:
-            # Only show significant forces
-            if contact["total_force"] > 0.1:
-                # Add arrow for force direction and magnitude
-                # Scale arrow size by force magnitude
-                arrow_length = min(contact["total_force"] / 100.0, 0.5)
+            if contact["total_force"] < 0.1:
+                continue
+            arrow_len = min(contact["total_force"] * force_scale, 0.5)
+            direction = contact["normal"]
+            start = contact["position"]
+            end = start + direction * arrow_len
 
-                # Direction of force (normal)
-                direction = contact["normal"]
+            # Normal force (red)
+            g = _add_geom()
+            if g is not None:
+                _init_arrow_geom(
+                    g, start, end, 0.005, FORCE_COLORS["contact_normal"]
+                )
 
-                # End point of arrow
-                contact["position"] + direction * arrow_length
+            # Friction force (orange, perpendicular indicator)
+            if contact["friction_force"] > 0.05:
+                fric_len = min(contact["friction_force"] * force_scale, 0.3)
+                # Build a tangent direction perpendicular to normal
+                n = np.asarray(direction, dtype=np.float64)
+                if abs(n[0]) < 0.9:
+                    tangent = np.cross(n, [1.0, 0.0, 0.0])
+                else:
+                    tangent = np.cross(n, [0.0, 1.0, 0.0])
+                tangent /= np.linalg.norm(tangent) + 1e-12
+                fric_end = start + tangent * fric_len
+                g = _add_geom()
+                if g is not None:
+                    _init_arrow_geom(
+                        g, start, fric_end, 0.003, FORCE_COLORS["contact_friction"]
+                    )
 
-                # Note: Actual rendering depends on viewer type
-                # This is the data structure for force visualization
-
-    # Add joint torque indicators
+    # ---- Joint torque indicators ----
     if show_torques:
-        visualizer.get_joint_torques()
-        # Torque visualization would show as colored joints or text overlays
+        torques = visualizer.get_joint_torques()
+        for i, (name, tau) in enumerate(torques.items()):
+            if abs(tau) < 0.01:
+                continue
+            # Place a small sphere at the joint body position coloured by sign
+            jnt_idx = None
+            for j in range(physics.model.njnt):
+                try:
+                    if physics.model.joint(j).name == name:
+                        jnt_idx = j
+                        break
+                except Exception:
+                    pass
+            # Fallback: use actuator index as body proxy
+            body_id = min(i + 1, physics.model.nbody - 1)
+            if jnt_idx is not None:
+                body_id = physics.model.jnt_bodyid[jnt_idx]
 
-    # Render trajectory traces
+            pos = physics.data.xpos[body_id]
+            colour = (
+                FORCE_COLORS["joint_torque_positive"]
+                if tau > 0
+                else FORCE_COLORS["joint_torque_negative"]
+            )
+            radius = min(abs(tau) * torque_scale, 0.04)
+            g = _add_geom()
+            if g is not None:
+                _init_sphere_geom(g, pos, max(radius, 0.005), colour)
+
+    # ---- Trajectory traces (actual) ----
     if show_tracers:
         for body_name in tracer_bodies:
             trace = tracer.get_trace(body_name)
-            if len(trace) > 1:
-                # Render trace as connected line segments
-                # Color code by body (e.g., head=red, hands=blue)
-                pass
+            if len(trace) < 2:
+                continue
+            color = get_trace_color(body_name)
+            step = max(1, len(trace) // 200)  # cap segments for perf
+            for k in range(0, len(trace) - step, step):
+                g = _add_geom()
+                if g is None:
+                    break
+                _init_line_geom(g, trace[k], trace[k + step], 0.002, color)
+
+    # ---- Desired trajectory overlay (dashed-style alternating segments) ----
+    if show_desired:
+        for body_name in tracer_bodies:
+            desired = tracer.get_desired_trace(body_name)
+            if len(desired) < 2:
+                continue
+            # Render in cyan with slight transparency
+            desired_color = [0.0, 1.0, 1.0, 0.5]
+            step = max(1, len(desired) // 200)
+            for k in range(0, len(desired) - step, step * 2):
+                g = _add_geom()
+                if g is None:
+                    break
+                end_k = min(k + step, len(desired) - 1)
+                _init_line_geom(
+                    g, desired[k], desired[end_k], 0.003, desired_color
+                )
 
 
-def create_force_arrow_geom(position, direction, magnitude, color):
-    """Create geometry data for a force arrow.
+# ---------------------------------------------------------------------------
+# Standalone geometry factories (for external consumers)
+# ---------------------------------------------------------------------------
 
-    Args:
-        position: Start position of arrow
-        direction: Direction vector (will be normalized)
-        magnitude: Force magnitude (affects arrow length)
-        color: RGBA color array
-
-    Returns:
-        Dict with arrow geometry data
-    """
-    # Normalize direction
-    direction = np.array(direction)
+def create_force_arrow_geom(
+    position: np.ndarray,
+    direction: np.ndarray,
+    magnitude: float,
+    color: list[float],
+) -> dict:
+    """Return a plain dict describing a force arrow (engine-agnostic)."""
+    direction = np.asarray(direction, dtype=np.float64)
     direction = direction / (np.linalg.norm(direction) + 1e-8)
-
-    # Scale length by magnitude (cap at reasonable size)
     length = min(magnitude / 100.0, 0.5)
-
-    # End position
-    end_pos = position + direction * length
-
-    # Arrow shaft radius
-    radius = 0.005
-
+    end_pos = np.asarray(position) + direction * length
     return {
         "type": "arrow",
-        "start": position,
+        "start": np.asarray(position),
         "end": end_pos,
-        "radius": radius,
+        "radius": 0.005,
         "color": color,
         "magnitude": magnitude,
     }
 
 
-def create_trace_line_geom(points, color, radius=0.002):
-    """Create geometry data for a trajectory trace line.
-
-    Args:
-        points: List of 3D positions
-        color: RGBA color array
-        radius: Line thickness
-
-    Returns:
-        List of line segment geometry data
-    """
+def create_trace_line_geom(
+    points: list[np.ndarray],
+    color: list[float],
+    radius: float = 0.002,
+) -> list[dict]:
+    """Return a list of line-segment dicts for a trajectory trace."""
     segments = []
-
     for i in range(len(points) - 1):
         segments.append(
             {
@@ -269,36 +409,32 @@ def create_trace_line_geom(points, color, radius=0.002):
                 "color": color,
             }
         )
-
     return segments
 
 
-# Color schemes for different visualization elements
+# ---------------------------------------------------------------------------
+# Color schemes
+# ---------------------------------------------------------------------------
+
 FORCE_COLORS = {
-    "contact_normal": [1.0, 0.0, 0.0, 0.8],  # Red for normal forces
-    "contact_friction": [1.0, 0.5, 0.0, 0.8],  # Orange for friction
-    "joint_torque_positive": [0.0, 1.0, 0.0, 0.8],  # Green for positive torque
-    "joint_torque_negative": [0.0, 0.0, 1.0, 0.8],  # Blue for negative torque
+    "contact_normal": [1.0, 0.0, 0.0, 0.8],
+    "contact_friction": [1.0, 0.5, 0.0, 0.8],
+    "joint_torque_positive": [0.0, 1.0, 0.0, 0.8],
+    "joint_torque_negative": [0.0, 0.0, 1.0, 0.8],
 }
 
 TRACE_COLORS = {
-    "pelvis": [1.0, 1.0, 0.0, 0.6],  # Yellow
-    "torso": [0.0, 1.0, 1.0, 0.6],  # Cyan
-    "head": [1.0, 0.0, 0.0, 0.6],  # Red
-    "r_hand": [0.0, 1.0, 0.0, 0.6],  # Green
-    "l_hand": [0.0, 0.0, 1.0, 0.6],  # Blue
-    "r_foot": [1.0, 0.5, 0.0, 0.6],  # Orange
-    "l_foot": [0.5, 0.0, 1.0, 0.6],  # Purple
+    "pelvis": [1.0, 1.0, 0.0, 0.6],
+    "torso": [0.0, 1.0, 1.0, 0.6],
+    "head": [1.0, 0.0, 0.0, 0.6],
+    "r_hand": [0.0, 1.0, 0.0, 0.6],
+    "l_hand": [0.0, 0.0, 1.0, 0.6],
+    "r_foot": [1.0, 0.5, 0.0, 0.6],
+    "l_foot": [0.5, 0.0, 1.0, 0.6],
+    "club_head": [1.0, 0.0, 1.0, 0.8],
 }
 
 
-def get_trace_color(body_name):
-    """Get color for a body's trajectory trace.
-
-    Args:
-        body_name: Name of the body
-
-    Returns:
-        RGBA color array
-    """
-    return TRACE_COLORS.get(body_name, [0.5, 0.5, 0.5, 0.6])  # Default gray
+def get_trace_color(body_name: str) -> list[float]:
+    """Get RGBA colour for a body's trajectory trace."""
+    return TRACE_COLORS.get(body_name, [0.5, 0.5, 0.5, 0.6])

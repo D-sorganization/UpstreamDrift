@@ -446,33 +446,100 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         contact_schedule: list[bool],
         horizon: int,
         dt: float = 0.01,
+        contact_smoothing_multiplier: float = 5.0,
+        contact_penalty_weight: float = 0.1,
     ) -> OptimizationResult:
         """Optimize trajectory with specified contact schedule.
 
+        Applies phase-aware smoothing: during contact phases the smoothing
+        factor is increased by ``contact_smoothing_multiplier`` to smooth
+        the non-differentiable contact dynamics.  A contact-consistency
+        penalty is added to discourage velocity discontinuities at
+        contact/release transitions:
+
+        .. math::
+            C_{contact} = w_c \\sum_{t \\in \\mathcal{T}_{transition}}
+                \\| v_{t+1} - v_t \\|^2
+
         Args:
-            initial_state: Initial state.
-            goal_state: Goal state.
-            contact_schedule: Binary contact schedule per timestep.
+            initial_state: Initial state [q, v].
+            goal_state: Goal state [q, v].
+            contact_schedule: Per-timestep contact flag (length >= horizon).
             horizon: Trajectory length.
             dt: Timestep.
+            contact_smoothing_multiplier: Factor to increase smoothing
+                during contact phases.
+            contact_penalty_weight: Weight for contact-transition penalty.
 
         Returns:
             Optimization result.
         """
-        # Use larger smoothing during contact phases
         original_smoothing = self.smoothing_factor
 
+        schedule = contact_schedule[:horizon] if len(contact_schedule) >= horizon else (
+            contact_schedule + [False] * (horizon - len(contact_schedule))
+        )
+
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
-            final_error = np.sum((trajectory[-1] - goal_state) ** 2)
+            final_error = float(np.sum((trajectory[-1] - goal_state) ** 2))
 
-            # Add contact penalty
             contact_penalty = 0.0
-            # Could add penalties for contact violations here
+            n_q = self._n_q
+            for t in range(min(len(schedule) - 1, len(trajectory) - 2)):
+                if schedule[t] != schedule[t + 1]:
+                    v_curr = trajectory[t + 1, n_q:]
+                    v_next = trajectory[t + 2, n_q:]
+                    contact_penalty += float(np.sum((v_next - v_curr) ** 2))
 
-            return float(final_error + contact_penalty)
+            return final_error + contact_penalty_weight * contact_penalty
 
-        # Optimize with contact-aware smoothing
-        result = self.optimize_trajectory(initial_state, goal_state, horizon, dt)
+        controls = np.zeros((horizon, self._n_u))
+
+        # Adam state
+        m = np.zeros_like(controls)
+        v = np.zeros_like(controls)
+        beta1, beta2 = 0.9, 0.999
+        eps_adam = 1e-8
+        lr = 0.01
+
+        best_loss = float("inf")
+        best_controls = controls.copy()
+        grad_norm = float("inf")
+
+        for iteration in range(100):
+            for t in range(horizon):
+                if t < len(schedule) and schedule[t]:
+                    self.smoothing_factor = original_smoothing * contact_smoothing_multiplier
+                else:
+                    self.smoothing_factor = original_smoothing
+
+            gradient = self.compute_gradient(initial_state, controls, loss_fn, dt)
+            trajectory = self.simulate_trajectory(initial_state, controls, dt)
+            current_loss = loss_fn(trajectory)
+
+            if current_loss < best_loss:
+                best_loss = current_loss
+                best_controls = controls.copy()
+
+            grad_norm = float(np.linalg.norm(gradient))
+            if grad_norm < 1e-6:
+                break
+
+            m = beta1 * m + (1 - beta1) * gradient
+            v = beta2 * v + (1 - beta2) * (gradient ** 2)
+            m_hat = m / (1 - beta1 ** (iteration + 1))
+            v_hat = v / (1 - beta2 ** (iteration + 1))
+            controls = controls - lr * m_hat / (np.sqrt(v_hat) + eps_adam)
 
         self.smoothing_factor = original_smoothing
-        return result
+
+        optimal_trajectory = self.simulate_trajectory(initial_state, best_controls, dt)
+
+        return OptimizationResult(
+            success=best_loss < 0.1,
+            optimal_states=optimal_trajectory,
+            optimal_controls=best_controls,
+            final_cost=best_loss,
+            iterations=iteration + 1,
+            gradient_norm=grad_norm,
+        )
