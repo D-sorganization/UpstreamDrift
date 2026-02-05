@@ -9,13 +9,10 @@ This module tests critical security implementations:
 
 import logging
 import secrets
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 
-# Shim for Python < 3.11
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
+# Python 3.10 compatibility: datetime.UTC is only available in 3.11+
+UTC = timezone.utc  # noqa: UP017
 from unittest.mock import MagicMock, patch
 
 import pytest

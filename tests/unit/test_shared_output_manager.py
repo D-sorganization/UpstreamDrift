@@ -2,8 +2,11 @@
 
 import shutil
 import unittest
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
+
+# Python 3.10 compatibility: datetime.UTC is only available in 3.11+
+UTC = timezone.utc  # noqa: UP017
 from unittest.mock import patch
 
 import numpy as np
