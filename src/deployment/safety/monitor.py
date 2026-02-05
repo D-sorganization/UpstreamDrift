@@ -329,7 +329,7 @@ class SafetyMonitor:
                     self.limits.joint_limits_lower,
                 )
             if self.limits.joint_limits_upper is not None:
-                safe_command.position_targets = np.minimum(
+                safe_command.position_targets = np.minimum(  # type: ignore[arg-type]
                     safe_command.position_targets,
                     self.limits.joint_limits_upper,
                 )

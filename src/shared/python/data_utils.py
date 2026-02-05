@@ -364,7 +364,7 @@ def convert_to_dataframe(
 
     if time is not None:
         df.index = time  # type: ignore[assignment]
-        df.index.name = "time"
+        df.index.name = "time"  # type: ignore[attr-defined]
 
     return df
 
