@@ -324,13 +324,15 @@ class SafetyMonitor:
         # Clip position targets
         if safe_command.position_targets is not None:
             if self.limits.joint_limits_lower is not None:
+                lower = self.limits.joint_limits_lower  # type: ignore[assignment]
                 safe_command.position_targets = np.maximum(
-                    safe_command.position_targets, self.limits.joint_limits_lower
-                )  # type: ignore[arg-type]
+                    safe_command.position_targets, lower
+                )
             if self.limits.joint_limits_upper is not None:
+                upper = self.limits.joint_limits_upper  # type: ignore[assignment]
                 safe_command.position_targets = np.minimum(
-                    safe_command.position_targets, self.limits.joint_limits_upper
-                )  # type: ignore[arg-type]
+                    safe_command.position_targets, upper
+                )
 
         return safe_command
 
