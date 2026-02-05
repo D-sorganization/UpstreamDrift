@@ -4,7 +4,7 @@ These tests verify the simulation service using Design by Contract principles.
 """
 
 from enum import Enum
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -92,11 +92,15 @@ class TestRunSimulationContract:
         mock_engine.set_state = MagicMock()
         mock_engine.set_control = MagicMock()
         mock_engine.step = MagicMock()
-        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=mock_engine)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
 
         # Mock recorder and EngineType
         with (
-            patch("src.api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder,
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
             patch("src.api.services.simulation_service.EngineType", MockEngineType),
         ):
             mock_recorder = MagicMock()
@@ -130,10 +134,14 @@ class TestRunSimulation:
         mock_engine.load_from_path = MagicMock()
         mock_engine.set_state = MagicMock()
         mock_engine.step = MagicMock()
-        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=mock_engine)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
 
         with (
-            patch("src.api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder,
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
             patch("src.api.services.simulation_service.EngineType", MockEngineType),
         ):
             mock_recorder = MagicMock()
@@ -165,10 +173,14 @@ class TestRunSimulation:
         mock_engine = MagicMock()
         mock_engine.load_from_path = MagicMock()
         mock_engine.step = MagicMock()
-        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=mock_engine)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
 
         with (
-            patch("src.api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder,
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
             patch("src.api.services.simulation_service.EngineType", MockEngineType),
         ):
             mock_recorder = MagicMock()
@@ -198,10 +210,14 @@ class TestRunSimulation:
         mock_engine.load_from_path = MagicMock()
         mock_engine.set_state = MagicMock()
         mock_engine.step = MagicMock()
-        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=mock_engine)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
 
         with (
-            patch("src.api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder,
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
             patch("src.api.services.simulation_service.EngineType", MockEngineType),
         ):
             mock_recorder = MagicMock()
@@ -250,10 +266,14 @@ class TestRunSimulation:
         mock_engine.load_from_path = MagicMock()
         mock_engine.set_control = MagicMock()
         mock_engine.step = MagicMock()
-        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=mock_engine)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
 
         with (
-            patch("src.api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder,
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
             patch("src.api.services.simulation_service.EngineType", MockEngineType),
         ):
             mock_recorder = MagicMock()
@@ -286,10 +306,14 @@ class TestRunSimulationBackground:
 
         mock_engine = MagicMock()
         mock_engine.step = MagicMock()
-        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=mock_engine)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
 
         with (
-            patch("src.api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder,
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
             patch("src.api.services.simulation_service.EngineType", MockEngineType),
         ):
             mock_recorder = MagicMock()
@@ -365,9 +389,18 @@ class TestExtractSimulationData:
         mock_recorder = MagicMock()
         mock_recorder.get_time_series = MagicMock(
             side_effect=[
-                (np.array([0.0, 0.1, 0.2]), np.array([[0], [1], [2]])),  # joint_positions
-                (np.array([0.0, 0.1, 0.2]), np.array([[0], [0.5], [1.0]])),  # joint_velocities
-                (np.array([0.0, 0.1, 0.2]), np.array([[0], [0.1], [0.2]])),  # joint_accelerations
+                (
+                    np.array([0.0, 0.1, 0.2]),
+                    np.array([[0], [1], [2]]),
+                ),  # joint_positions
+                (
+                    np.array([0.0, 0.1, 0.2]),
+                    np.array([[0], [0.5], [1.0]]),
+                ),  # joint_velocities
+                (
+                    np.array([0.0, 0.1, 0.2]),
+                    np.array([[0], [0.1], [0.2]]),
+                ),  # joint_accelerations
                 Exception("control_inputs not available"),  # control_inputs raises
             ]
         )
@@ -432,7 +465,9 @@ class TestPerformAnalysis:
     def test_handles_analysis_error(self, simulation_service):
         """Test handling analysis error."""
         mock_recorder = MagicMock()
-        mock_recorder.get_time_series = MagicMock(side_effect=Exception("Analysis failed"))
+        mock_recorder.get_time_series = MagicMock(
+            side_effect=Exception("Analysis failed")
+        )
 
         config = {"ztcf": True}
         results = simulation_service._perform_analysis(mock_recorder, config)

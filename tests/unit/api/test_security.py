@@ -24,7 +24,9 @@ class TestSecurityManagerContract:
 
     def test_instantiates(self):
         """Postcondition: SecurityManager can be instantiated."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -32,7 +34,9 @@ class TestSecurityManagerContract:
 
     def test_has_required_methods(self):
         """Postcondition: SecurityManager has required methods."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -51,7 +55,9 @@ class TestSecurityManagerHashPassword:
 
     def test_returns_string(self):
         """Test that hash_password returns a string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -60,7 +66,9 @@ class TestSecurityManagerHashPassword:
 
     def test_hash_differs_from_input(self):
         """Test that hash differs from input password."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -70,7 +78,9 @@ class TestSecurityManagerHashPassword:
 
     def test_same_password_different_hashes(self):
         """Test that same password produces different hashes (salt)."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -85,7 +95,9 @@ class TestSecurityManagerVerifyPassword:
 
     def test_correct_password_returns_true(self):
         """Test that correct password returns True."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -95,7 +107,9 @@ class TestSecurityManagerVerifyPassword:
 
     def test_wrong_password_returns_false(self):
         """Test that wrong password returns False."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -104,7 +118,9 @@ class TestSecurityManagerVerifyPassword:
 
     def test_invalid_hash_returns_false(self):
         """Test that invalid hash returns False."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -116,7 +132,9 @@ class TestSecurityManagerTokens:
 
     def test_create_access_token_returns_string(self):
         """Test that create_access_token returns a string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -126,7 +144,9 @@ class TestSecurityManagerTokens:
 
     def test_create_refresh_token_returns_string(self):
         """Test that create_refresh_token returns a string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -136,7 +156,9 @@ class TestSecurityManagerTokens:
 
     def test_access_and_refresh_tokens_differ(self):
         """Test that access and refresh tokens are different."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -147,7 +169,9 @@ class TestSecurityManagerTokens:
 
     def test_verify_access_token(self):
         """Test verifying access token."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -160,7 +184,9 @@ class TestSecurityManagerTokens:
 
     def test_verify_refresh_token(self):
         """Test verifying refresh token."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -172,7 +198,9 @@ class TestSecurityManagerTokens:
 
     def test_verify_token_wrong_type_raises(self):
         """Test that verifying with wrong type raises HTTPException."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from fastapi import HTTPException
 
             from src.api.auth.security import SecurityManager
@@ -187,7 +215,9 @@ class TestSecurityManagerTokens:
 
     def test_verify_invalid_token_raises(self):
         """Test that invalid token raises HTTPException."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from fastapi import HTTPException
 
             from src.api.auth.security import SecurityManager
@@ -201,7 +231,9 @@ class TestSecurityManagerTokens:
 
     def test_custom_expiration(self):
         """Test creating token with custom expiration."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -217,7 +249,9 @@ class TestSecurityManagerApiKey:
 
     def test_generate_api_key_returns_string(self):
         """Test that generate_api_key returns a string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -226,7 +260,9 @@ class TestSecurityManagerApiKey:
 
     def test_api_key_has_prefix(self):
         """Test that API key has gms_ prefix."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -235,7 +271,9 @@ class TestSecurityManagerApiKey:
 
     def test_api_keys_are_unique(self):
         """Test that generated API keys are unique."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -244,7 +282,9 @@ class TestSecurityManagerApiKey:
 
     def test_hash_api_key_returns_string(self):
         """Test that hash_api_key returns a string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -254,7 +294,9 @@ class TestSecurityManagerApiKey:
 
     def test_verify_api_key_correct(self):
         """Test verifying correct API key."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -264,7 +306,9 @@ class TestSecurityManagerApiKey:
 
     def test_verify_api_key_wrong(self):
         """Test verifying wrong API key."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
@@ -278,7 +322,9 @@ class TestRoleCheckerContract:
 
     def test_instantiates(self):
         """Postcondition: RoleChecker can be instantiated."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import RoleChecker
 
@@ -287,7 +333,9 @@ class TestRoleCheckerContract:
 
     def test_is_callable(self):
         """Postcondition: RoleChecker is callable."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import RoleChecker
 
@@ -300,7 +348,9 @@ class TestRoleChecker:
 
     def test_user_with_exact_role_passes(self):
         """Test user with exact required role passes."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import RoleChecker
 
@@ -311,7 +361,9 @@ class TestRoleChecker:
 
     def test_user_with_higher_role_passes(self):
         """Test user with higher role passes."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import RoleChecker
 
@@ -322,7 +374,9 @@ class TestRoleChecker:
 
     def test_user_with_lower_role_fails(self):
         """Test user with lower role fails."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import RoleChecker
 
@@ -333,7 +387,9 @@ class TestRoleChecker:
 
     def test_role_hierarchy(self):
         """Test complete role hierarchy."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import RoleChecker
 
@@ -341,7 +397,12 @@ class TestRoleChecker:
             admin_user = MagicMock()
             admin_user.role = UserRole.ADMIN.value
 
-            for role in [UserRole.FREE, UserRole.PROFESSIONAL, UserRole.ENTERPRISE, UserRole.ADMIN]:
+            for role in [
+                UserRole.FREE,
+                UserRole.PROFESSIONAL,
+                UserRole.ENTERPRISE,
+                UserRole.ADMIN,
+            ]:
                 checker = RoleChecker(role)
                 assert checker(admin_user) is True
 
@@ -361,7 +422,9 @@ class TestUsageTrackerContract:
 
     def test_instantiates(self):
         """Postcondition: UsageTracker can be instantiated."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import UsageTracker
 
             tracker = UsageTracker()
@@ -373,7 +436,9 @@ class TestUsageTracker:
 
     def test_check_quota_within_limit(self):
         """Test check_quota when within limit."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import UsageTracker
 
@@ -386,7 +451,9 @@ class TestUsageTracker:
 
     def test_check_quota_exceeded(self):
         """Test check_quota when exceeded."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import UsageTracker
 
@@ -399,7 +466,9 @@ class TestUsageTracker:
 
     def test_increment_usage(self):
         """Test incrementing usage counter."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import UsageTracker
 
             tracker = UsageTracker()
@@ -411,7 +480,9 @@ class TestUsageTracker:
 
     def test_get_usage_summary(self):
         """Test getting usage summary."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.models import UserRole
             from src.api.auth.security import UsageTracker
 
@@ -436,7 +507,9 @@ class TestAuthCacheContract:
 
     def test_instantiates(self):
         """Postcondition: AuthCache can be instantiated."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
@@ -448,7 +521,9 @@ class TestAuthCache:
 
     def test_get_returns_none_for_missing(self):
         """Test get returns None for missing key."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
@@ -456,7 +531,9 @@ class TestAuthCache:
 
     def test_set_and_get_round_trip(self):
         """Test set and get work together."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
@@ -470,7 +547,9 @@ class TestAuthCache:
 
     def test_different_keys_cached_separately(self):
         """Test different keys are cached separately."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
@@ -486,7 +565,9 @@ class TestComputePrefixHash:
 
     def test_returns_string(self):
         """Test that compute_prefix_hash returns a string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import compute_prefix_hash
 
             result = compute_prefix_hash("gms_test")
@@ -494,7 +575,9 @@ class TestComputePrefixHash:
 
     def test_returns_hex_string(self):
         """Test that result is a valid hex string."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import compute_prefix_hash
 
             result = compute_prefix_hash("gms_test")
@@ -504,7 +587,9 @@ class TestComputePrefixHash:
 
     def test_same_input_same_output(self):
         """Test deterministic output."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import compute_prefix_hash
 
             hash1 = compute_prefix_hash("gms_abcd")
@@ -513,7 +598,9 @@ class TestComputePrefixHash:
 
     def test_different_input_different_output(self):
         """Test different inputs produce different outputs."""
-        with patch.dict(os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}):
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
             from src.api.auth.security import compute_prefix_hash
 
             hash1 = compute_prefix_hash("prefix_a")
