@@ -12,7 +12,9 @@ export default defineConfig({
   },
 
   server: {
-    port: 3000,
+    port: 5180,
+    strictPort: true,
+    open: false,
     proxy: {
       // Proxy API requests to local backend during development
       '/api': {
