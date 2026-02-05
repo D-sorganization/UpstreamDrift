@@ -5,7 +5,6 @@ Design by Contract principles to prevent path traversal attacks.
 """
 
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from fastapi import HTTPException
@@ -27,8 +26,8 @@ class TestValidateModelPathContract:
 
     def test_returns_string(self, tmp_path):
         """Postcondition: Returns a string when path is valid."""
-        from src.api.utils.path_validation import validate_model_path
         import src.api.utils.path_validation as pv
+        from src.api.utils.path_validation import validate_model_path
 
         # Create a test file in a mocked allowed directory
         test_file = tmp_path / "test_model.xml"
@@ -44,8 +43,9 @@ class TestValidateModelPathContract:
 
     def test_rejects_absolute_path(self):
         """Precondition: Absolute paths must be rejected."""
-        from src.api.utils.path_validation import validate_model_path
         import sys
+
+        from src.api.utils.path_validation import validate_model_path
 
         # Use platform-appropriate absolute path
         if sys.platform == "win32":
@@ -84,8 +84,8 @@ class TestValidateModelPath:
 
     def test_valid_relative_path_in_allowed_directory(self, tmp_path):
         """Test that valid relative path within allowed directory passes."""
-        from src.api.utils.path_validation import validate_model_path
         import src.api.utils.path_validation as pv
+        from src.api.utils.path_validation import validate_model_path
 
         # Create a subdirectory and test file
         models_dir = tmp_path / "models"
@@ -103,8 +103,8 @@ class TestValidateModelPath:
 
     def test_valid_nested_path(self, tmp_path):
         """Test that nested relative paths work."""
-        from src.api.utils.path_validation import validate_model_path
         import src.api.utils.path_validation as pv
+        from src.api.utils.path_validation import validate_model_path
 
         # Create nested directory structure
         models_dir = tmp_path / "models"
@@ -124,8 +124,8 @@ class TestValidateModelPath:
 
     def test_nonexistent_file_raises_404(self, tmp_path):
         """Test that non-existent files raise 404."""
-        from src.api.utils.path_validation import validate_model_path
         import src.api.utils.path_validation as pv
+        from src.api.utils.path_validation import validate_model_path
 
         original_dirs = pv.ALLOWED_MODEL_DIRS
         pv.ALLOWED_MODEL_DIRS = [tmp_path]
@@ -164,8 +164,9 @@ class TestValidateModelPath:
 
     def test_unix_absolute_path_rejected(self):
         """Test that Unix absolute paths are rejected."""
-        from src.api.utils.path_validation import validate_model_path
         import sys
+
+        from src.api.utils.path_validation import validate_model_path
 
         # Skip on Windows since Unix paths aren't recognized as absolute
         if sys.platform == "win32":
@@ -178,8 +179,8 @@ class TestValidateModelPath:
 
     def test_multiple_allowed_directories(self, tmp_path):
         """Test file lookup across multiple allowed directories."""
-        from src.api.utils.path_validation import validate_model_path
         import src.api.utils.path_validation as pv
+        from src.api.utils.path_validation import validate_model_path
 
         # Create two directories
         dir1 = tmp_path / "dir1"
@@ -201,9 +202,10 @@ class TestValidateModelPath:
 
     def test_symlink_escape_prevented(self, tmp_path):
         """Test that symlinks cannot escape allowed directories."""
-        from src.api.utils.path_validation import validate_model_path
-        import src.api.utils.path_validation as pv
         import os
+
+        import src.api.utils.path_validation as pv
+        from src.api.utils.path_validation import validate_model_path
 
         # Only test if symlinks are supported
         if not hasattr(os, "symlink"):
