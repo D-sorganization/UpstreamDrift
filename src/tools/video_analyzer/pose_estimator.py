@@ -6,7 +6,6 @@ extracting 33 body landmarks from video frames.
 """
 
 import logging
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -131,7 +130,7 @@ class PoseEstimator:
         frame: np.ndarray,
         frame_number: int = 0,
         timestamp: float = 0.0,
-    ) -> Optional[PoseFrame]:
+    ) -> PoseFrame | None:
         """
         Process a single video frame and extract pose landmarks.
 
@@ -151,7 +150,7 @@ class PoseEstimator:
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Process the frame
-        results = self._pose.process(rgb_frame)
+        results = self._pose.process(rgb_frame)  # type: ignore[attr-defined]
 
         if not results.pose_landmarks:
             return None
@@ -186,7 +185,7 @@ class PoseEstimator:
         frame: np.ndarray,
         frame_number: int = 0,
         timestamp: float = 0.0,
-    ) -> Optional[PoseFrame]:
+    ) -> PoseFrame | None:
         """
         Process frame and return world coordinates (real-world scale).
 
@@ -205,7 +204,7 @@ class PoseEstimator:
                 return None
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = self._pose.process(rgb_frame)
+        results = self._pose.process(rgb_frame)  # type: ignore[attr-defined]
 
         if not results.pose_world_landmarks:
             return None
@@ -280,7 +279,9 @@ class PoseEstimator:
                 if start.visibility > 0.5 and end.visibility > 0.5:
                     start_point = (int(start.x * w), int(start.y * h))
                     end_point = (int(end.x * w), int(end.y * h))
-                    cv2.line(output, start_point, end_point, connection_color, thickness)
+                    cv2.line(
+                        output, start_point, end_point, connection_color, thickness
+                    )
 
         # Draw landmarks
         for landmark in pose_frame.landmarks:

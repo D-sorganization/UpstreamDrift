@@ -8,14 +8,12 @@ comprehensive swing analysis reports.
 import logging
 import math
 import uuid
+from collections.abc import Callable
 from datetime import datetime
-from typing import Optional
 
-from .pose_estimator import PoseEstimator
 from .types import (
     BalanceMetrics,
     BodyAngles,
-    BodyVelocities,
     Landmark,
     PhaseTransition,
     PlaneMetrics,
@@ -88,7 +86,7 @@ class SwingAnalyzer:
         self,
         video_path: str,
         stance: StanceDirection = StanceDirection.UNKNOWN,
-        progress_callback: Optional[callable] = None,
+        progress_callback: Callable[[str, float], None] | None = None,
     ) -> SwingAnalysis:
         """
         Analyze a golf swing video.
@@ -114,11 +112,11 @@ class SwingAnalyzer:
 
         poses = processor.extract_poses(
             min_confidence=self.min_confidence,
-            progress_callback=lambda c, t: progress_callback(
-                "Extracting poses", c / t * 100
-            )
-            if progress_callback
-            else None,
+            progress_callback=lambda c, t: (
+                progress_callback("Extracting poses", c / t * 100)
+                if progress_callback
+                else None
+            ),
         )
 
         if len(poses) < 10:
@@ -232,9 +230,7 @@ class SwingAnalyzer:
             return StanceDirection.LEFT_HANDED
         return StanceDirection.UNKNOWN
 
-    def _calculate_angle(
-        self, a: Landmark, b: Landmark, c: Landmark
-    ) -> float:
+    def _calculate_angle(self, a: Landmark, b: Landmark, c: Landmark) -> float:
         """Calculate angle at point B between points A and C."""
         ba = (a.x - b.x, a.y - b.y, a.z - b.z)
         bc = (c.x - b.x, c.y - b.y, c.z - b.z)
@@ -285,12 +281,8 @@ class SwingAnalyzer:
         ) * (180 / math.pi)
 
         # Rotations (using z-depth)
-        shoulder_rotation = math.atan2(
-            rs.z - ls.z, rs.x - ls.x
-        ) * (180 / math.pi)
-        hip_rotation = math.atan2(
-            rh.z - lh.z, rh.x - lh.x
-        ) * (180 / math.pi)
+        shoulder_rotation = math.atan2(rs.z - ls.z, rs.x - ls.x) * (180 / math.pi)
+        hip_rotation = math.atan2(rh.z - lh.z, rh.x - lh.x) * (180 / math.pi)
 
         # X-Factor
         x_factor = abs(shoulder_rotation - hip_rotation)
@@ -334,12 +326,11 @@ class SwingAnalyzer:
 
         # Calculate angles for all frames
         angle_history = [
-            self._calculate_body_angles(p.landmarks, stance)
-            for p in poses
+            self._calculate_body_angles(p.landmarks, stance) for p in poses
         ]
 
         # Find top of backswing (max shoulder rotation)
-        max_rotation = -999
+        max_rotation: float = -999.0
         top_idx = 0
         for i, angles in enumerate(angle_history):
             rotation = angles.shoulder_rotation
@@ -348,7 +339,7 @@ class SwingAnalyzer:
                     max_rotation = rotation
                     top_idx = i
             else:
-                if rotation < max_rotation:
+                if rotation < -max_rotation:  # Inverted for left-handed
                     max_rotation = rotation
                     top_idx = i
 
@@ -391,9 +382,7 @@ class SwingAnalyzer:
 
         return phases
 
-    def _get_key_frames(
-        self, phases: list[PhaseTransition]
-    ) -> dict[str, int]:
+    def _get_key_frames(self, phases: list[PhaseTransition]) -> dict[str, int]:
         """Extract key frame indices from phases."""
         key_frames = {}
 
@@ -421,9 +410,7 @@ class SwingAnalyzer:
 
         for name, frame_num in key_frames.items():
             # Find the pose for this frame
-            pose = next(
-                (p for p in poses if p.frame_number == frame_num), None
-            )
+            pose = next((p for p in poses if p.frame_number == frame_num), None)
             if pose:
                 angles = self._calculate_body_angles(pose.landmarks, stance)
                 positions[name] = SwingPositionMetrics(
@@ -438,11 +425,13 @@ class SwingAnalyzer:
     def _calculate_tempo(self, phases: list[PhaseTransition]) -> TempoMetrics:
         """Calculate tempo and timing metrics."""
         backswing_dur = sum(
-            p.duration for p in phases
+            p.duration
+            for p in phases
             if p.phase in [SwingPhase.BACKSWING, SwingPhase.TOP_OF_BACKSWING]
         )
         downswing_dur = sum(
-            p.duration for p in phases
+            p.duration
+            for p in phases
             if p.phase in [SwingPhase.DOWNSWING, SwingPhase.IMPACT]
         )
         total = backswing_dur + downswing_dur
@@ -474,6 +463,7 @@ class SwingAnalyzer:
         key_frames: dict[str, int],
     ) -> BalanceMetrics:
         """Calculate balance and weight shift metrics."""
+
         def get_weight_distribution(landmarks: list[Landmark]) -> tuple[float, float]:
             lh = landmarks[self.LEFT_HIP]
             rh = landmarks[self.RIGHT_HIP]
@@ -544,24 +534,22 @@ class SwingAnalyzer:
 
         # Calculate head stability
         if len(poses) < 2:
-            head_stability = 100
+            head_stability: float = 100.0
         else:
             address_nose = address_pose.landmarks[self.NOSE]
-            max_movement = 0
+            max_movement: float = 0.0
             for pose in poses:
                 nose = pose.landmarks[self.NOSE]
                 dist = math.sqrt(
-                    (nose.x - address_nose.x) ** 2 +
-                    (nose.y - address_nose.y) ** 2
+                    (nose.x - address_nose.x) ** 2 + (nose.y - address_nose.y) ** 2
                 )
                 max_movement = max(max_movement, dist)
-            head_stability = max(0, 100 - max_movement * 500)
+            head_stability = max(0.0, 100.0 - max_movement * 500)
 
         return PostureMetrics(
             address_spine_angle=angles.spine_angle,
-            address_knee_flexion=(
-                angles.left_knee_flexion + angles.right_knee_flexion
-            ) / 2,
+            address_knee_flexion=(angles.left_knee_flexion + angles.right_knee_flexion)
+            / 2,
             address_arm_hang="good",
             head_stability=head_stability,
             early_extension=False,
@@ -647,9 +635,7 @@ class SwingAnalyzer:
                 )
 
         if not issues:
-            recommendations.append(
-                "Great swing! Focus on consistency."
-            )
+            recommendations.append("Great swing! Focus on consistency.")
 
         return recommendations
 
@@ -678,8 +664,8 @@ class SwingAnalyzer:
 
         # Issue penalty
         issue_penalty = (
-            len([i for i in issues if i.severity == "major"]) * 10 +
-            len([i for i in issues if i.severity == "moderate"]) * 5
+            len([i for i in issues if i.severity == "major"]) * 10
+            + len([i for i in issues if i.severity == "moderate"]) * 5
         )
 
         # Overall
