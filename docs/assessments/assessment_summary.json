@@ -1,160 +1,169 @@
 {
-  "timestamp": "2026-02-03T12:00:00.000000",
-  "framework_version": "2.0",
-  "overall_score": 7.59,
+  "timestamp": "2026-02-05T00:56:09.656024",
+  "overall_score": 7.17,
   "category_scores": {
     "A": {
-      "score": 8.5,
-      "name": "Architecture & Implementation",
-      "weight": 2.0,
-      "status": "Excellent"
+      "score": 8.0,
+      "name": "Code Structure"
     },
     "B": {
-      "score": 7.5,
-      "name": "Code Quality & Hygiene",
-      "weight": 1.5,
-      "status": "Good"
+      "score": 7.0,
+      "name": "Documentation"
     },
     "C": {
-      "score": 7.5,
-      "name": "Documentation & Comments",
-      "weight": 1.0,
-      "status": "Good"
+      "score": 6.0,
+      "name": "Test Coverage"
     },
     "D": {
       "score": 7.0,
-      "name": "User Experience & Developer Journey",
-      "weight": 2.0,
-      "status": "Good"
+      "name": "Error Handling"
     },
     "E": {
       "score": 7.5,
-      "name": "Performance & Scalability",
-      "weight": 1.5,
-      "status": "Good"
+      "name": "Performance"
     },
     "F": {
       "score": 7.0,
-      "name": "Installation & Deployment",
-      "weight": 1.5,
-      "status": "Good"
+      "name": "Security"
     },
     "G": {
-      "score": 7.0,
-      "name": "Testing & Validation",
-      "weight": 2.0,
-      "status": "Good"
+      "score": 8.5,
+      "name": "Dependencies"
     },
     "H": {
-      "score": 7.5,
-      "name": "Error Handling & Debugging",
-      "weight": 1.5,
-      "status": "Good"
+      "score": 8.0,
+      "name": "CI/CD"
     },
     "I": {
-      "score": 7.0,
-      "name": "Security & Input Validation",
-      "weight": 1.5,
-      "status": "Good"
+      "score": 8.0,
+      "name": "Code Style"
     },
     "J": {
-      "score": 8.0,
-      "name": "Extensibility & Plugin Architecture",
-      "weight": 1.0,
-      "status": "Very Good"
+      "score": 7.5,
+      "name": "API Design"
     },
     "K": {
-      "score": 7.5,
-      "name": "Reproducibility & Provenance",
-      "weight": 1.5,
-      "status": "Good"
+      "score": 7.0,
+      "name": "Data Handling"
     },
     "L": {
-      "score": 8.0,
-      "name": "Long-Term Maintainability",
-      "weight": 1.0,
-      "status": "Very Good"
+      "score": 7.0,
+      "name": "Logging"
     },
     "M": {
-      "score": 6.5,
-      "name": "Educational Resources & Tutorials",
-      "weight": 1.0,
-      "status": "Needs Improvement"
+      "score": 7.5,
+      "name": "Configuration"
     },
     "N": {
-      "score": 8.0,
-      "name": "Visualization & Export",
-      "weight": 1.0,
-      "status": "Very Good"
+      "score": 7.0,
+      "name": "Scalability"
     },
     "O": {
-      "score": 8.5,
-      "name": "CI/CD & DevOps",
-      "weight": 1.0,
-      "status": "Excellent"
+      "score": 7.5,
+      "name": "Maintainability"
     }
   },
   "group_scores": {
-    "Core Technical (A-C)": 7.8,
-    "User-Facing (D-F)": 7.2,
-    "Reliability & Safety (G-I)": 7.4,
-    "Sustainability (J-L)": 7.8,
-    "Communication (M-O)": 7.9
+    "Code Quality": 7.625,
+    "Testing": 6.0,
+    "Documentation": 7.0,
+    "Security": 7.0,
+    "Performance": 7.25,
+    "Ops & Config": 7.75,
+    "Design": 7.5
   },
-  "critical_issues": [
+  "total_issues": 18,
+  "issues": [
     {
-      "priority": "P0",
-      "description": "Test suite collection failures in headless environments",
-      "category": "G",
-      "remediation": "Establish minimal reliable test slice"
+      "severity": "MAJOR",
+      "description": "Source directory structure exists (src/ or shared/).",
+      "source": "Assessment_A_Code_Structure"
     },
     {
-      "priority": "P0",
-      "description": "79 files flagged for potential hardcoded secrets",
-      "category": "I",
-      "remediation": "Audit and remediate immediately"
+      "severity": "MAJOR",
+      "description": "Root README.md exists.",
+      "source": "Assessment_B_Documentation"
     },
     {
-      "priority": "P1",
-      "description": "3/4 tutorial files are placeholders",
-      "category": "M",
-      "remediation": "Complete tutorials within 2 weeks"
+      "severity": "MAJOR",
+      "description": "README.md is reasonably detailed.",
+      "source": "Assessment_B_Documentation"
     },
     {
-      "priority": "P1",
-      "description": "Bandit findings (MD5, SQL, yaml.load)",
-      "category": "I",
-      "remediation": "Triage and fix within 2 weeks"
+      "severity": "MAJOR",
+      "description": "docs/ directory exists.",
+      "source": "Assessment_B_Documentation"
     },
     {
-      "priority": "P2",
-      "description": "No automated release pipeline",
-      "category": "O",
-      "remediation": "Implement PyPI release automation"
+      "severity": "MAJOR",
+      "description": "Found 213 test files in tests/ directory.",
+      "source": "Assessment_C_Test_Coverage"
     },
     {
-      "priority": "P2",
-      "description": "6 files not Black-formatted",
-      "category": "B",
-      "remediation": "Run black --fix"
+      "severity": "MAJOR",
+      "description": "Found 1607 try blocks and 0 bare except blocks.",
+      "source": "Assessment_D_Error_Handling"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Profiling tools usage detected.",
+      "source": "Assessment_E_Performance"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Potential hardcoded secrets found in 85 files (needs verification).",
+      "source": "Assessment_F_Security"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Dependency definition files found.",
+      "source": "Assessment_G_Dependencies"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 60 GitHub Actions workflows.",
+      "source": "Assessment_H_CICD"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Ruff configuration found.",
+      "source": "Assessment_I_Code_Style"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "src/api/ directory exists.",
+      "source": "Assessment_J_API_Design"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "FastAPI usage detected.",
+      "source": "Assessment_J_API_Design"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Assessed data handling patterns.",
+      "source": "Assessment_K_Data_Handling"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 1952 logging calls and 1523 print calls.",
+      "source": "Assessment_L_Logging"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 12 configuration files (yaml/toml).",
+      "source": "Assessment_M_Configuration"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Scalability assessment based on architecture.",
+      "source": "Assessment_N_Scalability"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Average complexity (branches/func): 1.13",
+      "source": "Assessment_O_Maintainability"
     }
   ],
-  "metrics": {
-    "test_files": 196,
-    "test_functions": 2113,
-    "documentation_files": 399,
-    "ruff_issues": 8,
-    "black_non_compliant": 6,
-    "mypy_errors": 4,
-    "bare_except_blocks": 0,
-    "github_workflows": 63,
-    "physics_engines": 6,
-    "shared_modules": 90,
-    "typing_files": 274,
-    "try_blocks": 1038,
-    "print_calls": 1332,
-    "logging_calls": 1536
-  },
-  "recommendation": "Production-ready for beta use. Security findings should be triaged and critical items remediated before production deployment.",
   "reports_analyzed": 15
 }
