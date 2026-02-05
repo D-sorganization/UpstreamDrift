@@ -26,13 +26,12 @@ Usage:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from model_generation.builders.base_builder import BaseURDFBuilder, BuildResult
 from model_generation.core.constants import (
-    DEFAULT_JOINT_FRICTION,
     GRAVITY_M_S2,
     INTERMEDIATE_LINK_MASS,
 )
@@ -47,8 +46,6 @@ from model_generation.core.types import (
     Material,
     Origin,
 )
-from model_generation.core.validation import ValidationResult, Validator
-
 
 # =============================================================================
 # Configuration Dataclasses
@@ -143,7 +140,9 @@ def create_world_link() -> Link:
     return Link(
         name="world",
         inertia=Inertia(
-            ixx=1e-9, iyy=1e-9, izz=1e-9,
+            ixx=1e-9,
+            iyy=1e-9,
+            izz=1e-9,
             mass=INTERMEDIATE_LINK_MASS,
         ),
     )
@@ -176,7 +175,9 @@ def create_vertical_post_link(config: StandConfig) -> Link:
         visual_geometry=Geometry.cylinder(config.post_radius_m, config.post_height_m),
         visual_origin=Origin.from_position(0, 0, config.post_height_m / 2),
         visual_material=Material.metal(),
-        collision_geometry=Geometry.cylinder(config.post_radius_m, config.post_height_m),
+        collision_geometry=Geometry.cylinder(
+            config.post_radius_m, config.post_height_m
+        ),
         collision_origin=Origin.from_position(0, 0, config.post_height_m / 2),
     )
 
@@ -248,7 +249,9 @@ def create_club_grip_link(config: ClubConfig) -> Link:
         visual_geometry=Geometry.cylinder(config.grip_radius_m, config.grip_length_m),
         visual_origin=Origin.from_position(0, 0, -config.grip_length_m / 2),
         visual_material=Material("grip_material", (0.1, 0.1, 0.1, 1.0)),
-        collision_geometry=Geometry.cylinder(config.grip_radius_m, config.grip_length_m),
+        collision_geometry=Geometry.cylinder(
+            config.grip_radius_m, config.grip_length_m
+        ),
         collision_origin=Origin.from_position(0, 0, -config.grip_length_m / 2),
     )
 
@@ -266,7 +269,9 @@ def create_club_shaft_link(config: ClubConfig) -> Link:
         visual_geometry=Geometry.cylinder(config.shaft_radius_m, config.shaft_length_m),
         visual_origin=Origin.from_position(0, 0, -config.shaft_length_m / 2),
         visual_material=Material("shaft_material", (0.2, 0.2, 0.22, 1.0)),
-        collision_geometry=Geometry.cylinder(config.shaft_radius_m, config.shaft_length_m),
+        collision_geometry=Geometry.cylinder(
+            config.shaft_radius_m, config.shaft_length_m
+        ),
         collision_origin=Origin.from_position(0, 0, -config.shaft_length_m / 2),
     )
 
@@ -460,7 +465,9 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
         self._include_club = include_club
 
         # Create config objects
-        self._stand_config = stand_config or self._create_stand_config(shoulder_height_m)
+        self._stand_config = stand_config or self._create_stand_config(
+            shoulder_height_m
+        )
         self._pendulum_config = self._create_pendulum_config(arm_length_m, damping)
         self._club_config = club_config or ClubConfig()
 
@@ -471,7 +478,9 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
         if arm_length <= 0:
             raise ValueError(f"arm_length_m must be positive (got {arm_length})")
         if shoulder_height <= 0:
-            raise ValueError(f"shoulder_height_m must be positive (got {shoulder_height})")
+            raise ValueError(
+                f"shoulder_height_m must be positive (got {shoulder_height})"
+            )
         if damping < 0:
             raise ValueError(f"damping must be non-negative (got {damping})")
 
@@ -481,7 +490,9 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
         post_height = shoulder_height - base_height
         return StandConfig(post_height_m=max(0.1, post_height))
 
-    def _create_pendulum_config(self, arm_length: float, damping: float) -> PendulumConfig:
+    def _create_pendulum_config(
+        self, arm_length: float, damping: float
+    ) -> PendulumConfig:
         """Create pendulum configuration."""
         return PendulumConfig(
             arm_length_m=arm_length,

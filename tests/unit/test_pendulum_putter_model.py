@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from model_generation.builders.base_builder import BuildResult
+    pass
 
 
 class TestPendulumPutterModelConstruction:
@@ -60,9 +60,7 @@ class TestPendulumPutterModelConstruction:
         result = builder.build()
 
         # Count revolute joints (DOF contributors)
-        revolute_joints = [
-            j for j in result.joints if j.joint_type.value == "revolute"
-        ]
+        revolute_joints = [j for j in result.joints if j.joint_type.value == "revolute"]
 
         assert len(revolute_joints) == 1, "Should have exactly 1 revolute joint"
         assert result.get_total_dof() == 1, "Total DOF should be 1"
@@ -128,9 +126,9 @@ class TestPendulumPutterModelPhysics:
 
         for link in result.links:
             if link.inertia.mass > 1e-6:  # Skip negligible mass links
-                assert link.inertia.is_positive_definite(), (
-                    f"Link {link.name} has non-positive-definite inertia"
-                )
+                assert (
+                    link.inertia.is_positive_definite()
+                ), f"Link {link.name} has non-positive-definite inertia"
 
     def test_pendulum_joint_has_appropriate_limits(self):
         """Pendulum joint should have reasonable angle limits."""
@@ -227,11 +225,15 @@ class TestInterchangeableClub:
         result = builder.build()
 
         # Should have club-related links
-        club_links = [l for l in result.links if "club" in l.name.lower()
-                      or "putter" in l.name.lower()
-                      or "grip" in l.name.lower()
-                      or "shaft" in l.name.lower()
-                      or "head" in l.name.lower()]
+        club_links = [
+            l
+            for l in result.links
+            if "club" in l.name.lower()
+            or "putter" in l.name.lower()
+            or "grip" in l.name.lower()
+            or "shaft" in l.name.lower()
+            or "head" in l.name.lower()
+        ]
         assert len(club_links) >= 1, "Should have club links attached"
 
     def test_can_build_without_club(self):
@@ -273,10 +275,11 @@ class TestURDFGeneration:
 
     def test_generates_valid_urdf_xml(self):
         """Generated URDF should be valid XML."""
+        import xml.etree.ElementTree as ET
+
         from model_generation.models.pendulum_putter import (
             PendulumPutterModelBuilder,
         )
-        import xml.etree.ElementTree as ET
 
         builder = PendulumPutterModelBuilder()
         result = builder.build()
@@ -288,10 +291,11 @@ class TestURDFGeneration:
 
     def test_urdf_has_all_required_elements(self):
         """URDF should have all required elements for physics engines."""
+        import xml.etree.ElementTree as ET
+
         from model_generation.models.pendulum_putter import (
             PendulumPutterModelBuilder,
         )
-        import xml.etree.ElementTree as ET
 
         builder = PendulumPutterModelBuilder()
         result = builder.build()
@@ -311,7 +315,9 @@ class TestURDFGeneration:
             if link.attrib["name"] != "world":
                 # Should have inertial (except world)
                 inertial = link.find("inertial")
-                assert inertial is not None, f"Link {link.attrib['name']} missing inertial"
+                assert (
+                    inertial is not None
+                ), f"Link {link.attrib['name']} missing inertial"
 
     def test_can_save_to_file(self, tmp_path: Path):
         """Should be able to save URDF to file."""
@@ -400,9 +406,9 @@ class TestValidation:
         result = builder.build()
 
         assert result.validation is not None
-        assert result.validation.is_valid, (
-            f"Validation failed: {result.validation.get_error_messages()}"
-        )
+        assert (
+            result.validation.is_valid
+        ), f"Validation failed: {result.validation.get_error_messages()}"
 
     def test_validation_catches_invalid_parameters(self):
         """Should catch invalid configuration parameters."""
