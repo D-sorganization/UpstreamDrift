@@ -558,7 +558,7 @@ class Cloth(DeformableObject):
                     rest = np.linalg.norm(self._rest_mesh[idx] - self._rest_mesh[idx2])
                     springs.append((idx, idx2, rest, "bend"))
 
-        return springs
+        return springs  # type: ignore[return-value]
 
     def compute_internal_forces(self) -> NDArray[np.floating]:
         """Compute spring forces for cloth.

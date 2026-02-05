@@ -96,7 +96,7 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     else:
         score_display = "PENDING REVIEW"
 
-    report = f"""# Assessment {assessment_id}: {assessment['name']}
+    report = f"""# Assessment {assessment_id}: {assessment["name"]}
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Score**: {score_display}
 

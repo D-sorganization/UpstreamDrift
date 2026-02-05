@@ -211,8 +211,8 @@ class SafetyMonitor:
         Returns:
             Safety status.
         """
-        violations = []
-        warnings = []
+        violations: list[str] = []
+        warnings: list[str] = []
 
         # Check torque limits
         if command.torque_commands is not None:
@@ -323,16 +323,14 @@ class SafetyMonitor:
 
         # Clip position targets
         if safe_command.position_targets is not None:
+            pos_targets = safe_command.position_targets
             if self.limits.joint_limits_lower is not None:
-                safe_command.position_targets = np.maximum(
-                    safe_command.position_targets,
-                    self.limits.joint_limits_lower,
-                )
+                lower = self.limits.joint_limits_lower
+                pos_targets = np.maximum(pos_targets, lower)  # type: ignore[arg-type]
             if self.limits.joint_limits_upper is not None:
-                safe_command.position_targets = np.minimum(
-                    safe_command.position_targets,
-                    self.limits.joint_limits_upper,
-                )
+                upper = self.limits.joint_limits_upper
+                pos_targets = np.minimum(pos_targets, upper)  # type: ignore[arg-type]
+            safe_command.position_targets = pos_targets
 
         return safe_command
 

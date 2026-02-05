@@ -187,8 +187,8 @@ def run_ik_demo(
     print(f"\n      Convergence rate: {ik_result.convergence_rate * 100:.1f}%")
     print(
         f"      Mean position errors: "
-        f"L={sum(ik_result.left_hand_errors)/len(ik_result.left_hand_errors)*1000:.2f}mm, "
-        f"R={sum(ik_result.right_hand_errors)/len(ik_result.right_hand_errors)*1000:.2f}mm"
+        f"L={sum(ik_result.left_hand_errors) / len(ik_result.left_hand_errors) * 1000:.2f}mm, "
+        f"R={sum(ik_result.right_hand_errors) / len(ik_result.right_hand_errors) * 1000:.2f}mm"
     )
 
     # Step 4: Export results

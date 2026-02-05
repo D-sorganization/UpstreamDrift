@@ -24,16 +24,16 @@ Usage:
 """
 
 from .analyzer import SwingAnalyzer
-from .video_processor import VideoProcessor
 from .pose_estimator import PoseEstimator
 from .types import (
+    BalanceMetrics,
+    BodyAngles,
     SwingAnalysis,
     SwingPhase,
-    BodyAngles,
-    TempoMetrics,
-    BalanceMetrics,
     SwingScores,
+    TempoMetrics,
 )
+from .video_processor import VideoProcessor
 
 __version__ = "1.0.0"
 __all__ = [

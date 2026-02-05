@@ -237,7 +237,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
         obj_pos = self._get_object_position()
         dist_to_target = np.linalg.norm(obj_pos - self._target_pos)
 
-        return dist_to_target < self._place_threshold
+        return bool(dist_to_target < self._place_threshold)
 
     def _reset_simulation(self, options: dict[str, Any] | None) -> None:
         """Reset manipulation environment."""
@@ -366,14 +366,14 @@ class DualArmManipulationEnv(RoboticsGymEnv):
             obj_pos = self._get_object_position()
             left_dist = np.linalg.norm(left_ee - obj_pos)
             left_closed = self._is_left_gripper_closed()
-            self._left_grasped = left_dist < grasp_threshold and left_closed
+            self._left_grasped = bool(left_dist < grasp_threshold and left_closed)
 
         if hasattr(self.engine, "get_right_ee_position"):
             right_ee = self.engine.get_right_ee_position()
             obj_pos = self._get_object_position()
             right_dist = np.linalg.norm(right_ee - obj_pos)
             right_closed = self._is_right_gripper_closed()
-            self._right_grasped = right_dist < grasp_threshold and right_closed
+            self._right_grasped = bool(right_dist < grasp_threshold and right_closed)
 
         # Object is lifted if both arms are grasping
         self._object_lifted = self._left_grasped and self._right_grasped
@@ -452,6 +452,9 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         reward = 0.0
 
         obj_pos = self._get_object_position()
+        assert (
+            self.task_config.target_position is not None
+        ), "target_position must be set"
         target_pos = self.task_config.target_position
 
         # Coordination reward: both arms approaching object
@@ -494,7 +497,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         ):
             left_vel = self.engine.get_left_ee_velocity()[:3]
             right_vel = self.engine.get_right_ee_velocity()[:3]
-            vel_diff = np.linalg.norm(left_vel - right_vel)
+            vel_diff = float(np.linalg.norm(left_vel - right_vel))
             reward -= 0.1 * vel_diff
 
         # Energy penalty
@@ -529,6 +532,9 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         info["right_grasped"] = self._right_grasped
         info["object_lifted"] = self._object_lifted
         info["object_position"] = obj_pos.tolist()
+        assert (
+            self.task_config.target_position is not None
+        ), "target_position must be set"
         info["distance_to_target"] = float(
             np.linalg.norm(obj_pos - self.task_config.target_position)
         )

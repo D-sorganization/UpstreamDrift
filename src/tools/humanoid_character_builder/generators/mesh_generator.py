@@ -357,8 +357,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
         # SMPL-X integration not yet implemented (see GitHub issue #980)
         logger.warning(
-            "SMPL-X integration not yet implemented. "
-            "Falling back to primitive meshes."
+            "SMPL-X integration not yet implemented. Falling back to primitive meshes."
         )
 
         primitive_gen = PrimitiveMeshGenerator()

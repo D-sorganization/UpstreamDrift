@@ -434,7 +434,7 @@ class IMUReading(SensorReading):
             )
         if self.angular_velocity.shape != (3,):
             raise ValueError(
-                f"angular_velocity must be (3,), " f"got {self.angular_velocity.shape}"
+                f"angular_velocity must be (3,), got {self.angular_velocity.shape}"
             )
 
         if self.orientation is not None:

@@ -324,7 +324,7 @@ class SystemIdentifier:
             identified[name] = float(best_params[i])
 
         return IdentificationResult(
-            identified_params=identified,
+            identified_params=identified,  # type: ignore[arg-type]
             residual_error=best_error,
             iterations=_iteration + 1,
             converged=converged,
