@@ -174,6 +174,8 @@ class TestPuttingGreenSimulator:
 
         # Time should not change
         assert final_time == initial_time
+        assert configured_simulator.get_last_acceleration() is not None
+        assert configured_simulator.get_last_roll_mode() is not None
 
     def test_get_state_returns_arrays(
         self, configured_simulator: PuttingGreenSimulator
@@ -441,7 +443,8 @@ class TestPuttingGreenSimulatorIO:
         """Should load topographical/elevation data."""
         # Create a heightmap file
         with tempfile.NamedTemporaryFile(suffix=".npy", delete=False) as f:
-            heightmap = np.random.rand(100, 100) * 0.1
+            rng = np.random.default_rng(42)
+            heightmap = rng.random((100, 100)) * 0.1
             np.save(f.name, heightmap)
 
             simulator.load_topographical_data(
@@ -534,6 +537,44 @@ class TestPuttingGreenSimulatorAdvanced:
         positions_array = np.array(final_positions)
         variance = np.var(positions_array, axis=0)
         assert np.any(variance > 0)
+
+    def test_scatter_is_deterministic_with_seed(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
+        """Scatter analysis should be reproducible with fixed RNG seed."""
+        start_pos = np.array([5.0, 10.0])
+        stroke_params = StrokeParameters(
+            speed=2.0,
+            direction=np.array([1.0, 0.0]),
+            face_angle=0.0,
+            attack_angle=0.0,
+        )
+
+        seed = 123
+        rng_one = np.random.default_rng(seed)
+        rng_two = np.random.default_rng(seed)
+
+        results_one = simulator.simulate_scatter(
+            start_pos,
+            stroke_params,
+            n_simulations=5,
+            speed_variance=0.1,
+            direction_variance_deg=2.0,
+            rng=rng_one,
+        )
+        results_two = simulator.simulate_scatter(
+            start_pos,
+            stroke_params,
+            n_simulations=5,
+            speed_variance=0.1,
+            direction_variance_deg=2.0,
+            rng=rng_two,
+        )
+
+        final_one = np.array([result.final_position for result in results_one])
+        final_two = np.array([result.final_position for result in results_two])
+
+        assert np.allclose(final_one, final_two)
 
     def test_aim_assist(self, simulator: PuttingGreenSimulator) -> None:
         """Should provide aim assist for breaking putts."""

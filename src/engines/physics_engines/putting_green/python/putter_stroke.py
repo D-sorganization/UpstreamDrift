@@ -27,6 +27,7 @@ from src.shared.python.physics_constants import (
     DEG_TO_RAD,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
+    GRAVITY_M_S2,
 )
 
 
@@ -175,7 +176,7 @@ class StrokeParameters:
 
         # Required initial velocity
         # d = v² / (2μg) → v = √(2μgd)
-        v_required = np.sqrt(2 * mu * 9.81 * distance * slope_factor)
+        v_required = np.sqrt(2 * mu * GRAVITY_M_S2 * distance * slope_factor)
 
         # Account for COR (ball speed ≈ 1.4 * clubhead speed for typical putter)
         clubhead_speed = v_required / 1.4
@@ -412,7 +413,7 @@ class PutterStroke:
         slope_adjustment = 1.0 + slope_percent / 100.0 * 2.5
 
         # Required ball speed: v = √(2μgd)
-        ball_speed = np.sqrt(2 * mu * 9.81 * distance * slope_adjustment)
+        ball_speed = np.sqrt(2 * mu * GRAVITY_M_S2 * distance * slope_adjustment)
 
         # Convert to clubhead speed
         m1, m2 = self.mass, GOLF_BALL_MASS_KG

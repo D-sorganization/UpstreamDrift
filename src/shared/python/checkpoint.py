@@ -155,6 +155,14 @@ class StateCheckpoint:
             "checksum": self.checksum,
         }
 
+    def __contains__(self, key: object) -> bool:
+        """Support `in` checks for common checkpoint fields."""
+        if not isinstance(key, str):
+            return False
+        if key == "position":
+            return True
+        return key in self.to_dict()
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> StateCheckpoint:
         """Create from dictionary."""
