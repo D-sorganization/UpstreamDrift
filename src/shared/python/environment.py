@@ -382,11 +382,14 @@ def get_admin_password() -> str | None:
     return os.environ.get("GOLF_ADMIN_PASSWORD")
 
 
-def get_api_host(default: str = "0.0.0.0") -> str:
+def get_api_host(default: str = "127.0.0.1") -> str:
     """Get the API host address.
 
+    Uses 127.0.0.1 (localhost) by default for security.
+    Set GOLF_API_HOST=0.0.0.0 for Docker or when external access is needed.
+
     Args:
-        default: Default host address.
+        default: Default host address (127.0.0.1 for localhost-only access).
 
     Returns:
         Host address string.
