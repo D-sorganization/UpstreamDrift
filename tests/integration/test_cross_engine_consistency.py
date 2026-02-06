@@ -385,6 +385,6 @@ class TestThreeWayTriangulation:
 
         # For now, just verify that at least two engines agree closely
         min_deviation = min(deviations.values()) if deviations else float("inf")
-        assert (
-            min_deviation < agreement_threshold
-        ), f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
+        assert min_deviation < agreement_threshold, (
+            f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
+        )
