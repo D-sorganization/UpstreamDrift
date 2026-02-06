@@ -39,7 +39,6 @@ jobs:
           pip install -r requirements.txt || true
           # Install tabulate for reports if needed
           pip install tabulate || true
-          npm install -g @google/jules
 
       # ---------------------------------------------------------
       # Component 1: Pragmatic Programmer Review (Local)
@@ -110,7 +109,7 @@ jobs:
           commit_message: "docs(assessment): pre-assessment data collection"
           branch: "automation/assessment-${{ steps.date.outputs.date }}"
           create_branch: true
-          push_options: "--force"
+          push_options: ""
 
       # ---------------------------------------------------------
       # Component 3: Jules Comprehensive Assessment (API)
