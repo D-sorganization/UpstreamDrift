@@ -3,15 +3,15 @@
 name: Jules Auto Refactor
 
 on:
-    workflow_call:
-        # No inputs required for this placeholder
+  workflow_call:
+    # No inputs required for this placeholder
 
 jobs:
-    auto-refactor:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Placeholder
-              run: |
-                  echo "Jules Auto-Refactor worker placeholder"
-                  echo "This workflow is triggered by Control Tower for automated refactoring tasks."
-                  echo "TODO: Implement DRY refactoring, code cleanup, and style fixes."
+  auto-refactor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: |
+          echo "Jules Auto-Refactor worker placeholder"
+          echo "This workflow is triggered by Control Tower for automated refactoring tasks."
+          echo "TODO: Implement DRY refactoring, code cleanup, and style fixes."

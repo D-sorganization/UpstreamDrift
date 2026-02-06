@@ -35,11 +35,11 @@ src/engines/physics_engines/pinocchio/python/dtack/viz/geppetto_viewer.py
 
 **Existing visualization backends:**
 
-| Backend | Location | Status |
-|---------|----------|--------|
-| Meshcat | `dtack/viz/meshcat_viewer.py` | Primary, fully integrated |
+| Backend  | Location                       | Status                     |
+| -------- | ------------------------------ | -------------------------- |
+| Meshcat  | `dtack/viz/meshcat_viewer.py`  | Primary, fully integrated  |
 | Geppetto | `dtack/viz/geppetto_viewer.py` | Exists, not exposed in GUI |
-| Rob Neal | `dtack/viz/rob_neal_viewer.py` | Specialized data viewer |
+| Rob Neal | `dtack/viz/rob_neal_viewer.py` | Specialized data viewer    |
 
 The main Pinocchio GUI (`pinocchio_golf/gui.py`) currently only uses Meshcat. Geppetto-Viewer exists but is not selectable as an option.
 
@@ -47,25 +47,25 @@ The main Pinocchio GUI (`pinocchio_golf/gui.py`) currently only uses Meshcat. Ge
 
 **Verdict: Doable and Contained**
 
-| Aspect | Assessment |
-|--------|------------|
-| **Code Impact** | Low - isolated to Pinocchio visualization layer |
-| **Architecture** | Already supports multi-backend pattern |
-| **Dependencies** | Optional (`gepetto-viewer` via conda-forge) |
-| **Risk** | Very low - fails gracefully if not installed |
-| **Effort** | 1-2 days of development |
+| Aspect           | Assessment                                      |
+| ---------------- | ----------------------------------------------- |
+| **Code Impact**  | Low - isolated to Pinocchio visualization layer |
+| **Architecture** | Already supports multi-backend pattern          |
+| **Dependencies** | Optional (`gepetto-viewer` via conda-forge)     |
+| **Risk**         | Very low - fails gracefully if not installed    |
+| **Effort**       | 1-2 days of development                         |
 
 ### Comparison: Meshcat vs Geppetto
 
-| Feature | Meshcat (Current) | Geppetto-Viewer (Optional) |
-|---------|-------------------|---------------------------|
-| **Rendering** | WebGL in browser | Native OpenGL desktop |
-| **Access** | Remote via HTTP URL | Local desktop only |
-| **Performance** | Good for most models | Better for complex scenes |
-| **Setup** | No extra process needed | Requires `gepetto-gui` server |
-| **Container Support** | Excellent | Limited (needs X11) |
-| **Use Case** | General visualization, remote access | Joint validation, debugging |
-| **Installation** | `pip install meshcat` | `conda install -c conda-forge gepetto-viewer` |
+| Feature               | Meshcat (Current)                    | Geppetto-Viewer (Optional)                    |
+| --------------------- | ------------------------------------ | --------------------------------------------- |
+| **Rendering**         | WebGL in browser                     | Native OpenGL desktop                         |
+| **Access**            | Remote via HTTP URL                  | Local desktop only                            |
+| **Performance**       | Good for most models                 | Better for complex scenes                     |
+| **Setup**             | No extra process needed              | Requires `gepetto-gui` server                 |
+| **Container Support** | Excellent                            | Limited (needs X11)                           |
+| **Use Case**          | General visualization, remote access | Joint validation, debugging                   |
+| **Installation**      | `pip install meshcat`                | `conda install -c conda-forge gepetto-viewer` |
 
 **Recommendation:** Keep Meshcat as default, offer Geppetto as optional for users who prefer desktop visualization or need better performance for complex models.
 
@@ -148,26 +148,26 @@ def add_frame(self, name: str, transform: np.ndarray) -> None:
 
 ### Current Distribution Methods
 
-| Method | Status | Notes |
-|--------|--------|-------|
-| **Source (pip/conda)** | Working | Requires manual dependency setup |
-| **Docker** | Working | Best "no setup" option currently |
-| **Windows MSI** | Infrastructure exists | cx_Freeze setup, not automated |
-| **PyPI** | Not published | Would help Python developers |
-| **Conda-forge** | Not available | Would be ideal for scientific users |
-| **macOS App** | Not implemented | Potential future option |
+| Method                 | Status                | Notes                               |
+| ---------------------- | --------------------- | ----------------------------------- |
+| **Source (pip/conda)** | Working               | Requires manual dependency setup    |
+| **Docker**             | Working               | Best "no setup" option currently    |
+| **Windows MSI**        | Infrastructure exists | cx_Freeze setup, not automated      |
+| **PyPI**               | Not published         | Would help Python developers        |
+| **Conda-forge**        | Not available         | Would be ideal for scientific users |
+| **macOS App**          | Not implemented       | Potential future option             |
 
 ### Binary Dependency Challenges
 
 The project depends on libraries requiring native binary components:
 
-| Dependency | Challenge |
-|------------|-----------|
-| **MuJoCo** | Native C physics engine |
-| **Drake** | Complex C++ robotics toolkit |
-| **Pinocchio** | C++ rigid body dynamics |
-| **PyQt6** | Platform-specific Qt bindings |
-| **OpenGL** | System graphics drivers |
+| Dependency    | Challenge                     |
+| ------------- | ----------------------------- |
+| **MuJoCo**    | Native C physics engine       |
+| **Drake**     | Complex C++ robotics toolkit  |
+| **Pinocchio** | C++ rigid body dynamics       |
+| **PyQt6**     | Platform-specific Qt bindings |
+| **OpenGL**    | System graphics drivers       |
 
 These make "download and double-click" distribution challenging across platforms.
 
@@ -180,15 +180,15 @@ Docker is currently the best path to "it just works" distribution.
 **Create `docker-compose.yml` for easy startup:**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   golf-suite:
     image: ghcr.io/d-sorganization/golf-modeling-suite:latest
     ports:
-      - "7000:7000"  # Meshcat visualization
-      - "8080:8080"  # Optional web UI
+      - "7000:7000" # Meshcat visualization
+      - "8080:8080" # Optional web UI
     volumes:
-      - ./data:/app/data  # User data persistence
+      - ./data:/app/data # User data persistence
     environment:
       - DISPLAY=${DISPLAY:-:0}
     # For GUI support on Linux:
@@ -230,7 +230,7 @@ windows-installer:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: "3.11"
     - name: Install dependencies
       run: |
         pip install cx_Freeze
@@ -279,11 +279,13 @@ Note: Users still need to install MuJoCo, Pinocchio, etc. separately.
 This would be the ideal solution as conda handles binary dependencies.
 
 **Benefits:**
+
 - Single command install with all dependencies
 - Cross-platform binary distribution
 - Scientific community standard
 
 **Requirements:**
+
 - Create `meta.yaml` recipe
 - Submit to conda-forge staged-recipes
 - Maintain recipe for updates
@@ -299,6 +301,7 @@ conda install -c conda-forge golf-modeling-suite
 #### Priority 5: Web Demo Mode (Optional)
 
 For zero-install demos:
+
 - Host a read-only demo instance
 - Users access via browser (Meshcat)
 - Consider Streamlit/Gradio for simple UI
@@ -348,7 +351,7 @@ CMD ["python", "-m", "src.launcher.main"]
 
 Add to README.md:
 
-```markdown
+````markdown
 ## Quick Start with Docker
 
 The easiest way to run Golf Modeling Suite without any setup:
@@ -362,12 +365,14 @@ docker run -p 7000:7000 ghcr.io/d-sorganization/golf-modeling-suite:latest
 
 # Open http://localhost:7000 in your browser
 ```
+````
 
 For persistent data:
 
 ```bash
 docker run -p 7000:7000 -v $(pwd)/data:/app/data golf-modeling-suite:latest
 ```
+
 ```
 
 ---
@@ -417,3 +422,4 @@ docker run -p 7000:7000 -v $(pwd)/data:/app/data golf-modeling-suite:latest
 - [Pinocchio Visualization Tutorial](https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_display_b-gepetto-viewer.html)
 - [Docker Best Practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
 - [Conda-forge Contributing](https://conda-forge.org/docs/maintainer/adding_pkgs.html)
+```

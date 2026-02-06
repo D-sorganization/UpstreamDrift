@@ -9,6 +9,7 @@ The core physics parameters are managed by a central registry found in `shared/p
 ### Default Parameters
 
 The suite comes with reasonable defaults based on:
+
 - **USGA Rules of Golf**: For ball mass and size.
 - **NIST Standards**: For gravity and physical constants.
 - **Biomechanics Literature**: For human swing characteristics.
@@ -33,6 +34,7 @@ print(f"New Club Mass: {param.value} {param.unit}")
 ### Parameter Validation
 
 The registry enforces safety checks:
+
 - **Type Checking**: Ensures numeric values for physical quantities.
 - **Range Checking**: Prevents unrealistic values (e.g., negative mass).
 - **Constants**: Prevents modification of fixed physical laws or strict rules (e.g., Gravity).

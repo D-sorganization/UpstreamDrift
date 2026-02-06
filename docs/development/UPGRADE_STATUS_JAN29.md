@@ -26,7 +26,7 @@
 - Central hub offering:
   - C3D Motion Viewer
   - OpenPose Analysis (Academic License)
-  - MediaPipe Analysis (Apache 2.0 License - *New*)
+  - MediaPipe Analysis (Apache 2.0 License - _New_)
 - Created `src/shared/python/pose_estimation/mediapipe_gui.py` as a wrapper for MediaPipe integration.
 
 ### ✅ 7. Branding & Logo Update
@@ -41,14 +41,14 @@
 **Status**: DONE
 
 - Updated `src/config/models.yaml` to strictly define 8 primary tiles:
-    1. MuJoCo (Unified)
-    2. Drake
-    3. Pinocchio
-    4. OpenSim
-    5. MyoSuite
-    6. Matlab Models (Unified)
-    7. Motion Capture (Unified)
-    8. Model Explorer
+  1. MuJoCo (Unified)
+  2. Drake
+  3. Pinocchio
+  4. OpenSim
+  5. MyoSuite
+  6. Matlab Models (Unified)
+  7. Motion Capture (Unified)
+  8. Model Explorer
 - Updated `golf_launcher.py` to enforce this 2x4 grid layout.
 
 ### ✅ 9. Repository Cleanup & Professionalism
@@ -88,7 +88,7 @@
 
 ## Pending Items
 
-*(None)*
+_(None)_
 
 ## Next Steps
 

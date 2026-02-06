@@ -14,6 +14,7 @@ This folder contains markdown documents that track known issues, bugs, and techn
 
 ```markdown
 ### [SEVERITY] Brief Title
+
 - **Status**: Open | In Progress | Resolved | Won't Fix
 - **Component**: Module/file affected
 - **Description**: What's wrong and why it matters

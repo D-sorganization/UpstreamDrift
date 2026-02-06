@@ -7,6 +7,7 @@ Welcome to the Golf Modeling Suite tutorial series!
 ### Beginner Level
 
 1. **[Getting Started](content/01_getting_started.md)** - START HERE
+
    - Installation and first simulation
    - Time: 30 minutes
 
@@ -17,6 +18,7 @@ Welcome to the Golf Modeling Suite tutorial series!
 ### Intermediate Level
 
 1. **[Engine Comparison](content/03_engine_comparison.md)**
+
    - Run simulations across multiple physics engines
    - Cross-engine validation and consistency checking
    - Time: 60 minutes

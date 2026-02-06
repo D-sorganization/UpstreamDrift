@@ -1,4 +1,5 @@
 # Competitor Analysis
+
 **Last Updated:** 2026-02-12
 
 This document maintains a comprehensive analysis of the golf technology market, focusing on launch monitors, software, biomechanics, and open-source alternatives.
@@ -6,49 +7,54 @@ This document maintains a comprehensive analysis of the golf technology market, 
 ## Competitor Categories
 
 ### 1. Launch Monitor Hardware
-| Competitor | Products | Key Features | Price Range | Market Position |
-|------------|----------|--------------|-------------|-----------------|
-| **TrackMan** | TrackMan 4, iO, Range | Dual Radar (OERT), Optically Enhanced, Gold Standard | $20,000+ | Tour / Premium Commercial |
-| **Foresight Sports** | GCQuad, GC3, QuadMAX | Quadrascopic Photometric, High Indoor Accuracy | $14,000 - $20,000+ | Premium Fitter / Indoor |
-| **FlightScope** | X3, Mevo+, Mevo | Fusion Tracking (Radar+Cam), Portable | $500 - $15,000 | Prosumer to Pro |
-| **Full Swing** | Full Swing KIT | Radar-based, Tiger Woods endorsed, customizable OLED | $5,000 | High-end Consumer / Pro |
-| **Uneekor** | EYE XO, QED, EYE MINI | Ceiling Mounted, High Speed Cams, Ball/Club Optics | $4,500 - $14,000 | Premium Home Sim |
-| **Garmin** | Approach R10 | Doppler Radar, Phone Integration, Portable | ~$600 | Entry Level |
-| **Rapsodo** | MLM2PRO | Radar + Camera, Simulation support | ~$700 | Entry Level |
+
+| Competitor           | Products              | Key Features                                         | Price Range        | Market Position           |
+| -------------------- | --------------------- | ---------------------------------------------------- | ------------------ | ------------------------- |
+| **TrackMan**         | TrackMan 4, iO, Range | Dual Radar (OERT), Optically Enhanced, Gold Standard | $20,000+           | Tour / Premium Commercial |
+| **Foresight Sports** | GCQuad, GC3, QuadMAX  | Quadrascopic Photometric, High Indoor Accuracy       | $14,000 - $20,000+ | Premium Fitter / Indoor   |
+| **FlightScope**      | X3, Mevo+, Mevo       | Fusion Tracking (Radar+Cam), Portable                | $500 - $15,000     | Prosumer to Pro           |
+| **Full Swing**       | Full Swing KIT        | Radar-based, Tiger Woods endorsed, customizable OLED | $5,000             | High-end Consumer / Pro   |
+| **Uneekor**          | EYE XO, QED, EYE MINI | Ceiling Mounted, High Speed Cams, Ball/Club Optics   | $4,500 - $14,000   | Premium Home Sim          |
+| **Garmin**           | Approach R10          | Doppler Radar, Phone Integration, Portable           | ~$600              | Entry Level               |
+| **Rapsodo**          | MLM2PRO               | Radar + Camera, Simulation support                   | ~$700              | Entry Level               |
 
 ### 2. Software/Analytics Platforms
-| Competitor | Products | Key Features | Price Range | Market Position |
-|------------|----------|--------------|-------------|-----------------|
-| **TrackMan** | Performance Studio (TPS) | Tracy AI, Virtual Golf, Deep Data | Bundled / Sub | Professional Ecosystem |
-| **Foresight** | FSX Play, FSX Pro | 4K Graphics, Fitting Tools, Insights | Bundled / Add-on | Professional Ecosystem |
-| **GSPro** | GSPro V2 | 4K Unity Graphics, Open API, SGT Tour | $250/yr | Sim-Enthusiast Favorite |
-| **E6 Connect** | E6 Connect | Cross-platform, Massive Course Library | $300 - $600/yr | Legacy Standard |
-| **TruGolf** | E6 Connect (Owner) | Integrated Sims, Hardware+Software | Varies | Commercial / Home |
-| **OpenGolf** | OpenGolf | Open Source Simulator | Free | Open Source Niche |
+
+| Competitor     | Products                 | Key Features                           | Price Range      | Market Position         |
+| -------------- | ------------------------ | -------------------------------------- | ---------------- | ----------------------- |
+| **TrackMan**   | Performance Studio (TPS) | Tracy AI, Virtual Golf, Deep Data      | Bundled / Sub    | Professional Ecosystem  |
+| **Foresight**  | FSX Play, FSX Pro        | 4K Graphics, Fitting Tools, Insights   | Bundled / Add-on | Professional Ecosystem  |
+| **GSPro**      | GSPro V2                 | 4K Unity Graphics, Open API, SGT Tour  | $250/yr          | Sim-Enthusiast Favorite |
+| **E6 Connect** | E6 Connect               | Cross-platform, Massive Course Library | $300 - $600/yr   | Legacy Standard         |
+| **TruGolf**    | E6 Connect (Owner)       | Integrated Sims, Hardware+Software     | Varies           | Commercial / Home       |
+| **OpenGolf**   | OpenGolf                 | Open Source Simulator                  | Free             | Open Source Niche       |
 
 ### 3. Biomechanics/Instruction
-| Competitor | Products | Key Features | Price Range | Market Position |
-|------------|----------|--------------|-------------|-----------------|
-| **GEARS Golf** | GEARS | Optical Motion Capture (Markers), "MRI of Golf" | $30,000+ | Research / Elite Fitting |
-| **K-Motion** | K-Vest, K-Coach | Wireless Sensors (IMU), Biofeedback | $2,500+ | Instruction / Coaching |
-| **Sportsbox AI** | Sportsbox 3D | Markerless Single-Cam 3D, Mobile App | SaaS ($/mo) | Accessible Coaching |
-| **Swing Catalyst**| Force Plates, Software | GRF Analysis, Video Sync, Pressure | $5,000 - $15,000 | Force/Pressure Standard |
-| **BodiTrak** | Vector, Dash | Pressure Mats, Portable | $1,500 - $3,000 | Affordable Pressure |
-| **V1 Sports** | V1 Pro, V1 Game | Video Analysis, Pressure Integration | SaaS | Video Standard |
-| **Hackmotion** | Wrist Sensor | Wrist Angle Biofeedback, Putting/Full Swing | $300 - $1,000 | Specialized Training |
+
+| Competitor         | Products               | Key Features                                    | Price Range      | Market Position          |
+| ------------------ | ---------------------- | ----------------------------------------------- | ---------------- | ------------------------ |
+| **GEARS Golf**     | GEARS                  | Optical Motion Capture (Markers), "MRI of Golf" | $30,000+         | Research / Elite Fitting |
+| **K-Motion**       | K-Vest, K-Coach        | Wireless Sensors (IMU), Biofeedback             | $2,500+          | Instruction / Coaching   |
+| **Sportsbox AI**   | Sportsbox 3D           | Markerless Single-Cam 3D, Mobile App            | SaaS ($/mo)      | Accessible Coaching      |
+| **Swing Catalyst** | Force Plates, Software | GRF Analysis, Video Sync, Pressure              | $5,000 - $15,000 | Force/Pressure Standard  |
+| **BodiTrak**       | Vector, Dash           | Pressure Mats, Portable                         | $1,500 - $3,000  | Affordable Pressure      |
+| **V1 Sports**      | V1 Pro, V1 Game        | Video Analysis, Pressure Integration            | SaaS             | Video Standard           |
+| **Hackmotion**     | Wrist Sensor           | Wrist Angle Biofeedback, Putting/Full Swing     | $300 - $1,000    | Specialized Training     |
 
 ### 4. Open Source Alternatives
-| Competitor | Products | Key Features | Price Range | Market Position |
-|------------|----------|--------------|-------------|-----------------|
-| **OpenSim** | OpenSim | Musculoskeletal Modeling, Physics | Free | Academic Research |
-| **OpenCap** | OpenCap | Markerless 3D (Multi-cam phones), Cloud | Free | Research |
-| **OpenBiomechanics**| Project Data | High-fidelity Mocap datasets (Baseball/Golf) | Free | Data Research |
+
+| Competitor           | Products     | Key Features                                 | Price Range | Market Position   |
+| -------------------- | ------------ | -------------------------------------------- | ----------- | ----------------- |
+| **OpenSim**          | OpenSim      | Musculoskeletal Modeling, Physics            | Free        | Academic Research |
+| **OpenCap**          | OpenCap      | Markerless 3D (Multi-cam phones), Cloud      | Free        | Research          |
+| **OpenBiomechanics** | Project Data | High-fidelity Mocap datasets (Baseball/Golf) | Free        | Data Research     |
 
 ---
 
 ## Analysis Framework
 
 ### TrackMan
+
 1.  **Core Value Proposition:** The undisputed "truth" in ball flight; brand prestige and trust.
 2.  **Key Features:** OERT (Optically Enhanced Radar Tracking), normalizing weather, Tracy AI practice assistant.
 3.  **Limitations:** Indoor space requirements (radar needs flight distance); high cost.
@@ -59,6 +65,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** We offer open physics models and raw data access, whereas TM is a "black box".
 
 ### Foresight Sports
+
 1.  **Core Value Proposition:** The most accurate indoor/camera-based launch monitor; exact club delivery data.
 2.  **Key Features:** Quadrascopic imaging (GCQuad) measures sub-millimeter impact details.
 3.  **Limitations:** Limited "real" ball flight tracking outdoors (mostly calculated).
@@ -69,6 +76,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** We can integrate similar photometric data streams into a broader open ecosystem.
 
 ### FlightScope
+
 1.  **Core Value Proposition:** Professional tracking technology at a prosumer price point.
 2.  **Key Features:** Fusion Tracking (Mevo+ Pro Package), Environmental Optimizer.
 3.  **Limitations:** Mevo+ requires metallic stickers for accurate spin; setup can be finicky.
@@ -79,6 +87,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** We provide the analysis layer that FlightScope users often export data to find.
 
 ### Full Swing
+
 1.  **Core Value Proposition:** Tiger Woods' trusted simulator; high-speed line-scan camera technology (sims) and radar (KIT).
 2.  **Key Features:** KIT launch monitor has a customizable OLED screen and 4K camera.
 3.  **Limitations:** KIT is relatively new compared to TM/Foresight; software ecosystem maturing.
@@ -89,6 +98,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** Flexible integration of their data into custom training workflows.
 
 ### Garmin / Rapsodo (Entry Level)
+
 1.  **Core Value Proposition:** Making launch monitor data accessible to every golfer.
 2.  **Key Features:** Portability, direct phone integration, gamification.
 3.  **Limitations:** Accuracy varies (spin rates often estimated); limited data parameters.
@@ -99,6 +109,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** We can upscale their limited data using physics models to approximate pro-level insights.
 
 ### GSPro (Software)
+
 1.  **Core Value Proposition:** Community-driven, realistic 4K golf simulation that connects to almost any hardware.
 2.  **Key Features:** Open API (OPCD), SGT online tour, realistic ball physics (no boost).
 3.  **Limitations:** Requires high-end gaming PC; no native mobile app.
@@ -109,6 +120,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** We are open source; GSPro is open-api but closed source. We focus on biomechanics/science, they focus on gameplay.
 
 ### Sportsbox AI
+
 1.  **Core Value Proposition:** 3D Motion Capture without markers or suits, using just a phone.
 2.  **Key Features:** 2D-to-3D lifting, Kinematic Sequence, Avatar visualization.
 3.  **Limitations:** Single camera lacks depth precision of multi-cam/marker systems; occlusion issues.
@@ -119,6 +131,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** Our biomechanics modules will be open and verifiable, allowing researchers to tweak the "lifting" algorithms.
 
 ### GEARS Golf
+
 1.  **Core Value Proposition:** The gold standard for motion capture accuracy in golf.
 2.  **Key Features:** Sub-millimeter accuracy, full body + club tracking (28-32 sensors).
 3.  **Limitations:** Extremely expensive ($30k+); requires dedicated studio space and setup time.
@@ -129,6 +142,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 8.  **Our Differentiation:** We aim to approximate GEARS-level insights using accessible hardware (multi-cam) and advanced physics.
 
 ### Open Source (OpenSim / OpenCap)
+
 1.  **Core Value Proposition:** Validated, peer-reviewed biomechanics tools for research.
 2.  **Key Features:** Muscle-actuated simulations (OpenSim); Multi-phone mocap (OpenCap).
 3.  **Limitations:** High technical barrier; not golf-specific; complex workflow.
@@ -142,34 +156,37 @@ This document maintains a comprehensive analysis of the golf technology market, 
 
 ## Feature Comparison Matrix
 
-| Feature | Us | TrackMan | Foresight | FlightScope | K-Motion | Sportsbox |
-|---------|----|----------|-----------|-------------|----------|-----------|
-| **Ball Flight Data** | **Simulated/Integrated** | Measured (Radar) | Measured (Photo) | Measured (Fusion) | N/A | N/A |
-| **Club Data** | **Simulated/Integrated** | Measured (OERT) | Measured (Fiducials) | Measured | N/A | N/A |
-| **Body Mocap** | **In Dev (Video)** | N/A | N/A | N/A | Sensors (IMU) | Video (AI) |
-| **3D Visualization** | **Web/Native** | TPS Software | FSX Software | E6/FS Skills | Proprietary App | App/Web |
-| **Export/API** | **Full Python API** | SDK (Paid) | Restricted | Restricted | Restricted | Restricted |
-| **Pricing** | **Free / Open** | $$$$$ | $$$$$ | $$ - $$$ | $$ | $ (Sub) |
-| **Platform Support** | **Linux/Mac/Win** | Win/iOS | Win | iOS/Android/Win | iOS/Win | iOS/Android |
+| Feature              | Us                       | TrackMan         | Foresight            | FlightScope       | K-Motion        | Sportsbox   |
+| -------------------- | ------------------------ | ---------------- | -------------------- | ----------------- | --------------- | ----------- |
+| **Ball Flight Data** | **Simulated/Integrated** | Measured (Radar) | Measured (Photo)     | Measured (Fusion) | N/A             | N/A         |
+| **Club Data**        | **Simulated/Integrated** | Measured (OERT)  | Measured (Fiducials) | Measured          | N/A             | N/A         |
+| **Body Mocap**       | **In Dev (Video)**       | N/A              | N/A                  | N/A               | Sensors (IMU)   | Video (AI)  |
+| **3D Visualization** | **Web/Native**           | TPS Software     | FSX Software         | E6/FS Skills      | Proprietary App | App/Web     |
+| **Export/API**       | **Full Python API**      | SDK (Paid)       | Restricted           | Restricted        | Restricted      | Restricted  |
+| **Pricing**          | **Free / Open**          | $$$$$            | $$$$$                | $$ - $$$          | $$              | $ (Sub)     |
+| **Platform Support** | **Linux/Mac/Win**        | Win/iOS          | Win                  | iOS/Android/Win   | iOS/Win         | iOS/Android |
 
 ---
 
 ## Market Positioning
 
 ### Our Advantages
-*   **Open Source / Transparency:** Full visibility into physics models and algorithms, contrasting with competitors' "black boxes."
-*   **Multi-engine Integration:** Ability to cross-reference data from MuJoCo, Drake, and custom solvers.
-*   **Scientific Rigor:** Focus on reproducible science and peer-reviewed methods rather than marketing claims.
-*   **Cost:** Free to use and extend, democratizing access to advanced analysis.
-*   **Customizability:** A platform for researchers to build upon, not just a finished product.
+
+- **Open Source / Transparency:** Full visibility into physics models and algorithms, contrasting with competitors' "black boxes."
+- **Multi-engine Integration:** Ability to cross-reference data from MuJoCo, Drake, and custom solvers.
+- **Scientific Rigor:** Focus on reproducible science and peer-reviewed methods rather than marketing claims.
+- **Cost:** Free to use and extend, democratizing access to advanced analysis.
+- **Customizability:** A platform for researchers to build upon, not just a finished product.
 
 ### Our Gaps
-*   **No Hardware:** We depend on input from third-party devices or video; we do not manufacture sensors.
-*   **Less Polished UI:** Our interface is functional/technical, lacking the gamification and gloss of commercial products.
-*   **Smaller Community:** Compared to the massive user bases of GSPro or TrackMan.
-*   **Less Validation Data:** We lack the millions of shots used by OEMs to tune their empirical models.
+
+- **No Hardware:** We depend on input from third-party devices or video; we do not manufacture sensors.
+- **Less Polished UI:** Our interface is functional/technical, lacking the gamification and gloss of commercial products.
+- **Smaller Community:** Compared to the massive user bases of GSPro or TrackMan.
+- **Less Validation Data:** We lack the millions of shots used by OEMs to tune their empirical models.
 
 ### Strategic Opportunities
+
 1.  **The "Linux of Golf Analytics":** Become the underlying infrastructure that power-users and developers build on top of.
 2.  **Hardware-Agnostic AI:** Develop superior computer vision models that can turn any webcam into a basic launch monitor, undercutting entry-level hardware.
 3.  **Unified Biomechanics Standard:** Bridge the gap between K-Vest, Sportsbox, and Force Plates by creating a universal data format and analysis pipeline.

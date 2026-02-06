@@ -1,67 +1,261 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Driven Double Pendulum Playground</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="toast.css">
-</head>
-<body>
-  <div class="container">
-    <div class="controls">
-      <h1>Driven Double Pendulum</h1>
-      <p>Control-affine model with user-defined torques on a swing plane.</p>
-      <div class="grid">
-        <label><span>Shoulder angle (deg)<code class="var-badge">theta1</code></span><input id="theta1" type="number" value="-45" required></label>
-        <label><span>Wrist angle (deg)<code class="var-badge">theta2</code></span><input id="theta2" type="number" value="-90" required></label>
-        <label>Shoulder torque f(t)<input id="tau1" type="text" value="0" aria-describedby="math-hint"></label>
-        <div id="tau1-error" class="error-message hidden" role="alert"></div>
-        <label>Wrist torque f(t)<input id="tau2" type="text" value="0" aria-describedby="math-hint"></label>
-        <div id="tau2-error" class="error-message hidden" role="alert"></div>
-        <p id="math-hint" class="hint">
-          <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-          </svg>
-          Use: <code>t</code>, <code>theta1</code>, <code>theta2</code>, <code>omega1</code>, <code>omega2</code>, <code>Math.*</code>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Driven Double Pendulum Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="toast.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="controls">
+        <h1>Driven Double Pendulum</h1>
+        <p>Control-affine model with user-defined torques on a swing plane.</p>
+        <div class="grid">
+          <label
+            ><span
+              >Shoulder angle (deg)<code class="var-badge">theta1</code></span
+            ><input id="theta1" type="number" value="-45" required
+          /></label>
+          <label
+            ><span>Wrist angle (deg)<code class="var-badge">theta2</code></span
+            ><input id="theta2" type="number" value="-90" required
+          /></label>
+          <label
+            >Shoulder torque f(t)<input
+              id="tau1"
+              type="text"
+              value="0"
+              aria-describedby="math-hint"
+          /></label>
+          <div id="tau1-error" class="error-message hidden" role="alert"></div>
+          <label
+            >Wrist torque f(t)<input
+              id="tau2"
+              type="text"
+              value="0"
+              aria-describedby="math-hint"
+          /></label>
+          <div id="tau2-error" class="error-message hidden" role="alert"></div>
+          <p id="math-hint" class="hint">
+            <svg
+              class="icon"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"
+              />
+              <path
+                d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"
+              />
+            </svg>
+            Use: <code>t</code>, <code>theta1</code>, <code>theta2</code>,
+            <code>omega1</code>, <code>omega2</code>, <code>Math.*</code>
+          </p>
+          <label
+            >Upper length (m)<input
+              id="l1"
+              type="number"
+              value="0.75"
+              step="0.01"
+              min="0"
+              required
+          /></label>
+          <label
+            >Upper mass (kg)<input
+              id="m1"
+              type="number"
+              value="7.5"
+              step="0.1"
+              min="0"
+              required
+          /></label>
+          <label
+            >Upper COM ratio<input
+              id="com1"
+              type="number"
+              value="0.45"
+              step="0.01"
+              min="0"
+              max="1"
+              required
+          /></label>
+          <label
+            >Lower length (m)<input
+              id="l2"
+              type="number"
+              value="1.0"
+              step="0.01"
+              min="0"
+              required
+          /></label>
+          <label
+            >Shaft mass (kg)<input
+              id="mshaft"
+              type="number"
+              value="0.35"
+              step="0.01"
+              min="0"
+              required
+          /></label>
+          <label
+            >Clubhead mass (kg)<input
+              id="mhead"
+              type="number"
+              value="0.2"
+              step="0.01"
+              min="0"
+              required
+          /></label>
+          <label
+            >Shaft COM ratio<input
+              id="com2"
+              type="number"
+              value="0.43"
+              step="0.01"
+              min="0"
+              max="1"
+              required
+          /></label>
+          <label
+            >Plane incline (deg)<input
+              id="plane"
+              type="number"
+              value="35"
+              step="1"
+              required
+          /></label>
+        </div>
+        <div class="buttons">
+          <button id="play-pause" title="Start simulation (Space)">
+            <svg
+              id="icon-play"
+              class="icon"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"
+              />
+            </svg>
+            <svg
+              id="icon-pause"
+              class="icon hidden"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"
+              />
+            </svg>
+            <span>Start</span>
+          </button>
+          <button id="reset" title="Reset simulation (R)">
+            <svg
+              class="icon"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"
+              />
+              <path
+                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"
+              />
+            </svg>
+            <span>Reset</span>
+          </button>
+          <button id="defaults" title="Restore default parameters">
+            <svg
+              class="icon"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"
+              />
+              <path
+                d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"
+              />
+            </svg>
+            <span>Defaults</span>
+          </button>
+          <button id="share" title="Copy link to current configuration">
+            <svg
+              id="icon-share"
+              class="icon"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"
+              />
+            </svg>
+            <svg
+              id="icon-share-check"
+              class="icon hidden"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"
+              />
+            </svg>
+            <span>Share</span>
+          </button>
+        </div>
+        <p class="shortcuts" id="shortcuts">
+          <small
+            >Shortcuts: <strong>Space</strong> (Start/Pause),
+            <strong>R</strong> (Reset)</small
+          >
         </p>
-        <label>Upper length (m)<input id="l1" type="number" value="0.75" step="0.01" min="0" required></label>
-        <label>Upper mass (kg)<input id="m1" type="number" value="7.5" step="0.1" min="0" required></label>
-        <label>Upper COM ratio<input id="com1" type="number" value="0.45" step="0.01" min="0" max="1" required></label>
-        <label>Lower length (m)<input id="l2" type="number" value="1.0" step="0.01" min="0" required></label>
-        <label>Shaft mass (kg)<input id="mshaft" type="number" value="0.35" step="0.01" min="0" required></label>
-        <label>Clubhead mass (kg)<input id="mhead" type="number" value="0.2" step="0.01" min="0" required></label>
-        <label>Shaft COM ratio<input id="com2" type="number" value="0.43" step="0.01" min="0" max="1" required></label>
-        <label>Plane incline (deg)<input id="plane" type="number" value="35" step="1" required></label>
+        <div class="readout" id="torques">Torques: --</div>
       </div>
-      <div class="buttons">
-        <button id="play-pause" title="Start simulation (Space)">
-          <svg id="icon-play" class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-          <svg id="icon-pause" class="icon hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/></svg>
-          <span>Start</span>
-        </button>
-        <button id="reset" title="Reset simulation (R)">
-          <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
-          <span>Reset</span>
-        </button>
-        <button id="defaults" title="Restore default parameters">
-          <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
-          <span>Defaults</span>
-        </button>
-        <button id="share" title="Copy link to current configuration">
-          <svg id="icon-share" class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/></svg>
-          <svg id="icon-share-check" class="icon hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-          <span>Share</span>
-        </button>
-      </div>
-      <p class="shortcuts" id="shortcuts"><small>Shortcuts: <strong>Space</strong> (Start/Pause), <strong>R</strong> (Reset)</small></p>
-      <div class="readout" id="torques">Torques: --</div>
+      <canvas
+        id="canvas"
+        role="img"
+        aria-label="Double Pendulum Simulation"
+        aria-describedby="shortcuts"
+        tabindex="0"
+        width="900"
+        height="700"
+      ></canvas>
     </div>
-    <canvas id="canvas" role="img" aria-label="Double Pendulum Simulation" aria-describedby="shortcuts" tabindex="0" width="900" height="700"></canvas>
-  </div>
-  <div id="status-announcer" class="sr-only" aria-live="polite"></div>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
-</body>
+    <div id="status-announcer" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
 </html>

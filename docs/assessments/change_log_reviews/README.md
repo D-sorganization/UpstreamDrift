@@ -6,4 +6,4 @@ The most current assessment is located at: `docs/assessments/Latest_Change_Log_R
 
 ## Archived Reviews
 
-*   (None yet - previous assessments are in the archive folder or were specific audits)
+- (None yet - previous assessments are in the archive folder or were specific audits)

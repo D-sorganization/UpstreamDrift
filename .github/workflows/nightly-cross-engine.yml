@@ -19,12 +19,12 @@ on:
     # Run at 2 AM UTC daily
     - cron: "0 0 * * 0,4"
 
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch: # Allow manual trigger
     inputs:
       engines:
-        description: 'Engines to validate (comma-separated)'
+        description: "Engines to validate (comma-separated)"
         required: false
-        default: 'mujoco,drake,pinocchio,pendulum'
+        default: "mujoco,drake,pinocchio,pendulum"
 
 jobs:
   cross-engine-validation:
@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11']
+        python-version: ["3.11"]
 
     steps:
       - name: Checkout repository

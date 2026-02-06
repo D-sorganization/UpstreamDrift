@@ -19,18 +19,18 @@
 
 ### Top 10 Risks (Ranked)
 
-| Rank | Risk | Severity | Location |
-|------|------|----------|----------|
-| 1 | No lockfile = non-reproducible builds | Critical | `pyproject.toml` |
-| 2 | 17% test coverage with 83% untested code paths | Critical | `pytest.ini_options` |
-| 3 | 326 bare `except Exception` catches swallowing errors | Critical | Project-wide |
-| 4 | Path traversal possible via model loading | Major | `*_physics_engine.py` |
-| 5 | GUI thread blocking on model load (sim_widget.py:57-67) | Major | MuJoCo GUI |
-| 6 | No retry/circuit-breaker for MATLAB engine startup | Major | `engine_manager.py:413` |
-| 7 | Hardcoded 30s timeout in subprocess calls insufficient | Major | `secure_subprocess.py:186` |
-| 8 | Mutable default dict in configuration dataclass | Minor | `configuration_manager.py:51` |
-| 9 | Sensor data access assumes dim=1 (incorrect for IMU) | Major | `physics_engine.py:263` |
-| 10 | YAML safe_load used but no schema validation | Minor | `model_registry.py` |
+| Rank | Risk                                                    | Severity | Location                      |
+| ---- | ------------------------------------------------------- | -------- | ----------------------------- |
+| 1    | No lockfile = non-reproducible builds                   | Critical | `pyproject.toml`              |
+| 2    | 17% test coverage with 83% untested code paths          | Critical | `pytest.ini_options`          |
+| 3    | 326 bare `except Exception` catches swallowing errors   | Critical | Project-wide                  |
+| 4    | Path traversal possible via model loading               | Major    | `*_physics_engine.py`         |
+| 5    | GUI thread blocking on model load (sim_widget.py:57-67) | Major    | MuJoCo GUI                    |
+| 6    | No retry/circuit-breaker for MATLAB engine startup      | Major    | `engine_manager.py:413`       |
+| 7    | Hardcoded 30s timeout in subprocess calls insufficient  | Major    | `secure_subprocess.py:186`    |
+| 8    | Mutable default dict in configuration dataclass         | Minor    | `configuration_manager.py:51` |
+| 9    | Sensor data access assumes dim=1 (incorrect for IMU)    | Major    | `physics_engine.py:263`       |
+| 10   | YAML safe_load used but no schema validation            | Minor    | `model_registry.py`           |
 
 ### "If We Shipped Today, What Breaks First?"
 
@@ -44,6 +44,7 @@
 6. **User files GitHub issue: "Launcher crashes on large models"**
 
 **Root causes:**
+
 - No progress indicator during model loading
 - Hardcoded timeout not configurable per-operation
 - No graceful degradation or retry logic
@@ -53,24 +54,24 @@
 
 ## 1. Scorecard
 
-| Category | Score | Why Not 10 | To Reach 9-10 |
-|----------|-------|------------|---------------|
-| **A. Correctness** | 6/10 | No property tests, 83% untested paths, ambiguous edge cases | Add hypothesis tests, increase coverage to 50%+ |
-| **B. Architecture** | 7/10 | EngineManager god module, circular probe imports | Extract probe registry, dependency injection |
-| **C. API/UX Design** | 7/10 | Clean Protocol, but CLI lacks --version, --help quality | Add argparse with proper help, version from metadata |
-| **D. Code Quality** | 6/10 | 326 broad exceptions, 1500+ line modules, copy-paste | Refactor top 10 files, custom exception types |
-| **E. Type Safety** | 5/10 | 45+ mypy overrides, `Any` abuse in 15+ locations | Remove overrides, enforce strict typing |
-| **F. Testing** | 4/10 | 17% coverage, no mutation testing, flaky mocks | 50% coverage minimum, add mutation testing |
-| **G. Security** | 7/10 | Good subprocess hardening, but path traversal gaps | Input validation on all file paths |
-| **H. Reliability** | 5/10 | No retries, no circuit breakers, resource leaks | Add tenacity retries, context managers |
-| **I. Observability** | 5/10 | Basic logging, no structured logs, no metrics | Structured JSON logs, OpenTelemetry traces |
-| **J. Performance** | 6/10 | Lazy imports good, but N+1 in probe_all_engines | Cache probe results, async engine discovery |
-| **K. Data Integrity** | 6/10 | Pickle disabled, but no schema validation | Add pydantic/dataclass validation |
-| **L. Dependencies** | 4/10 | No lockfile, wide version ranges | pip-compile, tighter bounds |
-| **M. DevEx/CI** | 7/10 | Good pre-commit, CI version checks | Faster CI, parallel test runs |
-| **N. Documentation** | 6/10 | Good README, but no ADRs, outdated API docs | ADR template, auto-generate API docs |
-| **O. Style Consistency** | 8/10 | Black/Ruff enforced, consistent naming | Minor: inconsistent docstring style |
-| **P. Compliance** | N/A | No user PII handling detected | - |
+| Category                 | Score | Why Not 10                                                  | To Reach 9-10                                        |
+| ------------------------ | ----- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| **A. Correctness**       | 6/10  | No property tests, 83% untested paths, ambiguous edge cases | Add hypothesis tests, increase coverage to 50%+      |
+| **B. Architecture**      | 7/10  | EngineManager god module, circular probe imports            | Extract probe registry, dependency injection         |
+| **C. API/UX Design**     | 7/10  | Clean Protocol, but CLI lacks --version, --help quality     | Add argparse with proper help, version from metadata |
+| **D. Code Quality**      | 6/10  | 326 broad exceptions, 1500+ line modules, copy-paste        | Refactor top 10 files, custom exception types        |
+| **E. Type Safety**       | 5/10  | 45+ mypy overrides, `Any` abuse in 15+ locations            | Remove overrides, enforce strict typing              |
+| **F. Testing**           | 4/10  | 17% coverage, no mutation testing, flaky mocks              | 50% coverage minimum, add mutation testing           |
+| **G. Security**          | 7/10  | Good subprocess hardening, but path traversal gaps          | Input validation on all file paths                   |
+| **H. Reliability**       | 5/10  | No retries, no circuit breakers, resource leaks             | Add tenacity retries, context managers               |
+| **I. Observability**     | 5/10  | Basic logging, no structured logs, no metrics               | Structured JSON logs, OpenTelemetry traces           |
+| **J. Performance**       | 6/10  | Lazy imports good, but N+1 in probe_all_engines             | Cache probe results, async engine discovery          |
+| **K. Data Integrity**    | 6/10  | Pickle disabled, but no schema validation                   | Add pydantic/dataclass validation                    |
+| **L. Dependencies**      | 4/10  | No lockfile, wide version ranges                            | pip-compile, tighter bounds                          |
+| **M. DevEx/CI**          | 7/10  | Good pre-commit, CI version checks                          | Faster CI, parallel test runs                        |
+| **N. Documentation**     | 6/10  | Good README, but no ADRs, outdated API docs                 | ADR template, auto-generate API docs                 |
+| **O. Style Consistency** | 8/10  | Black/Ruff enforced, consistent naming                      | Minor: inconsistent docstring style                  |
+| **P. Compliance**        | N/A   | No user PII handling detected                               | -                                                    |
 
 **Weighted Overall Score: 5.9/10** (weights: Correctness 2x, Security 2x, Testing 1.5x, others 1x)
 
@@ -78,23 +79,23 @@
 
 ## 2. Findings Table
 
-| ID | Severity | Category | Location | Symptom | Root Cause | Impact | Likelihood | Reproduce | Fix | Effort | Owner |
-|----|----------|----------|----------|---------|------------|--------|------------|-----------|-----|--------|-------|
-| F-001 | **Blocker** | Testing | `pyproject.toml:255` | 17% coverage threshold | No enforcement, "temporary" for 6+ months | Ship untested code paths | Certain | Run pytest --cov | Raise to 50%, enforce in CI | M | QA |
-| F-002 | **Critical** | Dependencies | Project root | No lockfile | Missing pip-compile/poetry | Non-reproducible builds | Certain | `pip install -r requirements.txt` twice | Add `requirements.lock` via pip-compile | S | DevOps |
-| F-003 | **Critical** | Error Handling | Project-wide | 326 `except Exception:` | Swallowing all errors | Silent failures, debugging hell | High | grep -r "except Exception" | Use specific exceptions | L | All |
-| F-004 | **Critical** | Security | `physics_engine.py:54-66` | Path not validated | `load_from_path(path)` trusts input | Path traversal possible | Medium | `engine.load_from_path("../../etc/passwd")` | Validate path within allowed dirs | S | Backend |
-| F-005 | **Major** | Reliability | `engine_manager.py:413` | MATLAB 30-60s startup with no timeout | No timeout, no retry | UI freeze, user abandonment | High | Load MATLAB engine on slow machine | Add configurable timeout, retry | M | Backend |
-| F-006 | **Major** | Architecture | `engine_manager.py` | 553-line god module | All engine logic in one class | Hard to extend, test, modify | Certain | Read the file | Extract EngineRegistry, EngineLoader | L | Architect |
-| F-007 | **Major** | Type Safety | `pyproject.toml:192-222` | 45+ modules with `disallow_untyped_defs = false` | Technical debt accumulation | Type errors at runtime | Medium | Run mypy strictly | Remove overrides incrementally | L | Backend |
-| F-008 | **Major** | Performance | `sim_widget.py:57-67` | Model loading blocks GUI thread | Synchronous load in QThread.run | Frozen UI during load | High | Load large model | Move to QRunnable with progress | M | Frontend |
-| F-009 | **Major** | Data Integrity | `physics_engine.py:263` | `sensors[name] = float(data[i])` | Assumes all sensors are scalar | Incorrect IMU/force sensor reads | Medium | Use multi-dim sensor | Read sensor dim, return array | S | Backend |
-| F-010 | **Major** | Reliability | `secure_subprocess.py:186` | Hardcoded 30s timeout | Not configurable per-operation | Timeouts on valid long operations | Medium | Run slow script | Make timeout configurable | S | Backend |
-| F-011 | **Minor** | Code Quality | `configuration_manager.py:51` | Mutable default dict in dataclass | Python gotcha | Shared state between instances | Low | Create two configs, modify one | Use `field(default_factory=dict)` already done - verify | S | Backend |
-| F-012 | **Minor** | Observability | `core.py:20-41` | `logging.StreamHandler(sys.stdout)` | All logs to stdout | Can't filter errors | Low | Check log output | Add stderr handler for ERROR+ | S | Backend |
-| F-013 | **Minor** | Security | `model_registry.py` | `yaml.safe_load` without schema | No validation of YAML structure | Malformed config crashes | Low | Load invalid YAML | Add pydantic schema validation | M | Backend |
-| F-014 | **Nit** | Style | Various | Inconsistent docstring styles | No docstring convention enforced | Harder to auto-generate docs | Low | View docstrings | Add pydocstyle to pre-commit | S | All |
-| F-015 | **Major** | Testing | `test_physics_engines_strict.py` | Tests rely on fragile module patching | `importlib.reload` + `patch.dict` | Flaky tests, DLL load failures | Medium | Run tests in isolation vs suite | Use dependency injection instead | M | QA |
+| ID    | Severity     | Category       | Location                         | Symptom                                          | Root Cause                                | Impact                            | Likelihood | Reproduce                                   | Fix                                                     | Effort | Owner     |
+| ----- | ------------ | -------------- | -------------------------------- | ------------------------------------------------ | ----------------------------------------- | --------------------------------- | ---------- | ------------------------------------------- | ------------------------------------------------------- | ------ | --------- |
+| F-001 | **Blocker**  | Testing        | `pyproject.toml:255`             | 17% coverage threshold                           | No enforcement, "temporary" for 6+ months | Ship untested code paths          | Certain    | Run pytest --cov                            | Raise to 50%, enforce in CI                             | M      | QA        |
+| F-002 | **Critical** | Dependencies   | Project root                     | No lockfile                                      | Missing pip-compile/poetry                | Non-reproducible builds           | Certain    | `pip install -r requirements.txt` twice     | Add `requirements.lock` via pip-compile                 | S      | DevOps    |
+| F-003 | **Critical** | Error Handling | Project-wide                     | 326 `except Exception:`                          | Swallowing all errors                     | Silent failures, debugging hell   | High       | grep -r "except Exception"                  | Use specific exceptions                                 | L      | All       |
+| F-004 | **Critical** | Security       | `physics_engine.py:54-66`        | Path not validated                               | `load_from_path(path)` trusts input       | Path traversal possible           | Medium     | `engine.load_from_path("../../etc/passwd")` | Validate path within allowed dirs                       | S      | Backend   |
+| F-005 | **Major**    | Reliability    | `engine_manager.py:413`          | MATLAB 30-60s startup with no timeout            | No timeout, no retry                      | UI freeze, user abandonment       | High       | Load MATLAB engine on slow machine          | Add configurable timeout, retry                         | M      | Backend   |
+| F-006 | **Major**    | Architecture   | `engine_manager.py`              | 553-line god module                              | All engine logic in one class             | Hard to extend, test, modify      | Certain    | Read the file                               | Extract EngineRegistry, EngineLoader                    | L      | Architect |
+| F-007 | **Major**    | Type Safety    | `pyproject.toml:192-222`         | 45+ modules with `disallow_untyped_defs = false` | Technical debt accumulation               | Type errors at runtime            | Medium     | Run mypy strictly                           | Remove overrides incrementally                          | L      | Backend   |
+| F-008 | **Major**    | Performance    | `sim_widget.py:57-67`            | Model loading blocks GUI thread                  | Synchronous load in QThread.run           | Frozen UI during load             | High       | Load large model                            | Move to QRunnable with progress                         | M      | Frontend  |
+| F-009 | **Major**    | Data Integrity | `physics_engine.py:263`          | `sensors[name] = float(data[i])`                 | Assumes all sensors are scalar            | Incorrect IMU/force sensor reads  | Medium     | Use multi-dim sensor                        | Read sensor dim, return array                           | S      | Backend   |
+| F-010 | **Major**    | Reliability    | `secure_subprocess.py:186`       | Hardcoded 30s timeout                            | Not configurable per-operation            | Timeouts on valid long operations | Medium     | Run slow script                             | Make timeout configurable                               | S      | Backend   |
+| F-011 | **Minor**    | Code Quality   | `configuration_manager.py:51`    | Mutable default dict in dataclass                | Python gotcha                             | Shared state between instances    | Low        | Create two configs, modify one              | Use `field(default_factory=dict)` already done - verify | S      | Backend   |
+| F-012 | **Minor**    | Observability  | `core.py:20-41`                  | `logging.StreamHandler(sys.stdout)`              | All logs to stdout                        | Can't filter errors               | Low        | Check log output                            | Add stderr handler for ERROR+                           | S      | Backend   |
+| F-013 | **Minor**    | Security       | `model_registry.py`              | `yaml.safe_load` without schema                  | No validation of YAML structure           | Malformed config crashes          | Low        | Load invalid YAML                           | Add pydantic schema validation                          | M      | Backend   |
+| F-014 | **Nit**      | Style          | Various                          | Inconsistent docstring styles                    | No docstring convention enforced          | Harder to auto-generate docs      | Low        | View docstrings                             | Add pydocstyle to pre-commit                            | S      | All       |
+| F-015 | **Major**    | Testing        | `test_physics_engines_strict.py` | Tests rely on fragile module patching            | `importlib.reload` + `patch.dict`         | Flaky tests, DLL load failures    | Medium     | Run tests in isolation vs suite             | Use dependency injection instead                        | M      | QA        |
 
 ---
 
@@ -351,6 +352,7 @@ def get_registry() -> EngineRegistry:
 4. **Failure isolation**: Wrap each engine in a subprocess pool worker so a SIGSEGV in MuJoCo doesn't crash the launcher
 
 5. **API ergonomics**: Add `PhysicsEngine.with_model(path)` context manager:
+
    ```python
    with engine.with_model("robot.urdf") as sim:
        sim.step(0.01)
@@ -377,37 +379,37 @@ def get_registry() -> EngineRegistry:
 
 ### Top 3 Most Complex Modules (with Simplification Recommendations)
 
-| Module | Lines | Complexity Score | Why Complex | Simplification |
-|--------|-------|------------------|-------------|----------------|
-| `sim_widget.py` | 1506 | 47 (McCabe) | Mixes rendering, physics, UI, recording, camera | Extract `PhysicsSimulator`, `FrameRenderer`, `CameraController` |
-| `models.py` | 1589 | 42 | Dynamic model generation, XML manipulation, validation | Extract `ModelBuilder`, `ModelValidator`, `XMLGenerator` |
-| `engine_manager.py` | 553 | 38 | Manages 8 engine types, probes, loaders, paths | Extract `EngineRegistry`, `EngineLoader`, `ProbeRunner` |
+| Module              | Lines | Complexity Score | Why Complex                                            | Simplification                                                  |
+| ------------------- | ----- | ---------------- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| `sim_widget.py`     | 1506  | 47 (McCabe)      | Mixes rendering, physics, UI, recording, camera        | Extract `PhysicsSimulator`, `FrameRenderer`, `CameraController` |
+| `models.py`         | 1589  | 42               | Dynamic model generation, XML manipulation, validation | Extract `ModelBuilder`, `ModelValidator`, `XMLGenerator`        |
+| `engine_manager.py` | 553   | 38               | Manages 8 engine types, probes, loaders, paths         | Extract `EngineRegistry`, `EngineLoader`, `ProbeRunner`         |
 
 ### Top 10 Files by Risk
 
-| File | Risk Level | Why Fragile |
-|------|------------|-------------|
-| `engine_manager.py` | 9/10 | Central coordinator, any change affects all engines |
-| `sim_widget.py` | 9/10 | 1500+ lines, mixes concerns, hard to test |
-| `physics_engine.py` (MuJoCo) | 8/10 | Direct FFI calls, memory management |
-| `drake_physics_engine.py` | 8/10 | Complex context management, lazy finalization |
-| `secure_subprocess.py` | 8/10 | Security-critical, any bug is a vulnerability |
-| `configuration_manager.py` | 7/10 | Touched by all features, validation gaps |
-| `golf_launcher.py` | 7/10 | 800+ lines GUI, subprocess spawning |
-| `urdf_io.py` | 7/10 | XML parsing, format conversion, edge cases |
-| `output_manager.py` | 6/10 | File I/O, format handling, HDF5/Parquet |
-| `model_registry.py` | 6/10 | YAML parsing, path resolution, caching |
+| File                         | Risk Level | Why Fragile                                         |
+| ---------------------------- | ---------- | --------------------------------------------------- |
+| `engine_manager.py`          | 9/10       | Central coordinator, any change affects all engines |
+| `sim_widget.py`              | 9/10       | 1500+ lines, mixes concerns, hard to test           |
+| `physics_engine.py` (MuJoCo) | 8/10       | Direct FFI calls, memory management                 |
+| `drake_physics_engine.py`    | 8/10       | Complex context management, lazy finalization       |
+| `secure_subprocess.py`       | 8/10       | Security-critical, any bug is a vulnerability       |
+| `configuration_manager.py`   | 7/10       | Touched by all features, validation gaps            |
+| `golf_launcher.py`           | 7/10       | 800+ lines GUI, subprocess spawning                 |
+| `urdf_io.py`                 | 7/10       | XML parsing, format conversion, edge cases          |
+| `output_manager.py`          | 6/10       | File I/O, format handling, HDF5/Parquet             |
+| `model_registry.py`          | 6/10       | YAML parsing, path resolution, caching              |
 
 ### External System Boundaries Audit
 
-| Boundary | Location | Timeout | Retry | Validation | Circuit Breaker |
-|----------|----------|---------|-------|------------|-----------------|
-| Subprocess calls | `secure_subprocess.py` | 30s fixed | None | Executable whitelist | None |
-| MATLAB Engine | `engine_manager.py:411` | None | None | None | None |
-| File system (model load) | `*_physics_engine.py` | None | N/A | Path check (partial) | N/A |
-| File system (output) | `output_manager.py` | None | N/A | Directory creation | N/A |
-| Network (Meshcat) | `meshcat_adapter.py` | Unknown | None | None | None |
-| Docker API | `golf_launcher.py` | None | None | None | None |
+| Boundary                 | Location                | Timeout   | Retry | Validation           | Circuit Breaker |
+| ------------------------ | ----------------------- | --------- | ----- | -------------------- | --------------- |
+| Subprocess calls         | `secure_subprocess.py`  | 30s fixed | None  | Executable whitelist | None            |
+| MATLAB Engine            | `engine_manager.py:411` | None      | None  | None                 | None            |
+| File system (model load) | `*_physics_engine.py`   | None      | N/A   | Path check (partial) | N/A             |
+| File system (output)     | `output_manager.py`     | None      | N/A   | Directory creation   | N/A             |
+| Network (Meshcat)        | `meshcat_adapter.py`    | Unknown   | None  | None                 | None            |
+| Docker API               | `golf_launcher.py`      | None      | None  | None                 | None            |
 
 **Verdict:** 6/6 boundaries lack proper resilience patterns. Priority fix: MATLAB engine timeout + retry.
 
@@ -426,18 +428,18 @@ def get_registry() -> EngineRegistry:
 
 ### 10 Code Smells with Exact Locations
 
-| Smell | Location | Evidence |
-|-------|----------|----------|
-| God class | `engine_manager.py:41-553` | 513 lines, 20+ methods |
-| Feature envy | `sim_widget.py:300-350` | Manipulator logic duplicated |
-| Primitive obsession | `configuration_manager.py:36` | `control_mode: str = "pd"` should be enum |
-| Long method | `golf_launcher.py:400-550` | `_launch_model` is 150 lines |
-| Magic numbers | `secure_subprocess.py:186` | `timeout: float = 30.0` |
-| Duplicate code | `output_manager.py:174, 345` | `json_serializer` defined twice |
-| Dead code | `output_manager.py:367` | Commented PDF generation |
-| Speculative generality | `interfaces.py:30-50` | Abstract methods never overridden differently |
-| Global state | `sim_widget.py:24-26` | `CV2_LIB`, `INVALID_CV2` globals |
-| Long parameter list | `save_simulation_results` | 5 parameters, should use config object |
+| Smell                  | Location                      | Evidence                                      |
+| ---------------------- | ----------------------------- | --------------------------------------------- |
+| God class              | `engine_manager.py:41-553`    | 513 lines, 20+ methods                        |
+| Feature envy           | `sim_widget.py:300-350`       | Manipulator logic duplicated                  |
+| Primitive obsession    | `configuration_manager.py:36` | `control_mode: str = "pd"` should be enum     |
+| Long method            | `golf_launcher.py:400-550`    | `_launch_model` is 150 lines                  |
+| Magic numbers          | `secure_subprocess.py:186`    | `timeout: float = 30.0`                       |
+| Duplicate code         | `output_manager.py:174, 345`  | `json_serializer` defined twice               |
+| Dead code              | `output_manager.py:367`       | Commented PDF generation                      |
+| Speculative generality | `interfaces.py:30-50`         | Abstract methods never overridden differently |
+| Global state           | `sim_widget.py:24-26`         | `CV2_LIB`, `INVALID_CV2` globals              |
+| Long parameter list    | `save_simulation_results`     | 5 parameters, should use config object        |
 
 ### 5 Potential Security Issues
 
@@ -470,6 +472,7 @@ python launchers/golf_launcher.py  # May fail due to version mismatches
 **Verdict: NO.** Missing lockfile means `pip install` will resolve to different versions on different days.
 
 **Fix:**
+
 ```bash
 pip install pip-tools
 pip-compile pyproject.toml -o requirements.lock
@@ -478,13 +481,13 @@ pip-sync requirements.lock  # Exact reproducible install
 
 ### Test Realism Evaluation
 
-| Aspect | Current State | Production Reality | Gap |
-|--------|--------------|-------------------|-----|
-| Model sizes | Simple pendulums | 500+ body humanoids | Tests don't cover large models |
-| Load times | Instant (mocked) | 5-60 seconds | No timeout/progress tests |
-| Concurrent users | Single | Multiple GUIs | No multi-instance tests |
-| Error conditions | Happy path | Network failures, OOM, SIGSEGV | Minimal failure mode testing |
-| Data volumes | 100 rows | 1M+ rows | No performance regression tests |
+| Aspect           | Current State    | Production Reality             | Gap                             |
+| ---------------- | ---------------- | ------------------------------ | ------------------------------- |
+| Model sizes      | Simple pendulums | 500+ body humanoids            | Tests don't cover large models  |
+| Load times       | Instant (mocked) | 5-60 seconds                   | No timeout/progress tests       |
+| Concurrent users | Single           | Multiple GUIs                  | No multi-instance tests         |
+| Error conditions | Happy path       | Network failures, OOM, SIGSEGV | Minimal failure mode testing    |
+| Data volumes     | 100 rows         | 1M+ rows                       | No performance regression tests |
 
 ### Minimum Acceptable Bar Checklist for Shipping
 
@@ -504,6 +507,7 @@ pip-sync requirements.lock  # Exact reproducible install
 ## 7. Ideal Target State Blueprint
 
 ### Repository Structure
+
 ```
 Golf_Modeling_Suite/
 ├── pyproject.toml           # Single source of truth
@@ -530,6 +534,7 @@ Golf_Modeling_Suite/
 ```
 
 ### Architecture Boundaries
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        CLI / GUI Layer                       │
@@ -550,6 +555,7 @@ Golf_Modeling_Suite/
 ```
 
 ### Typing/Testing Standards
+
 - **mypy**: `--strict` on all new code, remove overrides incrementally
 - **Coverage**: 60% minimum, 80% for `core/` and `engines/`
 - **Mutation testing**: 70% mutation score on critical paths
@@ -557,10 +563,11 @@ Golf_Modeling_Suite/
 - **Benchmarks**: Performance regression tests in CI
 
 ### CI/CD Pipeline
+
 ```yaml
 # Target: 5 min total
 jobs:
-  lint:     # 30s - ruff, black, mypy
+  lint: # 30s - ruff, black, mypy
   security: # 30s - pip-audit, bandit
   test-unit: # 2m - parallel pytest
   test-integration: # 2m - docker-based engine tests
@@ -568,18 +575,21 @@ jobs:
 ```
 
 ### Release Strategy
+
 - Semantic versioning via commits: `feat:` = minor, `fix:` = patch, `BREAKING:` = major
 - Automated changelog from conventional commits
 - PyPI release on tag push
 - Docker image published to GHCR
 
 ### Ops/Observability
+
 - Structured JSON logs with correlation IDs
 - OpenTelemetry traces for engine operations
 - Prometheus metrics: `golf_suite_engine_load_seconds`, `golf_suite_step_duration_seconds`
 - Sentry for error tracking (opt-in)
 
 ### Security Posture
+
 - All subprocess calls via `secure_subprocess.py`
 - All file paths validated before use
 - No `pickle`, `eval`, `exec`, `yaml.load`

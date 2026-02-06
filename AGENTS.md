@@ -68,11 +68,13 @@ project_name/
 **MANDATORY**: All new code must follow the Test-Driven Development methodology:
 
 1. **🔴 RED - Write a Failing Test First**
+
    - Before writing any production code, write a unit test that defines the new functionality or behavior.
    - The test MUST fail initially because the production code has not yet been written.
    - This ensures you understand the requirements before implementation.
 
 2. **🟢 GREEN - Make the Test Pass**
+
    - Write the **minimal** amount of production code necessary to make the failing test pass.
    - The goal is purely to pass the test, not to write perfect or optimized code.
    - Resist the temptation to add features not covered by tests.
@@ -236,17 +238,17 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 ### Overview: Overnight Automation Schedule (PST)
 
-| Time (PST) | Agent | Purpose |
-|------------|-------|---------|
-| 12:00 AM | Assessment Generator | Generate code quality assessment reports |
-| 12:30 AM | Code Quality Reviewer | Review and fix code quality issues |
-| 1:00 AM | Completist | Find and fix incomplete implementations |
-| 1:30 AM | Documentation Auditor | Update and improve documentation |
-| 2:30 AM | Sentinel | Security scanning and vulnerability fixes |
-| 3:00 AM | Auto-Refactor | Apply DRY/orthogonality improvements |
-| 3:30 AM | Issue Resolver | Work on open GitHub issues |
-| 4:00 AM | PR Compiler | Consolidate multiple PRs into one |
-| 5:00 AM | Auto-Rebase | Rebase PRs onto main, resolve conflicts |
+| Time (PST) | Agent                 | Purpose                                   |
+| ---------- | --------------------- | ----------------------------------------- |
+| 12:00 AM   | Assessment Generator  | Generate code quality assessment reports  |
+| 12:30 AM   | Code Quality Reviewer | Review and fix code quality issues        |
+| 1:00 AM    | Completist            | Find and fix incomplete implementations   |
+| 1:30 AM    | Documentation Auditor | Update and improve documentation          |
+| 2:30 AM    | Sentinel              | Security scanning and vulnerability fixes |
+| 3:00 AM    | Auto-Refactor         | Apply DRY/orthogonality improvements      |
+| 3:30 AM    | Issue Resolver        | Work on open GitHub issues                |
+| 4:00 AM    | PR Compiler           | Consolidate multiple PRs into one         |
+| 5:00 AM    | Auto-Rebase           | Rebase PRs onto main, resolve conflicts   |
 
 ---
 
@@ -265,8 +267,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Quality Assessment Reporter
 **Workflow:** `.github/workflows/Jules-Assessment-Generator.yml`
-**Schedule:** Midnight PST (0 8 ** * UTC)
-**Capabilities:**
+**Schedule:** Midnight PST (0 8 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Entire codebase for quality analysis
 - **Write:** Assessment reports to `docs/assessments/`
@@ -276,8 +278,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Code Quality Enforcer
 **Workflow:** `.github/workflows/Jules-Code-Quality-Reviewer.yml`
-**Schedule:** 12:30 AM PST (30 8 ** * UTC)
-**Capabilities:**
+**Schedule:** 12:30 AM PST (30 8 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Linting results, type check outputs
 - **Write:** Fixes for style, formatting, and minor code issues
@@ -287,8 +289,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Incomplete Implementation Hunter
 **Workflow:** `.github/workflows/Jules-Completist.yml`
-**Schedule:** 1:00 AM PST (0 9 ** * UTC)
-**Capabilities:**
+**Schedule:** 1:00 AM PST (0 9 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 - **Write:** Implementations for incomplete code
@@ -298,8 +300,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Documentation Maintainer
 **Workflow:** `.github/workflows/Jules-Documentation-Auditor.yml`
-**Schedule:** 1:30 AM PST (30 9 ** * UTC)
-**Capabilities:**
+**Schedule:** 1:30 AM PST (30 9 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Code and existing documentation
 - **Write:** Updates to `docs/`, README files, docstrings
@@ -309,8 +311,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Security Scanner
 **Workflow:** `.github/workflows/Jules-Sentinel.yml`
-**Schedule:** 2:30 AM PST (30 10 ** * UTC)
-**Capabilities:**
+**Schedule:** 2:30 AM PST (30 10 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Codebase for security vulnerabilities (OWASP Top 10)
 - **Write:** Security fixes, dependency updates
@@ -320,8 +322,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Code Improvement Specialist
 **Workflow:** `.github/workflows/Jules-Auto-Refactor.yml`
-**Schedule:** 3:00 AM PST (0 11 ** * UTC)
-**Capabilities:**
+**Schedule:** 3:00 AM PST (0 11 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Codebase for DRY violations, code smells
 - **Write:** Refactoring improvements
@@ -331,8 +333,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** GitHub Issue Worker
 **Workflow:** `.github/workflows/Jules-Issue-Resolver.yml`
-**Schedule:** 3:30 AM PST (30 11 ** * UTC)
-**Capabilities:**
+**Schedule:** 3:30 AM PST (30 11 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** Open GitHub issues with appropriate labels
 - **Write:** Code fixes, closes issues via PR
@@ -342,8 +344,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Pull Request Merger
 **Workflow:** `.github/workflows/Jules-PR-Compiler.yml`
-**Schedule:** 4:00 AM PST (0 12 ** * UTC)
-**Capabilities:**
+**Schedule:** 4:00 AM PST (0 12 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** All open PRs from automation
 - **Write:** Consolidated PRs combining multiple changes
@@ -353,8 +355,8 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 **Role:** Merge Conflict Resolver
 **Workflow:** `.github/workflows/Jules-Auto-Rebase.yml`
-**Schedule:** 5:00 AM PST (0 13 ** * UTC)
-**Capabilities:**
+**Schedule:** 5:00 AM PST (0 13 ** \* UTC)
+**Capabilities:\*\*
 
 - **Read:** PR branches, main branch
 - **Write:** Rebased branches, conflict resolutions

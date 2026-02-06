@@ -19,6 +19,7 @@ This review analyzes function design throughout the UpstreamDrift codebase again
 ### Overall Assessment: **NEEDS IMPROVEMENT**
 
 While the codebase is functional and well-organized at the module level, there are significant Clean Code violations at the function level, particularly in:
+
 - GUI/Launcher code (`golf_launcher.py`)
 - Statistical analysis (`statistical_analysis.py`)
 - Text editor validation (`text_editor.py`)
@@ -31,29 +32,31 @@ While the codebase is functional and well-organized at the module level, there a
 
 #### Critical Violations (>100 lines)
 
-| File | Function | Lines | Issue |
-|------|----------|-------|-------|
-| `src/launchers/golf_launcher.py` | `_setup_top_bar()` | ~180 | Creates entire toolbar with 20+ widgets; mixes widget creation, styling, and signal connections |
-| `src/launchers/golf_launcher.py` | `__init__()` | ~112 | God constructor - handles icon loading, registry setup, UI init, Docker checks, timers |
-| `src/launchers/golf_launcher.py` | `launch_simulation()` | ~120 | Routes to 5+ different launch paths; mixes routing logic with execution |
-| `src/launchers/golf_launcher.py` | `_center_window()` (lines 676-731) | ~56 | Excessive defensive programming for mock handling |
-| `src/tools/model_generation/editor/text_editor.py` | `_validate_urdf()` | ~250 | Validates links, joints, relationships, limits all in one function |
-| `src/shared/python/statistical_analysis.py` | `compute_swing_profile()` | ~122 | Computes 5 different scores in one function |
-| `src/shared/python/statistical_analysis.py` | `estimate_lyapunov_exponent()` | ~125 | Combines phase space reconstruction, neighbor finding, divergence tracking |
+| File                                               | Function                           | Lines | Issue                                                                                           |
+| -------------------------------------------------- | ---------------------------------- | ----- | ----------------------------------------------------------------------------------------------- |
+| `src/launchers/golf_launcher.py`                   | `_setup_top_bar()`                 | ~180  | Creates entire toolbar with 20+ widgets; mixes widget creation, styling, and signal connections |
+| `src/launchers/golf_launcher.py`                   | `__init__()`                       | ~112  | God constructor - handles icon loading, registry setup, UI init, Docker checks, timers          |
+| `src/launchers/golf_launcher.py`                   | `launch_simulation()`              | ~120  | Routes to 5+ different launch paths; mixes routing logic with execution                         |
+| `src/launchers/golf_launcher.py`                   | `_center_window()` (lines 676-731) | ~56   | Excessive defensive programming for mock handling                                               |
+| `src/tools/model_generation/editor/text_editor.py` | `_validate_urdf()`                 | ~250  | Validates links, joints, relationships, limits all in one function                              |
+| `src/shared/python/statistical_analysis.py`        | `compute_swing_profile()`          | ~122  | Computes 5 different scores in one function                                                     |
+| `src/shared/python/statistical_analysis.py`        | `estimate_lyapunov_exponent()`     | ~125  | Combines phase space reconstruction, neighbor finding, divergence tracking                      |
 
 #### Moderate Violations (50-100 lines)
 
-| File | Function | Lines | Issue |
-|------|----------|-------|-------|
-| `src/launchers/golf_launcher.py` | `_load_layout()` | ~65 | Mixes file I/O, JSON parsing, validation, UI restoration |
-| `src/launchers/golf_launcher.py` | `closeEvent()` | ~60 | Handles confirmation, timer cleanup, thread cleanup, process termination |
-| `src/launchers/golf_launcher.py` | `open_diagnostics()` | ~78 | Builds runtime state, creates dialog, handles button response |
-| `src/shared/python/ai/workflow_engine.py` | `execute_next_step()` | ~117 | Condition check, tool execution, validation, state update, error handling |
+| File                                      | Function              | Lines | Issue                                                                     |
+| ----------------------------------------- | --------------------- | ----- | ------------------------------------------------------------------------- |
+| `src/launchers/golf_launcher.py`          | `_load_layout()`      | ~65   | Mixes file I/O, JSON parsing, validation, UI restoration                  |
+| `src/launchers/golf_launcher.py`          | `closeEvent()`        | ~60   | Handles confirmation, timer cleanup, thread cleanup, process termination  |
+| `src/launchers/golf_launcher.py`          | `open_diagnostics()`  | ~78   | Builds runtime state, creates dialog, handles button response             |
+| `src/shared/python/ai/workflow_engine.py` | `execute_next_step()` | ~117  | Condition check, tool execution, validation, state update, error handling |
 
 ### 2. Functions with Multiple Responsibilities
 
 #### `golf_launcher.py::__init__()` (lines 167-279)
+
 **Responsibilities violated:**
+
 1. Window setup (title, size, icon)
 2. State initialization
 3. Process manager creation
@@ -67,6 +70,7 @@ While the codebase is functional and well-organized at the module level, there a
 11. UI component initialization
 
 **Recommended Refactoring:**
+
 ```python
 def __init__(self, startup_results: StartupResults | None = None):
     super().__init__()
@@ -78,7 +82,9 @@ def __init__(self, startup_results: StartupResults | None = None):
 ```
 
 #### `golf_launcher.py::launch_simulation()` (lines 1806-1926)
+
 **Responsibilities violated:**
+
 1. Special app routing (URDF generator, C3D viewer, shot tracer)
 2. MATLAB app detection
 3. Docker mode handling
@@ -89,6 +95,7 @@ def __init__(self, startup_results: StartupResults | None = None):
 8. Fallback MJCF handling
 
 **Recommended Refactoring:** Use Strategy pattern with a `LaunchStrategy` interface:
+
 ```python
 class LaunchStrategy(Protocol):
     def can_launch(self, model: Any, context: LaunchContext) -> bool: ...
@@ -96,7 +103,9 @@ class LaunchStrategy(Protocol):
 ```
 
 #### `text_editor.py::_validate_urdf()` (lines 400-651)
+
 **Responsibilities violated:**
+
 1. Root element validation
 2. Robot name validation
 3. Link collection and validation
@@ -108,6 +117,7 @@ class LaunchStrategy(Protocol):
 9. Orphan link detection
 
 **Recommended Refactoring:** Extract validator classes:
+
 ```python
 class URDFValidator:
     validators = [
@@ -126,14 +136,15 @@ class URDFValidator:
 
 ### 3. Functions with Too Many Parameters
 
-| File | Function | Parameters | Recommendation |
-|------|----------|------------|----------------|
-| `statistical_analysis.py` | `__init__()` | 11 | Use `AnalysisData` dataclass |
-| `statistical_analysis.py` | `compute_local_divergence_rate()` | 5 | Use `DivergenceConfig` dataclass |
-| `statistical_analysis.py` | `compute_multiscale_entropy()` | 4 | Use `EntropyConfig` dataclass |
-| `workflow_engine.py` | `WorkflowStep` dataclass | 10 fields | Consider builder pattern |
+| File                      | Function                          | Parameters | Recommendation                   |
+| ------------------------- | --------------------------------- | ---------- | -------------------------------- |
+| `statistical_analysis.py` | `__init__()`                      | 11         | Use `AnalysisData` dataclass     |
+| `statistical_analysis.py` | `compute_local_divergence_rate()` | 5          | Use `DivergenceConfig` dataclass |
+| `statistical_analysis.py` | `compute_multiscale_entropy()`    | 4          | Use `EntropyConfig` dataclass    |
+| `workflow_engine.py`      | `WorkflowStep` dataclass          | 10 fields  | Consider builder pattern         |
 
 **Example Refactoring:**
+
 ```python
 # Before
 def __init__(self, times, joint_positions, joint_velocities, joint_torques,
@@ -156,13 +167,14 @@ def __init__(self, data: SwingData):
 
 ### 4. Deep Nesting (>3 levels)
 
-| File | Function | Max Depth | Issue |
-|------|----------|-----------|-------|
-| `text_editor.py` | `_validate_urdf()` | 6+ | Nested loops and conditionals for joint/link validation |
-| `statistical_analysis.py` | `compute_rqa_metrics()` | 5 | Nested loops for diagonal/vertical line extraction |
-| `golf_launcher.py` | `_on_wsl_mode_changed()` | 4 | Try-except within if-else with nested conditions |
+| File                      | Function                 | Max Depth | Issue                                                   |
+| ------------------------- | ------------------------ | --------- | ------------------------------------------------------- |
+| `text_editor.py`          | `_validate_urdf()`       | 6+        | Nested loops and conditionals for joint/link validation |
+| `statistical_analysis.py` | `compute_rqa_metrics()`  | 5         | Nested loops for diagonal/vertical line extraction      |
+| `golf_launcher.py`        | `_on_wsl_mode_changed()` | 4         | Try-except within if-else with nested conditions        |
 
 **Example - `_validate_urdf()` nesting:**
+
 ```python
 for joint_elem in root.findall("joint"):       # Level 1
     if not name:                                 # Level 2
@@ -178,18 +190,19 @@ for joint_elem in root.findall("joint"):       # Level 1
 
 ### 5. Hidden Side Effects
 
-| File | Function | Side Effects |
-|------|----------|--------------|
-| `golf_launcher.py` | `select_model()` | Updates `selected_model`, changes card styling, updates context help, modifies launch button |
-| `golf_launcher.py` | `_on_docker_mode_changed()` | Modifies WSL checkbox, shows dialogs, updates execution status, shows toasts, updates launch button |
-| `golf_launcher.py` | `_apply_model_selection()` | Modifies model_order, syncs cards, rebuilds grid, saves layout, updates selection, updates launch button |
-| `statistical_analysis.py` | `compute_work_metrics()` | Writes to `_work_metrics_cache` |
+| File                      | Function                    | Side Effects                                                                                             |
+| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `golf_launcher.py`        | `select_model()`            | Updates `selected_model`, changes card styling, updates context help, modifies launch button             |
+| `golf_launcher.py`        | `_on_docker_mode_changed()` | Modifies WSL checkbox, shows dialogs, updates execution status, shows toasts, updates launch button      |
+| `golf_launcher.py`        | `_apply_model_selection()`  | Modifies model_order, syncs cards, rebuilds grid, saves layout, updates selection, updates launch button |
+| `statistical_analysis.py` | `compute_work_metrics()`    | Writes to `_work_metrics_cache`                                                                          |
 
 ### 6. Good Examples (Well-Designed Functions)
 
 The codebase also contains many well-designed functions that follow Clean Code principles:
 
 #### `education.py` - Excellent SRP adherence
+
 ```python
 def get_definition(self, level: ExpertiseLevel) -> str:  # ~10 lines
     """Get definition at or below the given level."""
@@ -197,6 +210,7 @@ def get_definition(self, level: ExpertiseLevel) -> str:  # ~10 lines
 ```
 
 #### `workflow_engine.py::get_progress()` - Clean and focused
+
 ```python
 def get_progress(self, execution: WorkflowExecution) -> dict[str, Any]:  # ~20 lines
     """Get progress information for an execution."""
@@ -204,6 +218,7 @@ def get_progress(self, execution: WorkflowExecution) -> dict[str, Any]:  # ~20 l
 ```
 
 #### `text_editor.py::_validate_xml()` - Good size and focus
+
 ```python
 def _validate_xml(self) -> list[ValidationMessage]:  # ~30 lines
     """Validate XML syntax."""
@@ -215,7 +230,9 @@ def _validate_xml(self) -> list[ValidationMessage]:  # ~30 lines
 ## Architecture Patterns Identified
 
 ### Pattern 1: God Class Anti-Pattern
+
 `GolfLauncher` (2200+ lines, 60+ methods) handles:
+
 - UI management
 - Process lifecycle
 - Docker orchestration
@@ -225,6 +242,7 @@ def _validate_xml(self) -> list[ValidationMessage]:  # ~30 lines
 - Diagnostics
 
 **Recommendation:** Decompose into:
+
 - `LauncherUI` - UI construction and updates
 - `ProcessOrchestrator` - Process lifecycle management
 - `DockerManager` - Already extracted (good!)
@@ -232,12 +250,15 @@ def _validate_xml(self) -> list[ValidationMessage]:  # ~30 lines
 - `ModelSelector` - Model selection logic
 
 ### Pattern 2: Data as Code
+
 `_build_default_glossary()` in `education.py` is a 380-line function that's pure data definition.
 
 **Recommendation:** Move to configuration file (`glossary.yaml` or `glossary.json`)
 
 ### Pattern 3: Mixin Overuse
+
 `StatisticalAnalyzer` uses 7 mixins:
+
 ```python
 class StatisticalAnalyzer(
     EnergyMetricsMixin,
@@ -251,6 +272,7 @@ class StatisticalAnalyzer(
 ```
 
 **Recommendation:** Consider composition over inheritance:
+
 ```python
 class StatisticalAnalyzer:
     def __init__(self, data: SwingData):
@@ -264,14 +286,14 @@ class StatisticalAnalyzer:
 
 ## Metrics Summary
 
-| Metric | Count | Severity |
-|--------|-------|----------|
-| Functions >100 lines | 12+ | HIGH |
-| Functions >50 lines | 35+ | MEDIUM |
-| Functions with >4 parameters | 15+ | MEDIUM |
-| Functions with >3 nesting levels | 20+ | MEDIUM |
-| God classes (>1000 lines) | 3 | HIGH |
-| Functions with hidden side effects | 10+ | MEDIUM |
+| Metric                             | Count | Severity |
+| ---------------------------------- | ----- | -------- |
+| Functions >100 lines               | 12+   | HIGH     |
+| Functions >50 lines                | 35+   | MEDIUM   |
+| Functions with >4 parameters       | 15+   | MEDIUM   |
+| Functions with >3 nesting levels   | 20+   | MEDIUM   |
+| God classes (>1000 lines)          | 3     | HIGH     |
+| Functions with hidden side effects | 10+   | MEDIUM   |
 
 ---
 
@@ -307,6 +329,7 @@ The codebase demonstrates good high-level organization (modular directories, cle
 3. **Statistical analysis** - Consider composition over mixins
 
 Following Clean Code principles will improve:
+
 - **Testability** - Smaller functions are easier to unit test
 - **Maintainability** - Single-responsibility functions are easier to modify
 - **Readability** - Functions that do one thing are easier to understand
@@ -314,4 +337,4 @@ Following Clean Code principles will improve:
 
 ---
 
-*This review follows principles from "Clean Code" by Robert C. Martin and "Refactoring" by Martin Fowler.*
+_This review follows principles from "Clean Code" by Robert C. Martin and "Refactoring" by Martin Fowler._

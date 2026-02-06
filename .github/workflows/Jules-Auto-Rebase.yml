@@ -3,15 +3,15 @@
 name: Jules Auto Rebase
 
 on:
-    workflow_call:
-        # No inputs required for this placeholder
+  workflow_call:
+    # No inputs required for this placeholder
 
 jobs:
-    auto-rebase:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Placeholder
-              run: |
-                  echo "Jules Auto-Rebase worker placeholder"
-                  echo "This workflow is triggered by Control Tower for automated PR rebasing."
-                  echo "TODO: Implement automatic rebase of stale PRs onto main."
+  auto-rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: |
+          echo "Jules Auto-Rebase worker placeholder"
+          echo "This workflow is triggered by Control Tower for automated PR rebasing."
+          echo "TODO: Implement automatic rebase of stale PRs onto main."

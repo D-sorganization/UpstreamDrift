@@ -16,6 +16,7 @@ Drake is a C++-based toolbox for model-based design and verification of robotics
 ## Features
 
 ### Trajectory Optimization
+
 - Direct collocation methods (Hermite-Simpson, trapez oidal)
 - Nonlinear programming (SNOPT, IPOPT)
 - Multi-phase optimization
@@ -23,6 +24,7 @@ Drake is a C++-based toolbox for model-based design and verification of robotics
 - Cost functions for speed, accuracy, smoothness, energy
 
 ### Contact Dynamics
+
 - Compliant contact models
 - Hybrid mode automaton (stance/flight transitions)
 - Ground reaction forces
@@ -30,12 +32,14 @@ Drake is a C++-based toolbox for model-based design and verification of robotics
 - Multi-contact scenarios
 
 ### System Analysis
+
 - Linearization around trajectories
 - Finite-time LQR (time-varying)
 - Reachability analysis
 - Lyapunov analysis for stability
 
 ### Visualization
+
 - MeshCat browser-based 3D viewer
 - Real-time playback of optimized trajectories
 - Contact force visualization
@@ -46,6 +50,7 @@ Drake is a C++-based toolbox for model-based design and verification of robotics
 ### Prerequisites
 
 Drake requires:
+
 - Python 3.10-3.11 (Drake not yet compatible with 3.12+)
 - macOS, Ubuntu 20.04/22.04, or Windows with WSL2
 
@@ -296,14 +301,17 @@ viz.stop()
 ### Golf Swing Models
 
 1. **Simple Pendulum (2 DOF)**
+
    - Shoulder + wrist
    - Fast optimization
 
 2. **Upper Body (10 DOF)**
+
    - Torso + arms + club
    - Realistic swing mechanics
 
 3. **Full Body (15 DOF)**
+
    - Legs + torso + arms
    - Weight transfer analysis
 
@@ -317,18 +325,19 @@ All models available in URDF format compatible with Drake.
 
 Drake provides excellent performance for optimization and analysis:
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Forward simulation | 10-50× realtime | Depends on model complexity |
-| Trajectory optimization | 1-60 seconds | 50-100 timesteps |
-| Linearization | <1 second | Per sample point |
-| LQR synthesis | <1 second | Per time sample |
+| Operation               | Time            | Notes                       |
+| ----------------------- | --------------- | --------------------------- |
+| Forward simulation      | 10-50× realtime | Depends on model complexity |
+| Trajectory optimization | 1-60 seconds    | 50-100 timesteps            |
+| Linearization           | <1 second       | Per sample point            |
+| LQR synthesis           | <1 second       | Per time sample             |
 
 ## Best Practices
 
 ### When to Use Drake
 
 ✅ **Use Drake for**:
+
 - Trajectory optimization
 - Optimal control design
 - System analysis and verification
@@ -336,6 +345,7 @@ Drake provides excellent performance for optimization and analysis:
 - Model predictive control
 
 ❌ **Prefer MuJoCo for**:
+
 - Real-time interactive simulation
 - Muscle-level biomechanics
 - Large-scale parameter sweeps
@@ -430,12 +440,15 @@ class SwingOptimizer:
 ### Common Issues
 
 **Issue**: Drake fails to import
+
 - **Solution**: Ensure Python 3.10-3.11, not 3.12+
 
 **Issue**: Optimization doesn't converge
+
 - **Solution**: Adjust initial guess, scale variables, try different solver
 
 **Issue**: Contact forces are unstable
+
 - **Solution**: Increase contact stiffness, reduce timestep
 
 ## Documentation
@@ -466,8 +479,10 @@ Drake is licensed under the BSD 3-Clause License. See the [Drake repository](htt
 ## Support
 
 For Drake-specific questions:
+
 - [Drake GitHub Discussions](https://github.com/RobotLocomotion/drake/discussions)
 - [Drake Slack Channel](https://drake.mit.edu/getting_help.html)
 
 For Golf Modeling Suite integration:
+
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

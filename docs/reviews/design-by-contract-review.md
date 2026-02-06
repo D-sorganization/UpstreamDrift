@@ -13,14 +13,14 @@ The Golf Modeling Suite has a **strong Design by Contract (DbC) foundation** wit
 
 **Overall Score: 8.5/10**
 
-| Category | Score | Notes |
-|----------|-------|-------|
-| Infrastructure | 10/10 | Excellent contracts module with all DbC primitives |
-| Core Components | 9/10 | `BasePhysicsEngine` demonstrates best practices |
-| Engine Implementations | 6/10 | Individual engines lack contract decorators |
-| API Layer | 8/10 | Partial adoption, room for expansion |
-| Test Coverage | 9/10 | Comprehensive contract infrastructure tests |
-| Documentation | 10/10 | Excellent guides and usage examples |
+| Category               | Score | Notes                                              |
+| ---------------------- | ----- | -------------------------------------------------- |
+| Infrastructure         | 10/10 | Excellent contracts module with all DbC primitives |
+| Core Components        | 9/10  | `BasePhysicsEngine` demonstrates best practices    |
+| Engine Implementations | 6/10  | Individual engines lack contract decorators        |
+| API Layer              | 8/10  | Partial adoption, room for expansion               |
+| Test Coverage          | 9/10  | Comprehensive contract infrastructure tests        |
+| Documentation          | 10/10 | Excellent guides and usage examples                |
 
 ---
 
@@ -32,18 +32,19 @@ The Golf Modeling Suite has a **strong Design by Contract (DbC) foundation** wit
 
 The contracts module provides a complete DbC toolkit:
 
-| Component | Implementation | Quality |
-|-----------|---------------|---------|
-| `@precondition` | Decorator with condition lambda + message | ✅ Complete |
-| `@postcondition` | Decorator checking return values | ✅ Complete |
-| `@require_state` | State-specific precondition decorator | ✅ Complete |
-| `@invariant_checked` | Post-method invariant verification | ✅ Complete |
-| `ContractChecker` | Mixin for invariant management | ✅ Complete |
-| Exception Hierarchy | `ContractViolationError` → specific errors | ✅ Complete |
-| Performance Toggle | `enable_contracts()` / `disable_contracts()` | ✅ Complete |
-| Helper Functions | `check_finite`, `check_positive`, etc. | ✅ Complete |
+| Component            | Implementation                               | Quality     |
+| -------------------- | -------------------------------------------- | ----------- |
+| `@precondition`      | Decorator with condition lambda + message    | ✅ Complete |
+| `@postcondition`     | Decorator checking return values             | ✅ Complete |
+| `@require_state`     | State-specific precondition decorator        | ✅ Complete |
+| `@invariant_checked` | Post-method invariant verification           | ✅ Complete |
+| `ContractChecker`    | Mixin for invariant management               | ✅ Complete |
+| Exception Hierarchy  | `ContractViolationError` → specific errors   | ✅ Complete |
+| Performance Toggle   | `enable_contracts()` / `disable_contracts()` | ✅ Complete |
+| Helper Functions     | `check_finite`, `check_positive`, etc.       | ✅ Complete |
 
 **Strengths:**
+
 - Clean decorator pattern allowing composition
 - Rich exception details (function name, parameters, values)
 - Global toggle for production performance
@@ -61,6 +62,7 @@ ContractViolationError (base)
 ```
 
 All exceptions include diagnostic details:
+
 - `contract_type`: Type of contract violated
 - `function_name`: Where violation occurred
 - `details`: Additional context (parameters, values)
@@ -142,12 +144,14 @@ class AerodynamicsCalculator:
 **Location:** `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py`
 
 **Issues Found:**
+
 - Does NOT inherit from `BasePhysicsEngine` or `ContractChecker`
 - No `@precondition` or `@postcondition` decorators
 - Manual state checks instead of `@require_state`
 - Silent failures (returns empty arrays instead of raising errors)
 
 **Current Pattern (Weak):**
+
 ```python
 def compute_mass_matrix(self) -> np.ndarray:
     if self.model is None or self.data is None:
@@ -155,6 +159,7 @@ def compute_mass_matrix(self) -> np.ndarray:
 ```
 
 **Recommended Pattern (Strong):**
+
 ```python
 @require_state(lambda self: self.model is not None, "model loaded")
 @postcondition(lambda M: check_positive_definite(M), "Mass matrix must be SPD")
@@ -169,20 +174,21 @@ def compute_mass_matrix(self) -> np.ndarray:
 **Location:** `src/engines/physics_engines/drake/python/drake_physics_engine.py`
 
 **Same issues as MuJoCo:**
+
 - No contract decorators
 - Manual state checks
 - Silent failures with logging warnings
 
 ### 3.3 Other Engines
 
-| Engine | Inherits ContractChecker | Uses Decorators | Rating |
-|--------|-------------------------|-----------------|--------|
-| MuJoCo | ❌ | ❌ | ⭐⭐⭐ |
-| Drake | ❌ | ❌ | ⭐⭐⭐ |
-| Pinocchio | ❌ | ❌ | ⭐⭐⭐ |
-| OpenSim | ❌ | ❌ | ⭐⭐⭐ |
-| MyoSuite | ❌ | ❌ | ⭐⭐⭐ |
-| Pendulum | ❌ | ❌ | ⭐⭐⭐ |
+| Engine    | Inherits ContractChecker | Uses Decorators | Rating |
+| --------- | ------------------------ | --------------- | ------ |
+| MuJoCo    | ❌                       | ❌              | ⭐⭐⭐ |
+| Drake     | ❌                       | ❌              | ⭐⭐⭐ |
+| Pinocchio | ❌                       | ❌              | ⭐⭐⭐ |
+| OpenSim   | ❌                       | ❌              | ⭐⭐⭐ |
+| MyoSuite  | ❌                       | ❌              | ⭐⭐⭐ |
+| Pendulum  | ❌                       | ❌              | ⭐⭐⭐ |
 
 ---
 
@@ -203,6 +209,7 @@ class AnalysisService:
 ```
 
 **Observations:**
+
 - Uses `@postcondition` for response validation
 - Missing `@precondition` for `engine_manager` state
 - Internal methods lack contract annotations
@@ -217,19 +224,20 @@ class AnalysisService:
 
 **Rating: ⭐⭐⭐⭐⭐ EXCELLENT**
 
-| Test Class | Coverage |
-|------------|----------|
-| `TestPreconditionDecorator` | ✅ Pass, fail, methods, multiple conditions |
-| `TestPostconditionDecorator` | ✅ Pass, fail, numpy arrays |
-| `TestRequireStateDecorator` | ✅ Pass, fail |
-| `TestContractChecker` | ✅ Invariant verification, `@invariant_checked` |
-| `TestStateError` | ✅ Exception attributes |
-| `TestContractHelpers` | ✅ All helper functions |
-| `TestFiniteResultDecorator` | ✅ Finite/NaN/None handling |
-| `TestContractEnableDisable` | ✅ Toggle behavior |
-| `TestContractViolationErrorHierarchy` | ✅ Inheritance |
+| Test Class                            | Coverage                                        |
+| ------------------------------------- | ----------------------------------------------- |
+| `TestPreconditionDecorator`           | ✅ Pass, fail, methods, multiple conditions     |
+| `TestPostconditionDecorator`          | ✅ Pass, fail, numpy arrays                     |
+| `TestRequireStateDecorator`           | ✅ Pass, fail                                   |
+| `TestContractChecker`                 | ✅ Invariant verification, `@invariant_checked` |
+| `TestStateError`                      | ✅ Exception attributes                         |
+| `TestContractHelpers`                 | ✅ All helper functions                         |
+| `TestFiniteResultDecorator`           | ✅ Finite/NaN/None handling                     |
+| `TestContractEnableDisable`           | ✅ Toggle behavior                              |
+| `TestContractViolationErrorHierarchy` | ✅ Inheritance                                  |
 
 **Missing Tests:**
+
 - Integration tests verifying contracts in actual engine usage
 - Performance benchmarks with contracts enabled/disabled
 - Contract violation logging/metrics tests
@@ -245,6 +253,7 @@ class AnalysisService:
 **Rating: ⭐⭐⭐⭐⭐ EXCELLENT**
 
 Covers:
+
 - Core concepts (preconditions, postconditions, invariants)
 - Usage examples for all decorators
 - Built-in validators
@@ -262,6 +271,7 @@ Covers:
 1. **Migrate Engine Implementations to BasePhysicsEngine**
 
    All physics engines should inherit from `BasePhysicsEngine`:
+
    ```python
    class MuJoCoPhysicsEngine(BasePhysicsEngine):
        def _load_from_path_impl(self, path: str) -> None:
@@ -272,6 +282,7 @@ Covers:
 2. **Add Contract Decorators to Critical Methods**
 
    Priority methods needing contracts:
+
    - `compute_mass_matrix()` - postcondition: SPD matrix
    - `compute_inverse_dynamics()` - precondition: qacc dimensions
    - `step()` - precondition: model loaded
@@ -280,11 +291,14 @@ Covers:
 3. **Replace Silent Failures with Explicit Errors**
 
    Change:
+
    ```python
    if self.model is None:
        return np.array([])  # BAD: Silent failure
    ```
+
    To:
+
    ```python
    @require_state(lambda self: self.model is not None, "model loaded")
    def method(self):
@@ -296,6 +310,7 @@ Covers:
 4. **Expand API Layer Contracts**
 
    Add `@precondition` to all service methods:
+
    ```python
    @precondition(
        lambda self: self.engine_manager is not None,
@@ -309,6 +324,7 @@ Covers:
 5. **Add Contract Metrics/Monitoring**
 
    Track contract violations in production:
+
    ```python
    # In contracts.py
    contract_violation_counter = Counter()
@@ -320,6 +336,7 @@ Covers:
 6. **Create Engine-Specific Invariants**
 
    Each engine can define domain-specific invariants:
+
    ```python
    class MuJoCoPhysicsEngine(BasePhysicsEngine):
        def _get_invariants(self):
@@ -334,6 +351,7 @@ Covers:
 7. **Integration Test Suite for Contracts**
 
    Test that contracts are enforced during realistic workflows:
+
    ```python
    def test_contract_enforced_when_stepping_uninitialized_engine():
        engine = MuJoCoPhysicsEngine()
@@ -344,6 +362,7 @@ Covers:
 8. **CI/CD Contract Validation**
 
    Add workflow step to verify contract compliance:
+
    ```yaml
    - name: Verify Contracts
      run: python -m pytest tests/contracts/ --tb=short
@@ -355,12 +374,12 @@ Covers:
 
 ### Current State
 
-| Category | Files Using Contracts | Total Files | Coverage |
-|----------|----------------------|-------------|----------|
-| Core Infrastructure | 3 | 3 | 100% |
-| Physics Engines | 0 | 6 | 0% |
-| API Services | 1 | 5 | 20% |
-| Shared Utilities | 2 | 50+ | ~4% |
+| Category            | Files Using Contracts | Total Files | Coverage |
+| ------------------- | --------------------- | ----------- | -------- |
+| Core Infrastructure | 3                     | 3           | 100%     |
+| Physics Engines     | 0                     | 6           | 0%       |
+| API Services        | 1                     | 5           | 20%      |
+| Shared Utilities    | 2                     | 50+         | ~4%      |
 
 ### Files Importing Contracts Module
 
@@ -393,12 +412,12 @@ Covers:
 
 ### Path to 10/10
 
-| Action | Impact | Effort |
-|--------|--------|--------|
-| Migrate all engines to `BasePhysicsEngine` | +1.0 | High |
-| Add contracts to critical engine methods | +0.3 | Medium |
-| Expand API layer contracts | +0.1 | Low |
-| Add contract metrics/monitoring | +0.1 | Low |
+| Action                                     | Impact | Effort |
+| ------------------------------------------ | ------ | ------ |
+| Migrate all engines to `BasePhysicsEngine` | +1.0   | High   |
+| Add contracts to critical engine methods   | +0.3   | Medium |
+| Expand API layer contracts                 | +0.1   | Low    |
+| Add contract metrics/monitoring            | +0.1   | Low    |
 
 ---
 
@@ -412,5 +431,5 @@ The Golf Modeling Suite has **exceptional DbC infrastructure** but **inconsisten
 
 ---
 
-*Review by Claude Code*
-*Session: https://claude.ai/code/session_016KnuE4TGsPfGG4EJFCCpPd*
+_Review by Claude Code_
+_Session: https://claude.ai/code/session_016KnuE4TGsPfGG4EJFCCpPd_

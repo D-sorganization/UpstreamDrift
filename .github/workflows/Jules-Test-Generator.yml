@@ -19,7 +19,7 @@ jobs:
           else
             BASE="HEAD^"
           fi
-          
+
           CHANGED_FILES=$(git diff --name-only $BASE HEAD -- 'src/**/*.py' ':!**/tests/*' ':!**/test_*.py' || true)
 
           if [ -z "$CHANGED_FILES" ]; then

@@ -18,6 +18,7 @@ gh issue list --state open --limit 5 --json number,title,labels,body
 ```
 
 Select up to 5 issues to address. Prioritize by:
+
 1. Critical/high priority labels
 2. Related issues that can be fixed together
 3. Oldest issues
@@ -34,14 +35,17 @@ git checkout -b fix/5-issues-batch-$(date +%Y%m%d)
 For each of the 5 issues:
 
 #### a. Read and Understand
+
 - Review issue description and requirements
 - Identify affected files
 
 #### b. Make Changes
+
 - Implement the fix for each issue
 - Keep changes organized by issue
 
 #### c. Track Progress
+
 - Note which issues have been addressed
 - Document any issues that cannot be resolved
 
@@ -102,6 +106,7 @@ gh pr checks <PR_NUMBER>
 ```
 
 **If CI fails**:
+
 1. Review failure logs: `gh run view --job <JOB_ID> --log-failed`
 2. Fix the issues locally
 3. Commit with message: `fix: Address CI feedback - <description>`
@@ -136,12 +141,12 @@ git branch -d fix/5-issues-batch-*
 ### Issues Resolved
 
 | Issue | Title | Status |
-|-------|-------|--------|
-| #XXX | Title | Fixed |
-| #XXX | Title | Fixed |
-| #XXX | Title | Fixed |
-| #XXX | Title | Fixed |
-| #XXX | Title | Fixed |
+| ----- | ----- | ------ |
+| #XXX  | Title | Fixed  |
+| #XXX  | Title | Fixed  |
+| #XXX  | Title | Fixed  |
+| #XXX  | Title | Fixed  |
+| #XXX  | Title | Fixed  |
 
 **CI/CD Iterations**: X attempts until green
 **Remaining open issues in repo**: Y

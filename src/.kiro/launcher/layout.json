@@ -1,10 +1,5 @@
 {
-  "model_order": [
-    "model_2",
-    "model_1",
-    "model_0",
-    "model_3"
-  ],
+  "model_order": ["model_2", "model_1", "model_0", "model_3"],
   "selected_model": "model_0",
   "window_geometry": {
     "x": -300,

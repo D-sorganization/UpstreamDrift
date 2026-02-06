@@ -28,6 +28,7 @@ Run comprehensive linting and code quality checks on the codebase.
    ```
 
 4. **Find and fix placeholder statements**:
+
    - Search for `pass` statements that should have implementations
    - Search for `TODO`, `FIXME`, `XXX`, `HACK` comments
    - Search for `NotImplementedError` that should be implemented
@@ -38,6 +39,7 @@ Run comprehensive linting and code quality checks on the codebase.
    ```
 
 5. **Fix any issues found**:
+
    - For each linting error, apply the appropriate fix
    - For placeholder statements, implement the functionality or remove if unnecessary
    - Ensure all changes pass linting after fixes

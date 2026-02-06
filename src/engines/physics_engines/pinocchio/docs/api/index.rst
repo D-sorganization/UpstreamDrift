@@ -1,5 +1,5 @@
 DTACK API Documentation
-======================
+=======================
 
 Welcome to the DTACK (Unified Golf Biomechanics Platform) API documentation.
 

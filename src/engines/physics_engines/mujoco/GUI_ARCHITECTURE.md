@@ -17,6 +17,7 @@ This document provides a comprehensive guide to all GUI applications in the Golf
 **Purpose**: Dedicated launcher for the Carnegie Mellon/MuJoCo humanoid golf simulation with full customization support.
 
 **Key Features**:
+
 - ✅ **Body Segment Color Customization**
   - Shirt, pants, shoes, skin, eyes, club colors
   - Real-time color picker with visual preview
@@ -53,6 +54,7 @@ This document provides a comprehensive guide to all GUI applications in the Golf
   - Environment rebuild capability
 
 **How to Launch**:
+
 ```bash
 cd engines/physics_engines/mujoco/python
 python humanoid_launcher.py
@@ -63,6 +65,7 @@ python humanoid_launcher.py
 **Configuration File**: `engines/physics_engines/mujoco/docker/src/simulation_config.json`
 
 **Output Files**:
+
 - Video: `engines/physics_engines/mujoco/docker/src/humanoid_golf.mp4`
 - Data: `engines/physics_engines/mujoco/docker/src/golf_data.csv`
 
@@ -77,6 +80,7 @@ python humanoid_launcher.py
 **Purpose**: Professional golf swing analysis tool with support for multiple biomechanical models.
 
 **Key Features**:
+
 - ✅ **Multiple Model Support**
   - Chaotic Pendulum (2 DOF)
   - Double Pendulum (2 DOF)
@@ -110,6 +114,7 @@ python humanoid_launcher.py
 - ❌ **NO Height/Weight Scaling** (uses model defaults)
 
 **How to Launch**:
+
 ```bash
 cd engines/physics_engines/mujoco/python
 python -m mujoco_humanoid_golf
@@ -130,6 +135,7 @@ python -m mujoco_humanoid_golf
 **Purpose**: Original Docker-based launcher (predecessor to Humanoid Golf Launcher).
 
 **Key Features**:
+
 - ✅ Body segment color customization
 - ✅ Height/weight scaling
 - ✅ Club parameters
@@ -138,6 +144,7 @@ python -m mujoco_humanoid_golf
 - ⚠️ **Less polished** than modern PyQt6 version
 
 **How to Launch**:
+
 ```bash
 cd engines/physics_engines/mujoco/docker/gui
 python deepmind_control_suite_MuJoCo_GUI.py
@@ -158,6 +165,7 @@ python deepmind_control_suite_MuJoCo_GUI.py
 **Purpose**: Core simulation engine that applies customization settings.
 
 **Features**:
+
 - Reads `simulation_config.json`
 - Applies color customization via `utils.customize_visuals()`
 - Handles height/weight scaling
@@ -166,6 +174,7 @@ python deepmind_control_suite_MuJoCo_GUI.py
 - Generates video (MP4) and data (CSV) outputs
 
 **Key Functions**:
+
 - `run_simulation()`: Main entry point
 - `utils.load_humanoid_with_props()`: Model loading with customization
 - `utils.customize_visuals()`: Applies color settings
@@ -180,6 +189,7 @@ python deepmind_control_suite_MuJoCo_GUI.py
 **Purpose**: Headless batch simulation runner for multiple models.
 
 **Features**:
+
 - Command-line interface
 - Batch processing support
 - Model catalog (pendulums, upper body, full body, etc.)
@@ -187,6 +197,7 @@ python deepmind_control_suite_MuJoCo_GUI.py
 - Summary statistics
 
 **How to Use**:
+
 ```bash
 python -m mujoco_humanoid_golf.cli_runner --model full_body --duration 5.0 --summary
 ```
@@ -204,6 +215,7 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 **File**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/interactive_manipulation.py`
 
 **Features**:
+
 - **IK-Based Dragging**: Click and drag body segments to new positions
 - **Constraint-Aware**: Respects joint limits and kinematic constraints
 - **Nullspace Posture**: Maintains natural poses while dragging
@@ -211,6 +223,7 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 - **Multi-Body Support**: Drag any body segment in the model
 
 **How to Use**:
+
 1. Launch Advanced Golf Analysis Window
 2. Go to "Manipulation" tab
 3. Enable "Enable Drag Manipulation"
@@ -221,6 +234,7 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 ### Joint Angle Editor
 
 **Features**:
+
 - Real-time joint angle sliders
 - Grouped by body part (legs, torso, arms, etc.)
 - Numerical input fields
@@ -228,6 +242,7 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 - Save/load custom poses
 
 **How to Use**:
+
 1. Use sliders in the "Control" tab
 2. Adjust joint angles in real-time
 3. Click "Save State" to preserve pose
@@ -236,6 +251,7 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 ### State Management
 
 **Features**:
+
 - Save simulation states (`.pkl` files)
 - Load previous states
 - Preserve joint angles, velocities, and positions
@@ -268,17 +284,20 @@ The **Humanoid Golf Launcher** includes a visual polynomial function generator f
 ### How to Use
 
 1. **Launch Humanoid Launcher**:
+
    ```bash
    cd engines/physics_engines/mujoco/python
    python humanoid_launcher.py
    ```
 
 2. **Select Polynomial Mode**:
+
    - Go to "Simulation" tab
    - Set Control Mode to "poly"
    - Click "📊 Configure Polynomial" button
 
 3. **Generate Polynomial**:
+
    - Select target joint from dropdown
    - Choose interaction mode:
      - **Draw**: Click and drag to draw trend
@@ -316,6 +335,7 @@ The **Humanoid Golf Launcher** includes a visual polynomial function generator f
 ### Available Joints
 
 The generator supports all humanoid joints:
+
 - **Spine**: lowerbackrx, upperbackrx
 - **Legs**: rtibiarx, ltibiarx, rfemurrx, lfemurrx, rfootrx, lfootrx
 - **Arms**: rhumerusrx, lhumerusrx, rhumerusrz, lhumerusrz, rhumerusry, lhumerusry
@@ -333,46 +353,51 @@ The generator supports all humanoid joints:
 
 ## 📊 Comparison Matrix
 
-| Feature | Humanoid Launcher | Advanced Analysis | Legacy Tkinter |
-|---------|------------------|-------------------|----------------|
-| **Framework** | PyQt6 | PyQt6 | Tkinter |
-| **Color Customization** | ✅ | ❌ | ✅ |
-| **Height/Weight Scaling** | ✅ | ❌ | ✅ |
-| **Polynomial Generator** | ✅ | ❌ | ❌ |
-| **Interactive Manipulation** | ❌ | ✅ | ❌ |
-| **Multiple Models** | ❌ (Humanoid only) | ✅ | ❌ (Humanoid only) |
-| **Biomechanical Analysis** | ❌ | ✅ | ❌ |
-| **Real-time Plotting** | ❌ | ✅ | ❌ |
-| **Docker Integration** | ✅ | ❌ | ✅ |
-| **State Save/Load** | ✅ | ✅ | ✅ |
-| **Modern UI** | ✅ | ✅ | ❌ |
-| **Status** | **ACTIVE** | **ACTIVE** | DEPRECATED |
+| Feature                      | Humanoid Launcher  | Advanced Analysis | Legacy Tkinter     |
+| ---------------------------- | ------------------ | ----------------- | ------------------ |
+| **Framework**                | PyQt6              | PyQt6             | Tkinter            |
+| **Color Customization**      | ✅                 | ❌                | ✅                 |
+| **Height/Weight Scaling**    | ✅                 | ❌                | ✅                 |
+| **Polynomial Generator**     | ✅                 | ❌                | ❌                 |
+| **Interactive Manipulation** | ❌                 | ✅                | ❌                 |
+| **Multiple Models**          | ❌ (Humanoid only) | ✅                | ❌ (Humanoid only) |
+| **Biomechanical Analysis**   | ❌                 | ✅                | ❌                 |
+| **Real-time Plotting**       | ❌                 | ✅                | ❌                 |
+| **Docker Integration**       | ✅                 | ❌                | ✅                 |
+| **State Save/Load**          | ✅                 | ✅                | ✅                 |
+| **Modern UI**                | ✅                 | ✅                | ❌                 |
+| **Status**                   | **ACTIVE**         | **ACTIVE**        | DEPRECATED         |
 
 ---
 
 ## 🚀 Quick Start Guide
 
 ### For Humanoid Customization (Colors, Size, Equipment)
+
 ```bash
 cd engines/physics_engines/mujoco/python
 python humanoid_launcher.py
 ```
+
 1. Customize appearance in "Appearance" tab
 2. Adjust equipment in "Equipment" tab
 3. Configure simulation in "Simulation" tab
 4. Click "RUN SIMULATION"
 
 ### For Interactive Pose Editing
+
 ```bash
 cd engines/physics_engines/mujoco/python
 python -m mujoco_humanoid_golf
 ```
+
 1. Select model from dropdown
 2. Use joint sliders to adjust pose
 3. Or enable drag mode and click-drag body segments
 4. Save state when satisfied
 
 ### For Batch Analysis
+
 ```bash
 cd engines/physics_engines/mujoco/python
 python -m mujoco_humanoid_golf.cli_runner --model full_body --duration 5.0 --output-csv results.csv
@@ -387,6 +412,7 @@ python -m mujoco_humanoid_golf.cli_runner --model full_body --duration 5.0 --out
 **Problem**: Simulation crashes with segfault when using Live Interactive View
 
 **Solution**:
+
 1. Ensure VcXsrv is running (Windows)
 2. Check "Disable access control" in VcXsrv settings
 3. Verify VcXsrv icon is in system tray
@@ -397,6 +423,7 @@ python -m mujoco_humanoid_golf.cli_runner --model full_body --duration 5.0 --out
 **Problem**: GUI appears pixelated or distorted over X11
 
 **Solution**: Already fixed in `humanoid_launcher.py` with Qt scaling environment variables:
+
 - `QT_AUTO_SCREEN_SCALE_FACTOR=0`
 - `QT_SCALE_FACTOR=1`
 - `QT_QPA_PLATFORM=xcb`
@@ -420,6 +447,7 @@ python -m mujoco_humanoid_golf.cli_runner --model full_body --duration 5.0 --out
 **Location**: `engines/physics_engines/mujoco/docker/src/simulation_config.json`
 
 **Example**:
+
 ```json
 {
   "colors": {

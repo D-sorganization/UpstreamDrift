@@ -6,13 +6,13 @@ Welcome to the Golf Modeling Suite - a professional biomechanical analysis and p
 
 ## Quick Navigation
 
-| I want to... | Go to... |
-|--------------|----------|
-| Get started quickly | [Quick Start](#quick-start) |
-| Understand the API | [API Architecture](api/API_ARCHITECTURE.md) |
-| Develop new features | [Development Guide](api/DEVELOPMENT.md) |
+| I want to...            | Go to...                                            |
+| ----------------------- | --------------------------------------------------- |
+| Get started quickly     | [Quick Start](#quick-start)                         |
+| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
+| Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
 | Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
-| Troubleshoot issues | [Troubleshooting](troubleshooting/) |
+| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
 
 ---
 
@@ -101,14 +101,14 @@ The Golf Modeling Suite uses a **local-first architecture**:
 
 Choose from 6+ physics engines:
 
-| Engine | Best For |
-|--------|----------|
-| **MuJoCo** | Full musculoskeletal simulation |
-| **Drake** | Trajectory optimization, control |
-| **Pinocchio** | Fast rigid body dynamics |
-| **OpenSim** | Biomechanical validation |
-| **MyoSuite** | 290-muscle body models |
-| **MATLAB** | Simscape Multibody models |
+| Engine        | Best For                         |
+| ------------- | -------------------------------- |
+| **MuJoCo**    | Full musculoskeletal simulation  |
+| **Drake**     | Trajectory optimization, control |
+| **Pinocchio** | Fast rigid body dynamics         |
+| **OpenSim**   | Biomechanical validation         |
+| **MyoSuite**  | 290-muscle body models           |
+| **MATLAB**    | Simscape Multibody models        |
 
 See [Engine Selection Guide](engine_selection_guide.md) for details.
 
@@ -127,21 +127,25 @@ See [Design by Contract Guide](development/design_by_contract.md).
 ## Key Features
 
 ### Physics Simulation
+
 - Multi-engine physics with unified interface
 - Real-time and batch simulation modes
 - Async task support for long simulations
 
 ### Video Analysis
+
 - Pose estimation (MediaPipe, OpenPose, MoveNet)
 - Swing sequence detection
 - Biomechanical analysis
 
 ### Diagnostics
+
 - Structured error codes (GMS-XXX-YYY)
 - Request tracing (correlation IDs)
 - Built-in health checks
 
 ### Security
+
 - JWT authentication (cloud mode)
 - Rate limiting
 - CORS and security headers
@@ -152,32 +156,34 @@ See [Design by Contract Guide](development/design_by_contract.md).
 
 ### Endpoints
 
-| Route | Purpose |
-|-------|---------|
-| `GET /health` | System health check |
-| `GET /engines` | List available engines |
-| `POST /engines/{type}/load` | Load an engine |
-| `POST /simulate` | Run simulation |
+| Route                        | Purpose                |
+| ---------------------------- | ---------------------- |
+| `GET /health`                | System health check    |
+| `GET /engines`               | List available engines |
+| `POST /engines/{type}/load`  | Load an engine         |
+| `POST /simulate`             | Run simulation         |
 | `POST /analyze/biomechanics` | Biomechanical analysis |
-| `POST /analyze/video` | Video pose analysis |
-| `GET /export/{task_id}` | Export results |
+| `POST /analyze/video`        | Video pose analysis    |
+| `GET /export/{task_id}`      | Export results         |
 
 ### Error Handling
 
 All errors include:
+
 - **Error code**: `GMS-ENG-003`
 - **Message**: Human-readable description
 - **Request ID**: For log correlation
 - **Details**: Additional context
 
 Example:
+
 ```json
 {
   "error": {
     "code": "GMS-ENG-003",
     "message": "Failed to load physics engine",
     "request_id": "req_abc123",
-    "details": {"engine": "drake"}
+    "details": { "engine": "drake" }
   }
 }
 ```
@@ -194,11 +200,11 @@ Example:
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/api/server.py` | FastAPI application |
-| `src/api/utils/` | Shared utilities |
-| `src/shared/python/contracts.py` | DbC decorators |
+| File                                  | Purpose              |
+| ------------------------------------- | -------------------- |
+| `src/api/server.py`                   | FastAPI application  |
+| `src/api/utils/`                      | Shared utilities     |
+| `src/shared/python/contracts.py`      | DbC decorators       |
 | `src/shared/python/engine_manager.py` | Engine orchestration |
 
 ### Running Tests
@@ -213,6 +219,7 @@ pytest tests/unit/test_api/ --cov=src/api
 ## For AI Agents
 
 See [AGENTS.md](../AGENTS.md) in the project root for:
+
 - Agent coding guidelines
 - Important files reference
 - Testing requirements
@@ -223,11 +230,13 @@ See [AGENTS.md](../AGENTS.md) in the project root for:
 ## Detailed Documentation
 
 ### [User Guide](user_guide/README.md)
+
 - [Installation](user_guide/installation.md) - Setup instructions
 - [Getting Started](user_guide/getting_started.md) - First simulation
 - [Launchers](user_guide/launchers.md) - GUI options
 
 ### [Engines](engines/README.md)
+
 - [MuJoCo](engines/mujoco.md) - High-performance physics
 - [Drake](engines/drake.md) - Model-based design
 - [Pinocchio](engines/pinocchio.md) - Rigid body algorithms
@@ -235,16 +244,19 @@ See [AGENTS.md](../AGENTS.md) in the project root for:
 - [Engine Capabilities](engine_capabilities.md) - Feature comparison
 
 ### [Development](development/README.md)
+
 - [Architecture](development/architecture.md) - System design
 - [Contributing](development/contributing.md) - Contribution guide
 - [Design by Contract](development/design_by_contract.md) - DbC patterns
 - [AI Agents](development/AGENTS.md) - Agent guidelines
 
 ### [Technical](technical/README.md)
+
 - [Control Strategies](technical/control-strategies-summary.md)
 - Engine reports and assessments
 
 ### [Integration Guides]
+
 - [MyoSuite Integration](MYOSUITE_INTEGRATION.md) - 290-muscle models
 - [OpenSim Integration](OPENSIM_INTEGRATION.md) - Musculoskeletal
 

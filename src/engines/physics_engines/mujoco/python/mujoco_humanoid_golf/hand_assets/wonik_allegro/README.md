@@ -31,7 +31,7 @@ descriptions](https://github.com/simlabrobotics/allegro_hand_ros/blob/master/all
 6. Added position-controlled actuators.
 7. Scaled the global density to be `1000 * actual_mass / current_mass`.
 8. Added `scene_left.xml` and `scene_right.xml` which include the robot, with
-    an object, textured groundplane, skybox, and haze.
+   an object, textured groundplane, skybox, and haze.
 
 ## License
 

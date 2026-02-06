@@ -32,11 +32,13 @@ You are a **Documentation Cleanup Agent** tasked with systematically improving t
 ### Phase 1: Critical Physics Documentation (Immediate)
 
 1. **Project Design Guidelines**
+
    - Verify `docs/project_design_guidelines.qmd` matches implementation
    - Update discrepancies between spec and code
    - Ensure cross-engine requirements are documented
 
 2. **Core Physics Modules**
+
    - `shared/python/physics_engine.py`: Protocol documentation
    - `shared/python/manipulability.py`: Manipulability ellipsoid documentation
    - `shared/python/plotting.py`: Visualization API documentation
@@ -100,11 +102,13 @@ References:
 ### Phase 3: User Documentation (2 Weeks)
 
 1. **Getting Started Guide**
+
    - Installation for each physics engine
    - Model setup and configuration
    - First simulation walkthrough
 
 2. **Analysis Workflows**
+
    - Drift-control decomposition
    - Manipulability analysis
    - Ground reaction force processing
@@ -326,11 +330,13 @@ mypy shared/python/ --strict
 ### Physics Documentation Requirements
 
 1. **All spatial quantities must specify:**
+
    - Coordinate frame (world, body, end-effector)
    - Units (SI: m, rad, N, N⋅m)
    - Sign conventions
 
 2. **Cross-engine documentation must include:**
+
    - Which engines support which features
    - Known numerical differences
    - Fallback strategies

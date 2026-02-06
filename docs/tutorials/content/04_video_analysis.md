@@ -4,13 +4,16 @@
 **Difficulty:** Intermediate-Advanced
 
 ## Prerequisites
+
 - Completed [Tutorial 2: Your First Simulation](02_first_simulation.md)
 - MediaPipe installed (`pip install mediapipe`)
 - OpenCV installed (`pip install opencv-python`)
 - Sample video of a golf swing (or any human motion)
 
 ## Learning Objectives
+
 By the end of this tutorial, you will:
+
 - Process video to extract human pose landmarks
 - Map video markers to biomechanical model bodies
 - Drive a simulation using extracted motion data
@@ -19,6 +22,7 @@ By the end of this tutorial, you will:
 ## Overview
 
 The Golf Modeling Suite includes a video-to-simulation pipeline that:
+
 1. Extracts 2D/3D pose landmarks from video using MediaPipe
 2. Maps video markers to model body segments
 3. Fits rigid body poses using least squares
@@ -28,10 +32,10 @@ The Golf Modeling Suite includes a video-to-simulation pipeline that:
 
 ### Available Estimators
 
-| Estimator | Landmarks | Speed | Accuracy | 3D Support |
-|-----------|-----------|-------|----------|------------|
-| **MediaPipe** | 33 body | Fast | Good | Yes (depth estimation) |
-| **OpenPose** | 25 body | Medium | Excellent | With multi-view |
+| Estimator     | Landmarks | Speed  | Accuracy  | 3D Support             |
+| ------------- | --------- | ------ | --------- | ---------------------- |
+| **MediaPipe** | 33 body   | Fast   | Good      | Yes (depth estimation) |
+| **OpenPose**  | 25 body   | Medium | Excellent | With multi-view        |
 
 ### MediaPipe Landmark Mapping for Golf
 
@@ -490,27 +494,32 @@ if __name__ == "__main__":
 ## Troubleshooting
 
 ### Low Detection Confidence
+
 - Ensure good lighting in video
 - Use higher resolution video (1080p+)
 - Subject should be fully visible in frame
 - Avoid loose/baggy clothing
 
 ### High RMS Fit Error
+
 - Check marker mapping local offsets match your model
 - Verify video calibration (camera intrinsics)
 - Consider multi-view setup for better 3D accuracy
 
 ### Temporal Jitter in Results
+
 - Increase `outlier_threshold` to filter more aggressively
 - Enable temporal smoothing (Kalman filter)
 - Use higher frame rate video (60fps+)
 
 ### Missing Landmarks
+
 - Some poses may occlude landmarks (e.g., wrist during backswing)
 - Use `visibility` score to filter unreliable detections
 - Consider adding redundant markers for robustness
 
 ## Next Steps
+
 - [API Reference: VideoPosePipeline](../../api/video_pose_pipeline.md)
 - [API Reference: MarkerToModelMapper](../../api/marker_mapping.md)
 - [Guideline A2: Marker Mapping Protocol](../../guidelines/A2_marker_mapping.md)

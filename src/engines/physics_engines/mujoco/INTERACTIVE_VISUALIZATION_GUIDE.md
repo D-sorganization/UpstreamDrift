@@ -13,12 +13,14 @@ This guide explains how to leverage MuJoCo's powerful built-in features for inte
 MuJoCo's viewer provides extensive built-in controls:
 
 #### Mouse Controls
+
 - **Left Click + Drag**: Rotate camera
 - **Right Click + Drag**: Pan camera
 - **Scroll Wheel**: Zoom in/out
 - **Double Click**: Select body (shows info)
 
 #### Keyboard Shortcuts
+
 - **Space**: Pause/Resume simulation
 - **Right Arrow**: Step forward one frame
 - **Left Arrow**: Step backward (if recording)
@@ -29,6 +31,7 @@ MuJoCo's viewer provides extensive built-in controls:
 - **F1**: Toggle help overlay
 
 #### Visualization Options
+
 - **Ctrl+1-9**: Toggle visualization groups
   - Contact forces
   - Joint axes
@@ -60,6 +63,7 @@ viewer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
 ```
 
 **What You'll See:**
+
 - Red arrows showing contact force magnitude and direction
 - Contact points highlighted
 - Force magnitude proportional to arrow length
@@ -96,6 +100,7 @@ viewer_options.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = True
 MuJoCo provides extensive sensor and state data:
 
 #### 1. **Joint States**
+
 ```python
 # Position (angles)
 qpos = data.qpos  # All generalized positions
@@ -110,6 +115,7 @@ qacc = data.qacc
 ```
 
 #### 2. **Contact Forces**
+
 ```python
 # Number of active contacts
 n_contacts = data.ncon
@@ -117,22 +123,23 @@ n_contacts = data.ncon
 # Iterate through contacts
 for i in range(data.ncon):
     contact = data.contact[i]
-    
+
     # Contact position
     pos = contact.pos
-    
+
     # Contact frame (normal, tangent directions)
     frame = contact.frame
-    
+
     # Contact force (in contact frame)
     force = np.zeros(6)
     mujoco.mj_contactForce(model, data, i, force)
-    
+
     normal_force = force[0]  # Normal component
     friction_force = np.linalg.norm(force[1:3])  # Tangential
 ```
 
 #### 3. **Actuator Data**
+
 ```python
 # Actuator forces (torques)
 actuator_forces = data.actuator_force
@@ -145,6 +152,7 @@ actuator_length = data.actuator_length
 ```
 
 #### 4. **Energy & Dynamics**
+
 ```python
 # Kinetic energy
 kinetic_energy = data.energy[0]
@@ -161,6 +169,7 @@ com_vel = data.cvel[0]  # COM velocity
 ```
 
 #### 5. **Sensor Readings**
+
 ```python
 # If you have sensors defined in XML
 for i in range(model.nsensor):
@@ -182,12 +191,12 @@ def add_text_overlay(viewer, data):
     """Add custom text overlay to viewer."""
     # This requires accessing the viewer's internal text buffer
     # MuJoCo viewer supports custom rendering callbacks
-    
+
     # Example: Display joint angles
     text = f"Time: {data.time:.2f}s\n"
     text += f"Energy: {data.energy[0] + data.energy[1]:.2f} J\n"
     text += f"Contacts: {data.ncon}\n"
-    
+
     # Add to viewer (implementation depends on viewer type)
     viewer.add_overlay(mujoco.mjtGridPos.mjGRID_TOPLEFT, "Stats", text)
 ```
@@ -228,27 +237,27 @@ class RealtimePlotter:
         self.angle_data = []
         self.torque_data = []
         self.energy_data = []
-        
+
     def update(self, data):
         self.time_data.append(data.time)
         self.angle_data.append(data.qpos[7:].copy())
         self.torque_data.append(data.actuator_force.copy())
         self.energy_data.append(data.energy[0] + data.energy[1])
-        
+
         # Update plots
         self.axes[0].clear()
         self.axes[0].plot(self.time_data, self.angle_data)
         self.axes[0].set_ylabel('Joint Angles (rad)')
-        
+
         self.axes[1].clear()
         self.axes[1].plot(self.time_data, self.torque_data)
         self.axes[1].set_ylabel('Torques (N⋅m)')
-        
+
         self.axes[2].clear()
         self.axes[2].plot(self.time_data, self.energy_data)
         self.axes[2].set_ylabel('Total Energy (J)')
         self.axes[2].set_xlabel('Time (s)')
-        
+
         plt.pause(0.001)
 ```
 
@@ -279,7 +288,7 @@ class SimulationRecorder:
     def __init__(self, model):
         self.states = []
         self.times = []
-        
+
     def record_frame(self, data):
         """Record current state."""
         self.states.append({
@@ -289,7 +298,7 @@ class SimulationRecorder:
             'time': data.time
         })
         self.times.append(data.time)
-    
+
     def playback(self, model, data, viewer):
         """Play back recorded simulation."""
         for state in self.states:
@@ -297,7 +306,7 @@ class SimulationRecorder:
             data.qvel[:] = state['qvel']
             data.ctrl[:] = state['ctrl']
             data.time = state['time']
-            
+
             mujoco.mj_forward(model, data)
             viewer.sync()
             time.sleep(model.opt.timestep)
@@ -315,20 +324,20 @@ Detailed contact force analysis:
 def analyze_contacts(model, data):
     """Analyze all active contacts."""
     contact_info = []
-    
+
     for i in range(data.ncon):
         contact = data.contact[i]
-        
+
         # Get contact force
         force = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, force)
-        
+
         # Get body names
         geom1 = contact.geom1
         geom2 = contact.geom2
         body1 = model.geom_bodyid[geom1]
         body2 = model.geom_bodyid[geom2]
-        
+
         contact_info.append({
             'body1': model.body(body1).name,
             'body2': model.body(body2).name,
@@ -337,7 +346,7 @@ def analyze_contacts(model, data):
             'friction_force': np.linalg.norm(force[1:3]),
             'penetration': contact.dist
         })
-    
+
     return contact_info
 ```
 
@@ -350,13 +359,13 @@ def compute_joint_loads(model, data):
     """Compute loads on each joint."""
     # Inverse dynamics to get required torques
     mujoco.mj_inverse(model, data)
-    
+
     joint_loads = {}
     for i in range(model.njnt):
         joint_name = model.joint(i).name
         qfrc = data.qfrc_inverse[i]
         joint_loads[joint_name] = qfrc
-    
+
     return joint_loads
 ```
 
@@ -369,25 +378,25 @@ def compute_stability_metrics(model, data):
     """Compute balance and stability metrics."""
     # Center of mass
     com = data.subtree_com[0]
-    
+
     # Zero moment point (ZMP)
     # Simplified calculation
     total_force = np.zeros(3)
     total_moment = np.zeros(3)
-    
+
     for i in range(data.ncon):
         force = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, force)
         contact_pos = data.contact[i].pos
-        
+
         total_force += force[:3]
         total_moment += np.cross(contact_pos - com, force[:3])
-    
+
     if total_force[2] > 0:
         zmp = com[:2] - total_moment[:2] / total_force[2]
     else:
         zmp = com[:2]
-    
+
     return {
         'com': com,
         'zmp': zmp,
@@ -411,9 +420,9 @@ def simple_pd_controller(model, data):
     """Simple PD controller to maintain standing pose."""
     kp = 100.0  # Proportional gain
     kd = 10.0   # Derivative gain
-    
+
     target_pos = np.zeros(model.nu)  # Target joint angles
-    
+
     for i in range(model.nu):
         error = target_pos[i] - data.qpos[7 + i]
         error_dot = -data.qvel[6 + i]

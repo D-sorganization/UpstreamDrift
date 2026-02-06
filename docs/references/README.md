@@ -11,18 +11,21 @@ The motion research group at University of Waterloo (Prof. John McPhee) has
 produced extensive research on golf club-ball dynamics, including:
 
 1. **Three Dimensional Golf Clubhead Ball Impact Models for Drivers and Irons.pdf**
+
    - Authors: McPhee et al. (Waterloo)
    - Key content: 3D impulse-momentum impact models, COR characterization,
      spin generation mechanics
    - Used for: Impact model validation
 
 2. **Development and Comparison of 3D Dynamics Models of Golf Clubhead Ball Impacts.pdf**
+
    - Authors: McPhee et al. (Waterloo)
    - Key content: Comparison of impulse-momentum vs volumetric contact models,
      shaft flexibility effects
    - Used for: Impact model architecture
 
 3. **A Three Dimensional Forward Dynamics Model of the Golf Swing.pdf**
+
    - Authors: Waterloo
    - Key content: Full swing dynamics including golfer biomechanics
    - Used for: Future swing kinematics integration
@@ -34,6 +37,7 @@ produced extensive research on golf club-ball dynamics, including:
 ### Ball Flight Aerodynamics
 
 5. **Golf Ball Flight Dynamics.pdf**
+
    - Key content: Aerodynamic equations, drag/lift coefficient models
    - Source for coefficient equations:
      ```
@@ -43,10 +47,12 @@ produced extensive research on golf club-ball dynamics, including:
      where S = (ω \* r) / v is the spin ratio
 
 6. **Three Dimensional Golf Ball Flight.pdf**
+
    - Key content: 3D trajectory simulation, wind effects
    - Used for: Ball flight model validation
 
 7. **On the Flight of a Golf Ball in the Vertical Plane.pdf**
+
    - Authors: Penner (Waterloo)
    - Key content: 2D trajectory fundamentals, optimal launch parameters
    - Used for: Physics validation
@@ -59,6 +65,7 @@ produced extensive research on golf club-ball dynamics, including:
 ### Modern Approaches
 
 9. **Combining Physics and Deep Learning Models to Simulate the Flight of a Golf Ball.pdf**
+
    - Key content: Hybrid physics/ML approach for trajectory prediction
    - Reference for: Future ML integration
 

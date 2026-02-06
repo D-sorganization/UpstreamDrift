@@ -17,6 +17,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 ### 1. Mathematical Correctness
 
 **Finding 1.1: Dimensional Inconsistency in Jerk Metric**
+
 - **File:** `src/shared/python/statistical_analysis.py` (Line ~877)
 - **Issue:** The `dimensionless_jerk` is calculated as `peak_jerk / peak_acc`.
 - **Expected Physics:** Dimensionless jerk should be dimensionless, typically calculated as $\text{Jerk}_{rms} \cdot \text{Duration}^5 / \text{Amplitude}^2$ or similar log-normalized metrics.
@@ -27,6 +28,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 ### 2. Physical Plausibility
 
 **Finding 2.1: Unrealistic Shaft Stiffness Magnitude**
+
 - **File:** `src/shared/python/flexible_shaft.py`
 - **Issue:** The calculated Bending Stiffness ($EI$) for a standard driver shaft is ~140 $N \cdot m^2$.
 - **Expected Physics:** Typical golf shaft $EI$ ranges from 2 to 6 $N \cdot m^2$.
@@ -35,6 +37,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 - **Recommended Fix:** Calibrate wall thickness and effective modulus to match empirical EI profiles, or allow direct input of EI profiles. (See Issue 041)
 
 **Finding 2.2: Ambiguous Equipment Parameters**
+
 - **File:** `src/shared/python/equipment.py`
 - **Issue:** `flex_stiffness` values are [180.0, 150.0, 120.0].
 - **Expected Physics:** Standard stiffness values (EI or torsional k) should align with physical units.
@@ -45,6 +48,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 ### 3. Biomechanics Accuracy
 
 **Finding 3.1: Absolute Value Peak Detection**
+
 - **File:** `src/shared/python/kinematic_sequence.py`
 - **Issue:** Peak detection uses `np.abs(velocity)`.
 - **Expected Physics:** Downswing peaks are distinct from backswing peaks.
@@ -55,6 +59,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 ### 4. Ball Flight Physics
 
 **Finding 4.1: Missing Spin Decay**
+
 - **File:** `src/shared/python/ball_flight_physics.py`
 - **Issue:** Spin rate (`omega`) is constant throughout the flight.
 - **Expected Physics:** Spin decays exponentially due to viscous torque ($\omega(t) = \omega_0 e^{-kt}$).
@@ -63,6 +68,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 - **Recommended Fix:** Implement `SPIN_DECAY_RATE_S` from `physics_constants.py` in the integration loop.
 
 **Finding 4.2: Docstring Mismatch**
+
 - **File:** `src/shared/python/ball_flight_physics.py`
 - **Issue:** Docstring claims implementation of "exponential spin decay".
 - **Actual Implementation:** Feature is missing.
@@ -71,6 +77,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 ### 5. Equipment Models
 
 **Finding 5.1: Heuristic Gear Effect**
+
 - **File:** `src/shared/python/impact_model.py`
 - **Issue:** Gear effect uses linear heuristic (`-gear_factor * h_offset * speed`).
 - **Expected Physics:** Gear effect results from the moment arm of the impact force relative to the CG causing rotation of the clubhead, which alters the tangential velocity at the contact point.
@@ -78,6 +85,7 @@ The codebase contains a mix of "research-grade" aspirations and placeholder or h
 - **Impact:** Cannot model specific clubhead CG properties or MOI benefits accurately. (See Issue 011)
 
 **Finding 5.2: Constant Ball MOI**
+
 - **File:** `src/shared/python/impact_model.py`
 - **Issue:** Ball MOI is hardcoded as solid sphere ($2/5 MR^2$).
 - **Expected Physics:** Modern balls have lower normalized MOI (~0.38).

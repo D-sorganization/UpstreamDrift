@@ -34,24 +34,28 @@ This guide establishes the mandatory principles, patterns, and practices for imp
 ### The Non-Negotiables
 
 #### 1. DRY (Don't Repeat Yourself)
+
 - **Every piece of knowledge must have a single, unambiguous, authoritative representation.**
 - If you find yourself copying code, extract it into a shared function/class.
 - Use mixins for cross-cutting concerns.
 - Configuration belongs in one place.
 
 #### 2. Orthogonality
+
 - **Components must be independent and interchangeable.**
 - Changing one module should not require changes in unrelated modules.
 - Each function/class does ONE thing well.
 - Dependencies flow downward through clean interfaces.
 
 #### 3. Reversibility
+
 - **Design for change.**
 - Abstract away engine-specific details behind protocols.
 - Use dependency injection.
 - Avoid hard-coded assumptions about specific implementations.
 
 #### 4. Reusability
+
 - **Build components as libraries, not applications.**
 - Every class should be usable in contexts you haven't imagined.
 - Prefer composition over inheritance.
@@ -59,13 +63,13 @@ This guide establishes the mandatory principles, patterns, and practices for imp
 
 ### The SOLID Principles
 
-| Principle | Application in UpstreamDrift |
-|-----------|------------------------------|
-| **S**ingle Responsibility | Each class has one reason to change |
-| **O**pen/Closed | Extend via protocols, not modification |
-| **L**iskov Substitution | All engines interchangeable via Protocol |
-| **I**nterface Segregation | Small, focused protocols |
-| **D**ependency Inversion | Depend on abstractions (Protocol), not concretions |
+| Principle                 | Application in UpstreamDrift                       |
+| ------------------------- | -------------------------------------------------- |
+| **S**ingle Responsibility | Each class has one reason to change                |
+| **O**pen/Closed           | Extend via protocols, not modification             |
+| **L**iskov Substitution   | All engines interchangeable via Protocol           |
+| **I**nterface Segregation | Small, focused protocols                           |
+| **D**ependency Inversion  | Depend on abstractions (Protocol), not concretions |
 
 ---
 
@@ -238,11 +242,11 @@ class ContactManager(ContractChecker):
 
 ### Contract Verification Levels
 
-| Level | When to Use | Performance Impact |
-|-------|-------------|-------------------|
-| **Always** | Safety-critical (contact forces, joint limits) | Accept overhead |
-| **Debug** | Development validation | Disable in production |
-| **Test** | Test assertions | Only in test suite |
+| Level      | When to Use                                    | Performance Impact    |
+| ---------- | ---------------------------------------------- | --------------------- |
+| **Always** | Safety-critical (contact forces, joint limits) | Accept overhead       |
+| **Debug**  | Development validation                         | Disable in production |
+| **Test**   | Test assertions                                | Only in test suite    |
 
 ---
 
@@ -339,13 +343,13 @@ def humanoid_urdf(tmp_path):
 
 ### Test Coverage Requirements
 
-| Module | Required Coverage | Critical Paths |
-|--------|-------------------|----------------|
-| Core Protocols | 100% | All protocol methods |
-| Contact | 95% | Force computation, friction |
-| Sensing | 90% | Measurement, noise models |
-| Control | 95% | QP solver, constraints |
-| Locomotion | 90% | Gait generation, balance |
+| Module         | Required Coverage | Critical Paths              |
+| -------------- | ----------------- | --------------------------- |
+| Core Protocols | 100%              | All protocol methods        |
+| Contact        | 95%               | Force computation, friction |
+| Sensing        | 90%               | Measurement, noise models   |
+| Control        | 95%               | QP solver, constraints      |
+| Locomotion     | 90%               | Gait generation, balance    |
 
 ---
 
@@ -518,52 +522,52 @@ disallow_untyped_defs = true
 
 ### Phase 1: Humanoid Foundation (CURRENT)
 
-| Component | Priority | Status | Dependencies |
-|-----------|----------|--------|--------------|
-| Core Types & Protocols | Critical | TODO | None |
-| ContactState & ContactManager | Critical | TODO | Core |
-| ForceTorqueSensor | High | TODO | Core |
-| Whole-Body Control (HQP) | Critical | TODO | Contact |
-| Bipedal Locomotion (LIPM) | Critical | TODO | WBC |
-| API Integration | High | TODO | All above |
-| Test Suite | Critical | TODO | All above |
+| Component                     | Priority | Status | Dependencies |
+| ----------------------------- | -------- | ------ | ------------ |
+| Core Types & Protocols        | Critical | TODO   | None         |
+| ContactState & ContactManager | Critical | TODO   | Core         |
+| ForceTorqueSensor             | High     | TODO   | Core         |
+| Whole-Body Control (HQP)      | Critical | TODO   | Contact      |
+| Bipedal Locomotion (LIPM)     | Critical | TODO   | WBC          |
+| API Integration               | High     | TODO   | All above    |
+| Test Suite                    | Critical | TODO   | All above    |
 
 ### Phase 2: Perception & Planning
 
-| Component | Priority | Dependencies |
-|-----------|----------|--------------|
-| Collision Checker | Critical | Phase 1 |
-| RRT/RRT* Planners | High | Collision |
-| Trajectory Optimization | High | Collision |
-| Perception Interface | Medium | Phase 1 |
-| Scene Manager | Medium | Phase 1 |
+| Component               | Priority | Dependencies |
+| ----------------------- | -------- | ------------ |
+| Collision Checker       | Critical | Phase 1      |
+| RRT/RRT\* Planners      | High     | Collision    |
+| Trajectory Optimization | High     | Collision    |
+| Perception Interface    | Medium   | Phase 1      |
+| Scene Manager           | Medium   | Phase 1      |
 
 ### Phase 3: Learning & Adaptation
 
-| Component | Priority | Dependencies |
-|-----------|----------|--------------|
-| Gymnasium Environments | Critical | Phase 1-2 |
-| Domain Randomization | High | Gym Envs |
-| Imitation Learning | High | Gym Envs |
-| Motion Retargeting | Medium | Phase 1 |
+| Component              | Priority | Dependencies |
+| ---------------------- | -------- | ------------ |
+| Gymnasium Environments | Critical | Phase 1-2    |
+| Domain Randomization   | High     | Gym Envs     |
+| Imitation Learning     | High     | Gym Envs     |
+| Motion Retargeting     | Medium   | Phase 1      |
 
 ### Phase 4: Industrial Deployment
 
-| Component | Priority | Dependencies |
-|-----------|----------|--------------|
-| Real-Time Interface | Critical | Phase 1 |
-| Digital Twin | High | RT Interface |
-| Safety System | Critical | Phase 1-2 |
-| Teleoperation | High | Phase 1 |
+| Component           | Priority | Dependencies |
+| ------------------- | -------- | ------------ |
+| Real-Time Interface | Critical | Phase 1      |
+| Digital Twin        | High     | RT Interface |
+| Safety System       | Critical | Phase 1-2    |
+| Teleoperation       | High     | Phase 1      |
 
 ### Phase 5: Advanced Research
 
-| Component | Priority | Dependencies |
-|-----------|----------|--------------|
-| MPC Framework | High | Phase 1 |
-| Differentiable Physics | Medium | Phase 1 |
-| Multi-Robot | Medium | Phase 1-2 |
-| Deformable Objects | Low | Phase 1 |
+| Component              | Priority | Dependencies |
+| ---------------------- | -------- | ------------ |
+| MPC Framework          | High     | Phase 1      |
+| Differentiable Physics | Medium   | Phase 1      |
+| Multi-Robot            | Medium   | Phase 1-2    |
+| Deformable Objects     | Low      | Phase 1      |
 
 ---
 
@@ -875,4 +879,4 @@ This guide is not optional. Every line of code in the robotics expansion must ad
 
 ---
 
-*Last updated: 2026-02-03*
+_Last updated: 2026-02-03_

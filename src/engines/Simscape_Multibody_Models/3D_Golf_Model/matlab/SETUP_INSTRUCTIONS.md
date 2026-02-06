@@ -21,6 +21,7 @@ setup_matlab_environment
 ```
 
 This script will:
+
 - ✅ Create cache directories in `matlab/cache/simulink/`
 - ✅ Configure Simulink to use these cache folders
 - ✅ Remove old Backup_Scripts paths from MATLAB path
@@ -33,12 +34,14 @@ If you prefer to configure manually or the script doesn't work:
 #### 1. Configure Simulink Cache Folders
 
 In MATLAB, run:
+
 ```matlab
 cd matlab
 configure_simulink_cache
 ```
 
 Or manually in MATLAB:
+
 1. Go to **Home > Preferences > Simulink > Code Generation**
 2. Set **Cache Folder** to: `C:\Users\diete\Repositories\Golf_Model\matlab\cache\simulink\cache`
 3. Set **Code Generation Folder** to: `C:\Users\diete\Repositories\Golf_Model\matlab\cache\simulink\codegen`
@@ -52,6 +55,7 @@ Or manually in MATLAB:
 4. Click **Save**
 
 Or run the cleanup script:
+
 ```matlab
 cd matlab/Scripts/Dataset Generator/utils
 cleanup_matlab_path

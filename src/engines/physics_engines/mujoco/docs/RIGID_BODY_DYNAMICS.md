@@ -106,6 +106,7 @@ tau = rnea(model, q, qd, qdd, f_ext)
 ```
 
 **Algorithm**:
+
 1. Forward pass: Compute velocities and accelerations
 2. Backward pass: Compute forces and project to joint torques
 
@@ -126,6 +127,7 @@ H = crba(model, q)
 ```
 
 **Properties of H**:
+
 - Symmetric: H = Hᵀ
 - Positive definite
 - Configuration-dependent
@@ -147,6 +149,7 @@ qdd = aba(model, q, qd, tau, f_ext)
 ```
 
 **Algorithm**:
+
 1. Forward pass: Kinematics
 2. Backward pass: Compute articulated-body inertias
 3. Forward pass: Compute accelerations
@@ -342,25 +345,27 @@ The existing MuJoCo integration in `python/mujoco_golf_pendulum/` uses MuJoCo's 
 
 ### Books
 
-1. **Featherstone, R. (2008)**. *Rigid Body Dynamics Algorithms*.
+1. **Featherstone, R. (2008)**. _Rigid Body Dynamics Algorithms_.
    Cambridge University Press.
+
    - The definitive reference for spatial algebra and RBD algorithms
    - Chapters 2, 5, 6, 7 cover the implemented algorithms
 
-2. **Murray, R. M., Li, Z., & Sastry, S. S. (1994)**. *A Mathematical Introduction to Robotic Manipulation*.
+2. **Murray, R. M., Li, Z., & Sastry, S. S. (1994)**. _A Mathematical Introduction to Robotic Manipulation_.
    CRC Press.
+
    - Screw theory foundations
    - Exponential coordinates
 
-3. **Lynch, K. M., & Park, F. C. (2017)**. *Modern Robotics: Mechanics, Planning, and Control*.
+3. **Lynch, K. M., & Park, F. C. (2017)**. _Modern Robotics: Mechanics, Planning, and Control_.
    Cambridge University Press.
    - Modern treatment of screw theory
    - Excellent examples and exercises
 
 ### Papers
 
-- Featherstone, R. (1983). "The calculation of robot dynamics using articulated-body inertias." *IJRR*, 2(1), 13-30.
-- Park, F. C. (1995). "Distance metrics on the rigid-body motions with applications to mechanism design." *ASME J. Mech. Design*, 117(1), 48-54.
+- Featherstone, R. (1983). "The calculation of robot dynamics using articulated-body inertias." _IJRR_, 2(1), 13-30.
+- Park, F. C. (1995). "Distance metrics on the rigid-body motions with applications to mechanism design." _ASME J. Mech. Design_, 117(1), 48-54.
 
 ### Online Resources
 

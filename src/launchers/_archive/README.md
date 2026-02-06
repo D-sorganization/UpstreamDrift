@@ -11,11 +11,13 @@ for reference and recovery purposes.
 **Date Archived:** 2026-01-25
 
 This is the full launcher before the January 24, 2026 refactoring that:
+
 - Removed the `MODEL_IMAGES` dictionary from the main launcher
 - Removed custom launch methods for OpenSim, MyoSim, OpenPose
 - Decomposed the launcher into modular UI components
 
 Key features preserved in this archive:
+
 - Full `MODEL_IMAGES` dictionary with 12 tile image mappings
 - `_custom_launch_opensim()` method
 - `_custom_launch_myosim()` method
@@ -44,6 +46,7 @@ git show ce85e6ec:src/launchers/golf_launcher.py > src/launchers/golf_launcher.p
 ## Notes
 
 The current launcher (as of 2026-01-25) has been updated to:
+
 1. Restore all custom launch methods
 2. Include proper MODEL_IMAGES mappings
 3. Add all engines to models.yaml configuration
