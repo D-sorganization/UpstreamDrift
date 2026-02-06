@@ -20,8 +20,9 @@ class UIBuildHook(BuildHookInterface):
         dist_dir = ui_dir / "dist"
 
         # Check if we should skip UI build
-        if os.environ.get("SKIP_UI_BUILD"):
-            logger.warning("Skipping UI build (SKIP_UI_BUILD is set)")
+        # Always skip UI build in CI environment or if explicitly requested
+        if os.environ.get("CI") or os.environ.get("SKIP_UI_BUILD"):
+            logger.warning("Skipping UI build (CI environment or SKIP_UI_BUILD set)")
             if not dist_dir.exists():
                 logger.warning("Warning: UI dist directory does not exist!")
             return
