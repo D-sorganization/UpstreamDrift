@@ -45,7 +45,12 @@ from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
 from src.shared.python.checkpoint import StateCheckpoint
-from src.shared.python.physics_constants import GOLF_BALL_RADIUS_M
+from src.shared.python.physics_constants import (
+    AIR_DENSITY_SEA_LEVEL_KG_M3,
+    GOLF_BALL_CROSS_SECTIONAL_AREA_M2,
+    PUTTING_WIND_DRAG_COEFFICIENT,
+    PUTTING_WIND_FORCE_SCALING,
+)
 
 
 @dataclass
@@ -159,6 +164,8 @@ class PuttingGreenSimulator:
         green: GreenSurface | None = None,
         config: SimulationConfig | None = None,
         putter: PutterStroke | None = None,
+        rng: np.random.Generator | None = None,
+        random_seed: int = 0,
     ) -> None:
         """Initialize simulator.
 
@@ -166,6 +173,8 @@ class PuttingGreenSimulator:
             green: Putting green surface (creates default if None)
             config: Simulation configuration
             putter: Putter model for strokes
+            rng: Optional numpy random generator for deterministic scatter
+            random_seed: Seed for deterministic randomness (used if rng is None)
         """
         self.config = config or SimulationConfig()
         self.green = green or GreenSurface(
@@ -189,6 +198,8 @@ class PuttingGreenSimulator:
         )
         self._time = 0.0
         self._real_time_mode = False
+        self._last_acceleration: np.ndarray | None = None
+        self._last_roll_mode: RollMode | None = None
 
         # Trajectory recording
         self._trajectory: dict[str, list[Any]] = {
@@ -204,6 +215,9 @@ class PuttingGreenSimulator:
 
         # Practice mode
         self._practice_mode = False
+
+        # Randomness (seeded for determinism)
+        self._rng = rng or np.random.default_rng(random_seed)
 
     @property
     def model_name(self) -> str:
@@ -330,6 +344,8 @@ class PuttingGreenSimulator:
             velocity=np.zeros(2),
             spin=np.zeros(3),
         )
+        self._last_acceleration = None
+        self._last_roll_mode = None
         self._trajectory = {
             "positions": [],
             "velocities": [],
@@ -354,6 +370,10 @@ class PuttingGreenSimulator:
         # Physics step
         self._ball_state = self._physics.step(self._ball_state, dt)
         self._time += dt
+        self._last_acceleration = self._physics.compute_total_acceleration(
+            self._ball_state
+        )
+        self._last_roll_mode = self._physics.determine_roll_mode(self._ball_state)
 
         # Record trajectory
         if self.config.record_trajectory:
@@ -366,7 +386,20 @@ class PuttingGreenSimulator:
 
     def forward(self) -> None:
         """Compute kinematics without advancing time."""
-        # Just update derived quantities
+        self._last_acceleration = self._physics.compute_total_acceleration(
+            self._ball_state
+        )
+        self._last_roll_mode = self._physics.determine_roll_mode(self._ball_state)
+
+    def get_last_acceleration(self) -> np.ndarray | None:
+        """Get last computed acceleration."""
+        if self._last_acceleration is None:
+            return None
+        return self._last_acceleration.copy()
+
+    def get_last_roll_mode(self) -> RollMode | None:
+        """Get last computed roll mode."""
+        return self._last_roll_mode
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get current state (position, velocity)."""
@@ -447,10 +480,34 @@ class PuttingGreenSimulator:
                 self._ball_state.position, self._ball_state.velocity
             ):
                 holed = True
+                self._ball_state.velocity = np.zeros(2)
+                if self.config.record_trajectory:
+                    self._trajectory["positions"].append(
+                        self._ball_state.position.copy()
+                    )
+                    self._trajectory["velocities"].append(
+                        self._ball_state.velocity.copy()
+                    )
+                    self._trajectory["times"].append(self._time)
+                    self._trajectory["modes"].append(
+                        self._physics.determine_roll_mode(self._ball_state)
+                    )
                 break
 
             # Check for off-green
             if not self.green.is_on_green(self._ball_state.position):
+                self._ball_state.velocity = np.zeros(2)
+                if self.config.record_trajectory:
+                    self._trajectory["positions"].append(
+                        self._ball_state.position.copy()
+                    )
+                    self._trajectory["velocities"].append(
+                        self._ball_state.velocity.copy()
+                    )
+                    self._trajectory["times"].append(self._time)
+                    self._trajectory["modes"].append(
+                        self._physics.determine_roll_mode(self._ball_state)
+                    )
                 break
 
         return SimulationResult(
@@ -561,10 +618,9 @@ class PuttingGreenSimulator:
 
         # Simplified aerodynamic drag from wind
         # F = 0.5 * rho * Cd * A * v^2
-        rho = 1.225  # Air density
-        Cd = 0.4  # Drag coefficient
-        r = GOLF_BALL_RADIUS_M
-        A = np.pi * r**2
+        rho = AIR_DENSITY_SEA_LEVEL_KG_M3
+        Cd = PUTTING_WIND_DRAG_COEFFICIENT
+        A = GOLF_BALL_CROSS_SECTIONAL_AREA_M2
 
         # Relative velocity
         relative_v = (
@@ -578,7 +634,7 @@ class PuttingGreenSimulator:
         force_mag = 0.5 * rho * Cd * A * rel_speed**2
         force_dir = relative_v / rel_speed
 
-        return force_mag * force_dir * 0.1  # Reduced effect for putting
+        return force_mag * force_dir * PUTTING_WIND_FORCE_SCALING
 
     # Practice mode
     def enable_practice_mode(self) -> None:
@@ -607,7 +663,9 @@ class PuttingGreenSimulator:
             "total_distance": result.total_distance,
         }
 
-        if not result.holed:
+        if result.holed:
+            feedback["suggested_adjustment"] = "Great putt"
+        else:
             # Suggest adjustment
             if distance_from_hole < 0.5:
                 if result.final_position[0] < self.green.hole_position[0]:
@@ -627,6 +685,7 @@ class PuttingGreenSimulator:
         n_simulations: int = 10,
         speed_variance: float = 0.1,
         direction_variance_deg: float = 2.0,
+        rng: np.random.Generator | None = None,
     ) -> list[SimulationResult]:
         """Simulate multiple putts with variance for scatter analysis.
 
@@ -636,18 +695,20 @@ class PuttingGreenSimulator:
             n_simulations: Number of simulations
             speed_variance: Standard deviation of speed [m/s]
             direction_variance_deg: Standard deviation of direction [degrees]
+            rng: Optional random generator (defaults to simulator RNG)
 
         Returns:
             List of simulation results
         """
         results = []
+        rng = rng or self._rng
 
         for _ in range(n_simulations):
             # Add variance
-            speed = stroke_params.speed + np.random.normal(0, speed_variance)
+            speed = stroke_params.speed + rng.normal(0, speed_variance)
             speed = max(0.1, speed)  # Ensure positive
 
-            angle_var = np.random.normal(0, direction_variance_deg * np.pi / 180)
+            angle_var = rng.normal(0, direction_variance_deg * np.pi / 180)
             cos_a, sin_a = np.cos(angle_var), np.sin(angle_var)
             direction = np.array(
                 [
@@ -661,7 +722,7 @@ class PuttingGreenSimulator:
             varied_params = StrokeParameters(
                 speed=speed,
                 direction=direction,
-                face_angle=stroke_params.face_angle + np.random.normal(0, 1.0),
+                face_angle=stroke_params.face_angle + rng.normal(0, 1.0),
                 attack_angle=stroke_params.attack_angle,
             )
 
