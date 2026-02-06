@@ -7,21 +7,25 @@ This guide helps you upgrade from older versions to the security-enhanced versio
 ### Critical Fixes
 
 1. **API Key Storage** (CRITICAL)
+
    - **Old**: SHA256 fast hash (vulnerable to brute force)
    - **New**: Bcrypt slow hash (industry standard)
    - **Impact**: ALL existing API keys must be regenerated
 
 2. **JWT Token Generation** (MEDIUM)
+
    - **Old**: `datetime.utcnow()` (deprecated in Python 3.12+)
    - **New**: `datetime.now(timezone.utc)` (timezone-aware)
    - **Impact**: Improved compatibility with Python 3.12+
 
 3. **Password Logging** (MEDIUM)
+
    - **Old**: Admin password logged in plaintext
    - **New**: No password logging, instructions provided instead
    - **Impact**: Prevents password leakage via logs
 
 4. **CI Security Audit** (LOW)
+
    - **Old**: pip-audit advisory (non-blocking)
    - **New**: pip-audit blocking (fails on vulnerabilities)
    - **Impact**: Prevents vulnerable dependencies from being merged
@@ -128,6 +132,7 @@ if __name__ == "__main__":
 ```
 
 Run the migration:
+
 ```bash
 python scripts/migrate_api_keys.py > new_api_keys.txt
 chmod 600 new_api_keys.txt  # Protect the file
@@ -207,6 +212,7 @@ No schema changes required - `key_hash` column is reused with new hash format.
 ### Configuration
 
 New required environment variables:
+
 - `GOLF_API_SECRET_KEY` (64+ characters)
 - `GOLF_ADMIN_PASSWORD` (for initial setup)
 

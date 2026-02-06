@@ -1,5 +1,5 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 const pixelsPerMeter = 300;
 const planeGuideLengthPx = pixelsPerMeter * 3;
 const pivot = {
@@ -12,8 +12,8 @@ const defaultValues = {};
 const gravity = 9.80665;
 
 const state = {
-  theta1: -45 * Math.PI / 180,
-  theta2: -90 * Math.PI / 180,
+  theta1: (-45 * Math.PI) / 180,
+  theta2: (-90 * Math.PI) / 180,
   omega1: 0,
   omega2: 0,
   time: 0,
@@ -45,15 +45,27 @@ function rotatePoint(point, angleRad, center = pivot) {
 }
 
 function resetStateFromInputs() {
-  state.theta1 = Number(document.getElementById('theta1').value) * Math.PI / 180;
-  state.theta2 = Number(document.getElementById('theta2').value) * Math.PI / 180;
-  state.omega1 = 0; state.omega2 = 0; state.time = 0;
+  state.theta1 =
+    (Number(document.getElementById("theta1").value) * Math.PI) / 180;
+  state.theta2 =
+    (Number(document.getElementById("theta2").value) * Math.PI) / 180;
+  state.omega1 = 0;
+  state.omega2 = 0;
+  state.time = 0;
 }
 
 function validateExpr(expr) {
   try {
     // Check syntax with dummy context keys matching torques()
-    new Function('t', 'theta1', 'theta2', 'omega1', 'omega2', 'Math', `return ${expr};`);
+    new Function(
+      "t",
+      "theta1",
+      "theta2",
+      "omega1",
+      "omega2",
+      "Math",
+      `return ${expr};`,
+    );
     return null;
   } catch (e) {
     return e.message;
@@ -62,60 +74,60 @@ function validateExpr(expr) {
 
 function updateParamsFromInputs() {
   // Validate numeric inputs
-  document.querySelectorAll('input[type="number"]').forEach(input => {
+  document.querySelectorAll('input[type="number"]').forEach((input) => {
     if (!input.checkValidity()) {
-      input.classList.add('error');
-      input.setAttribute('title', input.validationMessage);
-      input.setAttribute('aria-invalid', 'true');
+      input.classList.add("error");
+      input.setAttribute("title", input.validationMessage);
+      input.setAttribute("aria-invalid", "true");
     } else {
-      input.classList.remove('error');
-      input.removeAttribute('title');
-      input.setAttribute('aria-invalid', 'false');
+      input.classList.remove("error");
+      input.removeAttribute("title");
+      input.setAttribute("aria-invalid", "false");
     }
   });
 
-  params.l1 = Number(document.getElementById('l1').value);
-  params.l2 = Number(document.getElementById('l2').value);
-  params.m1 = Number(document.getElementById('m1').value);
-  params.mShaft = Number(document.getElementById('mshaft').value);
-  params.mHead = Number(document.getElementById('mhead').value);
-  params.com1 = Number(document.getElementById('com1').value);
-  params.com2 = Number(document.getElementById('com2').value);
-  params.plane = Number(document.getElementById('plane').value);
+  params.l1 = Number(document.getElementById("l1").value);
+  params.l2 = Number(document.getElementById("l2").value);
+  params.m1 = Number(document.getElementById("m1").value);
+  params.mShaft = Number(document.getElementById("mshaft").value);
+  params.mHead = Number(document.getElementById("mhead").value);
+  params.com1 = Number(document.getElementById("com1").value);
+  params.com2 = Number(document.getElementById("com2").value);
+  params.plane = Number(document.getElementById("plane").value);
 
-  const tau1Input = document.getElementById('tau1');
-  const tau2Input = document.getElementById('tau2');
+  const tau1Input = document.getElementById("tau1");
+  const tau2Input = document.getElementById("tau2");
 
-  [tau1Input, tau2Input].forEach(input => {
-    const errorMsg = validateExpr(input.value || '0');
+  [tau1Input, tau2Input].forEach((input) => {
+    const errorMsg = validateExpr(input.value || "0");
     const errorEl = document.getElementById(`${input.id}-error`);
 
     if (!errorMsg) {
-      input.classList.remove('error');
-      input.setAttribute('aria-invalid', 'false');
+      input.classList.remove("error");
+      input.setAttribute("aria-invalid", "false");
       if (errorEl) {
-        errorEl.classList.add('hidden');
-        errorEl.textContent = '';
+        errorEl.classList.add("hidden");
+        errorEl.textContent = "";
       }
-      input.setAttribute('aria-describedby', 'math-hint');
+      input.setAttribute("aria-describedby", "math-hint");
     } else {
-      input.classList.add('error');
-      input.setAttribute('aria-invalid', 'true');
+      input.classList.add("error");
+      input.setAttribute("aria-invalid", "true");
       if (errorEl) {
         errorEl.textContent = errorMsg;
-        errorEl.classList.remove('hidden');
-        input.setAttribute('aria-describedby', `math-hint ${input.id}-error`);
+        errorEl.classList.remove("hidden");
+        input.setAttribute("aria-describedby", `math-hint ${input.id}-error`);
       }
     }
   });
 
-  params.tau1Expr = tau1Input.value || '0';
-  params.tau2Expr = tau2Input.value || '0';
+  params.tau1Expr = tau1Input.value || "0";
+  params.tau2Expr = tau2Input.value || "0";
 }
 
 function restoreDefaults() {
   pause();
-  document.querySelectorAll('.grid input').forEach(input => {
+  document.querySelectorAll(".grid input").forEach((input) => {
     if (defaultValues[input.id] !== undefined) {
       input.value = defaultValues[input.id];
     }
@@ -123,7 +135,7 @@ function restoreDefaults() {
   resetStateFromInputs();
   updateParamsFromInputs();
   draw();
-  announce('Parameters restored to defaults');
+  announce("Parameters restored to defaults");
 }
 
 function safeEval(expr, context) {
@@ -139,13 +151,21 @@ function massMatrix(theta2) {
   const m2 = params.mShaft + params.mHead;
   const lc1 = params.l1 * params.com1;
   const lc2 = params.l2 * params.com2;
-  const I1 = (1 / 12) * params.m1 * params.l1 * params.l1 + params.m1 * lc1 * lc1;
+  const I1 =
+    (1 / 12) * params.m1 * params.l1 * params.l1 + params.m1 * lc1 * lc1;
   const I2 = (1 / 12) * m2 * params.l2 * params.l2 + m2 * lc2 * lc2;
   const cos2 = Math.cos(theta2);
-  const m11 = I1 + I2 + params.m1 * lc1 * lc1 + m2 * (params.l1 ** 2 + lc2 ** 2 + 2 * params.l1 * lc2 * cos2);
+  const m11 =
+    I1 +
+    I2 +
+    params.m1 * lc1 * lc1 +
+    m2 * (params.l1 ** 2 + lc2 ** 2 + 2 * params.l1 * lc2 * cos2);
   const m12 = I2 + m2 * (lc2 ** 2 + params.l1 * lc2 * cos2);
   const m22 = I2 + m2 * lc2 ** 2;
-  return [[m11, m12], [m12, m22]];
+  return [
+    [m11, m12],
+    [m12, m22],
+  ];
 }
 
 function coriolis(theta2, omega1, omega2) {
@@ -156,11 +176,13 @@ function coriolis(theta2, omega1, omega2) {
 }
 
 function gravityVector(theta1, theta2) {
-  const gProj = gravity * Math.cos(params.plane * Math.PI / 180);
+  const gProj = gravity * Math.cos((params.plane * Math.PI) / 180);
   const m2 = params.mShaft + params.mHead;
   const lc1 = params.l1 * params.com1;
   const lc2 = params.l2 * params.com2;
-  const g1 = (params.m1 * lc1 + m2 * params.l1) * gProj * Math.sin(theta1) + m2 * lc2 * gProj * Math.sin(theta1 + theta2);
+  const g1 =
+    (params.m1 * lc1 + m2 * params.l1) * gProj * Math.sin(theta1) +
+    m2 * lc2 * gProj * Math.sin(theta1 + theta2);
   const g2 = m2 * lc2 * gProj * Math.sin(theta1 + theta2);
   return [g1, g2];
 }
@@ -170,13 +192,23 @@ function damping(omega1, omega2) {
 }
 
 function torques(t, s) {
-  const ctx = { t, theta1: s.theta1, theta2: s.theta2, omega1: s.omega1, omega2: s.omega2, Math };
+  const ctx = {
+    t,
+    theta1: s.theta1,
+    theta2: s.theta2,
+    omega1: s.omega1,
+    omega2: s.omega2,
+    Math,
+  };
   return [safeEval(params.tau1Expr, ctx), safeEval(params.tau2Expr, ctx)];
 }
 
 function invert2x2(m) {
   const det = m[0][0] * m[1][1] - m[0][1] * m[1][0];
-  return [[m[1][1] / det, -m[0][1] / det], [-m[1][0] / det, m[0][0] / det]];
+  return [
+    [m[1][1] / det, -m[0][1] / det],
+    [-m[1][0] / det, m[0][0] / det],
+  ];
 }
 
 function derivatives(t, s) {
@@ -185,25 +217,29 @@ function derivatives(t, s) {
   const g = gravityVector(s.theta1, s.theta2);
   const d = damping(s.omega1, s.omega2);
   const inv = invert2x2(massMatrix(s.theta2));
-  const acc1 = inv[0][0] * (tau[0] - c[0] - g[0] - d[0]) + inv[0][1] * (tau[1] - c[1] - g[1] - d[1]);
-  const acc2 = inv[1][0] * (tau[0] - c[0] - g[0] - d[0]) + inv[1][1] * (tau[1] - c[1] - g[1] - d[1]);
+  const acc1 =
+    inv[0][0] * (tau[0] - c[0] - g[0] - d[0]) +
+    inv[0][1] * (tau[1] - c[1] - g[1] - d[1]);
+  const acc2 =
+    inv[1][0] * (tau[0] - c[0] - g[0] - d[0]) +
+    inv[1][1] * (tau[1] - c[1] - g[1] - d[1]);
   return [s.omega1, s.omega2, acc1, acc2];
 }
 
 function rk4(dt) {
   const k1 = derivatives(state.time, state);
   const s2 = {
-    theta1: state.theta1 + dt / 2 * k1[0],
-    theta2: state.theta2 + dt / 2 * k1[1],
-    omega1: state.omega1 + dt / 2 * k1[2],
-    omega2: state.omega2 + dt / 2 * k1[3],
+    theta1: state.theta1 + (dt / 2) * k1[0],
+    theta2: state.theta2 + (dt / 2) * k1[1],
+    omega1: state.omega1 + (dt / 2) * k1[2],
+    omega2: state.omega2 + (dt / 2) * k1[3],
   };
   const k2 = derivatives(state.time + dt / 2, s2);
   const s3 = {
-    theta1: state.theta1 + dt / 2 * k2[0],
-    theta2: state.theta2 + dt / 2 * k2[1],
-    omega1: state.omega1 + dt / 2 * k2[2],
-    omega2: state.omega2 + dt / 2 * k2[3],
+    theta1: state.theta1 + (dt / 2) * k2[0],
+    theta2: state.theta2 + (dt / 2) * k2[1],
+    omega1: state.omega1 + (dt / 2) * k2[2],
+    omega2: state.omega2 + (dt / 2) * k2[3],
   };
   const k3 = derivatives(state.time + dt / 2, s3);
   const s4 = {
@@ -214,17 +250,17 @@ function rk4(dt) {
   };
   const k4 = derivatives(state.time + dt, s4);
 
-  state.theta1 += dt / 6 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]);
-  state.theta2 += dt / 6 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
-  state.omega1 += dt / 6 * (k1[2] + 2 * k2[2] + 2 * k3[2] + k4[2]);
-  state.omega2 += dt / 6 * (k1[3] + 2 * k2[3] + 2 * k3[3] + k4[3]);
+  state.theta1 += (dt / 6) * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]);
+  state.theta2 += (dt / 6) * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
+  state.omega1 += (dt / 6) * (k1[2] + 2 * k2[2] + 2 * k3[2] + k4[2]);
+  state.omega2 += (dt / 6) * (k1[3] + 2 * k2[3] + 2 * k3[3] + k4[3]);
   state.time += dt;
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const planeRad = params.plane * Math.PI / 180;
-  ctx.strokeStyle = '#2a3545';
+  const planeRad = (params.plane * Math.PI) / 180;
+  ctx.strokeStyle = "#2a3545";
   ctx.setLineDash([6, 4]);
   ctx.beginPath();
   const planeDirection = { x: Math.sin(planeRad), y: Math.cos(planeRad) };
@@ -244,33 +280,35 @@ function draw() {
     y: pivot.y + Math.cos(state.theta1) * params.l1 * pixelsPerMeter,
   };
   const wristUnrotated = {
-    x: pivot.x + (
-      Math.sin(state.theta1) * params.l1 +
-      Math.sin(state.theta1 + state.theta2) * params.l2
-    ) * pixelsPerMeter,
-    y: pivot.y + (
-      Math.cos(state.theta1) * params.l1 +
-      Math.cos(state.theta1 + state.theta2) * params.l2
-    ) * pixelsPerMeter,
+    x:
+      pivot.x +
+      (Math.sin(state.theta1) * params.l1 +
+        Math.sin(state.theta1 + state.theta2) * params.l2) *
+        pixelsPerMeter,
+    y:
+      pivot.y +
+      (Math.cos(state.theta1) * params.l1 +
+        Math.cos(state.theta1 + state.theta2) * params.l2) *
+        pixelsPerMeter,
   };
 
   const elbow = rotatePoint(elbowUnrotated, -planeRad);
   const wrist = rotatePoint(wristUnrotated, -planeRad);
 
-  ctx.strokeStyle = '#66fcf1';
+  ctx.strokeStyle = "#66fcf1";
   ctx.lineWidth = 6;
   ctx.beginPath();
   ctx.moveTo(pivot.x, pivot.y);
   ctx.lineTo(elbow.x, elbow.y);
   ctx.stroke();
 
-  ctx.strokeStyle = '#ff6b6b';
+  ctx.strokeStyle = "#ff6b6b";
   ctx.beginPath();
   ctx.moveTo(elbow.x, elbow.y);
   ctx.lineTo(wrist.x, wrist.y);
   ctx.stroke();
 
-  ctx.fillStyle = '#ff6b6b';
+  ctx.fillStyle = "#ff6b6b";
   ctx.beginPath();
   ctx.arc(wrist.x, wrist.y, 10, 0, Math.PI * 2);
   ctx.fill();
@@ -280,7 +318,7 @@ function draw() {
     x: pivot.x + planeDirection.x * contactRadius,
     y: pivot.y + planeDirection.y * contactRadius,
   };
-  ctx.fillStyle = '#fcd34d';
+  ctx.fillStyle = "#fcd34d";
   ctx.beginPath();
   ctx.arc(contactPoint.x, contactPoint.y, 8, 0, Math.PI * 2);
   ctx.fill();
@@ -290,55 +328,56 @@ function step() {
   rk4(0.01);
   draw();
   const tau = torques(state.time, state);
-  document.getElementById('torques').textContent = `Applied Nm: shoulder=${tau[0].toFixed(2)}, wrist=${tau[1].toFixed(2)}`;
+  document.getElementById("torques").textContent =
+    `Applied Nm: shoulder=${tau[0].toFixed(2)}, wrist=${tau[1].toFixed(2)}`;
   animationId = requestAnimationFrame(step);
 }
 
 function updateButtonStates(isRunning) {
-  const btn = document.getElementById('play-pause');
-  const label = btn.querySelector('span');
-  const iconPlay = document.getElementById('icon-play');
-  const iconPause = document.getElementById('icon-pause');
+  const btn = document.getElementById("play-pause");
+  const label = btn.querySelector("span");
+  const iconPlay = document.getElementById("icon-play");
+  const iconPause = document.getElementById("icon-pause");
 
   if (isRunning) {
-    iconPlay.classList.add('hidden');
-    iconPause.classList.remove('hidden');
-    label.textContent = 'Pause';
-    btn.title = 'Pause simulation (Space)';
+    iconPlay.classList.add("hidden");
+    iconPause.classList.remove("hidden");
+    label.textContent = "Pause";
+    btn.title = "Pause simulation (Space)";
   } else {
-    iconPlay.classList.remove('hidden');
-    iconPause.classList.add('hidden');
+    iconPlay.classList.remove("hidden");
+    iconPause.classList.add("hidden");
     if (state.time !== 0) {
-      label.textContent = 'Resume';
-      btn.title = 'Resume simulation (Space)';
+      label.textContent = "Resume";
+      btn.title = "Resume simulation (Space)";
     } else {
-      label.textContent = 'Start';
-      btn.title = 'Start simulation (Space)';
+      label.textContent = "Start";
+      btn.title = "Start simulation (Space)";
     }
   }
 }
 
 function showToast(message) {
-  const toast = document.getElementById('toast');
+  const toast = document.getElementById("toast");
   if (toast) {
     toast.textContent = message;
-    toast.classList.add('visible');
-    setTimeout(() => toast.classList.remove('visible'), 3000);
+    toast.classList.add("visible");
+    setTimeout(() => toast.classList.remove("visible"), 3000);
   }
 }
 
 function announce(message) {
-  const region = document.getElementById('status-announcer');
+  const region = document.getElementById("status-announcer");
   if (region) region.textContent = message;
   showToast(message);
 }
 
 let shareFeedbackTimeout = null;
 function triggerShareFeedback() {
-  const btn = document.getElementById('share');
-  const label = btn.querySelector('span');
-  const iconShare = document.getElementById('icon-share');
-  const iconCheck = document.getElementById('icon-share-check');
+  const btn = document.getElementById("share");
+  const label = btn.querySelector("span");
+  const iconShare = document.getElementById("icon-share");
+  const iconCheck = document.getElementById("icon-share-check");
 
   if (iconShare && iconCheck) {
     // Clear existing timeout to prevent race conditions on rapid clicks
@@ -346,40 +385,46 @@ function triggerShareFeedback() {
       clearTimeout(shareFeedbackTimeout);
     }
 
-    iconShare.classList.add('hidden');
-    iconCheck.classList.remove('hidden');
-    label.textContent = 'Copied!';
+    iconShare.classList.add("hidden");
+    iconCheck.classList.remove("hidden");
+    label.textContent = "Copied!";
 
     shareFeedbackTimeout = setTimeout(() => {
-      iconShare.classList.remove('hidden');
-      iconCheck.classList.add('hidden');
-      label.textContent = 'Share';
+      iconShare.classList.remove("hidden");
+      iconCheck.classList.add("hidden");
+      label.textContent = "Share";
       shareFeedbackTimeout = null;
     }, 2000);
   }
 }
 
 function copyShareLink() {
-  const inputs = document.querySelectorAll('.grid input');
+  const inputs = document.querySelectorAll(".grid input");
   const params = new URLSearchParams();
-  inputs.forEach(input => params.set(input.id, input.value));
+  inputs.forEach((input) => params.set(input.id, input.value));
   // Handle file:// protocol where host is empty
-  const origin = window.location.protocol === 'file:' ? window.location.pathname : `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+  const origin =
+    window.location.protocol === "file:"
+      ? window.location.pathname
+      : `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
   const newUrl = `${origin}?${params.toString()}`;
 
   try {
-    window.history.replaceState(null, '', newUrl);
+    window.history.replaceState(null, "", newUrl);
   } catch (e) {
     // Ignore history errors on file://
   }
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(newUrl).then(() => {
-      announce('Link copied to clipboard');
-      triggerShareFeedback();
-    }).catch(() => {
-      fallbackCopy(newUrl);
-    });
+    navigator.clipboard
+      .writeText(newUrl)
+      .then(() => {
+        announce("Link copied to clipboard");
+        triggerShareFeedback();
+      })
+      .catch(() => {
+        fallbackCopy(newUrl);
+      });
   } else {
     fallbackCopy(newUrl);
   }
@@ -387,23 +432,23 @@ function copyShareLink() {
 
 function fallbackCopy(text) {
   try {
-    const textArea = document.createElement('textarea');
+    const textArea = document.createElement("textarea");
     textArea.value = text;
-    textArea.style.position = 'fixed'; // Avoid scrolling to bottom
+    textArea.style.position = "fixed"; // Avoid scrolling to bottom
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-    const successful = document.execCommand('copy');
+    const successful = document.execCommand("copy");
     document.body.removeChild(textArea);
     if (successful) {
-      announce('Link copied to clipboard');
+      announce("Link copied to clipboard");
       triggerShareFeedback();
       return;
     }
   } catch (err) {
     // Fallback failed
   }
-  prompt('Copy this link:', text);
+  prompt("Copy this link:", text);
 }
 
 function initFromUrl() {
@@ -420,7 +465,7 @@ function initFromUrl() {
     resetStateFromInputs();
     updateParamsFromInputs();
     draw();
-    announce('Configuration loaded from URL');
+    announce("Configuration loaded from URL");
   }
 }
 
@@ -432,14 +477,14 @@ function start() {
   updateParamsFromInputs();
   step();
   updateButtonStates(true);
-  announce('Simulation started');
+  announce("Simulation started");
 }
 
 function pause() {
   cancelAnimationFrame(animationId);
   animationId = null;
   updateButtonStates(false);
-  announce('Simulation paused');
+  announce("Simulation paused");
 }
 
 function reset() {
@@ -447,40 +492,42 @@ function reset() {
   resetStateFromInputs();
   updateParamsFromInputs();
   draw();
-  document.getElementById('torques').textContent = 'Torques: --';
+  document.getElementById("torques").textContent = "Torques: --";
   updateButtonStates(false);
-  announce('Simulation reset');
+  announce("Simulation reset");
 }
 
-document.getElementById('play-pause').addEventListener('click', () => {
+document.getElementById("play-pause").addEventListener("click", () => {
   if (animationId) pause();
   else start();
 });
 
-document.getElementById('share').addEventListener('click', copyShareLink);
+document.getElementById("share").addEventListener("click", copyShareLink);
 
-['reset', 'defaults'].forEach(id => document.getElementById(id).addEventListener('click', () => {
-  ({ reset, defaults: restoreDefaults })[id]();
-}));
+["reset", "defaults"].forEach((id) =>
+  document.getElementById(id).addEventListener("click", () => {
+    ({ reset, defaults: restoreDefaults })[id]();
+  }),
+);
 
-document.querySelectorAll('.grid input').forEach(input => {
+document.querySelectorAll(".grid input").forEach((input) => {
   defaultValues[input.id] = input.value;
 });
 
-document.addEventListener('keydown', (e) => {
-  if (e.target.matches('input, button, select, textarea')) return;
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input, button, select, textarea")) return;
 
-  if (e.key === ' ' || e.key === 'Spacebar') {
+  if (e.key === " " || e.key === "Spacebar") {
     e.preventDefault();
     animationId ? pause() : start();
-  } else if (e.key === 'r' || e.key === 'R') {
+  } else if (e.key === "r" || e.key === "R") {
     reset();
   }
 });
 
-document.querySelectorAll('.grid input').forEach(input => {
-  if (input.id !== 'theta1' && input.id !== 'theta2') {
-    input.addEventListener('input', () => {
+document.querySelectorAll(".grid input").forEach((input) => {
+  if (input.id !== "theta1" && input.id !== "theta2") {
+    input.addEventListener("input", () => {
       updateParamsFromInputs();
       if (!animationId) draw();
     });

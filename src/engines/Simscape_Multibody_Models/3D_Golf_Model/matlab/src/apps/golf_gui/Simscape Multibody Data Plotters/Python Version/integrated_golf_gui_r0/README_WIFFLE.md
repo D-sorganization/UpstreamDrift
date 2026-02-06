@@ -7,6 +7,7 @@ This is the most refined version of the golf swing visualization system, specifi
 ## Key Features
 
 ### 🎯 **Core Capabilities**
+
 - **Excel Data Loading**: Direct support for Wiffle_ProV1 Excel files
 - **3D Visualization**: High-performance OpenGL rendering with realistic lighting
 - **Motion Capture Display**: Full body segment visualization with club and ball tracking
@@ -14,6 +15,7 @@ This is the most refined version of the golf swing visualization system, specifi
 - **Interactive Controls**: Playback, camera controls, filtering options
 
 ### 🔧 **Advanced Features**
+
 - **Ball Comparison**: Side-by-side ProV1 vs Wiffle analysis
 - **Performance Monitoring**: FPS tracking and optimization
 - **Data Processing**: Noise filtering, interpolation, and normalization
@@ -71,16 +73,19 @@ filterpy>=1.4.5
 ### Quick Start
 
 1. **Navigate to the integrated GUI directory:**
+
    ```bash
    cd integrated_golf_gui_r0
    ```
 
 2. **Install dependencies:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Run the main application:**
+
    ```bash
    python golf_wiffle_main.py
    ```
@@ -124,15 +129,18 @@ Each sheet should contain the following columns (or similar):
 The application features a modern interface with dockable panels:
 
 1. **Data Loading Panel** (Left)
+
    - File selection and loading progress
    - Data information display
 
 2. **Wiffle Controls Panel** (Left)
+
    - Ball type selection (ProV1/Wiffle/Difference)
    - Data processing options
    - Reload functionality
 
 3. **Analysis Panel** (Right)
+
    - Comparison controls
    - Performance metrics
    - Export options
@@ -145,16 +153,19 @@ The application features a modern interface with dockable panels:
 ### Key Controls
 
 #### **Playback Controls**
+
 - **Play/Pause**: Start/stop animation
 - **Frame Slider**: Manual frame selection
 - **Speed Control**: Adjust playback speed
 
 #### **Camera Controls**
+
 - **Mouse Drag**: Rotate camera
 - **Mouse Wheel**: Zoom in/out
 - **Reset Camera**: Return to default view
 
 #### **Visualization Options**
+
 - **Ball Type**: Switch between ProV1, Wiffle, or Difference view
 - **Show/Hide**: Toggle visibility of different elements
 - **Filtering**: Apply noise reduction and smoothing
@@ -162,11 +173,13 @@ The application features a modern interface with dockable panels:
 ### Analysis Features
 
 #### **Real-time Metrics**
+
 - Maximum clubhead speed comparison
 - Trajectory difference analysis
 - Frame-by-frame distance calculations
 
 #### **Data Export**
+
 - Export comparison data to CSV
 - Screenshot capture
 - Video recording capabilities
@@ -174,16 +187,19 @@ The application features a modern interface with dockable panels:
 ## Data Processing Options
 
 ### **Noise Filtering**
+
 - **Savitzky-Golay Filter**: Smooths position data
 - **Configurable Window**: Automatic window size calculation
 - **Edge Handling**: Proper boundary condition handling
 
 ### **Data Interpolation**
+
 - **Missing Value Handling**: Linear interpolation for gaps
 - **Time Normalization**: Optional time scaling
 - **Data Validation**: Automatic error detection
 
 ### **Performance Optimization**
+
 - **Numba Acceleration**: JIT-compiled calculations
 - **OpenGL Rendering**: Hardware-accelerated visualization
 - **Memory Management**: Efficient data structures
@@ -193,18 +209,21 @@ The application features a modern interface with dockable panels:
 ### Common Issues
 
 1. **OpenGL Errors**
+
    ```bash
    # Check OpenGL support
    python -c "import moderngl; print('OpenGL supported')"
    ```
 
 2. **Missing Dependencies**
+
    ```bash
    # Reinstall requirements
    pip install --upgrade -r requirements.txt
    ```
 
 3. **Data Loading Errors**
+
    - Verify Excel file format
    - Check column names match expected format
    - Ensure both ProV1 and Wiffle sheets exist
@@ -217,6 +236,7 @@ The application features a modern interface with dockable panels:
 ### Debug Mode
 
 Enable debug output by setting environment variable:
+
 ```bash
 export PYTHONPATH=.
 python golf_wiffle_main.py
@@ -225,18 +245,21 @@ python golf_wiffle_main.py
 ## Comparison with Other Versions
 
 ### **SkeletonPlotter** (MATLAB)
+
 - ✅ Good for basic visualization
 - ❌ Limited to MATLAB environment
 - ❌ No Excel data support
 - ❌ Basic UI controls
 
 ### **Matlab Inverse Dynamics** (MATLAB)
+
 - ✅ Excel data support
 - ✅ Basic comparison features
 - ❌ Limited 3D visualization
 - ❌ MATLAB dependency
 
 ### **integrated_golf_gui_r0** (Python - **RECOMMENDED**)
+
 - ✅ Full Excel data support
 - ✅ Advanced 3D visualization
 - ✅ Professional UI
@@ -283,12 +306,14 @@ python golf_wiffle_main.py
 ## Performance Considerations
 
 ### **Optimization Features**
+
 - **Numba JIT Compilation**: Accelerated mathematical operations
 - **OpenGL Hardware Acceleration**: GPU-accelerated rendering
 - **Efficient Data Structures**: Memory-optimized arrays
 - **Background Loading**: Non-blocking data processing
 
 ### **Recommended Hardware**
+
 - **GPU**: OpenGL 3.3+ compatible graphics card
 - **RAM**: 8GB+ for large datasets
 - **CPU**: Multi-core processor for data processing
@@ -297,12 +322,14 @@ python golf_wiffle_main.py
 ## Future Enhancements
 
 ### **Planned Features**
+
 - **Machine Learning Analysis**: Automated swing analysis
 - **Cloud Integration**: Remote data processing
 - **Mobile Support**: Touch-optimized interface
 - **Advanced Metrics**: Biomechanical analysis
 
 ### **Performance Improvements**
+
 - **Vulkan Rendering**: Next-generation graphics API
 - **Parallel Processing**: Multi-threaded data analysis
 - **Memory Optimization**: Reduced memory footprint
@@ -310,6 +337,7 @@ python golf_wiffle_main.py
 ## Support
 
 For issues and questions:
+
 1. Check the troubleshooting section
 2. Review the code comments
 3. Test with sample data

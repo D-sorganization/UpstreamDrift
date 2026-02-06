@@ -19,8 +19,8 @@ Based on the assessment in `Golf_Modeling_Suite_Assessment.md` and current code 
 The viewer is currently a 670-line monolith. We will decompose it into a clean MVC structure:
 
 - [ ] **Extract UI Components**:
-    -   `ui/widgets/mpl_canvas.py`: The `MplCanvas` class.
-    -   `ui/tabs/`: Separate classes for `OverviewTab`, `MarkerPlotTab`, `Viewer3DTab`, etc.
+  - `ui/widgets/mpl_canvas.py`: The `MplCanvas` class.
+  - `ui/tabs/`: Separate classes for `OverviewTab`, `MarkerPlotTab`, `Viewer3DTab`, etc.
 - [ ] **Refactor Main Window**: `C3DViewerMainWindow` should only handle layout and signal connections, delegating logic to controllers or the extracted tabs.
 
 ## 3. Testing & Validation

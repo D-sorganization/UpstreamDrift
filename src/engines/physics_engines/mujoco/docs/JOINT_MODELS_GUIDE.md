@@ -27,17 +27,20 @@ The enhanced golf swing models include:
 ### 1. Two-Link Inclined Plane Model (`TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML`)
 
 A simplified model featuring:
+
 - Base mounted on 15° inclined plane
 - Single shoulder hinge joint
 - **Universal joint at wrist** (2 perpendicular hinges)
 - Sensors for constraint forces and torques
 
 **Key Features:**
+
 - Ideal for studying universal joint torque wobble
 - Inclined plane simulates swing plane geometry
 - Torque sensors at shoulder and wrist
 
 **Joint Configuration:**
+
 ```
 shoulder (hinge) → upper_arm → wrist_universal_1 (hinge, Y-axis)
                                      ↓
@@ -47,6 +50,7 @@ shoulder (hinge) → upper_arm → wrist_universal_1 (hinge, Y-axis)
 ```
 
 **Usage:**
+
 ```python
 from mujoco_golf_pendulum.models import TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML
 import mujoco as mj
@@ -60,22 +64,26 @@ data = mj.MjData(model)
 A pure gimbal joint demonstration with three nested rings:
 
 **Structure:**
+
 - Outer ring: Z-axis rotation
 - Middle ring: Y-axis rotation (perpendicular to outer)
 - Inner ring: X-axis rotation (perpendicular to middle)
 - Central payload platform
 
 **Key Features:**
+
 - Demonstrates gimbal lock phenomenon
 - Full 3-DOF orientation control
 - Visual representation of gimbal mechanics
 
 **Applications:**
+
 - Understanding shoulder joint kinematics
 - Testing gimbal lock detection
 - Studying Euler angle singularities
 
 **Usage:**
+
 ```python
 from mujoco_golf_pendulum.models import GIMBAL_JOINT_DEMO_XML
 import mujoco as mj
@@ -95,23 +103,25 @@ Full-body golf swing model with anatomically accurate joint types:
 
 **Joint Configuration:**
 
-| Body Part | Joint Type | DOF | Implementation |
-|-----------|------------|-----|----------------|
-| Shoulders | Gimbal | 3 | flexion, abduction, rotation |
-| Scapula | Universal | 2 | elevation, protraction |
-| Elbows | Revolute | 1 | flexion/extension |
-| Wrists | Universal | 2 | flexion, deviation |
-| Spine | Universal + Revolute | 3 | lateral, sagittal, rotation |
-| Ankles | Universal | 2 | plantar, inversion |
-| Knees | Revolute | 1 | flexion/extension |
+| Body Part | Joint Type           | DOF | Implementation               |
+| --------- | -------------------- | --- | ---------------------------- |
+| Shoulders | Gimbal               | 3   | flexion, abduction, rotation |
+| Scapula   | Universal            | 2   | elevation, protraction       |
+| Elbows    | Revolute             | 1   | flexion/extension            |
+| Wrists    | Universal            | 2   | flexion, deviation           |
+| Spine     | Universal + Revolute | 3   | lateral, sagittal, rotation  |
+| Ankles    | Universal            | 2   | plantar, inversion           |
+| Knees     | Revolute             | 1   | flexion/extension            |
 
 **Key Features:**
+
 - Flexible 3-segment club shaft
 - Realistic anthropometric parameters
 - Constraint forces at all joints
 - Optional rigid or flexible club
 
 **Club Attachment:**
+
 - Right hand holds club via flexible shaft
 - Left hand connects via weld constraint
 - Configurable shaft stiffness and segments
@@ -123,6 +133,7 @@ Full-body golf swing model with anatomically accurate joint types:
 A **universal joint** (U-joint) allows rotation about two perpendicular axes. Implemented in MuJoCo as two sequential hinge joints.
 
 **Characteristics:**
+
 - 2 degrees of freedom
 - Exhibits torque wobble when bent
 - Used in automotive driveshafts, wrists
@@ -135,11 +146,13 @@ The velocity ratio between input and output shafts varies as:
 ```
 
 where:
+
 - `β` = angle between shafts
 - `θ` = rotation angle
 - Wobble increases with larger `β`
 
 **Implementation:**
+
 ```xml
 <body name="wrist">
   <joint name="wrist_u1" type="hinge" axis="0 1 0" range="-1.57 1.57"/>
@@ -153,6 +166,7 @@ where:
 A **gimbal joint** provides 3 DOF rotation via three nested rings rotating about perpendicular axes.
 
 **Characteristics:**
+
 - 3 degrees of freedom
 - Can reach any orientation (except gimbal lock)
 - Avoids torque wobble
@@ -162,6 +176,7 @@ A **gimbal joint** provides 3 DOF rotation via three nested rings rotating about
 Occurs when middle ring is at ±90°, causing loss of one DOF.
 
 **Implementation:**
+
 ```xml
 <body name="gimbal_outer">
   <joint name="gimbal_z" type="hinge" axis="0 0 1"/>
@@ -177,13 +192,13 @@ Occurs when middle ring is at ±90°, causing loss of one DOF.
 
 ### Comparison
 
-| Feature | Universal Joint | Gimbal Joint |
-|---------|----------------|--------------|
-| DOF | 2 | 3 |
-| Torque Wobble | Yes | No |
-| Singularities | None | Gimbal lock at ±90° |
-| Complexity | Simple | Complex |
-| Golf Swing Use | Wrists, scapula | Shoulders |
+| Feature        | Universal Joint | Gimbal Joint        |
+| -------------- | --------------- | ------------------- |
+| DOF            | 2               | 3                   |
+| Torque Wobble  | Yes             | No                  |
+| Singularities  | None            | Gimbal lock at ±90° |
+| Complexity     | Simple          | Complex             |
+| Golf Swing Use | Wrists, scapula | Shoulders           |
 
 ## Golf Club Configurations
 
@@ -192,6 +207,7 @@ Occurs when middle ring is at ±90°, causing loss of one DOF.
 Three realistic club configurations are provided:
 
 #### Driver
+
 - **Length:** 116 cm
 - **Head mass:** 198 g
 - **Loft:** 10°
@@ -199,6 +215,7 @@ Three realistic club configurations are provided:
 - **Use:** Maximum distance off the tee
 
 #### 7-Iron
+
 - **Length:** 95 cm
 - **Head mass:** 253 g
 - **Loft:** 32°
@@ -206,6 +223,7 @@ Three realistic club configurations are provided:
 - **Use:** Approach shots, 150-170 yards
 
 #### Wedge
+
 - **Length:** 90 cm
 - **Head mass:** 288 g
 - **Loft:** 55°
@@ -215,6 +233,7 @@ Three realistic club configurations are provided:
 ### Shaft Options
 
 #### Rigid Shaft
+
 ```python
 from mujoco_golf_pendulum.models import generate_rigid_club_xml
 
@@ -223,6 +242,7 @@ club_xml = generate_rigid_club_xml("driver")
 ```
 
 #### Flexible Shaft (Beam Model)
+
 ```python
 from mujoco_golf_pendulum.models import generate_flexible_club_xml
 
@@ -234,6 +254,7 @@ club_xml = generate_flexible_club_xml("driver", num_segments=5)
 ```
 
 **Flexible Shaft Parameters:**
+
 - Each segment has independent stiffness
 - Damping decreases toward club head
 - Stiffness values from real club measurements
@@ -396,6 +417,7 @@ For a universal joint with input shaft rotating at constant velocity ω₁:
 **Torque Relationship:**
 
 By conservation of energy (assuming no friction):
+
 ```
 τ₂/τ₁ = 1 / (ω₂/ω₁)
 ```
@@ -403,6 +425,7 @@ By conservation of energy (assuming no friction):
 **Maximum Wobble:**
 
 Occurs at θ = 90°, 270°:
+
 ```
 (ω₂/ω₁)_max = 1 / cos(β)
 (ω₂/ω₁)_min = cos(β)
@@ -423,6 +446,7 @@ constraint_force = data.qfrc_constraint[joint_qpos_address]
 ```
 
 **Interpretation:**
+
 - Hinge joint: scalar constraint torque
 - Universal joint: 2D constraint torque vector
 - Gimbal joint: 3D constraint torque vector
@@ -436,16 +460,19 @@ Segment 1 (stiff) ⇿ Segment 2 (medium) ⇿ Segment 3 (flexible) → Head
 ```
 
 **Stiffness Distribution:**
+
 - Upper shaft: Stiffer (180-240 N⋅m/rad)
 - Middle shaft: Medium (150-220 N⋅m/rad)
 - Lower shaft: More flexible (120-200 N⋅m/rad)
 
 **Equation of Motion (per segment):**
+
 ```
 I·α = τ_applied - k·θ - b·ω
 ```
 
 where:
+
 - I = moment of inertia
 - k = torsional stiffness
 - b = damping coefficient

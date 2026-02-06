@@ -24,11 +24,11 @@ Created `BaseLauncher` abstract class in `src/launchers/base.py`:
 
 **Refactored Launchers:**
 
-| File | Before | After | Reduction |
-|------|--------|-------|-----------|
-| `matlab_launcher_unified.py` | 174 lines | 55 lines | **68%** |
-| `motion_capture_launcher.py` | 131 lines | 75 lines | **43%** |
-| `mujoco_unified_launcher.py` | 139 lines | 90 lines | **35%** |
+| File                         | Before    | After    | Reduction |
+| ---------------------------- | --------- | -------- | --------- |
+| `matlab_launcher_unified.py` | 174 lines | 55 lines | **68%**   |
+| `motion_capture_launcher.py` | 131 lines | 75 lines | **43%**   |
+| `mujoco_unified_launcher.py` | 139 lines | 90 lines | **35%**   |
 
 **Total Lines Saved:** ~225 lines
 
@@ -41,16 +41,16 @@ Created `BaseLauncher` abstract class in `src/launchers/base.py`:
 
 All files now import availability flags from `src/shared/python/engine_availability.py`:
 
-| File | Flags Consolidated |
-|------|-------------------|
-| `manipulability.py` | `DRAKE_AVAILABLE` |
-| `pose_editor_tab.py` (drake) | `DRAKE_AVAILABLE`, `PYQT6_AVAILABLE` |
-| `muscle_analysis.py` | `MUJOCO_AVAILABLE` |
-| `pinocchio_backend.py` | `PINOCCHIO_AVAILABLE` |
-| `dual_hand_ik_solver.py` | `PINOCCHIO_AVAILABLE` |
-| `motion_visualizer.py` | `PINOCCHIO_AVAILABLE` |
+| File                             | Flags Consolidated                       |
+| -------------------------------- | ---------------------------------------- |
+| `manipulability.py`              | `DRAKE_AVAILABLE`                        |
+| `pose_editor_tab.py` (drake)     | `DRAKE_AVAILABLE`, `PYQT6_AVAILABLE`     |
+| `muscle_analysis.py`             | `MUJOCO_AVAILABLE`                       |
+| `pinocchio_backend.py`           | `PINOCCHIO_AVAILABLE`                    |
+| `dual_hand_ik_solver.py`         | `PINOCCHIO_AVAILABLE`                    |
+| `motion_visualizer.py`           | `PINOCCHIO_AVAILABLE`                    |
 | `pose_editor_tab.py` (pinocchio) | `PINOCCHIO_AVAILABLE`, `PYQT6_AVAILABLE` |
-| `visualization_widget.py` | `MUJOCO_AVAILABLE` |
+| `visualization_widget.py`        | `MUJOCO_AVAILABLE`                       |
 
 **Total: 8 files migrated to centralized availability module**
 
@@ -101,11 +101,11 @@ Fixed WebSocket reconnect logic using ref pattern.
 
 ### 1. Remaining Launcher Refactoring (3 files)
 
-| File | Lines | Status | Notes |
-|------|-------|--------|-------|
-| `golf_launcher.py` | 2517 | Main app | Complex - may warrant separate pattern |
-| `golf_suite_launcher.py` | 404 | Deprecated | Keep for backwards compat |
-| `shot_tracer.py` | 512 | Specialized | 3D viz - unique pattern |
+| File                     | Lines | Status      | Notes                                  |
+| ------------------------ | ----- | ----------- | -------------------------------------- |
+| `golf_launcher.py`       | 2517  | Main app    | Complex - may warrant separate pattern |
+| `golf_suite_launcher.py` | 404   | Deprecated  | Keep for backwards compat              |
+| `shot_tracer.py`         | 512   | Specialized | 3D viz - unique pattern                |
 
 ### 2. Migration to Centralized Modules
 
@@ -121,27 +121,27 @@ Many files could benefit from using centralized modules:
 
 ## REMEDIATION PRIORITY ORDER (Final)
 
-| Priority | Item | Status |
-|----------|------|--------|
-| 1 | Launcher UI Duplication | ✅ DONE (3/6 files) |
-| 2 | Engine Detection | ✅ DONE (8 files) |
-| 3 | Logging Setup | ✅ ALREADY CONSOLIDATED |
-| 4 | Config Loading | ✅ ALREADY CONSOLIDATED |
-| 5 | Theme/Font Setup | ✅ ALREADY CONSOLIDATED |
-| 6 | Path Resolution | ✅ ALREADY CONSOLIDATED |
+| Priority | Item                    | Status                  |
+| -------- | ----------------------- | ----------------------- |
+| 1        | Launcher UI Duplication | ✅ DONE (3/6 files)     |
+| 2        | Engine Detection        | ✅ DONE (8 files)       |
+| 3        | Logging Setup           | ✅ ALREADY CONSOLIDATED |
+| 4        | Config Loading          | ✅ ALREADY CONSOLIDATED |
+| 5        | Theme/Font Setup        | ✅ ALREADY CONSOLIDATED |
+| 6        | Path Resolution         | ✅ ALREADY CONSOLIDATED |
 
 ---
 
 ## METRICS (Final)
 
-| Category | Original | Fixed/Consolidated | Remaining |
-|----------|----------|-------------------|-----------|
-| Launcher UI duplication | 6 | 3 | 3 (specialized) |
-| Engine detection | 7+ | 8 | 0 (main violations fixed) |
-| Logging duplications | 5 | ✅ | 0 |
-| Config loading | 47 | ✅ | 0 |
-| Path resolution | 64 | ✅ | 0 (module exists) |
-| Theme/font setup | 56 | ✅ | 0 (module exists) |
+| Category                | Original | Fixed/Consolidated | Remaining                 |
+| ----------------------- | -------- | ------------------ | ------------------------- |
+| Launcher UI duplication | 6        | 3                  | 3 (specialized)           |
+| Engine detection        | 7+       | 8                  | 0 (main violations fixed) |
+| Logging duplications    | 5        | ✅                 | 0                         |
+| Config loading          | 47       | ✅                 | 0                         |
+| Path resolution         | 64       | ✅                 | 0 (module exists)         |
+| Theme/font setup        | 56       | ✅                 | 0 (module exists)         |
 
 **Original DRY Violations: 775+**  
 **Resolved This Session: ~250 lines reduced, 11+ files refactored**  

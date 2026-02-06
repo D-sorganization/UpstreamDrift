@@ -27,26 +27,31 @@ This directory contains supplementary CI/CD documentation for the 2D_Golf_Model 
 ### For Developers
 
 **Python Development:**
+
 - See [UNIFIED_CI_APPROACH.md - Python CI Workflow](../UNIFIED_CI_APPROACH.md#python-ci-workflow)
 - Tool versions: ruff==0.5.0, mypy==1.10.0, black==24.4.2
 
 **MATLAB Development:**
+
 - See [MATLAB_COMPLIANCE.md](MATLAB_COMPLIANCE.md) for complete guide
 - Local checks: Run `matlab -batch "run_matlab_quality_checks"`
 - CI checks: Bash-based checks run automatically (no MATLAB license needed)
 
 **JavaScript/TypeScript Development:**
+
 - See [UNIFIED_CI_APPROACH.md - JavaScript/TypeScript CI Workflow](../UNIFIED_CI_APPROACH.md#javascripttypescript-ci-workflow)
 
 ### For CI/CD Maintenance
 
 **Updating CI Workflows:**
+
 1. Review [UNIFIED_CI_APPROACH.md](../UNIFIED_CI_APPROACH.md) for standards
 2. Check technology-specific sections
 3. Ensure pinned versions are up to date
 4. Test locally before committing
 
 **Adding New Repositories:**
+
 1. Follow patterns in UNIFIED_CI_APPROACH.md
 2. Use appropriate technology-specific workflow template
 3. Include replicant branch support if applicable
@@ -72,15 +77,18 @@ From UNIFIED_CI_APPROACH.md:
 ### 2D_Golf_Model
 
 **Tech Stack:**
+
 - MATLAB (primary) - 655 files in `matlab/`, 30 in `matlab_optimized/`
 - Python (secondary) - Data processing and analysis
 
 **CI Checks:**
+
 - Python: Full pytest, ruff, mypy, black, coverage
 - MATLAB: Bash-based checks (magic numbers, approximations, seeds)
 - MATLAB (optional): Full checkcode and unit tests when license available
 
 **Local Testing:**
+
 ```bash
 # Python checks
 python scripts/quality_check.py

@@ -74,12 +74,12 @@ The Golf Modeling Suite uses a **local-first API architecture** built on FastAPI
 
 All shared utilities are centralized in `src/api/utils/`:
 
-| Module | Purpose |
-|--------|---------|
-| `datetime_compat.py` | Timezone-aware datetime utilities |
-| `error_codes.py` | Structured error codes (GMS-XXX-YYY) |
-| `tracing.py` | Request correlation and tracing |
-| `path_validation.py` | Secure file path validation |
+| Module               | Purpose                              |
+| -------------------- | ------------------------------------ |
+| `datetime_compat.py` | Timezone-aware datetime utilities    |
+| `error_codes.py`     | Structured error codes (GMS-XXX-YYY) |
+| `tracing.py`         | Request correlation and tracing      |
+| `path_validation.py` | Secure file path validation          |
 
 ### 2. Orthogonality
 
@@ -112,52 +112,52 @@ def simulate(self) -> SimulationResult:
 
 ### Core Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | API info and version |
-| GET | `/health` | Health check with engine status |
-| GET | `/docs` | OpenAPI documentation |
-| GET | `/redoc` | ReDoc documentation |
+| Method | Path      | Description                     |
+| ------ | --------- | ------------------------------- |
+| GET    | `/`       | API info and version            |
+| GET    | `/health` | Health check with engine status |
+| GET    | `/docs`   | OpenAPI documentation           |
+| GET    | `/redoc`  | ReDoc documentation             |
 
 ### Authentication (`/auth`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/auth/login` | Obtain JWT tokens |
-| POST | `/auth/register` | Create account (cloud mode) |
-| POST | `/auth/refresh` | Refresh access token |
+| Method | Path             | Description                 |
+| ------ | ---------------- | --------------------------- |
+| POST   | `/auth/login`    | Obtain JWT tokens           |
+| POST   | `/auth/register` | Create account (cloud mode) |
+| POST   | `/auth/refresh`  | Refresh access token        |
 
 **Note**: Authentication is optional in local mode (`GOLF_SUITE_MODE=local`).
 
 ### Engine Management (`/engines`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/engines` | List all engines with status |
-| POST | `/engines/{type}/load` | Load a specific engine |
-| POST | `/engines/{type}/unload` | Unload an engine |
+| Method | Path                     | Description                  |
+| ------ | ------------------------ | ---------------------------- |
+| GET    | `/engines`               | List all engines with status |
+| POST   | `/engines/{type}/load`   | Load a specific engine       |
+| POST   | `/engines/{type}/unload` | Unload an engine             |
 
 ### Simulation (`/simulate`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/simulate` | Run synchronous simulation |
-| POST | `/simulate/async` | Start async simulation |
-| GET | `/simulate/status/{id}` | Check async task status |
+| Method | Path                    | Description                |
+| ------ | ----------------------- | -------------------------- |
+| POST   | `/simulate`             | Run synchronous simulation |
+| POST   | `/simulate/async`       | Start async simulation     |
+| GET    | `/simulate/status/{id}` | Check async task status    |
 
 ### Analysis (`/analyze`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/analyze/biomechanics` | Run biomechanical analysis |
-| POST | `/analyze/video` | Analyze video pose |
-| POST | `/analyze/video/async` | Async video analysis |
+| Method | Path                    | Description                |
+| ------ | ----------------------- | -------------------------- |
+| POST   | `/analyze/biomechanics` | Run biomechanical analysis |
+| POST   | `/analyze/video`        | Analyze video pose         |
+| POST   | `/analyze/video/async`  | Async video analysis       |
 
 ### Export (`/export`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/export/{task_id}` | Export completed task results |
+| Method | Path                | Description                   |
+| ------ | ------------------- | ----------------------------- |
+| GET    | `/export/{task_id}` | Export completed task results |
 
 ## Error Handling
 
@@ -180,17 +180,17 @@ All errors use structured error codes for traceability:
 
 ### Error Code Categories
 
-| Prefix | Category | Example |
-|--------|----------|---------|
-| GMS-GEN | General | Internal errors, rate limits |
-| GMS-ENG | Engine | Load failures, invalid state |
-| GMS-SIM | Simulation | Timeout, invalid params |
-| GMS-VID | Video | Invalid format, processing fail |
-| GMS-ANL | Analysis | Service not ready |
-| GMS-AUT | Auth | Token expired, quota exceeded |
-| GMS-VAL | Validation | Missing field, invalid value |
-| GMS-RES | Resource | Not found, access denied |
-| GMS-SYS | System | Database, configuration |
+| Prefix  | Category   | Example                         |
+| ------- | ---------- | ------------------------------- |
+| GMS-GEN | General    | Internal errors, rate limits    |
+| GMS-ENG | Engine     | Load failures, invalid state    |
+| GMS-SIM | Simulation | Timeout, invalid params         |
+| GMS-VID | Video      | Invalid format, processing fail |
+| GMS-ANL | Analysis   | Service not ready               |
+| GMS-AUT | Auth       | Token expired, quota exceeded   |
+| GMS-VAL | Validation | Missing field, invalid value    |
+| GMS-RES | Resource   | Not found, access denied        |
+| GMS-SYS | System     | Database, configuration         |
 
 ## Request Tracing
 
@@ -200,6 +200,7 @@ Every request is assigned:
 - **Correlation ID** (`X-Correlation-ID`): For cross-service tracing
 
 These IDs appear in:
+
 - Response headers
 - Error responses
 - Log entries
@@ -217,10 +218,10 @@ These IDs appear in:
 
 ### Authentication Modes
 
-| Mode | Auth Required | Use Case |
-|------|---------------|----------|
-| `local` | No | Local development |
-| `cloud` | Yes | Production deployment |
+| Mode    | Auth Required | Use Case              |
+| ------- | ------------- | --------------------- |
+| `local` | No            | Local development     |
+| `cloud` | Yes           | Production deployment |
 
 Set via environment: `GOLF_SUITE_MODE=local`
 
@@ -228,14 +229,14 @@ Set via environment: `GOLF_SUITE_MODE=local`
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GOLF_SUITE_MODE` | `local` | Authentication mode |
-| `GOLF_AUTH_DISABLED` | `false` | Force disable auth |
-| `GOLF_PORT` | `8000` | Server port |
-| `CORS_ORIGINS` | localhost | Allowed CORS origins |
-| `GOLF_API_SECRET_KEY` | - | JWT signing key |
-| `DATABASE_URL` | sqlite:///.db | Database connection |
+| Variable              | Default       | Description          |
+| --------------------- | ------------- | -------------------- |
+| `GOLF_SUITE_MODE`     | `local`       | Authentication mode  |
+| `GOLF_AUTH_DISABLED`  | `false`       | Force disable auth   |
+| `GOLF_PORT`           | `8000`        | Server port          |
+| `CORS_ORIGINS`        | localhost     | Allowed CORS origins |
+| `GOLF_API_SECRET_KEY` | -             | JWT signing key      |
+| `DATABASE_URL`        | sqlite:///.db | Database connection  |
 
 ### Config Files
 
@@ -272,6 +273,7 @@ report = diag.run_all_checks()
 ### Task Manager
 
 Background tasks use TTL-based cleanup:
+
 - `TTL_SECONDS = 3600` (1 hour)
 - `MAX_TASKS = 1000`
 - LRU eviction when over limit
@@ -279,6 +281,7 @@ Background tasks use TTL-based cleanup:
 ### Auth Cache
 
 API authentication results cached:
+
 - `TTL_SECONDS = 300` (5 minutes)
 - Avoids repeated bcrypt hashing
 

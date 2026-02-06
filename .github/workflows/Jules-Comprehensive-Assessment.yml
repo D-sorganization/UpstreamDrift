@@ -2,7 +2,7 @@ name: Jules Comprehensive Assessment
 
 on:
   schedule:
-    - cron: "0 0 * * 0,4"  # Every 3 days at 5 AM PST (10 UTC) - cost optimized
+    - cron: "0 0 * * 0,4" # Every 3 days at 5 AM PST (10 UTC) - cost optimized
   workflow_dispatch:
 
 permissions:
@@ -64,7 +64,7 @@ jobs:
         run: |
           echo "Collecting incomplete implementation patterns..."
           mkdir -p .jules/completist_data
-          
+
           # Find TODO/FIXME markers
           grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
             --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
@@ -110,7 +110,7 @@ jobs:
           commit_message: "docs(assessment): pre-assessment data collection"
           branch: "automation/assessment-${{ steps.date.outputs.date }}"
           create_branch: true
-          push_options: '--force'
+          push_options: "--force"
 
       # ---------------------------------------------------------
       # Component 3: Jules Comprehensive Assessment (API)
@@ -148,9 +148,9 @@ jobs:
 
           ## Mission
           Perform a thorough audit of the repository, combining General Code Quality (A-O), Completist Analysis, and Pragmatic Programmer review.
-          
+
           ## Requirements
-          
+
           ### 1. General Assessment (Categories A-O) - CRITICAL
           **You must NOT perform a generic assessment.**
           For EACH category from A to O:
@@ -158,14 +158,14 @@ jobs:
           2. **Follow Instructions Exactly**: Each prompt file contains specific tables, scoring criteria, and output formats. You MUST follow them.
           3. **Full Review**: Do not "lazy bypass". If the prompt asks for a "Critical Path Analysis", do it. If it asks for a "Findings Table" with specific columns, create it.
           4. **Output**: Save the detailed report to `docs/assessments/Assessment_X_Category.md` (or matching the pattern in the prompt).
-          
+
           If a specific prompt file is missing, perform a standard thorough assessment for that category, but prioritize the existing prompt files.
-          
+
           ### 2. Completist Audit
           - Review data in `.jules/completist_data/` (todos, not_implemented, etc).
           - Create `docs/assessments/completist/Completist_Report_DATE.md`.
           - Summarize critical gaps and technical debt.
-          
+
           ### 3. Pragmatic Programmer Review
           - I have already run a script to generate `docs/assessments/pragmatic_programmer/review_*.md`.
           - Please READ this file if it exists and incorporate its findings into your Comprehensive Report.
@@ -174,14 +174,14 @@ jobs:
           - Create `docs/assessments/Comprehensive_Assessment.md`.
           - Include a unified scorecard: General Grades + Completist Score + Pragmatic Score.
           - Top 10 unified recommendations.
-          
+
           ## PR Title Instruction
           The Pull Request Title MUST be exactly:
           [REPO_NAME_PLACEHOLDER] [docs] Assessment Generation - DATE_PLACEHOLDER
-          
+
           PROMPT_EOF
           )
-          
+
           # Inject Variables into Prompt
           PROMPT="${PROMPT//REPO_NAME_PLACEHOLDER/$REPO_NAME}"
           PROMPT="${PROMPT//DATE_PLACEHOLDER/$DATE}"
@@ -249,19 +249,19 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           EXPECTED_TITLE="[${{ github.event.repository.name }}] [docs] Assessment Generation - $DATE"
           BRANCH="automation/assessment-$DATE"
-          
+
           echo "Looking for PR on branch $BRANCH or by app/jules..."
-          
+
           # Try 1: By Branch
           PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
-          
+
           # Try 2: By Author (Recent)
           if [ -z "$PR" ]; then
             # Wait a moment for creation if needed
             sleep 5
             PR=$(gh pr list --author "app/jules" --state open --sort created --limit 1 --json number --jq '.[0].number')
           fi
-          
+
           if [ -n "$PR" ]; then
             echo "Found PR #$PR. Updating title..."
             gh pr edit "$PR" --title "$EXPECTED_TITLE"

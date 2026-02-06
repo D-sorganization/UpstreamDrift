@@ -7,12 +7,14 @@ Based on the analysis of the current MATLAB data structure and the GUI codebase,
 ## Current Data Structure Analysis
 
 ### Data Format
+
 - The current `.mat` files use a complex structure with `MatlabOpaque` objects
 - Files contain structured arrays with fields: `s0`, `s1`, `s2`, `arr`
 - The `arr` field contains a small array (6x1) which suggests this might be metadata or a different data format
 - This structure is **not** the expected signal bus format for the GUI
 
 ### GUI Compatibility Issues
+
 1. **Data Loading**: The current `MatlabDataLoader` expects simple numeric arrays, not `MatlabOpaque` objects
 2. **Signal Names**: The GUI expects specific column names like `CHx`, `CHy`, `CHz`, `MPx`, `MPy`, `MPz`
 3. **Data Structure**: The current files don't match the expected signal bus structure
@@ -20,11 +22,13 @@ Based on the analysis of the current MATLAB data structure and the GUI codebase,
 ## Signal Bus Implementation Status
 
 ### What You've Done Right ✅
+
 1. **Signal Bus Logging**: You've implemented signal bus logging in the model
 2. **To Workspace Blocks**: You're using To Workspace blocks for data collection
 3. **Centralized Logging**: All signals go through a common bus structure
 
 ### What Needs Attention ⚠️
+
 1. **Data Export Format**: The current files don't contain the expected signal data
 2. **GUI Compatibility**: The GUI needs updates to handle the new data structure
 3. **Signal Names**: Labels may have changed with the new bus structure
@@ -34,6 +38,7 @@ Based on the analysis of the current MATLAB data structure and the GUI codebase,
 ### 1. Immediate Actions
 
 #### A. Verify Signal Bus Data Generation
+
 ```matlab
 % Test script to verify signal bus data is being generated correctly
 % Run this in MATLAB to check what data is actually being saved
@@ -61,6 +66,7 @@ disp(to_workspace_vars);
 ```
 
 #### B. Update Data Export Process
+
 The current files suggest the data export process needs updating. Consider:
 
 1. **Direct Array Export**: Export signal bus data as simple numeric arrays
@@ -70,6 +76,7 @@ The current files suggest the data export process needs updating. Consider:
 ### 2. GUI Enhancements
 
 #### A. Add Simscape Results Explorer Toggle
+
 ```python
 # Add to the GUI configuration panel
 class SimulationConfigPanel(QWidget):
@@ -90,6 +97,7 @@ class SimulationConfigPanel(QWidget):
 ```
 
 #### B. Enhanced Data Loader
+
 ```python
 # Update MatlabDataLoader to handle new data structures
 class EnhancedMatlabDataLoader:
@@ -111,11 +119,13 @@ class EnhancedMatlabDataLoader:
 ### 3. Performance Optimization
 
 #### A. Simscape Results Explorer Impact
+
 - **Speed Gain**: Disabling Simscape Results Explorer can provide 10-30% speed improvement
 - **Data Redundancy**: If all data is in signal bus, Simscape Results may be redundant
 - **Memory Usage**: Disabling reduces memory footprint during simulation
 
 #### B. Recommended Configuration
+
 ```python
 # Default configuration for optimal performance
 DEFAULT_CONFIG = {
@@ -129,6 +139,7 @@ DEFAULT_CONFIG = {
 ## Testing Strategy
 
 ### 1. Data Generation Test
+
 ```matlab
 % Generate test data with signal bus
 % This should create files compatible with the GUI
@@ -145,6 +156,7 @@ simOut = sim('GolfSwing3D_Kinetic', 'StopTime', '0.3');
 ```
 
 ### 2. GUI Compatibility Test
+
 ```python
 # Test script to verify GUI can load new data
 def test_gui_compatibility():
@@ -165,16 +177,19 @@ def test_gui_compatibility():
 ## Implementation Priority
 
 ### High Priority 🔴
+
 1. **Fix Data Export**: Ensure signal bus data is exported in GUI-compatible format
 2. **Add Simscape Toggle**: Add GUI option to disable Simscape Results Explorer
 3. **Test Data Loading**: Verify GUI can load the new data structure
 
 ### Medium Priority 🟡
+
 1. **Enhanced Data Loader**: Update to handle multiple data formats
 2. **Performance Monitoring**: Add simulation speed metrics to GUI
 3. **Error Handling**: Improve error messages for data loading issues
 
 ### Low Priority 🟢
+
 1. **Format Detection**: Auto-detect data format
 2. **Data Validation**: Add data integrity checks
 3. **Export Options**: Add options to export in different formats

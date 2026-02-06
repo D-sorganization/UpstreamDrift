@@ -10,19 +10,19 @@
 
 ## Quick Reference Matrix
 
-| Feature                     | MuJoCo | Drake | Pinocchio | Pendulum | OpenSim | MyoSuite |
-| --------------------------- | :----: | :---: | :-------: | :------: | :-----: | :------: |
-| **Forward Dynamics**        |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
-| **Inverse Dynamics**        |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
-| **Mass Matrix M(q)**        |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
-| **Jacobians (Body)**        |   ✅   |  ✅   |    ✅     |    ⚠️    |   ⚠️    |    ⚠️    |
-| **Drift-Control Decomp**    |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
-| **ZTCF/ZVCF Counterfactuals** |  ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
-| **Contact/Collision**       |   ✅   |  ✅   |    ⚠️     |    ❌    |   ❌    |    ⚠️    |
-| **Closed-Loop Constraints** |   ✅   |  ✅   |    ✅     |    ❌    |   ❌    |    ❌    |
-| **Muscle Models (Hill)**    |   ❌   |  ❌   |    ❌     |    ❌    |   ✅    |    ✅    |
-| **Grip Modeling**           |   ✅   |  ❌   |    ❌     |    ❌    |   ✅    |    ✅    |
-| **Neural Control (RL)**     |   ⚠️   |  ⚠️   |    ❌     |    ❌    |   ❌    |    ✅    |
+| Feature                       | MuJoCo | Drake | Pinocchio | Pendulum | OpenSim | MyoSuite |
+| ----------------------------- | :----: | :---: | :-------: | :------: | :-----: | :------: |
+| **Forward Dynamics**          |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **Inverse Dynamics**          |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **Mass Matrix M(q)**          |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **Jacobians (Body)**          |   ✅   |  ✅   |    ✅     |    ⚠️    |   ⚠️    |    ⚠️    |
+| **Drift-Control Decomp**      |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **ZTCF/ZVCF Counterfactuals** |   ✅   |  ✅   |    ✅     |    ✅    |   ✅    |    ✅    |
+| **Contact/Collision**         |   ✅   |  ✅   |    ⚠️     |    ❌    |   ❌    |    ⚠️    |
+| **Closed-Loop Constraints**   |   ✅   |  ✅   |    ✅     |    ❌    |   ❌    |    ❌    |
+| **Muscle Models (Hill)**      |   ❌   |  ❌   |    ❌     |    ❌    |   ✅    |    ✅    |
+| **Grip Modeling**             |   ✅   |  ❌   |    ❌     |    ❌    |   ✅    |    ✅    |
+| **Neural Control (RL)**       |   ⚠️   |  ⚠️   |    ❌     |    ❌    |   ❌    |    ✅    |
 
 **Legend:**
 
@@ -36,44 +36,44 @@
 
 These features are available regardless of which physics engine is selected:
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **Unified API** | ✅ | PhysicsEngine Protocol with consistent interface |
-| **State Checkpoint** | ✅ | Save/restore simulation state |
-| **Cross-Engine Validation** | ✅ | Automatic comparison across engines |
-| **Design by Contract** | ✅ | Runtime contract enforcement |
-| **Ball Flight Physics** | ✅ | Magnus effect, environmental factors |
-| **Impact Dynamics** | ✅ | Club-ball collision modeling |
-| **Flexible Shaft** | ✅ | Shaft deflection and dynamics |
-| **Ground Reaction Forces** | ✅ | GRF computation and analysis |
+| Feature                     | Status | Description                                      |
+| --------------------------- | ------ | ------------------------------------------------ |
+| **Unified API**             | ✅     | PhysicsEngine Protocol with consistent interface |
+| **State Checkpoint**        | ✅     | Save/restore simulation state                    |
+| **Cross-Engine Validation** | ✅     | Automatic comparison across engines              |
+| **Design by Contract**      | ✅     | Runtime contract enforcement                     |
+| **Ball Flight Physics**     | ✅     | Magnus effect, environmental factors             |
+| **Impact Dynamics**         | ✅     | Club-ball collision modeling                     |
+| **Flexible Shaft**          | ✅     | Shaft deflection and dynamics                    |
+| **Ground Reaction Forces**  | ✅     | GRF computation and analysis                     |
 
 ---
 
 ## AI-First Implementation (NEW - Beyond Original Scope)
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **OpenAI Adapter** | ✅ | GPT-4 integration with tool use |
-| **Anthropic Adapter** | ✅ | Claude integration |
-| **Gemini Adapter** | ✅ | Google AI integration |
-| **Ollama Adapter** | ✅ | Free local LLM support |
-| **Tool Registry** | ✅ | Self-describing API for AI agents |
-| **Workflow Engine** | ✅ | Guided multi-step analysis workflows |
-| **Education System** | ✅ | 4-level progressive disclosure |
-| **RAG System** | ✅ | Documentation retrieval |
-| **GUI Integration** | ✅ | Assistant panel with settings |
+| Feature               | Status | Description                          |
+| --------------------- | ------ | ------------------------------------ |
+| **OpenAI Adapter**    | ✅     | GPT-4 integration with tool use      |
+| **Anthropic Adapter** | ✅     | Claude integration                   |
+| **Gemini Adapter**    | ✅     | Google AI integration                |
+| **Ollama Adapter**    | ✅     | Free local LLM support               |
+| **Tool Registry**     | ✅     | Self-describing API for AI agents    |
+| **Workflow Engine**   | ✅     | Guided multi-step analysis workflows |
+| **Education System**  | ✅     | 4-level progressive disclosure       |
+| **RAG System**        | ✅     | Documentation retrieval              |
+| **GUI Integration**   | ✅     | Assistant panel with settings        |
 
 ---
 
 ## Data Ingestion Features
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| **C3D Reader** | ✅ | Motion capture data import |
-| **C3D Viewer** | ✅ | Interactive visualization |
-| **Video Pose Estimation** | ✅ | OpenPose/MediaPipe integration |
-| **URDF Import/Export** | ✅ | Universal robot description format |
-| **Model Library** | ✅ | Pre-built humanoid and club models |
+| Feature                   | Status | Description                        |
+| ------------------------- | ------ | ---------------------------------- |
+| **C3D Reader**            | ✅     | Motion capture data import         |
+| **C3D Viewer**            | ✅     | Interactive visualization          |
+| **Video Pose Estimation** | ✅     | OpenPose/MediaPipe integration     |
+| **URDF Import/Export**    | ✅     | Universal robot description format |
+| **Model Library**         | ✅     | Pre-built humanoid and club models |
 
 ---
 
@@ -126,8 +126,8 @@ These features are available regardless of which physics engine is selected:
 
 ### Currently Validated (CI Runs on Every PR)
 
-| Engine Pair        | Validation Level | Status    |
-| ------------------ | ---------------- | --------- |
+| Engine Pair         | Validation Level | Status    |
+| ------------------- | ---------------- | --------- |
 | MuJoCo ↔ Pinocchio | Full suite       | ✅ Active |
 | MuJoCo ↔ Drake     | Full suite       | ✅ Active |
 | Drake ↔ Pinocchio  | Full suite       | ✅ Active |
@@ -156,13 +156,13 @@ These features are available regardless of which physics engine is selected:
 
 ### Forward Dynamics
 
-| Engine        | Method          | Notes                         |
-| ------------- | --------------- | ----------------------------- |
-| **MuJoCo**    | CRBA + Contacts | Full contact handling         |
-| **Drake**     | CRBA + Contacts | Full constraint solving       |
-| **Pinocchio** | ABA             | Pure rigid body               |
-| **OpenSim**   | SimTK           | Full implementation           |
-| **MyoSuite**  | MuJoCo Backend  | Muscle layer on MuJoCo        |
+| Engine        | Method          | Notes                   |
+| ------------- | --------------- | ----------------------- |
+| **MuJoCo**    | CRBA + Contacts | Full contact handling   |
+| **Drake**     | CRBA + Contacts | Full constraint solving |
+| **Pinocchio** | ABA             | Pure rigid body         |
+| **OpenSim**   | SimTK           | Full implementation     |
+| **MyoSuite**  | MuJoCo Backend  | Muscle layer on MuJoCo  |
 
 ### Muscle Integration
 
@@ -184,22 +184,27 @@ These features are available regardless of which physics engine is selected:
 ## Known Limitations
 
 ### MuJoCo
+
 - No analytical Hill muscles (use MyoSuite for muscles)
 - GPU requires MuJoCo 3.3+
 
 ### Drake
+
 - 30× slower than MuJoCo
 - Memory intensive for large models
 
 ### Pinocchio
+
 - Contact support limited (placeholder zeros returned)
 - Requires manual collision geometry
 
 ### OpenSim
+
 - Python bindings require separate install
 - Windows may need specific configuration
 
 ### MyoSuite
+
 - Requires gym environment wrapper
 - Limited to MuJoCo-based models
 

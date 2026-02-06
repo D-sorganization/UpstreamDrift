@@ -5,6 +5,7 @@ This guide explains how to set up WSL2 (Windows Subsystem for Linux) for running
 ## Why WSL2?
 
 Some robotics libraries are not available on Windows via pip:
+
 - **Pinocchio** - Rigid body dynamics library
 - **Crocoddyl** - Optimal control library
 - **Pink** - Python inverse kinematics
@@ -89,6 +90,7 @@ for pkg in packages:
 ```
 
 Expected output:
+
 ```
 pinocchio: OK
 mujoco: OK
@@ -103,6 +105,7 @@ meshcat: OK
 ### Option 1: Use the GUI Launcher (Recommended)
 
 1. Launch the Golf Modeling Suite on Windows:
+
    ```powershell
    py -3.12 src/launchers/golf_launcher.py
    ```
@@ -118,6 +121,7 @@ wsl -d Ubuntu-22.04 -- bash /mnt/c/Users/diete/Repositories/Golf_Modeling_Suite/
 ```
 
 Or with specific engine:
+
 ```bash
 # Pinocchio GUI
 wsl -d Ubuntu-22.04 -- bash /mnt/c/Users/diete/Repositories/Golf_Modeling_Suite/run_wsl.sh --pinocchio
@@ -149,6 +153,7 @@ python src/launchers/golf_launcher.py
 ### Meshcat (Web-based)
 
 When running Pinocchio simulations, meshcat starts a web server. Open in your browser:
+
 ```
 http://127.0.0.1:7000/static/
 ```
@@ -162,6 +167,7 @@ Gepetto-viewer requires X11. WSLg (Windows 11) handles this automatically. On Wi
 ### "libcoal.so.3.0.1: cannot open shared object file"
 
 Create the compatibility symlink:
+
 ```bash
 cd $CONDA_PREFIX/lib
 ln -sf libcoal.so.3.0.2 libcoal.so.3.0.1
@@ -170,6 +176,7 @@ ln -sf libcoal.so.3.0.2 libcoal.so.3.0.1
 ### GUI windows don't appear
 
 Ensure WSLg is working:
+
 ```bash
 # Test with a simple GUI
 sudo apt install x11-apps
@@ -177,6 +184,7 @@ xclock
 ```
 
 If xclock doesn't show, you may need to:
+
 1. Update Windows to latest version
 2. Run `wsl --update`
 3. Restart WSL: `wsl --shutdown`
@@ -184,21 +192,22 @@ If xclock doesn't show, you may need to:
 ### Import errors after conda install
 
 Always set `LD_LIBRARY_PATH` before running:
+
 ```bash
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 ```
 
 ## Package Versions (Tested)
 
-| Package | Version |
-|---------|---------|
-| Python | 3.11 |
-| Pinocchio | 3.8.0+ |
-| MuJoCo | 3.4.0 |
-| Drake | 1.49.0 |
-| Pink | 3.5.0 |
-| Crocoddyl | 3.2.0 |
-| Meshcat | Latest |
+| Package   | Version |
+| --------- | ------- |
+| Python    | 3.11    |
+| Pinocchio | 3.8.0+  |
+| MuJoCo    | 3.4.0   |
+| Drake     | 1.49.0  |
+| Pink      | 3.5.0   |
+| Crocoddyl | 3.2.0   |
+| Meshcat   | Latest  |
 
 ## See Also
 

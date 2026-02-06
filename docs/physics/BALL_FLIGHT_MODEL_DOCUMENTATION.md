@@ -209,11 +209,13 @@ Default values:
 
 1. **McPhee, J. et al.** - "Three Dimensional Golf Clubhead Ball Impact Models"
    _University of Waterloo Motion Research Group_
+
    - 3D impulse-momentum impact models
    - Quadratic coefficient formulas for Cd and Cl
 
 2. **McPhee, J. et al.** - "Development and Comparison of 3D Dynamics Models"
    _University of Waterloo_
+
    - Comparison of impact model approaches
    - Shaft flexibility effects
 
@@ -227,16 +229,19 @@ Default values:
 
 4. **Bearman, P.W. & Harvey, J.K. (1976)** - "Golf Ball Aerodynamics"
    _Aeronautical Quarterly_, 27(2), 112-122
+
    - Foundational work on dimpled sphere aerodynamics
    - Wind tunnel measurements of C_D and C_L vs. spin
 
 5. **Smits, A.J. & Ogg, S. (2004)** - "Aerodynamics of the Golf Ball"
    Chapter in _Biomedical Engineering Principles in Sports_
+
    - Comprehensive treatment of Magnus effect
    - Empirical correlations for lift coefficient
 
 6. **TrackMan University** - "The Ball Flight Laws"
    https://blog.trackmangolf.com
+
    - Industry-standard ball flight correlations
    - Launch condition to trajectory validation data
 

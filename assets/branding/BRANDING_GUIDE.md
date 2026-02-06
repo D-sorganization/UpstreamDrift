@@ -13,14 +13,14 @@ This directory contains the official UpstreamDrift branding assets.
 
 Generate icons at these sizes for different use cases:
 
-| Size | Use Case | Filename |
-|------|----------|----------|
-| 16x16 | Favicon (small) | `icon-16.png` |
-| 32x32 | Favicon (standard) | `icon-32.png` |
-| 48x48 | Desktop taskbar | `icon-48.png` |
-| 64x64 | Desktop shortcuts | `icon-64.png` |
-| 128x128 | Application icon | `icon-128.png` |
-| 256x256 | High-DPI displays | `icon-256.png` |
+| Size    | Use Case           | Filename       |
+| ------- | ------------------ | -------------- |
+| 16x16   | Favicon (small)    | `icon-16.png`  |
+| 32x32   | Favicon (standard) | `icon-32.png`  |
+| 48x48   | Desktop taskbar    | `icon-48.png`  |
+| 64x64   | Desktop shortcuts  | `icon-64.png`  |
+| 128x128 | Application icon   | `icon-128.png` |
+| 256x256 | High-DPI displays  | `icon-256.png` |
 | 512x512 | App stores, splash | `icon-512.png` |
 
 ### ICO File (Windows)
@@ -48,21 +48,23 @@ convert logo.png -resize 512x512 android-chrome-512x512.png
 
 ## Color Palette
 
-| Color | Hex | Use |
-|-------|-----|-----|
-| Navy Blue | `#1a365d` | Primary brand color |
+| Color          | Hex       | Use                   |
+| -------------- | --------- | --------------------- |
+| Navy Blue      | `#1a365d` | Primary brand color   |
 | Gradient Start | `#2563eb` | Swoosh gradient start |
-| Gradient End | `#10b981` | Swoosh gradient end |
-| White | `#ffffff` | Text, backgrounds |
+| Gradient End   | `#10b981` | Swoosh gradient end   |
+| White          | `#ffffff` | Text, backgrounds     |
 
 ## Usage Guidelines
 
 ### Do
+
 - Use the logo on a white or light background
 - Maintain minimum clear space around the logo
 - Use official color palette for brand materials
 
 ### Don't
+
 - Distort or stretch the logo
 - Change the logo colors
 - Place the logo on busy backgrounds

@@ -14,6 +14,7 @@ This guide helps you deploy the Golf Modeling Suite for immediate use without co
 ## 1. Installation
 
 ### Clone and Setup
+
 ```bash
 git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
@@ -30,6 +31,7 @@ pip install -e ".[dev,engines,analysis]"
 ```
 
 ### Install Additional API Dependencies
+
 ```bash
 pip install fastapi uvicorn sqlalchemy pydantic[email] PyJWT bcrypt python-multipart slowapi
 ```
@@ -39,12 +41,14 @@ pip install fastapi uvicorn sqlalchemy pydantic[email] PyJWT bcrypt python-multi
 The system uses SQLite by default (no setup required), but you can use PostgreSQL for production:
 
 ### Option A: SQLite (Default - No Setup Required)
+
 ```bash
 # Database file will be created automatically at: ./golf_modeling_suite.db
 # Perfect for development and small-scale use
 ```
 
 ### Option B: PostgreSQL (Recommended for Multi-User)
+
 ```bash
 # Install PostgreSQL locally or use cloud service
 # Set environment variable:
@@ -69,6 +73,7 @@ python -m uvicorn api.server:app --host 0.0.0.0 --port 8000 --reload
 ## 4. Initial Setup
 
 ### Create Your First User
+
 ```bash
 # The system creates a default admin user automatically:
 # Email: admin@golfmodelingsuite.com
@@ -86,6 +91,7 @@ curl -X POST "http://localhost:8000/auth/register" \
 ```
 
 ### Get Access Token
+
 ```bash
 curl -X POST "http://localhost:8000/auth/login" \
   -H "Content-Type: application/json" \
@@ -98,6 +104,7 @@ curl -X POST "http://localhost:8000/auth/login" \
 ```
 
 ### Create API Key (Alternative to JWT)
+
 ```bash
 # Using your access token:
 curl -X POST "http://localhost:8000/auth/api-keys" \
@@ -113,12 +120,14 @@ curl -X POST "http://localhost:8000/auth/api-keys" \
 ## 5. Test the System
 
 ### Check Available Engines
+
 ```bash
 curl -X GET "http://localhost:8000/engines" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ### Run a Simple Simulation
+
 ```bash
 curl -X POST "http://localhost:8000/simulate" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -131,6 +140,7 @@ curl -X POST "http://localhost:8000/simulate" \
 ```
 
 ### Analyze a Video (if you have MediaPipe installed)
+
 ```bash
 curl -X POST "http://localhost:8000/analyze/video" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -142,18 +152,21 @@ curl -X POST "http://localhost:8000/analyze/video" \
 ## 6. User Management
 
 ### View Your Usage
+
 ```bash
 curl -X GET "http://localhost:8000/auth/usage" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ### List Users (Admin Only)
+
 ```bash
 curl -X GET "http://localhost:8000/auth/users" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ### Update User Roles (Admin Only)
+
 ```bash
 # Promote user to Professional tier
 curl -X PUT "http://localhost:8000/auth/users/2/role" \
@@ -165,6 +178,7 @@ curl -X PUT "http://localhost:8000/auth/users/2/role" \
 ## 7. Configuration Options
 
 ### Environment Variables
+
 ```bash
 # Database (optional)
 export DATABASE_URL="sqlite:///./golf_modeling_suite.db"
@@ -178,10 +192,11 @@ export API_PORT="8000"
 ```
 
 ### Usage Quotas (No Billing)
+
 The system tracks usage but doesn't charge. Current limits:
 
 - **Free Tier**: 1,000 API calls, 5 videos, 10 simulations/month
-- **Professional**: 50,000 API calls, 500 videos, 1,000 simulations/month  
+- **Professional**: 50,000 API calls, 500 videos, 1,000 simulations/month
 - **Enterprise**: 1,000,000 API calls, 10,000 videos, 50,000 simulations/month
 
 Users hit quota limits but aren't charged. Perfect for controlled access.
@@ -205,6 +220,7 @@ print('Desktop interface ready!')
 ## 9. Development Workflow
 
 ### For Researchers/Developers:
+
 1. **Register users** via API or create them programmatically
 2. **Assign appropriate roles** (Professional/Enterprise for higher quotas)
 3. **Use API keys** for programmatic access
@@ -212,6 +228,7 @@ print('Desktop interface ready!')
 5. **Scale quotas** by promoting users to higher tiers
 
 ### For Teams:
+
 1. **Admin creates accounts** for team members
 2. **Distribute API keys** or login credentials
 3. **Monitor team usage** via admin endpoints
@@ -220,6 +237,7 @@ print('Desktop interface ready!')
 ## 10. Security Notes
 
 ### Current Security Features:
+
 - ✅ **JWT Authentication** with secure token generation
 - ✅ **API Key Authentication** with SHA-256 hashing
 - ✅ **Password Hashing** with bcrypt
@@ -229,6 +247,7 @@ print('Desktop interface ready!')
 - ✅ **Input Validation** via Pydantic models
 
 ### For Production Use:
+
 - Change the default admin password
 - Set a secure SECRET_KEY environment variable
 - Use PostgreSQL instead of SQLite
@@ -241,12 +260,14 @@ print('Desktop interface ready!')
 ### Common Issues:
 
 **"Module not found" errors:**
+
 ```bash
 # Ensure you're in the project root and virtual environment is activated
 pip install -e ".[dev,engines,analysis]"
 ```
 
 **Database errors:**
+
 ```bash
 # Reset the database (WARNING: Deletes all data)
 rm golf_modeling_suite.db
@@ -254,6 +275,7 @@ rm golf_modeling_suite.db
 ```
 
 **Physics engine errors:**
+
 ```bash
 # Check which engines are available
 python -c "
@@ -264,6 +286,7 @@ print('Available engines:', manager.get_available_engines())
 ```
 
 **Port already in use:**
+
 ```bash
 # Use a different port
 python -m uvicorn api.server:app --port 8001
@@ -281,6 +304,7 @@ This setup gives you a **fully functional research-grade biomechanical analysis 
 - Admin user management
 
 **Perfect for:**
+
 - Research projects
 - Team collaboration
 - API development
@@ -288,6 +312,7 @@ This setup gives you a **fully functional research-grade biomechanical analysis 
 - Private deployment
 
 **When ready for commercialization:**
+
 - Add Stripe billing integration
 - Deploy to cloud infrastructure (Kubernetes)
 - Set up monitoring and alerting

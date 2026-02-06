@@ -10,6 +10,7 @@ Run the complete test suite and fix any failing tests.
 ## Instructions
 
 1. **Discover test configuration**:
+
    - Check for `pytest.ini`, `pyproject.toml`, or `setup.cfg` for test configuration
    - Check for `package.json` for JavaScript/TypeScript tests
    - Identify test directories: `tests/`, `test/`, `*_test.py`, `test_*.py`
@@ -39,6 +40,7 @@ Run the complete test suite and fix any failing tests.
    ```
 
 4. **For each failing test**:
+
    - Read the test file and understand what it's testing
    - Read the implementation being tested
    - Identify the root cause of the failure
@@ -50,6 +52,7 @@ Run the complete test suite and fix any failing tests.
      ```
 
 5. **Iterate until all tests pass**:
+
    - Continue fixing failures one by one
    - After each fix, run the full test suite to check for regressions
    - Document any tests that cannot be fixed and why

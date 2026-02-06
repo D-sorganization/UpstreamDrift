@@ -25,24 +25,25 @@ A basic Geppetto viewer implementation already exists in the codebase:
 src/engines/physics_engines/pinocchio/python/dtack/viz/geppetto_viewer.py
 ```
 
-| Aspect | Status |
-|--------|--------|
-| Implementation | Basic wrapper exists (~82 lines) |
-| Error handling | Graceful fallback with helpful messages |
-| Optional import | Uses `GEPETTO_AVAILABLE` flag |
+| Aspect                | Status                                            |
+| --------------------- | ------------------------------------------------- |
+| Implementation        | Basic wrapper exists (~82 lines)                  |
+| Error handling        | Graceful fallback with helpful messages           |
+| Optional import       | Uses `GEPETTO_AVAILABLE` flag                     |
 | Pinocchio integration | Uses `GepettoVisualizer` from pinocchio.visualize |
 
 ### Why Geppetto is More Contained Than MeshCat
 
-| Feature | MeshCat | Geppetto |
-|---------|---------|----------|
-| Transport | ZMQ (network socket) | CORBA (local server) |
-| Rendering | Browser (WebGL) | Native desktop (OpenGL) |
-| External process | Spawns browser | gepetto-gui server |
-| Dependencies | `meshcat` (pip) | `gepetto-viewer` (conda-forge only) |
-| Best for | Remote/cloud/notebooks | Local desktop validation |
+| Feature          | MeshCat                | Geppetto                            |
+| ---------------- | ---------------------- | ----------------------------------- |
+| Transport        | ZMQ (network socket)   | CORBA (local server)                |
+| Rendering        | Browser (WebGL)        | Native desktop (OpenGL)             |
+| External process | Spawns browser         | gepetto-gui server                  |
+| Dependencies     | `meshcat` (pip)        | `gepetto-viewer` (conda-forge only) |
+| Best for         | Remote/cloud/notebooks | Local desktop validation            |
 
 **Geppetto advantages:**
+
 - No browser dependency
 - Native desktop rendering (faster for large models)
 - Better for local development/debugging
@@ -58,13 +59,13 @@ src/engines/physics_engines/pinocchio/python/dtack/viz/geppetto_viewer.py
 
 #### Estimated Effort
 
-| Task | Effort |
-|------|--------|
-| Add to optional dependencies | 15 min |
-| Fix `display()` method | 1 hour |
-| Create `ViewerFactory` for selection | 2 hours |
-| Update documentation | 1 hour |
-| **Total** | **~4 hours** |
+| Task                                 | Effort       |
+| ------------------------------------ | ------------ |
+| Add to optional dependencies         | 15 min       |
+| Fix `display()` method               | 1 hour       |
+| Create `ViewerFactory` for selection | 2 hours      |
+| Update documentation                 | 1 hour       |
+| **Total**                            | **~4 hours** |
 
 #### Files to Modify
 
@@ -76,6 +77,7 @@ src/engines/physics_engines/pinocchio/python/dtack/viz/geppetto_viewer.py
 #### Proposed Changes
 
 **pyproject.toml addition:**
+
 ```toml
 [project.optional-dependencies]
 engines = [
@@ -88,6 +90,7 @@ visualization = [
 ```
 
 **ViewerFactory pattern:**
+
 ```python
 class ViewerFactory:
     @staticmethod
@@ -102,11 +105,11 @@ class ViewerFactory:
 
 ### Risk Assessment
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Geppetto not available on all platforms | Medium | Low | Document as optional, graceful fallback |
-| CORBA server issues | Low | Medium | Clear error messages, fallback to MeshCat |
-| Conda-only dependency | Medium | Low | Document installation path |
+| Risk                                    | Likelihood | Impact | Mitigation                                |
+| --------------------------------------- | ---------- | ------ | ----------------------------------------- |
+| Geppetto not available on all platforms | Medium     | Low    | Document as optional, graceful fallback   |
+| CORBA server issues                     | Low        | Medium | Clear error messages, fallback to MeshCat |
+| Conda-only dependency                   | Medium     | Low    | Document installation path                |
 
 ### Recommendation
 
@@ -128,6 +131,7 @@ pip install golf-modeling-suite[engines]
 ```
 
 **Requirements for users:**
+
 - Python 3.11+
 - Conda (for binary dependencies)
 - System OpenGL drivers
@@ -135,13 +139,13 @@ pip install golf-modeling-suite[engines]
 
 ### Challenges for "No Setup" Distribution
 
-| Challenge | Severity | Description |
-|-----------|----------|-------------|
-| Python runtime | High | Users must install Python |
-| Binary physics libs | High | MuJoCo, Pinocchio require specific builds |
-| OpenGL/GPU drivers | Medium | Platform-specific graphics requirements |
-| Large model files | Medium | URDF/mesh files add ~500MB |
-| Platform-specific | High | Different builds for Windows/macOS/Linux |
+| Challenge           | Severity | Description                               |
+| ------------------- | -------- | ----------------------------------------- |
+| Python runtime      | High     | Users must install Python                 |
+| Binary physics libs | High     | MuJoCo, Pinocchio require specific builds |
+| OpenGL/GPU drivers  | Medium   | Platform-specific graphics requirements   |
+| Large model files   | Medium   | URDF/mesh files add ~500MB                |
+| Platform-specific   | High     | Different builds for Windows/macOS/Linux  |
 
 ### Packaging Options Comparison
 
@@ -149,12 +153,12 @@ pip install golf-modeling-suite[engines]
 
 **Description:** Bundle Python + all dependencies into single executable
 
-| Pros | Cons |
-|------|------|
-| Single executable | Large bundle (~500MB-1GB) |
-| No Python install needed | Platform-specific builds required |
-| Familiar distribution model | Complex build configuration |
-| | Binary deps (MuJoCo) may have issues |
+| Pros                        | Cons                                 |
+| --------------------------- | ------------------------------------ |
+| Single executable           | Large bundle (~500MB-1GB)            |
+| No Python install needed    | Platform-specific builds required    |
+| Familiar distribution model | Complex build configuration          |
+|                             | Binary deps (MuJoCo) may have issues |
 
 **Effort:** 2-3 days basic, 1-2 weeks polished
 **Best for:** Desktop application distribution
@@ -163,17 +167,18 @@ pip install golf-modeling-suite[engines]
 
 **Description:** Complete containerized environment
 
-| Pros | Cons |
-|------|------|
-| Complete isolation | Docker required on host |
-| Reproducible environment | Not ideal for GUI apps |
-| Easy updates | Additional complexity for users |
-| Works on any Docker host | Performance overhead |
+| Pros                     | Cons                            |
+| ------------------------ | ------------------------------- |
+| Complete isolation       | Docker required on host         |
+| Reproducible environment | Not ideal for GUI apps          |
+| Easy updates             | Additional complexity for users |
+| Works on any Docker host | Performance overhead            |
 
 **Effort:** 1-2 days
 **Best for:** Server deployments, CI/CD, headless computation
 
 **Example Dockerfile structure:**
+
 ```dockerfile
 FROM condaforge/mambaforge:latest
 COPY environment.yml .
@@ -188,17 +193,18 @@ ENTRYPOINT ["conda", "run", "-n", "golf-suite", "golf-suite"]
 
 **Description:** Self-contained installer with bundled Python and all dependencies
 
-| Pros | Cons |
-|------|------|
-| Professional installer experience | Large installer (~1-2GB) |
-| Includes Python + all deps | Build per platform |
-| No conda needed by user | Requires conda-constructor setup |
-| Handles binary deps well | Update mechanism needed |
+| Pros                              | Cons                             |
+| --------------------------------- | -------------------------------- |
+| Professional installer experience | Large installer (~1-2GB)         |
+| Includes Python + all deps        | Build per platform               |
+| No conda needed by user           | Requires conda-constructor setup |
+| Handles binary deps well          | Update mechanism needed          |
 
 **Effort:** 3-5 days
 **Best for:** End-user distribution, scientific software
 
 **Example construct.yaml:**
+
 ```yaml
 name: GolfModelingSuite
 version: 1.0.0
@@ -219,11 +225,11 @@ specs:
 
 **Description:** Sandboxed Linux application packages
 
-| Pros | Cons |
-|------|------|
-| Auto-updates | Linux only |
-| Sandboxed | Limited platform reach |
-| Handles dependencies | Complex manifest |
+| Pros                 | Cons                   |
+| -------------------- | ---------------------- |
+| Auto-updates         | Linux only             |
+| Sandboxed            | Limited platform reach |
+| Handles dependencies | Complex manifest       |
 
 **Effort:** 2-3 days
 **Best for:** Linux desktop users
@@ -232,12 +238,12 @@ specs:
 
 **Description:** Server-side computation with browser-based UI
 
-| Pros | Cons |
-|------|------|
-| No local install | Requires server hosting |
-| Cross-platform | Network latency |
-| Already have FastAPI + MeshCat | Ongoing hosting costs |
-| Easy updates | Not suitable for offline use |
+| Pros                           | Cons                         |
+| ------------------------------ | ---------------------------- |
+| No local install               | Requires server hosting      |
+| Cross-platform                 | Network latency              |
+| Already have FastAPI + MeshCat | Ongoing hosting costs        |
+| Easy updates                   | Not suitable for offline use |
 
 **Effort:** 1-2 weeks for full implementation
 **Best for:** Cloud deployment, collaborative use
@@ -270,11 +276,11 @@ specs:
 
 ### Effort Summary
 
-| Approach | Effort | User Experience | Maintenance |
-|----------|--------|-----------------|-------------|
-| Docker | 1-2 days | Medium | Low |
-| Conda Constructor | 3-5 days | High | Medium |
-| Web-based | 1-2 weeks | Highest | High |
+| Approach          | Effort    | User Experience | Maintenance |
+| ----------------- | --------- | --------------- | ----------- |
+| Docker            | 1-2 days  | Medium          | Low         |
+| Conda Constructor | 3-5 days  | High            | Medium      |
+| Web-based         | 1-2 weeks | Highest         | High        |
 
 ---
 
@@ -311,8 +317,8 @@ specs:
 
 ## Appendix: Current Viewer Implementations
 
-| Viewer | File | Status |
-|--------|------|--------|
-| MeshCat | `dtack/viz/meshcat_viewer.py` | Fully functional |
-| Geppetto | `dtack/viz/geppetto_viewer.py` | Needs fixes |
+| Viewer        | File                           | Status                     |
+| ------------- | ------------------------------ | -------------------------- |
+| MeshCat       | `dtack/viz/meshcat_viewer.py`  | Fully functional           |
+| Geppetto      | `dtack/viz/geppetto_viewer.py` | Needs fixes                |
 | Rob Neal Data | `dtack/viz/rob_neal_viewer.py` | Specialized for .mat files |

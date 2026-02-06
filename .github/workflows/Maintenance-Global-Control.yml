@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to perform'
+        description: "Action to perform"
         required: true
-        default: 'pause'
+        default: "pause"
         type: choice
         options:
           - pause
           - resume
       reason:
-        description: 'Reason for pause/resume'
+        description: "Reason for pause/resume"
         required: false
-        default: 'Maintenance'
+        default: "Maintenance"
 
 jobs:
   control:

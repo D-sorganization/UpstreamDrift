@@ -346,6 +346,94 @@ class MuJoCoMeshcatAdapter:
         if self.vis:
             self.vis["overlays/ellipsoids"].delete()
 
+    def draw_swing_plane(
+        self,
+        name: str,
+        vertices: np.ndarray,
+        color: int = 0x4488FF,
+        opacity: float = 0.25,
+    ) -> None:
+        """Draw a swing plane as a quad mesh.
+
+        Args:
+            name: Unique name for this plane object.
+            vertices: (4, 3) corner positions in CCW order [m].
+            color: Hex color for the plane surface.
+            opacity: Transparency (0=invisible, 1=opaque).
+        """
+        if self.vis is None:
+            return
+
+        path = f"overlays/swing_plane/{name}"
+        # Build two-triangle mesh from the 4 corners
+        verts = np.array(vertices, dtype=np.float32)  # (4, 3)
+        faces = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.uint32)
+
+        material = g.MeshPhongMaterial(
+            color=color, opacity=opacity, transparent=True, side=2  # double-sided
+        )
+        mesh = g.TriangularMeshGeometry(vertices=verts, faces=faces)
+        self.vis[path].set_object(mesh, material)
+
+    def draw_trajectory(
+        self,
+        name: str,
+        points: np.ndarray,
+        color: int = 0x00FF00,
+    ) -> None:
+        """Draw a trajectory as a polyline with point markers.
+
+        Args:
+            name: Unique name for this trajectory object.
+            points: (N, 3) trajectory positions [m].
+            color: Hex color for the line.
+        """
+        if self.vis is None or len(points) < 2:
+            return
+
+        path = f"overlays/trajectories/{name}"
+        pts = np.array(points, dtype=np.float32).T  # (3, N)
+        self.vis[path].set_object(
+            g.Line(
+                g.PointsGeometry(pts),
+                g.LineBasicMaterial(color=color, linewidth=3),
+            )
+        )
+
+    def draw_arrow_line(
+        self,
+        name: str,
+        start: np.ndarray,
+        end: np.ndarray,
+        color: int = 0x4488FF,
+    ) -> None:
+        """Draw a single directional line (e.g. plane normal arrow).
+
+        Args:
+            name: Unique name for this arrow.
+            start: Start position [m] (3,).
+            end: End position [m] (3,).
+            color: Hex color.
+        """
+        if self.vis is None:
+            return
+
+        path = f"overlays/arrows/{name}"
+        vertices = np.array([start, end], dtype=np.float32).T  # (3, 2)
+        self.vis[path].set_object(
+            g.Line(
+                g.PointsGeometry(vertices),
+                g.LineBasicMaterial(color=color, linewidth=4),
+            )
+        )
+
+    def clear_swing_plane(self) -> None:
+        """Clear all swing plane and trajectory overlays."""
+        if self.vis:
+            self.vis["overlays/swing_plane"].delete()
+            self.vis["overlays/trajectories"].delete()
+            self.vis["overlays/arrows"].delete()
+
     def _draw_arrow(
         self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
     ) -> None:

@@ -1,5 +1,7 @@
 # Critical Codebase Audit Report
+
 ## Golf Modeling Suite - Adversarial Review
+
 **Date:** January 21, 2026
 **Updated:** January 22, 2026
 **Auditor:** Claude (Opus 4.5)
@@ -15,26 +17,26 @@ This adversarial audit identified **significant issues across 7 dimensions** of 
 
 **10 issues have been fixed in this session:**
 
-| Issue | Status | Commit |
-|-------|--------|--------|
-| Auto-reload enabled in production | ✅ FIXED | Environment-based toggle added |
-| `exec()` code injection risk | ✅ FIXED | Replaced with `importlib` |
-| Temp file TOCTOU vulnerability | ✅ FIXED | Added `try/finally` cleanup |
-| Silent exception swallowing (MyoSuite) | ✅ FIXED | Added debug logging |
-| Missing database constraints | ✅ FIXED | Added CHECK constraints & ForeignKeys |
-| Magic numbers in API | ✅ FIXED | Extracted to named constants |
-| Missing API input validation | ✅ FIXED | Added validation for estimator_type, min_confidence, format |
-| Empty test functions | ✅ FIXED | Added meaningful assertions |
-| Missing confirmation dialogs | ✅ FIXED | Added to close, clear recent, restore defaults |
+| Issue                                  | Status   | Commit                                                      |
+| -------------------------------------- | -------- | ----------------------------------------------------------- |
+| Auto-reload enabled in production      | ✅ FIXED | Environment-based toggle added                              |
+| `exec()` code injection risk           | ✅ FIXED | Replaced with `importlib`                                   |
+| Temp file TOCTOU vulnerability         | ✅ FIXED | Added `try/finally` cleanup                                 |
+| Silent exception swallowing (MyoSuite) | ✅ FIXED | Added debug logging                                         |
+| Missing database constraints           | ✅ FIXED | Added CHECK constraints & ForeignKeys                       |
+| Magic numbers in API                   | ✅ FIXED | Extracted to named constants                                |
+| Missing API input validation           | ✅ FIXED | Added validation for estimator_type, min_confidence, format |
+| Empty test functions                   | ✅ FIXED | Added meaningful assertions                                 |
+| Missing confirmation dialogs           | ✅ FIXED | Added to close, clear recent, restore defaults              |
 
 ### Severity Distribution (Updated)
 
-| Severity | Original | Fixed | Remaining |
-|----------|----------|-------|-----------|
-| **CRITICAL** | 12 | 3 | 9 |
-| **HIGH** | 45+ | 5 | 40+ |
-| **MEDIUM** | 80+ | 2 | 78+ |
-| **LOW** | 50+ | 0 | 50+ |
+| Severity     | Original | Fixed | Remaining |
+| ------------ | -------- | ----- | --------- |
+| **CRITICAL** | 12       | 3     | 9         |
+| **HIGH**     | 45+      | 5     | 40+       |
+| **MEDIUM**   | 80+      | 2     | 78+       |
+| **LOW**      | 50+      | 0     | 50+       |
 
 ---
 
@@ -57,13 +59,14 @@ This adversarial audit identified **significant issues across 7 dimensions** of 
 
 **80+ placeholder test functions** with only `pass` statements provide false confidence in test coverage.
 
-| File | Empty Tests | Impact |
-|------|-------------|--------|
-| `tests/unit/test_ux_enhancements.py` | 25 | UX features untested |
-| `tests/unit/test_golf_launcher_logic.py` | 26 | Launcher logic untested |
-| `tests/unit/test_golf_suite_launcher.py` | 50+ | Suite launcher untested |
+| File                                     | Empty Tests | Impact                  |
+| ---------------------------------------- | ----------- | ----------------------- |
+| `tests/unit/test_ux_enhancements.py`     | 25          | UX features untested    |
+| `tests/unit/test_golf_launcher_logic.py` | 26          | Launcher logic untested |
+| `tests/unit/test_golf_suite_launcher.py` | 50+         | Suite launcher untested |
 
 **Example:**
+
 ```python
 # tests/unit/test_ux_enhancements.py:10
 def test_keyboard_shortcut_registration():
@@ -73,6 +76,7 @@ def test_keyboard_shortcut_registration():
 ### 1.2 Interface Protocol Stubs
 
 `shared/python/interfaces.py` defines 19 abstract methods with `...` that require implementation:
+
 - `compute_mass_matrix()` (line 150)
 - `compute_bias_forces()` (line 159)
 - `compute_gravity_forces()` (line 168)
@@ -89,12 +93,12 @@ def test_keyboard_shortcut_registration():
 
 **8+ locations** where exceptions are caught but silently ignored:
 
-| File | Line | Context |
-|------|------|---------|
-| `launchers/golf_launcher.py` | 461 | Engine loading failure |
-| `launchers/golf_launcher.py` | 679 | Model loading failure |
-| `launchers/golf_launcher.py` | 737 | Configuration failure |
-| `api/auth/security.py` | 263 | Authentication failure |
+| File                         | Line | Context                |
+| ---------------------------- | ---- | ---------------------- |
+| `launchers/golf_launcher.py` | 461  | Engine loading failure |
+| `launchers/golf_launcher.py` | 679  | Model loading failure  |
+| `launchers/golf_launcher.py` | 737  | Configuration failure  |
+| `api/auth/security.py`       | 263  | Authentication failure |
 
 ---
 
@@ -118,6 +122,7 @@ except (TypeError, AttributeError) as e:
 ```
 
 **Remaining locations needing similar fixes:**
+
 - `launchers/golf_launcher.py` (461, 679, 737)
 - `api/auth/security.py` (263)
 
@@ -125,11 +130,11 @@ except (TypeError, AttributeError) as e:
 
 **50+ instances** of `except Exception:` without specific handling:
 
-| File | Lines | Problem |
-|------|-------|---------|
-| `tests/integration/test_real_engine_loading.py` | 215, 228, 241 | Engine failures hidden |
-| `shared/python/engine_probes.py` | 73-74 | Returns `False` without diagnostics |
-| `shared/python/unified_engine_interface.py` | 195-200 | Silent pass |
+| File                                            | Lines         | Problem                             |
+| ----------------------------------------------- | ------------- | ----------------------------------- |
+| `tests/integration/test_real_engine_loading.py` | 215, 228, 241 | Engine failures hidden              |
+| `shared/python/engine_probes.py`                | 73-74         | Returns `False` without diagnostics |
+| `shared/python/unified_engine_interface.py`     | 195-200       | Silent pass                         |
 
 ### 2.3 Functions Returning None on Error (MEDIUM)
 
@@ -155,6 +160,7 @@ except (TypeError, AttributeError) as e:
 ### 3.1 CRITICAL Issues
 
 #### ✅ FIXED: Auto-Reload Enabled in Production Config
+
 **Files:** `api/server.py:763`, `start_api_server.py:147`
 
 ~~Previously enabled unconditionally.~~ **Now environment-based:**
@@ -167,6 +173,7 @@ uvicorn.run(app, host=host, port=port, reload=enable_reload)
 ```
 
 #### ✅ FIXED: Insecure Dynamic Import
+
 **File:** `tests/test_pinocchio_ecosystem.py:64`
 
 ~~Previously used `exec()`.~~ **Now uses safe `importlib`:**
@@ -178,6 +185,7 @@ importlib.import_module(f"pink.{module_name}")
 ```
 
 #### ✅ FIXED: Temporary File TOCTOU Vulnerability
+
 **File:** `api/server.py:580-598`
 
 ~~Temp files not cleaned up on exceptions.~~ **Now uses `try/finally`:**
@@ -193,12 +201,12 @@ finally:
 
 ### 3.2 HIGH Issues
 
-| Issue | Location | Risk |
-|-------|----------|------|
+| Issue                        | Location                                   | Risk              |
+| ---------------------------- | ------------------------------------------ | ----------------- |
 | Unprotected subprocess calls | `launchers/golf_launcher.py` (8 locations) | Command injection |
-| Hardcoded admin email | `api/database.py:89` | Targeted attacks |
-| Missing CSRF protection | All FastAPI endpoints | CSRF attacks |
-| No file upload sanitization | `api/server.py:602, 656` | Path traversal |
+| Hardcoded admin email        | `api/database.py:89`                       | Targeted attacks  |
+| Missing CSRF protection      | All FastAPI endpoints                      | CSRF attacks      |
+| No file upload sanitization  | `api/server.py:602, 656`                   | Path traversal    |
 
 ### 3.3 Positive Security Findings
 
@@ -216,19 +224,19 @@ The codebase has **excellent security implementations** in several areas:
 
 ### 4.1 God Classes (HIGH)
 
-| Class | File | Lines | Responsibilities |
-|-------|------|-------|------------------|
-| `MuJoCoSimWidget` | `mujoco/sim_widget.py` | 1,596 | Simulation, rendering, analysis, telemetry, visualization |
-| `GolfLauncher` | `launchers/golf_launcher.py` | 3,131 | UI, Docker, registry, engines, shortcuts, preferences |
+| Class             | File                         | Lines | Responsibilities                                          |
+| ----------------- | ---------------------------- | ----- | --------------------------------------------------------- |
+| `MuJoCoSimWidget` | `mujoco/sim_widget.py`       | 1,596 | Simulation, rendering, analysis, telemetry, visualization |
+| `GolfLauncher`    | `launchers/golf_launcher.py` | 3,131 | UI, Docker, registry, engines, shortcuts, preferences     |
 
 ### 4.2 Extremely Long Files
 
-| File | Lines | Problem |
-|------|-------|---------|
-| `shared/python/plotting_core.py` | 4,569 | Monolithic plotting module |
-| `launchers/golf_launcher.py` | 3,131 | Should be split into components |
-| `shared/python/statistical_analysis.py` | 2,219 | Mixed analytics |
-| `drake/python/src/drake_gui_app.py` | 2,037 | UI + logic combined |
+| File                                    | Lines | Problem                         |
+| --------------------------------------- | ----- | ------------------------------- |
+| `shared/python/plotting_core.py`        | 4,569 | Monolithic plotting module      |
+| `launchers/golf_launcher.py`            | 3,131 | Should be split into components |
+| `shared/python/statistical_analysis.py` | 2,219 | Mixed analytics                 |
+| `drake/python/src/drake_gui_app.py`     | 2,037 | UI + logic combined             |
 
 ### 4.3 Global Mutable State
 
@@ -292,6 +300,7 @@ def create_tables() -> None:
 ```
 
 **Problems:**
+
 - No Alembic migrations
 - No schema versioning
 - No rollback mechanism
@@ -303,34 +312,36 @@ def create_tables() -> None:
 
 ### 5.2 Configuration Conflicts
 
-| Setting | Config Value | Code Value | Winner |
-|---------|--------------|------------|--------|
-| Upload size | `100 MB` | `10 MB` | Code |
-| Rate limiting | `100/minute` | Not applied | Neither |
-| CORS origins | Config list | Hardcoded list | Code |
-| Token expiry | `30 min` | Hardcoded `30` | Code |
+| Setting       | Config Value | Code Value     | Winner  |
+| ------------- | ------------ | -------------- | ------- |
+| Upload size   | `100 MB`     | `10 MB`        | Code    |
+| Rate limiting | `100/minute` | Not applied    | Neither |
+| CORS origins  | Config list  | Hardcoded list | Code    |
+| Token expiry  | `30 min`     | Hardcoded `30` | Code    |
 
 ### 5.3 Missing API Validation
 
 #### ✅ FIXED: Video Analysis and Export Endpoints
 
-| Endpoint | Parameter | Status |
-|----------|-----------|--------|
-| `/analyze/video` | `estimator_type` | ✅ FIXED - Validates against `VALID_ESTIMATOR_TYPES` |
-| `/analyze/video` | `min_confidence` | ✅ FIXED - Range check `[0.0, 1.0]` |
-| `/analyze/video/async` | Both parameters | ✅ FIXED - Same validation |
-| `/export/{task_id}` | `format` | ✅ FIXED - Validates against `VALID_EXPORT_FORMATS` |
-| `/simulate` | `duration` | ❌ Still needs max value validation |
+| Endpoint               | Parameter        | Status                                               |
+| ---------------------- | ---------------- | ---------------------------------------------------- |
+| `/analyze/video`       | `estimator_type` | ✅ FIXED - Validates against `VALID_ESTIMATOR_TYPES` |
+| `/analyze/video`       | `min_confidence` | ✅ FIXED - Range check `[0.0, 1.0]`                  |
+| `/analyze/video/async` | Both parameters  | ✅ FIXED - Same validation                           |
+| `/export/{task_id}`    | `format`         | ✅ FIXED - Validates against `VALID_EXPORT_FORMATS`  |
+| `/simulate`            | `duration`       | ❌ Still needs max value validation                  |
 
 ### 5.4 Inconsistent Authentication
 
 **Unprotected endpoints that should require auth:**
+
 - `POST /engines/{engine_type}/load`
 - `POST /simulate`
 - `POST /analyze/video`
 - `POST /analyze/biomechanics`
 
 **Unused quota enforcement:**
+
 ```python
 # api/auth/dependencies.py - Defined but NEVER USED:
 CheckAPIQuota = Depends(check_usage_quota("api_calls"))
@@ -367,18 +378,19 @@ class Session(Base):
 
 ### 6.1 Completely Untested Critical Modules
 
-| Module | Lines | Risk | Priority |
-|--------|-------|------|----------|
-| `api/auth/security.py` | 406 | Password hashing, JWT signing | **CRITICAL** |
-| `api/database.py` | 102 | Admin creation, credentials | **CRITICAL** |
-| `api/auth/models.py` | 241 | User/role validation | HIGH |
-| `video_pose_pipeline.py` | ~300 | Video processing | HIGH |
-| `muscle_equilibrium.py` | ~200 | Biomechanical computation | HIGH |
-| `engine_manager.py` | ~150 | Engine orchestration | HIGH |
+| Module                   | Lines | Risk                          | Priority     |
+| ------------------------ | ----- | ----------------------------- | ------------ |
+| `api/auth/security.py`   | 406   | Password hashing, JWT signing | **CRITICAL** |
+| `api/database.py`        | 102   | Admin creation, credentials   | **CRITICAL** |
+| `api/auth/models.py`     | 241   | User/role validation          | HIGH         |
+| `video_pose_pipeline.py` | ~300  | Video processing              | HIGH         |
+| `muscle_equilibrium.py`  | ~200  | Biomechanical computation     | HIGH         |
+| `engine_manager.py`      | ~150  | Engine orchestration          | HIGH         |
 
 ### 6.2 Test Quality Issues
 
 **Tautological assertions:**
+
 ```python
 # engines/Simscape_Multibody_Models/.../test_example.py:68-76
 def test_set_seeds_default(self) -> None:
@@ -387,27 +399,30 @@ def test_set_seeds_default(self) -> None:
 ```
 
 **Type checking instead of value checking:**
+
 ```python
 # tests/unit/test_energy_monitor.py:113
 assert isinstance(monitor.E_initial, float)  # ← Only checks type, not correctness
 ```
 
 **Skipped tests due to missing dependencies:**
+
 - 63 tests skipped when `bcrypt` unavailable
 - Async tests skipped due to missing `pytest-asyncio`
 
 ### 6.3 Missing Integration Tests
 
-| Critical Path | Status |
-|---------------|--------|
+| Critical Path                               | Status     |
+| ------------------------------------------- | ---------- |
 | User registration → login → access resource | NOT TESTED |
-| Load model → simulate → export results | NOT TESTED |
-| Upload video → process → analyze → export | NOT TESTED |
-| Database initialization with admin user | NOT TESTED |
+| Load model → simulate → export results      | NOT TESTED |
+| Upload video → process → analyze → export   | NOT TESTED |
+| Database initialization with admin user     | NOT TESTED |
 
 ### 6.4 Flaky Tests
 
 **Timing-dependent assertions:**
+
 ```python
 # tests/unit/test_api_security.py:86
 ratio = max(correct_time, incorrect_time) / min(...)
@@ -421,12 +436,14 @@ assert ratio < 1.5  # ← Fails on loaded CI systems
 ### 7.1 Missing Keyboard Shortcuts
 
 Only 4 global shortcuts implemented:
+
 - `Ctrl+?` / `F1`: Help
 - `Ctrl+,`: Preferences
 - `Ctrl+Q`: Quit
 - `Ctrl+F`: Search
 
 **Missing:**
+
 - Run/launch selected model
 - Stop running process
 - Open recent model
@@ -441,6 +458,7 @@ Only 4 global shortcuts implemented:
 ```
 
 **Problems:**
+
 - No actionable guidance
 - No links to troubleshooting docs
 - Stack traces exposed to end users
@@ -450,13 +468,13 @@ Only 4 global shortcuts implemented:
 
 #### ✅ PARTIALLY FIXED: Critical Actions Now Have Confirmation
 
-| Action | Has Confirmation? | Status |
-|--------|-------------------|--------|
-| Clear log | NO | ❌ Needs fix |
-| Clear recent models | ✅ YES | **FIXED** - `shared/python/ui/recent_models.py` |
-| Reset simulation | NO | ❌ Needs fix |
-| Restore defaults | ✅ YES | **FIXED** - `shared/python/ui/preferences_dialog.py` |
-| Close while running | ✅ YES | **FIXED** - `launchers/golf_launcher.py` |
+| Action              | Has Confirmation? | Status                                               |
+| ------------------- | ----------------- | ---------------------------------------------------- |
+| Clear log           | NO                | ❌ Needs fix                                         |
+| Clear recent models | ✅ YES            | **FIXED** - `shared/python/ui/recent_models.py`      |
+| Reset simulation    | NO                | ❌ Needs fix                                         |
+| Restore defaults    | ✅ YES            | **FIXED** - `shared/python/ui/preferences_dialog.py` |
+| Close while running | ✅ YES            | **FIXED** - `launchers/golf_launcher.py`             |
 
 ### 7.4 Inaccessible Features
 
@@ -467,12 +485,12 @@ Only 4 global shortcuts implemented:
 
 ### 7.5 Missing Progress Indicators
 
-| Operation | Has Progress? |
-|-----------|---------------|
-| Model loading | NO |
-| Docker detection | NO |
-| Engine initialization | NO |
-| Analysis computation | Text only (no bar) |
+| Operation             | Has Progress?      |
+| --------------------- | ------------------ |
+| Model loading         | NO                 |
+| Docker detection      | NO                 |
+| Engine initialization | NO                 |
+| Analysis computation  | Text only (no bar) |
 
 ### 7.6 No Undo/Redo
 
@@ -525,15 +543,15 @@ Only 4 global shortcuts implemented:
 
 ## Appendix A: Files Requiring Immediate Attention
 
-| File | Issues | Priority |
-|------|--------|----------|
-| `api/server.py` | Auto-reload, temp files, missing validation | CRITICAL |
-| `api/database.py` | No migrations, hardcoded admin | CRITICAL |
-| `api/auth/security.py` | Untested, credential handling | CRITICAL |
-| `tests/unit/test_ux_enhancements.py` | 25 empty tests | HIGH |
-| `tests/unit/test_golf_suite_launcher.py` | 50+ empty tests | HIGH |
-| `launchers/golf_launcher.py` | God class, unprotected subprocess | HIGH |
-| `engines/physics_engines/myosuite/python/myosuite_physics_engine.py` | Silent exceptions | HIGH |
+| File                                                                 | Issues                                      | Priority |
+| -------------------------------------------------------------------- | ------------------------------------------- | -------- |
+| `api/server.py`                                                      | Auto-reload, temp files, missing validation | CRITICAL |
+| `api/database.py`                                                    | No migrations, hardcoded admin              | CRITICAL |
+| `api/auth/security.py`                                               | Untested, credential handling               | CRITICAL |
+| `tests/unit/test_ux_enhancements.py`                                 | 25 empty tests                              | HIGH     |
+| `tests/unit/test_golf_suite_launcher.py`                             | 50+ empty tests                             | HIGH     |
+| `launchers/golf_launcher.py`                                         | God class, unprotected subprocess           | HIGH     |
+| `engines/physics_engines/myosuite/python/myosuite_physics_engine.py` | Silent exceptions                           | HIGH     |
 
 ---
 
@@ -554,16 +572,16 @@ Only 4 global shortcuts implemented:
 
 ## Appendix C: Test Coverage Priorities
 
-| Priority | Module | Current Coverage | Target |
-|----------|--------|------------------|--------|
-| 1 | `api/auth/security.py` | 0% | 80% |
-| 2 | `api/database.py` | 0% | 80% |
-| 3 | `api/auth/models.py` | 0% | 70% |
-| 4 | `video_pose_pipeline.py` | 0% | 60% |
-| 5 | `engine_manager.py` | 0% | 70% |
-| 6 | `flight_models.py` | Partial | 80% |
-| 7 | `muscle_equilibrium.py` | 0% | 70% |
+| Priority | Module                   | Current Coverage | Target |
+| -------- | ------------------------ | ---------------- | ------ |
+| 1        | `api/auth/security.py`   | 0%               | 80%    |
+| 2        | `api/database.py`        | 0%               | 80%    |
+| 3        | `api/auth/models.py`     | 0%               | 70%    |
+| 4        | `video_pose_pipeline.py` | 0%               | 60%    |
+| 5        | `engine_manager.py`      | 0%               | 70%    |
+| 6        | `flight_models.py`       | Partial          | 80%    |
+| 7        | `muscle_equilibrium.py`  | 0%               | 70%    |
 
 ---
 
-*This report was generated through systematic adversarial analysis of the entire codebase. All findings are based on static code analysis and pattern matching. Some issues may require runtime verification.*
+_This report was generated through systematic adversarial analysis of the entire codebase. All findings are based on static code analysis and pattern matching. Some issues may require runtime verification._

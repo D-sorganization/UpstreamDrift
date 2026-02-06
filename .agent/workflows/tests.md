@@ -12,14 +12,14 @@ Run the complete test suite and fix any failing tests.
    - Check for `pytest.ini`, `pyproject.toml`, or `setup.cfg` for test configuration
    - Identify test directories: `tests/`, `test/`, `*_test.py`, `test_*.py`
 
-// turbo
-2. **Run Python tests**:
+// turbo 2. **Run Python tests**:
 
-   ```bash
-   pytest -v --tb=short
-   ```
+```bash
+pytest -v --tb=short
+```
 
 1. **For each failing test**:
+
    - Read the test file and understand what it's testing
    - Read the implementation being tested
    - Identify the root cause of the failure
@@ -34,12 +34,11 @@ Run the complete test suite and fix any failing tests.
    - Continue fixing failures one by one
    - After each fix, run the full test suite to check for regressions
 
-// turbo
-5. **Final verification**:
+// turbo 5. **Final verification**:
 
-   ```bash
-   pytest -v
-   ```
+```bash
+pytest -v
+```
 
 ## Output
 

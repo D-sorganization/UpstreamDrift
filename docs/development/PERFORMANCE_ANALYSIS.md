@@ -33,11 +33,13 @@ self.engine.compute_control_acceleration(tau) # If enabled
 ```
 
 **Impact**: For a 1000-frame simulation with all features enabled:
+
 - Minimum: 3,000 engine calls
 - With analysis: 7,000+ calls
 - Mass matrix alone: 1,000 x O(n^3) operations
 
 **Recommendation**:
+
 - Batch state queries into a single `get_full_state()` call
 - Cache mass matrix (only changes when q changes significantly)
 - Compute analysis metrics post-hoc or at reduced frequency
@@ -62,6 +64,7 @@ for src_idx in sources:
 **Impact**: 10 sources x 1000 frames = 10,000 expensive compute_control_acceleration calls
 
 **Recommendation**:
+
 - Compute induced accelerations post-hoc using vectorized operations
 - Use matrix decomposition to compute all sources in one pass
 
@@ -84,12 +87,13 @@ for i in range(n_joints):
 **Impact**: For 30 joints = 435 cross-correlation computations, each involving FFT operations
 
 **Recommendation**:
+
 - Parallelize using `concurrent.futures` or `joblib`
 - Pre-compute FFTs and reuse them across pairs
 
 ---
 
-### 4. Dynamic Time Warping - Pure Python O(n*m) Loop
+### 4. Dynamic Time Warping - Pure Python O(n\*m) Loop
 
 **Location**: `shared/python/signal_processing.py:410-454`
 
@@ -112,6 +116,7 @@ for i in range(1, n + 1):
 **Impact**: For 1000-sample time series = 1M+ Python loop iterations
 
 **Recommendation**:
+
 - Use `fastdtw` library or `dtw-python` with C backend
 - Apply Numba JIT compilation: `@numba.jit(nopython=True)`
 
@@ -156,6 +161,7 @@ def __init__(self, engine: PhysicsEngine, max_samples: int = 100000) -> None:
 **Impact**: 100,000 samples x 20+ joints x 10+ variables = 100+ MB pre-allocation
 
 **Recommendation**:
+
 - Use dynamic resizing with `numpy.resize()` or list appending with final conversion
 - Implement a `trim_buffers()` method called after recording
 
@@ -175,6 +181,7 @@ dist_matrix = squareform(dists)
 **Impact**: For 1000 samples = 500K pairwise distances + 1M element matrix
 
 **Recommendation**:
+
 - Use sparse representation for recurrence matrices
 - Implement FAN (Fixed Amount of Nearest Neighbors) thresholding
 - Consider approximate methods for large datasets
@@ -200,6 +207,7 @@ elif format_type == OutputFormat.HDF5:
 **Impact**: Large simulations (1GB+) can block for seconds
 
 **Recommendation**:
+
 - Use `asyncio` or `concurrent.futures.ThreadPoolExecutor` for I/O
 - Implement background save with callback notification
 
@@ -230,6 +238,7 @@ for i in range(n_frames):
 **Impact**: 4 expensive computations x n_frames = 4000+ engine calls for 1000 frames
 
 **Recommendation**:
+
 - Batch similar computations
 - Use vectorized implementations where possible
 - Consider computing only for key frames (impact, transition, etc.)
@@ -334,16 +343,16 @@ f2, t2, w2 = compute_cwt(data2, fs, freq_range, num_freqs, w0)
 
 ## Performance Optimization Priority Matrix
 
-| Priority | Issue | Estimated Speedup | Effort |
-|----------|-------|-------------------|--------|
-| 1 | Batch engine calls (#1, #2) | 10-50x | Medium |
-| 2 | Cache mass matrix | 5-20x | Low |
-| 3 | Use optimized DTW library (#4) | 100x | Low |
-| 4 | Parallelize lag matrix (#3) | 4-8x (cores) | Low |
-| 5 | Async file I/O (#8) | Non-blocking | Medium |
-| 6 | JIT compile tight loops | 10-100x | Medium |
-| 7 | Sparse recurrence matrices (#7) | 10x memory | Medium |
-| 8 | Dynamic buffer sizing (#6) | Memory only | Low |
+| Priority | Issue                           | Estimated Speedup | Effort |
+| -------- | ------------------------------- | ----------------- | ------ |
+| 1        | Batch engine calls (#1, #2)     | 10-50x            | Medium |
+| 2        | Cache mass matrix               | 5-20x             | Low    |
+| 3        | Use optimized DTW library (#4)  | 100x              | Low    |
+| 4        | Parallelize lag matrix (#3)     | 4-8x (cores)      | Low    |
+| 5        | Async file I/O (#8)             | Non-blocking      | Medium |
+| 6        | JIT compile tight loops         | 10-100x           | Medium |
+| 7        | Sparse recurrence matrices (#7) | 10x memory        | Medium |
+| 8        | Dynamic buffer sizing (#6)      | Memory only       | Low    |
 
 ---
 
@@ -375,7 +384,8 @@ active_tasks: dict[str, Any] = {}  # No TTL, no cleanup, no size limit
 <<<<<<< HEAD
 =======
 
->>>>>>> eda10f35340da0093d10a0407d743abd9d6dcb6c
+> > > > > > > eda10f35340da0093d10a0407d743abd9d6dcb6c
+
 - Implement TTL-based cleanup (e.g., remove tasks older than 1 hour)
 - Add maximum size limit with LRU eviction
 - Consider using Redis or similar for production deployments
@@ -405,7 +415,8 @@ for key_candidate in active_keys:
 <<<<<<< HEAD
 =======
 
->>>>>>> eda10f35340da0093d10a0407d743abd9d6dcb6c
+> > > > > > > eda10f35340da0093d10a0407d743abd9d6dcb6c
+
 - Store a fast-hashable prefix (first 8 chars SHA256) for filtering
 - Query: `WHERE prefix_hash = ? AND is_active = true` then verify only matches
 - This reduces bcrypt calls from O(n) to O(1) average case
@@ -443,7 +454,8 @@ user_map = {u.id: u for u in users}
 <<<<<<< HEAD
 =======
 
->>>>>>> eda10f35340da0093d10a0407d743abd9d6dcb6c
+> > > > > > > eda10f35340da0093d10a0407d743abd9d6dcb6c
+
 - Line 73, 102, 262, 285, 372, 407, 467
 
 Each method opens/closes connection separately, incurring connection overhead.
@@ -452,7 +464,8 @@ Each method opens/closes connection separately, incurring connection overhead.
 <<<<<<< HEAD
 =======
 
->>>>>>> eda10f35340da0093d10a0407d743abd9d6dcb6c
+> > > > > > > eda10f35340da0093d10a0407d743abd9d6dcb6c
+
 - Use a connection pool or singleton connection manager
 - For SQLite, consider using `check_same_thread=False` with thread-local connections
 
@@ -477,18 +490,18 @@ cursor.execute("SELECT club_type, COUNT(*) FROM ...")       # Query 3
 
 ## Updated Performance Optimization Priority Matrix
 
-| Priority | Issue | Estimated Speedup | Effort |
-|----------|-------|-------------------|--------|
-| 1 | Fix memory leak in active_tasks (#16) | Prevents OOM | Low |
-| 2 | Batch engine calls (#1, #2) | 10-50x | Medium |
-| 3 | API key prefix indexing (#17) | 100-1000x | Medium |
-| 4 | Use optimized DTW library (#4) | 100x | Low |
-| 5 | Cache mass matrix | 5-20x | Low |
-| 6 | Parallelize lag matrix (#3) | 4-8x (cores) | Low |
-| 7 | DB connection pooling (#19) | 2-5x | Low |
-| 8 | Async file I/O (#8) | Non-blocking | Medium |
-| 9 | JIT compile tight loops | 10-100x | Medium |
-| 10 | Sparse recurrence matrices (#7) | 10x memory | Medium |
+| Priority | Issue                                 | Estimated Speedup | Effort |
+| -------- | ------------------------------------- | ----------------- | ------ |
+| 1        | Fix memory leak in active_tasks (#16) | Prevents OOM      | Low    |
+| 2        | Batch engine calls (#1, #2)           | 10-50x            | Medium |
+| 3        | API key prefix indexing (#17)         | 100-1000x         | Medium |
+| 4        | Use optimized DTW library (#4)        | 100x              | Low    |
+| 5        | Cache mass matrix                     | 5-20x             | Low    |
+| 6        | Parallelize lag matrix (#3)           | 4-8x (cores)      | Low    |
+| 7        | DB connection pooling (#19)           | 2-5x              | Low    |
+| 8        | Async file I/O (#8)                   | Non-blocking      | Medium |
+| 9        | JIT compile tight loops               | 10-100x           | Medium |
+| 10       | Sparse recurrence matrices (#7)       | 10x memory        | Medium |
 
 ---
 

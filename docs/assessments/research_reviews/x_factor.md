@@ -17,6 +17,7 @@ The **X-Factor** quantifies the angular separation between the pelvis and thorax
 ### 1.2 Physical/biomechanical meaning
 
 The X-Factor represents:
+
 1. **Elastic energy storage** in trunk muscles (primarily obliques, erector spinae)
 2. **Pre-stretch** of the stretch-shortening cycle for power generation
 3. **Coordination pattern** between pelvis and thorax segments
@@ -25,16 +26,17 @@ The underlying biomechanical principle: increased separation creates greater pot
 
 ### 1.3 Units and conventions
 
-| Parameter | Symbol | Units | Definition |
-|-----------|--------|-------|------------|
-| X-Factor at Top | XF_top | degrees (°) | θ_thorax - θ_pelvis at top of backswing |
-| X-Factor Stretch | XFS | degrees (°) | max(XF) during transition - XF_top |
-| X-Factor Stretch Timing | t_XFS | seconds (s) | Time of maximum X-factor |
-| X-Factor Rate | dXF/dt | deg/s | Rate of change of X-factor |
+| Parameter               | Symbol | Units       | Definition                              |
+| ----------------------- | ------ | ----------- | --------------------------------------- |
+| X-Factor at Top         | XF_top | degrees (°) | θ_thorax - θ_pelvis at top of backswing |
+| X-Factor Stretch        | XFS    | degrees (°) | max(XF) during transition - XF_top      |
+| X-Factor Stretch Timing | t_XFS  | seconds (s) | Time of maximum X-factor                |
+| X-Factor Rate           | dXF/dt | deg/s       | Rate of change of X-factor              |
 
 ### 1.4 Sign convention
 
 For a right-handed golfer:
+
 - **Positive rotation:** Clockwise when viewed from above (backswing direction)
 - **Positive X-Factor:** Thorax rotated more than pelvis toward backswing
 
@@ -46,9 +48,10 @@ For a right-handed golfer:
 
 #### McLean (1992) - Original X-Factor concept
 
-**Citation:** McLean, J. (1992). Widen the gap. *Golf Magazine*, 12, 49-53.
+**Citation:** McLean, J. (1992). Widen the gap. _Golf Magazine_, 12, 49-53.
 
 **Key findings:**
+
 - Coined the term "X-Factor" (with John Andrisani)
 - Compared 5 long hitters (avg driving distance rank: 19th) vs 5 short hitters (rank: 161st)
 - Long hitters: X-Factor = 38°, hip turn = 50°
@@ -57,15 +60,17 @@ For a right-handed golfer:
 - X-Factor as percentage of shoulder turn: Long hitters 43% vs Short hitters 27%
 
 **Measurement method:**
+
 - Line through shoulders (both acromia)
 - Line through pelvis (ASIS to ASIS)
 - Angle between projections of these lines in horizontal plane
 
 #### Cheetham et al. (2001) - X-Factor Stretch discovery
 
-**Citation:** Cheetham, P. J., Martin, P. E., Mottram, R. E., & St Laurent, B. F. (2001). The importance of stretching the 'X-Factor' in the downswing of golf: The 'X-Factor Stretch.' In P. R. Thomas (Ed.), *Optimising Performance in Golf* (pp. 192-199). Brisbane, Australia: Australian Academic Press. ISBN 1 875378 37 5.
+**Citation:** Cheetham, P. J., Martin, P. E., Mottram, R. E., & St Laurent, B. F. (2001). The importance of stretching the 'X-Factor' in the downswing of golf: The 'X-Factor Stretch.' In P. R. Thomas (Ed.), _Optimising Performance in Golf_ (pp. 192-199). Brisbane, Australia: Australian Academic Press. ISBN 1 875378 37 5.
 
 **Key findings:**
+
 - X-Factor at top was NOT significantly different between skill levels
 - X-Factor Stretch WAS significantly different:
   - Skilled golfers: +19% increase from top during transition
@@ -73,15 +78,17 @@ For a right-handed golfer:
 - **Critical insight:** The stretch during transition, not the static value at top, differentiates skill levels
 
 **Mechanism:**
+
 - Pelvis reverses direction before thorax
 - Creates momentary increase in separation
 - "Head start" of pelvis stretches trunk muscles
 
 #### Myers et al. (2008) - Performance correlations
 
-**Citation:** Myers, J., Lephart, S., Tsai, Y. S., Sell, T., Smoliga, J., & Jolly, J. (2008). The role of upper torso and pelvis rotation in driving performance during the golf swing. *Journal of Sports Sciences*, 26(2), 181-188.
+**Citation:** Myers, J., Lephart, S., Tsai, Y. S., Sell, T., Smoliga, J., & Jolly, J. (2008). The role of upper torso and pelvis rotation in driving performance during the golf swing. _Journal of Sports Sciences_, 26(2), 181-188.
 
 **Key findings:**
+
 - Higher X-factor values correlated with greater ball velocity/displacement
 - More skilled players had higher X-factor and X-factor stretch
 - Faster sequential trunk rotation in professionals vs amateurs
@@ -90,44 +97,49 @@ For a right-handed golfer:
 
 #### Two competing segment definitions
 
-**Citation:** Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. *Journal of Sports Sciences*, 31(11), 1156-1163.
+**Citation:** Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. _Journal of Sports Sciences_, 31(11), 1156-1163.
 
-| Method | Segments | Typical Values | Used By |
-|--------|----------|----------------|---------|
+| Method          | Segments                                  | Typical Values | Used By                      |
+| --------------- | ----------------------------------------- | -------------- | ---------------------------- |
 | Shoulder/Pelvis | Line through acromia vs line through ASIS | ~55-65° at top | McLean (1992), older studies |
-| Thorax/Pelvis | Thorax segment vs pelvis segment | ~30-40° at top | Modern biomechanics studies |
+| Thorax/Pelvis   | Thorax segment vs pelvis segment          | ~30-40° at top | Modern biomechanics studies  |
 
 **Critical note:** Values are NOT directly comparable between methods. The ~30° difference must be accounted for when comparing studies.
 
 #### Joyce et al. (2010) - Cardan angle sequence
 
-**Citation:** Joyce, C., Burnett, A., Cochrane, J., & Ball, K. (2010). Methodological considerations for the 3D measurement of the X-factor and lower trunk movement in golf. *Sports Biomechanics*, 9(4), 206-221.
+**Citation:** Joyce, C., Burnett, A., Cochrane, J., & Ball, K. (2010). Methodological considerations for the 3D measurement of the X-factor and lower trunk movement in golf. _Sports Biomechanics_, 9(4), 206-221.
 
 **Key findings:**
+
 - Tested six Cardan angle rotation orders
 - **Recommended sequence:** ZYX (lateral bending → flexion/extension → axial rotation)
 - This order minimizes gimbal lock and produces physiologically meaningful angles
 
 #### Meister et al. (2011) - Performance correlation
 
-**Citation:** Meister, D. W., Ladd, A. L., Butler, E. E., Zhao, B., Rogers, A. P., Ray, C. J., & Rose, J. (2011). Rotational biomechanics of the elite golf swing: Benchmarks for amateurs. *Journal of Applied Biomechanics*, 27(3), 242-251.
+**Citation:** Meister, D. W., Ladd, A. L., Butler, E. E., Zhao, B., Rogers, A. P., Ray, C. J., & Rose, J. (2011). Rotational biomechanics of the elite golf swing: Benchmarks for amateurs. _Journal of Applied Biomechanics_, 27(3), 242-251.
 
 **Key finding:**
+
 - Peak X-factor correlation with club head speed: r = 0.863 ± 0.134 (very strong)
 
 ### 2.3 Controversies and limitations
 
 1. **Definition inconsistency:** No single standard definition across literature
+
    - Shoulder/pelvis vs thorax/pelvis
    - Different Cardan sequences
    - Different reference frames (global vs segment-relative)
 
 2. **Performance relationship debates:**
+
    - Some studies find X-Factor at top important (McLean)
    - Others find X-Factor Stretch more important (Cheetham)
    - Individual variation is substantial
 
 3. **Injury implications:**
+
    - Higher X-Factor may increase spinal loading (Cole & Grimshaw, 2016)
    - Relationship between X-Factor and injury risk is not fully established
 
@@ -145,15 +157,19 @@ For a right-handed golfer:
 We implement **both** major methods with explicit labeling:
 
 **Method A: Thorax-Pelvis (Modern biomechanics approach)**
+
 ```
 XF_thorax_pelvis = θ_thorax_axial - θ_pelvis_axial
 ```
+
 Using ZYX Cardan sequence per Joyce et al. (2010)
 
 **Method B: Shoulder-Pelvis (Classic McLean approach)**
+
 ```
 XF_shoulder_pelvis = θ_shoulder_line - θ_pelvis_line
 ```
+
 Projected into transverse plane
 
 ### 3.2 Rationale
@@ -218,31 +234,32 @@ Output:
 
 **TPI Tour Averages (Thorax-Pelvis method):**
 
-| Parameter | Tour Average | Range |
-|-----------|-------------|-------|
-| X-Factor at Top | ~40-45° | 35-55° |
-| X-Factor at Transition | ~42° | 38-50° |
-| X-Factor Stretch | ~5° | 0-12° |
+| Parameter              | Tour Average | Range  |
+| ---------------------- | ------------ | ------ |
+| X-Factor at Top        | ~40-45°      | 35-55° |
+| X-Factor at Transition | ~42°         | 38-50° |
+| X-Factor Stretch       | ~5°          | 0-12°  |
 
 **McLean Original Data (Shoulder-Pelvis method):**
 
-| Group | X-Factor at Top | Hip Turn | Shoulder Turn |
-|-------|-----------------|----------|---------------|
-| Long Hitters | 38° | 50° | 88° |
-| Short Hitters | 24° | 65° | 89° |
+| Group         | X-Factor at Top | Hip Turn | Shoulder Turn |
+| ------------- | --------------- | -------- | ------------- |
+| Long Hitters  | 38°             | 50°      | 88°           |
+| Short Hitters | 24°             | 65°      | 89°           |
 
 ### 4.2 Acceptance criteria
 
-| Criterion | Tolerance | Method |
-|-----------|-----------|--------|
-| X-Factor value | ±2° | Compare to motion capture reference |
-| X-Factor Stretch | ±1° | Cross-engine comparison |
-| Timing of XFS | ±5 ms | Cross-engine comparison |
-| Method consistency | Exact | Same method produces same result |
+| Criterion          | Tolerance | Method                              |
+| ------------------ | --------- | ----------------------------------- |
+| X-Factor value     | ±2°       | Compare to motion capture reference |
+| X-Factor Stretch   | ±1°       | Cross-engine comparison             |
+| Timing of XFS      | ±5 ms     | Cross-engine comparison             |
+| Method consistency | Exact     | Same method produces same result    |
 
 ### 4.3 Cross-engine validation
 
 For identical input kinematics:
+
 - All engines must produce identical X-Factor values (within numerical precision)
 - Cardan angle extraction must use identical ZYX sequence
 - Phase detection must use identical criteria
@@ -253,17 +270,18 @@ For identical input kinematics:
 
 ### 5.1 Sources of uncertainty
 
-| Source | Magnitude | Notes |
-|--------|-----------|-------|
-| Marker placement | ±5-10° | Varies with palpation accuracy |
-| Soft tissue artifact | ±3-5° | Skin movement over bone |
-| Cardan sequence choice | ~5-15° | Different sequences give different values |
-| Phase identification | ±1-2° | "Top" definition varies |
-| Numerical precision | <0.1° | Negligible |
+| Source                 | Magnitude | Notes                                     |
+| ---------------------- | --------- | ----------------------------------------- |
+| Marker placement       | ±5-10°    | Varies with palpation accuracy            |
+| Soft tissue artifact   | ±3-5°     | Skin movement over bone                   |
+| Cardan sequence choice | ~5-15°    | Different sequences give different values |
+| Phase identification   | ±1-2°     | "Top" definition varies                   |
+| Numerical precision    | <0.1°     | Negligible                                |
 
 ### 5.2 Propagation method
 
 Total uncertainty estimated as root-sum-square of independent sources:
+
 ```
 σ_XF = √(σ_marker² + σ_tissue² + σ_phase²)
 ```
@@ -299,30 +317,35 @@ McLean (1992) shoulder-pelvis values, add approximately 15-25°.
 
 ## 6. References
 
-1. McLean, J. (1992). Widen the gap. *Golf Magazine*, 12, 49-53.
+1. McLean, J. (1992). Widen the gap. _Golf Magazine_, 12, 49-53.
 
-2. Cheetham, P. J., Martin, P. E., Mottram, R. E., & St Laurent, B. F. (2001). The importance of stretching the 'X-Factor' in the downswing of golf: The 'X-Factor Stretch.' In P. R. Thomas (Ed.), *Optimising Performance in Golf* (pp. 192-199). Brisbane, Australia: Australian Academic Press.
+2. Cheetham, P. J., Martin, P. E., Mottram, R. E., & St Laurent, B. F. (2001). The importance of stretching the 'X-Factor' in the downswing of golf: The 'X-Factor Stretch.' In P. R. Thomas (Ed.), _Optimising Performance in Golf_ (pp. 192-199). Brisbane, Australia: Australian Academic Press.
+
    - Full paper: https://www.philcheetham.com/wp-content/uploads/2011/11/Stretching-the-X-Factor-Paper.pdf
 
-3. Myers, J., Lephart, S., Tsai, Y. S., Sell, T., Smoliga, J., & Jolly, J. (2008). The role of upper torso and pelvis rotation in driving performance during the golf swing. *Journal of Sports Sciences*, 26(2), 181-188.
+3. Myers, J., Lephart, S., Tsai, Y. S., Sell, T., Smoliga, J., & Jolly, J. (2008). The role of upper torso and pelvis rotation in driving performance during the golf swing. _Journal of Sports Sciences_, 26(2), 181-188.
 
-4. Joyce, C., Burnett, A., Cochrane, J., & Ball, K. (2010). Methodological considerations for the 3D measurement of the X-factor and lower trunk movement in golf. *Sports Biomechanics*, 9(4), 206-221.
+4. Joyce, C., Burnett, A., Cochrane, J., & Ball, K. (2010). Methodological considerations for the 3D measurement of the X-factor and lower trunk movement in golf. _Sports Biomechanics_, 9(4), 206-221.
+
    - https://pubmed.ncbi.nlm.nih.gov/21162365/
 
-5. Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. *Journal of Sports Sciences*, 31(11), 1156-1163.
+5. Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. _Journal of Sports Sciences_, 31(11), 1156-1163.
+
    - https://pubmed.ncbi.nlm.nih.gov/23463985/
 
-6. Meister, D. W., Ladd, A. L., Butler, E. E., Zhao, B., Rogers, A. P., Ray, C. J., & Rose, J. (2011). Rotational biomechanics of the elite golf swing: Benchmarks for amateurs. *Journal of Applied Biomechanics*, 27(3), 242-251.
+6. Meister, D. W., Ladd, A. L., Butler, E. E., Zhao, B., Rogers, A. P., Ray, C. J., & Rose, J. (2011). Rotational biomechanics of the elite golf swing: Benchmarks for amateurs. _Journal of Applied Biomechanics_, 27(3), 242-251.
+
    - https://www.researchgate.net/publication/51574307
 
-7. Cole, M. H., & Grimshaw, P. N. (2016). The biomechanics of the modern golf swing: Implications for lower back injuries. *Sports Medicine*, 46(3), 339-351.
+7. Cole, M. H., & Grimshaw, P. N. (2016). The biomechanics of the modern golf swing: Implications for lower back injuries. _Sports Medicine_, 46(3), 339-351.
+
    - https://pubmed.ncbi.nlm.nih.gov/26604102/
 
-8. Hellström, J. (2009). Competitive elite golf: A review of the relationships between playing results, technique and physique. *Sports Medicine*, 39(9), 723-741.
+8. Hellström, J. (2009). Competitive elite golf: A review of the relationships between playing results, technique and physique. _Sports Medicine_, 39(9), 723-741.
 
-9. Joyce, C., Chivers, P., Sato, K., & Burnett, A. (2016). Inter-segment sequencing during the golf swing. *Journal of Sports Sciences*, 34(20), 1970-1975.
+9. Joyce, C., Chivers, P., Sato, K., & Burnett, A. (2016). Inter-segment sequencing during the golf swing. _Journal of Sports Sciences_, 34(20), 1970-1975.
 
-10. Horan, S. A., Evans, K., Morris, N. R., & Kavanagh, J. J. (2010). Thorax and pelvis kinematics during the downswing of male and female skilled golfers. *Journal of Biomechanics*, 43(8), 1456-1462.
+10. Horan, S. A., Evans, K., Morris, N. R., & Kavanagh, J. J. (2010). Thorax and pelvis kinematics during the downswing of male and female skilled golfers. _Journal of Biomechanics_, 43(8), 1456-1462.
 
 ---
 

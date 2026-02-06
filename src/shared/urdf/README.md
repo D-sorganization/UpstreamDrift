@@ -9,6 +9,7 @@ This directory contains pre-configured URDF models and assets for golf swing sim
 The model library provides integration with the [human-gazebo repository](https://github.com/gbionics/human-gazebo), which contains high-fidelity URDF models of humans created for human-robot interaction experiments.
 
 Available models:
+
 - **Human Subject with Meshes**: Full human body model with detailed STL meshes (CC-BY-SA 2.0 license)
 - **Human Subject with Spinal Cord**: Enhanced model with detailed spinal representation
 
@@ -20,22 +21,24 @@ Procedurally generated golf club URDFs with realistic specifications:
 
 - **Driver**: 45" length, 10.5° loft, 310g total mass
 - **5-Iron**: 38" length, 28° loft, 390g total mass
-- **7-Iron**: 36.5" length, 34° loft, 410g total mass 
+- **7-Iron**: 36.5" length, 34° loft, 410g total mass
 - **9-Iron**: 35" length, 42° loft, 430g total mass
 - **Sand Wedge**: 35" length, 56° loft, 460g total mass
 - **Putter**: 34" length, 3° loft, 370g total mass
 
 Each club includes:
+
 - Accurate mass distribution (head, shaft, grip)
 - Realistic geometry (cylinders for shaft/grip, box approximation for head)
 - Proper inertial properties
 - Configurable loft angle
 
-### MyoConverter Integration  
+### MyoConverter Integration
 
 The library includes integration with [MyoConverter](https://github.com/MyoHub/myoconverter), a tool for converting OpenSim musculoskeletal models to MuJoCo format with optimized muscle kinematics and kinetics.
 
 Features:
+
 - Convert OpenSim (.osim) models to MuJoCo (.xml) format
 - Automatic muscle optimization
 - Validation PDF report generation
@@ -122,6 +125,7 @@ shared/
 MyoConverter requires specific dependencies:
 
 **Linux (Recommended):**
+
 ```bash
 conda create -n myoconv python=3.9
 conda activate myoconv
@@ -167,7 +171,7 @@ If you use MyoConverter, please cite:
 ## References
 
 - human-gazebo repository: https://github.com/gbionics/human-gazebo
-- human-model-generator: https://github.com/ami-iit/human-model-generator  
+- human-model-generator: https://github.com/ami-iit/human-model-generator
 - MyoConverter: https://github.com/MyoHub/myoconverter
 - MyoConverter Documentation: https://myoconverter.readthedocs.io/
 - MyoSuite: https://github.com/facebookresearch/myosuite

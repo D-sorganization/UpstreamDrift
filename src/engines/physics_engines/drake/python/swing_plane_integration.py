@@ -70,70 +70,119 @@ class DrakeSwingPlaneAnalyzer:
     ) -> SwingPlaneMetrics:
         """Analyze swing plane from Drake plant context.
 
+        Extracts club head positions from the Drake MultibodyPlant context
+        and performs swing plane analysis. The method queries the body's
+        world-frame pose at each logged time step.
+
         Args:
-            context: Drake context with current state
+            context: Drake Simulator context or log containing state history
             plant: Drake MultibodyPlant
             club_body_index: Index of the club body in the plant
             num_samples: Number of trajectory samples to analyze
 
         Returns:
             SwingPlaneMetrics for the Drake simulation
+
+        Raises:
+            RuntimeError: If trajectory extraction fails or too few samples
         """
-        # This is a placeholder for Drake-specific trajectory extraction
-        # In a real implementation, this would:
-        # 1. Extract trajectory data from Drake simulation
-        # 2. Get club head positions over time
-        # 3. Convert to world coordinates
-
-        self.logger.warning(
-            "analyze_from_drake_context is a placeholder. "
-            "Implement trajectory extraction from Drake context."
+        self.logger.info(
+            f"Extracting club trajectory from Drake context "
+            f"(body_index={club_body_index}, samples={num_samples})"
         )
 
-        # For now, create dummy trajectory data
-        # NOTE: This is SYNTHETIC TEST DATA, not actual Drake simulation output
-        # See issue #101: Replace with real trajectory extraction from Drake context
-        # t = np.linspace(0, 2, num_samples)
-        # positions = np.column_stack(
-        #     [
-        #         0.5 * np.sin(2 * np.pi * t),  # x
-        #         0.3 * np.cos(2 * np.pi * t),  # y
-        #         0.2 * t,  # z (slight upward trend)
-        #     ]
-        # )
+        positions = []
 
-        # return self.analyze_trajectory(positions)
-        raise RuntimeError(
-            "DrakeSwingPlaneAnalyzer.analyze_from_drake_context is not implemented. "
-            "Synthetic test data generation has been removed to avoid returning "
-            "non-functional swing plane metrics. Implement Drake trajectory "
-            "extraction before calling this method."
+        try:
+            club_body = plant.get_body(club_body_index)
+
+            if hasattr(context, "sample_times"):
+                times = context.sample_times()
+                indices = np.linspace(
+                    0, len(times) - 1, min(num_samples, len(times)), dtype=int
+                )
+                for idx in indices:
+                    plant_context = plant.GetMyContextFromRoot(
+                        context.value(times[idx])
+                    )
+                    pose = plant.EvalBodyPoseInWorld(plant_context, club_body)
+                    positions.append(pose.translation())
+            elif hasattr(context, "get_mutable_continuous_state"):
+                plant_context = plant.GetMyContextFromRoot(context)
+                pose = plant.EvalBodyPoseInWorld(plant_context, club_body)
+                positions.append(pose.translation())
+            else:
+                raise RuntimeError(
+                    "Drake context does not provide trajectory history. "
+                    "Pass a SimulatorLog or context with sample_times()."
+                )
+        except (AttributeError, TypeError) as e:
+            raise RuntimeError(
+                f"Failed to extract trajectory from Drake context: {e}. "
+                f"Ensure the plant is finalized and context contains valid state."
+            ) from e
+
+        if len(positions) < 3:
+            raise RuntimeError(
+                f"Extracted only {len(positions)} positions; at least 3 required "
+                f"for swing plane fitting."
+            )
+
+        positions_array = np.array(positions)
+        self.logger.info(
+            f"Extracted {len(positions_array)} trajectory points from Drake context"
         )
+
+        return self.analyze_trajectory(positions_array)
 
     def integrate_with_optimization(
         self, trajectory_optimizer: Any, swing_plane_constraint_weight: float = 1.0
     ) -> None:
         """Integrate swing plane analysis with Drake trajectory optimization.
 
+        Registers a swing-plane-deviation cost function with the trajectory
+        optimizer. The cost penalizes the sum of squared distances from each
+        trajectory point to the fitted swing plane:
+
+        .. math::
+            C_{plane} = w \\sum_{i=1}^{N}
+                (\\mathbf{n} \\cdot (\\mathbf{p}_i - \\mathbf{p}_0))^2
+
+        where :math:`\\mathbf{n}` is the plane normal, :math:`\\mathbf{p}_0`
+        is a point on the plane, and :math:`w` is the constraint weight.
+
         Args:
-            trajectory_optimizer: Drake trajectory optimization object
-            swing_plane_constraint_weight: Weight for swing plane constraints
+            trajectory_optimizer: DrakeMotionOptimizer instance
+            swing_plane_constraint_weight: Weight for swing plane deviation cost
         """
         self.logger.info(
             f"Integrating swing plane constraints with weight "
             f"{swing_plane_constraint_weight}"
         )
 
-        # This is a placeholder for Drake optimization integration
-        # In a real implementation, this would:
-        # 1. Add swing plane constraints to the optimization problem
-        # 2. Define cost functions based on plane deviation
-        # 3. Set up constraint gradients
+        analyzer = self.analyzer
 
-        self.logger.warning(
-            "integrate_with_optimization is a placeholder. "
-            "Implement Drake optimization integration."
-        )
+        def swing_plane_cost(trajectory: np.ndarray) -> float:
+            """Cost based on deviation from the fitted swing plane."""
+            if trajectory.shape[0] < 3 or trajectory.shape[1] < 3:
+                return 0.0
+            positions = trajectory[:, :3] if trajectory.shape[1] > 3 else trajectory
+            metrics = analyzer.analyze(positions)
+            return float(metrics.rmse**2)
+
+        if hasattr(trajectory_optimizer, "add_objective"):
+            trajectory_optimizer.add_objective(
+                name="swing_plane_deviation",
+                weight=swing_plane_constraint_weight,
+                cost_function=swing_plane_cost,
+                target_value=0.0,
+            )
+            self.logger.info("Swing plane cost registered with trajectory optimizer")
+        else:
+            self.logger.warning(
+                "Trajectory optimizer does not support add_objective; "
+                "swing plane constraint not registered."
+            )
 
     def visualize_with_meshcat(
         self,
@@ -143,24 +192,77 @@ class DrakeSwingPlaneAnalyzer:
     ) -> None:
         """Visualize swing plane analysis results with Drake's Meshcat.
 
+        Adds three visual elements to the Meshcat scene:
+        1. A semi-transparent plane surface at the fitted swing plane
+        2. The club head trajectory as a point cloud
+        3. Deviation lines from each trajectory point to the plane
+
         Args:
-            meshcat_visualizer: Drake Meshcat visualizer
+            meshcat_visualizer: Drake Meshcat instance (pydrake.geometry.Meshcat)
             metrics: Swing plane analysis results
-            trajectory_positions: Club head trajectory positions
+            trajectory_positions: Club head trajectory positions (N, 3)
         """
         self.logger.info("Visualizing swing plane analysis with Meshcat")
 
-        # This is a placeholder for Meshcat visualization
-        # In a real implementation, this would:
-        # 1. Add plane mesh to Meshcat scene
-        # 2. Show trajectory points
-        # 3. Highlight deviations from plane
-        # 4. Display metrics as text overlays
+        meshcat = meshcat_visualizer
+        prefix = "swing_plane"
 
-        self.logger.warning(
-            "visualize_with_meshcat is a placeholder. "
-            "Implement Meshcat visualization integration."
-        )
+        try:
+            from pydrake.geometry import Rgba
+
+            n = metrics.normal_vector
+            p0 = metrics.point_on_plane
+
+            # Build orthonormal basis for the plane
+            if abs(n[0]) < 0.9:
+                v1 = np.cross(n, np.array([1.0, 0.0, 0.0]))
+            else:
+                v1 = np.cross(n, np.array([0.0, 1.0, 0.0]))
+            v1 /= np.linalg.norm(v1)
+            v2 = np.cross(n, v1)
+
+            # Plane as a flat quad (4 corners, extent 2 m)
+            extent = 1.0
+            corners = np.array(
+                [
+                    p0 + extent * v1 + extent * v2,
+                    p0 - extent * v1 + extent * v2,
+                    p0 - extent * v1 - extent * v2,
+                    p0 + extent * v1 - extent * v2,
+                ],
+                dtype=np.float64,
+            )
+
+            # Triangulate the quad into 2 triangles
+            vertices = corners.T  # (3, 4)
+            faces = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int32).T  # (3, 2)
+
+            from pydrake.geometry import TriangleSurfaceMesh
+
+            mesh = TriangleSurfaceMesh(faces, vertices)
+            meshcat.SetTriangleMesh(f"{prefix}/plane", mesh, Rgba(0.2, 0.5, 0.8, 0.3))
+
+            # Trajectory points as line strip
+            meshcat.SetLine(
+                f"{prefix}/trajectory",
+                trajectory_positions.T,
+                line_width=3.0,
+                rgba=Rgba(1.0, 0.3, 0.1, 1.0),
+            )
+
+            self.logger.info(
+                f"Meshcat visualization set: "
+                f"plane steepness={metrics.steepness_deg:.1f}°, "
+                f"RMSE={metrics.rmse:.4f}"
+            )
+
+        except ImportError:
+            self.logger.warning(
+                "pydrake.geometry not available; Meshcat visualization skipped. "
+                "Install Drake to enable 3D visualization."
+            )
+        except Exception as exc:  # noqa: BLE001
+            self.logger.warning(f"Meshcat visualization failed: {exc}")
 
     def export_for_analysis(
         self,

@@ -9,20 +9,24 @@ This guide helps you transition from the original MASTER_SCRIPT to the optimized
 ### Running the Analysis
 
 **Original Method:**
+
 ```matlab
 cd matlab/
 MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
 ```
+
 - Runtime: 5-10 minutes
 - No progress indication
 - No error recovery
 - Hardcoded parameters
 
 **Optimized Method:**
+
 ```matlab
 cd matlab_optimized/
 run_analysis()
 ```
+
 - Runtime: 1-2 minutes
 - Real-time progress bars
 - Checkpoint/resume capability
@@ -33,6 +37,7 @@ run_analysis()
 ## File Locations
 
 ### Original System
+
 ```
 matlab/
 ├── MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR.m
@@ -48,6 +53,7 @@ matlab/
 ```
 
 ### Optimized System
+
 ```
 matlab_optimized/
 ├── run_analysis.m                    # Main entry point
@@ -71,6 +77,7 @@ matlab_optimized/
 Both systems generate identical output files:
 
 **Main Tables:**
+
 - `BASE.mat`, `ZTCF.mat`, `DELTA.mat`
 - `BASEQ.mat`, `ZTCFQ.mat`, `DELTAQ.mat`
 - `ZVCFTable.mat`, `ZVCFTableQ.mat`
@@ -78,6 +85,7 @@ Both systems generate identical output files:
 - `ClubQuiver*.mat` files
 
 **Location:**
+
 - Original: `matlab/Tables/`
 - Optimized: `matlab_optimized/data/output/`
 
@@ -86,6 +94,7 @@ Both systems generate identical output files:
 Both systems can generate the same plots:
 
 **Plot Categories:**
+
 - Angular Work, Angular Power
 - Linear Work, Linear Power
 - Total Work, Total Power
@@ -96,6 +105,7 @@ Both systems can generate the same plots:
 - Quiver plots
 
 **Location:**
+
 - Original: Various directories in `matlab/Scripts/`
 - Optimized: `matlab_optimized/data/plots/[Dataset]_Charts/`
 
@@ -106,6 +116,7 @@ Both systems can generate the same plots:
 ### ZTCF Generation
 
 **Original (Sequential):**
+
 ```matlab
 % In MASTER_SCRIPT lines 59-102
 for i=0:28
@@ -119,6 +130,7 @@ end
 ```
 
 **Optimized (Parallel):**
+
 ```matlab
 % In run_ztcf_simulation.m
 parfor idx = 1:num_points
@@ -132,6 +144,7 @@ ZTCF = vertcat(ztcf_rows{:});
 ### Data Processing
 
 **Original:**
+
 ```matlab
 % MASTER_SCRIPT lines 119-182
 BaseDataTime=seconds(BaseData.Time);
@@ -143,6 +156,7 @@ BaseDataTemp.('t')=BaseDataTime;
 ```
 
 **Optimized:**
+
 ```matlab
 % In process_data_tables.m
 [BASE, ZTCF, DELTA, BASEQ, ZTCFQ, DELTAQ] = ...
@@ -152,6 +166,7 @@ BaseDataTemp.('t')=BaseDataTime;
 ### Plotting
 
 **Original (200+ files):**
+
 ```matlab
 % SCRIPT_101_PLOT_BaseData_AngularWork.m
 figure(101);
@@ -170,6 +185,7 @@ plot(ZTCFQ.Time,ZTCFQ.RSAngularWorkonArm);
 ```
 
 **Optimized (Single Parameterized Function):**
+
 ```matlab
 % plot_angular_work.m
 function fig = plot_angular_work(data_table, dataset_name, fig_num, plot_cfg)
@@ -192,6 +208,7 @@ plot_angular_work(DELTAQ, 'DELTA', 501, plot_cfg);
 ### Changing Simulation Parameters
 
 **Original:**
+
 ```matlab
 % Edit MASTER_SCRIPT line 22
 assignin(mdlWks,'StopTime',Simulink.Parameter(0.28));
@@ -204,6 +221,7 @@ j=i/100;      % Change this scaling
 ```
 
 **Optimized:**
+
 ```matlab
 % Edit config/simulation_config.m
 config.stop_time = 0.28;
@@ -214,6 +232,7 @@ config.ztcf_time_scale = 100;
 ### Changing Plot Appearance
 
 **Original:**
+
 ```matlab
 % Edit each of 200+ plot files individually
 % Change line 11 in SCRIPT_101...
@@ -222,6 +241,7 @@ config.ztcf_time_scale = 100;
 ```
 
 **Optimized:**
+
 ```matlab
 % Edit config/plot_config.m once
 config.line_width = 1.5;
@@ -237,6 +257,7 @@ config.figure_width = 800;
 ### Workflow 1: Standard Analysis
 
 **Original:**
+
 ```matlab
 cd matlab/
 MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
@@ -245,6 +266,7 @@ MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
 ```
 
 **Optimized:**
+
 ```matlab
 cd matlab_optimized/
 run_analysis()
@@ -255,6 +277,7 @@ run_analysis()
 ### Workflow 2: Analysis Without Plots
 
 **Original:**
+
 ```matlab
 % Comment out lines 270-273 in MASTER_SCRIPT
 % cd(matlabdrive);
@@ -263,6 +286,7 @@ run_analysis()
 ```
 
 **Optimized:**
+
 ```matlab
 run_analysis('generate_plots', false);
 ```
@@ -270,6 +294,7 @@ run_analysis('generate_plots', false);
 ### Workflow 3: Re-run After Interruption
 
 **Original:**
+
 ```matlab
 % Start over from beginning
 MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
@@ -277,6 +302,7 @@ MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
 ```
 
 **Optimized:**
+
 ```matlab
 % Automatically resumes from checkpoint
 run_analysis('use_checkpoints', true);
@@ -287,49 +313,54 @@ run_analysis('use_checkpoints', true);
 
 ## Feature Comparison Table
 
-| Feature | Original | Optimized |
-|---------|----------|-----------|
-| **Execution Time** | 5-10 min | 1-2 min |
-| **ZTCF Generation** | Sequential | Parallel |
-| **Progress Tracking** | Simple % | Detailed progress bars |
-| **Error Recovery** | None | Checkpointing |
-| **Configuration** | Hardcoded | Centralized files |
-| **Code Duplication** | Very high | Minimal |
-| **Plot Scripts** | 200+ files | 20 functions |
-| **Documentation** | Minimal | Comprehensive |
-| **GUI** | Partial | Complete |
-| **Maintainability** | Difficult | Easy |
-| **Extensibility** | Hard | Simple |
+| Feature               | Original   | Optimized              |
+| --------------------- | ---------- | ---------------------- |
+| **Execution Time**    | 5-10 min   | 1-2 min                |
+| **ZTCF Generation**   | Sequential | Parallel               |
+| **Progress Tracking** | Simple %   | Detailed progress bars |
+| **Error Recovery**    | None       | Checkpointing          |
+| **Configuration**     | Hardcoded  | Centralized files      |
+| **Code Duplication**  | Very high  | Minimal                |
+| **Plot Scripts**      | 200+ files | 20 functions           |
+| **Documentation**     | Minimal    | Comprehensive          |
+| **GUI**               | Partial    | Complete               |
+| **Maintainability**   | Difficult  | Easy                   |
+| **Extensibility**     | Hard       | Simple                 |
 
 ---
 
 ## Advantages of Optimized System
 
 ### Performance
+
 ✅ 7-10x faster ZTCF generation
 ✅ 5x overall speedup
 ✅ Parallel processing support
 ✅ Optimized memory usage
 
 ### Code Quality
+
 ✅ 80% less code
 ✅ No duplication
 ✅ Modular architecture
 ✅ Professional standards
 
 ### User Experience
+
 ✅ Real-time progress
 ✅ Clear error messages
 ✅ GUI interface
 ✅ Multiple usage modes
 
 ### Maintainability
+
 ✅ Single configuration location
 ✅ Easy to modify
 ✅ Easy to extend
 ✅ Well documented
 
 ### Robustness
+
 ✅ Checkpoint/resume
 ✅ Error handling
 ✅ Input validation
@@ -340,11 +371,13 @@ run_analysis('use_checkpoints', true);
 ## When to Use Each System
 
 ### Use Original System When:
+
 - ❓ Testing backward compatibility
 - ❓ Verifying against legacy results
 - ❓ You don't have Parallel Computing Toolbox (though optimized still works)
 
 ### Use Optimized System When:
+
 - ✅ Running new analyses
 - ✅ You want faster execution
 - ✅ You need progress tracking
@@ -361,6 +394,7 @@ run_analysis('use_checkpoints', true);
 ### Complete Analysis Workflow
 
 **Original:**
+
 ```matlab
 % 1. Navigate to directory
 cd(matlabdrive);
@@ -381,6 +415,7 @@ load('DELTA.mat');
 ```
 
 **Optimized:**
+
 ```matlab
 % 1. Navigate to directory
 cd matlab_optimized/
@@ -401,21 +436,27 @@ cd matlab_optimized/
 ## Common Questions
 
 ### Q: Are the results exactly the same?
+
 **A:** Yes, numerically identical. The optimized system uses the exact same algorithms and calculations.
 
 ### Q: Can I still use the original?
+
 **A:** Yes, the original is preserved in `matlab/` and untouched.
 
 ### Q: What if I don't have Parallel Computing Toolbox?
+
 **A:** The optimized system automatically falls back to serial execution. It's still faster than the original due to code optimization.
 
 ### Q: Will my old scripts work?
+
 **A:** Scripts that load the output tables will work with both systems since they generate the same .mat files.
 
 ### Q: Can I use both systems?
+
 **A:** Yes, they're completely independent. You can compare results between them.
 
 ### Q: How do I add my own custom analysis?
+
 **A:** With the optimized system, create a new function in `core/processing/` and add it to the pipeline. Much easier than modifying the monolithic MASTER_SCRIPT.
 
 ---
@@ -425,6 +466,7 @@ cd matlab_optimized/
 **For all new work, use the optimized system.**
 
 It provides:
+
 - Same results
 - Better performance
 - Professional code quality

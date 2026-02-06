@@ -4,12 +4,15 @@
 **Difficulty:** Intermediate
 
 ## Prerequisites
+
 - Completed [Tutorial 2: Your First Simulation](02_first_simulation.md)
 - At least two physics engines installed (MuJoCo + one of Drake/Pinocchio)
 - Understanding of basic rigid body dynamics
 
 ## Learning Objectives
+
 By the end of this tutorial, you will:
+
 - Understand the strengths of each physics engine
 - Run identical simulations across multiple engines
 - Use the cross-engine validator to ensure consistency
@@ -23,42 +26,47 @@ The Golf Modeling Suite supports 6 physics engines through a unified interface. 
 
 ### Engine Comparison Matrix
 
-| Feature | MuJoCo | Drake | Pinocchio | OpenSim | MyoSuite |
-|---------|--------|-------|-----------|---------|----------|
-| **Primary Use** | Production | Optimization | Fast kinematics | Biomechanics | RL training |
-| **Contact Physics** | Excellent | Good | Basic | Basic | Excellent |
-| **Muscle Models** | Built-in | Manual | No | Excellent | Excellent |
-| **Speed** | Fast | Medium | Very Fast | Slow | Medium |
-| **Model Formats** | XML, MJCF | URDF, SDF | URDF | .osim | MuJoCo XML |
-| **Jacobians** | [Linear; Angular] | [Angular; Linear] | [Linear; Angular] | Limited | [Linear; Angular] |
+| Feature             | MuJoCo            | Drake             | Pinocchio         | OpenSim      | MyoSuite          |
+| ------------------- | ----------------- | ----------------- | ----------------- | ------------ | ----------------- |
+| **Primary Use**     | Production        | Optimization      | Fast kinematics   | Biomechanics | RL training       |
+| **Contact Physics** | Excellent         | Good              | Basic             | Basic        | Excellent         |
+| **Muscle Models**   | Built-in          | Manual            | No                | Excellent    | Excellent         |
+| **Speed**           | Fast              | Medium            | Very Fast         | Slow         | Medium            |
+| **Model Formats**   | XML, MJCF         | URDF, SDF         | URDF              | .osim        | MuJoCo XML        |
+| **Jacobians**       | [Linear; Angular] | [Angular; Linear] | [Linear; Angular] | Limited      | [Linear; Angular] |
 
 ### When to Use Each Engine
 
 **MuJoCo** - Default choice for:
+
 - Golf swing simulation with contact
 - Flexible shaft modeling (Euler-Bernoulli beam)
 - Counterfactual motion analysis
 - High-fidelity biomechanics
 
 **Drake** - Preferred for:
+
 - Trajectory optimization problems
 - Control system design
 - Multi-body dynamics with constraints
 - Robotics integration
 
 **Pinocchio** - Best for:
+
 - Rapid prototyping
 - Inverse kinematics/dynamics
 - When speed is critical
 - URDF-based workflows
 
 **OpenSim** - Ideal for:
+
 - Clinical biomechanics research
 - Muscle-driven simulations
 - Existing .osim model libraries
 - Comparative studies with published research
 
 **MyoSuite** - Use for:
+
 - Reinforcement learning training
 - Muscle activation optimization
 - Gym-compatible environments
@@ -249,21 +257,21 @@ def validate_results(results: dict) -> dict:
 
 The cross-engine validator uses the following tolerances (defined in Guideline P3):
 
-| Metric | Tolerance | Units |
-|--------|-----------|-------|
-| Position | 1e-6 | meters |
-| Velocity | 1e-5 | m/s |
-| Acceleration | 1e-4 | m/s^2 |
-| Torque | 1e-3 or <10% RMS | N*m |
-| Jacobian | 1e-8 | - |
+| Metric       | Tolerance        | Units  |
+| ------------ | ---------------- | ------ |
+| Position     | 1e-6             | meters |
+| Velocity     | 1e-5             | m/s    |
+| Acceleration | 1e-4             | m/s^2  |
+| Torque       | 1e-3 or <10% RMS | N\*m   |
+| Jacobian     | 1e-8             | -      |
 
 ### Severity Classification
 
-| Severity | Deviation Range | Interpretation |
-|----------|-----------------|----------------|
-| **PASSED** | <= 1x tolerance | Results are consistent |
-| **WARNING** | 1-2x tolerance | Acceptable with caution |
-| **ERROR** | 2-10x tolerance | Investigation required |
+| Severity    | Deviation Range | Interpretation          |
+| ----------- | --------------- | ----------------------- |
+| **PASSED**  | <= 1x tolerance | Results are consistent  |
+| **WARNING** | 1-2x tolerance  | Acceptable with caution |
+| **ERROR**   | 2-10x tolerance | Investigation required  |
 | **BLOCKER** | >100x tolerance | Fundamental model error |
 
 ## Step 5: Jacobian Convention Differences
@@ -372,6 +380,7 @@ if __name__ == "__main__":
 When validation fails, use these debugging steps:
 
 ### 1. Check Model Compatibility
+
 ```python
 # Ensure models are equivalent
 def check_model_compatibility(engine_a, engine_b):
@@ -386,6 +395,7 @@ def check_model_compatibility(engine_a, engine_b):
 ```
 
 ### 2. Compare Mass Matrices
+
 ```python
 def compare_mass_matrices(engine_a, engine_b, tol=1e-6):
     """Compare inertia matrices."""
@@ -401,6 +411,7 @@ def compare_mass_matrices(engine_a, engine_b, tol=1e-6):
 ```
 
 ### 3. Isolate Time of Divergence
+
 ```python
 def find_divergence_point(results_a, results_b, tol=1e-4):
     """Find when trajectories start diverging."""
@@ -417,15 +428,19 @@ def find_divergence_point(results_a, results_b, tol=1e-4):
 ## Troubleshooting
 
 ### Different Number of DOF
+
 Ensure both engines load the same model definition. Some engines may add implicit DOF (e.g., for contacts).
 
 ### Numerical Precision Differences
+
 Try smaller timesteps. Different integrators accumulate errors differently.
 
 ### Jacobian Sign Conventions
+
 Some engines use body-fixed vs. world-fixed frames. The suite normalizes these, but custom code may need adjustment.
 
 ## Next Steps
+
 - [Tutorial 4: Video Analysis](04_video_analysis.md) - Extract poses from video
 - [API Reference: CrossEngineValidator](../../api/cross_engine_validator.md)
 - [Guideline P3: Tolerance Specifications](../../guidelines/P3_tolerances.md)

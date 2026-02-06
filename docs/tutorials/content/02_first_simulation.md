@@ -4,12 +4,15 @@
 **Difficulty:** Beginner
 
 ## Prerequisites
+
 - Completed [Tutorial 1: Getting Started](01_getting_started.md)
 - Golf Modeling Suite installed and verified
 - Basic Python knowledge
 
 ## Learning Objectives
+
 By the end of this tutorial, you will:
+
 - Load and configure a biomechanical model
 - Run a physics simulation using MuJoCo
 - Analyze joint kinematics and dynamics
@@ -23,14 +26,14 @@ The Golf Modeling Suite uses a unified physics engine interface, allowing you to
 
 The suite supports multiple physics engines through a common interface:
 
-| Engine | Best For | Key Strengths |
-|--------|----------|---------------|
-| **MuJoCo** | Production simulations | Contact physics, muscle simulation, flexible shafts |
-| **Drake** | Control optimization | Multi-body dynamics, trajectory optimization |
-| **Pinocchio** | Fast kinematics | Efficient recursive algorithms, URDF support |
-| **OpenSim** | Biomechanics research | Muscle-driven simulation, .osim models |
-| **MyoSuite** | RL training | Gym environment, muscle activation |
-| **Pendulum** | Testing/validation | Analytical solutions, 6-DOF model |
+| Engine        | Best For               | Key Strengths                                       |
+| ------------- | ---------------------- | --------------------------------------------------- |
+| **MuJoCo**    | Production simulations | Contact physics, muscle simulation, flexible shafts |
+| **Drake**     | Control optimization   | Multi-body dynamics, trajectory optimization        |
+| **Pinocchio** | Fast kinematics        | Efficient recursive algorithms, URDF support        |
+| **OpenSim**   | Biomechanics research  | Muscle-driven simulation, .osim models              |
+| **MyoSuite**  | RL training            | Gym environment, muscle activation                  |
+| **Pendulum**  | Testing/validation     | Analytical solutions, 6-DOF model                   |
 
 ## Step 2: Create Your First Simulation Script
 
@@ -73,11 +76,13 @@ if __name__ == "__main__":
 ```
 
 Run the script:
+
 ```bash
 python my_first_simulation.py
 ```
 
 Expected output:
+
 ```
 Available engines: ['MUJOCO', 'PINOCCHIO', 'PENDULUM']
 Activated MuJoCo engine
@@ -334,25 +339,32 @@ if __name__ == "__main__":
 ## Troubleshooting
 
 ### Model Not Found
+
 Ensure you've pulled the Git LFS files:
+
 ```bash
 git lfs pull
 ```
 
 ### Engine Not Available
+
 Check which engines are installed:
+
 ```python
 from src.shared.python.engine_availability import check_availability
 print(check_availability())
 ```
 
 ### Numerical Instabilities
+
 If the simulation becomes unstable:
+
 - Reduce the timestep (try 0.001s or smaller)
 - Check initial conditions are physically reasonable
 - Verify model file is not corrupted
 
 ## Next Steps
+
 - [Tutorial 3: Engine Comparison](03_engine_comparison.md) - Run the same simulation across multiple engines
 - [Tutorial 4: Video Analysis](04_video_analysis.md) - Extract poses from video and map to simulation
 - [API Reference](../../api/physics_engine.md) - Complete PhysicsEngine interface documentation

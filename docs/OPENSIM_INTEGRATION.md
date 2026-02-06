@@ -250,15 +250,18 @@ Where:
 ### GUI Workflow
 
 1. **Launch OpenSim GUI**
+
    - From main launcher, click "OpenSim Golf" tile
    - If no model loaded, shows "Getting Started" interface
 
 2. **Load a Model**
+
    - Click "Load Model" button
    - Select a `.osim` file
    - Sample models in `shared/models/opensim/examples/`
 
 3. **Run Simulation**
+
    - Click "Run Simulation"
    - View muscle forces, joint angles, trajectories
    - Export data for analysis

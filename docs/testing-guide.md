@@ -133,6 +133,7 @@ Before running E2E tests:
    ```
 
 2. **Test Data**: E2E test datasets are in `tests/assets/e2e/`
+
    - `golf_swing_capture.c3d` - Sample motion capture data
    - `simple_humanoid.urdf` - Minimal humanoid model
    - `7iron.urdf` - Standard golf club model
@@ -166,29 +167,29 @@ The primary E2E test validates the complete swing analysis pipeline:
 def test_complete_swing_analysis_workflow():
     """
     End-to-end test: Load model → Run simulation → Analyze → Export
-    
+
     Runtime: ~30 seconds
     Prerequisites: MuJoCo engine, test data files
     """
     # 1. Load humanoid + club model
     engine = EngineManager().get_engine(EngineType.MUJOCO)
     engine.load_from_path("tests/assets/e2e/simple_humanoid.urdf")
-    
+
     # 2. Load motion capture data
     motion_data = load_c3d("tests/assets/e2e/golf_swing_capture.c3d")
-    
+
     # 3. Run inverse kinematics
     ik_result = engine.compute_inverse_kinematics(motion_data)
-    
+
     # 4. Run forward simulation
     sim_result = engine.simulate(ik_result.trajectory, dt=0.002)
-    
+
     # 5. Analyze results
     analysis = analyze_swing(sim_result)
-    
+
     # 6. Export to standard format
     export_path = export_analysis(analysis, format="json")
-    
+
     # Verify outputs
     assert export_path.exists()
     assert analysis.club_speed > 0
@@ -197,12 +198,12 @@ def test_complete_swing_analysis_workflow():
 
 #### Runtime Expectations
 
-| Test Category | Expected Duration | Notes |
-|--------------|------------------|-------|
-| Full E2E suite | 2-5 minutes | With all engines |
-| Single workflow | 30s - 1 min | Depends on model complexity |
-| GUI tests | 10-30s each | Requires display |
-| Headless tests | 5-20s each | API/CLI only |
+| Test Category   | Expected Duration | Notes                       |
+| --------------- | ----------------- | --------------------------- |
+| Full E2E suite  | 2-5 minutes       | With all engines            |
+| Single workflow | 30s - 1 min       | Depends on model complexity |
+| GUI tests       | 10-30s each       | Requires display            |
+| Headless tests  | 5-20s each        | API/CLI only                |
 
 #### E2E Test Markers
 
@@ -537,3 +538,4 @@ Questions about testing? Ask in:
 - [pytest documentation](https://docs.pytest.org/)
 - [Testing Best Practices](https://testdriven.io/blog/testing-best-practices/)
 - [Effective Python Testing With Pytest](https://realpython.com/pytest-python-testing/)
+```

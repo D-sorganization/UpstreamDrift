@@ -3,6 +3,7 @@
 ## Overview
 
 The humanoid golf simulation now includes comprehensive visualization features:
+
 - **Contact force arrows** showing ground reaction forces
 - **Joint torque indicators** for all actuators
 - **Persistent trajectory tracers** for key body parts
@@ -22,6 +23,7 @@ Displays real-time contact forces as colored arrows:
 - **Only shows forces > 0.1 N** (filters noise)
 
 **Data Available:**
+
 ```python
 {
     "position": [x, y, z],           # Contact point location
@@ -43,6 +45,7 @@ Monitors torques at all actuated joints:
 - **Real-time updates** during simulation
 
 **Data Available:**
+
 ```python
 {
     "actuator_name": torque_value  # N⋅m for each actuator
@@ -54,6 +57,7 @@ Monitors torques at all actuated joints:
 Persistent traces showing motion paths of key body parts:
 
 **Default Traced Bodies:**
+
 - **Pelvis** (Yellow): Center of mass trajectory
 - **Torso** (Cyan): Upper body motion
 - **Head** (Red): Head path through swing
@@ -61,6 +65,7 @@ Persistent traces showing motion paths of key body parts:
 - **Left Hand** (Blue): Lead hand path
 
 **Features:**
+
 - Traces persist throughout simulation
 - Color-coded by body part
 - Maximum 1000 points per trace (configurable)
@@ -77,17 +82,17 @@ The launcher now includes visualization options in the config:
 ```python
 config = {
     # ... other settings ...
-    
+
     # Simulation
     "simulation_duration": 3.0,  # Golf swing duration (seconds)
-    
+
     # Visualization
     "show_contact_forces": True,   # Show force arrows
     "show_joint_torques": True,    # Show torque indicators
     "show_tracers": True,          # Show trajectory traces
     "tracer_bodies": [             # Bodies to trace
         "pelvis",
-        "torso", 
+        "torso",
         "head",
         "r_hand",
         "l_hand"
@@ -326,6 +331,7 @@ config["tracer_bodies"] = [
 ## Future Enhancements
 
 Planned features:
+
 - [ ] Real-time plotting dashboard
 - [ ] Export to video with overlays
 - [ ] Interactive trace playback

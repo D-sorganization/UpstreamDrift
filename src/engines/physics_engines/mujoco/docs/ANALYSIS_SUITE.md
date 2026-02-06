@@ -7,12 +7,14 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 ## Key Features
 
 ### 1. **Advanced 3D Visualization**
+
 - Real-time MuJoCo physics simulation at 60 FPS
 - Multiple camera views (side, front, top, follow)
 - Force and torque vector visualization with adjustable scaling
 - Contact force visualization for ground reaction forces
 
 ### 2. **Biomechanical Analysis**
+
 - Real-time extraction of joint kinematics (position, velocity, acceleration)
 - Joint kinetics (forces and torques)
 - Actuator power computation
@@ -22,12 +24,14 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 - Center of mass tracking
 
 ### 3. **Data Recording & Export**
+
 - Record complete swing sequences
 - Export to CSV for analysis in Excel, Python, R, etc.
 - Export to JSON for custom data processing
 - Time-stamped biomechanical data
 
 ### 4. **Advanced Plotting**
+
 - **Summary Dashboard**: Overview of key metrics
 - **Joint Angles**: Time series of all joint positions
 - **Joint Velocities**: Angular velocities over time
@@ -40,6 +44,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 - **Torque Comparison**: Contribution analysis
 
 ### 5. **Professional GUI**
+
 - Tabbed interface for organized workflow
 - Real-time metrics display
 - Intuitive controls with visual feedback
@@ -50,6 +55,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 ### Tabs
 
 #### 1. **Controls Tab**
+
 - **Model Selection**: Choose from 5 different swing models (2-28 DOF)
 - **Simulation Control**: Play, pause, reset buttons
 - **Recording Control**: Start/stop data recording
@@ -58,7 +64,9 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
   - Real-time torque display in Nm
 
 #### 2. **Visualization Tab**
+
 - **Camera View**: Select viewing angle
+
   - Side: Classic golf swing view
   - Front: Face-on view
   - Top: Bird's eye view
@@ -72,7 +80,9 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
   - Toggle contact forces for ground reactions
 
 #### 3. **Analysis Tab**
+
 - **Real-Time Metrics**:
+
   - Club head speed (mph and m/s)
   - Total energy (Joules)
   - Recording duration
@@ -83,6 +93,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
   - Export to JSON button
 
 #### 4. **Plotting Tab**
+
 - **Plot Type Selection**: Choose from 10 plot types
 - **Joint Selection**: For phase diagrams
 - **Generate Plot Button**: Create visualization
@@ -93,26 +104,31 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 ### Basic Workflow
 
 1. **Select Model**
+
    - Choose appropriate model for your analysis
    - Simple models (2-3 DOF) for basic mechanics
    - Advanced models (28 DOF) for detailed biomechanics
 
 2. **Configure Visualization**
+
    - Set camera angle
    - Enable force/torque vectors if needed
    - Adjust scaling for clear visualization
 
 3. **Set Up Swing**
+
    - Use actuator sliders to configure joint torques
    - Observe real-time simulation
    - Adjust as needed for desired motion
 
 4. **Record Data**
+
    - Click "Start Recording"
    - Let simulation run through swing sequence
    - Click "Stop Recording" when complete
 
 5. **Analyze Results**
+
    - Switch to Plotting tab
    - Generate various plots to understand mechanics
    - View real-time metrics in Analysis tab
@@ -124,6 +140,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 ### Advanced Workflow
 
 #### Force Analysis
+
 1. Enable torque vector visualization
 2. Adjust scale to see relative magnitudes
 3. Record swing while observing force patterns
@@ -132,6 +149,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 6. Analyze torque sequencing and power generation
 
 #### Energy Analysis
+
 1. Record complete swing (backswing through follow-through)
 2. Generate "Energy Analysis" plot
 3. Observe energy transfer (PE → KE)
@@ -139,6 +157,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 5. Correlate with swing phases
 
 #### Club Head Analysis
+
 1. Use model with club head (any model)
 2. Record swing sequence
 3. Generate "Club Head Speed" plot
@@ -147,6 +166,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 6. Analyze swing path and plane
 
 #### Phase Space Analysis
+
 1. Record swing data
 2. Select joint of interest
 3. Generate "Phase Diagram"
@@ -158,6 +178,7 @@ The Golf Swing Biomechanical Analysis Suite is a comprehensive, professional-gra
 ### Biomechanical Data Structure
 
 Each recorded frame contains:
+
 - **Time**: Simulation time (seconds)
 - **Joint Positions**: qpos array (rad or m)
 - **Joint Velocities**: qvel array (rad/s or m/s)
@@ -174,6 +195,7 @@ Each recorded frame contains:
 ### Coordinate Systems
 
 - **MuJoCo World Frame**:
+
   - X: Forward (direction of ball flight)
   - Y: Left
   - Z: Up
@@ -186,6 +208,7 @@ Each recorded frame contains:
 ### Units
 
 All quantities use SI units:
+
 - Length: meters (m)
 - Time: seconds (s)
 - Angle: radians (rad) - displayed as degrees in GUI
@@ -200,6 +223,7 @@ All quantities use SI units:
 ### CSV Export
 
 Columns include:
+
 - `time`: Timestamp for each frame
 - `joint_positions_0`, `joint_positions_1`, ...: Joint angles
 - `joint_velocities_0`, `joint_velocities_1`, ...: Joint angular velocities
@@ -213,6 +237,7 @@ Columns include:
 ### JSON Export
 
 Nested dictionary with same fields as CSV, suitable for:
+
 - Python analysis (pandas, numpy)
 - MATLAB/Octave
 - R statistical analysis
@@ -223,16 +248,19 @@ Nested dictionary with same fields as CSV, suitable for:
 ### For Accurate Analysis
 
 1. **Recording Duration**:
+
    - Include full swing sequence
    - Start before backswing begins
    - Continue through follow-through
 
 2. **Timestep**:
+
    - Default: 0.001s (1ms)
    - Adequate for most analyses
    - Finer timesteps for high-frequency phenomena
 
 3. **Torque Settings**:
+
    - Start with small values
    - Gradually increase to desired motion
    - Avoid unrealistically large torques
@@ -246,10 +274,12 @@ Nested dictionary with same fields as CSV, suitable for:
 ### For Performance
 
 1. **Recording**:
+
    - Stop recording when not needed
    - Large datasets (>1000 frames) may slow plotting
 
 2. **Plotting**:
+
    - Generate one plot at a time
    - Close plot window before generating new one
    - Use dashboard for quick overview
@@ -278,8 +308,8 @@ Control presets are JSON files listing actuator instructions:
 ```json
 {
   "actuators": [
-    {"index": 0, "type": "constant", "value": 25.0},
-    {"index": 3, "type": "sine", "amplitude": 30.0, "frequency": 1.2},
+    { "index": 0, "type": "constant", "value": 25.0 },
+    { "index": 3, "type": "sine", "amplitude": 30.0, "frequency": 1.2 },
     {
       "index": 8,
       "type": "polynomial",
@@ -294,28 +324,34 @@ To sweep multiple scenarios, pass a batch configuration via `--batch-config`. Ea
 ## Troubleshooting
 
 ### No Plot Generated
+
 - **Cause**: No data recorded
 - **Solution**: Record data before plotting
 
 ### Plot Shows "No Data"
+
 - **Cause**: Requested data not available for this model
 - **Solution**: Use model with required features (e.g., club head)
 
 ### Simulation Unstable
+
 - **Cause**: Excessive torques
 - **Solution**: Reduce actuator values, reset simulation
 
 ### Vectors Not Visible
+
 - **Cause**: Scale too small
 - **Solution**: Increase force/torque scale in Visualization tab
 
 ### Export Fails
+
 - **Cause**: No write permissions or disk full
 - **Solution**: Check file permissions and disk space
 
 ## Future Enhancements
 
 Potential additions to the analysis suite:
+
 - Multi-swing comparison overlay
 - Automated swing phase detection
 - Optimization algorithms for target swing metrics
@@ -327,6 +363,7 @@ Potential additions to the analysis suite:
 ## References
 
 For model specifications and biomechanical details, see:
+
 - `ADVANCED_BIOMECHANICAL_MODEL.md` - 28 DOF model documentation
 - `models.py` - All model definitions
 - `biomechanics.py` - Analysis algorithms
@@ -335,6 +372,7 @@ For model specifications and biomechanical details, see:
 ## Support
 
 For questions, issues, or feature requests:
+
 - Check existing documentation
 - Review example workflows
 - Submit GitHub issue with details

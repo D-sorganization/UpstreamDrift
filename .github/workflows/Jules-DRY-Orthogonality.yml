@@ -16,11 +16,11 @@ on:
   workflow_dispatch:
     inputs:
       target_category:
-        description: 'Category to analyze (all, path, logging, datetime, exceptions, config, imports, env)'
+        description: "Category to analyze (all, path, logging, datetime, exceptions, config, imports, env)"
         required: false
-        default: 'all'
+        default: "all"
       create_issues:
-        description: 'Create GitHub issues for violations'
+        description: "Create GitHub issues for violations"
         required: false
         type: boolean
         default: true
@@ -67,7 +67,7 @@ jobs:
         if: steps.check-loop.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Analyze DRY Violations
         id: analyze

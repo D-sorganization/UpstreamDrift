@@ -15,6 +15,7 @@ OpenSim is the most widely-used biomechanical modeling platform in research and 
 ## What is OpenSim?
 
 OpenSim is an open-source software platform for:
+
 - Musculoskeletal modeling
 - Simulation of movement
 - Analysis of biomechanical data
@@ -25,18 +26,21 @@ Developed at Stanford University and used by thousands of researchers worldwide.
 ## Integration Features
 
 ### Model Import/Export
+
 - Load OpenSim models (.osim format)
 - Export Golf Suite models to OpenSim format
 - Convert between model representations
 - Preserve anatomical and mechanical properties
 
 ### Cross-Validation
+
 - Compare joint angles and trajectories
 - Validate muscle moment arms
 - Check inverse dynamics results
 - Verify contact forces
 
 ### Analysis Tools
+
 - Inverse kinematics (IK)
 - Inverse dynamics (ID)
 - Static optimization
@@ -170,11 +174,13 @@ muscle_lengths = muscle_analyzer.analyze_muscle_kinematics(
 The suite includes OpenSim models for golf analysis:
 
 1. **Simple Golfer (10 DOF)**
+
    - Upper body focus
    - No muscles (rigid body only)
    - Fast validation
 
 2. **Full Body Golfer (23 DOF)**
+
    - Complete body model
    - Ground contact
    - Weight transfer analysis
@@ -187,6 +193,7 @@ The suite includes OpenSim models for golf analysis:
 ### Community Models
 
 Compatible with standard OpenSim models:
+
 - Rajagopal et al. (2016) full body
 - Hamner et al. (2010) running model
 - Arnold et al. (2010) leg model
@@ -295,12 +302,12 @@ class OpenSimGolfAnalyzer:
 
 ### Speed Comparison
 
-| Operation | OpenSim | MuJoCo | Speedup |
-|-----------|---------|--------|---------|
-| Forward simulation | 1× | 100× | 100× faster |
-| Inverse kinematics | 1× | 5× | 5× faster |
-| Inverse dynamics | 1× | 50× | 50× faster |
-| Muscle analysis | 1× | 10× | 10× faster |
+| Operation          | OpenSim | MuJoCo | Speedup     |
+| ------------------ | ------- | ------ | ----------- |
+| Forward simulation | 1×      | 100×   | 100× faster |
+| Inverse kinematics | 1×      | 5×     | 5× faster   |
+| Inverse dynamics   | 1×      | 50×    | 50× faster  |
+| Muscle analysis    | 1×      | 10×    | 10× faster  |
 
 **Recommendation**: Use OpenSim for validation and detailed biomechanical analysis, MuJoCo for high-speed simulation and optimization.
 
@@ -309,6 +316,7 @@ class OpenSimGolfAnalyzer:
 ### When to Use OpenSim
 
 ✅ **Use OpenSim for**:
+
 - Model validation against established standards
 - Clinical biomechanical analysis
 - Detailed muscle moment arm computation
@@ -316,6 +324,7 @@ class OpenSimGolfAnalyzer:
 - Publishing in biomechanics journals
 
 ❌ **Don't use OpenSim for**:
+
 - Real-time simulation
 - Large-scale optimization (use MuJoCo)
 - Contact-rich scenarios (use MuJoCo)
@@ -365,12 +374,15 @@ results.save_report("validation_report.pdf")
 ### Common Issues
 
 **Issue**: OpenSim won't install with Python 3.11+
+
 - **Solution**: Use Python 3.10 in a separate conda environment
 
 **Issue**: Model file won't load
+
 - **Solution**: Ensure .osim file is compatible with OpenSim 4.x+
 
 **Issue**: Muscle names don't match
+
 - **Solution**: Use muscle name mapping file (see `docs/muscle_name_mappings.md`)
 
 ## Documentation
@@ -404,8 +416,10 @@ OpenSim is licensed under the Apache License 2.0. See the [OpenSim repository](h
 ## Support
 
 For OpenSim-specific questions:
+
 - [OpenSim Forums](https://simtk.org/plugins/phpBB/indexPhpbb.php?group_id=91&pluginname=phpBB)
 - [OpenSim GitHub Issues](https://github.com/opensim-org/opensim-core/issues)
 
 For Golf Modeling Suite integration:
+
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

@@ -5,32 +5,37 @@ This document provides a quick overview of the new universal joint, gimbal joint
 ## 🎯 What's New
 
 ### 1. **Universal Joint Models**
-   - Two-link inclined plane swing model with universal joint at wrist
-   - Realistic torque transmission and wobble effects
-   - Constraint force visualization
+
+- Two-link inclined plane swing model with universal joint at wrist
+- Realistic torque transmission and wobble effects
+- Constraint force visualization
 
 ### 2. **Gimbal Joint Models**
-   - 3-DOF gimbal demonstration model
-   - Gimbal lock detection
-   - Full spherical range of motion
+
+- 3-DOF gimbal demonstration model
+- Gimbal lock detection
+- Full spherical range of motion
 
 ### 3. **Enhanced Full-Body Model**
-   - Shoulders: Gimbal joints (3 DOF)
-   - Scapula: Universal joints (2 DOF)
-   - Elbows: Revolute joints (1 DOF)
-   - Wrists: Universal joints (2 DOF)
-   - Spine: Universal + Revolute (3 DOF total)
+
+- Shoulders: Gimbal joints (3 DOF)
+- Scapula: Universal joints (2 DOF)
+- Elbows: Revolute joints (1 DOF)
+- Wrists: Universal joints (2 DOF)
+- Spine: Universal + Revolute (3 DOF total)
 
 ### 4. **Flexible Club Shafts**
-   - Multi-segment beam model (1-5 segments)
-   - Realistic stiffness profiles
-   - Three club types: Driver, 7-Iron, Wedge
+
+- Multi-segment beam model (1-5 segments)
+- Realistic stiffness profiles
+- Three club types: Driver, 7-Iron, Wedge
 
 ### 5. **Analysis Tools**
-   - Constraint force recording and plotting
-   - Torque wobble analysis
-   - Gimbal lock detection
-   - Joint coupling visualization
+
+- Constraint force recording and plotting
+- Torque wobble analysis
+- Gimbal lock detection
+- Joint coupling visualization
 
 ## 🚀 Quick Start
 
@@ -123,21 +128,22 @@ else:
 
 ## 📚 Available Models
 
-| Model | XML Constant | Use Case |
-|-------|-------------|----------|
+| Model              | XML Constant                            | Use Case              |
+| ------------------ | --------------------------------------- | --------------------- |
 | Two-Link Universal | `TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML` | Universal joint study |
-| Gimbal Demo | `GIMBAL_JOINT_DEMO_XML` | Gimbal mechanics |
+| Gimbal Demo        | `GIMBAL_JOINT_DEMO_XML`                 | Gimbal mechanics      |
 | Advanced Full-Body | `ADVANCED_BIOMECHANICAL_GOLF_SWING_XML` | Complete biomechanics |
 
 ## 🏌️ Golf Club Configurations
 
 | Club Type | Length | Head Mass | Loft | Stiffness |
-|-----------|--------|-----------|------|-----------|
-| Driver | 116 cm | 198 g | 10° | Soft |
-| 7-Iron | 95 cm | 253 g | 32° | Medium |
-| Wedge | 90 cm | 288 g | 55° | Stiff |
+| --------- | ------ | --------- | ---- | --------- |
+| Driver    | 116 cm | 198 g     | 10°  | Soft      |
+| 7-Iron    | 95 cm  | 253 g     | 32°  | Medium    |
+| Wedge     | 90 cm  | 288 g     | 55°  | Stiff     |
 
 All clubs include realistic:
+
 - Grip dimensions and mass
 - Shaft radius and mass distribution
 - Head geometry and inertia
@@ -157,6 +163,7 @@ flex_club_5 = generate_flexible_club_xml("driver", num_segments=5)
 ```
 
 **Segment Distribution:**
+
 - **Upper:** Stiffest, near hands
 - **Middle:** Medium stiffness
 - **Lower:** Most flexible, near head
@@ -208,9 +215,11 @@ results = analyzer.analyze_torque_transmission(
 - **Golf application:** Wrist joints, scapula
 
 **Torque Wobble Formula:**
+
 ```
 ω_out/ω_in = cos(β) / (1 - sin²(β)sin²(θ))
 ```
+
 where β = joint angle, θ = rotation angle
 
 ### Gimbal Joint
@@ -303,16 +312,19 @@ force_data = analyze_constraint_forces_over_time(
 ## 🔬 Research Applications
 
 1. **Universal Joint Mechanics**
+
    - Torque wobble quantification
    - Constraint force analysis
    - Optimal joint angles
 
 2. **Biomechanical Studies**
+
    - Joint loading during swing
    - Range of motion analysis
    - Injury prevention
 
 3. **Equipment Design**
+
    - Shaft flexibility optimization
    - Club head speed vs. control
    - Grip pressure effects
@@ -325,6 +337,7 @@ force_data = analyze_constraint_forces_over_time(
 ## 📞 Support
 
 For issues or questions:
+
 - Check `docs/JOINT_MODELS_GUIDE.md` for detailed documentation
 - Review `examples_joint_analysis.py` for working code
 - Open an issue on GitHub

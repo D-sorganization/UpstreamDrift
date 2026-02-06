@@ -20,16 +20,16 @@ Key commands executed:
 
 I mapped the book's ideas into seven practical criteria and weighted them by their impact on long-term maintainability and delivery reliability.
 
-| Criterion (Pragmatic Principle) | Weight | Grade | Weighted Score |
-| --- | ---: | ---: | ---: |
-| DRY / Single Source of Truth | 18% | 52 | 9.36 |
-| Orthogonality / Decoupling | 16% | 55 | 8.80 |
-| Reversibility / Configurability | 10% | 60 | 6.00 |
-| Automation / Tooling Discipline | 16% | 62 | 9.92 |
-| Testing / Fast Feedback | 20% | 45 | 9.00 |
-| Robustness / Error Handling / Security | 12% | 50 | 6.00 |
-| Documentation / Communication | 8% | 68 | 5.44 |
-| **Total** | **100%** |  | **54.52 / 100** |
+| Criterion (Pragmatic Principle)        |   Weight | Grade |  Weighted Score |
+| -------------------------------------- | -------: | ----: | --------------: |
+| DRY / Single Source of Truth           |      18% |    52 |            9.36 |
+| Orthogonality / Decoupling             |      16% |    55 |            8.80 |
+| Reversibility / Configurability        |      10% |    60 |            6.00 |
+| Automation / Tooling Discipline        |      16% |    62 |            9.92 |
+| Testing / Fast Feedback                |      20% |    45 |            9.00 |
+| Robustness / Error Handling / Security |      12% |    50 |            6.00 |
+| Documentation / Communication          |       8% |    68 |            5.44 |
+| **Total**                              | **100%** |       | **54.52 / 100** |
 
 **Overall grade: 54.5 / 100 (D+).**
 

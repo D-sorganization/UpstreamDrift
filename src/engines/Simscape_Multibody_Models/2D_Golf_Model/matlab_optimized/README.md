@@ -19,12 +19,14 @@ This is a complete optimization and refactoring of the original MASTER_SCRIPT go
 ## 🚀 Quick Start
 
 ### Method 1: GUI Interface (Recommended)
+
 ```matlab
 cd matlab_optimized
 launch_gui()
 ```
 
 ### Method 2: Command Line
+
 ```matlab
 cd matlab_optimized
 addpath(genpath(pwd))
@@ -32,6 +34,7 @@ addpath(genpath(pwd))
 ```
 
 ### Method 3: Custom Configuration
+
 ```matlab
 cd matlab_optimized
 addpath(genpath(pwd))
@@ -119,27 +122,30 @@ matlab_optimized/
 
 ### Benchmark Comparison
 
-| Metric | Original | Optimized | Improvement |
-|--------|----------|-----------|-------------|
-| ZTCF Generation | ~29 sec | ~3-4 sec | **7-10x faster** |
-| Total Runtime | ~5-10 min | ~1-2 min | **5x faster** |
-| Code Lines | ~15,000+ | ~3,000 | **80% reduction** |
-| Plot Scripts | 200+ files | 20 functions | **90% reduction** |
-| Maintainability | Poor | Excellent | **Professional** |
+| Metric          | Original   | Optimized    | Improvement       |
+| --------------- | ---------- | ------------ | ----------------- |
+| ZTCF Generation | ~29 sec    | ~3-4 sec     | **7-10x faster**  |
+| Total Runtime   | ~5-10 min  | ~1-2 min     | **5x faster**     |
+| Code Lines      | ~15,000+   | ~3,000       | **80% reduction** |
+| Plot Scripts    | 200+ files | 20 functions | **90% reduction** |
+| Maintainability | Poor       | Excellent    | **Professional**  |
 
 ### Optimization Techniques
 
 1. **Parallel ZTCF Generation**
+
    - Uses MATLAB Parallel Computing Toolbox
    - Runs 29 simulations simultaneously across CPU cores
    - Automatic load balancing
 
 2. **Unified Plotting Functions**
+
    - Parameterized functions replace duplicated scripts
    - Single function handles BASE, ZTCF, DELTA, ZVCF
    - Consistent styling and configuration
 
 3. **Efficient Data Processing**
+
    - Vectorized operations
    - Reduced memory copies
    - Consolidated calculation loops
@@ -205,6 +211,7 @@ config.export_formats = {'fig', 'png'}; % Save formats
 The enhanced GUI provides:
 
 ### Setup & Run Tab
+
 - ✅ Enable/disable parallel processing
 - ✅ Enable/disable checkpointing
 - ✅ Toggle plot generation
@@ -212,11 +219,13 @@ The enhanced GUI provides:
 - ✅ Real-time status log
 
 ### Results Tab
+
 - ✅ Summary statistics
 - ✅ Data table dimensions
 - ✅ Output directory paths
 
 ### Performance Tab
+
 - ✅ Execution time metrics
 - ✅ Speedup calculations
 - ✅ Resource utilization
@@ -270,12 +279,14 @@ fig = plot_total_work(ZTCFQ, 'ZTCF', 301, plot_cfg);
 ## 📦 Dependencies
 
 ### Required
+
 - MATLAB R2020a or later
 - Simulink
 - Existing GolfSwing Simulink model
 - Original MATLAB scripts (in `../matlab/Scripts/`)
 
 ### Optional (for performance features)
+
 - Parallel Computing Toolbox (for parallelization)
   - Without this, system runs in serial mode (still optimized)
 
@@ -286,6 +297,7 @@ fig = plot_total_work(ZTCFQ, 'ZTCF', 301, plot_cfg);
 ### Parallel Pool Errors
 
 If you get parallel pool errors:
+
 ```matlab
 % Run in serial mode
 run_analysis('use_parallel', false);
@@ -294,6 +306,7 @@ run_analysis('use_parallel', false);
 ### Model Not Found
 
 Ensure the original GolfSwing model is in the correct location:
+
 ```matlab
 sim_config = simulation_config();
 disp(sim_config.model_path);  % Check this path exists
@@ -302,6 +315,7 @@ disp(sim_config.model_path);  % Check this path exists
 ### Memory Issues
 
 For large datasets, increase MATLAB memory or disable checkpointing:
+
 ```matlab
 run_analysis('use_checkpoints', false);
 ```
@@ -311,7 +325,9 @@ run_analysis('use_checkpoints', false);
 ## 📊 Output Files
 
 ### Data Tables
+
 All saved to `data/output/`:
+
 - `BASE.mat`, `ZTCF.mat`, `DELTA.mat` - Full resolution (0.0001s)
 - `BASEQ.mat`, `ZTCFQ.mat`, `DELTAQ.mat` - Plot resolution (0.0025s)
 - `ZVCFTable.mat`, `ZVCFTableQ.mat` - ZVCF data
@@ -319,7 +335,9 @@ All saved to `data/output/`:
 - `ClubQuiver*.mat` - Quiver plot data
 
 ### Plots
+
 All saved to `data/plots/`:
+
 - `BASE_Charts/` - Baseline plots
 - `ZTCF_Charts/` - ZTCF plots
 - `DELTA_Charts/` - Delta plots
@@ -332,6 +350,7 @@ All saved to `data/plots/`:
 ### Running Original vs Optimized
 
 **Original:**
+
 ```matlab
 cd matlab/
 MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
@@ -340,6 +359,7 @@ MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR
 ```
 
 **Optimized:**
+
 ```matlab
 cd matlab_optimized/
 run_analysis()
@@ -349,14 +369,14 @@ run_analysis()
 
 ### Key Differences
 
-| Aspect | Original | Optimized |
-|--------|----------|-----------|
-| ZTCF Loop | Sequential | Parallel |
-| Plot Scripts | 200+ individual files | 20 parameterized functions |
-| Progress Tracking | Simple percentage | Full progress bars |
-| Error Recovery | None | Checkpointing |
-| Configuration | Hardcoded | Centralized config files |
-| Documentation | Minimal | Comprehensive |
+| Aspect            | Original              | Optimized                  |
+| ----------------- | --------------------- | -------------------------- |
+| ZTCF Loop         | Sequential            | Parallel                   |
+| Plot Scripts      | 200+ individual files | 20 parameterized functions |
+| Progress Tracking | Simple percentage     | Full progress bars         |
+| Error Recovery    | None                  | Checkpointing              |
+| Configuration     | Hardcoded             | Centralized config files   |
+| Documentation     | Minimal               | Comprehensive              |
 
 ---
 
@@ -380,6 +400,7 @@ run_analysis()
 ### Adding New Plot Types
 
 1. Create new plot function in `visualization/plots/`:
+
 ```matlab
 function fig = plot_my_metric(data_table, dataset_name, fig_num, plot_cfg)
     % Your plotting code here
@@ -387,6 +408,7 @@ end
 ```
 
 2. Add to `generate_all_plots.m`:
+
 ```matlab
 plot_functions = {
     % ... existing functions ...
@@ -403,11 +425,13 @@ Edit functions in `core/processing/` or `core/simulation/` and the changes will 
 ## 📚 References
 
 ### Original System
+
 - `../matlab/MASTER_SCRIPT_ZTCF_ZVCF_PLOT_GENERATOR.m`
 - `../matlab/Scripts/` - Original processing scripts
 - `../matlab/2D GUI/` - Original GUI attempt
 
 ### Documentation
+
 - `docs/` - Additional documentation
 - Function headers - Comprehensive inline documentation
 
@@ -438,6 +462,7 @@ This optimized system represents a **professional-grade refactoring** that:
 ## 📞 Support
 
 For issues or questions:
+
 1. Check this README
 2. Review function documentation (help function_name)
 3. Check configuration files

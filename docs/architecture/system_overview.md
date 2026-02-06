@@ -34,13 +34,13 @@ UpstreamDrift/
 
 ### 1.2 Physics Engines
 
-| Engine | Strengths | Best For |
-|--------|-----------|----------|
-| **MuJoCo** | Fast contact dynamics, muscle models | Biomechanics, control |
-| **Drake** | Model-based design, optimization | Trajectory planning |
-| **Pinocchio** | High-performance RBDL | Real-time control |
-| **OpenSim** | Validated biomechanical models | Research validation |
-| **MyoSuite** | 290-muscle full body model | Detailed muscle analysis |
+| Engine        | Strengths                            | Best For                 |
+| ------------- | ------------------------------------ | ------------------------ |
+| **MuJoCo**    | Fast contact dynamics, muscle models | Biomechanics, control    |
+| **Drake**     | Model-based design, optimization     | Trajectory planning      |
+| **Pinocchio** | High-performance RBDL                | Real-time control        |
+| **OpenSim**   | Validated biomechanical models       | Research validation      |
+| **MyoSuite**  | 290-muscle full body model           | Detailed muscle analysis |
 
 ### 1.3 Data Flow
 
@@ -92,11 +92,11 @@ The `injury` module aggregates data from any engine to produce risk scores. It i
 
 ## 3. Testing Strategy
 
-| Level | Description | Location |
-|-------|-------------|----------|
-| **Unit Tests** | Test individual components in isolation | `tests/unit/` |
-| **Integration Tests** | Test engine interfaces with mocks | `tests/integration/` |
-| **E2E Tests** | Full pipeline with real simulations | `tests/e2e/` |
+| Level                 | Description                             | Location             |
+| --------------------- | --------------------------------------- | -------------------- |
+| **Unit Tests**        | Test individual components in isolation | `tests/unit/`        |
+| **Integration Tests** | Test engine interfaces with mocks       | `tests/integration/` |
+| **E2E Tests**         | Full pipeline with real simulations     | `tests/e2e/`         |
 
 ## 4. Deployment
 

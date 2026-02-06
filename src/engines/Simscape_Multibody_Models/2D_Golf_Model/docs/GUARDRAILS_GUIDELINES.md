@@ -1,7 +1,7 @@
 # Repository Safety Guardrails Guidelines
 
-This document defines a **universal standard** for implementing safety guardrails across any repository. 
-It is intended for use by humans and IDE AI assistants to verify whether a project meets safety, linting, 
+This document defines a **universal standard** for implementing safety guardrails across any repository.
+It is intended for use by humans and IDE AI assistants to verify whether a project meets safety, linting,
 and continuous integration (CI) quality goals.
 
 ---
@@ -9,6 +9,7 @@ and continuous integration (CI) quality goals.
 ## 1. Purpose
 
 The goal of these guardrails is to:
+
 - **Catch coding errors early** via automated linting, type-checking, and formatting.
 - **Prevent low-quality or broken code** from being merged into protected branches.
 - **Automate enforcement** using `pre-commit` hooks and CI status checks.
@@ -20,20 +21,21 @@ The goal of these guardrails is to:
 
 All repositories implementing guardrails must use:
 
-| Tool | Purpose |
-|------|---------|
-| **pre-commit** | Framework for running checks automatically before each commit |
-| **ruff** | Fast Python linter and formatter |
-| **mypy** | Static type checker for Python |
-| **black** (optional) | Python code formatter (if not using ruff's formatter) |
-| **pytest** | Test runner for automated unit/integration tests |
-| **GitHub Actions CI** | Runs the guardrail checks on all pushes and PRs |
+| Tool                  | Purpose                                                       |
+| --------------------- | ------------------------------------------------------------- |
+| **pre-commit**        | Framework for running checks automatically before each commit |
+| **ruff**              | Fast Python linter and formatter                              |
+| **mypy**              | Static type checker for Python                                |
+| **black** (optional)  | Python code formatter (if not using ruff's formatter)         |
+| **pytest**            | Test runner for automated unit/integration tests              |
+| **GitHub Actions CI** | Runs the guardrail checks on all pushes and PRs               |
 
 ---
 
 ## 3. File Exclusions
 
 Guardrails **must not block development** due to errors in:
+
 - Legacy or archived code
 - Experimental or prototype directories
 - Third-party libraries checked into the repo
@@ -42,6 +44,7 @@ Guardrails **must not block development** due to errors in:
 Use **consistent exclusions** in all configs (`.pre-commit-config.yaml`, `ruff.toml`, `mypy.ini`) to ignore these paths.
 
 **Example Exclusion Patterns**:
+
 ```
 ^(Archive/|legacy/|old_code/|experimental/|.*Python Version/|.*Motion Capture Plotter/)
 ```
@@ -53,6 +56,7 @@ Use **consistent exclusions** in all configs (`.pre-commit-config.yaml`, `ruff.t
 Below are minimal working examples of each required config.
 
 ### 4.1 `.pre-commit-config.yaml`
+
 ```yaml
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
@@ -60,21 +64,22 @@ repos:
     hooks:
       - id: ruff
         args: ["--fix"]
-        exclude: '^(Archive/|legacy/|experimental/)'
+        exclude: "^(Archive/|legacy/|experimental/)"
       - id: ruff-format
-        exclude: '^(Archive/|legacy/|experimental/)'
+        exclude: "^(Archive/|legacy/|experimental/)"
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1
     hooks:
       - id: mypy
-        exclude: '^(Archive/|legacy/|experimental/)'
+        exclude: "^(Archive/|legacy/|experimental/)"
 
 default_language_version:
   python: python3.11
 ```
 
 ### 4.2 `ruff.toml`
+
 ```toml
 target-version = "py311"
 extend-exclude = [
@@ -87,6 +92,7 @@ line-length = 100
 ```
 
 ### 4.3 `mypy.ini`
+
 ```ini
 [mypy]
 python_version = 3.11
@@ -108,12 +114,13 @@ ignore_errors = true
 Guardrails are **only effective** if enforced in CI.
 
 ### 5.1 Example GitHub Actions Workflow
+
 ```yaml
 name: ci
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   lint-and-test:
@@ -122,7 +129,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install tools
         run: |
           python -m pip install --upgrade pip
@@ -136,6 +143,7 @@ jobs:
 ```
 
 **Setup Notes**:
+
 1. This workflow must run **on every push and PR**.
 2. In GitHub branch protection rules, require this workflow to pass before merging.
 
@@ -166,15 +174,14 @@ jobs:
 ✅ GitHub Actions CI workflow present and passing  
 ✅ Branch protection rules require CI to pass  
 ✅ All maintained source files pass `pre-commit` locally and in CI  
-✅ Legacy, experimental, and third-party code excluded from checks  
+✅ Legacy, experimental, and third-party code excluded from checks
 
 ---
 
 ## 8. Final Notes
 
-- Avoid **bypassing** guardrails unless absolutely necessary (`--no-verify` should be rare).  
-- Exclusion lists should be **minimal** and periodically reviewed.  
+- Avoid **bypassing** guardrails unless absolutely necessary (`--no-verify` should be rare).
+- Exclusion lists should be **minimal** and periodically reviewed.
 - CI should reflect **exactly** what runs locally in `pre-commit` to avoid drift.
 
 ---
-

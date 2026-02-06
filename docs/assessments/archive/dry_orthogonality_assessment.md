@@ -1,4 +1,5 @@
 # DRY and Orthogonality Assessment
+
 ## Golf Modeling Suite - Pragmatic Programmer Principles Analysis
 
 **Date:** 2026-01-26
@@ -17,10 +18,10 @@ This assessment evaluates the Golf Modeling Suite against two core principles fr
 
 ### Overall Findings
 
-| Principle | Grade | Summary |
-|-----------|-------|---------|
-| **DRY** | C | Significant code duplication across physics engines, especially spatial algebra and analysis modules |
-| **Orthogonality** | C+ | Good protocol-based design, but launcher and API server have excessive coupling |
+| Principle         | Grade | Summary                                                                                              |
+| ----------------- | ----- | ---------------------------------------------------------------------------------------------------- |
+| **DRY**           | C     | Significant code duplication across physics engines, especially spatial algebra and analysis modules |
+| **Orthogonality** | C+    | Good protocol-based design, but launcher and API server have excessive coupling                      |
 
 ### Key Statistics
 
@@ -40,14 +41,15 @@ This assessment evaluates the Golf Modeling Suite against two core principles fr
 
 **Impact:** Foundational mathematical code is duplicated with trivial differences.
 
-| Module | Drake Location | MuJoCo Location | Duplication |
-|--------|---------------|-----------------|-------------|
-| Inertia | `drake/python/src/spatial_algebra/inertia.py` | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/inertia.py` | ~90% |
-| Joints | `drake/python/src/spatial_algebra/joints.py` | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/joints.py` | ~85% |
-| Transforms | `drake/python/src/spatial_algebra/transforms.py` | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/transforms.py` | ~95% |
-| Spatial Vectors | `drake/python/src/spatial_algebra/spatial_vectors.py` | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/spatial_vectors.py` | ~90% |
+| Module          | Drake Location                                        | MuJoCo Location                                                         | Duplication |
+| --------------- | ----------------------------------------------------- | ----------------------------------------------------------------------- | ----------- |
+| Inertia         | `drake/python/src/spatial_algebra/inertia.py`         | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/inertia.py`         | ~90%        |
+| Joints          | `drake/python/src/spatial_algebra/joints.py`          | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/joints.py`          | ~85%        |
+| Transforms      | `drake/python/src/spatial_algebra/transforms.py`      | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/transforms.py`      | ~95%        |
+| Spatial Vectors | `drake/python/src/spatial_algebra/spatial_vectors.py` | `mujoco/python/mujoco_humanoid_golf/spatial_algebra/spatial_vectors.py` | ~90%        |
 
 **Example of Duplicated Validation:**
+
 ```python
 # Drake lines 48-63, MuJoCo lines 45-53 - IDENTICAL
 if e_rot.shape != (3, 3):
@@ -68,11 +70,13 @@ if not np.isclose(det_e, 1.0, atol=1e-6):
 **Impact:** Core analysis algorithms reimplemented 3-5 times.
 
 ##### Manipulability Analysis
+
 - `drake/python/src/manipulability.py` (197 lines)
 - `mujoco/python/mujoco_humanoid_golf/manipulability.py` (100+ lines)
 - `pinocchio/python/pinocchio_golf/manipulability.py`
 
 All three independently compute:
+
 ```python
 mobility_matrix = J @ J.T
 eigenvalues, eigenvectors = np.linalg.eigh(mobility_matrix)
@@ -80,6 +84,7 @@ eigenvalues, eigenvectors = np.linalg.eigh(mobility_matrix)
 ```
 
 ##### Induced Acceleration Analysis
+
 - `drake/python/src/induced_acceleration.py` (60+ lines)
 - `mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/induced_acceleration.py` (60+ lines)
 - `pinocchio/python/pinocchio_golf/induced_acceleration.py` (60+ lines)
@@ -108,6 +113,7 @@ Pattern followed by all 5 engines:
 **Lines duplicated per engine:** ~50 lines × 5 engines = 250 lines
 
 **Recommendation:** Extract `CounterfactualMixin` or Template Method:
+
 ```python
 class CounterfactualMixin:
     def compute_counterfactual(self, q, v, zero_control=False, zero_velocity=False):
@@ -126,6 +132,7 @@ class CounterfactualMixin:
 #### 1.4 Quality Check Scripts
 
 Three identical scripts with same banned patterns and magic number detection:
+
 - `drake/scripts/quality_check.py` (80+ lines)
 - `pinocchio/scripts/quality_check.py` (80+ lines)
 - `mujoco/scripts/quality_check.py` (80+ lines)
@@ -136,12 +143,13 @@ Three identical scripts with same banned patterns and magic number detection:
 
 #### 1.5 Muscle Analysis Implementations
 
-| File | Lines | Engine |
-|------|-------|--------|
-| `opensim/python/muscle_analysis.py` | 560 | OpenSim |
-| `myosuite/python/muscle_analysis.py` | 560 | MyoSuite |
+| File                                 | Lines | Engine   |
+| ------------------------------------ | ----- | -------- |
+| `opensim/python/muscle_analysis.py`  | 560   | OpenSim  |
+| `myosuite/python/muscle_analysis.py` | 560   | MyoSuite |
 
 Nearly identical dataclasses, constants, and analysis logic:
+
 ```python
 # Both files:
 @dataclass
@@ -182,6 +190,7 @@ mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)
 #### 1.7 Initialization Guards
 
 Every method in every engine repeats:
+
 ```python
 if self.model is None or self.data is None:
     logger.warning("...")
@@ -197,6 +206,7 @@ if self.model is None or self.data is None:
 #### 1.8 Logger Utilities
 
 Exact duplicate re-exports:
+
 - `drake/python/src/logger_utils.py` (29 lines)
 - `pinocchio/python/src/logger_utils.py` (29 lines)
 
@@ -228,6 +238,7 @@ NINETY_DEGREES_RAD = 1.5708  # OpenSim AND MyoSuite
 **File:** `src/launchers/golf_launcher.py` (1689 lines)
 
 **Mixed Concerns (count: 8+):**
+
 - UI layout and rendering (~400 lines)
 - Model selection and management (~300 lines)
 - Process launching and management (~500 lines)
@@ -238,6 +249,7 @@ NINETY_DEGREES_RAD = 1.5708  # OpenSim AND MyoSuite
 - Keyboard shortcuts and window geometry (~200 lines)
 
 **Coupling Evidence:**
+
 ```python
 # Lines 1280-1313: Long if-elif chain coupling model types to launch methods
 if model_type == "mujoco":
@@ -250,6 +262,7 @@ elif model_type == "drake":
 **Impact:** Testing individual features requires mocking the entire 1689-line window class.
 
 **Recommendation:** Extract:
+
 - `ProcessLauncher` class
 - `LayoutManager` class
 - `DockerManager` class
@@ -262,6 +275,7 @@ elif model_type == "drake":
 **File:** `src/api/server.py` (864 lines)
 
 **Mixed Concerns:**
+
 - FastAPI app configuration (lines 68-99)
 - Security middleware (lines 136-191)
 - Path validation (lines 226-295)
@@ -274,6 +288,7 @@ elif model_type == "drake":
 - Export endpoints (lines 826-846)
 
 **Recommendation:** Split into router modules:
+
 - `routes/engines.py`
 - `routes/simulation.py`
 - `routes/video.py`
@@ -301,6 +316,7 @@ elif model_type == "drake":
 #### 2.4 Global State Dependencies
 
 **API Server Globals (`server.py` lines 298-302, 399):**
+
 ```python
 engine_manager: EngineManager | None = None
 simulation_service: SimulationService | None = None
@@ -310,6 +326,7 @@ active_tasks = TaskManager()  # Line 399
 ```
 
 **Impact:**
+
 - Every endpoint implicitly depends on globals
 - Tests share state between cases
 - Cannot run multiple instances safely
@@ -339,15 +356,16 @@ def get_registry() -> EngineRegistry:
 
 **Scattered across files:**
 
-| Configuration | File | Lines |
-|---------------|------|-------|
-| API ports | `api/server.py` | 79-81, 858-863 |
-| CORS origins | `api/server.py` | 82-94 |
-| Launcher paths | `launchers/golf_launcher.py` | 1358-1493 |
-| MeshCat port | `launchers/golf_launcher.py` | 1540 |
-| Layout config | `launchers/golf_launcher.py` | 145-149 |
+| Configuration  | File                         | Lines          |
+| -------------- | ---------------------------- | -------------- |
+| API ports      | `api/server.py`              | 79-81, 858-863 |
+| CORS origins   | `api/server.py`              | 82-94          |
+| Launcher paths | `launchers/golf_launcher.py` | 1358-1493      |
+| MeshCat port   | `launchers/golf_launcher.py` | 1540           |
+| Layout config  | `launchers/golf_launcher.py` | 145-149        |
 
 **Example - Hardcoded CORS:**
+
 ```python
 allow_origins=[
     "http://localhost:3000",   # React development
@@ -367,6 +385,7 @@ allow_origins=[
 **File:** `src/shared/python/engine_manager.py` (354 lines)
 
 **Distinct Concerns:**
+
 - Engine discovery (lines 147-166)
 - General engine loading (lines 167-209)
 - MATLAB special-case loading (lines 210-246)
@@ -376,6 +395,7 @@ allow_origins=[
 **Impact:** Cannot use discovery without loading capabilities.
 
 **Recommendation:**
+
 - `EngineDiscovery` - finding available engines
 - `EngineLoader` - instantiating engines
 - `EngineDiagnostics` - health checks
@@ -385,6 +405,7 @@ allow_origins=[
 #### 2.8 Circular Dependency Indicators
 
 **Lazy imports in `golf_launcher.py` (lines 75-94):**
+
 ```python
 def _lazy_load_engine_manager() -> tuple[Any, Any]:
     global _EngineManager, _EngineType
@@ -404,12 +425,15 @@ def _lazy_load_engine_manager() -> tuple[Any, Any]:
 ### Good DRY Practices
 
 #### 3.1 Engine Availability Module
+
 `src/shared/python/engine_availability.py` (653 lines) properly centralizes all engine import checking, eliminating duplicate try/except patterns.
 
 #### 3.2 Base Physics Engine Protocol
+
 `src/shared/python/interfaces.py` defines a clear `PhysicsEngine` protocol that all engines implement consistently.
 
 #### 3.3 Constants Module
+
 `src/shared/python/constants.py` centralizes many (though not all) constants.
 
 ---
@@ -417,7 +441,9 @@ def _lazy_load_engine_manager() -> tuple[Any, Any]:
 ### Good Orthogonality Practices
 
 #### 3.4 MuJoCo Flexible Shaft Implementation
+
 Lines 478-630 in the MuJoCo engine show proper separation:
+
 - `set_shaft_properties()` - Configuration interface
 - `_compute_shaft_modes()` - Physics calculation (isolated)
 - `get_shaft_state()` - State extraction
@@ -425,14 +451,18 @@ Lines 478-630 in the MuJoCo engine show proper separation:
 Completely decoupled from core dynamics.
 
 #### 3.5 MyoSuite Muscle Delegation
+
 Properly delegates to separate analyzer:
+
 ```python
 def get_muscle_analyzer(self):
     return MyoSuiteMuscleAnalyzer(self.sim)
 ```
 
 #### 3.6 Drake Lazy Finalization
+
 Clean state machine pattern:
+
 ```python
 def _ensure_finalized(self) -> None:
     if not self._is_finalized:
@@ -446,30 +476,30 @@ def _ensure_finalized(self) -> None:
 
 ### Immediate Actions (Week 1-2)
 
-| Priority | Action | Impact | Effort |
-|----------|--------|--------|--------|
-| P0 | Extract shared spatial algebra module | Eliminates ~400 lines duplication | Medium |
-| P0 | Create CounterfactualMixin for ZTCF/ZVCF | Eliminates ~200 lines duplication | Low |
-| P1 | Consolidate quality check scripts | Reduces maintenance burden | Low |
-| P1 | Remove duplicate logger_utils files | Cleaner imports | Low |
+| Priority | Action                                   | Impact                            | Effort |
+| -------- | ---------------------------------------- | --------------------------------- | ------ |
+| P0       | Extract shared spatial algebra module    | Eliminates ~400 lines duplication | Medium |
+| P0       | Create CounterfactualMixin for ZTCF/ZVCF | Eliminates ~200 lines duplication | Low    |
+| P1       | Consolidate quality check scripts        | Reduces maintenance burden        | Low    |
+| P1       | Remove duplicate logger_utils files      | Cleaner imports                   | Low    |
 
 ### Short-term Actions (Month 1)
 
-| Priority | Action | Impact | Effort |
-|----------|--------|--------|--------|
-| P1 | Split GolfLauncher into focused classes | Enables testing, reduces coupling | High |
-| P1 | Split API server into route modules | Cleaner architecture | Medium |
-| P2 | Create base analyzer classes | Eliminates ~300 lines duplication | Medium |
-| P2 | Consolidate muscle analysis modules | Eliminates ~500 lines duplication | Medium |
+| Priority | Action                                  | Impact                            | Effort |
+| -------- | --------------------------------------- | --------------------------------- | ------ |
+| P1       | Split GolfLauncher into focused classes | Enables testing, reduces coupling | High   |
+| P1       | Split API server into route modules     | Cleaner architecture              | Medium |
+| P2       | Create base analyzer classes            | Eliminates ~300 lines duplication | Medium |
+| P2       | Consolidate muscle analysis modules     | Eliminates ~500 lines duplication | Medium |
 
 ### Medium-term Actions (Quarter 1)
 
-| Priority | Action | Impact | Effort |
-|----------|--------|--------|--------|
-| P2 | Implement dependency injection in API | Improves testability | Medium |
-| P2 | Create plugin architecture for engines | Eliminates cascading changes | High |
-| P3 | Centralize all configuration | Reduces scattered config | Medium |
-| P3 | Break circular dependencies | Cleaner module graph | Medium |
+| Priority | Action                                 | Impact                       | Effort |
+| -------- | -------------------------------------- | ---------------------------- | ------ |
+| P2       | Implement dependency injection in API  | Improves testability         | Medium |
+| P2       | Create plugin architecture for engines | Eliminates cascading changes | High   |
+| P3       | Centralize all configuration           | Reduces scattered config     | Medium |
+| P3       | Break circular dependencies            | Cleaner module graph         | Medium |
 
 ---
 
@@ -477,24 +507,24 @@ def _ensure_finalized(self) -> None:
 
 ### High-Priority Files for Refactoring
 
-| File | Lines | Issues |
-|------|-------|--------|
-| `src/launchers/golf_launcher.py` | 1689 | Monolithic, mixed concerns, hardcoded paths |
-| `src/api/server.py` | 864 | Global state, mixed concerns, hardcoded config |
-| `src/shared/python/engine_manager.py` | 354 | Multiple responsibilities |
-| `src/engines/physics_engines/drake/python/src/spatial_algebra/*.py` | ~400 | Duplicated with MuJoCo |
-| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/spatial_algebra/*.py` | ~400 | Duplicated with Drake |
+| File                                                                                  | Lines | Issues                                         |
+| ------------------------------------------------------------------------------------- | ----- | ---------------------------------------------- |
+| `src/launchers/golf_launcher.py`                                                      | 1689  | Monolithic, mixed concerns, hardcoded paths    |
+| `src/api/server.py`                                                                   | 864   | Global state, mixed concerns, hardcoded config |
+| `src/shared/python/engine_manager.py`                                                 | 354   | Multiple responsibilities                      |
+| `src/engines/physics_engines/drake/python/src/spatial_algebra/*.py`                   | ~400  | Duplicated with MuJoCo                         |
+| `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/spatial_algebra/*.py` | ~400  | Duplicated with Drake                          |
 
 ### Physics Engine Implementations
 
-| Engine | File | Lines |
-|--------|------|-------|
-| Drake | `drake/python/drake_physics_engine.py` | 558 |
-| Pinocchio | `pinocchio/python/pinocchio_physics_engine.py` | 440 |
-| MuJoCo | `mujoco/python/mujoco_humanoid_golf/physics_engine.py` | 630 |
-| MyoSuite | `myosuite/python/myosuite_physics_engine.py` | 602 |
-| OpenSim | `opensim/python/opensim_physics_engine.py` | 649 |
-| Pendulum | `pendulum/python/pendulum_physics_engine.py` | 315 |
+| Engine    | File                                                   | Lines |
+| --------- | ------------------------------------------------------ | ----- |
+| Drake     | `drake/python/drake_physics_engine.py`                 | 558   |
+| Pinocchio | `pinocchio/python/pinocchio_physics_engine.py`         | 440   |
+| MuJoCo    | `mujoco/python/mujoco_humanoid_golf/physics_engine.py` | 630   |
+| MyoSuite  | `myosuite/python/myosuite_physics_engine.py`           | 602   |
+| OpenSim   | `opensim/python/opensim_physics_engine.py`             | 649   |
+| Pendulum  | `pendulum/python/pendulum_physics_engine.py`           | 315   |
 
 ---
 
@@ -510,6 +540,7 @@ The Golf Modeling Suite demonstrates competent protocol-based design and good us
 Addressing these issues will improve maintainability, testability, and make it easier to extend the system with new physics engines or analysis capabilities.
 
 The recommended refactoring priority is:
+
 1. Extract shared mathematical modules (high impact, medium effort)
 2. Split monolithic classes (high impact, high effort)
 3. Implement dependency injection (medium impact, medium effort)

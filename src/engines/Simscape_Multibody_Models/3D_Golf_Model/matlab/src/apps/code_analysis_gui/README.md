@@ -24,6 +24,7 @@ A user-friendly graphical interface for analyzing MATLAB code using the built-in
 ## Quick Start
 
 ### Method 1: Simple Launcher
+
 ```matlab
 % Add the Code_Analysis_GUI folder to your MATLAB path
 addpath('matlab/Scripts/Code_Analysis_GUI');
@@ -33,6 +34,7 @@ launchCodeAnalyzer();
 ```
 
 ### Method 2: Direct GUI Call
+
 ```matlab
 % For more control over options
 addpath('matlab/Scripts/Code_Analysis_GUI');
@@ -40,6 +42,7 @@ results = codeIssuesGUI('DefaultPath', 'C:\MyProject', 'ShowProgress', true);
 ```
 
 ### Method 3: Command Line (Non-GUI)
+
 ```matlab
 % For scripting/automation
 addpath('matlab/Scripts/Code_Analysis_GUI');
@@ -49,12 +52,14 @@ results = exportCodeIssues('C:\MyProject\src', 'Output', 'issues.csv');
 ## Usage Examples
 
 ### Analyze a Single File
+
 1. Run `launchCodeAnalyzer()`
 2. Click "Add File(s)" and select your .m file
 3. Configure options as needed
 4. Click "Analyze"
 
 ### Analyze a Project Folder
+
 1. Run `launchCodeAnalyzer()`
 2. Click "Add Folder" and select your project directory
 3. Enable "Recursive" to scan subfolders
@@ -62,6 +67,7 @@ results = exportCodeIssues('C:\MyProject\src', 'Output', 'issues.csv');
 5. Click "Analyze"
 
 ### Batch Analysis with Custom Options
+
 ```matlab
 results = codeIssuesGUI(...
     'DefaultPath', 'C:\MyProject', ...
@@ -73,6 +79,7 @@ results = codeIssuesGUI(...
 ## Configuration Options
 
 ### Analysis Options
+
 - **Recursive**: Scan subfolders when analyzing directories
 - **File Extensions**: Comma-separated list of extensions to include (default: `.m`)
 - **Exclude Directories**: Directories to skip (e.g., `.git, build, external`)
@@ -80,6 +87,7 @@ results = codeIssuesGUI(...
 - **Error Handling**: Choose to record errors as issues or stop on first error
 
 ### Output Options
+
 - **Output File**: Specify output file path (optional)
 - **Auto-save**: Automatically save with timestamp
 - **Supported Formats**: .csv, .xlsx, .json, .md
@@ -87,6 +95,7 @@ results = codeIssuesGUI(...
 ## Results Table
 
 The analysis returns a table with these columns:
+
 - **File**: Absolute file path
 - **RelFile**: Relative file path
 - **Line**: Line number where issue occurs

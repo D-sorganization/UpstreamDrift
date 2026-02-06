@@ -21,14 +21,17 @@ Three Conversion steps were taken to generate the myoLeg models from the referen
 After the conversion, a manual adjusting process is done to correct the abnormal results.
 
 ## Maunal adjustment:
+
 - Adjustments post conversion to optimize for kinematic and dynamic behaviors are detailed in our paper published at ICORR 2025 (see last section for reference).
 - Wrapping surfaces are stable against flipping tendons at every RoM.
 
 ## Contact Geometries:
+
 - Manually designed with references
 - Contact properties optimized for contact rich behaviors
 
 ## Issues:
+
 - N/A
 
 ## Citation

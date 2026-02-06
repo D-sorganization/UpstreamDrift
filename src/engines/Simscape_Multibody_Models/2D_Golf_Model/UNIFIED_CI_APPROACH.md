@@ -22,6 +22,7 @@ This document defines the **unified CI/CD standards** for all 15 repositories in
 ## Overview
 
 The unified CI/CD approach ensures:
+
 - **Consistency** across all repositories
 - **Reproducibility** via pinned versions
 - **Comprehensive checks** (linting, testing, security)
@@ -42,7 +43,7 @@ The unified CI/CD approach ensures:
 10. Video_Processor (JavaScript/TypeScript)
 11. Repository_Management (Shell scripts)
 12. Project_Template (Multi-language)
-13-15. Additional repositories as needed
+    13-15. Additional repositories as needed
 
 ---
 
@@ -64,6 +65,7 @@ pip install pydocstyle==6.3.0
 ```
 
 **Action versions:**
+
 ```yaml
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5
@@ -133,6 +135,7 @@ mypy python/
 ### 5. Security Checks
 
 **Required security scanning:**
+
 - Dependency scanning (Bandit, Safety)
 - Secret detection (TruffleHog)
 - Vulnerability alerts (Dependabot)
@@ -140,6 +143,7 @@ mypy python/
 ### 6. Documentation Checks
 
 **Verify documentation quality:**
+
 - Markdown linting
 - Link validation
 - Docstring coverage (pydocstyle)
@@ -179,9 +183,9 @@ fi
 
 ```yaml
 strategy:
-  fail-fast: true  # Stop all jobs if one fails
+  fail-fast: true # Stop all jobs if one fails
   matrix:
-    python-version: ['3.10', '3.11', '3.12']
+    python-version: ["3.10", "3.11", "3.12"]
 ```
 
 ### 10. Cache Patterns
@@ -205,6 +209,7 @@ strategy:
 ### Python Projects
 
 **Required Tools:**
+
 - Testing: pytest==8.3.3 with pytest-cov==6.0.0
 - Linting: ruff==0.5.0 (replaces flake8, isort)
 - Type checking: mypy==1.10.0 with strict mode
@@ -212,11 +217,13 @@ strategy:
 - Security: bandit==1.7.7, safety==3.0.1
 
 **Minimum Requirements:**
+
 - Python versions: 3.10, 3.11, 3.12
 - Test coverage: 60% minimum (configurable)
 - Type hints: Encouraged for public APIs
 
 **Standard Exclusions:**
+
 ```toml
 # ruff.toml
 extend-exclude = [
@@ -231,16 +238,19 @@ extend-exclude = [
 ### MATLAB Projects
 
 **Required Tools:**
+
 - Testing: MATLAB Unit Test framework
 - Code quality: checkcode (built-in code analyzer)
 - Style: mlint (code analyzer for best practices)
 
 **Minimum Requirements:**
+
 - MATLAB versions: R2023a or later
 - Test coverage: Basic unit tests for core functions
 - Code quality: Pass checkcode with standard rules
 
 **Test Structure:**
+
 ```matlab
 % matlab/tests/test_example.m
 function tests = test_example
@@ -253,6 +263,7 @@ end
 ```
 
 **Code Quality Check:**
+
 ```bash
 # Check all MATLAB files for issues
 find matlab -name "*.m" -type f -exec matlab -batch "checkcode -id {}" \;
@@ -261,12 +272,14 @@ find matlab -name "*.m" -type f -exec matlab -batch "checkcode -id {}" \;
 ### JavaScript/TypeScript Projects
 
 **Required Tools:**
+
 - Testing: Jest with coverage
 - Linting: ESLint with TypeScript support
 - Type checking: TypeScript strict mode
 - Formatting: Prettier
 
 **Minimum Requirements:**
+
 - Node versions: 18.x, 20.x
 - Test coverage: 70% minimum
 - TypeScript: strict mode enabled
@@ -274,6 +287,7 @@ find matlab -name "*.m" -type f -exec matlab -batch "checkcode -id {}" \;
 ### Shell Scripts
 
 **Required Tools:**
+
 - Syntax check: `bash -n script.sh`
 - Linting: shellcheck (if available)
 - Testing: bats-core (optional)
@@ -293,19 +307,19 @@ on:
     # Add replicant branches if they exist:
     # branches: [main, master, claude/RepositoryName_Replicants]
     paths:
-      - 'python/**'
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/python-ci.yml'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
+      - "python/**"
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/python-ci.yml"
+      - "requirements*.txt"
+      - "pyproject.toml"
   pull_request:
     branches: [main, master]
     # Add replicant branches if they exist
     paths:
-      - 'python/**'
-      - 'src/**'
-      - 'tests/**'
+      - "python/**"
+      - "src/**"
+      - "tests/**"
 
 jobs:
   lint:
@@ -315,13 +329,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for better diffs
+          fetch-depth: 0 # Full history for better diffs
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Cache pip dependencies
         uses: actions/cache@v4
@@ -393,11 +407,11 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
-    needs: lint  # Only run if lint passes
+    needs: lint # Only run if lint passes
     strategy:
-      fail-fast: true  # Always include
+      fail-fast: true # Always include
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - name: Checkout code
@@ -407,7 +421,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -472,7 +486,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Run Bandit security check
         continue-on-error: true
@@ -556,6 +570,7 @@ if: |
 ### Overview
 
 MATLAB projects require:
+
 1. **Code Quality Checks** - checkcode for static analysis
 2. **Unit Tests** - MATLAB Unit Test framework
 3. **Documentation** - Function documentation validation
@@ -564,6 +579,7 @@ MATLAB projects require:
 ### Prerequisites
 
 **GitHub-hosted runners require:**
+
 - `matlab-actions/setup-matlab@v2` action
 - MATLAB license (via GitHub Secrets or license file)
 - Supported MATLAB version (R2023a or later)
@@ -578,20 +594,20 @@ on:
     branches: [main, master]
     # Add replicant branches if they exist
     paths:
-      - 'matlab/**'
-      - 'matlab_optimized/**'
-      - '.github/workflows/matlab-ci.yml'
+      - "matlab/**"
+      - "matlab_optimized/**"
+      - ".github/workflows/matlab-ci.yml"
   pull_request:
     branches: [main, master]
     paths:
-      - 'matlab/**'
-      - 'matlab_optimized/**'
+      - "matlab/**"
+      - "matlab_optimized/**"
 
 jobs:
   matlab-quality:
     name: MATLAB Code Quality
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -602,7 +618,7 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           release: R2023b
-          products: MATLAB Simulink  # Add required toolboxes
+          products: MATLAB Simulink # Add required toolboxes
 
       - name: Check for magic numbers
         run: |
@@ -634,13 +650,13 @@ jobs:
             if exist('matlab_optimized', 'dir')
                 addpath(genpath('matlab_optimized'));
             end
-            
+
             % Find all MATLAB files
             mFiles = [
                 dir('matlab/**/*.m');
                 dir('matlab_optimized/**/*.m')
             ];
-            
+
             % Run checkcode on each file
             hasIssues = false;
             for i = 1:length(mFiles)
@@ -659,7 +675,7 @@ jobs:
                     hasIssues = true;
                 end
             end
-            
+
             % Exit with error if issues found
             if hasIssues
                 error('Code quality issues found. Please fix them.');
@@ -673,10 +689,10 @@ jobs:
           command: |
             % Check for random number generation without seeds
             fprintf('🔍 Checking for unseeded randomness...\n');
-            
+
             mFiles = [dir('matlab/**/*.m'); dir('matlab_optimized/**/*.m')];
             warningCount = 0;
-            
+
             for i = 1:length(mFiles)
                 filePath = fullfile(mFiles(i).folder, mFiles(i).name);
                 
@@ -696,7 +712,7 @@ jobs:
                     end
                 end
             end
-            
+
             if warningCount == 0
                 fprintf('✅ All files using randomness have seeds or are intentionally random\n');
             end
@@ -704,8 +720,8 @@ jobs:
   matlab-test:
     name: MATLAB Unit Tests
     runs-on: ubuntu-latest
-    needs: matlab-quality  # Only run if quality checks pass
-    
+    needs: matlab-quality # Only run if quality checks pass
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -740,8 +756,8 @@ jobs:
   matlab-build:
     name: MATLAB Build Check
     runs-on: ubuntu-latest
-    if: false  # Enable if MEX files need compilation
-    
+    if: false # Enable if MEX files need compilation
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -859,7 +875,7 @@ function result = calculate_position(time, velocity)
     % Validate inputs
     validateattributes(time, {'numeric'}, {'real', 'finite'});
     validateattributes(velocity, {'numeric'}, {'real', 'finite'});
-    
+
     % Calculate position
     result = velocity * time;  % [m] = [m/s] * [s]
 end
@@ -880,11 +896,13 @@ circumference = 2 * pi * radius;  % Use built-in pi
 ### MATLAB CI Limitations
 
 **Self-hosted runners:**
+
 - May be needed for licensed MATLAB versions
 - Configure with required toolboxes
 - Set up license file or network license
 
 **Alternative: MATLAB Docker**
+
 ```yaml
 - name: Run MATLAB in Docker
   run: |
@@ -893,6 +911,7 @@ circumference = 2 * pi * radius;  % Use built-in pi
 ```
 
 **Offline validation:**
+
 ```bash
 # Check MATLAB syntax without MATLAB installed
 # Use mlint or checkcode from command line
@@ -912,11 +931,11 @@ on:
   push:
     branches: [main, master]
     paths:
-      - 'src/**'
-      - 'test/**'
-      - 'package.json'
-      - 'tsconfig.json'
-      - '.github/workflows/js-ci.yml'
+      - "src/**"
+      - "test/**"
+      - "package.json"
+      - "tsconfig.json"
+      - ".github/workflows/js-ci.yml"
   pull_request:
     branches: [main, master]
 
@@ -937,7 +956,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -973,16 +992,16 @@ jobs:
 - name: Validate shell scripts
   run: |
     echo "🔍 Validating shell scripts..."
-    
+
     # Find all shell scripts
     scripts=$(find . -name "*.sh" -type f)
-    
+
     # Syntax check
     for script in $scripts; do
       echo "Checking $script..."
       bash -n "$script" || exit 1
     done
-    
+
     # Shellcheck (if available)
     if command -v shellcheck &> /dev/null; then
       shellcheck $scripts || exit 1
@@ -999,9 +1018,9 @@ jobs:
 
 ```yaml
 strategy:
-  fail-fast: true  # Stop all jobs if one fails
+  fail-fast: true # Stop all jobs if one fails
   matrix:
-    python-version: ['3.10', '3.11', '3.12']
+    python-version: ["3.10", "3.11", "3.12"]
     os: [ubuntu-latest, windows-latest, macos-latest]
 ```
 
@@ -1013,12 +1032,12 @@ strategy:
 on:
   push:
     paths:
-      - 'python/**'
-      - 'src/**'
-      - 'tests/**'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
-      - '.github/workflows/*.yml'
+      - "python/**"
+      - "src/**"
+      - "tests/**"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - ".github/workflows/*.yml"
 ```
 
 ### Reusable Workflows
@@ -1038,7 +1057,7 @@ on:
       source-dir:
         required: false
         type: string
-        default: 'python'
+        default: "python"
 
 jobs:
   test:
@@ -1092,9 +1111,9 @@ jobs:
 - name: Run Trivy scanner
   uses: aquasecurity/trivy-action@master
   with:
-    scan-type: 'fs'
-    scan-ref: '.'
-    severity: 'CRITICAL,HIGH'
+    scan-type: "fs"
+    scan-ref: "."
+    severity: "CRITICAL,HIGH"
 ```
 
 ---
@@ -1142,7 +1161,7 @@ This unified CI/CD approach ensures:
 ✅ **Fast feedback** - Fail-fast strategies and path filters  
 ✅ **Clear reporting** - Proper exit codes and artifact uploads  
 ✅ **Security first** - Multiple scanning tools  
-✅ **Multi-language** - Python, MATLAB, JavaScript/TypeScript, Shell  
+✅ **Multi-language** - Python, MATLAB, JavaScript/TypeScript, Shell
 
 ### References
 
@@ -1155,6 +1174,7 @@ This unified CI/CD approach ensures:
 ---
 
 **Document Maintenance:**
+
 - Review quarterly for tool version updates
 - Update when adding new repositories
 - Sync with actual CI workflows in repositories

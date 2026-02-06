@@ -7,9 +7,11 @@ This directory contains examples for using CasADi with Pinocchio for trajectory 
 This example demonstrates how to optimize the swing of a 2-link robotic arm (simulating a simplified arm + club system) using Direct Multiple Shooting.
 
 ### Objective
+
 Minimize the squared torque effort to swing the arm from a hanging position (0,0) to an upright position (180,0).
 
 ### Methods
+
 - **Dynamics**: Pinocchio (ABA algorithm) autodifferentiated via CasADi.
 - **Integration**: Semi-implicit Euler.
 - **Solver**: IPOPT (Interior Point Optimizer).
@@ -17,6 +19,7 @@ Minimize the squared torque effort to swing the arm from a hanging position (0,0
 ### Running the Example
 
 Ensure you have the dependencies installed:
+
 ```bash
 pip install casadi
 conda install pinocchio -c conda-forge
@@ -28,6 +31,7 @@ conda install pinocchio -c conda-forge
 ```
 
 Run the script:
+
 ```bash
 python shared/python/optimization/examples/optimize_arm.py
 ```

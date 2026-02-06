@@ -22,22 +22,26 @@ gh issue list --state open --limit 10 --json number,title,labels,body
 For issues 1 through 10 (or until no more issues):
 
 #### a. Select the Next Issue
+
 - Pick the highest priority issue (critical > high > medium > low)
 - If no priority labels, pick the oldest issue
 
 #### b. Create a Feature Branch
+
 ```bash
 git checkout main && git pull
 git checkout -b fix/issue-<NUMBER>-<short-description>
 ```
 
 #### c. Implement the Fix
+
 - Read the issue description carefully
 - Make the necessary code changes
 - Run local linting: `ruff check . --fix && black .`
 - Run local tests if applicable
 
 #### d. Commit and Push
+
 ```bash
 git add -A
 git commit -m "fix: <description>
@@ -49,6 +53,7 @@ git push -u origin fix/issue-<NUMBER>-<short-description>
 ```
 
 #### e. Create Pull Request
+
 ```bash
 gh pr create --title "fix: <description>" --body "## Summary
 <brief description of changes>
@@ -61,6 +66,7 @@ Closes #<NUMBER>"
 ```
 
 #### f. Wait for CI/CD
+
 ```bash
 # Poll CI status until complete
 gh pr checks <PR_NUMBER>
@@ -70,17 +76,20 @@ gh pr checks <PR_NUMBER>
 - Maximum 3 fix iterations per PR
 
 #### g. Merge When Green
+
 ```bash
 gh pr merge <PR_NUMBER> --squash
 ```
 
 #### h. Clean Up
+
 ```bash
 git checkout main && git pull
 git branch -d fix/issue-<NUMBER>-<short-description>
 ```
 
 #### i. Continue to Next Issue
+
 - Repeat steps a-h for the next issue
 - Track progress: "Completed X of 10 issues"
 
@@ -91,10 +100,11 @@ After completing all issues (or exhausting available issues), provide:
 ```markdown
 ## Issues Resolution Summary
 
-| # | Issue | PR | Status |
-|---|-------|-----|--------|
-| 1 | #XXX - Title | #YYY | Merged |
-| 2 | #XXX - Title | #YYY | Merged |
+| #   | Issue        | PR   | Status |
+| --- | ------------ | ---- | ------ |
+| 1   | #XXX - Title | #YYY | Merged |
+| 2   | #XXX - Title | #YYY | Merged |
+
 ...
 
 **Completed**: X issues

@@ -19,12 +19,14 @@ The chaotic driven pendulum is a simple yet powerful model for demonstrating var
 ### Degrees of Freedom
 
 The system has **2 DOF**:
+
 1. **Base Drive (x)**: Horizontal position of the pendulum's pivot point
 2. **Pendulum Angle (θ)**: Angle of the pendulum from vertical (downward equilibrium)
 
 ### Actuators
 
 1. **Base Drive Motor**: Controls horizontal oscillation of the base
+
    - Gear ratio: 10
    - Control range: -20 to 20 N
    - Purpose: Provides parametric/external forcing to induce complex dynamics
@@ -45,6 +47,7 @@ The driven pendulum system is governed by:
 ```
 
 Where:
+
 - `θ` = pendulum angle from vertical
 - `g` = gravitational acceleration (9.81 m/s²)
 - `L` = pendulum length (0.8 m)
@@ -71,6 +74,7 @@ This system can exhibit:
 **Objective**: Stabilize the pendulum at the unstable upright position (θ = π)
 
 **Control Strategies**:
+
 - **LQR (Linear Quadratic Regulator)**: Linearize around upright position
 - **Energy-based Control**: Swing-up followed by stabilization
 - **Sliding Mode Control**: Robust to disturbances and uncertainties
@@ -82,6 +86,7 @@ This system can exhibit:
 **Objective**: Make the pendulum follow a desired time-varying trajectory
 
 **Examples**:
+
 - Sinusoidal tracking
 - Square wave response
 - Polynomial trajectories
@@ -97,6 +102,7 @@ This system can exhibit:
 **Objective**: Understand and control resonant behavior
 
 **Experiment**:
+
 1. Apply sinusoidal forcing via base drive: `x_base(t) = A·sin(2πf·t)`
 2. Sweep forcing frequency `f` from 0.5 to 3.0 Hz
 3. Observe amplitude response and identify resonance peaks
@@ -107,6 +113,7 @@ This system can exhibit:
 **Objective**: Stabilize chaotic motion to periodic orbits
 
 **Control Methods**:
+
 - **OGY Method** (Ott-Grebogi-Yorke): Small perturbations to stabilize unstable periodic orbits
 - **Time-Delayed Feedback**: Pyragas control
 - **Adaptive Control**: Learn and adapt to chaotic dynamics
@@ -116,6 +123,7 @@ This system can exhibit:
 ### Example 1: Free Oscillation with Damping
 
 **Setup**:
+
 - Base Drive Motor: 0 N (no forcing)
 - Pendulum Motor: 0 N·m (no control)
 - Initial angle: 30° from vertical
@@ -125,6 +133,7 @@ This system can exhibit:
 ### Example 2: Driven Oscillation Near Resonance
 
 **Setup**:
+
 - Base Drive Motor: Apply sinusoidal forcing at 1.75 Hz (near natural frequency)
   - Control signal: `F(t) = 15·sin(2π·1.75·t)` N
 - Pendulum Motor: 0 N·m
@@ -135,10 +144,12 @@ This system can exhibit:
 ### Example 3: Swing-Up Control
 
 **Setup**:
+
 - Implement energy-based swing-up controller
 - Switch to LQR stabilization near upright position
 
 **Pseudocode**:
+
 ```python
 # Calculate total energy
 E = 0.5*m*L²*θ̇² + m*g*L*(1 - cos(θ))
@@ -153,12 +164,14 @@ else:  # Stabilization phase (LQR)
 ### Example 4: Exploring Chaos
 
 **Setup**:
+
 - Base Drive Motor: Strong forcing at moderate frequency
   - Example: `F(t) = 20·sin(2π·2.0·t)` N
 - Pendulum Motor: 0 N·m
 - Initial angle: Try multiple initial conditions
 
 **Expected Behavior**:
+
 - Chaotic motion with sensitive dependence on initial conditions
 - Phase plot shows strange attractor
 - Poincaré map reveals fractal structure
@@ -168,19 +181,23 @@ else:  # Stabilization phase (LQR)
 ### Recommended Plots
 
 1. **Time Series**:
+
    - Pendulum angle θ(t)
    - Angular velocity θ̇(t)
    - Base position x(t)
 
 2. **Phase Portrait**:
+
    - Plot θ̇ vs θ to visualize system trajectories
    - Look for limit cycles, attractors, or chaotic behavior
 
 3. **Poincaré Map**:
+
    - Sample phase space at fixed intervals of forcing period
    - Useful for identifying periodic orbits and chaos
 
 4. **Frequency Response**:
+
    - Sweep forcing frequency and measure response amplitude
    - Identify resonance peaks and bifurcation points
 
@@ -190,14 +207,14 @@ else:  # Stabilization phase (LQR)
 
 ## Comparison to Golf Swing Models
 
-| Feature | Chaotic Pendulum | Golf Swing Models |
-|---------|-----------------|-------------------|
-| **Primary Purpose** | Control demonstration, education | Biomechanical analysis |
-| **DOF** | 2 | 2-28 |
-| **Complexity** | Minimal (single pendulum) | High (multi-body, anthropometric) |
-| **Dynamics** | Highly nonlinear, chaotic | Complex but constrained |
-| **Control Focus** | Stabilization, chaos, resonance | Trajectory optimization, coordination |
-| **Applications** | Research, teaching, algorithm testing | Sports science, motion analysis |
+| Feature             | Chaotic Pendulum                      | Golf Swing Models                     |
+| ------------------- | ------------------------------------- | ------------------------------------- |
+| **Primary Purpose** | Control demonstration, education      | Biomechanical analysis                |
+| **DOF**             | 2                                     | 2-28                                  |
+| **Complexity**      | Minimal (single pendulum)             | High (multi-body, anthropometric)     |
+| **Dynamics**        | Highly nonlinear, chaotic             | Complex but constrained               |
+| **Control Focus**   | Stabilization, chaos, resonance       | Trajectory optimization, coordination |
+| **Applications**    | Research, teaching, algorithm testing | Sports science, motion analysis       |
 
 ## Implementation in Code
 
@@ -292,15 +309,19 @@ plt.show()
 ## Troubleshooting
 
 **Problem**: Pendulum doesn't exhibit chaotic behavior
+
 - **Solution**: Increase forcing amplitude or adjust frequency. Try forcing near 2× natural frequency.
 
 **Problem**: Controller makes system unstable
+
 - **Solution**: Reduce control gains. Check for phase lag in control loop.
 
 **Problem**: Simulation appears frozen
+
 - **Solution**: Check if pendulum is at stable equilibrium (θ = 0) with no forcing.
 
 **Problem**: Results not reproducible
+
 - **Solution**: This is actually expected for chaotic systems! Document random seed and initial conditions carefully.
 
 ---

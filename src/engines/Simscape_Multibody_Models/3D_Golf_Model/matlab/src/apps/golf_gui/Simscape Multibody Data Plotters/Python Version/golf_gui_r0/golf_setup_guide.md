@@ -5,6 +5,7 @@
 This is a comprehensive, high-performance 3D golf swing visualization system built with modern Python technologies. It provides real-time rendering, advanced camera controls, multi-dataset visualization, and cinematic analysis capabilities.
 
 ### Key Features
+
 - **🚀 High Performance**: 60+ FPS real-time rendering with OpenGL hardware acceleration
 - **🎨 Stunning Visuals**: PBR-style lighting, realistic materials, and smooth animations
 - **📊 Multi-Dataset Support**: Simultaneous visualization of BASEQ, ZTCFQ, and DELTAQ data
@@ -16,6 +17,7 @@ This is a comprehensive, high-performance 3D golf swing visualization system bui
 ## 📋 System Requirements
 
 ### Minimum Requirements
+
 - **OS**: Windows 10+, macOS 10.15+, or Linux (Ubuntu 18.04+)
 - **Python**: 3.8 or higher
 - **RAM**: 8 GB (16 GB recommended)
@@ -23,6 +25,7 @@ This is a comprehensive, high-performance 3D golf swing visualization system bui
 - **Storage**: 2 GB free space
 
 ### Recommended Requirements
+
 - **CPU**: Intel i7-8700K / AMD Ryzen 7 2700X or better
 - **RAM**: 16 GB or more
 - **Graphics**: Dedicated GPU with 4+ GB VRAM (NVIDIA GTX 1060 / AMD RX 580 or better)
@@ -139,11 +142,13 @@ If all tests pass, you should see success messages and component information.
 ### Basic Usage
 
 1. **Launch the Application**:
+
    ```bash
    python golf_main_application.py
    ```
 
 2. **Load Data**:
+
    - Use `File -> Load Data` to select your MATLAB files
    - Or place `BASEQ.mat`, `ZTCFQ.mat`, `DELTAQ.mat` in the project directory for auto-loading
 
@@ -162,18 +167,18 @@ If all tests pass, you should see success messages and component information.
 
 ### Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| `Space` | Play/Pause animation |
-| `←` / `→` | Previous/Next frame |
-| `Ctrl + ←/→` | Jump 10 frames |
-| `Shift + ←/→` | Jump 100 frames |
-| `Home` / `End` | First/Last frame |
-| `R` | Reset camera |
-| `F` | Frame data in view |
-| `F1` - `F7` | Camera presets |
-| `A` | Toggle analysis overlay |
-| `M` | Measurement mode |
+| Key            | Action                  |
+| -------------- | ----------------------- |
+| `Space`        | Play/Pause animation    |
+| `←` / `→`      | Previous/Next frame     |
+| `Ctrl + ←/→`   | Jump 10 frames          |
+| `Shift + ←/→`  | Jump 100 frames         |
+| `Home` / `End` | First/Last frame        |
+| `R`            | Reset camera            |
+| `F`            | Frame data in view      |
+| `F1` - `F7`    | Camera presets          |
+| `A`            | Toggle analysis overlay |
+| `M`            | Measurement mode        |
 
 ## 🎛️ Advanced Configuration
 
@@ -192,16 +197,19 @@ The system includes several predefined camera positions:
 ### Visualization Options
 
 **Forces and Torques**:
+
 - Toggle individual datasets (BASEQ, ZTCFQ, DELTAQ)
 - Adjust vector scaling (0.1x to 3.0x)
 - Color-coded by dataset (Orange, Turquoise, Yellow)
 
 **Body Segments**:
+
 - Individual limb visibility controls
 - Realistic skin and clothing materials
 - Joint sphere visualization
 
 **Environmental Settings**:
+
 - Ground grid with distance markers
 - Realistic golf course lighting
 - Sky gradient and fog effects
@@ -209,12 +217,15 @@ The system includes several predefined camera positions:
 ### Performance Optimization
 
 **For Best Performance**:
+
 1. **Graphics Settings**:
+
    - Enable hardware acceleration
    - Reduce anti-aliasing if needed
    - Disable shadows on older GPUs
 
 2. **Data Settings**:
+
    - Use frame caching for smooth playback
    - Enable level-of-detail rendering
    - Limit vector resolution for distant objects
@@ -231,6 +242,7 @@ The system includes several predefined camera positions:
 Your MATLAB files should contain tables with the following columns:
 
 **Required Point Data**:
+
 - `Butt`: Club butt position [x, y, z]
 - `Clubhead`: Club head position [x, y, z]
 - `MidPoint`: Grip midpoint [x, y, z]
@@ -239,12 +251,14 @@ Your MATLAB files should contain tables with the following columns:
 - `Hub`: Torso center point [x, y, z]
 
 **Required Vector Data**:
+
 - `TotalHandForceGlobal`: 3D force vector [Fx, Fy, Fz]
 - `EquivalentMidpointCoupleGlobal`: 3D torque vector [Tx, Ty, Tz]
 
 ### Data Validation
 
 The system automatically validates:
+
 - Consistent frame counts across datasets
 - Valid 3D coordinates (no NaN/Inf values)
 - Proper vector dimensions
@@ -257,6 +271,7 @@ The system automatically validates:
 Create smooth camera animations:
 
 1. **Camera Modes**:
+
    - **Orbit**: Traditional 3D navigation
    - **Fly**: Free-form camera movement
    - **Follow**: Track specific body points
@@ -274,6 +289,7 @@ Create smooth camera animations:
 ### Real-time Analysis
 
 Enable advanced analysis features:
+
 - Force magnitude tracking
 - Energy transfer calculations
 - Club face angle analysis
@@ -282,16 +298,19 @@ Enable advanced analysis features:
 ### Export Capabilities
 
 **High-Resolution Screenshots**:
+
 - Up to 4K resolution
 - Anti-aliased rendering
 - Custom camera angles
 
 **Video Recording**:
+
 - MP4/AVI format support
 - 30/60 FPS options
 - Custom resolution and quality
 
 **Data Export**:
+
 - CSV format for analysis
 - Include calculated metrics
 - Frame-by-frame data
@@ -301,38 +320,50 @@ Enable advanced analysis features:
 ### Common Issues
 
 **1. OpenGL Initialization Failed**
+
 ```
 ❌ Error: OpenGL context creation failed
 ```
+
 **Solution**:
+
 - Update graphics drivers
 - Ensure OpenGL 3.3+ support
 - Try software rendering: `export MESA_GL_VERSION_OVERRIDE=3.3`
 
 **2. MATLAB File Loading Error**
+
 ```
 ❌ Error: Failed to load BASEQ.mat
 ```
+
 **Solution**:
+
 - Check file format (MATLAB v7.3 or earlier)
 - Verify table variable names
 - Ensure consistent data types
 
 **3. Performance Issues**
+
 ```
 ⚠️ FPS below 15, choppy animation
 ```
+
 **Solution**:
+
 - Reduce vector scale and resolution
 - Disable anti-aliasing and shadows
 - Close other GPU-intensive applications
 - Use lower body segment resolution
 
 **4. PyQt6 Import Error**
+
 ```
 ❌ ImportError: No module named 'PyQt6'
 ```
+
 **Solution**:
+
 ```bash
 pip install --upgrade PyQt6
 # Or try alternative:
@@ -342,6 +373,7 @@ pip install PySide6  # Then modify imports
 ### Debug Mode
 
 Enable detailed logging:
+
 ```bash
 # Set environment variable for verbose logging
 export GOLF_VISUALIZER_DEBUG=1
@@ -349,6 +381,7 @@ python golf_main_application.py
 ```
 
 Check the log file:
+
 ```bash
 tail -f golf_visualizer.log
 ```
@@ -356,6 +389,7 @@ tail -f golf_visualizer.log
 ### System Information
 
 The application displays system information on startup:
+
 - OpenGL version and vendor
 - Available GPU memory
 - Supported extensions
@@ -393,16 +427,19 @@ class CustomAnalysisPlugin:
 ## 📞 Support and Resources
 
 ### Documentation
+
 - API documentation in code docstrings
 - Example scripts in `examples/` directory
 - Video tutorials (coming soon)
 
 ### Community
+
 - GitHub repository for issues and contributions
 - User forum for questions and discussions
 - Wiki with advanced tutorials
 
 ### Technical Support
+
 - Email: support@golfanalytics.com
 - Bug reports: GitHub Issues
 - Feature requests: GitHub Discussions
@@ -410,18 +447,21 @@ class CustomAnalysisPlugin:
 ## 🎯 Best Practices
 
 ### Data Preparation
+
 1. Ensure consistent sampling rates across datasets
 2. Filter noise in force/torque measurements
 3. Validate joint coordinate systems
 4. Check for missing or invalid frames
 
 ### Performance Optimization
+
 1. Use appropriate vector scaling for your data range
 2. Enable frame caching for smooth playback
 3. Monitor GPU memory usage
 4. Profile rendering performance regularly
 
 ### Analysis Workflow
+
 1. Load and validate data quality
 2. Set appropriate visualization settings
 3. Use camera presets for consistent viewpoints
@@ -429,6 +469,7 @@ class CustomAnalysisPlugin:
 5. Save session for later analysis
 
 ### Visualization Design
+
 1. Use consistent color schemes across datasets
 2. Adjust opacity for overlapping elements
 3. Consider viewer's perspective when framing
@@ -437,6 +478,7 @@ class CustomAnalysisPlugin:
 ## 🚀 Future Enhancements
 
 ### Planned Features
+
 - **VR/AR Support**: Immersive visualization capabilities
 - **Machine Learning Integration**: Automated swing analysis
 - **Cloud Sync**: Share sessions across devices
@@ -444,6 +486,7 @@ class CustomAnalysisPlugin:
 - **Multi-Golfer Comparison**: Side-by-side analysis
 
 ### Roadmap
+
 - **v2.1**: Enhanced export formats and batch processing
 - **v2.2**: VR headset support and spatial tracking
 - **v2.3**: AI-powered swing coaching features
@@ -454,21 +497,24 @@ class CustomAnalysisPlugin:
 ## 📝 License and Credits
 
 **Golf Swing Visualizer Pro**
+
 - Version: 2.0.0
 - License: MIT License
 - Built with: Python, PyQt6, ModernGL, NumPy, SciPy
 
 **Third-Party Libraries**:
+
 - PyQt6: Cross-platform GUI framework
 - ModernGL: Modern OpenGL wrapper
 - NumPy/SciPy: Scientific computing
 - Numba: Just-in-time compilation
 
 **Acknowledgments**:
+
 - Golf biomechanics research community
 - Open-source graphics and visualization projects
 - Beta testers and early adopters
 
 ---
 
-*Happy analyzing! 🏌️‍♂️⛳*
+_Happy analyzing! 🏌️‍♂️⛳_

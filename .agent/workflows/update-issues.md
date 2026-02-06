@@ -9,20 +9,21 @@ Sync GitHub issues with recent code assessments.
 ## Steps
 
 // turbo
+
 1. **Find recent assessments**:
 
    ```bash
    find . -type f \( -name "*assessment*" -o -name "*audit*" -o -name "*review*" \) -mtime -7
    ```
 
-// turbo
-2. **Get current open issues**:
+// turbo 2. **Get current open issues**:
 
-   ```bash
-   gh issue list --state open --limit 100 --json number,title,body,labels
-   ```
+```bash
+gh issue list --state open --limit 100 --json number,title,body,labels
+```
 
 3. **Parse assessment findings**:
+
    - Extract issues/findings from each assessment
    - Categorize by priority and type
 
@@ -30,21 +31,19 @@ Sync GitHub issues with recent code assessments.
    - Check if finding already tracked
    - Determine if issues have been resolved
 
-// turbo
-5. **Create missing issues**:
+// turbo 5. **Create missing issues**:
 
-   ```bash
-   gh issue create --title "<type>: <description>" \
-     --body "From assessment review" \
-     --label "<priority>"
-   ```
+```bash
+gh issue create --title "<type>: <description>" \
+  --body "From assessment review" \
+  --label "<priority>"
+```
 
-// turbo
-6. **Close resolved issues**:
+// turbo 6. **Close resolved issues**:
 
-   ```bash
-   gh issue close <NUMBER> --comment "Resolved - auto-closed by assessment review"
-   ```
+```bash
+gh issue close <NUMBER> --comment "Resolved - auto-closed by assessment review"
+```
 
 ## Output
 

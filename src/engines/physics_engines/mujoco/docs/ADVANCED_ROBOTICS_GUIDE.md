@@ -169,14 +169,14 @@ This module implements **multiple professional control strategies** used in indu
 
 ### Control Modes
 
-| Mode | Description | Best For |
-|------|-------------|----------|
-| **Torque** | Direct torque control | Precise low-level control |
-| **Impedance** | Position-based compliant control | Safe interaction, natural motion |
-| **Admittance** | Force-based compliant control | Force-sensitive tasks |
-| **Hybrid** | Combined force-position control | Simultaneous force and position objectives |
-| **Computed Torque** | Model-based feedforward | High-precision tracking |
-| **Task Space** | Cartesian-space control | End-effector control |
+| Mode                | Description                      | Best For                                   |
+| ------------------- | -------------------------------- | ------------------------------------------ |
+| **Torque**          | Direct torque control            | Precise low-level control                  |
+| **Impedance**       | Position-based compliant control | Safe interaction, natural motion           |
+| **Admittance**      | Force-based compliant control    | Force-sensitive tasks                      |
+| **Hybrid**          | Combined force-position control  | Simultaneous force and position objectives |
+| **Computed Torque** | Model-based feedforward          | High-precision tracking                    |
+| **Task Space**      | Cartesian-space control          | End-effector control                       |
 
 ---
 
@@ -191,6 +191,7 @@ Creates a **virtual spring-damper** system:
 #### Theory
 
 Impedance control makes the system behave like a mass-spring-damper:
+
 - **High stiffness**: Rigid position tracking
 - **Low stiffness**: Compliant, soft interaction
 - **Critical damping**: No oscillations
@@ -584,14 +585,14 @@ for step, q in enumerate(result.optimal_trajectory):
 
 **Methods:**
 
-| Method | Description | Returns |
-|--------|-------------|---------|
-| `compute_body_jacobian(body_id)` | Compute Jacobian for body | `(jacp, jacr)` |
-| `compute_constraint_jacobian()` | Analyze closed-chain constraints | `ConstraintJacobianData` |
-| `compute_manipulability(jacobian)` | Compute manipulability metrics | `ManipulabilityMetrics` |
-| `solve_inverse_kinematics(...)` | Solve IK to target position | `(q_solution, success, iters)` |
-| `analyze_singularities(...)` | Find singular configurations | `(configs, condition_numbers)` |
-| `compute_manipulability_ellipsoid(...)` | Compute visualization ellipsoid | `(center, radii, axes)` |
+| Method                                  | Description                      | Returns                        |
+| --------------------------------------- | -------------------------------- | ------------------------------ |
+| `compute_body_jacobian(body_id)`        | Compute Jacobian for body        | `(jacp, jacr)`                 |
+| `compute_constraint_jacobian()`         | Analyze closed-chain constraints | `ConstraintJacobianData`       |
+| `compute_manipulability(jacobian)`      | Compute manipulability metrics   | `ManipulabilityMetrics`        |
+| `solve_inverse_kinematics(...)`         | Solve IK to target position      | `(q_solution, success, iters)` |
+| `analyze_singularities(...)`            | Find singular configurations     | `(configs, condition_numbers)` |
+| `compute_manipulability_ellipsoid(...)` | Compute visualization ellipsoid  | `(center, radii, axes)`        |
 
 ---
 
@@ -608,13 +609,13 @@ for step, q in enumerate(result.optimal_trajectory):
 
 **Methods:**
 
-| Method | Description |
-|--------|-------------|
-| `set_control_mode(mode)` | Set control mode |
-| `set_impedance_parameters(params)` | Configure impedance |
-| `set_hybrid_mask(mask)` | Configure hybrid control |
-| `compute_control(...)` | Compute control torques |
-| `compute_operational_space_control(...)` | OSC control |
+| Method                                   | Description              |
+| ---------------------------------------- | ------------------------ |
+| `set_control_mode(mode)`                 | Set control mode         |
+| `set_impedance_parameters(params)`       | Configure impedance      |
+| `set_hybrid_mask(mask)`                  | Configure hybrid control |
+| `compute_control(...)`                   | Compute control torques  |
+| `compute_operational_space_control(...)` | OSC control              |
 
 ---
 
@@ -622,12 +623,12 @@ for step, q in enumerate(result.optimal_trajectory):
 
 **Methods:**
 
-| Method | Description |
-|--------|-------------|
-| `optimize_trajectory()` | General trajectory optimization |
-| `optimize_swing_for_speed(target_speed)` | Optimize for club speed |
-| `optimize_swing_for_accuracy(target_pos)` | Optimize for accuracy |
-| `generate_library_of_swings(...)` | Generate swing variations |
+| Method                                    | Description                     |
+| ----------------------------------------- | ------------------------------- |
+| `optimize_trajectory()`                   | General trajectory optimization |
+| `optimize_swing_for_speed(target_speed)`  | Optimize for club speed         |
+| `optimize_swing_for_accuracy(target_pos)` | Optimize for accuracy           |
+| `generate_library_of_swings(...)`         | Generate swing variations       |
 
 ---
 
@@ -691,19 +692,19 @@ for step, q in enumerate(result.optimal_trajectory):
 
 ### Robotics
 
-1. **Craig, J.J.** (2005). *Introduction to Robotics: Mechanics and Control*. Pearson.
-2. **Siciliano, B., et al.** (2009). *Robotics: Modelling, Planning and Control*. Springer.
-3. **Khatib, O.** (1987). "A unified approach for motion and force control of robot manipulators." *IEEE Journal on Robotics and Automation*.
+1. **Craig, J.J.** (2005). _Introduction to Robotics: Mechanics and Control_. Pearson.
+2. **Siciliano, B., et al.** (2009). _Robotics: Modelling, Planning and Control_. Springer.
+3. **Khatib, O.** (1987). "A unified approach for motion and force control of robot manipulators." _IEEE Journal on Robotics and Automation_.
 
 ### Golf Biomechanics
 
-1. **Zheng, N., et al.** (2008). "Kinematic analysis of golf swing." *Journal of Sports Science*.
-2. **McNitt-Gray, J.L., et al.** (2013). "Biomechanics of the golf swing." *Sports Biomechanics*.
+1. **Zheng, N., et al.** (2008). "Kinematic analysis of golf swing." _Journal of Sports Science_.
+2. **McNitt-Gray, J.L., et al.** (2013). "Biomechanics of the golf swing." _Sports Biomechanics_.
 
 ### Optimization
 
-1. **Betts, J.T.** (2010). *Practical Methods for Optimal Control Using Nonlinear Programming*. SIAM.
-2. **Kelly, M.** (2017). "An introduction to trajectory optimization." *SIAM Review*.
+1. **Betts, J.T.** (2010). _Practical Methods for Optimal Control Using Nonlinear Programming_. SIAM.
+2. **Kelly, M.** (2017). "An introduction to trajectory optimization." _SIAM Review_.
 
 ---
 

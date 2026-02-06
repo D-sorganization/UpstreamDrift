@@ -35,51 +35,51 @@ golf_clubs:
     description: "Standard driver with 10.5° loft"
     urdf_path: "shared/urdf/golf_clubs/driver.urdf"
     loft_deg: 10.5
-    length_m: 1.143  # 45 inches
+    length_m: 1.143 # 45 inches
     mass_kg: 0.310
     features:
       - "Titanium head simulation"
       - "Graphite shaft properties"
       - "Realistic mass distribution"
-  
+
   iron_5:
     name: "5-Iron"
     description: "Standard 5-iron with 28° loft"
     urdf_path: "shared/urdf/golf_clubs/5_iron.urdf"
     loft_deg: 28.0
-    length_m: 0.965  # 38 inches
+    length_m: 0.965 # 38 inches
     mass_kg: 0.390
-  
+
   iron_7:
     name: "7-Iron"
     description: "Standard 7-iron with 34° loft"
     urdf_path: "shared/urdf/golf_clubs/7_iron.urdf"
     loft_deg: 34.0
-    length_m: 0.927  # 36.5 inches
+    length_m: 0.927 # 36.5 inches
     mass_kg: 0.410
-  
+
   iron_9:
     name: "9-Iron"
     description: "Standard 9-iron with 42° loft"
     urdf_path: "shared/urdf/golf_clubs/9_iron.urdf"
     loft_deg: 42.0
-    length_m: 0.889  # 35 inches
+    length_m: 0.889 # 35 inches
     mass_kg: 0.430
-  
+
   sand_wedge:
     name: "Sand Wedge"
     description: "Standard sand wedge with 56° loft"
     urdf_path: "shared/urdf/golf_clubs/sand_wedge.urdf"
     loft_deg: 56.0
-    length_m: 0.889  # 35 inches
+    length_m: 0.889 # 35 inches
     mass_kg: 0.460
-  
+
   putter:
     name: "Putter"
     description: "Standard putter with 3° loft"
     urdf_path: "shared/urdf/golf_clubs/putter.urdf"
     loft_deg: 3.0
-    length_m: 0.864  # 34 inches
+    length_m: 0.864 # 34 inches
     mass_kg: 0.370
 
 # Engine-specific configurations
@@ -88,22 +88,22 @@ engine_compatibility:
     supported_formats: ["urdf", "mjcf"]
     mesh_formats: ["stl", "obj"]
     notes: "Automatic URDF to MJCF conversion"
-  
+
   drake:
     supported_formats: ["urdf", "sdf"]
     mesh_formats: ["stl", "obj", "dae"]
     notes: "Native URDF support with collision detection"
-  
+
   pinocchio:
     supported_formats: ["urdf"]
     mesh_formats: ["stl", "dae"]
     notes: "Efficient rigid body dynamics"
-  
+
   opensim:
     supported_formats: ["osim"]
     mesh_formats: ["stl", "obj"]
     notes: "Requires conversion via MyoConverter"
-  
+
   myosuite:
     supported_formats: ["xml"]
     mesh_formats: ["stl"]
@@ -113,7 +113,7 @@ engine_compatibility:
 default_models:
   humanoid: "standard_humanoid"
   golf_club: "driver"
-  
+
 # Validation settings
 validation:
   check_mesh_files: true

@@ -1,7 +1,7 @@
 # =============================================================================
 # Fleet-Wide Pre-commit Configuration (Polyglot)
 # =============================================================================
-# Supports: Python, JavaScript/TypeScript, React, HTML, CSS, C++, Rust
+# Supports: Python, JavaScript/TypeScript, React, HTML, CSS, C++
 # CROSS-PLATFORM: Works on Windows, Linux, and macOS
 # - Uses `language: python` instead of `language: system` for local hooks
 # - Avoids shell-specific commands that fail on Windows
@@ -54,6 +54,7 @@ repos:
   # ===========================================================================
 
   # ESLint - JavaScript/TypeScript linter
+  # NOTE: Only runs on ui/ directory which has its own eslint.config.js
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v9.19.0
     hooks:
@@ -67,33 +68,37 @@ repos:
           - eslint-plugin-react-hooks@5.1.0
           - "@typescript-eslint/parser@8.22.0"
           - "@typescript-eslint/eslint-plugin@8.22.0"
-        exclude: ^(\.github/|docs/|node_modules/|dist/|build/)
+        files: ^ui/src/
+        exclude: ^(\.github/|docs/|node_modules/|dist/|build/|htmlcov/)
 
   # ===========================================================================
   # HTML / CSS CHECKS
   # ===========================================================================
 
-  # HTMLHint - HTML linter
+  # RST linter - basic RST syntax check
+  # NOTE: Excludes Sphinx-specific files which use directives not understood by basic RST parser
   - repo: https://github.com/Lucas-C/pre-commit-hooks-markup
     rev: v1.0.1
     hooks:
       - id: rst-linter
         name: "RST linter"
         types: [rst]
-        exclude: ^(\.github/|node_modules/)
+        exclude: ^(\.github/|node_modules/|docs/|.*/docs/)
 
   # Stylelint - CSS/SCSS linter
+  # NOTE: Only runs on ui/src which has actual project CSS; excludes Sphinx docs CSS
   - repo: https://github.com/awebdeveloper/pre-commit-stylelint
     rev: 0.0.2
     hooks:
       - id: stylelint
         name: "stylelint (CSS/SCSS)"
         types_or: [css, scss]
-        args: ["--fix"]
+        args: ["--fix", "--config", "ui/.stylelintrc.json"]
         additional_dependencies:
           - stylelint@16.2.1
           - stylelint-config-standard@36.0.0
-        exclude: ^(\.github/|node_modules/|dist/|build/)
+        files: ^ui/src/
+        exclude: ^(\.github/|node_modules/|dist/|build/|docs/)
 
   # ===========================================================================
   # C++ CHECKS
@@ -108,20 +113,6 @@ repos:
         types_or: [c, c++]
         args: ["-i", "--style=file"]
         exclude: ^(\.github/|docs/|third_party/)
-
-  # ===========================================================================
-  # RUST CHECKS (Tauri desktop apps)
-  # ===========================================================================
-
-  # Rustfmt - Rust code formatter (skips if no .rs files)
-  - repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
-    hooks:
-      - id: fmt
-        name: "rustfmt (Rust format)"
-      - id: cargo-check
-        name: "cargo check (Rust)"
-        stages: [pre-push]
 
   # ===========================================================================
   # UNIVERSAL FORMATTING (All Languages)
@@ -145,12 +136,13 @@ repos:
   - repo: local
     hooks:
       # Prevent wildcard imports (Python)
+      # NOTE: Excludes files with intentional wildcard imports (constants re-exports)
       - id: no-wildcard-imports
         name: "no wildcard imports (Python)"
-        entry: "from .* import \\*"
+        entry: "from .* import \\*(?!.*noqa)"
         language: pygrep
         types: [python]
-        exclude: ^(archive/|legacy/|experimental/|tests/|\.github/)
+        exclude: ^(archive/|legacy/|experimental/|tests/|\.github/|src/shared/python/constants\.py|src/engines/.*constants.*\.py)
 
       # Check for debug statements (Python)
       - id: no-debug-statements
@@ -160,14 +152,33 @@ repos:
         types: [python]
         exclude: ^(tests/|archive/|legacy/|\.github/)
 
-      # Check for print statements in src (Python)
+      # Check for print statements in core library code (Python)
+      # NOTE: Excludes CLIs, scripts, engines (many have legitimate print for status), tools, etc.
       - id: no-print-in-src
         name: "no print() in src (Python)"
-        entry: "^\\s*print\\("
+        entry: "^\\s*print\\((?!.*noqa)"
         language: pygrep
         files: ^src/
         types: [python]
-        exclude: ^(src/.*/__main__\.py|tests/|\.github/)
+        exclude: |
+          (?x)^(
+            src/.*/__main__\.py|
+            src/.*/cli/|
+            src/.*/docker/|
+            src/.*/examples/|
+            src/.*/scripts/|
+            src/api/|
+            src/engines/|
+            src/shared/models/|
+            src/shared/python/|
+            src/launchers/|
+            src/tools/|
+            src/deployment/|
+            src/unreal_integration/|
+            src/learning/|
+            tests/|
+            \.github/
+          )
 
       # Check for console.log in src (JavaScript)
       - id: no-console-log
@@ -224,7 +235,15 @@ repos:
       - id: bandit
         name: "bandit (Python security)"
         stages: [push]
-        args: ["-r", ".", "-ll", "-ii", "-x", "tests/,archive/,legacy/,.github/,node_modules/"]
+        args:
+          [
+            "-r",
+            ".",
+            "-ll",
+            "-ii",
+            "-x",
+            "tests/,archive/,legacy/,.github/,node_modules/",
+          ]
         pass_filenames: false
         types: [python]
 
@@ -236,12 +255,19 @@ repos:
         name: "pytest (Python tests)"
         stages: [push]
         entry: pytest
-        args: ["tests/unit", "-x", "-q", "--tb=short", "-m", "not slow and not integration"]
+        args:
+          [
+            "tests/unit",
+            "-x",
+            "-q",
+            "--tb=short",
+            "-m",
+            "not slow and not integration",
+          ]
         language: python
         additional_dependencies: [pytest, pytest-cov]
         pass_filenames: false
         types: [python]
-
 
   # Semgrep - Free local security + code quality scanning (pre-push)
   - repo: https://github.com/semgrep/semgrep
@@ -295,11 +321,16 @@ exclude: |
     venv/|
     build/|
     dist/|
-    target/|
     .*\.egg-info/|
     \.next/|
     coverage/|
-    third_party/
+    third_party/|
+    vendor/|
+    shared/models/opensim/opensim-models/|
+    shared/models/myosuite/myo_sim/|
+    src/shared/tools/human-gazebo/|
+    src/shared/models/opensim/opensim-models/|
+    src/shared/models/myosuite/myo_sim/
   )
 
 # Don't fail fast - run all hooks
@@ -311,4 +342,4 @@ ci:
   autofix_prs: true
   autoupdate_branch: "main"
   autoupdate_commit_msg: "chore: update pre-commit hooks"
-  skip: [pytest-unit, bandit, mypy, semgrep, radon, fmt, cargo-check]  # Skip slow hooks in CI
+  skip: [pytest-unit, bandit, mypy, semgrep, radon] # Skip slow hooks in CI

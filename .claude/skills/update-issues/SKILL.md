@@ -21,6 +21,7 @@ find . -type f \( -name "*assessment*" -o -name "*audit*" -o -name "*review*" \)
 ```
 
 Common locations:
+
 - `.assessments/`
 - `docs/assessments/`
 - `reports/`
@@ -37,7 +38,9 @@ gh issue list --state open --limit 100 --json number,title,body,labels
 For each assessment file found:
 
 #### a. Extract Issues/Findings
+
 Look for sections like:
+
 - "Issues Found"
 - "Critical", "High", "Medium", "Low" priority items
 - "Recommendations"
@@ -45,6 +48,7 @@ Look for sections like:
 - Bullet points with problem descriptions
 
 #### b. Categorize Each Finding
+
 - **File/Location**: Where the issue exists
 - **Description**: What the problem is
 - **Priority**: Critical/High/Medium/Low
@@ -55,7 +59,9 @@ Look for sections like:
 For each finding from assessments:
 
 #### a. Check if Issue Already Exists
+
 Search existing issues for matching:
+
 - File paths mentioned
 - Similar keywords/descriptions
 - Related labels
@@ -65,6 +71,7 @@ gh issue list --search "<keywords>" --json number,title
 ```
 
 #### b. Determine Action
+
 - **Not tracked**: Create new issue
 - **Already exists**: Skip (note as already tracked)
 - **Resolved but open**: Close the issue
@@ -98,6 +105,7 @@ gh issue create --title "<type>: <brief description>" \
 For each open issue:
 
 #### a. Check if Fixed
+
 - Search codebase for the issue's file/location
 - Check recent commits that might address it
 - Review if the described problem still exists
@@ -107,6 +115,7 @@ git log --oneline --since="7 days ago" -- <filepath>
 ```
 
 #### b. Close if Resolved
+
 ```bash
 gh issue close <NUMBER> --comment "This issue has been resolved.
 
@@ -122,26 +131,31 @@ gh issue close <NUMBER> --comment "This issue has been resolved.
 ## GitHub Issues Sync Summary
 
 ### Assessment Files Reviewed
-| File | Date | Findings |
-|------|------|----------|
-| <filename> | <date> | X items |
+
+| File       | Date   | Findings |
+| ---------- | ------ | -------- |
+| <filename> | <date> | X items  |
 
 ### New Issues Created
-| Issue | Title | Priority | Source |
-|-------|-------|----------|--------|
-| #XXX | Title | High | assessment.md |
+
+| Issue | Title | Priority | Source        |
+| ----- | ----- | -------- | ------------- |
+| #XXX  | Title | High     | assessment.md |
 
 ### Issues Closed (Resolved)
-| Issue | Title | Resolution |
-|-------|-------|------------|
-| #XXX | Title | Fixed in commit abc123 |
+
+| Issue | Title | Resolution             |
+| ----- | ----- | ---------------------- |
+| #XXX  | Title | Fixed in commit abc123 |
 
 ### Issues Already Tracked
-| Finding | Existing Issue |
-|---------|----------------|
-| Description | #XXX |
+
+| Finding     | Existing Issue |
+| ----------- | -------------- |
+| Description | #XXX           |
 
 ### Statistics
+
 - **Assessments reviewed**: X
 - **Total findings**: X
 - **New issues created**: X

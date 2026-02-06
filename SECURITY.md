@@ -136,13 +136,13 @@ The following CVEs are currently ignored in our security scanning with documente
 
 ### CVE-2024-23342 (ecdsa)
 
-| Field | Value |
-|-------|-------|
-| **Status** | Ignored |
-| **Severity** | Medium |
-| **Affected Package** | `ecdsa` (transitive dependency) |
-| **Reason** | No upstream fix available as of 2026-01-31 |
-| **Review Date** | 2026-03-01 |
+| Field                | Value                                      |
+| -------------------- | ------------------------------------------ |
+| **Status**           | Ignored                                    |
+| **Severity**         | Medium                                     |
+| **Affected Package** | `ecdsa` (transitive dependency)            |
+| **Reason**           | No upstream fix available as of 2026-01-31 |
+| **Review Date**      | 2026-03-01                                 |
 
 **Mitigation:**
 
@@ -152,13 +152,13 @@ The following CVEs are currently ignored in our security scanning with documente
 
 ### CVE-2026-0994 (protobuf)
 
-| Field | Value |
-|-------|-------|
-| **Status** | Ignored |
-| **Severity** | Medium |
-| **Affected Package** | `protobuf` (transitive from dm_control) |
-| **Reason** | Cannot update independently; dependency of dm_control physics engine |
-| **Review Date** | Next dm_control release |
+| Field                | Value                                                                |
+| -------------------- | -------------------------------------------------------------------- |
+| **Status**           | Ignored                                                              |
+| **Severity**         | Medium                                                               |
+| **Affected Package** | `protobuf` (transitive from dm_control)                              |
+| **Reason**           | Cannot update independently; dependency of dm_control physics engine |
+| **Review Date**      | Next dm_control release                                              |
 
 **Mitigation:**
 

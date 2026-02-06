@@ -201,9 +201,7 @@ This will:
 1. ⭐ **NEW Tabbed** (`Integrated_Analysis_App/`)
 2. 📊 **OLD Standalone** (`2D GUI/visualization/`)
 
-**Archived/Other:** 2+
-3. 🗃️ **Archive** (`Simscape Multibody Data Plotters/`)
-4. 🎥 **Motion Capture** (`Motion Capture Plotter/`)
+**Archived/Other:** 2+ 3. 🗃️ **Archive** (`Simscape Multibody Data Plotters/`) 4. 🎥 **Motion Capture** (`Motion Capture Plotter/`)
 
 **Total GUI implementations in this folder:** **2 active, 2+ archived**
 
@@ -224,12 +222,12 @@ If you're using the old standalone version:
 
 ## 📞 Quick Reference
 
-| What do you want? | Use this | Location |
-|-------------------|----------|----------|
-| Latest & greatest | `launch_tabbed_app` | `Integrated_Analysis_App/` |
-| Quick visualization | `SkeletonPlotter(datasets)` | `2D GUI/visualization/` |
-| Test tabbed app | `test_tabbed_app` | `Integrated_Analysis_App/` |
-| Test standalone | `test_interactive_signal_plotter` | `2D GUI/visualization/` |
+| What do you want?   | Use this                          | Location                   |
+| ------------------- | --------------------------------- | -------------------------- |
+| Latest & greatest   | `launch_tabbed_app`               | `Integrated_Analysis_App/` |
+| Quick visualization | `SkeletonPlotter(datasets)`       | `2D GUI/visualization/`    |
+| Test tabbed app     | `test_tabbed_app`                 | `Integrated_Analysis_App/` |
+| Test standalone     | `test_interactive_signal_plotter` | `2D GUI/visualization/`    |
 
 ---
 

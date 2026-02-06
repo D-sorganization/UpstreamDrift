@@ -11,6 +11,7 @@
 **Recommendation: YES - Unify into a comprehensive `model_generation` package**
 
 After analyzing the codebase, I recommend consolidating the URDF generation capabilities into a unified package that:
+
 1. Serves as the **single source of truth** for model generation
 2. Provides a **layered API** (low-level builder, mid-level generators, high-level quick functions)
 3. Is **completely standalone** for external use
@@ -24,28 +25,31 @@ This approach maximizes code reuse, ensures consistent validation, and creates a
 
 ### Existing Components
 
-| Component | Purpose | Strengths | Limitations |
-|-----------|---------|-----------|-------------|
-| `URDFBuilder` | Manual segment construction | Strong validation, handedness support | No parametric generation, manual-only |
-| `MuJoCo I/O` | Bidirectional MJCF↔URDF | Good format conversion | Engine-specific, no standalone use |
-| `Pinocchio Exporter` | YAML→URDF | Composite joint expansion | Tightly coupled to YAML spec |
-| `HumanoidURDFGenerator` | Parametric humanoid | Anthropometry, multiple inertia modes | No general-purpose builder |
-| `CharacterBuilder` | High-level API | Clean interface, presets | Only humanoid models |
+| Component               | Purpose                     | Strengths                             | Limitations                           |
+| ----------------------- | --------------------------- | ------------------------------------- | ------------------------------------- |
+| `URDFBuilder`           | Manual segment construction | Strong validation, handedness support | No parametric generation, manual-only |
+| `MuJoCo I/O`            | Bidirectional MJCF↔URDF    | Good format conversion                | Engine-specific, no standalone use    |
+| `Pinocchio Exporter`    | YAML→URDF                   | Composite joint expansion             | Tightly coupled to YAML spec          |
+| `HumanoidURDFGenerator` | Parametric humanoid         | Anthropometry, multiple inertia modes | No general-purpose builder            |
+| `CharacterBuilder`      | High-level API              | Clean interface, presets              | Only humanoid models                  |
 
 ### Code Duplication Identified
 
 1. **Inertia Calculation**: 3 separate implementations
+
    - `URDFBuilder`: Default 0.1 kg·m² with validation
    - `spatial_algebra/inertia.py`: `mcI()` for spatial inertia
    - `humanoid_character_builder/mesh/inertia_calculator.py`: Full trimesh integration
 
 2. **URDF XML Generation**: 4 separate implementations
+
    - `URDFBuilder.get_urdf()`
    - `urdf_io.py` URDFExporter
    - `urdf_exporter.py` (Pinocchio)
    - `urdf_generator.py` (Humanoid)
 
 3. **Joint Handling**: Inconsistent composite joint support
+
    - Pinocchio: Gimbal/universal expansion
    - Humanoid: Same expansion, different code
    - URDFBuilder: No composite joint support
@@ -302,11 +306,11 @@ mjcf_xml = converter.from_urdf("robot.urdf")
 
 ### 1. Single Source of Truth
 
-| Before | After |
-|--------|-------|
-| 4 URDF generation implementations | 1 unified generator with modes |
+| Before                                | After                              |
+| ------------------------------------- | ---------------------------------- |
+| 4 URDF generation implementations     | 1 unified generator with modes     |
 | 3 inertia calculation implementations | 1 `InertiaCalculator` with 4 modes |
-| Scattered validation | Centralized `Validator` class |
+| Scattered validation                  | Centralized `Validator` class      |
 
 ### 2. Consistent Validation Everywhere
 
@@ -409,7 +413,7 @@ paths:
                 type:
                   enum: [humanoid, manual, composite]
                 params:
-                  $ref: '#/components/schemas/BodyParameters'
+                  $ref: "#/components/schemas/BodyParameters"
                 preset:
                   type: string
                 output_format:
@@ -422,7 +426,7 @@ paths:
                 type: string
             application/json:
               schema:
-                $ref: '#/components/schemas/GenerationResult'
+                $ref: "#/components/schemas/GenerationResult"
 
   /api/v1/inertia/compute:
     post:
@@ -517,12 +521,12 @@ class URDFBuilder(ManualBuilder):
 
 ## Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Breaking existing integrations | Medium | High | Backward-compatible shims, deprecation warnings |
-| Over-engineering | Low | Medium | Phased implementation, YAGNI principle |
-| Performance regression | Low | Low | Benchmark critical paths, optimize hot spots |
-| Scope creep | Medium | Medium | Strict phase boundaries, MVP focus |
+| Risk                           | Probability | Impact | Mitigation                                      |
+| ------------------------------ | ----------- | ------ | ----------------------------------------------- |
+| Breaking existing integrations | Medium      | High   | Backward-compatible shims, deprecation warnings |
+| Over-engineering               | Low         | Medium | Phased implementation, YAGNI principle          |
+| Performance regression         | Low         | Low    | Benchmark critical paths, optimize hot spots    |
+| Scope creep                    | Medium      | Medium | Strict phase boundaries, MVP focus              |
 
 ---
 
@@ -552,5 +556,5 @@ The resulting package will be a genuinely **special, versatile humanoid URDF gen
 
 ---
 
-*Evaluation Version: 1.0*
-*Last Updated: 2026-01-30*
+_Evaluation Version: 1.0_
+_Last Updated: 2026-01-30_

@@ -51,14 +51,13 @@ Contact parameters (feet → GRF, club → ball later)
 All other components (URDF, MJCF, Pinocchio/PINK objects, visualizers) are generated from this spec.
 
 Core backend stack
-Component	Purpose
-Pinocchio	Forward/inverse dynamics, Jacobians, constraints
-PINK	IK, task-space goals, closed-loop IK for complicated joint structures
-MuJoCo	Contact simulation (feet-ground, club-ball), GRF, realistic motion integration
-MeshCat	Browser visualization of Pinocchio/PINK (fast debugging)
-Geppetto Viewer	Desktop visualization of Pinocchio models; ideal for joint validation
-Python GUI (PySide6 / Qt)	End-user interface for interactive exploration
-2. Canonical Model Specification
+Component Purpose
+Pinocchio Forward/inverse dynamics, Jacobians, constraints
+PINK IK, task-space goals, closed-loop IK for complicated joint structures
+MuJoCo Contact simulation (feet-ground, club-ball), GRF, realistic motion integration
+MeshCat Browser visualization of Pinocchio/PINK (fast debugging)
+Geppetto Viewer Desktop visualization of Pinocchio models; ideal for joint validation
+Python GUI (PySide6 / Qt) End-user interface for interactive exploration 2. Canonical Model Specification
 
 A structured YAML file will define the complete multi-body model.
 
@@ -119,14 +118,15 @@ Foot-ground constraints (MuJoCo contact + constraint enforcement)
 Constraints will be defined in the canonical spec like:
 
 constraints:
-  - name: right_hand_to_club
-    type: rigid
-    frameA: right_hand/grip_frame
-    frameB: club/grip_frame
-  - name: left_hand_to_club
-    type: rigid
-    frameA: left_hand/grip_frame
-    frameB: club/grip_frame
+
+- name: right_hand_to_club
+  type: rigid
+  frameA: right_hand/grip_frame
+  frameB: club/grip_frame
+- name: left_hand_to_club
+  type: rigid
+  frameA: left_hand/grip_frame
+  frameB: club/grip_frame
 
 URDF note:
 
@@ -249,16 +249,16 @@ These require:
 
 5.1 Pinocchio-based FD/ID engine
 
-Compute 
+Compute
 q¨=f(q,q˙)+Bτ
 q
 ¨
-	​
+​
 
 =f(q,
 q
 ˙
-	​
+​
 
 )+Bτ
 
@@ -414,31 +414,31 @@ Run optimizations
 Visualize latent spaces (future)
 
 9. Project Folder Outline
-project_root/
-│
-├── models/
-│   ├── spec/                # canonical YAML files
-│   ├── geometry/            # STL/OBJ meshes
-│   └── generated/           # URDF/MJCF exports
-│
-├── dtack/                   # core library
-│   ├── backends/            # pinocchio, pink, mujoco
-│   ├── sim/                 # FD, ID, integrators, counterfactuals
-│   ├── viz/                 # meshcat, mujoco, geppetto
-│   ├── ik/                  # PINK task definitions
-│   ├── constraints/         # loop closures
-│   ├── ml/                  # dataset generation, optimization
-│   ├── gui/                 # PySide6 application
-│   └── utils/               # math helpers
-│
-├── examples/
-├── tests/
-├── README.md
-├── pyproject.toml
-└── requirements.txt
+   project_root/
+   │
+   ├── models/
+   │ ├── spec/ # canonical YAML files
+   │ ├── geometry/ # STL/OBJ meshes
+   │ └── generated/ # URDF/MJCF exports
+   │
+   ├── dtack/ # core library
+   │ ├── backends/ # pinocchio, pink, mujoco
+   │ ├── sim/ # FD, ID, integrators, counterfactuals
+   │ ├── viz/ # meshcat, mujoco, geppetto
+   │ ├── ik/ # PINK task definitions
+   │ ├── constraints/ # loop closures
+   │ ├── ml/ # dataset generation, optimization
+   │ ├── gui/ # PySide6 application
+   │ └── utils/ # math helpers
+   │
+   ├── examples/
+   ├── tests/
+   ├── README.md
+   ├── pyproject.toml
+   └── requirements.txt
 
 10. Development Phase Breakdown
-Phase 1 — Canonical model building
+    Phase 1 — Canonical model building
 
 Extract Simscape parameters
 

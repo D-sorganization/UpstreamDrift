@@ -31,14 +31,15 @@ This document explores the potential integration of Epic Games' Unreal Engine wi
 
 The Golf Modeling Suite currently provides visualization through:
 
-| Component | Technology | Strengths | Limitations |
-|-----------|------------|-----------|-------------|
-| **MuJoCo Renderer** | OpenGL | Fast, accurate physics viz | Basic graphics, no PBR |
-| **Meshcat** | Three.js (WebGL) | Browser-accessible, cross-platform | Limited realism |
-| **Matplotlib** | 2D plotting | Excellent for analysis charts | No 3D environments |
-| **PyQt6 GUI** | Qt Framework | Native desktop experience | No immersive features |
+| Component           | Technology       | Strengths                          | Limitations            |
+| ------------------- | ---------------- | ---------------------------------- | ---------------------- |
+| **MuJoCo Renderer** | OpenGL           | Fast, accurate physics viz         | Basic graphics, no PBR |
+| **Meshcat**         | Three.js (WebGL) | Browser-accessible, cross-platform | Limited realism        |
+| **Matplotlib**      | 2D plotting      | Excellent for analysis charts      | No 3D environments     |
+| **PyQt6 GUI**       | Qt Framework     | Native desktop experience          | No immersive features  |
 
 ### Current Data Flow
+
 ```
 Physics Engines → GenericPhysicsRecorder → OutputManager → CSV/JSON/Parquet
                                                        ↓
@@ -52,23 +53,27 @@ Physics Engines → GenericPhysicsRecorder → OutputManager → CSV/JSON/Parque
 ### Strengths for This Project
 
 1. **Photorealistic Rendering**
+
    - Lumen global illumination
    - Nanite virtualized geometry
    - Physically-based rendering (PBR)
    - MetaHuman technology for realistic golfer models
 
 2. **Virtual Reality Support**
+
    - Native VR plugin system
    - Support for all major headsets (Meta Quest, Valve Index, HTC Vive, Apple Vision Pro)
    - Hand tracking and motion controller integration
    - Low-latency rendering pipeline
 
 3. **Real-Time Performance**
+
    - Optimized for 60+ FPS gameplay
    - Level-of-detail (LOD) systems
    - Efficient streaming and loading
 
 4. **Mature Ecosystem**
+
    - Marketplace with golf course assets
    - Animation retargeting tools
    - Robust networking for multiplayer/shared sessions
@@ -85,6 +90,7 @@ Physics Engines → GenericPhysicsRecorder → OutputManager → CSV/JSON/Parque
 ### High-Value Use Cases
 
 #### 1. Immersive VR Swing Analysis Studio
+
 **Value: Critical**
 
 Enable coaches and players to view swing data in an immersive 3D environment.
@@ -104,6 +110,7 @@ User Experience:
 ```
 
 #### 2. Consumer Golf Training Application
+
 **Value: High**
 
 Transform research tools into an accessible training product.
@@ -115,6 +122,7 @@ Transform research tools into an accessible training product.
 - Integration with launch monitors (TrackMan, FlightScope)
 
 #### 3. Golf Course Simulation Environment
+
 **Value: High**
 
 Provide realistic environmental context for swing analysis.
@@ -125,6 +133,7 @@ Provide realistic environmental context for swing analysis.
 - Ball flight simulation with aerodynamics
 
 #### 4. Coaching & Education Platform
+
 **Value: Medium-High**
 
 Professional tools for instructors and biomechanists.
@@ -136,6 +145,7 @@ Professional tools for instructors and biomechanists.
 - Integration with existing lesson booking systems
 
 #### 5. Marketing & Demonstration
+
 **Value: Medium**
 
 Showcase capabilities to potential clients, investors, or partners.
@@ -146,13 +156,13 @@ Showcase capabilities to potential clients, investors, or partners.
 
 ### Use Case Priority Matrix
 
-| Use Case | Business Value | Technical Complexity | Recommended Phase |
-|----------|---------------|---------------------|-------------------|
-| VR Swing Analysis | High | Medium | Phase 1 |
-| Consumer Training App | High | High | Phase 2 |
-| Golf Course Simulation | Medium | Medium | Phase 2 |
-| Coaching Platform | Medium-High | Medium | Phase 1-2 |
-| Marketing Demos | Medium | Low | Phase 1 |
+| Use Case               | Business Value | Technical Complexity | Recommended Phase |
+| ---------------------- | -------------- | -------------------- | ----------------- |
+| VR Swing Analysis      | High           | Medium               | Phase 1           |
+| Consumer Training App  | High           | High                 | Phase 2           |
+| Golf Course Simulation | Medium         | Medium               | Phase 2           |
+| Coaching Platform      | Medium-High    | Medium               | Phase 1-2         |
+| Marketing Demos        | Medium         | Low                  | Phase 1           |
 
 ---
 
@@ -161,17 +171,20 @@ Showcase capabilities to potential clients, investors, or partners.
 ### Unreal Engine Licensing Model (as of 2025)
 
 #### Standard License (Free Tier)
+
 - **Cost:** Free to use
 - **Royalty:** 5% of gross revenue after first $1,000,000 USD per product
 - **Source Access:** Full C++ source code access via GitHub
 
 #### Key Terms
+
 - Royalty applies to gross revenue, not profit
 - Royalty is per-product, calculated quarterly
 - No royalty on consulting/services revenue
 - No royalty on internal tools not distributed externally
 
 #### Enterprise License
+
 - **Cost:** Custom pricing (typically $1M+/year for large studios)
 - **Benefits:**
   - No royalties
@@ -180,13 +193,13 @@ Showcase capabilities to potential clients, investors, or partners.
 
 ### Licensing Scenarios for Golf Modeling Suite
 
-| Scenario | License Needed | Cost Implications |
-|----------|---------------|-------------------|
-| Internal R&D tool only | Standard (Free) | $0 |
-| Free educational app | Standard (Free) | $0 |
-| Paid consumer app ($50/user) | Standard | 5% after $1M revenue |
-| Enterprise B2B product | Consider Enterprise | Custom negotiation |
-| Government/military contract | Verify compliance | May need special terms |
+| Scenario                     | License Needed      | Cost Implications      |
+| ---------------------------- | ------------------- | ---------------------- |
+| Internal R&D tool only       | Standard (Free)     | $0                     |
+| Free educational app         | Standard (Free)     | $0                     |
+| Paid consumer app ($50/user) | Standard            | 5% after $1M revenue   |
+| Enterprise B2B product       | Consider Enterprise | Custom negotiation     |
+| Government/military contract | Verify compliance   | May need special terms |
 
 ### Compliance Requirements
 
@@ -199,13 +212,13 @@ Showcase capabilities to potential clients, investors, or partners.
 
 The Golf Modeling Suite appears to use open-source components. Key considerations:
 
-| Component | License | Unreal Compatibility |
-|-----------|---------|---------------------|
-| MuJoCo | Apache 2.0 | Compatible |
-| Drake | BSD 3-Clause | Compatible |
-| Pinocchio | BSD 2-Clause | Compatible |
-| OpenSim | Apache 2.0 | Compatible |
-| PyQt6 | GPL v3 | Separate process required |
+| Component | License      | Unreal Compatibility      |
+| --------- | ------------ | ------------------------- |
+| MuJoCo    | Apache 2.0   | Compatible                |
+| Drake     | BSD 3-Clause | Compatible                |
+| Pinocchio | BSD 2-Clause | Compatible                |
+| OpenSim   | Apache 2.0   | Compatible                |
+| PyQt6     | GPL v3       | Separate process required |
 
 **Note:** If the Golf Modeling Suite is GPL-licensed, Unreal components must run as a separate process communicating via IPC/network to avoid license conflicts.
 
@@ -285,6 +298,7 @@ The Golf Modeling Suite appears to use open-source components. Key consideration
 ### Data Flow Specifications
 
 #### Option A: Real-Time Streaming (WebSocket)
+
 Best for: Live simulation visualization
 
 ```json
@@ -313,6 +327,7 @@ Best for: Live simulation visualization
 ```
 
 #### Option B: Batch Import (FBX/Alembic)
+
 Best for: Recorded swing playback
 
 1. Export animation from `GenericPhysicsRecorder`
@@ -321,6 +336,7 @@ Best for: Recorded swing playback
 4. Play back with custom overlays
 
 #### Option C: REST API Queries
+
 Best for: On-demand analysis data
 
 ```
@@ -439,12 +455,12 @@ GolfModelingSuitePlugin/
 
 ### Milestone Summary
 
-| Phase | Duration | Key Deliverable | Dependencies |
-|-------|----------|-----------------|--------------|
-| 1 | 2-3 months | Basic data pipeline + POC | None |
-| 2 | 2-3 months | Production visualization | Phase 1 |
-| 3 | 3-4 months | VR application | Phase 2 |
-| 4 | 4-6 months | Consumer product | Phase 2-3 |
+| Phase | Duration   | Key Deliverable           | Dependencies |
+| ----- | ---------- | ------------------------- | ------------ |
+| 1     | 2-3 months | Basic data pipeline + POC | None         |
+| 2     | 2-3 months | Production visualization  | Phase 1      |
+| 3     | 3-4 months | VR application            | Phase 2      |
+| 4     | 4-6 months | Consumer product          | Phase 2-3    |
 
 ---
 
@@ -452,22 +468,22 @@ GolfModelingSuitePlugin/
 
 ### Technical Challenges
 
-| Challenge | Impact | Mitigation Strategy |
-|-----------|--------|---------------------|
-| **Latency in real-time streaming** | Desync between physics and rendering | Use interpolation/extrapolation; target 60Hz minimum data rate |
-| **Skeletal mesh mismatch** | Incorrect joint mapping | Create custom skeleton matching MuJoCo topology; use animation retargeting |
-| **Cross-platform Python↔Unreal** | IPC complexity | Use well-tested protocols (WebSocket/REST); consider MessagePack for performance |
-| **VR performance** | Frame drops cause nausea | Aggressive LOD; fixed foveated rendering; async timewarp |
-| **Large motion capture files** | Memory issues | Streaming playback; chunked loading |
+| Challenge                          | Impact                               | Mitigation Strategy                                                              |
+| ---------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
+| **Latency in real-time streaming** | Desync between physics and rendering | Use interpolation/extrapolation; target 60Hz minimum data rate                   |
+| **Skeletal mesh mismatch**         | Incorrect joint mapping              | Create custom skeleton matching MuJoCo topology; use animation retargeting       |
+| **Cross-platform Python↔Unreal**  | IPC complexity                       | Use well-tested protocols (WebSocket/REST); consider MessagePack for performance |
+| **VR performance**                 | Frame drops cause nausea             | Aggressive LOD; fixed foveated rendering; async timewarp                         |
+| **Large motion capture files**     | Memory issues                        | Streaming playback; chunked loading                                              |
 
 ### Organizational Challenges
 
-| Challenge | Impact | Mitigation Strategy |
-|-----------|--------|---------------------|
-| **Unreal expertise gap** | Slow development | Hire/contract Unreal developer; use Blueprints initially |
-| **Maintaining two codebases** | Technical debt | Clear API boundaries; automated integration tests |
-| **Scope creep** | Delayed delivery | Strict phase gates; MVP approach |
-| **Licensing compliance** | Legal risk | Legal review before commercial release |
+| Challenge                     | Impact           | Mitigation Strategy                                      |
+| ----------------------------- | ---------------- | -------------------------------------------------------- |
+| **Unreal expertise gap**      | Slow development | Hire/contract Unreal developer; use Blueprints initially |
+| **Maintaining two codebases** | Technical debt   | Clear API boundaries; automated integration tests        |
+| **Scope creep**               | Delayed delivery | Strict phase gates; MVP approach                         |
+| **Licensing compliance**      | Legal risk       | Legal review before commercial release                   |
 
 ---
 
@@ -475,35 +491,37 @@ GolfModelingSuitePlugin/
 
 ### Team Composition (Recommended)
 
-| Role | Phase 1 | Phase 2 | Phase 3 | Phase 4 |
-|------|---------|---------|---------|---------|
-| Unreal Developer (C++/BP) | 1 | 1-2 | 2 | 2 |
-| Technical Artist | 0.5 | 1 | 1 | 1 |
-| Python Backend Developer | 0.5 | 0.25 | 0.25 | 0.5 |
-| UX Designer | 0.25 | 0.5 | 1 | 1 |
-| QA Tester | 0.25 | 0.5 | 1 | 1 |
+| Role                      | Phase 1 | Phase 2 | Phase 3 | Phase 4 |
+| ------------------------- | ------- | ------- | ------- | ------- |
+| Unreal Developer (C++/BP) | 1       | 1-2     | 2       | 2       |
+| Technical Artist          | 0.5     | 1       | 1       | 1       |
+| Python Backend Developer  | 0.5     | 0.25    | 0.25    | 0.5     |
+| UX Designer               | 0.25    | 0.5     | 1       | 1       |
+| QA Tester                 | 0.25    | 0.5     | 1       | 1       |
 
 ### Hardware Requirements
 
 **Development:**
+
 - High-end GPU (RTX 4080+ or equivalent)
 - 64GB RAM recommended
 - Fast SSD (NVMe)
 - VR headset for Phase 3+
 
 **Deployment:**
+
 - Desktop: Mid-range gaming PC (RTX 3060+)
 - VR: Per headset requirements
 
 ### Software/Asset Costs (Estimated)
 
-| Item | Cost | Notes |
-|------|------|-------|
-| Unreal Engine | $0 | Free until $1M revenue |
-| MetaHuman (if used) | $0 | Included with UE |
-| Golf course assets | $500-5,000 | Marketplace or custom |
-| Animation software | $0-2,000 | Blender (free) or Maya |
-| VR SDKs | $0 | OpenXR is free |
+| Item                    | Cost        | Notes                   |
+| ----------------------- | ----------- | ----------------------- |
+| Unreal Engine           | $0          | Free until $1M revenue  |
+| MetaHuman (if used)     | $0          | Included with UE        |
+| Golf course assets      | $500-5,000  | Marketplace or custom   |
+| Animation software      | $0-2,000    | Blender (free) or Maya  |
+| VR SDKs                 | $0          | OpenXR is free          |
 | Pixel Streaming hosting | $100-500/mo | AWS/Azure GPU instances |
 
 ---
@@ -512,14 +530,14 @@ GolfModelingSuitePlugin/
 
 ### Unity
 
-| Aspect | Unreal Engine | Unity |
-|--------|---------------|-------|
-| Graphics quality | Superior (Nanite, Lumen) | Good (HDRP) |
-| VR support | Excellent | Excellent |
-| Learning curve | Steeper | Gentler |
-| Licensing | 5% royalty >$1M | Runtime fee (changed 2024) |
-| C++ support | Native | Via plugins |
-| Golf assets | Good availability | Good availability |
+| Aspect           | Unreal Engine            | Unity                      |
+| ---------------- | ------------------------ | -------------------------- |
+| Graphics quality | Superior (Nanite, Lumen) | Good (HDRP)                |
+| VR support       | Excellent                | Excellent                  |
+| Learning curve   | Steeper                  | Gentler                    |
+| Licensing        | 5% royalty >$1M          | Runtime fee (changed 2024) |
+| C++ support      | Native                   | Via plugins                |
+| Golf assets      | Good availability        | Good availability          |
 
 **Verdict:** Unreal preferred for visual fidelity; Unity viable if team has existing expertise.
 
@@ -579,6 +597,7 @@ GolfModelingSuitePlugin/
 ## Appendix A: Sample WebSocket Protocol
 
 ### Connection
+
 ```
 ws://localhost:8765/simulation/stream
 ```
@@ -586,6 +605,7 @@ ws://localhost:8765/simulation/stream
 ### Messages
 
 **Server → Client: Frame Update**
+
 ```json
 {
   "type": "frame",
@@ -599,6 +619,7 @@ ws://localhost:8765/simulation/stream
 ```
 
 **Client → Server: Control**
+
 ```json
 {
   "type": "control",
@@ -613,26 +634,26 @@ ws://localhost:8765/simulation/stream
 
 Mapping between MuJoCo humanoid model and Unreal Mannequin:
 
-| MuJoCo Joint | Unreal Bone | Notes |
-|--------------|-------------|-------|
-| pelvis | pelvis | Root bone |
-| spine_01 | spine_01 | Lower spine |
-| spine_02 | spine_02 | Mid spine |
-| spine_03 | spine_03 | Upper spine |
-| clavicle_l | clavicle_l | Left shoulder girdle |
-| upperarm_l | upperarm_l | Left upper arm |
-| lowerarm_l | lowerarm_l | Left forearm |
-| hand_l | hand_l | Left hand |
-| ... | ... | ... |
+| MuJoCo Joint | Unreal Bone | Notes                |
+| ------------ | ----------- | -------------------- |
+| pelvis       | pelvis      | Root bone            |
+| spine_01     | spine_01    | Lower spine          |
+| spine_02     | spine_02    | Mid spine            |
+| spine_03     | spine_03    | Upper spine          |
+| clavicle_l   | clavicle_l  | Left shoulder girdle |
+| upperarm_l   | upperarm_l  | Left upper arm       |
+| lowerarm_l   | lowerarm_l  | Left forearm         |
+| hand_l       | hand_l      | Left hand            |
+| ...          | ...         | ...                  |
 
 ---
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | Jan 2026 | Claude | Initial document |
+| Version | Date     | Author | Changes          |
+| ------- | -------- | ------ | ---------------- |
+| 1.0     | Jan 2026 | Claude | Initial document |
 
 ---
 
-*This document is part of the Golf Modeling Suite future development planning. For questions or contributions, please open an issue in the project repository.*
+_This document is part of the Golf Modeling Suite future development planning. For questions or contributions, please open an issue in the project repository._

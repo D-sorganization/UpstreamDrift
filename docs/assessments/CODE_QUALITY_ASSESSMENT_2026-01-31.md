@@ -10,31 +10,31 @@
 
 ### Top 5 Risks
 
-| # | Risk | Location | Failure Modes |
-|---|------|----------|---------------|
-| 1 | **Security: Unsafe `eval()` usage** | `src/shared/python/signal_toolkit/fitting.py` | Code injection vulnerability if expression input is user-controlled; arbitrary code execution |
-| 2 | **Security: Pickle deserialization** | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py` | Arbitrary code execution from untrusted pickle files |
-| 3 | **God modules exceed maintainability limits** | `src/launchers/golf_launcher.py` (2,539 LOC), `src/shared/python/statistical_analysis.py` (2,221 LOC) | High coupling, difficult testing, merge conflicts, onboarding friction |
-| 4 | **Incomplete dependency locking** | `requirements.lock` (13 entries vs 100+ deps), loose constraints in `requirements.txt` | Non-reproducible builds, supply chain vulnerabilities, silent breakage |
-| 5 | **Frontend accessibility critical gaps** | `ui/src/components/**` | WCAG violations, legal liability, excluded users, failed accessibility audits |
+| #   | Risk                                          | Location                                                                                              | Failure Modes                                                                                 |
+| --- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 1   | **Security: Unsafe `eval()` usage**           | `src/shared/python/signal_toolkit/fitting.py`                                                         | Code injection vulnerability if expression input is user-controlled; arbitrary code execution |
+| 2   | **Security: Pickle deserialization**          | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py`               | Arbitrary code execution from untrusted pickle files                                          |
+| 3   | **God modules exceed maintainability limits** | `src/launchers/golf_launcher.py` (2,539 LOC), `src/shared/python/statistical_analysis.py` (2,221 LOC) | High coupling, difficult testing, merge conflicts, onboarding friction                        |
+| 4   | **Incomplete dependency locking**             | `requirements.lock` (13 entries vs 100+ deps), loose constraints in `requirements.txt`                | Non-reproducible builds, supply chain vulnerabilities, silent breakage                        |
+| 5   | **Frontend accessibility critical gaps**      | `ui/src/components/**`                                                                                | WCAG violations, legal liability, excluded users, failed accessibility audits                 |
 
 ### Top 5 Opportunities
 
-| # | Opportunity | Payoff |
-|---|-------------|--------|
-| 1 | **Expand mypy coverage** (10+ excluded directories) | Catch type errors early, reduce runtime bugs, improve IDE support |
-| 2 | **Refactor god modules into focused components** | 50% faster code reviews, easier testing, lower merge conflict rate |
-| 3 | **Complete dependency lockfile** | Reproducible builds, faster CI, security audit compliance |
-| 4 | **Add frontend component tests** | Prevent UI regressions, enable safe refactoring |
-| 5 | **Centralize error handling patterns** | Consistent API responses, easier debugging, better client integration |
+| #   | Opportunity                                         | Payoff                                                                |
+| --- | --------------------------------------------------- | --------------------------------------------------------------------- |
+| 1   | **Expand mypy coverage** (10+ excluded directories) | Catch type errors early, reduce runtime bugs, improve IDE support     |
+| 2   | **Refactor god modules into focused components**    | 50% faster code reviews, easier testing, lower merge conflict rate    |
+| 3   | **Complete dependency lockfile**                    | Reproducible builds, faster CI, security audit compliance             |
+| 4   | **Add frontend component tests**                    | Prevent UI regressions, enable safe refactoring                       |
+| 5   | **Centralize error handling patterns**              | Consistent API responses, easier debugging, better client integration |
 
 ### Stop / Start / Keep
 
-| Category | Practices |
-|----------|-----------|
-| **STOP** | Using `eval()` on any user-influenced input; adding new modules to mypy exclusion list; ignoring CVEs without documented remediation plan |
-| **START** | Breaking up large modules proactively (>500 LOC trigger); adding ARIA attributes to new UI components; running Docker security scans in CI |
-| **KEEP** | 90% test coverage threshold; structured error codes (GMS-XXX-NNN); Design by Contract patterns; TaskManager TTL cleanup; comprehensive CI quality gates |
+| Category  | Practices                                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **STOP**  | Using `eval()` on any user-influenced input; adding new modules to mypy exclusion list; ignoring CVEs without documented remediation plan               |
+| **START** | Breaking up large modules proactively (>500 LOC trigger); adding ARIA attributes to new UI components; running Docker security scans in CI              |
+| **KEEP**  | 90% test coverage threshold; structured error codes (GMS-XXX-NNN); Design by Contract patterns; TaskManager TTL cleanup; comprehensive CI quality gates |
 
 ---
 
@@ -105,21 +105,21 @@
 
 ### Dependency Direction Violations
 
-| Violation | Files | Impact |
-|-----------|-------|--------|
-| UI components import engine-specific code | `golf_launcher.py` imports from multiple engines | Breaks engine abstraction |
-| Shared utilities import from launchers | Some utils reference launcher-specific code | Circular dependency risk |
-| API routes contain business logic | `simulation.py`, `analysis.py` with inline logic | Harder to test, violates layering |
+| Violation                                 | Files                                            | Impact                            |
+| ----------------------------------------- | ------------------------------------------------ | --------------------------------- |
+| UI components import engine-specific code | `golf_launcher.py` imports from multiple engines | Breaks engine abstraction         |
+| Shared utilities import from launchers    | Some utils reference launcher-specific code      | Circular dependency risk          |
+| API routes contain business logic         | `simulation.py`, `analysis.py` with inline logic | Harder to test, violates layering |
 
 ### Coupling Hotspots ("God" Modules)
 
-| File | LOC | Responsibilities | Coupling Score |
-|------|-----|------------------|----------------|
-| `src/launchers/golf_launcher.py` | 2,539 | UI, Docker, environment, model loading, splash screens | CRITICAL |
-| `src/shared/python/statistical_analysis.py` | 2,221 | 7 mixins: Energy, Phase, GRF, Stability, Momentum, Swing, Stats | HIGH |
-| `src/engines/physics_engines/drake/python/src/drake_gui_app.py` | 2,050 | GUI + physics engine management | HIGH |
-| `src/launchers/ui_components.py` | 2,600+ | 20+ UI component classes | HIGH |
-| `src/shared/python/checkpoint.py` | 17,800 | Checkpoint management (likely auto-generated) | MEDIUM |
+| File                                                            | LOC    | Responsibilities                                                | Coupling Score |
+| --------------------------------------------------------------- | ------ | --------------------------------------------------------------- | -------------- |
+| `src/launchers/golf_launcher.py`                                | 2,539  | UI, Docker, environment, model loading, splash screens          | CRITICAL       |
+| `src/shared/python/statistical_analysis.py`                     | 2,221  | 7 mixins: Energy, Phase, GRF, Stability, Momentum, Swing, Stats | HIGH           |
+| `src/engines/physics_engines/drake/python/src/drake_gui_app.py` | 2,050  | GUI + physics engine management                                 | HIGH           |
+| `src/launchers/ui_components.py`                                | 2,600+ | 20+ UI component classes                                        | HIGH           |
+| `src/shared/python/checkpoint.py`                               | 17,800 | Checkpoint management (likely auto-generated)                   | MEDIUM         |
 
 ---
 
@@ -128,6 +128,7 @@
 ### CRITICAL
 
 #### C-1: Unsafe `eval()` Usage
+
 - **Severity:** CRITICAL
 - **Category:** Security
 - **Evidence:** `src/shared/python/signal_toolkit/fitting.py` - `return eval(expression, {"__builtins__": {}}, local_dict)  # noqa: S307`
@@ -137,6 +138,7 @@
 - **Effort:** S | **Risk:** HIGH
 
 #### C-2: Pickle Deserialization Vulnerability
+
 - **Severity:** CRITICAL
 - **Category:** Security
 - **Evidence:** `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py` - `data = np.load(filename, allow_pickle=True)`
@@ -148,6 +150,7 @@
 ### HIGH
 
 #### H-1: God Module - golf_launcher.py
+
 - **Severity:** HIGH
 - **Category:** Maintainability
 - **Evidence:** `src/launchers/golf_launcher.py` (2,539 LOC) handles UI, Docker checks, environment dialogs, splash screens, model cards
@@ -157,6 +160,7 @@
 - **Effort:** L | **Risk:** MEDIUM
 
 #### H-2: Incomplete Dependency Locking
+
 - **Severity:** HIGH
 - **Category:** Build/Deploy
 - **Evidence:** `requirements.lock` has only 13 entries vs 100+ actual dependencies; `requirements.txt` uses `>=` without upper bounds
@@ -166,6 +170,7 @@
 - **Effort:** S | **Risk:** LOW
 
 #### H-3: Frontend Accessibility Gaps
+
 - **Severity:** HIGH
 - **Category:** DX / Compliance
 - **Evidence:** `ui/src/components/**` - No ARIA attributes, no keyboard navigation indicators, Canvas without fallback content
@@ -175,6 +180,7 @@
 - **Effort:** M | **Risk:** LOW
 
 #### H-4: Missing Frontend Component Tests
+
 - **Severity:** HIGH
 - **Category:** Testability
 - **Evidence:** `ui/src/api/client.test.ts` is the only test file; no component render tests, no interaction tests
@@ -184,6 +190,7 @@
 - **Effort:** M | **Risk:** LOW
 
 #### H-5: Main Dockerfile Security Issues
+
 - **Severity:** HIGH
 - **Category:** Security / Build
 - **Evidence:** `/Dockerfile` uses `:latest` base, no non-root user, no multi-stage build, no health check
@@ -195,6 +202,7 @@
 ### MEDIUM
 
 #### M-1: MyPy Exclusion List Too Large
+
 - **Severity:** MEDIUM
 - **Category:** Maintainability
 - **Evidence:** `pyproject.toml` excludes 10+ directories from type checking including `src/api/`, `src/shared/python/signal_toolkit/`
@@ -204,6 +212,7 @@
 - **Effort:** L (ongoing) | **Risk:** LOW
 
 #### M-2: Generic Exception Catching
+
 - **Severity:** MEDIUM
 - **Category:** Reliability
 - **Evidence:** 50+ instances of `except Exception:` in API routes; `src/api/routes/simulation.py:45`, `src/api/server.py:231-235`
@@ -213,6 +222,7 @@
 - **Effort:** M | **Risk:** LOW
 
 #### M-3: Unused Frontend Dependencies
+
 - **Severity:** MEDIUM
 - **Category:** Build/DX
 - **Evidence:** `ui/package.json` includes Zustand, react-hook-form, zod - none are imported in codebase
@@ -222,6 +232,7 @@
 - **Effort:** S | **Risk:** LOW
 
 #### M-4: CVE Exceptions Without Remediation Plan
+
 - **Severity:** MEDIUM
 - **Category:** Security
 - **Evidence:** `.pre-commit-config.yaml` ignores CVE-2024-23342; `ci-standard.yml` ignores CVE-2026-0994
@@ -231,6 +242,7 @@
 - **Effort:** S | **Risk:** MEDIUM
 
 #### M-5: Missing WebSocket Reconnection Logic
+
 - **Severity:** MEDIUM
 - **Category:** Reliability
 - **Evidence:** `ui/src/api/client.ts` - WebSocket closes without auto-reconnect; no exponential backoff
@@ -242,6 +254,7 @@
 ### LOW
 
 #### L-1: Pytest Configuration Duplication
+
 - **Severity:** LOW
 - **Category:** Maintainability
 - **Evidence:** Identical `pytest.ini` files in 4+ engine subdirectories with same configuration
@@ -251,6 +264,7 @@
 - **Effort:** S | **Risk:** LOW
 
 #### L-2: Inline CSS Class Duplication (Frontend)
+
 - **Severity:** LOW
 - **Category:** Maintainability
 - **Evidence:** `ui/src/components/simulation/SimulationControls.tsx` - Button classes repeated 4+ times
@@ -260,6 +274,7 @@
 - **Effort:** S | **Risk:** LOW
 
 #### L-3: Missing Docker Image Scanning in CI
+
 - **Severity:** LOW
 - **Category:** Security
 - **Evidence:** No Trivy/Scout/Grype action in any CI workflow
@@ -274,21 +289,21 @@
 
 ### Boundary Contracts
 
-| Boundary | Type | Status | Location |
-|----------|------|--------|----------|
-| REST API | Pydantic models | GOOD | `src/api/models/requests.py`, `responses.py` |
-| WebSocket | JSON messages | PARTIAL | No schema validation on incoming frames |
-| Database | SQLAlchemy ORM | GOOD | `src/api/auth/models.py` with CHECK constraints |
-| File I/O | Path validation | GOOD | `src/api/utils/path_validation.py` whitelist |
-| Error responses | Structured codes | GOOD | `src/api/utils/error_codes.py` (GMS-XXX-NNN format) |
+| Boundary        | Type             | Status  | Location                                            |
+| --------------- | ---------------- | ------- | --------------------------------------------------- |
+| REST API        | Pydantic models  | GOOD    | `src/api/models/requests.py`, `responses.py`        |
+| WebSocket       | JSON messages    | PARTIAL | No schema validation on incoming frames             |
+| Database        | SQLAlchemy ORM   | GOOD    | `src/api/auth/models.py` with CHECK constraints     |
+| File I/O        | Path validation  | GOOD    | `src/api/utils/path_validation.py` whitelist        |
+| Error responses | Structured codes | GOOD    | `src/api/utils/error_codes.py` (GMS-XXX-NNN format) |
 
 ### Evaluation Results
 
-| Criterion | Status | Notes |
-|-----------|--------|-------|
-| Inputs validated at boundary | PARTIAL | Pydantic validates REST; WebSocket JSON not validated |
-| Outputs well-defined and versioned | PARTIAL | Response models defined; no API versioning |
-| Errors structured and consistent | GOOD | `GMS-{CATEGORY}-{NUMBER}` format with request tracing |
+| Criterion                          | Status  | Notes                                                 |
+| ---------------------------------- | ------- | ----------------------------------------------------- |
+| Inputs validated at boundary       | PARTIAL | Pydantic validates REST; WebSocket JSON not validated |
+| Outputs well-defined and versioned | PARTIAL | Response models defined; no API versioning            |
+| Errors structured and consistent   | GOOD    | `GMS-{CATEGORY}-{NUMBER}` format with request tracing |
 
 ### Recommendations
 
@@ -303,12 +318,12 @@
 
 ### Current State
 
-| Test Type | Count | Coverage | Status |
-|-----------|-------|----------|--------|
-| Unit tests | 117 files | 90% threshold | GOOD |
-| Integration tests | 10+ files | Included in 90% | GOOD |
-| E2E tests | Limited | Not measured | NEEDS WORK |
-| Frontend tests | 1 file | Minimal | CRITICAL GAP |
+| Test Type         | Count     | Coverage        | Status       |
+| ----------------- | --------- | --------------- | ------------ |
+| Unit tests        | 117 files | 90% threshold   | GOOD         |
+| Integration tests | 10+ files | Included in 90% | GOOD         |
+| E2E tests         | Limited   | Not measured    | NEEDS WORK   |
+| Frontend tests    | 1 file    | Minimal         | CRITICAL GAP |
 
 ### Test Pyramid Compliance
 
@@ -343,35 +358,35 @@ Target:                          Actual:
 
 ### Code Quality Tooling
 
-| Tool | Status | Configuration |
-|------|--------|---------------|
-| Formatting (Black) | ENFORCED | 88 chars, CI blocking |
-| Linting (Ruff) | ENFORCED | CI blocking |
-| Type checking (MyPy) | PARTIAL | Many exclusions |
-| Security (Bandit) | ENFORCED | low+high impact |
-| Security (pip-audit) | ENFORCED | 2 CVE exceptions |
+| Tool                 | Status   | Configuration         |
+| -------------------- | -------- | --------------------- |
+| Formatting (Black)   | ENFORCED | 88 chars, CI blocking |
+| Linting (Ruff)       | ENFORCED | CI blocking           |
+| Type checking (MyPy) | PARTIAL  | Many exclusions       |
+| Security (Bandit)    | ENFORCED | low+high impact       |
+| Security (pip-audit) | ENFORCED | 2 CVE exceptions      |
 
 ### CI/CD
 
-| Check | Required | Notes |
-|-------|----------|-------|
-| Linting | YES | Ruff + Black |
-| Type checking | YES | MyPy (with exclusions) |
-| Unit tests | YES | 90% coverage threshold |
-| Security scan | YES | Bandit + pip-audit |
-| TODO/FIXME check | YES | Blocks merge |
-| Frontend build | YES | Vite build |
-| Frontend tests | NO | Missing requirement |
+| Check            | Required | Notes                  |
+| ---------------- | -------- | ---------------------- |
+| Linting          | YES      | Ruff + Black           |
+| Type checking    | YES      | MyPy (with exclusions) |
+| Unit tests       | YES      | 90% coverage threshold |
+| Security scan    | YES      | Bandit + pip-audit     |
+| TODO/FIXME check | YES      | Blocks merge           |
+| Frontend build   | YES      | Vite build             |
+| Frontend tests   | NO       | Missing requirement    |
 
 ### Dependency Hygiene
 
-| Aspect | Status | Notes |
-|--------|--------|-------|
-| Python lockfile | INCOMPLETE | Only 13 of 100+ deps locked |
-| npm lockfile | COMPLETE | Full package-lock.json |
-| Conda env file | PARTIAL | Loose version constraints |
-| Dependabot | ENABLED | Weekly updates |
-| Supply chain risk | MEDIUM | CVE exceptions documented |
+| Aspect            | Status     | Notes                       |
+| ----------------- | ---------- | --------------------------- |
+| Python lockfile   | INCOMPLETE | Only 13 of 100+ deps locked |
+| npm lockfile      | COMPLETE   | Full package-lock.json      |
+| Conda env file    | PARTIAL    | Loose version constraints   |
+| Dependabot        | ENABLED    | Weekly updates              |
+| Supply chain risk | MEDIUM     | CVE exceptions documented   |
 
 ---
 
@@ -398,13 +413,13 @@ UpstreamDrift/
 
 ### Assessment
 
-| Criterion | Status | Notes |
-|-----------|--------|-------|
-| Clear separation of concerns | PARTIAL | Launchers mix UI and logic |
-| Consistent naming conventions | GOOD | Python: snake_case, TS: camelCase |
-| Test co-location | GOOD | Separate tests/ directory |
-| Documentation organization | GOOD | Well-structured docs/ |
-| Configuration centralization | PARTIAL | Multiple config files with some duplication |
+| Criterion                     | Status  | Notes                                       |
+| ----------------------------- | ------- | ------------------------------------------- |
+| Clear separation of concerns  | PARTIAL | Launchers mix UI and logic                  |
+| Consistent naming conventions | GOOD    | Python: snake_case, TS: camelCase           |
+| Test co-location              | GOOD    | Separate tests/ directory                   |
+| Documentation organization    | GOOD    | Well-structured docs/                       |
+| Configuration centralization  | PARTIAL | Multiple config files with some duplication |
 
 ---
 
@@ -412,10 +427,10 @@ UpstreamDrift/
 
 ### Currently Open Issues
 
-| Issue # | Title | Overlap with Assessment |
-|---------|-------|------------------------|
-| #980 | Implement SMPL-X integration for mesh generation | Feature request - No overlap |
-| #979 | Implement MakeHuman integration for mesh generation | Feature request - No overlap |
+| Issue # | Title                                               | Overlap with Assessment      |
+| ------- | --------------------------------------------------- | ---------------------------- |
+| #980    | Implement SMPL-X integration for mesh generation    | Feature request - No overlap |
+| #979    | Implement MakeHuman integration for mesh generation | Feature request - No overlap |
 
 ### Assessment Findings NOT in Existing Issues
 
@@ -428,6 +443,7 @@ All findings in this assessment are NEW and should be filed as GitHub issues.
 ### Critical Priority (Create Immediately)
 
 1. **[Security] Replace unsafe `eval()` in signal_toolkit/fitting.py**
+
    - Labels: `security`, `critical`, `python`
    - Assignee: Security review required
 
@@ -437,15 +453,19 @@ All findings in this assessment are NEW and should be filed as GitHub issues.
 ### High Priority
 
 3. **[Refactor] Break up golf_launcher.py god module**
+
    - Labels: `refactoring`, `maintainability`, `python`, `size/L`
 
 4. **[DevOps] Complete Python dependency lockfile**
+
    - Labels: `dependencies`, `ci/cd`, `size/M`
 
 5. **[A11y] Add accessibility attributes to React components**
+
    - Labels: `accessibility`, `frontend`, `size/M`
 
 6. **[Testing] Add React component tests**
+
    - Labels: `tests`, `frontend`, `size/M`
 
 7. **[Security] Harden main Dockerfile (non-root user, pinned base)**
@@ -454,15 +474,19 @@ All findings in this assessment are NEW and should be filed as GitHub issues.
 ### Medium Priority
 
 8. **[TypeScript] Reduce mypy exclusion list**
+
    - Labels: `typing`, `python`, `size/L`
 
 9. **[Reliability] Replace generic exception catches with specific handlers**
+
    - Labels: `error-handling`, `python`, `size/M`
 
 10. **[Cleanup] Remove unused frontend dependencies (Zustand, react-hook-form, zod)**
+
     - Labels: `dependencies`, `frontend`, `size/S`
 
 11. **[Security] Document CVE exception remediation plans**
+
     - Labels: `security`, `documentation`, `size/S`
 
 12. **[Reliability] Add WebSocket reconnection with exponential backoff**
@@ -471,9 +495,11 @@ All findings in this assessment are NEW and should be filed as GitHub issues.
 ### Low Priority
 
 13. **[DRY] Consolidate duplicate pytest.ini configurations**
+
     - Labels: `maintainability`, `tests`, `size/S`
 
 14. **[Cleanup] Extract repeated Tailwind button classes**
+
     - Labels: `frontend`, `maintainability`, `size/S`
 
 15. **[Security] Add Docker image scanning to CI (Trivy)**
@@ -483,14 +509,14 @@ All findings in this assessment are NEW and should be filed as GitHub issues.
 
 ## Summary Metrics
 
-| Category | Score | Notes |
-|----------|-------|-------|
-| Security | 6/10 | Critical eval/pickle issues; good auth/validation otherwise |
-| Maintainability | 7/10 | God modules and type gaps offset by good testing |
-| Testability | 8/10 | Strong Python testing; frontend tests lacking |
-| Build/Deploy | 7/10 | Good CI gates; Docker and locking need work |
-| Documentation | 9/10 | Comprehensive docs, good structure |
-| DX (Developer Experience) | 7/10 | Good tooling; onboarding could be smoother |
+| Category                  | Score | Notes                                                       |
+| ------------------------- | ----- | ----------------------------------------------------------- |
+| Security                  | 6/10  | Critical eval/pickle issues; good auth/validation otherwise |
+| Maintainability           | 7/10  | God modules and type gaps offset by good testing            |
+| Testability               | 8/10  | Strong Python testing; frontend tests lacking               |
+| Build/Deploy              | 7/10  | Good CI gates; Docker and locking need work                 |
+| Documentation             | 9/10  | Comprehensive docs, good structure                          |
+| DX (Developer Experience) | 7/10  | Good tooling; onboarding could be smoother                  |
 
 **Overall Assessment: GOOD with specific critical fixes needed**
 

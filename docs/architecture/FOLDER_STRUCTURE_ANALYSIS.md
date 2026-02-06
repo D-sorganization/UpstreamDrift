@@ -43,6 +43,7 @@ src/engines/
 ```
 
 Each engine directory is self-contained with:
+
 - `python/` - Python implementation
 - `python/src/` - Core engine code
 - `python/tests/` - Engine-specific tests
@@ -140,14 +141,14 @@ docs/
 
 Root-level configuration:
 
-| File | Purpose |
-|------|---------|
-| `pyproject.toml` | Python package configuration (hatch build) |
-| `environment.yml` | Conda environment definition |
-| `setup.py` | Legacy pip installation |
-| `.pre-commit-config.yaml` | Pre-commit hooks |
-| `mypy.ini` | Type checking configuration |
-| `Makefile` | Development task automation |
+| File                      | Purpose                                    |
+| ------------------------- | ------------------------------------------ |
+| `pyproject.toml`          | Python package configuration (hatch build) |
+| `environment.yml`         | Conda environment definition               |
+| `setup.py`                | Legacy pip installation                    |
+| `.pre-commit-config.yaml` | Pre-commit hooks                           |
+| `mypy.ini`                | Type checking configuration                |
+| `Makefile`                | Development task automation                |
 
 ## CI/CD and Automation
 
@@ -161,20 +162,25 @@ Extensive GitHub Actions automation in `.github/workflows/`:
 ## Key Conventions
 
 ### 1. Shared Code Pattern
+
 Common utilities live in `src/shared/python/` and are imported across engines.
 
 ### 2. Model Files Location
+
 - OpenSim models: `src/shared/models/opensim/opensim-models/`
 - MyoSuite models: `src/shared/models/myosuite/`
 - URDF models: `src/shared/urdf/`
 
 ### 3. Entry Points
+
 - Primary launcher: `launch_golf_suite.py`
 - Engine-specific launchers: `src/launchers/`
 - CLI entry: `upstream-drift` command
 
 ### 4. Namespace Pattern
+
 Python packages use `src/` as the root:
+
 - `src.api` - API modules
 - `src.engines` - Physics engines
 - `src.shared` - Shared utilities
@@ -197,6 +203,7 @@ Python packages use `src/` as the root:
 ## Summary
 
 UpstreamDrift uses a **multi-paradigm organizational approach**:
+
 - **Domain-driven** for physics engine separation
 - **Layer-based** for API and shared code
 - **Feature-based** for UI components

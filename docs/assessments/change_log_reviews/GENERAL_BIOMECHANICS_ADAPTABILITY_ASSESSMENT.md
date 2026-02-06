@@ -18,14 +18,14 @@ This assessment evaluates the Golf Modeling Suite's potential to evolve from a g
 
 ### Overall Adaptability Score: **8.5/10** (Highly Adaptable)
 
-| Category | Score | Notes |
-|----------|-------|-------|
-| Core Architecture | 9.5/10 | Protocol-based, domain-agnostic design |
-| Physics Engines | 10/10 | All 5 engines are completely generic |
-| Biomechanics Analysis | 9/10 | Most analysis tools are domain-agnostic |
-| AI Integration | 10/10 | Provider-agnostic, fully generic |
-| Domain-Specific Code | 6/10 | Golf-specific code is well-isolated |
-| Documentation | 7/10 | Good foundation, needs generalization |
+| Category              | Score  | Notes                                   |
+| --------------------- | ------ | --------------------------------------- |
+| Core Architecture     | 9.5/10 | Protocol-based, domain-agnostic design  |
+| Physics Engines       | 10/10  | All 5 engines are completely generic    |
+| Biomechanics Analysis | 9/10   | Most analysis tools are domain-agnostic |
+| AI Integration        | 10/10  | Provider-agnostic, fully generic        |
+| Domain-Specific Code  | 6/10   | Golf-specific code is well-isolated     |
+| Documentation         | 7/10   | Good foundation, needs generalization   |
 
 **Verdict:** The architecture is **exceptionally well-designed for generalization**. Transformation requires primarily documentation, naming, and minor abstraction work rather than fundamental restructuring.
 
@@ -53,6 +53,7 @@ class PhysicsEngine(Protocol):
 ```
 
 **Key Insight:** This interface works identically for:
+
 - Golf swing models
 - Humanoid walking robots (Boston Dynamics Atlas)
 - Quadruped robots (Spot, ANYmal)
@@ -62,13 +63,13 @@ class PhysicsEngine(Protocol):
 
 ### 1.2 Multi-Engine Architecture
 
-| Engine | Domain Independence | Use Cases Beyond Golf |
-|--------|-------------------|----------------------|
-| **MuJoCo** | 10/10 | Robotics, RL, musculoskeletal simulation |
-| **Drake** | 10/10 | Trajectory optimization, manipulation, real robots |
-| **Pinocchio** | 10/10 | High-performance dynamics, legged locomotion |
-| **OpenSim** | 10/10 | Clinical biomechanics, rehabilitation |
-| **MyoSuite** | 9/10 | Muscle-driven systems, motor control research |
+| Engine        | Domain Independence | Use Cases Beyond Golf                              |
+| ------------- | ------------------- | -------------------------------------------------- |
+| **MuJoCo**    | 10/10               | Robotics, RL, musculoskeletal simulation           |
+| **Drake**     | 10/10               | Trajectory optimization, manipulation, real robots |
+| **Pinocchio** | 10/10               | High-performance dynamics, legged locomotion       |
+| **OpenSim**   | 10/10               | Clinical biomechanics, rehabilitation              |
+| **MyoSuite**  | 9/10                | Muscle-driven systems, motor control research      |
 
 **Unique Competitive Advantage:** Cross-engine validation capability. No other open-source platform offers this.
 
@@ -79,61 +80,65 @@ class PhysicsEngine(Protocol):
 ### 2.1 Fully Generic Components (100% Reusable)
 
 #### Physics Engine Layer
+
 All physics engines are completely domain-agnostic and require zero modification:
 
-| Component | File | Reusability |
-|-----------|------|-------------|
-| MuJoCo Engine | `engines/physics_engines/mujoco/` | 100% |
-| Drake Engine | `engines/physics_engines/drake/` | 100% |
-| Pinocchio Engine | `engines/physics_engines/pinocchio/` | 100% |
-| OpenSim Engine | `engines/physics_engines/opensim/` | 100% |
-| MyoSuite Engine | `engines/physics_engines/myosuite/` | 100% |
-| Engine Manager | `shared/python/engine_manager.py` | 100% |
-| Unified Interface | `shared/python/unified_engine_interface.py` | 100% |
+| Component         | File                                        | Reusability |
+| ----------------- | ------------------------------------------- | ----------- |
+| MuJoCo Engine     | `engines/physics_engines/mujoco/`           | 100%        |
+| Drake Engine      | `engines/physics_engines/drake/`            | 100%        |
+| Pinocchio Engine  | `engines/physics_engines/pinocchio/`        | 100%        |
+| OpenSim Engine    | `engines/physics_engines/opensim/`          | 100%        |
+| MyoSuite Engine   | `engines/physics_engines/myosuite/`         | 100%        |
+| Engine Manager    | `shared/python/engine_manager.py`           | 100%        |
+| Unified Interface | `shared/python/unified_engine_interface.py` | 100%        |
 
 #### Biomechanics Analysis Core
-| Component | File | Reusability | Notes |
-|-----------|------|-------------|-------|
-| Biomechanics Data | `shared/python/biomechanics_data.py` | 100% | Generic kinematic/kinetic container |
-| Hill Muscle Model | `shared/python/hill_muscle.py` | 100% | Standard muscle model |
-| Signal Processing | `shared/python/signal_processing.py` | 100% | Filtering, differentiation |
-| Statistical Analysis | `shared/python/statistical_analysis.py` | 100% | PCA, correlation, comparison |
-| Manipulability | `shared/python/manipulability.py` | 100% | Workspace analysis |
-| Joint Stress | `shared/python/injury/joint_stress.py` | 90% | Minor parameter changes |
+
+| Component            | File                                    | Reusability | Notes                               |
+| -------------------- | --------------------------------------- | ----------- | ----------------------------------- |
+| Biomechanics Data    | `shared/python/biomechanics_data.py`    | 100%        | Generic kinematic/kinetic container |
+| Hill Muscle Model    | `shared/python/hill_muscle.py`          | 100%        | Standard muscle model               |
+| Signal Processing    | `shared/python/signal_processing.py`    | 100%        | Filtering, differentiation          |
+| Statistical Analysis | `shared/python/statistical_analysis.py` | 100%        | PCA, correlation, comparison        |
+| Manipulability       | `shared/python/manipulability.py`       | 100%        | Workspace analysis                  |
+| Joint Stress         | `shared/python/injury/joint_stress.py`  | 90%         | Minor parameter changes             |
 
 #### AI Integration Layer
-| Component | File | Reusability | Notes |
-|-----------|------|-------------|-------|
-| AI Types | `shared/python/ai/types.py` | 100% | Generic message types |
-| Base Adapter | `shared/python/ai/adapters/base.py` | 95% | Update system prompt only |
-| OpenAI Adapter | `shared/python/ai/adapters/openai_adapter.py` | 100% | Provider-agnostic |
-| Anthropic Adapter | `shared/python/ai/adapters/anthropic_adapter.py` | 100% | Provider-agnostic |
-| Ollama Adapter | `shared/python/ai/adapters/ollama_adapter.py` | 100% | Provider-agnostic |
-| Tool Registry | `shared/python/ai/tool_registry.py` | 100% | Generic tool framework |
-| Workflow Engine | `shared/python/ai/workflow_engine.py` | 100% | Multi-turn orchestration |
+
+| Component         | File                                             | Reusability | Notes                     |
+| ----------------- | ------------------------------------------------ | ----------- | ------------------------- |
+| AI Types          | `shared/python/ai/types.py`                      | 100%        | Generic message types     |
+| Base Adapter      | `shared/python/ai/adapters/base.py`              | 95%         | Update system prompt only |
+| OpenAI Adapter    | `shared/python/ai/adapters/openai_adapter.py`    | 100%        | Provider-agnostic         |
+| Anthropic Adapter | `shared/python/ai/adapters/anthropic_adapter.py` | 100%        | Provider-agnostic         |
+| Ollama Adapter    | `shared/python/ai/adapters/ollama_adapter.py`    | 100%        | Provider-agnostic         |
+| Tool Registry     | `shared/python/ai/tool_registry.py`              | 100%        | Generic tool framework    |
+| Workflow Engine   | `shared/python/ai/workflow_engine.py`            | 100%        | Multi-turn orchestration  |
 
 #### Video Processing
-| Component | File | Reusability | Notes |
-|-----------|------|-------------|-------|
-| Pose Estimation Interface | `shared/python/pose_estimation/interface.py` | 100% | Generic protocol |
-| MediaPipe Estimator | `shared/python/pose_estimation/mediapipe_estimator.py` | 100% | Works for any human pose |
+
+| Component                 | File                                                   | Reusability | Notes                    |
+| ------------------------- | ------------------------------------------------------ | ----------- | ------------------------ |
+| Pose Estimation Interface | `shared/python/pose_estimation/interface.py`           | 100%        | Generic protocol         |
+| MediaPipe Estimator       | `shared/python/pose_estimation/mediapipe_estimator.py` | 100%        | Works for any human pose |
 
 ### 2.2 Partially Reusable Components (60-90%)
 
-| Component | File | Current State | Generalization Effort |
-|-----------|------|---------------|----------------------|
-| Kinematic Sequence | `shared/python/kinematic_sequence.py` | Golf-specific segment order | Low: Parameterize expected order |
-| Spinal Load Analysis | `shared/python/injury/spinal_load_analysis.py` | Golf-specific but generic math | Low: Rename, adjust thresholds |
-| Grip Contact Model | `shared/python/grip_contact_model.py` | Two-handed grip | Medium: Abstract to contact model |
+| Component            | File                                           | Current State                  | Generalization Effort             |
+| -------------------- | ---------------------------------------------- | ------------------------------ | --------------------------------- |
+| Kinematic Sequence   | `shared/python/kinematic_sequence.py`          | Golf-specific segment order    | Low: Parameterize expected order  |
+| Spinal Load Analysis | `shared/python/injury/spinal_load_analysis.py` | Golf-specific but generic math | Low: Rename, adjust thresholds    |
+| Grip Contact Model   | `shared/python/grip_contact_model.py`          | Two-handed grip                | Medium: Abstract to contact model |
 
 ### 2.3 Golf-Specific Components (Need Replacement/Abstraction)
 
-| Component | File | Golf Usage | Generalization Strategy |
-|-----------|------|-----------|------------------------|
-| Ball Flight Physics | `shared/python/ball_flight_physics.py` | Golf ball aerodynamics | Extract `ProjectilePhysics` base class |
-| Equipment Registry | `shared/python/equipment.py` | Club specifications | Create generic `EquipmentProfile` interface |
-| Swing Plane Analysis | `shared/python/swing_plane_analysis.py` | Golf swing plane | Generalize to `PlanarMotionAnalyzer` |
-| Impact Model | `shared/python/impact_model.py` | Ball-club collision | Extract `CollisionDynamics` protocol |
+| Component            | File                                    | Golf Usage             | Generalization Strategy                     |
+| -------------------- | --------------------------------------- | ---------------------- | ------------------------------------------- |
+| Ball Flight Physics  | `shared/python/ball_flight_physics.py`  | Golf ball aerodynamics | Extract `ProjectilePhysics` base class      |
+| Equipment Registry   | `shared/python/equipment.py`            | Club specifications    | Create generic `EquipmentProfile` interface |
+| Swing Plane Analysis | `shared/python/swing_plane_analysis.py` | Golf swing plane       | Generalize to `PlanarMotionAnalyzer`        |
+| Impact Model         | `shared/python/impact_model.py`         | Ball-club collision    | Extract `CollisionDynamics` protocol        |
 
 ---
 
@@ -142,6 +147,7 @@ All physics engines are completely domain-agnostic and require zero modification
 ### 3.1 Human Gait Analysis
 
 **Required Components:**
+
 - OpenSim/MyoSuite musculoskeletal models (EXISTS)
 - Inverse kinematics for walking (EXISTS)
 - Ground reaction force analysis (EXISTS via `compute_contact_forces`)
@@ -151,6 +157,7 @@ All physics engines are completely domain-agnostic and require zero modification
 **Adaptation Effort:** 3-5 days
 
 **Example Workflow:**
+
 ```python
 # Load gait model
 engine.load_from_path("models/gait2354.osim")
@@ -166,6 +173,7 @@ gait_metrics = analyze_gait_cycle(engine, trajectory)
 ### 3.2 Olympic Weightlifting
 
 **Required Components:**
+
 - Full-body musculoskeletal model (EXISTS - MyoSuite 290-muscle)
 - Joint load analysis (EXISTS)
 - Power/force analysis (EXISTS)
@@ -175,6 +183,7 @@ gait_metrics = analyze_gait_cycle(engine, trajectory)
 **Adaptation Effort:** 3-4 days
 
 **Example Workflow:**
+
 ```python
 # Load weightlifting model with barbell
 engine.load_from_path("models/full_body_with_barbell.xml")
@@ -187,6 +196,7 @@ lift_analysis = analyze_lift(engine, trajectory)
 ### 3.3 Robotic Manipulators
 
 **Required Components:**
+
 - URDF model loading (EXISTS)
 - Jacobian computation (EXISTS)
 - Manipulability analysis (EXISTS)
@@ -196,6 +206,7 @@ lift_analysis = analyze_lift(engine, trajectory)
 **Adaptation Effort:** 1-2 days (mostly documentation)
 
 **Example Workflow:**
+
 ```python
 # Load robot model
 engine.load_from_path("models/ur5.urdf")
@@ -215,6 +226,7 @@ trajectory = optimize_trajectory(
 ### 3.4 General Athletic Performance
 
 **Required Components:**
+
 - Motion capture integration (EXISTS)
 - Kinematic analysis (EXISTS)
 - Kinetic analysis (EXISTS)
@@ -224,14 +236,14 @@ trajectory = optimize_trajectory(
 
 **Sports Coverage Matrix:**
 
-| Sport | Model Exists | Analysis Ready | Effort |
-|-------|-------------|----------------|--------|
-| Golf | Yes | Yes | 0 days |
-| Baseball Pitching | Via OpenSim | 90% | 1 day |
-| Tennis Serve | Via OpenSim | 85% | 1-2 days |
-| Running | Via OpenSim | 95% | 0.5 days |
-| Swimming | Via OpenSim | 70% | 3 days |
-| Weightlifting | Via MyoSuite | 80% | 2 days |
+| Sport             | Model Exists | Analysis Ready | Effort   |
+| ----------------- | ------------ | -------------- | -------- |
+| Golf              | Yes          | Yes            | 0 days   |
+| Baseball Pitching | Via OpenSim  | 90%            | 1 day    |
+| Tennis Serve      | Via OpenSim  | 85%            | 1-2 days |
+| Running           | Via OpenSim  | 95%            | 0.5 days |
+| Swimming          | Via OpenSim  | 70%            | 3 days   |
+| Weightlifting     | Via MyoSuite | 80%            | 2 days   |
 
 ---
 
@@ -240,12 +252,14 @@ trajectory = optimize_trajectory(
 ### Phase 1: Core Abstraction (2-3 weeks)
 
 **Week 1: Domain Abstraction**
+
 - [ ] Create `DomainConfig` class for sport/activity-specific parameters
 - [ ] Extract `ProjectilePhysics` base class from ball flight
 - [ ] Parameterize `KinematicSequenceAnalyzer` for any segment chain
 - [ ] Create generic `EquipmentProfile` interface
 
 **Week 2: Documentation & Examples**
+
 - [ ] Rename project or create umbrella branding ("Biomechanics Suite")
 - [ ] Write domain-specific quickstart guides:
   - `docs/domains/gait_analysis.md`
@@ -254,6 +268,7 @@ trajectory = optimize_trajectory(
 - [ ] Create example models for each domain
 
 **Week 3: Testing & Validation**
+
 - [ ] Validate with Atlas humanoid model (robotics)
 - [ ] Validate with gait2354 OpenSim model (gait)
 - [ ] Validate with UR5 URDF (manipulation)
@@ -262,18 +277,21 @@ trajectory = optimize_trajectory(
 ### Phase 2: Domain-Specific Features (4-6 weeks)
 
 **Gait Analysis Package:**
+
 - Gait event detection (heel strike, toe-off)
 - Spatiotemporal parameter computation
 - Symmetry analysis
 - Clinical report generation
 
 **Athletic Performance Package:**
+
 - Sport-specific metric definitions (pluggable)
 - Performance comparison database
 - Training load monitoring
 - Injury risk assessment
 
 **Robotics Package:**
+
 - Workspace visualization
 - Singularity analysis
 - Task-space controllers
@@ -297,6 +315,7 @@ trajectory = optimize_trajectory(
 **Implementation Quality:** Production-ready (617 lines)
 
 **Features:**
+
 - Magnus effect (spin-induced lift/drift)
 - Waterloo/Penner drag model with quadratic coefficients
 - Environmental conditions (wind, altitude, temperature)
@@ -304,6 +323,7 @@ trajectory = optimize_trajectory(
 - Comprehensive trajectory analysis
 
 **Generalization Potential:** HIGH
+
 - Core physics is standard aerodynamics
 - Can be extended to:
   - Baseball trajectory
@@ -312,6 +332,7 @@ trajectory = optimize_trajectory(
   - Any spinning projectile
 
 **Recommended Abstraction:**
+
 ```python
 class ProjectilePhysics(ABC):
     """Base class for projectile motion with aerodynamics."""
@@ -334,6 +355,7 @@ class TennisBallPhysics(ProjectilePhysics): ...
 **Implementation Quality:** Production-ready, comprehensive
 
 **Architecture:**
+
 ```
 ai/
 ├── types.py                 # Generic message types, contexts
@@ -351,6 +373,7 @@ ai/
 ```
 
 **Features:**
+
 - Multi-provider support (OpenAI, Anthropic, Ollama)
 - Tool/function calling with registry
 - Streaming responses
@@ -361,6 +384,7 @@ ai/
 **Generalization Status:** 100% domain-agnostic
 
 **Only Change Needed:** Update system prompt in `base.py`:
+
 ```python
 # Current (golf-specific)
 "You are an AI assistant for the Golf Modeling Suite..."
@@ -376,6 +400,7 @@ athletic performance, and robotic systems..."
 **Status:** Full integration with PhysicsEngine Protocol
 
 **Capabilities:**
+
 - 290-muscle full-body models
 - Hill-type muscle activation dynamics
 - MuJoCo-based simulation
@@ -388,6 +413,7 @@ athletic performance, and robotic systems..."
 **Directory:** `shared/python/pose_estimation/`
 
 **Implementations:**
+
 - MediaPipe (Apache 2.0 - recommended)
 - OpenPose (stub for reference)
 
@@ -399,24 +425,24 @@ athletic performance, and robotic systems..."
 
 ### Minimal Viable Generalization (MVP)
 
-| Task | Effort | Priority |
-|------|--------|----------|
-| Update system prompts | 0.5 days | P0 |
-| Parameterize kinematic sequence | 1 day | P0 |
-| Create domain config system | 2 days | P0 |
-| Write gait analysis guide | 1 day | P1 |
-| Write robotics guide | 1 day | P1 |
-| Example models (3 domains) | 2 days | P1 |
-| **Total MVP** | **7.5 days** | |
+| Task                            | Effort       | Priority |
+| ------------------------------- | ------------ | -------- |
+| Update system prompts           | 0.5 days     | P0       |
+| Parameterize kinematic sequence | 1 day        | P0       |
+| Create domain config system     | 2 days       | P0       |
+| Write gait analysis guide       | 1 day        | P1       |
+| Write robotics guide            | 1 day        | P1       |
+| Example models (3 domains)      | 2 days       | P1       |
+| **Total MVP**                   | **7.5 days** |          |
 
 ### Full Platform Transformation
 
-| Phase | Effort | Deliverables |
-|-------|--------|--------------|
-| Phase 1: Core Abstraction | 3 weeks | Generic interfaces, documentation |
-| Phase 2: Domain Features | 6 weeks | Gait, athletics, robotics packages |
-| Phase 3: Unified Platform | 4 weeks | Branded product, model library |
-| **Total** | **13 weeks** | Complete platform |
+| Phase                     | Effort       | Deliverables                       |
+| ------------------------- | ------------ | ---------------------------------- |
+| Phase 1: Core Abstraction | 3 weeks      | Generic interfaces, documentation  |
+| Phase 2: Domain Features  | 6 weeks      | Gait, athletics, robotics packages |
+| Phase 3: Unified Platform | 4 weeks      | Branded product, model library     |
+| **Total**                 | **13 weeks** | Complete platform                  |
 
 ---
 
@@ -424,26 +450,26 @@ athletic performance, and robotic systems..."
 
 ### Low Risk (Proceed Confidently)
 
-| Risk | Mitigation |
-|------|-----------|
+| Risk                                 | Mitigation                                   |
+| ------------------------------------ | -------------------------------------------- |
 | Breaking existing golf functionality | Golf is default domain; backwards compatible |
-| Documentation effort | Incremental; start with quickstarts |
-| Community confusion | Clear branding and domain selection |
+| Documentation effort                 | Incremental; start with quickstarts          |
+| Community confusion                  | Clear branding and domain selection          |
 
 ### Medium Risk (Monitor Carefully)
 
-| Risk | Mitigation |
-|------|-----------|
-| Scope creep per domain | Define clear feature boundaries |
-| Validation across domains | Leverage academic partnerships |
-| Performance degradation | Profile each domain separately |
+| Risk                      | Mitigation                      |
+| ------------------------- | ------------------------------- |
+| Scope creep per domain    | Define clear feature boundaries |
+| Validation across domains | Leverage academic partnerships  |
+| Performance degradation   | Profile each domain separately  |
 
 ### Low Probability / High Impact
 
-| Risk | Mitigation |
-|------|-----------|
-| Physics engine license changes | All Apache/BSD/MIT - very stable |
-| Competitor launches similar | First-mover advantage, community moat |
+| Risk                           | Mitigation                            |
+| ------------------------------ | ------------------------------------- |
+| Physics engine license changes | All Apache/BSD/MIT - very stable      |
+| Competitor launches similar    | First-mover advantage, community moat |
 
 ---
 
@@ -452,6 +478,7 @@ athletic performance, and robotic systems..."
 ### Unique Value Proposition
 
 **"The only open-source platform with:**
+
 1. Multi-physics engine validation
 2. Research-grade biomechanics
 3. AI-assisted analysis
@@ -459,14 +486,14 @@ athletic performance, and robotic systems..."
 
 ### Competitive Landscape
 
-| Competitor | Domain | Multi-Engine | Open Source | AI Integration |
-|------------|--------|--------------|-------------|----------------|
-| OpenSim | Biomechanics | No | Yes | No |
-| AnyBody | Biomechanics | No | No | No |
-| MoveAI | Motion Capture | No | No | Limited |
-| Vicon Nexus | Motion Capture | No | No | No |
-| RoboDK | Robotics | No | No | No |
-| **Ours** | **All** | **Yes** | **Yes** | **Yes** |
+| Competitor  | Domain         | Multi-Engine | Open Source | AI Integration |
+| ----------- | -------------- | ------------ | ----------- | -------------- |
+| OpenSim     | Biomechanics   | No           | Yes         | No             |
+| AnyBody     | Biomechanics   | No           | No          | No             |
+| MoveAI      | Motion Capture | No           | No          | Limited        |
+| Vicon Nexus | Motion Capture | No           | No          | No             |
+| RoboDK      | Robotics       | No           | No          | No             |
+| **Ours**    | **All**        | **Yes**      | **Yes**     | **Yes**        |
 
 ---
 
@@ -513,12 +540,12 @@ The platform has the potential to become the **de facto open standard** for biom
 
 **Document Approval:**
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Technical Lead | | | |
-| Product Owner | | | |
-| Architecture Review | | | |
+| Role                | Name | Date | Signature |
+| ------------------- | ---- | ---- | --------- |
+| Technical Lead      |      |      |           |
+| Product Owner       |      |      |           |
+| Architecture Review |      |      |           |
 
 ---
 
-*This assessment should be reviewed quarterly as generalization progresses.*
+_This assessment should be reviewed quarterly as generalization progresses._

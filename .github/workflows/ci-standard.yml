@@ -206,7 +206,7 @@ jobs:
   matlab-tests:
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: false  # DISABLED - Requires MATLAB license not available in CI
+    if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -225,7 +225,7 @@ jobs:
   arduino-build:
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: false  # DISABLED - No Arduino components in this project
+    if: false # DISABLED - No Arduino components in this project
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -234,4 +234,3 @@ jobs:
       - name: Verify Build
         working-directory: ./arduino
         run: pio run -e uno
-

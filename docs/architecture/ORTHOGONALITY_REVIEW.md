@@ -7,12 +7,12 @@
 
 This report analyzes the orthogonality of the UpstreamDrift codebase - the principle that components should be independent so changes to one don't affect others. Overall, the architecture demonstrates **good high-level separation** (engines, API, UI, shared utilities) but has **specific coupling issues** that should be addressed.
 
-| Area | Score | Summary |
-|------|-------|---------|
-| Engine Interface Layer | 6/10 | Leaky abstractions, inconsistent signatures |
-| Shared Python Modules | 7/10 | Good separation with notable exceptions |
-| API Layer | 5/10 | Business logic in routes, inconsistent DI |
-| Cross-Layer Dependencies | 8/10 | Clean boundaries, minimal violations |
+| Area                     | Score | Summary                                     |
+| ------------------------ | ----- | ------------------------------------------- |
+| Engine Interface Layer   | 6/10  | Leaky abstractions, inconsistent signatures |
+| Shared Python Modules    | 7/10  | Good separation with notable exceptions     |
+| API Layer                | 5/10  | Business logic in routes, inconsistent DI   |
+| Cross-Layer Dependencies | 8/10  | Clean boundaries, minimal violations        |
 
 ---
 
@@ -42,13 +42,14 @@ def set_shaft_properties(self, length: float, ...) -> bool:
 
 ### 1.2 Inconsistent Return Types (HIGH)
 
-| Method | Protocol Returns | Base Implementation Returns |
-|--------|------------------|----------------------------|
-| `get_state()` | `tuple[np.ndarray, np.ndarray]` | `EngineState \| None` |
-| `compute_jacobian()` | `dict[str, np.ndarray] \| None` | Keys vary: `linear`, `angular`, OR `spatial` |
-| `compute_contact_forces()` | `np.ndarray` | Shape (3,) OR (6,) undefined |
+| Method                     | Protocol Returns                | Base Implementation Returns                  |
+| -------------------------- | ------------------------------- | -------------------------------------------- |
+| `get_state()`              | `tuple[np.ndarray, np.ndarray]` | `EngineState \| None`                        |
+| `compute_jacobian()`       | `dict[str, np.ndarray] \| None` | Keys vary: `linear`, `angular`, OR `spatial` |
+| `compute_contact_forces()` | `np.ndarray`                    | Shape (3,) OR (6,) undefined                 |
 
 **Location:**
+
 - `interfaces.py:167` vs `base_physics_engine.py:304`
 - `interfaces.py:372-393`
 - `interfaces.py:395-410`
@@ -71,6 +72,7 @@ else:
 ```
 
 **Problems:**
+
 1. MATLAB/PENDULUM engines bypass the registry pattern
 2. Different storage attributes: `_matlab_engine` vs `active_physics_engine`
 3. Hard-coded validation paths per engine type (lines 287-308)
@@ -82,6 +84,7 @@ else:
 **Location:** `src/shared/python/interfaces.py:414-478`
 
 The protocol documents a CRITICAL CONTRACT:
+
 ```python
 @abstractmethod
 def compute_drift_acceleration(self) -> np.ndarray:
@@ -101,6 +104,7 @@ def compute_drift_acceleration(self) -> np.ndarray:
 **Location:** `src/shared/python/statistical_analysis.py` (2,236 lines)
 
 The `StatisticalAnalyzer` class has 35 methods and inherits from 6 mixins:
+
 - Energy analysis
 - Stability analysis
 - Phase detection
@@ -109,6 +113,7 @@ The `StatisticalAnalyzer` class has 35 methods and inherits from 6 mixins:
 - Swing metrics
 
 **Problems:**
+
 - Single class handling 6 different analysis domains
 - Difficult to test in isolation
 - Changes to one analysis type risk affecting others
@@ -136,17 +141,17 @@ if TYPE_CHECKING:
 
 Multiple shared modules import MuJoCo directly:
 
-| File | Type | Issue |
-|------|------|-------|
-| `physics_validation.py:25` | TYPE_CHECKING | **CRITICAL** - entire module is MuJoCo-specific |
-| `marker_mapping.py:21,107` | Runtime | Used for model inspection |
-| `engine_loaders.py:17` | Conditional | Acceptable - factory pattern |
-| `engine_availability.py:17,219,575` | Conditional | Acceptable - availability checking |
-| `engine_probes.py:106,567` | Conditional | Acceptable - probing |
-| `provenance.py:121` | Conditional | Version tracking |
-| `error_decorators.py:274` | Conditional | Error type handling |
-| `error_utils.py:350` | Conditional | Error handling |
-| `standard_models.py:325` | Conditional | Model validation |
+| File                                | Type          | Issue                                           |
+| ----------------------------------- | ------------- | ----------------------------------------------- |
+| `physics_validation.py:25`          | TYPE_CHECKING | **CRITICAL** - entire module is MuJoCo-specific |
+| `marker_mapping.py:21,107`          | Runtime       | Used for model inspection                       |
+| `engine_loaders.py:17`              | Conditional   | Acceptable - factory pattern                    |
+| `engine_availability.py:17,219,575` | Conditional   | Acceptable - availability checking              |
+| `engine_probes.py:106,567`          | Conditional   | Acceptable - probing                            |
+| `provenance.py:121`                 | Conditional   | Version tracking                                |
+| `error_decorators.py:274`           | Conditional   | Error type handling                             |
+| `error_utils.py:350`                | Conditional   | Error handling                                  |
+| `standard_models.py:325`            | Conditional   | Model validation                                |
 
 **Acceptable Pattern:** Most use try/except for optional functionality.
 **Problematic:** `physics_validation.py` and `marker_mapping.py` require MuJoCo at runtime.
@@ -225,6 +230,7 @@ def configure(simulation_service: SimulationService | None, ...):
 ```
 
 **Contrast with correct pattern in `engines.py`:**
+
 ```python
 async def get_engines(
     engine_manager: EngineManager = Depends(get_engine_manager),  # Correct
@@ -238,6 +244,7 @@ async def get_engines(
 **Location:** `src/api/services/simulation_service.py`
 
 `SimulationService` handles:
+
 1. Engine management (loading, checking)
 2. Model loading
 3. State management
@@ -264,12 +271,12 @@ The service expects a `data` field that doesn't exist in `AnalysisRequest`.
 
 ### 4.1 Positive Findings
 
-| Check | Result |
-|-------|--------|
-| Shared modules import from `src.engines`? | **No violations** |
-| Shared modules import from `src.api`? | **No violations** |
-| UI imports Python directly? | **No** - Uses HTTP/WebSocket |
-| Engines import from API? | **No violations** |
+| Check                                     | Result                       |
+| ----------------------------------------- | ---------------------------- |
+| Shared modules import from `src.engines`? | **No violations**            |
+| Shared modules import from `src.api`?     | **No violations**            |
+| UI imports Python directly?               | **No** - Uses HTTP/WebSocket |
+| Engines import from API?                  | **No violations**            |
 
 The high-level layer boundaries are well-maintained.
 
@@ -287,50 +294,57 @@ These areas demonstrate good orthogonality:
 ## 5. Summary of Issues
 
 ### Critical Priority
-| Issue | Location | Impact |
-|-------|----------|--------|
-| God Module | `statistical_analysis.py` | Hard to maintain, test, extend |
-| Engine-specific code in shared | `physics_validation.py` | False abstraction, hidden dependencies |
-| Direct engine access in routes | `engines.py`, `simulation_ws.py` | Tight coupling, bypasses services |
+
+| Issue                          | Location                         | Impact                                 |
+| ------------------------------ | -------------------------------- | -------------------------------------- |
+| God Module                     | `statistical_analysis.py`        | Hard to maintain, test, extend         |
+| Engine-specific code in shared | `physics_validation.py`          | False abstraction, hidden dependencies |
+| Direct engine access in routes | `engines.py`, `simulation_ws.py` | Tight coupling, bypasses services      |
 
 ### High Priority
-| Issue | Location | Impact |
-|-------|----------|--------|
-| Inconsistent return types | `interfaces.py` vs implementations | Runtime errors, type confusion |
-| Engine manager special-casing | `engine_manager.py` | Violates Open-Closed Principle |
-| Unenforceable contracts | `interfaces.py` | Silent correctness violations |
-| Business logic in routes | `video.py` | Mixed concerns, duplication risk |
+
+| Issue                         | Location                           | Impact                           |
+| ----------------------------- | ---------------------------------- | -------------------------------- |
+| Inconsistent return types     | `interfaces.py` vs implementations | Runtime errors, type confusion   |
+| Engine manager special-casing | `engine_manager.py`                | Violates Open-Closed Principle   |
+| Unenforceable contracts       | `interfaces.py`                    | Silent correctness violations    |
+| Business logic in routes      | `video.py`                         | Mixed concerns, duplication risk |
 
 ### Medium Priority
-| Issue | Location | Impact |
-|-------|----------|--------|
-| Mixin coupling | `swing_metrics.py` | Limited reusability |
-| Inconsistent DI pattern | Multiple route files | Testing difficulty |
-| Service too broad | `simulation_service.py` | Single responsibility violation |
-| MuJoCo in marker_mapping | `marker_mapping.py` | Hidden engine dependency |
+
+| Issue                    | Location                | Impact                          |
+| ------------------------ | ----------------------- | ------------------------------- |
+| Mixin coupling           | `swing_metrics.py`      | Limited reusability             |
+| Inconsistent DI pattern  | Multiple route files    | Testing difficulty              |
+| Service too broad        | `simulation_service.py` | Single responsibility violation |
+| MuJoCo in marker_mapping | `marker_mapping.py`     | Hidden engine dependency        |
 
 ### Low Priority
-| Issue | Location | Impact |
-|-------|----------|--------|
-| Import path inconsistency | `statistical_analysis.py` | Maintenance burden |
-| Data model mismatch | `analysis_service.py` | Defensive code smell |
+
+| Issue                     | Location                  | Impact               |
+| ------------------------- | ------------------------- | -------------------- |
+| Import path inconsistency | `statistical_analysis.py` | Maintenance burden   |
+| Data model mismatch       | `analysis_service.py`     | Defensive code smell |
 
 ---
 
 ## 6. Recommendations
 
 ### Immediate Actions
+
 1. **Move `physics_validation.py`** to `src/engines/mujoco/validation.py`
 2. **Fix return type signatures** in `interfaces.py` - use explicit types
 3. **Standardize DI** - Replace global `configure()` with `Depends()`
 
 ### Short-Term Refactoring
+
 1. **Split `statistical_analysis.py`** into focused analyzer classes
 2. **Create `EngineService`** to encapsulate engine operations in API
 3. **Create `VideoService`** to move video processing from routes
 4. **Make MATLAB/PENDULUM** conform to standard engine interface
 
 ### Long-Term Architecture
+
 1. **Strategy pattern** for engine configuration (self-describing engines)
 2. **Contract validation framework** for physics invariants
 3. **Composition over inheritance** for analysis mixins
@@ -342,19 +356,20 @@ These areas demonstrate good orthogonality:
 
 To track improvement over time:
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Max lines per module | 2,236 | < 500 |
-| Engine-specific code in shared/ | 2 modules | 0 |
-| Routes with direct engine access | 2 | 0 |
-| Routes using global DI | 5 | 0 |
-| Inconsistent interface methods | 3 | 0 |
+| Metric                           | Current   | Target |
+| -------------------------------- | --------- | ------ |
+| Max lines per module             | 2,236     | < 500  |
+| Engine-specific code in shared/  | 2 modules | 0      |
+| Routes with direct engine access | 2         | 0      |
+| Routes using global DI           | 5         | 0      |
+| Inconsistent interface methods   | 3         | 0      |
 
 ---
 
 ## Appendix: Files Analyzed
 
 ### Core Interface Layer
+
 - `src/shared/python/interfaces.py`
 - `src/shared/python/base_physics_engine.py`
 - `src/shared/python/engine_manager.py`
@@ -362,6 +377,7 @@ To track improvement over time:
 - `src/shared/python/mock_engine.py`
 
 ### Shared Modules
+
 - `src/shared/python/statistical_analysis.py`
 - `src/shared/python/physics_validation.py`
 - `src/shared/python/physics_constants.py`
@@ -371,6 +387,7 @@ To track improvement over time:
 - `src/shared/python/injury/*.py`
 
 ### API Layer
+
 - `src/api/server.py`
 - `src/api/local_server.py`
 - `src/api/routes/*.py`

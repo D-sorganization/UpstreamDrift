@@ -1,4 +1,5 @@
 # Physics Audit Report
+
 **Date:** 2026-02-05
 **Auditor:** Jules (Physics Auditor Agent)
 **Focus Area:** Core Physics Engines (Ball Flight, Impact, Kinematics)
@@ -18,6 +19,7 @@ The most critical deficiency is the treatment of the clubhead as a point mass in
 ### 1. Equipment Models (Impact & Shaft)
 
 #### **CRITICAL: Point Mass Assumption in Impact Model**
+
 - **File:** `src/shared/python/impact_model.py` (Line 135, `RigidBodyImpactModel`)
 - **Issue:** The impact solver uses a 1D impulse-momentum equation for point masses: `m_eff = (m_ball * m_club) / (m_ball + m_club)`. It ignores the clubhead's Moment of Inertia (MOI) and the offset of the impact vector from the Center of Gravity (CG).
 - **Impact:** Off-center hits do not naturally generate gear effect or reduce ball speed due to clubhead twisting.
@@ -25,6 +27,7 @@ The most critical deficiency is the treatment of the clubhead as a point mass in
 - **Recommendation:** Implement a full 6-DOF rigid body collision model solving the Newton-Euler equations, incorporating the clubhead's inertia tensor.
 
 #### **HIGH: Missing Torsional Stiffness in Shaft Model**
+
 - **File:** `src/shared/python/flexible_shaft.py`
 - **Issue:** The `FiniteElementShaftModel` implements Euler-Bernoulli beam elements which model transverse bending (EI) but ignore torsional stiffness (GJ).
 - **Impact:** The model cannot simulate "closing the face" dynamics or the twisting of the shaft due to the clubhead's offset CG (droop/twist). This is a critical factor in delivery accuracy.
@@ -33,12 +36,14 @@ The most critical deficiency is the treatment of the clubhead as a point mass in
 ### 2. Ball Flight Physics
 
 #### **MEDIUM: Inconsistent Aerodynamic Coefficients**
+
 - **File:** `src/shared/python/ball_flight_physics.py` vs `src/shared/python/physics_constants.py`
 - **Issue:** `BallProperties` uses hardcoded polynomial coefficients (e.g., `cd0=0.21`) that differ from the centralized constants (e.g., `GOLF_BALL_DRAG_COEFFICIENT=0.25`).
 - **Impact:** Simulation results will vary depending on which simulator class (`BallFlightSimulator` vs `EnhancedBallFlightSimulator`) is used, leading to confusion.
 - **Recommendation:** Standardize coefficients. The `BallProperties` class should ideally load from `physics_constants.py` or a unified configuration.
 
 #### **LOW: Missing Spin Decay in Basic Simulator**
+
 - **File:** `src/shared/python/ball_flight_physics.py`
 - **Issue:** The basic `BallFlightSimulator` treats `omega` (spin) as constant throughout the trajectory in `_solve_rk4_loop`.
 - **Impact:** Overestimates lift and drag late in the flight, leading to inaccurate carry distances.
@@ -47,6 +52,7 @@ The most critical deficiency is the treatment of the clubhead as a point mass in
 ### 3. Biomechanics & Kinematics
 
 #### **HIGH: Hardcoded Kinematic Sequence Order**
+
 - **File:** `src/shared/python/kinematic_sequence.py`
 - **Issue:** `KinematicSequenceAnalyzer` hardcodes the expected order as `['Pelvis', 'Torso', 'Arm', 'Club']`.
 - **Impact:** This restricts the tool's validity for non-standard swing styles (e.g., short game, elite variations) and creates potential patent risks (TPI patents).
@@ -55,6 +61,7 @@ The most critical deficiency is the treatment of the clubhead as a point mass in
 ### 4. Statistical Methods
 
 #### **LOW: Arbitrary Mass in Efficiency Calculation**
+
 - **File:** `src/shared/python/statistical_analysis.py` (Line 806)
 - **Issue:** `efficiency_score` calculates Kinetic Energy using a hardcoded mass of `1.0` kg: `ke = 0.5 * 1.0 * (self.club_head_speed**2)`.
 - **Impact:** The score is arbitrary and not physically meaningful as a ratio of real energy.
@@ -63,10 +70,10 @@ The most critical deficiency is the treatment of the clubhead as a point mass in
 ## Validation Recommendations
 
 1.  **Impact Physics:** Create a test case comparing `RigidBodyImpactModel` results against the theoretical output of a 2D rigid body collision with known MOI. The current model will fail this validation for off-center hits.
-2.  **Shaft Dynamics:** Validate the FE model against a known solution for a cantilevered beam under *torsional* load. The current model will show zero twist.
+2.  **Shaft Dynamics:** Validate the FE model against a known solution for a cantilevered beam under _torsional_ load. The current model will show zero twist.
 3.  **Ball Flight:** Compare `BallFlightSimulator` vs `EnhancedBallFlightSimulator` trajectories. They should match when `AerodynamicsConfig` matches the basic settings, but currently diverge due to different coefficient models.
 
 ## Citations Needed
 
--   **Gear Effect Constants:** The values `h_scale=100.0` and `v_scale=50.0` in `impact_model.py` need a source or derivation.
--   **Ball Coefficients:** The polynomial coefficients in `BallProperties` (`cd0=0.21`, etc.) need a citation (likely Bearman & Harvey or similar).
+- **Gear Effect Constants:** The values `h_scale=100.0` and `v_scale=50.0` in `impact_model.py` need a source or derivation.
+- **Ball Coefficients:** The polynomial coefficients in `BallProperties` (`cd0=0.21`, etc.) need a citation (likely Bearman & Harvey or similar).

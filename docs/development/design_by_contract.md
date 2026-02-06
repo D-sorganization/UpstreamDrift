@@ -7,19 +7,25 @@ Design by Contract (DbC) is a software correctness methodology that treats speci
 ## Core Concepts
 
 ### Preconditions
+
 What must be true **before** a method executes.
+
 - Checked at method entry
 - Caller's responsibility to satisfy
 - Raises `PreconditionError` if violated
 
 ### Postconditions
+
 What must be true **after** a method completes.
+
 - Checked at method exit
 - Implementation's responsibility
 - Raises `PostconditionError` if violated
 
 ### Invariants
+
 What must **always** be true for an object.
+
 - Checked after state-modifying methods
 - Class's responsibility
 - Raises `InvariantError` if violated
@@ -145,13 +151,13 @@ class Engine:
 
 ## Error Types
 
-| Exception | When Raised |
-|-----------|-------------|
-| `PreconditionError` | Input validation failed |
-| `PostconditionError` | Output validation failed |
-| `InvariantError` | Class invariant violated |
-| `StateError` | Invalid state for operation |
-| `ContractViolationError` | Base class for all |
+| Exception                | When Raised                 |
+| ------------------------ | --------------------------- |
+| `PreconditionError`      | Input validation failed     |
+| `PostconditionError`     | Output validation failed    |
+| `InvariantError`         | Class invariant violated    |
+| `StateError`             | Invalid state for operation |
+| `ContractViolationError` | Base class for all          |
 
 ## Error Messages
 

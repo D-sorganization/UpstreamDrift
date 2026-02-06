@@ -21,16 +21,19 @@ Successfully implemented all 4 critical performance fixes from the performance a
 ### Changes Made:
 
 1. **Added buffer pre-allocation:**
+
    - Replaced Python lists with pre-allocated NumPy arrays
    - Arrays sized based on `max_samples` parameter (previously unused)
    - Lazy initialization on first `record_step()` call to get proper dimensions
 
 2. **Updated `record_step()`:**
+
    - Changed from `.append()` to direct array indexing
    - Removed unnecessary `.copy()` calls (NumPy assignment is safe)
    - Added buffer overflow protection
 
 3. **Updated `get_time_series()`:**
+
    - Returns array views (slices) instead of creating new arrays
    - Zero-copy operation: `array[:current_idx]`
    - 100× faster for large recordings
@@ -40,6 +43,7 @@ Successfully implemented all 4 critical performance fixes from the performance a
    - Only processes recorded portion (`[:current_idx]`)
 
 ### Before:
+
 ```python
 self.data = {
     "times": [],              # Python list
@@ -53,6 +57,7 @@ def record_step(self):
 ```
 
 ### After:
+
 ```python
 self.data = {
     "times": np.zeros(max_samples),                         # Pre-allocated
@@ -77,19 +82,23 @@ def record_step(self):
 ### Changes Made:
 
 1. **Added caching infrastructure:**
+
    - New `_data_cache` dictionary in `GolfSwingPlotter.__init__()`
    - New `enable_cache` parameter (default: True)
 
 2. **Implemented `_preload_common_data()`:**
+
    - Pre-fetches 12 commonly used data fields at plotter initialization
    - Reduces 71 `recorder.get_time_series()` calls to ~10
 
 3. **Added `_get_cached_series()` method:**
+
    - Checks cache before calling recorder
    - Automatically caches new fields on first access
    - Transparent drop-in replacement
 
 4. **Global replacement:**
+
    - Changed all 71 calls from `self.recorder.get_time_series()` to `self._get_cached_series()`
 
 5. **Added `clear_cache()` method:**
@@ -98,13 +107,14 @@ def record_step(self):
 
 ### Performance Impact:
 
-| Scenario | Before | After | Speedup |
-|----------|--------|-------|---------|
-| Single plot | 1× fetch | 1× fetch | ~1× (no change) |
-| Dashboard (6 plots) | 6× fetches | 1× fetch | **6× faster** |
-| Full analysis (30 plots) | 30× fetches | 1× fetch | **30× faster** |
+| Scenario                 | Before      | After    | Speedup         |
+| ------------------------ | ----------- | -------- | --------------- |
+| Single plot              | 1× fetch    | 1× fetch | ~1× (no change) |
+| Dashboard (6 plots)      | 6× fetches  | 1× fetch | **6× faster**   |
+| Full analysis (30 plots) | 30× fetches | 1× fetch | **30× faster**  |
 
 ### Before:
+
 ```python
 def plot_summary_dashboard(self):
     times1, speeds = self.recorder.get_time_series("club_head_speed")    # Fetch #1
@@ -114,6 +124,7 @@ def plot_summary_dashboard(self):
 ```
 
 ### After:
+
 ```python
 def __init__(self, recorder, ...):
     self._data_cache = {}
@@ -142,6 +153,7 @@ def plot_summary_dashboard(self):
    - Classic N+1 query pattern fix
 
 ### Before:
+
 ```python
 for body_name in contact_body_names:  # 10+ bodies
     jac_dict = engine.compute_jacobian(body_name)
@@ -150,6 +162,7 @@ for body_name in contact_body_names:  # 10+ bodies
 ```
 
 ### After:
+
 ```python
 g = engine.compute_gravity_forces()  # ✅ Called ONCE outside loop
 
@@ -160,6 +173,7 @@ for body_name in contact_body_names:  # 10+ bodies
 ```
 
 ### Performance Impact:
+
 - **10 contact bodies:** 10× → 1× call = **90% reduction**
 - **Each gravity call:** ~5-10ms
 - **For 1000-frame simulation:** 50-100 seconds saved
@@ -175,6 +189,7 @@ for body_name in contact_body_names:  # 10+ bodies
 ### Changes Made:
 
 1. **Forward pass optimization (lines 304-323):**
+
    - Removed `prev_costs = []` list creation in nested loop
    - Replaced with direct `min()` comparisons
    - **Eliminated ~1 million list allocations** for 1000×1000 DTW
@@ -184,6 +199,7 @@ for body_name in contact_body_names:  # 10+ bodies
    - Replaced with direct comparisons and tracking of min
 
 ### Before:
+
 ```python
 for i in range(N):
     for j in range(start, end):
@@ -209,6 +225,7 @@ while i > 0 or j > 0:
 ```
 
 ### After:
+
 ```python
 for i in range(N):
     for j in range(start, end):
@@ -240,6 +257,7 @@ while i > 0 or j > 0:
 ```
 
 ### Performance Impact:
+
 - **1000×1000 DTW:** Eliminates 1 million list allocations
 - **Time saved:** ~500ms per DTW computation
 - **Overall:** 40-50% faster
@@ -249,6 +267,7 @@ while i > 0 or j > 0:
 ## Validation
 
 All modified files passed Python syntax validation:
+
 - ✅ `shared/python/dashboard/recorder.py` - syntax OK
 - ✅ `shared/python/plotting.py` - syntax OK
 - ✅ `shared/python/comparative_analysis.py` - syntax OK
@@ -259,6 +278,7 @@ All modified files passed Python syntax validation:
 ## Expected Performance Improvements
 
 ### Individual Improvements:
+
 1. **Recorder:** 40-60% faster recording
 2. **Plotting:** 50-70% faster for dashboards
 3. **GRF computation:** 90% reduction in gravity overhead
@@ -266,13 +286,13 @@ All modified files passed Python syntax validation:
 
 ### Combined Workflow Impact:
 
-| Workflow | Before | After | Improvement |
-|----------|--------|-------|-------------|
-| Record 10k frames | 2.0s | 0.8s | **60% faster** |
-| Generate dashboard (6 plots) | 5.0s | 1.5s | **70% faster** |
-| Full analysis (30 plots) | 25s | 8s | **68% faster** |
-| GRF computation (1000 frames, 10 bodies) | 100s | 10s | **90% faster** |
-| DTW swing comparison | 2.0s | 1.1s | **45% faster** |
+| Workflow                                 | Before | After | Improvement    |
+| ---------------------------------------- | ------ | ----- | -------------- |
+| Record 10k frames                        | 2.0s   | 0.8s  | **60% faster** |
+| Generate dashboard (6 plots)             | 5.0s   | 1.5s  | **70% faster** |
+| Full analysis (30 plots)                 | 25s    | 8s    | **68% faster** |
+| GRF computation (1000 frames, 10 bodies) | 100s   | 10s   | **90% faster** |
+| DTW swing comparison                     | 2.0s   | 1.1s  | **45% faster** |
 
 **Overall:** 30-40% performance improvement for typical simulation → analysis → plotting workflows.
 
@@ -281,6 +301,7 @@ All modified files passed Python syntax validation:
 ## Backward Compatibility
 
 All changes are backward compatible:
+
 - ✅ Recorder API unchanged (same method signatures)
 - ✅ Plotter API unchanged (added optional `enable_cache` parameter, default=True)
 - ✅ GRF computation API unchanged
@@ -306,12 +327,15 @@ Existing code will automatically benefit from these optimizations with no modifi
 From the performance analysis report, remaining optimizations:
 
 1. **Cache work metrics computation** (statistical_analysis.py:1280)
+
    - Expected: 30-40% faster for repeated calls
 
 2. **Vectorize power computation** (statistical_analysis.py:1298)
+
    - Expected: 2-3× faster
 
 3. **Fix np.append() in ellipsoid visualization** (ellipsoid_visualization.py:421)
+
    - Expected: 100× faster for large recordings
 
 4. **Pre-allocate lists in grip_contact_model.py** (lines 306-442)

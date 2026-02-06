@@ -7,6 +7,7 @@ MATLAB/Simulink Simscape Multibody models for golf swing biomechanical analysis,
 The Simscape Multibody Golf Models provide comprehensive biomechanical simulation and analysis tools using MATLAB's Simscape Multibody framework. These models complement the Python-based physics engines (MuJoCo, Drake, Pinocchio) with MATLAB's extensive analysis and visualization capabilities.
 
 **Key Features:**
+
 - **2D and 3D Models**: Progressive complexity from simplified 2D to full 3D biomechanics
 - **Interactive GUIs**: MATLAB App Designer-based visualization and analysis tools
 - **Motion Capture Integration**: Load and analyze experimental motion data
@@ -17,6 +18,7 @@ The Simscape Multibody Golf Models provide comprehensive biomechanical simulatio
 ## Available Models
 
 ### 2D Golf Model
+
 **Location**: `2D_Golf_Model/`
 
 - **Simplified planar dynamics** for educational and rapid analysis
@@ -27,6 +29,7 @@ The Simscape Multibody Golf Models provide comprehensive biomechanical simulatio
 **See**: [2D_Golf_Model/README.md](2D_Golf_Model/README.md)
 
 ### 3D Golf Model
+
 **Location**: `3D_Golf_Model/`
 
 - **Full 3D biomechanics** with realistic joint constraints
@@ -40,11 +43,13 @@ The Simscape Multibody Golf Models provide comprehensive biomechanical simulatio
 ## Prerequisites
 
 ### Required Software
+
 - **MATLAB** R2023a or later (R2023b+ recommended)
 - **Simulink** (included with MATLAB)
 - **Simscape Multibody** (Add-On Toolbox)
 
 ### Optional Toolboxes
+
 - **Optimization Toolbox**: For parameter optimization
 - **Signal Processing Toolbox**: For motion data filtering
 - **Statistics and Machine Learning Toolbox**: For data analysis
@@ -68,6 +73,7 @@ end
 ## Quick Start
 
 ### 1. Open MATLAB
+
 ```matlab
 cd /path/to/UpstreamDrift/engines/Simscape_Multibody_Models
 ```
@@ -75,6 +81,7 @@ cd /path/to/UpstreamDrift/engines/Simscape_Multibody_Models
 ### 2. Choose Your Model
 
 #### For 2D Model:
+
 ```matlab
 cd 2D_Golf_Model/matlab
 open_system('golf_swing_2d.slx')  % Open Simulink model
@@ -82,6 +89,7 @@ sim('golf_swing_2d')               % Run simulation
 ```
 
 #### For 3D Model:
+
 ```matlab
 cd 3D_Golf_Model/matlab
 open_system('golf_swing_3d.slx')  % Open Simulink model
@@ -91,6 +99,7 @@ run('Scripts/Golf_GUI/launch_golf_gui.m')
 ```
 
 ### 3. Run Analysis
+
 ```matlab
 % 3D Model example - analyze a swing
 cd 3D_Golf_Model/matlab/Scripts
@@ -100,21 +109,22 @@ plot_swing_results()
 
 ## Features Comparison
 
-| Feature | 2D Model | 3D Model |
-|---------|----------|----------|
-| Degrees of Freedom | 3-5 | 10-15 |
-| Computation Speed | Fast (real-time) | Moderate |
-| Biomechanical Accuracy | Simplified | High |
-| Motion Capture Support | Limited | Full |
-| Interactive GUI | Basic | Advanced |
-| Parameter Studies | Excellent | Good |
-| Research Applications | Educational | Professional |
+| Feature                | 2D Model         | 3D Model     |
+| ---------------------- | ---------------- | ------------ |
+| Degrees of Freedom     | 3-5              | 10-15        |
+| Computation Speed      | Fast (real-time) | Moderate     |
+| Biomechanical Accuracy | Simplified       | High         |
+| Motion Capture Support | Limited          | Full         |
+| Interactive GUI        | Basic            | Advanced     |
+| Parameter Studies      | Excellent        | Good         |
+| Research Applications  | Educational      | Professional |
 
 ## Integration with Python Engines
 
 The Simscape models can work alongside Python engines for comprehensive analysis:
 
 ### Workflow 1: MATLAB → Python
+
 ```matlab
 % 1. Generate data in MATLAB
 results = run_simscape_simulation(params);
@@ -132,6 +142,7 @@ validate_with_mujoco(results)
 ```
 
 ### Workflow 2: Python → MATLAB
+
 ```python
 # 1. Generate optimal trajectory in Drake
 trajectory = optimize_swing_drake(model)
@@ -148,6 +159,7 @@ compare_results(trajectory, simscape_results);
 ## Model Capabilities
 
 ### 2D Golf Model Capabilities
+
 - Planar swing dynamics
 - Club-ball impact modeling
 - Ground reaction forces (simplified)
@@ -156,6 +168,7 @@ compare_results(trajectory, simscape_results);
 - Fast parameter sweeps (1000s of simulations)
 
 ### 3D Golf Model Capabilities
+
 - Full 3D body kinematics and dynamics
 - Realistic joint constraints and ranges
 - Ground contact modeling (both feet)
@@ -168,6 +181,7 @@ compare_results(trajectory, simscape_results);
 ## Advanced Features
 
 ### Motion Capture Integration (3D Model)
+
 ```matlab
 % Load motion capture data
 mocap_data = load_c3d_file('swing_trial_01.c3d');
@@ -181,6 +195,7 @@ sim_results = simulate_from_mocap(joint_angles);
 ```
 
 ### Batch Simulation & Dataset Generation
+
 ```matlab
 % Define parameter ranges
 shoulder_range = linspace(-180, 90, 20);  % degrees
@@ -195,6 +210,7 @@ optimal_params = find_optimal_parameters(dataset);
 ```
 
 ### Optimization
+
 ```matlab
 % Define objective function
 objective = @(params) -club_head_speed(params);  % Maximize speed
@@ -211,6 +227,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ## Output and Visualization
 
 ### Available Outputs
+
 - **Kinematics**: Joint angles, velocities, accelerations
 - **Dynamics**: Joint torques, forces, power
 - **Club Metrics**: Head speed, trajectory, face angle
@@ -219,6 +236,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 - **Performance**: Swing efficiency, power transfer
 
 ### Visualization Tools
+
 - **3D Animation**: Real-time or playback of swing motion
 - **Time Series Plots**: Joint angles, velocities, torques
 - **Phase Diagrams**: State-space visualization
@@ -228,6 +246,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ## File Formats
 
 ### Input Formats
+
 - `.slx` - Simulink models
 - `.mat` - MATLAB data files
 - `.c3d` - Motion capture data
@@ -235,6 +254,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 - `.trc` - Trajectory files (OpenSim compatible)
 
 ### Output Formats
+
 - `.mat` - MATLAB simulation results
 - `.csv` - Exportable data for external analysis
 - `.fig` - MATLAB figures
@@ -244,16 +264,19 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ## Performance Considerations
 
 ### Simulation Speed
+
 - **2D Model**: 5-50× real-time (very fast)
 - **3D Model**: 0.5-5× real-time (depends on complexity)
 - **Batch Mode**: Optimized for throughput
 
 ### Memory Requirements
+
 - **2D Model**: ~100 MB RAM
 - **3D Model**: ~500 MB RAM
 - **Large Datasets**: 2-4 GB RAM
 
 ### Tips for Faster Simulation
+
 1. Use fixed-step solvers when possible
 2. Reduce visualization during batch runs
 3. Enable parallel computing for parameter sweeps
@@ -264,6 +287,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ### When to Use Simscape Models
 
 ✅ **Use Simscape for**:
+
 - MATLAB-native workflows
 - Integration with MATLAB optimization/control tools
 - Educational demonstrations
@@ -272,6 +296,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 - Signal processing and filtering of biomechanical data
 
 ❌ **Prefer Python Engines for**:
+
 - Muscle-level biomechanics (use MuJoCo + MyoSuite)
 - High-performance batch optimization (use Drake)
 - Real-time interactive simulation (use MuJoCo)
@@ -280,12 +305,14 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ### Model Selection Guide
 
 **Choose 2D Model when**:
+
 - Teaching biomechanics concepts
 - Need very fast computation
 - Performing large parameter studies
 - Planar assumptions are acceptable
 
 **Choose 3D Model when**:
+
 - Researching biomechanics
 - Analyzing real motion capture data
 - Need accurate 3D kinematics
@@ -294,10 +321,12 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ## Documentation
 
 ### Model-Specific Documentation
+
 - [2D Golf Model Documentation](2D_Golf_Model/README.md)
 - [3D Golf Model Documentation](3D_Golf_Model/README.md)
 
 ### Related Documentation
+
 - [Engine Selection Guide](../../docs/engine_selection_guide.md) - Compare with Python engines
 - [User Guide](../../docs/user_guide/README.md) - General Golf Suite documentation
 - [MATLAB Simscape Docs](https://www.mathworks.com/help/sm/) - Official Simscape documentation
@@ -307,15 +336,19 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 ### Common Issues
 
 **Issue**: Model won't open in older MATLAB versions
+
 - **Solution**: Models require R2023a+. Upgrade MATLAB or use compatibility mode
 
 **Issue**: Simscape Multibody not found
+
 - **Solution**: Install via MATLAB Add-On Explorer (Home → Add-Ons → Get Add-Ons)
 
 **Issue**: Simulation runs very slowly
+
 - **Solution**: Reduce visualization frequency, use fixed-step solver, simplify contact
 
 **Issue**: Motion capture data won't import
+
 - **Solution**: Check file format (.c3d, .trc), verify marker names match model
 
 ## Examples
@@ -323,6 +356,7 @@ optimal = fmincon(objective, initial_guess, [], [], [], [], lb, ub, [], options)
 Example scripts are included in each model directory:
 
 ### 2D Model Examples
+
 ```matlab
 cd 2D_Golf_Model/matlab/examples
 run_basic_swing           % Simple swing simulation
@@ -331,6 +365,7 @@ run_optimization_example  % Find optimal parameters
 ```
 
 ### 3D Model Examples
+
 ```matlab
 cd 3D_Golf_Model/matlab/examples
 run_mocap_analysis        % Motion capture workflow
@@ -341,6 +376,7 @@ run_gui_demo             % Interactive GUI demo
 ## Contributing
 
 Contributions to Simscape models are welcome:
+
 - Improve joint models or constraints
 - Add new biomechanical features
 - Enhance visualization
@@ -370,6 +406,7 @@ MIT License - See [LICENSE](../../LICENSE) for details.
 ## Support
 
 For Simscape-specific questions:
+
 - Review model-specific README files
 - Check MATLAB documentation: `doc simscape`
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

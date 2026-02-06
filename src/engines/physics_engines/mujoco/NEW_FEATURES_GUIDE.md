@@ -9,9 +9,11 @@ This guide describes the major professional enhancements added to the Golf Swing
 ## 🎥 1. Video Export System
 
 ### Location
+
 **Module:** `python/mujoco_golf_pendulum/video_export.py`
 
 ### Features
+
 - **Multiple Formats:** MP4, AVI, GIF
 - **Configurable Quality:** 720p, 1080p, 4K resolution
 - **Frame Rate Control:** 30, 60, 120 FPS
@@ -39,12 +41,14 @@ success = export_simulation_video(
 ```
 
 ### GUI Integration
+
 - Export button in Analysis tab
 - Format selection dialog
 - Quality presets
 - Progress bar during export
 
 ### Dependencies
+
 - `opencv-python` (required for MP4/AVI)
 - `imageio` (required for GIF)
 
@@ -53,31 +57,38 @@ success = export_simulation_video(
 ## 📊 2. Statistical Analysis Module
 
 ### Location
+
 **Module:** `python/mujoco_golf_pendulum/statistical_analysis.py`
 
 ### Features
 
 #### Automatic Peak Detection
+
 - Peak club head speed identification
 - Maximum torque detection
 - Peak velocity identification
 - Prominence and width analysis
 
 #### Summary Statistics
+
 For each joint and metric:
+
 - Mean, Median, Standard Deviation
 - Min/Max values with timestamps
 - Range of Motion (ROM)
 - Root Mean Square (RMS)
 
 #### Swing Quality Metrics
+
 - **Tempo Analysis:** Backswing:Downswing ratio
 - **X-Factor:** Shoulder-hip separation
 - **Energy Efficiency:** Energy transfer metrics
 - **Phase Duration:** Timing of each swing phase
 
 #### Automated Swing Phase Detection
+
 Automatically segments swing into:
+
 1. Address (Setup)
 2. Takeaway
 3. Backswing
@@ -144,16 +155,19 @@ Joint Range of Motion:
 ## 🗃️ 3. Recording Library Management
 
 ### Location
+
 **Module:** `python/mujoco_golf_pendulum/recording_library.py`
 
 ### Features
 
 #### SQLite Database
+
 - Persistent storage of recording metadata
 - Fast search and filtering
 - Automatic indexing
 
 #### Metadata Fields
+
 - Golfer name
 - Date/time recorded
 - Club type (Driver, Iron, Wedge, Putter)
@@ -166,6 +180,7 @@ Joint Range of Motion:
 - MD5 checksum for data integrity
 
 #### Search & Filter
+
 - Filter by golfer name
 - Filter by club type
 - Filter by date range
@@ -174,6 +189,7 @@ Joint Range of Motion:
 - Text search in notes
 
 #### Import/Export
+
 - Export entire library to JSON
 - Import library from JSON
 - Merge or replace existing library
@@ -223,6 +239,7 @@ print(f"Average rating: {stats['average_rating']:.2f}")
 ```
 
 ### GUI Integration
+
 - New "Library" tab
 - Table view with sortable columns
 - Quick filter buttons
@@ -235,11 +252,13 @@ print(f"Average rating: {stats['average_rating']:.2f}")
 ## 💾 4. Advanced Export Formats
 
 ### Location
+
 **Module:** `python/mujoco_golf_pendulum/advanced_export.py`
 
 ### Supported Formats
 
 #### MATLAB .mat Files
+
 - Compatible with MATLAB R2015b+
 - Preserves all data types
 - Column-major ordering
@@ -247,6 +266,7 @@ print(f"Average rating: {stats['average_rating']:.2f}")
 - Includes auto-generated MATLAB scripts
 
 **Usage:**
+
 ```python
 from mujoco_golf_pendulum.advanced_export import (
     export_to_matlab,
@@ -261,17 +281,20 @@ create_matlab_script("analyze_swing.m", "swing_data.mat", script_type="analyze")
 ```
 
 **MATLAB Script Types:**
+
 - `plot`: Generate comprehensive plots
 - `analyze`: Statistical analysis
 - `animate`: Playback animation
 
 #### HDF5 Files
+
 - Hierarchical organization
 - Efficient for large datasets
 - Compression support
 - Platform-independent
 
 **Usage:**
+
 ```python
 from mujoco_golf_pendulum.advanced_export import export_to_hdf5
 
@@ -279,6 +302,7 @@ export_to_hdf5("swing_data.h5", data_dict, compression="gzip")
 ```
 
 **HDF5 Structure:**
+
 ```
 swing_data.h5
 ├── timeseries/
@@ -295,12 +319,14 @@ swing_data.h5
 ```
 
 #### C3D Motion Capture Format
+
 - Standard biomechanics format
 - Compatible with Vicon, OptiTrack, etc.
 - Includes force plate data
 - 3D marker trajectories
 
 **Usage:**
+
 ```python
 from mujoco_golf_pendulum.advanced_export import export_to_c3d
 
@@ -317,6 +343,7 @@ export_to_c3d(
 **Note:** Requires `ezc3d` library (optional dependency)
 
 #### Batch Export
+
 Export to multiple formats simultaneously:
 
 ```python
@@ -333,6 +360,7 @@ for format, success in results.items():
 ```
 
 ### Dependencies
+
 - `scipy`: Required for .mat export
 - `h5py`: Required for HDF5 export
 - `ezc3d`: Optional for C3D export
@@ -342,18 +370,22 @@ for format, success in results.items():
 ## ⏯️ 5. Playback Control System
 
 ### Location
+
 **Module:** `python/mujoco_golf_pendulum/playback_control.py`
 
 ### Features
 
 #### Frame-by-Frame Control
+
 - Step forward/backward (single frame or multiple)
 - Jump to specific frame number
 - Seek to specific time
 - Seek to percentage of recording
 
 #### Variable Playback Speed
+
 **Speed Presets:**
+
 - Very Slow: 0.1× (10% speed)
 - Slow: 0.25× (quarter speed)
 - Half: 0.5× (half speed)
@@ -363,10 +395,12 @@ for format, success in results.items():
 - Very Fast: 10.0× (10× speed)
 
 #### Loop Control
+
 - Enable/disable continuous looping
 - Smooth loop transitions
 
 #### Timeline Scrubbing
+
 - Interactive timeline slider
 - Frame-accurate positioning
 - Time/frame display
@@ -411,6 +445,7 @@ controller.seek_to_percent(50.0)  # Seek to 50%
 ```
 
 ### GUI Integration
+
 - Timeline slider with frame markers
 - Play/Pause/Stop buttons
 - Speed selection dropdown
@@ -424,12 +459,15 @@ controller.seek_to_percent(50.0)  # Seek to 50%
 ## 🏌️ 6. Club Configuration Database
 
 ### Location
+
 **Module:** `python/mujoco_golf_pendulum/club_configurations.py`
 
 ### Features
 
 #### Pre-defined Club Specifications
+
 **Included Clubs:**
+
 - **Drivers:** Standard, Low Loft
 - **Woods:** 3-Wood, 5-Wood
 - **Hybrids:** 3-Hybrid
@@ -438,7 +476,9 @@ controller.seek_to_percent(50.0)  # Seek to 50%
 - **Putters:** Blade, Mallet
 
 #### Club Properties
+
 Each club includes:
+
 - Physical dimensions (length, mass)
 - Loft and lie angles
 - Shaft flexibility
@@ -448,7 +488,9 @@ Each club includes:
 - Detailed description
 
 #### Shaft Flexibility System
+
 **Flex Types with Recommended Swing Speeds:**
+
 - Ladies: 60-70 mph
 - Senior: 70-80 mph
 - Regular: 80-95 mph
@@ -513,6 +555,7 @@ Driver Specification:
 ```
 
 ### GUI Integration
+
 - Club selector dropdown in Controls tab
 - Automatic model parameter updates
 - Visual club specifications display
@@ -649,18 +692,18 @@ while controller.is_playing():
 
 ## 📋 Feature Comparison: Before vs After
 
-| Feature | Before | After |
-|---------|--------|-------|
-| **Video Export** | ❌ None | ✅ MP4/AVI/GIF with metrics |
-| **Statistical Analysis** | ⚠️ Basic real-time | ✅ Comprehensive with peak detection |
-| **Swing Phase Detection** | ❌ Manual | ✅ Automatic with 8 phases |
-| **Recording Management** | ⚠️ File browser | ✅ Database with search/tags |
-| **Export Formats** | CSV, JSON | CSV, JSON, MATLAB, HDF5, C3D |
-| **Playback Control** | ⚠️ Play/Pause only | ✅ Frame stepping, variable speed |
-| **Club Database** | ❌ None | ✅ 15+ clubs with full specs |
-| **Tempo Analysis** | ❌ None | ✅ Automatic backswing:downswing |
-| **MATLAB Integration** | ❌ None | ✅ .mat export + scripts |
-| **Motion Capture Format** | ❌ None | ✅ C3D export |
+| Feature                   | Before             | After                                |
+| ------------------------- | ------------------ | ------------------------------------ |
+| **Video Export**          | ❌ None            | ✅ MP4/AVI/GIF with metrics          |
+| **Statistical Analysis**  | ⚠️ Basic real-time | ✅ Comprehensive with peak detection |
+| **Swing Phase Detection** | ❌ Manual          | ✅ Automatic with 8 phases           |
+| **Recording Management**  | ⚠️ File browser    | ✅ Database with search/tags         |
+| **Export Formats**        | CSV, JSON          | CSV, JSON, MATLAB, HDF5, C3D         |
+| **Playback Control**      | ⚠️ Play/Pause only | ✅ Frame stepping, variable speed    |
+| **Club Database**         | ❌ None            | ✅ 15+ clubs with full specs         |
+| **Tempo Analysis**        | ❌ None            | ✅ Automatic backswing:downswing     |
+| **MATLAB Integration**    | ❌ None            | ✅ .mat export + scripts             |
+| **Motion Capture Format** | ❌ None            | ✅ C3D export                        |
 
 ---
 
@@ -733,6 +776,7 @@ The modules are ready for integration into `advanced_gui.py`:
 ## 📞 Support
 
 For issues or questions:
+
 - Check the module docstrings for detailed API documentation
 - See example code in this guide
 - Review the comprehensive enhancement plan: `PROFESSIONAL_ENHANCEMENT_PLAN.md`

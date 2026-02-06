@@ -5,6 +5,7 @@ inclusion: always
 # CI-Matched Local Testing Standards
 
 ## 🎯 Core Principle
+
 **NEVER claim tests "pass locally" without running them in a CI-equivalent environment.**
 
 ## 📋 Mandatory Pre-Push Checklist
@@ -20,7 +21,7 @@ cd /path/to/repository
 # Run Ruff with exact CI configuration
 ruff check .
 
-# Run Black with exact CI configuration  
+# Run Black with exact CI configuration
 black --check .
 
 # Run MyPy (if applicable to changed files)
@@ -60,17 +61,20 @@ python --version  # Prefer: 3.11.x (CI uses 3.11)
 ## 🚫 Prohibited Statements
 
 **NEVER say:**
+
 - ❌ "All tests pass locally"
 - ❌ "Ruff/Black checks pass"
 - ❌ "Everything looks good locally"
 
 **INSTEAD say:**
+
 - ✅ "Ran CI-equivalent checks: [list specific commands and results]"
 - ✅ "Verified with exact CI configuration: [show output]"
 
 ## 🔄 CI Configuration Reference
 
 Current CI configuration:
+
 - **Python Version**: 3.11
 - **Ruff Version**: 0.14.10
 - **Black Version**: 25.12.0

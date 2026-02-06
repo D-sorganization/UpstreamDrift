@@ -11,10 +11,12 @@ Historical records preserve the development journey of the Golf Modeling Suite, 
 ### Phase Summaries
 
 #### Phase 1: Initial Fixes and Stabilization
+
 - [PHASE1_FIXES_SUMMARY.md](PHASE1_FIXES_SUMMARY.md) - Summary of initial bug fixes and stabilization work
 - Focus: Critical bug fixes, basic functionality, initial architecture
 
 #### Phase 2: Quality Improvements
+
 - [PHASE2_FIXES_SUMMARY.md](PHASE2_FIXES_SUMMARY.md) - Summary of code quality and hygiene improvements
 - Focus: Linting, type checking, code organization, testing
 
@@ -26,18 +28,21 @@ Historical records preserve the development journey of the Golf Modeling Suite, 
 ## Purpose
 
 ### For Current Development
+
 - Avoid repeating past mistakes
 - Learn from previous implementation approaches
 - Understand the evolution of design decisions
 - Reference solutions to similar problems
 
 ### For New Contributors
+
 - Understand project history and context
 - See how the codebase evolved
 - Learn about major refactoring efforts
 - Appreciate the rationale behind current architecture
 
 ### For Documentation
+
 - Source material for release notes
 - Historical context for features
 - Timeline of major changes
@@ -53,6 +58,7 @@ Historical records preserve the development journey of the Golf Modeling Suite, 
 ## Archive Policy
 
 Documents are moved to this directory when:
+
 1. They describe completed development phases
 2. The information is primarily of historical interest
 3. They have been superseded by newer documentation
@@ -63,6 +69,7 @@ Active development documentation remains in other directories (plans, assessment
 ## Questions?
 
 For questions about project history or specific historical decisions:
+
 - Review the relevant phase summary or session notes
 - Check related current documentation for updates
 - Ask in GitHub Discussions with reference to the historical context

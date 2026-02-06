@@ -11,6 +11,7 @@ This document outlines future enhancements to achieve production-grade performan
 ## Overview
 
 The current implementation has achieved **8.0/10 quality** by addressing all critical architectural flaws. The remaining path to 9.0+ focuses on:
+
 1. **Performance optimization** (analytical methods, C++ acceleration)
 2. **Enhanced validation** (energy conservation, derivative checks)
 3. **Advanced features** (null-space control, spatial algebra)
@@ -23,6 +24,7 @@ The current implementation has achieved **8.0/10 quality** by addressing all cri
 ### Goal: Replace O(N²) Finite Differences with O(N) Analytical Solutions
 
 **Current State:**
+
 - `compute_coriolis_matrix` uses finite differences (Issue B-002)
 - `decompose_coriolis_forces` loops N+1 times (Issue A-002)
 - Jacobian time derivatives computed via perturbation
@@ -33,16 +35,19 @@ Replace finite differences with analytical Recursive Newton-Euler (RNE) algorith
 #### Benefits
 
 **Performance:**
+
 - **Speed:** 10-100× faster for high-DOF models
 - **Complexity:** O(N²) → O(N) for Coriolis computation
 - **Scalability:** Enables real-time analysis for 50+ DOF models
 
 **Accuracy:**
+
 - **No Discretization Noise:** Eliminates ε=1e-6 perturbation errors
 - **Numerical Stability:** Avoids finite-difference cancellation errors
 - **Exact Derivatives:** Analytical solution is mathematically precise
 
 **Use Cases Enabled:**
+
 - Real-time swing optimization (currently too slow)
 - High-DOF full-body humanoid models (currently O(N²) bottleneck)
 - Sensitivity analysis requiring many derivative computations
@@ -50,6 +55,7 @@ Replace finite differences with analytical Recursive Newton-Euler (RNE) algorith
 #### Implementation Approach
 
 **Option A: Use MuJoCo's mj_rne Directly**
+
 ```python
 def compute_coriolis_forces_analytical(self, qpos, qvel):
     """Analytical Coriolis computation using RNE properties."""
@@ -70,11 +76,13 @@ def compute_coriolis_forces_analytical(self, qpos, qvel):
 ```
 
 **Option B: Implement Custom RNE Recursion**
+
 - Forward pass: Compute velocities and accelerations
 - Backward pass: Compute forces and torques
 - Extract Coriolis matrix terms explicitly
 
 **Option C: Use Spatial Algebra (Screw Theory)**
+
 - Represent motions as twists (v, ω)
 - Forces as wrenches (f, τ)
 - Coriolis as Lie bracket [ad_V, M·V]
@@ -82,6 +90,7 @@ def compute_coriolis_forces_analytical(self, qpos, qvel):
 **Recommendation:** Start with Option A (simplest), move to Option B if decomposition needed.
 
 **Effort Estimate:**
+
 - Research & Design: 1 week
 - Implementation: 2-3 weeks
 - Testing & Validation: 2 weeks
@@ -89,6 +98,7 @@ def compute_coriolis_forces_analytical(self, qpos, qvel):
 - **Total: 6-8 weeks**
 
 **Expected Impact:**
+
 - Quality: 8.0 → 8.3
 - Performance: 10-100× faster for Coriolis computations
 - Enables: Real-time optimization, high-DOF models
@@ -107,12 +117,14 @@ Python loops in `decompose_coriolis_forces`, `compute_kinetic_energy_components`
 #### Performance Benefits
 
 **1. Raw Speed (10-100× Faster)**
+
 - **Compiled Code:** C++ compiles to native machine code vs Python bytecode
 - **No Interpreter Overhead:** Direct CPU execution vs Python VM
 - **Loop Optimization:** Compiler unrolling, vectorization, pipelining
 - **Stack Allocation:** Fast local variables vs heap-allocated Python objects
 
 **Example Performance Gains:**
+
 ```
 # Python loop (current):
 for i in range(nv):
@@ -135,12 +147,14 @@ Estimated: ~0.05ms for 30-DOF model (100× faster)
 ```
 
 **2. Memory Efficiency (2-10× Less Memory)**
+
 - **Dense Arrays:** Contiguous memory vs Python object pointers
 - **Stack Allocation:** No garbage collection overhead
 - **Cache Locality:** Better CPU cache utilization
 - **SIMD Vectorization:** Process 4-8 floats simultaneously
 
 **Memory Example:**
+
 ```
 Python: np.zeros(30) → ~280 bytes (array header + data + refcount)
 C++:    double x[30] → ~240 bytes (just data)
@@ -151,11 +165,13 @@ C++:    ~2.4 MB on stack (no heap allocations)
 ```
 
 **3. Parallelization (N-core Speedup)**
+
 - **OpenMP:** Automatic loop parallelization with #pragma directives
 - **Threading:** True multi-core parallelism (no GIL)
 - **SIMD:** Vectorize operations across DOFs
 
 **Parallelization Example:**
+
 ```cpp
 // Parallel trajectory analysis
 #pragma omp parallel for
@@ -167,6 +183,7 @@ Speedup: Linear with cores (8 cores = 8× faster)
 ```
 
 **4. MuJoCo Integration (Zero-Copy)**
+
 - **Direct API Access:** Call mj_forward, mj_rne without marshalling
 - **Shared Memory:** No Python↔C data copying
 - **Batch Processing:** Process entire trajectories in C++
@@ -174,6 +191,7 @@ Speedup: Linear with cores (8 cores = 8× faster)
 #### When C++ Migration Makes Sense
 
 **Good Use Cases:**
+
 - ✅ Tight loops over DOFs (decompose_coriolis_forces)
 - ✅ Trajectory-level analysis (1000+ timesteps)
 - ✅ Real-time applications (VR, haptics, online optimization)
@@ -181,6 +199,7 @@ Speedup: Linear with cores (8 cores = 8× faster)
 - ✅ Batch processing (analyze 100+ swings)
 
 **Poor Use Cases:**
+
 - ❌ One-time analysis scripts
 - ❌ Interactive exploration (Python REPL is better)
 - ❌ Prototyping new algorithms
@@ -234,6 +253,7 @@ PYBIND11_MODULE(mujoco_golf_cpp, m) {
 ```
 
 **Python Usage:**
+
 ```python
 # Automatic fallback pattern
 try:
@@ -306,6 +326,7 @@ Speedup: ~8× on 8-core machine
 #### Migration Complexity
 
 **Pros:**
+
 - ✅ Massive performance gains (10-100×)
 - ✅ Better memory efficiency
 - ✅ True parallelism (no GIL)
@@ -313,6 +334,7 @@ Speedup: ~8× on 8-core machine
 - ✅ Maintains Python API (pybind11)
 
 **Cons:**
+
 - ❌ Build complexity (requires compiler)
 - ❌ Platform-specific (Windows/Linux/Mac)
 - ❌ Harder to debug than Python
@@ -320,6 +342,7 @@ Speedup: ~8× on 8-core machine
 - ❌ Maintenance burden (two codebases)
 
 **Mitigation:**
+
 - Use CMake for cross-platform builds
 - Provide pre-compiled wheels for common platforms
 - Keep Python fallback for portability
@@ -327,6 +350,7 @@ Speedup: ~8× on 8-core machine
 - Clear migration path (Python → C++ on demand)
 
 **Effort Estimate:**
+
 - Setup & Build System: 1 week
 - Port Core Algorithms: 3-4 weeks
 - Testing & Validation: 2 weeks
@@ -335,6 +359,7 @@ Speedup: ~8× on 8-core machine
 - **Total: 8-12 weeks**
 
 **Expected Impact:**
+
 - Quality: 8.3 → 8.8
 - Performance: 10-100× for trajectory analysis
 - Scalability: Enables real-time applications
@@ -349,6 +374,7 @@ Speedup: ~8× on 8-core machine
 #### 3.1 Energy Conservation Verification
 
 **Implementation:**
+
 ```python
 def verify_energy_conservation(self, qpos, qvel, qacc, torques, dt=0.001):
     """Verify power balance: dE/dt = P_applied - P_dissipated."""
@@ -384,6 +410,7 @@ def verify_energy_conservation(self, qpos, qvel, qacc, torques, dt=0.001):
 #### 3.2 Analytical Derivative Checks
 
 **Implementation:**
+
 ```python
 def verify_jacobians(self, qpos, body_id):
     """Verify Jacobians via finite differences."""
@@ -433,10 +460,12 @@ def verify_jacobians(self, qpos, body_id):
 **Purpose:** For redundant systems (humanoid golfer has many DOFs), enable secondary tasks while achieving primary objective.
 
 **Example Use Case:**
+
 - Primary: Achieve desired club head velocity
 - Secondary: Maintain upright torso (comfort/realism)
 
 **Implementation:**
+
 ```python
 def compute_torques_with_posture(self, qpos, qvel, qacc_primary, qpos_desired):
     """Compute torques achieving primary task + secondary posture."""
@@ -470,6 +499,7 @@ def compute_torques_with_posture(self, qpos, qvel, qacc_primary, qpos_desired):
 **Purpose:** Frame-independent force/motion representation.
 
 **Benefits:**
+
 - Eliminates frame confusion (Assessment B issue)
 - More elegant Coriolis computation
 - Simplifies multi-body dynamics
@@ -485,6 +515,7 @@ def compute_torques_with_posture(self, qpos, qvel, qacc_primary, qpos_desired):
 ### 5.1 Performance Profiling
 
 Add built-in profiling:
+
 ```python
 @profile_method
 def analyze_trajectory(self, ...):
@@ -494,6 +525,7 @@ def analyze_trajectory(self, ...):
 ### 5.2 Telemetry & Monitoring
 
 Expose metrics:
+
 - Computation time per method
 - Memory usage trends
 - Cache hit rates
@@ -502,6 +534,7 @@ Expose metrics:
 ### 5.3 Optimization Hints
 
 Add performance recommendations:
+
 ```python
 if len(trajectory) > 1000 and not HAVE_CPP_EXTENSION:
     warnings.warn(
@@ -519,33 +552,36 @@ if len(trajectory) > 1000 and not HAVE_CPP_EXTENSION:
 
 ## Summary Roadmap
 
-| Phase | Duration | Quality | Key Deliverable |
-|-------|----------|---------|-----------------|
-| **Current** | - | 8.0 | Critical fixes complete |
-| **Phase 1** | 6-8 weeks | 8.3 | Analytical RNE methods |
-| **Phase 2** | 8-12 weeks | 8.8 | C++ acceleration |
-| **Phase 3** | 2-3 weeks | 9.0 | Energy/derivative validation |
-| **Phase 4** | 4-6 weeks | 9.2 | Null-space, spatial algebra |
-| **Phase 5** | 2-4 weeks | 9.5 | Production hardening |
-| **TOTAL** | 22-33 weeks | 9.5 | Production-grade system |
+| Phase       | Duration    | Quality | Key Deliverable              |
+| ----------- | ----------- | ------- | ---------------------------- |
+| **Current** | -           | 8.0     | Critical fixes complete      |
+| **Phase 1** | 6-8 weeks   | 8.3     | Analytical RNE methods       |
+| **Phase 2** | 8-12 weeks  | 8.8     | C++ acceleration             |
+| **Phase 3** | 2-3 weeks   | 9.0     | Energy/derivative validation |
+| **Phase 4** | 4-6 weeks   | 9.2     | Null-space, spatial algebra  |
+| **Phase 5** | 2-4 weeks   | 9.5     | Production hardening         |
+| **TOTAL**   | 22-33 weeks | 9.5     | Production-grade system      |
 
 ---
 
 ## Decision Matrix: When to Implement What
 
 ### Implement Now If:
+
 - ✅ You have high-DOF models (>30 DOF)
 - ✅ You need real-time performance
 - ✅ You process large datasets (1000+ swings)
 - ✅ You need parallel analysis
 
 ### Defer If:
+
 - ⏸️ Current performance is acceptable
 - ⏸️ Only analyzing single swings
 - ⏸️ Prototyping new algorithms
 - ⏸️ Limited development resources
 
 ### Never Needed If:
+
 - ❌ Low-DOF models (<10 DOF)
 - ❌ One-off analyses
 - ❌ Interactive exploration only
@@ -564,6 +600,7 @@ The current implementation has achieved **8.0/10** by fixing all critical bugs. 
 Each phase is independent and can be implemented as resources allow.
 
 **Recommended Priority:**
+
 1. **Phase 1** (Analytical RNE) - Immediate performance win, no new dependencies
 2. **Phase 3** (Validation) - Builds confidence in results
 3. **Phase 2** (C++) - Only if real-time performance is required

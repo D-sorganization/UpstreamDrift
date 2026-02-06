@@ -9,8 +9,12 @@ if (themeFlyoutDisplay === "attached") {
     }
 
     // Insert the current language to the options on the selector
-    let languages = config.projects.translations.concat(config.projects.current);
-    languages = languages.sort((a, b) => a.language.name.localeCompare(b.language.name));
+    let languages = config.projects.translations.concat(
+      config.projects.current,
+    );
+    languages = languages.sort((a, b) =>
+      a.language.name.localeCompare(b.language.name),
+    );
 
     const languagesHTML = `
       <dl>
@@ -18,8 +22,14 @@ if (themeFlyoutDisplay === "attached") {
         ${languages
           .map(
             (translation) => `
-        <dd ${translation.slug == config.projects.current.slug ? 'class="rtd-current-item"' : ""}>
-          <a href="${translation.urls.documentation}">${translation.language.code}</a>
+        <dd ${
+          translation.slug == config.projects.current.slug
+            ? 'class="rtd-current-item"'
+            : ""
+        }>
+          <a href="${translation.urls.documentation}">${
+            translation.language.code
+          }</a>
         </dd>
         `,
           )
@@ -39,7 +49,11 @@ if (themeFlyoutDisplay === "attached") {
         ${config.versions.active
           .map(
             (version) => `
-        <dd ${version.slug === config.versions.current.slug ? 'class="rtd-current-item"' : ""}>
+        <dd ${
+          version.slug === config.versions.current.slug
+            ? 'class="rtd-current-item"'
+            : ""
+        }>
           <a href="${version.urls.documentation}">${version.slug}</a>
         </dd>
         `,
@@ -101,7 +115,9 @@ if (themeFlyoutDisplay === "attached") {
                 <a href="${config.projects.current.urls.builds}">Builds</a>
               </dd>
               <dd>
-                <a href="${config.projects.current.urls.downloads}">Downloads</a>
+                <a href="${
+                  config.projects.current.urls.downloads
+                }">Downloads</a>
               </dd>
             </dl>
             <dl>
@@ -136,7 +152,7 @@ if (themeFlyoutDisplay === "attached") {
         const event = new CustomEvent("readthedocs-search-show");
         document.dispatchEvent(event);
       });
-  })
+  });
 }
 
 if (themeLanguageSelector || themeVersionSelector) {
@@ -154,7 +170,10 @@ if (themeLanguageSelector || themeVersionSelector) {
     );
     if (themeVersionSelector) {
       let versions = config.versions.active;
-      if (config.versions.current.hidden || config.versions.current.type === "external") {
+      if (
+        config.versions.current.hidden ||
+        config.versions.current.type === "external"
+      ) {
         versions.unshift(config.versions.current);
       }
       const versionSelect = `
@@ -174,7 +193,10 @@ if (themeLanguageSelector || themeVersionSelector) {
   `;
 
       versionSwitch.innerHTML = versionSelect;
-      versionSwitch.firstElementChild.addEventListener("change", onSelectorSwitch);
+      versionSwitch.firstElementChild.addEventListener(
+        "change",
+        onSelectorSwitch,
+      );
     }
 
     const languageSwitch = document.querySelector(
@@ -198,7 +220,11 @@ if (themeLanguageSelector || themeVersionSelector) {
             (language) => `
               <option
                   value="${language.language.code}"
-                  ${config.projects.current.slug === language.slug ? 'selected="selected"' : ""}
+                  ${
+                    config.projects.current.slug === language.slug
+                      ? 'selected="selected"'
+                      : ""
+                  }
                   data-url="${language.urls.documentation}">
                   ${language.language.name}
               </option>`,
@@ -208,9 +234,11 @@ if (themeLanguageSelector || themeVersionSelector) {
     `;
 
         languageSwitch.innerHTML = languageSelect;
-        languageSwitch.firstElementChild.addEventListener("change", onSelectorSwitch);
-      }
-      else {
+        languageSwitch.firstElementChild.addEventListener(
+          "change",
+          onSelectorSwitch,
+        );
+      } else {
         languageSwitch.remove();
       }
     }

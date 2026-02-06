@@ -167,15 +167,15 @@ class WholeBodyController:
 
 #### Standard Task Hierarchy (Example)
 
-| Priority | Task | Description |
-|----------|------|-------------|
-| 0 | Contact Constraints | Feet don't slip, forces in friction cone |
-| 1 | Dynamics Consistency | M*ddq + h = S*tau + J^T*f |
-| 2 | CoM Tracking | Keep CoM over support polygon |
-| 3 | Angular Momentum | Regulate whole-body rotation |
-| 4 | End-Effector Tasks | Hand position/orientation tracking |
-| 5 | Posture | Maintain nominal joint configuration |
-| 6 | Joint Limits | Soft bounds to avoid singularities |
+| Priority | Task                 | Description                              |
+| -------- | -------------------- | ---------------------------------------- |
+| 0        | Contact Constraints  | Feet don't slip, forces in friction cone |
+| 1        | Dynamics Consistency | M*ddq + h = S*tau + J^T\*f               |
+| 2        | CoM Tracking         | Keep CoM over support polygon            |
+| 3        | Angular Momentum     | Regulate whole-body rotation             |
+| 4        | End-Effector Tasks   | Hand position/orientation tracking       |
+| 5        | Posture              | Maintain nominal joint configuration     |
+| 6        | Joint Limits         | Soft bounds to avoid singularities       |
 
 ### 1.3 Contact Dynamics and Multi-Contact
 
@@ -1525,49 +1525,49 @@ class ManipulationMetricsMixin:
 
 ### Tier 1: Foundation (Months 1-3)
 
-| Component | Priority | Effort | Dependencies |
-|-----------|----------|--------|--------------|
-| Whole-Body Control (HQP) | Critical | High | None |
-| Bipedal Locomotion (LIPM) | Critical | High | WBC |
-| Contact Manager | Critical | Medium | None |
-| F/T Sensor Framework | High | Low | None |
-| Collision Checker | High | Medium | None |
+| Component                 | Priority | Effort | Dependencies |
+| ------------------------- | -------- | ------ | ------------ |
+| Whole-Body Control (HQP)  | Critical | High   | None         |
+| Bipedal Locomotion (LIPM) | Critical | High   | WBC          |
+| Contact Manager           | Critical | Medium | None         |
+| F/T Sensor Framework      | High     | Low    | None         |
+| Collision Checker         | High     | Medium | None         |
 
 ### Tier 2: Planning & Perception (Months 4-6)
 
-| Component | Priority | Effort | Dependencies |
-|-----------|----------|--------|--------------|
-| RRT/RRT* Planners | Critical | Medium | Collision |
-| CHOMP/TrajOpt | High | High | Collision |
-| Perception Interface | High | Medium | None |
-| Scene Manager | Medium | Low | None |
+| Component            | Priority | Effort | Dependencies |
+| -------------------- | -------- | ------ | ------------ |
+| RRT/RRT\* Planners   | Critical | Medium | Collision    |
+| CHOMP/TrajOpt        | High     | High   | Collision    |
+| Perception Interface | High     | Medium | None         |
+| Scene Manager        | Medium   | Low    | None         |
 
 ### Tier 3: Learning (Months 7-9)
 
-| Component | Priority | Effort | Dependencies |
-|-----------|----------|--------|--------------|
-| Gymnasium Environments | Critical | Medium | None |
-| Domain Randomization | High | Low | Gym Envs |
-| Behavior Cloning | High | Medium | Gym Envs |
-| Motion Retargeting | Medium | High | None |
+| Component              | Priority | Effort | Dependencies |
+| ---------------------- | -------- | ------ | ------------ |
+| Gymnasium Environments | Critical | Medium | None         |
+| Domain Randomization   | High     | Low    | Gym Envs     |
+| Behavior Cloning       | High     | Medium | Gym Envs     |
+| Motion Retargeting     | Medium   | High   | None         |
 
 ### Tier 4: Industrial (Months 10-12)
 
-| Component | Priority | Effort | Dependencies |
-|-----------|----------|--------|--------------|
-| Real-Time Interface | Critical | High | None |
-| Digital Twin | High | High | RT Interface |
-| Safety System | Critical | Medium | Collision |
-| Teleoperation | High | Medium | RT Interface |
+| Component           | Priority | Effort | Dependencies |
+| ------------------- | -------- | ------ | ------------ |
+| Real-Time Interface | Critical | High   | None         |
+| Digital Twin        | High     | High   | RT Interface |
+| Safety System       | Critical | Medium | Collision    |
+| Teleoperation       | High     | Medium | RT Interface |
 
 ### Tier 5: Research (Ongoing)
 
-| Component | Priority | Effort | Dependencies |
-|-----------|----------|--------|--------------|
-| MPC Framework | High | High | WBC |
-| Differentiable Physics | Medium | Very High | None |
-| Deformable Objects | Low | Very High | None |
-| Multi-Robot | Medium | High | Scene Manager |
+| Component              | Priority | Effort    | Dependencies  |
+| ---------------------- | -------- | --------- | ------------- |
+| MPC Framework          | High     | High      | WBC           |
+| Differentiable Physics | Medium   | Very High | None          |
+| Deformable Objects     | Low      | Very High | None          |
+| Multi-Robot            | Medium   | High      | Scene Manager |
 
 ---
 
@@ -1575,24 +1575,24 @@ class ManipulationMetricsMixin:
 
 ### Open-Source Models for Integration
 
-| Model | DOF | Features | License |
-|-------|-----|----------|---------|
-| **Unitree H1** | 19 | Industrial humanoid, torque control | Apache 2.0 |
-| **Unitree G1** | 23 | Compact humanoid, dexterous hands | Apache 2.0 |
-| **Boston Dynamics Atlas** | 28 | High-performance locomotion | Research only |
-| **Agility Digit** | 30 | Commercial humanoid | Contact |
-| **NVIDIA Isaac Humanoid** | 25+ | Simulation optimized | Apache 2.0 |
-| **MuJoCo Humanoid** | 21 | Standard benchmark | Apache 2.0 |
-| **MyoSuite Full Body** | 52 | Muscle-actuated | Apache 2.0 |
+| Model                     | DOF | Features                            | License       |
+| ------------------------- | --- | ----------------------------------- | ------------- |
+| **Unitree H1**            | 19  | Industrial humanoid, torque control | Apache 2.0    |
+| **Unitree G1**            | 23  | Compact humanoid, dexterous hands   | Apache 2.0    |
+| **Boston Dynamics Atlas** | 28  | High-performance locomotion         | Research only |
+| **Agility Digit**         | 30  | Commercial humanoid                 | Contact       |
+| **NVIDIA Isaac Humanoid** | 25+ | Simulation optimized                | Apache 2.0    |
+| **MuJoCo Humanoid**       | 21  | Standard benchmark                  | Apache 2.0    |
+| **MyoSuite Full Body**    | 52  | Muscle-actuated                     | Apache 2.0    |
 
 ### Recommended Arms for Manipulation
 
-| Model | DOF | Payload | Features |
-|-------|-----|---------|----------|
-| **Franka Emika** | 7 | 3kg | Torque sensing, impedance control |
-| **KUKA iiwa** | 7 | 7/14kg | Industrial, certified |
-| **Universal Robots** | 6 | 3-16kg | Collaborative, easy programming |
-| **Kinova Gen3** | 7 | 4kg | Lightweight, vision integrated |
+| Model                | DOF | Payload | Features                          |
+| -------------------- | --- | ------- | --------------------------------- |
+| **Franka Emika**     | 7   | 3kg     | Torque sensing, impedance control |
+| **KUKA iiwa**        | 7   | 7/14kg  | Industrial, certified             |
+| **Universal Robots** | 6   | 3-16kg  | Collaborative, easy programming   |
+| **Kinova Gen3**      | 7   | 4kg     | Lightweight, vision integrated    |
 
 ---
 
@@ -1676,4 +1676,4 @@ src/
 
 ---
 
-*Document prepared for UpstreamDrift strategic planning.*
+_Document prepared for UpstreamDrift strategic planning._

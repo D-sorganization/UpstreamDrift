@@ -13,6 +13,7 @@ This checklist ensures the `Integrated_Analysis_App` folder is ready for integra
 ## 📋 Files Ready for Git Tracking
 
 ### Source Files (Should be tracked)
+
 - [x] `main_golf_analysis_app.m` - Main entry point
 - [x] `tab1_model_setup.m` - Tab 1 implementation
 - [x] `tab2_ztcf_calculation.m` - Tab 2 implementation
@@ -22,15 +23,18 @@ This checklist ensures the `Integrated_Analysis_App` folder is ready for integra
 - [x] `utils/config_manager.m` - Config manager class
 
 ### Documentation Files (Should be tracked)
+
 - [x] `README.md` - Main documentation
 - [x] `REVIEW.md` - Review document
 - [x] `INTEGRATION_CHECKLIST.md` - This file
 - [x] `Archive/README.md` - Archive documentation
 
 ### Configuration Files (Should be tracked)
+
 - [x] `config/golf_analysis_app_config.mat` - Default config (binary, may need Git LFS)
 
 ### Archive Files (Should be tracked)
+
 - [x] `Archive/EmbeddedSkeletonPlotter.m` - Archived code
 
 ## 🔍 Pre-Commit Checklist
@@ -38,14 +42,17 @@ This checklist ensures the `Integrated_Analysis_App` folder is ready for integra
 Before committing, verify:
 
 1. **All paths are relative** ✅
+
    - No hardcoded absolute paths
    - All paths use `fileparts(mfilename('fullpath'))` or similar
 
 2. **Dependencies are documented** ✅
+
    - SkeletonPlotter from `matlab/2D GUI/visualization/`
    - Default data from `matlab/Skeleton Plotter/`
 
 3. **Code follows project standards** ✅
+
    - camelCase for functions
    - PascalCase for classes
    - Proper error handling
@@ -83,16 +90,19 @@ git add matlab/Integrated_Analysis_App/
 ## 🚀 Next Steps
 
 1. **Add files to git**:
+
    ```bash
    git add matlab/Integrated_Analysis_App/
    ```
 
 2. **Verify files are staged**:
+
    ```bash
    git status
    ```
 
 3. **Commit with descriptive message**:
+
    ```bash
    git commit -m "Add Integrated_Analysis_App: tabbed GUI application for golf swing analysis
 

@@ -20,30 +20,35 @@ This library transforms the golf swing analysis tool into a full-featured physic
 Four-bar linkages are fundamental planar mechanisms consisting of four rigid links connected by revolute (hinge) joints. They are classified based on the Grashof condition, which determines whether the mechanism can achieve full rotation.
 
 **Grashof Condition**: `s + l < p + q`
+
 - Where s = shortest link, l = longest link, p & q = intermediate links
 - If satisfied, at least one link can rotate fully 360°
 
 #### Available Four-Bar Mechanisms:
 
 **Four-Bar: Grashof Crank-Rocker**
+
 - Description: Classic crank-rocker mechanism with Grashof condition satisfied
 - Behavior: Input crank rotates fully, output rocker oscillates
 - Applications: Windshield wipers, rocking chairs, oscillating fans
 - Link lengths: [4.0, 1.0, 3.5, 3.0] (ground, crank, coupler, follower)
 
 **Four-Bar: Double Crank**
+
 - Description: Both input and output links can rotate fully (Grashof)
 - Behavior: Continuous rotation transmission with varying velocity ratio
 - Applications: Parallel-crank steering linkages, some conveyor systems
 - Link lengths: [4.0, 2.0, 4.5, 3.5]
 
 **Four-Bar: Double Rocker**
+
 - Description: Both output links oscillate (no full rotation)
 - Behavior: Input oscillation creates output oscillation
 - Applications: Rocking mechanisms, certain toggle mechanisms
 - Link lengths: [4.0, 3.8, 2.5, 3.0]
 
 **Four-Bar: Parallelogram**
+
 - Description: Special case with parallel opposite links (equal length)
 - Behavior: Output link maintains same orientation as input (parallel motion)
 - Applications: Truck suspensions, drafting tables, folding mechanisms
@@ -54,6 +59,7 @@ Four-bar linkages are fundamental planar mechanisms consisting of four rigid lin
 Slider mechanisms convert rotary motion to linear motion (or vice versa) and are foundational to many engines and machines.
 
 **Slider-Crank (Horizontal)**
+
 - Description: Piston engine mechanism converting rotation to linear motion
 - Behavior: Crank rotation drives slider in linear reciprocating motion
 - Applications: Internal combustion engines, reciprocating pumps, compressors
@@ -61,12 +67,14 @@ Slider mechanisms convert rotary motion to linear motion (or vice versa) and are
 - Physics: Non-sinusoidal motion due to connecting rod angularity
 
 **Slider-Crank (Vertical)**
+
 - Description: Vertical orientation of slider-crank mechanism
 - Behavior: Same kinematics as horizontal, different gravity effects
 - Applications: Vertical compressors, pile drivers
 - Parameters: Crank length = 1.0, Rod length = 3.0
 
 **Scotch Yoke**
+
 - Description: Perfect simple harmonic motion generator
 - Behavior: Produces exact sinusoidal motion (no connecting rod angularity)
 - Applications: Control valves, function generators, mechanical computers
@@ -78,6 +86,7 @@ Slider mechanisms convert rotary motion to linear motion (or vice versa) and are
 These mechanisms serve specialized purposes in mechanical systems.
 
 **Geneva Mechanism**
+
 - Description: Intermittent motion converter (continuous input → indexed output)
 - Behavior: Drive pin engages slots to create stepped rotational motion
 - Applications: Film projectors, indexing tables, automatic tools
@@ -85,6 +94,7 @@ These mechanisms serve specialized purposes in mechanical systems.
 - Dwell time: Output rests while drive completes rotation
 
 **Oldham Coupling**
+
 - Description: Couples two parallel shafts with lateral offset
 - Behavior: Transmits rotation between offset parallel shafts
 - Applications: Shaft couplings, eccentric drives, scroll compressors
@@ -96,6 +106,7 @@ These mechanisms serve specialized purposes in mechanical systems.
 These remarkable mechanisms generate approximate or exact straight-line motion using only rotary joints—a significant achievement in the history of mechanical engineering.
 
 **Peaucellier-Lipkin Linkage**
+
 - Description: First planar linkage to produce mathematically perfect straight-line motion
 - Behavior: Converts circular motion into exact linear motion
 - Historical significance: Solved a major engineering problem (1864)
@@ -103,6 +114,7 @@ These remarkable mechanisms generate approximate or exact straight-line motion u
 - Mathematical basis: Inverse geometry transformation
 
 **Chebyshev Linkage**
+
 - Description: Three-bar linkage producing approximate straight-line motion
 - Behavior: Foot point traces nearly straight path over portion of cycle
 - Applications: Walking mechanisms, leg prosthetics, mechanical calculators
@@ -110,6 +122,7 @@ These remarkable mechanisms generate approximate or exact straight-line motion u
 - Advantage: Simpler than exact mechanisms, sufficient for many applications
 
 **Watt's Linkage**
+
 - Description: James Watt's parallel motion linkage for steam engines
 - Behavior: Center point traces approximate straight vertical line
 - Historical significance: Enabled practical double-acting steam engines (1784)
@@ -121,6 +134,7 @@ These remarkable mechanisms generate approximate or exact straight-line motion u
 Parallel manipulators have multiple kinematic chains connecting the base to the end effector, providing high stiffness and accuracy.
 
 **Delta Robot (3-DOF Parallel)**
+
 - Description: High-speed pick-and-place parallel robot
 - Behavior: Three arms control platform position in 3D space
 - Applications: Food packaging, electronics assembly, medical devices
@@ -129,6 +143,7 @@ Parallel manipulators have multiple kinematic chains connecting the base to the 
 - Parameters: Base radius = 2.0, Platform radius = 0.5
 
 **5-Bar Parallel Manipulator**
+
 - Description: Two-degree-of-freedom planar parallel robot
 - Behavior: Two actuated arms control end effector position in plane
 - Applications: Drawing machines, laser cutting, assembly tasks
@@ -137,6 +152,7 @@ Parallel manipulators have multiple kinematic chains connecting the base to the 
 - Parameters: Link length = 1.5, Base width = 2.0
 
 **Stewart Platform (6-DOF)**
+
 - Description: Six-degree-of-freedom parallel manipulator (hexapod)
 - Behavior: Six actuated legs control platform in all spatial directions
 - Applications: Flight simulators, tire testing, telescope mounts, CNC machines
@@ -148,6 +164,7 @@ Parallel manipulators have multiple kinematic chains connecting the base to the 
 ### 6. Scaling Mechanisms
 
 **Pantograph**
+
 - Description: Geometric scaling and copying mechanism
 - Behavior: Output point traces path similar to input but scaled
 - Applications: Engraving machines, photocopy machines, sign writing
@@ -159,6 +176,7 @@ Parallel manipulators have multiple kinematic chains connecting the base to the 
 ### Loading a Mechanism
 
 1. Launch the application:
+
    ```bash
    python -m mujoco_golf_pendulum
    ```
@@ -166,6 +184,7 @@ Parallel manipulators have multiple kinematic chains connecting the base to the 
 2. In the GUI, locate the "Physics Models & Mechanisms" dropdown in the Control Panel
 
 3. Mechanisms are listed with the prefix "Mechanism:" followed by their name
+
    - Example: "Mechanism: Four-Bar: Grashof Crank-Rocker"
 
 4. Select any mechanism to load it into the simulation
@@ -187,7 +206,9 @@ Each mechanism has one or more actuators (motors) that you can control:
 ### Visualization Features
 
 The mechanisms include:
+
 - **Color-coded links**: Different colors for different link types
+
   - Red/Orange: Input cranks or drivers
   - Green: Couplers and intermediate links
   - Blue: Output links or followers
@@ -214,18 +235,22 @@ All standard analysis features work with mechanisms:
 For learning about mechanisms, we recommend this exploration order:
 
 1. **Start with Four-Bar Linkages**: Understand basic planar kinematics
+
    - Compare Grashof vs Non-Grashof behavior
    - Observe how link length ratios affect motion
 
 2. **Explore Slider Mechanisms**: Learn rotation-to-translation conversion
+
    - Compare Slider-Crank vs Scotch Yoke motion quality
    - Understand connecting rod effects on kinematics
 
 3. **Study Straight-Line Mechanisms**: Appreciate historical engineering achievements
+
    - Observe Peaucellier's perfect straight line
    - Compare approximate mechanisms (Chebyshev, Watt)
 
 4. **Examine Special Mechanisms**: Understand specialized motion types
+
    - Geneva mechanism intermittent motion
    - Oldham coupling offset transmission
 
@@ -237,18 +262,21 @@ For learning about mechanisms, we recommend this exploration order:
 ### Physics Concepts Demonstrated
 
 **Kinematics**:
+
 - Position, velocity, acceleration relationships
 - Degrees of freedom and mobility
 - Grashof condition and kinematic inversions
 - Instantaneous centers of rotation
 
 **Dynamics**:
+
 - Constraint forces in joints
 - Inertial effects and accelerations
 - Energy conservation and dissipation
 - Mechanical advantage and transmission
 
 **Control**:
+
 - Torque-based actuation
 - Position control challenges
 - Parallel mechanism singularities
@@ -259,6 +287,7 @@ For learning about mechanisms, we recommend this exploration order:
 ### MuJoCo Physics Parameters
 
 All mechanisms use:
+
 - **Timestep**: 0.001 - 0.002 seconds
 - **Gravity**: -9.81 m/s² (Earth gravity)
 - **Integrator**: Implicit Euler (stable for constrained systems)
@@ -336,35 +365,42 @@ custom_pantograph = generate_pantograph_xml(scale_factor=3.0)
 ## References and Further Reading
 
 ### Classic Mechanism Theory
-- Hartenberg, R. S., & Denavit, J. (1964). *Kinematic Synthesis of Linkages*
-- Erdman, A. G., & Sandor, G. N. (1997). *Mechanism Design: Analysis and Synthesis*
-- Norton, R. L. (2011). *Design of Machinery*
+
+- Hartenberg, R. S., & Denavit, J. (1964). _Kinematic Synthesis of Linkages_
+- Erdman, A. G., & Sandor, G. N. (1997). _Mechanism Design: Analysis and Synthesis_
+- Norton, R. L. (2011). _Design of Machinery_
 
 ### Historical Context
+
 - Ferguson, E. S. (1962). "Kinematics of Mechanisms from the Time of Watt"
-- Moon, F. C. (2007). *The Machines of Leonardo da Vinci and Franz Reuleaux*
+- Moon, F. C. (2007). _The Machines of Leonardo da Vinci and Franz Reuleaux_
 
 ### Parallel Mechanisms
-- Merlet, J. P. (2006). *Parallel Robots*
+
+- Merlet, J. P. (2006). _Parallel Robots_
 - Gosselin, C., & Angeles, J. (1990). "Singularity Analysis of Closed-Loop Kinematic Chains"
 
 ### Straight-Line Linkages
-- Artobolevskii, I. I. (1975). *Mechanisms in Modern Engineering Design*
-- Kempe, A. B. (1877). *How to Draw a Straight Line* (historic classic)
+
+- Artobolevskii, I. I. (1975). _Mechanisms in Modern Engineering Design_
+- Kempe, A. B. (1877). _How to Draw a Straight Line_ (historic classic)
 
 ## Troubleshooting
 
 ### Mechanism Not Moving
+
 - Check that simulation is running (Play button pressed)
 - Verify actuator sliders are moved from zero position
 - Some mechanisms have limited range - try both directions
 
 ### Unstable Behavior
+
 - Reduce actuator torque/force inputs
 - Check that mechanism hasn't reached a singularity
 - Reset simulation and try again
 
 ### Poor Performance
+
 - Some complex mechanisms (Stewart platform) are computationally intensive
 - Reduce simulation speed if needed
 - Close other applications to free resources
@@ -380,6 +416,7 @@ To add a new mechanism to the library:
 5. Test in GUI for stability and correct physics
 
 Example structure:
+
 ```python
 def generate_your_mechanism_xml(param1, param2):
     """

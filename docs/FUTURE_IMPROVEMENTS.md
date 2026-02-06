@@ -22,14 +22,17 @@ This document tracks work that was identified during the assessment process but 
 **Effort:** 2-3 hours
 
 **Current State:**
+
 - Mixed usage of `logging` and `structlog` across ~30 files
 - Both work correctly, just inconsistent
 
 **Target State:**
+
 - Unified `structlog` usage throughout
 - Structured logging with context
 
 **Recommendation:**
+
 - Create dedicated PR: "Standardize logging to structlog"
 - Use find/replace with verification
 - Low risk, low priority
@@ -45,15 +48,18 @@ This document tracks work that was identified during the assessment process but 
 **Effort:** Ongoing (8-12 hours estimated)
 
 **Current State:**
+
 - Coverage threshold set to 60% in `pyproject.toml`
 - Estimated actual coverage: 45-55%
 - Critical paths have good coverage
 
 **Target State:**
+
 - Sustained 60%+ coverage
 - Focus on physics computation paths
 
 **Strategy:**
+
 1. Run `pytest --cov=shared --cov=engines --cov-report=html`
 2. Review HTML report for gaps
 3. Add tests for:
@@ -76,6 +82,7 @@ These items weren't in the original assessments but would further improve qualit
 **Opportunity:** C++ extensions for hot paths
 
 **Candidates:**
+
 - Jacobian derivative computation
 - Coriolis matrix decomposition
 - Trajectory processing loops
@@ -92,6 +99,7 @@ These items weren't in the original assessments but would further improve qualit
 **Opportunity:** More complex models, more engines
 
 **Additions:**
+
 - Double pendulum (chaotic dynamics)
 - Humanoid arm (7 DOF)
 - Drake integration (in addition to Pinocchio)
@@ -109,6 +117,7 @@ ence in physics correctness
 **Opportunity:** SE(3)/se(3) classes for frame-independent code
 
 **Benefits:**
+
 - Eliminates Coriolis vs centrifugal ambiguity
 - Cleaner multi-body dynamics code
 - Automatic frame transformations
@@ -124,6 +133,7 @@ ence in physics correctness
 **Opportunity:** Propagate numerical uncertainty
 
 **Example:**
+
 ```python
 result = {
     'torque': 42.5,  # Current
@@ -142,6 +152,7 @@ result = {
 **Opportunity:** Exact derivatives via automatic differentiation
 
 **Approaches:**
+
 - JAX integration
 - MuJoCo's internal derivatives
 - Symbolic computation
@@ -157,6 +168,7 @@ result = {
 **Opportunity:** Speed-accuracy tradeoffs
 
 **Features:**
+
 - Fast mode (lower precision, higher speed)
 - Standard mode (current)
 - High-precision mode (extra validation)
@@ -172,6 +184,7 @@ result = {
 **Opportunity:** Perturbed parameter tests
 
 **Approach:**
+
 ```python
 @pytest.mark.parametrize("mass_perturbation", [-0.05, 0.05])
 @pytest.mark.parametrize("inertia_perturbation", [-0.05, 0.05])
@@ -191,6 +204,7 @@ def test_robust_to_parameter_uncertainty(mass_perturb, inertia_perturb):
 **Opportunity:** SymPy symbolic checks
 
 **Example:**
+
 ```python
 # Verify equation symbolically before numerical implementation
 def verify_kinetic_energy_formula():
@@ -210,11 +224,13 @@ def verify_kinetic_energy_formula():
 ### Regular Maintenance (Quarterly)
 
 1. **Dependency Updates**
+
    - Update MuJoCo, NumPy, etc.
    - Run full test suite
    - Verify cross-engine compatibility
 
 2. **Performance Benchmarks**
+
    - Track performance over time
    - Detect regressions
    - Identify optimization opportunities
@@ -227,6 +243,7 @@ def verify_kinetic_energy_formula():
 ### Long-Term Evolution (Annual)
 
 1. **Assessment Re-Run**
+
    - Re-run Assessments A, B, C annually
    - Identify new risks as code evolves
    - Update remediation plans
@@ -242,13 +259,13 @@ def verify_kinetic_energy_formula():
 
 When deciding what to work on next, use this framework:
 
-| Priority | Criteria | Examples from Above |
-|----------|----------|---------------------|
-| **P0 (Critical)** | Affects scientific correctness | (None remaining) |
-| **P1 (High)** | Improves scientific trust significantly | Additional cross-engine tests |
-| **P2 (Medium)** | Quality of life, maintainability | Test coverage, logging standardization |
-| **P3 (Low)** | Nice-to-have optimizations | Performance improvements, real-time mode |
-| **P4 (Future)** | Research/exploration | Spatial algebra, symbolic verification |
+| Priority          | Criteria                                | Examples from Above                      |
+| ----------------- | --------------------------------------- | ---------------------------------------- |
+| **P0 (Critical)** | Affects scientific correctness          | (None remaining)                         |
+| **P1 (High)**     | Improves scientific trust significantly | Additional cross-engine tests            |
+| **P2 (Medium)**   | Quality of life, maintainability        | Test coverage, logging standardization   |
+| **P3 (Low)**      | Nice-to-have optimizations              | Performance improvements, real-time mode |
+| **P4 (Future)**   | Research/exploration                    | Spatial algebra, symbolic verification   |
 
 ---
 
@@ -257,16 +274,19 @@ When deciding what to work on next, use this framework:
 If you want to tackle any of these items:
 
 1. **Create an Issue** on GitHub with:
+
    - Reference to this document
    - Proposed approach
    - Estimated effort
 
 2. **Create a Branch** following naming convention:
+
    - `feat/spatial-algebra-layer`
    - `improve/test-coverage-60pct`
    - `refactor/logging-standardization`
 
 3. **Follow Standards:**
+
    - Black formatting
    - Ruff linting
    - Type annotations
@@ -297,6 +317,7 @@ Current achievements to maintain or improve:
 ## Conclusion
 
 The Golf Modeling Suite has achieved **research-grade scientific quality** with:
+
 - ALL critical scientific issues resolved
 - Comprehensive validation (conservation + cross-engine)
 - Excellent documentation and numerical stability

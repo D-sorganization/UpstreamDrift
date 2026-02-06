@@ -16,6 +16,7 @@ Transform the Golf Modeling Suite from a collection of separate desktop applicat
 ## Architecture Principles
 
 ### 1. Local-First, Always Free
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     USER'S MACHINE                               │
@@ -31,12 +32,14 @@ Transform the Golf Modeling Suite from a collection of separate desktop applicat
 ```
 
 ### 2. API as Internal Backbone (Not External Gate)
+
 - The API is an **internal architecture pattern**, not a paywall
 - Local mode: API runs on `localhost:8000` with **no authentication**
 - Cloud mode (optional): API runs remotely with authentication
 - Same codebase, different deployment context
 
 ### 3. Progressive Enhancement
+
 - Core features work offline, locally, free
 - Cloud adds convenience (sharing, collaboration, remote compute)
 - Never lock features behind cloud/payment
@@ -547,16 +550,16 @@ if __name__ == "__main__":
 
 ### 2.1 Technology Stack
 
-| Component | Choice | Rationale |
-|-----------|--------|-----------|
-| **Framework** | React 18 + TypeScript | Industry standard, huge ecosystem |
-| **Build Tool** | Vite | Fast dev server, optimized builds |
-| **Styling** | Tailwind CSS | Rapid development, consistent design |
-| **State** | Zustand | Simple, performant, no boilerplate |
-| **3D Viz** | Three.js + React Three Fiber | Powerful, can embed or replace Meshcat |
-| **Charts** | Recharts or Visx | React-native charting |
-| **Forms** | React Hook Form + Zod | Type-safe form validation |
-| **API Client** | TanStack Query | Caching, real-time updates |
+| Component      | Choice                       | Rationale                              |
+| -------------- | ---------------------------- | -------------------------------------- |
+| **Framework**  | React 18 + TypeScript        | Industry standard, huge ecosystem      |
+| **Build Tool** | Vite                         | Fast dev server, optimized builds      |
+| **Styling**    | Tailwind CSS                 | Rapid development, consistent design   |
+| **State**      | Zustand                      | Simple, performant, no boilerplate     |
+| **3D Viz**     | Three.js + React Three Fiber | Powerful, can embed or replace Meshcat |
+| **Charts**     | Recharts or Visx             | React-native charting                  |
+| **Forms**      | React Hook Form + Zod        | Type-safe form validation              |
+| **API Client** | TanStack Query               | Caching, real-time updates             |
 
 ### 2.2 Project Structure
 
@@ -622,23 +625,18 @@ ui/
 ```tsx
 // ui/src/pages/Simulation.tsx
 
-import { useState } from 'react';
-import { useSimulation } from '../api/hooks';
-import { EngineSelector } from '../components/simulation/EngineSelector';
-import { SimulationControls } from '../components/simulation/SimulationControls';
-import { ParameterPanel } from '../components/simulation/ParameterPanel';
-import { Scene3D } from '../components/visualization/Scene3D';
-import { LivePlot } from '../components/analysis/LivePlot';
+import { useState } from "react";
+import { useSimulation } from "../api/hooks";
+import { EngineSelector } from "../components/simulation/EngineSelector";
+import { SimulationControls } from "../components/simulation/SimulationControls";
+import { ParameterPanel } from "../components/simulation/ParameterPanel";
+import { Scene3D } from "../components/visualization/Scene3D";
+import { LivePlot } from "../components/analysis/LivePlot";
 
 export function SimulationPage() {
-  const [selectedEngine, setSelectedEngine] = useState<string>('mujoco');
-  const {
-    isRunning,
-    currentFrame,
-    start,
-    stop,
-    pause
-  } = useSimulation(selectedEngine);
+  const [selectedEngine, setSelectedEngine] = useState<string>("mujoco");
+  const { isRunning, currentFrame, start, stop, pause } =
+    useSimulation(selectedEngine);
 
   return (
     <div className="flex h-screen bg-gray-900">
@@ -666,15 +664,12 @@ export function SimulationPage() {
       <main className="flex-1 flex flex-col">
         {/* 3D Visualization */}
         <div className="flex-1 relative">
-          <Scene3D
-            engine={selectedEngine}
-            frame={currentFrame}
-          />
+          <Scene3D engine={selectedEngine} frame={currentFrame} />
 
           {/* Overlay: Status */}
           <div className="absolute top-4 left-4 bg-black/50 px-3 py-1 rounded">
             <span className="text-green-400">
-              {isRunning ? `Frame ${currentFrame?.frame}` : 'Ready'}
+              {isRunning ? `Frame ${currentFrame?.frame}` : "Ready"}
             </span>
           </div>
         </div>
@@ -701,8 +696,8 @@ export function SimulationPage() {
 ```tsx
 // ui/src/api/hooks.ts
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SimulationFrame {
   frame: number;
@@ -725,64 +720,73 @@ interface SimulationConfig {
 export function useSimulation(engineType: string) {
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [currentFrame, setCurrentFrame] = useState<SimulationFrame | null>(null);
+  const [currentFrame, setCurrentFrame] = useState<SimulationFrame | null>(
+    null,
+  );
   const [frames, setFrames] = useState<SimulationFrame[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
 
-  const start = useCallback((config: SimulationConfig = {}) => {
-    // Connect to local WebSocket (no auth needed)
-    const ws = new WebSocket(`ws://localhost:8000/api/ws/simulate/${engineType}`);
-    wsRef.current = ws;
+  const start = useCallback(
+    (config: SimulationConfig = {}) => {
+      // Connect to local WebSocket (no auth needed)
+      const ws = new WebSocket(
+        `ws://localhost:8000/api/ws/simulate/${engineType}`,
+      );
+      wsRef.current = ws;
 
-    ws.onopen = () => {
-      setIsRunning(true);
-      setFrames([]);
-      ws.send(JSON.stringify({
-        action: 'start',
-        config: {
-          duration: 3.0,
-          timestep: 0.002,
-          live_analysis: true,
-          ...config,
-        },
-      }));
-    };
+      ws.onopen = () => {
+        setIsRunning(true);
+        setFrames([]);
+        ws.send(
+          JSON.stringify({
+            action: "start",
+            config: {
+              duration: 3.0,
+              timestep: 0.002,
+              live_analysis: true,
+              ...config,
+            },
+          }),
+        );
+      };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-      if (data.status === 'complete') {
+        if (data.status === "complete") {
+          setIsRunning(false);
+          return;
+        }
+
+        if (data.frame !== undefined) {
+          setCurrentFrame(data);
+          setFrames((prev) => [...prev, data]);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
         setIsRunning(false);
-        return;
-      }
+      };
 
-      if (data.frame !== undefined) {
-        setCurrentFrame(data);
-        setFrames(prev => [...prev, data]);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setIsRunning(false);
-    };
-
-    ws.onclose = () => {
-      setIsRunning(false);
-    };
-  }, [engineType]);
+      ws.onclose = () => {
+        setIsRunning(false);
+      };
+    },
+    [engineType],
+  );
 
   const stop = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ action: 'stop' }));
+    wsRef.current?.send(JSON.stringify({ action: "stop" }));
   }, []);
 
   const pause = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ action: 'pause' }));
+    wsRef.current?.send(JSON.stringify({ action: "pause" }));
     setIsPaused(true);
   }, []);
 
   const resume = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ action: 'resume' }));
+    wsRef.current?.send(JSON.stringify({ action: "resume" }));
     setIsPaused(false);
   }, []);
 
@@ -811,8 +815,8 @@ export function useSimulation(engineType: string) {
 ```tsx
 // ui/src/components/simulation/EngineSelector.tsx
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchEngines } from '../../api/client';
+import { useQuery } from "@tanstack/react-query";
+import { fetchEngines } from "../../api/client";
 
 interface Props {
   value: string;
@@ -822,7 +826,7 @@ interface Props {
 
 export function EngineSelector({ value, onChange, disabled }: Props) {
   const { data: engines, isLoading } = useQuery({
-    queryKey: ['engines'],
+    queryKey: ["engines"],
     queryFn: fetchEngines,
   });
 
@@ -843,21 +847,22 @@ export function EngineSelector({ value, onChange, disabled }: Props) {
             disabled={disabled || !engine.available}
             className={`
               p-3 rounded-lg border text-left transition-all
-              ${value === engine.name
-                ? 'border-blue-500 bg-blue-500/20 text-white'
-                : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+              ${
+                value === engine.name
+                  ? "border-blue-500 bg-blue-500/20 text-white"
+                  : "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
               }
-              ${!engine.available && 'opacity-50 cursor-not-allowed'}
-              ${disabled && 'cursor-not-allowed'}
+              ${!engine.available && "opacity-50 cursor-not-allowed"}
+              ${disabled && "cursor-not-allowed"}
             `}
           >
             <div className="font-medium">{engine.name}</div>
             <div className="text-xs text-gray-400">
-              {engine.available ? (
-                engine.loaded ? '● Loaded' : '○ Available'
-              ) : (
-                '✗ Not installed'
-              )}
+              {engine.available
+                ? engine.loaded
+                  ? "● Loaded"
+                  : "○ Available"
+                : "✗ Not installed"}
             </div>
           </button>
         ))}
@@ -872,10 +877,10 @@ export function EngineSelector({ value, onChange, disabled }: Props) {
 ```tsx
 // ui/src/components/visualization/Scene3D.tsx
 
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment } from '@react-three/drei';
-import { useRef, useMemo } from 'react';
-import * as THREE from 'three';
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Grid, Environment } from "@react-three/drei";
+import { useRef, useMemo } from "react";
+import * as THREE from "three";
 
 interface Props {
   engine: string;
@@ -884,10 +889,7 @@ interface Props {
 
 export function Scene3D({ engine, frame }: Props) {
   return (
-    <Canvas
-      camera={{ position: [3, 2, 3], fov: 50 }}
-      className="bg-gray-900"
-    >
+    <Canvas camera={{ position: [3, 2, 3], fov: 50 }} className="bg-gray-900">
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} />
 
@@ -969,16 +971,16 @@ function ClubTrajectory({ frame }: { frame: SimulationFrame | null }) {
 **File: `ui/vite.config.ts`**
 
 ```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 
@@ -986,27 +988,27 @@ export default defineConfig({
     port: 3000,
     proxy: {
       // Proxy API requests to local backend during development
-      '/api': {
-        target: 'http://localhost:8000',
+      "/api": {
+        target: "http://localhost:8000",
         changeOrigin: true,
       },
-      '/api/ws': {
-        target: 'ws://localhost:8000',
+      "/api/ws": {
+        target: "ws://localhost:8000",
         ws: true,
       },
     },
   },
 
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: false,
-    minify: 'terser',
+    minify: "terser",
     rollupOptions: {
       output: {
         manualChunks: {
-          'three': ['three', '@react-three/fiber', '@react-three/drei'],
-          'react': ['react', 'react-dom'],
-          'charts': ['recharts'],
+          three: ["three", "@react-three/fiber", "@react-three/drei"],
+          react: ["react", "react-dom"],
+          charts: ["recharts"],
         },
       },
     },
@@ -1299,7 +1301,7 @@ CMD ["micromamba", "run", "-n", "golf-suite", "golf-suite", "--no-browser"]
 **File: `docker-compose.yml`**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   golf-suite:
@@ -1405,7 +1407,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-ui:
@@ -1416,8 +1418,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: ui/package-lock.json
 
       - name: Build UI
@@ -1447,7 +1449,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Build wheel
         run: |
@@ -1673,7 +1675,7 @@ def get_cloud_client() -> CloudClient:
 ```tsx
 // ui/src/components/cloud/CloudStatus.tsx
 
-import { useCloud } from '../../stores/cloudStore';
+import { useCloud } from "../../stores/cloudStore";
 
 export function CloudStatus() {
   const { isLoggedIn, user, login, logout } = useCloud();
@@ -1740,14 +1742,14 @@ Week 12+:   Phase 4        - Optional cloud features (can defer)
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| **Time to first simulation** | < 5 minutes from install |
-| **Install success rate** | > 95% on supported platforms |
-| **No internet required** | 100% of core features |
-| **Bundle size (UI)** | < 5 MB gzipped |
-| **Docker image size** | < 2 GB |
-| **Startup time** | < 3 seconds to UI |
+| Metric                       | Target                       |
+| ---------------------------- | ---------------------------- |
+| **Time to first simulation** | < 5 minutes from install     |
+| **Install success rate**     | > 95% on supported platforms |
+| **No internet required**     | 100% of core features        |
+| **Bundle size (UI)**         | < 5 MB gzipped               |
+| **Docker image size**        | < 2 GB                       |
+| **Startup time**             | < 3 seconds to UI            |
 
 ---
 

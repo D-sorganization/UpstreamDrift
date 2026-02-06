@@ -9,6 +9,7 @@ and continuous integration (CI) quality goals.
 ## 1. Purpose
 
 The goal of these guardrails is to:
+
 - **Catch coding errors early** via automated linting, type-checking, and formatting.
 - **Prevent low-quality or broken code** from being merged into protected branches.
 - **Automate enforcement** using `pre-commit` hooks and CI status checks.
@@ -20,20 +21,21 @@ The goal of these guardrails is to:
 
 All repositories implementing guardrails must use:
 
-| Tool | Purpose |
-|------|---------|
-| **pre-commit** | Framework for running checks automatically before each commit |
-| **ruff** | Fast Python linter and formatter |
-| **mypy** | Static type checker for Python |
-| **black** (optional) | Python code formatter (if not using ruff's formatter) |
-| **pytest** | Test runner for automated unit/integration tests |
-| **GitHub Actions CI** | Runs the guardrail checks on all pushes and PRs |
+| Tool                  | Purpose                                                       |
+| --------------------- | ------------------------------------------------------------- |
+| **pre-commit**        | Framework for running checks automatically before each commit |
+| **ruff**              | Fast Python linter and formatter                              |
+| **mypy**              | Static type checker for Python                                |
+| **black** (optional)  | Python code formatter (if not using ruff's formatter)         |
+| **pytest**            | Test runner for automated unit/integration tests              |
+| **GitHub Actions CI** | Runs the guardrail checks on all pushes and PRs               |
 
 ---
 
 ## 3. File Exclusions
 
 Guardrails **must not block development** due to errors in:
+
 - Legacy or archived code
 - Experimental or prototype directories
 - Third-party libraries checked into the repo
@@ -42,6 +44,7 @@ Guardrails **must not block development** due to errors in:
 Use **consistent exclusions** in all configs (`.pre-commit-config.yaml`, `ruff.toml`, `mypy.ini`) to ignore these paths.
 
 **Example Exclusion Patterns**:
+
 ```
 ^(Archive/|legacy/|old_code/|experimental/|.*Python Version/|.*Motion Capture Plotter/)
 ```
@@ -53,6 +56,7 @@ Use **consistent exclusions** in all configs (`.pre-commit-config.yaml`, `ruff.t
 Below are minimal working examples of each required config.
 
 ### 4.1 `.pre-commit-config.yaml`
+
 ```yaml
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
@@ -60,21 +64,22 @@ repos:
     hooks:
       - id: ruff
         args: ["--fix"]
-        exclude: '^(Archive/|legacy/|experimental/)'
+        exclude: "^(Archive/|legacy/|experimental/)"
       - id: ruff-format
-        exclude: '^(Archive/|legacy/|experimental/)'
+        exclude: "^(Archive/|legacy/|experimental/)"
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1
     hooks:
       - id: mypy
-        exclude: '^(Archive/|legacy/|experimental/)'
+        exclude: "^(Archive/|legacy/|experimental/)"
 
 default_language_version:
   python: python3.11
 ```
 
 ### 4.2 `ruff.toml`
+
 ```toml
 target-version = "py311"
 extend-exclude = [
@@ -87,6 +92,7 @@ line-length = 100
 ```
 
 ### 4.3 `mypy.ini`
+
 ```ini
 [mypy]
 python_version = 3.11
@@ -117,6 +123,7 @@ This repository uses a **unified CI/CD workflow** that implements all best pract
 - **Documentation**: Pydocstyle docstring validation
 
 **Key Features**:
+
 - Pinned tool versions for reproducibility
 - Comprehensive source directory detection
 - Conditional coverage file uploads
@@ -125,6 +132,7 @@ This repository uses a **unified CI/CD workflow** that implements all best pract
 For implementation details, see `Repository_Management/UNIFIED_CI_APPROACH.md`.
 
 **Setup Notes**:
+
 1. This workflow must run **on every push and PR**.
 2. In GitHub branch protection rules, require this workflow to pass before merging.
 3. The workflow supports replicant branches (add to trigger branches as needed).

@@ -32,20 +32,21 @@ These loads represent the mechanical stress experienced by spinal structures (in
 
 ### 1.3 Units and conventions
 
-| Parameter | Symbol | Units | Typical Normalization |
-|-----------|--------|-------|----------------------|
-| Compression force | F_c | Newtons (N) | × body weight (BW) |
-| A-P shear force | F_ap | Newtons (N) | × body weight (BW) |
-| Lateral shear force | F_lat | Newtons (N) | × body weight (BW) |
-| Flexion-extension moment | M_fe | Newton-meters (N·m) | Absolute |
-| Lateral bending moment | M_lb | Newton-meters (N·m) | Absolute |
-| Axial torsion | M_ax | Newton-meters (N·m) | Absolute |
+| Parameter                | Symbol | Units               | Typical Normalization |
+| ------------------------ | ------ | ------------------- | --------------------- |
+| Compression force        | F_c    | Newtons (N)         | × body weight (BW)    |
+| A-P shear force          | F_ap   | Newtons (N)         | × body weight (BW)    |
+| Lateral shear force      | F_lat  | Newtons (N)         | × body weight (BW)    |
+| Flexion-extension moment | M_fe   | Newton-meters (N·m) | Absolute              |
+| Lateral bending moment   | M_lb   | Newton-meters (N·m) | Absolute              |
+| Axial torsion            | M_ax   | Newton-meters (N·m) | Absolute              |
 
 ### 1.4 Anatomical reference
 
 Standard measurement level: **L4-L5 or L5-S1** (most common sites of golf-related injury)
 
 Coordinate system (ISB recommendations):
+
 - **X-axis:** Anterior-posterior (+ = anterior)
 - **Y-axis:** Superior-inferior (+ = superior)
 - **Z-axis:** Medial-lateral (+ = right)
@@ -58,36 +59,40 @@ Coordinate system (ISB recommendations):
 
 #### Hosea et al. (1990) - Foundational spinal loading study
 
-**Citation:** Hosea, T. M., Gatt, C. J., Galli, K. M., Langrana, N. A., & Zawadsky, J. P. (1990). Biomechanical analysis of the golfer's back. In A. J. Cochran (Ed.), *Science and Golf: Proceedings of the First World Scientific Congress of Golf* (pp. 43-48). London: E & FN Spon.
+**Citation:** Hosea, T. M., Gatt, C. J., Galli, K. M., Langrana, N. A., & Zawadsky, J. P. (1990). Biomechanical analysis of the golfer's back. In A. J. Cochran (Ed.), _Science and Golf: Proceedings of the First World Scientific Congress of Golf_ (pp. 43-48). London: E & FN Spon.
 
 **Key findings:**
+
 - First study to quantify lumbar spine forces during golf swing
 - Used inverse dynamics with EMG-assisted muscle force estimation
 - Measured at L3-L4 segment
 
 **Results:**
 
-| Group | Compression (N) | A-P Shear (N) |
-|-------|----------------|---------------|
-| Professional (n=4) | 7584 | 329 |
-| Amateur (n=4) | 6100 | 596 |
+| Group              | Compression (N) | A-P Shear (N) |
+| ------------------ | --------------- | ------------- |
+| Professional (n=4) | 7584            | 329           |
+| Amateur (n=4)      | 6100            | 596           |
 
 **Critical values:**
+
 - Peak compression: ~8× body weight (professionals)
 - For comparison: Running produces ~3× BW compression
 - Peak forces occur just before or at ball impact
 
 #### Cole & Grimshaw (2016) - Modern swing biomechanics review
 
-**Citation:** Cole, M. H., & Grimshaw, P. N. (2016). The biomechanics of the modern golf swing: Implications for lower back injuries. *Sports Medicine*, 46(3), 339-351.
+**Citation:** Cole, M. H., & Grimshaw, P. N. (2016). The biomechanics of the modern golf swing: Implications for lower back injuries. _Sports Medicine_, 46(3), 339-351.
 
 **Key findings:**
+
 - Modern swing emphasizes restricted pelvis turn with increased thorax rotation
 - This creates higher X-factor but also higher spinal loading
 - Lateral slide of pelvis during downswing contributes to shear forces
 - Reviewed relationship between swing mechanics and injury mechanisms
 
 **Loading mechanisms identified:**
+
 1. High axial compression from muscle co-contraction
 2. Lateral shear from asymmetric trunk positioning
 3. Torsion from rapid axial rotation
@@ -95,11 +100,12 @@ Coordinate system (ISB recommendations):
 
 #### Lindsay & Horton (2002) - Comprehensive review
 
-**Citation:** Lindsay, D., & Horton, J. (2002). Comparison of spine motion in elite golfers with and without low back pain. *Journal of Sports Sciences*, 20(8), 599-605.
+**Citation:** Lindsay, D., & Horton, J. (2002). Comparison of spine motion in elite golfers with and without low back pain. _Journal of Sports Sciences_, 20(8), 599-605.
 
-**Related review:** Lindsay, D. M., & Vandervoort, A. A. (2014). Golf-related low back pain: A review of causative factors and prevention strategies. *Asian Journal of Sports Medicine*, 5(4), e24289.
+**Related review:** Lindsay, D. M., & Vandervoort, A. A. (2014). Golf-related low back pain: A review of causative factors and prevention strategies. _Asian Journal of Sports Medicine_, 5(4), e24289.
 
 **Key findings:**
+
 - Back pain affects 25-58% of golfers
 - Three loading types: compression, shear, torsion
 - "Crunch factor" concept: combined lateral bend + rotation
@@ -108,9 +114,10 @@ Coordinate system (ISB recommendations):
 
 #### Inverse dynamics approach
 
-**Citation:** Lim, Y. T., & Chow, J. W. (2004). Lumbar spinal loads and muscle activity during a golf swing. In M. Hubbard, R. D. Mehta, & J. M. Pallis (Eds.), *The Engineering of Sport 5* (Vol. 2, pp. 414-420). Sheffield: ISEA.
+**Citation:** Lim, Y. T., & Chow, J. W. (2004). Lumbar spinal loads and muscle activity during a golf swing. In M. Hubbard, R. D. Mehta, & J. M. Pallis (Eds.), _The Engineering of Sport 5_ (Vol. 2, pp. 414-420). Sheffield: ISEA.
 
 **Method:**
+
 1. Capture kinematics (markers on trunk, pelvis)
 2. Compute segment accelerations
 3. Apply Newton-Euler equations from distal to proximal
@@ -118,6 +125,7 @@ Coordinate system (ISB recommendations):
 5. Sum all force contributions at spinal level
 
 **Muscle model:**
+
 - 22 trunk muscles included
 - EMG-to-force relationship calibrated per subject
 - Muscle moment arms from anatomical data
@@ -127,11 +135,13 @@ Coordinate system (ISB recommendations):
 **Citation:** Defined in multiple studies; synthesized in systematic reviews.
 
 **Definition:**
+
 ```
 Crunch Factor = Lateral Inclination × Axial Rotation Velocity
 ```
 
 **Purpose:**
+
 - Captures combined effect of lateral bending and rotation
 - Both create stress in intervertebral disc
 - Axial rotation speed accounts for viscoelastic effects
@@ -140,14 +150,17 @@ Crunch Factor = Lateral Inclination × Axial Rotation Velocity
 ### 2.3 Controversies and limitations
 
 1. **Model complexity trade-offs:**
+
    - Simple models underestimate muscle contributions
    - Complex models require many assumptions about muscle force sharing
 
 2. **Individual variation:**
+
    - Muscle strength, geometry vary substantially
    - Generic models may not represent specific individuals
 
 3. **Validation challenges:**
+
    - Direct measurement of spinal forces is invasive
    - In vivo validation limited to instrumented vertebral implants
 
@@ -243,30 +256,30 @@ Output:
 
 **Hosea et al. (1990) values:**
 
-| Parameter | Professional | Amateur | Units |
-|-----------|-------------|---------|-------|
-| Peak Compression | 7584 | 6100 | N |
-| Peak Compression | ~8.0 | ~7.0 | ×BW |
-| Peak A-P Shear | 329 | 596 | N |
-| Peak A-P Shear | ~0.4 | ~0.7 | ×BW |
+| Parameter        | Professional | Amateur | Units |
+| ---------------- | ------------ | ------- | ----- |
+| Peak Compression | 7584         | 6100    | N     |
+| Peak Compression | ~8.0         | ~7.0    | ×BW   |
+| Peak A-P Shear   | 329          | 596     | N     |
+| Peak A-P Shear   | ~0.4         | ~0.7    | ×BW   |
 
 **Literature ranges (various studies):**
 
-| Parameter | Typical Range | Units |
-|-----------|--------------|-------|
-| Peak Compression | 4-8 | ×BW |
-| Peak Lateral Shear | 0.3-1.5 | ×BW |
-| Peak A-P Shear | 0.2-0.8 | ×BW |
-| Peak Axial Torsion | 50-150 | N·m |
+| Parameter          | Typical Range | Units |
+| ------------------ | ------------- | ----- |
+| Peak Compression   | 4-8           | ×BW   |
+| Peak Lateral Shear | 0.3-1.5       | ×BW   |
+| Peak A-P Shear     | 0.2-0.8       | ×BW   |
+| Peak Axial Torsion | 50-150        | N·m   |
 
 ### 4.2 Acceptance criteria
 
-| Criterion | Tolerance | Notes |
-|-----------|-----------|-------|
-| Compression magnitude | Within literature range | 4-8× BW |
-| Peak timing | ±10 ms of impact | Consistent with literature |
-| Force direction | Anatomically plausible | Compression > shear |
-| Cross-engine consistency | ±5% | For identical input |
+| Criterion                | Tolerance               | Notes                      |
+| ------------------------ | ----------------------- | -------------------------- |
+| Compression magnitude    | Within literature range | 4-8× BW                    |
+| Peak timing              | ±10 ms of impact        | Consistent with literature |
+| Force direction          | Anatomically plausible  | Compression > shear        |
+| Cross-engine consistency | ±5%                     | For identical input        |
 
 ### 4.3 Validation tests
 
@@ -281,17 +294,18 @@ Output:
 
 ### 5.1 Sources of uncertainty
 
-| Source | Magnitude | Notes |
-|--------|-----------|-------|
-| Segment mass estimation | ±10-15% | Anthropometric tables |
-| COM location | ±2 cm | Affects moment arms |
-| Moment arm assumption | ±20-30% | Individual variation |
-| Acceleration noise | ±5-10% | Differentiation amplifies noise |
-| Muscle force estimation | ±30-50% | Largest source |
+| Source                  | Magnitude | Notes                           |
+| ----------------------- | --------- | ------------------------------- |
+| Segment mass estimation | ±10-15%   | Anthropometric tables           |
+| COM location            | ±2 cm     | Affects moment arms             |
+| Moment arm assumption   | ±20-30%   | Individual variation            |
+| Acceleration noise      | ±5-10%    | Differentiation amplifies noise |
+| Muscle force estimation | ±30-50%   | Largest source                  |
 
 ### 5.2 Propagation method
 
 Given uncertainty in muscle contribution, report range:
+
 ```
 F_compression = F_skeletal + F_muscle_estimate
 F_compression_range = [F_skeletal, F_skeletal + 2×F_muscle_estimate]
@@ -334,28 +348,31 @@ Interpretation requires qualified professional assessment.
 
 ## 6. References
 
-1. Hosea, T. M., Gatt, C. J., Galli, K. M., Langrana, N. A., & Zawadsky, J. P. (1990). Biomechanical analysis of the golfer's back. In A. J. Cochran (Ed.), *Science and Golf I* (pp. 43-48). London: E & FN Spon.
+1. Hosea, T. M., Gatt, C. J., Galli, K. M., Langrana, N. A., & Zawadsky, J. P. (1990). Biomechanical analysis of the golfer's back. In A. J. Cochran (Ed.), _Science and Golf I_ (pp. 43-48). London: E & FN Spon.
 
-2. Cole, M. H., & Grimshaw, P. N. (2016). The biomechanics of the modern golf swing: Implications for lower back injuries. *Sports Medicine*, 46(3), 339-351.
+2. Cole, M. H., & Grimshaw, P. N. (2016). The biomechanics of the modern golf swing: Implications for lower back injuries. _Sports Medicine_, 46(3), 339-351.
+
    - https://pubmed.ncbi.nlm.nih.gov/26604102/
 
-3. Lindsay, D. M., & Horton, J. F. (2002). Comparison of spine motion in elite golfers with and without low back pain. *Journal of Sports Sciences*, 20(8), 599-605.
+3. Lindsay, D. M., & Horton, J. F. (2002). Comparison of spine motion in elite golfers with and without low back pain. _Journal of Sports Sciences_, 20(8), 599-605.
 
-4. Lindsay, D. M., & Vandervoort, A. A. (2014). Golf-related low back pain: A review of causative factors and prevention strategies. *Asian Journal of Sports Medicine*, 5(4), e24289.
+4. Lindsay, D. M., & Vandervoort, A. A. (2014). Golf-related low back pain: A review of causative factors and prevention strategies. _Asian Journal of Sports Medicine_, 5(4), e24289.
+
    - https://pmc.ncbi.nlm.nih.gov/articles/PMC4335481/
 
-5. Lim, Y. T., & Chow, J. W. (2004). Lumbar spinal loads and muscle activity during a golf swing. *The Engineering of Sport 5*, 2, 414-420.
+5. Lim, Y. T., & Chow, J. W. (2004). Lumbar spinal loads and muscle activity during a golf swing. _The Engineering of Sport 5_, 2, 414-420.
 
-6. Gluck, G. S., Bendo, J. A., & Spivak, J. M. (2008). The lumbar spine and low back pain in golf: A literature review of swing biomechanics and injury prevention. *The Spine Journal*, 8(5), 778-788.
+6. Gluck, G. S., Bendo, J. A., & Spivak, J. M. (2008). The lumbar spine and low back pain in golf: A literature review of swing biomechanics and injury prevention. _The Spine Journal_, 8(5), 778-788.
+
    - https://pubmed.ncbi.nlm.nih.gov/17938007/
 
-7. McHardy, A., Pollard, H., & Luo, K. (2006). Golf injuries: A review of the literature. *Sports Medicine*, 36(2), 171-187.
+7. McHardy, A., Pollard, H., & Luo, K. (2006). Golf injuries: A review of the literature. _Sports Medicine_, 36(2), 171-187.
 
-8. Sugaya, H., Tsuchiya, A., Moriya, H., Morgan, D. A., & Banks, S. A. (1999). Low back injury in elite and professional golfers: An epidemiologic and radiographic study. In M. R. Farrally & A. J. Cochran (Eds.), *Science and Golf III* (pp. 83-91). Champaign, IL: Human Kinetics.
+8. Sugaya, H., Tsuchiya, A., Moriya, H., Morgan, D. A., & Banks, S. A. (1999). Low back injury in elite and professional golfers: An epidemiologic and radiographic study. In M. R. Farrally & A. J. Cochran (Eds.), _Science and Golf III_ (pp. 83-91). Champaign, IL: Human Kinetics.
 
-9. McGill, S. M. (1997). The biomechanics of low back injury: Implications on current practice in industry and the clinic. *Journal of Biomechanics*, 30(5), 465-475.
+9. McGill, S. M. (1997). The biomechanics of low back injury: Implications on current practice in industry and the clinic. _Journal of Biomechanics_, 30(5), 465-475.
 
-10. Cejka, N., et al. (2024). Biomechanical parameters of the golf swing associated with lower back pain: A systematic review. *Journal of Sports Sciences*.
+10. Cejka, N., et al. (2024). Biomechanical parameters of the golf swing associated with lower back pain: A systematic review. _Journal of Sports Sciences_.
     - https://www.tandfonline.com/doi/full/10.1080/02640414.2024.2319443
 
 ---
