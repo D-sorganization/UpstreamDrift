@@ -205,7 +205,7 @@ class DockerLauncher:
                     "-e",
                     f"DISPLAY={disp}",
                     "-v",
-                    "/tmp/.X11-unix:/tmp/.X11-unix",
+                    "/tmp/.X11-unix:/tmp/.X11-unix",  # nosec B108 - Docker X11 socket mount
                 ]
             )
 

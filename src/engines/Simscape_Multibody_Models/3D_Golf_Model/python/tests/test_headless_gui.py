@@ -1,4 +1,5 @@
 import os
+import tempfile
 from unittest.mock import patch
 
 import pytest
@@ -29,7 +30,7 @@ def test_load_model_ui_update(app, qtbot):
     """Verify UI updates when a model is loaded."""
     # Mock data model
     model = C3DDataModel(
-        filepath="/tmp/test.c3d",
+        filepath=os.path.join(tempfile.gettempdir(), "test.c3d"),
         markers={},
         analog={},
         point_rate=100.0,

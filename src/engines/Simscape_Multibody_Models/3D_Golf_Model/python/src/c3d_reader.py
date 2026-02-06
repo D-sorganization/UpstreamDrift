@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -737,7 +738,7 @@ class C3DDataReader:
             [
                 "pytest" in str(base_dir),
                 "test" in str(base_dir).lower(),
-                "/tmp/pytest" in str(path),
+                str(tempfile.gettempdir()) in str(path) and "pytest" in str(path),
                 "pytest" in str(path),
             ]
         )
