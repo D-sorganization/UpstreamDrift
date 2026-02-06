@@ -35,7 +35,6 @@ os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
 
 # NOTE: These imports are placed after env setup intentionally
 # The environment variables must be set before FastAPI initialization
-import uvicorn  # noqa: E402
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
@@ -66,6 +65,14 @@ _startup_metrics: dict[str, Any] = {
     "engines_loaded": [],
     "errors": [],
 }
+
+
+def _resolve_ui_dist_path() -> Path:
+    """Resolve the UI build path for static file serving."""
+    env_override = os.environ.get("GOLF_UI_DIST")
+    if env_override:
+        return Path(env_override)
+    return Path(__file__).parent.parent.parent / "ui" / "dist"
 
 
 def create_local_app() -> FastAPI:
@@ -187,12 +194,10 @@ def create_local_app() -> FastAPI:
         return details
 
     # Serve static UI files in production
-    ui_path = Path(__file__).parent.parent.parent / "ui" / "dist"
+    ui_path = _resolve_ui_dist_path()
     _startup_metrics["ui_path"] = str(ui_path)
 
     if ui_path.exists():
-        from fastapi.responses import FileResponse
-
         logger.info(f"UI build found at {ui_path}, mounting static files")
         _startup_metrics["static_files_mounted"] = True
 
@@ -210,44 +215,10 @@ def create_local_app() -> FastAPI:
             _startup_metrics["errors"].append(
                 f"Assets directory missing: {assets_path}"
             )
-
-        # Serve other static files (favicon, etc.)
-        @app.get("/vite.svg")
-        async def serve_vite_svg() -> FileResponse:
-            svg_path = ui_path / "vite.svg"
-            if svg_path.exists():
-                return FileResponse(svg_path)
-            # Return a placeholder if not found
-            from fastapi import HTTPException
-
-            raise HTTPException(status_code=404, detail="vite.svg not found")
-
-        # SPA fallback: serve index.html for all non-API routes
-        @app.get("/{full_path:path}")
-        async def serve_spa(full_path: str) -> FileResponse:
-            # Don't intercept API routes
-            if full_path.startswith("api/"):
-                from fastapi import HTTPException
-
-                raise HTTPException(status_code=404, detail="API route not found")
-
-            index_path = ui_path / "index.html"
-            if index_path.exists():
-                return FileResponse(index_path)
-
-            from fastapi import HTTPException
-
-            raise HTTPException(
-                status_code=503,
-                detail="UI not available. Visit /api/diagnostics/html for troubleshooting.",
-            )
-
     else:
-        logger.warning(
-            f"UI build not found at {ui_path}. Web UI will not be available."
-        )
-        logger.warning("Run 'cd ui && npm install && npm run build' to build the UI.")
-        _startup_metrics["errors"].append(f"UI build not found at {ui_path}")
+        warning = f"UI build not found at {ui_path}. Run npm install && npm run build."
+        logger.warning(warning)
+        _startup_metrics["errors"].append(warning)
 
         # Provide a helpful error page when UI is not built
         @app.get("/{full_path:path}")
@@ -408,6 +379,8 @@ def main():
     import time
     import webbrowser
     from threading import Timer
+
+    import uvicorn
 
     DIM = "\033[2m"
     RESET = "\033[0m"
