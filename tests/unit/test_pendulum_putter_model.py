@@ -226,13 +226,13 @@ class TestInterchangeableClub:
 
         # Should have club-related links
         club_links = [
-            l
-            for l in result.links
-            if "club" in l.name.lower()
-            or "putter" in l.name.lower()
-            or "grip" in l.name.lower()
-            or "shaft" in l.name.lower()
-            or "head" in l.name.lower()
+            link
+            for link in result.links
+            if "club" in link.name.lower()
+            or "putter" in link.name.lower()
+            or "grip" in link.name.lower()
+            or "shaft" in link.name.lower()
+            or "head" in link.name.lower()
         ]
         assert len(club_links) >= 1, "Should have club links attached"
 
