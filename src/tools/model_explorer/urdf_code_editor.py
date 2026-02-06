@@ -7,9 +7,9 @@ with syntax highlighting, line numbers, validation, and auto-completion.
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET
 from typing import Any
 
+import defusedxml.ElementTree as ET
 from PyQt6.QtCore import QRect, QRegularExpression, QSize, Qt, pyqtSignal
 from PyQt6.QtGui import (
     QColor,

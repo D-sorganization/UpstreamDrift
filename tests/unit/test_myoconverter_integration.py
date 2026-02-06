@@ -7,10 +7,10 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import defusedxml.ElementTree as ET
 import pytest
 
 from src.shared.python.engine_availability import (

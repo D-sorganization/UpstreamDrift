@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import logging
 import re
-import xml.etree.ElementTree as ET
 import zipfile
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+import defusedxml.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 

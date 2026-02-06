@@ -7,11 +7,11 @@ in URDFs and copying mesh references between models.
 from __future__ import annotations
 
 import shutil
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import defusedxml.ElementTree as ET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (

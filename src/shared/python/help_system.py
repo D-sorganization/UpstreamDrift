@@ -580,7 +580,7 @@ class TooltipManager:
     DEFAULT_DELAY_MS = 500
 
     # Mapping of widget names to help content
-    _tooltip_content: dict[str, dict[str, Any]] = {}
+    _tooltip_content: dict[int, dict[str, Any]] = {}
 
     @classmethod
     def register_tooltip(
