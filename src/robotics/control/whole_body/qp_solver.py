@@ -165,7 +165,7 @@ class ScipyQPSolver(QPSolver):
     def _check_available(self) -> bool:
         """Check if scipy is available."""
         try:
-            pass
+            from scipy import optimize  # noqa: F401
 
             return True
         except ImportError:
