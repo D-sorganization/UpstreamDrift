@@ -2,9 +2,9 @@
 Unit tests for URDF I/O module.
 """
 
-import xml.etree.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
+import defusedxml.ElementTree as ET
 import numpy as np
 import pytest
 

@@ -275,8 +275,7 @@ class TestURDFGeneration:
 
     def test_generates_valid_urdf_xml(self):
         """Generated URDF should be valid XML."""
-        import xml.etree.ElementTree as ET
-
+        import defusedxml.ElementTree as ET
         from model_generation.models.pendulum_putter import (
             PendulumPutterModelBuilder,
         )
@@ -291,8 +290,7 @@ class TestURDFGeneration:
 
     def test_urdf_has_all_required_elements(self):
         """URDF should have all required elements for physics engines."""
-        import xml.etree.ElementTree as ET
-
+        import defusedxml.ElementTree as ET
         from model_generation.models.pendulum_putter import (
             PendulumPutterModelBuilder,
         )
