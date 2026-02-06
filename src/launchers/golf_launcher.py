@@ -36,10 +36,12 @@ from src.launchers.ui_components import (
     DraggableModelCard,
     EnvironmentDialog,
     GolfSplashScreen,
+)
+from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
+from src.launchers.ui_components import (
     LayoutManagerDialog,
     StartupResults,
 )
-from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
 
 # Import new help system (graceful degradation if not available)
 try:
