@@ -1,6 +1,21 @@
 ./.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./.github/workflows/Jules-Completist.yml:62:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./scripts/analyze_completist_data.py:179:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
+./vendor/ud-tools/scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:39:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:45:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:50:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:55:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py:182:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py:192:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:20:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:26:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:31:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:67:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:73:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:78:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
 ./src/research/deformable/objects.py:151:    @abstractmethod
 ./src/research/deformable/objects.py:159:    @abstractmethod
 ./src/learning/imitation/learners.py:110:    @abstractmethod
