@@ -111,7 +111,10 @@ fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Stri
     };
 
     if !script_path.exists() {
-        return Err(format!("Server script not found: {}", script_path.display()));
+        return Err(format!(
+            "Server script not found: {}",
+            script_path.display()
+        ));
     }
 
     log::info!(
