@@ -29,9 +29,9 @@ class TestPhysicalConstantXMLSafety:
         assert option_elem is not None, "option element not found"
         gravity_attr = option_elem.get("gravity")
         assert gravity_attr is not None, "gravity attribute not found"
-        assert (
-            "PhysicalConstant" not in gravity_attr
-        ), "PhysicalConstant.__repr__ leaked into XML"
+        assert "PhysicalConstant" not in gravity_attr, (
+            "PhysicalConstant.__repr__ leaked into XML"
+        )
 
         # Verify parseable as floats
         g_components = gravity_attr.split()
@@ -47,9 +47,9 @@ class TestPhysicalConstantXMLSafety:
         xml_string = f'<option gravity="0 0 -{GRAVITY_M_S2}"/>'
 
         # This will include the __repr__ representation
-        assert (
-            "PhysicalConstant" in xml_string
-        ), "Test assumption wrong: __repr__ should appear"
+        assert "PhysicalConstant" in xml_string, (
+            "Test assumption wrong: __repr__ should appear"
+        )
 
         # Parsing may succeed but value is garbage
         root = ET.fromstring(f"<root>{xml_string}</root>")

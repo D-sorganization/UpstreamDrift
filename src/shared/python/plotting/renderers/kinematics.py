@@ -368,7 +368,11 @@ class KinematicsRenderer(BaseRenderer):
             unit = (
                 "deg"
                 if dt == "position"
-                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
+                else "deg/s"
+                if dt == "velocity"
+                else "Nm"
+                if dt == "torque"
+                else ""
             )
             labels.append(f"{name} {dt[:3]} ({unit})")
 
