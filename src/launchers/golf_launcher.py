@@ -36,10 +36,25 @@ from src.launchers.ui_components import (
     DraggableModelCard,
     EnvironmentDialog,
     GolfSplashScreen,
-    HelpDialog,
     LayoutManagerDialog,
     StartupResults,
 )
+from src.launchers.ui_components import (
+    HelpDialog as LegacyHelpDialog,
+)
+
+# Import new help system (graceful degradation if not available)
+try:
+    from src.shared.python.help_system import (
+        HelpButton,
+        HelpDialog,
+        TooltipManager,
+    )
+
+    HELP_SYSTEM_AVAILABLE = True
+except ImportError:
+    HELP_SYSTEM_AVAILABLE = False
+    HelpDialog = LegacyHelpDialog  # Fallback to legacy
 from src.shared.python.logging_config import configure_gui_logging, get_logger
 from src.shared.python.subprocess_utils import kill_process_tree
 
@@ -48,6 +63,7 @@ if TYPE_CHECKING:
 
 from PyQt6.QtCore import QEventLoop, Qt, QTimer, QUrl
 from PyQt6.QtGui import (
+    QAction,
     QCloseEvent,
     QDesktopServices,
     QFont,
@@ -404,12 +420,13 @@ except Exception as e:
 
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
-        # Ctrl+? or F1 for shortcuts overlay
+        # F1 for help dialog (User Manual)
+        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
+        shortcut_f1.activated.connect(self._show_help_dialog)
+
+        # Ctrl+? for shortcuts overlay
         shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self)
         shortcut_help.activated.connect(self._show_shortcuts_overlay)
-
-        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
-        shortcut_f1.activated.connect(self._show_shortcuts_overlay)
 
         # Ctrl+, for preferences
         shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self)
@@ -418,6 +435,37 @@ except Exception as e:
         # Ctrl+Q to quit
         shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
         shortcut_quit.activated.connect(self.close)
+
+    def _show_help_dialog(self, topic: str | None = None) -> None:
+        """Show the help dialog.
+
+        Args:
+            topic: Optional help topic to display initially.
+        """
+        if HELP_SYSTEM_AVAILABLE:
+            dialog = HelpDialog(self, initial_topic=topic)
+            dialog.exec()
+        else:
+            # Fallback to legacy help dialog
+            dialog = LegacyHelpDialog(self)
+            dialog.exec()
+
+    def _show_about_dialog(self) -> None:
+        """Show the About dialog."""
+        QMessageBox.about(
+            self,
+            "About UpstreamDrift",
+            "<h2>UpstreamDrift</h2>"
+            "<h3>Golf Modeling Suite</h3>"
+            "<p><b>Version 2.1</b></p>"
+            "<p>Biomechanical Golf Swing Analysis Platform</p>"
+            "<hr>"
+            "<p>A unified platform for biomechanical golf swing analysis "
+            "integrating multiple physics engines including MuJoCo, Drake, "
+            "Pinocchio, OpenSim, and MyoSuite.</p>"
+            "<p>Copyright 2024-2026 UpstreamDrift Contributors</p>"
+            '<p><a href="https://github.com/dieterolson/UpstreamDrift">GitHub Repository</a></p>',
+        )
 
     def _show_shortcuts_overlay(self) -> None:
         """Show the keyboard shortcuts overlay."""
@@ -704,6 +752,9 @@ except Exception as e:
 
     def init_ui(self) -> None:
         """Initialize the user interface."""
+        # --- Menu Bar ---
+        self._setup_menu_bar()
+
         # Main Widget
         central = QWidget()
         self.setCentralWidget(central)
@@ -730,6 +781,129 @@ except Exception as e:
 
         # Initialize Overlay
         self._init_overlay()
+
+    def _setup_menu_bar(self) -> None:
+        """Set up the application menu bar."""
+        menubar = self.menuBar()
+
+        # File Menu
+        file_menu = menubar.addMenu("&File")
+
+        action_preferences = QAction("&Preferences...", self)
+        action_preferences.setShortcut("Ctrl+,")
+        action_preferences.triggered.connect(self._show_preferences)
+        file_menu.addAction(action_preferences)
+
+        file_menu.addSeparator()
+
+        action_exit = QAction("E&xit", self)
+        action_exit.setShortcut("Ctrl+Q")
+        action_exit.triggered.connect(self.close)
+        file_menu.addAction(action_exit)
+
+        # View Menu
+        view_menu = menubar.addMenu("&View")
+
+        action_layout_mode = QAction("&Edit Layout Mode", self)
+        action_layout_mode.setCheckable(True)
+        action_layout_mode.triggered.connect(self._toggle_layout_mode_from_menu)
+        view_menu.addAction(action_layout_mode)
+        self._action_layout_mode = action_layout_mode
+
+        view_menu.addSeparator()
+
+        action_context_help = QAction("Context &Help Panel", self)
+        action_context_help.setCheckable(True)
+        action_context_help.triggered.connect(self._toggle_context_help)
+        view_menu.addAction(action_context_help)
+        self._action_context_help = action_context_help
+
+        # Tools Menu
+        tools_menu = menubar.addMenu("&Tools")
+
+        action_env = QAction("&Environment Manager...", self)
+        action_env.triggered.connect(self.open_environment_manager)
+        tools_menu.addAction(action_env)
+
+        action_diag = QAction("&Diagnostics...", self)
+        action_diag.triggered.connect(self.open_diagnostics)
+        tools_menu.addAction(action_diag)
+
+        # Help Menu
+        help_menu = menubar.addMenu("&Help")
+
+        action_manual = QAction("&User Manual", self)
+        action_manual.setShortcut("F1")
+        action_manual.triggered.connect(lambda: self._show_help_dialog())
+        help_menu.addAction(action_manual)
+
+        # Add topic-specific help items
+        help_menu.addSeparator()
+
+        action_help_engines = QAction("Engine &Selection Guide", self)
+        action_help_engines.triggered.connect(
+            lambda: self._show_help_dialog("engine_selection")
+        )
+        help_menu.addAction(action_help_engines)
+
+        action_help_sim = QAction("Simulation &Controls", self)
+        action_help_sim.triggered.connect(
+            lambda: self._show_help_dialog("simulation_controls")
+        )
+        help_menu.addAction(action_help_sim)
+
+        action_help_mocap = QAction("&Motion Capture", self)
+        action_help_mocap.triggered.connect(
+            lambda: self._show_help_dialog("motion_capture")
+        )
+        help_menu.addAction(action_help_mocap)
+
+        action_help_viz = QAction("&Visualization", self)
+        action_help_viz.triggered.connect(
+            lambda: self._show_help_dialog("visualization")
+        )
+        help_menu.addAction(action_help_viz)
+
+        action_help_analysis = QAction("&Analysis Tools", self)
+        action_help_analysis.triggered.connect(
+            lambda: self._show_help_dialog("analysis_tools")
+        )
+        help_menu.addAction(action_help_analysis)
+
+        help_menu.addSeparator()
+
+        action_shortcuts = QAction("&Keyboard Shortcuts...", self)
+        action_shortcuts.setShortcut("Ctrl+?")
+        action_shortcuts.triggered.connect(self._show_shortcuts_overlay)
+        help_menu.addAction(action_shortcuts)
+
+        help_menu.addSeparator()
+
+        action_about = QAction("&About UpstreamDrift", self)
+        action_about.triggered.connect(self._show_about_dialog)
+        help_menu.addAction(action_about)
+
+    def _toggle_layout_mode_from_menu(self, checked: bool) -> None:
+        """Toggle layout edit mode from menu action.
+
+        Args:
+            checked: Whether the menu item is checked.
+        """
+        if hasattr(self, "btn_modify_layout"):
+            self.btn_modify_layout.setChecked(checked)
+            self.toggle_layout_mode(checked)
+
+    def _toggle_context_help(self, checked: bool) -> None:
+        """Toggle the context help panel visibility.
+
+        Args:
+            checked: Whether to show the panel.
+        """
+        if hasattr(self, "context_help"):
+            if checked:
+                self.context_help.show()
+            else:
+                self.context_help.hide()
 
     def _setup_top_bar(self) -> QHBoxLayout:
         """Set up the top tool bar."""
@@ -843,9 +1017,29 @@ except Exception as e:
         top_bar.addWidget(btn_env)
 
         btn_help = QPushButton("Help")
-        btn_help.setToolTip("View documentation and user guide")
-        btn_help.clicked.connect(self.open_help)
+        btn_help.setToolTip("View documentation and user guide (F1)")
+        btn_help.clicked.connect(lambda: self._show_help_dialog())
+        btn_help.setStyleSheet("""
+            QPushButton {
+                background-color: #0A84FF;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #0077E6;
+            }
+        """)
         top_bar.addWidget(btn_help)
+
+        # Add help button for engine selection (next to grid)
+        if HELP_SYSTEM_AVAILABLE:
+            btn_engine_help = HelpButton(
+                "engine_selection", "Help with engine selection", self
+            )
+            top_bar.addWidget(btn_engine_help)
 
         btn_diagnostics = QPushButton("Diagnostics")
         btn_diagnostics.setToolTip("Run diagnostics to troubleshoot launcher issues")
@@ -909,6 +1103,37 @@ except Exception as e:
 
         # Context Help Dock
         self._setup_context_help()
+
+        # Register enhanced tooltips for help system
+        if HELP_SYSTEM_AVAILABLE:
+            TooltipManager.register_tooltip(
+                self.chk_live,
+                "Live Visualization",
+                "Enable real-time 3D visualization during simulation. "
+                "Disable for faster computation when visuals aren't needed.",
+                "visualization",
+            )
+            TooltipManager.register_tooltip(
+                self.chk_gpu,
+                "GPU Acceleration",
+                "Use GPU for physics computation when available. "
+                "Provides faster simulation for compatible engines.",
+                "engine_selection",
+            )
+            TooltipManager.register_tooltip(
+                self.chk_docker,
+                "Docker Mode",
+                "Run physics engines in Docker containers. "
+                "Useful for engines not installed locally (Drake, Pinocchio).",
+                "engine_selection",
+            )
+            TooltipManager.register_tooltip(
+                self.chk_wsl,
+                "WSL Mode",
+                "Run in WSL2 Ubuntu environment for full Linux engine support. "
+                "Recommended for advanced features not available on Windows.",
+                "engine_selection",
+            )
 
         return top_bar
 
@@ -1480,6 +1705,35 @@ except Exception as e:
                 color: #FFFFFF;
                 font-family: 'Segoe UI', sans-serif;
             }
+            QMenuBar {
+                background-color: #252526;
+                color: #CCCCCC;
+                border-bottom: 1px solid #3E3E42;
+                padding: 2px;
+            }
+            QMenuBar::item {
+                padding: 6px 12px;
+                background: transparent;
+            }
+            QMenuBar::item:selected {
+                background-color: #094771;
+            }
+            QMenu {
+                background-color: #252526;
+                color: #CCCCCC;
+                border: 1px solid #3E3E42;
+            }
+            QMenu::item {
+                padding: 8px 24px;
+            }
+            QMenu::item:selected {
+                background-color: #094771;
+            }
+            QMenu::separator {
+                height: 1px;
+                background: #3E3E42;
+                margin: 4px 8px;
+            }
             QLineEdit {
                 background-color: #252526;
                 color: white;
@@ -1525,9 +1779,12 @@ except Exception as e:
         self._apply_docker_status(available)
 
     def open_help(self) -> None:
-        """Toggle the help drawer."""
-        help_dialog = HelpDialog(self)
-        help_dialog.exec()
+        """Open the help dialog.
+
+        Note: This method is kept for backward compatibility.
+        Use _show_help_dialog() for new code.
+        """
+        self._show_help_dialog()
 
     def open_diagnostics(self) -> None:
         """Open the diagnostics dialog to troubleshoot launcher issues."""
