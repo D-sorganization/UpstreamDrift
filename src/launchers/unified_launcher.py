@@ -76,20 +76,23 @@ class UnifiedLauncher:
 
         engines = manager.get_available_engines()
         if engines:
+            logger.info("Available engines:")
             for _engine in engines:
-                pass
+                logger.info(" - %s", getattr(_engine, "value", str(_engine)))
         else:
-            pass
+            logger.info("No engines available.")
 
         # Show suite root
         from src.shared.python import SUITE_ROOT
+
+        logger.info("Suite root: %s", SUITE_ROOT)
 
         # Show launcher paths
 
         launcher_dir = Path(__file__).parent
         for launcher_file in launcher_dir.glob("*_launcher.py"):
             if launcher_file.name != "unified_launcher.py":
-                pass
+                logger.info("Launcher: %s", launcher_file.name)
 
         # Show engine directories
 
@@ -97,7 +100,7 @@ class UnifiedLauncher:
         if engines_dir.exists():
             for engine_dir in engines_dir.iterdir():
                 if engine_dir.is_dir() and not engine_dir.name.startswith("."):
-                    pass
+                    logger.info("Engine dir: %s", engine_dir.name)
 
     def get_version(self) -> str:
         """Get suite version from package metadata.

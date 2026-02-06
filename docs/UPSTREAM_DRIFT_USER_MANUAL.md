@@ -1950,6 +1950,13 @@ python start_api_server.py
 golf-suite --api-only --port 8000
 ```
 
+**Local Mode vs. Authenticated Mode**
+
+By default, the local server runs with authentication disabled (`GOLF_AUTH_DISABLED=true`)
+so that offline workflows work without user accounts. For a JWT-authenticated deployment,
+run the production server entry point (`src/api/server.py`) or set
+`GOLF_AUTH_DISABLED=false` in your environment before startup.
+
 ### API Documentation
 
 Once the server is running, interactive documentation is available at:

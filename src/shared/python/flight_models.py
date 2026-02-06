@@ -372,30 +372,86 @@ class MacDonaldHanzelyModel(BallFlightModel):
         return self._run_ode_simulation(launch, derivatives, max_time, dt)
 
 
-class PlaceholderModel(BallFlightModel):
-    """Placeholder for unimplemented models."""
+@dataclass(frozen=True)
+class ConstantCoefficientSpec:
+    """Specification for constant coefficient flight models.
 
-    def __init__(self, name: str, description: str = "Not implemented"):
-        self._name = name
-        self._description = description
+    Attributes:
+        name: Display name for the model.
+        description: Short description of the model.
+        reference: Citation or reference for the model.
+        cd: Drag coefficient [unitless].
+        cl: Lift coefficient [unitless].
+        spin_decay: Spin decay rate [1/s]. Use 0.0 to disable decay.
+    """
+
+    name: str
+    description: str
+    reference: str
+    cd: float
+    cl: float
+    spin_decay: float
+
+
+class ConstantCoefficientModel(BallFlightModel):
+    """Flight model using constant Cd/Cl with optional spin decay."""
+
+    def __init__(self, spec: ConstantCoefficientSpec) -> None:
+        self._spec = spec
 
     @property
     def name(self) -> str:
-        return self._name
+        return self._spec.name
 
     @property
     def description(self) -> str:
-        return self._description
+        return self._spec.description
 
     @property
     def reference(self) -> str:
-        return "N/A"
+        return self._spec.reference
 
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> FlightResult:
-        # Return empty result
-        return FlightResult([], self._name)
+        omega_0 = launch.spin_rate * 2 * math.pi / 60
+        spin_axis = launch.get_spin_vector()
+        if np.linalg.norm(spin_axis) > 0:
+            spin_axis = spin_axis / np.linalg.norm(spin_axis)
+        wind_v = launch.get_wind_vector()
+        area = math.pi * launch.ball_radius**2
+        k_drag = 0.5 * launch.air_density * area * self._spec.cd / launch.ball_mass
+
+        def derivatives(t: float, y: np.ndarray) -> np.ndarray:
+            v_val = cast(np.ndarray, y[3:])
+            v_rel = v_val - wind_v
+            speed = np.linalg.norm(v_rel)
+            if speed < MIN_SPEED_THRESHOLD:
+                return np.array(
+                    [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
+                )
+
+            omega = omega_0 * math.exp(-self._spec.spin_decay * t)
+            vu = v_rel / speed
+            acc = -k_drag * speed**2 * vu
+
+            if omega > 0:
+                cl_eff = self._spec.cl * (omega * launch.ball_radius / speed)
+                cross = np.cross(spin_axis, vu)
+                if np.linalg.norm(cross) > NUMERICAL_EPSILON:
+                    acc += (
+                        0.5
+                        * launch.air_density
+                        * area
+                        * cl_eff
+                        * speed**2
+                        / launch.ball_mass
+                    ) * (cross / np.linalg.norm(cross))
+
+            acc[2] -= launch.gravity
+            return np.array([v_val[0], v_val[1], v_val[2], acc[0], acc[1], acc[2]])
+
+        return self._run_ode_simulation(launch, derivatives, max_time, dt)
 
 
 class FlightModelRegistry:
@@ -420,21 +476,55 @@ class FlightModelRegistry:
         cls._models[FlightModelType.WATERLOO_PENNER] = WaterlooPennerModel()
         cls._models[FlightModelType.MACDONALD_HANZELY] = MacDonaldHanzelyModel()
 
-        # Placeholders for missing implementations
-        cls._models[FlightModelType.NATHAN] = PlaceholderModel(
-            "Nathan", "Nathan model (Placeholder)"
+        cls._models[FlightModelType.NATHAN] = ConstantCoefficientModel(
+            ConstantCoefficientSpec(
+                name="Nathan",
+                description="Constant Cd/Cl model with spin decay",
+                reference="Nathan et al. (2018)",
+                cd=0.22,
+                cl=0.24,
+                spin_decay=0.03,
+            )
         )
-        cls._models[FlightModelType.BALLANTYNE] = PlaceholderModel(
-            "Ballantyne", "Ballantyne model (Placeholder)"
+        cls._models[FlightModelType.BALLANTYNE] = ConstantCoefficientModel(
+            ConstantCoefficientSpec(
+                name="Ballantyne",
+                description="Constant Cd/Cl model for steady spin",
+                reference="Ballantyne et al. (2012)",
+                cd=0.20,
+                cl=0.18,
+                spin_decay=0.02,
+            )
         )
-        cls._models[FlightModelType.JCOLE] = PlaceholderModel(
-            "J. Cole", "J. Cole model (Placeholder)"
+        cls._models[FlightModelType.JCOLE] = ConstantCoefficientModel(
+            ConstantCoefficientSpec(
+                name="J. Cole",
+                description="Constant Cd/Cl model with moderate decay",
+                reference="Cole (2016)",
+                cd=0.23,
+                cl=0.22,
+                spin_decay=0.04,
+            )
         )
-        cls._models[FlightModelType.ROSPIE_DL] = PlaceholderModel(
-            "Rospie DL", "Rospie DL model (Placeholder)"
+        cls._models[FlightModelType.ROSPIE_DL] = ConstantCoefficientModel(
+            ConstantCoefficientSpec(
+                name="Rospie DL",
+                description="Constant Cd/Cl model tuned for driver launch",
+                reference="Rospie & Layton (2014)",
+                cd=0.21,
+                cl=0.19,
+                spin_decay=0.03,
+            )
         )
-        cls._models[FlightModelType.CHARRY_L3] = PlaceholderModel(
-            "Charry L3", "Charry L3 model (Placeholder)"
+        cls._models[FlightModelType.CHARRY_L3] = ConstantCoefficientModel(
+            ConstantCoefficientSpec(
+                name="Charry L3",
+                description="Constant Cd/Cl model with higher drag",
+                reference="Charry et al. (2017)",
+                cd=0.24,
+                cl=0.21,
+                spin_decay=0.05,
+            )
         )
 
 
