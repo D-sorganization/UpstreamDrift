@@ -181,9 +181,9 @@ class TestLogarithmicMap:
             0,
             atol=1e-10,
         ), f"Identity transformation should have zero screw axis, got S={S}"
-        assert abs(theta) < 1e-10, (
-            f"Identity transformation should have zero displacement, got theta={theta}"
-        )
+        assert (
+            abs(theta) < 1e-10
+        ), f"Identity transformation should have zero displacement, got theta={theta}"
 
 
 class TestAdjointTransform:
