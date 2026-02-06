@@ -1,6 +1,6 @@
-import defusedxml.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
+import defusedxml.ElementTree as ET
 import mujoco
 import numpy as np
 import pytest
