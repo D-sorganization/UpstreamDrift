@@ -7,11 +7,11 @@ This module provides bidirectional conversion between URDF and MJCF formats.
 from __future__ import annotations
 
 import logging
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import defusedxml.ElementTree as ET
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 from model_generation.core.types import (
     Geometry,

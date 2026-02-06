@@ -4,8 +4,8 @@ Unit tests for URDF generator module.
 
 import tempfile
 from pathlib import Path
-from xml.etree import ElementTree as ET
 
+import defusedxml.ElementTree as ET
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_generator import (
     HumanoidURDFGenerator,

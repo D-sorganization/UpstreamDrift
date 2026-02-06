@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import logging
 import math
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
 
+import defusedxml.ElementTree as ET
 from model_generation.core.types import (
     Geometry,
     GeometryType,

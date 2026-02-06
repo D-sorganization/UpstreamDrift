@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
 import mujoco
