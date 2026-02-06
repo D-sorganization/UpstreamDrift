@@ -204,6 +204,56 @@ class VisualizationTab(QtWidgets.QWidget):
 
         viz_layout.addWidget(meshcat_group)
 
+        # --- Swing Plane & Trajectory Visualization ---
+        swing_group = QtWidgets.QGroupBox("Swing Plane & Trajectory")
+        swing_layout = QtWidgets.QVBoxLayout(swing_group)
+
+        self.show_swing_plane_cb = QtWidgets.QCheckBox("Show Instantaneous Swing Plane")
+        self.show_swing_plane_cb.setToolTip(
+            "Display the real-time swing plane fitted from clubhead trajectory (Blue)"
+        )
+        self.show_swing_plane_cb.stateChanged.connect(self.on_swing_plane_changed)
+        swing_layout.addWidget(self.show_swing_plane_cb)
+
+        self.show_club_trajectory_cb = QtWidgets.QCheckBox("Show Club Trajectory Path")
+        self.show_club_trajectory_cb.setToolTip(
+            "Display the recorded clubhead trajectory as a 3D polyline (Green)"
+        )
+        self.show_club_trajectory_cb.stateChanged.connect(self.on_swing_plane_changed)
+        swing_layout.addWidget(self.show_club_trajectory_cb)
+
+        self.show_reference_trajectory_cb = QtWidgets.QCheckBox(
+            "Show Reference/Desired Trajectory"
+        )
+        self.show_reference_trajectory_cb.setToolTip(
+            "Overlay a reference trajectory for comparison (Orange)"
+        )
+        self.show_reference_trajectory_cb.stateChanged.connect(
+            self.on_swing_plane_changed
+        )
+        swing_layout.addWidget(self.show_reference_trajectory_cb)
+
+        # Tracked body selector
+        body_track_layout = QtWidgets.QHBoxLayout()
+        body_track_layout.addWidget(QtWidgets.QLabel("Track Body:"))
+        self.tracked_body_combo = QtWidgets.QComboBox()
+        self.tracked_body_combo.setEditable(True)
+        self.tracked_body_combo.addItems(["clubhead", "club_face", "right_hand"])
+        self.tracked_body_combo.setToolTip(
+            "Body name to track for trajectory and swing plane"
+        )
+        self.tracked_body_combo.currentTextChanged.connect(self.on_tracked_body_changed)
+        body_track_layout.addWidget(self.tracked_body_combo, stretch=1)
+        swing_layout.addLayout(body_track_layout)
+
+        # Reset trajectory button
+        reset_traj_btn = QtWidgets.QPushButton("Clear Trajectory")
+        reset_traj_btn.setToolTip("Reset recorded trajectory data")
+        reset_traj_btn.clicked.connect(self.on_reset_trajectory)
+        swing_layout.addWidget(reset_traj_btn)
+
+        viz_layout.addWidget(swing_group)
+
         # Force/Torque visualization
         force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
         force_layout = QtWidgets.QVBoxLayout(force_group)
@@ -546,6 +596,23 @@ class VisualizationTab(QtWidgets.QWidget):
         show_force = self.show_force_ellipsoid_cb.isChecked()
         self.sim_widget.set_ellipsoid_visualization(show_mobility, show_force)
 
+    def on_swing_plane_changed(self, state: int = 0) -> None:
+        """Handle swing plane / trajectory visualization toggle."""
+        self.sim_widget.set_swing_plane_visualization(
+            show_plane=self.show_swing_plane_cb.isChecked(),
+            show_trajectory=self.show_club_trajectory_cb.isChecked(),
+            show_reference=self.show_reference_trajectory_cb.isChecked(),
+        )
+
+    def on_tracked_body_changed(self, body_name: str) -> None:
+        """Handle tracked body change for trajectory recording."""
+        if body_name:
+            self.sim_widget.swing_plane_body_name = body_name
+
+    def on_reset_trajectory(self) -> None:
+        """Reset recorded trajectory and swing plane data."""
+        self.sim_widget.reset_swing_plane()
+
     def on_change_body_color(self) -> None:
         """Handle body color change."""
         body_name = self.viz_body_combo.currentText()
@@ -626,3 +693,17 @@ class VisualizationTab(QtWidgets.QWidget):
 
         if current_text:
             self.induced_source_combo.setCurrentText(current_text)
+
+        # Update tracked body combo for swing plane
+        current_tracked = self.tracked_body_combo.currentText()
+        self.tracked_body_combo.clear()
+        for body_id in range(1, self.sim_widget.model.nbody):
+            body_name = mujoco.mj_id2name(
+                self.sim_widget.model,
+                mujoco.mjtObj.mjOBJ_BODY,
+                body_id,
+            )
+            if body_name:
+                self.tracked_body_combo.addItem(body_name)
+        if current_tracked:
+            self.tracked_body_combo.setCurrentText(current_tracked)

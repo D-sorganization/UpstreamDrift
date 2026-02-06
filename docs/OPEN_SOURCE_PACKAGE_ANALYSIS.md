@@ -18,17 +18,17 @@ UpstreamDrift is a mature, well-architected Python project with 60+ custom utili
 
 ### Priority Recommendations
 
-| Priority | Area | Current | Recommended | Impact |
-|----------|------|---------|-------------|--------|
-| HIGH | Design by Contract | `contracts.py` | `icontract` | More features, better IDE support |
-| HIGH | Workflow/Task Engine | `workflow_engine.py` | `prefect` or `temporalio` | Robust orchestration, observability |
-| HIGH | RAG System | `simple_rag.py` (TF-IDF) | `langchain` or `llama-index` | Semantic search, embeddings |
-| HIGH | Configuration | Manual YAML + Pydantic | `hydra-core` | Hierarchical config, overrides |
-| MEDIUM | Signal Processing | `signal_toolkit/` (8 modules) | Keep but add `python-control` | Control systems analysis |
-| MEDIUM | Property Testing | pytest only | Add `hypothesis` | Property-based testing |
-| MEDIUM | Async Tasks | Manual async | `celery` or `arq` | Background job queue |
-| LOW | LLM Adapters | Custom adapters | `litellm` | Unified API for all providers |
-| LOW | Pose Estimation | MediaPipe/OpenPose wrappers | `mmpose` | More models, unified interface |
+| Priority | Area                 | Current                       | Recommended                   | Impact                              |
+| -------- | -------------------- | ----------------------------- | ----------------------------- | ----------------------------------- |
+| HIGH     | Design by Contract   | `contracts.py`                | `icontract`                   | More features, better IDE support   |
+| HIGH     | Workflow/Task Engine | `workflow_engine.py`          | `prefect` or `temporalio`     | Robust orchestration, observability |
+| HIGH     | RAG System           | `simple_rag.py` (TF-IDF)      | `langchain` or `llama-index`  | Semantic search, embeddings         |
+| HIGH     | Configuration        | Manual YAML + Pydantic        | `hydra-core`                  | Hierarchical config, overrides      |
+| MEDIUM   | Signal Processing    | `signal_toolkit/` (8 modules) | Keep but add `python-control` | Control systems analysis            |
+| MEDIUM   | Property Testing     | pytest only                   | Add `hypothesis`              | Property-based testing              |
+| MEDIUM   | Async Tasks          | Manual async                  | `celery` or `arq`             | Background job queue                |
+| LOW      | LLM Adapters         | Custom adapters               | `litellm`                     | Unified API for all providers       |
+| LOW      | Pose Estimation      | MediaPipe/OpenPose wrappers   | `mmpose`                      | More models, unified interface      |
 
 ---
 
@@ -56,16 +56,17 @@ pip install icontract
 
 **Why Replace?**
 
-| Feature | Current | icontract |
-|---------|---------|-----------|
-| IDE integration | None | Full (mypy plugin) |
-| Inheritance | Manual | Automatic (Liskov) |
-| Error messages | Basic | Rich with values |
-| Documentation | Manual | Auto-generated |
-| Performance toggle | Global flag | Decorator-level |
-| Snapshot (old values) | No | Yes |
+| Feature               | Current     | icontract          |
+| --------------------- | ----------- | ------------------ |
+| IDE integration       | None        | Full (mypy plugin) |
+| Inheritance           | Manual      | Automatic (Liskov) |
+| Error messages        | Basic       | Rich with values   |
+| Documentation         | Manual      | Auto-generated     |
+| Performance toggle    | Global flag | Decorator-level    |
+| Snapshot (old values) | No          | Yes                |
 
 **Migration Example**:
+
 ```python
 # Before (current)
 from src.shared.python.contracts import precondition, postcondition
@@ -101,16 +102,17 @@ pip install prefect
 
 **Why Replace?**
 
-| Feature | Current | Prefect |
-|---------|---------|---------|
-| Retry logic | Basic enum | Exponential backoff, jitter |
-| Observability | Logs only | Full UI dashboard |
-| Caching | None | Result caching built-in |
-| Scheduling | None | Cron + interval triggers |
-| Distributed | No | Yes (optional) |
-| State persistence | None | Automatic |
+| Feature           | Current    | Prefect                     |
+| ----------------- | ---------- | --------------------------- |
+| Retry logic       | Basic enum | Exponential backoff, jitter |
+| Observability     | Logs only  | Full UI dashboard           |
+| Caching           | None       | Result caching built-in     |
+| Scheduling        | None       | Cron + interval triggers    |
+| Distributed       | No         | Yes (optional)              |
+| State persistence | None       | Automatic                   |
 
 **Migration Example**:
+
 ```python
 # Before (current)
 class WorkflowStep:
@@ -157,16 +159,17 @@ pip install llama-index
 
 **Why Replace?**
 
-| Feature | Current (TF-IDF) | LangChain/LlamaIndex |
-|---------|------------------|----------------------|
-| Similarity | Lexical only | Semantic (embeddings) |
-| Chunking | None | Smart text splitting |
-| Metadata | Basic | Rich filtering |
-| Embeddings | None | OpenAI, HuggingFace, local |
-| Vector stores | In-memory | FAISS, Chroma, Pinecone |
-| Hybrid search | No | BM25 + vector |
+| Feature       | Current (TF-IDF) | LangChain/LlamaIndex       |
+| ------------- | ---------------- | -------------------------- |
+| Similarity    | Lexical only     | Semantic (embeddings)      |
+| Chunking      | None             | Smart text splitting       |
+| Metadata      | Basic            | Rich filtering             |
+| Embeddings    | None             | OpenAI, HuggingFace, local |
+| Vector stores | In-memory        | FAISS, Chroma, Pinecone    |
+| Hybrid search | No               | BM25 + vector              |
 
 **Migration Example**:
+
 ```python
 # Before (current)
 class SimpleRAGStore:
@@ -204,16 +207,17 @@ pip install hydra-core
 
 **Why Replace?**
 
-| Feature | Current | Hydra |
-|---------|---------|-------|
-| Hierarchical config | Manual | Native |
-| CLI overrides | None | Built-in |
-| Config groups | Manual | Native |
-| Multirun | None | Yes (grid search) |
-| Plugins | None | Logging, sweepers, launchers |
-| Composition | Manual | Declarative |
+| Feature             | Current | Hydra                        |
+| ------------------- | ------- | ---------------------------- |
+| Hierarchical config | Manual  | Native                       |
+| CLI overrides       | None    | Built-in                     |
+| Config groups       | Manual  | Native                       |
+| Multirun            | None    | Yes (grid search)            |
+| Plugins             | None    | Logging, sweepers, launchers |
+| Composition         | Manual  | Declarative                  |
 
 **Example**:
+
 ```yaml
 # config/config.yaml
 defaults:
@@ -265,6 +269,7 @@ pip install control
 ```
 
 **Why Add?**
+
 - State-space analysis for musculoskeletal models
 - Transfer function design
 - Stability analysis (useful for assessing swing dynamics)
@@ -288,6 +293,7 @@ pip install PyWavelets
 ```
 
 **Why Add?**
+
 - Time-frequency analysis of swing phases
 - Denoising marker data
 - Feature extraction for swing comparison
@@ -313,14 +319,15 @@ pip install hypothesis
 
 **Why Add?**
 
-| Feature | pytest alone | pytest + hypothesis |
-|---------|--------------|---------------------|
-| Edge case discovery | Manual | Automatic |
-| Shrinking | None | Minimal failing cases |
-| Coverage | Line-based | Property-based |
-| Reproducibility | Fixed seeds | Stateful |
+| Feature             | pytest alone | pytest + hypothesis   |
+| ------------------- | ------------ | --------------------- |
+| Edge case discovery | Manual       | Automatic             |
+| Shrinking           | None         | Minimal failing cases |
+| Coverage            | Line-based   | Property-based        |
+| Reproducibility     | Fixed seeds  | Stateful              |
 
 **Example**:
+
 ```python
 from hypothesis import given, strategies as st
 import numpy as np
@@ -358,11 +365,13 @@ pip install celery[redis]  # Full-featured
 ```
 
 **Why Add?**
+
 - Long-running simulations (physics validation can take minutes)
 - Background indexing for RAG
 - Scheduled analysis jobs
 
 **Example (arq)**:
+
 ```python
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -397,16 +406,17 @@ pip install litellm
 
 **Why Replace?**
 
-| Feature | Current | LiteLLM |
-|---------|---------|---------|
-| Providers | 4 | 100+ |
-| Maintenance | Internal | Community |
-| Fallbacks | None | Built-in |
-| Cost tracking | None | Yes |
-| Rate limiting | None | Yes |
-| Caching | None | Optional |
+| Feature       | Current  | LiteLLM   |
+| ------------- | -------- | --------- |
+| Providers     | 4        | 100+      |
+| Maintenance   | Internal | Community |
+| Fallbacks     | None     | Built-in  |
+| Cost tracking | None     | Yes       |
+| Rate limiting | None     | Yes       |
+| Caching       | None     | Optional  |
 
 **Migration Example**:
+
 ```python
 # Before (current)
 if provider == "openai":
@@ -442,15 +452,16 @@ mim install mmpose
 
 **Why Consider?**
 
-| Feature | Current | MMPose |
-|---------|---------|--------|
-| Models | 2 | 100+ |
-| Sports models | None | Golf-specific available |
-| 3D pose | Limited | Full |
-| Multi-person | Basic | Advanced |
-| Benchmark suite | None | Yes |
+| Feature         | Current | MMPose                  |
+| --------------- | ------- | ----------------------- |
+| Models          | 2       | 100+                    |
+| Sports models   | None    | Golf-specific available |
+| 3D pose         | Limited | Full                    |
+| Multi-person    | Basic   | Advanced                |
+| Benchmark suite | None    | Yes                     |
 
 **Note**: This is a larger change and may not be worth the migration effort if current MediaPipe/OpenPose integration works well. Consider only if:
+
 - Need more accurate golf-specific pose models
 - Need 3D pose estimation from video
 - Current accuracy is insufficient
@@ -468,11 +479,13 @@ pip install pandera
 ```
 
 **Why Add Pandera?**
+
 - DataFrame validation (motion capture data is tabular)
 - Schema inference
 - Statistical validation (ranges, distributions)
 
 **Example**:
+
 ```python
 import pandera as pa
 from pandera import Column, Check
@@ -529,6 +542,7 @@ pip install rerun-sdk
 ```
 
 For streaming biomechanical visualization:
+
 ```python
 import rerun as rr
 
@@ -544,6 +558,7 @@ pip install uncertainties
 ```
 
 For propagating measurement uncertainty through calculations:
+
 ```python
 from uncertainties import ufloat
 
@@ -559,6 +574,7 @@ pip install jax jaxlib
 ```
 
 For gradient-based optimization in inverse kinematics:
+
 ```python
 import jax
 import jax.numpy as jnp
@@ -577,6 +593,7 @@ pip install mlflow
 ```
 
 For tracking simulation experiments:
+
 ```python
 import mlflow
 
@@ -592,16 +609,19 @@ with mlflow.start_run():
 ## Migration Roadmap
 
 ### Phase 1 (Quick Wins) - 1-2 weeks
+
 1. Add `hypothesis` for property-based testing
 2. Replace LLM adapters with `litellm`
 3. Add `pandera` for DataFrame validation
 
 ### Phase 2 (Medium Effort) - 2-4 weeks
+
 1. Replace `contracts.py` with `icontract`
 2. Implement `hydra-core` for configuration
 3. Upgrade RAG to `langchain` or `llama-index`
 
 ### Phase 3 (Significant Changes) - 4-8 weeks
+
 1. Migrate workflow engine to `prefect`
 2. Add `arq` or `celery` for background tasks
 3. Integrate `rerun` for real-time visualization

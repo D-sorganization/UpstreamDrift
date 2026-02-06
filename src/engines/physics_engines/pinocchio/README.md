@@ -16,6 +16,7 @@ Pinocchio is a C++ library with Python bindings for efficient rigid body dynamic
 ## Features
 
 ### Rigid Body Dynamics Algorithms
+
 - **RNEA** (Recursive Newton-Euler): Inverse dynamics O(n)
 - **ABA** (Articulated Body Algorithm): Forward dynamics O(n)
 - **CRBA** (Composite Rigid Body Algorithm): Mass matrix O(n²)
@@ -23,6 +24,7 @@ Pinocchio is a C++ library with Python bindings for efficient rigid body dynamic
 - **Energy Computation**: Kinetic and potential energy
 
 ### Kinematics & Jacobians
+
 - Forward kinematics for all bodies
 - Geometric and analytical Jacobians
 - Jacobian derivatives (velocity product)
@@ -30,12 +32,14 @@ Pinocchio is a C++ library with Python bindings for efficient rigid body dynamic
 - Spatial velocities and accelerations
 
 ### Constrained Dynamics
+
 - Loop closure constraints (two-handed grip)
 - Contact constraints
 - Constraint Jacobians
 - Constrained forward dynamics
 
 ### Inverse Kinematics (PINK)
+
 - Task-space goals (position, orientation)
 - Multiple simultaneous tasks with priorities
 - Joint limit avoidance
@@ -43,6 +47,7 @@ Pinocchio is a C++ library with Python bindings for efficient rigid body dynamic
 - Real-time capable
 
 ### Visualization
+
 - **MeshCat**: Browser-based 3D visualization
 - **Gepetto-Viewer**: Desktop Qt-based viewer
 - URDF/MJCF model loading
@@ -322,11 +327,11 @@ viz.display(q)
 Pinocchio is highly optimized for computational efficiency:
 
 | Algorithm | DOF=10 | DOF=30 | DOF=100 |
-|-----------|--------|--------|---------|
-| RNEA | 2 µs | 5 µs | 15 µs |
-| ABA | 5 µs | 15 µs | 50 µs |
-| CRBA | 8 µs | 30 µs | 150 µs |
-| Jacobian | 3 µs | 8 µs | 25 µs |
+| --------- | ------ | ------ | ------- |
+| RNEA      | 2 µs   | 5 µs   | 15 µs   |
+| ABA       | 5 µs   | 15 µs  | 50 µs   |
+| CRBA      | 8 µs   | 30 µs  | 150 µs  |
+| Jacobian  | 3 µs   | 8 µs   | 25 µs   |
 
 **Real-time capable** for models up to ~100 DOF
 
@@ -335,6 +340,7 @@ Pinocchio is highly optimized for computational efficiency:
 ### When to Use Pinocchio
 
 ✅ **Use Pinocchio for**:
+
 - High-performance dynamics computation
 - Analytical derivatives needed
 - Complex kinematic chains
@@ -343,6 +349,7 @@ Pinocchio is highly optimized for computational efficiency:
 - Cross-validation of dynamics
 
 ❌ **Prefer MuJoCo for**:
+
 - Contact-rich simulation
 - Muscle-level biomechanics
 - Interactive visualization
@@ -476,8 +483,10 @@ Pinocchio is licensed under the BSD-2-Clause License. See the [Pinocchio reposit
 ## Support
 
 For Pinocchio-specific questions:
+
 - [Pinocchio GitHub Issues](https://github.com/stack-of-tasks/pinocchio/issues)
 - [Pinocchio Discussions](https://github.com/stack-of-tasks/pinocchio/discussions)
 
 For Golf Modeling Suite integration:
+
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

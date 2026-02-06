@@ -18,22 +18,22 @@ The kinematic sequence captures the "summation of speed" principle: each success
 
 ### 1.3 Units and conventions
 
-| Parameter | Symbol | Units | Sign Convention |
-|-----------|--------|-------|-----------------|
-| Angular velocity | ω | deg/s or rad/s | Positive = rotation toward target (RH golfer) |
-| Peak time | t_peak | seconds (s) or milliseconds (ms) | Relative to transition (t=0) or impact |
-| Inter-segment lag | Δt | milliseconds (ms) | t_distal - t_proximal |
+| Parameter         | Symbol | Units                            | Sign Convention                               |
+| ----------------- | ------ | -------------------------------- | --------------------------------------------- |
+| Angular velocity  | ω      | deg/s or rad/s                   | Positive = rotation toward target (RH golfer) |
+| Peak time         | t_peak | seconds (s) or milliseconds (ms) | Relative to transition (t=0) or impact        |
+| Inter-segment lag | Δt     | milliseconds (ms)                | t_distal - t_proximal                         |
 
 ### 1.4 Segment definitions
 
 The standard 4-segment model (Cheetham et al., 2008):
 
-| Segment | Anatomical Definition | Typical Marker Set |
-|---------|----------------------|-------------------|
-| Pelvis | Rotation of pelvic girdle | ASIS (L/R), PSIS (L/R) |
-| Thorax/Trunk | Rotation of upper torso | Acromion (L/R), C7, T10 |
-| Lead Arm | Rotation of lead upper arm | Shoulder, Elbow, Wrist |
-| Club | Rotation of golf club | Grip, Shaft, Clubhead |
+| Segment      | Anatomical Definition      | Typical Marker Set      |
+| ------------ | -------------------------- | ----------------------- |
+| Pelvis       | Rotation of pelvic girdle  | ASIS (L/R), PSIS (L/R)  |
+| Thorax/Trunk | Rotation of upper torso    | Acromion (L/R), C7, T10 |
+| Lead Arm     | Rotation of lead upper arm | Shoulder, Elbow, Wrist  |
+| Club         | Rotation of golf club      | Grip, Shaft, Clubhead   |
 
 ---
 
@@ -43,9 +43,10 @@ The standard 4-segment model (Cheetham et al., 2008):
 
 #### Cheetham et al. (2008) - Foundational kinematic sequence paper
 
-**Citation:** Cheetham, P. J., Rose, G. A., Hinrichs, R. N., Neal, R. J., Mottram, R. E., Hurrion, P. D., & Vint, P. F. (2008). Comparison of kinematic sequence parameters between amateur and professional golfers. In D. Crews & R. Lutz (Eds.), *Science and Golf V: Proceedings of the World Scientific Congress of Golf* (pp. 30-36). Mesa, AZ: Energy in Motion.
+**Citation:** Cheetham, P. J., Rose, G. A., Hinrichs, R. N., Neal, R. J., Mottram, R. E., Hurrion, P. D., & Vint, P. F. (2008). Comparison of kinematic sequence parameters between amateur and professional golfers. In D. Crews & R. Lutz (Eds.), _Science and Golf V: Proceedings of the World Scientific Congress of Golf_ (pp. 30-36). Mesa, AZ: Energy in Motion.
 
 **Key findings:**
+
 - Defined the 4-segment kinematic sequence model
 - Professional golfers: peak pelvic rotation velocity 477 ± 53 deg/s
 - Amateur golfers: peak pelvic rotation velocity 395 ± 53 deg/s (p = 0.011)
@@ -58,6 +59,7 @@ The standard 4-segment model (Cheetham et al., 2008):
 **Citation:** Cheetham, P. J. (2014). A Simple Model of the Pelvis-Thorax Kinematic Sequence. Academia.edu publication.
 
 **Key findings:**
+
 - Simplified computational model for sequence extraction
 - Acceleration and deceleration timing analysis
 - Speed gain ratio quantification between segments
@@ -66,9 +68,10 @@ The standard 4-segment model (Cheetham et al., 2008):
 
 #### Angular velocity component selection
 
-**Citation:** Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. *Journal of Sports Sciences*, 31(11), 1156-1163.
+**Citation:** Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. _Journal of Sports Sciences_, 31(11), 1156-1163.
 
 Different studies use different angular velocity components:
+
 1. **Axial rotation only** - Rotation about vertical axis
 2. **Total angular velocity magnitude** - √(ωx² + ωy² + ωz²)
 3. **Resultant in swing plane** - Projected onto functional swing plane
@@ -77,11 +80,11 @@ The choice significantly affects peak timing identification.
 
 #### Reference frame considerations
 
-| Method | Description | Typical Values |
-|--------|-------------|----------------|
-| Global frame | Angular velocity relative to world | Most common |
-| Local frame | Relative to parent segment | Used in some studies |
-| Swing plane | Projected onto fitted plane | Less common |
+| Method       | Description                        | Typical Values       |
+| ------------ | ---------------------------------- | -------------------- |
+| Global frame | Angular velocity relative to world | Most common          |
+| Local frame  | Relative to parent segment         | Used in some studies |
+| Swing plane  | Projected onto fitted plane        | Less common          |
 
 ### 2.3 Controversies and limitations
 
@@ -160,24 +163,25 @@ Output:
 
 **TPI (Titleist Performance Institute) Tour Averages:**
 
-| Segment | Peak Angular Velocity | Typical Timing |
-|---------|----------------------|----------------|
-| Pelvis | 450-550 deg/s | First (t = 0) |
-| Thorax | 650-750 deg/s | +20-40 ms after pelvis |
-| Lead Arm | 900-1100 deg/s | +30-50 ms after thorax |
-| Club | 2000-2500 deg/s | +40-60 ms after arm |
+| Segment  | Peak Angular Velocity | Typical Timing         |
+| -------- | --------------------- | ---------------------- |
+| Pelvis   | 450-550 deg/s         | First (t = 0)          |
+| Thorax   | 650-750 deg/s         | +20-40 ms after pelvis |
+| Lead Arm | 900-1100 deg/s        | +30-50 ms after thorax |
+| Club     | 2000-2500 deg/s       | +40-60 ms after arm    |
 
 ### 4.2 Acceptance criteria
 
-| Criterion | Tolerance | Method |
-|-----------|-----------|--------|
-| Peak velocity magnitude | ±5% | Compare to motion capture reference |
-| Peak timing | ±1 ms | Cross-engine comparison |
-| Sequence order | Exact match | Deterministic |
+| Criterion               | Tolerance   | Method                              |
+| ----------------------- | ----------- | ----------------------------------- |
+| Peak velocity magnitude | ±5%         | Compare to motion capture reference |
+| Peak timing             | ±1 ms       | Cross-engine comparison             |
+| Sequence order          | Exact match | Deterministic                       |
 
 ### 4.3 Cross-engine validation
 
 All physics engines (MuJoCo, Drake, Pinocchio, OpenSim) must produce:
+
 - Identical sequence ordering for the same input motion
 - Peak times within ±1 ms
 - Peak velocities within ±5%
@@ -188,16 +192,17 @@ All physics engines (MuJoCo, Drake, Pinocchio, OpenSim) must produce:
 
 ### 5.1 Sources of uncertainty
 
-| Source | Magnitude | Notes |
-|--------|-----------|-------|
-| Marker tracking noise | ±1-3 mm | Propagates to velocity via differentiation |
-| Temporal resolution | 1/sample_rate | Limits peak timing precision |
-| Numerical differentiation | Varies | Depends on smoothing filter |
-| Segment definition | ~5-10° | Marker placement variation |
+| Source                    | Magnitude     | Notes                                      |
+| ------------------------- | ------------- | ------------------------------------------ |
+| Marker tracking noise     | ±1-3 mm       | Propagates to velocity via differentiation |
+| Temporal resolution       | 1/sample_rate | Limits peak timing precision               |
+| Numerical differentiation | Varies        | Depends on smoothing filter                |
+| Segment definition        | ~5-10°        | Marker placement variation                 |
 
 ### 5.2 Propagation method
 
 Velocity uncertainty estimated via:
+
 ```
 σ_ω ≈ σ_position / Δt × √2
 ```
@@ -222,17 +227,17 @@ Sequence: Pelvis → Thorax → Arm → Club (canonical)
 
 ## 6. References
 
-1. Cheetham, P. J., Rose, G. A., Hinrichs, R. N., Neal, R. J., Mottram, R. E., Hurrion, P. D., & Vint, P. F. (2008). Comparison of kinematic sequence parameters between amateur and professional golfers. In D. Crews & R. Lutz (Eds.), *Science and Golf V* (pp. 30-36). Mesa, AZ: Energy in Motion.
+1. Cheetham, P. J., Rose, G. A., Hinrichs, R. N., Neal, R. J., Mottram, R. E., Hurrion, P. D., & Vint, P. F. (2008). Comparison of kinematic sequence parameters between amateur and professional golfers. In D. Crews & R. Lutz (Eds.), _Science and Golf V_ (pp. 30-36). Mesa, AZ: Energy in Motion.
 
 2. Cheetham, P. J. (2014). A Simple Model of the Pelvis-Thorax Kinematic Sequence. [Technical report]
 
-3. Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. *Journal of Sports Sciences*, 31(11), 1156-1163. https://pubmed.ncbi.nlm.nih.gov/23463985/
+3. Brown, S. J., Selbie, W. S., & Wallace, E. S. (2013). The X-Factor: An evaluation of common methods used to analyse major inter-segment kinematics during the golf swing. _Journal of Sports Sciences_, 31(11), 1156-1163. https://pubmed.ncbi.nlm.nih.gov/23463985/
 
-4. Horan, S. A., Evans, K., Morris, N. R., & Kavanagh, J. J. (2010). Thorax and pelvis kinematics during the downswing of male and female skilled golfers. *Journal of Biomechanics*, 43(8), 1456-1462.
+4. Horan, S. A., Evans, K., Morris, N. R., & Kavanagh, J. J. (2010). Thorax and pelvis kinematics during the downswing of male and female skilled golfers. _Journal of Biomechanics_, 43(8), 1456-1462.
 
-5. Neal, R. J., & Wilson, B. D. (1985). 3D kinematics and kinetics of the golf swing. *International Journal of Sport Biomechanics*, 1(3), 221-232.
+5. Neal, R. J., & Wilson, B. D. (1985). 3D kinematics and kinetics of the golf swing. _International Journal of Sport Biomechanics_, 1(3), 221-232.
 
-6. Tinmark, F., Hellström, J., Halvorsen, K., & Thorstensson, A. (2010). Elite golfers' kinematic sequence in full-swing and partial-swing shots. *Sports Biomechanics*, 9(4), 236-244. https://www.diva-portal.org/smash/get/diva2:25224/FULLTEXT01.pdf
+6. Tinmark, F., Hellström, J., Halvorsen, K., & Thorstensson, A. (2010). Elite golfers' kinematic sequence in full-swing and partial-swing shots. _Sports Biomechanics_, 9(4), 236-244. https://www.diva-portal.org/smash/get/diva2:25224/FULLTEXT01.pdf
 
 ---
 

@@ -11,18 +11,21 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 ### Code Quality & Refactoring
 
 **[refactorer.md](refactorer.md)**
+
 - Systematic code refactoring
 - Design pattern application
 - Code smell detection
 - Architecture improvements
 
 **[pragmatist.md](pragmatist.md)**
+
 - Practical, no-nonsense solutions
 - Minimal viable implementations
 - Avoiding over-engineering
 - Focus on shipping
 
 **[bolt.md](bolt.md)**
+
 - Fast, efficient implementations
 - Quick fixes and patches
 - Rapid prototyping
@@ -31,18 +34,21 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 ### Analysis & Review
 
 **[critic.md](critic.md)**
+
 - Critical code review
 - Identifying potential issues
 - Security analysis
 - Performance concerns
 
 **[coherency_expert.md](coherency_expert.md)**
+
 - Consistency checking
 - API design coherence
 - Documentation alignment
 - Naming conventions
 
 **[sentinel.md](sentinel.md)**
+
 - Security monitoring
 - Dependency auditing
 - Vulnerability scanning
@@ -51,18 +57,21 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 ### Research & Documentation
 
 **[curie.md](curie.md)**
+
 - Scientific and technical research
 - Literature review
 - Algorithm analysis
 - Mathematical formulation
 
 **[bibliographer.md](bibliographer.md)**
+
 - Documentation organization
 - Reference management
 - Citation formatting
 - Literature tracking
 
 **[resource_finder.md](resource_finder.md)**
+
 - Finding relevant resources
 - Library research
 - Tool discovery
@@ -71,18 +80,21 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 ### Design & Architecture
 
 **[automaton.md](automaton.md)**
+
 - Automated workflows
 - CI/CD optimization
 - Build process improvement
 - Deployment automation
 
 **[layout_specialist.md](layout_specialist.md)**
+
 - Project structure organization
 - File organization
 - Module layout
 - Directory structure
 
 **[feature_finder.md](feature_finder.md)**
+
 - Feature discovery
 - Capability mapping
 - Integration opportunities
@@ -91,12 +103,14 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 ### Specialized Expertise
 
 **[technical_continuity.md](technical_continuity.md)**
+
 - Maintaining technical consistency
 - Long-term architecture preservation
 - Design principle enforcement
 - Technical debt prevention
 
 **[thesis_defender.md](thesis_defender.md)**
+
 - Argument construction
 - Design decision defense
 - Trade-off analysis
@@ -107,6 +121,7 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 ### For AI Assistants
 
 When using these templates:
+
 1. Select the agent most appropriate for the task
 2. Review the agent's expertise and guidelines
 3. Follow the specified workflow and constraints
@@ -115,6 +130,7 @@ When using these templates:
 ### For Human Developers
 
 Agent templates can guide:
+
 - Code review approach
 - Problem-solving perspective
 - Documentation style
@@ -125,16 +141,19 @@ Agent templates can guide:
 Each agent template typically includes:
 
 1. **Role Definition**
+
    - Primary expertise
    - Focus areas
    - Perspective
 
 2. **Guidelines**
+
    - Operating principles
    - Quality standards
    - Constraints
 
 3. **Workflow**
+
    - Typical process
    - Steps to follow
    - Decision criteria
@@ -167,17 +186,20 @@ For complex tasks, combine multiple agents:
 ## Best Practices
 
 ### Agent Selection
+
 - Choose the agent that best matches the task's primary objective
 - Consider the development phase (research, implementation, review)
 - Match agent expertise to problem domain
 
 ### Agent Usage
+
 - Stay in character with the agent's perspective
 - Follow the agent's guidelines consistently
 - Apply the agent's quality standards
 - Use the agent's typical workflow
 
 ### Agent Evolution
+
 - Update templates based on experience
 - Refine guidelines as project evolves
 - Add new examples and scenarios
@@ -193,6 +215,7 @@ For complex tasks, combine multiple agents:
 ## Questions?
 
 For questions about agent templates:
+
 - Review the specific agent template for detailed guidance
 - See [AI Agents Overview](../AGENTS.md) for system-level information
 - Ask in GitHub Discussions for template improvements

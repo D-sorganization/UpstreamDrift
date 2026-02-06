@@ -1,5 +1,7 @@
 # Golf Modeling Suite - Design Guidelines Addendum
+
 ## Drake Block Diagram Architecture & Enhanced Requirements
+
 **Date:** 2026-01-06  
 **Supersedes:** Sections added to project_design_guidelines.qmd
 
@@ -14,6 +16,7 @@
 Drake's `LeafSystem` and `Diagram` infrastructure enables composable, modular simulation architecture. **All Drake implementations must use this framework:**
 
 - **System Decomposition**:
+
   - Player model: `MultibodyPlant` (skeleton + club)
   - Controller: `LeafSystem` (PID, LQR, trajectory tracker, or RL policy)
   - Sensors: `LeafSystem` (joint encoders, IMU, force plates)
@@ -49,21 +52,25 @@ Drake's `LeafSystem` and `Diagram` infrastructure enables composable, modular si
 **Each must be implemented as standalone, reusable `LeafSystem` blocks:**
 
 1. **GolferPlantSystem**:
+
    - Wraps `MultibodyPlant` with golfer-specific ports
    - Input ports: `u_torques`, `u_muscle_activations` (if hybrid model)
    - Output ports: `q`, `v`, `qacc`, `joint_torques`, `reaction_forces`
 
 2. **TrajectoryControllerSystem**:
+
    - Input ports: `q_measured`, `v_measured`, `q_desired`, `v_desired`
    - Output ports: `u_control` (torques or activations)
    - Modes: PID, inverse dynamics, LQR, MPC preview
 
 3. **InducedAccelerationAnalyzerSystem**:
+
    - Input ports: `q`, `v`, `u`
    - Output ports: `indexed_accelerations` (struct with gravity/coriolis/control/constraint components)
    - Implements Section H2 indexed acceleration closure logic
 
 4. **DriftControlDecomposerSystem** (Section F):
+
    - Input ports: `q`, `v`, `u`
    - Output ports: `q_ddot_drift`, `q_ddot_control`
    - Validates: `q_ddot_drift + q_ddot_control ≈ q_ddot_total` (closure test)
@@ -84,20 +91,20 @@ Drake's `LeafSystem` and `Diagram` infrastructure enables composable, modular si
 ```python
 def test_drake_block_diagram_modularity():
     """Verify controller replacement without plant changes."""
-    
+
     # Build diagram with PID controller
     builder1 = DiagramBuilder()
     plant1, pid_controller = add_golfer_plant_with_pid(builder1)
     diagram1 = builder1.Build()
-    
+
     # Build diagram with LQR controller
     builder2 = DiagramBuilder()
     plant2, lqr_controller = add_golfer_plant_with_lqr(builder2)
-    diagram2 = builder2.Build()   
+    diagram2 = builder2.Build()
     # Same plant, different controller - should both simulate
     assert simulate(diagram1, T=1.0) is not None
     assert simulate(diagram2, T=1.0) is not None
-    
+
     # Controllers should expose same interface
     assert pid_controller.get_input_port().size() == lqr_controller.get_input_port().size()
 ```
@@ -111,11 +118,13 @@ def test_drake_block_diagram_modularity():
 ### J1.1 Implementation
 
 - **Wrapping Surfaces**:
+
   - Cylindrical wrap around grip (radius = shaft radius + hand thickness)
   - Ellipsoidal wraps for palm/finger bulges
   - Via-point constraints for thumb opposition point
 
 - **Muscle Routing**:
+
   - Flexor digitorum profundus (FDP) routed through fingers to grip
   - Extensor digitorum (ED) for grip release modeling
   - Thumb muscles: Flexor/abductor pollicis
@@ -160,11 +169,13 @@ class OpenSimGripAnalysis:
 ### K1.1 Implementation
 
 - **Fingertip Contact Elements**:
+
   - Sphere contacts at fingertip phalanges (5 per hand)
   - Compliant contact model: Spring-damper with K=1000 N/m, B=10 N·s/m
   - Friction coefficient μ=1.0 (dry skin on rubber grip)
 
 - **Intrinsic Hand Muscles**:
+
   - Flexor digitorum superficialis (FDS) - 4 compartments
   - Flexor digitorum profundus (FDP) - 4 compartments
   - Lumbricals - 4 muscles (fine motor control)
@@ -237,37 +248,38 @@ from concurrent.futures import ThreadPoolExecutor
 
 def simulate_swing_parallel(diagram: Diagram, initial_conditions: list[np.ndarray]):
     """Thread-safe Drake simulation."""
-    
+
     def run_one_sim(q0: np.ndarray) -> np.ndarray:
         # Each thread gets its own Simulator and Context
         simulator = Simulator(diagram)  # Stateless diagram, unique simulator
         context = simulator.get_mutable_context()
-        
+
         diagram.get_plant().SetPositions(context, q0)
         simulator.AdvanceTo(1.0)
-        
+
         return diagram.get_plant().GetPositions(context)
-    
+
     with ThreadPoolExecutor(max_workers=4) as executor:
         results = list(executor.map(run_one_sim, initial_conditions))
-    
+
     return results
 ```
 
 **Test:**
+
 ```python
 def test_drake_thread_safety():
     """Section O1a: Verify parallel simulations don't interfere."""
     diagram = build_golfer_diagram()
-    
+
     q_initial_list = [
         np.array([0.1, 0.0, ...]),  # Swing 1
         np.array([0.2, 0.0, ...]),  # Swing 2
         np.array([0.3, 0.0, ...]),  # Swing 3
     ]
-    
+
     results = simulate_swing_parallel(diagram, q_initial_list)
-    
+
     # Results should differ (each swing had different initial conditions)
     assert not np.allclose(results[0], results[1])
     assert not np.allclose(results[1], results[2])
@@ -280,6 +292,7 @@ def test_drake_thread_safety():
 ### Top Priority: Drift-Control Decomposition for All 5 Engines
 
 **Implementation order:**
+
 1. **Drake** (use block diagram `DriftControlDecomposerSystem`) - 2 days
 2. **MuJoCo** (implement in `mujoco_physics_engine.py`) - 2 days
 3. **Pinocchio** (use ABA algorithm with zero tau) - 2 days

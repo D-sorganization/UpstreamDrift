@@ -7,6 +7,7 @@ This document describes the MATLAB-specific compliance checks and quality standa
 ## Overview
 
 MATLAB compliance ensures:
+
 - Code quality through static analysis
 - Reproducible results via fixed random seeds
 - Comprehensive testing with MATLAB Unit Test framework
@@ -62,41 +63,41 @@ Create `run_matlab_quality_checks.m` in the root:
 function run_matlab_quality_checks()
     % Run all MATLAB quality checks
     fprintf('🔍 Running MATLAB Quality Checks...\n\n');
-    
+
     % 1. Check for magic numbers
     check_magic_numbers();
-    
+
     % 2. Run code analyzer
     run_code_analyzer();
-    
+
     % 3. Check reproducibility
     check_reproducibility();
-    
+
     % 4. Validate documentation
     check_documentation();
-    
+
     fprintf('\n✅ All quality checks completed!\n');
 end
 
 function check_magic_numbers()
     fprintf('1️⃣ Checking for magic numbers...\n');
-    
+
     % Common magic numbers to avoid
     magicNumbers = {'3.14', '9.8', '6.67', '2.71'};
-    
+
     files = [dir('matlab/**/*.m'); dir('matlab_optimized/**/*.m')];
     found = false;
-    
+
     for i = 1:length(files)
         filePath = fullfile(files(i).folder, files(i).name);
-        
+
         % Skip archived and test files
         if contains(filePath, 'Archive') || contains(filePath, 'Backup') || contains(filePath, 'test')
             continue;
         end
-        
+
         content = fileread(filePath);
-        
+
         for j = 1:length(magicNumbers)
             if contains(content, magicNumbers{j})
                 fprintf('   ⚠️ Found %s in %s\n', magicNumbers{j}, filePath);
@@ -104,7 +105,7 @@ function check_magic_numbers()
             end
         end
     end
-    
+
     if ~found
         fprintf('   ✅ No magic numbers found\n');
     end
@@ -112,20 +113,20 @@ end
 
 function run_code_analyzer()
     fprintf('2️⃣ Running code analyzer (checkcode)...\n');
-    
+
     files = [dir('matlab/**/*.m'); dir('matlab_optimized/**/*.m')];
     hasIssues = false;
-    
+
     for i = 1:length(files)
         filePath = fullfile(files(i).folder, files(i).name);
-        
+
         % Skip archived and test files
         if contains(filePath, 'Archive') || contains(filePath, 'Backup') || contains(filePath, 'test')
             continue;
         end
-        
+
         issues = checkcode(filePath, '-id');
-        
+
         if ~isempty(issues)
             fprintf('   ⚠️ Issues in %s:\n', filePath);
             for j = 1:length(issues)
@@ -134,7 +135,7 @@ function run_code_analyzer()
             hasIssues = true;
         end
     end
-    
+
     if ~hasIssues
         fprintf('   ✅ All files pass code analyzer\n');
     end
@@ -142,20 +143,20 @@ end
 
 function check_reproducibility()
     fprintf('3️⃣ Checking reproducibility...\n');
-    
+
     files = [dir('matlab/**/*.m'); dir('matlab_optimized/**/*.m')];
     warnings = 0;
-    
+
     for i = 1:length(files)
         filePath = fullfile(files(i).folder, files(i).name);
-        
+
         % Skip archived files
         if contains(filePath, 'Archive') || contains(filePath, 'Backup')
             continue;
         end
-        
+
         content = fileread(filePath);
-        
+
         % Check for random functions without rng
         if (contains(content, 'rand') || contains(content, 'randn') || contains(content, 'randi'))
             if ~contains(content, 'rng')
@@ -164,7 +165,7 @@ function check_reproducibility()
             end
         end
     end
-    
+
     if warnings == 0
         fprintf('   ✅ All files with randomness have seeds\n');
     end
@@ -172,20 +173,20 @@ end
 
 function check_documentation()
     fprintf('4️⃣ Checking function documentation...\n');
-    
+
     files = [dir('matlab/**/*.m'); dir('matlab_optimized/**/*.m')];
     missingDocs = 0;
-    
+
     for i = 1:length(files)
         filePath = fullfile(files(i).folder, files(i).name);
-        
+
         % Skip archived and test files
         if contains(filePath, 'Archive') || contains(filePath, 'Backup') || contains(filePath, 'test')
             continue;
         end
-        
+
         content = fileread(filePath);
-        
+
         % Check if it's a function
         if startsWith(strtrim(content), 'function')
             % Check for basic documentation
@@ -195,7 +196,7 @@ function check_documentation()
             end
         end
     end
-    
+
     if missingDocs == 0
         fprintf('   ✅ All functions have documentation\n');
     else
@@ -282,7 +283,7 @@ end
 function setupOnce(testCase)
     % Setup run once before all tests
     addpath(genpath('matlab'));
-    
+
     % Store data in testCase for use in tests
     testCase.TestData.tolerance = 1e-6;
 end
@@ -296,10 +297,10 @@ function test_position_calculation(testCase)
     % Test basic position calculation
     time = 2.0;  % [s]
     velocity = 5.0;  % [m/s]
-    
+
     expected = 10.0;  % [m]
     actual = calculate_position(time, velocity);
-    
+
     verifyEqual(testCase, actual, expected, ...
         'AbsTol', testCase.TestData.tolerance, ...
         'Position calculation failed');
@@ -310,10 +311,10 @@ function test_velocity_calculation(testCase)
     position1 = 0.0;  % [m]
     position2 = 10.0;  % [m]
     deltaTime = 2.0;  % [s]
-    
+
     expected = 5.0;  % [m/s]
     actual = calculate_velocity(position1, position2, deltaTime);
-    
+
     verifyEqual(testCase, actual, expected, ...
         'AbsTol', testCase.TestData.tolerance, ...
         'Velocity calculation failed');
@@ -324,7 +325,7 @@ function test_zero_time_error(testCase)
     position1 = 0.0;
     position2 = 10.0;
     deltaTime = 0.0;
-    
+
     verifyError(testCase, ...
         @() calculate_velocity(position1, position2, deltaTime), ...
         'MATLAB:divideByZero', ...
@@ -456,17 +457,18 @@ function [output1, output2] = example_function(input1, input2, options)
         options.field1 (1,1) double = 0.0
         options.field2 (1,1) logical = true
     end
-    
+
     % Implementation
     output1 = input1 + input2;
     output2 = input1 * input2;
-    
+
 end
 ```
 
 ### Physical Constants Documentation
 
 All physical constants must include:
+
 1. **Units** in square brackets `[m/s^2]`
 2. **Source** in comment (reference)
 3. **Date** of reference if applicable
@@ -572,22 +574,22 @@ The MATLAB CI workflow is defined in `.github/workflows/ci.yml`:
 matlab-analysis:
   runs-on: ubuntu-latest
   # Enable when MATLAB license is available
-  if: false  # Set to true when ready
-  
+  if: false # Set to true when ready
+
   steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up MATLAB
       uses: matlab-actions/setup-matlab@v2
       with:
         release: R2023b
         products: MATLAB Simulink
-    
+
     - name: Run quality checks
       uses: matlab-actions/run-command@v2
       with:
         command: run_matlab_quality_checks()
-    
+
     - name: Run tests
       uses: matlab-actions/run-tests@v2
       with:
@@ -600,13 +602,16 @@ matlab-analysis:
 To enable MATLAB CI checks:
 
 1. **Set up MATLAB license**
+
    - Add license file to repository secrets
    - Or configure network license server
 
 2. **Update workflow**
+
    - Change `if: false` to `if: true` in `.github/workflows/ci.yml`
 
 3. **Configure required toolboxes**
+
    - Add toolbox names to `products` list in workflow
 
 4. **Test locally first**
@@ -618,15 +623,15 @@ For repositories with licensed MATLAB installations:
 
 ```yaml
 matlab-analysis:
-  runs-on: self-hosted  # Use self-hosted runner
-  
+  runs-on: self-hosted # Use self-hosted runner
+
   steps:
     - uses: actions/checkout@v4
-    
+
     - name: Run MATLAB quality checks
       run: |
         matlab -batch "run_matlab_quality_checks()"
-    
+
     - name: Run MATLAB tests
       run: |
         matlab -batch "results = runtests('matlab/tests'); exit(any([results.Failed]));"
@@ -669,8 +674,8 @@ echo "✅ MATLAB quality checks passed!"
 
 ```json
 {
-    "matlab.linterSeverityLevel": "warning",
-    "matlab.linterEncoding": "windows1252"
+  "matlab.linterSeverityLevel": "warning",
+  "matlab.linterEncoding": "windows1252"
 }
 ```
 
@@ -688,11 +693,13 @@ echo "✅ MATLAB quality checks passed!"
 ### Issue: Magic Numbers
 
 **Problem:**
+
 ```matlab
 velocity = position / 3.14159;  % ❌
 ```
 
 **Solution:**
+
 ```matlab
 velocity = position / pi;  % ✅ Use built-in constant
 ```
@@ -700,6 +707,7 @@ velocity = position / pi;  % ✅ Use built-in constant
 ### Issue: Missing Documentation
 
 **Problem:**
+
 ```matlab
 function y = calc(x)
     y = x^2 + 2*x + 1;
@@ -707,6 +715,7 @@ end
 ```
 
 **Solution:**
+
 ```matlab
 function y = calc(x)
 % CALC Calculate quadratic function
@@ -725,11 +734,13 @@ end
 ### Issue: Non-Reproducible Random Numbers
 
 **Problem:**
+
 ```matlab
 data = randn(100, 1);  % ❌ No seed
 ```
 
 **Solution:**
+
 ```matlab
 rng(42);  % ✅ Fixed seed
 data = randn(100, 1);
@@ -738,11 +749,13 @@ data = randn(100, 1);
 ### Issue: Absolute Paths
 
 **Problem:**
+
 ```matlab
 load('C:\Users\Me\data.mat');  % ❌
 ```
 
 **Solution:**
+
 ```matlab
 load(fullfile('data', 'input.mat'));  % ✅
 ```
@@ -777,6 +790,7 @@ Before merging MATLAB code, verify:
 ---
 
 **Document Maintenance:**
+
 - Review when MATLAB version updates
 - Update examples as standards evolve
 - Sync with UNIFIED_CI_APPROACH.md

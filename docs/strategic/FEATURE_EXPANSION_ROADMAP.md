@@ -4,14 +4,16 @@
 
 **Goal**: Transform the Golf Modeling Suite into the most comprehensive, research-grade forward dynamics analysis platform for the golf swing—differentiated from commercial products (GEARS, K-VEST, TrackMan, Foresight) by focusing on **predictive simulation** rather than just measurement.
 
-**Key Differentiator**: Commercial systems measure what happened. We simulate what *could* happen—enabling swing optimization, injury prevention, and equipment customization through physics-based prediction.
+**Key Differentiator**: Commercial systems measure what happened. We simulate what _could_ happen—enabling swing optimization, injury prevention, and equipment customization through physics-based prediction.
 
 ---
 
 ## Executive Summary
 
 ### Current State
+
 The Golf Modeling Suite already provides:
+
 - 5 physics engines (MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite)
 - 290-muscle full-body models
 - Ball flight physics (multiple models)
@@ -19,6 +21,7 @@ The Golf Modeling Suite already provides:
 - Cross-engine validation
 
 ### Strategic Gaps to Address
+
 1. **Predictive Swing Optimization** - Generate optimal swings, not just analyze existing ones
 2. **Injury Risk Assessment** - Quantify biomechanical stress and injury probability
 3. **Real-Time Feedback Systems** - Live coaching with physics-based guidance
@@ -36,6 +39,7 @@ The Golf Modeling Suite already provides:
 **Purpose**: Generate biomechanically optimal swings for specific goals (max distance, accuracy, injury-safe).
 
 **Technical Approach**:
+
 ```
 Inputs:
 ├── Golfer body model (anthropometrics, strength limits)
@@ -60,12 +64,14 @@ Outputs:
 **Implementation Components**:
 
 1. **Multi-Objective Optimizer** (`shared/python/swing_optimizer.py`)
+
    - Clubhead velocity maximization
    - Ball direction accuracy
    - Injury risk minimization
    - Energy efficiency
 
 2. **Parametric Swing Generator** (`shared/python/parametric_swing.py`)
+
    - X-factor angle control
    - Kinematic sequence timing
    - Tempo parameters
@@ -77,6 +83,7 @@ Outputs:
    - Method: inverse optimal control
 
 **Research Foundation**:
+
 - [Kinetic Constrained Optimization of the Golf Swing Hub Path](https://pmc.ncbi.nlm.nih.gov/articles/PMC4234956/)
 - [Dynamic Optimization of the Golf Swing Using a Six Degree-of-Freedom Biomechanical Model](https://www.mdpi.com/2504-3900/2/6/243)
 
@@ -89,11 +96,13 @@ Outputs:
 **Features**:
 
 1. **Muscle Activation Optimizer**
+
    - Given desired motion, find optimal muscle activations
    - Hill-type muscle model with realistic constraints
    - Tendon dynamics and pennation angles
 
 2. **Muscle Synergy Analysis**
+
    - Identify principal muscle coordination patterns
    - Compare to elite golfer synergies
    - Detect inefficient muscle recruitment
@@ -104,6 +113,7 @@ Outputs:
    - Fatigue accumulation modeling
 
 **New Modules**:
+
 ```python
 # shared/python/muscle_synergy.py
 class MuscleSynergyAnalyzer:
@@ -128,16 +138,19 @@ class MuscleSynergyAnalyzer:
 **Components**:
 
 1. **Ground-Foot Contact**
+
    - Distributed contact pressure
    - Friction modeling (grass, mat, shoe type)
    - Center of pressure trajectory
 
 2. **Hand-Club Contact (Grip)**
+
    - Two-handed grip force distribution
    - Grip pressure variations through swing
    - Wrist cock/release mechanics
 
 3. **Club-Ball Impact**
+
    - Volumetric contact model
    - Coefficient of restitution (COR)
    - Gear effect (off-center hits)
@@ -157,6 +170,7 @@ class MuscleSynergyAnalyzer:
 **Purpose**: Quantify forces on the lumbar spine to prevent the #1 golf injury (low back pain affects 25-58% of golfers).
 
 **Scientific Basis**:
+
 - Compressive forces can reach 8x body weight on L4-L5
 - Shear forces during rotation create "crunch factor"
 - Modern swing increases thorax-pelvis separation load
@@ -164,6 +178,7 @@ class MuscleSynergyAnalyzer:
 **Features**:
 
 1. **Real-Time Spinal Force Calculator**
+
    ```python
    # shared/python/spinal_load_analysis.py
    class SpinalLoadAnalyzer:
@@ -183,11 +198,13 @@ class MuscleSynergyAnalyzer:
    ```
 
 2. **X-Factor Stretch Analysis**
+
    - Pelvis-thorax separation angle
    - Rate of separation change
    - Comparison to injury thresholds
 
 3. **Crunch Factor Quantification**
+
    - Lateral bending during downswing
    - Side compression asymmetry
    - Vertebral load distribution
@@ -212,6 +229,7 @@ class MuscleSynergyAnalyzer:
 **Purpose**: Quantify forces on all major joints involved in the golf swing.
 
 **Target Joints**:
+
 1. **Lumbar Spine** (L3-L5) - Compression, shear, torsion
 2. **Hip Joints** - Rotation range, impingement risk
 3. **Shoulder Complex** - Rotator cuff loading
@@ -220,6 +238,7 @@ class MuscleSynergyAnalyzer:
 6. **Elbow** - Golfer's elbow (medial epicondylitis) risk
 
 **Output Visualizations**:
+
 - Joint force time series
 - Force direction vectors on 3D model
 - Heat map of cumulative stress
@@ -232,6 +251,7 @@ class MuscleSynergyAnalyzer:
 **Purpose**: Suggest swing changes to reduce injury risk while maintaining performance.
 
 **Algorithm**:
+
 ```
 1. Analyze current swing for injury risk factors
 2. Identify modifiable parameters (stance width, X-factor, tempo)
@@ -242,6 +262,7 @@ class MuscleSynergyAnalyzer:
 ```
 
 **Swing Alternatives Database**:
+
 - "Classic" swing (reduced X-factor stretch)
 - "Stabilized spine" swing (limited lateral bend)
 - "Single-plane" swing (simplified rotation)
@@ -257,12 +278,14 @@ class MuscleSynergyAnalyzer:
 **Purpose**: Connect to wearable sensors for real-time swing analysis.
 
 **Supported Hardware** (via standard protocols):
+
 - IMU sensors (accelerometers, gyroscopes, magnetometers)
 - EMG sensors (muscle activation)
 - Force plates (ground reaction forces)
 - Pressure insoles (foot pressure distribution)
 
 **Integration Architecture**:
+
 ```
 Hardware Layer
 ├── Bluetooth LE connection manager
@@ -284,6 +307,7 @@ Feedback Layer
 ```
 
 **New Module**:
+
 ```python
 # shared/python/realtime_interface.py
 class RealtimeSensorInterface:
@@ -314,11 +338,13 @@ class RealtimeSensorInterface:
 **Feedback Modalities**:
 
 1. **Audio Feedback**
+
    - Tempo metronome (backswing, transition, downswing timing)
    - Pitch changes for deviation from target
    - Voice cues for phase transitions
 
 2. **Visual Feedback**
+
    - Ghost overlay of target swing
    - Color-coded joint position accuracy
    - Real-time trajectory comparison
@@ -328,6 +354,7 @@ class RealtimeSensorInterface:
    - Intensity proportional to deviation
 
 **Training Protocols**:
+
 - Tempo training (synchronize to beat)
 - Kinematic sequence training (hip-torso-arm timing)
 - Position accuracy training (hit target positions)
@@ -340,6 +367,7 @@ class RealtimeSensorInterface:
 **Purpose**: Improve the existing OpenPose integration for practical use.
 
 **Enhancements**:
+
 1. **Multi-Camera Fusion** - Combine views for 3D reconstruction
 2. **Golf-Specific Pose Model** - Train on golf swing data
 3. **Club Detection** - Track club position/orientation
@@ -355,6 +383,7 @@ class RealtimeSensorInterface:
 **Purpose**: Optimize club specifications for individual golfers through simulation.
 
 **Parameters to Optimize**:
+
 - Shaft length
 - Shaft flex/kick point
 - Clubhead weight
@@ -363,6 +392,7 @@ class RealtimeSensorInterface:
 - Grip size
 
 **Approach**:
+
 ```
 1. Capture/model golfer's swing kinematics
 2. Parameterize club model
@@ -373,6 +403,7 @@ class RealtimeSensorInterface:
 ```
 
 **New Module**:
+
 ```python
 # shared/python/club_fitting.py
 class ClubFittingOptimizer:
@@ -408,6 +439,7 @@ class ClubFittingOptimizer:
 **Current State**: 1-5 segment flexible shaft model
 
 **Enhancements**:
+
 1. **Continuous Beam Model** (Rayleigh beam theory)
 2. **Kick Point Analysis** - Low/mid/high kick behavior
 3. **Torque Response** - Shaft torsional characteristics
@@ -415,6 +447,7 @@ class ClubFittingOptimizer:
 5. **Loading Response** - How shaft stores/releases energy
 
 **Shaft Database**:
+
 - Popular shaft profiles (frequency, torque, bend profile)
 - Import from manufacturer specs
 - Custom shaft parameter entry
@@ -426,12 +459,14 @@ class ClubFittingOptimizer:
 **Purpose**: Match ball characteristics to swing type for optimal performance.
 
 **Ball Parameters**:
+
 - Compression rating
 - Spin characteristics (driver vs. wedge)
 - Cover material (urethane, surlyn, ionomer)
 - Dimple pattern aerodynamics
 
 **Analysis**:
+
 - Impact deformation modeling
 - Spin generation by strike type
 - Ball flight comparison across models
@@ -446,12 +481,15 @@ class ClubFittingOptimizer:
 **Purpose**: Create personalized biomechanical models from individual measurements.
 
 **Input Methods**:
+
 1. **Manual Measurements**
+
    - Height, weight, limb lengths
    - Joint range of motion
    - Body segment circumferences
 
 2. **Photo-Based Scaling**
+
    - Front/side photos with reference
    - Automatic landmark detection
    - Limb length estimation
@@ -461,6 +499,7 @@ class ClubFittingOptimizer:
    - Range of motion tests
 
 **Scaling Algorithm**:
+
 ```python
 # shared/python/body_scaling.py
 class BodyScaler:
@@ -496,12 +535,14 @@ class BodyScaler:
 **Purpose**: Estimate individual muscle strengths for realistic simulation.
 
 **Methods**:
+
 1. **Standard Profiles** by age/sex/fitness level
 2. **1RM Testing** - Import strength test results
 3. **Isokinetic Profiles** - Joint torque-angle-velocity data
 4. **EMG Calibration** - Correlate EMG to force production
 
 **Muscle Groups**:
+
 - Hip extensors/flexors/rotators
 - Knee extensors/flexors
 - Trunk rotators/flexors/extensors
@@ -515,6 +556,7 @@ class BodyScaler:
 **Purpose**: Model individual joint range of motion for realistic constraints.
 
 **Joints Assessed**:
+
 - Hip internal/external rotation (critical for golf)
 - Lumbar rotation
 - Thoracic rotation
@@ -522,6 +564,7 @@ class BodyScaler:
 - Wrist flexion/extension/deviation
 
 **Impact on Simulation**:
+
 - Constrain optimization to feasible ROM
 - Identify flexibility limitations affecting swing
 - Generate stretching recommendations
@@ -535,6 +578,7 @@ class BodyScaler:
 **Purpose**: Incorporate ground reaction forces into full-body dynamics.
 
 **Data Channels**:
+
 - Vertical force (Fz)
 - Anterior-posterior force (Fx)
 - Medial-lateral force (Fy)
@@ -542,12 +586,15 @@ class BodyScaler:
 - Free moment (torque about vertical axis)
 
 **Analysis Features**:
+
 1. **Weight Transfer Analysis**
+
    - Percentage of weight on each foot through swing
    - Timing of weight shift
    - Peak vertical forces
 
 2. **Ground Reaction Force Patterns**
+
    - Comparison to elite patterns
    - Phase-specific force profiles
    - Force direction visualization
@@ -558,6 +605,7 @@ class BodyScaler:
    - "Pushing off" mechanics
 
 **Integration with Simulation**:
+
 ```python
 # shared/python/force_plate_analysis.py
 class ForcePlateAnalyzer:
@@ -596,12 +644,14 @@ class ForcePlateAnalyzer:
 **Purpose**: Detailed analysis of pressure distribution within each foot.
 
 **Metrics**:
+
 - Heel-toe pressure ratio
 - Medial-lateral pressure distribution
 - Pressure migration patterns
 - Peak pressure locations
 
 **Applications**:
+
 - Balance assessment
 - Footwear recommendations
 - Stance adjustments
@@ -615,17 +665,20 @@ class ForcePlateAnalyzer:
 **Purpose**: Track how performance degrades over practice sessions and rounds.
 
 **Model Components**:
+
 1. **Acute Fatigue** - Within-session degradation
 2. **Cumulative Load** - Session-to-session accumulation
 3. **Recovery Dynamics** - Time-dependent recovery
 
 **Metrics Tracked**:
+
 - Clubhead speed degradation
 - Kinematic consistency
 - Muscle activation efficiency
 - Injury risk increase
 
 **Implementation**:
+
 ```python
 # shared/python/fatigue_model.py
 class FatigueModel:
@@ -659,11 +712,13 @@ class FatigueModel:
 **Purpose**: Optimize practice volume for improvement without overtraining.
 
 **Concepts from Sports Science**:
+
 - **ACWR** (Acute:Chronic Workload Ratio)
 - **Monotony** and **Strain** indices
 - **Training Impulse** (TRIMP)
 
 **Features**:
+
 - Practice session logging
 - Load trend visualization
 - Injury risk warnings
@@ -676,12 +731,14 @@ class FatigueModel:
 **Purpose**: Track skill acquisition over weeks/months/years.
 
 **Metrics**:
+
 - Swing consistency (variability reduction)
 - Key parameter improvements
 - Injury history
 - Performance milestones
 
 **Visualization**:
+
 - Progress timelines
 - Skill radar charts
 - Comparative analysis to previous periods
@@ -697,15 +754,18 @@ class FatigueModel:
 **Enhancements**:
 
 1. **Automatic Phase Detection**
+
    - Address, backswing, top, transition, downswing, impact, follow-through
    - Event timing extraction
 
 2. **Proximal-to-Distal Sequencing**
+
    - Angular velocity timing analysis
    - Peak velocity ordering (hips → torso → arms → club)
    - Timing gaps quantification
 
 3. **Sequence Efficiency Index**
+
    - Single score for kinematic chain efficiency
    - Comparison to elite patterns
    - Specific timing recommendations
@@ -721,12 +781,14 @@ class FatigueModel:
 **Purpose**: Quantify swing-to-swing consistency.
 
 **Metrics**:
+
 - **Coefficient of Variation** per joint
 - **Principal Component Analysis** of swing ensemble
 - **Movement Variability Profile**
 - **Consistency Index** (single score)
 
 **Analysis**:
+
 ```python
 # shared/python/variability_analysis.py
 class SwingVariabilityAnalyzer:
@@ -760,11 +822,13 @@ class SwingVariabilityAnalyzer:
 **Enhancements**:
 
 1. **Segmental Energy Tracking**
+
    - Kinetic energy per body segment
    - Potential energy changes
    - Energy transfers between segments
 
 2. **Work-Energy Analysis**
+
    - Work done by each joint
    - Positive vs. negative work
    - Efficiency calculations
@@ -781,12 +845,14 @@ class SwingVariabilityAnalyzer:
 **Purpose**: Rich comparison capabilities between swings, players, and time periods.
 
 **Comparison Types**:
+
 1. **Self-Comparison** - Same golfer, different times/conditions
 2. **Peer Comparison** - Against similar skill level
 3. **Elite Comparison** - Against professional patterns
 4. **Model Comparison** - Against simulated optimal
 
 **Visualization**:
+
 - Side-by-side 3D playback
 - Overlay trajectories
 - Difference heat maps
@@ -801,6 +867,7 @@ class SwingVariabilityAnalyzer:
 **Purpose**: Import data from popular launch monitors for validation and analysis.
 
 **Supported Formats**:
+
 - TrackMan CSV export
 - Foresight Sports export
 - FlightScope export
@@ -809,6 +876,7 @@ class SwingVariabilityAnalyzer:
 - Generic launch monitor CSV
 
 **Integration Features**:
+
 ```python
 # shared/python/launch_monitor_import.py
 class LaunchMonitorImporter:
@@ -842,6 +910,7 @@ class LaunchMonitorImporter:
 **Current State**: CSV, JSON, C3D
 
 **Additional Formats**:
+
 - **BVH** (Biovision Hierarchy) - Common mocap format
 - **FBX** (Filmbox) - 3D animation exchange
 - **TRC** (Track Row Column) - OpenSim marker format
@@ -855,12 +924,14 @@ class LaunchMonitorImporter:
 **Purpose**: Enable cloud-based storage and analysis for users who want it.
 
 **Features**:
+
 - Swing data cloud backup
 - Cross-device synchronization
 - Collaborative analysis (coach-student sharing)
 - Remote processing for compute-intensive tasks
 
 **Architecture** (self-hostable):
+
 - S3-compatible object storage
 - PostgreSQL for metadata
 - Redis for caching
@@ -871,12 +942,14 @@ class LaunchMonitorImporter:
 ### 9.4 Export & Reporting
 
 **Enhanced Export Formats**:
+
 - PDF reports with visualizations
 - Interactive HTML reports
 - Video exports with overlays
 - Research-grade HDF5 with full metadata
 
 **Report Templates**:
+
 - Coaching summary report
 - Injury risk assessment report
 - Club fitting report
@@ -892,12 +965,14 @@ class LaunchMonitorImporter:
 **Purpose**: Automatically classify swing types and detect patterns.
 
 **Classifications**:
+
 - Swing style (modern, classic, single-plane, etc.)
 - Skill level estimation
 - Swing fault detection
 - Shot type prediction (draw, fade, straight)
 
 **Approach**:
+
 - Train on labeled swing database
 - Feature extraction from kinematics
 - Random Forest / Gradient Boosting classifiers
@@ -910,11 +985,13 @@ class LaunchMonitorImporter:
 **Purpose**: Predict outcomes from swing characteristics.
 
 **Predictions**:
+
 - Ball flight parameters from kinematics
 - Clubhead speed from partial swing
 - Injury risk from movement patterns
 
 **Models**:
+
 - Physics-informed neural networks
 - Hybrid physics + ML models
 - Ensemble predictions with uncertainty
@@ -926,6 +1003,7 @@ class LaunchMonitorImporter:
 **Purpose**: Learn continuous representations of swings for similarity analysis.
 
 **Applications**:
+
 - Find similar swings in database
 - Interpolate between swing styles
 - Visualize swing space (t-SNE, UMAP)
@@ -938,12 +1016,14 @@ class LaunchMonitorImporter:
 ### 11.1 Advanced 3D Rendering
 
 **Enhancements**:
+
 - PBR (physically based rendering) materials
 - Real-time shadows and lighting
 - Course environment rendering
 - Multiple simultaneous views
 
 **Frameworks** (MIT/BSD compatible):
+
 - ModernGL / PyOpenGL
 - Vispy
 - PyVista (3D scientific visualization)
@@ -956,12 +1036,14 @@ class LaunchMonitorImporter:
 **Purpose**: Immersive swing visualization and training.
 
 **Features**:
+
 - View swing from any angle in VR
 - First-person swing replay
 - Virtual coaching overlay
 - Interactive manipulation of parameters
 
 **Frameworks**:
+
 - OpenXR (open standard)
 - PySide6 + OpenGL VR rendering
 
@@ -972,6 +1054,7 @@ class LaunchMonitorImporter:
 **Purpose**: Overlay guidance on real-world view during practice.
 
 **Features**:
+
 - Target position guides
 - Swing path visualization
 - Real-time correction indicators
@@ -1032,6 +1115,7 @@ shared/python/
 ### 12.2 API Expansion
 
 **New REST Endpoints**:
+
 ```
 POST /api/optimize/swing          # Run swing optimization
 POST /api/injury/assess           # Injury risk assessment
@@ -1092,6 +1176,7 @@ CREATE TABLE training_sessions (
 ### 13.1 Current License Status: MIT
 
 The Golf Modeling Suite uses MIT license, which is highly permissive and compatible with:
+
 - Apache 2.0 (Drake, many scientific packages)
 - BSD (NumPy, SciPy, Matplotlib, etc.)
 - LGPL (with dynamic linking)
@@ -1100,33 +1185,36 @@ The Golf Modeling Suite uses MIT license, which is highly permissive and compati
 
 All proposed additions use MIT/BSD/Apache compatible licenses:
 
-| Package | Purpose | License | Compatible |
-|---------|---------|---------|------------|
-| scikit-learn | ML classifiers | BSD-3 | ✅ |
-| optuna | Hyperparameter opt | MIT | ✅ |
-| PyVista | 3D visualization | MIT | ✅ |
-| trimesh | Mesh processing | MIT | ✅ |
-| filterpy | Kalman filtering | MIT | ✅ |
-| pyserial | Serial communication | BSD | ✅ |
-| bleak | Bluetooth LE | MIT | ✅ |
-| websockets | WebSocket support | BSD | ✅ |
-| umap-learn | Dimensionality reduction | BSD-3 | ✅ |
+| Package      | Purpose                  | License | Compatible |
+| ------------ | ------------------------ | ------- | ---------- |
+| scikit-learn | ML classifiers           | BSD-3   | ✅         |
+| optuna       | Hyperparameter opt       | MIT     | ✅         |
+| PyVista      | 3D visualization         | MIT     | ✅         |
+| trimesh      | Mesh processing          | MIT     | ✅         |
+| filterpy     | Kalman filtering         | MIT     | ✅         |
+| pyserial     | Serial communication     | BSD     | ✅         |
+| bleak        | Bluetooth LE             | MIT     | ✅         |
+| websockets   | WebSocket support        | BSD     | ✅         |
+| umap-learn   | Dimensionality reduction | BSD-3   | ✅         |
 
 ### 13.3 Avoiding Proprietary Infringement
 
 **We DO NOT**:
+
 - Reverse engineer proprietary algorithms (TrackMan, GEARS, etc.)
 - Use patented techniques without license
 - Copy proprietary data formats
 - Replicate trademarked interfaces
 
 **We DO**:
+
 - Implement published research algorithms
 - Support open standard formats
 - Create novel analysis approaches
 - Build on peer-reviewed science
 
 **Specific Patent Considerations**:
+
 - Avoid exact replication of GEARS marker placement/tracking
 - Use alternative swing metrics where TrackMan metrics are trademarked
 - Implement flight physics from academic papers, not proprietary models
@@ -1137,17 +1225,17 @@ All proposed additions use MIT/BSD/Apache compatible licenses:
 
 ### What Commercial Products Do
 
-| Feature | GEARS | K-VEST | TrackMan | Foresight | **Us** |
-|---------|-------|--------|----------|-----------|--------|
-| 3D Kinematics | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Ball Flight | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Forward Dynamics | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Muscle Models | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Swing Optimization | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Injury Risk | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Multi-Engine Validation | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Open Source | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Price | $30k+ | $8k+ | $22k+ | $20k+ | **Free** |
+| Feature                 | GEARS | K-VEST | TrackMan | Foresight | **Us**   |
+| ----------------------- | ----- | ------ | -------- | --------- | -------- |
+| 3D Kinematics           | ✅    | ✅     | ❌       | ❌        | ✅       |
+| Ball Flight             | ❌    | ❌     | ✅       | ✅        | ✅       |
+| Forward Dynamics        | ❌    | ❌     | ❌       | ❌        | ✅       |
+| Muscle Models           | ❌    | ❌     | ❌       | ❌        | ✅       |
+| Swing Optimization      | ❌    | ❌     | ❌       | ❌        | ✅       |
+| Injury Risk             | ❌    | ❌     | ❌       | ❌        | ✅       |
+| Multi-Engine Validation | ❌    | ❌     | ❌       | ❌        | ✅       |
+| Open Source             | ❌    | ❌     | ❌       | ❌        | ✅       |
+| Price                   | $30k+ | $8k+   | $22k+    | $20k+     | **Free** |
 
 ### Our Unique Value Proposition
 
@@ -1163,36 +1251,42 @@ All proposed additions use MIT/BSD/Apache compatible licenses:
 ## Part 15: Implementation Roadmap
 
 ### Phase 1: Core Forward Dynamics (Months 1-3)
+
 - [ ] Swing optimization engine
 - [ ] Parametric swing generator
 - [ ] Enhanced muscle synergy analysis
 - [ ] Spinal load analysis module
 
 ### Phase 2: Injury Prevention (Months 3-5)
+
 - [ ] Complete injury risk assessment
 - [ ] Joint stress analysis for all joints
 - [ ] Swing modification recommendations
 - [ ] Cumulative load tracking
 
 ### Phase 3: Real-Time & Integration (Months 5-8)
+
 - [ ] IMU sensor integration
 - [ ] Force plate integration
 - [ ] Launch monitor import
 - [ ] Biofeedback training mode
 
 ### Phase 4: Personalization (Months 8-10)
+
 - [ ] Body scaling system
 - [ ] Strength profile estimation
 - [ ] Flexibility assessment
 - [ ] Personalized model generation
 
 ### Phase 5: Equipment & ML (Months 10-14)
+
 - [ ] Club fitting optimizer
 - [ ] Enhanced shaft dynamics
 - [ ] Swing classification
 - [ ] Performance prediction
 
 ### Phase 6: Polish & Scale (Months 14-18)
+
 - [ ] VR/AR support
 - [ ] Cloud integration
 - [ ] Comprehensive documentation
@@ -1205,6 +1299,7 @@ All proposed additions use MIT/BSD/Apache compatible licenses:
 This roadmap transforms the Golf Modeling Suite from an excellent research platform into the **definitive open-source forward dynamics analysis system** for golf. By focusing on prediction, optimization, and injury prevention—capabilities no commercial system offers—we create unique value while respecting intellectual property and license constraints.
 
 The combination of:
+
 - **Scientific rigor** (peer-reviewed algorithms, multi-engine validation)
 - **Practical utility** (injury prevention, equipment fitting, training feedback)
 - **Accessibility** (open source, free, extensible)
@@ -1216,6 +1311,7 @@ The combination of:
 ## References
 
 ### Academic Papers
+
 - [Biomechanics of the golf swing using OpenSim](https://www.sciencedirect.com/science/article/abs/pii/S0010482518304001)
 - [Dynamic Optimization of the Golf Swing](https://www.mdpi.com/2504-3900/2/6/243)
 - [Golf Swing Biomechanics Systematic Review](https://pmc.ncbi.nlm.nih.gov/articles/PMC9227529/)
@@ -1226,6 +1322,7 @@ The combination of:
 - [The Biomechanics of the Modern Golf Swing and Back Injuries](https://pubmed.ncbi.nlm.nih.gov/26604102/)
 
 ### Commercial Systems Referenced
+
 - [GEARS Golf Biomechanics](https://www.gearssports.com/golf-swing-biomechanics/)
 - [TrackMan Launch Monitors](https://www.trackman.com/golf/launch-monitors)
 - [Foresight Sports](https://www.foresightsports.com/)

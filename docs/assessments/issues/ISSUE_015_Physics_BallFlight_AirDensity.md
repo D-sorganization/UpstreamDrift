@@ -7,6 +7,7 @@
 **Author:** PHYSICS AUDITOR
 
 ## Description
+
 The `BallFlightSimulator` in `src/shared/python/ball_flight_physics.py` calculates a `const_term` (Drag/Lift scaling factor) based on a single, static air density value (`self.environment.air_density`).
 
 ```python
@@ -18,12 +19,15 @@ This constant is used throughout the RK4 integration loop. However, for a driver
 Furthermore, dynamic density variation with height ($z$) is standard in high-fidelity trajectory models (ISA Atmosphere model).
 
 ## Impact
+
 - **Accuracy:** Slight error in carry distance for high trajectories.
 - **Usability:** Users setting `altitude` in `EnvironmentalConditions` will expect the physics to update automatically, but it does not.
 
 ## Affected Files
+
 - `src/shared/python/ball_flight_physics.py`
 
 ## Recommended Fix
+
 1.  Update `EnvironmentalConditions` to automatically calculate `air_density` based on `temperature`, `pressure`, and `altitude` if not explicitly provided.
 2.  (Optional) Implement dynamic air density $\rho(z)$ inside `_calculate_accel_core` for research-grade precision, though a constant density at launch altitude is usually sufficient for golf (max height < 50m).

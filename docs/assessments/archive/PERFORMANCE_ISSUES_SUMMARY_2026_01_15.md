@@ -9,6 +9,7 @@
 ## Executive Summary
 
 Analysis identified **20 performance issues** across the Golf Modeling Suite. After this PR:
+
 - **12 issues resolved** (60%) - up from 40%
 - **8 issues remain open** (low priority or already optimal)
 
@@ -23,12 +24,14 @@ The codebase performance score has improved from **8.0/10 → 8.5/10** after the
 **Location**: `api/server.py:328-331`
 
 **Before** (called 8+ times per request):
+
 ```python
 for engine_type in EngineType:
     available_engines = engine_manager.get_available_engines()  # Called EVERY iteration!
 ```
 
 **After** (called once):
+
 ```python
 available_engines = engine_manager.get_available_engines()  # Called ONCE
 for engine_type in EngineType:
@@ -59,6 +62,7 @@ Added optimized `get_full_state()` method to MuJoCoPhysicsEngine that returns `q
 Updated `record_step()` to use `get_full_state()` instead of separate calls.
 
 **Before**:
+
 ```python
 q, v = self.engine.get_state()
 t = self.engine.get_time()
@@ -66,6 +70,7 @@ M = self.engine.compute_mass_matrix()
 ```
 
 **After**:
+
 ```python
 full_state = self.engine.get_full_state()
 q, v, t, M = full_state["q"], full_state["v"], full_state["t"], full_state.get("M")
@@ -99,6 +104,7 @@ for src_idx in sources:
 Added `use_sparse=True` parameter that uses cKDTree for memory-efficient neighbor queries instead of O(n²) dense distance matrix.
 
 **Impact**:
+
 - Memory: O(n²) → O(n log n) for sparse recurrence
 - Time: Faster for large datasets (>500 samples) with low recurrence rates
 
@@ -106,52 +112,52 @@ Added `use_sparse=True` parameter that uses cKDTree for memory-efficient neighbo
 
 ## Issues Already Resolved (From Previous PRs)
 
-| Issue | Solution | PR | Gain |
-|-------|----------|----|----|
-| Memory Leak in Tasks | TTL + size limits | #441 | Prevents OOM |
-| N+1 API Key Verification | Prefix hash indexing | #441 | 100-1000x |
-| Sequential Lag Matrix | Parallel ThreadPool | #441 | 4-8x |
-| N+1 Migration Query | Batch fetch | #441 | 1001→2 queries |
-| Missing DB Pooling | Connection pool | #441 | 2-5x |
-| Repeated Statistics Queries | Combined query | #441 | 40% fewer queries |
-| CWT Wavelet Not Cached | lru_cache | #441 | 2-5x |
-| Buffer Over-Allocation | Dynamic sizing | #441 | 99% memory |
-| **DTW Algorithm** | **numba @jit** | - | **100x** |
-| **Async File I/O** | **ThreadPoolExecutor** | - | **Non-blocking** |
+| Issue                       | Solution               | PR   | Gain              |
+| --------------------------- | ---------------------- | ---- | ----------------- |
+| Memory Leak in Tasks        | TTL + size limits      | #441 | Prevents OOM      |
+| N+1 API Key Verification    | Prefix hash indexing   | #441 | 100-1000x         |
+| Sequential Lag Matrix       | Parallel ThreadPool    | #441 | 4-8x              |
+| N+1 Migration Query         | Batch fetch            | #441 | 1001→2 queries    |
+| Missing DB Pooling          | Connection pool        | #441 | 2-5x              |
+| Repeated Statistics Queries | Combined query         | #441 | 40% fewer queries |
+| CWT Wavelet Not Cached      | lru_cache              | #441 | 2-5x              |
+| Buffer Over-Allocation      | Dynamic sizing         | #441 | 99% memory        |
+| **DTW Algorithm**           | **numba @jit**         | -    | **100x**          |
+| **Async File I/O**          | **ThreadPoolExecutor** | -    | **Non-blocking**  |
 
 ---
 
 ## Issues Reviewed and Skipped (Already Optimal)
 
-| Issue | Finding | Status |
-|-------|---------|--------|
-| String Concatenation | Uses proper `+=` pattern, small strings | ✅ Optimal |
-| SQL Query Building | Uses parameterized query builder | ✅ Optimal |
-| Cache Declarations | Cache is used correctly (`_work_metrics_cache`) | ✅ Optimal |
+| Issue                   | Finding                                                         | Status         |
+| ----------------------- | --------------------------------------------------------------- | -------------- |
+| String Concatenation    | Uses proper `+=` pattern, small strings                         | ✅ Optimal     |
+| SQL Query Building      | Uses parameterized query builder                                | ✅ Optimal     |
+| Cache Declarations      | Cache is used correctly (`_work_metrics_cache`)                 | ✅ Optimal     |
 | Blocking `time.sleep()` | Appropriate for sync contexts (rate limiting, hardware polling) | ✅ Appropriate |
-| Range-to-List | Small lists, negligible impact | ✅ Acceptable |
-| Array-to-List for JSON | Required for serialization | ✅ Required |
-| List Conversions | Necessary for dict iteration safety | ✅ Required |
+| Range-to-List           | Small lists, negligible impact                                  | ✅ Acceptable  |
+| Array-to-List for JSON  | Required for serialization                                      | ✅ Required    |
+| List Conversions        | Necessary for dict iteration safety                             | ✅ Required    |
 
 ---
 
 ## Remaining Open Issues (Low Priority)
 
-| # | Issue | Priority | Reason |
-|---|-------|----------|--------|
-| 1 | Recurrence Matrix O(n²) (dense mode) | Low | Sparse option added; dense still useful for small datasets |
-| 2 | Hardware polling sleep | Low | Intentional for hardware sync |
+| #   | Issue                                | Priority | Reason                                                     |
+| --- | ------------------------------------ | -------- | ---------------------------------------------------------- |
+| 1   | Recurrence Matrix O(n²) (dense mode) | Low      | Sparse option added; dense still useful for small datasets |
+| 2   | Hardware polling sleep               | Low      | Intentional for hardware sync                              |
 
 ---
 
 ## Performance Metrics Summary
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Engine calls per frame | 3+ | 1 | 3x reduction |
-| Induced accel computation | N engine calls | 1 matrix op | Nx reduction |
-| `/engines` API overhead | 8 calls | 1 call | 8x reduction |
-| Recurrence matrix (sparse) | O(n²) | O(n log n) | Memory efficient |
+| Metric                     | Before         | After       | Improvement      |
+| -------------------------- | -------------- | ----------- | ---------------- |
+| Engine calls per frame     | 3+             | 1           | 3x reduction     |
+| Induced accel computation  | N engine calls | 1 matrix op | Nx reduction     |
+| `/engines` API overhead    | 8 calls        | 1 call      | 8x reduction     |
+| Recurrence matrix (sparse) | O(n²)          | O(n log n)  | Memory efficient |
 
 ---
 
@@ -179,4 +185,4 @@ The remaining issues are either low-priority, already optimal, or require signif
 
 ---
 
-*Generated by automated performance analysis and implementation*
+_Generated by automated performance analysis and implementation_

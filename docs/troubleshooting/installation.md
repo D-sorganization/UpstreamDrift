@@ -38,6 +38,7 @@ pip install -e ".[dev,engines,analysis]"
 ### 1. MuJoCo Import Fails
 
 **Symptom:**
+
 ```
 ImportError: cannot import name 'mujoco' from 'mujoco'
 ```
@@ -45,6 +46,7 @@ ImportError: cannot import name 'mujoco' from 'mujoco'
 **Cause:** MuJoCo requires specific system libraries and sometimes conflicts with pip installations.
 
 **Solution (Windows):**
+
 1. Install Visual C++ Redistributable 2015-2022:
    https://aka.ms/vs/17/release/vc_redist.x64.exe
 2. Use conda instead of pip:
@@ -53,6 +55,7 @@ ImportError: cannot import name 'mujoco' from 'mujoco'
    ```
 
 **Solution (Linux):**
+
 ```bash
 # Install OpenGL dependencies
 sudo apt-get install libgl1-mesa-glx libosmesa6-dev libglfw3
@@ -62,6 +65,7 @@ conda install -c conda-forge mujoco
 ```
 
 **Solution (macOS):**
+
 ```bash
 # For Apple Silicon (M1/M2/M3)
 CONDA_SUBDIR=osx-arm64 conda install -c conda-forge mujoco
@@ -73,6 +77,7 @@ conda install -c conda-forge mujoco
 ### 2. OpenGL Version Error
 
 **Symptom:**
+
 ```
 mujoco.FatalError: OpenGL version 1.5 or higher required
 ```
@@ -80,10 +85,12 @@ mujoco.FatalError: OpenGL version 1.5 or higher required
 **Cause:** Graphics driver too old or running in headless environment.
 
 **Solution (Desktop):**
+
 1. Update graphics drivers
 2. Ensure you're not SSH'd without X forwarding
 
 **Solution (Headless/CI):**
+
 ```bash
 # Use OSMesa for software rendering
 export MUJOCO_GL=osmesa
@@ -95,11 +102,13 @@ export MUJOCO_GL=egl
 ### 3. PyQt6 Fails to Import
 
 **Symptom:**
+
 ```
 ImportError: cannot import name 'QtCore' from 'PyQt6'
 ```
 
 **Solution:**
+
 ```bash
 # Conda installation (recommended)
 conda install -c conda-forge pyqt
@@ -111,6 +120,7 @@ pip install PyQt6 --force-reinstall
 ### 4. Drake Installation Fails
 
 **Symptom:**
+
 ```
 ERROR: Could not find a version that satisfies the requirement drake
 ```
@@ -118,6 +128,7 @@ ERROR: Could not find a version that satisfies the requirement drake
 **Cause:** Drake has limited platform support (Ubuntu/macOS only for some versions).
 
 **Solution:**
+
 ```bash
 # Ubuntu 22.04
 pip install drake
@@ -132,11 +143,13 @@ docker-compose up drake-service
 ### 5. Pinocchio Installation Fails
 
 **Symptom:**
+
 ```
 ERROR: No matching distribution found for pin
 ```
 
 **Solution:**
+
 ```bash
 # Conda (recommended)
 conda install -c conda-forge pinocchio
@@ -148,11 +161,13 @@ pip install pin pin-pink
 ### 6. Permission Denied on Windows
 
 **Symptom:**
+
 ```
 PermissionError: [WinError 5] Access is denied
 ```
 
 **Solution:**
+
 1. Run terminal as Administrator
 2. Or install in user directory:
    ```bash
@@ -162,6 +177,7 @@ PermissionError: [WinError 5] Access is denied
 ### 7. Tests Fail During Collection
 
 **Symptom:**
+
 ```
 ERRORS during collection
 ImportError: cannot import name 'mujoco'
@@ -170,6 +186,7 @@ ImportError: cannot import name 'mujoco'
 **Cause:** Test collection imports all modules, including physics engines.
 
 **Solution:**
+
 ```bash
 # Skip tests requiring unavailable engines
 pytest -m "not mujoco" tests/
@@ -181,11 +198,13 @@ conda install -c conda-forge mujoco
 ### 8. bcrypt Native Library Missing
 
 **Symptom:**
+
 ```
 passlib.exc.MissingBackendError: bcrypt: no backends available
 ```
 
 **Solution:**
+
 ```bash
 # Install bcrypt with native extension
 pip install bcrypt --force-reinstall --no-binary :all:
@@ -221,7 +240,7 @@ def main() -> int:
     print("=" * 50)
     print("Golf Modeling Suite - Installation Verification")
     print("=" * 50)
-    
+
     checks = [
         ("numpy", None),
         ("scipy", None),
@@ -233,14 +252,14 @@ def main() -> int:
         ("shared.python.interfaces", None),
         ("shared.python.ball_flight_physics", None),
     ]
-    
+
     results = [check_import(name, pkg) for name, pkg in checks]
-    
+
     print("=" * 50)
     passed = sum(results)
     total = len(results)
     print(f"Result: {passed}/{total} checks passed")
-    
+
     if passed == total:
         print("✓ Installation verified successfully!")
         return 0
@@ -253,6 +272,7 @@ if __name__ == "__main__":
 ```
 
 Save as `scripts/verify_installation.py` and run:
+
 ```bash
 python scripts/verify_installation.py
 ```

@@ -95,20 +95,20 @@ raise_api_error(
 
 ### Error Code Reference
 
-| Code | Category | HTTP | Description |
-|------|----------|------|-------------|
-| GMS-GEN-001 | General | 500 | Internal server error |
-| GMS-GEN-002 | General | 400 | Invalid request |
-| GMS-GEN-003 | General | 429 | Rate limited |
-| GMS-ENG-001 | Engine | 404 | Engine not found |
-| GMS-ENG-002 | Engine | 400 | Engine not loaded |
-| GMS-ENG-003 | Engine | 500 | Engine load failed |
-| GMS-SIM-001 | Simulation | 500 | Simulation failed |
-| GMS-SIM-006 | Simulation | 404 | Task not found |
-| GMS-VID-001 | Video | 500 | Pipeline not initialized |
-| GMS-VID-002 | Video | 400 | Invalid video format |
-| GMS-AUT-001 | Auth | 401 | Invalid token |
-| GMS-AUT-002 | Auth | 401 | Token expired |
+| Code        | Category   | HTTP | Description              |
+| ----------- | ---------- | ---- | ------------------------ |
+| GMS-GEN-001 | General    | 500  | Internal server error    |
+| GMS-GEN-002 | General    | 400  | Invalid request          |
+| GMS-GEN-003 | General    | 429  | Rate limited             |
+| GMS-ENG-001 | Engine     | 404  | Engine not found         |
+| GMS-ENG-002 | Engine     | 400  | Engine not loaded        |
+| GMS-ENG-003 | Engine     | 500  | Engine load failed       |
+| GMS-SIM-001 | Simulation | 500  | Simulation failed        |
+| GMS-SIM-006 | Simulation | 404  | Task not found           |
+| GMS-VID-001 | Video      | 500  | Pipeline not initialized |
+| GMS-VID-002 | Video      | 400  | Invalid video format     |
+| GMS-AUT-001 | Auth       | 401  | Invalid token            |
+| GMS-AUT-002 | Auth       | 401  | Token expired            |
 
 ### Request Tracing
 
@@ -124,6 +124,7 @@ traced_log("info", "Processing simulation", engine="mujoco")
 ```
 
 Response headers include:
+
 - `X-Request-ID`: Unique request identifier
 - `X-Correlation-ID`: Cross-service correlation
 - `X-Response-Time-Ms`: Processing time
@@ -273,6 +274,7 @@ Error: GMS-ENG-003 - Failed to load physics engine
 ```
 
 **Solution**:
+
 1. Check if engine is installed: `python -c "import mujoco"`
 2. Run diagnostics: `diag.check_engine_manager()`
 3. Check engine paths in `EngineManager.engine_paths`
@@ -284,6 +286,7 @@ Error: 404 Not Found
 ```
 
 **Solution**:
+
 1. Check route registration in `server.py`
 2. Verify router prefix matches expected path
 3. Run `diag.check_api_routes()` to list all routes
@@ -295,6 +298,7 @@ Error: GMS-SYS-001 - Database operation failed
 ```
 
 **Solution**:
+
 1. Check `DATABASE_URL` environment variable
 2. Ensure database file is writable
 3. Run `init_db()` to create tables
@@ -342,19 +346,19 @@ ruff format src/api/
 
 ## File Reference
 
-| File | Purpose |
-|------|---------|
-| `server.py` | FastAPI app setup, middleware |
-| `config.py` | Constants, defaults |
-| `database.py` | SQLAlchemy config |
-| `diagnostics.py` | Health checks |
-| `dependencies.py` | DI helpers |
-| `routes/*.py` | HTTP handlers |
-| `services/*.py` | Business logic |
-| `models/*.py` | Request/response schemas |
-| `auth/*.py` | Authentication |
-| `middleware/*.py` | HTTP middleware |
-| `utils/*.py` | Shared utilities |
+| File              | Purpose                       |
+| ----------------- | ----------------------------- |
+| `server.py`       | FastAPI app setup, middleware |
+| `config.py`       | Constants, defaults           |
+| `database.py`     | SQLAlchemy config             |
+| `diagnostics.py`  | Health checks                 |
+| `dependencies.py` | DI helpers                    |
+| `routes/*.py`     | HTTP handlers                 |
+| `services/*.py`   | Business logic                |
+| `models/*.py`     | Request/response schemas      |
+| `auth/*.py`       | Authentication                |
+| `middleware/*.py` | HTTP middleware               |
+| `utils/*.py`      | Shared utilities              |
 
 ## See Also
 

@@ -4,9 +4,11 @@ labels: ["security", "jules:sentinel"]
 ---
 
 ## Description
+
 Code uses insecure methods for creating temporary files or directories, which can be vulnerable to symlink attacks or information disclosure.
 
 **Findings:**
+
 - `engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/c3d_reader.py:740` (B108)
 - `engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py:1106` (B108)
 - `engines/physics_engines/mujoco/python/humanoid_launcher.py:841` (B108)
@@ -18,4 +20,5 @@ Code uses insecure methods for creating temporary files or directories, which ca
 - `tests/unit/test_opensim_physics_engine.py:65` (B108)
 
 ## Remediation
+
 Use the `tempfile` module (e.g., `tempfile.NamedTemporaryFile`, `tempfile.mkstemp`) which creates files securely.

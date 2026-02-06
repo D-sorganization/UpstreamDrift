@@ -25,27 +25,30 @@ This document outlines a comprehensive plan to implement a video game-style char
 
 ### 2.1 Existing URDF Generation Components
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `URDFBuilder` | `src/tools/model_explorer/urdf_builder.py` | Core URDF segment management with physics validation |
-| `GolfURDFGenerator` | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` | Drake-based specialized golf model generation |
-| `URDFExporter` (MuJoCo) | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_io.py` | Bidirectional URDF/MJCF conversion |
-| `URDFExporter` (Pinocchio) | `src/engines/physics_engines/pinocchio/python/dtack/utils/urdf_exporter.py` | YAML-based canonical URDF export |
-| `MeshBrowser` | `src/tools/model_explorer/mesh_browser.py` | Mesh file browsing and copying |
-| `FrankensteinEditor` | `src/tools/model_explorer/frankenstein_editor.py` | Multi-URDF component composition |
+| Component                  | Location                                                                    | Purpose                                              |
+| -------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `URDFBuilder`              | `src/tools/model_explorer/urdf_builder.py`                                  | Core URDF segment management with physics validation |
+| `GolfURDFGenerator`        | `src/engines/physics_engines/drake/python/src/drake_golf_model.py`          | Drake-based specialized golf model generation        |
+| `URDFExporter` (MuJoCo)    | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_io.py` | Bidirectional URDF/MJCF conversion                   |
+| `URDFExporter` (Pinocchio) | `src/engines/physics_engines/pinocchio/python/dtack/utils/urdf_exporter.py` | YAML-based canonical URDF export                     |
+| `MeshBrowser`              | `src/tools/model_explorer/mesh_browser.py`                                  | Mesh file browsing and copying                       |
+| `FrankensteinEditor`       | `src/tools/model_explorer/frankenstein_editor.py`                           | Multi-URDF component composition                     |
 
 ### 2.2 Existing Inertia Calculation
 
 **Current Implementation** (`src/shared/python/spatial_algebra/inertia.py`):
+
 - `mcI()`: Constructs 6x6 spatial inertia matrix from mass, COM, and rotational inertia
 - `transform_spatial_inertia()`: Transforms inertia between reference frames
-- Default inertia: 0.1 kg*m^2 for unspecified segments
+- Default inertia: 0.1 kg\*m^2 for unspecified segments
 
 **Drake Integration**:
+
 - `make_cylinder_inertia()`: Uses `pydrake.UnitInertia.SolidCylinder`
 - Analytical formulas for primitive shapes
 
 **Limitations**:
+
 - No mesh-based inertia calculation
 - Only primitive shapes (box, cylinder, sphere, capsule)
 - No convex hull decomposition
@@ -70,18 +73,19 @@ The GUI uses PyQt6 with dockable widgets, making it extensible for new character
 
 ### 3.1 Character Generation Libraries
 
-| Resource | License | Python Support | Mesh Export | Body Parameters | Faces | Recommendation |
-|----------|---------|----------------|-------------|-----------------|-------|----------------|
-| **MakeHuman** | AGPL-3.0 (code), CC0 (exports) | Yes (PyQt) | OBJ, FBX, DAE | Excellent | Yes | **PRIMARY** |
-| **MPFB2** | GPL-3.0 (code), CC0 (assets) | Blender Python | All Blender formats | Excellent | Yes | **PRIMARY** |
-| **SMPL/SMPL-X** | Custom (research) | PyTorch | OBJ, PLY | Good | Limited | **SECONDARY** |
-| **Anny** | Apache-2.0 | PyTorch/Warp | Multiple | Excellent | No | Consider |
-| **CharMorph** | GPL-3.0 | Blender Python | All Blender formats | Good | Yes | Alternative |
-| **MB-Lab** | AGPL-3.0 | Blender Python | All Blender formats | Good | Yes | Legacy |
+| Resource        | License                        | Python Support | Mesh Export         | Body Parameters | Faces   | Recommendation |
+| --------------- | ------------------------------ | -------------- | ------------------- | --------------- | ------- | -------------- |
+| **MakeHuman**   | AGPL-3.0 (code), CC0 (exports) | Yes (PyQt)     | OBJ, FBX, DAE       | Excellent       | Yes     | **PRIMARY**    |
+| **MPFB2**       | GPL-3.0 (code), CC0 (assets)   | Blender Python | All Blender formats | Excellent       | Yes     | **PRIMARY**    |
+| **SMPL/SMPL-X** | Custom (research)              | PyTorch        | OBJ, PLY            | Good            | Limited | **SECONDARY**  |
+| **Anny**        | Apache-2.0                     | PyTorch/Warp   | Multiple            | Excellent       | No      | Consider       |
+| **CharMorph**   | GPL-3.0                        | Blender Python | All Blender formats | Good            | Yes     | Alternative    |
+| **MB-Lab**      | AGPL-3.0                       | Blender Python | All Blender formats | Good            | Yes     | Legacy         |
 
 ### 3.2 Recommended Primary Integration: MakeHuman + MPFB2
 
 **MakeHuman** advantages:
+
 - Mature project (15+ years development)
 - Extensive body parameter system (height, weight, age, gender, ethnicity, muscularity)
 - Rich face customization (eyes, nose, mouth, chin, etc.)
@@ -91,6 +95,7 @@ The GUI uses PyQt6 with dockable widgets, making it extensible for new character
 - Standalone application + Blender plugin
 
 **MPFB2** advantages:
+
 - Modern Blender 4.x integration
 - Same asset compatibility as MakeHuman
 - Direct mesh manipulation in Blender
@@ -99,6 +104,7 @@ The GUI uses PyQt6 with dockable widgets, making it extensible for new character
 ### 3.3 Secondary Integration: SMPL-X
 
 **SMPL-X** provides:
+
 - Differentiable body model (good for optimization)
 - Learned shape space from 10,000+ body scans
 - Hand and face articulation
@@ -110,6 +116,7 @@ The GUI uses PyQt6 with dockable widgets, making it extensible for new character
 ### 3.4 Mesh Processing: Trimesh
 
 **Trimesh** (`pip install trimesh`) is the recommended library for:
+
 - Loading STL, OBJ, PLY meshes
 - Computing mass properties (volume, COM, inertia tensor)
 - Convex hull generation
@@ -117,6 +124,7 @@ The GUI uses PyQt6 with dockable widgets, making it extensible for new character
 - Boolean operations
 
 Key functions:
+
 ```python
 import trimesh
 
@@ -294,7 +302,7 @@ class SegmentMeshExporter:
 
 ### 4.3 GUI Widget Design
 
-```python
+````python
 # character_builder/character_builder_widget.py
 class CharacterBuilderWidget(QWidget):
     """
@@ -337,11 +345,12 @@ class CharacterBuilderWidget(QWidget):
     +--------------------------------------------------+
     ```
 """
-```
+````
 
 ### 4.4 Inertia Modes
 
 **Mode 1: Automatic Mesh-Based Computation**
+
 ```python
 class InertiaMode(Enum):
     MESH_UNIFORM_DENSITY = "mesh_uniform"      # Compute from mesh with uniform density
@@ -358,6 +367,7 @@ class SegmentInertiaConfig:
 ```
 
 **Mode 2: Manual Override**
+
 ```python
 @dataclass
 class ManualInertia:
@@ -636,12 +646,14 @@ output/
 ### Phase 1: Foundation (Weeks 1-2)
 
 **Deliverables:**
+
 1. `mesh_inertia.py` - Trimesh-based inertia calculation
 2. `body_parameters.py` - Parameter dataclasses and anthropometric data
 3. `inertia_calculator.py` - Both mesh-based and manual modes
 4. Unit tests for inertia calculations
 
 **Key Milestones:**
+
 - [ ] Trimesh integration working
 - [ ] Inertia validation against known shapes
 - [ ] Anthropometric mass distribution tables
@@ -649,11 +661,13 @@ output/
 ### Phase 2: MakeHuman Integration (Weeks 3-4)
 
 **Deliverables:**
+
 1. `makehuman_bridge.py` - Subprocess/script integration
 2. Mesh segmentation pipeline
 3. Parameter mapping (BodyParameters -> MakeHuman targets)
 
 **Key Milestones:**
+
 - [ ] Generate full body mesh from parameters
 - [ ] Segment mesh into individual parts
 - [ ] Export collision-simplified meshes
@@ -661,12 +675,14 @@ output/
 ### Phase 3: GUI Implementation (Weeks 5-6)
 
 **Deliverables:**
+
 1. `character_builder_widget.py` - Main GUI
 2. `body_sliders_panel.py` - Parameter sliders
 3. `appearance_panel.py` - Face/skin customization
 4. `segment_list_widget.py` - Segment selection and export
 
 **Key Milestones:**
+
 - [ ] Working slider interface
 - [ ] Real-time preview updates
 - [ ] Segment selection UI
@@ -674,12 +690,14 @@ output/
 ### Phase 4: URDF Integration (Weeks 7-8)
 
 **Deliverables:**
+
 1. Integration with existing `URDFBuilder`
 2. Mesh path resolution in URDF
 3. Export wizard for complete model packages
 4. Template presets (athletic, average, etc.)
 
 **Key Milestones:**
+
 - [ ] Complete URDF generation from character builder
 - [ ] Mesh files properly referenced
 - [ ] Works with existing physics engines
@@ -687,6 +705,7 @@ output/
 ### Phase 5: Polish & Advanced Features (Weeks 9-10)
 
 **Deliverables:**
+
 1. Clothing/accessory support
 2. Save/load character configurations
 3. Batch export for parameter studies
@@ -715,11 +734,11 @@ character_builder = [
 
 ### 9.2 External Dependencies
 
-| Dependency | Purpose | Installation |
-|------------|---------|--------------|
-| MakeHuman | Character generation | Download from makehuman.org |
-| MPFB2 | Blender integration | Blender extension |
-| Blender (optional) | Mesh processing | blender.org |
+| Dependency         | Purpose              | Installation                |
+| ------------------ | -------------------- | --------------------------- |
+| MakeHuman          | Character generation | Download from makehuman.org |
+| MPFB2              | Blender integration  | Blender extension           |
+| Blender (optional) | Mesh processing      | blender.org                 |
 
 ### 9.3 Asset Requirements
 
@@ -794,13 +813,13 @@ POST /api/character/{id}/export:
 
 ## 11. Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| MakeHuman compatibility issues | Medium | High | Maintain fallback primitive-based generation |
-| Mesh segmentation quality | Medium | Medium | Manual vertex group definitions as fallback |
-| Inertia calculation accuracy | Low | Medium | Validate against analytical solutions |
-| Performance with large meshes | Medium | Low | Level-of-detail options, caching |
-| License compliance | Low | High | Document all licenses, use CC0 exports |
+| Risk                           | Probability | Impact | Mitigation                                   |
+| ------------------------------ | ----------- | ------ | -------------------------------------------- |
+| MakeHuman compatibility issues | Medium      | High   | Maintain fallback primitive-based generation |
+| Mesh segmentation quality      | Medium      | Medium | Manual vertex group definitions as fallback  |
+| Inertia calculation accuracy   | Low         | Medium | Validate against analytical solutions        |
+| Performance with large meshes  | Medium      | Low    | Level-of-detail options, caching             |
+| License compliance             | Low         | High   | Document all licenses, use CC0 exports       |
 
 ---
 
@@ -835,12 +854,15 @@ POST /api/character/{id}/export:
 ## 13. Open Questions
 
 1. **Finger articulation**: Should we include individual finger joints, or treat hands as single rigid bodies?
+
    - Recommendation: Start with rigid hands, add finger option later
 
 2. **Facial expressions**: Do we need blend shapes for faces?
+
    - Recommendation: Static faces for Phase 1, blend shapes for future
 
 3. **Clothing collision**: Should clothing affect collision geometry?
+
    - Recommendation: Clothing visual only, use body for collision
 
 4. **Real-time preview**: OpenGL preview in Qt, or separate visualizer?
@@ -931,5 +953,5 @@ POST /api/character/{id}/export:
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: 2026-01-30*
+_Document Version: 1.0_
+_Last Updated: 2026-01-30_

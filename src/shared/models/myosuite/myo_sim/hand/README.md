@@ -7,7 +7,6 @@ extremity model [https://simtk.org/projects/upexdyn/] and the 2nd-Hand [https://
 
 This generated mujoco MSK model has almost identical kinematics, and very similar muscle kinematics (moment arms) and kinetic (forces) properties.
 
-
 ## Conversion process:
 
 The myoHand model was generated using our developed automatic conversion pipeline (will release at June 2023).
@@ -21,13 +20,16 @@ Three Conversion steps were taken to generate the myoLeg models from the referen
 After the conversion, a manual adjusting process is done to correct the abnormal results.
 
 ## Maunal adjustment:
+
 - Adjustments post conversion to optimize for kitnematic and dynamic behaviors
 - Inertial properties
 - Dynamics properties of the joints
 
 ## Contact Geometries:
+
 - Manually designed with references
 - Contact properties optimized for contact rich behaviors
 
 ## Issues:
+
 - N/A

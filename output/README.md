@@ -34,25 +34,30 @@ output/
 ## File Naming Conventions
 
 ### Simulation Results
+
 - Format: `{engine}_{model}_{timestamp}_{parameters}.{ext}`
 - Example: `mujoco_golf_swing_20241218_120000_speed100mph.csv`
 
 ### Analysis Results
+
 - Format: `analysis_{type}_{timestamp}_{description}.{ext}`
 - Example: `analysis_biomechanics_20241218_120000_muscle_activation.json`
 
 ### Exports
+
 - Videos: `{engine}_{description}_{timestamp}.mp4`
 - Images: `{type}_{description}_{timestamp}.png`
 - Data: `export_{format}_{timestamp}_{description}.{ext}`
 
 ### Reports
+
 - Format: `report_{type}_{timestamp}_{description}.{ext}`
 - Example: `report_swing_analysis_20241218_120000_optimization_study.pdf`
 
 ## Data Formats
 
 ### Supported Formats
+
 - **CSV**: Tabular data, time series
 - **JSON**: Metadata, configuration, structured results
 - **HDF5**: Large datasets, hierarchical data
@@ -63,6 +68,7 @@ output/
 - **PDF**: Reports and documentation
 
 ### Data Schema
+
 All simulation results follow a standardized schema:
 
 ```json
@@ -119,11 +125,13 @@ golf-suite output report --type biomechanics --output pdf
 ## Cleanup and Maintenance
 
 ### Automatic Cleanup
+
 - Temporary files are cleaned automatically after 24 hours
 - Cache files are cleaned when they exceed 1GB total size
 - Old simulation results are archived after 30 days (configurable)
 
 ### Manual Cleanup
+
 ```python
 from golf_modeling_suite.output import OutputManager
 
@@ -172,21 +180,25 @@ output:
 ### Common Issues
 
 **Disk Space**: Monitor output directory size, enable auto-cleanup
+
 ```bash
 du -sh output/
 ```
 
 **Permission Errors**: Ensure write permissions to output directory
+
 ```bash
 chmod -R 755 output/
 ```
 
 **Corrupted Files**: Use validation tools to check file integrity
+
 ```python
 output.validate_simulation_file("simulation.csv")
 ```
 
 **Missing Results**: Check simulation logs and error messages
+
 ```python
 output.get_simulation_logs("simulation_id")
 ```

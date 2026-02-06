@@ -243,14 +243,17 @@ mujoco.mj_step(model, data)
 ### GUI Workflow
 
 1. **Launch MyoSuite GUI**
+
    - From main launcher, click "MyoSuite" tile
    - If not installed, shows setup instructions
 
 2. **Select Environment**
+
    - Choose from dropdown (e.g., "myoElbowPose1D6MRandom-v0")
    - Click "Load Environment"
 
 3. **Run Simulation or Training**
+
    - Click "Visualize" for demo with random actions
    - Click "Train Policy" to start RL training
    - Monitor training progress in real-time

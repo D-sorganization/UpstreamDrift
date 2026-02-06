@@ -13,39 +13,41 @@ The recent changes represent a significant consolidation of the **Interactive UR
 ## 1. Code Quality Assessment
 
 ### URDF Generator (`tools/urdf_generator/`)
-*   **Structure:** The application is well-structured using `PyQt6`, with a clear separation between the main window logic (`main_window.py`), the core builder logic (`urdf_builder.py`), and visualization (`visualization_widget.py`, `mujoco_viewer.py`).
-*   **Standards:**
-    *   **Type Hinting:** Extensive and correct usage of Python type hints.
-    *   **Documentation:** Functions and classes are well-documented with docstrings.
-    *   **Scientific Rigor:** `urdf_builder.py` includes validation logic for physics parameters (e.g., checking positive-definiteness of inertia tensors), which aligns with `AGENTS.md` directives.
-    *   **Safety:** No `print` statements found in production code (logging is used). No hardcoded secrets.
-*   **Issues:**
-    *   **Redundancy:** `tools/urdf_generator/main.py` appears to be a redundant prototype script that duplicates functionality found in `main_window.py`. It should likely be removed to avoid confusion.
-    *   **Placeholders:** `main_window.py` contains placeholders for export optimizations (e.g., `# Add MuJoCo-specific optimizations (future enhancement)`). While not critical, these indicate that the "Export" feature is currently generic.
+
+- **Structure:** The application is well-structured using `PyQt6`, with a clear separation between the main window logic (`main_window.py`), the core builder logic (`urdf_builder.py`), and visualization (`visualization_widget.py`, `mujoco_viewer.py`).
+- **Standards:**
+  - **Type Hinting:** Extensive and correct usage of Python type hints.
+  - **Documentation:** Functions and classes are well-documented with docstrings.
+  - **Scientific Rigor:** `urdf_builder.py` includes validation logic for physics parameters (e.g., checking positive-definiteness of inertia tensors), which aligns with `AGENTS.md` directives.
+  - **Safety:** No `print` statements found in production code (logging is used). No hardcoded secrets.
+- **Issues:**
+  - **Redundancy:** `tools/urdf_generator/main.py` appears to be a redundant prototype script that duplicates functionality found in `main_window.py`. It should likely be removed to avoid confusion.
+  - **Placeholders:** `main_window.py` contains placeholders for export optimizations (e.g., `# Add MuJoCo-specific optimizations (future enhancement)`). While not critical, these indicate that the "Export" feature is currently generic.
 
 ### New Tooling
-*   **`tools/code_quality_check.py`**: Functional AST-based linter that checks for banned patterns and missing docstrings. It correctly handles context (e.g., allowing `pass` in abstract methods).
-*   **`tools/scientific_auditor.py`**: A specialized linter for detecting scientific risks (e.g., division by variable, unit ambiguity in trig functions). This is a strong addition to the project's hygiene.
+
+- **`tools/code_quality_check.py`**: Functional AST-based linter that checks for banned patterns and missing docstrings. It correctly handles context (e.g., allowing `pass` in abstract methods).
+- **`tools/scientific_auditor.py`**: A specialized linter for detecting scientific risks (e.g., division by variable, unit ambiguity in trig functions). This is a strong addition to the project's hygiene.
 
 ## 2. Test Quality Assessment
 
 The testing suite has been massively expanded (`tests/unit/`).
 
-*   **Unit Tests:**
-    *   **Engine Wrappers:** Tests for physics engines (e.g., `test_drake_physics_engine.py`) heavily rely on mocking (`unittest.mock`, `sys.modules`). This is acceptable for *unit* tests to ensure the wrapper logic is correct without requiring the heavy engine installation, provided integration tests exist elsewhere.
-    *   **Utilities:** `test_common_utils.py` includes specific security tests for path traversal, which is excellent.
-*   **Scientific Tests:**
-    *   **Flight Models:** `test_flight_models.py` is exemplary. It tests 7 different aerodynamics models with checks for physical plausibility (e.g., landing angle, spin effects).
-*   **Weakness:** `tests/verify_changes.py` is a very basic smoke test that only checks imports. It does not replace a proper integration test suite.
+- **Unit Tests:**
+  - **Engine Wrappers:** Tests for physics engines (e.g., `test_drake_physics_engine.py`) heavily rely on mocking (`unittest.mock`, `sys.modules`). This is acceptable for _unit_ tests to ensure the wrapper logic is correct without requiring the heavy engine installation, provided integration tests exist elsewhere.
+  - **Utilities:** `test_common_utils.py` includes specific security tests for path traversal, which is excellent.
+- **Scientific Tests:**
+  - **Flight Models:** `test_flight_models.py` is exemplary. It tests 7 different aerodynamics models with checks for physical plausibility (e.g., landing angle, spin effects).
+- **Weakness:** `tests/verify_changes.py` is a very basic smoke test that only checks imports. It does not replace a proper integration test suite.
 
 ## 3. Project Guideline Adherence
 
-*   **`AGENTS.md`**:
-    *   **Binary Files:** `tools/urdf_generator/bundled_assets/` contains `.stl` files. All checked files are small (< 300KB), well below the 50MB limit.
-    *   **Structure:** The project structure is respected.
-*   **`docs/assessments/project_design_guidelines.qmd`**:
-    *   **Task 3.4 (Left-Handed Support):** Implemented in `urdf_builder.py` (`mirror_for_handedness`).
-    *   **Task 2.1 (MuJoCo Visualization):** Implemented in `mujoco_viewer.py`.
+- **`AGENTS.md`**:
+  - **Binary Files:** `tools/urdf_generator/bundled_assets/` contains `.stl` files. All checked files are small (< 300KB), well below the 50MB limit.
+  - **Structure:** The project structure is respected.
+- **`docs/assessments/project_design_guidelines.qmd`**:
+  - **Task 3.4 (Left-Handed Support):** Implemented in `urdf_builder.py` (`mirror_for_handedness`).
+  - **Task 2.1 (MuJoCo Visualization):** Implemented in `mujoco_viewer.py`.
 
 ## 4. Recommendations
 

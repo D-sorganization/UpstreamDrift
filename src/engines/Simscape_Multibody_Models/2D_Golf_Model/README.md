@@ -19,14 +19,16 @@ The 2D Golf Model simplifies the golf swing to planar motion, enabling rapid sim
 ### Degrees of Freedom
 
 The 2D model includes:
+
 1. **Shoulder Flexion/Extension** - Arm elevation in sagittal plane
 2. **Elbow Flexion/Extension** - Forearm rotation
 3. **Wrist Flexion/Extension** - Club control
-4. *Optional*: Hip angle, knee angle for more complete model
+4. _Optional_: Hip angle, knee angle for more complete model
 
 **Total**: 3-5 DOF depending on configuration
 
 ### Coordinate System
+
 - **X-axis**: Forward (direction of ball flight)
 - **Y-axis**: Upward (vertical)
 - **Z-axis**: Out of plane (not modeled in 2D)
@@ -34,6 +36,7 @@ The 2D model includes:
 ### Simplifications
 
 Compared to 3D model:
+
 - ❌ No out-of-plane motion
 - ❌ No shoulder/wrist rotation
 - ❌ Simplified ground contact
@@ -45,6 +48,7 @@ Compared to 3D model:
 ## Quick Start
 
 ### Prerequisites
+
 - MATLAB R2023a+ with Simulink and Simscape Multibody
 - See [parent README](../README.md) for installation details
 
@@ -212,6 +216,7 @@ fprintf('Wrist timing: %.3f s\n', x_opt(3));
 ## Analysis Capabilities
 
 ### Kinematics
+
 - Joint angles vs. time
 - Joint velocities vs. time
 - Club head position and trajectory
@@ -219,6 +224,7 @@ fprintf('Wrist timing: %.3f s\n', x_opt(3));
 - Angular velocities
 
 ### Dynamics
+
 - Joint torques vs. time
 - Joint power vs. time
 - Total mechanical energy
@@ -226,6 +232,7 @@ fprintf('Wrist timing: %.3f s\n', x_opt(3));
 - Energy transfer efficiency
 
 ### Performance Metrics
+
 - Maximum club head speed
 - Club head speed at impact
 - Impact timing
@@ -235,6 +242,7 @@ fprintf('Wrist timing: %.3f s\n', x_opt(3));
 ## Visualization
 
 ### Animation
+
 ```matlab
 % Animate the swing
 animate_2d_swing(simulation_results)
@@ -244,6 +252,7 @@ animate_2d_swing(simulation_results, 'SaveAs', 'swing_2d.avi')
 ```
 
 ### Plotting
+
 ```matlab
 % Plot kinematics
 plot_joint_angles_2d(results)
@@ -260,6 +269,7 @@ plot_phase_diagram_2d(results, 'shoulder')
 ## Integration with Other Models
 
 ### Compare with 3D Model
+
 ```matlab
 % Run 2D model
 results_2d = sim_2d_golf(params);
@@ -273,6 +283,7 @@ compare_2d_vs_3d(results_2d, results_3d);
 ```
 
 ### Validate with Python Engines
+
 ```matlab
 % Export 2D trajectory
 trajectory_2d = results.joint_angles;
@@ -287,6 +298,7 @@ writetable(trajectory_2d, 'trajectory_2d.csv');
 ## Performance Optimization
 
 ### Optimized Version
+
 The `matlab_optimized/` directory contains a performance-optimized version:
 
 ```matlab
@@ -295,6 +307,7 @@ open_system('golf_swing_2d_optimized.slx')
 ```
 
 **Optimizations**:
+
 - Fixed-step solver
 - Reduced visualization overhead
 - Simplified contact model
@@ -303,6 +316,7 @@ open_system('golf_swing_2d_optimized.slx')
 **Speed improvement**: 2-5× faster than standard version
 
 ### Batch Simulation Tips
+
 ```matlab
 % Disable visualization
 set_param('golf_swing_2d', 'SimMechanicsOpenEditorOnUpdate', 'off')
@@ -352,6 +366,7 @@ The 2D model has several limitations compared to 3D:
 ## Examples
 
 ### Example 1: Basic Swing
+
 ```matlab
 % Run with default parameters
 cd matlab/Scripts
@@ -362,6 +377,7 @@ animate_2d_swing(results);
 ```
 
 ### Example 2: Parameter Study
+
 ```matlab
 % Study effect of club length
 club_lengths = linspace(0.8, 1.4, 20);  % 0.8 to 1.4 m
@@ -374,6 +390,7 @@ title('Club Length vs. Speed')
 ```
 
 ### Example 3: Optimization
+
 ```matlab
 % Find optimal timing
 cd matlab/Scripts
@@ -412,6 +429,7 @@ MIT License - See [LICENSE](../../../LICENSE)
 ## Support
 
 For 2D model questions:
+
 - Check this README
 - Review example scripts in `matlab/examples/`
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

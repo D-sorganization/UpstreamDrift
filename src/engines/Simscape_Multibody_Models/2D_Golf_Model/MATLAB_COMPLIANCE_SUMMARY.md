@@ -25,6 +25,7 @@ The main CI/CD documentation file that defines standards for all 15 dieterolson 
 - ✅ Replicant branch support patterns
 
 **Key Sections:**
+
 - Python CI Workflow - Complete examples with pytest, ruff, mypy
 - MATLAB CI Workflow - checkcode, unit tests, reproducibility
 - JavaScript/TypeScript CI Workflow - Jest, ESLint, TypeScript
@@ -47,6 +48,7 @@ Comprehensive MATLAB quality standards and compliance guide:
 - ✅ Pre-commit hook examples
 
 **Quick Start Section:**
+
 ```matlab
 % Run all quality checks
 run_matlab_quality_checks();
@@ -75,18 +77,21 @@ Navigation and reference guide for all CI/CD documentation:
 Comprehensive MATLAB quality validation script that developers can run locally:
 
 **Features:**
+
 1. **Magic Number Detection** - Finds 3.14, 9.8, 6.67, 2.71 with suggestions
 2. **Code Analyzer** - Runs checkcode on all .m files
 3. **Reproducibility Checks** - Verifies random functions use rng()
 4. **Documentation Validation** - Checks function documentation completeness
 
 **Usage:**
+
 ```matlab
 % In MATLAB command window
 run_matlab_quality_checks()
 ```
 
 **Output:**
+
 ```
 🔍 Running MATLAB Quality Checks...
 
@@ -109,6 +114,7 @@ run_matlab_quality_checks()
 Automated test suite for MATLAB quality standards:
 
 **Tests:**
+
 - ✅ `test_no_magic_numbers` - Verify no magic numbers in code
 - ✅ `test_functions_have_documentation` - Check documentation completeness
 - ✅ `test_random_functions_use_seeds` - Verify reproducibility
@@ -117,6 +123,7 @@ Automated test suite for MATLAB quality standards:
 - ✅ `test_tests_directory_exists` - Ensure test infrastructure
 
 **Usage:**
+
 ```matlab
 % Run quality tests
 results = runtests('matlab/tests/test_matlab_quality.m');
@@ -134,16 +141,19 @@ Added MATLAB-specific checks that run on every PR/push:
 These run automatically on all PRs:
 
 1. **Magic Number Detection**
+
    - Scans all .m files for 3.14, 9.8, 6.67, 2.71
    - Excludes Archive, Backup, and test files
    - Provides suggestions (use pi, g with source, exp(1))
 
 2. **Approximation Detection**
+
    - Searches for "approximately", "approx", "roughly", "~N"
    - Fails CI if approximations found
    - Enforces exact values with sources
 
 3. **Random Seed Validation**
+
    - Checks for rand/randn/randi usage
    - Verifies rng() is called for reproducibility
    - Reports count of unseeded files
@@ -154,6 +164,7 @@ These run automatically on all PRs:
    - Verifies quality script presence
 
 **Example Output:**
+
 ```
 🔍 Running MATLAB quality checks (bash-based)...
 
@@ -181,6 +192,7 @@ These run automatically on all PRs:
 **Job:** `matlab-analysis` (currently disabled with `if: false`)
 
 When enabled, provides:
+
 - ✅ Full checkcode static analysis
 - ✅ MATLAB Unit Test execution
 - ✅ Code coverage reporting
@@ -188,6 +200,7 @@ When enabled, provides:
 - ✅ Coverage artifacts
 
 **To Enable:**
+
 1. Set up MATLAB license (repository secret or network license)
 2. Change `if: false` to `if: true` in workflow
 3. Configure required toolboxes in `products` list
@@ -227,11 +240,13 @@ When enabled, provides:
 ### Compliance Issues Found
 
 **Magic Numbers:**
+
 - Found: 3.1415926 in SCRIPT_ZVCF_SingleTime.m and SCRIPT_ZVCF_GENERATOR.m
 - Recommendation: Replace with `pi` built-in constant
-- Location: matlab/Scripts/SCRIPT_ZVCF_*.m
+- Location: matlab/Scripts/SCRIPT*ZVCF*\*.m
 
 **Approximations:**
+
 - Detected in some files (bash check found matches)
 - Need manual review to determine if they are comments or code
 
@@ -248,6 +263,7 @@ When enabled, provides:
 ### For Developers
 
 **Before Committing:**
+
 ```matlab
 % Run quality checks
 cd /path/to/2D_Golf_Model
@@ -259,6 +275,7 @@ disp(results);
 ```
 
 **From Command Line:**
+
 ```bash
 # Run MATLAB checks (if MATLAB in PATH)
 matlab -batch "run_matlab_quality_checks"
@@ -270,12 +287,14 @@ matlab -batch "results = runtests('matlab/tests'); disp(results);"
 ### For Reviewers
 
 **Check CI Results:**
+
 1. Go to PR → Actions tab
 2. Look for "CI" workflow
 3. Check "MATLAB Quality Checks" step
 4. Review any warnings or errors
 
 **Review Documentation:**
+
 - Read UNIFIED_CI_APPROACH.md for standards
 - Check MATLAB_COMPLIANCE.md for MATLAB-specific rules
 - Verify code follows documented patterns
@@ -283,12 +302,14 @@ matlab -batch "results = runtests('matlab/tests'); disp(results);"
 ### For CI/CD Maintainers
 
 **Update Tool Versions:**
+
 1. Edit UNIFIED_CI_APPROACH.md
 2. Update pinned versions
 3. Test in workflow
 4. Update "Last Updated" date
 
 **Add New Checks:**
+
 1. Add to run_matlab_quality_checks.m
 2. Add bash equivalent to ci.yml (if possible)
 3. Document in MATLAB_COMPLIANCE.md
@@ -313,6 +334,7 @@ Modified:
 ### Local Testing
 
 Tested bash-based checks:
+
 ```bash
 ✅ Magic number detection - Found 3.1415926 in ZVCF scripts
 ✅ Approximation detection - Working correctly
@@ -336,6 +358,7 @@ Will be validated on next push to branch.
 ## Contact
 
 For questions about this implementation:
+
 - See documentation in UNIFIED_CI_APPROACH.md
 - Review MATLAB_COMPLIANCE.md for MATLAB-specific guidance
 - Check CI_Documentation/README.md for navigation

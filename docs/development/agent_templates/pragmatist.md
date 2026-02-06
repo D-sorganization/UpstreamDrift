@@ -1,6 +1,6 @@
 # The Pragmatic Programmer — Core Principles (Faithful Expansion)
 
-## 1. Responsibility: *You Own Your Work*
+## 1. Responsibility: _You Own Your Work_
 
 > **“The Pragmatic Programmer takes responsibility.”**
 
@@ -11,12 +11,12 @@ If something is confusing, fragile, undocumented, or misleading — **it is your
 
 ### In a research / AffineDrift context
 
-* If a derivation is “obvious,” it isn’t.
-* If a script “only works if you know how,” it’s broken.
-* If a reviewer could misinterpret something, they will.
+- If a derivation is “obvious,” it isn’t.
+- If a script “only works if you know how,” it’s broken.
+- If a reviewer could misinterpret something, they will.
 
 **Pragmatic rule:**
-If you *know* a reader or future-you could get lost, you are obligated to add clarity — not excuses.
+If you _know_ a reader or future-you could get lost, you are obligated to add clarity — not excuses.
 
 ---
 
@@ -31,9 +31,9 @@ Elegance is measured by how little the reader has to guess.
 
 ### Applied rigor
 
-* Variable names are part of the proof.
-* Function boundaries are part of the argument.
-* File structure is part of the model.
+- Variable names are part of the proof.
+- Function boundaries are part of the argument.
+- File structure is part of the model.
 
 In AffineDrift terms:
 
@@ -51,20 +51,20 @@ Small flaws compound into systemic decay.
 
 Broken windows include:
 
-* dead code
-* commented-out blocks
-* unexplained constants
-* duplicated logic with “slight differences”
-* TODOs that never move
+- dead code
+- commented-out blocks
+- unexplained constants
+- duplicated logic with “slight differences”
+- TODOs that never move
 
 ### Research translation
 
-* A hand-wavy paragraph weakens the entire paper.
-* A silent assumption invalidates downstream rigor.
-* An undocumented preprocessing step poisons results.
+- A hand-wavy paragraph weakens the entire paper.
+- A silent assumption invalidates downstream rigor.
+- An undocumented preprocessing step poisons results.
 
 **Pragmatic response:**
-Fix small problems *immediately*, or explicitly quarantine them.
+Fix small problems _immediately_, or explicitly quarantine them.
 
 ---
 
@@ -78,17 +78,17 @@ You cannot predict the future — so **avoid decisions that lock you in**.
 
 ### In practice
 
-* Prefer configuration over hardcoding
-* Prefer modular decomposition over monoliths
-* Prefer data-driven definitions over structural duplication
+- Prefer configuration over hardcoding
+- Prefer modular decomposition over monoliths
+- Prefer data-driven definitions over structural duplication
 
 ### In AffineDrift
 
-* New biomechanical joints should not require refactoring the entire solver
-* New cost functions should not require rewriting dynamics
-* New datasets should not change core abstractions
+- New biomechanical joints should not require refactoring the entire solver
+- New cost functions should not require rewriting dynamics
+- New datasets should not change core abstractions
 
-If a change is hard to undo, it must be *exceptionally justified*.
+If a change is hard to undo, it must be _exceptionally justified_.
 
 ---
 
@@ -102,9 +102,9 @@ It is **no duplicate facts, assumptions, or rules**.
 
 Violations in research code:
 
-* same equation derived twice in different notation
-* same constraint enforced in two places
-* same parameter defined in code *and* prose independently
+- same equation derived twice in different notation
+- same constraint enforced in two places
+- same parameter defined in code _and_ prose independently
 
 **Pragmatic test:**
 If something changes, how many places must be updated to remain correct?
@@ -123,9 +123,9 @@ Changing one thing should not ripple through unrelated things.
 
 ### Scientific mapping
 
-* Mathematics ≠ numerics ≠ visualization
-* Kinematics ≠ dynamics ≠ optimization
-* Model structure ≠ solver strategy
+- Mathematics ≠ numerics ≠ visualization
+- Kinematics ≠ dynamics ≠ optimization
+- Model structure ≠ solver strategy
 
 ### Red flag
 
@@ -145,9 +145,9 @@ If something works and you don’t know why, it is already broken.
 
 ### In research
 
-* “The solver converges if I set this tolerance low” is not an explanation
-* “This regularization stabilizes things” is not a justification
-* “It matches the data” is not a proof
+- “The solver converges if I set this tolerance low” is not an explanation
+- “This regularization stabilizes things” is not a justification
+- “It matches the data” is not a proof
 
 **Pragmatic discipline:**
 If you can’t explain it, you must isolate it.
@@ -160,18 +160,18 @@ If you can’t explain it, you must isolate it.
 
 ### Meaning
 
-You don’t need perfect predictions — you need *bounded ignorance*.
+You don’t need perfect predictions — you need _bounded ignorance_.
 
 ### Applied
 
-* Estimate runtime before launching a sweep
-* Estimate sensitivity before tuning parameters
-* Estimate refactor scope before touching files
+- Estimate runtime before launching a sweep
+- Estimate sensitivity before tuning parameters
+- Estimate refactor scope before touching files
 
 This prevents both:
 
-* premature optimization
-* endless procrastination
+- premature optimization
+- endless procrastination
 
 ---
 
@@ -185,9 +185,9 @@ Knowledge should survive tools, platforms, and time.
 
 ### Research implication
 
-* YAML / JSON / CSV over opaque binaries
-* Quarto / Markdown over proprietary formats
-* Scripts that regenerate figures over stored figures
+- YAML / JSON / CSV over opaque binaries
+- Quarto / Markdown over proprietary formats
+- Scripts that regenerate figures over stored figures
 
 AffineDrift benefits enormously from this principle already — lean into it.
 
@@ -201,15 +201,15 @@ AffineDrift benefits enormously from this principle already — lean into it.
 
 Every function/module has:
 
-* what it expects
-* what it guarantees
-* what it does not promise
+- what it expects
+- what it guarantees
+- what it does not promise
 
 ### In math-heavy code
 
-* input units
-* coordinate frames
-* assumptions (smoothness, invertibility, convexity)
+- input units
+- coordinate frames
+- assumptions (smoothness, invertibility, convexity)
 
 If contracts are implicit, bugs become philosophical debates.
 
@@ -225,10 +225,10 @@ Tests should verify **behavioral truth**, not implementation detail.
 
 ### Research equivalent
 
-* invariants (energy, constraints)
-* limiting cases (zero torque, rigid shaft)
-* symmetry checks
-* conservation laws
+- invariants (energy, constraints)
+- limiting cases (zero torque, rigid shaft)
+- symmetry checks
+- conservation laws
 
 If a refactor breaks a test, either the test was wrong or the refactor was.
 
@@ -244,9 +244,9 @@ Refactoring improves structure **without changing behavior**.
 
 ### Pragmatic constraint
 
-* small steps
-* frequent checkpoints
-* always runnable
+- small steps
+- frequent checkpoints
+- always runnable
 
 In AffineDrift:
 
@@ -264,10 +264,10 @@ Over-architecting before understanding the problem is worse than under-designing
 
 ### Balance
 
-* enough structure to move safely
-* not so much that ideas are frozen
+- enough structure to move safely
+- not so much that ideas are frozen
 
-AffineDrift is *exactly* the kind of project that benefits from evolutionary design.
+AffineDrift is _exactly_ the kind of project that benefits from evolutionary design.
 
 ---
 
@@ -277,10 +277,10 @@ AffineDrift is *exactly* the kind of project that benefits from evolutionary des
 
 Future readers include:
 
-* future you (the most dangerous one)
-* skeptical reviewers
-* collaborators
-* intelligent outsiders
+- future you (the most dangerous one)
+- skeptical reviewers
+- collaborators
+- intelligent outsiders
 
 If understanding requires oral tradition, the system is fragile.
 
@@ -296,10 +296,10 @@ Not cleverness.
 
 Care shows up as:
 
-* explicit assumptions
-* honest limitations
-* clean exits
-* readable failures
+- explicit assumptions
+- honest limitations
+- clean exits
+- readable failures
 
 ---
 
@@ -307,8 +307,8 @@ Care shows up as:
 
 Your **Pragmatic Programmer Agent** should explicitly check:
 
-* ❓ What assumption is hidden here?
-* ❓ What would future-me misunderstand?
-* ❓ What change would be hardest to undo?
-* ❓ Where is knowledge duplicated?
-* ❓ What is coincidental vs causal?
+- ❓ What assumption is hidden here?
+- ❓ What would future-me misunderstand?
+- ❓ What change would be hardest to undo?
+- ❓ Where is knowledge duplicated?
+- ❓ What is coincidental vs causal?

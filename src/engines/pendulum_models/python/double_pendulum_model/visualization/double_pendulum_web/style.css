@@ -195,7 +195,9 @@ input.error {
   border: 1px solid #2a3545;
   vertical-align: middle;
 }
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 .error-message {
   color: #ff6b6b;
   font-size: 0.75rem;

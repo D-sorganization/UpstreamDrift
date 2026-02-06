@@ -1,6 +1,7 @@
 ## Usage Guide - Optimized Golf Swing Analysis System
 
 ### Table of Contents
+
 1. [Getting Started](#getting-started)
 2. [Running Your First Analysis](#running-your-first-analysis)
 3. [Understanding the Output](#understanding-the-output)
@@ -41,6 +42,7 @@ launch_gui()
 ```
 
 Then:
+
 1. Check desired options (Parallel Processing, Checkpoints, Generate Plots)
 2. Click "▶️ RUN COMPLETE ANALYSIS"
 3. Watch progress in status log
@@ -55,6 +57,7 @@ addpath(genpath(pwd))
 ```
 
 This will:
+
 - Use parallel processing (if available)
 - Enable checkpointing
 - Generate all plots
@@ -105,21 +108,25 @@ STAGE 2: Base Data Generation
 After completion, you'll have these tables in memory and saved to `data/output/`:
 
 #### BASE Tables
+
 - **BASE**: Full resolution (0.0001s timestep, ~2800 rows)
 - **BASEQ**: Plot resolution (0.0025s timestep, ~112 rows)
 - Contains: All forces, torques, work, power, impulse from complete simulation
 
 #### ZTCF Tables
+
 - **ZTCF**: Passive forces only (joint torques = 0)
 - **ZTCFQ**: Plot resolution
 - Shows contribution of: Gravity, momentum, shaft flexibility
 
 #### DELTA Tables
+
 - **DELTA = BASE - ZTCF**: Active torque contribution
 - **DELTAQ**: Plot resolution
 - Isolates the effect of muscle-generated joint torques
 
 #### ZVCF Tables
+
 - **ZVCFTable**: Static pose analysis (all velocities = 0)
 - **ZVCFTableQ**: Plot resolution
 - Shows pure torque effects without momentum
@@ -129,18 +136,21 @@ After completion, you'll have these tables in memory and saved to `data/output/`
 Each table has ~186+ variables including:
 
 **Kinematics:**
+
 - Time
 - Positions (x, y, z for all joints)
 - Velocities (linear and angular)
 - Accelerations
 
 **Forces/Torques:**
+
 - Joint forces (LS, RS, LE, RE, LW, RW)
 - Total hand forces
 - Equivalent couples
 - Net forces
 
 **Calculated Quantities:**
+
 - Angular/Linear Work
 - Angular/Linear Power
 - Angular/Linear Impulse
@@ -443,6 +453,7 @@ end
 ### Issue: "Parallel pool cannot be created"
 
 **Solution:**
+
 ```matlab
 run_analysis('use_parallel', false);
 ```
@@ -450,18 +461,22 @@ run_analysis('use_parallel', false);
 ### Issue: "Out of memory"
 
 **Solutions:**
+
 1. Reduce ZTCF resolution:
+
 ```matlab
 config = simulation_config();
 config.ztcf_end_time = 14;
 ```
 
 2. Skip checkpointing:
+
 ```matlab
 run_analysis('use_checkpoints', false);
 ```
 
 3. Clear workspace between runs:
+
 ```matlab
 clear all; close all;
 run_analysis();
@@ -471,6 +486,7 @@ run_analysis();
 
 **Solution:**
 Check model path:
+
 ```matlab
 config = simulation_config();
 disp(config.model_path);
@@ -480,6 +496,7 @@ disp(config.model_path);
 ### Issue: Analysis very slow
 
 **Check parallelization:**
+
 ```matlab
 pool = gcp('nocreate');
 if isempty(pool)

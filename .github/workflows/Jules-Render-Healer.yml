@@ -2,7 +2,6 @@ name: Jules Render Healer
 on:
   deployment_status:
 
-
 jobs:
   fix-deploy:
     if:
@@ -21,15 +20,15 @@ jobs:
           # REST API Implementation
           REPO="${{ github.repository }}"
           API_BASE="https://jules.googleapis.com/v1alpha"
-          
+
           echo "Looking up repository source..."
           SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
-          
+
           OWNER=$(echo "$REPO" | cut -d'/' -f1)
           REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
-          
+
           SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
-          
+
           if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
             echo "::warning::Repository $REPO not found in Jules sources."
             exit 0
@@ -48,10 +47,9 @@ jobs:
               },
               automationMode: "AUTO_CREATE_PR"
             }')
-          
+
           # Fire and forget session creation
           curl -sf -X POST -H "X-Goog-Api-Key: $JULES_API_KEY" \
              -H "Content-Type: application/json" \
              -d "$REQUEST_JSON" \
              "$API_BASE/sessions"
-
