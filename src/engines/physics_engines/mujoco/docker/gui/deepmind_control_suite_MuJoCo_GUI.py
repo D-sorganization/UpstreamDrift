@@ -1103,7 +1103,7 @@ class GolfSimulationGUI:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
-                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])
+                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])  # nosec B108
             else:
                 # Headless mode
                 cmd.extend(["-e", "MUJOCO_GL=osmesa"])
