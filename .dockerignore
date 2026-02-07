@@ -1,0 +1,53 @@
+# Version control
+.git
+.gitignore
+
+# Node modules (frontend installs its own)
+ui/node_modules
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.eggs
+dist
+build
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Testing / CI artifacts
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+.coverage
+*.coveragerc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker (avoid recursive build context)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation markdown (not needed in image)
+docs/
+*.md
+!README.md
+
+# Data and logs
+*.db
+*.log
+data/
+logs/
+
+# Environment files
+.env
+.env.*
