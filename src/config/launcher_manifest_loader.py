@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 # Paths
 CONFIG_DIR = Path(__file__).parent
 MANIFEST_PATH = CONFIG_DIR / "launcher_manifest.json"
-ASSETS_DIR = Path(__file__).parent.parent / "launchers" / "assets"
+ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "logos"
 
 
 @dataclass(frozen=True)
