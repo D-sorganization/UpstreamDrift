@@ -98,18 +98,16 @@ class TestEngineRegistryConsistency:
         for engine_type in EngineType:
             if engine_type in skip_types:
                 continue
-            assert engine_type in LOADER_MAP, (
-                f"{engine_type.value} missing from LOADER_MAP"
-            )
+            assert (
+                engine_type in LOADER_MAP
+            ), f"{engine_type.value} missing from LOADER_MAP"
 
     def test_loader_map_values_are_callable(self) -> None:
         """All LOADER_MAP values are callable functions."""
         from src.shared.python.engine_loaders import LOADER_MAP
 
         for engine_type, loader in LOADER_MAP.items():
-            assert callable(loader), (
-                f"Loader for {engine_type.value} is not callable"
-            )
+            assert callable(loader), f"Loader for {engine_type.value} is not callable"
 
     def test_engine_type_enum_values_are_strings(self) -> None:
         """EngineType enum values are strings (used in API routes)."""
@@ -124,9 +122,7 @@ class TestEngineRegistryConsistency:
 class TestCrossEngineConsistency:
     """Verify consistent behavior across all engines."""
 
-    def test_all_probes_have_available_field(
-        self, client: TestClient
-    ) -> None:
+    def test_all_probes_have_available_field(self, client: TestClient) -> None:
         """All probes return responses containing 'available'."""
         engines = ["mujoco", "drake", "pinocchio", "putting_green"]
 
