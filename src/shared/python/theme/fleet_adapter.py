@@ -4,8 +4,10 @@ This module provides an adapter layer between the fleet-wide shared theme system
 (vendor/ud-tools/src/shared/python/theme/) and UpstreamDrift's native ThemeColors
 dataclass format.
 
-This enables access to all 13 fleet-wide themes while maintaining backward
-compatibility with UpstreamDrift's existing theme API.
+This enables access to all 14 fleet-wide themes (loaded from themes.json) while
+maintaining backward compatibility with UpstreamDrift's existing theme API.
+Semantic colors (success, warning, error, info, link) are read from the JSON
+source of truth rather than being hardcoded.
 
 Usage:
     from shared.python.theme.fleet_adapter import (
@@ -157,9 +159,11 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     is_dark = _is_dark_theme(ft)
 
     # Map fleet theme to ThemeColors
-    # Fleet keys: bg, group_bg, border, text, text_secondary, label, focus,
-    #             input_bg, accent, title_bg, title_border, table_header,
-    #             table_alt, button_hover
+    # Fleet base keys: bg, group_bg, border, text, text_secondary, label, focus,
+    #                  input_bg, accent, title_bg, title_border, table_header,
+    #                  table_alt, button_hover
+    # Fleet semantic keys (from themes.json): success, warning, error, info,
+    #                  link, link_hover, selection_bg, selection_text
 
     # Derive colors from fleet theme
     accent = ft.get("accent", "#0A84FF")
@@ -172,15 +176,20 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     focus = ft.get("focus", accent)
     label = ft.get("label", "#A0A0A0" if is_dark else "#666666")
 
-    # Success, warning, error - use reasonable defaults based on dark/light
-    if is_dark:
-        success = "#30D158"
-        warning = "#FF9F0A"
-        error = "#FF375F"
-    else:
-        success = "#28A745"
-        warning = "#E67E00"
-        error = "#DC3545"
+    # Semantic colors - read from theme dict (populated from themes.json),
+    # falling back to reasonable defaults based on dark/light
+    success = ft.get(
+        "success", "#30D158" if is_dark else "#28A745"
+    )
+    warning = ft.get(
+        "warning", "#FF9F0A" if is_dark else "#E67E00"
+    )
+    error = ft.get(
+        "error", "#FF375F" if is_dark else "#DC3545"
+    )
+    info = ft.get(
+        "info", "#64D2FF" if is_dark else "#17A2B8"
+    )
 
     return ThemeColors(
         name=theme_name,
@@ -216,14 +225,14 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
         text_secondary=text_secondary,
         text_tertiary=label,
         text_quaternary=_adjust_color_brightness(label, 0.7),
-        text_link=accent,
+        text_link=ft.get("link", accent),
         # Chart colors - use accent-based palette
         chart_blue=accent,
         chart_green=success,
         chart_orange=warning,
         chart_red=error,
         chart_purple="#BF5AF2" if is_dark else "#9B59B6",
-        chart_cyan="#64D2FF" if is_dark else "#17A2B8",
+        chart_cyan=info,
         chart_yellow="#FFD60A" if is_dark else "#F0AD4E",
         chart_brown="#AC8E68" if is_dark else "#8B6914",
         # Grid and axis
