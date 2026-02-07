@@ -306,7 +306,7 @@ describe('SimulationPage', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Simulation State')).toBeInTheDocument();
-      expect(screen.getByText(/\"qpos\"/)).toBeInTheDocument();
+      expect(screen.getByText(/"qpos"/)).toBeInTheDocument();
     });
   });
 

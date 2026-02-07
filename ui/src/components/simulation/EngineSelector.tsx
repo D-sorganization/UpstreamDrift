@@ -69,7 +69,6 @@ export function EngineSelector({
           const isLoaded = engine.loadState === 'loaded';
           const isLoading = engine.loadState === 'loading';
           const isError = engine.loadState === 'error';
-          const isIdle = engine.loadState === 'idle';
 
           return (
             <div
