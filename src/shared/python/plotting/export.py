@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -121,7 +121,7 @@ def export_plot_data(
         payload: dict[str, Any] = {}
         if config.include_metadata:
             payload["_meta"] = {
-                "exported_at": datetime.now(tz=UTC).isoformat(),
+                "exported_at": datetime.now(tz=timezone.utc).isoformat(),
                 "source": "UpstreamDrift",
             }
         for key, val in data.items():
