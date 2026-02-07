@@ -8,6 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // hls.js ESM entry is missing in v1.6.x — alias to the CJS dist
+      'hls.js': path.resolve(__dirname, 'node_modules/hls.js/dist/hls.js'),
     },
   },
 
