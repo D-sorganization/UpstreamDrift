@@ -21,7 +21,6 @@ from src.shared.python.plot_generator import (
     SimulationData,
 )
 
-
 # ---- Fixtures ----
 
 
@@ -125,9 +124,7 @@ class TestPlotGeneration:
         self, generator: PlotGenerator, sample_data: SimulationData
     ) -> None:
         """Test generating a single plot."""
-        fig = generator.generate_single_plot(
-            sample_data, PlotType.JOINT_POSITIONS
-        )
+        fig = generator.generate_single_plot(sample_data, PlotType.JOINT_POSITIONS)
         assert fig is not None
 
     def test_generate_single_plot_with_save(
@@ -289,9 +286,7 @@ class TestCustomConfig:
 
     def test_specific_plot_types(self, sample_data: SimulationData) -> None:
         """Test generating only specific plot types."""
-        config = PlotConfig(
-            plot_types=[PlotType.JOINT_POSITIONS, PlotType.ENERGY]
-        )
+        config = PlotConfig(plot_types=[PlotType.JOINT_POSITIONS, PlotType.ENERGY])
         gen = PlotGenerator(config)
 
         with tempfile.TemporaryDirectory() as tmpdir:

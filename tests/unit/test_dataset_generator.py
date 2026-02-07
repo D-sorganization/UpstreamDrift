@@ -21,11 +21,9 @@ from src.shared.python.dataset_generator import (
     DatasetGenerator,
     GeneratorConfig,
     ParameterRange,
-    SimulationSample,
     TrainingDataset,
 )
 from src.shared.python.mock_engine import MockPhysicsEngine
-
 
 # ---- Fixtures ----
 
@@ -81,7 +79,9 @@ class TestParameterRange:
     def test_uniform_sampling(self) -> None:
         """Postcondition: sampled values are within range."""
         rng = np.random.default_rng(42)
-        pr = ParameterRange(name="test", min_val=-1.0, max_val=1.0, distribution="uniform")
+        pr = ParameterRange(
+            name="test", min_val=-1.0, max_val=1.0, distribution="uniform"
+        )
         for _ in range(100):
             val = pr.sample(rng)
             assert -1.0 <= val <= 1.0
@@ -89,7 +89,9 @@ class TestParameterRange:
     def test_normal_sampling_clipped(self) -> None:
         """Postcondition: normal samples are clipped to range."""
         rng = np.random.default_rng(42)
-        pr = ParameterRange(name="test", min_val=0.0, max_val=1.0, distribution="normal")
+        pr = ParameterRange(
+            name="test", min_val=0.0, max_val=1.0, distribution="normal"
+        )
         for _ in range(100):
             val = pr.sample(rng)
             assert 0.0 <= val <= 1.0
@@ -98,8 +100,11 @@ class TestParameterRange:
         """Postcondition: linspace samples are from discrete set."""
         rng = np.random.default_rng(42)
         pr = ParameterRange(
-            name="test", min_val=0.0, max_val=1.0,
-            distribution="linspace", num_points=5,
+            name="test",
+            min_val=0.0,
+            max_val=1.0,
+            distribution="linspace",
+            num_points=5,
         )
         expected = np.linspace(0.0, 1.0, 5)
         for _ in range(20):
@@ -131,7 +136,8 @@ class TestControlProfile:
     def test_constant_profile(self) -> None:
         """Test constant control profile."""
         profile = ControlProfile(
-            name="const", profile_type="constant",
+            name="const",
+            profile_type="constant",
             parameters={"magnitude": 5.0},
         )
         rng = np.random.default_rng(42)
@@ -142,7 +148,8 @@ class TestControlProfile:
     def test_sinusoidal_profile(self) -> None:
         """Test sinusoidal control profile."""
         profile = ControlProfile(
-            name="sin", profile_type="sinusoidal",
+            name="sin",
+            profile_type="sinusoidal",
             parameters={"frequency": 1.0, "amplitude": 2.0},
         )
         rng = np.random.default_rng(42)
@@ -153,7 +160,8 @@ class TestControlProfile:
     def test_random_profile(self) -> None:
         """Test random control profile."""
         profile = ControlProfile(
-            name="rand", profile_type="random",
+            name="rand",
+            profile_type="random",
             parameters={"scale": 1.0},
         )
         rng = np.random.default_rng(42)
@@ -164,7 +172,8 @@ class TestControlProfile:
     def test_step_profile(self) -> None:
         """Test step control profile."""
         profile = ControlProfile(
-            name="step", profile_type="step",
+            name="step",
+            profile_type="step",
             parameters={"magnitude": 10.0, "step_time": 0.05},
         )
         rng = np.random.default_rng(42)
@@ -209,7 +218,9 @@ class TestGeneratorConfig:
 class TestDatasetGenerator:
     """Tests for DatasetGenerator core functionality."""
 
-    def test_generate_basic(self, generator: DatasetGenerator, basic_config: GeneratorConfig) -> None:
+    def test_generate_basic(
+        self, generator: DatasetGenerator, basic_config: GeneratorConfig
+    ) -> None:
         """Test basic dataset generation produces correct structure."""
         dataset = generator.generate(basic_config)
 
@@ -232,9 +243,7 @@ class TestDatasetGenerator:
             assert sample.accelerations.shape == (n_steps, 4)
             assert sample.torques.shape == (n_steps, 4)
 
-    def test_generate_with_mass_matrix(
-        self, generator: DatasetGenerator
-    ) -> None:
+    def test_generate_with_mass_matrix(self, generator: DatasetGenerator) -> None:
         """Test that mass matrix recording works."""
         config = GeneratorConfig(
             num_samples=2, duration=0.05, timestep=0.01, record_mass_matrix=True
@@ -246,9 +255,7 @@ class TestDatasetGenerator:
             n_steps = len(sample.times)
             assert sample.mass_matrices.shape == (n_steps, 4, 4)
 
-    def test_generate_with_drift_control(
-        self, generator: DatasetGenerator
-    ) -> None:
+    def test_generate_with_drift_control(self, generator: DatasetGenerator) -> None:
         """Test drift/control decomposition recording."""
         config = GeneratorConfig(
             num_samples=2, duration=0.05, timestep=0.01, record_drift_control=True
@@ -259,9 +266,7 @@ class TestDatasetGenerator:
             assert sample.drift_accelerations is not None
             assert sample.control_accelerations is not None
 
-    def test_generate_reproducibility(
-        self, mock_engine: MockPhysicsEngine
-    ) -> None:
+    def test_generate_reproducibility(self, mock_engine: MockPhysicsEngine) -> None:
         """Invariant: same seed produces same dataset."""
         config = GeneratorConfig(num_samples=3, duration=0.05, timestep=0.01, seed=123)
 
@@ -281,7 +286,9 @@ class TestDatasetGenerator:
     ) -> None:
         """Test that initial positions are varied between samples."""
         config = GeneratorConfig(
-            num_samples=5, duration=0.02, timestep=0.01,
+            num_samples=5,
+            duration=0.02,
+            timestep=0.01,
             vary_initial_positions=True,
         )
         dataset = generator.generate(config)
@@ -294,12 +301,12 @@ class TestDatasetGenerator:
         )
         assert not all_same, "Expected varied initial positions"
 
-    def test_generate_with_custom_ranges(
-        self, generator: DatasetGenerator
-    ) -> None:
+    def test_generate_with_custom_ranges(self, generator: DatasetGenerator) -> None:
         """Test parameter ranges are respected."""
         config = GeneratorConfig(
-            num_samples=10, duration=0.02, timestep=0.01,
+            num_samples=10,
+            duration=0.02,
+            timestep=0.01,
             vary_initial_positions=True,
             position_ranges=[
                 ParameterRange(name="all", min_val=-0.1, max_val=0.1),
@@ -316,10 +323,14 @@ class TestDatasetGenerator:
     ) -> None:
         """Test generation with multiple control profiles."""
         config = GeneratorConfig(
-            num_samples=5, duration=0.05, timestep=0.01,
+            num_samples=5,
+            duration=0.05,
+            timestep=0.01,
             control_profiles=[
                 ControlProfile(name="zero"),
-                ControlProfile(name="rand", profile_type="random", parameters={"scale": 0.5}),
+                ControlProfile(
+                    name="rand", profile_type="random", parameters={"scale": 0.5}
+                ),
             ],
         )
         dataset = generator.generate(config)

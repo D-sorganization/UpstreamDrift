@@ -20,7 +20,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from src.api.dependencies import get_logger, get_simulation_service
+from src.api.dependencies import get_logger
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
 
@@ -32,15 +32,21 @@ class DatasetGenerationRequest(BaseModel):
     """Request model for dataset generation."""
 
     engine_type: str = Field(..., description="Physics engine to use")
-    num_samples: int = Field(10, description="Number of simulation runs", ge=1, le=10000)
-    duration: float = Field(2.0, description="Duration per simulation (seconds)", gt=0, le=60)
+    num_samples: int = Field(
+        10, description="Number of simulation runs", ge=1, le=10000
+    )
+    duration: float = Field(
+        2.0, description="Duration per simulation (seconds)", gt=0, le=60
+    )
     timestep: float = Field(0.002, description="Simulation timestep", gt=0, le=0.1)
     seed: int = Field(42, description="Random seed for reproducibility")
     vary_positions: bool = Field(True, description="Randomize initial positions")
     vary_velocities: bool = Field(False, description="Randomize initial velocities")
     record_mass_matrix: bool = Field(True, description="Record inertia matrices")
     record_dynamics: bool = Field(True, description="Record bias/gravity forces")
-    record_drift_control: bool = Field(True, description="Record drift/control decomposition")
+    record_drift_control: bool = Field(
+        True, description="Record drift/control decomposition"
+    )
     export_format: str = Field("hdf5", description="Export format (hdf5, sqlite, csv)")
     output_path: str = Field("output/training_data", description="Output path")
 
@@ -59,7 +65,9 @@ class SwingImportRequest(BaseModel):
     """Request model for swing capture import."""
 
     file_path: str = Field(..., description="Path to capture file (C3D, CSV, JSON)")
-    target_frame_rate: float = Field(200.0, description="Target frame rate for resampling")
+    target_frame_rate: float = Field(
+        200.0, description="Target frame rate for resampling"
+    )
     export_for_rl: bool = Field(True, description="Export trajectory for RL training")
     output_path: str | None = Field(None, description="Output path for RL export")
 
@@ -81,7 +89,9 @@ class ControlStateRequest(BaseModel):
 
     strategy: str = Field("zero", description="Control strategy")
     torques: list[float] | None = Field(None, description="Direct torque values")
-    joint_index: int | None = Field(None, description="Joint index for single-joint control")
+    joint_index: int | None = Field(
+        None, description="Joint index for single-joint control"
+    )
     joint_torque: float | None = Field(None, description="Torque for single joint")
     kp: float | None = Field(None, description="Proportional gain")
     kd: float | None = Field(None, description="Derivative gain")
@@ -93,7 +103,9 @@ class ControlStateRequest(BaseModel):
 class PlotGenerationRequest(BaseModel):
     """Request model for plot generation."""
 
-    plot_types: list[str] | None = Field(None, description="Plot types to generate (None = all)")
+    plot_types: list[str] | None = Field(
+        None, description="Plot types to generate (None = all)"
+    )
     output_dir: str = Field("output/plots", description="Output directory for plots")
     output_format: str = Field("png", description="Image format (png, svg, pdf)")
     dpi: int = Field(150, description="Resolution in DPI")
@@ -145,7 +157,9 @@ async def generate_dataset(
             record_drift_control=request.record_drift_control,
             control_profiles=[
                 ControlProfile(name="zero"),
-                ControlProfile(name="random", profile_type="random", parameters={"scale": 0.5}),
+                ControlProfile(
+                    name="random", profile_type="random", parameters={"scale": 0.5}
+                ),
             ],
         )
 
@@ -196,7 +210,10 @@ async def import_swing_capture(
 
         rl_export_path = None
         if request.export_for_rl:
-            output = request.output_path or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
+            output = (
+                request.output_path
+                or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
+            )
             rl_export_path = str(importer.export_for_rl(trajectory, output))
 
         return SwingImportResponse(
@@ -356,6 +373,7 @@ async def execute_feature(
 async def get_plot_types() -> list[dict[str, str]]:
     """Get available plot types."""
     from src.shared.python.plot_generator import PlotGenerator
+
     gen = PlotGenerator()
     return gen.get_available_plot_types()
 
@@ -364,7 +382,10 @@ async def get_plot_types() -> list[dict[str, str]]:
 async def get_export_formats() -> list[dict[str, str]]:
     """Get supported export formats."""
     return [
-        {"format": "hdf5", "description": "HDF5 hierarchical data (recommended for large datasets)"},
+        {
+            "format": "hdf5",
+            "description": "HDF5 hierarchical data (recommended for large datasets)",
+        },
         {"format": "sqlite", "description": "SQLite database (queryable, structured)"},
         {"format": "csv", "description": "CSV files (one per sample, human-readable)"},
         {"format": "mat", "description": "MATLAB .mat files (scipy required)"},

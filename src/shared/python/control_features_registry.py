@@ -113,11 +113,16 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         "Requires qacc vector as input.",
         category=FeatureCategory.DYNAMICS,
         requires_args=True,
-        arg_specs=[{"name": "qacc", "type": "np.ndarray (n_v,)", "description": "Desired acceleration"}],
+        arg_specs=[
+            {
+                "name": "qacc",
+                "type": "np.ndarray (n_v,)",
+                "description": "Desired acceleration",
+            }
+        ],
         return_type="np.ndarray (n_v,)",
         section="Dynamics Interface",
     ),
-
     # --- Drift/Control Decomposition (Section F) ---
     FeatureDescriptor(
         name="compute_drift_acceleration",
@@ -137,11 +142,16 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         "CRITICAL: drift + control = full acceleration (superposition).",
         category=FeatureCategory.ANALYSIS,
         requires_args=True,
-        arg_specs=[{"name": "tau", "type": "np.ndarray (n_v,)", "description": "Applied torques"}],
+        arg_specs=[
+            {
+                "name": "tau",
+                "type": "np.ndarray (n_v,)",
+                "description": "Applied torques",
+            }
+        ],
         return_type="np.ndarray (n_v,)",
         section="Section F: Drift-Control Decomposition",
     ),
-
     # --- Counterfactual Experiments (Section G) ---
     FeatureDescriptor(
         name="compute_ztcf",
@@ -152,8 +162,16 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         category=FeatureCategory.COUNTERFACTUAL,
         requires_args=True,
         arg_specs=[
-            {"name": "q", "type": "np.ndarray (n_q,)", "description": "Joint positions"},
-            {"name": "v", "type": "np.ndarray (n_v,)", "description": "Joint velocities"},
+            {
+                "name": "q",
+                "type": "np.ndarray (n_q,)",
+                "description": "Joint positions",
+            },
+            {
+                "name": "v",
+                "type": "np.ndarray (n_v,)",
+                "description": "Joint velocities",
+            },
         ],
         return_type="np.ndarray (n_v,)",
         section="Section G1: ZTCF",
@@ -167,12 +185,15 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         category=FeatureCategory.COUNTERFACTUAL,
         requires_args=True,
         arg_specs=[
-            {"name": "q", "type": "np.ndarray (n_q,)", "description": "Joint positions"},
+            {
+                "name": "q",
+                "type": "np.ndarray (n_q,)",
+                "description": "Joint positions",
+            },
         ],
         return_type="np.ndarray (n_v,)",
         section="Section G2: ZVCF",
     ),
-
     # --- Kinematics ---
     FeatureDescriptor(
         name="get_state",
@@ -195,10 +216,11 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         "Returns linear (3, n_v) and angular (3, n_v) Jacobians.",
         category=FeatureCategory.KINEMATICS,
         requires_args=True,
-        arg_specs=[{"name": "body_name", "type": "str", "description": "Body frame name"}],
+        arg_specs=[
+            {"name": "body_name", "type": "str", "description": "Body frame name"}
+        ],
         return_type="dict with 'linear', 'angular' keys or None",
     ),
-
     # --- Contact ---
     FeatureDescriptor(
         name="compute_contact_forces",
@@ -208,7 +230,6 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         category=FeatureCategory.CONTACT,
         return_type="np.ndarray (3,) or (6,)",
     ),
-
     # --- Control ---
     FeatureDescriptor(
         name="set_control",
@@ -217,10 +238,11 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         "Stored for next step/forward call.",
         category=FeatureCategory.CONTROL,
         requires_args=True,
-        arg_specs=[{"name": "u", "type": "np.ndarray (n_u,)", "description": "Control vector"}],
+        arg_specs=[
+            {"name": "u", "type": "np.ndarray (n_u,)", "description": "Control vector"}
+        ],
         return_type="None",
     ),
-
     # --- Shaft (Section B5) ---
     FeatureDescriptor(
         name="set_shaft_properties",
@@ -231,8 +253,16 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         requires_args=True,
         arg_specs=[
             {"name": "length", "type": "float", "description": "Shaft length [m]"},
-            {"name": "EI_profile", "type": "np.ndarray", "description": "Bending stiffness profile"},
-            {"name": "mass_profile", "type": "np.ndarray", "description": "Mass per unit length"},
+            {
+                "name": "EI_profile",
+                "type": "np.ndarray",
+                "description": "Bending stiffness profile",
+            },
+            {
+                "name": "mass_profile",
+                "type": "np.ndarray",
+                "description": "Mass per unit length",
+            },
         ],
         return_type="bool",
         section="Section B5: Flexible Beam Shaft",
@@ -441,17 +471,19 @@ class ControlFeaturesRegistry:
                 # These have default implementations that return False/None
                 available = True  # Always available since default exists
 
-            features.append(FeatureDescriptor(
-                name=fd.name,
-                display_name=fd.display_name,
-                description=fd.description,
-                category=fd.category,
-                requires_args=fd.requires_args,
-                arg_specs=fd.arg_specs,
-                return_type=fd.return_type,
-                section=fd.section,
-                available=available,
-            ))
+            features.append(
+                FeatureDescriptor(
+                    name=fd.name,
+                    display_name=fd.display_name,
+                    description=fd.description,
+                    category=fd.category,
+                    requires_args=fd.requires_args,
+                    arg_specs=fd.arg_specs,
+                    return_type=fd.return_type,
+                    section=fd.section,
+                    available=available,
+                )
+            )
 
         return features
 
@@ -465,7 +497,11 @@ class ControlFeaturesRegistry:
             JSON-serializable result.
         """
         if isinstance(result, np.ndarray):
-            return {"type": "ndarray", "shape": list(result.shape), "data": result.tolist()}
+            return {
+                "type": "ndarray",
+                "shape": list(result.shape),
+                "data": result.tolist(),
+            }
         elif isinstance(result, tuple):
             return [self._serialize_result(r) for r in result]
         elif isinstance(result, dict):
