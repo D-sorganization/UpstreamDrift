@@ -249,10 +249,8 @@ repos:
             "--tb=short",
             "-m",
             "not slow and not integration",
-            "--ignore=tests/unit/ai",
           ]
-        language: python
-        additional_dependencies: [pytest, pytest-cov]
+        language: system
         pass_filenames: false
         types: [python]
 
