@@ -12,9 +12,8 @@ try:
     UTC: Final = _UTC
 except ImportError:
     # Fallback for Python < 3.11
-    from datetime import timezone
 
-    UTC: Final = timezone.utc  # type: ignore[misc]
+    UTC: Final = _UTC  # type: ignore[misc]
 
 
 def utc_now() -> datetime:
