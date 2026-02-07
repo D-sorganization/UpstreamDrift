@@ -142,9 +142,7 @@ class TestTerrainQueries:
     def test_query_response_fields(self, client: TestClient) -> None:
         """Query response has all required fields."""
         client.post("/api/terrain/load", json={"preset": "fairway"})
-        data = client.post(
-            "/api/terrain/query", json={"x": 25.0, "y": 100.0}
-        ).json()
+        data = client.post("/api/terrain/query", json={"x": 25.0, "y": 100.0}).json()
         assert "elevation" in data
         assert "slope_angle_deg" in data
         assert "terrain_type" in data
@@ -155,9 +153,7 @@ class TestTerrainQueries:
     def test_query_returns_numeric_values(self, client: TestClient) -> None:
         """Query results are numeric."""
         client.post("/api/terrain/load", json={"preset": "fairway"})
-        data = client.post(
-            "/api/terrain/query", json={"x": 25.0, "y": 100.0}
-        ).json()
+        data = client.post("/api/terrain/query", json={"x": 25.0, "y": 100.0}).json()
         assert isinstance(data["elevation"], (int, float))
         assert isinstance(data["friction"], (int, float))
         assert data["friction"] > 0
@@ -167,9 +163,7 @@ class TestTerrainQueries:
         # Load full hole which has multiple terrain types
         client.post("/api/terrain/load", json={"preset": "full_hole"})
         # Center should be fairway
-        center = client.post(
-            "/api/terrain/query", json={"x": 30.0, "y": 100.0}
-        ).json()
+        center = client.post("/api/terrain/query", json={"x": 30.0, "y": 100.0}).json()
         assert center["terrain_type"] in [
             "fairway",
             "rough",
