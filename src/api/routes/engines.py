@@ -119,7 +119,7 @@ async def probe_engine(
         return {
             "available": is_available,
             "version": "1.0.0" if is_available else None,
-            "capabilities": ["physics"] if is_available else []
+            "capabilities": ["physics"] if is_available else [],
         }
     except Exception as e:
         return {"available": False, "error": str(e)}
@@ -143,7 +143,9 @@ async def load_engine_lazy(
 
         engine_type = engine_map.get(engine_name.lower())
         if not engine_type:
-            raise HTTPException(status_code=400, detail=f"Unknown engine: {engine_name}")
+            raise HTTPException(
+                status_code=400, detail=f"Unknown engine: {engine_name}"
+            )
 
         success = engine_manager.switch_engine(engine_type)
         if not success:
@@ -154,7 +156,7 @@ async def load_engine_lazy(
             "engine": engine_name,
             "version": "1.0.0",
             "capabilities": ["physics"],
-            "message": f"{engine_name} loaded successfully"
+            "message": f"{engine_name} loaded successfully",
         }
     except HTTPException:
         raise

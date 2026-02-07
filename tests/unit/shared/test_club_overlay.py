@@ -12,6 +12,7 @@ class TestClubTargetOverlay(unittest.TestCase):
 
     def test_subclass_instantiation(self):
         """Test that a concrete subclass can be instantiated."""
+
         class ConcreteOverlay(ClubTargetOverlay):
             def render(self, renderer: Any) -> None:
                 pass
@@ -19,5 +20,6 @@ class TestClubTargetOverlay(unittest.TestCase):
         overlay = ConcreteOverlay()
         self.assertIsInstance(overlay, ClubTargetOverlay)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -43,5 +43,6 @@ class TestRealTimeController(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             controller._strategy.connect(config)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
