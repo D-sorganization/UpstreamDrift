@@ -9,20 +9,8 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
-
-from src.shared.python.ai.gui.settings_dialog import AISettingsDialog
-from src.shared.python.ai.rag.indexer_worker import IndexerWorker
-from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
-from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
-from src.shared.python.ai.tools.file_ops import register_file_tools
-from src.shared.python.logging_config import get_logger
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
 from typing import TYPE_CHECKING, Any
 
 from PyQt6 import QtCore, QtGui
@@ -42,6 +30,13 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.ai.gui.settings_dialog import AISettingsDialog
+from src.shared.python.ai.rag.indexer_worker import IndexerWorker
+from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
+from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
+from src.shared.python.ai.tools.file_ops import register_file_tools
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from shared.python.ai.adapters.base import BaseAgentAdapter
@@ -73,7 +68,7 @@ class MessageWidget(QFrame):
         super().__init__(parent)
         self._role = role
         self._content = content
-        self._timestamp = timestamp or datetime.now(UTC)
+        self._timestamp = timestamp or datetime.now(timezone.utc)
         self._setup_ui()
         self._apply_style()
 
