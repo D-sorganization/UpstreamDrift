@@ -1,0 +1,174 @@
+{
+  "version": "1.0.0",
+  "description": "Single source of truth for all launcher tiles across PyQt and Tauri/React UIs",
+  "tiles": [
+    {
+      "id": "model_explorer",
+      "name": "Model Explorer",
+      "description": "Browse, select, and build URDF/MJCF models",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/urdf_generator/launch_urdf_generator.py",
+      "logo": "urdf_icon.png",
+      "status": "utility",
+      "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
+      "order": 1
+    },
+    {
+      "id": "mujoco_unified",
+      "name": "MuJoCo",
+      "description": "Unified MuJoCo interface: Humanoid Simulation & Analytics Dashboard",
+      "category": "physics_engine",
+      "type": "custom_humanoid",
+      "path": "src/launchers/mujoco_unified_launcher.py",
+      "engine_type": "mujoco",
+      "logo": "mujoco_humanoid.png",
+      "status": "gui_ready",
+      "capabilities": [
+        "rigid_body",
+        "contact",
+        "tendons",
+        "actuators",
+        "mass_matrix",
+        "jacobian",
+        "force_vectors",
+        "torque_vectors",
+        "contact_forces",
+        "wrench",
+        "screw_theory",
+        "video_export",
+        "dataset_export"
+      ],
+      "order": 2
+    },
+    {
+      "id": "drake_golf",
+      "name": "Drake",
+      "description": "Drake robotics framework with MeshCat visualization",
+      "category": "physics_engine",
+      "type": "drake",
+      "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
+      "engine_type": "drake",
+      "logo": "drake.png",
+      "status": "gui_ready",
+      "capabilities": [
+        "rigid_body",
+        "optimization",
+        "contact",
+        "mass_matrix",
+        "jacobian"
+      ],
+      "order": 3
+    },
+    {
+      "id": "pinocchio_golf",
+      "name": "Pinocchio",
+      "description": "Pinocchio rigid body dynamics with analytical derivatives",
+      "category": "physics_engine",
+      "type": "pinocchio",
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
+      "engine_type": "pinocchio",
+      "logo": "pinocchio.png",
+      "status": "gui_ready",
+      "capabilities": [
+        "rigid_body",
+        "inverse_kinematics",
+        "mass_matrix",
+        "jacobian"
+      ],
+      "order": 4
+    },
+    {
+      "id": "opensim_golf",
+      "name": "OpenSim",
+      "description": "OpenSim musculoskeletal modeling for biomechanics analysis",
+      "category": "physics_engine",
+      "type": "opensim",
+      "path": "src/engines/physics_engines/opensim/python/opensim_gui.py",
+      "engine_type": "opensim",
+      "logo": "opensim.png",
+      "status": "engine_ready",
+      "capabilities": [
+        "musculoskeletal",
+        "inverse_kinematics",
+        "muscle_analysis",
+        "mass_matrix",
+        "jacobian"
+      ],
+      "order": 5
+    },
+    {
+      "id": "myosim_suite",
+      "name": "MyoSuite",
+      "description": "MyoSuite muscle-actuated simulation environment",
+      "category": "physics_engine",
+      "type": "myosim",
+      "path": "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py",
+      "engine_type": "myosuite",
+      "logo": "myosim.png",
+      "status": "engine_ready",
+      "capabilities": [
+        "musculoskeletal",
+        "muscle_control",
+        "neural_activation",
+        "mass_matrix",
+        "jacobian"
+      ],
+      "order": 6
+    },
+    {
+      "id": "putting_green",
+      "name": "Putting Green",
+      "description": "Realistic putting green simulation with ball rolling physics",
+      "category": "physics_engine",
+      "type": "putting_green",
+      "path": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "engine_type": "putting_green",
+      "logo": "putting_green.png",
+      "status": "simulator",
+      "capabilities": ["surface_modeling", "ball_physics", "terrain"],
+      "order": 7
+    },
+    {
+      "id": "matlab_unified",
+      "name": "Matlab Models",
+      "description": "Access 2D/3D Simscape models and Analysis Tools",
+      "category": "external",
+      "type": "special_app",
+      "path": "src/launchers/matlab_launcher_unified.py",
+      "logo": "matlab_logo.png",
+      "status": "external",
+      "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
+      "order": 8
+    },
+    {
+      "id": "motion_capture",
+      "name": "Motion Capture",
+      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/launchers/motion_capture_launcher.py",
+      "logo": "c3d_icon.png",
+      "status": "utility",
+      "capabilities": [
+        "c3d_viewer",
+        "openpose",
+        "mediapipe",
+        "pose_estimation"
+      ],
+      "order": 9
+    },
+    {
+      "id": "data_explorer",
+      "name": "Data Explorer",
+      "description": "Import, filter, and visualize simulation datasets",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/data_explorer/data_explorer_app.py",
+      "logo": "data_explorer.png",
+      "status": "utility",
+      "capabilities": ["data_import", "filtering", "visualization", "export"],
+      "order": 10
+    }
+  ]
+}

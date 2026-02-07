@@ -43,6 +43,7 @@ from .routes import auth as auth_routes
 from .routes import core as core_routes
 from .routes import engines as engine_routes
 from .routes import export as export_routes
+from .routes import launcher as launcher_routes
 from .routes import simulation as simulation_routes
 from .routes import terrain as terrain_routes
 from .routes import video as video_routes
@@ -277,6 +278,7 @@ app.include_router(simulation_routes.router)
 app.include_router(video_routes.router)
 app.include_router(analysis_routes.router)
 app.include_router(export_routes.router)
+app.include_router(launcher_routes.router)
 app.include_router(terrain_routes.router)
 
 

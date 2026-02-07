@@ -48,7 +48,7 @@ async def health_check() -> dict[str, str | int]:
 async def get_diagnostics() -> dict:  # type: ignore[type-arg]
     """Get comprehensive diagnostic information for browser mode."""
     repo_root = Path(__file__).parent.parent.parent.parent
-    
+
     return {
         "backend": {
             "running": True,

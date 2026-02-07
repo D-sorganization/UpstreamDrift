@@ -72,14 +72,15 @@ class LayoutManager:
         """
         if default_ids is None:
             default_ids = [
+                "model_explorer",
                 "mujoco_unified",
                 "drake_golf",
                 "pinocchio_golf",
                 "opensim_golf",
                 "myosim_suite",
+                "putting_green",
                 "matlab_unified",
                 "motion_capture",
-                "model_explorer",
             ]
 
         # Filter to available models
