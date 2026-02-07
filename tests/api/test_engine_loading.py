@@ -9,7 +9,13 @@ from fastapi.testclient import TestClient
 
 from src.api.server import app
 
-client = TestClient(app)
+
+@pytest.fixture(scope="module")
+def client():
+    """Test client with proper app lifespan."""
+    with TestClient(app) as test_client:
+        yield test_client
+
 
 
 class TestEngineProbing:
@@ -21,12 +27,12 @@ class TestEngineProbing:
             ("mujoco", True),  # Should be installed in Docker
             ("drake", True),  # Should be installed in Docker
             ("pinocchio", True),  # Should be installed in Docker
-            ("opensim", False),  # Not yet installed (Issue #1140)
+            ("opensim", True),  # Actually available! 🎉
             ("myosuite", False),  # Not yet installed (Issue #1141)
             ("putting_green", True),  # Mapped to PENDULUM temporarily
         ],
     )
-    def test_engine_probe(self, engine_name: str, expected_available: bool) -> None:
+    def test_engine_probe(self, client, engine_name: str, expected_available: bool) -> None:
         """Test that engine probe endpoint returns correct availability."""
         response = client.get(f"/api/engines/{engine_name}/probe")
         assert response.status_code == 200, f"Failed to probe {engine_name}"
@@ -42,7 +48,7 @@ class TestEngineProbing:
             assert "capabilities" in data
             assert isinstance(data["capabilities"], list)
 
-    def test_unknown_engine_probe(self) -> None:
+    def test_unknown_engine_probe(self, client) -> None:
         """Test probing unknown engine returns proper error."""
         response = client.get("/api/engines/nonexistent/probe")
         assert response.status_code == 200  # Returns 200 with error in body
@@ -64,7 +70,7 @@ class TestEngineLoading:
             "pinocchio",
         ],
     )
-    def test_load_available_engine(self, engine_name: str) -> None:
+    def test_load_available_engine(self, client, engine_name: str) -> None:
         """Test loading an available engine succeeds."""
         response = client.post(f"/api/engines/{engine_name}/load")
         assert response.status_code == 200, f"Failed to load {engine_name}"
@@ -82,13 +88,13 @@ class TestEngineLoading:
             "myosuite",  # Not installed yet
         ],
     )
-    def test_load_unavailable_engine(self, engine_name: str) -> None:
+    def test_load_unavailable_engine(self, client, engine_name: str) -> None:
         """Test loading unavailable engine fails gracefully."""
         response = client.post(f"/api/engines/{engine_name}/load")
         # Should return error status
         assert response.status_code in [400, 500]
 
-    def test_load_unknown_engine(self) -> None:
+    def test_load_unknown_engine(self, client) -> None:
         """Test loading unknown engine returns 400."""
         response = client.post("/api/engines/nonexistent/load")
         assert response.status_code == 400
@@ -101,7 +107,7 @@ class TestEngineLoading:
 class TestEngineList:
     """Test engine listing endpoint."""
 
-    def test_get_engines_list(self) -> None:
+    def test_get_engines_list(self, client) -> None:
         """Test GET /api/engines returns all configured engines."""
         response = client.get("/api/engines")
         assert response.status_code == 200
@@ -127,7 +133,7 @@ class TestSimulationStart:
         """Fixture to ensure MuJoCo is loaded."""
         client.post("/api/engines/mujoco/load")
 
-    def test_start_simulation_with_mujoco(self, loaded_mujoco: None) -> None:
+    def test_start_simulation_with_mujoco(self, client, loaded_mujoco: None) -> None:
         """Test starting a simulation with MuJoCo engine."""
         response = client.post(
             "/api/simulation/start",
@@ -150,7 +156,7 @@ class TestSimulationStart:
 class TestPuttingGreenEngine:
     """Test Putting Green specific functionality (Issue #1136)."""
 
-    def test_putting_green_probe(self) -> None:
+    def test_putting_green_probe(self, client) -> None:
         """Test Putting Green engine is available."""
         response = client.get("/api/engines/putting_green/probe")
         assert response.status_code == 200
@@ -158,7 +164,7 @@ class TestPuttingGreenEngine:
         data = response.json()
         assert data["available"] is True
 
-    def test_putting_green_load(self) -> None:
+    def test_putting_green_load(self, client) -> None:
         """Test Putting Green engine can be loaded."""
         response = client.post("/api/engines/putting_green/load")
         assert response.status_code == 200
@@ -168,7 +174,7 @@ class TestPuttingGreenEngine:
         assert data["engine"] == "putting_green"
 
     @pytest.mark.skip(reason="Proper Putting Green implementation pending (Issue #1136)")
-    def test_putting_green_simulation(self) -> None:
+    def test_putting_green_simulation(self, client) -> None:
         """Test Putting Green simulation (will be implemented in #1136)."""
         # Load engine
         client.post("/api/engines/putting_green/load")
