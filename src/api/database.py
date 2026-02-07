@@ -60,8 +60,8 @@ def init_db() -> None:
     # Create default admin user if none exists
     db = SessionLocal()
     try:
-        from api.auth.models import User, UserRole
-        from api.auth.security import security_manager
+        from src.api.auth.models import User, UserRole
+        from src.api.auth.security import security_manager
 
         admin_user = db.query(User).filter(User.role == UserRole.ADMIN.value).first()
         if not admin_user:
