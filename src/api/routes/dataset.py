@@ -3,9 +3,13 @@
 Provides endpoints for generating training datasets, importing swing captures,
 managing control interfaces, and generating plots.
 
+All endpoints that need a physics engine obtain it from the EngineManager
+via FastAPI's Depends() mechanism — no mocks in production code.
+
 Design by Contract:
     Preconditions:
         - Server must have engine manager initialized
+        - An engine must be loaded before engine-dependent endpoints are called
         - Request bodies must pass Pydantic validation
     Postconditions:
         - Responses contain valid, serializable data
@@ -15,14 +19,48 @@ Design by Contract:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from src.api.dependencies import get_logger
+from src.api.dependencies import get_engine_manager, get_logger
+
+if TYPE_CHECKING:
+    from src.shared.python.engine_manager import EngineManager
+    from src.shared.python.interfaces import PhysicsEngine
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
+
+
+# ---- Helpers ----
+
+
+def _require_active_engine(engine_manager: EngineManager) -> PhysicsEngine:
+    """Get the currently loaded physics engine or raise 409.
+
+    This is the single place that enforces the "engine must be loaded"
+    precondition for every endpoint that touches the physics engine.
+
+    Args:
+        engine_manager: Injected engine manager.
+
+    Returns:
+        The active PhysicsEngine instance.
+
+    Raises:
+        HTTPException 409: If no engine is currently loaded.
+    """
+    engine = engine_manager.get_active_physics_engine()
+    if engine is None:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "No physics engine is currently loaded. "
+                "Load an engine first via POST /engines/{engine_type}/load"
+            ),
+        )
+    return engine
 
 
 # ---- Request/Response Models ----
@@ -31,7 +69,6 @@ router = APIRouter(prefix="/dataset", tags=["dataset"])
 class DatasetGenerationRequest(BaseModel):
     """Request model for dataset generation."""
 
-    engine_type: str = Field(..., description="Physics engine to use")
     num_samples: int = Field(
         10, description="Number of simulation runs", ge=1, le=10000
     )
@@ -125,24 +162,24 @@ class FeatureExecuteRequest(BaseModel):
 @router.post("/generate", response_model=DatasetGenerationResponse)
 async def generate_dataset(
     request: DatasetGenerationRequest,
+    engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> DatasetGenerationResponse:
     """Generate a training dataset from simulation runs.
 
     Varies inputs across simulations and records all kinematics, kinetics,
     and model data for neural network training.
+
+    Requires a loaded engine (POST /engines/{type}/load first).
     """
+    engine = _require_active_engine(engine_manager)
+
     try:
         from src.shared.python.dataset_generator import (
             ControlProfile,
             DatasetGenerator,
             GeneratorConfig,
         )
-        from src.shared.python.mock_engine import MockPhysicsEngine
-
-        # Use mock engine for now (will be replaced with real engine loading)
-        engine = MockPhysicsEngine()
-        engine.load_from_string("<mock/>")
 
         config = GeneratorConfig(
             num_samples=request.num_samples,
@@ -187,7 +224,11 @@ async def import_swing_capture(
     request: SwingImportRequest,
     logger: Any = Depends(get_logger),
 ) -> SwingImportResponse:
-    """Import a golf swing capture file for RL training."""
+    """Import a golf swing capture file for RL training.
+
+    This endpoint does not require a loaded engine — it only parses
+    capture data and converts it to joint-space trajectories.
+    """
     try:
         from src.shared.python.swing_capture_import import SwingCaptureImporter
 
@@ -236,18 +277,19 @@ async def import_swing_capture(
 
 @router.get("/control/state")
 async def get_control_state(
+    engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> dict[str, Any]:
     """Get current control interface state.
 
-    Returns all joint torques, control strategy, gains, and joint info.
+    Returns all joint torques, control strategy, gains, and joint info
+    for the currently loaded engine.
     """
+    engine = _require_active_engine(engine_manager)
+
     try:
         from src.shared.python.control_interface import ControlInterface
-        from src.shared.python.mock_engine import MockPhysicsEngine
 
-        engine = MockPhysicsEngine()
-        engine.load_from_string("<mock/>")
         ctrl = ControlInterface(engine)
         return ctrl.get_state()
 
@@ -258,15 +300,15 @@ async def get_control_state(
 @router.post("/control/configure")
 async def configure_control(
     request: ControlStateRequest,
+    engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> dict[str, Any]:
-    """Configure control strategy and parameters."""
+    """Configure control strategy and parameters on the active engine."""
+    engine = _require_active_engine(engine_manager)
+
     try:
         from src.shared.python.control_interface import ControlInterface
-        from src.shared.python.mock_engine import MockPhysicsEngine
 
-        engine = MockPhysicsEngine()
-        engine.load_from_string("<mock/>")
         ctrl = ControlInterface(engine)
 
         if request.strategy:
@@ -296,13 +338,18 @@ async def configure_control(
 
 
 @router.get("/control/strategies")
-async def get_control_strategies() -> list[dict[str, str]]:
-    """Get available control strategies with descriptions."""
-    from src.shared.python.control_interface import ControlInterface
-    from src.shared.python.mock_engine import MockPhysicsEngine
+async def get_control_strategies(
+    engine_manager: EngineManager = Depends(get_engine_manager),
+) -> list[dict[str, str]]:
+    """Get available control strategies with descriptions.
 
-    engine = MockPhysicsEngine()
-    engine.load_from_string("<mock/>")
+    Requires a loaded engine so strategy availability can be checked
+    against actual engine capabilities.
+    """
+    engine = _require_active_engine(engine_manager)
+
+    from src.shared.python.control_interface import ControlInterface
+
     ctrl = ControlInterface(engine)
     return ctrl.get_available_strategies()
 
@@ -311,17 +358,18 @@ async def get_control_strategies() -> list[dict[str, str]]:
 async def list_features(
     category: str | None = None,
     available_only: bool = False,
+    engine_manager: EngineManager = Depends(get_engine_manager),
 ) -> list[dict[str, Any]]:
     """List all control and analysis features.
 
     Exposes all hidden engine capabilities for discoverability.
+    Feature availability is checked against the currently loaded engine.
     """
+    engine = _require_active_engine(engine_manager)
+
     try:
         from src.shared.python.control_features_registry import ControlFeaturesRegistry
-        from src.shared.python.mock_engine import MockPhysicsEngine
 
-        engine = MockPhysicsEngine()
-        engine.load_from_string("<mock/>")
         registry = ControlFeaturesRegistry(engine)
         return registry.list_features(category=category, available_only=available_only)
 
@@ -330,14 +378,15 @@ async def list_features(
 
 
 @router.get("/features/summary")
-async def features_summary() -> dict[str, Any]:
-    """Get summary of all available features."""
+async def features_summary(
+    engine_manager: EngineManager = Depends(get_engine_manager),
+) -> dict[str, Any]:
+    """Get summary of all available features on the active engine."""
+    engine = _require_active_engine(engine_manager)
+
     try:
         from src.shared.python.control_features_registry import ControlFeaturesRegistry
-        from src.shared.python.mock_engine import MockPhysicsEngine
 
-        engine = MockPhysicsEngine()
-        engine.load_from_string("<mock/>")
         registry = ControlFeaturesRegistry(engine)
         return registry.get_summary()
 
@@ -348,15 +397,15 @@ async def features_summary() -> dict[str, Any]:
 @router.post("/features/execute")
 async def execute_feature(
     request: FeatureExecuteRequest,
+    engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> dict[str, Any]:
-    """Execute a specific engine feature by name."""
+    """Execute a specific engine feature by name on the active engine."""
+    engine = _require_active_engine(engine_manager)
+
     try:
         from src.shared.python.control_features_registry import ControlFeaturesRegistry
-        from src.shared.python.mock_engine import MockPhysicsEngine
 
-        engine = MockPhysicsEngine()
-        engine.load_from_string("<mock/>")
         registry = ControlFeaturesRegistry(engine)
         result = registry.execute(request.feature_name, **request.args)
         return {"feature": request.feature_name, "result": result}
@@ -371,7 +420,10 @@ async def execute_feature(
 
 @router.get("/plots/types")
 async def get_plot_types() -> list[dict[str, str]]:
-    """Get available plot types."""
+    """Get available plot types.
+
+    This is a static listing — no engine needed.
+    """
     from src.shared.python.plot_generator import PlotGenerator
 
     gen = PlotGenerator()
@@ -380,7 +432,10 @@ async def get_plot_types() -> list[dict[str, str]]:
 
 @router.get("/export/formats")
 async def get_export_formats() -> list[dict[str, str]]:
-    """Get supported export formats."""
+    """Get supported export formats.
+
+    This is a static listing — no engine needed.
+    """
     return [
         {
             "format": "hdf5",
