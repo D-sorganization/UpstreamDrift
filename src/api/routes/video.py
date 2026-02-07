@@ -4,16 +4,9 @@ from __future__ import annotations
 
 import tempfile
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-from src.api.utils.datetime_compat import UTC
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 
@@ -27,6 +20,7 @@ from src.shared.python.video_pose_pipeline import (
     VideoPosePipeline,
     VideoProcessingConfig,
 )
+from src.api.utils.datetime_compat import UTC
 
 from ..models.responses import VideoAnalysisResponse
 

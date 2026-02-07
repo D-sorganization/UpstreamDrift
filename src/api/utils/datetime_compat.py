@@ -18,17 +18,12 @@ Usage:
 
 from __future__ import annotations
 
+from datetime import UTC as _UTC
 from datetime import datetime, timedelta
 from typing import Final
 
 # Python 3.11+ compatible UTC timezone
-try:
-    from datetime import UTC as _UTC
-
-    UTC: Final = _UTC
-except ImportError:
-    # Fallback for Python < 3.11
-    UTC: Final = _UTC  # type: ignore[misc]
+UTC: Final = _UTC
 
 
 def utc_now() -> datetime:

@@ -19,7 +19,7 @@ class TestPyVistaBackend(unittest.TestCase):
 
         # Ensure pyvista is not in sys.modules
         # Setting the module to None simulates it being missing
-        with patch.dict(sys.modules, {"pyvista": None}):
+        with patch.dict(sys.modules, {'pyvista': None}):
             with self.assertRaises(RuntimeError) as cm:
                 backend.initialize()
             self.assertIn("PyVista not available", str(cm.exception))
@@ -33,13 +33,12 @@ class TestPyVistaBackend(unittest.TestCase):
         mock_plotter = MagicMock()
         mock_pv.Plotter.return_value = mock_plotter
 
-        with patch.dict(sys.modules, {"pyvista": mock_pv}):
+        with patch.dict(sys.modules, {'pyvista': mock_pv}):
             backend.initialize()
             self.assertTrue(backend.is_initialized)
             mock_pv.Plotter.assert_called_once()
             # Verify background color was set
             mock_plotter.set_background.assert_called_with(config.background_color)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

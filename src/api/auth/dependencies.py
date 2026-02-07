@@ -1,21 +1,14 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
-from datetime import timezone
-
-# Python 3.10 compatibility: timezone.utc was added in 3.11
-from src.api.utils.datetime_compat import UTC
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
+from datetime import datetime
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from src.api.database import get_db
+from src.api.utils.datetime_compat import UTC
 
 from .models import APIKey, User, UserRole
 from .security import (
@@ -161,8 +154,6 @@ async def get_current_user_from_api_key(
         )
 
     # Update API key usage
-    from datetime import datetime
-
     # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
     api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
     api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
