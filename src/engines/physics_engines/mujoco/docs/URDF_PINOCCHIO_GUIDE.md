@@ -9,6 +9,7 @@ This guide covers the new URDF import/export functionality and Pinocchio interfa
 ### Features
 
 The URDF import/export module (`urdf_io.py`) enables:
+
 - **Export MuJoCo models to URDF format** for sharing with ROS, Pinocchio, Drake, and other robotics frameworks
 - **Import URDF models into MuJoCo** for using models from other sources
 - **Automatic conversion** of joint types, geometries, and inertial properties
@@ -51,12 +52,14 @@ data = mujoco.MjData(model)
 ### Supported Features
 
 **Joint Types:**
+
 - Revolute (hinge) ↔ `mjJNT_HINGE`
 - Prismatic (slide) ↔ `mjJNT_SLIDE`
 - Fixed joints (handled as constraints in MuJoCo)
 - Continuous joints (treated as unlimited revolute)
 
 **Geometry Types:**
+
 - Box
 - Sphere
 - Cylinder
@@ -64,6 +67,7 @@ data = mujoco.MjData(model)
 - Mesh (with scale support)
 
 **Properties:**
+
 - Inertial properties (mass, inertia matrix, center of mass)
 - Visual geometries (with materials/colors)
 - Collision geometries
@@ -191,17 +195,17 @@ for step in range(1000):
     # Get current state
     q = data.qpos.copy()
     v = data.qvel.copy()
-    
+
     # Use Pinocchio for fast inverse dynamics
     desired_a = compute_desired_acceleration(q, v)  # Your control law
     tau = wrapper.compute_inverse_dynamics(q, v, desired_a)
-    
+
     # Apply torques in MuJoCo
     data.ctrl[:] = tau
-    
+
     # Step simulation (MuJoCo handles contacts, constraints, etc.)
     mujoco.mj_step(model, data)
-    
+
     # Optional: Use Pinocchio for analysis
     if step % 10 == 0:
         M = wrapper.compute_mass_matrix(q)
@@ -297,6 +301,7 @@ pip install pin
 ### Model Conversion Issues
 
 If model conversion fails:
+
 1. Check that all bodies have valid inertial properties
 2. Ensure joint types are supported
 3. Verify geometry types are compatible
@@ -304,6 +309,7 @@ If model conversion fails:
 ### State Synchronization
 
 If states don't match:
+
 - Check quaternion conventions (MuJoCo: w,x,y,z vs Pinocchio: x,y,z,w)
 - Verify joint ordering matches between models
 - Use `sync_mujoco_to_pinocchio()` before analysis
@@ -313,4 +319,3 @@ If states don't match:
 - [Pinocchio Documentation](https://stack-of-tasks.github.io/pinocchio/)
 - [URDF Specification](http://wiki.ros.org/urdf/XML)
 - [MuJoCo Documentation](https://mujoco.readthedocs.io/)
-

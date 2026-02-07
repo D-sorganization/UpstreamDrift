@@ -23,6 +23,10 @@ _project_root = (
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
+from src.shared.python.engine_availability import (  # noqa: E402
+    DRAKE_AVAILABLE,
+    PYQT6_AVAILABLE,
+)
 from src.shared.python.logging_config import get_logger  # noqa: E402
 from src.shared.python.pose_editor.core import (  # noqa: E402
     BasePoseEditor,
@@ -39,19 +43,17 @@ from src.shared.python.pose_editor.widgets import (  # noqa: E402
 
 logger = get_logger(__name__)
 
-# PyQt6 imports
-try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
 
-    PYQT6_AVAILABLE = True
-except ImportError:
-    PYQT6_AVAILABLE = False
+# PyQt6 imports
+if PYQT6_AVAILABLE:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+else:
     QtCore = None  # type: ignore[misc, assignment]
     QtGui = None  # type: ignore[misc, assignment]
     QtWidgets = None  # type: ignore[misc, assignment]
 
 # Drake imports
-try:
+if DRAKE_AVAILABLE:
     from pydrake.all import (
         Context,
         JointIndex,
@@ -60,10 +62,7 @@ try:
         RevoluteJoint,
         RigidTransform,
     )
-
-    DRAKE_AVAILABLE = True
-except ImportError:
-    DRAKE_AVAILABLE = False
+else:
     MultibodyPlant = None  # type: ignore[misc, assignment]
     JointIndex = None  # type: ignore[misc, assignment]
     PrismaticJoint = None  # type: ignore[misc, assignment]

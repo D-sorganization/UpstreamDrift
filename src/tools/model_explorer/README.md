@@ -89,16 +89,19 @@ The generator supports parallel kinematic chains through:
 ## Engine-Specific Features
 
 ### MuJoCo Export
+
 - Optimized for MuJoCo's XML format
 - Proper handling of parallel constraints
 - Material and visual optimizations
 
 ### Drake Export
+
 - Compatible with Drake's URDF parser
 - Inertia tensor optimizations
 - Joint limit handling
 
 ### Pinocchio Export
+
 - Optimized for Pinocchio's kinematic chains
 - Proper mass distribution
 - Efficient joint representations

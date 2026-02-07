@@ -82,43 +82,42 @@ dependencies:
   # Some packages are only available via pip or have better pip versions
   # ============================================================================
   - pip:
-    # API and Web Framework
-    - fastapi>=0.126.0,<1.0.0
-    - uvicorn[standard]>=0.24.0,<1.0.0
-    - slowapi>=0.1.9,<1.0.0
-    - python-multipart>=0.0.6,<1.0.0
-    - httpx>=0.25.0  # For testing
+      # API and Web Framework
+      - fastapi>=0.126.0,<1.0.0
+      - uvicorn[standard]>=0.24.0,<1.0.0
+      - slowapi>=0.1.9,<1.0.0
+      - python-multipart>=0.0.6,<1.0.0
+      - httpx>=0.25.0 # For testing
 
-    # Database and Auth
-    - sqlalchemy>=2.0.0,<3.0.0
-    - pydantic[email]>=2.5.0,<3.0.0
-    # SECURITY: Replaced python-jose (CVE-2024-33663, CVE-2024-33664) with PyJWT
-    - PyJWT>=2.10.1,<3.0.0
-    # SECURITY: Replaced passlib (abandoned since 2020) with bcrypt directly
-    - bcrypt>=4.1.0,<5.0.0
-    # cryptography for JWT signatures (updated for CVE-2024-26130)
-    - cryptography>=44.0.1,<47.0.0
+      # Database and Auth
+      - sqlalchemy>=2.0.0,<3.0.0
+      - pydantic[email]>=2.5.0,<3.0.0
+      # SECURITY: Replaced python-jose (CVE-2024-33663, CVE-2024-33664) with PyJWT
+      - PyJWT>=2.10.1,<3.0.0
+      # SECURITY: Replaced passlib (abandoned since 2020) with bcrypt directly
+      - bcrypt>=4.1.0,<5.0.0
+      # cryptography for JWT signatures (updated for CVE-2024-26130)
+      - cryptography>=44.0.1,<47.0.0
 
-    # Data Formats
-    - pyyaml>=6.0.1
-    - defusedxml>=0.7.1,<1.0.0
-    - ezc3d>=1.4.0
+      # Data Formats
+      - pyyaml>=6.0.1
+      - defusedxml>=0.7.1,<1.0.0
+      - ezc3d>=1.4.0
 
-    # Logging and Security
-    - structlog>=24.1.0,<25.0.0
-    - simpleeval>=0.9.13
+      # Logging and Security
+      - structlog>=24.1.0,<25.0.0
+      - simpleeval>=0.9.13
 
-    # Linting (specific version for CI compatibility)
-    - ruff==0.14.10
+      # Linting (specific version for CI compatibility)
+      - ruff==0.14.10
 
-    # Type stubs for mypy
-    - types-PyYAML>=6.0.12.12
-    - pandas-stubs>=2.0.0
-    - types-requests>=2.31.0
+      # Type stubs for mypy
+      - types-PyYAML>=6.0.12.12
+      - pandas-stubs>=2.0.0
+      - types-requests>=2.31.0
 
-    # Install the package itself in editable mode
-    - -e .
-
+      # Install the package itself in editable mode
+      - -e .
 # ============================================================================
 # Platform-specific notes:
 #

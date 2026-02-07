@@ -34,7 +34,7 @@ The original URDF and assets were provided directly by
 7. Removed 2 artifact boxes left from the URDF conversion.
 8. Manually edited the MJCF to extract common properties into the `<default>` section.
 9. Added `<exclude>` clauses to prevent collisions between the forearm and the
-    wrist and thumb bodies.
+   wrist and thumb bodies.
 10. Added position-controlled actuators.
 11. Added `impratio=10` for better noslip.
 12. Hardened the contacts on the hand geoms.

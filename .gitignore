@@ -11,6 +11,7 @@ env/
 .coverage.*
 build/
 dist/
+uv.lock
 
 # MATLAB/Simulink
 *.asv
@@ -51,6 +52,7 @@ ProfilePhoto.jpg
 !launchers/assets/**/*.jpg
 !src/launchers/assets/**/*.png
 !src/launchers/assets/**/*.jpg
+!ui/src-tauri/icons/**/*.png
 
 # Cache directories
 .ruff_cache/

@@ -14,17 +14,20 @@ Complete guide for setting up and using the MuJoCo Golf Swing Model GUI applicat
 ## System Requirements
 
 ### Operating System
+
 - **Windows**: Windows 10 or later (64-bit)
 - **macOS**: macOS 10.15 (Catalina) or later
 - **Linux**: Ubuntu 20.04+, Debian 11+, or equivalent
 
 ### Hardware
+
 - **CPU**: Modern multi-core processor (Intel/AMD x86_64 or Apple Silicon)
 - **RAM**: Minimum 4 GB, recommended 8 GB or more
 - **Graphics**: Any graphics card with OpenGL support (integrated graphics sufficient)
 - **Display**: 1024x768 minimum resolution
 
 ### Python Version
+
 - **Python 3.10 or later** (Python 3.13 recommended)
 - Python 3.13.5 is specified in the conda environment
 
@@ -33,15 +36,18 @@ Complete guide for setting up and using the MuJoCo Golf Swing Model GUI applicat
 ### Core Dependencies
 
 1. **Python 3.10+**
+
    - Download from [python.org](https://www.python.org/downloads/)
    - Or use conda/miniconda (recommended)
 
 2. **MuJoCo Physics Engine**
+
    - Python package: `mujoco>=3.0.0`
    - Automatically installed via pip/conda
    - No separate MuJoCo installation needed (uses Python bindings)
 
 3. **PyQt6 GUI Framework**
+
    - Python package: `PyQt6>=6.6.0`
    - Provides the graphical user interface
    - Cross-platform windowing system
@@ -59,14 +65,17 @@ Complete guide for setting up and using the MuJoCo Golf Swing Model GUI applicat
 ### System-Level Dependencies
 
 #### Windows
+
 - No additional system packages required
 - PyQt6 includes all necessary Qt libraries
 
 #### macOS
+
 - Xcode Command Line Tools (usually installed automatically)
 - If missing, install via: `xcode-select --install`
 
 #### Linux (Ubuntu/Debian)
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
@@ -79,6 +88,7 @@ sudo apt-get install -y \
 ```
 
 #### Linux (Fedora/RHEL)
+
 ```bash
 sudo dnf install -y \
     python3-devel \
@@ -204,6 +214,7 @@ python __main__.py
 #### Method 3: Create a Launcher Script
 
 **Windows** (`run_gui.bat`):
+
 ```batch
 @echo off
 call conda activate sim-env
@@ -212,6 +223,7 @@ pause
 ```
 
 **macOS/Linux** (`run_gui.sh`):
+
 ```bash
 #!/bin/bash
 source ~/miniconda3/etc/profile.d/conda.sh  # Adjust path as needed
@@ -220,6 +232,7 @@ python -m python.mujoco_golf_pendulum
 ```
 
 Make executable:
+
 ```bash
 chmod +x run_gui.sh
 ```
@@ -265,6 +278,7 @@ When launched successfully, you should see:
 #### 1. Model Selection
 
 **Dropdown Menu**: "Pendulum Model"
+
 - **Double Pendulum**: Simplified model with shoulder and wrist joints
   - Faster simulation
   - Good for basic swing analysis
@@ -274,6 +288,7 @@ When launched successfully, you should see:
   - All three torque sliders active
 
 **How to Use**:
+
 - Click the dropdown to select a model
 - The simulation automatically reloads with the new model
 - The pendulum resets to initial backswing position
@@ -281,6 +296,7 @@ When launched successfully, you should see:
 #### 2. Simulation Control
 
 **Play/Pause Button**:
+
 - **Pause** (default): Simulation is running
   - Click to pause the simulation
   - Button text changes to "Play"
@@ -289,6 +305,7 @@ When launched successfully, you should see:
   - Button text changes to "Pause"
 
 **Reset Button**:
+
 - Resets the pendulum to initial backswing position
 - Sets all velocities to zero
 - Does not change current torque settings
@@ -300,17 +317,20 @@ When launched successfully, you should see:
 #### 3. Joint Torque Controls
 
 **Torque Sliders**:
+
 - **Range**: -100 Nm to +100 Nm
 - **Resolution**: 1 Nm per step
 - **Real-time**: Changes apply immediately while simulation runs
 
 **Shoulder Torque**:
+
 - Controls rotation at the shoulder joint
 - Positive values: Forward rotation (downswing)
 - Negative values: Backward rotation (backswing)
 - Always active in both models
 
 **Elbow Torque**:
+
 - Controls rotation at the elbow joint
 - Only active in Triple Pendulum model
 - Disabled (grayed out) in Double Pendulum model
@@ -318,12 +338,14 @@ When launched successfully, you should see:
 - Negative values: Flexion
 
 **Wrist Torque**:
+
 - Controls rotation at the wrist joint
 - Always active in both models
 - Positive values: Forward rotation
 - Negative values: Backward rotation
 
 **Torque Value Display**:
+
 - Shows current torque value next to each slider
 - Updates in real-time as you move the slider
 - Format: Integer value in Nm (Newton-meters)
@@ -331,24 +353,29 @@ When launched successfully, you should see:
 ### Typical Workflow
 
 1. **Start the Application**
+
    ```bash
    python -m python.mujoco_golf_pendulum
    ```
 
 2. **Select a Model**
+
    - Choose Double or Triple Pendulum from dropdown
    - Wait for model to load (instant)
 
 3. **Set Initial Conditions**
+
    - Use Reset button to ensure clean starting state
    - Pendulum starts at top of backswing position
 
 4. **Apply Torques**
+
    - Adjust sliders to apply desired joint torques
    - Start with small values (10-20 Nm) to observe effects
    - Use Pause to freeze simulation while adjusting
 
 5. **Observe Motion**
+
    - Click Play to start/resume simulation
    - Watch the 3D visualization
    - Adjust torques in real-time to control the swing
@@ -369,6 +396,7 @@ When launched successfully, you should see:
 4. **Model Comparison**: Switch between Double and Triple models to understand the effect of the elbow joint
 
 5. **Realistic Torques**: Golf swing torques are typically:
+
    - Shoulder: 50-150 Nm during downswing
    - Elbow: 20-80 Nm
    - Wrist: 10-50 Nm
@@ -385,6 +413,7 @@ When launched successfully, you should see:
 #### Issue: "ModuleNotFoundError: No module named 'mujoco'"
 
 **Solution**:
+
 ```bash
 # Verify environment is activated
 conda activate sim-env  # or: source venv/bin/activate
@@ -396,6 +425,7 @@ pip install --upgrade mujoco
 #### Issue: "ModuleNotFoundError: No module named 'PyQt6'"
 
 **Solution**:
+
 ```bash
 # Install PyQt6
 pip install PyQt6>=6.6.0
@@ -406,11 +436,14 @@ pip install PyQt6>=6.6.0
 #### Issue: Application Window Doesn't Appear
 
 **Possible Causes**:
+
 1. Window opened off-screen
+
    - Check taskbar/dock for the application
    - Try Alt+Tab (Windows/Linux) or Cmd+Tab (macOS)
 
 2. Display server issues (Linux)
+
    ```bash
    # Check if X11/Wayland is running
    echo $DISPLAY
@@ -426,7 +459,9 @@ pip install PyQt6>=6.6.0
 #### Issue: "Segmentation Fault" or Application Crashes
 
 **Possible Causes**:
+
 1. Incompatible Qt version
+
    ```bash
    # Reinstall PyQt6
    pip uninstall PyQt6
@@ -434,6 +469,7 @@ pip install PyQt6>=6.6.0
    ```
 
 2. Corrupted MuJoCo installation
+
    ```bash
    pip uninstall mujoco
    pip install --upgrade mujoco
@@ -446,6 +482,7 @@ pip install PyQt6>=6.6.0
 #### Issue: Simulation Runs Very Slowly
 
 **Solutions**:
+
 1. Use Double Pendulum model (simpler, faster)
 2. Reduce window size
 3. Close other applications
@@ -455,6 +492,7 @@ pip install PyQt6>=6.6.0
 #### Issue: "Permission Denied" on Linux/macOS
 
 **Solution**:
+
 ```bash
 # Make scripts executable
 chmod +x scripts/*.sh
@@ -466,6 +504,7 @@ export PATH="$HOME/miniconda3/bin:$PATH"
 #### Issue: Conda Environment Not Found
 
 **Solution**:
+
 ```bash
 # List all environments
 conda env list
@@ -509,6 +548,7 @@ For best performance:
 ### Command Line Arguments
 
 Currently, the application doesn't support command-line arguments, but you can modify the code to:
+
 - Set initial window size
 - Choose default model
 - Set initial torque values
@@ -517,6 +557,7 @@ Currently, the application doesn't support command-line arguments, but you can m
 ### Customization
 
 You can customize the application by editing:
+
 - `python/mujoco_golf_pendulum/models.py`: Modify pendulum models
 - `python/mujoco_golf_pendulum/__main__.py`: Change GUI layout and controls
 - `python/mujoco_golf_pendulum/sim_widget.py`: Adjust rendering and simulation parameters
@@ -524,6 +565,7 @@ You can customize the application by editing:
 ### Integration with Other Tools
 
 The simulation can be integrated with:
+
 - Data logging scripts
 - Analysis tools (MATLAB, Python scripts)
 - Optimization algorithms

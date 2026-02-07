@@ -7,3 +7,6 @@
 [submodule "src/shared/tools/human-gazebo"]
 	path = src/shared/tools/human-gazebo
 	url = https://github.com/gbionics/human-gazebo
+[submodule "vendor/ud-tools"]
+	path = vendor/ud-tools
+	url = https://github.com/D-sorganization/Tools.git

@@ -1,13 +1,8 @@
 """Authentication routes for user management."""
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, datetime, timedelta, timezone
+# Python 3.10 compatibility: UTC constant was added in 3.11
+from datetime import datetime, timedelta
 from typing import Any
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter
@@ -28,6 +23,7 @@ from src.api.auth.models import (
 )
 from src.api.auth.security import security_manager, usage_tracker
 from src.api.database import get_db
+from src.api.utils.datetime_compat import UTC
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

@@ -1,9 +1,12 @@
 """Utilities for analyzing Python code quality and structure."""
 
 import ast
+import logging
 import re
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def get_python_metrics(file_path: Path) -> dict[str, Any]:
@@ -34,8 +37,8 @@ def get_python_metrics(file_path: Path) -> dict[str, Any]:
             elif isinstance(node, ast.If | ast.For | ast.While | ast.ExceptHandler):
                 metrics["branches"] += 1
 
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to parse %s: %s", file_path, e)
 
     return metrics
 
@@ -84,8 +87,8 @@ def get_detailed_function_metrics(content: str) -> list[dict[str, Any]]:
                         "has_docstring": ast.get_docstring(node) is not None,
                     }
                 )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to parse content: %s", e)
     return functions
 
 
@@ -104,8 +107,8 @@ def grep_count(root: Path, pattern: str, file_pattern: str = "**/*.py") -> int:
                 with p.open(encoding="utf-8", errors="ignore") as f:
                     if regex.search(f.read()):
                         count += 1
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to read %s: %s", p, e)
     return count
 
 

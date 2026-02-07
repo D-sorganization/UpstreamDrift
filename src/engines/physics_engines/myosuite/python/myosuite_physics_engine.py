@@ -20,6 +20,11 @@ if str(_project_root) not in sys.path:
 
 import numpy as np  # noqa: E402
 
+from src.shared.python.contracts import (  # noqa: E402
+    check_finite,
+    postcondition,
+    precondition,
+)
 from src.shared.python.engine_availability import MYOSUITE_AVAILABLE  # noqa: E402
 from src.shared.python.interfaces import PhysicsEngine  # noqa: E402
 from src.shared.python.logging_config import get_logger  # noqa: E402
@@ -63,6 +68,11 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return self.sim.model
         return None
 
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has a loaded environment and simulation."""
+        return self.env is not None and self.sim is not None
+
     def load_from_path(self, path: str) -> None:
         """Load environment by ID (passed as path)."""
         if not MYOSUITE_AVAILABLE:
@@ -105,11 +115,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             "MyoSuite does not support loading from string (requires Env ID registration)"
         )
 
+    @precondition(lambda self: self.env is not None, "Environment must be loaded")
     def reset(self) -> None:
         """Reset environment."""
         if self.env:
             self.env.reset()
 
+    @precondition(
+        lambda self, dt=None: self.env is not None, "Environment must be loaded"
+    )
     def step(self, dt: float | None = None) -> None:
         """Step simulation."""
         if not self.env:
@@ -144,6 +158,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             zero_action = self.env.action_space.sample() * 0
             self.env.step(zero_action)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
         """Compute forward dynamics."""
         if self.sim:
@@ -222,6 +237,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return float(self.sim.data.time)
         return 0.0
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         if not self.sim:
             return np.array([])
@@ -253,6 +270,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             logger.error("Failed to compute mass matrix: %s", e)
             return np.array([])
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         if self.sim:
             return np.array(self.sim.data.qfrc_bias)
@@ -262,6 +281,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         # Not easily exposed separately in basic bindings without extra calc
         return np.array([])
 
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         # Requires calling mj_inverse
         if not self.sim:
@@ -301,6 +322,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     # -------- Section F: Drift-Control Decomposition --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Drift acceleration must contain finite values")
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive (drift) acceleration with zero muscle activations.
 
@@ -338,6 +361,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to compute drift acceleration: {e}")
             return np.array([])
 
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from muscle activations.
 

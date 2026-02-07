@@ -17,15 +17,18 @@
 ### 1. ❌ **ICN003 Global Ignore + banned-from Removal (PROBLEMATIC)**
 
 **What Changed:**
+
 - Added `ICN003` to global ignore list
 - Changed `banned-from = ["typing"]` to `banned-from = []`
 
 **Issue:**
 This is a **double bypass** of the typing import convention:
+
 1. `ICN003` suppresses warnings about typing imports
 2. Removing `banned-from = ["typing"]` allows typing imports without any checks
 
 **Standard Across Repos:**
+
 - ✅ **2D_Golf_Model**: `banned-from = ["typing"]` (no ICN003 ignore)
 - ✅ **Project_Template**: `banned-from = ["typing"]` (no ICN003 ignore)
 - ✅ **Data_Processor**: `banned-from = ["typing"]` (no ICN003 ignore)
@@ -34,12 +37,14 @@ This is a **double bypass** of the typing import convention:
 
 **Proper Solution:**
 The codebase uses `typing` imports for legitimate reasons:
+
 - `from typing import Literal` (spatial_algebra/spatial_vectors.py)
 - `from typing import Final` (sim_widget.py)
 - `from typing import TYPE_CHECKING` (test_cli_runner.py)
 - `from typing import Any` (advanced_export.py, cli_runner.py)
 
 **Recommended Fix:**
+
 ```toml
 # Keep the ban to enforce best practices
 [lint.flake8-import-conventions]
@@ -69,11 +74,13 @@ This maintains consistency with other repos while allowing legitimate exceptions
 
 **What Changed:**
 Added per-file ignores for mathematical notation:
+
 - `N802`, `N803`, `N806` (non-lowercase variable/function names)
 - `RUF002`, `RUF003` (unicode symbols like × in docstrings/comments)
 - `PT011` (pytest.raises patterns)
 
 **Assessment:** ✅ **LEGITIMATE**
+
 - These are consistent with `Gasification_Model/ruff.toml` which has similar suppressions
 - Scientific/mathematical code legitimately uses:
   - Uppercase variables (X, T, S, E) for mathematical conventions
@@ -81,6 +88,7 @@ Added per-file ignores for mathematical notation:
   - Qt override methods (wheelEvent) that require specific naming
 
 **Consistency Check:**
+
 - ✅ Matches patterns in `Gasification_Model/ruff.toml` (lines 53-55, 62-63, 92)
 - ✅ Appropriate for scientific computing codebase
 
@@ -90,6 +98,7 @@ Added per-file ignores for mathematical notation:
 
 **What Changed:**
 Added targeted ignores for:
+
 - `**/sim_widget.py` - Qt override methods
 - `**/__main__.py` - GUI setup complexity
 - `**/control_system.py` - Control system parameters
@@ -99,6 +108,7 @@ Added targeted ignores for:
 - `tests/**/*.py` - Test conventions
 
 **Assessment:** ✅ **LEGITIMATE**
+
 - These are targeted, well-documented suppressions
 - Each has a clear justification
 - Follows the pattern of per-file ignores rather than global ignores
@@ -108,6 +118,7 @@ Added targeted ignores for:
 ### 4. ⚠️ **Removed Per-File Ignores (NEEDS REVIEW)**
 
 **What Was Removed:**
+
 - `**/models.py` - E501 (line length)
 - `**/club_configurations.py` - E501 (line length)
 - `**/advanced_export.py` - Multiple ignores
@@ -117,6 +128,7 @@ Added targeted ignores for:
 - `**/examples/*.py` - Multiple ignores
 
 **Assessment:** ⚠️ **NEEDS VERIFICATION**
+
 - If these files were removed from the codebase, this is fine
 - If these files still exist, removing ignores may cause new errors
 - **Action Required:** Verify these files still exist and if they need these ignores
@@ -126,11 +138,13 @@ Added targeted ignores for:
 ## CI/CD Compliance Check
 
 ### ✅ **Compliant:**
+
 - Ruff version: `ruff==0.5.0` (matches standard)
 - Workflow respects `ruff.toml` config (line 66-68 in pr-quality-check.yml)
 - Uses `ruff check .` when config exists (doesn't override)
 
 ### ❌ **Inconsistent:**
+
 - `banned-from = []` differs from standard `banned-from = ["typing"]` across all other repos
 - Global `ICN003` ignore differs from per-file approach used elsewhere
 
@@ -139,6 +153,7 @@ Added targeted ignores for:
 ## Recommendations
 
 ### **Option 1: Fix Properly (RECOMMENDED)**
+
 1. **Revert** the `banned-from = []` change
 2. **Revert** the global `ICN003` ignore
 3. **Add** per-file `ICN003` ignores only for files that legitimately need typing:
@@ -146,12 +161,15 @@ Added targeted ignores for:
    - Document why each file needs typing imports
 
 ### **Option 2: Document Exception (IF JUSTIFIED)**
+
 If there's a legitimate reason to allow typing imports globally:
+
 1. **Document** why this repo is different from others
 2. **Update** `UNIFIED_CI_APPROACH.md` to reflect this exception
 3. **Ensure** all other repos remain consistent
 
 ### **Option 3: Hybrid Approach**
+
 1. Keep `banned-from = ["typing"]` for consistency
 2. Add `ICN003` to per-file ignores for specific files
 3. Update code where possible to use `collections.abc` instead of `typing`
@@ -160,18 +178,18 @@ If there's a legitimate reason to allow typing imports globally:
 
 ## Consistency Matrix
 
-| Repository | `banned-from` | `ICN003` in ignore | Status |
-|------------|---------------|-------------------|--------|
-| 2D_Golf_Model | `["typing"]` | ❌ No | ✅ Standard |
-| Project_Template | `["typing"]` | ❌ No | ✅ Standard |
-| Data_Processor | `["typing"]` | ❌ No | ✅ Standard |
-| Audio_Processor | `["typing"]` | ❌ No | ✅ Standard |
-| Robotics | `["typing"]` | ❌ No | ✅ Standard |
-| Video_Processor | `["typing"]` | ❌ No | ✅ Standard |
-| MLProjects | `["typing"]` | ❌ No | ✅ Standard |
-| Tools | `["typing"]` | ❌ No | ✅ Standard |
-| Gasification_Model | `["typing"]` | ✅ Yes (inconsistent) | ⚠️ Inconsistent |
-| **MuJoCo (PR)** | `[]` | ✅ Yes (global) | ❌ **Breaks standard** |
+| Repository         | `banned-from` | `ICN003` in ignore    | Status                 |
+| ------------------ | ------------- | --------------------- | ---------------------- |
+| 2D_Golf_Model      | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Project_Template   | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Data_Processor     | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Audio_Processor    | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Robotics           | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Video_Processor    | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| MLProjects         | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Tools              | `["typing"]`  | ❌ No                 | ✅ Standard            |
+| Gasification_Model | `["typing"]`  | ✅ Yes (inconsistent) | ⚠️ Inconsistent        |
+| **MuJoCo (PR)**    | `[]`          | ✅ Yes (global)       | ❌ **Breaks standard** |
 
 ---
 
@@ -187,6 +205,7 @@ The PR contains legitimate fixes (mathematical notation suppressions) but also i
 4. ✅ **Per-file ignores** for specific modules are appropriate
 
 **Recommended Action:**
+
 - Keep the mathematical notation and per-file ignore changes
 - Revert the `banned-from` and global `ICN003` changes
 - Add targeted per-file `ICN003` ignores for files that legitimately need typing imports
@@ -214,4 +233,3 @@ This maintains consistency with CI/CD standards while allowing legitimate except
 3. Update PR with proper fixes
 4. Verify CI/CD still passes with corrected config
 5. Ensure consistency across all repositories
-

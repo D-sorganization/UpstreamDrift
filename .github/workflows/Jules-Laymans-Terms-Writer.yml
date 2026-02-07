@@ -4,31 +4,31 @@ on:
   workflow_call:
     inputs:
       target_file:
-        description: 'Specific .qmd file to update (leave empty for all)'
+        description: "Specific .qmd file to update (leave empty for all)"
         required: false
         type: string
       mode:
-        description: 'Mode: create (new sections) or refine (improve existing)'
+        description: "Mode: create (new sections) or refine (improve existing)"
         required: false
-        default: 'auto'
+        default: "auto"
         type: string
   workflow_dispatch:
     inputs:
       target_file:
-        description: 'Specific .qmd file to update (leave empty for all)'
+        description: "Specific .qmd file to update (leave empty for all)"
         required: false
         type: string
       mode:
-        description: 'Mode: create (new sections) or refine (improve existing)'
+        description: "Mode: create (new sections) or refine (improve existing)"
         required: false
-        default: 'auto'
+        default: "auto"
         type: choice
         options:
           - auto
           - create
           - refine
   schedule:
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4" # Daily at 1:30 AM UTC (overnight schedule)
 
 permissions:
   contents: write
@@ -196,51 +196,51 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           REPO="${{ github.repository }}"
           API_BASE="https://jules.googleapis.com/v1alpha"
-          
+
           # Check if API key is configured
           if [ -z "$JULES_API_KEY" ]; then
             echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
             exit 0
           fi
-          
+
           echo "Looking up repository source..."
           SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
-          
+
           OWNER=$(echo "$REPO" | cut -d'/' -f1)
           REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
-          
+
           SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
-          
+
           if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
             echo "::warning::Repository $REPO not found in Jules sources."
             exit 0
           fi
-          
+
           echo "Found source: $SOURCE_ID"
-          
+
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
           '
           You are the LAYMAN'S TERMS WRITER for AffineDrift - a technical golf science website.
-          
+
           ## Current Task
           - MODE: $MODE
           - TARGET: $TARGET_FILE
           - REVIEW: $REVIEW_NUM of 5
-          
+
           ## Mode-Specific Instructions
-          
+
           ### If MODE = "create":
           Add a NEW "In Layman's Terms" section to the target article.
           Follow the HTML template exactly.
-          
+
           ### If MODE = "refine":
           IMPROVE the existing section. This is review $REVIEW_NUM:
           - Review 1-2: Focus on CLARITY - simplify complex explanations
           - Review 3: Focus on ANALOGIES - make them more relatable
           - Review 4: Focus on COMPLETENESS - ensure all key concepts covered
           - Review 5: Final POLISH - grammar, flow, accessibility
-          
+
           ## HTML Structure (MUST FOLLOW EXACTLY)
           ```html
           <section class="laymans-terms">
@@ -253,7 +253,7 @@ jobs:
                 <p class="laymans-terms-intro">
                   [Brief intro about what you'll learn]
                 </p>
-          
+
                 <div class="laymans-item">
                   <h3>[Topic Title]</h3>
                   <p>[Simple explanation - avoid jargon]</p>
@@ -261,7 +261,7 @@ jobs:
           <strong>Think of it like:</strong> [Relatable everyday analogy]
                   </div>
                 </div>
-          
+
                 <div class="key-takeaway">
                   <strong>Key Takeaway:</strong> [One sentence summary]
                 </div>
@@ -269,7 +269,7 @@ jobs:
             </div>
           </section>
           ```
-          
+
           ## Writing Guidelines
           1. Read the FULL article to understand the technical content
           2. Identify 3-5 key concepts that need simplification
@@ -277,18 +277,18 @@ jobs:
           4. Avoid ALL technical jargon in explanations
           5. Make it accessible to someone with no golf or physics background
           6. Place the section AFTER the main content, BEFORE any references
-          
+
           ## Quality Checks
           - Every laymans-item MUST have an analogy
           - Analogies should be relatable (not golf-specific)
           - Key takeaway should be actionable or memorable
           - Keep explanations under 3 sentences each
-          
+
           IMPORTANT: You ARE authorized to modify .qmd files.
           ONLY modify the target file: $TARGET_FILE
           PROMPT_EOF
           )
-          
+
           echo "Creating Jules session..."
           REQUEST_JSON=$(jq -n \
             --arg prompt "$PROMPT" \
@@ -303,36 +303,36 @@ jobs:
               },
               automationMode: "AUTO_CREATE_PR"
             }')
-          
+
           echo "Request: $REQUEST_JSON"
-          
+
           HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
             -H "X-Goog-Api-Key: $JULES_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$REQUEST_JSON" \
             "$API_BASE/sessions")
-          
+
           SESSION_RESPONSE=$(cat /tmp/session_response.json)
           echo "HTTP Status: $HTTP_CODE"
-          
+
           if [ "$HTTP_CODE" != "200" ]; then
             echo "::error::Jules API returned HTTP $HTTP_CODE"
             exit 1
           fi
-          
+
           SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
           echo "Created session: $SESSION_ID"
-          
+
           # Poll for completion
           MAX_WAIT=1800
           POLL_INTERVAL=30
           ELAPSED=0
-          
+
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
             STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
             echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
-          
+
             case "$STATE" in
               "COMPLETED"|"SUBMITTED")
                 echo "Session completed successfully!"
@@ -346,8 +346,6 @@ jobs:
             sleep $POLL_INTERVAL
             ELAPSED=$((ELAPSED + POLL_INTERVAL))
           done
-          
-
 
       - name: Update Review Log
         if: steps.select.outputs.skip != 'true'

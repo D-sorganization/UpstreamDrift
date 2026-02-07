@@ -36,4 +36,3 @@ This repository includes optimized Cursor settings for cross-computer developmen
 - **`CURSOR_SETTINGS_README.md`** - Detailed usage guide for syncing settings across computers
 
 Copy these settings to your Cursor `settings.json` for consistent development experience.
-

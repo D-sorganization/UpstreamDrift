@@ -20,15 +20,15 @@ on:
 
   # Also run on a schedule to catch any missed PRs
   schedule:
-    - cron: "0 8 */3 * *"  # Every 2 hours (reduced from 15 min for cost control)
+    - cron: "0 0 * * 0,4" # Every 2 hours (reduced from 15 min for cost control)
 
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'PR number to trigger CI for (optional)'
+        description: "PR number to trigger CI for (optional)"
         required: false
       force:
-        description: 'Force trigger even if checks exist'
+        description: "Force trigger even if checks exist"
         required: false
         type: boolean
         default: false

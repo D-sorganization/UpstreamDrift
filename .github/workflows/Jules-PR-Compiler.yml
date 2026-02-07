@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run - report only, no changes'
+        description: "Dry run - report only, no changes"
         required: false
         default: false
         type: boolean
   schedule:
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4" # Daily at 3:30 AM UTC (overnight schedule)
 
 permissions:
   contents: write

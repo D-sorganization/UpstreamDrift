@@ -8,19 +8,23 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // hls.js ESM entry is missing in v1.6.x — alias to the CJS dist
+      'hls.js': path.resolve(__dirname, 'node_modules/hls.js/dist/hls.js'),
     },
   },
 
   server: {
-    port: 3000,
+    port: 5180,
+    strictPort: true,
+    open: false,
     proxy: {
-      // Proxy API requests to local backend during development
+      // Proxy API requests to Docker backend during development
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8001',
         changeOrigin: true,
       },
       '/api/ws': {
-        target: 'ws://localhost:8000',
+        target: 'ws://localhost:8001',
         ws: true,
       },
     },

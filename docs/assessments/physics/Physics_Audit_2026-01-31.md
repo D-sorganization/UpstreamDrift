@@ -16,13 +16,16 @@ The UpstreamDrift codebase demonstrates a strong foundation in physics-based mod
 ## Findings by Category
 
 ### 1. Mathematical Correctness
+
 - **Issue:** `dimensionless_jerk` calculation has dimensions of Frequency ($T^{-1}$).
   - **Location:** `src/shared/python/statistical_analysis.py` (Line 1150)
   - **Status:** **Confirmed Error** (See Issue 042).
   - **Impact:** Misleading metric for smoothness comparison.
 
 ### 2. Physical Plausibility
+
 - **Issue:** Golf ball spin does not decay during flight.
+
   - **Location:** `src/shared/python/ball_flight_physics.py`
   - **Details:** `omega` is treated as a constant in the RK4 integration loop.
   - **Status:** **Critical Error** (See Issue 008).
@@ -35,7 +38,9 @@ The UpstreamDrift codebase demonstrates a strong foundation in physics-based mod
   - **Impact:** Overestimation of drag for high shots (e.g., driver apex > 30m).
 
 ### 3. Biomechanics Accuracy
+
 - **Issue:** Kinematic Sequence missing efficiency transfer metrics.
+
   - **Location:** `src/shared/python/kinematic_sequence.py`
   - **Details:** Identifies peak timing but lacks "Speed Gain" (output/input velocity ratio between segments) and "Braking" (proximal deceleration) quantification.
   - **Status:** **Gap** (New Issue 013).
@@ -48,13 +53,16 @@ The UpstreamDrift codebase demonstrates a strong foundation in physics-based mod
   - **Impact:** Skewed efficiency ratings for swings with high deceleration requirements.
 
 ### 4. Ball Flight Physics
+
 - **Issue:** Oversimplified Lift/Drag Coefficients.
   - **Location:** `src/shared/python/ball_flight_physics.py`
   - **Details:** Uses simple quadratic spin ratio models or constants. Lacks Reynolds number dependency for drag crisis (transition from laminar to turbulent).
   - **Status:** **Limitation** (See Issue 008 references).
 
 ### 5. Equipment Models
+
 - **Issue:** Clubhead treated as a Point Mass in Impact Solver.
+
   - **Location:** `src/shared/python/impact_model.py` (`RigidBodyImpactModel`)
   - **Details:** Conservation of momentum equations ignore clubhead Moment of Inertia (MOI).
   - **Status:** **Critical Error** (New Issue 012).
@@ -66,21 +74,25 @@ The UpstreamDrift codebase demonstrates a strong foundation in physics-based mod
   - **Status:** **Critical Gap** (See Issue 011).
 
 ### 6. Statistical Methods
+
 - **Issue:** Lyapunov Exponent implementation looks robust (Rosenstein).
 - **Issue:** `efficiency_score` metric definition is non-standard (Output KE / Positive Work).
 
 ## Validation Recommendations
 
 ### Test Cases Needed
+
 1.  **Spin Decay Verification:** Compare simulated trajectory of a 3000rpm vs 10000rpm shot against TrackMan data. The 10000rpm shot should show significant apex curvature and steeper descent, with spin landing < 10000rpm.
 2.  **Off-Center Impact:** Validate `RigidBodyImpactModel` against theoretical rigid body collision (e.g., rod striking sphere) to demonstrate lack of rotation error.
 3.  **Kinematic Sequence:** Validation against TPI 3D normative ranges for amateur vs pro golfers.
 
 ### Citations Needed
+
 - `src/shared/python/impact_model.py`: The `gear_effect_h_scale=100.0` requires a source or derivation. (Likely empirical/phenomenological).
 - `src/shared/python/ball_flight_physics.py`: The specific coefficients `cd0=0.21`, `cl1=0.38` need specific ball model attribution (e.g., Titleist ProV1 vs Generic).
 
 ## Summary of Actions
+
 - **Issue 008** (Existing): Fix Ball Spin Decay.
 - **Issue 010** (Existing): Fix Ball MOI.
 - **Issue 011** (Existing): Fix Gear Effect Heuristic.

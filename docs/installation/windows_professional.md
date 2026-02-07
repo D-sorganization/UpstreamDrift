@@ -7,6 +7,7 @@ This guide covers the professional Windows installation process for Golf Modelin
 ## 🎯 Quick Start (Recommended)
 
 ### Option 1: MSI Installer (Coming Soon)
+
 The easiest way to install Golf Modeling Suite on Windows with all dependencies managed automatically.
 
 1. **Download the MSI installer** from our releases page
@@ -26,12 +27,14 @@ For developers and advanced users who need full control over the installation.
 ## 📋 Prerequisites
 
 ### System Requirements
+
 - **Windows 10/11** (64-bit)
 - **8GB RAM minimum** (16GB recommended for multi-engine use)
 - **5GB free disk space** (more for models and data)
 - **Graphics card** with OpenGL 3.3+ support
 
 ### Software Prerequisites
+
 - **Python 3.11+** ([Download from python.org](https://www.python.org/downloads/))
 - **Git with Git LFS** ([Download from git-scm.com](https://git-scm.com/))
 - **Visual Studio Build Tools** (for some physics engines)
@@ -93,30 +96,35 @@ python -c "import shared.python.version; print(shared.python.version.__version__
 Choose which physics engines to install based on your needs:
 
 #### MuJoCo (Always Recommended)
+
 ```powershell
 # MuJoCo is included in base installation
 python -c "import mujoco; print('MuJoCo:', mujoco.__version__)"
 ```
 
 #### Drake (Trajectory Optimization)
+
 ```powershell
 pip install "drake>=1.22.0"
 python -c "import pydrake; print('Drake installed successfully')"
 ```
 
 #### Pinocchio (High-Performance Dynamics)
+
 ```powershell
 pip install "pin>=2.6.0" "pin-pink>=1.0.0"
 python -c "import pinocchio; print('Pinocchio:', pinocchio.__version__)"
 ```
 
 #### MyoSuite (Muscle Simulation)
+
 ```powershell
 pip install "myosuite>=2.0.0"
 python -c "import myosuite; print('MyoSuite installed successfully')"
 ```
 
 #### OpenSim (Biomechanics)
+
 ```powershell
 # OpenSim requires additional setup - see OpenSim documentation
 # pip install opensim
@@ -186,19 +194,23 @@ pip install "boto3>=1.34.0" "azure-storage-blob>=12.19.0"
 ### Common Issues
 
 #### "Python not found"
+
 - Ensure Python is added to PATH during installation
 - Restart command prompt after Python installation
 
 #### "Git LFS not working"
+
 - Run `git lfs install` in command prompt
 - Re-clone repository if LFS files are missing
 
 #### "Physics engine import errors"
+
 - Check that virtual environment is activated
 - Verify engine-specific dependencies are installed
 - Some engines require Visual Studio Build Tools
 
 #### "Model files not found"
+
 - Run the model setup command again
 - Check internet connection for model downloads
 - Verify Git LFS is working properly
@@ -206,18 +218,21 @@ pip install "boto3>=1.34.0" "azure-storage-blob>=12.19.0"
 ### Performance Optimization
 
 #### For Research Use
+
 ```powershell
 # Install all engines for cross-validation
 pip install -e ".[engines,analysis,optimization]"
 ```
 
 #### For Production Use
+
 ```powershell
 # Install only required engines
 pip install -e ".[analysis]"  # Core + video analysis
 ```
 
 #### For Development
+
 ```powershell
 # Install development tools
 pip install -e ".[dev,engines,analysis,optimization]"
@@ -227,15 +242,18 @@ pre-commit install
 ## 📞 Professional Support
 
 ### Documentation
+
 - **User Guide**: `docs/user_guide/`
 - **API Documentation**: `http://localhost:8000/docs` (when server running)
 - **Developer Guide**: `docs/developer_guide/`
 
 ### Community Support
+
 - **GitHub Issues**: Report bugs and feature requests
 - **Discussions**: Community Q&A and best practices
 
 ### Professional Support
+
 - **Enterprise Support**: Available for research institutions and companies
 - **Custom Development**: Tailored solutions for specific needs
 - **Training**: Professional training programs available

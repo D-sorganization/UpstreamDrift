@@ -14,16 +14,18 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-try:
+if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
     from pinocchio.visualize import MeshcatVisualizer
+else:
+    pin = None  # type: ignore[assignment]
+    MeshcatVisualizer = None  # type: ignore[misc, assignment]
 
-    PINOCCHIO_AVAILABLE = True
-except ImportError:
-    PINOCCHIO_AVAILABLE = False
 
 try:
     import meshcat

@@ -5,6 +5,7 @@ A comprehensive, reusable toolkit for MATLAB code quality checking, testing, and
 ## Overview
 
 This package provides automated quality control tools for MATLAB projects, including:
+
 - **Code Analysis**: MATLAB mlint/checkcode integration
 - **Static Analysis**: Python-based static analysis (no MATLAB license required)
 - **Testing Framework**: Automated test execution and reporting
@@ -30,6 +31,7 @@ matlab_utilities/
 ### Installation
 
 **Option 1: Copy to Your Project**
+
 ```bash
 # Copy entire utilities package to your project
 cp -r matlab_utilities /path/to/your/project/
@@ -40,6 +42,7 @@ addpath('matlab_utilities/testing');
 ```
 
 **Option 2: Git Submodule (Recommended)**
+
 ```bash
 # Add as submodule (stays updated across projects)
 git submodule add <repository-url> matlab_utilities
@@ -51,6 +54,7 @@ addpath('matlab_utilities/testing');
 ```
 
 **Option 3: Symbolic Link**
+
 ```bash
 # Create symlink (for local development across multiple projects)
 ln -s /path/to/matlab_utilities /path/to/your/project/matlab_utilities
@@ -169,6 +173,7 @@ exit 0
 ```
 
 Make hooks executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 chmod +x .git/hooks/pre-push
@@ -184,7 +189,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   matlab-quality-check:
@@ -232,6 +237,7 @@ repos:
 ### MATLAB Code Analyzer (mlint/checkcode)
 
 When running with MATLAB, the following checks are performed:
+
 - Syntax errors and warnings
 - Unused variables
 - Unreachable code
@@ -245,15 +251,18 @@ When running with MATLAB, the following checks are performed:
 The Python-based analyzer checks for:
 
 **Required Structure**:
+
 - Function docstrings
 - Arguments validation blocks
 - Proper error handling
 
 **Banned Patterns**:
+
 - TODO, FIXME, HACK, XXX placeholders
 - Template placeholders (`<VAR>`, `{{var}}`)
 
 **Code Quality Issues**:
+
 - Magic numbers (undefined constants)
 - Known physics constants without definition
 - Global variables
@@ -264,6 +273,7 @@ The Python-based analyzer checks for:
 - `addpath` in functions
 
 **Best Practices**:
+
 - Proper encapsulation
 - No workspace pollution
 - Explicit path management
@@ -281,6 +291,7 @@ results = run_quality_checks('.', ...
 ### Custom Output Formats
 
 Supported output formats:
+
 - `.csv` - Comma-separated values
 - `.xlsx` - Excel spreadsheet
 - `.json` - JSON format
@@ -356,10 +367,12 @@ end
 ## Requirements
 
 ### MATLAB Tools
+
 - MATLAB R2019b or later (for `exportCodeIssues.m` and `run_quality_checks.m`)
 - Code Analyzer (mlint/checkcode) - included with MATLAB
 
 ### Python Tools
+
 - Python 3.7 or later (3.11+ recommended for CI/CD)
 - No additional dependencies required for `matlab_quality_check.py`
 
@@ -368,6 +381,7 @@ end
 **Important**: The MATLAB-based tools (`*.m` files) require a valid MATLAB license to run.
 
 For CI/CD environments:
+
 - Use the **Python static analyzer** if you don't have a CI/CD-compatible MATLAB license
 - The Python tools provide quality checking **without requiring MATLAB**
 - For local development, use MATLAB tools with your standard development license
@@ -377,6 +391,7 @@ For CI/CD environments:
 ### "MATLAB not found" in CI/CD
 
 **Solution**: Use the Python static analyzer instead:
+
 ```bash
 python matlab_utilities/scripts/matlab_quality_check.py
 ```
@@ -384,6 +399,7 @@ python matlab_utilities/scripts/matlab_quality_check.py
 ### Pre-commit hooks not running
 
 **Solution**: Ensure hooks are executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 chmod +x .git/hooks/pre-push
@@ -392,6 +408,7 @@ chmod +x .git/hooks/pre-push
 ### Too many false positives
 
 **Solution**: Customize the exclusions or use non-strict mode:
+
 ```matlab
 results = run_quality_checks('.', 'StrictMode', false);
 ```
@@ -403,6 +420,7 @@ See the parent project for complete examples of integration.
 ## Contributing
 
 To improve these utilities:
+
 1. Make changes to your local copy
 2. Test thoroughly with your project
 3. Submit improvements back to the main utilities repository
@@ -410,6 +428,7 @@ To improve these utilities:
 ## Support
 
 For issues or questions:
+
 - Check the documentation in each tool's header comments
 - Review the parent project's quality control documentation
 - Consult MATLAB's checkcode documentation

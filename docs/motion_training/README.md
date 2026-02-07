@@ -31,18 +31,19 @@ This module implements inverse kinematics (IK) based motion training for golf sw
 
 The motion capture data is stored in Excel format with the following structure:
 
-| Field | Description | Units |
-|-------|-------------|-------|
-| Sample # | Frame index | integer |
-| Time | Time relative to impact (T=0) | seconds |
-| Mid-hands (X,Y,Z) | Grip center position | centimeters |
-| Mid-hands (Xx,Xy,Xz) | Grip X-axis orientation | unit vector |
-| Mid-hands (Yx,Yy,Yz) | Grip Y-axis orientation | unit vector |
-| Club face (X,Y,Z) | Club face center position | centimeters |
-| Club face (Xx,Xy,Xz) | Club face X-axis orientation | unit vector |
-| Club face (Yx,Yy,Yz) | Club face Y-axis orientation | unit vector |
+| Field                | Description                   | Units       |
+| -------------------- | ----------------------------- | ----------- |
+| Sample #             | Frame index                   | integer     |
+| Time                 | Time relative to impact (T=0) | seconds     |
+| Mid-hands (X,Y,Z)    | Grip center position          | centimeters |
+| Mid-hands (Xx,Xy,Xz) | Grip X-axis orientation       | unit vector |
+| Mid-hands (Yx,Yy,Yz) | Grip Y-axis orientation       | unit vector |
+| Club face (X,Y,Z)    | Club face center position     | centimeters |
+| Club face (Xx,Xy,Xz) | Club face X-axis orientation  | unit vector |
+| Club face (Yx,Yy,Yz) | Club face Y-axis orientation  | unit vector |
 
 **Event Markers:**
+
 - **A (Address)**: Starting position
 - **T (Top)**: Top of backswing
 - **I (Impact)**: Ball contact
@@ -53,6 +54,7 @@ The motion capture data is stored in Excel format with the following structure:
 We use **Pink** (a task-based IK solver for Pinocchio) with the following task formulation:
 
 #### Primary Tasks: Hand Placement
+
 - **Left Hand Task**: SE(3) frame task tracking the left grip position
 - **Right Hand Task**: SE(3) frame task tracking the right grip position
 
@@ -64,22 +66,26 @@ right_hand_pos = mid_hands_pos + offset_right @ local_rotation
 ```
 
 Where offsets are typically:
+
 - Left hand: +3-4 cm along grip axis (bottom hand for right-handed golfer)
 - Right hand: -3-4 cm along grip axis (top hand for right-handed golfer)
 
 #### Secondary Tasks: Posture Regularization
+
 - **Posture Task**: Low-weight regularization toward a reference pose
 - **Joint Limit Task**: Soft constraints to keep joints within limits
 
 ### 3. Humanoid Model Requirements
 
 The golfer model must have:
+
 - **Pelvis as root** (can be fixed or floating base)
 - **Full arm kinematic chains**: Shoulder (3DOF) → Elbow (2DOF) → Wrist (2DOF) → Hand
 - **Spine articulation**: For torso rotation during swing
 - **Leg chains**: For weight transfer and balance
 
 Key frames (end-effectors):
+
 - `hand_left` - Left hand link
 - `hand_right` - Right hand link
 
@@ -158,28 +164,29 @@ Output: Joint trajectory Q = {q_i}
 
 ### Solver Settings
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `solver` | "quadprog" | QP solver backend |
-| `damping` | 1e-6 | Levenberg-Marquardt damping |
-| `dt` | 0.01 | Integration timestep |
-| `max_iterations` | 100 | Max IK iterations per frame |
-| `position_tolerance` | 1e-3 | Position error tolerance (m) |
-| `orientation_tolerance` | 1e-2 | Orientation error tolerance (rad) |
+| Parameter               | Default    | Description                       |
+| ----------------------- | ---------- | --------------------------------- |
+| `solver`                | "quadprog" | QP solver backend                 |
+| `damping`               | 1e-6       | Levenberg-Marquardt damping       |
+| `dt`                    | 0.01       | Integration timestep              |
+| `max_iterations`        | 100        | Max IK iterations per frame       |
+| `position_tolerance`    | 1e-3       | Position error tolerance (m)      |
+| `orientation_tolerance` | 1e-2       | Orientation error tolerance (rad) |
 
 ### Task Weights
 
-| Task | Weight | Description |
-|------|--------|-------------|
-| Left hand position | 10.0 | High priority hand tracking |
-| Left hand orientation | 5.0 | Moderate orientation tracking |
-| Right hand position | 10.0 | High priority hand tracking |
-| Right hand orientation | 5.0 | Moderate orientation tracking |
-| Posture regularization | 1e-3 | Soft preference for reference pose |
+| Task                   | Weight | Description                        |
+| ---------------------- | ------ | ---------------------------------- |
+| Left hand position     | 10.0   | High priority hand tracking        |
+| Left hand orientation  | 5.0    | Moderate orientation tracking      |
+| Right hand position    | 10.0   | High priority hand tracking        |
+| Right hand orientation | 5.0    | Moderate orientation tracking      |
+| Posture regularization | 1e-3   | Soft preference for reference pose |
 
 ### Hand Grip Offsets
 
 For a standard golf grip (right-handed golfer):
+
 ```python
 LEFT_HAND_OFFSET = [0.0, 0.0, 0.04]   # 4cm below grip center (lead hand)
 RIGHT_HAND_OFFSET = [0.0, 0.0, -0.04]  # 4cm above grip center (trail hand)
@@ -188,6 +195,7 @@ RIGHT_HAND_OFFSET = [0.0, 0.0, -0.04]  # 4cm above grip center (trail hand)
 ## Visualization
 
 The visualizer shows:
+
 1. **Club trajectory path**: As a line/ribbon through space
 2. **Club at each frame**: Semi-transparent club model
 3. **Humanoid model**: Full body following the motion
@@ -204,6 +212,7 @@ exporter.export(configurations, "motion_data/swing_trajectory.json")
 ```
 
 Output format:
+
 ```json
 {
   "model": "golfer.xml",
@@ -227,15 +236,18 @@ exporter.export(configurations, "motion_data/swing_trajectory.yaml")
 ### Common Issues
 
 1. **IK fails to converge**
+
    - Increase max iterations
    - Check if target is reachable (within arm length)
    - Reduce target velocity (smaller dt)
 
 2. **Joint limits violated**
+
    - Add joint limit tasks with higher weight
    - Check model joint limit definitions
 
 3. **Discontinuous motion**
+
    - Use smaller dt steps
    - Add velocity smoothing
    - Check for singularities

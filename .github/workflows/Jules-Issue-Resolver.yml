@@ -5,13 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       max_issues:
-        description: 'Maximum issues to fix per run'
+        description: "Maximum issues to fix per run"
         required: false
-        default: '5'
+        default: "5"
         type: string
   # Schedule disabled - orchestrated by Jules-Control-Tower.yml
   # schedule:
-  #   - cron: "30 2 * * *"  # Daily at 2:30 AM UTC (overnight window)
+  #   - cron: "0 0 * * 0,4"  # Daily at 2:30 AM UTC (overnight window)
 
 permissions:
   contents: write
@@ -97,42 +97,42 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           REPO="${{ github.repository }}"
           API_BASE="https://jules.googleapis.com/v1alpha"
-          
+
           # Check if API key is configured
           if [ -z "$JULES_API_KEY" ]; then
             echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
             exit 0
           fi
-          
+
           echo "Looking up repository source..."
           SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
-          
+
           OWNER=$(echo "$REPO" | cut -d'/' -f1)
           REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
-          
+
           SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
-          
+
           if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
             echo "::warning::Repository $REPO not found in Jules sources."
             exit 0
           fi
-          
+
           echo "Found source: $SOURCE_ID"
-          
+
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
           '
           You are the ISSUE RESOLVER agent. FIX identified issues from .jules/resolver_data/.
-          
+
           1. Identify TOP $MAX_ISSUES priority items
           2. ACTUALLY FIX THEM - make code changes
           3. Run: ruff check . --fix && black .
           4. Document in docs/assessments/issues/resolved/
-          
+
           Include "Fixes #NUM" for issues you completely resolve.
           PROMPT_EOF
           )
-          
+
           echo "Creating Jules session..."
           REQUEST_JSON=$(jq -n \
             --arg prompt "$PROMPT" \
@@ -147,36 +147,36 @@ jobs:
               },
               # automationMode: "AUTO_CREATE_PR"
             }')
-          
+
           echo "Request: $REQUEST_JSON"
-          
+
           HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
             -H "X-Goog-Api-Key: $JULES_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$REQUEST_JSON" \
             "$API_BASE/sessions")
-          
+
           SESSION_RESPONSE=$(cat /tmp/session_response.json)
           echo "HTTP Status: $HTTP_CODE"
-          
+
           if [ "$HTTP_CODE" != "200" ]; then
             echo "::error::Jules API returned HTTP $HTTP_CODE"
             exit 1
           fi
-          
+
           SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
           echo "Created session: $SESSION_ID"
-          
+
           # Poll for completion
           MAX_WAIT=1800
           POLL_INTERVAL=30
           ELAPSED=0
-          
+
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
             STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
             echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
-          
+
             case "$STATE" in
               "COMPLETED"|"SUBMITTED")
                 echo "Session completed successfully!"
@@ -190,8 +190,6 @@ jobs:
             sleep $POLL_INTERVAL
             ELAPSED=$((ELAPSED + POLL_INTERVAL))
           done
-          
-
 
       - name: Run Linters
         continue-on-error: true

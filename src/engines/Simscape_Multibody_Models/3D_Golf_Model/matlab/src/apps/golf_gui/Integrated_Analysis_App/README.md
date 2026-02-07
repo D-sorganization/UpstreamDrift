@@ -125,26 +125,31 @@ Provides:
 ### Tab 3: Visualization (Current)
 
 **Automatic Startup:**
+
 - Default data loads automatically when you open Tab 3
 - Visualization appears immediately - no manual loading required!
 
 **Loading Your Own Data:**
 
 1. **Load 3 Files...** (Recommended for separate files)
+
    - Select BASEQ.mat
    - Select ZTCFQ.mat
    - Select DELTAQ.mat
 
 2. **Load Combined...** (For single combined file)
+
    - Select MAT file containing all three datasets
 
 3. **Load from Tab 2** (For calculated data)
+
    - Uses results from ZTCF Calculation tab
 
 4. **Reload Defaults**
    - Reloads the example data from repository
 
 **Interactive Controls:**
+
 - **Play/Pause** - Animate the golf swing
 - **Speed Slider** - Adjust playback speed (0.1x to 2x)
 - **Frame Slider** - Scrub through frames manually
@@ -155,10 +160,12 @@ Provides:
 ### Menu Options
 
 - **File Menu:**
+
   - Load/Save Session: Restore or save your entire workspace
   - Exit: Close the application
 
 - **Tools Menu:**
+
   - Clear All Data: Remove all data from memory
   - Reset Configuration: Restore default settings
 

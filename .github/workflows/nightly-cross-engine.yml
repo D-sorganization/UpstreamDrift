@@ -17,14 +17,14 @@ name: Nightly Cross-Engine Validation
 on:
   schedule:
     # Run at 2 AM UTC daily
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4"
 
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch: # Allow manual trigger
     inputs:
       engines:
-        description: 'Engines to validate (comma-separated)'
+        description: "Engines to validate (comma-separated)"
         required: false
-        default: 'mujoco,drake,pinocchio,pendulum'
+        default: "mujoco,drake,pinocchio,pendulum"
 
 jobs:
   cross-engine-validation:
@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11']
+        python-version: ["3.11"]
 
     steps:
       - name: Checkout repository
@@ -111,28 +111,44 @@ jobs:
         run: |
           python -c "
           import xml.etree.ElementTree as ET
-          import sys
+          import sys, os
 
-          # Parse JUnit XML for deviation metrics
-          tree = ET.parse('test-results/cross-engine-junit.xml')
+          xml_path = 'test-results/cross-engine-junit.xml'
+          if not os.path.exists(xml_path):
+            print('## Cross-Engine Validation Summary')
+            print('- **No test results found** (tests may not have run)')
+            sys.exit(0)
+
+          tree = ET.parse(xml_path)
           root = tree.getroot()
 
+          # Handle both <testsuites> (pytest) and <testsuite> root elements
+          if root.tag == 'testsuites':
+            suite = root.find('testsuite')
+            if suite is None:
+              print('## Cross-Engine Validation Summary')
+              print('- **No test suite found in results**')
+              sys.exit(0)
+          else:
+            suite = root
+
           print('## Cross-Engine Validation Summary')
-          print(f'- **Tests run**: {root.attrib[\"tests\"]}')
-          print(f'- **Failures**: {root.attrib[\"failures\"]}')
-          print(f'- **Errors**: {root.attrib[\"errors\"]}')
-          print(f'- **Skipped**: {root.attrib[\"skipped\"]}')
+          print(f'- **Tests run**: {suite.attrib.get(\"tests\", \"N/A\")}')
+          print(f'- **Failures**: {suite.attrib.get(\"failures\", \"N/A\")}')
+          print(f'- **Errors**: {suite.attrib.get(\"errors\", \"N/A\")}')
+          print(f'- **Skipped**: {suite.attrib.get(\"skipped\", \"N/A\")}')
 
           # Extract max deviation from test outputs
           for testcase in root.findall('.//testcase'):
-            if 'deviation' in testcase.attrib.get('name', ''):
-              print(f'- **{testcase.attrib[\"name\"]}**')
+            name = testcase.attrib.get('name', '')
+            if 'deviation' in name:
+              print(f'- **{name}**')
               if testcase.find('failure') is not None:
-                print('  - Status: ❌ FAILED')
+                print('  - Status: FAILED')
               elif testcase.find('error') is not None:
-                print('  - Status: ⚠️ ERROR')
+                print('  - Status: ERROR')
               else:
-                print('  - Status: ✅ PASSED')
+                print('  - Status: PASSED')
           " >> $GITHUB_STEP_SUMMARY
 
       - name: Send notification on ERROR
@@ -200,7 +216,7 @@ jobs:
 
     steps:
       - name: Download test results
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           name: cross-engine-test-results
           path: test-results/

@@ -97,6 +97,18 @@ GOLF_BALL_DRAG_COEFFICIENT = PhysicalConstant(
 GOLF_BALL_LIFT_COEFFICIENT = PhysicalConstant(
     0.15, "dimensionless", "Bearman & Harvey 1976", "Typical lift coefficient"
 )
+PUTTING_WIND_DRAG_COEFFICIENT = PhysicalConstant(
+    0.4,
+    "dimensionless",
+    "Engineering estimate",
+    "Effective drag coefficient for low-speed putting wind model",
+)
+PUTTING_WIND_FORCE_SCALING = PhysicalConstant(
+    0.5,
+    "dimensionless",
+    "Model tuning",
+    "Scaling factor to reduce wind influence on putting roll",
+)
 
 # Club specifications
 DRIVER_LENGTH_MAX_M = PhysicalConstant(

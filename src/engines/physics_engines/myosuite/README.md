@@ -15,20 +15,26 @@ MyoSuite provides research-grade musculoskeletal models with Hill-type muscle dy
 ## Available Models
 
 ### MyoBody Full (52 DOF, 290 muscles)
+
 Complete full-body musculoskeletal model with all major muscle groups:
+
 - **Torso**: 19 torso actuators
 - **Upper Limbs**: Bilateral arms with complete muscle groups
 - **Lower Limbs**: Legs with full muscle representation
 - **Applications**: Complete golf swing biomechanics, whole-body coordination analysis
 
 ### MyoUpperBody (19 DOF, 20 actuators)
+
 Upper body focus with muscle-based control:
+
 - **Torso + Head**: Core stability muscles
 - **Bilateral Arms**: Shoulder, elbow, and wrist muscles
 - **Applications**: Upper body golf swing analysis, arm-torso coordination
 
 ### MyoArm Simple (14 DOF, 14 actuators)
+
 Simplified bilateral arm model for rapid analysis:
+
 - **Bilateral Arms**: Streamlined muscle groups
 - **Fast Simulation**: Reduced complexity for quick iterations
 - **Applications**: Arm motion analysis, initial biomechanical testing
@@ -36,6 +42,7 @@ Simplified bilateral arm model for rapid analysis:
 ## Features
 
 ### Hill-Type Muscle Models
+
 - Force-length relationships (active and passive)
 - Force-velocity relationships
 - Tendon compliance
@@ -43,11 +50,13 @@ Simplified bilateral arm model for rapid analysis:
 - Maximum isometric force parameterization
 
 ### Muscle Activation Dynamics
+
 - Realistic activation/deactivation time constants
 - Excitation-to-activation mapping
 - Muscle fatigue modeling (optional)
 
 ### Biomechanical Analysis
+
 - Muscle recruitment patterns
 - Co-contraction analysis
 - Power generation and absorption
@@ -130,12 +139,14 @@ power_abs = analyzer.compute_power_absorption()
 ### Muscle Groups
 
 **Upper Body**:
+
 - Shoulder: Deltoids, rotator cuff, trapezius
 - Arm: Biceps, triceps, brachialis
 - Forearm: Wrist flexors/extensors, pronators/supinators
 - Torso: Pectoralis, latissimus dorsi, serratus anterior
 
 **Lower Body** (Full model only):
+
 - Hip: Gluteals, hip flexors, adductors
 - Thigh: Quadriceps, hamstrings
 - Leg: Gastrocnemius, soleus, tibialis
@@ -143,10 +154,12 @@ power_abs = analyzer.compute_power_absorption()
 ### Conversion from OpenSim
 
 MyoSuite models are converted from validated OpenSim models:
+
 - **MoBL-ARMS**: Upper extremity (arms)
 - **Rajagopal et al. (2015)**: Full body model
 
 Conversion process preserves:
+
 - Muscle attachment points
 - Optimal fiber lengths
 - Maximum isometric forces
@@ -157,29 +170,32 @@ Conversion process preserves:
 
 MyoSuite achieves significant speedup over OpenSim:
 
-| Model | DOF | Muscles | Speed vs OpenSim |
-|-------|-----|---------|------------------|
-| MyoArm Simple | 14 | 14 | 60× faster |
-| MyoUpperBody | 19 | 20 | 150× faster |
-| MyoBody Full | 52 | 290 | 4000× faster |
+| Model         | DOF | Muscles | Speed vs OpenSim |
+| ------------- | --- | ------- | ---------------- |
+| MyoArm Simple | 14  | 14      | 60× faster       |
+| MyoUpperBody  | 19  | 20      | 150× faster      |
+| MyoBody Full  | 52  | 290     | 4000× faster     |
 
 Simulation speed: **Real-time to 100× real-time** depending on model complexity
 
 ## Research Applications
 
 ### Golf Biomechanics
+
 - Muscle activation patterns during swing phases
 - Power generation and transfer through kinetic chain
 - Injury risk assessment
 - Performance optimization
 
 ### Injury Prevention
+
 - Identify high-stress muscle groups
 - Analyze joint loading
 - Evaluate alternative swing mechanics
 - Rehabilitation planning
 
 ### Performance Analysis
+
 - Optimal muscle recruitment strategies
 - Energy efficiency analysis
 - Fatigue effects on swing mechanics
@@ -188,6 +204,7 @@ Simulation speed: **Real-time to 100× real-time** depending on model complexity
 ## Validation
 
 MyoSuite models are validated against:
+
 - Original OpenSim model outputs
 - Experimental EMG data
 - Motion capture studies
@@ -220,12 +237,16 @@ python examples/myosuite_optimization.py
 ## Limitations
 
 ### MuJoCo Dependency
+
 MyoSuite models **require MuJoCo** and are not compatible with Drake or Pinocchio engines. For non-muscle analysis:
+
 - Use MuJoCo for muscle-level biomechanics
 - Use Drake/Pinocchio for rigid-body dynamics only
 
 ### Model Complexity
+
 Full body model (290 muscles) requires:
+
 - Significant computational resources
 - Careful parameter tuning
 - Experience with muscle modeling
@@ -252,8 +273,10 @@ MyoSuite is licensed under the Apache License 2.0. See the [MyoSuite repository]
 ## Support
 
 For MyoSuite-specific questions:
+
 - [MyoSuite GitHub Issues](https://github.com/MyoHub/myosuite/issues)
 - [MyoSuite Discussions](https://github.com/MyoHub/myosuite/discussions)
 
 For Golf Modeling Suite integration:
+
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

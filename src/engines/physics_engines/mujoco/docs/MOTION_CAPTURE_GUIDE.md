@@ -1,5 +1,3 @@
-
-
 # Motion Capture Integration and Force Analysis Guide
 
 **Version 2.1** - Professional Motion Capture Workflow for Golf Swing Analysis
@@ -51,6 +49,7 @@ These forces are crucial for understanding swing dynamics and can be computed ev
 #### Supported Formats
 
 ##### CSV Format
+
 ```csv
 time, LSHO_x, LSHO_y, LSHO_z, RSHO_x, RSHO_y, RSHO_z, ...
 0.000, 0.0, 0.2, 1.4, 0.0, -0.2, 1.4, ...
@@ -58,6 +57,7 @@ time, LSHO_x, LSHO_y, LSHO_z, RSHO_x, RSHO_y, RSHO_z, ...
 ```
 
 ##### JSON Format
+
 ```json
 {
   "frame_rate": 120.0,
@@ -141,6 +141,7 @@ print(f"Joint trajectories: {joint_trajectories.shape}")  # [N x nv]
 #### IK Solver Details
 
 The retargeting uses a multi-target IK solver:
+
 - **Algorithm**: Damped Least-Squares (singularity-robust)
 - **Objective**: Minimize error to all marker positions
 - **Constraints**: Joint limits automatically enforced
@@ -344,6 +345,7 @@ export_kinematic_forces_to_csv(
 ```
 
 CSV includes:
+
 - Time
 - Coriolis forces (per joint)
 - Centrifugal forces (per joint)
@@ -365,6 +367,7 @@ M(q)q̈ + C(q,q̇)q̇ + g(q) = τ
 ```
 
 Where:
+
 - **M(q)**: Mass matrix (configuration-dependent)
 - **C(q,q̇)q̇**: Coriolis and centrifugal forces
 - **g(q)**: Gravitational forces
@@ -744,11 +747,13 @@ print(f"Iron peak Coriolis: {iron_peak:.2f} Nm")
 ### Optimization
 
 1. **Use spline derivatives** for smoother velocity/acceleration:
+
    ```python
    velocities = processor.compute_velocities(times, pos, method="spline")
    ```
 
 2. **Filter before analysis** to reduce noise:
+
    ```python
    filtered = processor.filter_trajectory(times, pos, cutoff_frequency=10.0)
    ```
@@ -762,12 +767,12 @@ print(f"Iron peak Coriolis: {iron_peak:.2f} Nm")
 
 ### Recommended Settings
 
-| Task | Setting | Value |
-|------|---------|-------|
-| **Filter cutoff** | Motion capture | 10-15 Hz |
-| **IK iterations** | Retargeting | 30-50 |
-| **Derivative method** | Kinematics | "spline" |
-| **Frame rate** | Mocap | 120+ Hz |
+| Task                  | Setting        | Value    |
+| --------------------- | -------------- | -------- |
+| **Filter cutoff**     | Motion capture | 10-15 Hz |
+| **IK iterations**     | Retargeting    | 30-50    |
+| **Derivative method** | Kinematics     | "spline" |
+| **Frame rate**        | Mocap          | 120+ Hz  |
 
 ---
 
@@ -780,6 +785,7 @@ print(f"Iron peak Coriolis: {iron_peak:.2f} Nm")
 **Problem**: Low success rate (<80%) in retargeting
 
 **Solution**:
+
 - Increase IK iterations
 - Use more markers
 - Check marker visibility
@@ -801,6 +807,7 @@ print(f"Visibility: {visibility['visibility_percentage']:.1f}%")
 **Problem**: Forces have high-frequency oscillations
 
 **Solution**:
+
 - Lower filter cutoff frequency
 - Use spline derivatives
 - Increase mocap frame rate
@@ -817,6 +824,7 @@ filtered = processor.filter_trajectory(times, pos, cutoff_frequency=6.0)
 **Problem**: Coriolis power not near zero
 
 **Solution**:
+
 - Check numerical derivatives
 - Verify mass matrix
 - Look for constraint violations
@@ -839,13 +847,13 @@ print(f"Mass matrix condition: {condition_number:.2e}")
 
 ### Robotics
 
-1. **Featherstone, R.** (2008). *Rigid Body Dynamics Algorithms*.
-2. **Murray, R.M., et al.** (1994). *A Mathematical Introduction to Robotic Manipulation*.
+1. **Featherstone, R.** (2008). _Rigid Body Dynamics Algorithms_.
+2. **Murray, R.M., et al.** (1994). _A Mathematical Introduction to Robotic Manipulation_.
 
 ### Motion Capture
 
 1. **Cappozzo, A., et al.** (1995). "Position and orientation in space of bones."
-2. **Winter, D.A.** (2009). *Biomechanics and Motor Control of Human Movement*.
+2. **Winter, D.A.** (2009). _Biomechanics and Motor Control of Human Movement_.
 
 ---
 

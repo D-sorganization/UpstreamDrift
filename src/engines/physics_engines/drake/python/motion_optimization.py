@@ -187,7 +187,22 @@ class DrakeMotionOptimizer:
         max_iterations: int = 100,
         tolerance: float = 1e-6,
     ) -> OptimizationResult:
-        """Optimize golf swing trajectory.
+        """Optimize golf swing trajectory using SLSQP.
+
+        Formulates the trajectory optimization as a nonlinear program:
+
+        .. math::
+            \\min_{x} \\sum_i w_i \\cdot f_i(x)
+
+        subject to:
+
+        .. math::
+            g_j(x) \\leq 0 \\quad \\text{(inequality constraints)}
+            h_k(x) = 0 \\quad \\text{(equality constraints)}
+
+        where :math:`x` is the flattened trajectory, :math:`f_i` are the
+        weighted objective functions, and :math:`g_j, h_k` are constraint
+        functions.
 
         Args:
             initial_trajectory: Initial guess for trajectory (N, dim)
@@ -197,59 +212,110 @@ class DrakeMotionOptimizer:
         Returns:
             OptimizationResult with optimization results
         """
+        from scipy.optimize import minimize as scipy_minimize
+
         self.logger.info(
             f"Starting trajectory optimization with {len(self.objectives)} objectives "
             f"and {len(self.constraints)} constraints"
         )
 
-        # This is a placeholder implementation
-        # In a real Drake implementation, this would:
-        # 1. Set up Drake's trajectory optimization problem
-        # 2. Add objectives and constraints to the problem
-        # 3. Solve using Drake's optimization solvers
-        # 4. Return the optimized trajectory
+        traj_shape = initial_trajectory.shape
+        x0 = initial_trajectory.flatten()
 
-        # This is a stub implementation that evaluates the initial trajectory
-        # against the objectives but does not perform actual optimization yet.
-        # This allows the pipeline to function while awaiting Drake solvers integration.
+        def total_cost(x: np.ndarray) -> float:
+            """Combined weighted objective function."""
+            traj = x.reshape(traj_shape)
+            cost = 0.0
+            for obj in self.objectives:
+                if obj.cost_function is not None:
+                    cost += obj.weight * obj.cost_function(traj)
+            return cost
 
-        current_cost = 0.0
+        scipy_constraints = []
+        for con in self.constraints:
+            if con.constraint_function is None:
+                continue
+            if con.constraint_type == "equality":
+                scipy_constraints.append(
+                    {
+                        "type": "eq",
+                        "fun": lambda x, c=con: c.constraint_function(
+                            x.reshape(traj_shape)
+                        ),
+                    }
+                )
+            elif con.constraint_type == "inequality":
+                if con.upper_bound is not None:
+                    scipy_constraints.append(
+                        {
+                            "type": "ineq",
+                            "fun": lambda x, c=con: c.upper_bound
+                            - c.constraint_function(x.reshape(traj_shape)),
+                        }
+                    )
+                if con.lower_bound is not None:
+                    scipy_constraints.append(
+                        {
+                            "type": "ineq",
+                            "fun": lambda x, c=con: c.constraint_function(
+                                x.reshape(traj_shape)
+                            )
+                            - c.lower_bound,
+                        }
+                    )
+
+        opt_result = scipy_minimize(
+            total_cost,
+            x0,
+            method="SLSQP",
+            constraints=scipy_constraints,
+            options={
+                "maxiter": max_iterations,
+                "ftol": tolerance,
+                "disp": False,
+            },
+        )
+
+        optimal_trajectory = opt_result.x.reshape(traj_shape)
+
         objective_values = {}
         for obj in self.objectives:
-            if obj.cost_function:
-                val = obj.cost_function(initial_trajectory)
-                objective_values[obj.name] = val
-                current_cost += obj.weight * val
+            if obj.cost_function is not None:
+                objective_values[obj.name] = obj.cost_function(optimal_trajectory)
 
         constraint_violations = {}
-        success = True
+        all_satisfied = True
         for con in self.constraints:
-            if con.constraint_function:
-                val = con.constraint_function(initial_trajectory)
-                # Check simple bounds violation
+            if con.constraint_function is not None:
+                val = con.constraint_function(optimal_trajectory)
                 violation = 0.0
                 if con.lower_bound is not None and val < con.lower_bound:
                     violation = con.lower_bound - val
                 elif con.upper_bound is not None and val > con.upper_bound:
                     violation = val - con.upper_bound
-
                 constraint_violations[con.name] = violation
                 if violation > tolerance:
-                    success = False
+                    all_satisfied = False
+
+        success = opt_result.success and all_satisfied
 
         result = OptimizationResult(
             success=success,
-            optimal_trajectory=initial_trajectory.copy(),
-            optimal_cost=current_cost,
-            iterations=0,
-            convergence_message="Evaluation only (Drake solvers pending integration)",
+            optimal_trajectory=optimal_trajectory,
+            optimal_cost=float(opt_result.fun),
+            iterations=opt_result.nit if hasattr(opt_result, "nit") else 0,
+            convergence_message=(
+                opt_result.message
+                if hasattr(opt_result, "message")
+                else str(opt_result.get("message", "Unknown"))
+            ),
             objective_values=objective_values,
             constraint_violations=constraint_violations,
         )
 
         self.logger.info(
-            f"Evaluated initial trajectory. Cost: {current_cost:.4f}. "
-            f"Success: {success}"
+            f"Trajectory optimization complete. Cost: {result.optimal_cost:.4f}. "
+            f"Success: {success}. Iterations: {result.iterations}"
         )
 
         return result

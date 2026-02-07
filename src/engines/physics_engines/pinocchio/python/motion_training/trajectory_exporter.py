@@ -93,7 +93,7 @@ class TrajectoryExporter:
         format = format.lower()
         if format not in self.SUPPORTED_FORMATS:
             raise ValueError(
-                f"Unsupported format: {format}. " f"Supported: {self.SUPPORTED_FORMATS}"
+                f"Unsupported format: {format}. Supported: {self.SUPPORTED_FORMATS}"
             )
 
         exporters = {

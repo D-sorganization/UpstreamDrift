@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       issue_numbers:
-        description: 'Comma-separated issue numbers to remediate (e.g., 520,521,522)'
+        description: "Comma-separated issue numbers to remediate (e.g., 520,521,522)"
         required: true
         type: string
       max_issues:
-        description: 'Maximum number of issues to fix (default: 10)'
+        description: "Maximum number of issues to fix (default: 10)"
         required: false
-        default: '10'
+        default: "10"
         type: string
   schedule:
     # Run weekly on Sundays at 2 AM UTC
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4"
 
 permissions:
   contents: write
@@ -121,7 +121,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install ruff
         run: pip install ruff==0.14.10
@@ -330,7 +330,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -412,7 +412,13 @@ jobs:
 
   workflow-summary:
     name: Remediation Summary
-    needs: [prioritize-issues, fix-ruff-violations, add-security-headers, generate-api-documentation]
+    needs:
+      [
+        prioritize-issues,
+        fix-ruff-violations,
+        add-security-headers,
+        generate-api-documentation,
+      ]
     runs-on: ubuntu-latest
     if: always()
     steps:

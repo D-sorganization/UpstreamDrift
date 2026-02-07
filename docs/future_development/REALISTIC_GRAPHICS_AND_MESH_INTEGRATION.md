@@ -66,34 +66,34 @@ The suite currently employs a multi-viewer, multi-engine architecture:
 
 ### 1.2 Current Mesh Support
 
-| Format | Status | Location |
-|--------|--------|----------|
-| OBJ | Supported | `hand_assets/shadow_hand/assets/` |
-| STL | Supported | `hand_assets/wonik_allegro/assets/` |
-| URDF | Supported | `shared/urdf/`, `bundled_assets/` |
-| MJCF | Supported | MuJoCo models |
+| Format | Status    | Location                            |
+| ------ | --------- | ----------------------------------- |
+| OBJ    | Supported | `hand_assets/shadow_hand/assets/`   |
+| STL    | Supported | `hand_assets/wonik_allegro/assets/` |
+| URDF   | Supported | `shared/urdf/`, `bundled_assets/`   |
+| MJCF   | Supported | MuJoCo models                       |
 
 ### 1.3 Current Rendering Capabilities by Engine
 
-| Feature | MuJoCo | Drake | Pinocchio | OpenSim | MyoSuite |
-|---------|--------|-------|-----------|---------|----------|
-| Web Visualization | Meshcat | Meshcat | Meshcat | N/A | Limited |
-| Desktop Viewer | N/A | N/A | Geppetto | N/A | N/A |
-| Real-time Render | mujoco.Renderer | Native | N/A | N/A | N/A |
-| Mesh Support | OBJ, STL | URDF | URDF | URDF | Limited |
-| Force Vectors | Yes | Yes | Limited | N/A | No |
-| PBR Materials | No | No | No | No | No |
-| Shadows | No | No | No | No | No |
+| Feature           | MuJoCo          | Drake   | Pinocchio | OpenSim | MyoSuite |
+| ----------------- | --------------- | ------- | --------- | ------- | -------- |
+| Web Visualization | Meshcat         | Meshcat | Meshcat   | N/A     | Limited  |
+| Desktop Viewer    | N/A             | N/A     | Geppetto  | N/A     | N/A      |
+| Real-time Render  | mujoco.Renderer | Native  | N/A       | N/A     | N/A      |
+| Mesh Support      | OBJ, STL        | URDF    | URDF      | URDF    | Limited  |
+| Force Vectors     | Yes             | Yes     | Limited   | N/A     | No       |
+| PBR Materials     | No              | No      | No        | No      | No       |
+| Shadows           | No              | No      | No        | No      | No       |
 
 ### 1.4 Key Files
 
-| Component | File Path |
-|-----------|-----------|
-| Meshcat Adapter | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py` |
-| Pinocchio Viewer | `src/engines/physics_engines/pinocchio/python/dtack/viz/meshcat_viewer.py` |
-| Drake Visualizer | `src/engines/physics_engines/drake/python/src/drake_visualizer.py` |
-| Ellipsoid Export | `src/shared/python/ellipsoid_visualization.py` |
-| Sim Widget | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
+| Component        | File Path                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| Meshcat Adapter  | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py` |
+| Pinocchio Viewer | `src/engines/physics_engines/pinocchio/python/dtack/viz/meshcat_viewer.py`          |
+| Drake Visualizer | `src/engines/physics_engines/drake/python/src/drake_visualizer.py`                  |
+| Ellipsoid Export | `src/shared/python/ellipsoid_visualization.py`                                      |
+| Sim Widget       | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py`      |
 
 ---
 
@@ -178,29 +178,32 @@ The suite currently employs a multi-viewer, multi-engine architecture:
 
 ### 2.3 Commercial Options (High Quality)
 
-| Source | Price Range | Quality | Rigging |
-|--------|-------------|---------|---------|
-| TurboSquid | $50-$500 | High | Usually |
-| CGTrader | $30-$300 | Medium-High | Varies |
-| Renderpeople | $200-$400 | Photo-realistic | Yes |
-| AXYZ Design | $100-$300 | High | Yes |
+| Source       | Price Range | Quality         | Rigging |
+| ------------ | ----------- | --------------- | ------- |
+| TurboSquid   | $50-$500    | High            | Usually |
+| CGTrader     | $30-$300    | Medium-High     | Varies  |
+| Renderpeople | $200-$400   | Photo-realistic | Yes     |
+| AXYZ Design  | $100-$300   | High            | Yes     |
 
 ### 2.4 Recommended Format Priorities
 
 For integration with the Golf Modeling Suite:
 
 1. **GLTF/GLB** (Priority 1)
+
    - Modern standard
    - Preserves materials, textures, animations
    - Efficient binary format
    - Wide tool support
 
 2. **FBX** (Priority 2)
+
    - Industry standard for rigged characters
    - Good skeleton support
    - Requires conversion library
 
 3. **COLLADA (.dae)** (Priority 3)
+
    - XML-based, human-readable
    - Good for physics engine integration
    - Supports skeleton hierarchies
@@ -251,17 +254,20 @@ For integration with the Golf Modeling Suite:
 #### Option A: Enhanced Meshcat (Low Effort)
 
 **Improvements to current system:**
+
 - Custom Three.js shaders for PBR materials
 - Shadow mapping via shadow planes
 - Environment maps for reflections
 - GLTF loading support
 
 **Pros:**
+
 - Minimal changes to existing code
 - Browser-based (cross-platform)
 - Already integrated
 
 **Cons:**
+
 - Limited by Three.js capabilities
 - Not game-engine quality
 - WebGL performance limits
@@ -288,12 +294,14 @@ class PyVistaBackend(VisualizationBackend):
 ```
 
 **Pros:**
+
 - Professional quality rendering
 - PBR materials, shadows, SSAO
 - Good Python integration
 - Supports many mesh formats
 
 **Cons:**
+
 - Separate from existing Meshcat
 - Learning curve
 - Desktop only (no web)
@@ -313,6 +321,7 @@ class PyVistaBackend(VisualizationBackend):
 ```
 
 **Pros:**
+
 - Game-quality graphics
 - Open source (MIT license)
 - GLTF native support
@@ -320,6 +329,7 @@ class PyVistaBackend(VisualizationBackend):
 - Cross-platform
 
 **Cons:**
+
 - Requires Godot installation
 - Communication overhead
 - More complex architecture
@@ -331,11 +341,13 @@ class PyVistaBackend(VisualizationBackend):
 **For ultra-realistic rendering:**
 
 **Pros:**
+
 - Film/game quality graphics
 - MetaHuman support (Unreal)
 - Industry-standard tools
 
 **Cons:**
+
 - Commercial engines (licensing)
 - Complex integration
 - Heavy resource requirements
@@ -345,16 +357,19 @@ class PyVistaBackend(VisualizationBackend):
 ### 3.3 Recommended Approach: Phased Implementation
 
 **Phase 1: Enhanced Meshcat + GLTF Support**
+
 - Add trimesh/pygltflib for mesh loading
 - Improve Meshcat materials
 - Load gaming meshes in existing system
 
 **Phase 2: PyVista Alternative Backend**
+
 - Create abstraction layer
 - Implement PyVista backend
 - User choice between Meshcat/PyVista
 
 **Phase 3: Game Engine Bridge (Optional)**
+
 - ZMQ communication protocol
 - Godot/Unreal receiver
 - High-fidelity mode
@@ -368,6 +383,7 @@ class PyVistaBackend(VisualizationBackend):
 #### 4.1.1 Add GLTF/GLB Mesh Support
 
 **New Dependencies:**
+
 ```toml
 # pyproject.toml additions
 "trimesh>=4.0.0"      # Universal mesh loading
@@ -376,6 +392,7 @@ class PyVistaBackend(VisualizationBackend):
 ```
 
 **New Module Structure:**
+
 ```
 src/visualization/
 ├── __init__.py
@@ -445,6 +462,7 @@ class MeshLoader:
 #### 4.2.1 Map Gaming Skeletons to Physics Models
 
 Gaming characters use standard skeleton hierarchies (e.g., Mixamo):
+
 ```
 Hips
 ├── Spine
@@ -461,6 +479,7 @@ Hips
 ```
 
 **Mapping to URDF joints:**
+
 ```python
 # src/visualization/skeleton_mapper.py
 
@@ -552,23 +571,23 @@ GOLF_COURSE_ENVIRONMENT = {
 
 ### 5.1 Mesh Requirements for Realistic Golfers
 
-| Specification | Minimum | Recommended | Notes |
-|---------------|---------|-------------|-------|
-| Polygon Count | 5,000 | 20,000-50,000 | Balance quality/performance |
-| Texture Resolution | 1024x1024 | 2048x2048 | Per material |
-| Skeleton Bones | 20 | 50-70 | Standard humanoid rig |
-| UV Mapping | Required | Required | For textures |
-| Normal Maps | Optional | Recommended | Surface detail |
-| Format | OBJ | GLTF/GLB | Animation support |
+| Specification      | Minimum   | Recommended   | Notes                       |
+| ------------------ | --------- | ------------- | --------------------------- |
+| Polygon Count      | 5,000     | 20,000-50,000 | Balance quality/performance |
+| Texture Resolution | 1024x1024 | 2048x2048     | Per material                |
+| Skeleton Bones     | 20        | 50-70         | Standard humanoid rig       |
+| UV Mapping         | Required  | Required      | For textures                |
+| Normal Maps        | Optional  | Recommended   | Surface detail              |
+| Format             | OBJ       | GLTF/GLB      | Animation support           |
 
 ### 5.2 Performance Targets
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Frame Rate | 60 FPS | At 1080p |
-| Mesh Load Time | < 2 sec | Cold load |
-| Memory Usage | < 500 MB | Per golfer mesh |
-| Physics Sync | < 5 ms | Transform update |
+| Metric         | Target   | Measurement      |
+| -------------- | -------- | ---------------- |
+| Frame Rate     | 60 FPS   | At 1080p         |
+| Mesh Load Time | < 2 sec  | Cold load        |
+| Memory Usage   | < 500 MB | Per golfer mesh  |
+| Physics Sync   | < 5 ms   | Transform update |
 
 ### 5.3 API Design
 
@@ -634,21 +653,21 @@ graphics-full = [
 
 ### 6.2 System Requirements for Full Graphics
 
-| Component | Requirement |
-|-----------|-------------|
-| GPU | OpenGL 4.1+ / Vulkan 1.0+ |
-| VRAM | 2 GB minimum, 4 GB recommended |
-| CPU | 4 cores recommended |
-| RAM | 8 GB minimum |
-| Disk | 2 GB for mesh assets |
+| Component | Requirement                    |
+| --------- | ------------------------------ |
+| GPU       | OpenGL 4.1+ / Vulkan 1.0+      |
+| VRAM      | 2 GB minimum, 4 GB recommended |
+| CPU       | 4 cores recommended            |
+| RAM       | 8 GB minimum                   |
+| Disk      | 2 GB for mesh assets           |
 
 ### 6.3 External Tools (Optional)
 
-| Tool | Purpose | Required For |
-|------|---------|--------------|
-| MakeHuman | Generate custom golfer meshes | Custom avatars |
-| Blender | Mesh editing, format conversion | Asset preparation |
-| Godot 4.x | Game engine rendering | Phase 3 |
+| Tool      | Purpose                         | Required For      |
+| --------- | ------------------------------- | ----------------- |
+| MakeHuman | Generate custom golfer meshes   | Custom avatars    |
+| Blender   | Mesh editing, format conversion | Asset preparation |
+| Godot 4.x | Game engine rendering           | Phase 3           |
 
 ---
 
@@ -656,20 +675,20 @@ graphics-full = [
 
 ### 7.1 Technical Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Skeleton mapping complexity | Medium | High | Use standard Mixamo rig |
-| Performance degradation | Low | Medium | LOD system, profiling |
-| Format compatibility issues | Medium | Low | trimesh fallbacks |
-| WebGL limitations | Low | Medium | PyVista alternative |
+| Risk                        | Likelihood | Impact | Mitigation              |
+| --------------------------- | ---------- | ------ | ----------------------- |
+| Skeleton mapping complexity | Medium     | High   | Use standard Mixamo rig |
+| Performance degradation     | Low        | Medium | LOD system, profiling   |
+| Format compatibility issues | Medium     | Low    | trimesh fallbacks       |
+| WebGL limitations           | Low        | Medium | PyVista alternative     |
 
 ### 7.2 Resource Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Mesh licensing issues | Medium | High | Use CC0/MIT meshes |
-| Large asset sizes | High | Low | Compression, CDN |
-| External tool dependencies | Medium | Medium | Bundled converters |
+| Risk                       | Likelihood | Impact | Mitigation         |
+| -------------------------- | ---------- | ------ | ------------------ |
+| Mesh licensing issues      | Medium     | High   | Use CC0/MIT meshes |
+| Large asset sizes          | High       | Low    | Compression, CDN   |
+| External tool dependencies | Medium     | Medium | Bundled converters |
 
 ### 7.3 Maintenance Considerations
 

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Security Grade Improvement: D+ (68/100) → A- (92/100)**
 
 #### Added
+
 - `SECURITY.md`: Comprehensive security policy with reporting procedures, best practices, and compliance standards
 - `docs/SECURITY_UPGRADE_GUIDE.md`: Step-by-step migration guide for API key regeneration
 - `scripts/migrate_api_keys.py`: Automated migration script from SHA256 to bcrypt hashing
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.gitattributes`: Exclude archive code from language statistics
 
 #### Fixed (CRITICAL)
+
 - **API Key Security**: Upgraded from SHA256 (fast hash, brute-force vulnerable) to bcrypt (slow hash, industry standard)
   - **BREAKING CHANGE**: All API keys must be regenerated - old keys will NOT work
   - Constant-time comparison prevents timing attacks
@@ -42,11 +44,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Files: `.github/workflows/ci-standard.yml`
 
 #### Documentation
+
 - `CRITICAL_PROJECT_REVIEW.md`: 557-line adversarial security review
 - `SECURITY_FIXES_SUMMARY.md`: Technical details of all security fixes
 - `PR_SUMMARY.md`: Comprehensive PR summary with migration checklist
 
 #### Compliance Achieved
+
 - ✅ OWASP Top 10 (Authentication, Sensitive Data Exposure)
 - ✅ CWE-327 (Broken Cryptography)
 - ✅ CWE-532 (Sensitive Info in Logs)

@@ -9,7 +9,6 @@ Features:
 
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import sys
@@ -19,6 +18,11 @@ from typing import TYPE_CHECKING, Any
 # Add current directory to path so we can import ui_components if needed locally
 sys.path.append(str(Path(__file__).parent))
 
+from src.launchers.docker_manager import DockerLauncher
+from src.launchers.launcher_layout_manager import (
+    LayoutManager,
+    compute_centered_geometry,
+)
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_process_manager import (
     ProcessManager,
@@ -32,10 +36,23 @@ from src.launchers.ui_components import (
     DraggableModelCard,
     EnvironmentDialog,
     GolfSplashScreen,
-    HelpDialog,
     LayoutManagerDialog,
     StartupResults,
 )
+from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
+
+# Import new help system (graceful degradation if not available)
+try:
+    from src.shared.python.help_system import (
+        HelpButton,
+        HelpDialog,
+        TooltipManager,
+    )
+
+    HELP_SYSTEM_AVAILABLE = True
+except ImportError:
+    HELP_SYSTEM_AVAILABLE = False
+    HelpDialog = LegacyHelpDialog  # Fallback to legacy
 from src.shared.python.logging_config import configure_gui_logging, get_logger
 from src.shared.python.subprocess_utils import kill_process_tree
 
@@ -44,6 +61,7 @@ if TYPE_CHECKING:
 
 from PyQt6.QtCore import QEventLoop, Qt, QTimer, QUrl
 from PyQt6.QtGui import (
+    QAction,
     QCloseEvent,
     QDesktopServices,
     QFont,
@@ -214,6 +232,7 @@ class GolfLauncher(QMainWindow):
         # Initialize process and model managers (extracted from god class)
         self.process_manager = ProcessManager(REPOS_ROOT)
         self.model_handler_registry = ModelHandlerRegistry()
+        self.docker_launcher = DockerLauncher(REPOS_ROOT)
         # Keep backwards-compatible reference
         self.running_processes = self.process_manager.running_processes
         self.available_models: dict[str, Any] = {}
@@ -247,6 +266,18 @@ class GolfLauncher(QMainWindow):
                 self.engine_manager = None
 
         self._build_available_models()
+
+        # Initialize layout manager (extracted from god class)
+        self.layout_manager = LayoutManager(
+            config_file=LAYOUT_CONFIG_FILE,
+            available_models=self.available_models,
+            get_model_func=self._get_model,
+            create_card_func=lambda model: DraggableModelCard(model, self),
+        )
+        # Keep backward-compatible references
+        self.model_cards = self.layout_manager.model_cards
+        self.model_order = self.layout_manager.model_order
+
         self._initialize_model_order()
 
         self.init_ui()
@@ -387,12 +418,13 @@ except Exception as e:
 
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
-        # Ctrl+? or F1 for shortcuts overlay
+        # F1 for help dialog (User Manual)
+        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
+        shortcut_f1.activated.connect(self._show_help_dialog)
+
+        # Ctrl+? for shortcuts overlay
         shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self)
         shortcut_help.activated.connect(self._show_shortcuts_overlay)
-
-        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
-        shortcut_f1.activated.connect(self._show_shortcuts_overlay)
 
         # Ctrl+, for preferences
         shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self)
@@ -401,6 +433,37 @@ except Exception as e:
         # Ctrl+Q to quit
         shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
         shortcut_quit.activated.connect(self.close)
+
+    def _show_help_dialog(self, topic: str | None = None) -> None:
+        """Show the help dialog.
+
+        Args:
+            topic: Optional help topic to display initially.
+        """
+        if HELP_SYSTEM_AVAILABLE:
+            dialog = HelpDialog(self, initial_topic=topic)
+            dialog.exec()
+        else:
+            # Fallback to legacy help dialog
+            dialog = LegacyHelpDialog(self)
+            dialog.exec()
+
+    def _show_about_dialog(self) -> None:
+        """Show the About dialog."""
+        QMessageBox.about(
+            self,
+            "About UpstreamDrift",
+            "<h2>UpstreamDrift</h2>"
+            "<h3>Golf Modeling Suite</h3>"
+            "<p><b>Version 2.1</b></p>"
+            "<p>Biomechanical Golf Swing Analysis Platform</p>"
+            "<hr>"
+            "<p>A unified platform for biomechanical golf swing analysis "
+            "integrating multiple physics engines including MuJoCo, Drake, "
+            "Pinocchio, OpenSim, and MyoSuite.</p>"
+            "<p>Copyright 2024-2026 UpstreamDrift Contributors</p>"
+            '<p><a href="https://github.com/dieterolson/UpstreamDrift">GitHub Repository</a></p>',
+        )
 
     def _show_shortcuts_overlay(self) -> None:
         """Show the keyboard shortcuts overlay."""
@@ -470,104 +533,44 @@ except Exception as e:
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
         logger.debug("Initializing model order...")
-
-        default_ids = [
-            "mujoco_unified",
-            "drake_golf",
-            "pinocchio_golf",
-            "opensim_golf",
-            "myosim_suite",
-            "matlab_unified",
-            "motion_capture",
-            "model_explorer",
-        ]
-
-        # Check which default IDs are available
-        available_ids = []
-        missing_ids = []
-        for model_id in default_ids:
-            if model_id in self.available_models:
-                available_ids.append(model_id)
-            else:
-                missing_ids.append(model_id)
-
-        self.model_order = available_ids
-
-        # Log diagnostic information
-        logger.info(
-            f"Model order initialized with {len(self.model_order)} of {len(default_ids)} tiles"
-        )
-        if missing_ids:
-            logger.warning(f"Missing models from defaults: {missing_ids}")
-            logger.warning(f"Available model IDs: {list(self.available_models.keys())}")
+        self.layout_manager.initialize_model_order()
+        # Keep backward-compatible reference in sync
+        self.model_order = self.layout_manager.model_order
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
-        try:
-            # Ensure config directory exists
-            CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-
-            layout_data = {
-                "model_order": self.model_order,
-                "selected_model": self.selected_model,
-                "window_geometry": {
-                    "x": self.x(),
-                    "y": self.y(),
-                    "width": self.width(),
-                    "height": self.height(),
-                },
-                "options": {
-                    "live_visualization": (
-                        self.chk_live.isChecked() if hasattr(self, "chk_live") else True
-                    ),
-                    "gpu_acceleration": (
-                        self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
-                    ),
-                    "docker_mode": (
-                        self.chk_docker.isChecked()
-                        if hasattr(self, "chk_docker")
-                        else False
-                    ),
-                },
-            }
-
-            with open(LAYOUT_CONFIG_FILE, "w", encoding="utf-8") as f:
-                json.dump(layout_data, f, indent=2)
-
-            logger.info(f"Layout saved to {LAYOUT_CONFIG_FILE}")
-
-        except Exception as e:
-            logger.error(f"Failed to save layout: {e}")
+        window_state = {
+            "selected_model": self.selected_model,
+            "geometry": {
+                "x": self.x(),
+                "y": self.y(),
+                "width": self.width(),
+                "height": self.height(),
+            },
+            "options": {
+                "live_visualization": (
+                    self.chk_live.isChecked() if hasattr(self, "chk_live") else True
+                ),
+                "gpu_acceleration": (
+                    self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
+                ),
+                "docker_mode": (
+                    self.chk_docker.isChecked()
+                    if hasattr(self, "chk_docker")
+                    else False
+                ),
+            },
+        }
+        self.layout_manager.save_layout(window_state)
 
     def _sync_model_cards(self) -> None:
         """Ensure widgets match the current model order."""
-
-        # Remove cards that are no longer selected
-        for model_id in list(self.model_cards.keys()):
-            if model_id not in self.model_order:
-                widget = self.model_cards.pop(model_id)
-                widget.setParent(None)
-                widget.deleteLater()
-
-        # Create cards for any newly added models
-        for model_id in self.model_order:
-            if model_id not in self.model_cards:
-                model = self._get_model(model_id)
-                if model:
-                    self.model_cards[model_id] = DraggableModelCard(model, self)
+        self.layout_manager.sync_model_cards()
 
     def _apply_model_selection(self, selected_ids: list[str]) -> None:
         """Apply a new set of selected models from the layout dialog."""
-
-        ordered_selection = [
-            model_id for model_id in self.model_order if model_id in selected_ids
-        ]
-
-        for model_id in selected_ids:
-            if model_id not in ordered_selection and model_id in self.available_models:
-                ordered_selection.append(model_id)
-
-        self.model_order = ordered_selection
+        self.layout_manager.apply_model_selection(selected_ids)
+        self.model_order = self.layout_manager.model_order
         self._sync_model_cards()
         self._rebuild_grid()
         self._save_layout()
@@ -575,11 +578,6 @@ except Exception as e:
         if self.selected_model not in self.model_order:
             self.selected_model = self.model_order[0] if self.model_order else None
 
-        # Copilot AI Review Change:
-        # Start with the existing model_order filtered to the newly selected IDs so
-        # that previously selected models keep their relative positions in the grid.
-        # ordered_selection already handled this by iterating self.model_order first.
-        # Append any newly selected models (not already in model_order) to the end.
         self.update_launch_button()
 
     def _get_model(self, model_id: str) -> Any | None:
@@ -607,126 +605,73 @@ except Exception as e:
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
-        try:
-            if not LAYOUT_CONFIG_FILE.exists():
-                logger.info("No saved layout found, using default")
-                self._rebuild_grid()  # Still need to build grid with defaults
-                return
+        layout_data = self.layout_manager.load_layout()
 
-            with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
-                layout_data = json.load(f)
+        if layout_data is None:
+            self._rebuild_grid()
+            return
 
-            # Restore model order if valid
-            saved_order = [
-                model_id
-                for model_id in layout_data.get("model_order", [])
-                if model_id in self.available_models
-            ]
-            if saved_order:
-                self.model_order = saved_order
-                self._sync_model_cards()
-                self._rebuild_grid()
-                logger.info("Model layout restored from saved configuration")
+        # Keep backward-compatible reference in sync
+        self.model_order = self.layout_manager.model_order
+        self._sync_model_cards()
 
-            # Restore window geometry
-            geo = layout_data.get("window_geometry", {})
-            if geo:
-                # Ensure window title bar is visible (y >= 30)
-                # And center if it looks weird
-                x = geo.get("x", 100)
-                y = geo.get("y", 100)
-                w = geo.get("width", 1280)
-                h = geo.get("height", 800)
-
-                # Clamp Y to avoid being off-screen top
-                if y < 30:
-                    y = 50
-
-                self.setGeometry(x, y, w, h)
-            else:
-                self._center_window()
-
-            # Restore options
-            options = layout_data.get("options", {})
-            if hasattr(self, "chk_live"):
-                self.chk_live.setChecked(options.get("live_visualization", True))
-            if hasattr(self, "chk_gpu"):
-                self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
-            if hasattr(self, "chk_docker"):
-                # Only restore Docker mode if Docker is available
-                saved_docker = options.get("docker_mode", False)
-                if saved_docker and self.docker_available:
-                    self.chk_docker.setChecked(True)
-
-            # Restore selected model
-            saved_selection = layout_data.get("selected_model")
-            if saved_selection and saved_selection in self.model_cards:
-                self.select_model(saved_selection)
-
-            self._rebuild_grid()  # Use _rebuild_grid as it exists
-            logger.info("Layout loaded successfully")
-
-        except Exception as e:
-            logger.error(f"Failed to load layout: {e}")
-            self._rebuild_grid()  # Still build grid with defaults on error
+        # Restore window geometry
+        geo = layout_data.get("window_geometry", {})
+        if geo:
+            x = geo.get("x", 100)
+            y = geo.get("y", 100)
+            w = geo.get("width", 1280)
+            h = geo.get("height", 800)
+            # Clamp Y to avoid being off-screen top
+            if y < 30:
+                y = 50
+            self.setGeometry(x, y, w, h)
+        else:
             self._center_window()
+
+        # Restore options
+        options = layout_data.get("options", {})
+        if hasattr(self, "chk_live"):
+            self.chk_live.setChecked(options.get("live_visualization", True))
+        if hasattr(self, "chk_gpu"):
+            self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
+        if hasattr(self, "chk_docker"):
+            # Only restore Docker mode if Docker is available
+            saved_docker = options.get("docker_mode", False)
+            if saved_docker and self.docker_available:
+                self.chk_docker.setChecked(True)
+
+        # Restore selected model
+        saved_selection = layout_data.get("selected_model")
+        if saved_selection and saved_selection in self.model_cards:
+            self.select_model(saved_selection)
+
+        self._rebuild_grid()
+        logger.info("Layout loaded successfully")
 
     def _center_window(self) -> None:
         """Center the window on the primary screen."""
         screen = QApplication.primaryScreen()
         if screen:
             screen_geo = screen.availableGeometry()
-            # Ensure width is treated as int, handling potential Mock objects from tests
-            current_width = self.width()
-            if hasattr(current_width, "return_value"):  # Handle MagicMock
-                current_width = 1280
-            width = (
-                int(current_width) if isinstance(current_width, int | float) else 1280
+            # Extract values, handling Mock objects from tests
+            screen_x = self._safe_int(screen_geo.x(), 0)
+            screen_y = self._safe_int(screen_geo.y(), 0)
+            screen_width = self._safe_int(screen_geo.width(), 1920)
+            screen_height = self._safe_int(screen_geo.height(), 1080)
+            w = max(self._safe_int(self.width(), 1280), 100)
+            h = max(self._safe_int(self.height(), 800), 100)
+
+            x, y, w, h = compute_centered_geometry(
+                screen_width, screen_height, w, h, screen_x, screen_y
             )
-
-            w = width if width > 100 else 1280
-
-            # Ensure height is treated as int, handling potential Mock objects from tests
-            current_height = self.height()
-            if hasattr(current_height, "return_value"):  # Handle MagicMock
-                current_height = 800
-            height = (
-                int(current_height) if isinstance(current_height, int | float) else 800
-            )
-            h = height if height > 100 else 800
-
-            # Handle Mock objects for screen geometry
-            screen_x = screen_geo.x()
-            if hasattr(screen_x, "return_value"):
-                screen_x = 0
-            screen_x = int(screen_x) if isinstance(screen_x, int | float) else 0
-
-            screen_y = screen_geo.y()
-            if hasattr(screen_y, "return_value"):
-                screen_y = 0
-            screen_y = int(screen_y) if isinstance(screen_y, int | float) else 0
-
-            screen_width = screen_geo.width()
-            if hasattr(screen_width, "return_value"):
-                screen_width = 1920
-            screen_width = (
-                int(screen_width) if isinstance(screen_width, int | float) else 1920
-            )
-
-            screen_height = screen_geo.height()
-            if hasattr(screen_height, "return_value"):
-                screen_height = 1080
-            screen_height = (
-                int(screen_height) if isinstance(screen_height, int | float) else 1080
-            )
-
-            x = screen_x + (screen_width - w) // 2
-            y = screen_y + (screen_height - h) // 2
-
-            # Ensure not too high
-            y = max(y, 50)
-
             self.setGeometry(x, y, w, h)
+
+    def _safe_int(self, value: Any, default: int) -> int:
+        """Safely convert a value to int, handling Mock objects from tests."""
+        if hasattr(value, "return_value"):  # Handle MagicMock
+            return default
+        return int(value) if isinstance(value, int | float) else default
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout.
@@ -805,6 +750,9 @@ except Exception as e:
 
     def init_ui(self) -> None:
         """Initialize the user interface."""
+        # --- Menu Bar ---
+        self._setup_menu_bar()
+
         # Main Widget
         central = QWidget()
         self.setCentralWidget(central)
@@ -831,6 +779,129 @@ except Exception as e:
 
         # Initialize Overlay
         self._init_overlay()
+
+    def _setup_menu_bar(self) -> None:
+        """Set up the application menu bar."""
+        menubar = self.menuBar()
+
+        # File Menu
+        file_menu = menubar.addMenu("&File")
+
+        action_preferences = QAction("&Preferences...", self)
+        action_preferences.setShortcut("Ctrl+,")
+        action_preferences.triggered.connect(self._show_preferences)
+        file_menu.addAction(action_preferences)
+
+        file_menu.addSeparator()
+
+        action_exit = QAction("E&xit", self)
+        action_exit.setShortcut("Ctrl+Q")
+        action_exit.triggered.connect(self.close)
+        file_menu.addAction(action_exit)
+
+        # View Menu
+        view_menu = menubar.addMenu("&View")
+
+        action_layout_mode = QAction("&Edit Layout Mode", self)
+        action_layout_mode.setCheckable(True)
+        action_layout_mode.triggered.connect(self._toggle_layout_mode_from_menu)
+        view_menu.addAction(action_layout_mode)
+        self._action_layout_mode = action_layout_mode
+
+        view_menu.addSeparator()
+
+        action_context_help = QAction("Context &Help Panel", self)
+        action_context_help.setCheckable(True)
+        action_context_help.triggered.connect(self._toggle_context_help)
+        view_menu.addAction(action_context_help)
+        self._action_context_help = action_context_help
+
+        # Tools Menu
+        tools_menu = menubar.addMenu("&Tools")
+
+        action_env = QAction("&Environment Manager...", self)
+        action_env.triggered.connect(self.open_environment_manager)
+        tools_menu.addAction(action_env)
+
+        action_diag = QAction("&Diagnostics...", self)
+        action_diag.triggered.connect(self.open_diagnostics)
+        tools_menu.addAction(action_diag)
+
+        # Help Menu
+        help_menu = menubar.addMenu("&Help")
+
+        action_manual = QAction("&User Manual", self)
+        action_manual.setShortcut("F1")
+        action_manual.triggered.connect(lambda: self._show_help_dialog())
+        help_menu.addAction(action_manual)
+
+        # Add topic-specific help items
+        help_menu.addSeparator()
+
+        action_help_engines = QAction("Engine &Selection Guide", self)
+        action_help_engines.triggered.connect(
+            lambda: self._show_help_dialog("engine_selection")
+        )
+        help_menu.addAction(action_help_engines)
+
+        action_help_sim = QAction("Simulation &Controls", self)
+        action_help_sim.triggered.connect(
+            lambda: self._show_help_dialog("simulation_controls")
+        )
+        help_menu.addAction(action_help_sim)
+
+        action_help_mocap = QAction("&Motion Capture", self)
+        action_help_mocap.triggered.connect(
+            lambda: self._show_help_dialog("motion_capture")
+        )
+        help_menu.addAction(action_help_mocap)
+
+        action_help_viz = QAction("&Visualization", self)
+        action_help_viz.triggered.connect(
+            lambda: self._show_help_dialog("visualization")
+        )
+        help_menu.addAction(action_help_viz)
+
+        action_help_analysis = QAction("&Analysis Tools", self)
+        action_help_analysis.triggered.connect(
+            lambda: self._show_help_dialog("analysis_tools")
+        )
+        help_menu.addAction(action_help_analysis)
+
+        help_menu.addSeparator()
+
+        action_shortcuts = QAction("&Keyboard Shortcuts...", self)
+        action_shortcuts.setShortcut("Ctrl+?")
+        action_shortcuts.triggered.connect(self._show_shortcuts_overlay)
+        help_menu.addAction(action_shortcuts)
+
+        help_menu.addSeparator()
+
+        action_about = QAction("&About UpstreamDrift", self)
+        action_about.triggered.connect(self._show_about_dialog)
+        help_menu.addAction(action_about)
+
+    def _toggle_layout_mode_from_menu(self, checked: bool) -> None:
+        """Toggle layout edit mode from menu action.
+
+        Args:
+            checked: Whether the menu item is checked.
+        """
+        if hasattr(self, "btn_modify_layout"):
+            self.btn_modify_layout.setChecked(checked)
+            self.toggle_layout_mode(checked)
+
+    def _toggle_context_help(self, checked: bool) -> None:
+        """Toggle the context help panel visibility.
+
+        Args:
+            checked: Whether to show the panel.
+        """
+        if hasattr(self, "context_help"):
+            if checked:
+                self.context_help.show()
+            else:
+                self.context_help.hide()
 
     def _setup_top_bar(self) -> QHBoxLayout:
         """Set up the top tool bar."""
@@ -944,9 +1015,29 @@ except Exception as e:
         top_bar.addWidget(btn_env)
 
         btn_help = QPushButton("Help")
-        btn_help.setToolTip("View documentation and user guide")
-        btn_help.clicked.connect(self.open_help)
+        btn_help.setToolTip("View documentation and user guide (F1)")
+        btn_help.clicked.connect(lambda: self._show_help_dialog())
+        btn_help.setStyleSheet("""
+            QPushButton {
+                background-color: #0A84FF;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #0077E6;
+            }
+        """)
         top_bar.addWidget(btn_help)
+
+        # Add help button for engine selection (next to grid)
+        if HELP_SYSTEM_AVAILABLE:
+            btn_engine_help = HelpButton(
+                "engine_selection", "Help with engine selection", self
+            )
+            top_bar.addWidget(btn_engine_help)
 
         btn_diagnostics = QPushButton("Diagnostics")
         btn_diagnostics.setToolTip("Run diagnostics to troubleshoot launcher issues")
@@ -1010,6 +1101,37 @@ except Exception as e:
 
         # Context Help Dock
         self._setup_context_help()
+
+        # Register enhanced tooltips for help system
+        if HELP_SYSTEM_AVAILABLE:
+            TooltipManager.register_tooltip(
+                self.chk_live,
+                "Live Visualization",
+                "Enable real-time 3D visualization during simulation. "
+                "Disable for faster computation when visuals aren't needed.",
+                "visualization",
+            )
+            TooltipManager.register_tooltip(
+                self.chk_gpu,
+                "GPU Acceleration",
+                "Use GPU for physics computation when available. "
+                "Provides faster simulation for compatible engines.",
+                "engine_selection",
+            )
+            TooltipManager.register_tooltip(
+                self.chk_docker,
+                "Docker Mode",
+                "Run physics engines in Docker containers. "
+                "Useful for engines not installed locally (Drake, Pinocchio).",
+                "engine_selection",
+            )
+            TooltipManager.register_tooltip(
+                self.chk_wsl,
+                "WSL Mode",
+                "Run in WSL2 Ubuntu environment for full Linux engine support. "
+                "Recommended for advanced features not available on Windows.",
+                "engine_selection",
+            )
 
         return top_bar
 
@@ -1268,55 +1390,6 @@ except Exception as e:
                 "color: #FFD60A; font-weight: bold; margin-left: 10px;"
             )
 
-    def _launch_in_wsl(self, script_path: str, args: list[str] | None = None) -> None:
-        """Launch a script in WSL2 Ubuntu environment.
-
-        Args:
-            script_path: Path to the Python script (Windows path will be converted)
-            args: Optional list of arguments to pass to the script
-        """
-        # Convert Windows path to WSL path
-        if script_path.startswith("C:") or script_path.startswith("c:"):
-            wsl_path = script_path.replace("\\", "/")
-            wsl_path = "/mnt/c" + wsl_path[2:]
-        else:
-            wsl_path = script_path.replace("\\", "/")
-
-        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
-
-        # Build the WSL command
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{project_dir}"
-python "{wsl_path}" {' '.join(args or [])}
-"""
-
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching in WSL: {script_path}")
-            if os.name == "nt":
-                # On Windows, create a new console window
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                subprocess.Popen(cmd)
-
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(f"Launched in WSL: {Path(script_path).name}", "success")
-        except Exception as e:
-            logger.error(f"Failed to launch in WSL: {e}")
-            QMessageBox.critical(
-                self,
-                "WSL Launch Error",
-                f"Failed to launch in WSL:\n{e}",
-            )
-
     def _open_ai_settings(self) -> None:
         """Open the AI settings dialog."""
         if not AI_AVAILABLE:
@@ -1331,79 +1404,19 @@ python "{wsl_path}" {' '.join(args or [])}
 
     def _swap_models(self, source_id: str, target_id: str) -> None:
         """Swap two models in the grid layout."""
-        if not self.layout_edit_mode:
-            return
-
-        try:
-            idx1 = self.model_order.index(source_id)
-            idx2 = self.model_order.index(target_id)
-
-            # Swap in list
-            self.model_order[idx1], self.model_order[idx2] = (
-                self.model_order[idx2],
-                self.model_order[idx1],
-            )
-
-            # Rebuild grid
+        if self.layout_manager.swap_models(source_id, target_id):
+            self.model_order = self.layout_manager.model_order
             self._rebuild_grid()
-
-            # Save layout
             self._save_layout()
-
-        except ValueError:
-            pass  # ID not found
 
     def update_search_filter(self, text: str) -> None:
         """Update the search filter and rebuild grid."""
-        self.current_filter_text = text.lower()
+        self.layout_manager.update_search_filter(text)
         self._rebuild_grid()
 
     def _rebuild_grid(self) -> None:
         """Rebuild the grid layout based on current model order."""
-        # Clean current layout
-        while self.grid_layout.count():
-            item = self.grid_layout.takeAt(0)
-            if item:
-                widget = item.widget()
-                if widget:
-                    widget.setParent(None)
-
-        # Filter models if search is active
-        filtered_order = []
-        for model_id in self.model_order:
-            if not self.current_filter_text:
-                filtered_order.append(model_id)
-                continue
-
-            model = self._get_model(model_id)
-            if not model:
-                continue
-
-            # Search in name, id, and description
-            search_content = f"{model.name} {model.id} {model.description}".lower()
-            if self.current_filter_text in search_content:
-                filtered_order.append(model_id)
-
-        # Get or create widgets
-        widgets = []
-        for model_id in filtered_order:
-            if model_id not in self.model_cards:
-                model = self._get_model(model_id)
-                if model:
-                    self.model_cards[model_id] = DraggableModelCard(model, self)
-
-            if model_id in self.model_cards:
-                widgets.append(self.model_cards[model_id])
-
-        # Add to grid
-        row = 0
-        col = 0
-        for widget in widgets:
-            self.grid_layout.addWidget(widget, row, col)
-            col += 1
-            if col >= GRID_COLUMNS:
-                col = 0
-                row += 1
+        self.layout_manager.rebuild_grid(self.grid_layout)
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
@@ -1690,6 +1703,35 @@ python "{wsl_path}" {' '.join(args or [])}
                 color: #FFFFFF;
                 font-family: 'Segoe UI', sans-serif;
             }
+            QMenuBar {
+                background-color: #252526;
+                color: #CCCCCC;
+                border-bottom: 1px solid #3E3E42;
+                padding: 2px;
+            }
+            QMenuBar::item {
+                padding: 6px 12px;
+                background: transparent;
+            }
+            QMenuBar::item:selected {
+                background-color: #094771;
+            }
+            QMenu {
+                background-color: #252526;
+                color: #CCCCCC;
+                border: 1px solid #3E3E42;
+            }
+            QMenu::item {
+                padding: 8px 24px;
+            }
+            QMenu::item:selected {
+                background-color: #094771;
+            }
+            QMenu::separator {
+                height: 1px;
+                background: #3E3E42;
+                margin: 4px 8px;
+            }
             QLineEdit {
                 background-color: #252526;
                 color: white;
@@ -1735,9 +1777,12 @@ python "{wsl_path}" {' '.join(args or [])}
         self._apply_docker_status(available)
 
     def open_help(self) -> None:
-        """Toggle the help drawer."""
-        help_dialog = HelpDialog(self)
-        help_dialog.exec()
+        """Open the help dialog.
+
+        Note: This method is kept for backward compatibility.
+        Use _show_help_dialog() for new code.
+        """
+        self._show_help_dialog()
 
     def open_diagnostics(self) -> None:
         """Open the diagnostics dialog to troubleshoot launcher issues."""
@@ -1768,17 +1813,17 @@ python "{wsl_path}" {' '.join(args or [])}
             status_emoji = "✅" if summary["status"] == "healthy" else "⚠️"
 
             text = f"""
-{status_emoji} Status: {summary['status'].upper()}
+{status_emoji} Status: {summary["status"].upper()}
 
-Checks: {summary['passed']} passed, {summary['failed']} failed, {summary['warnings']} warnings
+Checks: {summary["passed"]} passed, {summary["failed"]} failed, {summary["warnings"]} warnings
 
 Runtime State:
-• Available models: {results['runtime_state']['available_models_count']}
-• Model order (tiles): {results['runtime_state']['model_order_count']}
-• Model cards: {results['runtime_state']['model_cards_count']}
-• Registry loaded: {results['runtime_state']['registry_loaded']}
+• Available models: {results["runtime_state"]["available_models_count"]}
+• Model order (tiles): {results["runtime_state"]["model_order_count"]}
+• Model cards: {results["runtime_state"]["model_cards_count"]}
+• Registry loaded: {results["runtime_state"]["registry_loaded"]}
 
-Expected tiles: {summary['expected_tiles']}
+Expected tiles: {summary["expected_tiles"]}
 """
 
             # Add check details
@@ -1945,21 +1990,19 @@ Expected tiles: {summary['expected_tiles']}
             if repo_path:
                 abs_repo_path = REPOS_ROOT / repo_path
 
-                # Route to appropriate custom launcher based on model type
-                if model.type == "custom_humanoid":
-                    self._custom_launch_humanoid(abs_repo_path)
-                elif model.type == "custom_dashboard":
-                    self._custom_launch_comprehensive(abs_repo_path)
-                elif model.type == "drake":
-                    self._custom_launch_drake(abs_repo_path)
-                elif model.type == "pinocchio":
-                    self._custom_launch_pinocchio(abs_repo_path)
-                elif model.type == "opensim":
-                    self._custom_launch_opensim(abs_repo_path)
-                elif model.type == "myosim":
-                    self._custom_launch_myosim(abs_repo_path)
-                elif model.type == "openpose":
-                    self._custom_launch_openpose(abs_repo_path)
+                # Try to use the handler registry first (cleaner, extensible approach)
+                handler = self.model_handler_registry.get_handler(model.type)
+                if handler:
+                    success = handler.launch(model, REPOS_ROOT, self.process_manager)
+                    if success:
+                        self.show_toast(f"{model.name} Launched", "success")
+                        self.lbl_status.setText(f"● {model.name} Running")
+                        self.lbl_status.setStyleSheet("color: #30D158;")
+                    else:
+                        self.show_toast(f"Failed to launch {model.name}", "error")
+                        self.lbl_status.setText("● Launch Error")
+                        self.lbl_status.setStyleSheet("color: #FF375F;")
+                # Fallback for MJCF and unknown types
                 elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
                     self._launch_generic_mjcf(abs_repo_path)
                 else:
@@ -2014,97 +2057,12 @@ Expected tiles: {summary['expected_tiles']}
         except Exception as e:
             raise RuntimeError(f"Failed to launch MJCF: {e}") from e
 
-    def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
-        """Launch the MuJoCo humanoid GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Humanoid launcher not found: {script}"
-            )
-            return
-        logger.info(f"Launching MuJoCo Humanoid: {script}")
-        self._launch_script_process("MuJoCo Humanoid", script, REPOS_ROOT)
-
-    def _custom_launch_comprehensive(self, abs_repo_path: Path) -> None:
-        """Launch the comprehensive MuJoCo dashboard directly."""
-        python_dir = REPOS_ROOT / "src/engines/physics_engines/mujoco/python"
-        if not python_dir.exists():
-            QMessageBox.critical(
-                self, "Error", f"MuJoCo Python directory not found: {python_dir}"
-            )
-            return
-        logger.info(f"Launching MuJoCo Dashboard from {python_dir}")
-        # Dashboard runs as a module from its directory
-        self._launch_module_process(
-            "MuJoCo Dashboard", "mujoco_humanoid_golf", python_dir
-        )
-
-    def _custom_launch_drake(self, abs_repo_path: Path) -> None:
-        """Launch the Drake GUI directly."""
-        script = (
-            REPOS_ROOT / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(self, "Error", f"Drake GUI not found: {script}")
-            return
-        logger.info(f"Launching Drake GUI: {script}")
-        self._launch_script_process("Drake", script, REPOS_ROOT)
-
-    def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
-        """Launch the Pinocchio GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Pinocchio GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching Pinocchio GUI: {script}")
-        self._launch_script_process("Pinocchio", script, REPOS_ROOT)
-
-    def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
-        """Launch the OpenSim GUI directly."""
-        script = (
-            REPOS_ROOT / "src/engines/physics_engines/opensim/python/opensim_gui.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"OpenSim GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching OpenSim GUI: {script}")
-        self._launch_script_process("OpenSim", script, REPOS_ROOT)
-
-    def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
-        """Launch the MyoSim GUI directly."""
-        script = (
-            REPOS_ROOT
-            / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
-        )
-        if not script.exists():
-            QMessageBox.critical(self, "Error", f"MyoSim script not found: {script}")
-            return
-        logger.info(f"Launching MyoSim: {script}")
-        self._launch_script_process("MyoSim", script, REPOS_ROOT)
-
-    def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
-        """Launch the OpenPose GUI directly."""
-        script = REPOS_ROOT / "src/shared/python/pose_estimation/openpose_gui.py"
-        if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"OpenPose GUI script not found: {script}"
-            )
-            return
-        logger.info(f"Launching OpenPose GUI: {script}")
-        self._launch_script_process("OpenPose", script, REPOS_ROOT)
-
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
-        """Launch the model in a Docker container."""
+        """Launch the model in a Docker container.
+
+        Delegates to DockerLauncher for container orchestration while
+        handling UI feedback (prompts, status updates, error dialogs).
+        """
         try:
             # Auto-start VcXsrv on Windows for GUI support
             if os.name == "nt":
@@ -2122,104 +2080,39 @@ Expected tiles: {summary['expected_tiles']}
                         return
 
             # Check if Docker image exists
-            docker_image = "robotics_env:latest"
-            try:
-                check_result = subprocess.run(
-                    ["docker", "image", "inspect", docker_image],
-                    capture_output=True,
-                    timeout=10,
+            if not self.docker_launcher.check_image_exists():
+                QMessageBox.warning(
+                    self,
+                    "Docker Image Not Found",
+                    f"The Docker image '{self.docker_launcher.image_name}' is not available.\n\n"
+                    "Build it first using:\n"
+                    "  docker build -t robotics_env .\n\n"
+                    "Or use the Environment dialog to build.",
                 )
-                if check_result.returncode != 0:
-                    QMessageBox.warning(
-                        self,
-                        "Docker Image Not Found",
-                        f"The Docker image '{docker_image}' is not available.\n\n"
-                        "Build it first using:\n"
-                        "  docker build -t robotics_env .\n\n"
-                        "Or use the Environment dialog to build.",
-                    )
-                    return
-            except Exception as e:
-                logger.warning(f"Failed to check Docker image: {e}")
+                return
 
-            # Construct Docker command - no -it for GUI apps
-            cmd = [
-                "docker",
-                "run",
-                "--rm",
-                "-v",
-                f"{REPOS_ROOT}:/workspace",
-                "-e",
-                "PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python",
-            ]
-
-            # Display configuration for GUI apps
-            if os.name == "nt":  # Windows
-                cmd.extend(
-                    [
-                        "-e",
-                        "DISPLAY=host.docker.internal:0",
-                        "-e",
-                        "MUJOCO_GL=glfw",
-                        "-e",
-                        "PYOPENGL_PLATFORM=glx",
-                        "-e",
-                        "QT_QPA_PLATFORM=xcb",
-                    ]
-                )
-            else:  # Linux
-                disp = os.environ.get("DISPLAY", ":0")
-                cmd.extend(
-                    [
-                        "-e",
-                        f"DISPLAY={disp}",
-                        "-v",
-                        "/tmp/.X11-unix:/tmp/.X11-unix",
-                    ]
-                )
-
-            # GPU Support
-            if self.chk_gpu.isChecked():
-                cmd.extend(["--gpus=all"])
-
-            # Port mapping for MeshCat (Drake/Pinocchio)
-            if model.type in ("drake", "pinocchio"):
-                cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])
-
-            # Working Directory
-            work_dir = (
-                f"/workspace/{repo_path.parent.relative_to(REPOS_ROOT).as_posix()}"
+            # Launch container via DockerLauncher
+            use_gpu = hasattr(self, "chk_gpu") and self.chk_gpu.isChecked()
+            process = self.docker_launcher.launch_container(
+                model_type=model.type,
+                model_name=model.name,
+                repo_path=repo_path,
+                use_gpu=use_gpu,
             )
-            cmd.extend(["-w", work_dir])
 
-            # Python command - determine correct launch command based on model type
-            if model.type == "drake":
-                cmd.extend(
-                    [
-                        docker_image,
-                        "python",
-                        "-m",
-                        "src.drake_gui_app",
-                    ]
-                )
-            elif model.type == "pinocchio":
-                cmd.extend([docker_image, "python", "pinocchio_golf/gui.py"])
-            elif model.type in ("custom_humanoid", "custom_dashboard"):
-                # MuJoCo humanoid models
-                cmd.extend([docker_image, "python", repo_path.name])
+            if process:
+                self.running_processes[model.name] = process
+                self.show_toast(f"{model.name} Launched (Docker)", "success")
+                self.lbl_status.setText(f"● {model.name} Running (Docker)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
             else:
-                cmd.extend([docker_image, "python", repo_path.name])
-
-            logger.info(f"Docker Launch: {' '.join(cmd)}")
-
-            process = subprocess.Popen(
-                cmd,
-                creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0,
-            )
-            self.running_processes[model.name] = process
-            self.show_toast(f"{model.name} Launched (Docker)", "success")
-            self.lbl_status.setText(f"● {model.name} Running (Docker)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+                self.lbl_status.setText("● Docker Error")
+                self.lbl_status.setStyleSheet("color: #FF375F;")
+                QMessageBox.critical(
+                    self,
+                    "Docker Launch Error",
+                    f"Failed to launch {model.name} in Docker",
+                )
 
         except Exception as e:
             logger.error(f"Failed to launch Docker container: {e}")
@@ -2238,156 +2131,71 @@ Expected tiles: {summary['expected_tiles']}
         allowing users to see the error message.
 
         If WSL mode is enabled, launches the script in WSL2 Ubuntu environment.
+
+        Delegates to ProcessManager for the actual subprocess handling.
         """
         # Check if WSL mode is enabled
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
-            self._launch_in_wsl(str(script_path))
-            self.lbl_status.setText(f"● {name} Running (WSL)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            success = self.process_manager.launch_in_wsl(str(script_path))
+            if success:
+                self.lbl_status.setText(f"● {name} Running (WSL)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.show_toast(f"{name} Launched in WSL", "success")
+            else:
+                QMessageBox.critical(
+                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                )
             return
 
-        try:
-            env = self._get_subprocess_env()
+        # Delegate to ProcessManager with keep_terminal_open=True for error visibility
+        process = self.process_manager.launch_script(
+            name, script_path, cwd, keep_terminal_open=True
+        )
 
-            if os.name == "nt":
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=env,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                process = subprocess.Popen(
-                    [sys.executable, str(script_path)],
-                    cwd=str(cwd),
-                    env=env,
-                )
-
-            self.running_processes[name] = process
+        if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
-
-        except Exception as e:
-            logger.error(f"Failed to launch {name}: {e}")
-            QMessageBox.critical(
-                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
-            )
+        else:
+            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
     def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:
         """Helper to launch python module with error visibility.
 
         Similar to _launch_script_process but uses -m to run a module.
         If WSL mode is enabled, launches in WSL2 Ubuntu environment.
+
+        Delegates to ProcessManager for the actual subprocess handling.
         """
         # Check if WSL mode is enabled
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
             # For WSL, we run the module using python -m
-            self._launch_module_in_wsl(module_name, cwd)
-            self.lbl_status.setText(f"● {name} Running (WSL)")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            success = self.process_manager.launch_module_in_wsl(module_name, cwd)
+            if success:
+                self.lbl_status.setText(f"● {name} Running (WSL)")
+                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.show_toast(f"{name} Launched in WSL", "success")
+            else:
+                QMessageBox.critical(
+                    self, "Launch Error", f"Failed to launch {name} in WSL"
+                )
             return
 
-        try:
-            env = self._get_subprocess_env()
+        # Delegate to ProcessManager with keep_terminal_open=True for error visibility
+        process = self.process_manager.launch_module(
+            name, module_name, cwd, keep_terminal_open=True
+        )
 
-            # Ensure PYTHONPATH is set correctly for Windows
-            if os.name == "nt":
-                current_pythonpath = env.get("PYTHONPATH", "")
-                repo_root_str = str(REPOS_ROOT)
-                src_dir_str = str(REPOS_ROOT / "src")
-
-                paths_to_add = []
-                if repo_root_str not in current_pythonpath:
-                    paths_to_add.append(repo_root_str)
-                if src_dir_str not in current_pythonpath:
-                    paths_to_add.append(src_dir_str)
-
-                if paths_to_add:
-                    env["PYTHONPATH"] = f"{';'.join(paths_to_add)};{current_pythonpath}"
-
-                # Use cmd /k with a single string command to keep window open
-                cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=env,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                process = subprocess.Popen(
-                    [sys.executable, "-m", module_name],
-                    cwd=str(cwd),
-                    env=env,
-                )
-
-            self.running_processes[name] = process
+        if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
-
-        except Exception as e:
-            logger.error(f"Failed to launch {name}: {e}")
-            QMessageBox.critical(
-                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
-            )
-
-    def _launch_module_in_wsl(self, module_name: str, cwd: Path | None = None) -> None:
-        """Launch a Python module in WSL2 Ubuntu environment.
-
-        Args:
-            module_name: Python module name to run with -m flag
-            cwd: Optional working directory (Windows Path)
-        """
-        project_dir = "/mnt/c/Users/diete/Repositories/UpstreamDrift"
-
-        # Determine working directory
-        work_dir = project_dir
-        if cwd:
-            # Convert Windows path to WSL path
-            s_cwd = str(cwd)
-            if len(s_cwd) > 1 and s_cwd[1] == ":":
-                drive = s_cwd[0].lower()
-                path_part = s_cwd[2:].replace("\\", "/")
-                work_dir = f"/mnt/{drive}{path_part}"
-
-        # Build the WSL command
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{work_dir}"
-python -m {module_name}
-"""
-
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching module in WSL: {module_name}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
-                )
-            else:
-                subprocess.Popen(cmd)
-
-            if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast(f"Launched in WSL: {module_name}", "success")
-        except Exception as e:
-            logger.error(f"Failed to launch module in WSL: {e}")
-            QMessageBox.critical(
-                self,
-                "WSL Launch Error",
-                f"Failed to launch module in WSL:\n{e}",
-            )
+        else:
+            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
     def open_layout_manager(self) -> None:
         """Open the layout customization dialog."""
@@ -2400,6 +2208,7 @@ python -m {module_name}
     def toggle_layout_mode(self, checked: bool) -> None:
         """Toggle tile editing mode."""
         self.layout_edit_mode = checked
+        self.layout_manager.set_edit_mode(checked)
         if checked:
             self.btn_modify_layout.setText("🔓 Edit Mode On")
             self.btn_modify_layout.setStyleSheet("""
@@ -2420,10 +2229,6 @@ python -m {module_name}
                 }
                 """)
             self.btn_customize_tiles.setEnabled(False)
-
-        # Update all cards to accept/reject drops
-        for card in self.model_cards.values():
-            card.setAcceptDrops(checked)
 
     def _setup_context_help(self) -> None:
         """Setup context help dock."""
@@ -2454,6 +2259,14 @@ def main() -> None:
     """Application entry point."""
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+
+    # Apply plot theme for matplotlib visualizations
+    try:
+        from shared.python.plot_theme import apply_plot_theme
+
+        apply_plot_theme(settings_app="GolfModelingSuite")
+    except ImportError:
+        logger.debug("Plot theme module not available")
 
     # Show splash
     splash = GolfSplashScreen()

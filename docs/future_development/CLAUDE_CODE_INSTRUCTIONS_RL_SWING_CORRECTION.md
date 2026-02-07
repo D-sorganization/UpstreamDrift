@@ -45,6 +45,7 @@ src/
 ```
 
 Also create:
+
 ```
 examples/
 └── correction/
@@ -94,17 +95,18 @@ matplotlib>=3.7.0
 Add to `environment.yml` under dependencies:
 
 ```yaml
-  - stable-baselines3>=2.0
-  - gymnasium>=0.29
-  - mediapipe>=0.10
-  - dtaidistance>=2.3
-  - tensorboard>=2.15
-  - opencv>=4.8
+- stable-baselines3>=2.0
+- gymnasium>=0.29
+- mediapipe>=0.10
+- dtaidistance>=2.3
+- tensorboard>=2.15
+- opencv>=4.8
 ```
 
 ### Task 1.3: Create Module `__init__.py` Files
 
 **`src/correction/__init__.py`**:
+
 ```python
 """
 RL-based Golf Swing Correction Module.
@@ -136,6 +138,7 @@ __version__ = "0.1.0"
 **File**: `src/correction/environment.py`
 
 **Requirements**:
+
 1. Implement `GolfSwingCorrectionEnv` as a Gymnasium environment
 2. State space: Flattened normalized joint coordinates `(N_joints * 2,)`
 3. Action space: Continuous correction deltas per joint coordinate
@@ -148,12 +151,14 @@ __version__ = "0.1.0"
    - Velocity-based rhythm consistency
 
 **Key equations from paper**:
+
 - Pose accuracy reward: `R_L2(t) = -α * (L2(t))^η` (Equation 21)
 - Improvement reward: `R_ΔL2(t) = β * tanh(k * (L2(t-1) - L2(t)))` (Equation 22)
 - Hip alignment: `R_hip(t) = -λ * (||h_L^u - h_L^e|| + ||h_R^u - h_R^e||)` (Equation 23)
 - Velocity-DTW: `R_VDTW(t) = -γ * DTW(V^u, V^e)` (Equation 25)
 
 **Default hyperparameters** (from paper Table 7, setting S0):
+
 - `pose_accuracy_alpha`: 1.0
 - `pose_accuracy_eta`: 2.0
 - `improvement_beta`: 0.5
@@ -162,6 +167,7 @@ __version__ = "0.1.0"
 - `rhythm_gamma`: 0.7
 
 **Implementation notes**:
+
 - Use `gymnasium` not deprecated `gym`
 - Clip actions to prevent unrealistic corrections (default max magnitude: 0.1)
 - Clip corrected coordinates to [-1, 1] after applying actions
@@ -169,6 +175,7 @@ __version__ = "0.1.0"
 - Joint importance weights: higher for wrists/shoulders (1.5), moderate for hips (1.2), standard for others (1.0)
 
 **Include methods**:
+
 - `reset(seed, options) -> (observation, info)`
 - `step(action) -> (observation, reward, terminated, truncated, info)`
 - `_get_observation() -> np.ndarray`
@@ -188,6 +195,7 @@ Create separate files for each reward component for modularity and testing.
 **File**: `src/correction/rewards/pose_accuracy.py`
 
 Implement:
+
 ```python
 def compute_weighted_l2_error(
     corrected_pose: np.ndarray,  # Shape: (N_joints, 2)
@@ -207,6 +215,7 @@ def pose_accuracy_reward(
 **File**: `src/correction/rewards/improvement_rate.py`
 
 Implement:
+
 ```python
 def improvement_rate_reward(
     previous_l2: float,
@@ -220,6 +229,7 @@ def improvement_rate_reward(
 **File**: `src/correction/rewards/hip_stability.py`
 
 Implement:
+
 ```python
 def hip_alignment_reward(
     corrected_hips: np.ndarray,  # Shape: (2, 2) for left/right hip (x,y)
@@ -232,6 +242,7 @@ def hip_alignment_reward(
 **File**: `src/correction/rewards/velocity_dtw.py`
 
 Implement:
+
 ```python
 def compute_velocity_sequence(positions: np.ndarray) -> np.ndarray:
     """v_i(t) = p_i(t) - p_i(t-1), returns shape (T-1, N_joints, 2)"""
@@ -258,6 +269,7 @@ def per_frame_velocity_reward(
 ```
 
 **File**: `src/correction/rewards/__init__.py`
+
 ```python
 from .pose_accuracy import compute_weighted_l2_error, pose_accuracy_reward
 from .improvement_rate import improvement_rate_reward
@@ -288,11 +300,13 @@ __all__ = [
 **File**: `src/correction/preprocessing/temporal_alignment.py`
 
 **Requirements**:
+
 1. Phase-wise interpolation to align user sequence to expert frame count
 2. Uses linear interpolation within each phase (Equations 3-4 from paper)
 3. Prevents global temporal distortion by aligning phase-by-phase
 
 **Implement**:
+
 ```python
 def phase_wise_alignment(
     user_sequence: np.ndarray,      # Shape: (T_user, N_joints, 2)
@@ -302,7 +316,7 @@ def phase_wise_alignment(
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Align user sequence to expert phase-by-phase.
-    
+
     Returns aligned_user (same length as expert) and expert (unchanged).
     """
 
@@ -321,11 +335,13 @@ def _interpolate_phase(
 **File**: `src/correction/preprocessing/spatial_normalization.py`
 
 **Requirements**:
+
 1. Hip-centered coordinate system (Equation 5-6)
 2. Scale by torso length (shoulder center to hip center) (Equations 7-9)
 3. Clip to [-1, 1] range (Equation 10)
 
 **Implement**:
+
 ```python
 def hip_centered_normalization(
     sequence: np.ndarray,           # Shape: (T, N_joints, 2)
@@ -338,7 +354,7 @@ def hip_centered_normalization(
 ) -> np.ndarray:
     """
     Apply hip-centered spatial normalization per frame.
-    
+
     Steps:
     1. Compute hip center: c_hip = 0.5 * (h_L + h_R)
     2. Compute shoulder center: c_shoulder = 0.5 * (s_L + s_R)
@@ -364,11 +380,13 @@ def denormalize_sequence(
 **File**: `src/correction/preprocessing/phase_detection.py`
 
 **Requirements**:
+
 1. Detect 8 canonical golf swing phases: address, takeaway, half, top, down_half, impact, follow_through, finish
 2. Uses velocity-based features (movement start, velocity reversal at top, max speed at impact)
 3. Fallback to uniform distribution if detection fails
 
 **Implement**:
+
 ```python
 SWING_PHASES = [
     "address",
@@ -388,13 +406,13 @@ def detect_swing_phases(
 ) -> list[int]:
     """
     Detect phase boundaries from keypoint sequence.
-    
+
     Key events detected:
     - Movement start (address → takeaway): speed exceeds threshold
     - Top of backswing: horizontal velocity sign change
     - Impact: maximum speed
     - Finish: speed drops below threshold
-    
+
     Returns list of frame indices: [0, t1, t2, ..., T]
     """
 
@@ -418,6 +436,7 @@ def _interpolate_phase_boundaries(
 ```
 
 **File**: `src/correction/preprocessing/__init__.py`
+
 ```python
 from .temporal_alignment import phase_wise_alignment
 from .spatial_normalization import hip_centered_normalization, denormalize_sequence
@@ -441,12 +460,14 @@ __all__ = [
 **File**: `src/correction/data/pose_extraction.py`
 
 **Requirements**:
+
 1. Extract 2D keypoints from video using MediaPipe BlazePose
 2. Map MediaPipe landmarks to paper's joint names
 3. Handle missing detections with linear interpolation
 4. Save extracted sequences as .npy files
 
 **MediaPipe landmark indices to use**:
+
 ```python
 BLAZEPOSE_TO_PAPER = {
     15: "left_wrist",
@@ -462,6 +483,7 @@ BLAZEPOSE_TO_PAPER = {
 ```
 
 **Implement**:
+
 ```python
 def extract_keypoints_from_video(
     video_path: str | Path,
@@ -471,7 +493,7 @@ def extract_keypoints_from_video(
 ) -> tuple[np.ndarray, list[str]]:
     """
     Extract 2D keypoints from golf swing video.
-    
+
     Returns:
         keypoints: Shape (T, N_joints, 2), normalized coords [0, 1]
         joint_names: List of joint names in order
@@ -503,11 +525,13 @@ def batch_extract_keypoints(
 **File**: `src/correction/agents/ppo_corrector.py`
 
 **Requirements**:
+
 1. Wrapper around Stable-Baselines3 PPO with paper's hyperparameters
 2. Network architecture: 3 fully connected layers (256, 256, 128) for both actor and critic
 3. Training configuration from Section 4.1.2
 
 **Default hyperparameters**:
+
 ```python
 PPO_CONFIG = {
     "learning_rate": 3e-4,
@@ -530,14 +554,15 @@ PPO_CONFIG = {
 ```
 
 **Implement**:
+
 ```python
 class SwingCorrectorAgent:
     """
     PPO-based swing correction agent.
-    
+
     Wraps Stable-Baselines3 PPO with paper's configuration.
     """
-    
+
     def __init__(
         self,
         env: GolfSwingCorrectionEnv,
@@ -545,7 +570,7 @@ class SwingCorrectorAgent:
         tensorboard_log: str | None = None,
     ):
         """Initialize PPO agent with environment."""
-    
+
     def train(
         self,
         total_timesteps: int = 3_000_000,
@@ -553,20 +578,20 @@ class SwingCorrectorAgent:
         progress_bar: bool = True,
     ) -> None:
         """Train the agent."""
-    
+
     def save(self, path: str | Path) -> None:
         """Save model checkpoint."""
-    
+
     def load(self, path: str | Path) -> None:
         """Load model checkpoint."""
-    
+
     def predict(
         self,
         observation: np.ndarray,
         deterministic: bool = True,
     ) -> np.ndarray:
         """Get correction action for observation."""
-    
+
     def correct_sequence(
         self,
         user_sequence: np.ndarray,
@@ -575,7 +600,7 @@ class SwingCorrectorAgent:
     ) -> np.ndarray:
         """
         Correct entire swing sequence.
-        
+
         Returns corrected sequence same shape as input.
         """
 ```
@@ -585,6 +610,7 @@ class SwingCorrectorAgent:
 **File**: `examples/correction/train_corrector.py`
 
 **Requirements**:
+
 1. Command-line interface with argparse
 2. Load and preprocess data
 3. Create vectorized environments (SubprocVecEnv for parallel training)
@@ -593,6 +619,7 @@ class SwingCorrectorAgent:
 6. Save final model
 
 **CLI arguments**:
+
 ```
 --user-data: Path to user swing sequence (.npy)
 --expert-data: Path to expert swing sequence (.npy)
@@ -612,6 +639,7 @@ class SwingCorrectorAgent:
 **File**: `src/correction/evaluation/metrics.py`
 
 **Implement**:
+
 ```python
 def compute_correction_metrics(
     original_sequence: np.ndarray,
@@ -621,7 +649,7 @@ def compute_correction_metrics(
 ) -> dict[str, float]:
     """
     Compute comprehensive metrics matching paper's Tables 1-5.
-    
+
     Returns dict with keys:
     - l2_original_{joint}, l2_corrected_{joint}, l2_improvement_{joint}
     - l2_original_avg, l2_corrected_avg, l2_improvement_avg
@@ -639,7 +667,7 @@ def compute_phase_wise_metrics(
 ) -> dict[str, dict[str, float]]:
     """
     Compute metrics per swing phase (Tables 2, 4 in paper).
-    
+
     Returns nested dict: phase_name -> metric_name -> value
     """
 
@@ -649,7 +677,7 @@ def statistical_validation(
 ) -> dict[str, float]:
     """
     Paired t-test and effect size (Section 4.8).
-    
+
     Returns:
     - p_value
     - cohens_d (effect size)
@@ -662,6 +690,7 @@ def statistical_validation(
 **File**: `src/correction/evaluation/visualization.py`
 
 **Implement**:
+
 ```python
 def plot_joint_trajectories(
     user_sequence: np.ndarray,
@@ -674,7 +703,7 @@ def plot_joint_trajectories(
 ) -> plt.Figure:
     """
     Plot X and Y trajectories for single joint (Figures 4-7 in paper).
-    
+
     Shows user (original), expert, and corrected overlaid.
     Optionally shows phase boundaries as vertical lines.
     """
@@ -717,6 +746,7 @@ def create_correction_report(
 **File**: `examples/correction/evaluate_correction.py`
 
 **Requirements**:
+
 1. Load trained model
 2. Run correction on test sequences
 3. Compute all metrics
@@ -724,6 +754,7 @@ def create_correction_report(
 5. Save results to JSON and create report
 
 **CLI arguments**:
+
 ```
 --model-path: Path to trained model
 --user-data: Path to user swing sequence
@@ -741,6 +772,7 @@ def create_correction_report(
 **File**: `tests/correction/test_environment.py`
 
 **Test cases**:
+
 ```python
 def test_reset_returns_correct_shape():
     """Observation shape matches (N_joints * 2,)"""
@@ -772,6 +804,7 @@ def test_reward_components_have_correct_signs():
 **File**: `tests/correction/test_preprocessing.py`
 
 **Test cases**:
+
 ```python
 def test_phase_alignment_matches_expert_length():
     """Aligned user sequence has same length as expert"""
@@ -797,6 +830,7 @@ def test_phase_detection_covers_full_sequence():
 **File**: `tests/correction/test_rewards.py`
 
 **Test cases**:
+
 ```python
 def test_l2_reward_negative_for_nonzero_error():
     """Pose accuracy reward is negative when error > 0"""
@@ -848,14 +882,14 @@ def synthetic_sequences(joint_names):
     """
     T, N = 60, len(joint_names)
     t = np.linspace(0, 2*np.pi, T)
-    
+
     expert = np.zeros((T, N, 2))
     for j in range(N):
         expert[:, j, 0] = 0.5 * np.sin(t + j * 0.1)
         expert[:, j, 1] = 0.3 * np.cos(t + j * 0.1)
-    
+
     user = expert + np.random.randn(T, N, 2) * 0.1
-    
+
     return user, expert
 
 @pytest.fixture
@@ -890,7 +924,7 @@ def generate_expert_trajectory_drake(
 ) -> np.ndarray:
     """
     Generate biomechanically optimal trajectory using Drake.
-    
+
     Can be used as expert reference for RL training.
     """
 
@@ -901,7 +935,7 @@ def refine_corrected_trajectory(
 ) -> np.ndarray:
     """
     Use trajectory optimization to smooth RL-corrected trajectory.
-    
+
     Removes any artifacts while preserving correction intent.
     """
 ```
@@ -916,10 +950,10 @@ def refine_corrected_trajectory(
 class MuscleAwareCorrectionEnv(GolfSwingCorrectionEnv):
     """
     Extended environment with muscle dynamics validation.
-    
+
     Adds penalty for corrections requiring implausible muscle activations.
     """
-    
+
     def __init__(
         self,
         mujoco_model_path: str | Path,
@@ -927,7 +961,7 @@ class MuscleAwareCorrectionEnv(GolfSwingCorrectionEnv):
         *args, **kwargs
     ):
         """Load MuJoCo model and initialize muscle validation."""
-    
+
     def _compute_muscle_activation_cost(
         self,
         current_pose: np.ndarray,
@@ -935,7 +969,7 @@ class MuscleAwareCorrectionEnv(GolfSwingCorrectionEnv):
     ) -> float:
         """
         Estimate muscle activation cost for transition.
-        
+
         Uses inverse dynamics to get required torques,
         then estimates activation via torque-squared proxy.
         """
@@ -952,17 +986,17 @@ class PinocchioDynamics:
     """
     Use Pinocchio for efficient FK/IK computations.
     """
-    
+
     def __init__(self, urdf_path: str | Path):
         """Load URDF model."""
-    
+
     def keypoints_to_joint_angles(
         self,
         keypoints: np.ndarray,  # Shape: (N_joints, 2) or (N_joints, 3)
         q_init: np.ndarray | None = None,
     ) -> np.ndarray:
         """Inverse kinematics to get joint configuration."""
-    
+
     def joint_angles_to_keypoints(
         self,
         q: np.ndarray,
@@ -983,6 +1017,7 @@ Create comprehensive docstrings for all public functions following NumPy style.
 **File**: `docs/correction/user_guide.md`
 
 Sections:
+
 1. Overview of RL-based swing correction
 2. Installation and setup
 3. Extracting keypoints from video
@@ -1023,18 +1058,18 @@ Auto-generated from docstrings using pdoc or sphinx.
 
 ## Key Files Reference
 
-| File | Purpose | Priority |
-|------|---------|----------|
-| `src/correction/environment.py` | Core Gym environment | Critical |
-| `src/correction/rewards/velocity_dtw.py` | Paper's key contribution | Critical |
-| `src/correction/preprocessing/temporal_alignment.py` | Phase-wise alignment | Critical |
-| `src/correction/preprocessing/spatial_normalization.py` | Hip-centered coords | Critical |
-| `src/correction/preprocessing/phase_detection.py` | Swing phase detection | High |
-| `src/correction/data/pose_extraction.py` | Video to keypoints | High |
-| `src/correction/agents/ppo_corrector.py` | PPO wrapper | High |
-| `examples/correction/train_corrector.py` | Training script | High |
-| `src/correction/evaluation/metrics.py` | Evaluation metrics | Medium |
-| `src/correction/evaluation/visualization.py` | Plotting utilities | Medium |
+| File                                                    | Purpose                  | Priority |
+| ------------------------------------------------------- | ------------------------ | -------- |
+| `src/correction/environment.py`                         | Core Gym environment     | Critical |
+| `src/correction/rewards/velocity_dtw.py`                | Paper's key contribution | Critical |
+| `src/correction/preprocessing/temporal_alignment.py`    | Phase-wise alignment     | Critical |
+| `src/correction/preprocessing/spatial_normalization.py` | Hip-centered coords      | Critical |
+| `src/correction/preprocessing/phase_detection.py`       | Swing phase detection    | High     |
+| `src/correction/data/pose_extraction.py`                | Video to keypoints       | High     |
+| `src/correction/agents/ppo_corrector.py`                | PPO wrapper              | High     |
+| `examples/correction/train_corrector.py`                | Training script          | High     |
+| `src/correction/evaluation/metrics.py`                  | Evaluation metrics       | Medium   |
+| `src/correction/evaluation/visualization.py`            | Plotting utilities       | Medium   |
 
 ---
 

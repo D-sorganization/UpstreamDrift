@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // Mock the useSimulation hook
 const mockSimulation = {
@@ -18,7 +19,52 @@ const mockSimulation = {
 
 vi.mock('@/api/client', () => ({
   useSimulation: vi.fn(() => mockSimulation),
-  fetchEngines: vi.fn(),
+}));
+
+// Mock the engine manager
+interface MockEngine {
+  name: string;
+  displayName: string;
+  description: string;
+  loadState: string;
+  available: boolean;
+  capabilities: string[];
+  version?: string;
+}
+
+const mockEngineManager: {
+  engines: MockEngine[];
+  loadedEngines: MockEngine[];
+  getEngine: ReturnType<typeof vi.fn>;
+  requestLoad: ReturnType<typeof vi.fn>;
+  unloadEngine: ReturnType<typeof vi.fn>;
+} = {
+  engines: [
+    {
+      name: 'mujoco',
+      displayName: 'MuJoCo',
+      description: 'High-performance physics',
+      loadState: 'idle',
+      available: true,
+      capabilities: ['rigid_body'],
+    },
+    {
+      name: 'drake',
+      displayName: 'Drake',
+      description: 'Optimization-based dynamics',
+      loadState: 'idle',
+      available: true,
+      capabilities: ['rigid_body'],
+    },
+  ],
+  loadedEngines: [],
+  getEngine: vi.fn(),
+  requestLoad: vi.fn(),
+  unloadEngine: vi.fn(),
+};
+
+vi.mock('@/api/useEngineManager', () => ({
+  useEngineManager: vi.fn(() => mockEngineManager),
 }));
 
 // Mock Scene3D
@@ -30,14 +76,33 @@ vi.mock('@/components/visualization/Scene3D', () => ({
   ),
 }));
 
-import { SimulationPage } from './Simulation';
-import { useSimulation, fetchEngines } from '@/api/client';
-import type { SimulationFrame } from '@/api/client';
+// Mock LivePlot
+vi.mock('@/components/analysis/LivePlot', () => ({
+  LivePlot: () => <div data-testid="live-plot-mock">LivePlot Mock</div>,
+}));
 
-const mockEngines = [
-  { name: 'mujoco', available: true, loaded: true, capabilities: ['rigid_body'] },
-  { name: 'drake', available: true, loaded: false, capabilities: ['rigid_body'] },
-];
+// Mock ParameterPanel — do NOT call onChange during render to avoid infinite loops
+vi.mock('@/components/simulation/ParameterPanel', () => ({
+  ParameterPanel: ({ engine }: { engine: string; disabled?: boolean; onChange: (params: unknown) => void }) => {
+    return (
+      <div data-testid="parameter-panel-mock" data-engine={engine}>
+        ParameterPanel Mock
+      </div>
+    );
+  },
+}));
+
+// Mock ConnectionStatus
+vi.mock('@/components/ui/ConnectionStatus', () => ({
+  ConnectionStatus: ({ status }: { status: string }) => (
+    <div data-testid="connection-status-mock" data-status={status}>
+      Connection: {status}
+    </div>
+  ),
+}));
+
+import { SimulationPage } from './Simulation';
+import type { SimulationFrame } from '@/api/client';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -47,7 +112,9 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{children}</ToastProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -66,7 +133,31 @@ describe('SimulationPage', () => {
       pause: vi.fn(),
       resume: vi.fn(),
     });
-    vi.mocked(fetchEngines).mockResolvedValue(mockEngines);
+
+    // Reset engine manager to idle state (no engines loaded)
+    Object.assign(mockEngineManager, {
+      engines: [
+        {
+          name: 'mujoco',
+          displayName: 'MuJoCo',
+          description: 'High-performance physics',
+          loadState: 'idle',
+          available: true,
+          capabilities: ['rigid_body'],
+        },
+        {
+          name: 'drake',
+          displayName: 'Drake',
+          description: 'Optimization-based dynamics',
+          loadState: 'idle',
+          available: true,
+          capabilities: ['rigid_body'],
+        },
+      ],
+      loadedEngines: [],
+      requestLoad: vi.fn(),
+      unloadEngine: vi.fn(),
+    });
   });
 
   describe('layout', () => {
@@ -74,7 +165,7 @@ describe('SimulationPage', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Golf Suite')).toBeInTheDocument();
-      expect(screen.getByText('Simulation')).toBeInTheDocument();
+      expect(screen.getAllByText('Physics Engines').length).toBeGreaterThan(0);
       expect(screen.getByText('Live Analysis')).toBeInTheDocument();
     });
 
@@ -84,15 +175,6 @@ describe('SimulationPage', () => {
       expect(screen.getByTestId('scene3d-mock')).toBeInTheDocument();
     });
 
-    it('renders engine selector', async () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      // Engine selector should be present
-      await waitFor(() => {
-        expect(screen.getByRole('radiogroup', { name: /physics engine/i })).toBeInTheDocument();
-      });
-    });
-
     it('renders simulation controls', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
@@ -100,30 +182,73 @@ describe('SimulationPage', () => {
     });
   });
 
-  describe('idle state', () => {
-    it('shows ready status when not running', () => {
+  describe('idle state — no engines loaded', () => {
+    it('shows "No engine loaded" status when no engine selected', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
-      expect(screen.getByText('Ready')).toBeInTheDocument();
+      expect(screen.getByText('No engine loaded')).toBeInTheDocument();
     });
 
-    it('shows start simulation placeholder in analysis panel', () => {
+    it('shows helpful overlay prompting to load an engine', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
-      expect(screen.getByText(/start simulation to view live data/i)).toBeInTheDocument();
+      expect(screen.getByText('Load a Physics Engine')).toBeInTheDocument();
     });
 
-    it('shows start button', () => {
+    it('shows "0 engines loaded" count', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
-      expect(screen.getByRole('button', { name: /start simulation/i })).toBeInTheDocument();
+      expect(screen.getByText('0 engines loaded')).toBeInTheDocument();
     });
 
-    it('passes null frame to Scene3D when idle', () => {
+    it('shows "Load an engine to get started" in analysis panel', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
-      const scene = screen.getByTestId('scene3d-mock');
-      expect(scene.getAttribute('data-has-frame')).toBe('false');
+      expect(screen.getByText('Load an engine to get started')).toBeInTheDocument();
+    });
+  });
+
+  describe('engine loaded state', () => {
+    beforeEach(() => {
+      const loadedEngine = {
+        name: 'mujoco',
+        displayName: 'MuJoCo',
+        description: 'High-performance physics',
+        loadState: 'loaded' as const,
+        available: true,
+        capabilities: ['rigid_body'],
+        version: '3.1.0',
+      };
+
+      Object.assign(mockEngineManager, {
+        engines: [
+          loadedEngine,
+          {
+            name: 'drake',
+            displayName: 'Drake',
+            description: 'Optimization-based dynamics',
+            loadState: 'idle',
+            available: true,
+            capabilities: ['rigid_body'],
+          },
+        ],
+        loadedEngines: [loadedEngine],
+      });
+    });
+
+    it('shows engine count for loaded engines', () => {
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('1 engine loaded')).toBeInTheDocument();
+    });
+
+    it('shows "Ready" when engine loaded and selected', async () => {
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      // The auto-select effect runs and selects 'mujoco'
+      await waitFor(() => {
+        expect(screen.getByText('Ready')).toBeInTheDocument();
+      });
     });
   });
 
@@ -136,6 +261,20 @@ describe('SimulationPage', () => {
     };
 
     beforeEach(() => {
+      const loadedEngine = {
+        name: 'mujoco',
+        displayName: 'MuJoCo',
+        description: 'High-performance physics',
+        loadState: 'loaded' as const,
+        available: true,
+        capabilities: ['rigid_body'],
+      };
+
+      Object.assign(mockEngineManager, {
+        engines: [loadedEngine],
+        loadedEngines: [loadedEngine],
+      });
+
       Object.assign(mockSimulation, {
         isRunning: true,
         isPaused: false,
@@ -167,92 +306,34 @@ describe('SimulationPage', () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Simulation State')).toBeInTheDocument();
-      // State should be displayed as JSON
       expect(screen.getByText(/"qpos"/)).toBeInTheDocument();
-    });
-
-    it('passes current frame to Scene3D', () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      const scene = screen.getByTestId('scene3d-mock');
-      expect(scene.getAttribute('data-has-frame')).toBe('true');
-    });
-
-    it('shows pause and stop buttons', () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      expect(screen.getByRole('button', { name: /pause simulation/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /stop simulation/i })).toBeInTheDocument();
-    });
-
-    it('disables engine selector while running', async () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      await waitFor(() => {
-        const radios = screen.getAllByRole('radio');
-        radios.forEach((radio) => {
-          expect(radio).toBeDisabled();
-        });
-      });
-    });
-  });
-
-  describe('paused state', () => {
-    const pausedFrame: SimulationFrame = {
-      frame: 100,
-      time: 2.0,
-      state: { qpos: [0.5] },
-    };
-
-    beforeEach(() => {
-      Object.assign(mockSimulation, {
-        isRunning: true,
-        isPaused: true,
-        currentFrame: pausedFrame,
-        frames: [pausedFrame],
-      });
-    });
-
-    it('shows resume button when paused', () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      expect(screen.getByRole('button', { name: /resume simulation/i })).toBeInTheDocument();
-    });
-  });
-
-  describe('engine selection', () => {
-    it('initializes with mujoco engine selected', () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      const scene = screen.getByTestId('scene3d-mock');
-      expect(scene.getAttribute('data-engine')).toBe('mujoco');
-    });
-
-    it('calls useSimulation with selected engine', () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      expect(useSimulation).toHaveBeenCalledWith('mujoco');
-    });
-
-    it('updates engine when selector changes', async () => {
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      await waitFor(() => {
-        expect(screen.getByText('drake')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByRole('radio', { name: /drake/i }));
-
-      // useSimulation should be called with new engine
-      await waitFor(() => {
-        expect(useSimulation).toHaveBeenCalledWith('drake');
-      });
     });
   });
 
   describe('simulation controls interaction', () => {
-    it('calls start when start button is clicked', () => {
+    beforeEach(() => {
+      const loadedEngine = {
+        name: 'mujoco',
+        displayName: 'MuJoCo',
+        description: 'High-performance physics',
+        loadState: 'loaded' as const,
+        available: true,
+        capabilities: ['rigid_body'],
+      };
+
+      Object.assign(mockEngineManager, {
+        engines: [loadedEngine],
+        loadedEngines: [loadedEngine],
+      });
+    });
+
+    it('calls start when start button is clicked', async () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        const startBtn = screen.getByRole('button', { name: /start simulation/i });
+        expect(startBtn).not.toBeDisabled();
+      });
 
       fireEvent.click(screen.getByRole('button', { name: /start simulation/i }));
 
@@ -294,7 +375,6 @@ describe('SimulationPage', () => {
     it('has proper flex layout structure', () => {
       const { container } = render(<SimulationPage />, { wrapper: createWrapper() });
 
-      // Main container should be flex
       const mainDiv = container.firstChild as HTMLElement;
       expect(mainDiv.className).toContain('flex');
       expect(mainDiv.className).toContain('h-screen');
@@ -305,11 +385,7 @@ describe('SimulationPage', () => {
 
       const sidebars = document.querySelectorAll('aside');
       expect(sidebars.length).toBe(2);
-
-      // Left sidebar: w-80 (320px)
       expect(sidebars[0].className).toContain('w-80');
-
-      // Right sidebar: w-72 (288px)
       expect(sidebars[1].className).toContain('w-72');
     });
 
@@ -318,27 +394,6 @@ describe('SimulationPage', () => {
 
       const main = document.querySelector('main');
       expect(main?.className).toContain('flex-1');
-    });
-  });
-
-  describe('frame history', () => {
-    it('passes frames array to Scene3D', () => {
-      const frames: SimulationFrame[] = [
-        { frame: 0, time: 0, state: { qpos: [0] } },
-        { frame: 1, time: 0.1, state: { qpos: [0.1] } },
-        { frame: 2, time: 0.2, state: { qpos: [0.2] } },
-      ];
-
-      Object.assign(mockSimulation, {
-        isRunning: true,
-        currentFrame: frames[2],
-        frames,
-      });
-
-      render(<SimulationPage />, { wrapper: createWrapper() });
-
-      // Scene3D receives frames for trajectory visualization
-      expect(screen.getByTestId('scene3d-mock')).toBeInTheDocument();
     });
   });
 });

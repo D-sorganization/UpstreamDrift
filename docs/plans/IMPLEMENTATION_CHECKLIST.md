@@ -1,6 +1,7 @@
 # Golf Modeling Suite Implementation Checklist
 
 ## Phase 1: Foundation (Weeks 1-3)
+
 **Goal:** Establish optimization and data processing infrastructure.
 
 - [x] **Week 1: CasADi + Pinocchio Setup**
@@ -16,6 +17,7 @@
   - [ ] Parse industry-standard mocap data
 
 ## Phase 2: Input & Kinematics (Weeks 4-5)
+
 **Goal:** Process video into optimized 3D kinematics.
 
 - [ ] **OpenPose Integration**
@@ -26,6 +28,7 @@
   - [ ] Solve 2D -> 3D lifting
 
 ## Phase 3: Biomechanics (Weeks 6-9)
+
 **Goal:** Integrate muscle physiology and bridge to robotics.
 
 - [ ] **OpenSim Setup**
@@ -36,6 +39,7 @@
   - [ ] Validate muscle force preservation
 
 ## Phase 4: Advanced (Weeks 10-12)
+
 **Goal:** High-fidelity muscle simulation.
 
 - [ ] **MyoSim / MyoSuite**

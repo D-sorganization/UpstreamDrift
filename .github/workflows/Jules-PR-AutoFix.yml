@@ -16,18 +16,18 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to fix (leave empty for auto-detect)'
+        description: "Branch to fix (leave empty for auto-detect)"
         required: false
         type: string
       dry_run:
-        description: 'Dry run - show changes without committing'
+        description: "Dry run - show changes without committing"
         required: false
         default: false
         type: boolean
       max_iterations:
-        description: 'Maximum fix iterations (1-10)'
+        description: "Maximum fix iterations (1-10)"
         required: false
-        default: '10'
+        default: "10"
         type: string
 
 permissions:
@@ -138,12 +138,12 @@ jobs:
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Fix Tools
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         run: |
-          pip install ruff black mypy isort autoflake
+          pip install ruff==0.14.10 black==26.1.0 mypy autoflake
 
       # ============================================================
       # ITERATIVE FIX LOOP - The core improvement
@@ -188,19 +188,19 @@ jobs:
               git add -A
             fi
 
-            # ----- FIX 3: isort import sorting -----
-            echo ">>> Running isort..."
-            isort --profile black . 2>&1 || true
-            if ! git diff --quiet; then
-              CHANGES_MADE="$CHANGES_MADE isort"
-              git add -A
-            fi
-
-            # ----- FIX 4: Remove unused imports -----
+            # ----- FIX 3: Remove unused imports -----
             echo ">>> Running autoflake..."
             autoflake --in-place --remove-all-unused-imports --recursive . 2>&1 || true
             if ! git diff --quiet; then
               CHANGES_MADE="$CHANGES_MADE autoflake"
+              git add -A
+            fi
+
+            # ----- FIX 4: Re-run ruff to ensure consistency after other tools -----
+            echo ">>> Re-running ruff check --fix (post-cleanup)..."
+            ruff check --fix . 2>&1 || true
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE ruff-post"
               git add -A
             fi
 
@@ -333,12 +333,11 @@ jobs:
           $MESSAGE
 
           **Iterations used:** $ITERATIONS / ${{ env.MAX_FIX_ATTEMPTS }}
-          **Fix types applied:** ruff, black, isort, autoflake
+          **Fix types applied:** ruff, black, autoflake
 
           ### What was fixed:
           - Code formatting (black)
-          - Linting issues (ruff --fix)
-          - Import sorting (isort)
+          - Linting & import sorting (ruff --fix)
           - Unused imports (autoflake)
 
           ---

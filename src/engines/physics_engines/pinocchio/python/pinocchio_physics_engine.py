@@ -11,6 +11,11 @@ from typing import Any, cast
 
 import numpy as np
 
+from src.shared.python.contracts import (
+    check_finite,
+    postcondition,
+    precondition,
+)
 from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
@@ -52,6 +57,11 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         if self.model:
             return cast(str, self.model.name)
         return self.model_name_str
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has a loaded model."""
+        return self.model is not None and self.data is not None
 
     def load_from_path(self, path: str) -> None:
         """Load model from file path (URDF)."""
@@ -96,6 +106,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             logger.error("Failed to load Pinocchio model from string: %s", e)
             raise
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
         """Reset the simulation to its initial state."""
         if self.model:
@@ -107,6 +118,9 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             # Refresh data
             self.forward()
 
+    @precondition(
+        lambda self, dt=None: self.is_initialized, "Engine must be initialized"
+    )
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
         if self.model is None or self.data is None:
@@ -128,6 +142,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
         self.time += time_step
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without advancing time."""
         if self.model is None or self.data is None:
@@ -208,6 +223,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
     # -------- Dynamics Interface --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q)."""
         if self.model is None or self.data is None:
@@ -222,6 +239,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         M = np.triu(M) + np.triu(M, 1).T
         return cast(np.ndarray, M)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q)."""
         if self.model is None or self.data is None:
@@ -236,6 +255,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             pin.rnea(self.model, self.data, self.q, self.v, a_zero),
         )
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
         if self.model is None or self.data is None:
@@ -246,6 +267,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             np.ndarray, pin.computeGeneralizedGravity(self.model, self.data, self.q)
         )
 
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
         if self.model is None or self.data is None:
@@ -324,6 +347,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
     # -------- Section F: Drift-Control Decomposition --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Drift acceleration must contain finite values")
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive (drift) acceleration with zero control inputs.
 
@@ -343,6 +368,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
         return cast(np.ndarray, a_drift)
 
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.
 

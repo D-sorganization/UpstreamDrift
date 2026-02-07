@@ -2,7 +2,7 @@ name: Nightly Documentation Organizer
 
 on:
   schedule:
-    - cron: "0 8 */3 * *"  # Daily at 3 AM PST (11 UTC)
+    - cron: "0 0 * * 0,4" # Daily at 3 AM PST (11 UTC)
   workflow_dispatch:
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
           # Group files by month if there are many
           # For now, just ensuring the directory is clean and structured
           echo "Organizing review archive..."
-          find docs/review_archive -name "*.md" -maxdepth 1 -mtime +30 -exec gzip {} \; || true
+          find docs/review_archive -maxdepth 1 -name "*.md" -mtime +30 -exec gzip {} \; || true
 
       - name: Update Workflow Documentation
         run: |
@@ -66,4 +66,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "docs: nightly documentation organization and workflow update"
-          file_pattern: "docs/maintenance/WORKFLOWS.md docs/review_archive/*"
+          file_pattern: "docs/maintenance/WORKFLOWS.md docs/review_archive/* .jules/temp_* .jules/debug_*"

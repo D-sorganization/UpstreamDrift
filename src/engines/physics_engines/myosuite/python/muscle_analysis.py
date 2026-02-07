@@ -11,17 +11,17 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-try:
+if MUJOCO_AVAILABLE:
     import mujoco
-
-    MUJOCO_AVAILABLE = True
-except ImportError:
-    MUJOCO_AVAILABLE = False
+else:
+    mujoco = None  # type: ignore[assignment]
     logger.warning("MuJoCo not available - muscle analysis limited")
+
 
 # Constants for muscle analysis
 MJDYN_MUSCLE = 2  # MuJoCo dyntype constant for muscle actuators

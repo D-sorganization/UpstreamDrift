@@ -27,6 +27,7 @@ main_golf_analysis_app();
 **Default data loads automatically!** Just go to Tab 3 and the visualization appears.
 
 To load your own data:
+
 1. **Load 3 Files...** - Select BASEQ, ZTCFQ, DELTAQ separately (recommended)
 2. **Load Combined...** - Select single MAT file with all datasets
 3. **Load from Tab 2** - Use ZTCF calculation results
@@ -92,12 +93,12 @@ launch_tabbed_app;
 
 ## ✅ Key Differences
 
-| Feature | Old (Standalone) | New (Tabbed) |
-|---------|-----------------|--------------|
-| Interface | Single window | 3 tabs |
-| Data loading | Manual script | UI buttons |
-| Session save | No | Yes ✓ |
-| Config persist | No | Yes ✓ |
-| Future-proof | No | Yes ✓ |
+| Feature        | Old (Standalone) | New (Tabbed) |
+| -------------- | ---------------- | ------------ |
+| Interface      | Single window    | 3 tabs       |
+| Data loading   | Manual script    | UI buttons   |
+| Session save   | No               | Yes ✓        |
+| Config persist | No               | Yes ✓        |
+| Future-proof   | No               | Yes ✓        |
 
 **Recommendation:** Use the new tabbed version!

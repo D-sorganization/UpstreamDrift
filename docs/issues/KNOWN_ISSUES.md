@@ -5,6 +5,7 @@ Last Updated: 2026-01-19
 ## Test Infrastructure
 
 ### [HIGH] Module Reload Corruption
+
 - **Status**: Open
 - **Component**: `tests/integration/test_physics_engines_strict.py:152-210`
 - **Description**: Drake and Pinocchio strict tests permanently skipped because `reload()` causes numpy corruption when mocking physics engines
@@ -12,6 +13,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #496
 
 ### [MEDIUM] Coverage Threshold Reduced
+
 - **Status**: Open
 - **Component**: `pyproject.toml`
 - **Description**: Main repo coverage reduced from 60% to 10% while recovery is in progress
@@ -19,6 +21,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #533
 
 ### [LOW] Inconsistent Coverage Requirements
+
 - **Status**: Open
 - **Component**: Engine-specific pyproject.toml files
 - **Description**: Different engines have different coverage requirements (Main: 10%, MuJoCo: 60%, Drake: 90%, Pinocchio: 90%)
@@ -28,6 +31,7 @@ Last Updated: 2026-01-19
 ## Missing Test Coverage
 
 ### [HIGH] AI/Workflow Engine Untested
+
 - **Status**: Open
 - **Component**: `shared/python/ai/`
 - **Description**: Critical AI components have no tests:
@@ -39,6 +43,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #494
 
 ### [HIGH] Injury Analysis Module Untested
+
 - **Status**: Open
 - **Component**: `shared/python/injury/`
 - **Description**: Safety-critical injury analysis has no tests:
@@ -49,6 +54,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #495
 
 ### [MEDIUM] Dashboard Components Untested
+
 - **Status**: Open
 - **Component**: `shared/python/dashboard/`
 - **Description**: All dashboard widgets have only mocked coverage tests, no functional tests
@@ -56,6 +62,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #535
 
 ### [MEDIUM] Swing Optimizer Untested
+
 - **Status**: Open
 - **Component**: `shared/python/optimization/swing_optimizer.py`
 - **Description**: No tests for swing optimization module
@@ -63,6 +70,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #536
 
 ### [MEDIUM] MediaPipe Estimator Untested
+
 - **Status**: Open
 - **Component**: `shared/python/pose/mediapipe_estimator.py`
 - **Description**: No tests for MediaPipe pose estimation
@@ -72,6 +80,7 @@ Last Updated: 2026-01-19
 ## Platform Issues
 
 ### [MEDIUM] Windows DLL Initialization Issues
+
 - **Status**: Open
 - **Component**: Platform-specific tests
 - **Description**: Some tests fail on Windows due to DLL initialization issues
@@ -79,6 +88,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #538
 
 ### [LOW] Linux Requires Xvfb for GUI Tests
+
 - **Status**: Open
 - **Component**: CI configuration
 - **Description**: GUI tests on Linux require Xvfb wrapper
@@ -88,6 +98,7 @@ Last Updated: 2026-01-19
 ## API Security & Operations
 
 ### [CRITICAL] API Endpoints Unauthenticated
+
 - **Status**: Open
 - **Component**: `api/server.py`, `api/routes/auth.py`
 - **Description**: Auth router is not mounted and core endpoints do not require authentication or API keys
@@ -95,6 +106,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #543
 
 ### [HIGH] Database Initialization Not Invoked
+
 - **Status**: Open
 - **Component**: `api/database.py`, `start_api_server.py`
 - **Description**: Database initialization exists but is not called during API startup
@@ -102,6 +114,7 @@ Last Updated: 2026-01-19
 - **GitHub Issue**: #544
 
 ### [HIGH] Upload Size Limit Not Enforced
+
 - **Status**: Open
 - **Component**: `api/server.py`
 - **Description**: Video upload endpoints read full payloads without enforcing MAX_UPLOAD_SIZE_BYTES
@@ -111,6 +124,7 @@ Last Updated: 2026-01-19
 ## CI/CD
 
 ### [LOW] Weekly CI Failure Digests Accumulating
+
 - **Status**: Resolved
 - **Component**: GitHub Issues
 - **Description**: Multiple weekly digest issues (#378, #270, #170, #75) were open

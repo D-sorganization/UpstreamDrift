@@ -17,28 +17,34 @@ Pendulum models represent the golf swing as a system of connected rigid links (p
 ## Available Pendulum Models
 
 ### 1. Single Pendulum (1 DOF)
+
 **Description**: Simplest model - single rigid link representing the entire arm-club system
 
 **Components**:
+
 - One rigid link (arm + club combined)
 - One revolute joint (shoulder)
 - Fixed base (torso)
 
 **Applications**:
+
 - Teaching basic pendulum dynamics
 - Understanding energy conservation
 - Demonstrating phase space
 - Introduction to nonlinear dynamics
 
 ### 2. Double Pendulum (2 DOF)
+
 **Description**: Two-segment model representing arm and club
 
 **Components**:
+
 - Upper arm segment
 - Forearm + club segment
 - Two revolute joints (shoulder, wrist)
 
 **Applications**:
+
 - Chaotic dynamics demonstration
 - Energy transfer between segments
 - Timing and coordination
@@ -47,24 +53,29 @@ Pendulum models represent the golf swing as a system of connected rigid links (p
 **Note**: Double pendulum exhibits chaotic behavior - small changes in initial conditions lead to dramatically different outcomes.
 
 ### 3. Triple Pendulum (3 DOF)
+
 **Description**: Three-segment model with shoulder, elbow, and wrist
 
 **Components**:
+
 - Upper arm
 - Forearm
 - Club
 - Three revolute joints (shoulder, elbow, wrist)
 
 **Applications**:
+
 - Multi-segment coordination
 - Sequential energy transfer
 - Kinetic chain analysis
 - Optimal timing strategies
 
 ### 4. Inverted Pendulum (1-2 DOF)
+
 **Description**: Upside-down pendulum models (unstable equilibrium)
 
 **Applications**:
+
 - Balance and stability analysis
 - Control system design
 - Postural control during swing
@@ -73,6 +84,7 @@ Pendulum models represent the golf swing as a system of connected rigid links (p
 ## Implementation Platforms
 
 ### Python Implementation
+
 **Location**: `python/`
 
 ```bash
@@ -81,12 +93,14 @@ python -m pendulum_golf_swing
 ```
 
 **Features**:
+
 - NumPy/SciPy integration
 - Matplotlib visualization
 - Animation capabilities
 - Integration with Python physics engines
 
 ### MATLAB Implementation
+
 **Location**: `matlab/`
 
 ```matlab
@@ -95,24 +109,29 @@ run_pendulum_model
 ```
 
 **Features**:
+
 - Symbolic Math Toolbox support
 - Simulink models
 - Optimization Toolbox integration
 - Easy GUI development
 
 ### JavaScript Implementation
+
 **Location**: `javascript/`
 
 **Features**:
+
 - Browser-based visualization
 - Interactive web demos
 - Real-time animation
 - Educational web apps
 
 ### Arduino Implementation
+
 **Location**: `arduino/`
 
 **Features**:
+
 - Physical pendulum control
 - Sensor integration
 - Real-time embedded systems
@@ -181,17 +200,20 @@ Using Lagrangian mechanics:
 **Lagrangian**: L = T - V (kinetic - potential energy)
 
 **Kinetic Energy**:
+
 ```
 T = (1/2) * m1 * v1² + (1/2) * m2 * v2²
   + (1/2) * I1 * ω1² + (1/2) * I2 * ω2²
 ```
 
 **Potential Energy**:
+
 ```
 V = m1 * g * h1 + m2 * g * h2
 ```
 
 **Equations of Motion** (highly nonlinear):
+
 ```
 (m1 + m2) * L1² * θ1'' + m2 * L1 * L2 * θ2'' * cos(θ1 - θ2)
   + m2 * L1 * L2 * θ2'² * sin(θ1 - θ2)
@@ -203,6 +225,7 @@ m2 * L2² * θ2'' + m2 * L1 * L2 * θ1'' * cos(θ1 - θ2)
 ```
 
 Where:
+
 - θ₁, θ₂: Joint angles
 - θ₁', θ₂': Angular velocities
 - θ₁'', θ₂'': Angular accelerations
@@ -213,6 +236,7 @@ Where:
 ## Analysis Capabilities
 
 ### Energy Analysis
+
 ```python
 # Compute energy
 KE = pendulum.kinetic_energy(states)
@@ -224,6 +248,7 @@ plot_energy_conservation(t, KE, PE, TE)
 ```
 
 ### Phase Space Analysis
+
 ```python
 # Phase portrait
 plot_phase_space(theta1, omega1)
@@ -234,6 +259,7 @@ poincare_section(theta1, theta2, omega1, omega2)
 ```
 
 ### Sensitivity Analysis
+
 ```python
 # Study sensitivity to initial conditions
 initial_conditions = generate_ic_variations(theta0, epsilon=0.01)
@@ -249,16 +275,19 @@ plot_trajectory_divergence(trajectories)
 ### Classroom Demonstrations
 
 1. **Energy Conservation**
+
    - Show total energy remains constant
    - Visualize kinetic/potential exchange
    - Demonstrate energy loss with damping
 
 2. **Chaos Theory**
+
    - Double pendulum chaotic behavior
    - Butterfly effect visualization
    - Lyapunov exponents
 
 3. **Optimization**
+
    - Find initial conditions for maximum speed
    - Optimal timing of joint actuation
    - Trade-offs between speed and accuracy
@@ -271,39 +300,44 @@ plot_trajectory_divergence(trajectories)
 ### Student Projects
 
 **Beginner Projects**:
+
 - Measure period vs. amplitude
 - Compare simulation to analytical solution
 - Energy conservation verification
 
 **Intermediate Projects**:
+
 - Implement double pendulum from scratch
 - Add damping and compare to experiments
 - Optimize launch angle for distance
 
 **Advanced Projects**:
+
 - Chaotic dynamics analysis
 - Control system design
 - Comparison with full biomechanical models
 
 ## Comparison with Full Models
 
-| Aspect | Pendulum Models | Full Biomechanical |
-|--------|----------------|-------------------|
-| DOF | 1-3 | 10-28 |
-| Computation | Milliseconds | Seconds |
-| Accuracy | Conceptual | High fidelity |
-| Muscle Modeling | No | Yes (MuJoCo+MyoSuite) |
-| Contact Dynamics | Simplified | Realistic |
-| Use Case | Education | Research |
-| Learning Curve | Easy | Steep |
+| Aspect           | Pendulum Models | Full Biomechanical    |
+| ---------------- | --------------- | --------------------- |
+| DOF              | 1-3             | 10-28                 |
+| Computation      | Milliseconds    | Seconds               |
+| Accuracy         | Conceptual      | High fidelity         |
+| Muscle Modeling  | No              | Yes (MuJoCo+MyoSuite) |
+| Contact Dynamics | Simplified      | Realistic             |
+| Use Case         | Education       | Research              |
+| Learning Curve   | Easy            | Steep                 |
 
 **When to use pendulum models**:
+
 - Teaching and learning
 - Quick concept validation
 - Developing intuition
 - Computational efficiency needed
 
 **When to use full models**:
+
 - Research publications
 - Detailed biomechanics
 - Muscle-level analysis
@@ -312,6 +346,7 @@ plot_trajectory_divergence(trajectories)
 ## Integration with Full Suite
 
 ### Export Pendulum Results
+
 ```python
 # Simulate pendulum
 results = pendulum.simulate()
@@ -325,6 +360,7 @@ comparison = compare_with_pendulum('pendulum_trajectory.csv')
 ```
 
 ### Use as Initial Guess
+
 ```python
 # Get rough trajectory from pendulum
 pendulum_trajectory = simple_pendulum.optimize()
@@ -338,6 +374,7 @@ drake_trajectory = drake_optimizer.optimize(
 ## Visualization
 
 ### Animation
+
 ```python
 # Real-time animation
 pendulum.animate_realtime(states)
@@ -348,6 +385,7 @@ pendulum.animate(states, save_as='swing.mp4')
 ```
 
 ### Plotting
+
 ```python
 # Kinematics
 plot_joint_angles(t, theta1, theta2)
@@ -365,11 +403,11 @@ plot_phase_portrait(theta, omega)
 
 Pendulum models are extremely fast:
 
-| Model | Python | MATLAB | JavaScript |
-|-------|--------|--------|------------|
-| Single | 10,000× RT | 5,000× RT | 1,000× RT |
-| Double | 5,000× RT | 2,000× RT | 500× RT |
-| Triple | 2,000× RT | 1,000× RT | 200× RT |
+| Model  | Python     | MATLAB    | JavaScript |
+| ------ | ---------- | --------- | ---------- |
+| Single | 10,000× RT | 5,000× RT | 1,000× RT  |
+| Double | 5,000× RT  | 2,000× RT | 500× RT    |
+| Triple | 2,000× RT  | 1,000× RT | 200× RT    |
 
 RT = Real-time
 
@@ -378,6 +416,7 @@ RT = Real-time
 ## Examples
 
 ### Example 1: Energy Conservation
+
 ```python
 # examples/energy_conservation.py
 pendulum = SinglePendulum(L=1.0, m=1.0)
@@ -386,6 +425,7 @@ pendulum.verify_energy_conservation(t, states)
 ```
 
 ### Example 2: Chaotic Behavior
+
 ```python
 # examples/chaos_demo.py
 pendulum = DoublePendulum()
@@ -403,6 +443,7 @@ plot_trajectory_comparison(traj1, traj2)
 ```
 
 ### Example 3: Optimization
+
 ```python
 # examples/optimize_swing.py
 def objective(ic):
@@ -438,6 +479,7 @@ MIT License - See [LICENSE](LICENSE)
 ## Support
 
 For questions about pendulum models:
+
 - Review example scripts
 - Check platform-specific READMEs (python/, matlab/, etc.)
 - See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

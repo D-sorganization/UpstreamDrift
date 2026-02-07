@@ -16,10 +16,12 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 ### ✅ Strong Alignment
 
 1. **Critical files protection**
+
    - Guidance explicitly protects root files like `AGENTS.md`, `README.md`, `CHANGELOG.md`, `LICENSE`, `pyproject.toml`, `conftest.py`, and key entry points.
    - `critical-files-guard.yml` enforces this on PRs to `main` and `develop`.
 
 2. **Control Tower orchestration**
+
    - Guidance describes a “Control Tower” that dispatches worker workflows based on events/schedules.
    - `Jules-Control-Tower.yml` exists and dispatches workers on CI failure, PR events, scheduled runs, and workflow dispatch.
 
@@ -34,14 +36,17 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 ### ⚠️ Misalignment / Gaps
 
 1. **Auto-Repair is described but disabled**
+
    - Guidance lists Auto-Repair as active for CI failures.
    - The workflow `Jules-Auto-Repair.yml` is currently disabled (`if: false`), so the behavior does not match guidance.
 
 2. **Workflow naming inconsistencies**
+
    - Guidance references lowercase workflow filenames (e.g., `jules-control-tower.yml`).
    - Actual workflows use capitalized filenames (e.g., `Jules-Control-Tower.yml`).
 
 3. **Pre-commit expectations vs. actual hooks**
+
    - Guidance lists commands like `ruff format` and emphasizes broad lint/type checks.
    - `.pre-commit-config.yaml` currently includes only:
      - `black`
@@ -50,6 +55,7 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
    - `ruff format` is not configured in pre-commit.
 
 4. **CI configuration does not match user-stated CI expectations**
+
    - The repository does **not** contain `.github/workflows/ci.yml` or `pr-quality-check.yml`.
    - Actual CI is driven by `ci-standard.yml` and `ci-fast-tests.yml`.
    - `ci-standard.yml` runs:
@@ -63,6 +69,7 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
    - There is no isort job in CI and Ruff is not set to “select ALL.”
 
 5. **Formatting and linting differences**
+
    - Repo enforces Black line length **88** in `pyproject.toml`.
    - Guidance and user-provided instructions reference line length **100**.
    - Ruff’s rule selection is a curated subset, not “ALL.”
@@ -74,6 +81,7 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 ## Current CI/CD Checks (Actual Behavior)
 
 ### CI Standard (`ci-standard.yml`)
+
 - Linting: `ruff check .`
 - Formatting: `black --check .`
 - Type checking: `mypy . --config-file pyproject.toml`
@@ -83,27 +91,33 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 - Tests: pytest + cross-engine validation + Codecov (if token present)
 
 ### CI Fast Tests (`ci-fast-tests.yml`)
+
 - Fast unit and integration test jobs with pytest-xdist/timeouts.
 - Designed for quick signal on PRs/branches.
 
 ### Critical File Guard (`critical-files-guard.yml`)
+
 - Enforces the protected file list specified in `AGENTS.md`.
 
 ## Recommendations to Improve Automation and Reduce Manual Oversight
 
 1. **Update guidance to match actual CI**
+
    - Reflect real workflow names and the disabled Auto-Repair state.
    - Document that CI uses `ci-standard.yml` and `ci-fast-tests.yml`, not `ci.yml`.
 
 2. **Align pre-commit with CI**
+
    - Add hooks for `pip-audit`, placeholder checks, and `tools/code_quality_check.py`.
    - This reduces CI failures after pushing.
 
 3. **Integrate `tools/code_quality_check.py` into CI**
+
    - The repository already includes a robust quality checker.
    - Adding it to CI (and/or pre-commit) would enforce placeholder/magic-number rules automatically.
 
 4. **Consider adding Bandit to CI Standard**
+
    - Bandit runs in Tech Debt Assessor but does not gate CI.
    - If security scanning is expected to gate merges, add Bandit to `ci-standard.yml`.
 
@@ -114,12 +128,15 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 ## IDE + Agent Workflow Tips (Claude / Antigravity)
 
 1. **Use Black line length 88 locally**
+
    - Match `pyproject.toml` to avoid formatting churn.
 
 2. **Run Ruff + Mypy on save**
+
    - Aligns with CI Standard and avoids post-hoc rework.
 
 3. **Add a “CI parity” task**
+
    - A single IDE task that runs:
      - `ruff check .`
      - `black --check .`
@@ -134,4 +151,3 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 - The user-provided CI instructions differ from the repo’s actual workflows.
 - Always confirm whether CI and lint/format rules are enforced by `ci-standard.yml`.
 - Do **not** assume `scripts/quality_check.py` exists at the repo root; quality checks live under `tools/` and per-engine directories.
-

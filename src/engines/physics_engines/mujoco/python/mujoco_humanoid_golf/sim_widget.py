@@ -13,6 +13,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.biomechanics_data import BiomechanicalData
 from src.shared.python.logging_config import get_logger
+from src.shared.python.swing_plane_visualization import SwingPlaneVisualizer
 
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
@@ -119,6 +120,14 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         # Ellipsoid Visualization Toggles
         self.show_mobility_ellipsoid = False
         self.show_force_ellipsoid = False
+
+        # Swing Plane & Trajectory Visualization
+        self.swing_plane_visualizer = SwingPlaneVisualizer()
+        self.show_swing_plane = False
+        self.show_club_trajectory = False
+        self.show_reference_trajectory = False
+        self.swing_plane_body_name = "clubhead"  # Body to track for trajectory
+        self.reference_trajectory: np.ndarray | None = None  # (N, 3) desired path
 
         # Real-time Analysis
         self.enable_live_analysis = False
@@ -301,6 +310,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.analyzer = BiomechanicalAnalyzer(self.model, self.data)
         self.recorder.reset()
         self.latest_bio_data = None
+
+        # Reset swing plane tracking
+        self.swing_plane_visualizer.reset()
 
         # Reset Interaction
         self.manipulator = InteractiveManipulator(self.model, self.data)
@@ -635,6 +647,135 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.show_mobility_ellipsoid = mobility_enabled
         self.show_force_ellipsoid = force_enabled
 
+    def set_swing_plane_visualization(
+        self,
+        show_plane: bool,
+        show_trajectory: bool,
+        show_reference: bool | None = None,
+    ) -> None:
+        """Toggle swing plane and trajectory overlay rendering."""
+        self.show_swing_plane = show_plane
+        self.show_club_trajectory = show_trajectory
+        if show_reference is not None:
+            self.show_reference_trajectory = show_reference
+
+    def set_reference_trajectory(self, trajectory: np.ndarray | None) -> None:
+        """Set or clear a desired/reference trajectory for overlay display.
+
+        Args:
+            trajectory: (N, 3) array of reference positions [m], or None to clear.
+        """
+        self.reference_trajectory = trajectory
+
+    def reset_swing_plane(self) -> None:
+        """Clear recorded trajectory and swing plane state."""
+        self.swing_plane_visualizer.reset()
+
+    def _record_club_trajectory_point(self) -> None:
+        """Record the current clubhead position for swing plane analysis."""
+        if self.model is None or self.data is None:
+            return
+        if not (self.show_swing_plane or self.show_club_trajectory):
+            return
+
+        # Find the tracked body
+        body_id = mujoco.mj_name2id(
+            self.model, mujoco.mjtObj.mjOBJ_BODY, self.swing_plane_body_name
+        )
+        if body_id == -1:
+            # Fallback: use last body (likely end-effector)
+            body_id = self.model.nbody - 1
+
+        position = self.data.xpos[body_id].copy()
+        timestamp = self.data.time
+        self.swing_plane_visualizer.record_trajectory_point(position, timestamp)
+
+    def _update_swing_plane_overlays(self) -> None:
+        """Push swing plane and trajectory data to meshcat."""
+        if self.meshcat_adapter is None:
+            return
+        if not (self.show_swing_plane or self.show_club_trajectory):
+            self.meshcat_adapter.clear_swing_plane()
+            return
+
+        # Trajectory overlay
+        if self.show_club_trajectory:
+            traj_vis = self.swing_plane_visualizer.get_trajectory_visualization()
+            if traj_vis is not None:
+                self.meshcat_adapter.draw_trajectory(
+                    "club_trajectory", traj_vis.points, color=0x00FF00
+                )
+
+        # Swing plane overlay (need at least 3 points)
+        hist = self.swing_plane_visualizer.trajectory_history
+        if self.show_swing_plane and len(hist) >= 3:
+            if self.model is not None and self.data is not None:
+                body_id = mujoco.mj_name2id(
+                    self.model,
+                    mujoco.mjtObj.mjOBJ_BODY,
+                    self.swing_plane_body_name,
+                )
+                if body_id == -1:
+                    body_id = self.model.nbody - 1
+
+                # Compute velocity for instantaneous plane
+                if body_id < self.model.nbody:
+                    vel_adr = self.model.body_dofadr[body_id]
+                else:
+                    vel_adr = -1
+                if vel_adr >= 0 and vel_adr + 2 < len(self.data.qvel):
+                    clubhead_velocity = self.data.qvel[vel_adr : vel_adr + 3]
+                else:
+                    # Approximate velocity from recent trajectory
+                    hist = self.swing_plane_visualizer.trajectory_history
+                    if len(hist) >= 2:
+                        dt = (
+                            self.swing_plane_visualizer.timestamp_history[-1]
+                            - self.swing_plane_visualizer.timestamp_history[-2]
+                        )
+                        if dt > 0:
+                            clubhead_velocity = (hist[-1] - hist[-2]) / dt
+                        else:
+                            clubhead_velocity = np.zeros(3)
+                    else:
+                        clubhead_velocity = np.zeros(3)
+
+                clubhead_pos = self.data.xpos[body_id].copy()
+                # Use a proxy for grip position (parent body or body 1)
+                parent_id = self.model.body_parentid[body_id]
+                grip_pos = self.data.xpos[max(parent_id, 1)].copy()
+
+                if np.linalg.norm(clubhead_velocity) > 1e-3:
+                    try:
+                        spv = self.swing_plane_visualizer
+                        plane_vis = spv.update_instantaneous_plane(
+                            clubhead_velocity,
+                            grip_pos,
+                            clubhead_pos,
+                        )
+                        self.meshcat_adapter.draw_swing_plane(
+                            "instantaneous_plane",
+                            plane_vis.vertices,
+                            color=0x4488FF,
+                            opacity=0.25,
+                        )
+                        self.meshcat_adapter.draw_arrow_line(
+                            "plane_normal",
+                            plane_vis.normal_arrow_start,
+                            plane_vis.normal_arrow_end,
+                            color=0x4488FF,
+                        )
+                    except Exception:
+                        pass
+
+        # Reference trajectory overlay
+        if self.show_reference_trajectory and self.reference_trajectory is not None:
+            self.meshcat_adapter.draw_trajectory(
+                "reference_trajectory",
+                self.reference_trajectory,
+                color=0xFF8844,
+            )
+
     def set_advanced_vector_visualization(
         self,
         induced_enabled: bool,
@@ -876,6 +1017,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         self._enforce_interactive_constraints()
         self.compute_ellipsoids()
+        self._record_club_trajectory_point()
+        self._update_swing_plane_overlays()
         self._render_once()
 
     def render(self) -> None:  # type: ignore[override]
@@ -921,6 +1064,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             self.show_selected_body or self.show_constraints
         ):
             rgb = self._add_manipulation_overlays(rgb)
+
+        if self.show_club_trajectory or self.show_swing_plane:
+            rgb = self._add_swing_plane_overlays(rgb)
 
         if self.visible_frames or self.visible_coms:
             rgb = self._add_frame_and_com_overlays(rgb)
@@ -1537,6 +1683,55 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         else:
             self.visible_coms.add(body_id)
         self._render_once()
+
+    def _add_swing_plane_overlays(self, rgb: np.ndarray) -> np.ndarray:
+        """Overlay club trajectory and swing plane normal onto the pixel frame."""
+        cv2 = get_cv2()
+        if cv2 is None or self.model is None or self.data is None:
+            return rgb
+
+        img = rgb.copy()
+        history = self.swing_plane_visualizer.trajectory_history
+
+        # Draw trajectory as connected screen-space points
+        if self.show_club_trajectory and len(history) >= 2:
+            prev_px = None
+            for pt in history:
+                px = self._world_to_screen(np.asarray(pt))
+                if px is not None:
+                    cv2.circle(img, px, 2, (0, 255, 0), -1)  # Green dots
+                    if prev_px is not None:
+                        cv2.line(img, prev_px, px, (0, 255, 0), 1)
+                    prev_px = px
+
+        # Draw reference trajectory if enabled
+        if (
+            self.show_reference_trajectory
+            and self.reference_trajectory is not None
+            and len(self.reference_trajectory) >= 2
+        ):
+            prev_px = None
+            for pt in self.reference_trajectory:
+                px = self._world_to_screen(np.asarray(pt))
+                if px is not None:
+                    cv2.circle(img, px, 2, (0, 140, 255), -1)  # Orange dots
+                    if prev_px is not None:
+                        cv2.line(img, prev_px, px, (0, 140, 255), 1)
+                    prev_px = px
+
+        # Draw swing plane normal arrow
+        if self.show_swing_plane:
+            scene = self.swing_plane_visualizer.current_scene
+            if scene.instantaneous_plane is not None:
+                plane = scene.instantaneous_plane
+                start_px = self._world_to_screen(plane.normal_arrow_start)
+                end_px = self._world_to_screen(plane.normal_arrow_end)
+                if start_px is not None and end_px is not None:
+                    cv2.arrowedLine(
+                        img, start_px, end_px, (255, 136, 68), 2, tipLength=0.3
+                    )  # Blue-ish for plane normal
+
+        return img
 
     def _add_frame_and_com_overlays(self, rgb: np.ndarray) -> np.ndarray:
         cv2 = get_cv2()

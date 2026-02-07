@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import tempfile
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from src.api.utils.datetime_compat import UTC
 
 try:
     from datetime import timezone

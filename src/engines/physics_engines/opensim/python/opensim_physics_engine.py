@@ -10,6 +10,11 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.contracts import (
+    check_finite,
+    postcondition,
+    precondition,
+)
 from src.shared.python.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
@@ -45,6 +50,11 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if self._model:
             return self._model.getName()
         return "OpenSim_NoModel"
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has a loaded model."""
+        return self._model is not None and self._state is not None
 
     def load_from_path(self, path: str) -> None:
         if opensim is None:
@@ -96,6 +106,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                         f"Failed to remove temporary file {tmp_path}: {cleanup_error}"
                     )
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
         if self._model and self._state:
             # Re-initialize the system to defaults
@@ -104,6 +115,9 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             self._manager.setSessionTime(0.0)
             self._manager.setIntegrator(opensim.RungeKuttaMersonIntegrator(self._model))
 
+    @precondition(
+        lambda self, dt=None: self.is_initialized, "Engine must be initialized"
+    )
     def step(self, dt: float | None = None) -> None:
         if not self._model or not self._state:
             return
@@ -118,6 +132,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         # Integrate
         self._manager.integrate(current_time + step_size)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
         if self._model and self._state:
             self._model.realizeDynamics(self._state)
@@ -179,6 +194,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             return self._state.getTime()
         return 0.0
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
@@ -197,6 +214,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                 res[r, c] = m_mat.get(r, c)
         return res
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         """Compute C(q,u) + G(q).
 
@@ -215,6 +234,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to compute bias forces: {e}")
             return np.array([])
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q).
 
@@ -244,6 +265,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to compute gravity forces: {e}")
             return np.array([])
 
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
@@ -438,6 +461,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     # -------- Section F: Drift-Control Decomposition --------
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Drift acceleration must contain finite values")
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive (drift) acceleration with zero control inputs.
 
@@ -461,6 +486,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         return a_drift
 
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques/muscles.
 

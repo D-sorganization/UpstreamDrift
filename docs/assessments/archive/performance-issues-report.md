@@ -12,12 +12,12 @@ This report documents **20 performance anti-patterns** identified in the Golf Mo
 
 ### Impact Overview
 
-| Severity | Count | Potential Impact |
-|----------|-------|------------------|
-| Critical | 4 | Memory exhaustion, 100-1000x slowdown |
-| High | 5 | 10-50x slowdown |
-| Medium | 7 | 2-10x slowdown |
-| Low | 4 | Minor inefficiency |
+| Severity | Count | Potential Impact                      |
+| -------- | ----- | ------------------------------------- |
+| Critical | 4     | Memory exhaustion, 100-1000x slowdown |
+| High     | 5     | 10-50x slowdown                       |
+| Medium   | 7     | 2-10x slowdown                        |
+| Low      | 4     | Minor inefficiency                    |
 
 ---
 
@@ -36,6 +36,7 @@ active_tasks: dict[str, Any] = {}  # No TTL, no cleanup, no size limit
 **Impact**: Long-running API servers will exhaust memory as completed tasks accumulate indefinitely. In production with continuous usage, this could cause OOM crashes within days.
 
 **Recommendation**:
+
 - Implement TTL-based cleanup (remove tasks older than 1 hour)
 - Add maximum size limit with LRU eviction
 - Consider Redis or similar for production deployments
@@ -62,6 +63,7 @@ for key_candidate in active_keys:
 **Impact**: O(n) bcrypt operations where n = total active API keys. With 1000 users having 3 keys each, worst case is 3000 bcrypt verifications (~5 minutes per auth request).
 
 **Recommendation**:
+
 - Store a fast-hashable prefix (first 8 chars SHA256) for filtering
 - Query: `WHERE prefix_hash = ? AND is_active = true`
 - Reduces bcrypt calls from O(n) to O(1) average case
@@ -86,6 +88,7 @@ self.engine.compute_zvcf(q)           # Call 5 (if enabled)
 **Impact**: A 1000-frame simulation results in 7,000+ expensive engine calls. Each mass matrix computation is O(n³) in joint count.
 
 **Recommendation**:
+
 - Create `get_full_state()` batch method returning `(q, v, t, M)` tuple
 - Cache mass matrix when configuration hasn't changed
 - Implement `compute_analysis_batch()` for ZTCF/ZVCF
@@ -109,6 +112,7 @@ for i in range(1, n + 1):
 **Impact**: For 1000-sample time series, this executes 1M+ Python loop iterations. Python loops are ~100x slower than compiled code.
 
 **Recommendation**:
+
 - Replace with `fastdtw` library (pip install fastdtw)
 - Or add `@numba.jit(nopython=True)` decorator
 - Expected speedup: 100x
@@ -133,6 +137,7 @@ for i in range(n_joints):
 **Impact**: For 30 joints, this computes 435 FFT-based cross-correlations sequentially.
 
 **Recommendation**:
+
 - Use `concurrent.futures.ThreadPoolExecutor` for parallel computation
 - Expected speedup: 4-8x (depending on CPU cores)
 
@@ -152,6 +157,7 @@ for idx, record in enumerate(api_records, 1):
 **Impact**: 1000 API keys = 1001 database queries (classic N+1).
 
 **Recommendation**:
+
 ```python
 user_ids = [r.user_id for r in api_records]
 users = db.session.query(User).filter(User.id.in_(user_ids)).all()
@@ -165,6 +171,7 @@ user_map = {u.id: u for u in users}
 **Location**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/recording_library.py`
 
 **Problem**: Multiple independent `sqlite3.connect()` calls without pooling:
+
 - Line 73, 102, 262, 285, 372, 407, 467
 
 Each method opens/closes connection separately.
@@ -172,6 +179,7 @@ Each method opens/closes connection separately.
 **Impact**: Connection overhead on every operation (typically 5-20ms each).
 
 **Recommendation**:
+
 - Implement singleton connection manager
 - For SQLite: use `check_same_thread=False` with thread-local connections
 - For PostgreSQL: use SQLAlchemy connection pool
@@ -194,6 +202,7 @@ for src_idx in sources:
 **Impact**: 10 torque sources × 1000 frames = 10,000 expensive dynamics computations.
 
 **Recommendation**:
+
 - Implement vectorized `compute_induced_accelerations_batch()`
 - Process all sources in single matrix operation
 
@@ -255,6 +264,7 @@ def __init__(self, engine: PhysicsEngine, max_samples: int = 100000):
 ### 12. Blocking time.sleep() Operations
 
 **Locations**:
+
 - `scripts/populate_refactor_issues.py:94` - `time.sleep(1.0)`
 - `launchers/golf_launcher.py:2555` - `time.sleep(3)`
 - `engines/physics_engines/pinocchio/python/pinocchio_golf/coppelia_bridge.py:98,138`
@@ -270,6 +280,7 @@ def __init__(self, engine: PhysicsEngine, max_samples: int = 100000):
 **Location**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py:332-358`
 
 **Problem**:
+
 ```python
 mocap_xml += """..."""
 equality_xml += "..."
@@ -284,6 +295,7 @@ equality_xml += "..."
 **Location**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/recording_library.py:414-437`
 
 **Problem**:
+
 ```python
 query += " AND golfer_name LIKE ?"
 query += " AND club_type = ?"
@@ -299,6 +311,7 @@ query += " AND swing_type = ?"
 **Location**: `shared/python/statistical_analysis.py:1795-1796`
 
 **Problem**:
+
 ```python
 dists = pdist(normalized_state, metric=metric)
 dist_matrix = squareform(dists)  # Full matrix materialization
@@ -325,11 +338,13 @@ dist_matrix = squareform(dists)  # Full matrix materialization
 ### 17. Unnecessary List Conversions
 
 **Locations**:
+
 - `tools/urdf_generator/model_library.py:440-441`
 - `launchers/golf_launcher.py:1128`
 - `shared/python/optimization/swing_optimizer.py:397`
 
 **Problem**:
+
 ```python
 for model_id in list(self.model_cards.keys()):  # Unnecessary list()
 ```
@@ -343,6 +358,7 @@ for model_id in list(self.model_cards.keys()):  # Unnecessary list()
 **Location**: `shared/python/statistical_analysis.py:256-257`
 
 **Problem**:
+
 ```python
 self._work_metrics_cache: dict[int, dict[str, float]] = {}  # Never used
 self._power_metrics_cache: dict[int, JointPowerMetrics] = {}  # Never used
@@ -357,6 +373,7 @@ self._power_metrics_cache: dict[int, JointPowerMetrics] = {}  # Never used
 **Location**: `shared/python/plotting.py:274, 868, 1011, 1054`
 
 **Problem**:
+
 ```python
 joint_indices = list(range(positions.shape[1]))  # Unnecessary
 ```
@@ -370,6 +387,7 @@ joint_indices = list(range(positions.shape[1]))  # Unnecessary
 **Location**: `shared/python/ellipsoid_visualization.py:228-230`
 
 **Problem**:
+
 ```python
 "center": ellipsoid.center.tolist()
 ```
@@ -380,38 +398,38 @@ joint_indices = list(range(positions.shape[1]))  # Unnecessary
 
 ## Priority Action Matrix
 
-| Priority | Issue | Est. Speedup | Effort | Risk |
-|----------|-------|--------------|--------|------|
-| 1 | Fix memory leak (#1) | Prevents OOM | Low | Low |
-| 2 | API key prefix indexing (#2) | 100-1000x | Medium | Medium |
-| 3 | Batch engine calls (#3) | 10-50x | Medium | Low |
-| 4 | Use optimized DTW (#4) | 100x | Low | Low |
-| 5 | Parallelize lag matrix (#5) | 4-8x | Low | Low |
-| 6 | Fix N+1 in migration (#6) | Linear | Low | Low |
-| 7 | DB connection pooling (#7) | 2-5x | Low | Low |
-| 8 | Batch induced accel (#8) | 10x | Medium | Low |
-| 9 | Combine stats queries (#9) | 5x | Low | Low |
-| 10 | Cache wavelets (#10) | 2-5x | Low | Low |
+| Priority | Issue                        | Est. Speedup | Effort | Risk   |
+| -------- | ---------------------------- | ------------ | ------ | ------ |
+| 1        | Fix memory leak (#1)         | Prevents OOM | Low    | Low    |
+| 2        | API key prefix indexing (#2) | 100-1000x    | Medium | Medium |
+| 3        | Batch engine calls (#3)      | 10-50x       | Medium | Low    |
+| 4        | Use optimized DTW (#4)       | 100x         | Low    | Low    |
+| 5        | Parallelize lag matrix (#5)  | 4-8x         | Low    | Low    |
+| 6        | Fix N+1 in migration (#6)    | Linear       | Low    | Low    |
+| 7        | DB connection pooling (#7)   | 2-5x         | Low    | Low    |
+| 8        | Batch induced accel (#8)     | 10x          | Medium | Low    |
+| 9        | Combine stats queries (#9)   | 5x           | Low    | Low    |
+| 10       | Cache wavelets (#10)         | 2-5x         | Low    | Low    |
 
 ---
 
 ## Files Analyzed
 
-| File | Issues Found |
-|------|--------------|
-| `api/server.py` | 1 |
-| `api/auth/dependencies.py` | 1 |
-| `shared/python/dashboard/recorder.py` | 3 |
-| `shared/python/signal_processing.py` | 2 |
-| `shared/python/statistical_analysis.py` | 3 |
-| `shared/python/output_manager.py` | 1 |
-| `shared/python/plotting.py` | 1 |
-| `shared/python/ellipsoid_visualization.py` | 1 |
-| `scripts/migrate_api_keys.py` | 1 |
-| `engines/.../recording_library.py` | 3 |
-| `engines/.../grip_modelling_tab.py` | 1 |
-| `tools/urdf_generator/model_library.py` | 1 |
-| `launchers/golf_launcher.py` | 1 |
+| File                                       | Issues Found |
+| ------------------------------------------ | ------------ |
+| `api/server.py`                            | 1            |
+| `api/auth/dependencies.py`                 | 1            |
+| `shared/python/dashboard/recorder.py`      | 3            |
+| `shared/python/signal_processing.py`       | 2            |
+| `shared/python/statistical_analysis.py`    | 3            |
+| `shared/python/output_manager.py`          | 1            |
+| `shared/python/plotting.py`                | 1            |
+| `shared/python/ellipsoid_visualization.py` | 1            |
+| `scripts/migrate_api_keys.py`              | 1            |
+| `engines/.../recording_library.py`         | 3            |
+| `engines/.../grip_modelling_tab.py`        | 1            |
+| `tools/urdf_generator/model_library.py`    | 1            |
+| `launchers/golf_launcher.py`               | 1            |
 
 ---
 

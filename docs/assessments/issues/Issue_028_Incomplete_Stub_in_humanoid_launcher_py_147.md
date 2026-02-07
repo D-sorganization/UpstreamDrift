@@ -1,6 +1,6 @@
 ---
 title: "Incomplete Stub in humanoid_launcher.py:147"
-labels: ['incomplete-implementation', 'critical', 'high-impact']
+labels: ["incomplete-implementation", "critical", "high-impact"]
 assignee: "unassigned"
 status: "open"
 ---

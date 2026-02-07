@@ -11,6 +11,11 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
     DoublePendulumDynamics,
     DoublePendulumState,
 )
+from src.shared.python.contracts import (
+    check_finite,
+    postcondition,
+    precondition,
+)
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
 
@@ -52,6 +57,11 @@ class PendulumPhysicsEngine(PhysicsEngine):
     def model_name(self) -> str:
         """Return the name of the currently loaded model."""
         return "DoublePendulum"
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine is initialized (always True for pendulum)."""
+        return self.dynamics is not None
 
     def load_from_path(self, path: str) -> None:
         """Load model from file path."""
@@ -119,12 +129,16 @@ class PendulumPhysicsEngine(PhysicsEngine):
         """Get the current simulation time."""
         return self.time
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q)."""
         # returns ((m11, m12), (m12, m22))
         m_tuple = self.dynamics.mass_matrix(self.state.theta2)
         return np.array(m_tuple)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q) + d(q,v)."""
         # We can use joint_torque_breakdown with zero control to get the rest?
@@ -148,11 +162,15 @@ class PendulumPhysicsEngine(PhysicsEngine):
 
         return np.array([c1 + g1 + d1, c2 + g2 + d2])
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
         g1, g2 = self.dynamics.gravity_vector(self.state.theta1, self.state.theta2)
         return np.array([g1, g2])
 
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
         if len(qacc) < 2:
@@ -163,6 +181,8 @@ class PendulumPhysicsEngine(PhysicsEngine):
         )
         return np.array([tau1, tau2])
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Drift acceleration must contain finite values")
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive (drift) acceleration with zero control inputs.
 
@@ -177,6 +197,8 @@ class PendulumPhysicsEngine(PhysicsEngine):
         a_drift = np.linalg.solve(M, -bias)
         return a_drift
 
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.
 

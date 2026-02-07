@@ -7,7 +7,6 @@ from scripts.generate_assessment_summary import extract_score_from_report
 
 
 class TestAssessmentScripts(unittest.TestCase):
-
     def test_extract_score_from_report(self):
         # Create a dummy report file
         dummy_report = Path("dummy_report.md")

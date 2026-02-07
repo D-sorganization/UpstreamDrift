@@ -95,11 +95,9 @@ _tracer = RequestTracer()
 app.middleware("http")(_tracer.trace_request)
 
 
-# Global services
-engine_manager: EngineManager | None = None
-simulation_service: SimulationService | None = None
-analysis_service: AnalysisService | None = None
-video_pipeline: VideoPosePipeline | None = None
+# Note: Services are now stored in app.state for proper dependency injection.
+# The global variables below are kept for backward compatibility but should
+# not be used directly in routes - use Depends() instead.
 
 
 class TaskManager:
@@ -201,9 +199,14 @@ active_tasks = TaskManager()
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    """Initialize services on startup."""
-    global engine_manager, simulation_service, analysis_service, video_pipeline
+    """Initialize services on startup.
 
+    All services are stored in app.state for proper dependency injection
+    via FastAPI's Depends() mechanism. This enables:
+    - Better testability (dependencies can be overridden)
+    - Cleaner separation of concerns
+    - Type-safe dependency resolution
+    """
     try:
         # Initialize database (Issue #544)
         logger.info("Initializing database...")
@@ -212,15 +215,17 @@ async def startup_event() -> None:
 
         # Initialize engine manager
         engine_manager = EngineManager()
-        # ORTHOGONALITY FIX: Store in app.state for dependency injection
         app.state.engine_manager = engine_manager
         logger.info("Engine manager initialized")
 
-        # Initialize services
-        simulation_service = SimulationService(engine_manager)
-        analysis_service = AnalysisService(engine_manager)
+        # Initialize services and store in app.state for dependency injection
+        app.state.simulation_service = SimulationService(engine_manager)
+        app.state.analysis_service = AnalysisService(engine_manager)
+        app.state.task_manager = active_tasks
+        app.state.logger = logger
 
         # Initialize video pipeline with default config
+        video_pipeline = None
         try:
             video_config = VideoProcessingConfig(
                 estimator_type="mediapipe",
@@ -230,20 +235,20 @@ async def startup_event() -> None:
             video_pipeline = VideoPosePipeline(video_config)
         except ImportError as e:
             logger.info("MediaPipe not installed, video features disabled: %s", e)
-            video_pipeline = None
         except OSError as e:
             logger.warning(
                 "Video pipeline failed to initialize (camera/device issue): %s", e
             )
-            video_pipeline = None
         except RuntimeError as e:
             logger.warning("Video pipeline runtime initialization failed: %s", e)
-            video_pipeline = None
 
+        app.state.video_pipeline = video_pipeline
+
+        # Legacy configure() calls - will be removed after routes migration to Depends()
         core_routes.configure(engine_manager)
         engine_routes.configure(engine_manager, logger)
-        simulation_routes.configure(simulation_service, active_tasks, logger)
-        analysis_routes.configure(analysis_service, logger)
+        simulation_routes.configure(app.state.simulation_service, active_tasks, logger)
+        analysis_routes.configure(app.state.analysis_service, logger)
         video_routes.configure(video_pipeline, active_tasks, logger)
         export_routes.configure(active_tasks)
 

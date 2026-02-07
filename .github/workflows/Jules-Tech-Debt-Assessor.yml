@@ -5,17 +5,17 @@ on:
   workflow_dispatch:
     inputs:
       create_issues:
-        description: 'Create GitHub issues for critical debt'
+        description: "Create GitHub issues for critical debt"
         required: false
         default: true
         type: boolean
       threshold_critical:
-        description: 'Threshold for critical debt items'
+        description: "Threshold for critical debt items"
         required: false
-        default: '10'
+        default: "10"
         type: string
   schedule:
-    - cron: "0 8 */3 * *"  # Weekly on Sunday at 5 AM PST / 1 PM UTC
+    - cron: "0 0 * * 0,4" # Weekly on Sunday at 5 AM PST / 1 PM UTC
 
 permissions:
   contents: write

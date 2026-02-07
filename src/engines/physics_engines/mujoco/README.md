@@ -5,6 +5,7 @@ A professional-grade physics-based golf swing simulation and analysis system usi
 ## Overview
 
 This repository contains:
+
 - **Eight Progressive Swing Models**: From educational pendulums (2 DOF) to research-grade biomechanical (28 DOF) and complete musculoskeletal models (290 muscles)
 - **Musculoskeletal Models**: MyoSuite integration with realistic muscle-tendon units and physiological constraints
 - **Advanced Analysis Suite**: Comprehensive biomechanical analysis with force/torque extraction and visualization
@@ -20,11 +21,13 @@ This repository contains:
 The simulator now includes three physiologically realistic musculoskeletal models from [MyoSuite](https://github.com/MyoHub/myosuite):
 
 #### Available Models
+
 - **MyoUpperBody (19 DOF, 20 actuators)**: Torso + head + bilateral arms with muscle-based control
 - **MyoBody Full (52 DOF, 290 muscles)**: Complete full-body model with all major muscle groups
 - **MyoArm Simple (14 DOF, 14 actuators)**: Simplified bilateral arms for rapid analysis
 
 #### Features
+
 - **Realistic Muscle Dynamics**: Hill-type muscle models with force-length-velocity relationships
 - **Physiological Accuracy**: Converted from validated OpenSim models (MoBL-ARMS, Rajagopal)
 - **High Performance**: 60-4000× faster than OpenSim equivalents
@@ -38,17 +41,20 @@ See **[Musculoskeletal Models Guide](docs/MUSCULOSKELETAL_MODELS.md)** for compl
 **Latest Addition** introduces advanced joint models for studying constraint forces and torque transmission:
 
 #### Universal Joint Models
+
 - **Two-Link Inclined Plane**: Universal joint at wrist for studying torque wobble
 - **Constraint Force Analysis**: Real-time force/torque measurement at joints
 - **Torque Transmission**: Analyze velocity and torque ratios through U-joints
 - **Realistic Wrist Mechanics**: 2-DOF universal joints matching human anatomy
 
 #### Gimbal Joint Models
+
 - **3-DOF Gimbal Demonstration**: Nested ring structure for full orientation control
 - **Gimbal Lock Detection**: Automatic singularity warnings
 - **Shoulder Joints**: Anatomically accurate 3-DOF shoulder implementation
 
 #### Flexible Golf Clubs
+
 - **Multi-Segment Beam Model**: 1-5 flexible shaft segments
 - **Realistic Club Configurations**: Driver, 7-Iron, Wedge with proper inertia
 - **Configurable Stiffness**: Based on real club measurements
@@ -56,16 +62,17 @@ See **[Musculoskeletal Models Guide](docs/MUSCULOSKELETAL_MODELS.md)** for compl
 
 See **[Joint Models Guide](docs/JOINT_MODELS_GUIDE.md)** and **[Quick Start](docs/ADVANCED_JOINTS_README.md)** for complete documentation.
 
-
 **Version 2.1** adds complete motion capture workflow and kinematic force analysis:
 
 #### 📹 Motion Capture Integration
+
 - **Motion Capture Loading**: CSV, JSON formats with automatic parsing
 - **Motion Retargeting**: IK-based mapping from markers to joint angles
 - **Kinematic Processing**: Filtering, derivatives, time normalization
 - **Marker-Based Analysis**: Support for standard golf biomechanics marker sets
 
 #### ⚡ Kinematic Force Analysis
+
 - **Coriolis Forces**: Compute velocity-dependent coupling forces
 - **Centrifugal Forces**: Rotation-induced outward forces
 - **Gravitational Forces**: Configuration-dependent weight effects
@@ -74,6 +81,7 @@ See **[Joint Models Guide](docs/JOINT_MODELS_GUIDE.md)** and **[Quick Start](doc
 - **NO Inverse Dynamics Required**: Analyze forces from kinematics alone!
 
 #### 🔧 Inverse Dynamics Framework
+
 - **Full Inverse Dynamics**: Complete torque computation for any motion
 - **Partial Solutions**: Handle parallel mechanism constraints
 - **Force Decomposition**: Break down into inertial, Coriolis, gravity
@@ -86,12 +94,14 @@ See **[Motion Capture Guide](docs/MOTION_CAPTURE_GUIDE.md)** for complete workfl
 **Version 2.0** brought professional-grade parallel mechanism robotics and advanced control capabilities:
 
 #### 🤖 Advanced Kinematics & Analysis
+
 - **Constraint Jacobian Analysis**: Analyze closed-chain systems (two-handed grip as parallel mechanism)
 - **Manipulability Analysis**: Singularity detection, condition number analysis, manipulability ellipsoids
 - **Inverse Kinematics**: Professional IK solver with Damped Least-Squares and nullspace optimization
 - **Task-Space Control**: Control end-effector in Cartesian coordinates with redundancy resolution
 
 #### 🎮 Multiple Control Schemes
+
 - **Impedance Control**: Position-based compliant control with adjustable stiffness/damping
 - **Admittance Control**: Force-based control for compliant interaction
 - **Hybrid Force-Position Control**: Simultaneous force and position objectives
@@ -99,6 +109,7 @@ See **[Motion Capture Guide](docs/MOTION_CAPTURE_GUIDE.md)** for complete workfl
 - **Operational Space Control**: Advanced task-space control with inertia compensation
 
 #### 🎯 Motion Optimization & Planning
+
 - **Trajectory Optimization**: Generate optimal swings maximizing club speed, minimizing energy
 - **Multi-Objective Optimization**: Balance speed, accuracy, smoothness, and efficiency
 - **Motion Synthesis**: Suggest optimal motion inputs for desired swing characteristics
@@ -109,6 +120,7 @@ See **[Advanced Robotics Guide](docs/ADVANCED_ROBOTICS_GUIDE.md)** for complete 
 ### 📊 Biomechanical Analysis Suite
 
 The core analysis features:
+
 - **Force & Torque Visualization**: Real-time 3D vector rendering with user-adjustable scaling
 - **Comprehensive Plotting**: Summary dashboards, time series, phase diagrams, 3D trajectories
 - **Biomechanical Metrics**: Club head speed, energy analysis, power curves, ground reaction forces
@@ -209,11 +221,13 @@ pip install -r python/requirements.txt
 Use the launcher scripts for easy startup:
 
 **Windows:**
+
 ```batch
 run_gui.bat
 ```
 
 **macOS/Linux:**
+
 ```bash
 ./run_gui.sh
 ```
@@ -230,6 +244,7 @@ python -m mujoco_golf_pendulum
 ```
 
 The Advanced Analysis GUI will launch with:
+
 - **Controls Tab**: Model selection, simulation controls, recording, actuator torque sliders
 - **Visualization Tab**: Camera views, force/torque vector visualization with adjustable scaling
 - **Analysis Tab**: Real-time biomechanical metrics, data export (CSV/JSON)
@@ -248,6 +263,7 @@ python -m mujoco_golf_pendulum.examples_advanced_robotics
 ```
 
 This will run 8 examples covering:
+
 1. **Constraint Jacobian Analysis** - Parallel mechanism analysis of two-handed grip
 2. **Manipulability Analysis** - Singularity detection and condition number analysis
 3. **Inverse Kinematics** - Professional IK solver with nullspace optimization
@@ -290,6 +306,7 @@ python -m mujoco_golf_pendulum.examples_motion_capture
 ```
 
 This runs 6 examples covering:
+
 1. **Load Motion Capture** - CSV and JSON format support
 2. **Motion Retargeting** - IK-based mapping to model
 3. **Kinematic Forces** - Coriolis, centrifugal, gravity (KEY FEATURE!)
@@ -375,6 +392,7 @@ See [Golf Swing Models Documentation](docs/GOLF_SWING_MODELS.md) and [Advanced B
 ### Code Quality
 
 This project uses:
+
 - `ruff` for linting and formatting
 - `mypy` for type checking
 - `pytest` for testing

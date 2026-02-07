@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run - analyze only'
+        description: "Dry run - analyze only"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
       exclude_prs:
-        description: 'Comma-separated PR numbers to exclude'
+        description: "Comma-separated PR numbers to exclude"
         required: false
-        default: ''
+        default: ""
         type: string
   schedule:
-    - cron: "0 8 */3 * *"
+    - cron: "0 0 * * 0,4" # 5 AM PST Mon-Fri (13 UTC)
 
 concurrency:
   group: jules-consolidator
