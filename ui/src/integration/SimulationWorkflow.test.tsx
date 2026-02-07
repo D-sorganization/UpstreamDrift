@@ -120,13 +120,6 @@ vi.mock('three', () => ({
   Mesh: class { },
 }));
 
-// Mock fetch for API calls
-const mockEngines = [
-  { name: 'mujoco', available: true, loaded: true, capabilities: ['rigid_body', 'contact'] },
-  { name: 'drake', available: true, loaded: false, capabilities: ['rigid_body', 'optimization'] },
-  { name: 'pinocchio', available: false, loaded: false, capabilities: ['rigid_body'] },
-];
-
 // Import after mocks
 import { SimulationPage } from '@/pages/Simulation';
 
