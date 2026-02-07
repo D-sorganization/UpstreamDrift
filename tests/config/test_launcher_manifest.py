@@ -240,6 +240,8 @@ class TestParity:
         "motion_capture",
         "model_explorer",
         "putting_green",
+        "video_analyzer",
+        "data_explorer",
     }
 
     REQUIRED_TAURI_IDS = {
@@ -249,6 +251,8 @@ class TestParity:
         "opensim_golf",
         "myosim_suite",
         "putting_green",
+        "video_analyzer",
+        "data_explorer",
     }
 
     def test_manifest_covers_all_pyqt_tiles(self, manifest: LauncherManifest) -> None:
