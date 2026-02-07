@@ -44,6 +44,7 @@ from .routes import core as core_routes
 from .routes import engines as engine_routes
 from .routes import export as export_routes
 from .routes import simulation as simulation_routes
+from .routes import terrain as terrain_routes
 from .routes import video as video_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
@@ -276,6 +277,7 @@ app.include_router(simulation_routes.router)
 app.include_router(video_routes.router)
 app.include_router(analysis_routes.router)
 app.include_router(export_routes.router)
+app.include_router(terrain_routes.router)
 
 
 if __name__ == "__main__":
