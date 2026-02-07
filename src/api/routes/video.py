@@ -16,11 +16,11 @@ from src.api.config import (
     MIN_CONFIDENCE,
     VALID_ESTIMATOR_TYPES,
 )
+from src.api.utils.datetime_compat import UTC
 from src.shared.python.video_pose_pipeline import (
     VideoPosePipeline,
     VideoProcessingConfig,
 )
-from src.api.utils.datetime_compat import UTC
 
 from ..models.responses import VideoAnalysisResponse
 
