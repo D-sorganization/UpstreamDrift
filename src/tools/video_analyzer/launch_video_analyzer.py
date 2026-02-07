@@ -29,9 +29,9 @@ def main() -> int:
 
     try:
         # Import the analyzer module
-        from src.tools.video_analyzer.analyzer import VideoAnalyzer
+        from src.tools.video_analyzer.analyzer import SwingAnalyzer
 
-        _analyzer = VideoAnalyzer()
+        _analyzer = SwingAnalyzer()
         logger.info("Video Analyzer initialized successfully")
 
         # In a full implementation, this would open the GUI

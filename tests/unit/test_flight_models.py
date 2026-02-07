@@ -15,11 +15,11 @@ import pytest
 
 from src.shared.python.flight_models import (
     BallFlightModel,
+    ConstantCoefficientModel,
     FlightModelRegistry,
     FlightModelType,
     FlightResult,
     MacDonaldHanzelyModel,
-    PlaceholderModel,
     TrajectoryPoint,
     UnifiedLaunchConditions,
     WaterlooPennerModel,
@@ -244,7 +244,7 @@ class TestFlightModelRegistry:
         assert isinstance(model, WaterlooPennerModel)
 
         model = FlightModelRegistry.get_model(FlightModelType.NATHAN)
-        assert isinstance(model, PlaceholderModel)
+        assert isinstance(model, ConstantCoefficientModel)
 
 
 # =============================================================================
@@ -266,13 +266,7 @@ class TestModelComparison:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that all models agree on general trajectory direction."""
-        # Only test implemented models
-        impl_models = [
-            m
-            for m in FlightModelRegistry.get_all_models()
-            if "Placeholder" not in m.description
-        ]
-        results = compare_models(driver_launch, impl_models)
+        results = compare_models(driver_launch, FlightModelRegistry.get_all_models())
 
         for name, result in results.items():
             # All should have positive carry
@@ -286,13 +280,7 @@ class TestModelComparison:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that models produce reasonably similar results."""
-        # Only test implemented models
-        impl_models = [
-            m
-            for m in FlightModelRegistry.get_all_models()
-            if "Placeholder" not in m.description
-        ]
-        results = compare_models(driver_launch, impl_models)
+        results = compare_models(driver_launch, FlightModelRegistry.get_all_models())
         carries = [r.carry_distance for r in results.values()]
 
         # All carries should be within 2x of each other (reasonable tolerance)
@@ -332,13 +320,7 @@ class TestPhysicalPlausibility:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that trajectory ends at ground level."""
-        models = [
-            m
-            for m in FlightModelRegistry.get_all_models()
-            if not isinstance(m, PlaceholderModel)
-        ]
-
-        for model in models:
+        for model in FlightModelRegistry.get_all_models():
             result = model.simulate(driver_launch)
             final_pos = result.trajectory[-1].position
 
@@ -349,13 +331,7 @@ class TestPhysicalPlausibility:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that landing angle is a descent (positive angle down)."""
-        models = [
-            m
-            for m in FlightModelRegistry.get_all_models()
-            if not isinstance(m, PlaceholderModel)
-        ]
-
-        for model in models:
+        for model in FlightModelRegistry.get_all_models():
             result = model.simulate(driver_launch)
 
             # Landing angle should be positive (descending)
