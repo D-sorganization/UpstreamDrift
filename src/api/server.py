@@ -24,10 +24,6 @@ from src.shared.python.engine_manager import EngineManager
 
 # Configure logging - use centralized logging config
 from src.shared.python.logging_config import get_logger, setup_logging
-from src.shared.python.video_pose_pipeline import (
-    VideoPosePipeline,
-    VideoProcessingConfig,
-)
 
 from .config import (
     get_allowed_hosts,
@@ -230,6 +226,11 @@ async def startup_event() -> None:
         # Initialize video pipeline with default config
         video_pipeline = None
         try:
+            from src.shared.python.video_pose_pipeline import (
+                VideoPosePipeline,
+                VideoProcessingConfig,
+            )
+
             video_config = VideoProcessingConfig(
                 estimator_type="mediapipe",
                 min_confidence=0.5,
