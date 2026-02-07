@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import threading
 import time
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
 
@@ -58,6 +59,82 @@ class RobotConfig:
         """Set default joint names if not provided."""
         if not self.joint_names:
             self.joint_names = [f"joint_{i}" for i in range(self.n_joints)]
+
+
+class CommunicationStrategy(Protocol):
+    """Protocol for robot communication strategies."""
+
+    def connect(self, config: RobotConfig) -> bool:
+        """Connect to robot hardware."""
+        ...
+
+    def disconnect(self) -> None:
+        """Disconnect from robot hardware."""
+        ...
+
+    def read_state(self) -> RobotState:
+        """Read current robot state."""
+        ...
+
+    def send_command(self, command: ControlCommand) -> None:
+        """Send control command to robot."""
+        ...
+
+
+class SimulationStrategy:
+    """Simulation communication strategy."""
+
+    def __init__(self) -> None:
+        self._config: RobotConfig | None = None
+        self._start_time: float = 0.0
+
+    def connect(self, config: RobotConfig) -> bool:
+        """Connect to simulation."""
+        self._config = config
+        self._start_time = time.perf_counter()
+        return True
+
+    def disconnect(self) -> None:
+        """Disconnect from simulation."""
+        self._config = None
+
+    def read_state(self) -> RobotState:
+        """Read simulated state."""
+        if self._config is None:
+            raise RuntimeError("Not connected to simulation")
+
+        timestamp = time.perf_counter() - self._start_time
+        n_joints = self._config.n_joints
+
+        return RobotState(
+            timestamp=timestamp,
+            joint_positions=np.zeros(n_joints),
+            joint_velocities=np.zeros(n_joints),
+            joint_torques=np.zeros(n_joints),
+        )
+
+    def send_command(self, command: ControlCommand) -> None:
+        """Send command to simulation (no-op)."""
+        pass
+
+
+class HardwareStubStrategy:
+    """Base class for hardware communication stubs."""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def connect(self, config: RobotConfig) -> bool:
+        raise NotImplementedError(f"{self.name} connection not implemented")
+
+    def disconnect(self) -> None:
+        pass
+
+    def read_state(self) -> RobotState:
+        raise NotImplementedError(f"{self.name} state reading not implemented")
+
+    def send_command(self, command: ControlCommand) -> None:
+        raise NotImplementedError(f"{self.name} command sending not implemented")
 
 
 @dataclass
@@ -118,6 +195,18 @@ class RealTimeController:
         self.dt = 1.0 / control_frequency
         self.comm_type = CommunicationType(communication_type)
 
+        # Initialize strategy based on type
+        if self.comm_type == CommunicationType.SIMULATION:
+            self._strategy: CommunicationStrategy = SimulationStrategy()
+        elif self.comm_type == CommunicationType.ROS2:
+            self._strategy = HardwareStubStrategy("ROS2")
+        elif self.comm_type == CommunicationType.UDP:
+            self._strategy = HardwareStubStrategy("UDP")
+        elif self.comm_type == CommunicationType.ETHERCAT:
+            self._strategy = HardwareStubStrategy("EtherCAT")
+        else:
+            raise ValueError(f"Unknown communication type: {communication_type}")
+
         self._config: RobotConfig | None = None
         self._control_callback: Callable[[RobotState], ControlCommand] | None = None
         self._is_connected = False
@@ -162,41 +251,23 @@ class RealTimeController:
         self._config = robot_config
 
         try:
-            if self.comm_type == CommunicationType.SIMULATION:
-                # Simulated connection always succeeds
+            if self._strategy.connect(robot_config):
                 self._is_connected = True
-            elif self.comm_type == CommunicationType.ROS2:
-                self._connect_ros2()
-            elif self.comm_type == CommunicationType.UDP:
-                self._connect_udp()
-            elif self.comm_type == CommunicationType.ETHERCAT:
-                self._connect_ethercat()
-
-            self._is_connected = True
-            return True
+                return True
+            return False
 
         except Exception as e:
             print(f"Failed to connect: {e}")
             self._is_connected = False
             return False
 
-    def _connect_ros2(self) -> None:
-        """Connect via ROS2."""
-        # ROS2 connection would be implemented here
-        # For now, placeholder for integration
-
-    def _connect_udp(self) -> None:
-        """Connect via UDP socket."""
-        # UDP socket connection would be implemented here
-
-    def _connect_ethercat(self) -> None:
-        """Connect via EtherCAT."""
-        # EtherCAT connection would be implemented here
-
     def disconnect(self) -> None:
         """Safely disconnect from robot."""
         if self._is_running:
             self.stop()
+
+        if self._strategy:
+            self._strategy.disconnect()
 
         self._is_connected = False
         self._config = None
@@ -317,20 +388,7 @@ class RealTimeController:
         Returns:
             Current robot state.
         """
-        timestamp = time.perf_counter() - self._start_time
-
-        if self.comm_type == CommunicationType.SIMULATION:
-            # Return simulated state
-            n_joints = self._config.n_joints if self._config else 7
-            return RobotState(
-                timestamp=timestamp,
-                joint_positions=np.zeros(n_joints),
-                joint_velocities=np.zeros(n_joints),
-                joint_torques=np.zeros(n_joints),
-            )
-
-        # Real hardware reading would be implemented per protocol
-        raise NotImplementedError(f"State reading not implemented for {self.comm_type}")
+        return self._strategy.read_state()
 
     def _send_command(self, command: ControlCommand) -> None:
         """Send control command to robot.
@@ -338,14 +396,7 @@ class RealTimeController:
         Args:
             command: Control command to send.
         """
-        if self.comm_type == CommunicationType.SIMULATION:
-            # Simulated: command is "sent"
-            return
-
-        # Real hardware command sending would be implemented per protocol
-        raise NotImplementedError(
-            f"Command sending not implemented for {self.comm_type}"
-        )
+        self._strategy.send_command(command)
 
     def get_timing_stats(self) -> TimingStatistics:
         """Get control loop timing statistics.

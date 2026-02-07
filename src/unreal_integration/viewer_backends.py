@@ -554,6 +554,191 @@ class MeshcatBackend(ViewerBackend):
         return None
 
 
+class PyVistaBackend(ViewerBackend):
+    """PyVista-based viewer backend.
+
+    Uses PyVista (VTK) for desktop visualization.
+    """
+
+    def __init__(self, config: ViewerConfig | None = None):
+        """Initialize PyVista backend."""
+        super().__init__(config)
+        self._plotter: Any = None
+        self._actors: dict[str, Any] = {}
+
+    def initialize(self) -> None:
+        """Initialize PyVista plotter."""
+        if self._is_initialized:
+            return
+
+        try:
+            import pyvista as pv
+
+            self._plotter = pv.Plotter(
+                window_size=(self.config.width, self.config.height),
+                off_screen=False,  # Can be configurable
+            )
+            self._plotter.set_background(self.config.background_color)
+
+            if self.config.enable_antialiasing:
+                self._plotter.enable_anti_aliasing()
+
+            if self.config.enable_shadows:
+                self._plotter.enable_shadows()
+
+            self._is_initialized = True
+            logger.info("PyVista backend initialized")
+
+        except ImportError as e:
+            logger.error(f"Failed to import pyvista: {e}")
+            raise RuntimeError(
+                "PyVista not available. Install with: pip install pyvista"
+            ) from e
+
+    def shutdown(self) -> None:
+        """Shutdown PyVista plotter."""
+        if self._plotter is not None:
+            self._plotter.close()
+            self._plotter = None
+        self._is_initialized = False
+        self._actors.clear()
+        self._objects.clear()
+        logger.info("PyVista backend shutdown")
+
+    def add_mesh(
+        self,
+        mesh: LoadedMesh,
+        name: str | None = None,
+        position: Vector3 | None = None,
+        rotation: Quaternion | None = None,
+        scale: float = 1.0,
+    ) -> str:
+        """Add mesh to PyVista scene."""
+        if not self._is_initialized:
+            raise RuntimeError("Backend not initialized")
+
+        if name is None:
+            name = f"mesh_{len(self._objects)}"
+
+        # Convert to PyVista mesh
+        import pyvista as pv
+
+        vertices, faces = mesh.to_arrays()
+        # PyVista faces format: [n_nodes, node1, node2, ..., n_nodes, node1, ...]
+        # Assuming triangles
+        n_faces = faces.shape[1]
+        pv_faces = np.column_stack((np.full(n_faces, 3), faces.T)).flatten()
+
+        pv_mesh = pv.PolyData(vertices.T, pv_faces)
+
+        # Add to plotter
+        actor = self._plotter.add_mesh(pv_mesh, name=name)
+
+        self._actors[name] = actor
+        self._objects[name] = {
+            "mesh": mesh,
+            "position": position or Vector3.zero(),
+            "rotation": rotation or Quaternion.identity(),
+            "scale": scale,
+        }
+
+        self.update_transform(name, position, rotation, scale)
+
+        return name
+
+    def update_transform(
+        self,
+        name: str,
+        position: Vector3 | None = None,
+        rotation: Quaternion | None = None,
+        scale: float | None = None,
+    ) -> None:
+        """Update object transform in PyVista."""
+        if not self._is_initialized or name not in self._actors:
+            return
+
+        actor = self._actors[name]
+        obj = self._objects[name]
+
+        if position is not None:
+            obj["position"] = position
+        if rotation is not None:
+            obj["rotation"] = rotation
+        if scale is not None:
+            obj["scale"] = scale
+
+        # Apply transform
+        # PyVista actors have user_matrix property
+        T = np.eye(4)
+
+        # Scale
+        T[:3, :3] *= obj["scale"]
+
+        # Rotation
+        q = obj["rotation"]
+        rot = np.array(
+            [
+                [
+                    1 - 2 * q.y * q.y - 2 * q.z * q.z,
+                    2 * q.x * q.y - 2 * q.z * q.w,
+                    2 * q.x * q.z + 2 * q.y * q.w,
+                ],
+                [
+                    2 * q.x * q.y + 2 * q.z * q.w,
+                    1 - 2 * q.x * q.x - 2 * q.z * q.z,
+                    2 * q.y * q.z - 2 * q.x * q.w,
+                ],
+                [
+                    2 * q.x * q.z - 2 * q.y * q.w,
+                    2 * q.y * q.z + 2 * q.x * q.w,
+                    1 - 2 * q.x * q.x - 2 * q.y * q.y,
+                ],
+            ]
+        )
+        T[:3, :3] = rot @ T[:3, :3]
+
+        # Translation
+        T[:3, 3] = obj["position"].to_numpy()
+
+        actor.user_matrix = T
+
+    def remove_object(self, name: str) -> bool:
+        """Remove object from PyVista scene."""
+        if not self._is_initialized:
+            return False
+
+        if name in self._actors:
+            self._plotter.remove_actor(self._actors[name])
+            del self._actors[name]
+            del self._objects[name]
+            return True
+        return False
+
+    def clear(self) -> None:
+        """Clear all objects from PyVista scene."""
+        if not self._is_initialized:
+            return
+
+        self._plotter.clear()
+        self._actors.clear()
+        self._objects.clear()
+
+    def render(self) -> np.ndarray | None:
+        """Render current frame."""
+        if not self._is_initialized:
+            return None
+
+        # If off_screen is False, this updates the window
+        # If off_screen is True, we can capture the image
+        self._plotter.render()
+
+        # Return image if possible (simplified)
+        try:
+            return self._plotter.screenshot(return_img=True)
+        except Exception:
+            return None
+
+
 class MockBackend(ViewerBackend):
     """Mock viewer backend for testing.
 
@@ -666,7 +851,7 @@ def create_viewer(
     elif backend_type == BackendType.MOCK:
         return MockBackend(config)
     elif backend_type == BackendType.PYVISTA:
-        raise NotImplementedError("PyVista backend not yet implemented")
+        return PyVistaBackend(config)
     elif backend_type == BackendType.UNREAL_BRIDGE:
         raise NotImplementedError("Unreal Bridge backend not yet implemented")
     else:
