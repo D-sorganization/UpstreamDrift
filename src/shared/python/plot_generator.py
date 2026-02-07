@@ -42,8 +42,8 @@ try:
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
-    plt = None
-    Figure = None
+    plt = None  # type: ignore[assignment]
+    Figure = None  # type: ignore[assignment, misc]
 
 
 class PlotType(str):

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import typing
-from enum import StrEnum
+from enum import Enum
 
 if typing.TYPE_CHECKING:
     from pathlib import Path
@@ -14,7 +14,7 @@ from dtack.backends.pink_backend import PINKBackend
 from dtack.backends.pinocchio_backend import PinocchioBackend
 
 
-class BackendType(StrEnum):
+class BackendType(str, Enum):  # noqa: UP042
     """Supported backend types."""
 
     PINOCCHIO = "pinocchio"

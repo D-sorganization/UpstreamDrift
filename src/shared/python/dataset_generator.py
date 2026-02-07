@@ -450,7 +450,8 @@ class DatasetGenerator:
         self.engine.set_state(q0, v0)
 
         # Generate control profile
-        profile = rng.choice(config.control_profiles)
+        idx = rng.integers(len(config.control_profiles))
+        profile = config.control_profiles[idx]
         control_sequence = profile.generate(n_v, n_steps, config.timestep, rng)
 
         # Pre-allocate recording arrays
