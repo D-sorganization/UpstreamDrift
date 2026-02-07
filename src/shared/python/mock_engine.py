@@ -102,8 +102,16 @@ class MockPhysicsEngine:
 
         self._time += dt
 
-    def get_state(self) -> dict[str, Any]:
-        """Get current simulation state.
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Get current simulation state as (positions, velocities) tuple.
+
+        Returns:
+            Tuple of (positions, velocities) numpy arrays.
+        """
+        return self._positions.copy(), self._velocities.copy()
+
+    def get_state_dict(self) -> dict[str, Any]:
+        """Get current simulation state as a dictionary (legacy).
 
         Returns:
             Dictionary containing positions, velocities, time, etc.
@@ -241,6 +249,43 @@ class MockPhysicsEngine:
     # Biomechanics Methods (Stubs for Protocol Compliance)
     # =========================================================================
 
+    def get_time(self) -> float:
+        """Get current simulation time.
+
+        Returns:
+            Current time in seconds.
+        """
+        return self._time
+
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call.
+
+        Returns:
+            Dictionary with q, v, t, M keys.
+        """
+        return {
+            "q": self._positions.copy(),
+            "v": self._velocities.copy(),
+            "t": self._time,
+            "M": np.eye(self.num_joints),
+        }
+
+    def forward(self) -> None:
+        """Compute forward kinematics/dynamics without advancing time."""
+        damping = 0.1
+        mass = 1.0
+        self._accelerations = (self._torques - damping * self._velocities) / mass
+
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
+        """Load a model from string content (mock accepts any content).
+
+        Args:
+            content: Model definition string.
+            extension: Optional format hint.
+        """
+        self._is_loaded = True
+        self.model_name = "mock_model"
+
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute mass matrix (returns identity for mock).
 
@@ -249,16 +294,107 @@ class MockPhysicsEngine:
         """
         return np.eye(self.num_joints)
 
-    def compute_jacobian(self, body_name: str) -> np.ndarray:
+    def compute_bias_forces(self) -> np.ndarray:
+        """Compute bias forces (returns zeros for mock).
+
+        Returns:
+            Bias force vector (n,)
+        """
+        return np.zeros(self.num_joints)
+
+    def compute_gravity_forces(self) -> np.ndarray:
+        """Compute gravity forces (returns small downward for mock).
+
+        Returns:
+            Gravity force vector (n,)
+        """
+        g = np.zeros(self.num_joints)
+        g[0] = -9.81  # First joint feels gravity
+        return g
+
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute inverse dynamics tau = M*qacc + bias.
+
+        Args:
+            qacc: Desired acceleration vector.
+
+        Returns:
+            Required torques.
+        """
+        M = self.compute_mass_matrix()
+        bias = self.compute_bias_forces()
+        return M @ qacc + bias
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute drift acceleration (passive dynamics, zero control).
+
+        Returns:
+            Drift acceleration vector.
+        """
+        M = self.compute_mass_matrix()
+        bias = self.compute_bias_forces()
+        gravity = self.compute_gravity_forces()
+        # drift = M^-1 * (bias + gravity)
+        return np.linalg.solve(M, bias + gravity)
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration.
+
+        Args:
+            tau: Applied torques.
+
+        Returns:
+            Control acceleration vector.
+        """
+        M = self.compute_mass_matrix()
+        return np.linalg.solve(M, tau)
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual.
+
+        Args:
+            q: Joint positions.
+            v: Joint velocities.
+
+        Returns:
+            Acceleration under zero torque.
+        """
+        return self.compute_drift_acceleration()
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Zero-Velocity Counterfactual.
+
+        Args:
+            q: Joint positions.
+
+        Returns:
+            Acceleration with zero velocity.
+        """
+        M = self.compute_mass_matrix()
+        gravity = self.compute_gravity_forces()
+        return np.linalg.solve(M, gravity)
+
+    def compute_contact_forces(self) -> np.ndarray:
+        """Compute contact forces (returns zeros for mock).
+
+        Returns:
+            Contact force vector (3,).
+        """
+        return np.zeros(3)
+
+    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute Jacobian for a body (returns zeros for mock).
 
         Args:
             body_name: Name of body
 
         Returns:
-            Jacobian matrix (6 x n)
+            Dict with 'linear' and 'angular' Jacobians.
         """
-        return np.zeros((6, self.num_joints))
+        return {
+            "linear": np.zeros((3, self.num_joints)),
+            "angular": np.zeros((3, self.num_joints)),
+        }
 
     def get_body_position(self, body_name: str) -> np.ndarray:
         """Get position of a body.
