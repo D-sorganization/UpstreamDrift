@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from src.api.utils.datetime_compat import iso_format
+from src.api.utils.datetime_compat import iso_format, utc_now
 from src.shared.python.engine_manager import EngineManager
 
 router = APIRouter()
@@ -37,5 +37,5 @@ async def health_check() -> dict[str, str | int]:
         "engines_available": (
             len(_engine_manager.get_available_engines()) if _engine_manager else 0
         ),
-        "timestamp": iso_format(),
+        "timestamp": iso_format(utc_now()),
     }
