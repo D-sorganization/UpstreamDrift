@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 from fastapi import APIRouter
 
 from src.api.utils.datetime_compat import iso_format, utc_now
@@ -38,4 +41,23 @@ async def health_check() -> dict[str, str | int]:
             len(_engine_manager.get_available_engines()) if _engine_manager else 0
         ),
         "timestamp": iso_format(utc_now()),
+    }
+
+
+@router.get("/api/diagnostics", response_model=None)
+async def get_diagnostics() -> dict:  # type: ignore[type-arg]
+    """Get comprehensive diagnostic information for browser mode."""
+    repo_root = Path(__file__).parent.parent.parent.parent
+    
+    return {
+        "backend": {
+            "running": True,
+            "pid": None,  # Not available in browser mode
+            "port": 8001,  # Docker backend port
+            "error": None,
+        },
+        "python_found": True,
+        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "repo_root": str(repo_root),
+        "local_server_found": True,  # If this endpoint is hit, server is found
     }

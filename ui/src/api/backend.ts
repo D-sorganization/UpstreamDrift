@@ -59,13 +59,28 @@ export async function getBackendStatus(): Promise<BackendStatus> {
 /** Get comprehensive diagnostic info (Tauri only). */
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
-    return {
-      backend: { running: false, pid: null, port: 8080, error: null },
-      python_found: false,
-      python_version: null,
-      repo_root: null,
-      local_server_found: false,
-    };
+    // In browser mode, call the backend API endpoint
+    try {
+      const response = await fetch('/api/diagnostics');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      // Fallback if backend is not available
+      return {
+        backend: {
+          running: false,
+          pid: null,
+          port: 8001,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        python_found: false,
+        python_version: null,
+        repo_root: null,
+        local_server_found: false,
+      };
+    }
   }
   return invoke<DiagnosticInfo>('get_diagnostics');
 }
