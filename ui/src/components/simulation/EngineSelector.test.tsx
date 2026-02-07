@@ -1,188 +1,189 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { screen, fireEvent, waitFor } from '@testing-library/dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { screen, fireEvent } from '@testing-library/dom';
 import { EngineSelector } from './EngineSelector';
+import type { ManagedEngine } from '@/api/useEngineManager';
 
-// Mock the API client
-vi.mock('@/api/client', () => ({
-  fetchEngines: vi.fn(),
-}));
+const createEngine = (overrides: Partial<ManagedEngine> = {}): ManagedEngine => ({
+  name: 'mujoco',
+  displayName: 'MuJoCo',
+  description: 'High-performance physics',
+  loadState: 'idle',
+  available: true,
+  capabilities: ['rigid_body'],
+  ...overrides,
+});
 
-import { fetchEngines } from '@/api/client';
-
-const mockEngines = [
-  { name: 'mujoco', available: true, loaded: true, capabilities: ['rigid_body', 'contact'] },
-  { name: 'drake', available: true, loaded: false, capabilities: ['rigid_body', 'optimization'] },
-  { name: 'pinocchio', available: false, loaded: false, capabilities: ['rigid_body'] },
+const mockEngines: ManagedEngine[] = [
+  createEngine({ name: 'mujoco', displayName: 'MuJoCo', description: 'High-performance physics for robotics', loadState: 'loaded' }),
+  createEngine({ name: 'drake', displayName: 'Drake', description: 'Optimization-based dynamics', loadState: 'idle' }),
+  createEngine({ name: 'pinocchio', displayName: 'Pinocchio', description: 'Rigid body algorithms', loadState: 'error', error: 'Not installed' }),
 ];
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
-
 describe('EngineSelector', () => {
+  const defaultProps = {
+    engines: mockEngines,
+    selectedEngine: 'mujoco',
+    onSelect: vi.fn(),
+    onLoad: vi.fn(),
+    onUnload: vi.fn(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('loading state', () => {
-    it('shows loading indicator while fetching engines', () => {
-      vi.mocked(fetchEngines).mockReturnValue(new Promise(() => {})); // Never resolves
+  describe('rendering', () => {
+    it('renders all engines', () => {
+      render(<EngineSelector {...defaultProps} />);
 
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
+      expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+      expect(screen.getByText('Drake')).toBeInTheDocument();
+      expect(screen.getByText('Pinocchio')).toBeInTheDocument();
+    });
 
-      expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
+    it('has radiogroup role with label', () => {
+      render(<EngineSelector {...defaultProps} />);
+
+      expect(screen.getByRole('radiogroup', { name: /physics engines/i })).toBeInTheDocument();
+    });
+
+    it('shows engine descriptions', () => {
+      render(<EngineSelector {...defaultProps} />);
+
+      expect(screen.getByText('High-performance physics for robotics')).toBeInTheDocument();
     });
   });
 
-  describe('error state', () => {
-    it('shows error message when fetch fails', async () => {
-      vi.mocked(fetchEngines).mockRejectedValue(new Error('Network error'));
+  describe('load states', () => {
+    it('shows "Not loaded" for idle engines', () => {
+      render(<EngineSelector {...defaultProps} />);
 
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
-      });
-
-      expect(screen.getByText(/failed to load engines/i)).toBeInTheDocument();
+      expect(screen.getByText('Not loaded')).toBeInTheDocument();
     });
 
-    it('shows retry button on error', async () => {
-      vi.mocked(fetchEngines).mockRejectedValue(new Error('Network error'));
+    it('shows "Loaded" for loaded engines', () => {
+      render(<EngineSelector {...defaultProps} />);
 
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
+      expect(screen.getByText(/Loaded/)).toBeInTheDocument();
+    });
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
-      });
+    it('shows error message for failed engines', () => {
+      render(<EngineSelector {...defaultProps} />);
+
+      expect(screen.getByText('Not installed')).toBeInTheDocument();
+    });
+
+    it('shows loading state with spinner', () => {
+      const engines = [
+        createEngine({ name: 'mujoco', displayName: 'MuJoCo', loadState: 'loading' }),
+      ];
+
+      render(<EngineSelector {...defaultProps} engines={engines} />);
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });
 
-  describe('success state', () => {
-    beforeEach(() => {
-      vi.mocked(fetchEngines).mockResolvedValue(mockEngines);
+  describe('Load button', () => {
+    it('shows Load button for idle engines', () => {
+      render(<EngineSelector {...defaultProps} />);
+
+      expect(screen.getByRole('button', { name: /load drake/i })).toBeInTheDocument();
     });
 
-    it('renders list of engines', async () => {
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
+    it('shows Retry button for errored engines', () => {
+      render(<EngineSelector {...defaultProps} />);
 
-      await waitFor(() => {
-        expect(screen.getByText('mujoco')).toBeInTheDocument();
-        expect(screen.getByText('drake')).toBeInTheDocument();
-        expect(screen.getByText('pinocchio')).toBeInTheDocument();
-      });
+      expect(screen.getByRole('button', { name: /load pinocchio/i })).toBeInTheDocument();
+      expect(screen.getByText('Retry')).toBeInTheDocument();
     });
 
-    it('calls onChange when engine is selected', async () => {
-      const onChange = vi.fn();
+    it('calls onLoad when Load button clicked', () => {
+      const onLoad = vi.fn();
+      render(<EngineSelector {...defaultProps} onLoad={onLoad} />);
 
+      fireEvent.click(screen.getByRole('button', { name: /load drake/i }));
+      expect(onLoad).toHaveBeenCalledWith('drake');
+    });
+
+    it('shows Unload button for loaded engines', () => {
+      render(<EngineSelector {...defaultProps} />);
+
+      expect(screen.getByRole('button', { name: /unload mujoco/i })).toBeInTheDocument();
+    });
+
+    it('calls onUnload when Unload button clicked', () => {
+      const onUnload = vi.fn();
+      const engines = [
+        createEngine({ name: 'mujoco', displayName: 'MuJoCo', loadState: 'loaded' }),
+      ];
       render(
-        <EngineSelector value="mujoco" onChange={onChange} />,
-        { wrapper: createWrapper() }
+        <EngineSelector
+          {...defaultProps}
+          engines={engines}
+          selectedEngine={null}
+          onUnload={onUnload}
+        />
       );
 
-      await waitFor(() => {
-        expect(screen.getByText('drake')).toBeInTheDocument();
-      });
+      fireEvent.click(screen.getByRole('button', { name: /unload mujoco/i }));
+      expect(onUnload).toHaveBeenCalledWith('mujoco');
+    });
+
+    it('disables Unload button on selected engine', () => {
+      render(<EngineSelector {...defaultProps} selectedEngine="mujoco" />);
+
+      const unloadBtn = screen.getByRole('button', { name: /unload mujoco/i });
+      expect(unloadBtn).toBeDisabled();
+    });
+  });
+
+  describe('selection', () => {
+    it('only allows selecting loaded engines', () => {
+      const onSelect = vi.fn();
+      render(<EngineSelector {...defaultProps} onSelect={onSelect} />);
+
+      // Drake is idle — clicking it should not call onSelect
+      const drakeRadio = screen.getByRole('radio', { name: /drake.*not loaded/i });
+      expect(drakeRadio).toBeDisabled();
+    });
+
+    it('calls onSelect for loaded engine click', () => {
+      const onSelect = vi.fn();
+      const engines = [
+        createEngine({ name: 'mujoco', displayName: 'MuJoCo', loadState: 'loaded' }),
+        createEngine({ name: 'drake', displayName: 'Drake', loadState: 'loaded' }),
+      ];
+
+      render(
+        <EngineSelector
+          {...defaultProps}
+          engines={engines}
+          selectedEngine="mujoco"
+          onSelect={onSelect}
+        />
+      );
 
       fireEvent.click(screen.getByRole('radio', { name: /drake/i }));
-      expect(onChange).toHaveBeenCalledWith('drake');
+      expect(onSelect).toHaveBeenCalledWith('drake');
     });
 
-    it('disables unavailable engines', async () => {
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
+    it('shows aria-checked on selected engine', () => {
+      render(<EngineSelector {...defaultProps} selectedEngine="mujoco" />);
 
-      await waitFor(() => {
-        const pinocchioButton = screen.getByRole('radio', { name: /pinocchio.*not installed/i });
-        expect(pinocchioButton).toBeDisabled();
-      });
-    });
-
-    it('shows selected engine with aria-checked', async () => {
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        const selectedRadio = screen.getByRole('radio', { name: /mujoco/i });
-        expect(selectedRadio).toHaveAttribute('aria-checked', 'true');
-      });
-    });
-  });
-
-  describe('accessibility', () => {
-    beforeEach(() => {
-      vi.mocked(fetchEngines).mockResolvedValue(mockEngines);
-    });
-
-    it('has radiogroup role with label', async () => {
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('radiogroup', { name: /physics engine/i })).toBeInTheDocument();
-      });
-    });
-
-    it('buttons have focus rings', async () => {
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} />,
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        const radio = screen.getByRole('radio', { name: /mujoco/i });
-        expect(radio.className).toContain('focus:ring');
-      });
+      const selected = screen.getByRole('radio', { name: /mujoco/i });
+      expect(selected).toHaveAttribute('aria-checked', 'true');
     });
   });
 
   describe('disabled state', () => {
-    beforeEach(() => {
-      vi.mocked(fetchEngines).mockResolvedValue(mockEngines);
-    });
+    it('disables all interactions when disabled', () => {
+      render(<EngineSelector {...defaultProps} disabled />);
 
-    it('disables all engines when disabled prop is true', async () => {
-      render(
-        <EngineSelector value="mujoco" onChange={vi.fn()} disabled />,
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        const radios = screen.getAllByRole('radio');
-        radios.forEach((radio) => {
-          expect(radio).toBeDisabled();
-        });
+      const radios = screen.getAllByRole('radio');
+      radios.forEach((radio) => {
+        expect(radio).toBeDisabled();
       });
     });
   });

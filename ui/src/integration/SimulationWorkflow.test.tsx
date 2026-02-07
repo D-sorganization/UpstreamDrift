@@ -154,14 +154,36 @@ describe('Simulation Workflow Integration', () => {
     vi.stubGlobal('WebSocket', MockWebSocket);
 
     // Mock fetch for engines API
+    // Mock fetch for engines API
     global.fetch = vi.fn().mockImplementation((url: string) => {
-      if (url.includes('/api/engines')) {
+      // Mock probe endpoint
+      if (url.includes('/probe')) {
+        // Pinocchio is not available in these tests
+        if (url.includes('pinocchio')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ available: false }),
+          });
+        }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({ engines: mockEngines }),
+          json: () => Promise.resolve({ available: true }),
         });
       }
-      return Promise.reject(new Error('Unknown endpoint'));
+
+      // Mock load endpoint
+      if (url.includes('/load')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            status: 'loaded',
+            version: '1.0.0',
+            capabilities: ['rigid_body']
+          }),
+        });
+      }
+
+      return Promise.reject(new Error(`Unknown endpoint: ${url}`));
     });
   });
 
@@ -175,13 +197,19 @@ describe('Simulation Workflow Integration', () => {
     it('allows user to select engine, start, and view simulation', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      // Wait for engines to load
+      // Wait for engines to be listed (from registry)
       await waitFor(() => {
-        expect(screen.getByText('mujoco')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
       });
 
-      // Verify initial state
-      expect(screen.getByText('Ready')).toBeInTheDocument();
+      // Click Load button for MuJoCo
+      const loadButton = screen.getByRole('button', { name: /load mujoco/i });
+      fireEvent.click(loadButton);
+
+      // Verify Ready state after loading
+      await waitFor(() => {
+        expect(screen.getByText('Ready')).toBeInTheDocument();
+      });
       expect(screen.getByText(/start simulation to view live data/i)).toBeInTheDocument();
 
       // Click start button
@@ -211,9 +239,20 @@ describe('Simulation Workflow Integration', () => {
     it('allows switching engines before starting simulation', async () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      // Wait for engines to load
+      // Wait for engines to be listed
       await waitFor(() => {
-        expect(screen.getByText('drake')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+        expect(screen.getByText('Drake')).toBeInTheDocument();
+      });
+
+      // Load Drake
+      const loadDrakeBtn = screen.getByRole('button', { name: /load drake/i });
+      fireEvent.click(loadDrakeBtn);
+
+      // Wait for Drake to load
+      await waitFor(() => {
+        const drakeButton = screen.getByRole('radio', { name: /drake/i });
+        expect(drakeButton).not.toBeDisabled();
       });
 
       // Select drake engine
@@ -235,7 +274,15 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText('mujoco')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+      });
+
+      // Load MuJoCo
+      fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
+
+      // Wait for Ready
+      await waitFor(() => {
+        expect(screen.getByText('Ready')).toBeInTheDocument();
       });
 
       // Start simulation
@@ -258,7 +305,15 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText('mujoco')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+      });
+
+      // Load MuJoCo
+      fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
+
+      // Wait for Ready
+      await waitFor(() => {
+        expect(screen.getByText('Ready')).toBeInTheDocument();
       });
 
       // Start simulation
@@ -313,7 +368,15 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText('mujoco')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+      });
+
+      // Load MuJoCo
+      fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
+
+      // Wait for Ready
+      await waitFor(() => {
+        expect(screen.getByText('Ready')).toBeInTheDocument();
       });
 
       // Start simulation
@@ -361,9 +424,16 @@ describe('Simulation Workflow Integration', () => {
 
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
-      // Should show error state
       await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+      });
+
+      // Try to load
+      fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
+
+      // Should show error state (Retry button)
+      await waitFor(() => {
+        expect(screen.getByText('Retry')).toBeInTheDocument();
       });
     });
 
@@ -371,12 +441,17 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText('pinocchio')).toBeInTheDocument();
+        expect(screen.getByText('Pinocchio')).toBeInTheDocument();
       });
 
-      // Pinocchio should be disabled (not installed)
-      const pinocchioRadio = screen.getByRole('radio', { name: /pinocchio.*not installed/i });
-      expect(pinocchioRadio).toBeDisabled();
+      // Click Load for Pinocchio
+      const loadBtn = screen.getByRole('button', { name: /load pinocchio/i });
+      fireEvent.click(loadBtn);
+
+      // Should show error state (Retry button)
+      await waitFor(() => {
+        expect(screen.getByText('Retry')).toBeInTheDocument();
+      });
     });
   });
 
@@ -385,7 +460,15 @@ describe('Simulation Workflow Integration', () => {
       render(<SimulationPage />, { wrapper: createTestWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText('mujoco')).toBeInTheDocument();
+        expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+      });
+
+      // Load MuJoCo
+      fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
+
+      // Wait for Ready
+      await waitFor(() => {
+        expect(screen.getByText('Ready')).toBeInTheDocument();
       });
 
       // Start simulation
@@ -429,13 +512,13 @@ describe('Multi-session workflow', () => {
     vi.stubGlobal('WebSocket', MockWebSocket);
 
     global.fetch = vi.fn().mockImplementation((url: string) => {
-      if (url.includes('/api/engines')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ engines: mockEngines }),
-        });
+      if (url.includes('/probe')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ available: true }) });
       }
-      return Promise.reject(new Error('Unknown endpoint'));
+      if (url.includes('/load')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ status: 'loaded' }) });
+      }
+      return Promise.reject(new Error(`Unknown endpoint: ${url}`));
     });
   });
 
@@ -448,7 +531,15 @@ describe('Multi-session workflow', () => {
     render(<SimulationPage />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByText('mujoco')).toBeInTheDocument();
+      expect(screen.getByText('MuJoCo')).toBeInTheDocument();
+    });
+
+    // Load MuJoCo once
+    fireEvent.click(screen.getByRole('button', { name: /load mujoco/i }));
+
+    // Wait for Ready
+    await waitFor(() => {
+      expect(screen.getByText('Ready')).toBeInTheDocument();
     });
 
     // First simulation - start it
