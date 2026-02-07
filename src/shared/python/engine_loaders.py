@@ -208,7 +208,7 @@ def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:
         # Putting green doesn't need probing - it's always available as pure Python
         simulator = PuttingGreenSimulator()
         logger.info("Putting Green engine loaded successfully")
-        return simulator  # type: ignore[no-any-return]
+        return simulator  # type: ignore[return-value]
 
     except ImportError as e:
         raise GolfModelingError("Putting Green engine not found.") from e
