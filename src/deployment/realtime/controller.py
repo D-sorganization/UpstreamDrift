@@ -114,6 +114,7 @@ class SimulationStrategy:
 
     def send_command(self, command: ControlCommand) -> None:
         """Send command to simulation (no-op)."""
+        pass
 
 
 class HardwareStubStrategy:
