@@ -131,11 +131,7 @@ class TestSimulationEndpoints:
         if response.status_code == 200:
             data = response.json()
             # If 200, the response body should signal the error
-            assert (
-                "error" in data
-                or "status" in data
-                or data.get("success") is False
-            )
+            assert "error" in data or "status" in data or data.get("success") is False
         else:
             assert response.status_code in [400, 422, 500]
 
