@@ -21,6 +21,7 @@ DEFAULT_CONFIDENCE = 0.5
 DEFAULT_ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "testserver",  # For FastAPI TestClient
     "*.golfmodelingsuite.com",
 ]
 
