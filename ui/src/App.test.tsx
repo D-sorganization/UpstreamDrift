@@ -1,11 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Mock the SimulationPage to isolate App component testing
+// Mock the pages to isolate App component testing
 vi.mock('@/pages/Simulation', () => ({
   SimulationPage: () => <div data-testid="simulation-page-mock">SimulationPage Mock</div>,
+}));
+
+vi.mock('@/pages/Dashboard', () => ({
+  DashboardPage: () => <div data-testid="dashboard-page-mock">DashboardPage Mock</div>,
 }));
 
 import App from './App';
@@ -27,16 +31,20 @@ describe('App', () => {
     vi.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
-    render(<App />, { wrapper: createWrapper() });
-
-    expect(screen.getByTestId('simulation-page-mock')).toBeInTheDocument();
+  afterEach(() => {
+    // Reset the URL after each test
+    window.history.pushState({}, '', '/');
   });
 
-  it('renders SimulationPage component', () => {
+  it('renders without crashing', () => {
     render(<App />, { wrapper: createWrapper() });
+    // At "/" the Dashboard should render
+    expect(screen.getByTestId('dashboard-page-mock')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('SimulationPage Mock')).toBeInTheDocument();
+  it('renders DashboardPage at root route', () => {
+    render(<App />, { wrapper: createWrapper() });
+    expect(screen.getByText('DashboardPage Mock')).toBeInTheDocument();
   });
 
   it('exports default App component', () => {
