@@ -578,15 +578,15 @@ class MyoSimProbe(EngineProbe):
             )
 
         # Check for engine directory
-        engine_dir = self.suite_root / "engines" / "physics_engines" / "myosim"
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "myosuite"
         if not engine_dir.exists():
             missing.append("engine directory")
 
         # Check for Python modules
         python_dir = engine_dir / "python"
         if python_dir.exists():
-            if not (python_dir / "myosim_physics_engine.py").exists():
-                missing.append("module: myosim_physics_engine.py")
+            if not (python_dir / "myosuite_physics_engine.py").exists():
+                missing.append("module: myosuite_physics_engine.py")
         else:
             missing.append("python directory")
 
