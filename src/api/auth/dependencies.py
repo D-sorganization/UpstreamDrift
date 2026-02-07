@@ -3,7 +3,7 @@
 from collections.abc import Callable
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, timezone
+from src.api.utils.datetime_compat import UTC; from datetime import timezone
 
 try:
     from datetime import timezone

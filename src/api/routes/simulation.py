@@ -7,7 +7,7 @@ Uses FastAPI's Depends() for dependency injection.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from src.api.utils.datetime_compat import UTC; from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
