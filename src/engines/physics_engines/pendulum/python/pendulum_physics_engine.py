@@ -11,6 +11,7 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
     DoublePendulumDynamics,
     DoublePendulumState,
 )
+from src.shared.python.checkpoint import StateCheckpoint
 from src.shared.python.contracts import (
     check_finite,
     postcondition,
@@ -57,6 +58,11 @@ class PendulumPhysicsEngine(PhysicsEngine):
     def model_name(self) -> str:
         """Return the name of the currently loaded model."""
         return "DoublePendulum"
+
+    @property
+    def engine_type(self) -> str:
+        """Get engine type identifier."""
+        return "pendulum"
 
     @property
     def is_initialized(self) -> bool:
@@ -334,3 +340,30 @@ class PendulumPhysicsEngine(PhysicsEngine):
             self.state.theta2 = theta2_orig
             self.state.omega1 = omega1_orig
             self.state.omega2 = omega2_orig
+
+    # -------- Checkpointable Protocol --------
+
+    def save_checkpoint(self) -> StateCheckpoint:
+        """Save current state as a checkpoint."""
+        q, v = self.get_state()
+        return StateCheckpoint.create(
+            engine_type=self.engine_type,
+            engine_state={
+                "phi": self.state.phi,
+                "omega_phi": self.state.omega_phi,
+            },
+            q=q,
+            v=v,
+            timestamp=self.time,
+        )
+
+    def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
+        """Restore state from a checkpoint."""
+        q = checkpoint.get_q()
+        v = checkpoint.get_v()
+        self.set_state(q, v)
+        self.time = checkpoint.timestamp
+        if "phi" in checkpoint.engine_state:
+            self.state.phi = checkpoint.engine_state["phi"]
+        if "omega_phi" in checkpoint.engine_state:
+            self.state.omega_phi = checkpoint.engine_state["omega_phi"]

@@ -174,11 +174,9 @@ class EngineManager:
         self.active_physics_engine = None
 
         try:
-            # Handle special cases (MATLAB / PENDULUM) that don't conform to standard PhysicsEngine yet
+            # Handle special cases (MATLAB) that don't conform to standard PhysicsEngine yet
             if engine_type in (EngineType.MATLAB_2D, EngineType.MATLAB_3D):
                 self._load_matlab_engine(engine_type)
-            elif engine_type == EngineType.PENDULUM:
-                self._load_pendulum_engine()
             else:
                 # Standard Registry Loading
                 registry = get_registry()
@@ -247,14 +245,6 @@ class EngineManager:
                 exc_info=True,
             )
             raise GolfModelingError("MATLAB Engine for Python not installed.") from e
-
-    def _load_pendulum_engine(self) -> None:
-        """Load pendulum models."""
-        self.active_physics_engine = None
-        model_dir = self.engine_paths[EngineType.PENDULUM]
-        if not model_dir.exists():
-            raise GolfModelingError(f"Pendulum models not found: {model_dir}")
-        self._pendulum_model_dir = model_dir
 
     def cleanup(self) -> None:
         """Clean up loaded engines."""

@@ -35,7 +35,7 @@ class SimulationService:
         """
         try:
             # Load requested engine
-            engine_type = EngineType(request.engine_type.upper())
+            engine_type = EngineType(request.engine_type.lower())
             self.engine_manager._load_engine(
                 engine_type
             )  # This method doesn't return success status
