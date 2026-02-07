@@ -178,18 +178,10 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
 
     # Semantic colors - read from theme dict (populated from themes.json),
     # falling back to reasonable defaults based on dark/light
-    success = ft.get(
-        "success", "#30D158" if is_dark else "#28A745"
-    )
-    warning = ft.get(
-        "warning", "#FF9F0A" if is_dark else "#E67E00"
-    )
-    error = ft.get(
-        "error", "#FF375F" if is_dark else "#DC3545"
-    )
-    info = ft.get(
-        "info", "#64D2FF" if is_dark else "#17A2B8"
-    )
+    success = ft.get("success", "#30D158" if is_dark else "#28A745")
+    warning = ft.get("warning", "#FF9F0A" if is_dark else "#E67E00")
+    error = ft.get("error", "#FF375F" if is_dark else "#DC3545")
+    info = ft.get("info", "#64D2FF" if is_dark else "#17A2B8")
 
     return ThemeColors(
         name=theme_name,
