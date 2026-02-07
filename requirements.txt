@@ -59,3 +59,7 @@ mujoco>=3.0.0
 # See docs/wsl_setup.md for detailed instructions.
 # ============================================================================
 defusedxml>=0.7.1
+
+# Biomechanics engines
+myosuite>=2.0.0
+opensim>=4.4.0

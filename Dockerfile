@@ -59,6 +59,8 @@ RUN pip install --no-cache-dir \
     pin-pink \
     qpsolvers \
     osqp \
+    myosuite \
+    opensim \
     fastapi>=0.100.0 \
     uvicorn[standard]>=0.23.0 \
     slowapi \
