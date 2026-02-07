@@ -295,6 +295,112 @@ class OpenPoseHandler:
         return process is not None
 
 
+class SpecialAppHandler:
+    """Handler for launching special applications (tools, utilities, sub-launchers).
+
+    Handles model types: special_app
+    Covers: motion_capture, model_explorer, matlab_unified, and any
+    future tool/utility tiles.
+
+    Design by Contract:
+        Precondition: model.path must be a valid relative path to a Python script
+        Postcondition: script is launched as a subprocess
+    """
+
+    MODEL_TYPES = {"special_app"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Launch a special application by running its script.
+
+        Args:
+            model: Model configuration with 'path' and 'name' attrs.
+            repo_path: Path to the repository root.
+            process_manager: Process manager for subprocess handling.
+
+        Returns:
+            True if launch succeeded, False otherwise.
+        """
+        # DBC Precondition: model must have a path
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error(
+                "SpecialAppHandler: model '%s' has no path",
+                getattr(model, "id", "unknown"),
+            )
+            return False
+
+        script_path = repo_path / model_path
+        model_name = getattr(model, "name", model_path)
+
+        if not script_path.exists():
+            logger.warning("SpecialAppHandler: script not found: %s", script_path)
+            return False
+
+        process = process_manager.launch_script(
+            name=model_name,
+            script_path=script_path,
+            cwd=repo_path,
+        )
+        return process is not None
+
+
+class PuttingGreenHandler:
+    """Handler for launching the Putting Green simulator.
+
+    Design by Contract:
+        Precondition: model.path must point to the putting green simulator
+        Postcondition: putting green simulator subprocess is running
+    """
+
+    MODEL_TYPES = {"putting_green"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Launch the Putting Green simulation.
+
+        Args:
+            model: Model configuration with 'path' attr.
+            repo_path: Path to the repository root.
+            process_manager: Process manager for subprocess handling.
+
+        Returns:
+            True if launch succeeded, False otherwise.
+        """
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error("PuttingGreenHandler: model has no path")
+            return False
+
+        script_path = repo_path / model_path
+        if not script_path.exists():
+            logger.warning("PuttingGreenHandler: script not found: %s", script_path)
+            return False
+
+        process = process_manager.launch_script(
+            name="Putting Green Simulator",
+            script_path=script_path,
+            cwd=script_path.parent,
+        )
+        return process is not None
+
+
 class ModelHandlerRegistry:
     """Registry for model launch handlers.
 
@@ -312,6 +418,8 @@ class ModelHandlerRegistry:
             OpenSimHandler(),
             MyoSimHandler(),
             OpenPoseHandler(),
+            SpecialAppHandler(),
+            PuttingGreenHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:
