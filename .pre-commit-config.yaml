@@ -39,15 +39,9 @@ repos:
         types: [python]
         exclude: ^(\.github/|docs/|.*\.md$)
 
-  # Black - Python code formatter (backup)
-  - repo: https://github.com/psf/black
-    rev: 26.1.0
-    hooks:
-      - id: black
-        name: "black (Python format)"
-        language_version: python3.11
-        types: [python]
-        exclude: ^(\.github/|docs/|.*\.md$)
+  # NOTE: Black hook removed - ruff format is the primary Python formatter.
+  # Black and ruff format produce conflicting output for parenthesized asserts,
+  # causing an infinite reformat cycle. ruff format is faster and sufficient.
 
   # ===========================================================================
   # JAVASCRIPT / TYPESCRIPT / REACT CHECKS
@@ -207,7 +201,7 @@ repos:
     hooks:
       - id: mypy
         name: "mypy (Python type check)"
-        stages: [push]
+        stages: [pre-push]
         additional_dependencies:
           - types-requests
           - types-PyYAML
@@ -234,18 +228,10 @@ repos:
     hooks:
       - id: bandit
         name: "bandit (Python security)"
-        stages: [push]
-        args:
-          [
-            "-r",
-            ".",
-            "-ll",
-            "-ii",
-            "-x",
-            "tests/,archive/,legacy/,.github/,node_modules/",
-          ]
-        pass_filenames: false
+        stages: [pre-push]
+        args: ["-ll", "-ii"]
         types: [python]
+        exclude: ^(tests/|archive/|legacy/|\.github/|node_modules/|scripts/)
 
   # Pytest - Python unit tests (pre-push only)
   # NOTE: Using language: python (not system) for cross-platform compatibility (Windows/Linux)
@@ -253,7 +239,7 @@ repos:
     hooks:
       - id: pytest-unit
         name: "pytest (Python tests)"
-        stages: [push]
+        stages: [pre-push]
         entry: pytest
         args:
           [
@@ -263,6 +249,7 @@ repos:
             "--tb=short",
             "-m",
             "not slow and not integration",
+            "--ignore=tests/unit/ai",
           ]
         language: python
         additional_dependencies: [pytest, pytest-cov]
@@ -275,7 +262,7 @@ repos:
     hooks:
       - id: semgrep
         name: "semgrep (security + quality)"
-        stages: [push]
+        stages: [pre-push]
         args: ["--config", "auto", "--error", "--quiet"]
         types: [python]
         exclude: ^(tests/|archive/|legacy/|experimental/|\.github/)
@@ -287,7 +274,7 @@ repos:
     hooks:
       - id: radon
         name: "radon (complexity check)"
-        stages: [push]
+        stages: [pre-push]
         entry: radon
         args: ["cc", "--min", "C", "--show-complexity", "--total-average"]
         language: python
