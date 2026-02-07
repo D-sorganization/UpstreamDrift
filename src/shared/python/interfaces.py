@@ -23,11 +23,14 @@ Design by Contract:
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 import numpy as np
 
 from src.shared.python.checkpoint import Checkpointable
+
+if TYPE_CHECKING:
+    from src.engines.common.capabilities import EngineCapabilities
 
 
 @runtime_checkable
@@ -280,6 +283,30 @@ class PhysicsEngine(Checkpointable, Protocol):
             Default implementation returns generic names.
         """
         return []
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report which optional capabilities this engine supports.
+
+        Returns an EngineCapabilities dataclass describing the support level
+        for each optional feature (video export, dataset export, force
+        visualization, model positioning, measurements).
+
+        Engines should override this method to accurately report their
+        capabilities. The default returns NONE for all optional features.
+
+        Returns:
+            EngineCapabilities with support levels for each feature.
+        """
+        from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
+
+        return EngineCapabilities(
+            engine_name="unknown",
+            mass_matrix=CapabilityLevel.NONE,
+            jacobian=CapabilityLevel.NONE,
+            contact_forces=CapabilityLevel.NONE,
+            inverse_dynamics=CapabilityLevel.NONE,
+            drift_acceleration=CapabilityLevel.NONE,
+        )
 
     # -------- Dynamics Interface --------
 
