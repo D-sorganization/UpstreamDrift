@@ -1,9 +1,10 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
+from datetime import timezone
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from src.api.utils.datetime_compat import UTC; from datetime import timezone
+from src.api.utils.datetime_compat import UTC
 
 try:
     from datetime import timezone

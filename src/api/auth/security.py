@@ -2,10 +2,10 @@
 
 import os
 import secrets
+from datetime import datetime, timedelta, timezone
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from src.api.utils.datetime_compat import UTC; from datetime import datetime, timedelta, timezone
-
+from src.api.utils.datetime_compat import UTC
 from src.shared.python.logging_config import get_logger
 
 try:

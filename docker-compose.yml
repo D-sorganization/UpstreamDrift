@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Backend API server with all physics engines
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: golf-suite:latest
+    container_name: golf-suite-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/workspace:delegated
+      - ./data:/workspace/data
+    environment:
+      - PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python
+      - PATH=/home/golfer/.local/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - DATABASE_URL=sqlite:////workspace/golf_modeling_suite.db
+      - API_HOST=0.0.0.0
+      - API_PORT=8001
+      - ENVIRONMENT=development
+      - MUJOCO_GL=egl
+    command: python3 -m uvicorn api.server:app --host 0.0.0.0 --port 8001 --reload
+    working_dir: /workspace
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - golf-suite
+
+  # Frontend UI (optional - can also run locally)
+  frontend:
+    image: node:20-alpine
+    container_name: golf-suite-frontend
+    ports:
+      - "5180:5180"
+    volumes:
+      - ./ui:/app:delegated
+      - /app/node_modules
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      - VITE_API_URL=http://backend:8001
+    depends_on:
+      - backend
+    networks:
+      - golf-suite
+
+networks:
+  golf-suite:
+    driver: bridge
+
+volumes:
+  node_modules:

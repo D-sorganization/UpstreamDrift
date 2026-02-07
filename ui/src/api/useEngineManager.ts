@@ -43,16 +43,22 @@ export const ENGINE_REGISTRY: Omit<ManagedEngine, 'loadState' | 'available' | 'e
         capabilities: ['rigid_body', 'inverse_kinematics'],
     },
     {
-        name: 'putting_green',
-        displayName: 'Putting Green',
-        description: 'Pendulum putter and green surface simulation',
-        capabilities: ['surface_modeling', 'ball_physics'],
+        name: 'opensim',
+        displayName: 'OpenSim',
+        description: 'Musculoskeletal modeling and biomechanics simulation',
+        capabilities: ['musculoskeletal', 'inverse_kinematics', 'muscle_analysis'],
     },
     {
-        name: 'simscape',
-        displayName: 'Simscape',
-        description: 'MATLAB/Simulink multibody modeling',
-        capabilities: ['multibody', 'cad_import'],
+        name: 'myosuite',
+        displayName: 'MyoSuite',
+        description: 'Muscle-tendon control and neural activation',
+        capabilities: ['musculoskeletal', 'muscle_control', 'neural_activation'],
+    },
+    {
+        name: 'putting_green',
+        displayName: 'Putting Green',
+        description: 'Golf putting green with ball roll physics',
+        capabilities: ['surface_modeling', 'ball_physics', 'terrain'],
     },
 ];
 

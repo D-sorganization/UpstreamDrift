@@ -35,7 +35,7 @@ async function invoke<T>(cmd: string): Promise<T> {
 /** Start the Python backend server (Tauri only). */
 export async function startBackend(): Promise<BackendStatus> {
   if (!isTauri()) {
-    return { running: false, pid: null, port: 8000, error: 'Not running in Tauri' };
+    return { running: false, pid: null, port: 8080, error: 'Not running in Tauri' };
   }
   return invoke<BackendStatus>('start_backend');
 }
@@ -43,7 +43,7 @@ export async function startBackend(): Promise<BackendStatus> {
 /** Stop the Python backend server (Tauri only). */
 export async function stopBackend(): Promise<BackendStatus> {
   if (!isTauri()) {
-    return { running: false, pid: null, port: 8000, error: 'Not running in Tauri' };
+    return { running: false, pid: null, port: 8080, error: 'Not running in Tauri' };
   }
   return invoke<BackendStatus>('stop_backend');
 }
@@ -51,7 +51,7 @@ export async function stopBackend(): Promise<BackendStatus> {
 /** Get current backend status (Tauri only). */
 export async function getBackendStatus(): Promise<BackendStatus> {
   if (!isTauri()) {
-    return { running: false, pid: null, port: 8000, error: null };
+    return { running: false, pid: null, port: 8080, error: null };
   }
   return invoke<BackendStatus>('backend_status');
 }
@@ -60,7 +60,7 @@ export async function getBackendStatus(): Promise<BackendStatus> {
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
     return {
-      backend: { running: false, pid: null, port: 8000, error: null },
+      backend: { running: false, pid: null, port: 8080, error: null },
       python_found: false,
       python_version: null,
       repo_root: null,
