@@ -7,6 +7,7 @@ interface Props {
   onStop: () => void;
   onPause: () => void;
   onResume: () => void;
+  disabled?: boolean;
 }
 
 // Extracted button styles to reduce duplication and ensure consistency
@@ -15,9 +16,10 @@ const buttonStyles = {
   primary: 'flex-1 bg-green-600 hover:bg-green-700 text-white focus:ring-green-400',
   warning: 'flex-1 bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-400',
   danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-400',
+  disabled: 'flex-1 bg-gray-600 text-gray-400 cursor-not-allowed',
 };
 
-export function SimulationControls({ isRunning, isPaused, onStart, onStop, onPause, onResume }: Props) {
+export function SimulationControls({ isRunning, isPaused, onStart, onStop, onPause, onResume, disabled }: Props) {
   return (
     <div
       className="flex gap-2 mt-4"
@@ -27,8 +29,9 @@ export function SimulationControls({ isRunning, isPaused, onStart, onStop, onPau
       {!isRunning ? (
         <button
           onClick={onStart}
+          disabled={disabled}
           aria-label="Start simulation"
-          className={`${buttonStyles.base} ${buttonStyles.primary}`}
+          className={`${buttonStyles.base} ${disabled ? buttonStyles.disabled : buttonStyles.primary}`}
         >
           <Play size={20} aria-hidden="true" />
           Start
