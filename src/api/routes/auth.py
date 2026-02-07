@@ -1,7 +1,7 @@
 """Authentication routes for user management."""
 
 # Python 3.10 compatibility: UTC constant was added in 3.11
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -115,7 +115,7 @@ async def login(
     )
 
     # Update last login
-    user.last_login = datetime.now(timezone.utc)  # type: ignore[assignment]
+    user.last_login = datetime.now(UTC)  # type: ignore[assignment]
     db.commit()
 
     return LoginResponse(

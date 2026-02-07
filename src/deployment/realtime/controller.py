@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import threading
 import time
-from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -115,7 +114,6 @@ class SimulationStrategy:
 
     def send_command(self, command: ControlCommand) -> None:
         """Send command to simulation (no-op)."""
-        pass
 
 
 class HardwareStubStrategy:

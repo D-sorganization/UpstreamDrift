@@ -27,7 +27,7 @@ _logger: logging.Logger | None = None
 
 def configure(engine_manager: EngineManager, logger: logging.Logger) -> None:
     """Configure the engines module (legacy pattern).
-    
+
     Args:
         engine_manager: Engine manager instance
         logger: Logger instance
@@ -108,18 +108,18 @@ async def probe_engine(
             "putting_green": EngineType.PENDULUM,  # Map to pendulum for now
             "simscape": EngineType.MATLAB_3D,
         }
-        
+
         engine_type = engine_map.get(engine_name.lower())
         if not engine_type:
             return {"available": False, "error": f"Unknown engine: {engine_name}"}
-        
+
         available_engines = engine_manager.get_available_engines()
         is_available = engine_type in available_engines
-        
+
         return {
             "available": is_available,
             "version": "1.0.0" if is_available else None,
-            "capabilities": ["physics"] if is_available else []
+            "capabilities": ["physics"] if is_available else [],
         }
     except Exception as e:
         return {"available": False, "error": str(e)}
@@ -140,21 +140,23 @@ async def load_engine_lazy(
             "putting_green": EngineType.PENDULUM,
             "simscape": EngineType.MATLAB_3D,
         }
-        
+
         engine_type = engine_map.get(engine_name.lower())
         if not engine_type:
-            raise HTTPException(status_code=400, detail=f"Unknown engine: {engine_name}")
-        
+            raise HTTPException(
+                status_code=400, detail=f"Unknown engine: {engine_name}"
+            )
+
         success = engine_manager.switch_engine(engine_type)
         if not success:
             raise HTTPException(status_code=400, detail=f"Failed to load {engine_name}")
-        
+
         return {
             "status": "loaded",
             "engine": engine_name,
             "version": "1.0.0",
             "capabilities": ["physics"],
-            "message": f"{engine_name} loaded successfully"
+            "message": f"{engine_name} loaded successfully",
         }
     except HTTPException:
         raise
