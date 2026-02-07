@@ -163,7 +163,7 @@ async def load_engine_lazy(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/engines/{engine_type}/load")
