@@ -200,6 +200,20 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
         raise GolfModelingError("MyoSim requirements not met.") from e
 
 
+def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:
+    """Load Putting Green engine."""
+    try:
+        from src.engines.physics_engines.putting_green import PuttingGreenSimulator
+
+        # Putting green doesn't need probing - it's always available as pure Python
+        simulator = PuttingGreenSimulator()
+        logger.info("Putting Green engine loaded successfully")
+        return simulator  # type: ignore[return-value]
+
+    except ImportError as e:
+        raise GolfModelingError("Putting Green engine not found.") from e
+
+
 # Helper for loaders map
 LOADER_MAP = {
     EngineType.MUJOCO: load_mujoco_engine,
@@ -207,4 +221,5 @@ LOADER_MAP = {
     EngineType.PINOCCHIO: load_pinocchio_engine,
     EngineType.OPENSIM: load_opensim_engine,
     EngineType.MYOSIM: load_myosim_engine,
+    EngineType.PUTTING_GREEN: load_putting_green_engine,
 }

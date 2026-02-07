@@ -20,6 +20,7 @@ class EngineType(Enum):
     MATLAB_2D = "matlab_2d"
     MATLAB_3D = "matlab_3d"
     PENDULUM = "pendulum"
+    PUTTING_GREEN = "putting_green"
 
 
 class EngineStatus(Enum):
