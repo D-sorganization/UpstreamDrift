@@ -180,3 +180,55 @@ class TestLauncherParityRequirements:
         assert "c3d_viewer" in caps
         assert "openpose" in caps
         assert "mediapipe" in caps
+
+
+class TestLogoEndpoints:
+    """Test /api/launcher/logos/* endpoints (Phase 3, #1164)."""
+
+    def test_get_logo_svg(self, client: TestClient) -> None:
+        """GET /api/launcher/logos/{file} returns SVG logo."""
+        response = client.get("/api/launcher/logos/mujoco_humanoid.svg")
+        assert response.status_code == 200
+        assert "image/svg+xml" in response.headers["content-type"]
+        assert b"<svg" in response.content
+
+    def test_get_logo_not_found(self, client: TestClient) -> None:
+        """GET /api/launcher/logos/{file} returns 404 for missing logo."""
+        response = client.get("/api/launcher/logos/nonexistent.svg")
+        assert response.status_code == 404
+
+    def test_get_logo_path_traversal_blocked(self, client: TestClient) -> None:
+        """Path traversal attempts are rejected (400 or 404, never 200)."""
+        # Test with dot-dot in filename
+        response = client.get("/api/launcher/logos/..%2Fetc%2Fpasswd")
+        assert response.status_code in {400, 404}
+        # Direct dot-dot attempt
+        response2 = client.get("/api/launcher/logos/..secret.svg")
+        assert response2.status_code in {400, 404}
+
+    def test_all_manifest_logos_servable(self, client: TestClient) -> None:
+        """Every logo referenced in the manifest is served by the API."""
+        tiles_resp = client.get("/api/launcher/tiles")
+        for tile in tiles_resp.json():
+            logo = tile["logo"]
+            resp = client.get(f"/api/launcher/logos/{logo}")
+            assert resp.status_code == 200, (
+                f"Logo '{logo}' for tile '{tile['id']}' not served (HTTP {resp.status_code})"
+            )
+
+    def test_validate_logos_all_present(self, client: TestClient) -> None:
+        """Logo validation reports all logos present (Phase 3 complete)."""
+        response = client.get("/api/launcher/logos/validate")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["all_valid"] is True
+        assert data["missing_count"] == 0
+        assert data["present"] == data["total"]
+
+    def test_logo_filenames_are_svg(self, client: TestClient) -> None:
+        """All logos should now use SVG format."""
+        response = client.get("/api/launcher/tiles")
+        for tile in response.json():
+            assert tile["logo"].endswith(".svg"), (
+                f"Tile '{tile['id']}' logo '{tile['logo']}' is not SVG"
+            )
