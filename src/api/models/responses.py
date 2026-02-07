@@ -1,8 +1,10 @@
 """Response models for Golf Modeling Suite API."""
 
+from __future__ import annotations
+
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class EngineStatusResponse(BaseModel):
@@ -27,11 +29,17 @@ class EngineStatusResponse(BaseModel):
 
 
 class SimulationResponse(BaseModel):
-    """Response model for simulation results."""
+    """Response model for simulation results.
+
+    Postconditions:
+        - frames >= 0
+        - duration >= 0
+        - data must contain at least 'states' key on success
+    """
 
     success: bool = Field(..., description="Whether simulation completed successfully")
-    duration: float = Field(..., description="Actual simulation duration")
-    frames: int = Field(..., description="Number of simulation frames")
+    duration: float = Field(..., description="Actual simulation duration", ge=0)
+    frames: int = Field(..., description="Number of simulation frames", ge=0)
     data: dict[str, Any] = Field(
         ..., description="Simulation data (states, controls, etc.)"
     )
@@ -39,6 +47,15 @@ class SimulationResponse(BaseModel):
         None, description="Analysis results if requested"
     )
     export_paths: list[str] | None = Field(None, description="Paths to exported files")
+
+    @model_validator(mode="after")
+    def check_data_on_success(self) -> SimulationResponse:
+        """Postcondition: successful simulations must include state data."""
+        if self.success and not self.data:
+            raise ValueError(
+                "Successful simulation must include non-empty data"
+            )
+        return self
 
 
 class VideoAnalysisResponse(BaseModel):
@@ -55,7 +72,12 @@ class VideoAnalysisResponse(BaseModel):
 
 
 class AnalysisResponse(BaseModel):
-    """Response model for biomechanical analysis."""
+    """Response model for biomechanical analysis.
+
+    Postconditions:
+        - analysis_type must match the original request
+        - results must be non-empty on success
+    """
 
     analysis_type: str = Field(..., description="Type of analysis performed")
     success: bool = Field(..., description="Whether analysis completed successfully")
@@ -64,6 +86,15 @@ class AnalysisResponse(BaseModel):
         None, description="Generated visualization files"
     )
     export_path: str | None = Field(None, description="Path to exported results")
+
+    @model_validator(mode="after")
+    def check_results_on_success(self) -> AnalysisResponse:
+        """Postcondition: successful analysis must include results."""
+        if self.success and not self.results:
+            raise ValueError(
+                "Successful analysis must include non-empty results"
+            )
+        return self
 
 
 class TaskStatusResponse(BaseModel):
