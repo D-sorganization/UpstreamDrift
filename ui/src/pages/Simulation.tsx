@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSimulation } from '@/api/client';
 import { useEngineManager } from '@/api/useEngineManager';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
@@ -22,8 +22,18 @@ export function SimulationPage() {
   // Lazy engine manager — no engines loaded on startup
   const { engines, loadedEngines, requestLoad, unloadEngine } = useEngineManager();
 
+  // Derive the effective engine: use explicit selection, or fall back to first loaded
+  const effectiveEngine = useMemo(() => {
+    if (selectedEngine) {
+      // Verify it's still loaded
+      const eng = loadedEngines.find((e) => e.name === selectedEngine);
+      if (eng) return selectedEngine;
+    }
+    return loadedEngines.length > 0 ? loadedEngines[0].name : null;
+  }, [selectedEngine, loadedEngines]);
+
   // Only connect to the simulation when an engine is selected AND loaded
-  const activeEngine = selectedEngine || 'mujoco'; // fallback for hook (won't connect unless started)
+  const activeEngine = effectiveEngine || 'mujoco'; // fallback for hook (won't connect unless started)
   const {
     isRunning,
     isPaused,
@@ -36,13 +46,6 @@ export function SimulationPage() {
     resume
   } = useSimulation(activeEngine);
 
-  // Auto-select first loaded engine if none selected
-  useEffect(() => {
-    if (!selectedEngine && loadedEngines.length > 0) {
-      setSelectedEngine(loadedEngines[0].name);
-    }
-  }, [selectedEngine, loadedEngines]);
-
   // Handle engine loading
   const handleLoadEngine = useCallback(async (engineName: string) => {
     showInfo(`Loading ${engineName}...`);
@@ -52,14 +55,13 @@ export function SimulationPage() {
 
   // Handle engine unloading
   const handleUnloadEngine = useCallback((engineName: string) => {
-    if (selectedEngine === engineName) {
+    if (effectiveEngine === engineName) {
       // Deselect if unloading the active engine
-      const remaining = loadedEngines.filter((e) => e.name !== engineName);
-      setSelectedEngine(remaining.length > 0 ? remaining[0].name : null);
+      setSelectedEngine(null);
     }
     unloadEngine(engineName);
     showInfo(`${engineName} engine unloaded`);
-  }, [selectedEngine, loadedEngines, unloadEngine, showInfo]);
+  }, [effectiveEngine, unloadEngine, showInfo]);
 
   // Handle parameter changes
   const handleParameterChange = useCallback((params: SimulationParameters) => {
@@ -68,7 +70,7 @@ export function SimulationPage() {
 
   // Start simulation with current parameters
   const handleStart = useCallback(() => {
-    if (!selectedEngine) {
+    if (!effectiveEngine) {
       showError('Please load and select an engine first');
       return;
     }
@@ -77,8 +79,8 @@ export function SimulationPage() {
       timestep: parameters.timestep,
       live_analysis: parameters.liveAnalysis,
     });
-    showInfo(`Starting ${selectedEngine} simulation...`);
-  }, [start, parameters, selectedEngine, showInfo, showError]);
+    showInfo(`Starting ${effectiveEngine} simulation...`);
+  }, [start, parameters, effectiveEngine, showInfo, showError]);
 
   // Handle stop
   const handleStop = useCallback(() => {
@@ -95,7 +97,7 @@ export function SimulationPage() {
     }
   }, [connectionStatus, showSuccess, showError]);
 
-  const canStart = selectedEngine !== null && !isRunning;
+  const canStart = effectiveEngine !== null && !isRunning;
 
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">
@@ -116,7 +118,7 @@ export function SimulationPage() {
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Physics Engines</h3>
           <EngineSelector
             engines={engines}
-            selectedEngine={selectedEngine}
+            selectedEngine={effectiveEngine}
             onSelect={setSelectedEngine}
             onLoad={handleLoadEngine}
             onUnload={handleUnloadEngine}
@@ -127,8 +129,8 @@ export function SimulationPage() {
         {/* Parameter Panel */}
         <div className="mb-6 border-t border-gray-700 pt-4">
           <ParameterPanel
-            engine={selectedEngine || 'mujoco'}
-            disabled={isRunning || !selectedEngine}
+            engine={effectiveEngine || 'mujoco'}
+            disabled={isRunning || !effectiveEngine}
             onChange={handleParameterChange}
           />
         </div>
@@ -151,7 +153,7 @@ export function SimulationPage() {
         {/* 3D Visualization */}
         <div className="flex-1 relative bg-gray-950">
           <Scene3D
-            engine={selectedEngine || 'mujoco'}
+            engine={effectiveEngine || 'mujoco'}
             frame={currentFrame}
             frames={frames}
           />
@@ -161,7 +163,7 @@ export function SimulationPage() {
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
               <span className="text-gray-200 font-mono text-sm">
-                {isRunning ? `Frame ${currentFrame?.frame || 0}` : selectedEngine ? 'Ready' : 'No engine loaded'}
+                {isRunning ? `Frame ${currentFrame?.frame || 0}` : effectiveEngine ? 'Ready' : 'No engine loaded'}
               </span>
             </div>
             {currentFrame && (
@@ -172,7 +174,7 @@ export function SimulationPage() {
           </div>
 
           {/* No engine loaded overlay */}
-          {!selectedEngine && !isRunning && (
+          {!effectiveEngine && !isRunning && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
                 <div className="text-4xl mb-4 text-gray-600">⚡</div>
@@ -207,7 +209,7 @@ export function SimulationPage() {
           </div>
         ) : (
           <div className="text-sm text-gray-500 italic text-center mt-10">
-            {selectedEngine
+            {effectiveEngine
               ? 'Start simulation to view live data'
               : 'Load an engine to get started'}
           </div>
