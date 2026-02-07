@@ -107,7 +107,7 @@ async def probe_engine(
             "pinocchio": EngineType.PINOCCHIO,
             "opensim": EngineType.OPENSIM,
             "myosuite": EngineType.MYOSIM,
-            "putting_green": EngineType.PENDULUM,  # TEMP: Map to pendulum (see #1136)
+            "putting_green": EngineType.PUTTING_GREEN,
         }
 
         engine_type = engine_map.get(engine_name.lower())
@@ -140,7 +140,7 @@ async def load_engine_lazy(
             "pinocchio": EngineType.PINOCCHIO,
             "opensim": EngineType.OPENSIM,
             "myosuite": EngineType.MYOSIM,
-            "putting_green": EngineType.PENDULUM,  # TEMP: Map to pendulum (see #1136)
+            "putting_green": EngineType.PUTTING_GREEN,
         }
 
         engine_type = engine_map.get(engine_name.lower())

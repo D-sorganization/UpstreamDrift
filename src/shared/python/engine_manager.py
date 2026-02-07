@@ -61,6 +61,9 @@ class EngineManager:
                 self.engines_root / "Simscape_Multibody_Models" / "3D_Golf_Model"
             ),
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
+            EngineType.PUTTING_GREEN: (
+                self.engines_root / "physics_engines" / "putting_green"
+            ),
         }
 
         # Initialize probes
@@ -302,6 +305,7 @@ class EngineManager:
             EngineType.MATLAB_2D: base_path / "matlab",
             EngineType.MATLAB_3D: base_path / "matlab",
             EngineType.PENDULUM: base_path / "python",
+            EngineType.PUTTING_GREEN: base_path / "python",
         }
 
         validation_path = validation_paths.get(engine_type, base_path)
