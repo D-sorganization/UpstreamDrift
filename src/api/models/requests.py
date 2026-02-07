@@ -6,14 +6,27 @@ from pydantic import BaseModel, Field, field_validator
 
 # Valid engine types — keep in sync with EngineType enum
 VALID_ENGINE_TYPES = {
-    "mujoco", "drake", "pinocchio", "opensim",
-    "myosim", "myosuite", "matlab_2d", "matlab_3d",
-    "pendulum", "putting_green",
+    "mujoco",
+    "drake",
+    "pinocchio",
+    "opensim",
+    "myosim",
+    "myosuite",
+    "matlab_2d",
+    "matlab_3d",
+    "pendulum",
+    "putting_green",
 }
 
 VALID_ANALYSIS_TYPES = {
-    "kinematics", "kinetics", "muscle", "center_of_pressure",
-    "club_head", "joint_torque", "power", "custom",
+    "kinematics",
+    "kinetics",
+    "muscle",
+    "center_of_pressure",
+    "club_head",
+    "joint_torque",
+    "power",
+    "custom",
 }
 
 VALID_EXPORT_FORMATS = {"json", "csv", "mat", "hdf5", "c3d"}

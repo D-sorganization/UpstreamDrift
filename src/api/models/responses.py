@@ -52,9 +52,7 @@ class SimulationResponse(BaseModel):
     def check_data_on_success(self) -> SimulationResponse:
         """Postcondition: successful simulations must include state data."""
         if self.success and not self.data:
-            raise ValueError(
-                "Successful simulation must include non-empty data"
-            )
+            raise ValueError("Successful simulation must include non-empty data")
         return self
 
 
@@ -91,9 +89,7 @@ class AnalysisResponse(BaseModel):
     def check_results_on_success(self) -> AnalysisResponse:
         """Postcondition: successful analysis must include results."""
         if self.success and not self.results:
-            raise ValueError(
-                "Successful analysis must include non-empty results"
-            )
+            raise ValueError("Successful analysis must include non-empty results")
         return self
 
 
