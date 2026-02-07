@@ -56,9 +56,9 @@ class TestLauncherManifestEndpoints:
             assert "type" in tile, f"Tile missing type: {tile.get('id')}"
             assert "logo" in tile, f"Tile missing logo: {tile.get('id')}"
             assert "status" in tile, f"Tile missing status: {tile.get('id')}"
-            assert "capabilities" in tile, (
-                f"Tile missing capabilities: {tile.get('id')}"
-            )
+            assert (
+                "capabilities" in tile
+            ), f"Tile missing capabilities: {tile.get('id')}"
             assert "order" in tile, f"Tile missing order: {tile.get('id')}"
 
     def test_manifest_tiles_sorted_by_order(self, client: TestClient) -> None:
@@ -154,9 +154,9 @@ class TestLauncherParityRequirements:
         """No tile should have 'unknown' status (fixes #1168)."""
         response = client.get("/api/launcher/tiles")
         for tile in response.json():
-            assert tile["status"] != "unknown", (
-                f"Tile '{tile['id']}' has unknown status"
-            )
+            assert (
+                tile["status"] != "unknown"
+            ), f"Tile '{tile['id']}' has unknown status"
 
     def test_putting_green_has_valid_status(self, client: TestClient) -> None:
         """Putting Green tile has a valid (non-unknown) status chip."""
@@ -170,9 +170,10 @@ class TestLauncherParityRequirements:
         response = client.get("/api/launcher/tiles")
         special_apps = [t for t in response.json() if t["type"] == "special_app"]
         for tile in special_apps:
-            assert tile["status"] in {"utility", "external"}, (
-                f"special_app tile '{tile['id']}' has status '{tile['status']}'"
-            )
+            assert tile["status"] in {
+                "utility",
+                "external",
+            }, f"special_app tile '{tile['id']}' has status '{tile['status']}'"
 
     def test_motion_capture_has_all_capabilities(self, client: TestClient) -> None:
         """Motion Capture tile declares C3D, OpenPose, and MediaPipe capabilities."""
@@ -214,9 +215,9 @@ class TestLogoEndpoints:
         for tile in tiles_resp.json():
             logo = tile["logo"]
             resp = client.get(f"/api/launcher/logos/{logo}")
-            assert resp.status_code == 200, (
-                f"Logo '{logo}' for tile '{tile['id']}' not served (HTTP {resp.status_code})"
-            )
+            assert (
+                resp.status_code == 200
+            ), f"Logo '{logo}' for tile '{tile['id']}' not served (HTTP {resp.status_code})"
 
     def test_validate_logos_all_present(self, client: TestClient) -> None:
         """Logo validation reports all logos present (Phase 3 complete)."""
@@ -231,9 +232,9 @@ class TestLogoEndpoints:
         """All logos should now use SVG format."""
         response = client.get("/api/launcher/tiles")
         for tile in response.json():
-            assert tile["logo"].endswith(".svg"), (
-                f"Tile '{tile['id']}' logo '{tile['logo']}' is not SVG"
-            )
+            assert tile["logo"].endswith(
+                ".svg"
+            ), f"Tile '{tile['id']}' logo '{tile['logo']}' is not SVG"
 
 
 class TestNewTiles:
@@ -284,3 +285,71 @@ class TestNewTiles:
         assert "motion_capture" in tool_ids
         assert "video_analyzer" in tool_ids
         assert "data_explorer" in tool_ids
+
+
+class TestEngineCapabilitiesAPI:
+    """Tests for GET /api/launcher/engines/capabilities endpoints."""
+
+    def test_all_engine_capabilities(self, client: TestClient) -> None:
+        """GET /engines/capabilities should return all engine profiles."""
+        response = client.get("/api/launcher/engines/capabilities")
+        assert response.status_code == 200
+        data = response.json()
+        # Must include all known engines
+        expected_engines = {
+            "mujoco",
+            "drake",
+            "pinocchio",
+            "opensim",
+            "myosuite",
+            "pendulum",
+            "putting_green",
+        }
+        assert expected_engines.issubset(set(data.keys()))
+
+    def test_mujoco_capabilities(self, client: TestClient) -> None:
+        """MuJoCo should have FULL support for all capabilities."""
+        response = client.get("/api/launcher/engines/mujoco/capabilities")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["engine_name"] == "MuJoCo"
+        assert data["mass_matrix"] == "full"
+        assert data["jacobian"] == "full"
+        assert data["video_export"] == "full"
+        assert data["dataset_export"] == "full"
+        assert data["force_visualization"] == "full"
+
+    def test_drake_capabilities(self, client: TestClient) -> None:
+        """Drake should have PARTIAL contact forces."""
+        response = client.get("/api/launcher/engines/drake/capabilities")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["engine_name"] == "Drake"
+        assert data["contact_forces"] == "partial"
+        assert data["mass_matrix"] == "full"
+
+    def test_unknown_engine_404(self, client: TestClient) -> None:
+        """Unknown engine should return 404."""
+        response = client.get("/api/launcher/engines/nonexistent/capabilities")
+        assert response.status_code == 404
+
+    def test_capabilities_have_all_fields(self, client: TestClient) -> None:
+        """Every capability profile must have all required fields."""
+        response = client.get("/api/launcher/engines/capabilities")
+        data = response.json()
+        required_fields = {
+            "engine_name",
+            "mass_matrix",
+            "jacobian",
+            "contact_forces",
+            "inverse_dynamics",
+            "drift_acceleration",
+            "video_export",
+            "dataset_export",
+            "force_visualization",
+            "model_positioning",
+            "measurements",
+        }
+        for engine_id, profile in data.items():
+            missing = required_fields - set(profile.keys())
+            assert not missing, f"{engine_id} missing fields: {missing}"
