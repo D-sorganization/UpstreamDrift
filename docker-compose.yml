@@ -22,7 +22,8 @@ services:
       - API_PORT=8001
       - ENVIRONMENT=development
       - MUJOCO_GL=egl
-    command: python3 -m uvicorn api.server:app --host 0.0.0.0 --port 8001 --reload
+    command: python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001 --reload
+    restart: unless-stopped
     working_dir: /workspace
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/"]

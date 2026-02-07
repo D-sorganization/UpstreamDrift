@@ -1,176 +1,206 @@
-# Golf Modeling Suite - Docker Setup
+# Docker Development Environment
+
+The Golf Modeling Suite ships a complete Docker environment with **all physics
+engines pre-installed** (MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite).
+
+---
 
 ## Quick Start
 
-The Golf Modeling Suite runs in a Docker container with all physics engines pre-installed (MuJoCo, Drake, Pinocchio, OpenSim).
-
-### Prerequisites
-- Docker installed and running
-- Docker Compose (usually included with Docker Desktop)
-
-### Running the Suite
-
-**Option 1: Full Stack (Recommended)**
 ```bash
-# Build and start everything
+# Clone and start everything
+git clone https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
 docker-compose up --build
-
-# Access:
-# - Frontend UI: http://localhost:5180
-# - Backend API: http://localhost:8000
-# - API Docs: http://localhost:8000/docs
 ```
 
-**Option 2: Backend Only** (use local frontend for development)
+| Service   | URL                        |
+|-----------|----------------------------|
+| Frontend  | http://localhost:5180       |
+| Backend   | http://localhost:8001       |
+| API Docs  | http://localhost:8001/docs  |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────┐     ┌──────────────────────┐
+│  Frontend (Node 20)     │────▶│  Backend (Python 3.11)│
+│  localhost:5180          │     │  localhost:8001        │
+│  Vite + React + TS      │     │  FastAPI + Uvicorn     │
+└─────────────────────────┘     │                        │
+                                │  Engines:              │
+                                │  ├─ MuJoCo  ≥3.2.3    │
+                                │  ├─ Drake              │
+                                │  ├─ Pinocchio          │
+                                │  ├─ OpenSim            │
+                                │  ├─ MyoSuite           │
+                                │  └─ Putting Green      │
+                                └──────────────────────────┘
+```
+
+---
+
+## Detailed Usage
+
+### Development (recommended)
+
+Live code editing with hot-reload on both frontend and backend:
+
 ```bash
-# Start just the backend
+docker-compose up
+```
+
+Source files are volume-mounted, so edits are reflected immediately.
+
+### Build Only (no compose)
+
+```bash
+# Build image
+docker build -t golf-suite:latest .
+
+# Run container
+docker run -p 8001:8001 -v $(pwd):/workspace golf-suite:latest \
+    python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001
+```
+
+### Hybrid Mode (Docker backend, local frontend)
+
+```bash
+# Start only the backend in Docker
 docker-compose up backend
 
-# Then in another terminal, run frontend locally:
-cd ui && npm run dev
+# In another terminal, run the frontend locally
+cd ui && npm install && npm run dev
 ```
 
-**Option 3: Development Mode** (live code changes)
+Set `VITE_API_URL=http://localhost:8001` in the frontend `.env` for this mode.
+
+### Production Build
+
 ```bash
-# Start with volume mounts for live editing:
+docker build -t golf-suite:prod --target runtime .
+docker run -d -p 8001:8001 --name golf-suite-prod golf-suite:prod \
+    python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001
+```
+
+---
+
+## Platform Notes
+
+### Linux
+
+Works out of the box. For GPU passthrough (NVIDIA):
+
+```bash
+docker-compose up  # CPU rendering via EGL (default)
+
+# For GPU rendering, add to docker-compose.yml:
+# deploy:
+#   resources:
+#     reservations:
+#       devices:
+#         - capabilities: [gpu]
+```
+
+### macOS
+
+Docker Desktop ≥ 4.x required. Performance is good with the `delegated` volume
+mount strategy (already configured).
+
+```bash
+# Install Docker Desktop from https://docker.com
 docker-compose up
-
-# Edit code locally - changes are reflected immediately
-# Backend has --reload flag enabled
 ```
 
-### Installed Physics Engines
+### Windows
 
-The Docker image includes:
+Use Docker Desktop with WSL 2 backend:
 
-| Engine | Version | Status | Capabilities |
-|--------|---------|--------|--------------|
-| **MuJoCo** | 3.2.3+ | ✅ Ready | Contact-rich simulation, muscle/tendon models |
-| **Drake** | Latest | ✅ Ready | Optimization, trajectory planning, multibody dynamics |
-| **Pinocchio** | Latest | ✅ Ready | Rigid body kinematics/dynamics, fast algorithms |
-| **OpenSim** | 4.x | | ⚙️  Planned | Musculoskeletal simulation, biomechanics |
-| **MyoSuite** | Latest | ⚙️ Planned | Muscle-tendon control, neural activation |
+1. Install [Docker Desktop](https://docker.com) with WSL 2 enabled
+2. Clone the repo inside WSL 2 for best I/O performance
+3. Run `docker-compose up` from WSL 2 terminal
 
-### Managing the Environment
+---
+
+## Verifying Engine Installation
+
+After `docker-compose up`, verify engines:
 
 ```bash
-# Stop all services
-docker-compose down
+# Check engine probes via API
+curl http://localhost:8001/api/engines/mujoco/probe
+curl http://localhost:8001/api/engines/drake/probe
+curl http://localhost:8001/api/engines/pinocchio/probe
+curl http://localhost:8001/api/engines/putting_green/probe
 
-# Rebuild after Dockerfile changes
-docker-compose build
+# Or use the /engines endpoint:
+curl http://localhost:8001/engines | python3 -m json.tool
 
-# View logs
-docker-compose logs -f backend
-
-# Shell into container
-docker-compose exec backend bash
-
-# Test physics engines manually
-docker-compose exec backend python -c "import mujoco; print(mujoco.__version__)"
-docker-compose exec backend python -c "import pydrake; print('Drake OK')"
-docker-compose exec backend python -c "import pinocchio; print(pinocchio.__version__)"
+# Run tests inside the container
+docker exec golf-suite-backend pytest tests/api/ -v
 ```
 
-### Troubleshooting
+---
 
-**Port already in use:**
+## Environment Variables
+
+| Variable        | Default           | Description                   |
+|-----------------|-------------------|-------------------------------|
+| `API_HOST`      | `0.0.0.0`         | Backend bind address          |
+| `API_PORT`      | `8001`            | Backend port                  |
+| `ENVIRONMENT`   | `development`     | `development` or `production` |
+| `MUJOCO_GL`     | `egl`             | MuJoCo rendering backend      |
+| `DATABASE_URL`  | `sqlite:///...`   | Database connection string     |
+| `VITE_API_URL`  | `http://backend:8001` | Frontend → backend URL    |
+
+---
+
+## Troubleshooting
+
+### Container won't start
+
 ```bash
-# Kill existing processes
-pkill -f uvicorn
-pkill -f "npm.*dev"
+# Check logs
+docker-compose logs backend
 
-# Or change ports in docker-compose.yml
-```
-
-**Build failures:**
-```bash
-# Clear Docker cache and rebuild
-docker system prune -a
+# Rebuild from scratch
 docker-compose build --no-cache
+docker-compose up
 ```
 
-**Permission issues:**
-```bash
-# Fix file ownership (Linux)
-docker-compose exec backend chown -R $(id -u):$(id -g) /workspace
-```
-
-**GPU support (for visualization):**
-```yaml
-# Add to backend service in docker-compose.yml:
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-```
-
-### Architecture
-
-```
-┌─────────────────────────────────────┐
-│   Browser (localhost:5180)          │
-│   ┌──────────┐                      │
-│   │    UI    │  React + Three.js    │
-│   └────┬─────┘                      │
-│        │ API calls                  │
-└────────┼─────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────┐
-│  Docker Container (localhost:8000)  │
-│  ┌────────────────────────────────┐ │
-│  │  FastAPI Backend               │ │
-│  │  ├─ Engine Manager             │ │
-│  │  ├─ Simulation Service         │ │
-│  │  └─ Analysis Service           │ │
-│  └────────────────────────────────┘ │
-│  ┌────────────────────────────────┐ │
-│  │  Physics Engines               │ │
-│  │  ├─ MuJoCo ✅                  │ │
-│  │  ├─ Drake ✅                   │ │
-│  │  ├─ Pinocchio ✅               │ │
-│  │  ├─ OpenSim (planned)          │ │
-│  │  └─ MyoSuite (planned)         │ │
-│  └────────────────────────────────┘ │
-│  ┌────────────────────────────────┐ │
-│  │  Environments                  │ │
-│  │  ├─ Putting Green              │ │
-│  │  ├─ Golf Course (planned)      │ │
-│  │  └─ Driving Range (planned)    │ │
-│  └────────────────────────────────┘ │
-└─────────────────────────────────────┘
-```
-
-### Development Workflow
-
-1. **Make code changes** locally in your editor
-2. **Changes auto-reload** in Docker container (backend has `--reload`)
-3. **Frontend** rebuilds via Vite HMR
-4. **Test** at http://localhost:5180
-
-### Production Deployment
+### Port conflicts
 
 ```bash
-# Build production image
-docker build -t golf-suite:v1.0 -f Dockerfile .
+# Check what's using port 8001
+lsof -i :8001
 
-# Run production container
-docker run -d \
-  -p 8000:8000 \
-  -v $(pwd)/data:/workspace/data \
-  --name golf-suite-prod \
-  golf-suite:v1.0 \
-  python3 -m uvicorn api.server:app --host 0.0.0.0 --port 8000
+# Use a different port
+API_PORT=9001 docker-compose up
 ```
 
-### Next Steps
+### Engine import errors
 
-See [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) for the roadmap to:
-1. Register Putting Green engine properly
-2. Create Golf Course environment
-3. Full biomechanical simulation pipeline
-4. Add MyoSuite and advanced features
+```bash
+# Shell into the container
+docker exec -it golf-suite-backend bash
+
+# Test imports manually
+python3 -c "import mujoco; print(mujoco.__version__)"
+python3 -c "import pydrake; print('Drake OK')"
+python3 -c "import pinocchio; print(pinocchio.__version__)"
+```
+
+---
+
+## File Structure
+
+```
+├── Dockerfile              # Multi-stage build (builder + runtime)
+├── Dockerfile.unified      # Alternative single-stage build
+├── docker-compose.yml      # Full-stack orchestration
+├── .dockerignore           # Build context exclusions
+└── docs/
+    └── DOCKER_SETUP.md     # This file
+```
