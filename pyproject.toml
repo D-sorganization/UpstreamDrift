@@ -171,6 +171,15 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --strict-markers --strict-config"
+# Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
+norecursedirs = [
+    "src",
+    "archive",
+    "legacy",
+    "node_modules",
+    ".git",
+    "*.egg-info",
+]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
