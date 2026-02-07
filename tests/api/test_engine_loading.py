@@ -17,7 +17,6 @@ def client():
         yield test_client
 
 
-
 class TestEngineProbing:
     """Test engine availability probing."""
 
@@ -32,7 +31,9 @@ class TestEngineProbing:
             ("putting_green", True),  # Mapped to PENDULUM temporarily
         ],
     )
-    def test_engine_probe(self, client, engine_name: str, expected_available: bool) -> None:
+    def test_engine_probe(
+        self, client, engine_name: str, expected_available: bool
+    ) -> None:
         """Test that engine probe endpoint returns correct availability."""
         response = client.get(f"/api/engines/{engine_name}/probe")
         assert response.status_code == 200, f"Failed to probe {engine_name}"
@@ -173,7 +174,9 @@ class TestPuttingGreenEngine:
         assert data["status"] == "loaded"
         assert data["engine"] == "putting_green"
 
-    @pytest.mark.skip(reason="Proper Putting Green implementation pending (Issue #1136)")
+    @pytest.mark.skip(
+        reason="Proper Putting Green implementation pending (Issue #1136)"
+    )
     def test_putting_green_simulation(self, client) -> None:
         """Test Putting Green simulation (will be implemented in #1136)."""
         # Load engine
