@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import csv
 import json
-import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -258,8 +257,7 @@ class SwingCaptureImporter:
             import ezc3d
         except ImportError:
             raise ImportError(
-                "ezc3d is required for C3D import. "
-                "Install with: pip install ezc3d"
+                "ezc3d is required for C3D import. " "Install with: pip install ezc3d"
             )
 
         c3d_data = ezc3d.c3d(str(filepath))
@@ -320,9 +318,11 @@ class SwingCaptureImporter:
         positions = data[:, 1:]
 
         # Infer joint names from header
-        joint_names = header[1:] if len(header) > 1 else [
-            f"joint_{i}" for i in range(positions.shape[1])
-        ]
+        joint_names = (
+            header[1:]
+            if len(header) > 1
+            else [f"joint_{i}" for i in range(positions.shape[1])]
+        )
 
         # Compute velocities via finite differences
         velocities = np.gradient(positions, times, axis=0)
@@ -377,9 +377,9 @@ class SwingCaptureImporter:
         times = np.array(data["times"], dtype=np.float64)
         positions = np.array(data["positions"], dtype=np.float64)
 
-        joint_names = data.get("joint_names", [
-            f"joint_{i}" for i in range(positions.shape[1])
-        ])
+        joint_names = data.get(
+            "joint_names", [f"joint_{i}" for i in range(positions.shape[1])]
+        )
 
         if "velocities" in data:
             velocities = np.array(data["velocities"], dtype=np.float64)
@@ -469,12 +469,8 @@ class SwingCaptureImporter:
                 "No marker-to-joint mappings matched. Using raw marker positions."
             )
             n_markers = marker_data.n_markers
-            joint_names = [
-                f"marker_{name}_x" for name in marker_data.marker_names
-            ]
-            joint_angles = [
-                marker_data.positions[:, i, 0] for i in range(n_markers)
-            ]
+            joint_names = [f"marker_{name}_x" for name in marker_data.marker_names]
+            joint_angles = [marker_data.positions[:, i, 0] for i in range(n_markers)]
 
         positions = np.column_stack(joint_angles)
         velocities = np.gradient(positions, marker_data.times, axis=0)
@@ -530,17 +526,19 @@ class SwingCaptureImporter:
         new_velocities = np.zeros((n_new_frames, velocities.shape[1]))
 
         for j in range(positions.shape[1]):
-            f_pos = interp1d(times, positions[:, j], kind="cubic", fill_value="extrapolate")
+            f_pos = interp1d(
+                times, positions[:, j], kind="cubic", fill_value="extrapolate"
+            )
             new_positions[:, j] = f_pos(new_times)
 
-            f_vel = interp1d(times, velocities[:, j], kind="cubic", fill_value="extrapolate")
+            f_vel = interp1d(
+                times, velocities[:, j], kind="cubic", fill_value="extrapolate"
+            )
             new_velocities[:, j] = f_vel(new_times)
 
         return new_positions, new_velocities, new_times
 
-    def detect_swing_phases(
-        self, trajectory: JointTrajectory
-    ) -> SwingPhaseLabels:
+    def detect_swing_phases(self, trajectory: JointTrajectory) -> SwingPhaseLabels:
         """Auto-detect golf swing phases from trajectory.
 
         Uses heuristics based on joint velocity patterns to identify

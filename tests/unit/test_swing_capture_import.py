@@ -17,12 +17,9 @@ import pytest
 
 from src.shared.python.swing_capture_import import (
     JointTrajectory,
-    MarkerData,
-    MarkerToJointMapping,
     SwingCaptureImporter,
     SwingPhaseLabels,
 )
-
 
 # ---- Fixtures ----
 
@@ -75,11 +72,13 @@ def sample_trajectory() -> JointTrajectory:
     """Create a sample joint trajectory for testing."""
     n_frames = 200
     times = np.linspace(0, 2.0, n_frames)
-    positions = np.column_stack([
-        0.5 * np.sin(2 * np.pi * 0.5 * times),  # shoulder
-        0.3 * np.sin(2 * np.pi * 0.5 * times + 0.5),  # elbow
-        0.2 * np.sin(2 * np.pi * 0.5 * times + 1.0),  # wrist
-    ])
+    positions = np.column_stack(
+        [
+            0.5 * np.sin(2 * np.pi * 0.5 * times),  # shoulder
+            0.3 * np.sin(2 * np.pi * 0.5 * times + 0.5),  # elbow
+            0.2 * np.sin(2 * np.pi * 0.5 * times + 1.0),  # wrist
+        ]
+    )
     velocities = np.gradient(positions, times, axis=0)
 
     return JointTrajectory(
@@ -196,7 +195,9 @@ class TestJSONImport:
 
         importer = SwingCaptureImporter()
         trajectory = importer.import_json(filepath)
-        np.testing.assert_array_equal(trajectory.velocities, [[10, 10], [10, 10], [10, 10]])
+        np.testing.assert_array_equal(
+            trajectory.velocities, [[10, 10], [10, 10], [10, 10]]
+        )
 
     def test_import_json_missing_keys(self, tmp_path: Path) -> None:
         """Precondition: JSON must have required keys."""
@@ -232,7 +233,9 @@ class TestJSONImport:
 class TestUnsupportedFormats:
     """Tests for unsupported file formats."""
 
-    def test_unsupported_format(self, importer: SwingCaptureImporter, tmp_path: Path) -> None:
+    def test_unsupported_format(
+        self, importer: SwingCaptureImporter, tmp_path: Path
+    ) -> None:
         """Precondition: format must be supported."""
         filepath = tmp_path / "data.xyz"
         filepath.touch()

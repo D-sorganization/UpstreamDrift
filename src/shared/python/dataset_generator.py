@@ -198,9 +198,11 @@ class GeneratorConfig:
     vary_initial_velocities: bool = False
     position_ranges: list[ParameterRange] = field(default_factory=list)
     velocity_ranges: list[ParameterRange] = field(default_factory=list)
-    control_profiles: list[ControlProfile] = field(default_factory=lambda: [
-        ControlProfile(name="zero"),
-    ])
+    control_profiles: list[ControlProfile] = field(
+        default_factory=lambda: [
+            ControlProfile(name="zero"),
+        ]
+    )
     record_mass_matrix: bool = True
     record_bias_forces: bool = True
     record_gravity: bool = True
@@ -465,12 +467,8 @@ class DatasetGenerator:
             np.zeros((n_steps, n_v)) if config.record_bias_forces else None
         )
         gravity_arr = np.zeros((n_steps, n_v)) if config.record_gravity else None
-        contact_arr = (
-            np.zeros((n_steps, 3)) if config.record_contact_forces else None
-        )
-        drift_arr = (
-            np.zeros((n_steps, n_v)) if config.record_drift_control else None
-        )
+        contact_arr = np.zeros((n_steps, 3)) if config.record_contact_forces else None
+        drift_arr = np.zeros((n_steps, n_v)) if config.record_drift_control else None
         control_accel_arr = (
             np.zeros((n_steps, n_v)) if config.record_drift_control else None
         )
@@ -659,9 +657,7 @@ class DatasetGenerator:
         n_q, _ = self._get_dimensions()
         return [f"joint_{i}" for i in range(n_q)]
 
-    def export_to_hdf5(
-        self, dataset: TrainingDataset, output_path: str | Path
-    ) -> Path:
+    def export_to_hdf5(self, dataset: TrainingDataset, output_path: str | Path) -> Path:
         """Export dataset to HDF5 format.
 
         Args:
@@ -718,9 +714,7 @@ class DatasetGenerator:
                 s_grp.create_dataset(
                     "accelerations", data=sample.accelerations, compression="gzip"
                 )
-                s_grp.create_dataset(
-                    "torques", data=sample.torques, compression="gzip"
-                )
+                s_grp.create_dataset("torques", data=sample.torques, compression="gzip")
 
                 if sample.mass_matrices is not None:
                     s_grp.create_dataset(
@@ -867,16 +861,18 @@ class DatasetGenerator:
                         if "kinetic" in sample.energies
                         else 0.0
                     )
-                    frame_rows.append((
-                        sample.sample_id,
-                        step,
-                        float(sample.times[step]),
-                        json.dumps(sample.positions[step].tolist()),
-                        json.dumps(sample.velocities[step].tolist()),
-                        json.dumps(sample.accelerations[step].tolist()),
-                        json.dumps(sample.torques[step].tolist()),
-                        ke,
-                    ))
+                    frame_rows.append(
+                        (
+                            sample.sample_id,
+                            step,
+                            float(sample.times[step]),
+                            json.dumps(sample.positions[step].tolist()),
+                            json.dumps(sample.velocities[step].tolist()),
+                            json.dumps(sample.accelerations[step].tolist()),
+                            json.dumps(sample.torques[step].tolist()),
+                            ke,
+                        )
+                    )
 
                 cursor.executemany(
                     "INSERT INTO frames "
@@ -893,9 +889,7 @@ class DatasetGenerator:
         logger.info("Exported dataset to SQLite: %s", output_path)
         return output_path
 
-    def export_to_csv(
-        self, dataset: TrainingDataset, output_dir: str | Path
-    ) -> Path:
+    def export_to_csv(self, dataset: TrainingDataset, output_dir: str | Path) -> Path:
         """Export dataset to CSV files (one per sample).
 
         Args:
@@ -991,6 +985,5 @@ class DatasetGenerator:
             return self.export_to_csv(dataset, output_path)
         else:
             raise ValueError(
-                f"Unsupported export format: {format}. "
-                "Supported: hdf5, sqlite, csv"
+                f"Unsupported export format: {format}. " "Supported: hdf5, sqlite, csv"
             )

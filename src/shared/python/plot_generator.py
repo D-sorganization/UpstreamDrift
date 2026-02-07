@@ -25,7 +25,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
@@ -35,6 +34,7 @@ logger = get_logger(__name__)
 
 try:
     import matplotlib
+
     matplotlib.use("Agg")  # Non-interactive backend
     import matplotlib.pyplot as plt
     from matplotlib.figure import Figure
@@ -246,16 +246,43 @@ class PlotGenerator:
             List of dicts with 'type' and 'description'.
         """
         return [
-            {"type": PlotType.JOINT_POSITIONS, "description": "Joint positions vs time"},
-            {"type": PlotType.JOINT_VELOCITIES, "description": "Joint velocities vs time"},
-            {"type": PlotType.JOINT_ACCELERATIONS, "description": "Joint accelerations vs time"},
-            {"type": PlotType.JOINT_TORQUES, "description": "Applied joint torques vs time"},
-            {"type": PlotType.ENERGY, "description": "Energy analysis (kinetic, potential, total)"},
-            {"type": PlotType.PHASE_PORTRAIT, "description": "Phase portrait (position vs velocity)"},
-            {"type": PlotType.CONTACT_FORCES, "description": "Contact / ground reaction forces"},
-            {"type": PlotType.DRIFT_VS_CONTROL, "description": "Drift vs control acceleration decomposition"},
+            {
+                "type": PlotType.JOINT_POSITIONS,
+                "description": "Joint positions vs time",
+            },
+            {
+                "type": PlotType.JOINT_VELOCITIES,
+                "description": "Joint velocities vs time",
+            },
+            {
+                "type": PlotType.JOINT_ACCELERATIONS,
+                "description": "Joint accelerations vs time",
+            },
+            {
+                "type": PlotType.JOINT_TORQUES,
+                "description": "Applied joint torques vs time",
+            },
+            {
+                "type": PlotType.ENERGY,
+                "description": "Energy analysis (kinetic, potential, total)",
+            },
+            {
+                "type": PlotType.PHASE_PORTRAIT,
+                "description": "Phase portrait (position vs velocity)",
+            },
+            {
+                "type": PlotType.CONTACT_FORCES,
+                "description": "Contact / ground reaction forces",
+            },
+            {
+                "type": PlotType.DRIFT_VS_CONTROL,
+                "description": "Drift vs control acceleration decomposition",
+            },
             {"type": PlotType.POWER, "description": "Joint power (torque × velocity)"},
-            {"type": PlotType.MASS_MATRIX_CONDITION, "description": "Mass matrix condition number over time"},
+            {
+                "type": PlotType.MASS_MATRIX_CONDITION,
+                "description": "Mass matrix condition number over time",
+            },
         ]
 
     def _generate_plot(
@@ -284,9 +311,7 @@ class PlotGenerator:
         plt.close(fig)
         return filepath
 
-    def _create_plot(
-        self, data: SimulationData, plot_type: str
-    ) -> Figure | None:
+    def _create_plot(self, data: SimulationData, plot_type: str) -> Figure | None:
         """Create a plot figure without saving.
 
         Args:
@@ -298,27 +323,39 @@ class PlotGenerator:
         """
         if plot_type == PlotType.JOINT_POSITIONS:
             return self._plot_joint_data(
-                data.times, data.positions, data.joint_names,
-                "Joint Positions", "Position (rad)",
+                data.times,
+                data.positions,
+                data.joint_names,
+                "Joint Positions",
+                "Position (rad)",
             )
         elif plot_type == PlotType.JOINT_VELOCITIES:
             return self._plot_joint_data(
-                data.times, data.velocities, data.joint_names,
-                "Joint Velocities", "Velocity (rad/s)",
+                data.times,
+                data.velocities,
+                data.joint_names,
+                "Joint Velocities",
+                "Velocity (rad/s)",
             )
         elif plot_type == PlotType.JOINT_ACCELERATIONS:
             if data.accelerations is None:
                 return None
             return self._plot_joint_data(
-                data.times, data.accelerations, data.joint_names,
-                "Joint Accelerations", "Acceleration (rad/s²)",
+                data.times,
+                data.accelerations,
+                data.joint_names,
+                "Joint Accelerations",
+                "Acceleration (rad/s²)",
             )
         elif plot_type == PlotType.JOINT_TORQUES:
             if data.torques is None:
                 return None
             return self._plot_joint_data(
-                data.times, data.torques, data.joint_names,
-                "Joint Torques", "Torque (N·m)",
+                data.times,
+                data.torques,
+                data.joint_names,
+                "Joint Torques",
+                "Torque (N·m)",
             )
         elif plot_type == PlotType.ENERGY:
             return self._plot_energy(data)
@@ -358,7 +395,7 @@ class PlotGenerator:
         """
         n_joints = data.shape[1]
         indices = self.config.joint_indices or list(range(n_joints))
-        indices = indices[:self.config.max_joints_per_plot]
+        indices = indices[: self.config.max_joints_per_plot]
 
         fig, ax = plt.subplots(figsize=self.config.figsize)
 
@@ -384,7 +421,9 @@ class PlotGenerator:
         fig, ax = plt.subplots(figsize=self.config.figsize)
 
         for name, energy_arr in data.energies.items():
-            if isinstance(energy_arr, np.ndarray) and len(energy_arr) == len(data.times):
+            if isinstance(energy_arr, np.ndarray) and len(energy_arr) == len(
+                data.times
+            ):
                 ax.plot(data.times, energy_arr, label=name.capitalize(), linewidth=1.0)
 
         prefix = f"{self.config.title_prefix} " if self.config.title_prefix else ""
@@ -401,7 +440,7 @@ class PlotGenerator:
         """Plot phase portrait (position vs velocity) for each joint."""
         n_joints = min(data.positions.shape[1], data.velocities.shape[1])
         indices = self.config.joint_indices or list(range(n_joints))
-        indices = indices[:min(4, len(indices))]  # Max 4 subplots
+        indices = indices[: min(4, len(indices))]  # Max 4 subplots
 
         n_plots = len(indices)
         ncols = min(2, n_plots)
@@ -416,7 +455,9 @@ class PlotGenerator:
             if i >= len(axes):
                 break
             ax = axes[i]
-            name = data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
+            name = (
+                data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
+            )
             ax.plot(data.positions[:, idx], data.velocities[:, idx], linewidth=0.5)
             ax.set_title(f"{name}")
             ax.set_xlabel("Position (rad)")
@@ -424,8 +465,20 @@ class PlotGenerator:
             if self.config.show_grid:
                 ax.grid(True, alpha=0.3)
             # Mark start and end
-            ax.plot(data.positions[0, idx], data.velocities[0, idx], "go", markersize=5, label="Start")
-            ax.plot(data.positions[-1, idx], data.velocities[-1, idx], "ro", markersize=5, label="End")
+            ax.plot(
+                data.positions[0, idx],
+                data.velocities[0, idx],
+                "go",
+                markersize=5,
+                label="Start",
+            )
+            ax.plot(
+                data.positions[-1, idx],
+                data.velocities[-1, idx],
+                "ro",
+                markersize=5,
+                label="End",
+            )
             ax.legend(fontsize="x-small")
 
         # Hide unused subplots
@@ -445,11 +498,20 @@ class PlotGenerator:
         fig, ax = plt.subplots(figsize=self.config.figsize)
         labels = ["Fx", "Fy", "Fz"]
         for i in range(min(3, data.contact_forces.shape[1])):
-            ax.plot(data.times, data.contact_forces[:, i], label=labels[i], linewidth=0.8)
+            ax.plot(
+                data.times, data.contact_forces[:, i], label=labels[i], linewidth=0.8
+            )
 
         # Plot magnitude
         magnitude = np.linalg.norm(data.contact_forces[:, :3], axis=1)
-        ax.plot(data.times, magnitude, label="|F|", linewidth=1.0, linestyle="--", color="black")
+        ax.plot(
+            data.times,
+            magnitude,
+            label="|F|",
+            linewidth=1.0,
+            linestyle="--",
+            color="black",
+        )
 
         prefix = f"{self.config.title_prefix} " if self.config.title_prefix else ""
         ax.set_title(f"{prefix}Contact Forces (GRF)")
@@ -468,7 +530,7 @@ class PlotGenerator:
 
         n_joints = data.drift_accelerations.shape[1]
         indices = self.config.joint_indices or list(range(n_joints))
-        indices = indices[:min(4, len(indices))]
+        indices = indices[: min(4, len(indices))]
 
         n_plots = len(indices)
         fig, axes = plt.subplots(n_plots, 1, figsize=(12, 3 * n_plots), sharex=True)
@@ -477,10 +539,21 @@ class PlotGenerator:
 
         for i, idx in enumerate(indices):
             ax = axes[i]
-            name = data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
-            ax.plot(data.times, data.drift_accelerations[:, idx], label="Drift", alpha=0.8)
-            ax.plot(data.times, data.control_accelerations[:, idx], label="Control", alpha=0.8)
-            total = data.drift_accelerations[:, idx] + data.control_accelerations[:, idx]
+            name = (
+                data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
+            )
+            ax.plot(
+                data.times, data.drift_accelerations[:, idx], label="Drift", alpha=0.8
+            )
+            ax.plot(
+                data.times,
+                data.control_accelerations[:, idx],
+                label="Control",
+                alpha=0.8,
+            )
+            total = (
+                data.drift_accelerations[:, idx] + data.control_accelerations[:, idx]
+            )
             ax.plot(data.times, total, label="Total", linestyle="--", alpha=0.6)
             ax.set_ylabel(f"{name}\n(rad/s²)")
             ax.legend(loc="upper right", fontsize="x-small")
@@ -502,11 +575,13 @@ class PlotGenerator:
         power = data.torques[:, :n_joints] * data.velocities[:, :n_joints]
 
         indices = self.config.joint_indices or list(range(n_joints))
-        indices = indices[:self.config.max_joints_per_plot]
+        indices = indices[: self.config.max_joints_per_plot]
 
         fig, ax = plt.subplots(figsize=self.config.figsize)
         for idx in indices:
-            name = data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
+            name = (
+                data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
+            )
             ax.plot(data.times, power[:, idx], label=name, linewidth=0.8)
 
         prefix = f"{self.config.title_prefix} " if self.config.title_prefix else ""

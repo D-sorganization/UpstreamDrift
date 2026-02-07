@@ -214,9 +214,7 @@ class ControlInterface:
                 strategy = ControlStrategy(strategy.lower())
             except ValueError:
                 valid = [s.value for s in ControlStrategy]
-                raise ValueError(
-                    f"Unknown strategy '{strategy}'. Valid: {valid}"
-                )
+                raise ValueError(f"Unknown strategy '{strategy}'. Valid: {valid}")
 
         self._state.strategy = strategy
         self._state.integral_error = np.zeros(self._n_v)
@@ -233,9 +231,7 @@ class ControlInterface:
         """
         torques = np.asarray(torques, dtype=np.float64)
         if len(torques) != self._n_v:
-            raise ValueError(
-                f"Expected {self._n_v} torques, got {len(torques)}"
-            )
+            raise ValueError(f"Expected {self._n_v} torques, got {len(torques)}")
 
         # Clip to torque limits
         torques = self._clip_torques(torques)
@@ -269,15 +265,19 @@ class ControlInterface:
             ki: Integral gain(s). Scalar applies to all joints.
         """
         if kp is not None:
-            self._state.kp = np.full(self._n_v, kp) if np.isscalar(kp) else np.asarray(kp)
+            self._state.kp = (
+                np.full(self._n_v, kp) if np.isscalar(kp) else np.asarray(kp)
+            )
         if kd is not None:
-            self._state.kd = np.full(self._n_v, kd) if np.isscalar(kd) else np.asarray(kd)
+            self._state.kd = (
+                np.full(self._n_v, kd) if np.isscalar(kd) else np.asarray(kd)
+            )
         if ki is not None:
-            self._state.ki = np.full(self._n_v, ki) if np.isscalar(ki) else np.asarray(ki)
+            self._state.ki = (
+                np.full(self._n_v, ki) if np.isscalar(ki) else np.asarray(ki)
+            )
 
-    def set_target_positions(
-        self, positions: np.ndarray | list[float]
-    ) -> None:
+    def set_target_positions(self, positions: np.ndarray | list[float]) -> None:
         """Set target positions for tracking controllers (PD, PID, etc.).
 
         Args:
@@ -285,9 +285,7 @@ class ControlInterface:
         """
         self._state.target_positions = np.asarray(positions, dtype=np.float64)
 
-    def set_target_velocities(
-        self, velocities: np.ndarray | list[float]
-    ) -> None:
+    def set_target_velocities(self, velocities: np.ndarray | list[float]) -> None:
         """Set target velocities for tracking controllers.
 
         Args:
@@ -426,14 +424,12 @@ class ControlInterface:
         )
 
         # Handle dimension mismatch (n_q vs n_v)
-        pos_error = q_target[:self._n_v] - q[:self._n_v]
-        vel_error = v_target[:self._n_v] - v[:self._n_v]
+        pos_error = q_target[: self._n_v] - q[: self._n_v]
+        vel_error = v_target[: self._n_v] - v[: self._n_v]
 
         return self._state.kp * pos_error + self._state.kd * vel_error
 
-    def _compute_pid(
-        self, q: np.ndarray, v: np.ndarray, dt: float
-    ) -> np.ndarray:
+    def _compute_pid(self, q: np.ndarray, v: np.ndarray, dt: float) -> np.ndarray:
         """Compute PID control torques.
 
         tau = Kp * e + Kd * e_dot + Ki * integral(e)
@@ -449,8 +445,8 @@ class ControlInterface:
             else np.zeros(self._n_v)
         )
 
-        pos_error = q_target[:self._n_v] - q[:self._n_v]
-        vel_error = v_target[:self._n_v] - v[:self._n_v]
+        pos_error = q_target[: self._n_v] - q[: self._n_v]
+        vel_error = v_target[: self._n_v] - v[: self._n_v]
 
         # Update integral
         self._state.integral_error += pos_error * dt
@@ -477,9 +473,7 @@ class ControlInterface:
             logger.warning("Gravity compensation failed: %s", e)
             return np.zeros(self._n_v)
 
-    def _compute_computed_torque(
-        self, q: np.ndarray, v: np.ndarray
-    ) -> np.ndarray:
+    def _compute_computed_torque(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Compute inverse-dynamics-based control.
 
         tau = M(q) * (a_desired) + C(q,v) + g(q)
@@ -496,8 +490,8 @@ class ControlInterface:
             else np.zeros(self._n_v)
         )
 
-        pos_error = q_target[:self._n_v] - q[:self._n_v]
-        vel_error = v_target[:self._n_v] - v[:self._n_v]
+        pos_error = q_target[: self._n_v] - q[: self._n_v]
+        vel_error = v_target[: self._n_v] - v[: self._n_v]
         a_desired = self._state.kp * pos_error + self._state.kd * vel_error
 
         try:
@@ -506,9 +500,7 @@ class ControlInterface:
             logger.warning("Computed torque failed, falling back to PD: %s", e)
             return self._compute_pd(q, v)
 
-    def _compute_impedance(
-        self, q: np.ndarray, v: np.ndarray
-    ) -> np.ndarray:
+    def _compute_impedance(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Compute impedance control torques.
 
         tau = g(q) + Kp * (q_target - q) + Kd * (v_target - v)
@@ -520,9 +512,7 @@ class ControlInterface:
         except Exception:
             return pd_torques
 
-    def _compute_whole_body(
-        self, q: np.ndarray, v: np.ndarray
-    ) -> np.ndarray:
+    def _compute_whole_body(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Compute whole-body control torques using task priorities.
 
         Falls back to computed torque if WBC module not available.
@@ -533,7 +523,11 @@ class ControlInterface:
             wbc = WholeBodyController(self.engine)
             # Use custom params for task configuration
             solution = wbc.solve()
-            return solution.torques if hasattr(solution, "torques") else np.zeros(self._n_v)
+            return (
+                solution.torques
+                if hasattr(solution, "torques")
+                else np.zeros(self._n_v)
+            )
         except Exception as e:
             logger.debug("WBC not available, using computed torque: %s", e)
             return self._compute_computed_torque(q, v)
@@ -573,9 +567,7 @@ class ControlInterface:
         for ji in self._joint_info:
             if ji.name == joint:
                 return ji.index
-        raise ValueError(
-            f"Joint '{joint}' not found. Available: {self.joint_names}"
-        )
+        raise ValueError(f"Joint '{joint}' not found. Available: {self.joint_names}")
 
     def _get_dimensions(self) -> tuple[int, int]:
         """Get model dimensions."""
@@ -585,9 +577,7 @@ class ControlInterface:
         except Exception:
             return 7, 7
 
-    def _build_joint_info(
-        self, torque_limits: np.ndarray | None
-    ) -> list[JointInfo]:
+    def _build_joint_info(self, torque_limits: np.ndarray | None) -> list[JointInfo]:
         """Build joint information list.
 
         Args:
@@ -605,10 +595,16 @@ class ControlInterface:
 
         joints = []
         for i in range(self._n_v):
-            limit = float(torque_limits[i]) if torque_limits is not None and i < len(torque_limits) else 100.0
-            joints.append(JointInfo(
-                index=i,
-                name=names[i],
-                torque_limit=limit,
-            ))
+            limit = (
+                float(torque_limits[i])
+                if torque_limits is not None and i < len(torque_limits)
+                else 100.0
+            )
+            joints.append(
+                JointInfo(
+                    index=i,
+                    name=names[i],
+                    torque_limit=limit,
+                )
+            )
         return joints

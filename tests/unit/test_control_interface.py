@@ -13,12 +13,9 @@ import pytest
 
 from src.shared.python.control_interface import (
     ControlInterface,
-    ControlState,
     ControlStrategy,
-    JointInfo,
 )
 from src.shared.python.mock_engine import MockPhysicsEngine
-
 
 # ---- Fixtures ----
 
