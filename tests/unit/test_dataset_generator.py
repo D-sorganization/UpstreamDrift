@@ -278,7 +278,7 @@ class TestDatasetGenerator:
         dataset2 = gen2.generate(config)
 
         assert dataset1.num_samples == dataset2.num_samples
-        for s1, s2 in zip(dataset1.samples, dataset2.samples):
+        for s1, s2 in zip(dataset1.samples, dataset2.samples, strict=True):
             np.testing.assert_array_almost_equal(s1.positions, s2.positions)
 
     def test_generate_with_position_variation(
