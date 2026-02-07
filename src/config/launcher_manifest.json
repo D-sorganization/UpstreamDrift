@@ -9,9 +9,13 @@
       "category": "tool",
       "type": "special_app",
       "path": "src/tools/urdf_generator/launch_urdf_generator.py",
-      "logo": "urdf_icon.png",
+      "logo": "urdf_icon.svg",
       "status": "utility",
-      "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
+      "capabilities": [
+        "model_browsing",
+        "urdf_generation",
+        "open_in_engine"
+      ],
       "order": 1
     },
     {
@@ -22,7 +26,7 @@
       "type": "custom_humanoid",
       "path": "src/launchers/mujoco_unified_launcher.py",
       "engine_type": "mujoco",
-      "logo": "mujoco_humanoid.png",
+      "logo": "mujoco_humanoid.svg",
       "status": "gui_ready",
       "capabilities": [
         "rigid_body",
@@ -49,7 +53,7 @@
       "type": "drake",
       "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
       "engine_type": "drake",
-      "logo": "drake.png",
+      "logo": "drake.svg",
       "status": "gui_ready",
       "capabilities": [
         "rigid_body",
@@ -68,7 +72,7 @@
       "type": "pinocchio",
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
       "engine_type": "pinocchio",
-      "logo": "pinocchio.png",
+      "logo": "pinocchio.svg",
       "status": "gui_ready",
       "capabilities": [
         "rigid_body",
@@ -86,7 +90,7 @@
       "type": "opensim",
       "path": "src/engines/physics_engines/opensim/python/opensim_gui.py",
       "engine_type": "opensim",
-      "logo": "opensim.png",
+      "logo": "opensim.svg",
       "status": "engine_ready",
       "capabilities": [
         "musculoskeletal",
@@ -105,7 +109,7 @@
       "type": "myosim",
       "path": "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py",
       "engine_type": "myosuite",
-      "logo": "myosim.png",
+      "logo": "myosim.svg",
       "status": "engine_ready",
       "capabilities": [
         "musculoskeletal",
@@ -124,9 +128,13 @@
       "type": "putting_green",
       "path": "src/engines/physics_engines/putting_green/python/simulator.py",
       "engine_type": "putting_green",
-      "logo": "putting_green.png",
+      "logo": "putting_green.svg",
       "status": "simulator",
-      "capabilities": ["surface_modeling", "ball_physics", "terrain"],
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "terrain"
+      ],
       "order": 7
     },
     {
@@ -136,9 +144,13 @@
       "category": "external",
       "type": "special_app",
       "path": "src/launchers/matlab_launcher_unified.py",
-      "logo": "matlab_logo.png",
+      "logo": "matlab_logo.svg",
       "status": "external",
-      "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
+      "capabilities": [
+        "simscape_2d",
+        "simscape_3d",
+        "analysis_tools"
+      ],
       "order": 8
     },
     {
@@ -148,7 +160,7 @@
       "category": "tool",
       "type": "special_app",
       "path": "src/launchers/motion_capture_launcher.py",
-      "logo": "c3d_icon.png",
+      "logo": "c3d_icon.svg",
       "status": "utility",
       "capabilities": [
         "c3d_viewer",
@@ -165,9 +177,14 @@
       "category": "tool",
       "type": "special_app",
       "path": "src/tools/data_explorer/data_explorer_app.py",
-      "logo": "data_explorer.png",
+      "logo": "data_explorer.svg",
       "status": "utility",
-      "capabilities": ["data_import", "filtering", "visualization", "export"],
+      "capabilities": [
+        "data_import",
+        "filtering",
+        "visualization",
+        "export"
+      ],
       "order": 10
     }
   ]

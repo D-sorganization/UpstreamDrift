@@ -79,9 +79,9 @@ class TestManifestLoading:
     def test_manifest_has_no_duplicate_ids(self, manifest: LauncherManifest) -> None:
         """DBC Postcondition: all tile IDs must be unique."""
         ids = [t.id for t in manifest.tiles]
-        assert len(ids) == len(
-            set(ids)
-        ), f"Duplicate IDs found: {[x for x in ids if ids.count(x) > 1]}"
+        assert len(ids) == len(set(ids)), (
+            f"Duplicate IDs found: {[x for x in ids if ids.count(x) > 1]}"
+        )
 
     def test_manifest_file_not_found_raises(self) -> None:
         """DBC Precondition: missing file raises FileNotFoundError."""
@@ -135,9 +135,9 @@ class TestTileProperties:
         """Category must be one of the allowed values."""
         valid_categories = {"physics_engine", "tool", "external"}
         for tile in manifest.tiles:
-            assert (
-                tile.category in valid_categories
-            ), f"Tile '{tile.id}' has invalid category: '{tile.category}'"
+            assert tile.category in valid_categories, (
+                f"Tile '{tile.id}' has invalid category: '{tile.category}'"
+            )
 
     def test_physics_engines_have_engine_type(self, manifest: LauncherManifest) -> None:
         """All physics_engine tiles must have an engine_type."""
@@ -176,10 +176,14 @@ class TestLogoValidation:
         assert ASSETS_DIR.exists(), f"Assets dir missing: {ASSETS_DIR}"
 
     def test_all_tiles_have_logo_files(self, manifest: LauncherManifest) -> None:
-        """Every tile's logo file must exist in the assets directory."""
+        """Every tile's logo file must exist in the assets directory.
+
+        All SVG logos were created in Phase 3 (closes #1164).
+        """
         missing = manifest.validate_logos()
-        if missing:
-            pytest.skip(f"Known missing logos (tracked in issue #1164): {missing}")
+        assert not missing, (
+            f"Missing logo files for tiles: {missing}. Expected in: {ASSETS_DIR}"
+        )
 
     def test_logo_path_property(self, sample_tile_dict: dict) -> None:
         """Tile logo_path property returns absolute path."""
@@ -204,9 +208,9 @@ class TestOrdering:
     def test_model_explorer_is_first(self, manifest: LauncherManifest) -> None:
         """Model Explorer must be the first tile (order=1)."""
         first = manifest.tiles[0]
-        assert (
-            first.id == "model_explorer"
-        ), f"First tile should be model_explorer, got: {first.id}"
+        assert first.id == "model_explorer", (
+            f"First tile should be model_explorer, got: {first.id}"
+        )
 
     def test_ordered_ids_returns_deterministic_list(
         self, manifest: LauncherManifest
