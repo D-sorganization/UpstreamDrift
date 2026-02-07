@@ -133,7 +133,7 @@ class TestPlotGeneration:
         """Test generating and saving a single plot."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_plot.png"
-            fig = generator.generate_single_plot(
+            generator.generate_single_plot(
                 sample_data, PlotType.JOINT_POSITIONS, output_path
             )
             assert output_path.exists()

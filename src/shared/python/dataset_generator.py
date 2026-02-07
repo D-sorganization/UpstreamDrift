@@ -673,7 +673,9 @@ class DatasetGenerator:
         try:
             import h5py
         except ImportError:
-            raise ImportError("h5py required for HDF5 export: pip install h5py")
+            raise ImportError(
+                "h5py required for HDF5 export: pip install h5py"
+            ) from None
 
         output_path = Path(output_path)
         if not output_path.suffix:

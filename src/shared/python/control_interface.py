@@ -214,7 +214,9 @@ class ControlInterface:
                 strategy = ControlStrategy(strategy.lower())
             except ValueError:
                 valid = [s.value for s in ControlStrategy]
-                raise ValueError(f"Unknown strategy '{strategy}'. Valid: {valid}")
+                raise ValueError(
+                    f"Unknown strategy '{strategy}'. Valid: {valid}"
+                ) from None
 
         self._state.strategy = strategy
         self._state.integral_error = np.zeros(self._n_v)

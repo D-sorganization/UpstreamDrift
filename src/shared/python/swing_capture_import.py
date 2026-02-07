@@ -258,7 +258,7 @@ class SwingCaptureImporter:
         except ImportError:
             raise ImportError(
                 "ezc3d is required for C3D import. " "Install with: pip install ezc3d"
-            )
+            ) from None
 
         c3d_data = ezc3d.c3d(str(filepath))
 
