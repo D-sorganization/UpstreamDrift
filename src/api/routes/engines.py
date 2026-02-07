@@ -105,8 +105,9 @@ async def probe_engine(
             "mujoco": EngineType.MUJOCO,
             "drake": EngineType.DRAKE,
             "pinocchio": EngineType.PINOCCHIO,
-            "putting_green": EngineType.PENDULUM,  # Map to pendulum for now
-            "simscape": EngineType.MATLAB_3D,
+            "opensim": EngineType.OPENSIM,
+            "myosuite": EngineType.MYOSIM,
+            "putting_green": EngineType.PENDULUM,  # TEMP: Map to pendulum (see #1136)
         }
         
         engine_type = engine_map.get(engine_name.lower())
@@ -137,8 +138,9 @@ async def load_engine_lazy(
             "mujoco": EngineType.MUJOCO,
             "drake": EngineType.DRAKE,
             "pinocchio": EngineType.PINOCCHIO,
-            "putting_green": EngineType.PENDULUM,
-            "simscape": EngineType.MATLAB_3D,
+            "opensim": EngineType.OPENSIM,
+            "myosuite": EngineType.MYOSIM,
+            "putting_green": EngineType.PENDULUM,  # TEMP: Map to pendulum (see #1136)
         }
         
         engine_type = engine_map.get(engine_name.lower())

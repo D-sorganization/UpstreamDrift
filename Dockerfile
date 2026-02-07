@@ -42,7 +42,15 @@ RUN conda install -y -c conda-forge \
     crocoddyl \
     && conda clean --all --yes
 
-# Install physics engines and additional packages via pip
+# Copy requirements file
+COPY requirements.txt /tmp/requirements.txt
+
+# Install Python dependencies from requirements.txt
+# Filter out comments, WSL/Linux notes, and optional packages
+RUN grep -v '^#' /tmp/requirements.txt | grep -v '^$' | grep -v 'robot_descriptions' > /tmp/filtered_requirements.txt && \
+    pip install --no-cache-dir -r /tmp/filtered_requirements.txt
+
+# Install additional physics engines and API server dependencies
 RUN pip install --no-cache-dir \
     mujoco>=3.2.3 \
     drake \
@@ -51,7 +59,21 @@ RUN pip install --no-cache-dir \
     pin-pink \
     qpsolvers \
     osqp \
-    && echo "Physics engines and robotics packages installed successfully"
+    fastapi>=0.100.0 \
+    uvicorn[standard]>=0.23.0 \
+    slowapi \
+    pydantic \
+    python-multipart \
+    sqlalchemy \
+    email-validator \
+    bcrypt \
+    python-jose[cryptography] \
+    passlib \
+    PyJWT \
+    aiofiles \
+    python-dateutil \
+    websockets \
+    && echo "Physics engines and API dependencies installed successfully"
 
 
 # Stage 2: Runtime stage with minimal footprint
