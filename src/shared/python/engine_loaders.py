@@ -200,6 +200,21 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
         raise GolfModelingError("MyoSim requirements not met.") from e
 
 
+def load_pendulum_engine(suite_root: Path) -> PhysicsEngine:
+    """Load Pendulum (double-pendulum) engine."""
+    try:
+        from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+            PendulumPhysicsEngine,
+        )
+
+        engine = PendulumPhysicsEngine()
+        logger.info("Pendulum engine loaded successfully")
+        return engine  # type: ignore[return-value]
+
+    except ImportError as e:
+        raise GolfModelingError("Pendulum engine not found.") from e
+
+
 def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:
     """Load Putting Green engine."""
     try:
@@ -221,5 +236,6 @@ LOADER_MAP = {
     EngineType.PINOCCHIO: load_pinocchio_engine,
     EngineType.OPENSIM: load_opensim_engine,
     EngineType.MYOSIM: load_myosim_engine,
+    EngineType.PENDULUM: load_pendulum_engine,
     EngineType.PUTTING_GREEN: load_putting_green_engine,
 }
