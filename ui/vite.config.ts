@@ -18,13 +18,13 @@ export default defineConfig({
     strictPort: true,
     open: false,
     proxy: {
-      // Proxy API requests to local backend during development
+      // Proxy API requests to Docker backend during development
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8001',
         changeOrigin: true,
       },
       '/api/ws': {
-        target: 'ws://localhost:8000',
+        target: 'ws://localhost:8001',
         ws: true,
       },
     },
