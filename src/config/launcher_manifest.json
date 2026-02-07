@@ -171,6 +171,23 @@
       "order": 9
     },
     {
+      "id": "video_analyzer",
+      "name": "Video Analyzer",
+      "description": "Video-based motion analysis with pose estimation and tracking",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/video_analyzer/launch_video_analyzer.py",
+      "logo": "video_analyzer.svg",
+      "status": "utility",
+      "capabilities": [
+        "video_processing",
+        "pose_estimation",
+        "motion_tracking",
+        "frame_analysis"
+      ],
+      "order": 10
+    },
+    {
       "id": "data_explorer",
       "name": "Data Explorer",
       "description": "Import, filter, and visualize simulation datasets",
@@ -185,7 +202,7 @@
         "visualization",
         "export"
       ],
-      "order": 10
+      "order": 11
     }
   ]
 }

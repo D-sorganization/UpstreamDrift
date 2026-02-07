@@ -139,6 +139,8 @@ class TestLauncherParityRequirements:
         "matlab_unified",
         "motion_capture",
         "model_explorer",
+        "video_analyzer",
+        "data_explorer",
     }
 
     def test_all_required_tiles_present(self, client: TestClient) -> None:
@@ -232,3 +234,53 @@ class TestLogoEndpoints:
             assert tile["logo"].endswith(".svg"), (
                 f"Tile '{tile['id']}' logo '{tile['logo']}' is not SVG"
             )
+
+
+class TestNewTiles:
+    """Test newly added tiles (Phase 4, #1167, #1177)."""
+
+    def test_video_analyzer_tile_exists(self, client: TestClient) -> None:
+        """Video Analyzer tile is present (closes #1167)."""
+        response = client.get("/api/launcher/tiles/video_analyzer")
+        assert response.status_code == 200
+        tile = response.json()
+        assert tile["name"] == "Video Analyzer"
+        assert tile["category"] == "tool"
+        assert tile["status"] == "utility"
+
+    def test_video_analyzer_has_capabilities(self, client: TestClient) -> None:
+        """Video Analyzer declares video/pose capabilities."""
+        response = client.get("/api/launcher/tiles/video_analyzer")
+        caps = response.json()["capabilities"]
+        assert "video_processing" in caps
+        assert "pose_estimation" in caps
+
+    def test_video_analyzer_has_logo(self, client: TestClient) -> None:
+        """Video Analyzer logo is servable."""
+        response = client.get("/api/launcher/logos/video_analyzer.svg")
+        assert response.status_code == 200
+
+    def test_data_explorer_tile_exists(self, client: TestClient) -> None:
+        """Data Explorer tile is present (closes #1177, #1178)."""
+        response = client.get("/api/launcher/tiles/data_explorer")
+        assert response.status_code == 200
+        tile = response.json()
+        assert tile["name"] == "Data Explorer"
+        assert tile["category"] == "tool"
+        assert "data_import" in tile["capabilities"]
+
+    def test_total_tile_count(self, client: TestClient) -> None:
+        """Manifest now has 11 tiles (10 original + video_analyzer)."""
+        response = client.get("/api/launcher/tiles")
+        tiles = response.json()
+        assert len(tiles) == 11
+
+    def test_tool_tiles_count(self, client: TestClient) -> None:
+        """There should be 4 tool tiles now."""
+        response = client.get("/api/launcher/tools")
+        tools = response.json()
+        tool_ids = {t["id"] for t in tools}
+        assert "model_explorer" in tool_ids
+        assert "motion_capture" in tool_ids
+        assert "video_analyzer" in tool_ids
+        assert "data_explorer" in tool_ids
