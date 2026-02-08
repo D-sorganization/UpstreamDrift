@@ -1431,8 +1431,8 @@ except Exception as e:
         self.launch_simulation()
 
     def _launch_urdf_generator(self) -> None:
-        """Launch the URDF generator application."""
-        from shared.python.constants import URDF_GENERATOR_SCRIPT
+        """Launch the URDF generator / Model Explorer application."""
+        from src.shared.python.constants import URDF_GENERATOR_SCRIPT
 
         script_path = REPOS_ROOT / URDF_GENERATOR_SCRIPT
 
@@ -1903,7 +1903,7 @@ Expected tiles: {summary["expected_tiles"]}
         model_id = self.selected_model
 
         # Handle Utility/Special Apps first
-        if "urdf_generator" in model_id:
+        if "urdf_generator" in model_id or "model_explorer" in model_id:
             self._launch_urdf_generator()
             return
         elif "c3d_viewer" in model_id:

@@ -76,6 +76,9 @@ MODEL_IMAGES = {
     # Tools
     "Motion Capture": "c3d_icon.png",
     "Model Explorer": "urdf_icon.png",
+    "Putting Green": "putting_green.svg",
+    "Video Analyzer": "video_analyzer.svg",
+    "Data Explorer": "data_explorer.svg",
     # Legacy names (backward compatibility)
     "MuJoCo Humanoid": "mujoco_humanoid.png",
     "MuJoCo Dashboard": "mujoco_hand.png",
@@ -374,7 +377,16 @@ class DraggableModelCard(QFrame):
                 if getattr(self.model, "engine_type", "") == "mujoco":
                     img_name = "mujoco_humanoid.png"
 
-        img_path = ASSETS_DIR / img_name if img_name else None
+        # Check assets dir first, then fall back to SVG logos dir
+        img_path = None
+        if img_name:
+            img_path = ASSETS_DIR / img_name
+            if not img_path.exists():
+                # Fall back to SVG logos directory
+                svg_logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
+                img_path = svg_logos_dir / img_name
+                if not img_path.exists():
+                    img_path = None
         lbl_img = QLabel()
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)

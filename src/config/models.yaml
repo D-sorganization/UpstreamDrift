@@ -58,7 +58,7 @@ models:
     name: "Model Explorer"
     description: "Explore models and generate URDFs"
     type: "special_app"
-    path: "src/tools/urdf_generator/launch_urdf_generator.py"
+    path: "src/tools/model_explorer/launch_model_explorer.py"
 
   - id: "putting_green"
     name: "Putting Green"
@@ -66,6 +66,18 @@ models:
     type: "putting_green"
     path: "src/engines/physics_engines/putting_green/python/simulator.py"
     engine_type: "putting_green"
+
+  - id: "video_analyzer"
+    name: "Video Analyzer"
+    description: "Video-based motion analysis with pose estimation and tracking"
+    type: "special_app"
+    path: "src/tools/video_analyzer/launch_video_analyzer.py"
+
+  - id: "data_explorer"
+    name: "Data Explorer"
+    description: "Import, filter, and visualize simulation datasets"
+    type: "special_app"
+    path: "src/tools/data_explorer/data_explorer_app.py"
 
   # =============================================================================
   # ARCHIVED / HIDDEN / LEGACY entries preserved below (commented or type: hidden if supported)
