@@ -60,9 +60,18 @@ class LauncherDiagnostics:
         "pinocchio_golf",
         "opensim_golf",
         "myosim_suite",
-        "matlab_unified",
-        "motion_capture",
+        "putting_green",
+        "simscape_2d",
+        "simscape_3d",
+        "dataset_generator",
+        "matlab_analysis",
+        "c3d_viewer",
+        "openpose_analysis",
+        "mediapipe_analysis",
         "model_explorer",
+        "video_analyzer",
+        "data_explorer",
+        "project_map",
     ]
 
     # Expected tile names
@@ -72,9 +81,18 @@ class LauncherDiagnostics:
         "pinocchio_golf": "Pinocchio",
         "opensim_golf": "OpenSim",
         "myosim_suite": "MyoSuite",
-        "matlab_unified": "Matlab Models",
-        "motion_capture": "Motion Capture",
+        "putting_green": "Putting Green",
+        "simscape_2d": "Simscape 2D",
+        "simscape_3d": "Simscape 3D",
+        "dataset_generator": "Dataset Generator",
+        "matlab_analysis": "Analysis GUI",
+        "c3d_viewer": "C3D Viewer",
+        "openpose_analysis": "OpenPose",
+        "mediapipe_analysis": "MediaPipe",
         "model_explorer": "Model Explorer",
+        "video_analyzer": "Video Analyzer",
+        "data_explorer": "Data Explorer",
+        "project_map": "Project Map",
     }
 
     def __init__(self) -> None:

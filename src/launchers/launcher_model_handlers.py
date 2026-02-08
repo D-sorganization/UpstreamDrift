@@ -299,11 +299,11 @@ class OpenPoseHandler:
 
 
 class SpecialAppHandler:
-    """Handler for launching special applications (tools, utilities, sub-launchers).
+    """Handler for launching special applications (tools, utilities).
 
     Handles model types: special_app
-    Covers: motion_capture, model_explorer, matlab_unified, and any
-    future tool/utility tiles.
+    Covers: c3d_viewer, openpose, mediapipe, model_explorer, video_analyzer,
+    data_explorer, and any future tool/utility tiles.
 
     Design by Contract:
         Precondition: model.path must be a valid relative path to a Python script

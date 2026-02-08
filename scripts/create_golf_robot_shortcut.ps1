@@ -7,18 +7,22 @@ $ShortcutPath = Join-Path $Desktop "Golf Modeling Suite.lnk"
 $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 
 # Derive paths dynamically based on script location
-$repoRoot = $PSScriptRoot
-$pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\Python") "Python313"
-$pythonExePath = Join-Path $pythonBasePath "python.exe"
+# $PSScriptRoot is the scripts/ directory, so go one level up for repo root
+$repoRoot = Split-Path $PSScriptRoot -Parent
+$pythonExePath = (Get-Command python -ErrorAction SilentlyContinue).Source
+if (-not $pythonExePath) {
+    $pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\Python") "Python313"
+    $pythonExePath = Join-Path $pythonBasePath "python.exe"
+}
 $launcherPath = Join-Path $repoRoot "launch_golf_suite.py"
 
 # Use the Windows-optimized GolfingRobot icon for maximum clarity on Windows
 $iconCandidates = @(
-    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_windows_optimized.ico"),
-    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_ultra_sharp.ico"),
-    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_cropped_icon.ico"),
-    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_icon.ico"),
-    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_icon.ico")
+    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_windows_optimized.ico"),
+    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_ultra_sharp.ico"),
+    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_cropped_icon.ico"),
+    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_icon.ico"),
+    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_icon.ico")
 )
 
 $iconPath = $null
@@ -37,7 +41,7 @@ if (-not $iconPath) {
 
 # Configure shortcut properties
 $Shortcut.TargetPath = $pythonExePath
-$Shortcut.Arguments = "`"$launcherPath`""
+$Shortcut.Arguments = "`"$launcherPath`" --classic"
 $Shortcut.WorkingDirectory = $repoRoot
 $Shortcut.Description = "Launch the Golf Modeling Suite with GolfingRobot"
 # Set icon if available
