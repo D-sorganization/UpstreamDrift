@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create comprehensive environment
 # Install core scientific packages via conda
 RUN conda install -y -c conda-forge \
-    python=3.11 \
+    python=3.12 \
     numpy \
     scipy \
     matplotlib \
