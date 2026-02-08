@@ -2,6 +2,13 @@
 
 This module provides centralized process lifecycle management for launching
 simulations, Docker containers, and WSL processes.
+
+Supports two output modes:
+- **Unified console** (default): Output is captured via pipes and routed
+  to a callback (e.g. a dockable console widget in the GUI). No separate
+  terminal windows are created.
+- **Separate terminals** (legacy): Each engine gets its own console window
+  via CREATE_NEW_CONSOLE. Can be enabled per-launch or globally.
 """
 
 from __future__ import annotations
@@ -9,6 +16,8 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import threading
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -19,6 +28,8 @@ if TYPE_CHECKING:
     from subprocess import Popen
 
 logger = get_logger(__name__)
+
+OutputCallback = Callable[[str, str], None]  # (engine_name, line) -> None
 
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int
@@ -47,16 +58,34 @@ class ProcessManager:
 
     This class centralizes process creation, monitoring, and cleanup
     for Python scripts, modules, Docker containers, and WSL processes.
+
+    By default, subprocess output is captured and routed to an
+    ``output_callback`` (unified console mode). Set
+    ``use_separate_terminals=True`` to revert to the legacy behavior
+    of opening a new console window per engine.
     """
 
-    def __init__(self, repo_root: Path) -> None:
+    def __init__(
+        self,
+        repo_root: Path,
+        output_callback: OutputCallback | None = None,
+        use_separate_terminals: bool = False,
+    ) -> None:
         """Initialize the process manager.
 
         Args:
             repo_root: Root directory of the repository.
+            output_callback: Called with (engine_name, line) for each
+                line of captured output. If *None*, output is logged
+                via the Python logger instead.
+            use_separate_terminals: If True, each engine opens its own
+                console window (legacy behaviour).
         """
         self.repo_root = repo_root
         self.running_processes: dict[str, Popen[bytes]] = {}
+        self.output_callback = output_callback
+        self.use_separate_terminals = use_separate_terminals
+        self._output_threads: dict[str, threading.Thread] = {}
 
     def get_subprocess_env(self) -> dict[str, str]:
         """Get environment variables for subprocess execution.
@@ -85,6 +114,37 @@ class ProcessManager:
 
         return env
 
+    def _emit_output(self, name: str, line: str) -> None:
+        """Route a line of process output to the callback or logger."""
+        if self.output_callback is not None:
+            self.output_callback(name, line)
+        else:
+            logger.info("[%s] %s", name, line)
+
+    def _stream_output(self, name: str, process: subprocess.Popen[bytes]) -> None:
+        """Read stdout/stderr from *process* and emit lines until EOF.
+
+        Runs in a daemon thread so the main GUI thread is never blocked.
+        """
+        try:
+            if process.stdout:
+                for raw_line in iter(process.stdout.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if line:
+                        self._emit_output(name, line)
+                process.stdout.close()
+            if process.stderr:
+                for raw_line in iter(process.stderr.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if line:
+                        self._emit_output(name, f"STDERR: {line}")
+                process.stderr.close()
+        except Exception as e:
+            logger.debug("Output stream ended for %s: %s", name, e)
+
+        return_code = process.wait()
+        self._emit_output(name, f"[exited with code {return_code}]")
+
     def launch_script(
         self,
         name: str,
@@ -102,6 +162,7 @@ class ProcessManager:
             env: Optional environment variables.
             keep_terminal_open: If True, keep terminal open on script exit/error
                                (uses cmd /k with pause). Default False.
+                               Only effective in separate-terminal mode.
 
         Returns:
             The process object if successful, None otherwise.
@@ -109,25 +170,43 @@ class ProcessManager:
         try:
             process_env = env or self.get_subprocess_env()
 
-            if os.name == "nt":
-                if keep_terminal_open:
-                    # Use cmd /k with & pause to keep terminal open on error
-                    cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
+            if self.use_separate_terminals:
+                # Legacy: each engine gets its own console window
+                if os.name == "nt":
+                    if keep_terminal_open:
+                        cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
+                    else:
+                        cmd_str = f'cmd /c ""{sys.executable}" "{script_path}""'
+                    process = subprocess.Popen(
+                        cmd_str,
+                        cwd=str(cwd),
+                        env=process_env,
+                        creationflags=CREATE_NEW_CONSOLE,
+                    )
                 else:
-                    # Use cmd /c to close terminal when process exits
-                    cmd_str = f'cmd /c ""{sys.executable}" "{script_path}""'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=process_env,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
+                    process = subprocess.Popen(
+                        [sys.executable, str(script_path)],
+                        cwd=str(cwd),
+                        env=process_env,
+                    )
             else:
+                # Unified console: capture output via pipes
                 process = subprocess.Popen(
                     [sys.executable, str(script_path)],
                     cwd=str(cwd),
                     env=process_env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                 )
+                # Stream output in a background thread
+                t = threading.Thread(
+                    target=self._stream_output,
+                    args=(name, process),
+                    daemon=True,
+                )
+                t.start()
+                self._output_threads[name] = t
 
             self.running_processes[name] = process
             logger.info(f"Launched {name} (PID: {process.pid})")
@@ -154,6 +233,7 @@ class ProcessManager:
             env: Optional environment variables.
             keep_terminal_open: If True, keep terminal open on script exit/error
                                (uses cmd /k with pause). Default False.
+                               Only effective in separate-terminal mode.
 
         Returns:
             The process object if successful, None otherwise.
@@ -161,7 +241,7 @@ class ProcessManager:
         try:
             process_env = env or self.get_subprocess_env()
 
-            # Ensure PYTHONPATH is set correctly for Windows
+            # Ensure PYTHONPATH is set correctly
             if os.name == "nt":
                 current_pythonpath = process_env.get("PYTHONPATH", "")
                 repo_root_str = str(self.repo_root)
@@ -178,24 +258,42 @@ class ProcessManager:
                         f"{';'.join(paths_to_add)};{current_pythonpath}"
                     )
 
-                if keep_terminal_open:
-                    # Use cmd /k with & pause to keep terminal open on error
-                    cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+            if self.use_separate_terminals:
+                # Legacy: each engine gets its own console window
+                if os.name == "nt":
+                    if keep_terminal_open:
+                        cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+                    else:
+                        cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
+                    process = subprocess.Popen(
+                        cmd_str,
+                        cwd=str(cwd),
+                        env=process_env,
+                        creationflags=CREATE_NEW_CONSOLE,
+                    )
                 else:
-                    # Use cmd /c to close terminal when process exits
-                    cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=str(cwd),
-                    env=process_env,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
+                    process = subprocess.Popen(
+                        [sys.executable, "-m", module_name],
+                        cwd=str(cwd),
+                        env=process_env,
+                    )
             else:
+                # Unified console: capture output via pipes
                 process = subprocess.Popen(
                     [sys.executable, "-m", module_name],
                     cwd=str(cwd),
                     env=process_env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                 )
+                t = threading.Thread(
+                    target=self._stream_output,
+                    args=(name, process),
+                    daemon=True,
+                )
+                t.start()
+                self._output_threads[name] = t
 
             self.running_processes[name] = process
             logger.info(f"Launched module {name} (PID: {process.pid})")
