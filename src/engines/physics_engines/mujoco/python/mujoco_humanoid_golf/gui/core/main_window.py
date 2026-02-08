@@ -24,6 +24,7 @@ from ...grip_modelling_tab import GripModellingTab
 from ...sim_widget import MuJoCoSimWidget
 from ..tabs.analysis_tab import AnalysisTab
 from ..tabs.controls_tab import ControlsTab
+from ..tabs.humanoid_config_tab import HumanoidConfigTab
 from ..tabs.manipulability_tab import ManipulabilityTab
 from ..tabs.manipulation_tab import ManipulationTab
 from ..tabs.physics_tab import PhysicsTab
@@ -108,6 +109,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # --- Tab 2: Grip Modelling ---
         self.grip_modelling_tab = GripModellingTab()
         self.main_tab_widget.addTab(self.grip_modelling_tab, "Grip Modelling")
+
+        # --- Tab 3: Humanoid Config (appearance, equipment, Docker sim) ---
+        self.humanoid_config_tab = HumanoidConfigTab()
+        self.main_tab_widget.addTab(self.humanoid_config_tab, "Humanoid Config")
 
         # Create tabs
         # Physics Configuration Tab

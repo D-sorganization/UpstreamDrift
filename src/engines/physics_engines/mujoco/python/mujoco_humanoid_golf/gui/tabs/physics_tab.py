@@ -14,11 +14,13 @@ from ...models import (
     CHAOTIC_PENDULUM_XML,
     DOUBLE_PENDULUM_XML,
     FULL_BODY_GOLF_SWING_XML,
+    HUMANOID_CM_JOINTS,
     MYOARM_SIMPLE_PATH,
     MYOBODY_PATH,
     MYOUPPERBODY_PATH,
     TRIPLE_PENDULUM_XML,
     UPPER_BODY_GOLF_SWING_XML,
+    load_humanoid_cm_xml,
 )
 from ...sim_widget import MuJoCoSimWidget
 
@@ -51,12 +53,16 @@ class PhysicsTab(QtWidgets.QWidget):
 
         self.model_configs: list[dict] = []
         self.model_descriptions: dict[int, str] = {}
+        self._default_model_index = 5  # advanced_biomech fallback
 
         self._init_model_configs()
         self._setup_ui()
 
     def _init_model_configs(self) -> None:
         """Initialize the list of available physics models."""
+        # Try to load the CMU Humanoid from dm_control (preferred default)
+        humanoid_cm_xml = load_humanoid_cm_xml()
+
         self.model_configs = [
             {
                 "name": "chaotic_pendulum",
@@ -145,58 +151,83 @@ class PhysicsTab(QtWidgets.QWidget):
                     "Shaft Tip",
                 ],
             },
-            {
-                "name": "myoupperbody",
-                "xml_path": MYOUPPERBODY_PATH,
-                "actuators": [
-                    "R Shoulder Flex",
-                    "R Shoulder Add",
-                    "R Shoulder Rot",
-                    "R Elbow",
-                    "R Forearm",
-                    "R Wrist Flex",
-                    "R Wrist Dev",
-                    "L Shoulder Flex",
-                    "L Shoulder Add",
-                    "L Shoulder Rot",
-                    "L Elbow",
-                    "L Forearm",
-                    "L Wrist Flex",
-                    "L Wrist Dev",
-                    "R Erector Spinae",
-                    "L Erector Spinae",
-                    "R Int Oblique",
-                    "L Int Oblique",
-                    "R Ext Oblique",
-                    "L Ext Oblique",
-                ],
-            },
-            {
-                "name": "myobody",
-                "xml_path": MYOBODY_PATH,
-                "actuators": [f"Muscle {i + 1}" for i in range(290)],
-            },
-            {
-                "name": "myoarm_simple",
-                "xml_path": MYOARM_SIMPLE_PATH,
-                "actuators": [
-                    "R Shoulder Flex",
-                    "R Shoulder Add",
-                    "R Shoulder Rot",
-                    "R Elbow",
-                    "R Forearm",
-                    "R Wrist Flex",
-                    "R Wrist Dev",
-                    "L Shoulder Flex",
-                    "L Shoulder Add",
-                    "L Shoulder Rot",
-                    "L Elbow",
-                    "L Forearm",
-                    "L Wrist Flex",
-                    "L Wrist Dev",
-                ],
-            },
         ]
+
+        # Insert humanoid CM (CMU) model if dm_control is available
+        if humanoid_cm_xml is not None:
+            self.model_configs.append(
+                {
+                    "name": "humanoid_cm",
+                    "xml": humanoid_cm_xml,
+                    "actuators": list(HUMANOID_CM_JOINTS),
+                },
+            )
+            # Humanoid CM is the preferred default
+            self._default_model_index = len(self.model_configs) - 1
+            logger.info("Loaded humanoid CM (CMU) model from dm_control")
+        else:
+            # Fallback default: advanced_biomech (index 5)
+            self._default_model_index = 5
+            logger.info(
+                "dm_control not available; defaulting to advanced_biomech model"
+            )
+
+        # Continue adding remaining models
+        self.model_configs.extend(
+            [
+                {
+                    "name": "myoupperbody",
+                    "xml_path": MYOUPPERBODY_PATH,
+                    "actuators": [
+                        "R Shoulder Flex",
+                        "R Shoulder Add",
+                        "R Shoulder Rot",
+                        "R Elbow",
+                        "R Forearm",
+                        "R Wrist Flex",
+                        "R Wrist Dev",
+                        "L Shoulder Flex",
+                        "L Shoulder Add",
+                        "L Shoulder Rot",
+                        "L Elbow",
+                        "L Forearm",
+                        "L Wrist Flex",
+                        "L Wrist Dev",
+                        "R Erector Spinae",
+                        "L Erector Spinae",
+                        "R Int Oblique",
+                        "L Int Oblique",
+                        "R Ext Oblique",
+                        "L Ext Oblique",
+                    ],
+                },
+                {
+                    "name": "myobody",
+                    "xml_path": MYOBODY_PATH,
+                    "actuators": [f"Muscle {i + 1}" for i in range(290)],
+                },
+                {
+                    "name": "myoarm_simple",
+                    "xml_path": MYOARM_SIMPLE_PATH,
+                    "actuators": [
+                        "R Shoulder Flex",
+                        "R Shoulder Add",
+                        "R Shoulder Rot",
+                        "R Elbow",
+                        "R Forearm",
+                        "R Wrist Flex",
+                        "R Wrist Dev",
+                        "L Shoulder Flex",
+                        "L Shoulder Add",
+                        "L Shoulder Rot",
+                        "L Elbow",
+                        "L Forearm",
+                        "L Wrist Flex",
+                        "L Wrist Dev",
+                    ],
+                },
+            ]
+        )
 
         # Add linkage mechanisms
         for mech_name, mech_config in LINKAGE_CATALOG.items():
@@ -288,36 +319,50 @@ class PhysicsTab(QtWidgets.QWidget):
         # Add stretch to push everything to top
         main_layout.addStretch(1)
 
-        # Select default model (Full Body Golf Swing)
-        # Indices: 0=Chaotic, 1=Double, 2=Triple, 3=Upper, 4=Full
-        default_index = 4
-        if self.model_combo.count() > default_index:
-            self.model_combo.setCurrentIndex(default_index)
+        # Select default model (humanoid CM if available, else advanced_biomech)
+        if self.model_combo.count() > self._default_model_index:
+            self.model_combo.setCurrentIndex(self._default_model_index)
 
     def _populate_model_combo(self) -> None:
-        # Add basic described models first
+        # Name-based descriptions (stable regardless of insertion order)
         desc_map = {
-            0: "Simple driven pendulum showing chaotic behavior.",
-            1: "Basic swing with shoulder and wrist joints. Simplest realistic model.",
-            2: "Adds elbow joint for more realistic arm mechanics.",
-            3: "Upper body model with spine rotation and both arms.",
-            4: "Full body model including leg drive and weight transfer.",
-            5: "Most detailed model with scapulae, 3-DOF shoulders, flexible shaft.",
-            6: "Muscle-actuated upper body. Independent muscle control.",
-            7: "Complete musculoskeletal model. Very complex - for advanced users.",
-            8: "Both arms with muscle actuation. Good for arm mechanics study.",
+            "chaotic_pendulum": ("Simple driven pendulum showing chaotic behavior."),
+            "double": ("Basic swing with shoulder and wrist joints."),
+            "triple": ("Adds elbow joint for more realistic arm mechanics."),
+            "upper_body": ("Upper body model with spine rotation and both arms."),
+            "full_body": ("Full body with leg drive and weight transfer."),
+            "advanced_biomech": (
+                "Detailed golf model: scapulae, 3-DOF shoulders, flexible shaft."
+            ),
+            "humanoid_cm": (
+                "CMU Humanoid from DeepMind Control Suite. Original MuJoCo humanoid."
+            ),
+            "myoupperbody": ("Muscle-actuated upper body. Independent muscle control."),
+            "myobody": (
+                "Complete musculoskeletal model. Very complex - for advanced users."
+            ),
+            "myoarm_simple": (
+                "Both arms with muscle actuation. Good for arm mechanics study."
+            ),
+        }
+
+        # Names that should be categorized as golf/pendulum models
+        golf_names = {
+            "chaotic_pendulum",
+            "double",
+            "triple",
+            "upper_body",
+            "full_body",
+            "advanced_biomech",
+            "humanoid_cm",
         }
 
         for i, config in enumerate(self.model_configs):
             display_name = config["name"].replace("_", " ").title()
             if "category" in config:
                 display_name = f"{config['category']}: {display_name}"
-            elif i < 9:  # The basic golf/myo models
-                prefix = (
-                    "Golf"
-                    if "golf" in config["name"] or "pendulum" in config["name"]
-                    else "Musculoskeletal"
-                )
+            elif config["name"] in desc_map:
+                prefix = "Golf" if config["name"] in golf_names else "Musculoskeletal"
                 display_name = (
                     f"{prefix}: {display_name} ({len(config['actuators'])} DOF)"
                 )
@@ -325,9 +370,7 @@ class PhysicsTab(QtWidgets.QWidget):
             self.model_combo.addItem(display_name)
 
             # Store description
-            mapped_desc = desc_map.get(i)
-            desc = str(mapped_desc) if mapped_desc else None
-
+            desc = desc_map.get(config["name"])
             if not desc:
                 desc = str(config.get("description", "Imported model"))
             self.model_descriptions[i] = desc
