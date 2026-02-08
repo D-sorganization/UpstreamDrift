@@ -276,7 +276,7 @@ class SmoothPlaybackController(QObject):
 
         # Interpolate forces
         result.forces = {}
-        if hasattr(frame_a, 'forces') and hasattr(frame_b, 'forces'):
+        if hasattr(frame_a, "forces") and hasattr(frame_b, "forces"):
             for key in frame_a.forces:
                 if key in frame_b.forces:
                     f_a = frame_a.forces[key]
@@ -288,7 +288,7 @@ class SmoothPlaybackController(QObject):
 
         # Interpolate torques
         result.torques = {}
-        if hasattr(frame_a, 'torques') and hasattr(frame_b, 'torques'):
+        if hasattr(frame_a, "torques") and hasattr(frame_b, "torques"):
             for key in frame_a.torques:
                 if key in frame_b.torques:
                     t_a = frame_a.torques[key]

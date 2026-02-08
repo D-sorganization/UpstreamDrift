@@ -17,7 +17,6 @@ from dataclasses import dataclass
 import moderngl as mgl
 import numpy as np
 import scipy.io
-from numba import jit
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import (
@@ -144,7 +143,9 @@ class DataProcessor:
             self.max_force_magnitude = 2000.0  # N (approx 200kg force max)
             self.max_torque_magnitude = 200.0  # Nm
 
-            print(f"✅ Scaling factors set: Force={self.max_force_magnitude}N, Torque={self.max_torque_magnitude}Nm")
+            print(
+                f"✅ Scaling factors set: Force={self.max_force_magnitude}N, Torque={self.max_torque_magnitude}Nm"
+            )
         except Exception as e:
             print(f"⚠️ Error calculating scaling factors: {e}")
             self.max_force_magnitude = 1000.0
@@ -468,32 +469,132 @@ class OpenGLRenderer:
     def _create_sphere_geometry(self):
         """Create optimized sphere geometry"""
         # Simple cube approximation for sphere to ensure valid VAO
-        vertices = np.array([
-            -0.5, -0.5, -0.5,  0, 0, -1,  0, 0,
-             0.5, -0.5, -0.5,  0, 0, -1,  1, 0,
-             0.5,  0.5, -0.5,  0, 0, -1,  1, 1,
-            -0.5,  0.5, -0.5,  0, 0, -1,  0, 1,
-            -0.5, -0.5,  0.5,  0, 0, 1,   0, 0,
-             0.5, -0.5,  0.5,  0, 0, 1,   1, 0,
-             0.5,  0.5,  0.5,  0, 0, 1,   1, 1,
-            -0.5,  0.5,  0.5,  0, 0, 1,   0, 1,
-        ], dtype=np.float32)
+        vertices = np.array(
+            [
+                -0.5,
+                -0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                0,
+                0,
+                0.5,
+                -0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                1,
+                0,
+                0.5,
+                0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                1,
+                1,
+                -0.5,
+                0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                0,
+                1,
+                -0.5,
+                -0.5,
+                0.5,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0.5,
+                -0.5,
+                0.5,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0.5,
+                0.5,
+                0.5,
+                0,
+                0,
+                1,
+                1,
+                1,
+                -0.5,
+                0.5,
+                0.5,
+                0,
+                0,
+                1,
+                0,
+                1,
+            ],
+            dtype=np.float32,
+        )
 
-        indices = np.array([
-            0, 1, 2, 2, 3, 0,
-            4, 5, 6, 6, 7, 4,
-            0, 4, 7, 7, 3, 0,
-            1, 5, 6, 6, 2, 1,
-            0, 1, 5, 5, 4, 0,
-            3, 2, 6, 6, 7, 3
-        ], dtype=np.uint32)
+        indices = np.array(
+            [
+                0,
+                1,
+                2,
+                2,
+                3,
+                0,
+                4,
+                5,
+                6,
+                6,
+                7,
+                4,
+                0,
+                4,
+                7,
+                7,
+                3,
+                0,
+                1,
+                5,
+                6,
+                6,
+                2,
+                1,
+                0,
+                1,
+                5,
+                5,
+                4,
+                0,
+                3,
+                2,
+                6,
+                6,
+                7,
+                3,
+            ],
+            dtype=np.uint32,
+        )
 
         self.buffers["sphere_vbo"] = self.ctx.buffer(vertices)
         self.buffers["sphere_ebo"] = self.ctx.buffer(indices)
 
         self.vaos["sphere"] = self.ctx.vertex_array(
             self.programs["standard"],
-            [(self.buffers["sphere_vbo"], "3f 3f 2f", "position", "normal", "texCoord")],
+            [
+                (
+                    self.buffers["sphere_vbo"],
+                    "3f 3f 2f",
+                    "position",
+                    "normal",
+                    "texCoord",
+                )
+            ],
             self.buffers["sphere_ebo"],
         )
 
@@ -501,7 +602,6 @@ class OpenGLRenderer:
         """Create detailed club geometry"""
         # Reuse cylinder for shaft, sphere for head (scaled)
         # Geometry already exists in vaos["cylinder"] and vaos["sphere"]
-        pass
 
     def _create_arrow_geometry(self):
         """Create arrow geometry for force/torque vectors"""
@@ -519,14 +619,14 @@ class OpenGLRenderer:
             angle = 2 * np.pi * i / segments
             x, z = np.cos(angle), np.sin(angle)
             # Normal is approximate (pointing out and up)
-            vertices.extend([x, 0, z, x, 0.5, z, i/segments, 0])
+            vertices.extend([x, 0, z, x, 0.5, z, i / segments, 0])
 
         vertices = np.array(vertices, dtype=np.float32)
 
         # Indices
         for i in range(segments):
             # Tip to base
-            indices.extend([0, i+1, (i+1)%segments + 1])
+            indices.extend([0, i + 1, (i + 1) % segments + 1])
 
         indices = np.array(indices, dtype=np.uint32)
 
@@ -765,12 +865,31 @@ class OpenGLRenderer:
         # Create ground VAO if needed
         if "ground" not in self.vaos:
             size = 50.0
-            vertices = np.array([
-                -size, 0, -size,  0, 0,
-                 size, 0, -size,  1, 0,
-                 size, 0,  size,  1, 1,
-                -size, 0,  size,  0, 1,
-            ], dtype=np.float32)
+            vertices = np.array(
+                [
+                    -size,
+                    0,
+                    -size,
+                    0,
+                    0,
+                    size,
+                    0,
+                    -size,
+                    1,
+                    0,
+                    size,
+                    0,
+                    size,
+                    1,
+                    1,
+                    -size,
+                    0,
+                    size,
+                    0,
+                    1,
+                ],
+                dtype=np.float32,
+            )
 
             indices = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
 
@@ -793,7 +912,10 @@ class OpenGLRenderer:
 
     def _render_club(self, frame_data, config, view_matrix, proj_matrix):
         """Render golf club"""
-        if np.isfinite(frame_data.butt).all() and np.isfinite(frame_data.clubhead).all():
+        if (
+            np.isfinite(frame_data.butt).all()
+            and np.isfinite(frame_data.clubhead).all()
+        ):
             # Shaft
             self._render_cylinder_between_points(
                 frame_data.butt,
@@ -802,7 +924,7 @@ class OpenGLRenderer:
                 [0.8, 0.8, 0.8],
                 config.body_opacity,
                 view_matrix,
-                proj_matrix
+                proj_matrix,
             )
 
             # Clubhead (placeholder sphere)
@@ -811,9 +933,9 @@ class OpenGLRenderer:
                 model_matrix[:3, 3] = frame_data.clubhead
                 # Scale
                 s = 0.05
-                model_matrix[0,0] = s
-                model_matrix[1,1] = s
-                model_matrix[2,2] = s
+                model_matrix[0, 0] = s
+                model_matrix[1, 1] = s
+                model_matrix[2, 2] = s
 
                 self.programs["standard"]["model"].write(model_matrix.tobytes())
                 self.programs["standard"]["view"].write(view_matrix.tobytes())
@@ -825,7 +947,6 @@ class OpenGLRenderer:
     def _render_face_normal(self, frame_data, config, view_matrix, proj_matrix):
         """Render face normal"""
         # Placeholder as orientation data is not explicitly available in points
-        pass
 
     def _render_arrow(
         self,
@@ -843,11 +964,11 @@ class OpenGLRenderer:
         self._render_cylinder_between_points(
             start_pos,
             end_pos,
-            0.01, # Thin shaft
+            0.01,  # Thin shaft
             color,
             opacity,
             view_matrix,
-            proj_matrix
+            proj_matrix,
         )
 
         # Head (Cone)
@@ -876,9 +997,9 @@ class OpenGLRenderer:
 
             # Scale
             s = 0.04
-            model_matrix[0,0] = s
-            model_matrix[1,1] = s * 2.0 # Longer head
-            model_matrix[2,2] = s
+            model_matrix[0, 0] = s
+            model_matrix[1, 1] = s * 2.0  # Longer head
+            model_matrix[2, 2] = s
 
             self.programs["standard"]["model"].write(model_matrix.tobytes())
             self.programs["standard"]["view"].write(view_matrix.tobytes())
