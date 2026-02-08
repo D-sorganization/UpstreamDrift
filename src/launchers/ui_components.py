@@ -842,7 +842,23 @@ class SettingsDialog(QDialog):
         if self._diagnostics_data:
             self._render_diagnostics(self._diagnostics_data)
 
-        # Error log viewer
+        # Process output log viewer
+        proc_group = QGroupBox("Process Output Log (recent)")
+        proc_inner = QVBoxLayout(proc_group)
+        self._proc_log_viewer = QTextEdit()
+        self._proc_log_viewer.setReadOnly(True)
+        self._proc_log_viewer.setMaximumHeight(180)
+        self._proc_log_viewer.setStyleSheet(
+            "QTextEdit {"
+            "  background-color: #0d0d0d; color: #00ff00;"
+            "  font-family: 'Cascadia Code', Consolas, monospace;"
+            "  font-size: 11px;"
+            "}"
+        )
+        proc_inner.addWidget(self._proc_log_viewer)
+        tab_layout.addWidget(proc_group, stretch=1)
+
+        # Application log viewer
         log_group = QGroupBox("Application Log (recent)")
         log_inner = QVBoxLayout(log_group)
         self._log_viewer = QTextEdit()
@@ -859,6 +875,7 @@ class SettingsDialog(QDialog):
         tab_layout.addWidget(log_group, stretch=1)
 
         # Load recent log lines
+        self._load_process_log()
         self._load_app_log()
 
         # Action buttons
@@ -870,9 +887,9 @@ class SettingsDialog(QDialog):
         btn_refresh.clicked.connect(self._refresh_diagnostics)
         btn_row.addWidget(btn_refresh)
 
-        btn_refresh_log = QPushButton("Refresh Log")
-        btn_refresh_log.setToolTip("Reload application log")
-        btn_refresh_log.clicked.connect(self._load_app_log)
+        btn_refresh_log = QPushButton("Refresh Logs")
+        btn_refresh_log.setToolTip("Reload all log files")
+        btn_refresh_log.clicked.connect(self._refresh_all_logs)
         btn_row.addWidget(btn_refresh_log)
 
         tab_layout.addLayout(btn_row)
@@ -898,6 +915,30 @@ class SettingsDialog(QDialog):
                 except Exception:
                     pass
         self._log_viewer.setPlainText("(No log file found)")
+
+    def _load_process_log(self) -> None:
+        """Load recent lines from the process output log file."""
+        log_path = Path.home() / ".golf_modeling_suite" / "process_output.log"
+        if log_path.exists():
+            try:
+                text = log_path.read_text(encoding="utf-8", errors="replace")
+                lines = text.strip().splitlines()
+                recent = "\n".join(lines[-300:])
+                self._proc_log_viewer.setPlainText(recent)
+                self._proc_log_viewer.moveCursor(
+                    self._proc_log_viewer.textCursor().End  # type: ignore[arg-type]
+                )
+                return
+            except Exception:
+                pass
+        self._proc_log_viewer.setPlainText(
+            "(No process output log yet — launch a model to generate output)"
+        )
+
+    def _refresh_all_logs(self) -> None:
+        """Refresh both log viewers."""
+        self._load_process_log()
+        self._load_app_log()
 
     def _render_diagnostics(self, data: dict[str, Any]) -> None:
         """Render diagnostics results as styled HTML."""

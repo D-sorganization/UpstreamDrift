@@ -13,6 +13,7 @@ Supports two output modes:
 
 from __future__ import annotations
 
+import datetime
 import os
 import subprocess
 import sys
@@ -87,6 +88,11 @@ class ProcessManager:
         self.use_separate_terminals = use_separate_terminals
         self._output_threads: dict[str, threading.Thread] = {}
 
+        # Persistent log file for all process output
+        self._log_dir = Path.home() / ".golf_modeling_suite"
+        self._log_file_path = self._log_dir / "process_output.log"
+        self._init_log_file()
+
     def get_subprocess_env(self) -> dict[str, str]:
         """Get environment variables for subprocess execution.
 
@@ -114,12 +120,62 @@ class ProcessManager:
 
         return env
 
+    def _init_log_file(self) -> None:
+        """Initialize the persistent process output log file."""
+        try:
+            self._log_dir.mkdir(parents=True, exist_ok=True)
+            # Truncate if larger than 2 MB to prevent unbounded growth
+            if (
+                self._log_file_path.exists()
+                and self._log_file_path.stat().st_size > 2 * 1024 * 1024
+            ):
+                # Keep last 500 lines
+                lines = self._log_file_path.read_text(
+                    encoding="utf-8", errors="replace"
+                ).splitlines()
+                self._log_file_path.write_text(
+                    "\n".join(lines[-500:]) + "\n", encoding="utf-8"
+                )
+        except Exception as e:
+            logger.debug("Could not init log file: %s", e)
+
+    @classmethod
+    def get_log_path(cls) -> Path:
+        """Return the path to the persistent process output log."""
+        return Path.home() / ".golf_modeling_suite" / "process_output.log"
+
+    def _write_log_line(self, name: str, line: str) -> None:
+        """Append a timestamped line to the persistent log file."""
+        try:
+            ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(self._log_file_path, "a", encoding="utf-8") as f:
+                f.write(f"[{ts}] [{name}] {line}\n")
+        except Exception:
+            pass  # Never let logging crash the app
+
     def _emit_output(self, name: str, line: str) -> None:
-        """Route a line of process output to the callback or logger."""
+        """Route a line of process output to callback, logger, and log file."""
+        self._write_log_line(name, line)
         if self.output_callback is not None:
             self.output_callback(name, line)
         else:
             logger.info("[%s] %s", name, line)
+
+    def attach_process(self, name: str, process: subprocess.Popen[bytes]) -> None:
+        """Attach an externally-created process for output streaming.
+
+        Use this for processes not created by ProcessManager (e.g. Docker
+        containers) that still need their output captured in the unified
+        console and log file.
+        """
+        self.running_processes[name] = process
+        t = threading.Thread(
+            target=self._stream_output,
+            args=(name, process),
+            daemon=True,
+        )
+        t.start()
+        self._output_threads[name] = t
 
     def _stream_output(self, name: str, process: subprocess.Popen[bytes]) -> None:
         """Read stdout/stderr from *process* and emit lines until EOF.

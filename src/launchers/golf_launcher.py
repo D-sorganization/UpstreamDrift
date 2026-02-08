@@ -227,7 +227,6 @@ class GolfLauncher(QMainWindow):
         self.layout_edit_mode = False  # Track if layout editing is enabled
 
         # Initialize process output console (unified terminal)
-        self._console_output: list[str] = []
         self._setup_process_console()
 
         # Initialize process and model managers (extracted from god class)
@@ -1521,14 +1520,11 @@ except Exception as e:
         try:
             logger.info("Launching URDF Generator: %s", script_path)
 
-            # Launch detached
-            process = secure_popen(
-                [sys.executable, str(script_path)],
-                cwd=str(REPOS_ROOT),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            process = self.process_manager.launch_script(
+                "urdf_generator", script_path, REPOS_ROOT
             )
-
-            self.running_processes["urdf_generator"] = process
+            if not process:
+                raise RuntimeError("ProcessManager returned None")
             self.show_toast("URDF Generator launched.", "success")
             self.lbl_status.setText("> URDF Generator Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
@@ -1560,13 +1556,11 @@ except Exception as e:
 
         try:
             logger.info("Launching C3D Viewer: %s", c3d_script)
-            process = secure_popen(
-                [sys.executable, str(c3d_script)],
-                cwd=str(c3d_script.parent),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            process = self.process_manager.launch_script(
+                "c3d_viewer", c3d_script, c3d_script.parent
             )
-
-            self.running_processes["c3d_viewer"] = process
+            if not process:
+                raise RuntimeError("ProcessManager returned None")
             self.show_toast("C3D Viewer launched.", "success")
 
         except Exception as e:
@@ -1588,14 +1582,11 @@ except Exception as e:
 
         try:
             logger.info("Launching Shot Tracer: %s", shot_tracer_script)
-            process = secure_popen(
-                [sys.executable, str(shot_tracer_script)],
-                cwd=str(REPOS_ROOT),  # Run from project root for imports
-                env=self._get_subprocess_env(),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            process = self.process_manager.launch_script(
+                "shot_tracer", shot_tracer_script, REPOS_ROOT
             )
-
-            self.running_processes["shot_tracer"] = process
+            if not process:
+                raise RuntimeError("ProcessManager returned None")
             self.show_toast("Shot Tracer launched.", "success")
 
         except Exception as e:
@@ -2101,11 +2092,11 @@ except Exception as e:
             )
 
             if viewer_script.exists():
-                process = secure_popen(
-                    [sys.executable, str(viewer_script), str(path)],
-                    creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+                process = self.process_manager.launch_script(
+                    path.name, viewer_script, viewer_script.parent
                 )
-                self.running_processes[path.name] = process
+                if not process:
+                    raise RuntimeError("ProcessManager returned None")
                 self.show_toast("Launched Passive Viewer", "success")
             else:
                 # Fallback if script missing
@@ -2158,10 +2149,12 @@ except Exception as e:
                 model_name=model.name,
                 repo_path=repo_path,
                 use_gpu=use_gpu,
+                capture_output=True,
             )
 
             if process:
-                self.running_processes[model.name] = process
+                # Route Docker output through the unified console
+                self.process_manager.attach_process(model.name, process)
                 self.show_toast(f"{model.name} Launched (Docker)", "success")
                 self.lbl_status.setText(f"● {model.name} Running (Docker)")
                 self.lbl_status.setStyleSheet("color: #30D158;")
