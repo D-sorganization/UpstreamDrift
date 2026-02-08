@@ -407,9 +407,8 @@ async def execute_feature(
         from src.shared.python.control_features_registry import ControlFeaturesRegistry
 
         registry = ControlFeaturesRegistry(engine)
-        result = registry.execute(
-            request.feature_name, **request.args
-        )  # nosemgrep: sql-injection-db-cursor-execute
+        # nosemgrep: sql-injection-db-cursor-execute
+        result = registry.execute(request.feature_name, **request.args)
         return {"feature": request.feature_name, "result": result}
 
     except ValueError as exc:
