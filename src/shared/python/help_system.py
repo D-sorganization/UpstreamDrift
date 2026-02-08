@@ -22,8 +22,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QFont, QKeySequence, QShortcut
+from PyQt6.QtCore import QSize, Qt, QUrl
+from PyQt6.QtGui import QDesktopServices, QFont, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -307,6 +307,16 @@ class HelpDialog(QDialog):
         lbl_links.setOpenExternalLinks(True)
         layout.addWidget(lbl_links)
 
+        # Report a Bug button
+        btn_bug = QPushButton("Report a Bug")
+        btn_bug.setStyleSheet(
+            "background-color: #d32f2f; color: white; padding: 6px 14px;"
+            " border: none; border-radius: 4px;"
+        )
+        btn_bug.setToolTip("Report a bug via email")
+        btn_bug.clicked.connect(self._report_bug)
+        layout.addWidget(btn_bug)
+
         layout.addStretch()
 
         # Close button
@@ -329,6 +339,16 @@ class HelpDialog(QDialog):
         """Focus the search input."""
         self.search_input.setFocus()
         self.search_input.selectAll()
+
+    def _report_bug(self) -> None:
+        """Open default mail client to report a bug."""
+        from urllib.parse import quote
+
+        subject = "Bug Report: Golf Modeling Suite"
+        body = "Please describe the issue you encountered:\n\n"
+        email = "support@golfmodelingsuite.com"
+        mailto_url = f"mailto:{email}?subject={quote(subject)}&body={quote(body)}"
+        QDesktopServices.openUrl(QUrl(mailto_url))
 
     def _apply_styles(self) -> None:
         """Apply CSS styles to the dialog."""
