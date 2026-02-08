@@ -14,7 +14,7 @@ from dtack.backends.pink_backend import PINKBackend
 from dtack.backends.pinocchio_backend import PinocchioBackend
 
 
-class BackendType(str, Enum):
+class BackendType(str, Enum):  # noqa: UP042
     """Supported backend types."""
 
     PINOCCHIO = "pinocchio"
