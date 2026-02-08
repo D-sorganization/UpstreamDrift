@@ -26,7 +26,6 @@ Usage:
 from __future__ import annotations
 
 import logging
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -57,7 +56,9 @@ try:
     if not _colors_path.exists():
         raise ImportError(f"vendor theme module not found at {_colors_path}")
 
-    _spec = importlib.util.spec_from_file_location("_vendor_theme_colors", str(_colors_path))
+    _spec = importlib.util.spec_from_file_location(
+        "_vendor_theme_colors", str(_colors_path)
+    )
     _vendor_colors = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
     _spec.loader.exec_module(_vendor_colors)  # type: ignore[union-attr]
 
