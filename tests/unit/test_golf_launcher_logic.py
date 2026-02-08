@@ -249,9 +249,11 @@ class TestGolfLauncherLogic:
         which might trigger TypeErrors with our MockQMainWindow parent.
         """
         # Patch where it is defined, so imports get the mock
-        with patch("src.shared.python.help_system.HelpButton") as mock_btn, \
-             patch("src.shared.python.help_system.HelpDialog"), \
-             patch("src.shared.python.help_system.TooltipManager"):
+        with (
+            patch("src.shared.python.help_system.HelpButton") as mock_btn,
+            patch("src.shared.python.help_system.HelpDialog"),
+            patch("src.shared.python.help_system.TooltipManager"),
+        ):
             yield mock_btn
 
     @pytest.fixture(autouse=True)

@@ -603,7 +603,6 @@ class OpenGLRenderer:
         """Create detailed club geometry"""
         # Reuse cylinder for shaft, sphere for head (scaled)
         # Geometry already exists in vaos["cylinder"] and vaos["sphere"]
-        pass
 
     def _create_arrow_geometry(self):
         """Create arrow geometry for force/torque vectors"""
@@ -949,7 +948,6 @@ class OpenGLRenderer:
     def _render_face_normal(self, frame_data, config, view_matrix, proj_matrix):
         """Render face normal"""
         # Placeholder as orientation data is not explicitly available in points
-        pass
 
     def _render_arrow(
         self,
