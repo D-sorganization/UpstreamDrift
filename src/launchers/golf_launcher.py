@@ -34,9 +34,9 @@ from src.launchers.ui_components import (
     ContextHelpDock,
     DockerCheckThread,
     DraggableModelCard,
-    EnvironmentDialog,
     GolfSplashScreen,
     LayoutManagerDialog,
+    SettingsDialog,
     StartupResults,
 )
 from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
@@ -81,6 +81,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QScrollArea,
+    QSplitter,
     QVBoxLayout,
     QWidget,
 )
@@ -188,7 +189,7 @@ class GolfLauncher(QMainWindow):
                             If provided, skips redundant loading of registry and engines.
         """
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite - GolfingRobot")
+        self.setWindowTitle("Golf Modeling Suite - UpstreamDrift")
         self.resize(1400, 900)
         self.center_window()
 
@@ -197,14 +198,10 @@ class GolfLauncher(QMainWindow):
             startup_results.startup_time_ms if startup_results else 0
         )
 
-        # Set Icon - Prefer .ico on Windows for proper taskbar/title bar display
+        # Set Icon - UpstreamDrift logo (golfer swoosh)
         icon_candidates = [
-            ASSETS_DIR / "golf_suite_unified.ico",  # Multi-size .ico (best for Windows)
-            ASSETS_DIR / "golf_robot_windows_optimized.ico",
-            ASSETS_DIR / "golf_icon.ico",
-            ASSETS_DIR / "golf_robot_windows_optimized.png",
-            ASSETS_DIR / "golf_robot_icon.png",
-            ASSETS_DIR / "golf_icon.png",
+            ASSETS_DIR / "golf_logo.ico",  # UpstreamDrift logo .ico (best for Windows)
+            ASSETS_DIR / "golf_logo.png",  # UpstreamDrift logo .png fallback
         ]
 
         icon_loaded = False
@@ -784,12 +781,30 @@ except Exception as e:
         top_bar = self._setup_top_bar()
         main_layout.addLayout(top_bar)
 
-        # --- Launcher Grid ---
-        self._setup_grid_area(main_layout)
+        # --- Content area with horizontal splitter (tiles | AI chat) ---
+        self.content_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.content_splitter.setHandleWidth(3)
+        self.content_splitter.setStyleSheet(
+            "QSplitter::handle { background-color: #484f58; }"
+        )
 
-        # --- Bottom Bar ---
+        # Left panel: launcher grid + bottom bar
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(20)
+        self._setup_grid_area(left_layout)
         bottom_bar = self._setup_bottom_bar()
-        main_layout.addLayout(bottom_bar)
+        left_layout.addLayout(bottom_bar)
+
+        self.content_splitter.addWidget(left_panel)
+
+        # Right panel: AI chat (added to splitter, hidden by default)
+        self._ai_visible = False
+        if AI_AVAILABLE:
+            self._setup_ai_panel()
+
+        main_layout.addWidget(self.content_splitter, 1)
 
         # Apply dark theme
         self.apply_styles()
@@ -838,7 +853,7 @@ except Exception as e:
 
         action_console = QAction("&Process Output Console", self)
         action_console.setCheckable(True)
-        action_console.setChecked(True)
+        action_console.setChecked(False)
         action_console.setShortcut("Ctrl+`")
         action_console.triggered.connect(
             lambda checked: self._console_dock.setVisible(checked)
@@ -850,11 +865,11 @@ except Exception as e:
         tools_menu = menubar.addMenu("&Tools")
 
         action_env = QAction("&Environment Manager...", self)
-        action_env.triggered.connect(self.open_environment_manager)
+        action_env.triggered.connect(lambda: self._open_settings(tab=2))
         tools_menu.addAction(action_env)
 
         action_diag = QAction("&Diagnostics...", self)
-        action_diag.triggered.connect(self.open_diagnostics)
+        action_diag.triggered.connect(lambda: self._open_settings(tab=3))
         tools_menu.addAction(action_diag)
 
         # Help Menu
@@ -938,7 +953,11 @@ except Exception as e:
                 self.context_help.hide()
 
     def _setup_top_bar(self) -> QHBoxLayout:
-        """Set up the top tool bar."""
+        """Set up the top tool bar.
+
+        Home page is focused on launching — all configuration controls
+        (Docker, WSL, GPU, Live Viz, Layout) live in the Settings dialog.
+        """
         top_bar = QHBoxLayout()
 
         # Status Indicator
@@ -946,56 +965,7 @@ except Exception as e:
         self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
         top_bar.addWidget(self.lbl_status)
 
-        # Configuration options
-        self.chk_live = QCheckBox("Live Viz")
-        self.chk_live.setChecked(True)
-        self.chk_live.setToolTip("Enable real-time 3D visualization during simulation")
-        top_bar.addWidget(self.chk_live)
-
-        self.chk_gpu = QCheckBox("GPU")
-        self.chk_gpu.setChecked(False)
-        self.chk_gpu.setToolTip(
-            "Use GPU for physics computation (requires supported hardware)"
-        )
-        top_bar.addWidget(self.chk_gpu)
-
-        # Overlay Toggle
-        overlay_btn = QPushButton("Overlay")
-        overlay_btn.setCheckable(True)
-        overlay_btn.clicked.connect(self._toggle_overlay)
-        overlay_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #444; color: white; border: none;
-                padding: 5px 10px; border-radius: 4px;
-            }
-            QPushButton:checked {
-                background-color: #007ACC;
-            }
-            QPushButton:hover { background-color: #555; }
-        """)
-        top_bar.addWidget(overlay_btn)
-
-        # Docker mode toggle
-        self.chk_docker = QCheckBox("Docker")
-        self.chk_docker.setChecked(False)
-        self.chk_docker.setToolTip(
-            "Run physics engines in Docker containers (requires Docker Desktop)\n"
-            "Use this for engines not installed locally (Drake, Pinocchio, etc.)"
-        )
-        self.chk_docker.stateChanged.connect(self._on_docker_mode_changed)
-        top_bar.addWidget(self.chk_docker)
-
-        # WSL mode toggle - for full Pinocchio/Drake/Crocoddyl support
-        self.chk_wsl = QCheckBox("WSL")
-        self.chk_wsl.setChecked(False)
-        self.chk_wsl.setToolTip(
-            "Run in WSL2 Ubuntu environment (full Pinocchio/Drake/Crocoddyl support)\n"
-            "Recommended for advanced robotics features not available on Windows"
-        )
-        self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
-        top_bar.addWidget(self.chk_wsl)
-
-        # Execution Mode Label
+        # Execution Mode Label (compact status, stays on top bar)
         self.lbl_execution_mode = QLabel("Mode: Local (Windows)")
         self.lbl_execution_mode.setStyleSheet(
             "color: #FFD60A; font-weight: bold; margin-left: 10px;"
@@ -1010,43 +980,38 @@ except Exception as e:
         # Search Bar
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search models...")
-        self.search_input.setFixedWidth(200)
+        self.search_input.setFixedWidth(250)
         self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
         self.search_input.setAccessibleName("Search models")
-        self.search_input.setClearButtonEnabled(True)  # Add clear button
+        self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
-        # Modify Layout toggle button
+        # --- Hidden widgets (managed by Settings dialog, not shown on top bar) ---
+        # Configuration checkboxes
+        self.chk_live = QCheckBox("Live Viz")
+        self.chk_live.setChecked(True)
+
+        self.chk_gpu = QCheckBox("GPU")
+        self.chk_gpu.setChecked(False)
+
+        self.chk_docker = QCheckBox("Docker")
+        self.chk_docker.setChecked(False)
+        self.chk_docker.stateChanged.connect(self._on_docker_mode_changed)
+
+        self.chk_wsl = QCheckBox("WSL")
+        self.chk_wsl.setChecked(False)
+        self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
+
+        # Layout controls
         self.btn_modify_layout = QPushButton("Layout: Locked")
         self.btn_modify_layout.setCheckable(True)
         self.btn_modify_layout.setChecked(False)
-        self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
         self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
-        self.btn_modify_layout.setStyleSheet("""
-            QPushButton {
-                background-color: #444444;
-                color: #cccccc;
-                padding: 8px 16px;
-            }
-            QPushButton:checked {
-                background-color: #007acc;
-                color: white;
-            }
-            """)
-        top_bar.addWidget(self.btn_modify_layout)
 
         self.btn_customize_tiles = QPushButton("Edit Tiles")
         self.btn_customize_tiles.setEnabled(False)
-        self.btn_customize_tiles.setToolTip("Add or remove launcher tiles in edit mode")
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
-        self.btn_customize_tiles.setCursor(Qt.CursorShape.PointingHandCursor)
-        top_bar.addWidget(self.btn_customize_tiles)
-
-        btn_env = QPushButton("Environment")
-        btn_env.setToolTip("Manage Docker environment and dependencies")
-        btn_env.clicked.connect(self.open_environment_manager)
-        top_bar.addWidget(btn_env)
 
         btn_help = QPushButton("Help")
         btn_help.setToolTip("View documentation and user guide (F1)")
@@ -1066,22 +1031,22 @@ except Exception as e:
         """)
         top_bar.addWidget(btn_help)
 
-        btn_diagnostics = QPushButton("Diagnostics")
-        btn_diagnostics.setToolTip("Run diagnostics to troubleshoot launcher issues")
-        btn_diagnostics.setStyleSheet("""
+        btn_settings = QPushButton("\u2699 Settings")
+        btn_settings.setToolTip("Diagnostics, environment, and build settings")
+        btn_settings.setStyleSheet("""
             QPushButton {
-                background-color: #6f42c1;
+                background-color: #484f58;
                 color: white;
                 border: none;
                 padding: 5px 10px;
                 border-radius: 4px;
             }
             QPushButton:hover {
-                background-color: #7c4dff;
+                background-color: #6e7681;
             }
         """)
-        btn_diagnostics.clicked.connect(self.open_diagnostics)
-        top_bar.addWidget(btn_diagnostics)
+        btn_settings.clicked.connect(self._open_settings)
+        top_bar.addWidget(btn_settings)
 
         # Report Bug moved to Help dialog bottom bar
 
@@ -1107,9 +1072,6 @@ except Exception as e:
                 }
                 """)
             top_bar.addWidget(self.btn_ai)
-
-            # Setup AI Dock Widget (Hidden by default)
-            self._setup_ai_dock()
 
         # Context Help Dock
         self._setup_context_help()
@@ -1260,6 +1222,8 @@ except Exception as e:
         )
         self._console_dock.setWidget(console_container)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._console_dock)
+        # Hidden by default — shown automatically when process output arrives
+        self._console_dock.hide()
 
     def _on_process_output(self, engine_name: str, line: str) -> None:
         """Receive a line of output from a subprocess.
@@ -1276,6 +1240,12 @@ except Exception as e:
         """Append a formatted line to the console widget (GUI thread only)."""
         import datetime
 
+        # Auto-show console on first output
+        if not self._console_dock.isVisible():
+            self._console_dock.show()
+            if hasattr(self, "_action_console"):
+                self._action_console.setChecked(True)
+
         ts = datetime.datetime.now().strftime("%H:%M:%S")
         self._console_text.appendPlainText(f"[{ts}] [{engine_name}] {line}")
 
@@ -1291,28 +1261,28 @@ except Exception as e:
             self.search_input.clear()
             self.search_input.clearFocus()
 
-    def _setup_ai_dock(self) -> None:
-        """Set up the AI Assistant dock widget."""
+    def _setup_ai_panel(self) -> None:
+        """Set up the AI Assistant panel inside the content splitter."""
         if not AI_AVAILABLE:
             return
 
-        self.ai_dock = QDockWidget("AI Assistant", self)
-        self.ai_dock.setAllowedAreas(
-            Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea
-        )
-
-        # Create AI Panel
         try:
             self.ai_panel = AIAssistantPanel(self)
-            self.ai_dock.setWidget(self.ai_panel)
-            self.ai_dock.hide()  # Hidden by default
-            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.ai_dock)
+            self.ai_panel.setMinimumWidth(0)
+            self.content_splitter.addWidget(self.ai_panel)
 
-            # Connect dock visibility change
-            self.ai_dock.visibilityChanged.connect(self._on_ai_dock_visibility_changed)
+            # Allow the AI panel (index 1) to collapse fully
+            self.content_splitter.setCollapsible(1, True)
 
-            # Connect settings request
+            # Start collapsed — use max-width 0 instead of hide() so the
+            # splitter keeps managing the widget.
+            self.ai_panel.setMaximumWidth(0)
+
+            # Connect settings request and close button
             self.ai_panel.settings_requested.connect(self._open_ai_settings)
+            self.ai_panel.close_requested.connect(
+                lambda: self.toggle_ai_assistant(False)
+            )
 
         except Exception as e:
             logger.error(f"Failed to initialize AI panel: {e}")
@@ -1320,26 +1290,29 @@ except Exception as e:
             self.btn_ai.setToolTip(f"AI Assistant unavailable: {e}")
 
     def toggle_ai_assistant(self, checked: bool) -> None:
-        """Toggle the AI Assistant dock visibility.
+        """Toggle the AI Assistant panel visibility via the content splitter.
 
         Args:
             checked: Whether the button is checked.
         """
-        if not AI_AVAILABLE or not hasattr(self, "ai_dock"):
+        if not AI_AVAILABLE or not hasattr(self, "ai_panel"):
             return
 
+        self._ai_visible = checked
+        # Keep the toggle button in sync when called programmatically
+        if hasattr(self, "btn_ai") and self.btn_ai.isChecked() != checked:
+            self.btn_ai.setChecked(checked)
+
+        total = self.content_splitter.width() or 1200
+
         if checked:
-            self.ai_dock.show()
+            # Remove max-width constraint and allocate 30% to AI panel
+            self.ai_panel.setMaximumWidth(16777215)  # QWIDGETSIZE_MAX
+            self.content_splitter.setSizes([int(total * 0.7), int(total * 0.3)])
         else:
-            self.ai_dock.hide()
-
-    def _on_ai_dock_visibility_changed(self, visible: bool) -> None:
-        """Handle AI dock visibility change.
-
-        Args:
-            visible: Whether the dock is visible.
-        """
-        self.btn_ai.setChecked(visible)
+            # Collapse AI panel to zero width
+            self.content_splitter.setSizes([total, 0])
+            self.ai_panel.setMaximumWidth(0)
 
     def _on_docker_mode_changed(self, state: int) -> None:
         """Handle Docker mode toggle change.
@@ -1872,16 +1845,20 @@ except Exception as e:
         """
         self._show_help_dialog()
 
-    def open_diagnostics(self) -> None:
-        """Open the diagnostics dialog to troubleshoot launcher issues."""
+    def _open_settings(self, tab: int = 0) -> None:
+        """Open the settings dialog with Diagnostics and Rebuild Environment tabs.
+
+        Args:
+            tab: Initial tab index (0=Diagnostics, 1=Rebuild Environment).
+        """
+        diagnostics_data = None
         try:
             from src.launchers.launcher_diagnostics import LauncherDiagnostics
 
             diag = LauncherDiagnostics()
-            results = diag.run_all_checks()
+            diagnostics_data = diag.run_all_checks()
 
-            # Add runtime state information
-            results["runtime_state"] = {
+            diagnostics_data["runtime_state"] = {
                 "available_models_count": len(self.available_models),
                 "available_model_ids": list(self.available_models.keys()),
                 "model_order_count": len(self.model_order),
@@ -1891,97 +1868,45 @@ except Exception as e:
                 "docker_available": self.docker_available,
                 "registry_loaded": self.registry is not None,
             }
-
-            # Create dialog
-            dialog = QMessageBox(self)
-            dialog.setWindowTitle("Launcher Diagnostics")
-            dialog.setIcon(QMessageBox.Icon.Information)
-
-            summary = results["summary"]
-            status_emoji = "✅" if summary["status"] == "healthy" else "⚠️"
-
-            text = f"""
-{status_emoji} Status: {summary["status"].upper()}
-
-Checks: {summary["passed"]} passed, {summary["failed"]} failed, {summary["warnings"]} warnings
-
-Runtime State:
-• Available models: {results["runtime_state"]["available_models_count"]}
-• Model order (tiles): {results["runtime_state"]["model_order_count"]}
-• Model cards: {results["runtime_state"]["model_cards_count"]}
-• Registry loaded: {results["runtime_state"]["registry_loaded"]}
-
-Expected tiles: {summary["expected_tiles"]}
-"""
-
-            # Add check details
-            for check in results["checks"]:
-                if check["status"] == "fail":
-                    text += f"\n❌ {check['name']}: {check['message']}"
-                elif check["status"] == "warning":
-                    text += f"\n⚠️ {check['name']}: {check['message']}"
-
-            # Add recommendations
-            text += "\n\nRecommendations:\n"
-            for rec in results["recommendations"][:5]:
-                text += f"• {rec}\n"
-
-            dialog.setText(text)
-
-            # Add reset button if layout issue detected
-            reset_btn = dialog.addButton(
-                "Reset Layout", QMessageBox.ButtonRole.ActionRole
-            )
-            dialog.addButton(QMessageBox.StandardButton.Ok)
-
-            dialog.exec()
-
-            # Handle reset button
-            if dialog.clickedButton() == reset_btn:
-                self._reset_layout_to_defaults()
-
-        except ImportError as e:
-            QMessageBox.warning(
-                self,
-                "Diagnostics Unavailable",
-                f"Could not load diagnostics module: {e}",
-            )
         except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Diagnostics Error",
-                f"Error running diagnostics: {e}",
-            )
+            logger.warning(f"Failed to run diagnostics: {e}")
+
+        dialog = SettingsDialog(
+            parent=self,
+            diagnostics_data=diagnostics_data,
+            initial_tab=tab,
+        )
+        dialog.reset_layout_requested.connect(self._reset_layout_to_defaults)
+        dialog.exec()
+
+    def open_diagnostics(self) -> None:
+        """Open the settings dialog on the Diagnostics tab."""
+        self._open_settings(tab=3)
+
+    def open_environment_manager(self) -> None:
+        """Open the settings dialog on the Rebuild Environment tab."""
+        self._open_settings(tab=2)
 
     def _reset_layout_to_defaults(self) -> None:
-        """Reset layout configuration to show all 8 default tiles."""
-        from pathlib import Path
-
+        """Reset layout configuration to show all default tiles."""
         config_file = Path.home() / ".golf_modeling_suite" / "launcher_layout.json"
 
         try:
             if config_file.exists():
-                # Backup existing config
                 backup_path = config_file.with_suffix(".json.bak")
                 config_file.rename(backup_path)
                 logger.info(f"Backed up existing config to {backup_path}")
 
-            # Re-initialize model order with all defaults
             self._initialize_model_order()
             self._sync_model_cards()
             self._rebuild_grid()
 
-            self.show_toast("Layout reset to defaults with all 8 tiles", "success")
+            self.show_toast("Layout reset to defaults", "success")
             logger.info("Layout reset to defaults")
 
         except Exception as e:
             logger.error(f"Failed to reset layout: {e}")
             self.show_toast(f"Failed to reset layout: {e}", "error")
-
-    def open_environment_manager(self) -> None:
-        """Open the environment manager dialog."""
-        dialog = EnvironmentDialog(self)
-        dialog.exec()
 
     def launch_simulation(self) -> None:
         """Launch the selected simulation."""
@@ -2345,6 +2270,18 @@ Expected tiles: {summary["expected_tiles"]}
 
 def main() -> None:
     """Application entry point."""
+    # On Windows, set AppUserModelID so the taskbar shows our icon
+    # instead of the generic Python icon.
+    if sys.platform == "win32":
+        try:
+            import ctypes
+
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                "UpstreamDrift.GolfModelingSuite.Launcher.1"
+            )
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
