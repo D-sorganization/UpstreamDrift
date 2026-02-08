@@ -158,7 +158,9 @@ def create_local_app() -> FastAPI:
         alt_path = launcher_logos / logo_name
         if alt_path.exists() and alt_path.is_file():
             return FileResponse(str(alt_path))
-        return JSONResponse(status_code=404, content={"detail": f"Logo not found: {logo_name}"})
+        return JSONResponse(
+            status_code=404, content={"detail": f"Logo not found: {logo_name}"}
+        )
 
     # Health check
     @app.get("/api/health")
@@ -277,6 +279,7 @@ def create_local_app() -> FastAPI:
                 if full_path and static_file.exists() and static_file.is_file():
                     return FileResponse(str(static_file))
                 return FileResponse(str(index_html))
+
     else:
         warning = f"UI build not found at {ui_path}. Run npm install && npm run build."
         logger.warning(warning)
@@ -439,11 +442,11 @@ def print_server_info(host: str, port: int):
     └─────────────────────────────────────────────────────────┘{RESET}
     """)
     except UnicodeEncodeError:
-        print(f"\n    Golf Modeling Suite - Local Server")
+        print("\n    Golf Modeling Suite - Local Server")
         print(f"    Running at: http://{host}:{port}")
         print(f"    API Docs:   http://{host}:{port}/api/docs")
-        print(f"    Mode: LOCAL (no auth required)")
-        print(f"    Press Ctrl+C to stop.\n")
+        print("    Mode: LOCAL (no auth required)")
+        print("    Press Ctrl+C to stop.\n")
 
 
 def main():
