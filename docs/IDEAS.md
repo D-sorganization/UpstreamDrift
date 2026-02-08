@@ -43,6 +43,17 @@ This document serves as the central registry for scientific research topics, tec
   - _Outcome_: Understanding of motor control strategies and coordination complexity.
   - _Ref_: d'Avella, A., et al. (2003). "Combinations of muscle synergies in the construction of a natural motor behavior."
 
+### Injury & Learning
+
+- **Muscle-Tendon Strain Modeling**: Quantify strain in specific high-risk muscle groups (e.g., lead adductor magnus, trailing internal oblique) using Hill-type muscle models to predict acute injury risk beyond generic joint stress.
+  - _Data Needed_: Musculoskeletal geometry and kinematics.
+  - _Outcome_: Specific "Strain Hazard" map for injury prevention.
+
+- **Differential Learning Protocols**: Simulate the effect of movement variability on motor learning and robustness. Instead of minimizing error, this approach injects noise into target parameters to explore the solution space.
+  - _Data Needed_: Stochastic target generation algorithms.
+  - _Outcome_: Training protocols that accelerate skill acquisition.
+  - _Ref_: Schöllhorn, W. I. (1999). "Individualality of human movements."
+
 ## 2. Ball Flight Physics
 
 ### Aerodynamics
@@ -62,6 +73,15 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: $C_L$ and $C_D$ surfaces as functions of $Re$ and $S$.
   - _Outcome_: High-fidelity trajectory simulation across all ball speeds (driver vs. wedge).
   - _Ref_: Bearman, P. W., & Harvey, J. K. (1976). "Golf ball aerodynamics."
+
+- **Hydrodynamic Lubrication (Wet Play)**: Model the water film thickness at impact and its drastic reduction of friction/spin generation ($ \mu_{wet} \ll \mu_{dry} $).
+  - _Data Needed_: Water film thickness vs. impact pressure.
+  - _Outcome_: Accurate "Wet Weather" mode predicting flyer lies and reduced spin.
+  - _Ref_: Cross, R. (2004). "Physics of baseball and softball." (Relevant friction principles).
+
+- **Dimple Geometry Optimization**: Use surrogate models to predict aerodynamic coefficients ($C_L, C_D$) for custom dimple patterns without wind tunnel testing.
+  - _Data Needed_: CFD training data linking geometry features to aero coefficients.
+  - _Outcome_: Rapid prototyping of ball designs.
 
 ### Trajectory
 
@@ -115,6 +135,16 @@ This document serves as the central registry for scientific research topics, tec
   - _Outcome_: Accurate prediction of impact position and dynamic face angle.
   - _Ref_: Mather, J. S. B. (2000). "The role of the shaft in the golf swing."
 
+### Ball & Face Mechanics
+
+- **Multi-Layer Compression Dynamics**: Model the interaction between core, mantle, and cover layers to predict ball speed and spin separation. Finite Element or lumped-parameter modeling of deformation.
+  - _Data Needed_: Viscoelastic properties of Polybutadiene (core) and Urethane (cover).
+  - _Outcome_: Prediction of "Feel" and performance differences between 2-piece and 4-piece balls.
+
+- **Groove-Edge Sharpness Degradation**: Model the wear of groove radii over time and its effect on "Launch Ratio" (Launch Angle / Dynamic Loft) and Spin Rate, particularly for wedges.
+  - _Data Needed_: Tribological wear rates for varying steel hardness.
+  - _Outcome_: "Wedge Lifespan" predictor based on practice volume.
+
 ## 4. Statistical Methods
 
 ### Analytics
@@ -144,6 +174,14 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Large dataset of swing metrics and outcomes.
   - _Outcome_: Identification of root causes vs. symptoms in swing faults.
 
+- **Fatigue-Induced Kinematic Drift**: Model the progressive degradation of peak power and coordination (sequencing) over a simulation of 18 holes (approx. 4 hours).
+  - _Data Needed_: Decay constants for fast-twitch muscle fibers.
+  - _Outcome_: Prediction of "Back 9" scoring collapse risks.
+
+- **Synthetic Computer Vision Data**: Use the biomechanics engine to render synthetic video frames with perfect ground truth labels (joint centers) to train pose estimation models.
+  - _Data Needed_: High-fidelity 3D golfer meshes and textures.
+  - _Outcome_: Robust "Sim2Real" transfer for markerless motion capture.
+
 ## 5. Simulation Technology
 
 ### Physics Engine
@@ -162,6 +200,12 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Large dataset of physics engine simulations (Input-Output pairs).
   - _Outcome_: Real-time trajectory prediction on mobile devices.
 
+### Haptics & Immersion
+
+- **Haptic Feedback Modeling**: Calculate force-feedback vectors for VR controllers to simulate impact feel (vibration frequency and amplitude).
+  - _Data Needed_: Impact impulse and shaft vibration modes.
+  - _Outcome_: Immersive training in VR environments.
+
 ## 6. Control Theory
 
 ### Robotics
@@ -176,6 +220,10 @@ This document serves as the central registry for scientific research topics, tec
   - _Outcome_: Realistic dispersion patterns generated from biomechanical simulations.
   - _Ref_: Harris, C. M., & Wolpert, D. M. (1998). "Signal-dependent noise determines motor planning."
 
+- **Policy Gradient Swing Optimization**: Use Proximal Policy Optimization (PPO) to find optimal muscle activation patterns that maximize carry distance while minimizing injury risk penalties.
+  - _Data Needed_: Reward function balancing distance, accuracy, and joint stress.
+  - _Outcome_: Identification of theoretically optimal swing mechanics.
+
 ---
 
 ## Workflow Log
@@ -185,3 +233,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-01-29 | Initial Population of Research Ideas                                                                    | All      | Active |
 | 2026-02-01 | Added CoP, Aero Coeffs, Shaft Droop, Monte Carlo, Radar, Noise                                          | All      | Active |
 | 2026-02-13 | Added Power Flow, Muscle Synergy, Trajectory Opt, Flyer Lie, Rigid Impact, Bayesian, Causal, Neural ODE | All      | Active |
+| 2026-02-13 | Added Muscle Strain, Wet Play, Dimple Opt, Multi-Layer Ball, Fatigue, Synthetic Data, PPO               | All      | Active |
