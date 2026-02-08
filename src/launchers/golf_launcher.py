@@ -803,9 +803,10 @@ except Exception as e:
 
         self.content_splitter.addWidget(left_panel)
 
-        # Right panel: AI chat (set up later in _setup_top_bar via _setup_ai_panel)
-        # Placeholder — actual AI panel added in _setup_ai_panel()
+        # Right panel: AI chat (added to splitter, hidden by default)
         self._ai_visible = False
+        if AI_AVAILABLE:
+            self._setup_ai_panel()
 
         main_layout.addWidget(self.content_splitter, 1)
 
@@ -1120,9 +1121,6 @@ except Exception as e:
                 }
                 """)
             top_bar.addWidget(self.btn_ai)
-
-            # Setup AI panel in content splitter (hidden by default)
-            self._setup_ai_panel()
 
         # Context Help Dock
         self._setup_context_help()
