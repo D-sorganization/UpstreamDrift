@@ -161,7 +161,7 @@ class PreferencesDialog(QDialog):
         layout.addWidget(buttons)
 
     def _create_appearance_tab(self) -> QWidget:
-        """Create the appearance settings tab."""
+        """Create the appearance settings tab with fleet theme support."""
         tab = QWidget()
         layout = QVBoxLayout(tab)
         layout.setSpacing(16)
@@ -171,8 +171,29 @@ class PreferencesDialog(QDialog):
         theme_layout = QFormLayout(theme_group)
 
         self.theme_combo = QComboBox()
-        self.theme_combo.addItems(["Dark", "Light", "System"])
-        self.theme_combo.setCurrentText(self.prefs.theme.capitalize())
+
+        # Build theme list: core presets + fleet themes
+        theme_items = ["Dark", "Light", "High Contrast"]
+        try:
+            from src.shared.python.theme import ThemeManager
+
+            fleet = ThemeManager.instance().get_available_fleet_themes()
+            for name in fleet:
+                if name not in theme_items:
+                    theme_items.append(name)
+        except Exception:
+            pass
+
+        self.theme_combo.addItems(theme_items)
+
+        # Match current saved preference
+        saved = self.prefs.theme.capitalize()
+        idx = self.theme_combo.findText(saved)
+        if idx >= 0:
+            self.theme_combo.setCurrentIndex(idx)
+
+        # Live preview on change
+        self.theme_combo.currentTextChanged.connect(self._preview_theme)
         theme_layout.addRow("Color theme:", self.theme_combo)
 
         layout.addWidget(theme_group)
@@ -384,6 +405,27 @@ class PreferencesDialog(QDialog):
     def get_preferences(self) -> UserPreferences:
         """Get the current preferences."""
         return self.prefs
+
+    def _preview_theme(self, theme_name: str) -> None:
+        """Live-preview theme when combo selection changes."""
+        try:
+            from src.shared.python.theme import ThemeManager, ThemePreset
+
+            manager = ThemeManager.instance()
+
+            # Map combo text to preset or fleet theme
+            preset_map = {
+                "Dark": ThemePreset.DARK,
+                "Light": ThemePreset.LIGHT,
+                "High Contrast": ThemePreset.HIGH_CONTRAST,
+            }
+
+            if theme_name in preset_map:
+                manager.set_theme(preset_map[theme_name])
+            else:
+                manager.set_fleet_theme(theme_name)
+        except Exception as e:
+            logger.debug(f"Theme preview failed: {e}")
 
 
 __all__ = ["PreferencesDialog", "UserPreferences", "PREFS_FILE"]

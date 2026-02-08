@@ -241,6 +241,7 @@ class DockerLauncher:
         model_name: str,
         repo_path: Path,
         use_gpu: bool = False,
+        capture_output: bool = False,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Docker container for the given model.
 
@@ -249,6 +250,8 @@ class DockerLauncher:
             model_name: Display name of the model.
             repo_path: Path to the model within the repository.
             use_gpu: Whether to enable GPU support.
+            capture_output: If True, pipe stdout/stderr for unified console
+                capture instead of opening a separate terminal window.
 
         Returns:
             The process object if successful, None otherwise.
@@ -257,10 +260,25 @@ class DockerLauncher:
         self.logger.info(f"Docker Launch: {' '.join(cmd)}")
 
         try:
-            process = subprocess.Popen(
-                cmd,
-                creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0,
-            )
+            if capture_output:
+                # Unified console mode: pipe output for streaming
+                creationflags = 0
+                if os.name == "nt":
+                    creationflags = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    creationflags=creationflags,
+                )
+            else:
+                # Legacy: separate terminal window
+                process = subprocess.Popen(
+                    cmd,
+                    creationflags=(
+                        subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                    ),
+                )
             return process
         except Exception as e:
             self.logger.error(f"Failed to launch Docker container: {e}")
