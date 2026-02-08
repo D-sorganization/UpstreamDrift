@@ -243,6 +243,18 @@ def mock_pyqt(monkeypatch):
 
 class TestGolfLauncherLogic:
     @pytest.fixture(autouse=True)
+    def mock_help_system(self):
+        """
+        Mock the help system to avoid instantiation of real QWidgets (HelpButton)
+        which might trigger TypeErrors with our MockQMainWindow parent.
+        """
+        # Patch where it is defined, so imports get the mock
+        with patch("src.shared.python.help_system.HelpButton") as mock_btn, \
+             patch("src.shared.python.help_system.HelpDialog"), \
+             patch("src.shared.python.help_system.TooltipManager"):
+            yield mock_btn
+
+    @pytest.fixture(autouse=True)
     def setup_launcher_module(self, mock_pyqt):
         """
         Reload the module to ensure it uses the patched sys.modules.
