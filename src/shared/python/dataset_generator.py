@@ -988,5 +988,5 @@ class DatasetGenerator:
             return self.export_to_csv(dataset, output_path)
         else:
             raise ValueError(
-                f"Unsupported export format: {format}. " "Supported: hdf5, sqlite, csv"
+                f"Unsupported export format: {format}. Supported: hdf5, sqlite, csv"
             )

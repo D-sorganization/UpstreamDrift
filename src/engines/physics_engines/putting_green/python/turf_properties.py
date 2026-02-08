@@ -247,7 +247,7 @@ class TurfProperties:
             Modified velocity with grain effect
         """
         speed = np.linalg.norm(velocity)
-        if speed < 1e-10:
+        if speed < 0.05:  # Grain effect negligible at very low speeds
             return velocity
 
         v_dir = velocity / speed
