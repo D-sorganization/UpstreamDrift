@@ -350,7 +350,7 @@ class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
     def __init__(self, model: Any, parent_launcher: Any):
-        super().__init__(parent_launcher)
+        super().__init__(None)
         self.model = model
         self.parent_launcher = parent_launcher
 
