@@ -15,11 +15,11 @@ import pytest
 
 from src.shared.python.flight_models import (
     BallFlightModel,
+    ConstantCoefficientModel,
     FlightModelRegistry,
     FlightModelType,
     FlightResult,
     MacDonaldHanzelyModel,
-    PlaceholderModel,
     TrajectoryPoint,
     UnifiedLaunchConditions,
     WaterlooPennerModel,
@@ -244,7 +244,7 @@ class TestFlightModelRegistry:
         assert isinstance(model, WaterlooPennerModel)
 
         model = FlightModelRegistry.get_model(FlightModelType.NATHAN)
-        assert isinstance(model, PlaceholderModel)
+        assert isinstance(model, ConstantCoefficientModel)
 
 
 # =============================================================================
@@ -332,11 +332,7 @@ class TestPhysicalPlausibility:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that trajectory ends at ground level."""
-        models = [
-            m
-            for m in FlightModelRegistry.get_all_models()
-            if not isinstance(m, PlaceholderModel)
-        ]
+        models = FlightModelRegistry.get_all_models()
 
         for model in models:
             result = model.simulate(driver_launch)
@@ -349,11 +345,7 @@ class TestPhysicalPlausibility:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that landing angle is a descent (positive angle down)."""
-        models = [
-            m
-            for m in FlightModelRegistry.get_all_models()
-            if not isinstance(m, PlaceholderModel)
-        ]
+        models = FlightModelRegistry.get_all_models()
 
         for model in models:
             result = model.simulate(driver_launch)

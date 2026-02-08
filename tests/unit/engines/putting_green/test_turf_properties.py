@@ -154,7 +154,7 @@ class TestTurfProperties:
         """Custom friction coefficient should override computed value."""
         turf = TurfProperties(
             stimp_rating=10,
-            rolling_friction_coefficient=0.15,  # Custom override
+            _friction_override=0.15,  # Custom override
         )
         assert turf.rolling_friction_coefficient == 0.15
 

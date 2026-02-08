@@ -22,6 +22,8 @@ VALID_ANALYSIS_TYPES = {
     "kinematics",
     "kinetics",
     "muscle",
+    "energetics",
+    "swing_sequence",
     "center_of_pressure",
     "club_head",
     "joint_torque",
