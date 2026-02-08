@@ -455,6 +455,20 @@ except Exception as e:
             dialog = LegacyHelpDialog(self)
             dialog.exec()
 
+    def _open_project_map(self) -> None:
+        """Open the Project Map document in the system viewer."""
+        project_map = REPOS_ROOT / "docs" / "PROJECT_MAP.md"
+        if project_map.exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(project_map)))
+        else:
+            QMessageBox.warning(
+                self,
+                "Project Map Not Found",
+                "The Project Map file was not found at:\n"
+                f"{project_map}\n\n"
+                "Please ensure docs/PROJECT_MAP.md exists.",
+            )
+
     def _show_about_dialog(self) -> None:
         """Show the About dialog."""
         QMessageBox.about(
@@ -851,6 +865,10 @@ except Exception as e:
         action_manual.setShortcut("F1")
         action_manual.triggered.connect(lambda: self._show_help_dialog())
         help_menu.addAction(action_manual)
+
+        action_project_map = QAction("&Project Map", self)
+        action_project_map.triggered.connect(self._open_project_map)
+        help_menu.addAction(action_project_map)
 
         # Add topic-specific help items
         help_menu.addSeparator()
