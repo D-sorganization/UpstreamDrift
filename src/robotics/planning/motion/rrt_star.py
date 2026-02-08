@@ -189,8 +189,10 @@ class RRTStarPlanner(MotionPlanner):
                     if goal_cost < best_goal_cost:
                         # Update or add goal node
                         if goal_idx >= 0:
-                            self._nodes[goal_idx].parent_idx = new_idx
-                            self._nodes[goal_idx].cost = goal_cost
+                            # Skip if new_idx is a descendant of goal (would create cycle)
+                            if not self._is_ancestor(goal_idx, new_idx):
+                                self._nodes[goal_idx].parent_idx = new_idx
+                                self._nodes[goal_idx].cost = goal_cost
                         else:
                             goal_node = TreeNode(
                                 config=q_goal.copy(),
