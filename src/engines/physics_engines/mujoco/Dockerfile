@@ -73,7 +73,21 @@ RUN pip install \
     pyyaml==6.0.1 \
     "pathlib2>=2.3.6,<=2.3.7" \
     types-PyYAML==6.0.12.12 \
-    "defusedxml>=0.7.1"
+    "defusedxml>=0.7.1" \
+    structlog>=24.0.0 \
+    colorama>=0.4.6 \
+    simpleeval>=0.9.13 \
+    sympy>=1.12 \
+    mediapipe>=0.10.0 \
+    gymnasium>=0.29.0 \
+    stable-baselines3>=2.0.0 \
+    trimesh>=4.0.0 \
+    robot_descriptions>=1.12.0 \
+    ezc3d>=1.4.0 \
+    fastapi>=0.126.0 \
+    "uvicorn[standard]>=0.24.0" \
+    pydantic>=2.5.0 \
+    httpx>=0.25.0
 
 # ==========================================
 # Stage: MuJoCo

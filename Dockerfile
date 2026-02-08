@@ -46,8 +46,8 @@ RUN conda install -y -c conda-forge \
 COPY requirements.txt /tmp/requirements.txt
 
 # Install Python dependencies from requirements.txt
-# Filter out comments, WSL/Linux notes, and optional packages
-RUN grep -v '^#' /tmp/requirements.txt | grep -v '^$' | grep -v 'robot_descriptions' > /tmp/filtered_requirements.txt && \
+# Filter out comments, WSL/Linux notes, and blank lines
+RUN grep -v '^#' /tmp/requirements.txt | grep -v '^$' > /tmp/filtered_requirements.txt && \
     pip install --no-cache-dir -r /tmp/filtered_requirements.txt
 
 # Install additional physics engines and API server dependencies
@@ -61,20 +61,26 @@ RUN pip install --no-cache-dir \
     osqp \
     myosuite \
     opensim \
+    gymnasium>=0.29.0 \
+    stable-baselines3>=2.0.0 \
+    mediapipe>=0.10.0 \
+    "imageio[ffmpeg]>=2.31.0" \
+    trimesh>=4.0.0 \
+    robot_descriptions>=1.12.0 \
     fastapi>=0.100.0 \
-    uvicorn[standard]>=0.23.0 \
+    "uvicorn[standard]>=0.23.0" \
     slowapi \
     pydantic \
     python-multipart \
     sqlalchemy \
     email-validator \
     bcrypt \
-    python-jose[cryptography] \
-    passlib \
     PyJWT \
+    httpx>=0.25.0 \
     aiofiles \
     python-dateutil \
     websockets \
+    simpleeval>=0.9.13 \
     && echo "Physics engines and API dependencies installed successfully"
 
 

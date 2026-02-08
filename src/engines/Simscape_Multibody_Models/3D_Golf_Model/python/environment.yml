@@ -10,3 +10,6 @@ dependencies:
   - pip:
       - pytest
       - pyyaml
+      - defusedxml>=0.7.1
+      - structlog>=24.0.0
+      - colorama>=0.4.6
