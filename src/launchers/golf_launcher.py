@@ -1309,15 +1309,18 @@ except Exception as e:
 
         try:
             self.ai_panel = AIAssistantPanel(self)
+            self.ai_panel.setMinimumWidth(0)
             self.content_splitter.addWidget(self.ai_panel)
-            self.ai_panel.hide()
+
+            # Allow the AI panel (index 1) to collapse fully
+            self.content_splitter.setCollapsible(1, True)
+
+            # Start collapsed — use max-width 0 instead of hide() so the
+            # splitter keeps managing the widget.
+            self.ai_panel.setMaximumWidth(0)
 
             # Connect settings request
             self.ai_panel.settings_requested.connect(self._open_ai_settings)
-
-            # Start with AI panel collapsed
-            total = self.content_splitter.width() or 1200
-            self.content_splitter.setSizes([total, 0])
 
         except Exception as e:
             logger.error(f"Failed to initialize AI panel: {e}")
@@ -1337,12 +1340,13 @@ except Exception as e:
         total = self.content_splitter.width() or 1200
 
         if checked:
-            self.ai_panel.show()
-            # 70/30 split: tiles get 70%, AI chat gets 30%
+            # Remove max-width constraint and allocate 30% to AI panel
+            self.ai_panel.setMaximumWidth(16777215)  # QWIDGETSIZE_MAX
             self.content_splitter.setSizes([int(total * 0.7), int(total * 0.3)])
         else:
-            self.ai_panel.hide()
+            # Collapse AI panel to zero width
             self.content_splitter.setSizes([total, 0])
+            self.ai_panel.setMaximumWidth(0)
 
     def _on_docker_mode_changed(self, state: int) -> None:
         """Handle Docker mode toggle change.
@@ -2300,6 +2304,18 @@ except Exception as e:
 
 def main() -> None:
     """Application entry point."""
+    # On Windows, set AppUserModelID so the taskbar shows our icon
+    # instead of the generic Python icon.
+    if sys.platform == "win32":
+        try:
+            import ctypes
+
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                "UpstreamDrift.GolfModelingSuite.Launcher.1"
+            )
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
