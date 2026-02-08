@@ -237,7 +237,7 @@ class TestForceTorqueSensor:
         # After reset, tare should be zero
         reading = sensor.read(np.zeros(6))
         # Should be near zero (only noise)
-        assert np.allclose(reading, 0.0, atol=1.0)  # Allow for noise
+        assert np.allclose(reading.wrench, 0.0, atol=1.0)  # Allow for noise
 
     def test_sensor_clipping(self) -> None:
         """Test sensor clips to range."""

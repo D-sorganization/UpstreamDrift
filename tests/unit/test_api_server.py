@@ -63,7 +63,10 @@ class TestEngineEndpoints:
         """Test GET /engines returns engine list."""
         response = client.get("/engines")
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+        data = response.json()
+        assert isinstance(data, dict)
+        assert "engines" in data
+        assert isinstance(data["engines"], list)
 
     def test_load_engine_invalid_type(self, client: TestClient) -> None:
         """Test loading non-existent engine type."""

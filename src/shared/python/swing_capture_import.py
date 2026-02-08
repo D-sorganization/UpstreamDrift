@@ -223,8 +223,7 @@ class SwingCaptureImporter:
         suffix = filepath.suffix.lower()
         if suffix not in SUPPORTED_FORMATS:
             raise ValueError(
-                f"Unsupported format: {suffix}. "
-                f"Supported: {sorted(SUPPORTED_FORMATS)}"
+                f"Unsupported format: {suffix}. Supported: {sorted(SUPPORTED_FORMATS)}"
             )
 
         if suffix == ".c3d":
@@ -257,7 +256,7 @@ class SwingCaptureImporter:
             import ezc3d
         except ImportError:
             raise ImportError(
-                "ezc3d is required for C3D import. " "Install with: pip install ezc3d"
+                "ezc3d is required for C3D import. Install with: pip install ezc3d"
             ) from None
 
         c3d_data = ezc3d.c3d(str(filepath))

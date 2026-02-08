@@ -167,6 +167,11 @@ class BallRollPhysics:
         if speed < self.STOP_VELOCITY_THRESHOLD:
             return RollMode.STOPPED
 
+        # At very low speeds, numerical errors in spin-velocity ratio
+        # dominate; treat as rolling to avoid slip-friction feedback loop
+        if speed < 0.05:
+            return RollMode.ROLLING
+
         # For pure rolling: spin_y (about axis perpendicular to velocity) = v / r
         # The spin_y should be negative for forward roll (right-hand rule)
         expected_spin = -speed / self.ball_radius

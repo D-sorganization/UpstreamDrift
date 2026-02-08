@@ -285,3 +285,71 @@ class TestNewTiles:
         assert "motion_capture" in tool_ids
         assert "video_analyzer" in tool_ids
         assert "data_explorer" in tool_ids
+
+
+class TestEngineCapabilitiesAPI:
+    """Tests for GET /api/launcher/engines/capabilities endpoints."""
+
+    def test_all_engine_capabilities(self, client: TestClient) -> None:
+        """GET /engines/capabilities should return all engine profiles."""
+        response = client.get("/api/launcher/engines/capabilities")
+        assert response.status_code == 200
+        data = response.json()
+        # Must include all known engines
+        expected_engines = {
+            "mujoco",
+            "drake",
+            "pinocchio",
+            "opensim",
+            "myosuite",
+            "pendulum",
+            "putting_green",
+        }
+        assert expected_engines.issubset(set(data.keys()))
+
+    def test_mujoco_capabilities(self, client: TestClient) -> None:
+        """MuJoCo should have FULL support for all capabilities."""
+        response = client.get("/api/launcher/engines/mujoco/capabilities")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["engine_name"] == "MuJoCo"
+        assert data["mass_matrix"] == "full"
+        assert data["jacobian"] == "full"
+        assert data["video_export"] == "full"
+        assert data["dataset_export"] == "full"
+        assert data["force_visualization"] == "full"
+
+    def test_drake_capabilities(self, client: TestClient) -> None:
+        """Drake should have PARTIAL contact forces."""
+        response = client.get("/api/launcher/engines/drake/capabilities")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["engine_name"] == "Drake"
+        assert data["contact_forces"] == "partial"
+        assert data["mass_matrix"] == "full"
+
+    def test_unknown_engine_404(self, client: TestClient) -> None:
+        """Unknown engine should return 404."""
+        response = client.get("/api/launcher/engines/nonexistent/capabilities")
+        assert response.status_code == 404
+
+    def test_capabilities_have_all_fields(self, client: TestClient) -> None:
+        """Every capability profile must have all required fields."""
+        response = client.get("/api/launcher/engines/capabilities")
+        data = response.json()
+        required_fields = {
+            "engine_name",
+            "mass_matrix",
+            "jacobian",
+            "contact_forces",
+            "inverse_dynamics",
+            "drift_acceleration",
+            "video_export",
+            "dataset_export",
+            "force_visualization",
+            "model_positioning",
+            "measurements",
+        }
+        for engine_id, profile in data.items():
+            missing = required_fields - set(profile.keys())
+            assert not missing, f"{engine_id} missing fields: {missing}"
