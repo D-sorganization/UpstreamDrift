@@ -42,17 +42,49 @@ models:
     path: "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
     engine_type: "myosuite"
 
-  - id: "matlab_unified"
-    name: "Matlab Models"
-    description: "Access 2D/3D Simscape models and Analysis Tools"
-    type: "special_app"
-    path: "src/launchers/matlab_launcher_unified.py"
+  # --- Matlab (direct launch, no sub-launcher) ---
+  - id: "simscape_2d"
+    name: "Simscape 2D"
+    description: "2D Simscape Multibody Golf Swing Model (.slx)"
+    type: "matlab_file"
+    path: "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/GolfSwingZVCF.slx"
 
-  - id: "motion_capture"
-    name: "Motion Capture"
-    description: "C3D Viewer, OpenPose, and MediaPipe Analysis"
+  - id: "simscape_3d"
+    name: "Simscape 3D"
+    description: "3D Simscape Multibody Golf Swing Model (.slx)"
+    type: "matlab_file"
+    path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/GolfSwing3D_Kinetic.slx"
+
+  - id: "dataset_generator"
+    name: "Dataset Generator"
+    description: "Forward Dynamics Dataset Generator GUI (.m)"
+    type: "matlab_file"
+    path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m"
+
+  - id: "matlab_analysis"
+    name: "Analysis GUI"
+    description: "Golf Swing Analysis and Plotting Suite (.m)"
+    type: "matlab_file"
+    path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m"
+
+  # --- Motion Capture (direct launch, no sub-launcher) ---
+  - id: "c3d_viewer"
+    name: "C3D Viewer"
+    description: "Visualize and analyze optical motion capture data (.c3d)"
     type: "special_app"
-    path: "src/launchers/motion_capture_launcher.py"
+    path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+
+  - id: "openpose_analysis"
+    name: "OpenPose"
+    description: "High-accuracy body pose estimation (Academic License)"
+    type: "special_app"
+    path: "src/shared/python/pose_estimation/openpose_gui.py"
+
+  - id: "mediapipe_analysis"
+    name: "MediaPipe"
+    description: "Fast pose estimation using Google MediaPipe (Apache 2.0)"
+    type: "special_app"
+    path: "src/shared/python/pose_estimation/mediapipe_gui.py"
 
   - id: "model_explorer"
     name: "Model Explorer"
@@ -82,16 +114,10 @@ models:
   - id: "project_map"
     name: "Project Map"
     description: "Complete map of all features, modules, and hidden gems in the suite"
-    type: "special_app"
+    type: "document"
     path: "docs/PROJECT_MAP.md"
 
   # =============================================================================
-  # ARCHIVED / HIDDEN / LEGACY entries preserved below (commented or type: hidden if supported)
-  # For now we just don't list them in the Launcher `default_ids` but keeping them structured here
-  # actually removes them from the registry if I remove them.
-  # Refactoring to only show the 8 above means removing others from this list unless
-  # the launcher supports a "More" view.
-  # The user request is "Simplify... Two rows of 4 tiles".
-  # I will designate ONLY the above 8 for now.
-  # The sub-models (simscape_2d, etc) will be accessed via the unified launchers.
+  # All sub-launchers have been eliminated. Each tile launches directly.
+  # Matlab files open with system MATLAB. Motion capture tools launch directly.
   # =============================================================================
