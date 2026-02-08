@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified Golf Modeling Suite Launcher (PyQt6)
+UpstreamDrift Launcher (PyQt6)
 Features:
 - Modern UI with rounded corners.
 - Modular Docker Environment Management.
@@ -190,7 +190,7 @@ class GolfLauncher(QMainWindow):
                             If provided, skips redundant loading of registry and engines.
         """
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite - UpstreamDrift")
+        self.setWindowTitle("UpstreamDrift")
         self.resize(1400, 900)
         self.center_window()
 
@@ -475,7 +475,7 @@ except Exception as e:
             self,
             "About UpstreamDrift",
             "<h2>UpstreamDrift</h2>"
-            "<h3>Golf Modeling Suite</h3>"
+            "<h3>Biomechanical Golf Swing Analysis</h3>"
             "<p><b>Version 2.1</b></p>"
             "<p>Biomechanical Golf Swing Analysis Platform</p>"
             "<hr>"
@@ -1427,7 +1427,7 @@ except Exception as e:
 
     def _report_bug(self) -> None:
         """Open default mail client to report a bug."""
-        subject = "Bug Report: Golf Modeling Suite"
+        subject = "Bug Report: UpstreamDrift"
         body = "Please describe the issue you encountered:\n\n"
 
         # Safely encode

@@ -1,4 +1,4 @@
-"""UI Components for the Golf Modeling Suite Launcher.
+"""UI Components for the UpstreamDrift Launcher.
 
 This module provides specialized widgets, dialogs, and background workers
 to improve the modularity and maintainability of the launcher.
@@ -141,7 +141,7 @@ class StartupResults:
 
 
 class GolfSplashScreen(QSplashScreen):
-    """Custom splash screen for Golf Modeling Suite."""
+    """Custom splash screen for UpstreamDrift."""
 
     SPLASH_WIDTH = 520
     SPLASH_HEIGHT = 340
@@ -156,23 +156,22 @@ class GolfSplashScreen(QSplashScreen):
 
         self.logo_pixmap: QPixmap | None = None
         logo_candidates = [
-            ASSETS_DIR / "golf_robot_ultra_sharp.png",
-            ASSETS_DIR / "golf_robot_windows_optimized.png",
-            ASSETS_DIR / "golf_robot_icon_128.png",
+            ASSETS_DIR / "golf_logo.png",
+            ASSETS_DIR / "golf_icon.png",
         ]
         for logo_path in logo_candidates:
             if logo_path.exists():
                 self.logo_pixmap = QPixmap(str(logo_path))
                 if not self.logo_pixmap.isNull():
                     self.logo_pixmap = self.logo_pixmap.scaled(
-                        64,
-                        64,
+                        80,
+                        80,
                         Qt.AspectRatioMode.KeepAspectRatio,
                         Qt.TransformationMode.SmoothTransformation,
                     )
                     break
 
-        self.loading_message = "Initializing Golf Modeling Suite..."
+        self.loading_message = "Initializing UpstreamDrift..."
         self.progress = 0
 
     def drawContents(self, painter: QPainter | None) -> None:
@@ -214,7 +213,7 @@ class GolfSplashScreen(QSplashScreen):
         painter.drawText(
             self.rect().adjusted(20, title_y, -20, 0),
             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
-            "Golf Modeling Suite",
+            "UpstreamDrift",
         )
 
         subtitle_font = (
@@ -274,7 +273,7 @@ class GolfSplashScreen(QSplashScreen):
         painter.drawText(
             self.rect().adjusted(16, 0, -20, -12),
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft,
-            "\u00a9 2024-2025 Golf Modeling Suite",
+            "\u00a9 2024-2026 UpstreamDrift",
         )
 
     def show_message(self, message: str, progress: int) -> None:
