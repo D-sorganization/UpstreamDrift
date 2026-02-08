@@ -189,7 +189,7 @@ class GolfLauncher(QMainWindow):
                             If provided, skips redundant loading of registry and engines.
         """
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite - GolfingRobot")
+        self.setWindowTitle("Golf Modeling Suite - UpstreamDrift")
         self.resize(1400, 900)
         self.center_window()
 
