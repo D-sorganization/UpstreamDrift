@@ -6,6 +6,9 @@ and simulation types (MuJoCo, Drake, Pinocchio, OpenSim, etc.).
 
 from __future__ import annotations
 
+import os
+import platform
+import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -401,6 +404,120 @@ class PuttingGreenHandler:
         return process is not None
 
 
+class MatlabFileHandler:
+    """Handler for opening MATLAB files (.slx, .m) with system MATLAB.
+
+    Design by Contract:
+        Precondition: model.path must point to a .slx or .m file
+        Postcondition: file is opened with the system MATLAB installation
+    """
+
+    MODEL_TYPES = {"matlab_file"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Open a MATLAB file with the system MATLAB installation.
+
+        Args:
+            model: Model configuration with 'path' and 'name' attrs.
+            repo_path: Path to the repository root.
+            process_manager: Process manager (unused, opens via OS).
+
+        Returns:
+            True if launch succeeded, False otherwise.
+        """
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error(
+                "MatlabFileHandler: model '%s' has no path",
+                getattr(model, "id", "unknown"),
+            )
+            return False
+
+        file_path = repo_path / model_path
+        if not file_path.exists():
+            logger.warning("MatlabFileHandler: file not found: %s", file_path)
+            return False
+
+        try:
+            if platform.system() == "Windows":
+                os.startfile(str(file_path))  # noqa: S606
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
+            else:
+                subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
+            logger.info("Opened MATLAB file: %s", file_path.name)
+            return True
+        except Exception:
+            logger.exception("Failed to open MATLAB file: %s", file_path)
+            return False
+
+
+class DocumentHandler:
+    """Handler for opening document files (.md, .pdf, etc.) with the system viewer.
+
+    Design by Contract:
+        Precondition: model.path must point to a document file
+        Postcondition: file is opened with the system default application
+    """
+
+    MODEL_TYPES = {"document"}
+
+    def can_handle(self, model_type: str) -> bool:
+        """Check if this handler supports the model type."""
+        return model_type.lower() in self.MODEL_TYPES
+
+    def launch(
+        self,
+        model: Any,
+        repo_path: Path,
+        process_manager: ProcessManager,
+    ) -> bool:
+        """Open a document file with the system default application.
+
+        Args:
+            model: Model configuration with 'path' and 'name' attrs.
+            repo_path: Path to the repository root.
+            process_manager: Process manager (unused, opens via OS).
+
+        Returns:
+            True if launch succeeded, False otherwise.
+        """
+        model_path = getattr(model, "path", None) or ""
+        if not model_path:
+            logger.error(
+                "DocumentHandler: model '%s' has no path",
+                getattr(model, "id", "unknown"),
+            )
+            return False
+
+        file_path = repo_path / model_path
+        if not file_path.exists():
+            logger.warning("DocumentHandler: file not found: %s", file_path)
+            return False
+
+        try:
+            if platform.system() == "Windows":
+                os.startfile(str(file_path))  # noqa: S606
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
+            else:
+                subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
+            logger.info("Opened document: %s", file_path.name)
+            return True
+        except Exception:
+            logger.exception("Failed to open document: %s", file_path)
+            return False
+
+
 class ModelHandlerRegistry:
     """Registry for model launch handlers.
 
@@ -420,6 +537,8 @@ class ModelHandlerRegistry:
             OpenPoseHandler(),
             SpecialAppHandler(),
             PuttingGreenHandler(),
+            MatlabFileHandler(),
+            DocumentHandler(),
         ]
 
     def register_handler(self, handler: ModelHandler) -> None:
