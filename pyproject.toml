@@ -44,8 +44,17 @@ all-engines = ["upstream-drift[drake,pinocchio]"]
 # Analysis extras
 analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]
 
+# Pose estimation and video processing
+pose = ["mediapipe>=0.10.0", "opencv-python>=4.8.0", "imageio[ffmpeg]>=2.31.0"]
+
+# Biomechanics engines
+biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
+
+# Reinforcement learning (for MyoSuite muscle training)
+rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]
+
 # URDF generation tools (from shared Tools repo)
-urdf = ["trimesh>=4.0.0", "PyYAML>=6.0", "defusedxml>=0.7.0"]
+urdf = ["trimesh>=4.0.0", "PyYAML>=6.0", "defusedxml>=0.7.0", "robot_descriptions>=1.12.0"]
 
 # Development and testing
 dev = [
@@ -71,7 +80,7 @@ gui-test = [
 ]
 
 # Everything
-all = ["upstream-drift[all-engines,analysis,urdf,dev]"]
+all = ["upstream-drift[all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"

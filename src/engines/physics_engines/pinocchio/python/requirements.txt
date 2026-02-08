@@ -1,0 +1,59 @@
+# Pinocchio Golf Model - Full Dependencies
+# Used by Docker builds and local development
+
+# Core scientific computing
+numpy>=1.26.4,<3.0.0
+pandas>=2.2.3
+matplotlib>=3.8.0,<=3.9.1
+scipy>=1.13.1
+sympy>=1.12
+
+# Pinocchio and robotics
+pin>=2.6.0
+pin-pink
+meshcat>=0.3.0
+qpsolvers
+osqp
+scs
+quadprog
+
+# GUI
+PyQt6>=6.6.0
+opencv-python>=4.8.0
+
+# Shared module dependencies (required by src/shared/python)
+pyyaml>=6.0.1
+defusedxml>=0.7.1
+structlog>=24.0.0
+colorama>=0.4.6
+simpleeval>=0.9.13
+
+# Pose estimation & video
+mediapipe>=0.10.0
+imageio[ffmpeg]>=2.31.0
+
+# URDF & mesh tools
+trimesh>=4.0.0
+robot_descriptions>=1.12.0
+
+# Motion capture data
+ezc3d>=1.4.0
+
+# RL (optional, for training)
+gymnasium>=0.29.0
+
+# API (if running services)
+fastapi>=0.126.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+httpx>=0.25.0
+
+# Testing and development
+pytest>=8.2.1
+pytest-cov>=5.0.0
+pytest-mock>=3.14.0
+ruff>=0.14.0
+black>=24.4.2
+mypy>=1.10.0
+pre-commit>=4.0.0
+types-PyYAML>=6.0.12.12

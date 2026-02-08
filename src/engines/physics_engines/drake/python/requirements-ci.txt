@@ -28,6 +28,11 @@ pyyaml==6.0.1
 # Type stubs for better type checking
 types-PyYAML==6.0.12.12
 
+# Shared module dependencies (required by src/shared/python)
+defusedxml>=0.7.1
+structlog>=24.0.0
+colorama>=0.4.6
+
 # Note: Modeling dependencies (pin, pin-pink, drake, qpsolvers) are excluded
 # from CI to speed up builds. Install them locally using:
 # pip install -r python/requirements.txt
