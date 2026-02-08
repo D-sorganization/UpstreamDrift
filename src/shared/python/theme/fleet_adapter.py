@@ -26,7 +26,6 @@ Usage:
 from __future__ import annotations
 
 import logging
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -35,17 +34,36 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Add vendor path for shared module imports
-_vendor_path = (
-    Path(__file__).parent.parent.parent.parent.parent / "vendor" / "ud-tools" / "src"
+# Load fleet-wide themes from vendor/ud-tools using importlib to avoid
+# circular import: this module is imported during src/shared/python/theme/__init__
+# initialization, so `from shared.python.theme import ...` would resolve to the
+# partially-loaded UpstreamDrift module instead of the vendor module.
+_vendor_theme_path = (
+    Path(__file__).parent.parent.parent.parent.parent
+    / "vendor"
+    / "ud-tools"
+    / "src"
+    / "shared"
+    / "python"
+    / "theme"
 )
-if _vendor_path.exists() and str(_vendor_path) not in sys.path:
-    sys.path.insert(0, str(_vendor_path))
 
 # Try to import fleet-wide themes
 try:
-    from shared.python.theme import BUILTIN_THEMES as FLEET_THEMES
-    from shared.python.theme import is_valid_hex_color
+    import importlib.util
+
+    _colors_path = _vendor_theme_path / "colors.py"
+    if not _colors_path.exists():
+        raise ImportError(f"vendor theme module not found at {_colors_path}")
+
+    _spec = importlib.util.spec_from_file_location(
+        "_vendor_theme_colors", str(_colors_path)
+    )
+    _vendor_colors = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
+    _spec.loader.exec_module(_vendor_colors)  # type: ignore[union-attr]
+
+    FLEET_THEMES: dict = _vendor_colors.BUILTIN_THEMES
+    is_valid_hex_color = _vendor_colors.is_valid_hex_color
 
     _FLEET_AVAILABLE = True
     logger.info("Fleet-wide theme system available from vendor/ud-tools")

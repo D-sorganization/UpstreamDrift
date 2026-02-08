@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified Golf Modeling Suite Launcher (PyQt6)
+UpstreamDrift Launcher (PyQt6)
 Features:
 - Modern UI with rounded corners.
 - Modular Docker Environment Management.
@@ -78,6 +78,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -189,7 +190,7 @@ class GolfLauncher(QMainWindow):
                             If provided, skips redundant loading of registry and engines.
         """
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite - UpstreamDrift")
+        self.setWindowTitle("UpstreamDrift")
         self.resize(1400, 900)
         self.center_window()
 
@@ -226,7 +227,6 @@ class GolfLauncher(QMainWindow):
         self.layout_edit_mode = False  # Track if layout editing is enabled
 
         # Initialize process output console (unified terminal)
-        self._console_output: list[str] = []
         self._setup_process_console()
 
         # Initialize process and model managers (extracted from god class)
@@ -284,6 +284,9 @@ class GolfLauncher(QMainWindow):
         self._initialize_model_order()
 
         self.init_ui()
+
+        # Apply shared theme system
+        self._apply_theme_system()
 
         # Use pre-loaded Docker status or check asynchronously
         if startup_results:
@@ -471,7 +474,7 @@ except Exception as e:
             self,
             "About UpstreamDrift",
             "<h2>UpstreamDrift</h2>"
-            "<h3>Golf Modeling Suite</h3>"
+            "<h3>Biomechanical Golf Swing Analysis</h3>"
             "<p><b>Version 2.1</b></p>"
             "<p>Biomechanical Golf Swing Analysis Platform</p>"
             "<hr>"
@@ -861,15 +864,20 @@ except Exception as e:
         view_menu.addAction(action_console)
         self._action_console = action_console
 
+        # Theme submenu under View
+        view_menu.addSeparator()
+        theme_menu = view_menu.addMenu("&Theme")
+        self._setup_theme_menu(theme_menu)
+
         # Tools Menu
         tools_menu = menubar.addMenu("&Tools")
 
         action_env = QAction("&Environment Manager...", self)
-        action_env.triggered.connect(lambda: self._open_settings(tab=2))
+        action_env.triggered.connect(lambda: self._open_settings(tab=1))
         tools_menu.addAction(action_env)
 
         action_diag = QAction("&Diagnostics...", self)
-        action_diag.triggered.connect(lambda: self._open_settings(tab=3))
+        action_diag.triggered.connect(lambda: self._open_settings(tab=2))
         tools_menu.addAction(action_diag)
 
         # Help Menu
@@ -1418,7 +1426,7 @@ except Exception as e:
 
     def _report_bug(self) -> None:
         """Open default mail client to report a bug."""
-        subject = "Bug Report: Golf Modeling Suite"
+        subject = "Bug Report: UpstreamDrift"
         body = "Please describe the issue you encountered:\n\n"
 
         # Safely encode
@@ -1512,14 +1520,11 @@ except Exception as e:
         try:
             logger.info("Launching URDF Generator: %s", script_path)
 
-            # Launch detached
-            process = secure_popen(
-                [sys.executable, str(script_path)],
-                cwd=str(REPOS_ROOT),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            process = self.process_manager.launch_script(
+                "urdf_generator", script_path, REPOS_ROOT
             )
-
-            self.running_processes["urdf_generator"] = process
+            if not process:
+                raise RuntimeError("ProcessManager returned None")
             self.show_toast("URDF Generator launched.", "success")
             self.lbl_status.setText("> URDF Generator Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
@@ -1551,13 +1556,11 @@ except Exception as e:
 
         try:
             logger.info("Launching C3D Viewer: %s", c3d_script)
-            process = secure_popen(
-                [sys.executable, str(c3d_script)],
-                cwd=str(c3d_script.parent),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            process = self.process_manager.launch_script(
+                "c3d_viewer", c3d_script, c3d_script.parent
             )
-
-            self.running_processes["c3d_viewer"] = process
+            if not process:
+                raise RuntimeError("ProcessManager returned None")
             self.show_toast("C3D Viewer launched.", "success")
 
         except Exception as e:
@@ -1579,14 +1582,11 @@ except Exception as e:
 
         try:
             logger.info("Launching Shot Tracer: %s", shot_tracer_script)
-            process = secure_popen(
-                [sys.executable, str(shot_tracer_script)],
-                cwd=str(REPOS_ROOT),  # Run from project root for imports
-                env=self._get_subprocess_env(),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            process = self.process_manager.launch_script(
+                "shot_tracer", shot_tracer_script, REPOS_ROOT
             )
-
-            self.running_processes["shot_tracer"] = process
+            if not process:
+                raise RuntimeError("ProcessManager returned None")
             self.show_toast("Shot Tracer launched.", "success")
 
         except Exception as e:
@@ -1656,27 +1656,36 @@ except Exception as e:
         """Select a model and update UI."""
         self.selected_model = model_id
 
-        # Update visual selection state
+        # Update visual selection state using theme colors
+        try:
+            from src.shared.python.theme import get_current_colors
+
+            c = get_current_colors()
+        except Exception:
+            from src.shared.python.theme import (
+                DARK_THEME as c,  # type: ignore[assignment]
+            )
+
         for mid, card in self.model_cards.items():
             if mid == model_id:
-                card.setStyleSheet("""
-                    QFrame#ModelCard {
-                        background-color: #383838;
-                        border: 2px solid #0A84FF;
+                card.setStyleSheet(f"""
+                    QFrame#ModelCard {{
+                        background-color: {c.bg_highlight};
+                        border: 2px solid {c.primary};
                         border-radius: 12px;
-                    }
+                    }}
                     """)
             else:
-                card.setStyleSheet("""
-                    QFrame#ModelCard {
-                        background-color: #2D2D2D;
-                        border: 1px solid #3A3A3A;
+                card.setStyleSheet(f"""
+                    QFrame#ModelCard {{
+                        background-color: {c.bg_elevated};
+                        border: 1px solid {c.border_default};
                         border-radius: 12px;
-                    }
-                    QFrame#ModelCard:hover {
-                        background-color: #333333;
-                        border: 1px solid #555555;
-                    }
+                    }}
+                    QFrame#ModelCard:hover {{
+                        background-color: {c.bg_highlight};
+                        border: 1px solid {c.border_strong};
+                    }}
                     """)
 
         # Update launch button
@@ -1690,15 +1699,24 @@ except Exception as e:
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
+        try:
+            from src.shared.python.theme import get_current_colors
+
+            c = get_current_colors()
+        except Exception:
+            from src.shared.python.theme import (
+                DARK_THEME as c,  # type: ignore[assignment]
+            )
+
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")
             self.btn_launch.setEnabled(False)
-            self.btn_launch.setStyleSheet("""
-                QPushButton {
-                    background-color: #3a3a3a;
-                    color: #888888;
+            self.btn_launch.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {c.bg_elevated};
+                    color: {c.text_quaternary};
                     border-radius: 6px;
-                }
+                }}
                 """)
             return
 
@@ -1711,29 +1729,29 @@ except Exception as e:
         if model and getattr(model, "requires_docker", False):
             if not self.docker_available:
                 self.btn_launch.setText("! Docker Required")
-                self.btn_launch.setStyleSheet("""
-                    QPushButton {
-                        background-color: #3a3a3a;
-                        color: #ff453a;
-                        border: 2px solid #ff453a;
+                self.btn_launch.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {c.bg_elevated};
+                        color: {c.error};
+                        border: 2px solid {c.error};
                         border-radius: 6px;
-                    }
+                    }}
                     """)
                 self.btn_launch.setEnabled(False)
                 return
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
-        self.btn_launch.setStyleSheet("""
-            QPushButton {
-                background-color: #2da44e;
+        self.btn_launch.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {c.success};
                 color: white;
                 border-radius: 6px;
                 font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #2c974b;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {c.success_hover};
+            }}
             """)
 
     def _get_engine_type(self, model_type: str) -> _EngineType:
@@ -1754,68 +1772,243 @@ except Exception as e:
         return EngineType.MUJOCO  # Default
 
     def apply_styles(self) -> None:
-        """Apply custom stylesheets."""
-        # Global dark theme
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #1E1E1E;
-            }
-            QWidget {
-                color: #FFFFFF;
-                font-family: 'Segoe UI', sans-serif;
-            }
-            QMenuBar {
-                background-color: #252526;
-                color: #CCCCCC;
-                border-bottom: 1px solid #3E3E42;
-                padding: 2px;
-            }
-            QMenuBar::item {
-                padding: 6px 12px;
-                background: transparent;
-            }
-            QMenuBar::item:selected {
-                background-color: #094771;
-            }
-            QMenu {
-                background-color: #252526;
-                color: #CCCCCC;
-                border: 1px solid #3E3E42;
-            }
-            QMenu::item {
-                padding: 8px 24px;
-            }
-            QMenu::item:selected {
-                background-color: #094771;
-            }
-            QMenu::separator {
-                height: 1px;
-                background: #3E3E42;
-                margin: 4px 8px;
-            }
-            QLineEdit {
-                background-color: #252526;
-                color: white;
-                border: 1px solid #3E3E42;
-                border-radius: 4px;
-                padding: 6px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #007ACC;
-            }
-            QScrollArea {
-                border: none;
-            }
-            QPushButton {
-                background-color: #333333;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                padding: 6px 12px;
-            }
-            QPushButton:hover {
-                background-color: #3E3E42;
-            }
+        """Apply themed stylesheet from the shared ThemeManager."""
+        try:
+            from src.shared.python.theme import ThemeManager
+
+            manager = ThemeManager.instance()
+            c = manager.colors
+            self.setStyleSheet(manager.get_stylesheet() + f"""
+                QScrollArea {{ border: none; }}
+                QMenu::separator {{
+                    height: 1px;
+                    margin: 4px 8px;
+                }}
+                QFrame#ModelCard {{
+                    background-color: {c.bg_elevated};
+                    border: 1px solid {c.border_default};
+                    border-radius: 12px;
+                }}
+                QFrame#ModelCard:hover {{
+                    background-color: {c.bg_highlight};
+                    border: 1px solid {c.border_strong};
+                }}
+                QLabel#CardDescription {{
+                    color: {c.text_secondary};
+                }}
             """)
+        except Exception:
+            # Fallback minimal dark style if theme system unavailable
+            self.setStyleSheet(
+                "QMainWindow { background-color: #1E1E1E; }"
+                "QWidget { color: #FFFFFF; font-family: 'Segoe UI', sans-serif; }"
+            )
+
+    def _apply_theme_system(self) -> None:
+        """Initialize theme manager and register for theme change callbacks."""
+        try:
+            from src.shared.python.theme import ThemeManager, apply_golf_suite_style
+
+            self._theme_manager = ThemeManager.instance()
+
+            # Restore saved theme preference
+            self._theme_manager.load_saved_theme()
+
+            # Apply matplotlib styling globally
+            apply_golf_suite_style()
+
+            # Register callback for dynamic theme switching
+            self._theme_manager.on_theme_changed(self._on_theme_changed)
+
+        except Exception as e:
+            logger.warning(f"Theme system unavailable: {e}")
+
+    def _on_theme_changed(self, colors: object) -> None:
+        """Handle dynamic theme change — reapply stylesheet and update menu."""
+        self.apply_styles()
+
+        # Refresh all model card inline styles
+        for card in self.model_cards.values():
+            if hasattr(card, "refresh_theme"):
+                card.refresh_theme()
+
+        # Reapply card selection state with new theme colors
+        if self.selected_model:
+            self.select_model(self.selected_model)
+        else:
+            self.update_launch_button()
+
+        # Update the checked state of theme menu actions
+        if hasattr(self, "_theme_actions"):
+            from src.shared.python.theme import ThemeManager
+
+            current = ThemeManager.instance().theme_name
+            for action in self._theme_actions:
+                action.setChecked(action.text() == current)
+
+    def _setup_theme_menu(self, theme_menu: QMenu) -> None:
+        """Populate the View > Theme submenu with all available themes.
+
+        Includes core presets (Dark, Light, High Contrast), fleet-wide themes,
+        custom themes, a "Manage Themes..." dialog, and a Plot Theme submenu.
+        """
+        from PyQt6.QtGui import QActionGroup
+
+        try:
+            from src.shared.python.theme import ThemeManager, ThemePreset
+
+            manager = ThemeManager.instance()
+
+            group = QActionGroup(self)
+            group.setExclusive(True)
+            self._theme_actions: list[QAction] = []
+
+            # Core presets
+            preset_map: dict[str, ThemePreset] = {
+                "Dark": ThemePreset.DARK,
+                "Light": ThemePreset.LIGHT,
+                "High Contrast": ThemePreset.HIGH_CONTRAST,
+            }
+            for name, preset in preset_map.items():
+                action = QAction(name, self)
+                action.setCheckable(True)
+                action.setChecked(manager.theme_name == name)
+                action.triggered.connect(lambda checked, p=preset: manager.set_theme(p))
+                group.addAction(action)
+                theme_menu.addAction(action)
+                self._theme_actions.append(action)
+
+            # Fleet-wide themes
+            fleet_names = manager.get_available_fleet_themes()
+            if fleet_names:
+                theme_menu.addSeparator()
+                for fleet_name in fleet_names:
+                    if fleet_name in preset_map:
+                        continue
+                    action = QAction(fleet_name, self)
+                    action.setCheckable(True)
+                    action.setChecked(manager.theme_name == fleet_name)
+                    action.triggered.connect(
+                        lambda checked, n=fleet_name: manager.set_fleet_theme(n)
+                    )
+                    group.addAction(action)
+                    theme_menu.addAction(action)
+                    self._theme_actions.append(action)
+
+            # Custom themes
+            custom_names = manager.get_custom_theme_names()
+            if custom_names:
+                theme_menu.addSeparator()
+                for cname in custom_names:
+                    action = QAction(cname, self)
+                    action.setCheckable(True)
+                    action.setChecked(manager.theme_name == cname)
+                    action.triggered.connect(
+                        lambda checked, n=cname: manager.change_theme(n)
+                    )
+                    group.addAction(action)
+                    theme_menu.addAction(action)
+                    self._theme_actions.append(action)
+
+            # Manage Themes dialog
+            theme_menu.addSeparator()
+            manage_action = QAction("Manage Themes...", self)
+            manage_action.triggered.connect(self._open_theme_manager_dialog)
+            theme_menu.addAction(manage_action)
+
+            # Plot Theme submenu
+            theme_menu.addSeparator()
+            plot_menu = theme_menu.addMenu("Plot Theme")
+            if plot_menu:
+                self._setup_plot_theme_menu(plot_menu)
+
+        except Exception as e:
+            logger.warning(f"Could not populate theme menu: {e}")
+            fallback = QAction("(Theme system unavailable)", self)
+            fallback.setEnabled(False)
+            theme_menu.addAction(fallback)
+
+    def _open_theme_manager_dialog(self) -> None:
+        """Open the full Theme Manager dialog."""
+        try:
+            from src.shared.python.theme import ThemeManager
+            from src.shared.python.theme.dialogs import ThemeManagerDialog
+
+            manager = ThemeManager.instance()
+            dialog = ThemeManagerDialog(manager, self)
+            dialog.theme_changed.connect(lambda _: self._on_theme_changed(None))
+            dialog.exec()
+        except Exception as e:
+            logger.error(f"Could not open Theme Manager: {e}")
+
+    def _setup_plot_theme_menu(self, plot_menu: QMenu) -> None:
+        """Populate the Plot Theme submenu.
+
+        Plot themes affect matplotlib styling used by submodules.
+        The setting is saved to QSettings so launched modules inherit it.
+        """
+        from PyQt6.QtCore import QSettings
+        from PyQt6.QtGui import QActionGroup
+
+        group = QActionGroup(self)
+        group.setExclusive(True)
+
+        settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+        current_plot = settings.value("plot_theme", "follow_ui")
+
+        # "Follow UI Theme" option
+        follow_action = QAction("Follow UI Theme (Recommended)", self)
+        follow_action.setCheckable(True)
+        follow_action.setChecked(current_plot == "follow_ui")
+        follow_action.triggered.connect(lambda: self._set_plot_theme("follow_ui"))
+        group.addAction(follow_action)
+        plot_menu.addAction(follow_action)
+
+        plot_menu.addSeparator()
+
+        # Matplotlib built-in styles
+        try:
+            import matplotlib.pyplot as plt
+
+            for style_name in sorted(plt.style.available):
+                if style_name.startswith("_"):
+                    continue
+                action = QAction(style_name, self)
+                action.setCheckable(True)
+                action.setChecked(current_plot == style_name)
+                action.triggered.connect(
+                    lambda checked, s=style_name: self._set_plot_theme(s)
+                )
+                group.addAction(action)
+                plot_menu.addAction(action)
+        except ImportError:
+            na = QAction("(matplotlib not available)", self)
+            na.setEnabled(False)
+            plot_menu.addAction(na)
+
+    def _set_plot_theme(self, theme_name: str) -> None:
+        """Save plot theme preference to QSettings."""
+        from PyQt6.QtCore import QSettings
+
+        settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+        settings.setValue("plot_theme", theme_name)
+        logger.info("Plot theme set to: %s", theme_name)
+
+        # Apply immediately if matplotlib is available
+        if theme_name == "follow_ui":
+            try:
+                from src.shared.python.theme import apply_golf_suite_style
+
+                apply_golf_suite_style()
+            except Exception:
+                pass
+        else:
+            try:
+                import matplotlib.pyplot as plt
+
+                plt.style.use(theme_name)
+            except Exception:
+                pass
 
     def check_docker(self) -> None:
         """Start the docker check thread."""
@@ -1881,11 +2074,11 @@ except Exception as e:
 
     def open_diagnostics(self) -> None:
         """Open the settings dialog on the Diagnostics tab."""
-        self._open_settings(tab=3)
+        self._open_settings(tab=2)
 
     def open_environment_manager(self) -> None:
-        """Open the settings dialog on the Rebuild Environment tab."""
-        self._open_settings(tab=2)
+        """Open the settings dialog on the Configuration tab."""
+        self._open_settings(tab=1)
 
     def _reset_layout_to_defaults(self) -> None:
         """Reset layout configuration to show all default tiles."""
@@ -2054,11 +2247,11 @@ except Exception as e:
             )
 
             if viewer_script.exists():
-                process = secure_popen(
-                    [sys.executable, str(viewer_script), str(path)],
-                    creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+                process = self.process_manager.launch_script(
+                    path.name, viewer_script, viewer_script.parent
                 )
-                self.running_processes[path.name] = process
+                if not process:
+                    raise RuntimeError("ProcessManager returned None")
                 self.show_toast("Launched Passive Viewer", "success")
             else:
                 # Fallback if script missing
@@ -2111,10 +2304,12 @@ except Exception as e:
                 model_name=model.name,
                 repo_path=repo_path,
                 use_gpu=use_gpu,
+                capture_output=True,
             )
 
             if process:
-                self.running_processes[model.name] = process
+                # Route Docker output through the unified console
+                self.process_manager.attach_process(model.name, process)
                 self.show_toast(f"{model.name} Launched (Docker)", "success")
                 self.lbl_status.setText(f"● {model.name} Running (Docker)")
                 self.lbl_status.setStyleSheet("color: #30D158;")

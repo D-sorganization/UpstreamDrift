@@ -533,12 +533,13 @@ class LauncherDiagnostics:
         return result
 
     def check_engine_availability(self) -> DiagnosticResult:
-        """Check physics engine availability."""
+        """Check physics engine availability with per-engine probe details."""
         start = time.time()
         details: dict[str, Any] = {}
 
         try:
             from src.shared.python.engine_manager import EngineManager
+            from src.shared.python.engine_registry import EngineStatus
 
             manager = EngineManager()
             available = manager.get_available_engines()
@@ -547,11 +548,44 @@ class LauncherDiagnostics:
             details["available_engines"] = [e.value for e in available]
             details["engine_count"] = len(available)
 
-            if available:
+            # Per-engine status with probe results
+            engines_detail: list[dict[str, Any]] = []
+            for engine_type, status in manager.engine_status.items():
+                engine_info: dict[str, Any] = {
+                    "name": engine_type.value,
+                    "directory_status": status.value,
+                    "path": str(manager.engine_paths.get(engine_type, "N/A")),
+                }
+
+                # Run probe if available
+                probe = manager.probes.get(engine_type)
+                if probe:
+                    try:
+                        probe_result = probe.probe()
+                        engine_info["probe_status"] = probe_result.status.value
+                        engine_info["version"] = probe_result.version
+                        engine_info["missing_deps"] = probe_result.missing_dependencies
+                        engine_info["diagnostic"] = probe_result.diagnostic_message
+                        engine_info["installed"] = probe_result.is_available()
+                    except Exception as e:
+                        engine_info["probe_status"] = "error"
+                        engine_info["diagnostic"] = str(e)
+                        engine_info["installed"] = False
+                else:
+                    engine_info["probe_status"] = "no_probe"
+                    engine_info["installed"] = status == EngineStatus.AVAILABLE
+
+                engines_detail.append(engine_info)
+
+            details["engines"] = engines_detail
+            installed_count = sum(1 for e in engines_detail if e["installed"])
+            total_count = len(engines_detail)
+
+            if installed_count > 0:
                 result = DiagnosticResult(
                     name="engine_availability",
                     status="pass",
-                    message=f"{len(available)} physics engines available",
+                    message=f"{installed_count}/{total_count} engines installed",
                     details=details,
                     duration_ms=(time.time() - start) * 1000,
                 )

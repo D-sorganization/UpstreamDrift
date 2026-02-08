@@ -62,9 +62,7 @@ class HumanoidMuJoCoHandler:
         Returns:
             True if launch succeeded, False otherwise.
         """
-        module_name = (
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.main"
-        )
+        module_name = "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf"
         cwd = repo_path
 
         process = process_manager.launch_module(
