@@ -51,7 +51,20 @@ from src.shared.python.secure_subprocess import (
 )
 
 if TYPE_CHECKING:
-    pass
+    from src.shared.python.theme.theme_manager import ThemeColors
+
+
+def _get_theme_colors() -> ThemeColors:
+    """Get current theme colors, with fallback to dark theme defaults."""
+    try:
+        from src.shared.python.theme import get_current_colors
+
+        return get_current_colors()
+    except Exception:
+        from src.shared.python.theme import DARK_THEME
+
+        return DARK_THEME
+
 
 logger = get_logger(__name__)
 
@@ -390,6 +403,7 @@ class DraggableModelCard(QFrame):
                 if not img_path.exists():
                     img_path = None
         lbl_img = QLabel()
+        lbl_img.setObjectName("CardImage")
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -409,9 +423,11 @@ class DraggableModelCard(QFrame):
             )
             lbl_img.setPixmap(pixmap)
         else:
+            c = _get_theme_colors()
             lbl_img.setText("No Image")
             lbl_img.setStyleSheet(
-                "QLabel { color: #666; font-style: italic; border: none; background: transparent; }"
+                f"QLabel {{ color: {c.text_quaternary}; font-style: italic; "
+                f"border: none; background: transparent; }}"
             )
 
         img_container = QWidget()
@@ -431,7 +447,7 @@ class DraggableModelCard(QFrame):
 
         lbl_desc = QLabel(self.model.description)
         lbl_desc.setFont(QFont("Segoe UI", 9))
-        lbl_desc.setStyleSheet("color: #cccccc;")
+        lbl_desc.setObjectName("CardDescription")
         lbl_desc.setWordWrap(True)
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_desc)
@@ -439,6 +455,7 @@ class DraggableModelCard(QFrame):
         # Status Chip
         status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
+        lbl_status.setObjectName("StatusChip")
         lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
         lbl_status.setStyleSheet(
             f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
@@ -456,6 +473,7 @@ class DraggableModelCard(QFrame):
         layout.addLayout(chip_layout)
 
     def _get_status_info(self) -> tuple[str, str, str]:
+        c = _get_theme_colors()
         t = getattr(self.model, "type", "").lower()
         if t in [
             "custom_humanoid",
@@ -464,19 +482,42 @@ class DraggableModelCard(QFrame):
             "pinocchio",
             "openpose",
         ]:
-            return "GUI Ready", "#28a745", "#000000"
+            return "GUI Ready", c.success, "#000000"
 
         path_str = str(getattr(self.model, "path", ""))
         if t == "mjcf" or path_str.endswith(".xml"):
-            return "Viewer", "#17a2b8", "#000000"
+            return "Viewer", c.chart_cyan, "#000000"
         elif t in ["opensim", "myosim"]:
-            return "Engine Ready", "#28a745", "#000000"
+            return "Engine Ready", c.success, "#000000"
         elif t in ["matlab", "matlab_app"]:
-            return "External", "#6f42c1", "#ffffff"
+            return "External", c.chart_purple, "#ffffff"
         elif t in ["urdf_generator", "c3d_viewer"]:
-            return "Utility", "#6c757d", "#ffffff"
+            return "Utility", c.text_tertiary, "#ffffff"
 
-        return "Unknown", "#6c757d", "#ffffff"
+        return "Unknown", c.text_tertiary, "#ffffff"
+
+    def refresh_theme(self) -> None:
+        """Refresh inline styles to match the current theme."""
+        c = _get_theme_colors()
+        # Update description label
+        desc = self.findChild(QLabel, "CardDescription")
+        if desc:
+            desc.setStyleSheet(f"color: {c.text_secondary};")
+        # Update status chip
+        status_text, status_color, text_color = self._get_status_info()
+        chip = self.findChild(QLabel, "StatusChip")
+        if chip:
+            chip.setStyleSheet(
+                f"background-color: {status_color}; color: {text_color}; "
+                f"padding: 2px 6px; border-radius: 4px;"
+            )
+        # Update no-image fallback
+        img = self.findChild(QLabel, "CardImage")
+        if img and not img.pixmap():
+            img.setStyleSheet(
+                f"QLabel {{ color: {c.text_quaternary}; font-style: italic; "
+                f"border: none; background: transparent; }}"
+            )
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         if event and event.button() == Qt.MouseButton.LeftButton:

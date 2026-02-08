@@ -1,7 +1,8 @@
 """Theme manager for dynamic theme switching.
 
 This module provides a centralized ThemeManager for switching between
-Light, Dark, and High Contrast themes throughout the application.
+Light, Dark, High Contrast, and fleet-wide themes throughout the application.
+Also supports custom user-defined themes with persistence via QSettings.
 
 Usage:
     from shared.python.theme import ThemeManager, ThemePreset
@@ -19,10 +20,14 @@ Usage:
     manager.theme_changed.connect(self.on_theme_changed)
 """
 
+import json
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from PyQt6.QtCore import pyqtSignal
@@ -298,6 +303,9 @@ class ThemeManager:
     _instance: ClassVar["ThemeManager | None"] = None
     _theme_changed_callbacks: list[Callable[[ThemeColors], None]]
 
+    _CUSTOM_THEME_KEY = "custom_themes"
+    _SETTINGS_GROUP = "UpstreamDrift/Theme"
+
     def __init__(self) -> None:
         """Initialize the theme manager."""
         self._current_preset: ThemePreset | None = ThemePreset.DARK
@@ -305,6 +313,8 @@ class ThemeManager:
         self._theme_changed_callbacks: list[Callable[[ThemeColors], None]] = []
         self._qt_signal: pyqtSignal | None = None
         self._fleet_theme_name: str | None = None
+        self._custom_themes: dict[str, dict[str, str]] = {}
+        self._load_custom_themes()
 
     @classmethod
     def instance(cls) -> "ThemeManager":
@@ -343,6 +353,8 @@ class ThemeManager:
         self._current_preset = preset
         self._current_theme = THEME_PRESETS[preset]
         self._fleet_theme_name = None  # Clear fleet theme when using preset
+
+        self.save_theme_preference()
 
         # Notify all callbacks
         for callback in self._theme_changed_callbacks:
@@ -396,6 +408,8 @@ class ThemeManager:
         self._current_theme = fleet_to_theme_colors(theme_name)
         self._current_preset = None  # Clear preset when using fleet theme
         self._fleet_theme_name = theme_name
+
+        self.save_theme_preference()
 
         # Notify all callbacks
         for callback in self._theme_changed_callbacks:
@@ -615,6 +629,264 @@ class ThemeManager:
                 padding: 4px;
             }}
         """
+
+    # ── Custom theme support ─────────────────────────────────────
+
+    def _load_custom_themes(self) -> None:
+        """Load custom themes from QSettings."""
+        try:
+            from PyQt6.QtCore import QSettings
+
+            settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+            settings.beginGroup(self._SETTINGS_GROUP)
+            raw = settings.value(self._CUSTOM_THEME_KEY, "")
+            settings.endGroup()
+            if raw:
+                self._custom_themes = json.loads(raw)
+        except Exception:
+            self._custom_themes = {}
+
+    def _save_custom_themes(self) -> None:
+        """Persist custom themes to QSettings."""
+        try:
+            from PyQt6.QtCore import QSettings
+
+            settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+            settings.beginGroup(self._SETTINGS_GROUP)
+            settings.setValue(self._CUSTOM_THEME_KEY, json.dumps(self._custom_themes))
+            settings.endGroup()
+        except Exception as e:
+            logger.warning("Failed to save custom themes: %s", e)
+
+    def get_builtin_themes(self) -> list[str]:
+        """Get list of built-in theme names (presets + fleet themes, deduplicated)."""
+        seen: set[str] = set()
+        names: list[str] = []
+        for p in ThemePreset:
+            n = p.name.replace("_", " ").title()
+            if n not in seen:
+                seen.add(n)
+                names.append(n)
+        for n in self.get_available_fleet_themes():
+            if n not in seen:
+                seen.add(n)
+                names.append(n)
+        return names
+
+    def get_custom_theme_names(self) -> list[str]:
+        """Get list of user-created custom theme names."""
+        return list(self._custom_themes.keys())
+
+    def get_available_themes(self) -> list[str]:
+        """Get all theme names (built-in + custom)."""
+        return self.get_builtin_themes() + self.get_custom_theme_names()
+
+    def get_current_theme_name(self) -> str:
+        """Get the name of the currently active theme."""
+        return self.theme_name
+
+    def get_theme_definition(self, name: str) -> dict[str, str] | None:
+        """Get the color dictionary for a theme by name.
+
+        Returns a dict of color keys → hex values suitable for the
+        CustomThemeEditor, or None if not found.
+        """
+        # Custom themes are stored as dicts already
+        if name in self._custom_themes:
+            return dict(self._custom_themes[name])
+
+        # Built-in: convert ThemeColors dataclass to dict
+        theme_colors = self._resolve_theme_by_name(name)
+        if theme_colors is None:
+            return None
+
+        return {
+            "bg": theme_colors.bg_base,
+            "group_bg": theme_colors.bg_surface,
+            "border": theme_colors.border_default,
+            "text": theme_colors.text_primary,
+            "text_secondary": theme_colors.text_secondary,
+            "label": theme_colors.text_tertiary,
+            "focus": theme_colors.border_focus,
+            "input_bg": theme_colors.bg_surface,
+            "accent": theme_colors.primary,
+            "title_bg": theme_colors.bg_elevated,
+            "title_border": theme_colors.border_strong,
+            "table_header": theme_colors.bg_elevated,
+            "table_alt": theme_colors.bg_surface,
+            "button_hover": theme_colors.primary_hover,
+        }
+
+    def _resolve_theme_by_name(self, name: str) -> ThemeColors | None:
+        """Resolve a theme name to ThemeColors."""
+        # Check presets
+        for preset in ThemePreset:
+            preset_name = preset.name.replace("_", " ").title()
+            if preset_name == name:
+                return THEME_PRESETS[preset]
+
+        # Check fleet themes
+        try:
+            from .fleet_adapter import fleet_to_theme_colors, is_fleet_available
+
+            if is_fleet_available():
+                fleet_names = self.get_available_fleet_themes()
+                if name in fleet_names:
+                    return fleet_to_theme_colors(name)
+        except Exception:
+            pass
+
+        return None
+
+    def save_custom_theme(
+        self,
+        name: str,
+        colors: dict[str, str],
+        apply_immediately: bool = False,
+    ) -> str:
+        """Save a custom theme.
+
+        Args:
+            name: Theme name
+            colors: Dict of color keys → hex values
+            apply_immediately: If True, apply the theme after saving
+
+        Returns:
+            The saved theme name
+        """
+        self._custom_themes[name] = dict(colors)
+        self._save_custom_themes()
+        logger.info("Saved custom theme: %s", name)
+
+        if apply_immediately:
+            self.change_theme(name)
+
+        return name
+
+    def delete_custom_theme(self, name: str) -> bool:
+        """Delete a custom theme by name."""
+        if name not in self._custom_themes:
+            return False
+        del self._custom_themes[name]
+        self._save_custom_themes()
+        logger.info("Deleted custom theme: %s", name)
+        return True
+
+    def change_theme(self, name: str) -> None:
+        """Change theme by name (works for preset, fleet, and custom themes).
+
+        This is the unified entry point for theme switching from dialogs.
+        """
+        # Check presets first
+        for preset in ThemePreset:
+            preset_name = preset.name.replace("_", " ").title()
+            if preset_name == name:
+                self.set_theme(preset)
+                return
+
+        # Check fleet themes
+        try:
+            fleet_names = self.get_available_fleet_themes()
+            if name in fleet_names:
+                self.set_fleet_theme(name)
+                return
+        except Exception:
+            pass
+
+        # Custom theme
+        if name in self._custom_themes:
+            self._apply_custom_theme(name)
+            return
+
+        raise KeyError(f"Unknown theme: {name}")
+
+    def _apply_custom_theme(self, name: str) -> None:
+        """Apply a custom theme from stored color definitions."""
+        colors = self._custom_themes.get(name)
+        if not colors:
+            raise KeyError(f"Custom theme not found: {name}")
+
+        # Build a ThemeColors from the custom color dict with dark theme fallbacks
+        base = DARK_THEME
+        self._current_theme = ThemeColors(
+            name=name,
+            is_dark=True,  # Custom themes default to dark mode
+            primary=colors.get("accent", base.primary),
+            primary_hover=colors.get("button_hover", base.primary_hover),
+            primary_pressed=base.primary_pressed,
+            primary_muted=base.primary_muted,
+            success=base.success,
+            success_hover=base.success_hover,
+            success_muted=base.success_muted,
+            warning=base.warning,
+            warning_hover=base.warning_hover,
+            warning_muted=base.warning_muted,
+            error=base.error,
+            error_hover=base.error_hover,
+            error_muted=base.error_muted,
+            bg_deep=colors.get("bg", base.bg_deep),
+            bg_base=colors.get("bg", base.bg_base),
+            bg_surface=colors.get("group_bg", base.bg_surface),
+            bg_elevated=colors.get("title_bg", base.bg_elevated),
+            bg_highlight=base.bg_highlight,
+            border_subtle=base.border_subtle,
+            border_default=colors.get("border", base.border_default),
+            border_strong=colors.get("title_border", base.border_strong),
+            border_focus=colors.get("focus", base.border_focus),
+            text_primary=colors.get("text", base.text_primary),
+            text_secondary=colors.get("text_secondary", base.text_secondary),
+            text_tertiary=colors.get("label", base.text_tertiary),
+            text_quaternary=base.text_quaternary,
+            text_link=colors.get("accent", base.text_link),
+            chart_blue=base.chart_blue,
+            chart_green=base.chart_green,
+            chart_orange=base.chart_orange,
+            chart_red=base.chart_red,
+            chart_purple=base.chart_purple,
+            chart_cyan=base.chart_cyan,
+            chart_yellow=base.chart_yellow,
+            chart_brown=base.chart_brown,
+            grid_line=base.grid_line,
+            axis_line=base.axis_line,
+            tick_color=base.tick_color,
+            shadow_light=base.shadow_light,
+            shadow_medium=base.shadow_medium,
+            shadow_heavy=base.shadow_heavy,
+        )
+        self._current_preset = None
+        self._fleet_theme_name = None
+
+        # Notify callbacks
+        for callback in self._theme_changed_callbacks:
+            callback(self._current_theme)
+        if self._qt_signal is not None:
+            self._qt_signal.emit(self._current_theme)  # type: ignore[attr-defined]
+
+    def save_theme_preference(self) -> None:
+        """Save current theme name to QSettings for submodule inheritance."""
+        try:
+            from PyQt6.QtCore import QSettings
+
+            settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+            settings.beginGroup(self._SETTINGS_GROUP)
+            settings.setValue("current_theme", self.theme_name)
+            settings.endGroup()
+        except Exception as e:
+            logger.debug("Could not save theme preference: %s", e)
+
+    def load_saved_theme(self) -> None:
+        """Load and apply the previously saved theme preference."""
+        try:
+            from PyQt6.QtCore import QSettings
+
+            settings = QSettings("UpstreamDrift", "GolfModelingSuite")
+            settings.beginGroup(self._SETTINGS_GROUP)
+            saved = settings.value("current_theme", "")
+            settings.endGroup()
+            if saved:
+                self.change_theme(saved)
+        except Exception as e:
+            logger.debug("Could not load saved theme: %s", e)
 
 
 # Convenience functions
