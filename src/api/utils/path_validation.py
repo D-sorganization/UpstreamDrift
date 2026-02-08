@@ -24,9 +24,7 @@ def validate_model_path(model_path: str) -> str:
         ) from exc
 
     # Check both POSIX and Windows-style absolute paths
-    if user_path.is_absolute() or (
-        len(model_path) >= 2 and model_path[1] == ":"
-    ):
+    if user_path.is_absolute() or (len(model_path) >= 2 and model_path[1] == ":"):
         raise HTTPException(
             status_code=400,
             detail="Invalid path: absolute paths are not allowed",

@@ -80,8 +80,7 @@ class SimulationRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_ENGINE_TYPES:
             raise ValueError(
-                f"Unknown engine_type '{v}'. "
-                f"Valid types: {sorted(VALID_ENGINE_TYPES)}"
+                f"Unknown engine_type '{v}'. Valid types: {sorted(VALID_ENGINE_TYPES)}"
             )
         return normalized
 
