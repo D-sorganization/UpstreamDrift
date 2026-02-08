@@ -81,6 +81,8 @@ class LayoutManager:
                 "putting_green",
                 "matlab_unified",
                 "motion_capture",
+                "video_analyzer",
+                "data_explorer",
             ]
 
         # Filter to available models

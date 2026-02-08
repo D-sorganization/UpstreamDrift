@@ -8,7 +8,7 @@
       "description": "Browse, select, and build URDF/MJCF models",
       "category": "tool",
       "type": "special_app",
-      "path": "src/tools/urdf_generator/launch_urdf_generator.py",
+      "path": "src/tools/model_explorer/launch_model_explorer.py",
       "logo": "urdf_icon.svg",
       "status": "utility",
       "capabilities": [
@@ -90,7 +90,7 @@
       "type": "opensim",
       "path": "src/engines/physics_engines/opensim/python/opensim_gui.py",
       "engine_type": "opensim",
-      "logo": "opensim.svg",
+      "logo": "opensim.png",
       "status": "engine_ready",
       "capabilities": [
         "musculoskeletal",

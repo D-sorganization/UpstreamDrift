@@ -95,7 +95,9 @@ def create_local_app() -> FastAPI:
             "http://localhost:8080",  # Production UI
             "http://127.0.0.1:3000",
             "http://127.0.0.1:5173",
+            "http://127.0.0.1:8001",
             "http://127.0.0.1:8080",
+            "http://localhost:8001",
         ],
         allow_credentials=True,
         allow_methods=["*"],
@@ -126,6 +128,39 @@ def create_local_app() -> FastAPI:
     _startup_metrics["engines_loaded"] = [
         e.value for e in engine_manager.get_available_engines()
     ]
+
+    # Launcher manifest endpoint - serves tile configuration for React frontend
+    @app.get("/api/launcher/manifest")
+    async def get_launcher_manifest() -> dict[str, Any]:
+        """Return the launcher manifest (tile configuration) for the web UI."""
+        import json
+
+        manifest_path = (
+            Path(__file__).parent.parent / "config" / "launcher_manifest.json"
+        )
+        if manifest_path.exists():
+            with open(manifest_path, encoding="utf-8") as f:
+                return json.load(f)
+        return {"version": "1.0.0", "tiles": []}
+
+    # Launcher logos endpoint - serves tile logo images for React frontend
+    @app.get("/api/launcher/logos/{logo_name:path}")
+    async def get_launcher_logo(logo_name: str):
+        """Serve logo images from assets/logos directory."""
+        from fastapi.responses import FileResponse
+
+        logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
+        logo_path = logos_dir / logo_name
+        if logo_path.exists() and logo_path.is_file():
+            return FileResponse(str(logo_path))
+        # Also check launcher assets directory
+        launcher_logos = Path(__file__).parent.parent / "launchers" / "assets"
+        alt_path = launcher_logos / logo_name
+        if alt_path.exists() and alt_path.is_file():
+            return FileResponse(str(alt_path))
+        return JSONResponse(
+            status_code=404, content={"detail": f"Logo not found: {logo_name}"}
+        )
 
     # Health check
     @app.get("/api/health")
@@ -201,6 +236,16 @@ def create_local_app() -> FastAPI:
         logger.info(f"UI build found at {ui_path}, mounting static files")
         _startup_metrics["static_files_mounted"] = True
 
+        # Mount logos directory so web UI can load tile logos
+        logos_path = Path(__file__).parent.parent.parent / "assets" / "logos"
+        if logos_path.exists():
+            app.mount(
+                "/logos",
+                StaticFiles(directory=str(logos_path)),
+                name="logos",
+            )
+            logger.info(f"Mounted /logos from {logos_path}")
+
         # Check if assets directory exists before mounting
         assets_path = ui_path / "assets"
         if assets_path.exists():
@@ -215,6 +260,26 @@ def create_local_app() -> FastAPI:
             _startup_metrics["errors"].append(
                 f"Assets directory missing: {assets_path}"
             )
+
+        # SPA catch-all: serve index.html for all non-API routes
+        index_html = ui_path / "index.html"
+        if index_html.exists():
+            from fastapi.responses import FileResponse
+
+            @app.get("/{full_path:path}")
+            async def serve_spa(request: Request, full_path: str):
+                """Serve the SPA index.html for all non-API routes."""
+                if full_path.startswith("api/"):
+                    return JSONResponse(
+                        status_code=404,
+                        content={"detail": "API route not found", "path": full_path},
+                    )
+                # Check if it's a static file first
+                static_file = ui_path / full_path
+                if full_path and static_file.exists() and static_file.is_file():
+                    return FileResponse(str(static_file))
+                return FileResponse(str(index_html))
+
     else:
         warning = f"UI build not found at {ui_path}. Run npm install && npm run build."
         logger.warning(warning)
@@ -342,10 +407,13 @@ def print_logo_animated():
     ]
 
     print()
-    for line in logo:
-        print(f"    {ORANGE}{line}{RESET}")
-        sys.stdout.flush()
-        time.sleep(0.03)  # Scroll effect
+    try:
+        for line in logo:
+            print(f"    {ORANGE}{line}{RESET}")
+            sys.stdout.flush()
+            time.sleep(0.03)  # Scroll effect
+    except UnicodeEncodeError:
+        print(f"    {ORANGE}UPSTREAM DRIFT{RESET}")
     print()
 
 
@@ -361,7 +429,8 @@ def print_server_info(host: str, port: int):
     CYAN = "\033[38;5;51m"
     RESET = "\033[0m"
 
-    print(f"""
+    try:
+        print(f"""
 {CYAN}    ┌─────────────────────────────────────────────────────────┐
     │              Golf Modeling Suite - Local Server         │
     ├─────────────────────────────────────────────────────────┤
@@ -372,6 +441,12 @@ def print_server_info(host: str, port: int):
     │  Press Ctrl+C to stop.                                  │
     └─────────────────────────────────────────────────────────┘{RESET}
     """)
+    except UnicodeEncodeError:
+        print("\n    Golf Modeling Suite - Local Server")
+        print(f"    Running at: http://{host}:{port}")
+        print(f"    API Docs:   http://{host}:{port}/api/docs")
+        print("    Mode: LOCAL (no auth required)")
+        print("    Press Ctrl+C to stop.\n")
 
 
 def main():

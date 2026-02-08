@@ -58,7 +58,7 @@ DRAKE_LAUNCHER_SCRIPT: Path = Path(
 PINOCCHIO_LAUNCHER_SCRIPT: Path = Path(
     "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
 )
-URDF_GENERATOR_SCRIPT: Path = Path("src/tools/urdf_generator/launch_urdf_generator.py")
+URDF_GENERATOR_SCRIPT: Path = Path("src/tools/model_explorer/launch_model_explorer.py")
 C3D_VIEWER_SCRIPT: Path = Path(
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
 )
