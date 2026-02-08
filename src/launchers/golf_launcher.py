@@ -44,7 +44,6 @@ from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
 # Import new help system (graceful degradation if not available)
 try:
     from src.shared.python.help_system import (
-        HelpButton,
         HelpDialog,
         TooltipManager,
     )
@@ -198,14 +197,14 @@ class GolfLauncher(QMainWindow):
             startup_results.startup_time_ms if startup_results else 0
         )
 
-        # Set Icon - Use Windows-optimized icon for maximum clarity on Windows
+        # Set Icon - Prefer .ico on Windows for proper taskbar/title bar display
         icon_candidates = [
-            ASSETS_DIR
-            / "golf_robot_windows_optimized.png",  # Windows-optimized (best for Windows)
-            ASSETS_DIR / "golf_robot_ultra_sharp.png",  # Ultra-sharp version
-            ASSETS_DIR / "golf_robot_cropped_icon.png",  # Cropped version
-            ASSETS_DIR / "golf_robot_icon.png",  # High-quality standard
-            ASSETS_DIR / "golf_icon.png",  # Original fallback
+            ASSETS_DIR / "golf_suite_unified.ico",  # Multi-size .ico (best for Windows)
+            ASSETS_DIR / "golf_robot_windows_optimized.ico",
+            ASSETS_DIR / "golf_icon.ico",
+            ASSETS_DIR / "golf_robot_windows_optimized.png",
+            ASSETS_DIR / "golf_robot_icon.png",
+            ASSETS_DIR / "golf_icon.png",
         ]
 
         icon_loaded = False
@@ -1067,13 +1066,6 @@ except Exception as e:
         """)
         top_bar.addWidget(btn_help)
 
-        # Add help button for engine selection (next to grid)
-        if HELP_SYSTEM_AVAILABLE:
-            btn_engine_help = HelpButton(
-                "engine_selection", "Help with engine selection", self
-            )
-            top_bar.addWidget(btn_engine_help)
-
         btn_diagnostics = QPushButton("Diagnostics")
         btn_diagnostics.setToolTip("Run diagnostics to troubleshoot launcher issues")
         btn_diagnostics.setStyleSheet("""
@@ -1091,22 +1083,7 @@ except Exception as e:
         btn_diagnostics.clicked.connect(self.open_diagnostics)
         top_bar.addWidget(btn_diagnostics)
 
-        btn_bug = QPushButton("Report Bug")
-        btn_bug.setStyleSheet("""
-            QPushButton {
-                background-color: #d32f2f;
-                color: white;
-                padding: 8px 16px;
-                border: none;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #b71c1c;
-            }
-        """)
-        btn_bug.setToolTip("Report a bug via email")
-        btn_bug.clicked.connect(self._report_bug)
-        top_bar.addWidget(btn_bug)
+        # Report Bug moved to Help dialog bottom bar
 
         # AI Assistant Button (if available)
         if AI_AVAILABLE:
