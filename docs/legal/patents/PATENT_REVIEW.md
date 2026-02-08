@@ -1,6 +1,6 @@
 # Patent & Legal Risk Assessment
 
-**Last Updated:** 2026-02-05
+**Last Updated:** 2026-02-18
 **Status:** ACTIVE
 **Reviewer:** Jules (Patent Reviewer Agent)
 
@@ -8,18 +8,18 @@
 
 ### High Risk Areas
 
-| Area                     | Patent(s) / Assignee                                                                           | Our Implementation                                                                                                              | Risk Level              | Mitigation                                                                                                                                                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` in `shared/python/kinematic_sequence.py`. Explicitly checks order: Pelvis -> Thorax -> Arm -> Club. | **HIGH**                | Rename "Kinematic Sequence" to "Segment Timing". Use relative timing gaps instead of absolute efficiency score. **Legal Review Required.**                                 |
-| **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `SwingComparator.compute_kinematic_similarity` in `shared/python/swing_comparison.py`. Uses `100 / (1 + DTW_dist)` formula.     | **HIGH**                | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance).                                                                |
-| **Swing DNA**            | **Mizuno** (Trademark/Method)<br>Club fitting based on specific metric vector                  | `SwingProfileMetrics` in `shared/python/statistical_analysis.py`. Visualization as Radar Chart.                                 | **VERIFIED REMEDIATED** | Renamed to "Swing Profile". Metrics changed to: Speed, Sequence, Stability, Efficiency, Power (distinct from Mizuno's). Audit confirmed no "Swing DNA" strings in UI code. |
+| Area                     | Patent(s) / Assignee                                                                           | Our Implementation                                                                                                              | Risk Level              | Mitigation                                                                                                                                                                 | Issue Tracker |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` in `shared/python/kinematic_sequence.py`. Explicitly checks order: Pelvis -> Thorax -> Arm -> Club. | **HIGH**                | Rename "Kinematic Sequence" to "Segment Timing". Use relative timing gaps instead of absolute efficiency score. **Legal Review Required.**                                 | [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md) |
+| **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `SwingComparator.compute_kinematic_similarity` in `shared/python/swing_comparison.py`. Uses `100 * exp(-norm_dist)` formula.     | **HIGH**                | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance). The formula change is partial mitigation but DTW usage remains risk. | [`ISSUE_002`](../../assessments/issues/ISSUE_002_DTW_SCORING.md) |
+| **Swing DNA**            | **Mizuno** (Trademark/Method)<br>Club fitting based on specific metric vector                  | `SwingProfileMetrics` in `shared/python/statistical_analysis.py`. Visualization as Radar Chart.                                 | **VERIFIED REMEDIATED** | Renamed to "Swing Profile". Metrics changed to: Speed, Sequence, Stability, Efficiency, Power (distinct from Mizuno's). Audit confirmed no "Swing DNA" strings in UI code. | N/A           |
 
 ### Medium Risk Areas
 
-| Area                         | Patent(s) / Assignee                                                | Our Implementation                                                                                                       | Risk Level | Mitigation                                                                                                                                                                              |
-| ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Gear Effect Simulation**   | **TrackMan**, **Foresight**<br>Methods for simulating ball flight   | `compute_gear_effect_spin` in `shared/python/impact_model.py`. Uses linear approximation with constants `100.0`, `50.0`. | **MEDIUM** | Document source of constants. If derived from TrackMan data, ensure "fair use" or clean-room implementation.                                                                            |
-| **Ball Flight Coefficients** | **Unknown / Proprietary SDKs**<br>Specific aerodynamic coefficients | `BallProperties` in `shared/python/ball_flight_physics.py`. Uses specific values (`cd0=0.21`, `cl1=0.38`, etc.).         | **MEDIUM** | Citation missing. If these match a specific competitor's SDK or proprietary research, it could be infringement. **Action:** Cite source (e.g., Smits & Smith) or externalize to config. |
+| Area                         | Patent(s) / Assignee                                                | Our Implementation                                                                                                       | Risk Level | Mitigation                                                                                                                                                                              | Issue Tracker |
+| ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **Gear Effect Simulation**   | **TrackMan**, **Foresight**<br>Methods for simulating ball flight   | `compute_gear_effect_spin` in `shared/python/impact_model.py`. Uses heuristic constants `100.0`, `50.0`.                 | **MEDIUM** | Document source of constants. If derived from TrackMan data, ensure "fair use" or clean-room implementation.                                                                            | [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md) |
+| **Ball Flight Coefficients** | **Unknown / Proprietary SDKs**<br>Specific aerodynamic coefficients | `BallProperties` in `shared/python/ball_flight_physics.py`. Uses specific values (`cd0=0.21`, `cl1=0.38`, etc.).         | **MEDIUM** | Citation missing. If these match a specific competitor's SDK or proprietary research, it could be infringement. **Action:** Cite source (e.g., Smits & Smith) or externalize to config. | [`ISSUE_046`](../../assessments/issues/ISSUE_046_BALL_FLIGHT_COEFFICIENTS.md) |
 
 ### Low Risk Areas
 
@@ -29,6 +29,8 @@
 | **Physics Engine**      | Public Domain                                        | Standard rigid body dynamics (Newtonian/Lagrangian).                                                  | **LOW**    | Standard physics.                                                                                                        |
 | **Ball Flight ODE**     | Public Domain                                        | Implementation of standard aerodynamic equations (drag, lift, Magnus).                                | **LOW**    | Equations are standard; coefficients are the only risk (see Medium).                                                     |
 | **Statistical Metrics** | Public Domain                                        | Standard deviations, correlations, PCA.                                                               | **LOW**    | Generic math.                                                                                                            |
+| **Photometric Measure** | **Foresight**                                        | N/A                                                                                                   | **N/A**    | No implementation of camera-based ball tracking logic. We use simulation only.                                           |
+| **Radar Tracking**      | **TrackMan**                                         | N/A                                                                                                   | **N/A**    | No implementation of radar signal processing. We use simulation only.                                                    |
 
 ## 2. Code-Specific Analysis
 
@@ -37,13 +39,15 @@
 - **Risk**: `KinematicSequenceAnalyzer.analyze`
 - **Finding**: Logic explicitly defines `expected_order = ["Pelvis", "Torso", "Arm", "Club"]`. This specific order check is the core claim of several TPI patents.
 - **Action**: Avoid binary "Efficiency" scoring based on this order. Present data as raw timing charts without "Good/Bad" judgment based on TPI norms.
+- **Tracker**: [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md)
 
 ### `shared/python/swing_comparison.py`
 
 - **Risk**: `compute_kinematic_similarity`
-- **Finding**: Uses Dynamic Time Warping (DTW) to normalize temporal differences and generate a similarity score (0-100).
+- **Finding**: Uses Dynamic Time Warping (DTW) to normalize temporal differences and generate a similarity score. Updated formula: `100 * exp(-norm_dist)`.
 - **Context**: Zepp and K-Motion have patents on "comparing user motion to pro motion using time-warping".
 - **Action**: Isolate this logic. Consider making it an optional plugin or replacing with "Key Position Analysis" (P1-P10 positions).
+- **Tracker**: [`ISSUE_002`](../../assessments/issues/ISSUE_002_DTW_SCORING.md)
 
 ### `shared/python/impact_model.py`
 
@@ -51,6 +55,7 @@
 - **Finding**: Uses hardcoded scalars `h_scale=100.0`, `v_scale=50.0`.
 - **Context**: "Magic numbers" suggest empirical tuning against a reference (likely TrackMan).
 - **Action**: Validate these constants against open literature (e.g., Cochran & Stobbs) to establish independent derivation.
+- **Tracker**: [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md)
 
 ### `shared/python/ball_flight_physics.py`
 
@@ -58,6 +63,14 @@
 - **Finding**: Hardcoded aerodynamic coefficients: `cd0=0.21`, `cd1=0.05`, `cd2=0.02`, `cl1=0.38`, etc.
 - **Context**: These specific numbers likely come from a specific study or competitor model.
 - **Action**: Add citation immediately.
+- **Tracker**: [`ISSUE_046`](../../assessments/issues/ISSUE_046_BALL_FLIGHT_COEFFICIENTS.md)
+
+### `shared/python/data_fitting.py`
+
+- **Risk**: Anthropometric Coefficients
+- **Finding**: Contains hardcoded coefficients (e.g., `(0.028, 0.436, 0.322)`).
+- **Context**: Explicitly cites "Dempster (1955)", "Winter (2009)", "de Leva (1996)".
+- **Status**: **LOW RISK** (Public Domain / Academic Citation).
 
 ## 3. Trademark Concerns
 
@@ -73,6 +86,7 @@
 - **Kinematic Sequence**: Cheetham, P. J. (2014). "A Simple Model of the Pelvis-Thorax Kinematic Sequence." (Academic citation used in docs).
 - **Ball Flight**: Uses standard aerodynamic models (MacDonald & Hanzely). _Verify coefficient source._
 - **Chaos Theory**: Implementations are standard mathematical algorithms (Rosenstein for LLE, Higuchi for FD) available in open scientific libraries.
+- **Anthropometry**: Explicitly based on Dempster, Winter, and de Leva (see `shared/python/data_fitting.py`).
 
 ## 5. Risk Mitigation Actions
 
@@ -89,6 +103,11 @@
 
 ## 6. Change Log
 
+- **2026-02-18**: Updated review.
+  - Updated `SwingComparator` formula description (`100 * exp(-norm_dist)`).
+  - Explicitly linked all major risks to issue tracker files.
+  - Added section for Foresight (Photometric) and TrackMan (Radar) clarifying non-implementation.
+  - Validated `data_fitting.py` coefficients as low risk (cited).
 - **2026-02-05**: Updated review.
   - Added **Ball Flight Coefficients** as Medium Risk (uncited magic numbers).
   - Verified "Swing DNA" remediation.
