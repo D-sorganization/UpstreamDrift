@@ -20,3 +20,6 @@ dependencies:
       - types-PyYAML==6.0.12.12
       - mujoco>=3.0.0
       - PyQt6>=6.6.0
+      - defusedxml>=0.7.1
+      - structlog>=24.0.0
+      - colorama>=0.4.6

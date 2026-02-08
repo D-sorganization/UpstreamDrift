@@ -107,6 +107,19 @@ dependencies:
       # Logging and Security
       - structlog>=24.1.0,<25.0.0
       - simpleeval>=0.9.13
+      - colorama>=0.4.6
+
+      # Pose Estimation & Video Processing
+      - mediapipe>=0.10.0
+      - imageio[ffmpeg]>=2.31.0
+
+      # Reinforcement Learning (MyoSuite requires gymnasium)
+      - gymnasium>=0.29.0
+      - stable-baselines3>=2.0.0
+
+      # URDF & Mesh Tools
+      - trimesh>=4.0.0
+      - robot_descriptions>=1.12.0
 
       # Linting (specific version for CI compatibility)
       - ruff==0.14.10

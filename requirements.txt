@@ -41,11 +41,22 @@ colorama>=0.4.6
 # Web Automation & Testing
 playwright>=1.40.0
 
+# Pose Estimation & Video Processing
+mediapipe>=0.10.0
+imageio[ffmpeg]>=2.31.0
+
 # Physics Engines (Windows - install via pip)
 mujoco>=3.0.0
 
-# Community Models (Optional)
-# robot_descriptions>=1.4.0
+# Reinforcement Learning (MyoSuite requires gymnasium)
+gymnasium>=0.29.0
+stable-baselines3>=2.0.0
+
+# URDF & Mesh Tools
+trimesh>=4.0.0
+
+# Community Robot Models (Model Explorer)
+robot_descriptions>=1.12.0
 
 # ============================================================================
 # WSL2/Linux Only Dependencies (not available on Windows via pip)
