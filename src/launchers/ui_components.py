@@ -273,7 +273,7 @@ class GolfSplashScreen(QSplashScreen):
         painter.drawText(
             self.rect().adjusted(16, 0, -20, -12),
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft,
-            "\u00a9 2024-2026 UpstreamDrift",
+            "UpstreamDrift",
         )
 
     def show_message(self, message: str, progress: int) -> None:
@@ -941,6 +941,46 @@ class SettingsDialog(QDialog):
                 f"<td style='padding:2px 6px; color:#666;'>{duration:.0f}ms</td></tr>"
             )
         html += "</table>"
+
+        # Engine availability table (from engine_availability check details)
+        engine_check = next(
+            (c for c in checks if c["name"] == "engine_availability"), None
+        )
+        engines = (
+            engine_check.get("details", {}).get("engines", []) if engine_check else []
+        )
+        if engines:
+            html += "<h3>Physics Engines</h3>"
+            html += (
+                "<table style='width:100%; border-collapse:collapse;'>"
+                "<tr style='border-bottom:1px solid #333;'>"
+                "<th style='padding:4px 8px; text-align:left;'>Engine</th>"
+                "<th style='padding:4px 8px; text-align:left;'>Status</th>"
+                "<th style='padding:4px 8px; text-align:left;'>Version</th>"
+                "<th style='padding:4px 8px; text-align:left;'>Details</th>"
+                "</tr>"
+            )
+            for eng in engines:
+                installed = eng.get("installed", False)
+                icon = "&#9989;" if installed else "&#10060;"
+                color = "#2da44e" if installed else "#f85149"
+                name = eng.get("name", "?").replace("_", " ").title()
+                version = eng.get("version") or "-"
+                diag = eng.get("diagnostic", "")
+                missing = eng.get("missing_deps", [])
+                detail_str = diag
+                if missing and not installed:
+                    detail_str = f"Missing: {', '.join(missing[:3])}"
+                html += (
+                    f"<tr>"
+                    f"<td style='padding:3px 8px;'><b>{name}</b></td>"
+                    f"<td style='padding:3px 8px; color:{color};'>{icon} "
+                    f"{'Installed' if installed else 'Not installed'}</td>"
+                    f"<td style='padding:3px 8px; color:#a0a0a0;'>{version}</td>"
+                    f"<td style='padding:3px 8px; color:#888;'>{detail_str}</td>"
+                    f"</tr>"
+                )
+            html += "</table>"
 
         # Runtime state
         if runtime:
