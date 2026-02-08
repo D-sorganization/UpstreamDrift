@@ -25,11 +25,13 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QDockWidget,
     QFrame,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -37,6 +39,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSplashScreen,
     QTabWidget,
+    QTextBrowser,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -640,6 +643,297 @@ class EnvironmentDialog(QDialog):
         self.console.clear()
         self.build_thread = DockerBuildThread(self.combo_stage.currentText())
         self.build_thread.log_signal.connect(self.console.append)
+        self.build_thread.start()
+
+
+class SettingsDialog(QDialog):
+    """Combined settings dialog with Diagnostics and Rebuild Environment tabs."""
+
+    # Emitted when the user clicks Reset Layout in the Diagnostics tab
+    reset_layout_requested = pyqtSignal()
+
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        diagnostics_data: dict[str, Any] | None = None,
+        initial_tab: int = 0,
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.resize(800, 600)
+        self._diagnostics_data = diagnostics_data
+        self._setup_ui()
+        self.tabs.setCurrentIndex(initial_tab)
+
+    def _setup_ui(self) -> None:
+        layout = QVBoxLayout(self)
+        self.tabs = QTabWidget()
+        layout.addWidget(self.tabs)
+
+        # Tab 0: Configuration (Docker, WSL, GPU, Live Viz)
+        self.tabs.addTab(self._create_configuration_tab(), "Configuration")
+
+        # Tab 1: Layout (Edit Tiles, Layout Lock, Reset)
+        self.tabs.addTab(self._create_layout_tab(), "Layout")
+
+        # Tab 2: Rebuild Environment
+        self.tabs.addTab(self._create_environment_tab(), "Rebuild Environment")
+
+        # Tab 3: Diagnostics
+        self.tabs.addTab(self._create_diagnostics_tab(), "Diagnostics")
+
+        # Close button
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        layout.addWidget(close_btn)
+
+    def _create_configuration_tab(self) -> QWidget:
+        """Create the Configuration tab with execution environment controls."""
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        # Execution environment group
+        env_group = QGroupBox("Execution Environment")
+        env_layout = QVBoxLayout(env_group)
+
+        self.chk_docker = QCheckBox("Docker mode")
+        self.chk_docker.setToolTip(
+            "Run physics engines in Docker containers (requires Docker Desktop)"
+        )
+        env_layout.addWidget(self.chk_docker)
+
+        self.chk_wsl = QCheckBox("WSL mode")
+        self.chk_wsl.setToolTip(
+            "Run in WSL2 Ubuntu environment (full Pinocchio/Drake/Crocoddyl support)"
+        )
+        env_layout.addWidget(self.chk_wsl)
+
+        tab_layout.addWidget(env_group)
+
+        # Simulation options group
+        sim_group = QGroupBox("Simulation Options")
+        sim_layout = QVBoxLayout(sim_group)
+
+        self.chk_live_viz = QCheckBox("Live Visualization")
+        self.chk_live_viz.setToolTip(
+            "Enable real-time 3D visualization during simulation"
+        )
+        sim_layout.addWidget(self.chk_live_viz)
+
+        self.chk_gpu = QCheckBox("GPU Acceleration")
+        self.chk_gpu.setToolTip(
+            "Use GPU for physics computation (requires supported hardware)"
+        )
+        sim_layout.addWidget(self.chk_gpu)
+
+        tab_layout.addWidget(sim_group)
+
+        # Sync checkboxes with parent launcher state
+        launcher = self.parent()
+        if launcher and hasattr(launcher, "chk_docker"):
+            self.chk_docker.setChecked(launcher.chk_docker.isChecked())
+            self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
+            self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
+            self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
+
+            # Two-way sync: dialog checkboxes update launcher checkboxes
+            self.chk_docker.toggled.connect(launcher.chk_docker.setChecked)
+            self.chk_wsl.toggled.connect(launcher.chk_wsl.setChecked)
+            self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
+            self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
+
+        tab_layout.addStretch()
+        return tab
+
+    def _create_layout_tab(self) -> QWidget:
+        """Create the Layout tab with tile arrangement controls."""
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        layout_group = QGroupBox("Tile Layout")
+        layout_inner = QVBoxLayout(layout_group)
+
+        # Layout lock toggle
+        self._btn_layout_lock = QPushButton("Layout: Locked")
+        self._btn_layout_lock.setCheckable(True)
+        self._btn_layout_lock.setChecked(False)
+        self._btn_layout_lock.setStyleSheet(
+            "QPushButton { background: #444; color: #ccc; padding: 8px 16px; }"
+            "QPushButton:checked { background: #007acc; color: white; }"
+        )
+        layout_inner.addWidget(self._btn_layout_lock)
+
+        # Edit tiles button
+        self._btn_edit_tiles = QPushButton("Edit Tiles (show/hide)")
+        self._btn_edit_tiles.setEnabled(False)
+        layout_inner.addWidget(self._btn_edit_tiles)
+
+        # Reset layout button
+        btn_reset = QPushButton("Reset Layout to Defaults")
+        btn_reset.clicked.connect(self._on_reset_layout)
+        layout_inner.addWidget(btn_reset)
+
+        tab_layout.addWidget(layout_group)
+
+        # Sync with parent launcher
+        launcher = self.parent()
+        if launcher and hasattr(launcher, "btn_modify_layout"):
+            self._btn_layout_lock.setChecked(launcher.btn_modify_layout.isChecked())
+            self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
+            self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
+            # Enable edit tiles when layout is unlocked
+            self._btn_layout_lock.toggled.connect(self._btn_edit_tiles.setEnabled)
+
+        tab_layout.addStretch()
+        return tab
+
+    def _create_diagnostics_tab(self) -> QWidget:
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        self._diag_browser = QTextBrowser()
+        self._diag_browser.setOpenExternalLinks(False)
+        self._diag_browser.setStyleSheet(
+            "QTextBrowser {"
+            "  background-color: #1e1e1e; color: #d4d4d4;"
+            "  font-family: 'Segoe UI', sans-serif; font-size: 13px;"
+            "  padding: 12px;"
+            "}"
+        )
+        tab_layout.addWidget(self._diag_browser)
+
+        if self._diagnostics_data:
+            self._render_diagnostics(self._diagnostics_data)
+
+        # Action buttons
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+
+        btn_refresh = QPushButton("Re-run Diagnostics")
+        btn_refresh.setToolTip("Run all diagnostic checks again")
+        btn_refresh.clicked.connect(self._refresh_diagnostics)
+        btn_row.addWidget(btn_refresh)
+
+        btn_reset = QPushButton("Reset Layout")
+        btn_reset.setToolTip("Reset tile layout to defaults")
+        btn_reset.clicked.connect(self._on_reset_layout)
+        btn_row.addWidget(btn_reset)
+
+        tab_layout.addLayout(btn_row)
+        return tab
+
+    def _render_diagnostics(self, data: dict[str, Any]) -> None:
+        summary = data.get("summary", {})
+        checks = data.get("checks", [])
+        runtime = data.get("runtime_state", {})
+        recommendations = data.get("recommendations", [])
+
+        status = summary.get("status", "unknown").upper()
+        passed = summary.get("passed", 0)
+        failed = summary.get("failed", 0)
+        warnings = summary.get("warnings", 0)
+
+        status_color = "#2da44e" if status == "HEALTHY" else "#d29922"
+        html = (
+            f"<h2 style='color:{status_color};'>Status: {status}</h2>"
+            f"<p><b>Checks:</b> {passed} passed, {failed} failed, "
+            f"{warnings} warnings</p>"
+        )
+
+        # Runtime state
+        html += "<h3>Runtime State</h3><ul>"
+        html += (
+            f"<li>Available models: {runtime.get('available_models_count', '?')}</li>"
+        )
+        html += f"<li>Tile order: {runtime.get('model_order_count', '?')}</li>"
+        html += f"<li>Model cards: {runtime.get('model_cards_count', '?')}</li>"
+        html += f"<li>Registry loaded: {runtime.get('registry_loaded', '?')}</li>"
+        html += f"<li>Docker available: {runtime.get('docker_available', '?')}</li>"
+        html += "</ul>"
+
+        # Check details
+        if any(c["status"] != "pass" for c in checks):
+            html += "<h3>Issues</h3><ul>"
+            for check in checks:
+                if check["status"] == "fail":
+                    html += (
+                        f"<li style='color:#f85149;'>"
+                        f"<b>{check['name']}</b>: {check['message']}</li>"
+                    )
+                elif check["status"] == "warning":
+                    html += (
+                        f"<li style='color:#d29922;'>"
+                        f"<b>{check['name']}</b>: {check['message']}</li>"
+                    )
+            html += "</ul>"
+
+        # Recommendations
+        if recommendations:
+            html += "<h3>Recommendations</h3><ul>"
+            for rec in recommendations[:5]:
+                html += f"<li>{rec}</li>"
+            html += "</ul>"
+
+        self._diag_browser.setHtml(html)
+
+    def _refresh_diagnostics(self) -> None:
+        """Re-run diagnostics and update the display."""
+        try:
+            from src.launchers.launcher_diagnostics import LauncherDiagnostics
+
+            diag = LauncherDiagnostics()
+            results = diag.run_all_checks()
+
+            # Add runtime state from parent launcher if available
+            launcher = self.parent()
+            if launcher and hasattr(launcher, "available_models"):
+                results["runtime_state"] = {
+                    "available_models_count": len(launcher.available_models),
+                    "available_model_ids": list(launcher.available_models.keys()),
+                    "model_order_count": len(launcher.model_order),
+                    "model_order": launcher.model_order,
+                    "model_cards_count": len(launcher.model_cards),
+                    "selected_model": launcher.selected_model,
+                    "docker_available": launcher.docker_available,
+                    "registry_loaded": launcher.registry is not None,
+                }
+
+            self._diagnostics_data = results
+            self._render_diagnostics(results)
+        except Exception as e:
+            self._diag_browser.setHtml(
+                f"<p style='color:#f85149;'>Error running diagnostics: {e}</p>"
+            )
+
+    def _on_reset_layout(self) -> None:
+        self.reset_layout_requested.emit()
+
+    def _create_environment_tab(self) -> QWidget:
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        self.combo_stage = QComboBox()
+        self.combo_stage.addItems(["all", "mujoco", "pinocchio", "drake", "base"])
+        tab_layout.addWidget(QLabel("Target Stage:"))
+        tab_layout.addWidget(self.combo_stage)
+
+        btn_build = QPushButton("Build Environment")
+        btn_build.clicked.connect(self._start_build)
+        tab_layout.addWidget(btn_build)
+
+        self.build_console = QTextEdit()
+        self.build_console.setReadOnly(True)
+        self.build_console.setStyleSheet(
+            "background-color: #1e1e1e; color: #00ff00; font-family: Consolas;"
+        )
+        tab_layout.addWidget(self.build_console)
+
+        return tab
+
+    def _start_build(self) -> None:
+        self.build_console.clear()
+        self.build_thread = DockerBuildThread(self.combo_stage.currentText())
+        self.build_thread.log_signal.connect(self.build_console.append)
         self.build_thread.start()
 
 
