@@ -48,6 +48,7 @@ docs/
 data/
 logs/
 
-# Environment files
+# Environment files (exclude secrets, keep the example template)
 .env
 .env.*
+!.env.example
