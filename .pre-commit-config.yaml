@@ -247,6 +247,7 @@ repos:
             "-x",
             "-q",
             "--tb=short",
+            "--timeout=10",
             "-m",
             "not slow and not integration",
           ]
