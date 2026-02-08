@@ -189,8 +189,10 @@ class RRTStarPlanner(MotionPlanner):
                     if goal_cost < best_goal_cost:
                         # Update or add goal node
                         if goal_idx >= 0:
-                            self._nodes[goal_idx].parent_idx = new_idx
-                            self._nodes[goal_idx].cost = goal_cost
+                            # Skip if new_idx is a descendant of goal (would create cycle)
+                            if not self._is_ancestor(goal_idx, new_idx):
+                                self._nodes[goal_idx].parent_idx = new_idx
+                                self._nodes[goal_idx].cost = goal_cost
                         else:
                             goal_node = TreeNode(
                                 config=q_goal.copy(),
@@ -338,6 +340,19 @@ class RRTStarPlanner(MotionPlanner):
 
         return best_idx
 
+    def _is_ancestor(self, candidate_idx: int, node_idx: int) -> bool:
+        """Check if candidate_idx is an ancestor of node_idx in the tree."""
+        idx = node_idx
+        visited: set[int] = set()
+        while idx >= 0:
+            if idx == candidate_idx:
+                return True
+            if idx in visited:
+                break
+            visited.add(idx)
+            idx = self._nodes[idx].parent_idx
+        return False
+
     def _rewire(self, new_idx: int, near_indices: list[int]) -> None:
         """Rewire tree to improve costs through new node.
 
@@ -349,6 +364,9 @@ class RRTStarPlanner(MotionPlanner):
 
         for idx in near_indices:
             if idx == new_idx or idx == new_node.parent_idx:
+                continue
+            # Skip if near node is an ancestor of new node (would create cycle)
+            if self._is_ancestor(idx, new_idx):
                 continue
 
             node = self._nodes[idx]
@@ -395,8 +413,10 @@ class RRTStarPlanner(MotionPlanner):
         """
         path = []
         idx = goal_idx
+        visited: set[int] = set()
 
-        while idx >= 0:
+        while idx >= 0 and idx not in visited:
+            visited.add(idx)
             path.append(self._nodes[idx].config.copy())
             idx = self._nodes[idx].parent_idx
 
