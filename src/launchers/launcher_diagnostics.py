@@ -354,7 +354,7 @@ class LauncherDiagnostics:
             result = DiagnosticResult(
                 name="layout_config",
                 status="pass",
-                message="No saved layout (will use defaults with 8 tiles)",
+                message="No saved layout (will use defaults with 17 tiles)",
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
@@ -595,7 +595,7 @@ class LauncherDiagnostics:
             if result.status == "fail":
                 if result.name == "models_yaml":
                     recommendations.append(
-                        "CRITICAL: Ensure src/config/models.yaml exists and contains all 8 model definitions"
+                        "CRITICAL: Ensure src/config/models.yaml exists and contains all 17 model definitions"
                     )
                 elif result.name == "model_registry":
                     recommendations.append(
@@ -613,7 +613,7 @@ class LauncherDiagnostics:
                     details = result.details
                     if details.get("missing_from_saved"):
                         recommendations.append(
-                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 8 tiles"
+                            f"LIKELY CAUSE: Saved layout is missing tiles. Delete {LAYOUT_CONFIG_FILE} to reset to defaults with all 17 tiles"
                         )
                 elif result.name == "asset_files":
                     recommendations.append("Some tile icons may not display correctly")
@@ -637,7 +637,7 @@ def reset_layout_config() -> bool:
             LAYOUT_CONFIG_FILE.rename(backup_path)
             print(f"Backed up existing config to {backup_path}")
 
-        print("Layout config reset - launcher will use defaults (8 tiles)")
+        print("Layout config reset - launcher will use defaults (17 tiles)")
         return True
     except Exception as e:
         print(f"Failed to reset layout config: {e}")
