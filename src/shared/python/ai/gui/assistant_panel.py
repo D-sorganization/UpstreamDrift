@@ -39,8 +39,8 @@ from src.shared.python.ai.tools.file_ops import register_file_tools
 from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from shared.python.ai.adapters.base import BaseAgentAdapter
-    from shared.python.ai.gui.settings_dialog import AISettings
+    from src.shared.python.ai.adapters.base import BaseAgentAdapter
+    from src.shared.python.ai.gui.settings_dialog import AISettings
 
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
@@ -278,6 +278,7 @@ class AIAssistantPanel(QWidget):
 
     message_sent = pyqtSignal(str)  # Emits when user sends message
     settings_requested = pyqtSignal()  # Emits when settings button clicked
+    close_requested = pyqtSignal()  # Emits when close button clicked
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize AI assistant panel.
@@ -394,7 +395,7 @@ class AIAssistantPanel(QWidget):
     def _auto_load_settings(self) -> None:
         """Try to load settings and init adapter on startup."""
         try:
-            from shared.python.ai.gui.settings_dialog import AISettings
+            from src.shared.python.ai.gui.settings_dialog import AISettings
 
             settings = AISettings.load()
             self.apply_settings(settings)
@@ -481,6 +482,27 @@ class AIAssistantPanel(QWidget):
         settings_btn.setToolTip("Settings")
         settings_btn.clicked.connect(self._show_settings)
         layout.addWidget(settings_btn)
+
+        # Close button
+        close_btn = QPushButton("✕")
+        close_btn.setToolTip("Close AI Chat")
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(0, 0, 0, 0.15);
+                color: #000000;
+                border: 1px solid rgba(0, 0, 0, 0.3);
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: rgba(200, 0, 0, 0.5);
+                color: white;
+            }
+        """)
+        close_btn.clicked.connect(self.close_requested.emit)
+        layout.addWidget(close_btn)
 
         return header
 
@@ -853,8 +875,8 @@ class AIAssistantPanel(QWidget):
         Args:
             settings: Settings to apply.
         """
-        from shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
-        from shared.python.ai.types import ExpertiseLevel
+        from src.shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
+        from src.shared.python.ai.types import ExpertiseLevel
 
         # Update Header Icons
         provider_icons = {
@@ -889,7 +911,7 @@ class AIAssistantPanel(QWidget):
         adapter: BaseAgentAdapter | None = None
 
         if settings.provider == AIProvider.OLLAMA:
-            from shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
             adapter = OllamaAdapter(
                 host=settings.ollama_host,
@@ -898,7 +920,7 @@ class AIAssistantPanel(QWidget):
         elif settings.provider == AIProvider.OPENAI:
             api_key = get_api_key(AIProvider.OPENAI)
             if api_key:
-                from shared.python.ai.adapters.openai_adapter import OpenAIAdapter
+                from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
                 adapter = OpenAIAdapter(
                     api_key=api_key,
@@ -907,7 +929,9 @@ class AIAssistantPanel(QWidget):
         elif settings.provider == AIProvider.ANTHROPIC:
             api_key = get_api_key(AIProvider.ANTHROPIC)
             if api_key:
-                from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
+                from src.shared.python.ai.adapters.anthropic_adapter import (
+                    AnthropicAdapter,
+                )
 
                 adapter = AnthropicAdapter(
                     api_key=api_key,
@@ -916,7 +940,7 @@ class AIAssistantPanel(QWidget):
         elif settings.provider == AIProvider.GEMINI:
             api_key = get_api_key(AIProvider.GEMINI)
             if api_key:
-                from shared.python.ai.adapters.gemini_adapter import GeminiAdapter
+                from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter
 
                 adapter = GeminiAdapter(
                     api_key=api_key,

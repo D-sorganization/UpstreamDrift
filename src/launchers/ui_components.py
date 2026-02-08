@@ -25,11 +25,13 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QDockWidget,
     QFrame,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -668,16 +670,122 @@ class SettingsDialog(QDialog):
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
 
-        # Tab 1: Diagnostics
-        self.tabs.addTab(self._create_diagnostics_tab(), "Diagnostics")
+        # Tab 0: Configuration (Docker, WSL, GPU, Live Viz)
+        self.tabs.addTab(self._create_configuration_tab(), "Configuration")
+
+        # Tab 1: Layout (Edit Tiles, Layout Lock, Reset)
+        self.tabs.addTab(self._create_layout_tab(), "Layout")
 
         # Tab 2: Rebuild Environment
         self.tabs.addTab(self._create_environment_tab(), "Rebuild Environment")
+
+        # Tab 3: Diagnostics
+        self.tabs.addTab(self._create_diagnostics_tab(), "Diagnostics")
 
         # Close button
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
         layout.addWidget(close_btn)
+
+    def _create_configuration_tab(self) -> QWidget:
+        """Create the Configuration tab with execution environment controls."""
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        # Execution environment group
+        env_group = QGroupBox("Execution Environment")
+        env_layout = QVBoxLayout(env_group)
+
+        self.chk_docker = QCheckBox("Docker mode")
+        self.chk_docker.setToolTip(
+            "Run physics engines in Docker containers (requires Docker Desktop)"
+        )
+        env_layout.addWidget(self.chk_docker)
+
+        self.chk_wsl = QCheckBox("WSL mode")
+        self.chk_wsl.setToolTip(
+            "Run in WSL2 Ubuntu environment (full Pinocchio/Drake/Crocoddyl support)"
+        )
+        env_layout.addWidget(self.chk_wsl)
+
+        tab_layout.addWidget(env_group)
+
+        # Simulation options group
+        sim_group = QGroupBox("Simulation Options")
+        sim_layout = QVBoxLayout(sim_group)
+
+        self.chk_live_viz = QCheckBox("Live Visualization")
+        self.chk_live_viz.setToolTip(
+            "Enable real-time 3D visualization during simulation"
+        )
+        sim_layout.addWidget(self.chk_live_viz)
+
+        self.chk_gpu = QCheckBox("GPU Acceleration")
+        self.chk_gpu.setToolTip(
+            "Use GPU for physics computation (requires supported hardware)"
+        )
+        sim_layout.addWidget(self.chk_gpu)
+
+        tab_layout.addWidget(sim_group)
+
+        # Sync checkboxes with parent launcher state
+        launcher = self.parent()
+        if launcher and hasattr(launcher, "chk_docker"):
+            self.chk_docker.setChecked(launcher.chk_docker.isChecked())
+            self.chk_wsl.setChecked(launcher.chk_wsl.isChecked())
+            self.chk_live_viz.setChecked(launcher.chk_live.isChecked())
+            self.chk_gpu.setChecked(launcher.chk_gpu.isChecked())
+
+            # Two-way sync: dialog checkboxes update launcher checkboxes
+            self.chk_docker.toggled.connect(launcher.chk_docker.setChecked)
+            self.chk_wsl.toggled.connect(launcher.chk_wsl.setChecked)
+            self.chk_live_viz.toggled.connect(launcher.chk_live.setChecked)
+            self.chk_gpu.toggled.connect(launcher.chk_gpu.setChecked)
+
+        tab_layout.addStretch()
+        return tab
+
+    def _create_layout_tab(self) -> QWidget:
+        """Create the Layout tab with tile arrangement controls."""
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        layout_group = QGroupBox("Tile Layout")
+        layout_inner = QVBoxLayout(layout_group)
+
+        # Layout lock toggle
+        self._btn_layout_lock = QPushButton("Layout: Locked")
+        self._btn_layout_lock.setCheckable(True)
+        self._btn_layout_lock.setChecked(False)
+        self._btn_layout_lock.setStyleSheet(
+            "QPushButton { background: #444; color: #ccc; padding: 8px 16px; }"
+            "QPushButton:checked { background: #007acc; color: white; }"
+        )
+        layout_inner.addWidget(self._btn_layout_lock)
+
+        # Edit tiles button
+        self._btn_edit_tiles = QPushButton("Edit Tiles (show/hide)")
+        self._btn_edit_tiles.setEnabled(False)
+        layout_inner.addWidget(self._btn_edit_tiles)
+
+        # Reset layout button
+        btn_reset = QPushButton("Reset Layout to Defaults")
+        btn_reset.clicked.connect(self._on_reset_layout)
+        layout_inner.addWidget(btn_reset)
+
+        tab_layout.addWidget(layout_group)
+
+        # Sync with parent launcher
+        launcher = self.parent()
+        if launcher and hasattr(launcher, "btn_modify_layout"):
+            self._btn_layout_lock.setChecked(launcher.btn_modify_layout.isChecked())
+            self._btn_layout_lock.toggled.connect(launcher.btn_modify_layout.click)
+            self._btn_edit_tiles.clicked.connect(launcher.open_layout_manager)
+            # Enable edit tiles when layout is unlocked
+            self._btn_layout_lock.toggled.connect(self._btn_edit_tiles.setEnabled)
+
+        tab_layout.addStretch()
+        return tab
 
     def _create_diagnostics_tab(self) -> QWidget:
         tab = QWidget()
