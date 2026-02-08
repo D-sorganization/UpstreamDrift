@@ -453,9 +453,7 @@ class MatlabFileHandler:
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
             else:
-                subprocess.Popen(  # noqa: S603, S607
-                    ["xdg-open", str(file_path)]
-                )
+                subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
             logger.info("Opened MATLAB file: %s", file_path.name)
             return True
         except Exception:
@@ -512,9 +510,7 @@ class DocumentHandler:
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
             else:
-                subprocess.Popen(  # noqa: S603, S607
-                    ["xdg-open", str(file_path)]
-                )
+                subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
             logger.info("Opened document: %s", file_path.name)
             return True
         except Exception:
