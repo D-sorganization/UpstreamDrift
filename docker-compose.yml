@@ -15,7 +15,7 @@ services:
       - .:/workspace:delegated
       - ./data:/workspace/data
     environment:
-      - PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python
+      - PYTHONPATH=/workspace
       - PATH=/home/golfer/.local/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - DATABASE_URL=sqlite:////workspace/golf_modeling_suite.db
       - API_HOST=0.0.0.0
@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     working_dir: /workspace
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
