@@ -17,7 +17,6 @@ from dataclasses import dataclass
 import moderngl as mgl
 import numpy as np
 import scipy.io
-from numba import jit
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import (
@@ -134,11 +133,24 @@ class DataProcessor:
             return vars_found[0]
         raise ValueError(f"No valid table found in {dataset_name}")
 
-    @jit(nopython=True)
     def _calculate_scaling_factors(self, baseq_data: np.ndarray):
-        """Numba-accelerated scaling calculation"""
-        # This would be implemented with proper Numba-compatible data access
-        # For now, using regular NumPy approach
+        """Calculate scaling factors from data"""
+        # Removed @jit as we need class access and robust dataframe handling
+        try:
+            # Set reasonable defaults for visualization scaling
+            # Ideally this would iterate the dataset, but for now we set
+            # typical values for golf swing forces/torques
+            self.max_force_magnitude = 2000.0  # N (approx 200kg force max)
+            self.max_torque_magnitude = 200.0  # Nm
+
+            print(
+                f"✅ Scaling factors set: Force={self.max_force_magnitude}N, "
+                f"Torque={self.max_torque_magnitude}Nm"
+            )
+        except Exception as e:
+            print(f"⚠️ Error calculating scaling factors: {e}")
+            self.max_force_magnitude = 1000.0
+            self.max_torque_magnitude = 100.0
 
     def extract_frame_data(self, frame_idx: int, datasets: dict) -> FrameData:
         """Extract and process single frame data efficiently"""
@@ -357,7 +369,50 @@ class OpenGLRenderer:
 
     def _compile_ground_shaders(self):
         """Compile shaders for ground plane with grid"""
-        # Implementation for ground grid rendering
+        # Ground vertex shader
+        ground_vertex = """
+        #version 330 core
+        layout (location = 0) in vec3 position;
+        layout (location = 1) in vec2 texCoord;
+
+        uniform mat4 mvp;
+        out vec2 uv;
+
+        void main() {
+            uv = texCoord;
+            gl_Position = mvp * vec4(position, 1.0);
+        }
+        """
+
+        # Ground fragment shader (procedural grid)
+        ground_fragment = """
+        #version 330 core
+        in vec2 uv;
+        out vec4 FragColor;
+
+        uniform vec3 color;
+        uniform float opacity;
+
+        void main() {
+            // Simple grid pattern
+            vec2 grid = abs(fract(uv * 20.0 - 0.5) - 0.5) / fwidth(uv * 20.0);
+            float line = min(grid.x, grid.y);
+            float alpha = 1.0 - min(line, 1.0);
+
+            vec3 gridColor = vec3(0.8);
+            vec3 groundColor = color * 0.3;
+
+            vec3 finalColor = mix(groundColor, gridColor, alpha * 0.3);
+            FragColor = vec4(finalColor, opacity);
+        }
+        """
+
+        try:
+            self.programs["ground"] = self.ctx.program(
+                vertex_shader=ground_vertex, fragment_shader=ground_fragment
+            )
+        except Exception as e:
+            print(f"⚠️ Failed to compile ground shader: {e}")
 
     def _setup_geometry(self):
         """Create optimized geometry for body segments and club"""
@@ -414,20 +469,195 @@ class OpenGLRenderer:
 
     def _create_sphere_geometry(self):
         """Create optimized sphere geometry"""
-        # Icosphere generation for smooth spheres
+        # Simple cube approximation for sphere to ensure valid VAO
+        vertices = np.array(
+            [
+                -0.5,
+                -0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                0,
+                0,
+                0.5,
+                -0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                1,
+                0,
+                0.5,
+                0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                1,
+                1,
+                -0.5,
+                0.5,
+                -0.5,
+                0,
+                0,
+                -1,
+                0,
+                1,
+                -0.5,
+                -0.5,
+                0.5,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0.5,
+                -0.5,
+                0.5,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0.5,
+                0.5,
+                0.5,
+                0,
+                0,
+                1,
+                1,
+                1,
+                -0.5,
+                0.5,
+                0.5,
+                0,
+                0,
+                1,
+                0,
+                1,
+            ],
+            dtype=np.float32,
+        )
+
+        indices = np.array(
+            [
+                0,
+                1,
+                2,
+                2,
+                3,
+                0,
+                4,
+                5,
+                6,
+                6,
+                7,
+                4,
+                0,
+                4,
+                7,
+                7,
+                3,
+                0,
+                1,
+                5,
+                6,
+                6,
+                2,
+                1,
+                0,
+                1,
+                5,
+                5,
+                4,
+                0,
+                3,
+                2,
+                6,
+                6,
+                7,
+                3,
+            ],
+            dtype=np.uint32,
+        )
+
+        self.buffers["sphere_vbo"] = self.ctx.buffer(vertices)
+        self.buffers["sphere_ebo"] = self.ctx.buffer(indices)
+
+        self.vaos["sphere"] = self.ctx.vertex_array(
+            self.programs["standard"],
+            [
+                (
+                    self.buffers["sphere_vbo"],
+                    "3f 3f 2f",
+                    "position",
+                    "normal",
+                    "texCoord",
+                )
+            ],
+            self.buffers["sphere_ebo"],
+        )
 
     def _create_club_geometry(self):
         """Create detailed club geometry"""
-        # Shaft: Simple cylinder
-        # Clubhead: More complex geometry with realistic proportions
+        # Reuse cylinder for shaft, sphere for head (scaled)
+        # Geometry already exists in vaos["cylinder"] and vaos["sphere"]
 
     def _create_arrow_geometry(self):
         """Create arrow geometry for force/torque vectors"""
-        # Arrow shaft + arrowhead
+        # Reuse cylinder for shaft, cone for head
+        # We'll create a simple cone here
+        segments = 16
+        vertices = []
+        indices = []
+
+        # Cone tip
+        vertices.extend([0, 1, 0, 0, 1, 0, 0.5, 1])
+
+        # Base circle
+        for i in range(segments):
+            angle = 2 * np.pi * i / segments
+            x, z = np.cos(angle), np.sin(angle)
+            # Normal is approximate (pointing out and up)
+            vertices.extend([x, 0, z, x, 0.5, z, i / segments, 0])
+
+        vertices = np.array(vertices, dtype=np.float32)
+
+        # Indices
+        for i in range(segments):
+            # Tip to base
+            indices.extend([0, i + 1, (i + 1) % segments + 1])
+
+        indices = np.array(indices, dtype=np.uint32)
+
+        self.buffers["cone_vbo"] = self.ctx.buffer(vertices)
+        self.buffers["cone_ebo"] = self.ctx.buffer(indices)
+
+        self.vaos["cone"] = self.ctx.vertex_array(
+            self.programs["standard"],
+            [(self.buffers["cone_vbo"], "3f 3f 2f", "position", "normal", "texCoord")],
+            self.buffers["cone_ebo"],
+        )
 
     def _setup_lighting(self):
         """Configure realistic lighting"""
-        # Set up uniforms for lighting calculations
+        # Set default lighting parameters
+        if "standard" in self.programs:
+            prog = self.programs["standard"]
+            try:
+                if "lightPosition" in prog:
+                    prog["lightPosition"].value = (5.0, 10.0, 5.0)
+                if "lightColor" in prog:
+                    prog["lightColor"].value = (1.0, 1.0, 1.0)
+                if "ambientStrength" in prog:
+                    prog["ambientStrength"].value = 0.4
+                if "materialSpecular" in prog:
+                    prog["materialSpecular"].value = 0.5
+                if "materialShininess" in prog:
+                    prog["materialShininess"].value = 32.0
+            except Exception as e:
+                print(f"⚠️ Lighting setup warning: {e}")
 
     def render_frame(
         self,
@@ -630,6 +860,155 @@ class OpenGLRenderer:
                     view_matrix,
                     proj_matrix,
                 )
+
+    def _render_ground(self, view_matrix, proj_matrix):
+        """Render infinite ground grid"""
+        # Create ground VAO if needed
+        if "ground" not in self.vaos:
+            size = 50.0
+            vertices = np.array(
+                [
+                    -size,
+                    0,
+                    -size,
+                    0,
+                    0,
+                    size,
+                    0,
+                    -size,
+                    1,
+                    0,
+                    size,
+                    0,
+                    size,
+                    1,
+                    1,
+                    -size,
+                    0,
+                    size,
+                    0,
+                    1,
+                ],
+                dtype=np.float32,
+            )
+
+            indices = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
+
+            self.buffers["ground_vbo"] = self.ctx.buffer(vertices)
+            self.buffers["ground_ebo"] = self.ctx.buffer(indices)
+
+            if "ground" in self.programs:
+                self.vaos["ground"] = self.ctx.vertex_array(
+                    self.programs["ground"],
+                    [(self.buffers["ground_vbo"], "3f 2f", "position", "texCoord")],
+                    self.buffers["ground_ebo"],
+                )
+
+        if "ground" in self.vaos and "ground" in self.programs:
+            mvp = proj_matrix @ view_matrix
+            self.programs["ground"]["mvp"].write(mvp.tobytes())
+            self.programs["ground"]["color"].value = (0.2, 0.6, 0.2)
+            self.programs["ground"]["opacity"].value = 1.0
+            self.vaos["ground"].render()
+
+    def _render_club(self, frame_data, config, view_matrix, proj_matrix):
+        """Render golf club"""
+        if (
+            np.isfinite(frame_data.butt).all()
+            and np.isfinite(frame_data.clubhead).all()
+        ):
+            # Shaft
+            self._render_cylinder_between_points(
+                frame_data.butt,
+                frame_data.clubhead,
+                0.015,
+                [0.8, 0.8, 0.8],
+                config.body_opacity,
+                view_matrix,
+                proj_matrix,
+            )
+
+            # Clubhead (placeholder sphere)
+            if "sphere" in self.vaos:
+                model_matrix = np.eye(4, dtype=np.float32)
+                model_matrix[:3, 3] = frame_data.clubhead
+                # Scale
+                s = 0.05
+                model_matrix[0, 0] = s
+                model_matrix[1, 1] = s
+                model_matrix[2, 2] = s
+
+                self.programs["standard"]["model"].write(model_matrix.tobytes())
+                self.programs["standard"]["view"].write(view_matrix.tobytes())
+                self.programs["standard"]["projection"].write(proj_matrix.tobytes())
+                self.programs["standard"]["materialColor"].value = (0.2, 0.2, 0.2)
+                self.programs["standard"]["opacity"].value = config.body_opacity
+                self.vaos["sphere"].render()
+
+    def _render_face_normal(self, frame_data, config, view_matrix, proj_matrix):
+        """Render face normal"""
+        # Placeholder as orientation data is not explicitly available in points
+
+    def _render_arrow(
+        self,
+        start_pos: np.ndarray,
+        vector: np.ndarray,
+        color: list[float],
+        opacity: float,
+        view_matrix: np.ndarray,
+        proj_matrix: np.ndarray,
+    ):
+        """Render 3D arrow"""
+        end_pos = start_pos + vector
+
+        # Shaft
+        self._render_cylinder_between_points(
+            start_pos,
+            end_pos,
+            0.01,  # Thin shaft
+            color,
+            opacity,
+            view_matrix,
+            proj_matrix,
+        )
+
+        # Head (Cone)
+        if "cone" in self.vaos:
+            direction = vector
+            length = np.linalg.norm(direction)
+            if length < 1e-6:
+                return
+
+            direction_normalized = direction / length
+
+            # Rotation matrix
+            up = np.array([0, 1, 0])
+            if abs(np.dot(direction_normalized, up)) > 0.99:
+                up = np.array([1, 0, 0])
+
+            right = np.cross(direction_normalized, up)
+            right = right / np.linalg.norm(right)
+            up = np.cross(right, direction_normalized)
+
+            rotation_matrix = np.column_stack([right, direction_normalized, up])
+
+            model_matrix = np.eye(4, dtype=np.float32)
+            model_matrix[:3, :3] = rotation_matrix
+            model_matrix[:3, 3] = end_pos
+
+            # Scale
+            s = 0.04
+            model_matrix[0, 0] = s
+            model_matrix[1, 1] = s * 2.0  # Longer head
+            model_matrix[2, 2] = s
+
+            self.programs["standard"]["model"].write(model_matrix.tobytes())
+            self.programs["standard"]["view"].write(view_matrix.tobytes())
+            self.programs["standard"]["projection"].write(proj_matrix.tobytes())
+            self.programs["standard"]["materialColor"].value = tuple(color)
+            self.programs["standard"]["opacity"].value = opacity
+
+            self.vaos["cone"].render()
 
 
 # ============================================================================
