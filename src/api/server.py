@@ -251,10 +251,10 @@ async def startup_event() -> None:
         # Legacy configure() calls - will be removed after routes migration to Depends()
         core_routes.configure(engine_manager)
         engine_routes.configure(engine_manager, logger)
-        simulation_routes.configure(app.state.simulation_service, active_tasks, logger)
+        simulation_routes.configure(app.state.simulation_service, active_tasks, logger)  # type: ignore[arg-type]
         analysis_routes.configure(app.state.analysis_service, logger)
-        video_routes.configure(video_pipeline, active_tasks, logger)
-        export_routes.configure(active_tasks)
+        video_routes.configure(video_pipeline, active_tasks, logger)  # type: ignore[arg-type]
+        export_routes.configure(active_tasks)  # type: ignore[arg-type]
 
         logger.info("Golf Modeling Suite API started successfully")
 
