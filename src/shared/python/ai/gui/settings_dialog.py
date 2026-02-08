@@ -408,7 +408,7 @@ class ProviderConfigWidget(QWidget):
         self._status_label.setStyleSheet("")
 
         try:
-            from shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+            from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
 
             host = self._host_input.text().strip()
             adapter = OllamaAdapter(host=host)

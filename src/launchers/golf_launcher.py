@@ -78,6 +78,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -284,6 +285,9 @@ class GolfLauncher(QMainWindow):
         self._initialize_model_order()
 
         self.init_ui()
+
+        # Apply shared theme system
+        self._apply_theme_system()
 
         # Use pre-loaded Docker status or check asynchronously
         if startup_results:
@@ -861,15 +865,20 @@ except Exception as e:
         view_menu.addAction(action_console)
         self._action_console = action_console
 
+        # Theme submenu under View
+        view_menu.addSeparator()
+        theme_menu = view_menu.addMenu("&Theme")
+        self._setup_theme_menu(theme_menu)
+
         # Tools Menu
         tools_menu = menubar.addMenu("&Tools")
 
         action_env = QAction("&Environment Manager...", self)
-        action_env.triggered.connect(lambda: self._open_settings(tab=2))
+        action_env.triggered.connect(lambda: self._open_settings(tab=1))
         tools_menu.addAction(action_env)
 
         action_diag = QAction("&Diagnostics...", self)
-        action_diag.triggered.connect(lambda: self._open_settings(tab=3))
+        action_diag.triggered.connect(lambda: self._open_settings(tab=2))
         tools_menu.addAction(action_diag)
 
         # Help Menu
@@ -1754,68 +1763,106 @@ except Exception as e:
         return EngineType.MUJOCO  # Default
 
     def apply_styles(self) -> None:
-        """Apply custom stylesheets."""
-        # Global dark theme
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #1E1E1E;
-            }
-            QWidget {
-                color: #FFFFFF;
-                font-family: 'Segoe UI', sans-serif;
-            }
-            QMenuBar {
-                background-color: #252526;
-                color: #CCCCCC;
-                border-bottom: 1px solid #3E3E42;
-                padding: 2px;
-            }
-            QMenuBar::item {
-                padding: 6px 12px;
-                background: transparent;
-            }
-            QMenuBar::item:selected {
-                background-color: #094771;
-            }
-            QMenu {
-                background-color: #252526;
-                color: #CCCCCC;
-                border: 1px solid #3E3E42;
-            }
-            QMenu::item {
-                padding: 8px 24px;
-            }
-            QMenu::item:selected {
-                background-color: #094771;
-            }
-            QMenu::separator {
-                height: 1px;
-                background: #3E3E42;
-                margin: 4px 8px;
-            }
-            QLineEdit {
-                background-color: #252526;
-                color: white;
-                border: 1px solid #3E3E42;
-                border-radius: 4px;
-                padding: 6px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #007ACC;
-            }
-            QScrollArea {
-                border: none;
-            }
-            QPushButton {
-                background-color: #333333;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                padding: 6px 12px;
-            }
-            QPushButton:hover {
-                background-color: #3E3E42;
-            }
+        """Apply themed stylesheet from the shared ThemeManager."""
+        try:
+            from src.shared.python.theme import ThemeManager
+
+            manager = ThemeManager.instance()
+            self.setStyleSheet(manager.get_stylesheet() + """
+                QScrollArea { border: none; }
+                QMenu::separator {
+                    height: 1px;
+                    margin: 4px 8px;
+                }
             """)
+        except Exception:
+            # Fallback minimal dark style if theme system unavailable
+            self.setStyleSheet(
+                "QMainWindow { background-color: #1E1E1E; }"
+                "QWidget { color: #FFFFFF; font-family: 'Segoe UI', sans-serif; }"
+            )
+
+    def _apply_theme_system(self) -> None:
+        """Initialize theme manager and register for theme change callbacks."""
+        try:
+            from src.shared.python.theme import ThemeManager, apply_golf_suite_style
+
+            self._theme_manager = ThemeManager.instance()
+
+            # Apply matplotlib styling globally
+            apply_golf_suite_style()
+
+            # Register callback for dynamic theme switching
+            self._theme_manager.on_theme_changed(self._on_theme_changed)
+
+        except Exception as e:
+            logger.warning(f"Theme system unavailable: {e}")
+
+    def _on_theme_changed(self, colors: object) -> None:
+        """Handle dynamic theme change — reapply stylesheet and update menu."""
+        self.apply_styles()
+        # Update the checked state of theme menu actions
+        if hasattr(self, "_theme_actions"):
+            from src.shared.python.theme import ThemeManager
+
+            current = ThemeManager.instance().theme_name
+            for action in self._theme_actions:
+                action.setChecked(action.text() == current)
+
+    def _setup_theme_menu(self, theme_menu: QMenu) -> None:
+        """Populate the View > Theme submenu with all available themes.
+
+        Includes core presets (Dark, Light, High Contrast) plus any fleet-wide
+        themes from vendor/ud-tools.
+        """
+        from PyQt6.QtGui import QActionGroup
+
+        try:
+            from src.shared.python.theme import ThemeManager, ThemePreset
+
+            manager = ThemeManager.instance()
+
+            group = QActionGroup(self)
+            group.setExclusive(True)
+            self._theme_actions: list[QAction] = []
+
+            # Core presets
+            preset_map: dict[str, ThemePreset] = {
+                "Dark": ThemePreset.DARK,
+                "Light": ThemePreset.LIGHT,
+                "High Contrast": ThemePreset.HIGH_CONTRAST,
+            }
+            for name, preset in preset_map.items():
+                action = QAction(name, self)
+                action.setCheckable(True)
+                action.setChecked(manager.theme_name == name)
+                action.triggered.connect(lambda checked, p=preset: manager.set_theme(p))
+                group.addAction(action)
+                theme_menu.addAction(action)
+                self._theme_actions.append(action)
+
+            # Fleet-wide themes
+            fleet_names = manager.get_available_fleet_themes()
+            if fleet_names:
+                theme_menu.addSeparator()
+                for fleet_name in fleet_names:
+                    if fleet_name in preset_map:
+                        continue
+                    action = QAction(fleet_name, self)
+                    action.setCheckable(True)
+                    action.setChecked(manager.theme_name == fleet_name)
+                    action.triggered.connect(
+                        lambda checked, n=fleet_name: manager.set_fleet_theme(n)
+                    )
+                    group.addAction(action)
+                    theme_menu.addAction(action)
+                    self._theme_actions.append(action)
+
+        except Exception as e:
+            logger.warning(f"Could not populate theme menu: {e}")
+            fallback = QAction("(Theme system unavailable)", self)
+            fallback.setEnabled(False)
+            theme_menu.addAction(fallback)
 
     def check_docker(self) -> None:
         """Start the docker check thread."""
@@ -1881,11 +1928,11 @@ except Exception as e:
 
     def open_diagnostics(self) -> None:
         """Open the settings dialog on the Diagnostics tab."""
-        self._open_settings(tab=3)
+        self._open_settings(tab=2)
 
     def open_environment_manager(self) -> None:
-        """Open the settings dialog on the Rebuild Environment tab."""
-        self._open_settings(tab=2)
+        """Open the settings dialog on the Configuration tab."""
+        self._open_settings(tab=1)
 
     def _reset_layout_to_defaults(self) -> None:
         """Reset layout configuration to show all default tiles."""
