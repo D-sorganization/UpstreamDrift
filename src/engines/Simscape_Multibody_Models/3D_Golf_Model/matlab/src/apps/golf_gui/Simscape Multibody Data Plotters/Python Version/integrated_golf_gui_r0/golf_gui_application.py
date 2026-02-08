@@ -258,10 +258,14 @@ class SmoothPlaybackController(QObject):
             "hub",
             "butt",
             "clubhead",
+            "midpoint",
         ]
 
         # Lerp each position: result = a * (1 - t) + b * t
         for attr in position_attrs:
+            if not hasattr(frame_a, attr) or not hasattr(frame_b, attr):
+                continue
+
             pos_a = getattr(frame_a, attr)
             pos_b = getattr(frame_b, attr)
 
@@ -269,6 +273,30 @@ class SmoothPlaybackController(QObject):
             if np.isfinite(pos_a).all() and np.isfinite(pos_b).all():
                 interpolated_pos = pos_a * (1.0 - t) + pos_b * t
                 setattr(result, attr, interpolated_pos)
+
+        # Interpolate forces
+        result.forces = {}
+        if hasattr(frame_a, "forces") and hasattr(frame_b, "forces"):
+            for key in frame_a.forces:
+                if key in frame_b.forces:
+                    f_a = frame_a.forces[key]
+                    f_b = frame_b.forces[key]
+                    if np.isfinite(f_a).all() and np.isfinite(f_b).all():
+                        result.forces[key] = f_a * (1.0 - t) + f_b * t
+                    else:
+                        result.forces[key] = f_a
+
+        # Interpolate torques
+        result.torques = {}
+        if hasattr(frame_a, "torques") and hasattr(frame_b, "torques"):
+            for key in frame_a.torques:
+                if key in frame_b.torques:
+                    t_a = frame_a.torques[key]
+                    t_b = frame_b.torques[key]
+                    if np.isfinite(t_a).all() and np.isfinite(t_b).all():
+                        result.torques[key] = t_a * (1.0 - t) + t_b * t
+                    else:
+                        result.torques[key] = t_a
 
         return result
 

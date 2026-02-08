@@ -8,6 +8,7 @@ sympy>=1.12
 # Testing & Quality Assurance
 pytest>=8.2.0
 pytest-cov
+pytest-asyncio>=0.23.0
 ruff
 mypy
 types-PyYAML
@@ -22,9 +23,13 @@ opencv-python>=4.9.0
 
 # Web Applications
 flask>=3.0.0
+slowapi>=0.1.9
+sqlalchemy>=2.0.0
 
 # Security & Encryption
 cryptography
+bcrypt>=4.0.0
+passlib>=1.7.4
 
 # Data Formats & Configuration
 pyyaml>=6.0.1
