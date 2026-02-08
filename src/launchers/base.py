@@ -13,7 +13,6 @@ import logging
 import os
 import subprocess
 import sys
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -75,8 +74,8 @@ class LaunchItem:
         return None
 
 
-class BaseLauncher(QMainWindow, ABC):
-    """Abstract base class for all launcher windows.
+class BaseLauncher(QMainWindow):
+    """Base class for all launcher windows.
 
     Provides common functionality:
     - Window initialization and centering
@@ -84,6 +83,11 @@ class BaseLauncher(QMainWindow, ABC):
     - File launching utilities
     - Grid-based card layout
     - Error handling dialogs
+
+    Note: Cannot use ABC mixin due to PyQt6 metaclass conflict
+    (QMainWindow's sip.wrappertype is incompatible with ABCMeta).
+    Subclasses must override get_items() -- failure to do so raises
+    NotImplementedError at runtime.
     """
 
     # Default window properties - override in subclasses
@@ -296,16 +300,15 @@ class BaseLauncher(QMainWindow, ABC):
         line.setFrameShadow(QFrame.Shadow.Sunken)
         return line
 
-    @abstractmethod
     def get_items(self) -> list[LaunchItem]:
         """Get the list of items to display.
 
-        Subclasses must implement this to provide their launch items.
+        Subclasses must override this to provide their launch items.
 
         Returns:
             List of LaunchItem objects
         """
-        ...
+        raise NotImplementedError(f"{type(self).__name__} must implement get_items()")
 
     def init_ui(self) -> None:
         """Initialize the standard UI layout.
