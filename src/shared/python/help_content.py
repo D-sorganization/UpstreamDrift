@@ -81,6 +81,7 @@ UI_HELP_TOPICS: dict[str, str] = {
     "urdf_generator": "urdf_generator",
     "model_explorer": "model_explorer",
     "shot_tracer": "ball_flight",
+    "project_map": "project_map",
     # Settings
     "settings_general": "configuration",
     "settings_engines": "engine_selection",
@@ -333,6 +334,43 @@ UpstreamDrift provides comprehensive analysis tools for simulation data.
             "Kinematic sequence is key for golf swing analysis",
         ],
         "see_also": ["simulation_controls", "visualization"],
+    },
+    # -------------------------------------------------------------------------
+    # Project Map
+    # -------------------------------------------------------------------------
+    "project_map": {
+        "title": "Project Map",
+        "short": "Complete map of all features and modules in UpstreamDrift",
+        "description": """
+The Project Map (docs/PROJECT_MAP.md) is a comprehensive reference for every
+feature, module, and tool in the UpstreamDrift Golf Modeling Suite.
+
+**What it covers:**
+- All 11 launcher tiles and their capabilities
+- All 7 physics engines with detailed features
+- Gait & locomotion system (walk, run, stand, trot, crawl, bound, gallop)
+- Robotics module (contact dynamics, whole-body control, sensing, planning)
+- Learning & AI (RL environments, imitation learning, sim-to-real, AI assistant)
+- Research modules (MPC, differentiable physics, deformable objects, multi-robot)
+- Deployment (digital twin, real-time control, safety, teleoperation)
+- Unreal Engine integration (streaming, VR, mesh loading)
+- Shared analysis library (biomechanics, signal processing, spatial algebra)
+- Tools (model explorer, humanoid builder, model generation, video analyzer)
+- Visualization & plotting (10+ renderer types)
+- API & web UI reference
+- Hidden features not yet exposed in the UI
+- Deprecated/archived code inventory
+
+**Access:**
+- Help menu > Project Map (opens the document)
+- Directly at: docs/PROJECT_MAP.md
+""",
+        "tips": [
+            "Use the Project Map to discover hidden features not in the launcher",
+            "The Hidden Features table shows what can be exposed next",
+            "Check the Deprecated section before working on old code",
+        ],
+        "see_also": ["engine_selection", "analysis_tools"],
     },
 }
 

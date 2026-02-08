@@ -79,6 +79,12 @@ models:
     type: "special_app"
     path: "src/tools/data_explorer/data_explorer_app.py"
 
+  - id: "project_map"
+    name: "Project Map"
+    description: "Complete map of all features, modules, and hidden gems in the suite"
+    type: "special_app"
+    path: "docs/PROJECT_MAP.md"
+
   # =============================================================================
   # ARCHIVED / HIDDEN / LEGACY entries preserved below (commented or type: hidden if supported)
   # For now we just don't list them in the Launcher `default_ids` but keeping them structured here

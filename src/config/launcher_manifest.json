@@ -203,6 +203,22 @@
         "export"
       ],
       "order": 11
+    },
+    {
+      "id": "project_map",
+      "name": "Project Map",
+      "description": "Complete map of all features, modules, and hidden gems in the suite",
+      "category": "tool",
+      "type": "special_app",
+      "path": "docs/PROJECT_MAP.md",
+      "logo": "golf_logo.png",
+      "status": "utility",
+      "capabilities": [
+        "documentation",
+        "feature_discovery",
+        "project_overview"
+      ],
+      "order": 12
     }
   ]
 }
