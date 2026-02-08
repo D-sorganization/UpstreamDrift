@@ -5,9 +5,9 @@ models:
 
   - id: "mujoco_unified"
     name: "MuJoCo"
-    description: "Unified MuJoCo interface: Humanoid Simulation & Analytics Dashboard"
+    description: "Biomechanical golf swing analysis with humanoid config & simulation"
     type: "custom_humanoid"
-    path: "src/launchers/mujoco_unified_launcher.py"
+    path: "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py"
     engine_type: "mujoco"
 
   - id: "drake_golf"

@@ -1385,6 +1385,51 @@ MYOBODY_PATH = "myo_sim/body/myobody.xml"
 MYOARM_SIMPLE_PATH = "myo_sim/arm/myoarm_simple.xml"
 
 
+# ==============================================================================
+# DeepMind Control Suite - CMU Humanoid Model
+# ==============================================================================
+# The humanoid CM (Carnegie Mellon University) model is from the DeepMind
+# Control Suite. It provides a realistic full-body humanoid based on CMU
+# motion capture data with 16 actuated joints.
+
+HUMANOID_CM_JOINTS = [
+    "Lower Back",
+    "Upper Back",
+    "R Tibia",
+    "L Tibia",
+    "R Femur",
+    "L Femur",
+    "R Foot",
+    "L Foot",
+    "R Humerus RX",
+    "L Humerus RX",
+    "R Humerus RZ",
+    "L Humerus RZ",
+    "R Humerus RY",
+    "L Humerus RY",
+    "R Radius",
+    "L Radius",
+]
+
+
+def load_humanoid_cm_xml() -> str | None:
+    """Load the CMU Humanoid MJCF XML from dm_control if available.
+
+    The humanoid CM (CMU) model is the original MuJoCo humanoid from the
+    DeepMind Control Suite, based on CMU motion capture anthropometry.
+
+    Returns:
+        XML string if dm_control is installed, None otherwise.
+    """
+    try:
+        from dm_control import suite
+
+        env = suite.load(domain_name="humanoid", task_name="stand")
+        return env.physics.model.get_xml()
+    except Exception:
+        return None
+
+
 def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3) -> str:
     """Generate XML for a flexible golf club with specified number of segments.
 
