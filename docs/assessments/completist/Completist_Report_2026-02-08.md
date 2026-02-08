@@ -1,0 +1,54 @@
+# Completist Audit Report
+
+**Date**: 2026-02-08
+
+## Executive Summary
+- **Total TODOs**: 22
+- **Total FIXMEs**: 16
+- **Stubbed Functions**: 412
+- **Incomplete Documentation**: 0 files
+- **Not Implemented Errors**: 59
+
+## Critical Technical Debt (FIXME)
+- ./scripts/analyze_completist_data.py:105:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
+- ./scripts/analyze_completist_data.py:202:        "FIXME": 2,
+- ./scripts/analyze_completist_data.py:277:    chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
+- ./scripts/setup_hooks.py:106:  - quality-check (no TODOs/FIXMEs)
+- ./tests/unit/api/test_error_codes.py:36:        """Postcondition: All codes follow GMS-XXX-NNN format."""
+- ./src/api/utils/error_codes.py:53:    # General Errors (GMS-GEN-XXX)
+- ./src/api/utils/error_codes.py:59:    # Engine Errors (GMS-ENG-XXX)
+- ./src/api/utils/error_codes.py:67:    # Simulation Errors (GMS-SIM-XXX)
+- ./src/api/utils/error_codes.py:76:    # Video Errors (GMS-VID-XXX)
+- ./src/api/utils/error_codes.py:83:    # Analysis Errors (GMS-ANL-XXX)
+- ./src/api/utils/error_codes.py:88:    # Auth Errors (GMS-AUT-XXX)
+- ./src/api/utils/error_codes.py:95:    # Validation Errors (GMS-VAL-XXX)
+- ./src/api/utils/error_codes.py:101:    # Resource Errors (GMS-RES-XXX)
+- ./src/api/utils/error_codes.py:106:    # System Errors (GMS-SYS-XXX)
+- ./src/tools/matlab_utilities/scripts/matlab_quality_check.py:78:            (r"\bXXX\b", "XXX comment found"),
+- ./src/shared/python/theme/typography.py:83:    XXXL: ClassVar[int] = 32
+
+## Feature Gaps (TODO)
+*(Showing first 20)*
+- ./scripts/analyze_completist_data.py:113:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
+- ./scripts/analyze_completist_data.py:127:        if marker_item["type"] == "TODO":
+- ./scripts/analyze_completist_data.py:203:        "TODO": 3,
+- ./scripts/analyze_completist_data.py:276:    chart.append(f'    "Feature Requests (TODO)" : {len(todos)}')
+- ./scripts/analyze_completist_data.py:322:        f"- **Feature Gaps (TODO)**: {len(todos)}",
+- ./scripts/pragmatic_programmer_review.py:206:            if "TODO" in content:
+- ./scripts/pragmatic_programmer_review.py:216:                "title": f"High TODO count ({len(todos)})",
+- ./scripts/pragmatic_programmer_review.py:219:                "recommendation": "Review TODOs",
+- ./ui/src/api/useSimulation.test.ts:582:      // We need to go through MAX_RECONNECT_ATTEMPTS (5) reconnection attempts
+- ./ui/src/api/client.ts:33:const MAX_RECONNECT_ATTEMPTS = 5;
+- ./ui/src/api/client.ts:170:      if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+- ./ui/src/api/client.ts:172:        console.log(`WebSocket closed unexpectedly. Reconnecting in ${Math.round(delay)}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:32:        TEMPERATURE_C,
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:53:        TEMPERATURE_C,
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:193:        assert TEMPERATURE_C == 20.0
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:195:        assert 15.0 <= TEMPERATURE_C <= 25.0
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:230:            TEMPERATURE_C,
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:254:            TEMPERATURE_C,
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/constants.py:23:    TEMPERATURE_C,
+- ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/constants.py:47:    "TEMPERATURE_C",
+
+## Documentation Gaps
+*(Showing first 20)*
