@@ -308,9 +308,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             List of LaunchItem objects
         """
-        raise NotImplementedError(
-            f"{type(self).__name__} must implement get_items()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must implement get_items()")
 
     def init_ui(self) -> None:
         """Initialize the standard UI layout.

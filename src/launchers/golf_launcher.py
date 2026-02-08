@@ -1264,9 +1264,7 @@ except Exception as e:
             | Qt.DockWidgetArea.LeftDockWidgetArea
         )
         self._console_dock.setWidget(console_container)
-        self.addDockWidget(
-            Qt.DockWidgetArea.BottomDockWidgetArea, self._console_dock
-        )
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._console_dock)
 
     def _on_process_output(self, engine_name: str, line: str) -> None:
         """Receive a line of output from a subprocess.

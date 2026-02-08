@@ -262,7 +262,9 @@ class ProcessManager:
                 # Legacy: each engine gets its own console window
                 if os.name == "nt":
                     if keep_terminal_open:
-                        cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+                        cmd_str = (
+                            f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+                        )
                     else:
                         cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
                     process = subprocess.Popen(
