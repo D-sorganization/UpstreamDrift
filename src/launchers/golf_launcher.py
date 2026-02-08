@@ -229,8 +229,15 @@ class GolfLauncher(QMainWindow):
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
 
+        # Initialize process output console (unified terminal)
+        self._console_output: list[str] = []
+        self._setup_process_console()
+
         # Initialize process and model managers (extracted from god class)
-        self.process_manager = ProcessManager(REPOS_ROOT)
+        self.process_manager = ProcessManager(
+            REPOS_ROOT,
+            output_callback=self._on_process_output,
+        )
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
         # Keep backwards-compatible reference
@@ -816,6 +823,16 @@ except Exception as e:
         view_menu.addAction(action_context_help)
         self._action_context_help = action_context_help
 
+        action_console = QAction("&Process Output Console", self)
+        action_console.setCheckable(True)
+        action_console.setChecked(True)
+        action_console.setShortcut("Ctrl+`")
+        action_console.triggered.connect(
+            lambda checked: self._console_dock.setVisible(checked)
+        )
+        view_menu.addAction(action_console)
+        self._action_console = action_console
+
         # Tools Menu
         tools_menu = menubar.addMenu("&Tools")
 
@@ -1196,6 +1213,82 @@ except Exception as e:
         """Focus and select all text in search bar."""
         self.search_input.setFocus()
         self.search_input.selectAll()
+
+    # ── Process Output Console ──────────────────────────────────────────
+
+    def _setup_process_console(self) -> None:
+        """Create the dockable Process Output console widget.
+
+        All engine subprocess output is routed here instead of spawning
+        separate console windows, providing a single unified view of
+        diagnostics across all engines.
+        """
+        from PyQt6.QtWidgets import QPlainTextEdit, QToolButton
+
+        self._console_text = QPlainTextEdit()
+        self._console_text.setReadOnly(True)
+        self._console_text.setMaximumBlockCount(5000)  # Circular buffer
+        self._console_text.setStyleSheet(
+            "QPlainTextEdit {"
+            "  background-color: #1e1e1e;"
+            "  color: #d4d4d4;"
+            "  font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;"
+            "  font-size: 11px;"
+            "  border: none;"
+            "}"
+        )
+
+        # Container with clear button
+        console_container = QWidget()
+        console_layout = QVBoxLayout(console_container)
+        console_layout.setContentsMargins(0, 0, 0, 0)
+        console_layout.setSpacing(0)
+        console_layout.addWidget(self._console_text)
+
+        # Toolbar row
+        toolbar = QHBoxLayout()
+        toolbar.setContentsMargins(4, 2, 4, 2)
+
+        clear_btn = QToolButton()
+        clear_btn.setText("Clear")
+        clear_btn.setToolTip("Clear console output")
+        clear_btn.clicked.connect(self._console_text.clear)
+        toolbar.addStretch()
+        toolbar.addWidget(clear_btn)
+        console_layout.addLayout(toolbar)
+
+        self._console_dock = QDockWidget("Process Output", self)
+        self._console_dock.setAllowedAreas(
+            Qt.DockWidgetArea.BottomDockWidgetArea
+            | Qt.DockWidgetArea.RightDockWidgetArea
+            | Qt.DockWidgetArea.LeftDockWidgetArea
+        )
+        self._console_dock.setWidget(console_container)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._console_dock)
+
+    def _on_process_output(self, engine_name: str, line: str) -> None:
+        """Receive a line of output from a subprocess.
+
+        Thread-safe: schedules the append on the GUI thread via
+        QMetaObject.invokeMethod / QTimer.singleShot.
+        """
+        QTimer.singleShot(
+            0,
+            lambda: self._append_console_line(engine_name, line),
+        )
+
+    def _append_console_line(self, engine_name: str, line: str) -> None:
+        """Append a formatted line to the console widget (GUI thread only)."""
+        import datetime
+
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        self._console_text.appendPlainText(f"[{ts}] [{engine_name}] {line}")
+
+    def toggle_process_console(self) -> None:
+        """Toggle visibility of the Process Output dock."""
+        self._console_dock.setVisible(not self._console_dock.isVisible())
+
+    # ── Search ────────────────────────────────────────────────────────
 
     def _clear_search(self) -> None:
         """Clear the search filter and remove focus from search bar."""
