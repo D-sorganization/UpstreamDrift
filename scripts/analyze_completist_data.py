@@ -36,6 +36,9 @@ EXCLUDED_PATHS = [
     "docs/",
     ".github/",
     ".jules/",
+    ".Jules/",
+    ".claude/",
+    ".agent/",
     "CRITICAL_PROJECT_REVIEW.md",
     "WORKFLOW_AND_AGENTS_REPORT.md",
     "pyproject.toml",
@@ -109,6 +112,10 @@ def analyze_todos() -> tuple[list[Finding], list[Finding]]:
         if not filepath or not lineno or content is None:
             return None
 
+        # Filter out regex definitions and grep commands to avoid false positives
+        if "re.compile" in content or "grep" in content:
+            return None
+
         if re.search(r"\b" + todo_str + r"\b", content):
             return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
 
@@ -165,6 +172,9 @@ def analyze_not_implemented() -> list[Finding]:
     def _parser(line: str) -> Finding | None:
         f_path, l_no, c_txt = _parse_grep_line(line)
         if f_path and l_no and c_txt and ni_str in c_txt:
+            # Filter out regex definitions
+            if "re.compile" in c_txt:
+                return None
             return {"file": f_path, "line": l_no, "text": c_txt, "type": ni_str}
         return None
 
@@ -177,6 +187,9 @@ def analyze_abstract_methods() -> list[Finding]:
     def _parser(line: str) -> Finding | None:
         f_path, l_no, c_txt = _parse_grep_line(line)
         if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+            # Filter out regex definitions
+            if "re.compile" in c_txt or "grep" in c_txt:
+                return None
             return {"file": f_path, "line": l_no, "text": c_txt, "type": "Abstract"}
         return None
 
@@ -388,7 +401,8 @@ def generate_report() -> None:
             max_id = max(max_id, int(match_id.group(1)))
 
     next_id = max_id + 1
-    for item in [c for c in criticals if calculate_metrics(c)[0] >= 4][:10]:
+    # Increased limit from 10 to 50
+    for item in [c for c in criticals if calculate_metrics(c)[0] >= 4][:50]:
         report.append(f"- Created `{create_issue_file(item, next_id)}`")
         next_id += 1
 
