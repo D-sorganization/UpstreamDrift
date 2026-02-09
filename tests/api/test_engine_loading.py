@@ -90,7 +90,6 @@ class TestEngineLoading:
     @pytest.mark.parametrize(
         "engine_name",
         [
-            "opensim",  # Not installed yet
             "myosuite",  # Not installed yet
         ],
     )
