@@ -1,4 +1,8 @@
-"""Unit tests for shared engine loaders."""
+"""Unit tests for engine loaders.
+
+Tests both the canonical location (src.engines.loaders) and the
+backward-compatible shim (src.shared.python.engine_loaders).
+"""
 
 import sys
 from pathlib import Path
@@ -31,16 +35,22 @@ def test_loader_map() -> None:
     assert EngineType.MYOSIM in LOADER_MAP
 
 
+def test_loader_map_from_canonical_location() -> None:
+    """Verify LOADER_MAP is importable from the canonical location."""
+    from src.engines.loaders import LOADER_MAP as canonical_map
+
+    assert EngineType.MUJOCO in canonical_map
+    assert canonical_map is LOADER_MAP  # Same object, not a copy
+
+
 @patch.dict(
     sys.modules,
     {
         "mujoco": MagicMock(),
-        "engines": MagicMock(),
-        "engines.physics_engines": MagicMock(),
-        "engines.physics_engines.mujoco": MagicMock(),
-        "engines.physics_engines.mujoco.python": MagicMock(),
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": MagicMock(),
+        "src.engines.physics_engines.mujoco": MagicMock(),
+        "src.engines.physics_engines.mujoco.python": MagicMock(),
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": MagicMock(),
     },
 )
 def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
@@ -48,7 +58,7 @@ def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
     with (
         patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls,
         patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
         ) as mock_engine_cls,
     ):
         # Setup Probe
@@ -94,11 +104,9 @@ def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
     sys.modules,
     {
         "pydrake": MagicMock(),
-        "engines": MagicMock(),
-        "engines.physics_engines": MagicMock(),
-        "engines.physics_engines.drake": MagicMock(),
-        "engines.physics_engines.drake.python": MagicMock(),
-        "engines.physics_engines.drake.python.drake_physics_engine": MagicMock(),
+        "src.engines.physics_engines.drake": MagicMock(),
+        "src.engines.physics_engines.drake.python": MagicMock(),
+        "src.engines.physics_engines.drake.python.drake_physics_engine": MagicMock(),
     },
 )
 def test_load_drake_engine_success(mock_suite_root: Path) -> None:
@@ -106,7 +114,7 @@ def test_load_drake_engine_success(mock_suite_root: Path) -> None:
     with (
         patch("src.shared.python.engine_probes.DrakeProbe") as mock_probe_cls,
         patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
+            "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
         ) as mock_engine_cls,
     ):
         # Setup Probe
@@ -125,11 +133,9 @@ def test_load_drake_engine_success(mock_suite_root: Path) -> None:
     sys.modules,
     {
         "pinocchio": MagicMock(),
-        "engines": MagicMock(),
-        "engines.physics_engines": MagicMock(),
-        "engines.physics_engines.pinocchio": MagicMock(),
-        "engines.physics_engines.pinocchio.python": MagicMock(),
-        "engines.physics_engines.pinocchio.python.pinocchio_physics_engine": MagicMock(),
+        "src.engines.physics_engines.pinocchio": MagicMock(),
+        "src.engines.physics_engines.pinocchio.python": MagicMock(),
+        "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine": MagicMock(),
     },
 )
 def test_load_pinocchio_engine_success(mock_suite_root: Path) -> None:
@@ -137,7 +143,7 @@ def test_load_pinocchio_engine_success(mock_suite_root: Path) -> None:
     with (
         patch("src.shared.python.engine_probes.PinocchioProbe") as mock_probe_cls,
         patch(
-            "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+            "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
         ) as mock_engine_cls,
     ):
         # Setup Probe

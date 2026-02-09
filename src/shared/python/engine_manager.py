@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 from .common_utils import GolfModelingError, get_logger, setup_structured_logging
-from .engine_loaders import LOADER_MAP
 from .engine_registry import (
     EngineRegistration,
     EngineStatus,
@@ -89,7 +88,10 @@ class EngineManager:
         }
         self.probe_results: dict[EngineType, Any] = {}
 
-        # Register standard loaders
+        # Register standard loaders (lazy import to avoid shared -> engines
+        # module-level dependency; loaders now live in src.engines.loaders)
+        from src.engines.loaders import LOADER_MAP
+
         registry = get_registry()
         for engine_type, loader_func in LOADER_MAP.items():
             # Create a partial to bind suite_root
