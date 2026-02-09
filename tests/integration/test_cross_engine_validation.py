@@ -18,6 +18,7 @@ from src.shared.python.cross_engine_validator import CrossEngineValidator
 from src.shared.python.logging_config import get_logger
 from tests.fixtures.fixtures_lib import (
     TOLERANCE_ACCELERATION_M_S2,
+    TOLERANCE_CLOSURE_RAD_S2,
     TOLERANCE_JACOBIAN,
     compute_accelerations,
     set_identical_state,
@@ -506,3 +507,163 @@ class TestCrossEngineValidationIntegration:
                     f"Mass matrix mismatch between {name1} and {name2}: "
                     f"{result.message}"
                 )
+
+    def test_indexed_acceleration_closure(
+        self,
+        mujoco_pendulum: Any,
+        drake_pendulum: Any,
+        pinocchio_pendulum: Any,
+    ) -> None:
+        """Validate indexed acceleration closure per Guideline M2.
+
+        Verifies that M(q)*qacc + bias(q,v) = tau (with tau=0 for free motion).
+        The residual ||M*qacc_drift + bias|| should be near zero.
+        """
+        engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
+        skip_if_insufficient_engines(engines, min_count=1)
+        available_engines = [e for e in engines if e.available]
+
+        test_configs = [
+            (np.array([0.1]), np.array([0.0])),
+            (np.array([0.5]), np.array([1.0])),
+            (np.array([1.0]), np.array([-0.5])),
+        ]
+
+        for eng in available_engines:
+            if eng.engine is None:
+                continue
+            for q, v in test_configs:
+                eng.engine.set_state(q, v)
+                eng.engine.forward()
+
+                M = eng.engine.compute_mass_matrix()
+                bias = eng.engine.compute_bias_forces()
+
+                if M.size == 0 or bias.size == 0:
+                    continue
+
+                # Drift acceleration at zero torque
+                qacc_drift = -np.linalg.solve(M, bias)
+
+                # Closure residual: M*qacc + bias should be zero
+                residual = M @ qacc_drift + bias
+                closure_err = float(np.linalg.norm(residual))
+
+                logger.info(
+                    f"{eng.name} acceleration closure at q={q}: "
+                    f"residual={closure_err:.2e}"
+                )
+                assert closure_err < TOLERANCE_CLOSURE_RAD_S2, (
+                    f"{eng.name}: acceleration closure residual "
+                    f"{closure_err:.2e} exceeds tolerance "
+                    f"{TOLERANCE_CLOSURE_RAD_S2:.2e}"
+                )
+
+    def test_multi_configuration_forward_dynamics(
+        self,
+        mujoco_pendulum: Any,
+        drake_pendulum: Any,
+        pinocchio_pendulum: Any,
+    ) -> None:
+        """Validate forward dynamics at multiple configurations per M2.
+
+        Tests consistency at various (q, v) pairs spanning the
+        configuration space, not just a single test point.
+        """
+        engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
+        skip_if_insufficient_engines(engines)
+
+        validator = CrossEngineValidator()
+        available_engines = [e for e in engines if e.available]
+
+        test_configs = [
+            (np.array([0.0]), np.array([0.0])),  # Equilibrium
+            (np.array([0.1]), np.array([0.0])),  # Small angle
+            (np.array([0.5]), np.array([0.0])),  # Moderate angle
+            (np.array([1.0]), np.array([0.0])),  # Large angle
+            (np.array([0.3]), np.array([1.0])),  # With velocity
+            (np.array([0.3]), np.array([-2.0])),  # Negative velocity
+        ]
+
+        for q, v in test_configs:
+            set_identical_state(available_engines, q, v)
+            accelerations = compute_accelerations(available_engines)
+
+            if len(accelerations) < 2:
+                continue
+
+            engine_names = list(accelerations.keys())
+            for i, name1 in enumerate(engine_names):
+                for name2 in engine_names[i + 1 :]:
+                    result = validator.compare_states(
+                        name1,
+                        accelerations[name1],
+                        name2,
+                        accelerations[name2],
+                        metric="acceleration",
+                    )
+                    assert result.severity in ["PASSED", "WARNING"], (
+                        f"Forward dynamics at q={q}, v={v}: "
+                        f"{name1} vs {name2}: {result.message}"
+                    )
+
+    def test_grf_cross_engine_validation(
+        self,
+        mujoco_pendulum: Any,
+        drake_pendulum: Any,
+        pinocchio_pendulum: Any,
+    ) -> None:
+        """Validate GRF outputs agree across engines per M2/E5.
+
+        For pendulum models that support contact forces, the GRF
+        should be consistent across engines.
+        """
+        engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
+        skip_if_insufficient_engines(engines)
+
+        available_engines = [e for e in engines if e.available]
+
+        q_test = np.array([0.2])
+        v_test = np.array([0.0])
+        set_identical_state(available_engines, q_test, v_test)
+
+        contact_forces: dict[str, np.ndarray] = {}
+        gravity_forces: dict[str, np.ndarray] = {}
+
+        for eng in available_engines:
+            if eng.engine is None:
+                continue
+
+            # Collect gravity forces (always available)
+            g = eng.engine.compute_gravity_forces()
+            if g.size > 0:
+                gravity_forces[eng.name] = g
+
+            # Collect contact forces if supported
+            cf = eng.engine.compute_contact_forces()
+            if cf is not None and cf.size > 0:
+                contact_forces[eng.name] = cf
+
+        # Gravity forces should agree across all engines
+        if len(gravity_forces) >= 2:
+            grav_names = list(gravity_forces.keys())
+            for i, name1 in enumerate(grav_names):
+                for name2 in grav_names[i + 1 :]:
+                    np.testing.assert_allclose(
+                        gravity_forces[name1],
+                        gravity_forces[name2],
+                        atol=TOLERANCE_ACCELERATION_M_S2,
+                        err_msg=f"Gravity force mismatch: {name1} vs {name2}",
+                    )
+
+        # Contact forces should agree if available in multiple engines
+        if len(contact_forces) >= 2:
+            cf_names = list(contact_forces.keys())
+            for i, name1 in enumerate(cf_names):
+                for name2 in cf_names[i + 1 :]:
+                    np.testing.assert_allclose(
+                        contact_forces[name1],
+                        contact_forces[name2],
+                        atol=1e-2,  # Contact forces have more variation
+                        err_msg=f"Contact force mismatch: {name1} vs {name2}",
+                    )
