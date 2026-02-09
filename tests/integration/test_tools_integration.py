@@ -57,7 +57,8 @@ class TestToolsRepoIntegration:
             t = np.linspace(0, 1, 100)
             signal = SignalGenerator.sinusoid(t, amplitude=1.0, frequency=5.0)
             assert signal is not None
-            assert len(signal) == len(t)
+            # Signal is a dataclass with .values attribute, not directly sized
+            assert len(signal.values) == len(t)
         except ImportError:
             pytest.skip("signal_toolkit not installed")
 
