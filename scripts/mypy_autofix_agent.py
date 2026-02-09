@@ -255,7 +255,7 @@ def fix_callable_as_type(lines: list[str], error: MypyError) -> Fix | None:
         return Fix(
             file=error.file,
             line=error.line,
-            description=f"Replace 'callable' with 'Callable[..., Any]'",
+            description="Replace 'callable' with 'Callable[..., Any]'",
             strategy="real-fix",
             original_code=original.strip(),
         )
