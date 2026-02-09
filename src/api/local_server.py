@@ -46,11 +46,13 @@ from src.api.diagnostics import (  # noqa: E402
 )
 from src.api.routes import (  # noqa: E402
     analysis,
+    chat_ws,
     engines,
     export,
     simulation,
     simulation_ws,
 )
+from src.api.services.chat_service import ChatService  # noqa: E402
 from src.shared.python.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_config import get_logger  # noqa: E402
 
@@ -110,9 +112,7 @@ def create_local_app() -> FastAPI:
 
     # Store in app state for dependency injection
     app.state.engine_manager = engine_manager
-    # Service wrappers: See docs/GITHUB_ISSUES_TRACKING.md Issue #2 for implementation plan
-    # app.state.simulation_service = simulation_service
-    # app.state.analysis_service = analysis_service
+    app.state.chat_service = ChatService()
 
     # Register routes (no auth required in local mode)
     # Note: Routers already define their own paths (e.g., /engines), so prefix is just /api
@@ -121,6 +121,7 @@ def create_local_app() -> FastAPI:
     app.include_router(
         simulation_ws.router, prefix="/api", tags=["Simulation WebSocket"]
     )
+    app.include_router(chat_ws.router, prefix="/api", tags=["Chat"])
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
 
