@@ -18,6 +18,7 @@ Design by Contract:
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -332,7 +333,7 @@ def validate_jacobians_cross_engine(
 
 
 def diagnose_task_points(
-    engine_compute_jacobian: callable,
+    engine_compute_jacobian: Callable[[str], dict[str, np.ndarray] | None],
     task_points: list[str] | None = None,
 ) -> dict[str, JacobianDiagnostics]:
     """Run diagnostics on all golf task points for an engine.

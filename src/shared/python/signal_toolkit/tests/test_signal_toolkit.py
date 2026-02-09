@@ -636,6 +636,7 @@ class TestIO:
 
             # Import
             imported = SignalImporter.from_csv(path, time_column=0, value_columns=1)
+            assert isinstance(imported, Signal)
 
             # Compare
             assert np.allclose(original.time, imported.time, rtol=1e-4)
