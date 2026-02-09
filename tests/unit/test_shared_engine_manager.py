@@ -143,16 +143,15 @@ class TestEngineManager(unittest.TestCase):
         mock_physics_engine_mod.MuJoCoPhysicsEngine = mock_engine_cls
 
         # Add the full module hierarchy to sys.modules
+        # Note: loaders now use src.engines.* import paths (Phase 1 decoupling)
         with patch.dict(
             sys.modules,
             {
                 "mujoco": mock_mujoco_pkg,
-                "engines": MagicMock(),
-                "engines.physics_engines": MagicMock(),
-                "engines.physics_engines.mujoco": MagicMock(),
-                "engines.physics_engines.mujoco.python": MagicMock(),
-                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
-                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_mod,
+                "src.engines.physics_engines.mujoco": MagicMock(),
+                "src.engines.physics_engines.mujoco.python": MagicMock(),
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_mod,
             },
         ):
             with (

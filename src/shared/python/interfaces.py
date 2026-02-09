@@ -30,7 +30,7 @@ import numpy as np
 from src.shared.python.checkpoint import Checkpointable
 
 if TYPE_CHECKING:
-    from src.engines.common.capabilities import EngineCapabilities
+    from src.shared.python.capabilities import EngineCapabilities
 
 
 @runtime_checkable
@@ -297,7 +297,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Returns:
             EngineCapabilities with support levels for each feature.
         """
-        from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
+        from src.shared.python.capabilities import CapabilityLevel, EngineCapabilities
 
         return EngineCapabilities(
             engine_name="unknown",
