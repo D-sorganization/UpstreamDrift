@@ -21,27 +21,16 @@ import ast
 import hashlib
 import json
 import re
-import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-# Add project root to path for imports
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
-
-# Mock imports/utils if shared/python doesn't exist in all repos
-# We will define minimal utils here to ensure standalone execution
-def setup_script_logging(name):
-    import logging
-
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-    return logging.getLogger(name)
-
+from scripts.script_utils import (
+    find_python_files as _find_python_files,
+)
+from scripts.script_utils import (
+    setup_script_logging,
+)
 
 logger = setup_script_logging(__name__)
 
@@ -60,24 +49,7 @@ PRINCIPLES = {
 
 def find_python_files(root_path: Path) -> list[Path]:
     """Find all Python files, excluding common non-source directories."""
-    excluded = {
-        ".git",
-        "node_modules",
-        ".venv",
-        "venv",
-        "env",
-        "build",
-        "dist",
-        "__pycache__",
-        ".tox",
-        ".eggs",
-        ".pytest_cache",
-    }
-    python_files = []
-    for f in root_path.rglob("*.py"):
-        if not any(ex in f.parts for ex in excluded):
-            python_files.append(f)
-    return python_files
+    return _find_python_files(root_path)
 
 
 def compute_file_hash(content: str) -> str:
