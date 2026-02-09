@@ -314,83 +314,77 @@ def generate_mermaid_charts(
     return "\n".join(chart)
 
 
-def generate_report() -> None:
-    """Generate the structured completist status report."""
-    stubs = analyze_stubs()
-    ni_errors = analyze_not_implemented()
-    todos, fixmes = analyze_todos()
-    missing_docs = analyze_docs()
-    _ = analyze_abstract_methods()
-
-    # Identify and prioritize critical candidates
-    criticals = [s for s in (stubs + ni_errors) if "test" not in s["file"].lower()]
-    criticals.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
-
-    # Report Generation
-    date_s = datetime.now().strftime("%Y-%m-%d")
-    report = [
-        f"# Completist Report: {date_s}\n",
-        "## Executive Summary",
-        f"- **Critical Gaps**: {len(criticals)}",
-        f"- **Feature Gaps (TODO)**: {len(todos)}",
-        f"- **Technical Debt**: {len(fixmes)}",
-        f"- **Documentation Gaps**: {len(missing_docs)}\n",
+def _generate_critical_table(criticals: list[Finding]) -> list[str]:
+    """Generate the critical incomplete items table section."""
+    section = [
+        "\n## Critical Incomplete (Top 50)",
+        "| File | Line | Type | Impact | Coverage | Complexity |",
+        "|---|---|---|---|---|---|",
     ]
-
-    # Insert Mermaid Visualization
-    report.append(generate_mermaid_charts(criticals, todos, fixmes, missing_docs))
-
-    # Critical Table
-    report.append("\n## Critical Incomplete (Top 50)")
-    report.append("| File | Line | Type | Impact | Coverage | Complexity |")
-    report.append("|---|---|---|---|---|---|")
-
     for item in criticals[:50]:
         imp, cov, comp = calculate_metrics(item)
-        report.append(
+        section.append(
             f"| `{item['file']}` | {item['line']} | {item['type']} | {imp} | {cov} | {comp} |"
         )
+    return section
 
-    # Feature Gap Matrix
-    report.append("\n## Feature Gap Matrix")
-    report.append("| Module | Feature Gap | Type |")
-    report.append("|---|---|---|")
+
+def _generate_feature_gap_matrix(todos: list[Finding]) -> list[str]:
+    """Generate the feature gap matrix section."""
+    section = [
+        "\n## Feature Gap Matrix",
+        "| Module | Feature Gap | Type |",
+        "|---|---|---|",
+    ]
     for item in todos[:50]:
         text = item.get("text", "").replace("|", "\\|")
-        report.append(f"| `{item['file']}` | {text[:100]} | {item['type']} |")
+        section.append(f"| `{item['file']}` | {text[:100]} | {item['type']} |")
+    return section
 
-    # Technical Debt Register
-    report.append("\n## Technical Debt Register")
-    report.append("| File | Line | Issue | Type |")
-    report.append("|---|---|---|---|")
+
+def _generate_tech_debt_register(fixmes: list[Finding]) -> list[str]:
+    """Generate the technical debt register section."""
+    section = [
+        "\n## Technical Debt Register",
+        "| File | Line | Issue | Type |",
+        "|---|---|---|---|",
+    ]
     for item in fixmes:
         text = item.get("text", "").replace("|", "\\|")
-        report.append(
+        section.append(
             f"| `{item['file']}` | {item['line']} | {text[:100]} | {item['type']} |"
         )
+    return section
 
-    # Recommended Implementation Order
-    report.append("\n## Recommended Implementation Order")
-    report.append("Prioritized by Impact (High) and Complexity (Low).")
-    report.append("| Priority | File | Issue | Metrics (I/C/C) |")
-    report.append("|---|---|---|---|")
 
-    # Combined list for prioritization
+def _priority_score(item: Mapping[str, Any]) -> int:
+    """Compute priority score: high impact, low complexity."""
+    imp, _, comp = calculate_metrics(item)
+    return (imp * 10) - comp
+
+
+def _generate_priority_table(
+    criticals: list[Finding], todos: list[Finding]
+) -> list[str]:
+    """Generate the recommended implementation order section."""
+    section = [
+        "\n## Recommended Implementation Order",
+        "Prioritized by Impact (High) and Complexity (Low).",
+        "| Priority | File | Issue | Metrics (I/C/C) |",
+        "|---|---|---|---|",
+    ]
     all_items = criticals + todos
-
-    def priority_score(item: Mapping[str, Any]) -> int:
-        imp, _, comp = calculate_metrics(item)
-        return (imp * 10) - comp
-
-    all_items.sort(key=priority_score, reverse=True)
-
+    all_items.sort(key=_priority_score, reverse=True)
     for i, item in enumerate(all_items[:20], 1):
         imp, cov, comp = calculate_metrics(item)
         desc = item.get("name", item.get("text", ""))[:80].replace("|", "\\|")
-        report.append(f"| {i} | `{item['file']}` | {desc} | {imp}/{cov}/{comp} |")
+        section.append(f"| {i} | `{item['file']}` | {desc} | {imp}/{cov}/{comp} |")
+    return section
 
-    # Issue creation for High Impact items
-    report.append("\n## Issues Created")
+
+def _generate_issues_section(criticals: list[Finding]) -> list[str]:
+    """Generate the issues created section and create issue files."""
+    section = ["\n## Issues Created"]
     max_id = 0
     issues_glob = glob.glob(os.path.join(ISSUES_DIR, "Issue_*.md")) + glob.glob(
         os.path.join(ISSUES_DIR, "ISSUE_*.md")
@@ -401,20 +395,57 @@ def generate_report() -> None:
             max_id = max(max_id, int(match_id.group(1)))
 
     next_id = max_id + 1
-    # Increased limit from 10 to 50
     for item in [c for c in criticals if calculate_metrics(c)[0] >= 4][:50]:
-        report.append(f"- Created `{create_issue_file(item, next_id)}`")
+        section.append(f"- Created `{create_issue_file(item, next_id)}`")
         next_id += 1
+    return section
 
+
+def _write_report(report: list[str], date_s: str) -> str:
+    """Write the report to disk and return the file path."""
     os.makedirs(REPORT_DIR, exist_ok=True)
+    report_text = "\n".join(report)
+
     report_path = os.path.join(REPORT_DIR, f"Completist_Report_{date_s}.md")
     with open(report_path, "w", encoding="utf-8") as f_out:
-        f_out.write("\n".join(report))
+        f_out.write(report_text)
 
     latest_path = os.path.join(REPORT_DIR, "COMPLETIST_LATEST.md")
     with open(latest_path, "w", encoding="utf-8") as f_out:
-        f_out.write("\n".join(report))
+        f_out.write(report_text)
 
+    return report_path
+
+
+def generate_report() -> None:
+    """Generate the structured completist status report."""
+    stubs = analyze_stubs()
+    ni_errors = analyze_not_implemented()
+    todos, fixmes = analyze_todos()
+    missing_docs = analyze_docs()
+    _ = analyze_abstract_methods()
+
+    criticals = [s for s in (stubs + ni_errors) if "test" not in s["file"].lower()]
+    criticals.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
+
+    date_s = datetime.now().strftime("%Y-%m-%d")
+    report = [
+        f"# Completist Report: {date_s}\n",
+        "## Executive Summary",
+        f"- **Critical Gaps**: {len(criticals)}",
+        f"- **Feature Gaps (TODO)**: {len(todos)}",
+        f"- **Technical Debt**: {len(fixmes)}",
+        f"- **Documentation Gaps**: {len(missing_docs)}\n",
+    ]
+
+    report.append(generate_mermaid_charts(criticals, todos, fixmes, missing_docs))
+    report.extend(_generate_critical_table(criticals))
+    report.extend(_generate_feature_gap_matrix(todos))
+    report.extend(_generate_tech_debt_register(fixmes))
+    report.extend(_generate_priority_table(criticals, todos))
+    report.extend(_generate_issues_section(criticals))
+
+    report_path = _write_report(report, date_s)
     logger.info("Report generated: %s", report_path)
 
 
