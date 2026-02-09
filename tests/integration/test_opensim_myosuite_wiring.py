@@ -302,6 +302,7 @@ class TestAPIRouteConnectivity:
         """Create test client."""
         try:
             from fastapi.testclient import TestClient
+
             from src.api.server import app
         except ImportError as exc:
             pytest.skip(f"API server deps not available: {exc}")
