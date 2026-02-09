@@ -760,8 +760,8 @@ except Exception as e:
 
             self.overlay = OverlayWidget(self)
             self.overlay.hide()
-        except ImportError:
-            logger.warning("OverlayWidget could not be imported.")
+        except (ImportError, TypeError):
+            logger.warning("OverlayWidget could not be initialized.")
 
     def _toggle_overlay(self) -> None:
         """Toggle the screen overlay."""

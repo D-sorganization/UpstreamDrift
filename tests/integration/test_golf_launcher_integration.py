@@ -29,7 +29,7 @@ class MockQtBase:
     def setWindowTitle(self, title):
         pass
 
-    def resize(self, w, h):
+    def resize(self, *args):
         pass
 
     def setStyleSheet(self, s):
