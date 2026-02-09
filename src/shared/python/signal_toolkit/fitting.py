@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from scipy import optimize
@@ -672,7 +673,7 @@ class CustomFunctionFitter:
 
         def custom_func(t: np.ndarray, *args: float) -> np.ndarray:
             # Build evaluation context with parameters
-            names = dict(safe_names)
+            names: dict[str, Any] = dict(safe_names)
             names["t"] = t
             for name, val in zip(param_names, args, strict=False):
                 names[name] = val
