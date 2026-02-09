@@ -23,6 +23,10 @@ from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )
+from src.shared.python.pose_estimation.joint_angle_utils import (
+    OPENPOSE_TO_CANONICAL,
+    compute_joint_angles,
+)
 
 logger = get_logger(__name__)
 
@@ -144,12 +148,16 @@ class OpenPoseEstimator(PoseEstimator):
 
             avg_confidence = total_score / valid_points if valid_points > 0 else 0.0
 
-            # returning empty joint angles until a biomechanical model is integrated.
+            # Compute joint angles using shared utility with OpenPose mapping
+            joint_angles = compute_joint_angles(
+                keypoints_dict, keypoint_mapping=OPENPOSE_TO_CANONICAL
+            )
+
             return PoseEstimationResult(
                 raw_keypoints=keypoints_dict,
                 confidence=avg_confidence,
                 timestamp=time.time(),
-                joint_angles={},
+                joint_angles=joint_angles,
             )
 
         except Exception as e:
