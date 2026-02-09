@@ -219,6 +219,7 @@ models:
         # Clear modules first so patches take effect
         sys.modules.pop("launchers.golf_launcher", None)
         sys.modules.pop("src.launchers.golf_launcher", None)
+        sys.modules.pop("src.launchers.ui_components", None)
         sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
         sys.modules.pop("src.shared.python.ai.gui", None)
         sys.modules.pop("shared.python.ai.gui", None)
@@ -234,6 +235,13 @@ models:
             return_value=mock_ai_panel,
         )
         ai_panel_patcher.start()
+
+        # Patch ContextHelpDock to avoid TypeError from real QDockWidget parent
+        context_help_patcher = patch(
+            "src.launchers.golf_launcher.ContextHelpDock",
+            MagicMock(),
+        )
+        context_help_patcher.start()
 
         try:
             with (
@@ -252,6 +260,7 @@ models:
                 yield launcher, model_xml
         finally:
             ai_panel_patcher.stop()
+            context_help_patcher.stop()
 
 
 def test_launcher_detects_real_model_files(launcher_env):
