@@ -1,6 +1,7 @@
 """Generic recorder for PhysicsEngine compatible simulations.
 
 Records state, control, and derived quantities for analysis and plotting.
+Integrates GRF analysis and swing-plane wrench decomposition (Issue #761).
 """
 
 from __future__ import annotations
@@ -173,6 +174,7 @@ class GenericPhysicsRecorder:
             "cop_position": None,
             "com_position": None,
             "ground_forces": None,
+            "ground_moments": None,
             # Storage for computed analyses (Real-time or Post-hoc)
             "ztcf_accel": None,
             "zvcf_accel": None,
@@ -204,6 +206,7 @@ class GenericPhysicsRecorder:
         self.data["cop_position"] = np.zeros((self.current_capacity, 3))
         self.data["com_position"] = np.zeros((self.max_samples, 3))
         self.data["ground_forces"] = np.zeros((self.max_samples, 3))
+        self.data["ground_moments"] = np.zeros((self.max_samples, 3))
 
         # Real-time analysis buffers
         if self.analysis_config["ztcf"]:
@@ -372,8 +375,11 @@ class GenericPhysicsRecorder:
         # Ground Forces (from engine, if supported)
         try:
             grf = self.engine.compute_contact_forces()
-            if grf is not None and len(grf) == 3:
-                self.data["ground_forces"][idx] = grf
+            if grf is not None and len(grf) >= 3:
+                self.data["ground_forces"][idx] = grf[:3]
+                # Some engines return a 6-vector [force(3), moment(3)]
+                if len(grf) >= 6:
+                    self.data["ground_moments"][idx] = grf[3:6]
         except Exception as e:
             logger.warning("Failed to compute ground forces at frame %d: %s", idx, e)
 
@@ -533,6 +539,169 @@ class GenericPhysicsRecorder:
         )
 
         logger.info("Post-hoc analysis complete.")
+
+    def compute_grf_and_wrench_analysis(
+        self, impact_time: float | None = None, fsp_window_ms: float = 100.0
+    ) -> dict[str, Any]:
+        """Compute GRF analysis and swing-plane wrench decomposition.
+
+        Builds GRFTimeSeries from recorded forces/moments/COP, runs the
+        GRFAnalyzer for impulse metrics, fits a Functional Swing Plane (FSP)
+        from the clubhead trajectory, and decomposes GRF wrenches into
+        global, local, and swing-plane frames.
+
+        Args:
+            impact_time: Time of impact [s]. If None, uses time of peak
+                vertical force.
+            fsp_window_ms: FSP fitting window around impact [ms].
+
+        Returns:
+            Dictionary with GRF summary, FSP parameters, and per-frame
+            wrench decompositions.
+        """
+        from src.shared.python.ground_reaction_forces import (
+            FootSide,
+            GRFAnalyzer,
+            GRFTimeSeries,
+        )
+        from src.shared.python.reference_frames import (
+            ReferenceFrame,
+            ReferenceFrameTransformer,
+            WrenchInFrame,
+            fit_functional_swing_plane,
+        )
+
+        if not self._buffers_initialized or self.current_idx == 0:
+            logger.warning("No data recorded for GRF/wrench analysis")
+            return {}
+
+        n = self.current_idx
+        times = self.data["times"][:n]
+        forces = self.data["ground_forces"][:n]
+        moments = self.data["ground_moments"][:n]
+        cops = self.data["cop_position"][:n]
+
+        # --- GRF Analysis ---
+        grf_ts = GRFTimeSeries(
+            timestamps=times,
+            forces=forces,
+            moments=moments,
+            cops=cops,
+            foot_side=FootSide.COMBINED,
+        )
+
+        analyzer = GRFAnalyzer()
+        analyzer.add_grf_data(grf_ts)
+
+        try:
+            grf_summary = analyzer.analyze(FootSide.COMBINED)
+        except Exception as e:
+            logger.warning("GRF analysis failed: %s", e)
+            grf_summary = None
+
+        # Determine impact time from peak vertical force if not provided
+        if impact_time is None:
+            vertical_forces = forces[:, 2]
+            if np.max(np.abs(vertical_forces)) > 0:
+                impact_time = float(times[np.argmax(np.abs(vertical_forces))])
+            else:
+                impact_time = float(times[n // 2])
+
+        # --- FSP (Functional Swing Plane) ---
+        clubhead_traj = self.data["club_head_position"][:n]
+        fsp = None
+        if clubhead_traj is not None and np.any(clubhead_traj != 0):
+            try:
+                fsp = fit_functional_swing_plane(
+                    clubhead_traj, times, impact_time, window_ms=fsp_window_ms
+                )
+            except Exception as e:
+                logger.warning("FSP fitting failed: %s", e)
+
+        # --- Wrench Decomposition ---
+        transformer = ReferenceFrameTransformer()
+        if fsp is not None:
+            transformer.set_swing_plane(fsp)
+
+        wrench_decompositions: list[dict[str, float]] = []
+        for i in range(n):
+            wrench = WrenchInFrame(
+                force=forces[i],
+                torque=moments[i],
+                frame=ReferenceFrame.GLOBAL,
+                body_name="ground",
+            )
+            if fsp is not None:
+                decomp = transformer.get_swing_plane_decomposition(wrench)
+            else:
+                decomp = {
+                    "force_in_plane": 0.0,
+                    "force_out_of_plane": 0.0,
+                    "force_along_grip": 0.0,
+                    "torque_in_plane": 0.0,
+                    "torque_out_of_plane": 0.0,
+                    "torque_about_grip": 0.0,
+                }
+            wrench_decompositions.append(decomp)
+
+        # Convert to columnar arrays
+        decomp_keys = [
+            "force_in_plane",
+            "force_out_of_plane",
+            "force_along_grip",
+            "torque_in_plane",
+            "torque_out_of_plane",
+            "torque_about_grip",
+        ]
+        wrench_arrays = {
+            k: np.array([d[k] for d in wrench_decompositions]) for k in decomp_keys
+        }
+
+        # Build result
+        result: dict[str, Any] = {
+            "grf_analysis": {},
+            "fsp": {},
+            "wrench_swing_plane": wrench_arrays,
+        }
+
+        if grf_summary is not None:
+            result["grf_analysis"] = {
+                "peak_vertical_force": grf_summary.peak_vertical_force,
+                "peak_horizontal_force": grf_summary.peak_horizontal_force,
+                "time_to_peak_vertical": grf_summary.time_to_peak_vertical,
+                "cop_trajectory_length": grf_summary.cop_trajectory_length,
+                "cop_range_ap": grf_summary.cop_range_ap,
+                "cop_range_ml": grf_summary.cop_range_ml,
+            }
+            result["grf_analysis"][
+                "linear_impulse_magnitude"
+            ] = grf_summary.linear_impulse.linear_impulse_magnitude
+            result["grf_analysis"][
+                "angular_impulse_magnitude"
+            ] = grf_summary.linear_impulse.angular_impulse_magnitude
+            result["grf_analysis"]["duration"] = grf_summary.linear_impulse.duration
+
+        if fsp is not None:
+            result["fsp"] = {
+                "origin": fsp.origin,
+                "normal": fsp.normal,
+                "in_plane_x": fsp.in_plane_x,
+                "in_plane_y": fsp.in_plane_y,
+                "grip_axis": fsp.grip_axis,
+                "fitting_rmse": fsp.fitting_rmse,
+                "fitting_window_ms": fsp.fitting_window_ms,
+            }
+
+        # Store in recorder data for export
+        self.data["grf_analysis"] = result["grf_analysis"]
+        self.data["fsp"] = result["fsp"]
+        self.data["wrench_swing_plane"] = result["wrench_swing_plane"]
+
+        logger.info(
+            "GRF and wrench analysis complete. FSP RMSE=%.4f m",
+            fsp.fitting_rmse if fsp else float("nan"),
+        )
+        return result
 
     def get_data_dict(self) -> dict[str, Any]:
         """Return the raw data dictionary for export.
