@@ -14,7 +14,7 @@ import pinocchio as pin  # noqa: E402
 import pinocchio.casadi as cpin  # noqa: E402
 
 # Use sys.modules.pop instead of reload to avoid C-extension corruption
-sys.modules.pop("shared.python.optimization.examples.optimize_arm", None)
+sys.modules.pop("src.shared.python.optimization.examples.optimize_arm", None)
 from src.shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
 
@@ -108,7 +108,7 @@ def test_main_execution(mock_casadi, mock_pinocchio):
     with (
         patch("os.path.exists", return_value=True),
         patch(
-            "shared.python.optimization.examples.optimize_arm.np.savetxt"
+            "src.shared.python.optimization.examples.optimize_arm.np.savetxt"
         ) as mock_save,
     ):
         main()
@@ -126,11 +126,11 @@ def test_main_execution(mock_casadi, mock_pinocchio):
 def test_main_missing_dependencies():
     with (
         patch(
-            "shared.python.optimization.examples.optimize_arm.DEPENDENCIES_AVAILABLE",
+            "src.shared.python.optimization.examples.optimize_arm.DEPENDENCIES_AVAILABLE",
             False,
         ),
         patch(
-            "shared.python.optimization.examples.optimize_arm.MISSING_DEP_ERROR",
+            "src.shared.python.optimization.examples.optimize_arm.MISSING_DEP_ERROR",
             "Test Error",
             create=True,
         ),

@@ -1,5 +1,3 @@
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,114 +23,97 @@ def test_engine_initialization(mock_engine_manager):
     # engine_status might be all UNAVAILABLE if paths don't exist
 
 
-@patch("src.shared.python.engine_probes.MuJoCoProbe.probe")
-def test_mujoco_loading_success(mock_probe, mock_engine_manager):
-    """Test successful MuJoCo loading."""
-    # Mock probe result
-    mock_probe.return_value.is_available.return_value = True
-
+def test_mujoco_loading_success(mock_engine_manager):
+    """Test successful MuJoCo loading via registry factory mock."""
     # Force engine availability (bypass discovery)
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-    # Mock file system checks and mujoco module using sys.modules
-    mock_mujoco_pkg = MagicMock()
-    mock_mujoco_pkg.__version__ = "3.2.3"
-    mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
+    # Mock the registry to return a registration with a mock factory
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-    with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
-        # We also need to mock the PhysicsEngine import inside switch_engine
-        with patch(
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
-        ):
-            with patch("pathlib.Path.exists", return_value=True):
-                with patch("pathlib.Path.glob", return_value=[Path("model.xml")]):
-                    result = mock_engine_manager.switch_engine(EngineType.MUJOCO)
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+        mock_get_reg.return_value = mock_registry
 
-                    assert result is True
-                    assert mock_engine_manager.get_current_engine() == EngineType.MUJOCO
-                    # Verify that the engine was loaded successfully
-                    assert (
-                        mock_engine_manager.engine_status[EngineType.MUJOCO]
-                        == EngineStatus.LOADED
-                    )
-                    assert mock_engine_manager.active_physics_engine is not None
+        result = mock_engine_manager.switch_engine(EngineType.MUJOCO)
+
+        assert result is True
+        assert mock_engine_manager.get_current_engine() == EngineType.MUJOCO
+        assert (
+            mock_engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
+        )
+        assert mock_engine_manager.active_physics_engine is not None
 
 
-@patch("src.shared.python.engine_probes.MuJoCoProbe.probe")
-def test_mujoco_loading_failure_missing_dependency(mock_probe, mock_engine_manager):
-    """Test MuJoCo loading failure when dependency is missing."""
-    # Mock probe result failure
-    mock_probe.return_value.is_available.return_value = False
-    mock_probe.return_value.diagnostic_message = "MuJoCo not installed"
-
+def test_mujoco_loading_failure_no_registration(mock_engine_manager):
+    """Test MuJoCo loading failure when no registration found."""
     # Force engine availability
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-    result = mock_engine_manager.switch_engine(EngineType.MUJOCO)
+    # Mock registry returning no registration
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = None
+        mock_get_reg.return_value = mock_registry
 
-    assert result is False
-    assert mock_engine_manager.get_current_engine() is None
+        result = mock_engine_manager.switch_engine(EngineType.MUJOCO)
+
+        assert result is False
+        assert mock_engine_manager.get_current_engine() is None
 
 
-@patch.dict(
-    "sys.modules",
-    {
-        "pydrake": MagicMock(),
-        "pydrake.systems.framework": MagicMock(),
-        "pydrake.geometry": MagicMock(),
-    },
-)
-@patch(
-    "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
-)
-@patch("src.shared.python.engine_probes.DrakeProbe.probe")
-def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager):
-    """Test successful Drake loading."""
-    mock_probe.return_value.is_available.return_value = True
-
+def test_drake_loading_success(mock_engine_manager):
+    """Test successful Drake loading via registry factory mock."""
     # Force engine availability
     mock_engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
 
-    mock_drake = sys.modules["pydrake"]
-    mock_drake.__version__ = "1.22.0"  # type: ignore[attr-defined]
+    # Mock the registry to return a registration with a mock factory
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-    result = mock_engine_manager.switch_engine(EngineType.DRAKE)
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+        mock_get_reg.return_value = mock_registry
 
-    assert result is True
-    assert mock_engine_manager.get_current_engine() == EngineType.DRAKE
-    # Verify that the engine was loaded successfully
-    assert mock_engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
-    assert mock_engine_manager.active_physics_engine is not None
+        result = mock_engine_manager.switch_engine(EngineType.DRAKE)
+
+        assert result is True
+        assert mock_engine_manager.get_current_engine() == EngineType.DRAKE
+        assert (
+            mock_engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
+        )
+        assert mock_engine_manager.active_physics_engine is not None
 
 
-@patch(
-    "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
-)
-@patch("src.shared.python.engine_probes.PinocchioProbe.probe")
-def test_pinocchio_loading_success(
-    mock_probe, mock_pin_engine_class, mock_engine_manager
-):
-    """Test successful Pinocchio loading."""
-    mock_probe.return_value.is_available.return_value = True
-
+def test_pinocchio_loading_success(mock_engine_manager):
+    """Test successful Pinocchio loading via registry factory mock."""
     # Force engine availability
     mock_engine_manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.AVAILABLE
 
-    mock_pin = MagicMock()
-    mock_pin.__version__ = "2.6.0"
+    # Mock the registry to return a registration with a mock factory
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-    with patch.dict("sys.modules", {"pinocchio": mock_pin}):
-        with patch("pathlib.Path.exists", return_value=True):
-            result = mock_engine_manager.switch_engine(EngineType.PINOCCHIO)
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+        mock_get_reg.return_value = mock_registry
 
-            assert result is True
-            assert mock_engine_manager.get_current_engine() == EngineType.PINOCCHIO
-            # Verify that the engine was loaded successfully
-            assert (
-                mock_engine_manager.engine_status[EngineType.PINOCCHIO]
-                == EngineStatus.LOADED
-            )
-            assert mock_engine_manager.active_physics_engine is not None
+        result = mock_engine_manager.switch_engine(EngineType.PINOCCHIO)
+
+        assert result is True
+        assert mock_engine_manager.get_current_engine() == EngineType.PINOCCHIO
+        assert (
+            mock_engine_manager.engine_status[EngineType.PINOCCHIO]
+            == EngineStatus.LOADED
+        )
+        assert mock_engine_manager.active_physics_engine is not None
 
 
 def test_cleanup_releases_resources(mock_engine_manager):

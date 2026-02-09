@@ -20,6 +20,16 @@ sys.modules["pydrake.geometry"] = MagicMock()
 sys.modules["pydrake.math"] = MagicMock()
 sys.modules["pydrake.all"] = MagicMock()
 
+# Patch DRAKE_AVAILABLE to True so the drake_physics_engine module imports
+# the pydrake names (DiagramBuilder, etc.) into its namespace, making them patchable.
+_drake_avail_patcher = patch(
+    "src.shared.python.engine_availability.DRAKE_AVAILABLE", True
+)
+_drake_avail_patcher.start()
+
+# Force re-import of drake_physics_engine with DRAKE_AVAILABLE=True
+sys.modules.pop("src.engines.physics_engines.drake.python.drake_physics_engine", None)
+
 try:
     from src.engines.physics_engines.drake.python.drake_physics_engine import (
         DrakePhysicsEngine,
@@ -27,6 +37,8 @@ try:
 except ImportError:
     # Handle case where import logic inside module fails due to complex dependencies
     DrakePhysicsEngine = None  # type: ignore[assignment,misc]
+finally:
+    _drake_avail_patcher.stop()
 
 
 class TestDrakeWrapper(unittest.TestCase):
@@ -60,6 +72,7 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine.diagram = MagicMock()
         self.engine.context = MagicMock()
         self.engine.plant_context = MagicMock()
+        self.engine._is_finalized = True
         # Simulator starts None
         self.engine.simulator = None
 
@@ -75,7 +88,8 @@ class TestDrakeWrapper(unittest.TestCase):
             self.engine.diagram.CreateDefaultContext.return_value = self.engine.context
         self.engine.plant.GetMyContextFromRoot.return_value = self.engine.plant_context
 
-        # 1. Finalize (creates simulator)
+        # 1. Finalize (creates simulator) - reset flag so finalization actually runs
+        self.engine._is_finalized = False
         self.engine._ensure_finalized()
 
         mock_simulator_class.assert_called_once_with(
@@ -144,13 +158,15 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine.plant.CalcInverseDynamics.assert_called_once()
 
     def test_forward_with_no_context(self):
-        """Test forward() handles missing context gracefully."""
+        """Test forward() raises PreconditionError when context is missing."""
+        from src.shared.python.contracts import PreconditionError
+
         self.engine.plant_context = None
 
-        # Should not raise exception, just log warning
-        self.engine.forward()
-
-        # No assertions needed - just verify no exception is raised
+        # With Design by Contract, forward() requires is_initialized,
+        # which checks plant_context is not None
+        with self.assertRaises(PreconditionError):
+            self.engine.forward()
 
 
 if __name__ == "__main__":

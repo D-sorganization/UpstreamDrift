@@ -68,7 +68,7 @@ class TestPreconditionDecorator:
                 self.value = value
                 self._is_ready = True
 
-            @precondition(lambda self: self._is_ready, "Calculator must be ready")
+            @precondition(lambda self, x: self._is_ready, "Calculator must be ready")
             def compute(self, x: float) -> float:
                 return self.value + x
 

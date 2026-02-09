@@ -14,9 +14,14 @@ Fixes #1119
 import time
 
 import pytest
-from fastapi.testclient import TestClient
 
-from src.api.server import app
+try:
+    from fastapi.testclient import TestClient
+
+    from src.api.server import app
+except ImportError:
+    pytest.skip("API server deps not available", allow_module_level=True)
+
 from src.shared.python.engine_registry import EngineType
 
 

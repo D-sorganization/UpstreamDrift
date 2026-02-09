@@ -21,6 +21,9 @@ import pytest
 if TYPE_CHECKING:
     pass
 
+# Skip entire module if model_generation is not available
+pytest.importorskip("model_generation", reason="model_generation package not installed")
+
 
 class TestPendulumPutterModelConstruction:
     """Test model construction and structure."""

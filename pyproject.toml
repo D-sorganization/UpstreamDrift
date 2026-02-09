@@ -71,6 +71,28 @@ dev = [
     "defusedxml>=0.7.0",
     # Required for plotting tests
     "matplotlib>=3.8.0",
+    # Required for auth/security tests
+    "sqlalchemy>=2.0.0",
+    "bcrypt>=4.1.0",
+    "PyJWT>=2.10.1",
+    "cryptography>=44.0.0",
+    # Required for async tests
+    "anyio>=4.0.0",
+    "pytest-anyio>=0.0.0; python_version>='3.10'",
+    # Required for config tests
+    "PyYAML>=6.0",
+    # Required for pydantic email validation in auth models
+    "email-validator>=2.0.0",
+    # Required for API rate limiting tests
+    "slowapi>=0.1.9",
+    # Required for async streaming tests
+    "pytest-asyncio>=0.23.0",
+    # Required for symbolic math in controls tab
+    "sympy>=1.12",
+    # Required for multipart form data in API tests
+    "python-multipart>=0.0.6",
+    # Required for video/image processing tests
+    "opencv-python-headless>=4.8.0",
 ]
 
 # GUI testing (requires PyQt6)
@@ -180,6 +202,7 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --strict-markers --strict-config"
+asyncio_mode = "auto"
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "src",
@@ -198,6 +221,7 @@ markers = [
     "slow_numba: Tests that require numba JIT or are heavy",
     "asyncio: marks tests as async tests",
     "benchmark: marks tests as performance benchmarks",
+    "serial: marks tests that must not run in parallel (sys.modules manipulation)",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",

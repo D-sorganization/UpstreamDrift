@@ -6,13 +6,11 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLauncherManifest } from '@/api/useLauncherManifest';
 import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
 import { useToast } from '@/components/ui/Toast';
 
 export function DashboardPage() {
-    const navigate = useNavigate();
     const { tiles, loadState, error, refetch } = useLauncherManifest();
     const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
     const { showInfo, showError } = useToast();
@@ -25,20 +23,25 @@ export function DashboardPage() {
                 return;
             }
 
-            // Physics engines navigate to the simulation page with the engine preselected
-            if (tile.category === 'physics_engine' && tile.engine_type) {
-                showInfo(`Opening ${tile.name} simulation...`);
-                navigate(`/simulation?engine=${tile.engine_type}`);
-                return;
-            }
-
-            // Tools and external apps are launched via the backend API
+            // Launch all engines/tools as subprocesses via the backend API
             showInfo(`Launching ${tile.name}...`);
-            fetch(`/api/launcher/launch/${tile.id}`, { method: 'POST' }).catch(() => {
-                showError(`Failed to launch ${tile.name}`);
-            });
+            fetch(`/api/launcher/launch/${tile.id}`, { method: 'POST' })
+                .then((res) => {
+                    if (!res.ok) {
+                        return res.json().then((body) => {
+                            throw new Error(body.detail || `HTTP ${res.status}`);
+                        });
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    showInfo(`${data.name || tile.name} launched successfully`);
+                })
+                .catch((err) => {
+                    showError(`Failed to launch ${tile.name}: ${err.message}`);
+                });
         },
-        [tiles, navigate, showInfo, showError]
+        [tiles, showInfo, showError]
     );
 
     const handleShowHelp = useCallback(() => {

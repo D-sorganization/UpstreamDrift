@@ -167,6 +167,7 @@ def test_compute_mass_matrix(engine):
 
 
 def test_compute_bias_forces(engine):
+    engine.model = MagicMock()
     engine.data = MagicMock()
     engine.data.qfrc_bias = np.array([1.0, 2.0])
 

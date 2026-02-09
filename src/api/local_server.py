@@ -55,6 +55,7 @@ from src.api.routes import (  # noqa: E402
 from src.api.services.chat_service import ChatService  # noqa: E402
 from src.shared.python.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_config import get_logger  # noqa: E402
+from src.shared.python.subprocess_utils import kill_process_tree  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -162,6 +163,133 @@ def create_local_app() -> FastAPI:
         return JSONResponse(
             status_code=404, content={"detail": f"Logo not found: {logo_name}"}
         )
+
+    # ── Launcher: launch engines/tools as subprocesses ────────────────
+    # Initialize process manager and handler registry once (stored on app)
+    from src.launchers.launcher_model_handlers import ModelHandlerRegistry
+    from src.launchers.launcher_process_manager import ProcessManager
+
+    _repo_root = Path(__file__).parent.parent.parent
+    _process_manager = ProcessManager(repo_root=_repo_root)
+    _handler_registry = ModelHandlerRegistry()
+    app.state.process_manager = _process_manager
+
+    @app.post("/api/launcher/launch/{tile_id}")
+    async def launch_tile(tile_id: str) -> dict[str, Any]:
+        """Launch an engine or tool by tile ID.
+
+        Looks up the tile in the launcher manifest and uses the model
+        handler registry to spawn it as a subprocess.
+        """
+        import json as _json
+
+        logger.info("[launch] Received launch request for tile_id=%s", tile_id)
+
+        # Load manifest to find tile config
+        manifest_path = (
+            Path(__file__).parent.parent / "config" / "launcher_manifest.json"
+        )
+        if not manifest_path.exists():
+            logger.error("[launch] Manifest not found at %s", manifest_path)
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "Launcher manifest not found"},
+            )
+
+        with open(manifest_path, encoding="utf-8") as f:
+            manifest = _json.load(f)
+
+        tile = None
+        for t in manifest.get("tiles", []):
+            if t.get("id") == tile_id:
+                tile = t
+                break
+
+        if tile is None:
+            logger.warning("[launch] Tile not found: %s", tile_id)
+            return JSONResponse(
+                status_code=404,
+                content={"detail": f"Tile not found: {tile_id}"},
+            )
+
+        model_type = tile.get("type", "")
+        repo_path = Path(__file__).parent.parent.parent
+        logger.info(
+            "[launch] Resolved tile: name=%s type=%s path=%s",
+            tile.get("name"),
+            model_type,
+            tile.get("path"),
+        )
+
+        # Use a simple namespace so handlers can read .id, .type, .path, etc.
+        class _TileModel:
+            """Minimal model object compatible with handler.launch()."""
+
+            def __init__(self, data: dict) -> None:
+                for k, v in data.items():
+                    setattr(self, k, v)
+
+        model = _TileModel(tile)
+
+        handler = _handler_registry.get_handler(model_type)
+        if handler is None:
+            logger.error(
+                "[launch] No handler for type=%s (tile=%s)", model_type, tile_id
+            )
+            return JSONResponse(
+                status_code=400,
+                content={"detail": f"No handler for type: {model_type}"},
+            )
+
+        logger.info(
+            "[launch] Using handler %s for tile %s",
+            type(handler).__name__,
+            tile_id,
+        )
+        success = handler.launch(model, repo_path, _process_manager)
+        if success:
+            logger.info(
+                "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
+            )
+            return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
+        else:
+            logger.error(
+                "[launch] Handler returned failure for tile %s (type=%s)",
+                tile_id,
+                model_type,
+            )
+            return JSONResponse(
+                status_code=500,
+                content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
+            )
+
+    @app.get("/api/launcher/processes")
+    async def list_running_processes() -> dict[str, Any]:
+        """List currently running engine/tool processes."""
+        processes = {}
+        for name, proc in _process_manager.running_processes.items():
+            poll = proc.poll()
+            processes[name] = {
+                "pid": proc.pid,
+                "running": poll is None,
+                "exit_code": poll,
+            }
+        return {"processes": processes}
+
+    @app.post("/api/launcher/stop/{name}")
+    async def stop_process(name: str) -> dict[str, Any]:
+        """Stop a running engine/tool process by name."""
+        proc = _process_manager.running_processes.get(name)
+        if proc is None:
+            logger.warning("[stop] Process not found: %s", name)
+            return JSONResponse(
+                status_code=404, content={"detail": f"Process not found: {name}"}
+            )
+        logger.info("[stop] Killing process tree for %s (pid=%s)", name, proc.pid)
+        kill_process_tree(proc.pid)
+        del _process_manager.running_processes[name]
+        logger.info("[stop] Process %s stopped and removed", name)
+        return {"status": "stopped", "name": name}
 
     # Health check
     @app.get("/api/health")
