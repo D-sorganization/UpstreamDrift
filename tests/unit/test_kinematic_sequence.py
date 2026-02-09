@@ -2,7 +2,10 @@
 
 import numpy as np
 
-from src.shared.python.kinematic_sequence import KinematicSequenceAnalyzer
+from src.shared.python.kinematic_sequence import (
+    KinematicSequenceAnalyzer,
+    SegmentTimingAnalyzer,
+)
 
 
 class MockRecorder:
@@ -107,11 +110,40 @@ def test_extract_velocities():
 
 def test_empty_data():
     """Test handling empty data."""
-    analyzer = KinematicSequenceAnalyzer()
+    analyzer = SegmentTimingAnalyzer()
     result = analyzer.analyze({}, np.array([]))
 
     assert len(result.peaks) == 0
     assert result.sequence_consistency == 0.0
+
+
+def test_backward_compat_alias():
+    """KinematicSequenceAnalyzer should be an alias for SegmentTimingAnalyzer."""
+    assert KinematicSequenceAnalyzer is SegmentTimingAnalyzer
+
+
+def test_no_expected_order_peaks_only():
+    """Without expected_order, only peak detection should be performed."""
+    times = np.linspace(0, 1.0, 200)
+    seg_a = np.exp(-((times - 0.2) ** 2) / 0.005) * 10
+    seg_b = np.exp(-((times - 0.4) ** 2) / 0.005) * 20
+
+    data = {"SegA": seg_a, "SegB": seg_b}
+    analyzer = SegmentTimingAnalyzer(expected_order=None)
+    result = analyzer.analyze(data, times)
+
+    assert len(result.peaks) == 2
+    # No sequence scoring when expected_order is None
+    assert result.sequence_consistency == 0.0
+    assert result.expected_order is None
+
+    # Speed gain should be None (no expected order to determine proximal)
+    for peak in result.peaks:
+        assert peak.speed_gain is None
+
+    # Deceleration should still be computed
+    for peak in result.peaks:
+        assert peak.deceleration_rate is not None
 
 
 # =============================================================================
