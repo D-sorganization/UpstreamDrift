@@ -1,21 +1,18 @@
-"""Video analysis routes."""
+"""Video analysis routes.
+
+All dependencies are injected via FastAPI's Depends() mechanism.
+No module-level mutable state.
+"""
 
 from __future__ import annotations
 
 import tempfile
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from src.api.utils.datetime_compat import UTC
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
-
-from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 
 from src.api.config import (
     MAX_CONFIDENCE,
@@ -23,30 +20,16 @@ from src.api.config import (
     MIN_CONFIDENCE,
     VALID_ESTIMATOR_TYPES,
 )
+from src.api.utils.datetime_compat import UTC
 from src.shared.python.video_pose_pipeline import (
     VideoPosePipeline,
     VideoProcessingConfig,
 )
 
+from ..dependencies import get_logger, get_task_manager, get_video_pipeline
 from ..models.responses import VideoAnalysisResponse
 
 router = APIRouter()
-
-_video_pipeline: VideoPosePipeline | None = None
-_active_tasks: dict[str, dict[str, Any]] = {}
-_logger: Any = None
-
-
-def configure(
-    video_pipeline: VideoPosePipeline | None,
-    active_tasks: dict[str, dict[str, Any]],
-    logger: Any,
-) -> None:
-    """Configure route dependencies from the server startup."""
-    global _video_pipeline, _active_tasks, _logger
-    _video_pipeline = video_pipeline
-    _active_tasks = active_tasks
-    _logger = logger
 
 
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
@@ -55,11 +38,25 @@ async def analyze_video(
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
     enable_smoothing: bool = True,
+    video_pipeline: VideoPosePipeline = Depends(get_video_pipeline),
+    logger: Any = Depends(get_logger),
 ) -> VideoAnalysisResponse:
-    """Analyze golf swing from uploaded video."""
-    if not _video_pipeline:
-        raise HTTPException(status_code=500, detail="Video pipeline not initialized")
+    """Analyze golf swing from uploaded video.
 
+    Args:
+        file: Uploaded video file.
+        estimator_type: Pose estimation backend.
+        min_confidence: Minimum confidence threshold.
+        enable_smoothing: Enable temporal smoothing.
+        video_pipeline: Injected video pipeline.
+        logger: Injected logger.
+
+    Returns:
+        Video analysis results.
+
+    Raises:
+        HTTPException: On validation or processing failure.
+    """
     if estimator_type not in VALID_ESTIMATOR_TYPES:
         raise HTTPException(
             status_code=400,
@@ -110,9 +107,11 @@ async def analyze_video(
 
         return response
 
+    except HTTPException:
+        raise
     except Exception as e:
-        if _logger:
-            _logger.error("Video analysis error: %s", e)
+        if logger:
+            logger.error("Video analysis error: %s", e)
         raise HTTPException(
             status_code=500, detail=f"Video analysis failed: {str(e)}"
         ) from e
@@ -121,8 +120,8 @@ async def analyze_video(
             try:
                 temp_path.unlink()
             except OSError as cleanup_error:
-                if _logger:
-                    _logger.warning(
+                if logger:
+                    logger.warning(
                         "Failed to clean up temp file %s: %s",
                         temp_path,
                         cleanup_error,
@@ -135,11 +134,25 @@ async def analyze_video_async(
     file: UploadFile = File(...),
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
+    video_pipeline: VideoPosePipeline = Depends(get_video_pipeline),
+    task_manager: Any = Depends(get_task_manager),
 ) -> dict[str, str]:
-    """Start asynchronous video analysis."""
-    if not _video_pipeline:
-        raise HTTPException(status_code=500, detail="Video pipeline not initialized")
+    """Start asynchronous video analysis.
 
+    Args:
+        background_tasks: FastAPI background task manager.
+        file: Uploaded video file.
+        estimator_type: Pose estimation backend.
+        min_confidence: Minimum confidence threshold.
+        video_pipeline: Injected video pipeline (validates initialization).
+        task_manager: Injected task manager for tracking.
+
+    Returns:
+        Task ID and initial status.
+
+    Raises:
+        HTTPException: On validation failure.
+    """
     if estimator_type not in VALID_ESTIMATOR_TYPES:
         raise HTTPException(
             status_code=400,
@@ -163,7 +176,7 @@ async def analyze_video_async(
         temp_file.write(content)
         temp_path = Path(temp_file.name)
 
-    _active_tasks[task_id] = {
+    task_manager[task_id] = {
         "status": "started",
         "created_at": datetime.now(UTC),
     }
@@ -175,6 +188,7 @@ async def analyze_video_async(
         file.filename or "unknown",
         estimator_type,
         min_confidence,
+        task_manager,
     )
 
     return {"task_id": task_id, "status": "started"}
@@ -186,13 +200,23 @@ async def _process_video_background(
     filename: str,
     estimator_type: str,
     min_confidence: float,
+    task_manager: Any,
 ) -> None:
-    """Background task for video processing."""
+    """Background task for video processing.
+
+    Args:
+        task_id: Unique task identifier.
+        video_path: Path to temporary video file.
+        filename: Original filename.
+        estimator_type: Pose estimation backend.
+        min_confidence: Minimum confidence threshold.
+        task_manager: Task manager for status updates.
+    """
     try:
-        task_data = _active_tasks.get(task_id) or {}
+        task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 
-        _active_tasks[task_id] = {
+        task_manager[task_id] = {
             "status": "processing",
             "progress": 0,
             "created_at": created_at,
@@ -205,10 +229,10 @@ async def _process_video_background(
 
         result = pipeline.process_video(video_path)
 
-        task_data = _active_tasks.get(task_id) or {}
+        task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 
-        _active_tasks[task_id] = {
+        task_manager[task_id] = {
             "status": "completed",
             "created_at": created_at,
             "result": {
@@ -221,10 +245,10 @@ async def _process_video_background(
         }
 
     except Exception as e:
-        task_data = _active_tasks.get(task_id) or {}
+        task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 
-        _active_tasks[task_id] = {
+        task_manager[task_id] = {
             "status": "failed",
             "error": str(e),
             "created_at": created_at,

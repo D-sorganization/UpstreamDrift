@@ -1,7 +1,8 @@
 """Simulation routes.
 
 Provides endpoints for running physics simulations synchronously and asynchronously.
-Uses FastAPI's Depends() for dependency injection.
+All dependencies are injected via FastAPI's Depends() mechanism.
+No module-level mutable state.
 """
 
 from __future__ import annotations
@@ -22,26 +23,6 @@ if TYPE_CHECKING:
     from ..services.simulation_service import SimulationService
 
 router = APIRouter()
-
-# Legacy globals for backward compatibility during migration
-_simulation_service: SimulationService | None = None
-_active_tasks: dict[str, dict[str, Any]] = {}
-_logger: Any = None
-
-
-def configure(
-    simulation_service: SimulationService | None,
-    active_tasks: dict[str, dict[str, Any]],
-    logger: Any,
-) -> None:
-    """Configure dependencies for simulation routes (legacy).
-
-    Note: This function is deprecated. New code should use Depends() instead.
-    """
-    global _simulation_service, _active_tasks, _logger
-    _simulation_service = simulation_service
-    _active_tasks = active_tasks
-    _logger = logger
 
 
 @router.post("/simulate", response_model=SimulationResponse)

@@ -1,7 +1,8 @@
 """Export routes.
 
 Provides endpoints for exporting analysis results.
-Uses FastAPI's Depends() for dependency injection.
+All dependencies are injected via FastAPI's Depends() mechanism.
+No module-level mutable state.
 """
 
 from __future__ import annotations
@@ -16,18 +17,6 @@ from src.api.config import VALID_EXPORT_FORMATS
 from ..dependencies import get_task_manager
 
 router = APIRouter()
-
-# Legacy global for backward compatibility during migration
-_active_tasks: dict[str, dict[str, Any]] = {}
-
-
-def configure(active_tasks: dict[str, dict[str, Any]]) -> None:
-    """Configure dependencies for export routes (legacy).
-
-    Note: This function is deprecated. New code should use Depends() instead.
-    """
-    global _active_tasks
-    _active_tasks = active_tasks
 
 
 @router.get("/export/{task_id}")

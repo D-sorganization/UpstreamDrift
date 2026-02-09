@@ -1,8 +1,11 @@
-"""Engine management routes."""
+"""Engine management routes.
+
+All dependencies are injected via FastAPI's Depends() mechanism.
+No module-level mutable state.
+"""
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,24 +22,6 @@ from ..models.responses import EngineStatusResponse
 from ..utils.path_validation import validate_model_path
 
 router = APIRouter()
-
-# Module-level state for legacy configure pattern
-_engine_manager: EngineManager | None = None
-_logger: logging.Logger | None = None
-
-
-def configure(engine_manager: EngineManager, logger: logging.Logger) -> None:
-    """Configure the engines module (legacy pattern).
-
-    Args:
-        engine_manager: Engine manager instance
-        logger: Logger instance
-    """
-    global _engine_manager, _logger
-    _engine_manager = engine_manager
-    _logger = logger
-    if _logger:
-        _logger.info("Engines routes configured")
 
 
 class EngineListResponse(BaseModel):
