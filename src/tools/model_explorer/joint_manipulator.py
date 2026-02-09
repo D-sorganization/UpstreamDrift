@@ -8,9 +8,10 @@ joint parameters.
 from __future__ import annotations
 
 import math
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -620,7 +621,7 @@ class JointManipulatorWidget(QWidget):
             return
 
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError as e:
             self.status_label.setText(f"Parse error: {e}")
             return
@@ -708,7 +709,7 @@ class JointManipulatorWidget(QWidget):
             return
 
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:
             return
 

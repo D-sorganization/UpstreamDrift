@@ -11,12 +11,15 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+# Skip entire module if model_generation is not installed
+pytest.importorskip("model_generation", reason="model_generation package not installed")
+
 
 # Check if mujoco is available without causing module-level skip
 def _mujoco_available() -> bool:
     """Check if MuJoCo is available."""
     try:
-        pass
+        import mujoco  # noqa: F401
 
         return True
     except ImportError:

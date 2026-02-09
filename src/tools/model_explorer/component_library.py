@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -162,7 +163,7 @@ class ComponentLibrary:
             return []
 
         try:
-            tree = ET.parse(urdf_path)
+            tree = DefusedET.parse(urdf_path)
             root = tree.getroot()
         except ET.ParseError as e:
             logger.error(f"Failed to parse URDF: {e}")
@@ -198,7 +199,7 @@ class ComponentLibrary:
             return []
 
         try:
-            tree = ET.parse(urdf_path)
+            tree = DefusedET.parse(urdf_path)
             root = tree.getroot()
         except ET.ParseError as e:
             logger.error(f"Failed to parse URDF: {e}")
@@ -376,7 +377,7 @@ class ComponentLibrary:
 
         for component in sorted_components:
             try:
-                element = ET.fromstring(component.xml_content)
+                element = DefusedET.fromstring(component.xml_content)
                 root.append(element)
             except ET.ParseError as e:
                 logger.error(f"Failed to parse component {component.name}: {e}")

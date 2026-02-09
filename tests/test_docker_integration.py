@@ -34,10 +34,10 @@ class TestDockerBuild(unittest.TestCase):
 
         content = dockerfile_path.read_text()
 
-        # Check for required components
-        self.assertIn("FROM continuumio/miniconda3:latest", content)
-        self.assertIn("ENV PYTHONPATH=", content)
-        self.assertIn("/workspace:/workspace/shared/python:/workspace/engines", content)
+        # Check for required components (multi-stage build with pinned version)
+        self.assertIn("FROM continuumio/miniconda3:24.11.1-0 AS builder", content)
+        self.assertIn("FROM continuumio/miniconda3:24.11.1-0 AS runtime", content)
+        self.assertIn('ENV PYTHONPATH="/workspace"', content)
         self.assertIn("WORKDIR /workspace", content)
 
     def test_dockerfile_pythonpath_setup(self):
@@ -45,13 +45,18 @@ class TestDockerBuild(unittest.TestCase):
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
-        # Verify PYTHONPATH includes all required directories
+        # Verify PYTHONPATH is set to the workspace root
+        # The multi-stage Dockerfile sets PYTHONPATH="/workspace" in the runtime stage,
+        # enabling "from src.xxx" imports from the project root.
         pythonpath_line = [
             line for line in content.split("\n") if "PYTHONPATH=" in line
         ][0]
         self.assertIn("/workspace", pythonpath_line)
-        self.assertIn("/workspace/shared/python", pythonpath_line)
-        self.assertIn("/workspace/engines", pythonpath_line)
+        self.assertEqual(
+            pythonpath_line.strip(),
+            'ENV PYTHONPATH="/workspace"',
+            "PYTHONPATH should be set to /workspace only",
+        )
 
     @unittest.skipUnless(_is_docker_available(), "Docker not available")
     def test_docker_available(self):
@@ -366,14 +371,13 @@ class TestContainerEnvironment(unittest.TestCase):
         )
 
         pythonpath_line = pythonpath_lines[0]
-        expected_paths = [
-            "/workspace",
-            "/workspace/shared/python",
-            "/workspace/engines",
-        ]
-
-        for path in expected_paths:
-            self.assertIn(path, pythonpath_line, f"PYTHONPATH should include {path}")
+        # The Dockerfile sets PYTHONPATH to /workspace (the project root)
+        # so that "from src.xxx" imports work inside the container.
+        self.assertEqual(
+            pythonpath_line.strip(),
+            'ENV PYTHONPATH="/workspace"',
+            "PYTHONPATH should be set to /workspace",
+        )
 
     def test_workspace_directory_creation(self):
         """Test workspace directory structure creation."""
@@ -381,7 +385,9 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Check for workspace directory creation
-        self.assertIn("mkdir -p /workspace/shared/python /workspace/engines", content)
+        # The multi-stage Dockerfile creates /workspace and sets ownership
+        # (source code is COPYed in, so subdirectories are implicit)
+        self.assertIn("mkdir -p /workspace", content)
         self.assertIn("WORKDIR /workspace", content)
 
     def test_conda_environment_setup(self):
@@ -389,13 +395,13 @@ class TestContainerEnvironment(unittest.TestCase):
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
-        # Verify base image and package installation
-        self.assertIn("FROM continuumio/miniconda3:latest", content)
+        # Verify base image (pinned version, multi-stage build) and package installation
+        self.assertIn("FROM continuumio/miniconda3:24.11.1-0 AS builder", content)
         self.assertIn("conda install", content)
-        self.assertIn("python=3.11", content)
+        self.assertIn("python=3.12", content)
 
         # Check for required packages
-        required_packages = ["numpy", "scipy", "matplotlib", "pandas", "pyqt"]
+        required_packages = ["numpy", "scipy", "matplotlib", "pandas", "pyqt6"]
         for package in required_packages:
             self.assertIn(package, content, f"Should install {package}")
 
@@ -408,11 +414,12 @@ class TestModuleAccessibility(unittest.TestCase):
         shared_path = get_src_root() / "shared" / "python"
         self.assertTrue(shared_path.exists(), "Shared python directory should exist")
 
-        # Check for key modules
+        # Check for key modules that live directly in shared/python/
+        # Note: process_worker.py lives under ui/qt/, not at the top level.
         key_modules = [
             "configuration_manager.py",
-            "process_worker.py",
             "engine_manager.py",
+            "common_utils.py",
             "__init__.py",
         ]
 

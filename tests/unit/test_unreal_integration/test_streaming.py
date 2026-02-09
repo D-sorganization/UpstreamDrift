@@ -10,13 +10,13 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from src.unreal_integration.data_models import (
+from src.unreal_integration.data_models import (  # noqa: E402
     JointState,
     Quaternion,
     UnrealDataFrame,
     Vector3,
 )
-from src.unreal_integration.streaming import (
+from src.unreal_integration.streaming import (  # noqa: E402
     ControlAction,
     ControlMessage,
     FrameBuffer,
@@ -25,6 +25,10 @@ from src.unreal_integration.streaming import (
     StreamingState,
     UnrealStreamingServer,
 )
+
+# Ensure pytest-asyncio is available for async test classes;
+# skip the entire module if it is not installed.
+pytest.importorskip("pytest_asyncio", reason="pytest-asyncio not installed")
 
 
 class TestStreamingConfig:

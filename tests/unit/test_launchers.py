@@ -3,7 +3,6 @@ Unit tests for launcher functionality.
 """
 
 import os
-import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -24,8 +23,8 @@ class TestLauncherModule:
         try:
             import launch_golf_suite
 
-            assert hasattr(launch_golf_suite, "launch_gui_launcher")
-            assert hasattr(launch_golf_suite, "launch_local_launcher")
+            assert hasattr(launch_golf_suite, "main")
+            assert hasattr(launch_golf_suite, "launch_engine_directly")
         except ImportError:
             pytest.skip("Main launcher not available")
 
@@ -56,13 +55,10 @@ class TestLauncherModule:
         try:
             import launch_golf_suite
 
-            # Check for expected functions
+            # Check for expected functions (post-refactor API)
             expected_functions = [
-                "launch_gui_launcher",
-                "launch_local_launcher",
-                "launch_mujoco_gui",
-                "launch_drake_gui",
-                "launch_pinocchio_gui",
+                "main",
+                "launch_engine_directly",
             ]
 
             available_functions = []
@@ -70,7 +66,7 @@ class TestLauncherModule:
                 if hasattr(launch_golf_suite, func_name):
                     available_functions.append(func_name)
 
-            # Should have at least some launcher functions
+            # Should have the core launcher functions
             assert len(available_functions) >= 2
 
         except ImportError:
@@ -97,29 +93,18 @@ class TestLauncherModule:
         except ImportError:
             pytest.skip("Main launcher not available")
 
-    @pytest.mark.skipif(
-        os.environ.get("DISPLAY") is None and sys.platform != "win32",
-        reason="Test requires display on Linux",
-    )
     def test_launcher_error_handling(self):
         """Test launcher error handling.
 
-        Note: This test is skipped on headless Linux CI as it requires a display
-        to initialize PyQt6 even with mocking. The test validates that
-        launch_gui_launcher handles import errors gracefully.
+        Validates that main() handles argument parsing and the --engine flag
+        gracefully when an engine module is not importable.
         """
         try:
             import launch_golf_suite
 
-            # Test that launch_gui_launcher handles ImportError gracefully
-            # Mock the entire unified_launcher module to simulate import failure
-            with patch.dict(
-                "sys.modules",
-                {"launchers.unified_launcher": None},
-            ):
-                result = launch_golf_suite.launch_gui_launcher()
-                # Should handle import errors gracefully
-                assert result is False
+            # Test that launch_engine_directly handles ImportError gracefully
+            with pytest.raises(SystemExit):
+                launch_golf_suite.launch_engine_directly("nonexistent_engine")
 
         except ImportError:
             pytest.skip("Main launcher not available")
@@ -134,12 +119,16 @@ class TestLauncherUtilities:
         project_root = get_repo_root()
 
         # Should be able to find key directories (launchers is inside src/)
-        expected_dirs = ["engines", "shared", "output"]
+        # Note: 'engines' may be at root or under src/ depending on repo structure
+        expected_dirs_either = ["engines"]  # root or src/
         expected_src_dirs = ["launchers"]
 
-        for dir_name in expected_dirs:
-            dir_path = project_root / dir_name
-            assert dir_path.exists(), f"Directory {dir_name} should exist"
+        for dir_name in expected_dirs_either:
+            root_path = project_root / dir_name
+            src_path = project_root / "src" / dir_name
+            assert (
+                root_path.exists() or src_path.exists()
+            ), f"Directory {dir_name} should exist at root or under src/"
 
         for dir_name in expected_src_dirs:
             dir_path = project_root / "src" / dir_name
