@@ -1,3 +1,6 @@
+# ruff: noqa: E402
+"""Unit tests for OpenPose pose estimator."""
+
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -5,18 +8,34 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# We import the module under test normally
-# dependencies will be handled by patching attributes or local imports
-from src.shared.python.pose_estimation.openpose_estimator import (
+# Mock pyopenpose at sys.modules level BEFORE importing the estimator,
+# so the try/except import in the module succeeds.
+mock_op = MagicMock()
+sys.modules["pyopenpose"] = mock_op
+
+# Now import with pyopenpose mocked
+from src.shared.python.pose_estimation import (
+    openpose_estimator as op_module,  # noqa: E402
+)
+from src.shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
     OpenPoseEstimator,
 )
+
+# Ensure the module-level 'op' reference uses our mock
+op_module.op = mock_op
+
+
+def teardown_module(module):
+    """Clean up sys.modules pollution."""
+    sys.modules.pop("pyopenpose", None)
 
 
 @pytest.fixture
 def op_mock():
-    mock_op = MagicMock()
-    with patch("src.shared.python.pose_estimation.openpose_estimator.op", mock_op):
-        yield mock_op
+    """Provide a fresh mock for pyopenpose."""
+    mock_op.reset_mock()
+    op_module.op = mock_op
+    yield mock_op
 
 
 @pytest.fixture

@@ -72,7 +72,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         """Test secure subprocess validates script paths."""
         # Create test paths
         suite_root = Path(__file__).resolve().parent.parent.parent
-        valid_script = suite_root / "tools" / "test_script.py"
+        valid_script = suite_root / "scripts" / "test_script.py"
         invalid_script = Path("/tmp/malicious_script.py")
 
         # Test valid path (within suite) - mock both exists and is_file
@@ -200,7 +200,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         suite_root = Path(__file__).resolve().parent.parent.parent
 
         # Test valid working directory (within suite)
-        valid_cwd = suite_root / "tools"
+        valid_cwd = suite_root / "scripts"
         print(f"DEBUG: suite_root={suite_root}")
         print(f"DEBUG: valid_cwd={valid_cwd}")
         with patch("pathlib.Path.exists", return_value=True):

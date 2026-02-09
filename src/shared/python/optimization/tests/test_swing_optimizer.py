@@ -279,9 +279,9 @@ def test_optimizer_respects_joint_limits(default_golfer, default_club, basic_con
         angles = result.trajectory.joint_angles
         # Check angles are within reasonable bounds (allowing some tolerance)
         for joint_name, joint_angles in angles.items():
-            assert np.all(
-                np.abs(joint_angles) < 5.0
-            ), f"Joint {joint_name} exceeds limits"
+            assert np.all(np.abs(joint_angles) < 5.0), (
+                f"Joint {joint_name} exceeds limits"
+            )
 
 
 @pytest.mark.slow

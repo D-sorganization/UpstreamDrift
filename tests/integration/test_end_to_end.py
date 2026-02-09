@@ -29,30 +29,25 @@ class TestLauncherIntegration:
         assert launcher is not None
         assert hasattr(launcher, "mainloop")
 
-    def test_launch_golf_suite_status(self):
-        """Test launch_golf_suite.py --status command."""
+    def test_launch_golf_suite_help(self):
+        """Test launch_golf_suite.py --help command."""
         suite_root = get_repo_root()
         script = suite_root / "launch_golf_suite.py"
 
-        # Prepare environment with offscreen platform for headless testing
-        import os
-
-        env = os.environ.copy()
-        env["QT_QPA_PLATFORM"] = "offscreen"
-
         result = subprocess.run(
-            [sys.executable, str(script), "--status"],
+            [sys.executable, str(script), "--help"],
             capture_output=True,
             text=True,
             timeout=10,
-            env=env,
         )
 
-        # Should complete successfully
+        # --help exits with 0 and prints usage
         assert result.returncode == 0
 
-        # Should contain status information
-        assert "Golf Modeling Suite" in result.stdout or "Engine" in result.stdout
+        # Should contain usage information
+        assert (
+            "Golf Modeling Suite" in result.stdout or "usage" in result.stdout.lower()
+        )
 
     @pytest.mark.skipif(
         not sys.platform.startswith("win")

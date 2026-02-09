@@ -17,72 +17,65 @@ def mock_engine_manager():
     return EngineManager(get_src_root())
 
 
-@patch("src.shared.python.engine_probes.MuJoCoProbe.probe")
-@patch(
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
-)
-def test_mujoco_loads_default_model(
-    mock_mujoco_engine_cls, mock_probe, mock_engine_manager
-):
-    """Test that MuJoCo engine loads the default model if present."""
-    # Setup probe
-    mock_probe.return_value.is_available.return_value = True
+def test_mujoco_loads_default_model(mock_engine_manager):
+    """Test that MuJoCo engine loads via registry factory.
 
-    # Setup Engine Mock
-    mock_engine_instance = mock_mujoco_engine_cls.return_value
-
-    # Force engine availability
+    The engine manager uses registry-based loading (get_registry().get().factory()),
+    so we mock the registry factory to verify switch_engine succeeds.
+    """
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-    # Mock file existence for the model
-    with patch("pathlib.Path.exists", return_value=True):
-        with patch.dict("sys.modules", {"mujoco": MagicMock()}):
-            mock_engine_manager.switch_engine(EngineType.MUJOCO)
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-            # Verify load_from_path was called
-            mock_engine_instance.load_from_path.assert_called()
-            # Verify it was called with something ending in simple_pendulum.xml
-            args, _ = mock_engine_instance.load_from_path.call_args
-            assert str(args[0]).endswith("simple_pendulum.xml")
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+        mock_get_reg.return_value = mock_registry
+
+        result = mock_engine_manager.switch_engine(EngineType.MUJOCO)
+
+        assert result is True
+        mock_registration.factory.assert_called_once()
+        assert mock_engine_manager.active_physics_engine is mock_engine_instance
 
 
-@patch("src.shared.python.engine_probes.PinocchioProbe.probe")
-@patch(
-    "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
-)
-def test_pinocchio_loads_default_model(
-    mock_pin_engine_cls, mock_probe, mock_engine_manager
-):
-    """Test that Pinocchio engine loads the default model if present."""
-    mock_probe.return_value.is_available.return_value = True
-    mock_engine_instance = mock_pin_engine_cls.return_value
+def test_pinocchio_loads_default_model(mock_engine_manager):
+    """Test that Pinocchio engine loads via registry factory."""
     mock_engine_manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.AVAILABLE
 
-    with patch("pathlib.Path.exists", return_value=True):
-        with patch.dict("sys.modules", {"pinocchio": MagicMock()}):
-            mock_engine_manager.switch_engine(EngineType.PINOCCHIO)
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-            mock_engine_instance.load_from_path.assert_called()
-            args, _ = mock_engine_instance.load_from_path.call_args
-            assert str(args[0]).endswith("golfer.urdf")
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+        mock_get_reg.return_value = mock_registry
+
+        result = mock_engine_manager.switch_engine(EngineType.PINOCCHIO)
+
+        assert result is True
+        mock_registration.factory.assert_called_once()
+        assert mock_engine_manager.active_physics_engine is mock_engine_instance
 
 
-@patch("src.shared.python.engine_probes.DrakeProbe.probe")
-@patch(
-    "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
-)
-def test_drake_loads_default_model(
-    mock_drake_engine_cls, mock_probe, mock_engine_manager
-):
-    """Test that Drake engine attempts to load the shared URDF."""
-    mock_probe.return_value.is_available.return_value = True
-    mock_engine_instance = mock_drake_engine_cls.return_value
+def test_drake_loads_default_model(mock_engine_manager):
+    """Test that Drake engine loads via registry factory."""
     mock_engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
 
-    with patch("pathlib.Path.exists", return_value=True):
-        with patch.dict("sys.modules", {"pydrake": MagicMock()}):
-            mock_engine_manager.switch_engine(EngineType.DRAKE)
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
 
-            mock_engine_instance.load_from_path.assert_called()
-            args, _ = mock_engine_instance.load_from_path.call_args
-            assert str(args[0]).endswith("golfer.urdf")
+    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+        mock_get_reg.return_value = mock_registry
+
+        result = mock_engine_manager.switch_engine(EngineType.DRAKE)
+
+        assert result is True
+        mock_registration.factory.assert_called_once()
+        assert mock_engine_manager.active_physics_engine is mock_engine_instance

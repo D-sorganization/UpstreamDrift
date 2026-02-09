@@ -93,9 +93,9 @@ class TestCrossRepoImportPaths:
 
         content = pyproject_path.read_text()
         # Check for Tools repo reference
-        assert (
-            "Tools" in content or "tools" in content.lower()
-        ), "Tools integration not documented in pyproject.toml"
+        assert "Tools" in content or "tools" in content.lower(), (
+            "Tools integration not documented in pyproject.toml"
+        )
 
 
 class TestEngineModelCompatibility:
@@ -124,8 +124,8 @@ class TestEngineModelCompatibility:
             from src.shared.python.model_registry import ModelRegistry
 
             registry = ModelRegistry()
-            models = registry.list_models()
-            assert isinstance(models, (list, dict))
+            models = registry.get_all_models()
+            assert isinstance(models, list)
         except ImportError:
             # Model registry might not exist yet
             pytest.skip("ModelRegistry not implemented")

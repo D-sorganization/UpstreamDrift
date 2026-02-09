@@ -250,6 +250,7 @@ class TestEngineTypes:
             "matlab_2d",
             "matlab_3d",
             "pendulum",
+            "putting_green",
         }
 
         assert engine_values == expected_values

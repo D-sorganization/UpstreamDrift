@@ -205,6 +205,7 @@ def mock_pyqt(monkeypatch):
     mock_qt_widgets.QDialog = MagicMock()
     mock_qt_widgets.QTextEdit = MagicMock()
     mock_qt_widgets.QTabWidget = MagicMock()
+    mock_qt_widgets.QDockWidget = MagicMock()
 
     mock_qt_core = MagicMock()
     mock_qt_core.Qt = MagicMock()

@@ -187,12 +187,12 @@ class TestSimulationRequestValidation:
 
         # Test with parameters that frontend might send
         request = SimulationRequest(
-            engine="mujoco",
+            engine_type="mujoco",
             duration=3.0,
             timestep=0.002,
         )
 
-        assert request.engine == "mujoco"
+        assert request.engine_type == "mujoco"
         assert request.duration == 3.0
         assert request.timestep == 0.002
 
@@ -201,10 +201,10 @@ class TestSimulationRequestValidation:
         from src.api.models.requests import SimulationRequest
 
         # Minimal request
-        request = SimulationRequest(engine="mujoco")
+        request = SimulationRequest(engine_type="mujoco")
 
         # Should have defaults
-        assert request.engine == "mujoco"
+        assert request.engine_type == "mujoco"
         assert request.duration is not None or hasattr(request, "duration")
 
 
@@ -284,7 +284,7 @@ class TestErrorResponses:
         # Try to create invalid request
         try:
             # This should fail validation
-            SimulationRequest(engine=123)  # type: ignore
+            SimulationRequest(engine_type=123)  # type: ignore
         except ValidationError as e:
             errors = e.errors()
             assert len(errors) > 0

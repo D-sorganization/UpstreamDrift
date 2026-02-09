@@ -59,15 +59,45 @@ mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 # reloaded, corrupting pandas' C API bindings in later tests.
 
 with patch.dict("sys.modules", module_patches):
-    from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
-        MyoSuitePhysicsEngine,
-    )
-    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-        OpenSimPhysicsEngine,
-    )
+    # Remove cached engine modules to force re-import with our mocks
+    import sys as _sys
+
+    for _mod_name in list(_sys.modules.keys()):
+        if (
+            "opensim_physics_engine" in _mod_name
+            or "myosuite_physics_engine" in _mod_name
+        ):
+            del _sys.modules[_mod_name]
+
+    # Patch availability flags so engines initialize with mock modules
+    with (
+        patch(
+            "src.shared.python.engine_availability.OPENSIM_AVAILABLE",
+            True,
+        ),
+        patch(
+            "src.shared.python.engine_availability.MYOSUITE_AVAILABLE",
+            True,
+        ),
+    ):
+        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
+            MyoSuitePhysicsEngine,
+        )
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+            OpenSimPhysicsEngine,
+        )
     from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
         PendulumPhysicsEngine,
     )
+
+# Inject mock modules into the engine modules so they use our mocks at test time
+import src.engines.physics_engines.myosuite.python.myosuite_physics_engine as _myosuite_mod  # noqa: E402
+import src.engines.physics_engines.opensim.python.opensim_physics_engine as _opensim_mod  # noqa: E402
+
+_opensim_mod.opensim = mock_opensim  # type: ignore[attr-defined]
+_opensim_mod.OPENSIM_AVAILABLE = True  # type: ignore[attr-defined]
+_myosuite_mod.gym = mock_gym  # type: ignore[attr-defined]
+_myosuite_mod.MYOSUITE_AVAILABLE = True  # type: ignore[attr-defined]
 
 TEST_LINEAR_VAL = 1.0
 TEST_ANGULAR_VAL = 2.0

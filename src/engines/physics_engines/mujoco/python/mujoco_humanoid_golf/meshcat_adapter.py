@@ -370,7 +370,10 @@ class MuJoCoMeshcatAdapter:
         faces = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.uint32)
 
         material = g.MeshPhongMaterial(
-            color=color, opacity=opacity, transparent=True, side=2  # double-sided
+            color=color,
+            opacity=opacity,
+            transparent=True,
+            side=2,  # double-sided
         )
         mesh = g.TriangularMeshGeometry(vertices=verts, faces=faces)
         self.vis[path].set_object(mesh, material)
