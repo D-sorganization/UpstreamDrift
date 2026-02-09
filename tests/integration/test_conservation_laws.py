@@ -180,9 +180,9 @@ class TestEnergyConservation:
         )
         logger.info(f"Energy drift: {final_drift_pct:.4f}% (max: {max_drift_pct:.4f}%)")
 
-        assert max_drift_pct < 1.0, (
-            f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
-        )
+        assert (
+            max_drift_pct < 1.0
+        ), f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
 
     @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_pendulum_energy_at_extremes(self) -> None:
@@ -288,9 +288,9 @@ class TestIndexedAccelerationClosure:
         logger.info(f"Residual: {residual}")
 
         TOLERANCE_CLOSURE = 1e-6  # [rad/s²] per Guideline M2
-        assert np.all(residual < TOLERANCE_CLOSURE), (
-            f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
-        )
+        assert np.all(
+            residual < TOLERANCE_CLOSURE
+        ), f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
 
     @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_ztcf_equals_drift(self) -> None:
@@ -373,9 +373,9 @@ class TestIndexedAccelerationClosure:
 
         # Also verify physics makes sense: should be negative (restoring force)
         # when theta > 0 (pendulum displaced counter-clockwise)
-        assert qacc_zvcf < 0, (
-            f"Acceleration should be negative (restoring), got {qacc_zvcf:.4f}"
-        )
+        assert (
+            qacc_zvcf < 0
+        ), f"Acceleration should be negative (restoring), got {qacc_zvcf:.4f}"
 
 
 @pytest.mark.integration
@@ -455,9 +455,9 @@ class TestWorkEnergyTheorem:
         TOLERANCE_ABS = 0.001  # 1 mJ absolute tolerance
         TOLERANCE_REL = 0.05  # 5% relative tolerance for numerical integration
         relative_error = error / max(abs(delta_E), TOLERANCE_ABS)
-        assert relative_error < TOLERANCE_REL, (
-            f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
-        )
+        assert (
+            relative_error < TOLERANCE_REL
+        ), f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
 
 
 @pytest.mark.unit

@@ -141,6 +141,6 @@ class TestBallFlightPhysics:
 
             # However, we can check that the point.acceleration matches the sum of point.forces / mass.
             # This confirms the reporting logic is self-consistent.
-            assert np.allclose(point.acceleration, expected_acc, atol=1e-5), (
-                f"Acceleration mismatch at t={point.time}"
-            )
+            assert np.allclose(
+                point.acceleration, expected_acc, atol=1e-5
+            ), f"Acceleration mismatch at t={point.time}"
