@@ -1,10 +1,12 @@
 # Medium Priority Issue: Efficiency Score Omits Eccentric Work
 
-**Status:** Open
+**Status:** Resolved
 **Priority:** Medium
 **Labels:** physics-gap, medium
 **Date Identified:** 2026-01-31
 **Author:** PHYSICS AUDITOR
+**Date Resolved:** 2026-02-16
+**Resolution:** Fixed by including absolute power (eccentric work) in the total work calculation.
 
 ## Description
 
@@ -31,3 +33,14 @@ It ignores negative power (eccentric work), where the body absorbs energy (e.g.,
 1.  Update the definition of `total_work` in `efficiency_score` to include the absolute value of negative work: `total_work = integral(|power| dt)`.
 2.  Alternatively, define separate `concentric_efficiency` and `total_efficiency` metrics.
 3.  Rename the metric if it is intended to represent only "Propulsive Efficiency".
+
+## Resolution Notes
+
+The code in `src/shared/python/statistical_analysis.py` has been updated to use:
+```python
+abs_power = np.abs(power)
+# Integrate absolute power across time for each joint
+```
+This correctly accounts for both concentric and eccentric work.
+
+Note: A separate issue has been opened regarding the hardcoded 1.0 kg mass in the same function (`ISSUE_PHYSICS_EFFICIENCY_HARDCODED_MASS.md`).
