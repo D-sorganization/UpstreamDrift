@@ -5,6 +5,8 @@ Guideline E5 implementation tests.
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import numpy as np
 import pytest
 
@@ -16,6 +18,7 @@ from src.shared.python.ground_reaction_forces import (
     compute_cop_from_grf,
     compute_cop_trajectory_length,
     compute_linear_impulse,
+    extract_grf_from_contacts,
     validate_grf_cross_engine,
 )
 
@@ -206,6 +209,93 @@ class TestGRFAnalyzer:
         assert summary.peak_vertical_force > 0
         assert summary.cop_trajectory_length > 0
         assert summary.linear_impulse is not None
+
+
+class TestExtractGRFFromContacts:
+    """Tests for extract_grf_from_contacts with engine contact solver."""
+
+    def _make_engine(
+        self,
+        contact_force: np.ndarray | None = None,
+        gravity: np.ndarray | None = None,
+        time: float = 0.0,
+    ) -> MagicMock:
+        """Create a mock engine with configurable contact forces."""
+        engine = MagicMock()
+        engine.get_time.return_value = time
+
+        if contact_force is not None:
+            engine.compute_contact_forces.return_value = contact_force
+        else:
+            engine.compute_contact_forces.return_value = np.zeros(3)
+
+        if gravity is not None:
+            engine.compute_gravity_forces.return_value = gravity
+        else:
+            engine.compute_gravity_forces.return_value = np.array([-9.81])
+
+        # Jacobian returns a dict with a linear key
+        jac = {"linear": np.array([[0.0, 0.1], [0.0, 0.0], [0.0, 0.0]])}
+        engine.compute_jacobian.return_value = jac
+        return engine
+
+    def test_uses_contact_solver_when_available(self) -> None:
+        """When engine returns non-zero contact forces, use them."""
+        contact = np.array([10.0, 5.0, 800.0])
+        engine = self._make_engine(contact_force=contact)
+
+        grf = extract_grf_from_contacts(engine, ["left_foot", "right_foot"])
+
+        np.testing.assert_allclose(grf.force[:3], contact, atol=1e-10)
+        # Should NOT call compute_gravity_forces (primary path used)
+        engine.compute_gravity_forces.assert_not_called()
+
+    def test_falls_back_to_gravity_when_no_contacts(self) -> None:
+        """When engine returns zero contact forces, fall back to gravity."""
+        engine = self._make_engine(contact_force=np.zeros(3))
+
+        grf = extract_grf_from_contacts(engine, ["left_foot"])
+
+        # Should call gravity fallback
+        engine.compute_gravity_forces.assert_called()
+        # Force should be non-zero (gravity-based estimate)
+        assert grf.force[2] > 0
+
+    def test_timestamp_from_engine(self) -> None:
+        """GRF timestamp should come from engine time."""
+        engine = self._make_engine(time=1.5)
+
+        grf = extract_grf_from_contacts(engine, ["foot"])
+
+        assert grf.timestamp == 1.5
+
+    def test_cop_at_ground_height(self) -> None:
+        """COP z-coordinate should equal the ground_height argument."""
+        engine = self._make_engine(contact_force=np.array([0.0, 0.0, 500.0]))
+
+        grf = extract_grf_from_contacts(engine, ["foot"], ground_height=0.05)
+
+        assert grf.cop[2] == 0.05
+
+    def test_empty_contact_bodies_returns_zero(self) -> None:
+        """No contact bodies should give zero force."""
+        engine = self._make_engine(contact_force=np.zeros(3))
+
+        grf = extract_grf_from_contacts(engine, [])
+
+        np.testing.assert_allclose(grf.force, 0.0, atol=1e-10)
+
+    def test_moment_computed_from_contact_data(self) -> None:
+        """When contact data is available, moment should be computed from COP x force."""
+        contact = np.array([0.0, 0.0, 1000.0])
+        engine = self._make_engine(contact_force=contact)
+
+        grf = extract_grf_from_contacts(engine, ["foot"])
+
+        # Moment is cross(cop - ground_origin, force)
+        # With default ground_height=0.0, moment depends on COP position
+        assert grf.moment is not None
+        assert grf.moment.shape == (3,)
 
 
 class TestCrossEngineValidation:
