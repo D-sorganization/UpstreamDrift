@@ -1,8 +1,13 @@
-"""Kinematic Sequence Analysis Module.
+"""Segment Timing Analysis Module.
 
-This module provides tools to analyze the kinematic sequence (proximal-to-distal sequencing)
-of a golf swing. It identifies peak velocities of body segments and evaluates the
-timing and order of these peaks.
+This module provides tools to analyze the timing sequence of body segment
+peak velocities during dynamic movements. It identifies peak velocities and
+evaluates the timing and order of these peaks against a user-supplied
+expected order.
+
+Note: This module does NOT implement any proprietary or patented analysis
+methodology. The expected segment order must be supplied by the caller
+and is treated as a neutral, user-defined parameter.
 """
 
 from __future__ import annotations
@@ -43,22 +48,23 @@ class KinematicSequenceResult:
     is_valid_sequence: bool = False  # True if order matches expected
 
 
-class KinematicSequenceAnalyzer:
-    """Analyzer for kinematic sequencing."""
+class SegmentTimingAnalyzer:
+    """Analyzer for segment timing sequence.
+
+    Evaluates the temporal ordering of peak velocities across body segments
+    during a dynamic movement. The expected order is fully user-defined and
+    not tied to any specific proprietary methodology.
+    """
 
     def __init__(self, expected_order: list[str] | None = None) -> None:
         """Initialize analyzer.
 
         Args:
             expected_order: List of segment names in expected order (Proximal -> Distal).
-                            e.g. ['Pelvis', 'Thorax', 'Arm', 'Club']
+                            Must be supplied by the caller. If None, only peak detection
+                            is performed (no sequence scoring).
         """
-        self.expected_order = expected_order or [
-            "Pelvis",
-            "Torso",
-            "Arm",
-            "Club",
-        ]
+        self.expected_order = expected_order
 
     def analyze(
         self,
@@ -105,18 +111,14 @@ class KinematicSequenceAnalyzer:
                 peak.normalized_velocity = peak.peak_velocity / max_overall_velocity
 
         # 3. Calculate extended metrics (Speed Gain, Deceleration)
-        # Create map for name -> SegmentPeak
         peak_map = {p.name: p for p in peaks}
 
+        # 3a. Speed Gain — requires expected_order to identify proximal segments
         if self.expected_order:
             for i, name in enumerate(self.expected_order):
                 if name not in peak_map:
                     continue
-
                 current_peak = peak_map[name]
-
-                # Speed Gain (Distal / Proximal)
-                # Proximal is expected_order[i-1]
                 if i > 0:
                     proximal_name = self.expected_order[i - 1]
                     if proximal_name in peak_map:
@@ -126,43 +128,25 @@ class KinematicSequenceAnalyzer:
                                 current_peak.peak_velocity / proximal_peak.peak_velocity
                             )
 
-                # Deceleration Rate (Slope post-peak)
-                # Calculate slope over next 20-50ms or until velocity drops significantly
-                # Using 30ms window (approx 0.03s)
-                window_duration = 0.03
+        # 3b. Deceleration Rate — computed for ALL segments (independent of expected_order)
+        window_duration = 0.03  # 30ms post-peak window
+        for name, peak_info in peak_map.items():
+            if name in segment_velocities:
+                vel_data = np.abs(segment_velocities[name])
+                start_idx = peak_info.index
+                start_time = times[start_idx]
+                target_time = start_time + window_duration
 
-                # Get velocity data for this segment
-                if name in segment_velocities:
-                    vel_data = np.abs(segment_velocities[name])
+                end_idx = int(np.searchsorted(times, target_time))
+                end_idx = min(end_idx, len(times) - 1)
 
-                    # Find indices corresponding to window
-                    start_idx = current_peak.index
-                    start_time = times[start_idx]
-                    target_time = start_time + window_duration
-
-                    # Find end index (closest to target time)
-                    # Assuming times are sorted
-                    # Using searchsorted for efficiency or just simple search
-                    # times is np.ndarray
-                    end_idx = np.searchsorted(times, target_time)
-                    end_idx = min(end_idx, len(times) - 1)
-
-                    if end_idx > start_idx:
-                        v_start = vel_data[start_idx]
-                        v_end = vel_data[end_idx]
-                        t_start = times[start_idx]
-                        t_end = times[end_idx]
-
-                        dt = t_end - t_start
-                        if dt > 1e-6:
-                            # Deceleration is rate of decrease.
-                            # Since we expect v_end < v_start, (v_end - v_start) is negative.
-                            # We report positive deceleration rate (magnitude of negative slope).
-                            slope = (v_end - v_start) / dt
-                            # If slope is negative (decelerating), store magnitude.
-                            # If slope is positive (accelerating), store 0 or negative?
-                            # Usually deceleration is expected.
-                            current_peak.deceleration_rate = -slope
+                if end_idx > start_idx:
+                    v_start = vel_data[start_idx]
+                    v_end = vel_data[end_idx]
+                    dt = times[end_idx] - times[start_idx]
+                    if dt > 1e-6:
+                        slope = (v_end - v_start) / dt
+                        peak_info.deceleration_rate = -slope
 
         # 4. Sort by time to determine actual sequence
         peaks.sort(key=lambda x: x.time)
@@ -262,3 +246,7 @@ class KinematicSequenceAnalyzer:
                     segment_data[name] = joint_velocities[:, idx]
 
         return segment_data, np.asarray(times)
+
+
+# Backward-compatible alias
+KinematicSequenceAnalyzer = SegmentTimingAnalyzer
