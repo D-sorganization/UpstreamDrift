@@ -76,9 +76,9 @@ class TestMuJoCoIntegration:
 
             if model.nq > 0:
                 final_angle = data.qpos[0]
-                assert abs(final_angle) < abs(initial_angle) + 0.5, (
-                    "Pendulum should be oscillating, not diverging"
-                )
+                assert (
+                    abs(final_angle) < abs(initial_angle) + 0.5
+                ), "Pendulum should be oscillating, not diverging"
 
         except Exception as e:
             pytest.skip(f"MuJoCo simulation test skipped: {e}")
@@ -103,9 +103,9 @@ class TestModelValidationForEngines:
 
             assert link.inertia is not None, f"Link {link.name} missing inertia"
             assert link.inertia.mass > 0, f"Link {link.name} has zero/negative mass"
-            assert link.inertia.is_positive_definite(), (
-                f"Link {link.name} has invalid inertia tensor"
-            )
+            assert (
+                link.inertia.is_positive_definite()
+            ), f"Link {link.name} has invalid inertia tensor"
 
     def test_all_joints_have_valid_axes(self, model_result):
         """All joints should have valid, normalized axes."""
@@ -115,9 +115,9 @@ class TestModelValidationForEngines:
 
             axis = np.array(joint.axis)
             norm = np.linalg.norm(axis)
-            assert abs(norm - 1.0) < 1e-6, (
-                f"Joint {joint.name} axis not normalized: {joint.axis}"
-            )
+            assert (
+                abs(norm - 1.0) < 1e-6
+            ), f"Joint {joint.name} axis not normalized: {joint.axis}"
 
     def test_joint_limits_are_consistent(self, model_result):
         """Joint limits should be valid (lower < upper)."""
@@ -135,12 +135,12 @@ class TestModelValidationForEngines:
         link_names = {link.name for link in model_result.links}
 
         for joint in model_result.joints:
-            assert joint.parent in link_names, (
-                f"Joint {joint.name} has missing parent: {joint.parent}"
-            )
-            assert joint.child in link_names, (
-                f"Joint {joint.name} has missing child: {joint.child}"
-            )
+            assert (
+                joint.parent in link_names
+            ), f"Joint {joint.name} has missing parent: {joint.parent}"
+            assert (
+                joint.child in link_names
+            ), f"Joint {joint.name} has missing child: {joint.child}"
 
 
 class TestPendulumPhysicsProperties:

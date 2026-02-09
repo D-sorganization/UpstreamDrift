@@ -250,6 +250,6 @@ class TestRegistryModelConsistency:
         for vt in VALID_ENGINE_TYPES:
             if vt in aliases:
                 continue
-            assert vt in registry_values, (
-                f"'{vt}' in VALID_ENGINE_TYPES but not in EngineType enum"
-            )
+            assert (
+                vt in registry_values
+            ), f"'{vt}' in VALID_ENGINE_TYPES but not in EngineType enum"

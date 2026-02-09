@@ -40,9 +40,9 @@ class TestEngineProbing:
 
         data = response.json()
         assert "available" in data, f"Missing 'available' key for {engine_name}"
-        assert data["available"] == expected_available, (
-            f"{engine_name} availability mismatch"
-        )
+        assert (
+            data["available"] == expected_available
+        ), f"{engine_name} availability mismatch"
 
         if expected_available:
             assert "version" in data or data["version"] is not None
