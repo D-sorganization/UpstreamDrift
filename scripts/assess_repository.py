@@ -6,12 +6,10 @@ Assess repository against 15 categories (A-O) and generate reports.
 import json
 import subprocess
 import sys
-from pathlib import Path
 
-# Add project root to path for imports
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+from scripts.script_utils import get_repo_root
+
+_REPO_ROOT = get_repo_root()
 
 from src.shared.python.assessment.analysis import (  # noqa: E402
     assess_error_handling_content,

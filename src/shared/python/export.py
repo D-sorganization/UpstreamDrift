@@ -153,7 +153,21 @@ def export_to_c3d(
     frame_rate: float = 60.0,
     units: dict[str, str] | None = None,
 ) -> bool:
-    """Export recording to C3D motion capture format."""
+    """Export recording to C3D motion capture format.
+
+    Args:
+        output_path: Output .c3d file path
+        times: Time array (N,)
+        joint_positions: Joint positions (N, nq)
+        joint_names: Names of joints
+        forces: Optional force data (N, nforces, 3)
+        moments: Optional moment data (N, nforces, 3)
+        frame_rate: Sampling rate in Hz
+        units: Dictionary of units (position, force, moment)
+
+    Returns:
+        True if successful
+    """
     if not EZC3D_AVAILABLE and not C3D_AVAILABLE:
         logger.error("ezc3d or c3d required for C3D export (pip install ezc3d)")
         return False
@@ -162,15 +176,119 @@ def export_to_c3d(
         units = {"position": "mm", "force": "N", "moment": "Nmm"}  # C3D standard is mm
 
     try:
-        # Implementation skipped for brevity in this generic transfer,
-        # normally would import from the engine's implementation or replicate here.
-        # For robustness, we return False if not implemented or fallback to a simple dummy.
-        logger.warning("C3D export generic implementation pending.")
-        return False
-
+        if EZC3D_AVAILABLE:
+            return _export_to_c3d_ezc3d(
+                output_path,
+                times,
+                joint_positions,
+                joint_names,
+                forces,
+                moments,
+                frame_rate,
+                units,
+            )
+        return _export_to_c3d_py(
+            output_path,
+            times,
+            joint_positions,
+            joint_names,
+            forces,
+            moments,
+            frame_rate,
+            units,
+        )
     except Exception as e:
         logger.error(f"Failed to export to C3D: {e}")
         return False
+
+
+def _export_to_c3d_ezc3d(
+    output_path: str,
+    times: np.ndarray,
+    joint_positions: np.ndarray,
+    joint_names: list,
+    forces: np.ndarray | None,
+    moments: np.ndarray | None,
+    frame_rate: float,
+    units: dict[str, str],
+) -> bool:
+    """Export using ezc3d library."""
+    import ezc3d
+
+    c = ezc3d.c3d()
+    c["parameters"]["POINT"]["RATE"]["value"] = [frame_rate]
+    c["parameters"]["POINT"]["UNITS"]["value"] = [units["position"]]
+
+    num_frames = len(times)
+    num_markers = joint_positions.shape[1]
+    c["parameters"]["POINT"]["LABELS"]["value"] = joint_names[:num_markers]
+
+    # Point data: [X, Y, Z, residual] for each marker
+    points = np.zeros((4, num_markers, num_frames))
+    for i in range(num_markers):
+        angles = joint_positions[:, i]
+        radius = (i + 1) * 100  # mm
+        points[0, i, :] = radius * np.cos(angles)
+        points[1, i, :] = radius * np.sin(angles)
+        points[2, i, :] = np.arange(num_frames) * 10
+        points[3, i, :] = 0  # Residual
+    c["data"]["points"] = points
+
+    # Analog data (forces/moments)
+    if forces is not None or moments is not None:
+        analog_data = []
+        analog_labels = []
+        if forces is not None:
+            for fp in range(forces.shape[1]):
+                for axis, label in enumerate(["X", "Y", "Z"]):
+                    analog_data.append(forces[:, fp, axis])
+                    analog_labels.append(f"Force{fp + 1}_{label}")
+        if moments is not None:
+            for mp in range(moments.shape[1]):
+                for axis, label in enumerate(["X", "Y", "Z"]):
+                    analog_data.append(moments[:, mp, axis])
+                    analog_labels.append(f"Moment{mp + 1}_{label}")
+        if analog_data:
+            c["data"]["analogs"] = np.array(analog_data)
+            c["parameters"]["ANALOG"]["LABELS"]["value"] = analog_labels
+            c["parameters"]["ANALOG"]["RATE"]["value"] = [frame_rate]
+            c["parameters"]["FORCE_PLATFORM"]["UNITS"]["value"] = [units["force"]]
+
+    c.write(output_path)
+    return True
+
+
+def _export_to_c3d_py(
+    output_path: str,
+    times: np.ndarray,
+    joint_positions: np.ndarray,
+    joint_names: list,
+    forces: np.ndarray | None,
+    moments: np.ndarray | None,
+    frame_rate: float,
+    units: dict[str, str],
+) -> bool:
+    """Export using c3d library (fallback)."""
+    import c3d
+
+    writer = c3d.Writer(point_rate=frame_rate)
+    num_frames = len(times)
+    num_markers = joint_positions.shape[1]
+
+    for frame_idx in range(num_frames):
+        frame_points = []
+        for marker_idx in range(num_markers):
+            angle = joint_positions[frame_idx, marker_idx]
+            radius = (marker_idx + 1) * 100
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            z = frame_idx * 10
+            frame_points.append([x, y, z, 0.0, 0.0])
+        writer.add_frames([(np.array(frame_points), np.array([]))])
+
+    with open(output_path, "wb") as f:
+        writer.write(f)
+    return True
 
 
 def export_recording_all_formats(
@@ -296,5 +414,11 @@ def get_available_export_formats() -> dict[str, dict[str, Any]]:
             "extension": ".h5",
             "available": H5PY_AVAILABLE,
             "description": "Hierarchical Data Format - efficient for large datasets",
+        },
+        "c3d": {
+            "name": "C3D",
+            "extension": ".c3d",
+            "available": EZC3D_AVAILABLE or C3D_AVAILABLE,
+            "description": "Motion Capture Standard - compatible with Vicon, etc.",
         },
     }

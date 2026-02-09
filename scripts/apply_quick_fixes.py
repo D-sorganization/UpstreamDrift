@@ -7,20 +7,9 @@ Current fixes:
 """
 
 import os
-import sys
 from pathlib import Path
 
-# Add project root to path for imports
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
-try:
-    from src.shared.python.path_utils import get_repo_root
-except ImportError:
-    # Fallback if src import fails
-    def get_repo_root():
-        return _REPO_ROOT
+from scripts.script_utils import get_repo_root
 
 
 def add_missing_init_files():
