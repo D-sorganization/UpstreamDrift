@@ -144,3 +144,183 @@ def test_no_expected_order_peaks_only():
     # Deceleration should still be computed
     for peak in result.peaks:
         assert peak.deceleration_rate is not None
+
+
+# =============================================================================
+# Speed Gain Tests (Issue #1083)
+# =============================================================================
+
+
+class TestSpeedGain:
+    """Tests for speed gain metric: distal_peak / proximal_peak."""
+
+    def test_speed_gain_computed(self) -> None:
+        """Speed gain should be calculated for distal segments."""
+        times = np.linspace(0, 1.0, 200)
+        pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.005) * 10
+        torso_vel = np.exp(-((times - 0.3) ** 2) / 0.005) * 15
+        arm_vel = np.exp(-((times - 0.4) ** 2) / 0.005) * 20
+        club_vel = np.exp(-((times - 0.5) ** 2) / 0.005) * 30
+
+        data = {
+            "Pelvis": pelvis_vel,
+            "Torso": torso_vel,
+            "Arm": arm_vel,
+            "Club": club_vel,
+        }
+        analyzer = KinematicSequenceAnalyzer(
+            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+        )
+        result = analyzer.analyze(data, times)
+
+        peak_map = {p.name: p for p in result.peaks}
+
+        # Pelvis has no proximal → speed_gain should be None
+        assert peak_map["Pelvis"].speed_gain is None
+
+        # Torso / Pelvis = 15 / 10 = 1.5
+        assert peak_map["Torso"].speed_gain is not None
+        assert peak_map["Torso"].speed_gain == np.testing.assert_approx_equal(
+            peak_map["Torso"].speed_gain, 1.5, significant=2
+        ) or np.isclose(peak_map["Torso"].speed_gain, 1.5, rtol=0.05)
+
+        # Arm / Torso = 20 / 15 ≈ 1.33
+        assert peak_map["Arm"].speed_gain is not None
+        assert np.isclose(peak_map["Arm"].speed_gain, 20 / 15, rtol=0.05)
+
+        # Club / Arm = 30 / 20 = 1.5
+        assert peak_map["Club"].speed_gain is not None
+        assert np.isclose(peak_map["Club"].speed_gain, 30 / 20, rtol=0.05)
+
+    def test_speed_gain_increases_distally(self) -> None:
+        """In a good sequence, speed gain should be > 1 for distal segments."""
+        times = np.linspace(0, 1.0, 200)
+        pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.005) * 8
+        torso_vel = np.exp(-((times - 0.3) ** 2) / 0.005) * 14
+        arm_vel = np.exp(-((times - 0.4) ** 2) / 0.005) * 22
+        club_vel = np.exp(-((times - 0.5) ** 2) / 0.005) * 38
+
+        data = {
+            "Pelvis": pelvis_vel,
+            "Torso": torso_vel,
+            "Arm": arm_vel,
+            "Club": club_vel,
+        }
+        analyzer = KinematicSequenceAnalyzer(
+            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+        )
+        result = analyzer.analyze(data, times)
+
+        peak_map = {p.name: p for p in result.peaks}
+
+        for name in ["Torso", "Arm", "Club"]:
+            assert peak_map[name].speed_gain is not None
+            assert (
+                peak_map[name].speed_gain > 1.0
+            ), f"{name} speed gain should be > 1.0, got {peak_map[name].speed_gain}"
+
+    def test_speed_gain_missing_segment(self) -> None:
+        """Speed gain should handle missing segments gracefully."""
+        times = np.linspace(0, 1.0, 200)
+        pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.005) * 10
+        club_vel = np.exp(-((times - 0.5) ** 2) / 0.005) * 30
+
+        # Missing Torso and Arm
+        data = {"Pelvis": pelvis_vel, "Club": club_vel}
+        analyzer = KinematicSequenceAnalyzer(
+            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+        )
+        result = analyzer.analyze(data, times)
+
+        peak_map = {p.name: p for p in result.peaks}
+        # Club's proximal in expected_order is "Arm", which is missing
+        # So speed_gain should be None
+        assert peak_map["Club"].speed_gain is None
+
+
+# =============================================================================
+# Deceleration (Braking) Rate Tests (Issue #1083)
+# =============================================================================
+
+
+class TestDecelerationRate:
+    """Tests for deceleration rate metric: slope post-peak over ~30ms window."""
+
+    def test_deceleration_computed(self) -> None:
+        """Deceleration rate should be computed for all segments."""
+        times = np.linspace(0, 1.0, 1000)  # 1ms resolution
+        pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.005) * 10
+        torso_vel = np.exp(-((times - 0.3) ** 2) / 0.005) * 15
+        arm_vel = np.exp(-((times - 0.4) ** 2) / 0.005) * 20
+        club_vel = np.exp(-((times - 0.5) ** 2) / 0.005) * 30
+
+        data = {
+            "Pelvis": pelvis_vel,
+            "Torso": torso_vel,
+            "Arm": arm_vel,
+            "Club": club_vel,
+        }
+        analyzer = KinematicSequenceAnalyzer(
+            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+        )
+        result = analyzer.analyze(data, times)
+
+        peak_map = {p.name: p for p in result.peaks}
+
+        # All segments should have a positive deceleration rate
+        # (velocity decreases after peak → deceleration is positive)
+        for name in ["Pelvis", "Torso", "Arm", "Club"]:
+            assert (
+                peak_map[name].deceleration_rate is not None
+            ), f"{name} should have deceleration_rate computed"
+            assert (
+                peak_map[name].deceleration_rate > 0
+            ), f"{name} deceleration_rate should be positive, got {peak_map[name].deceleration_rate}"
+
+    def test_proximal_decelerates_faster(self) -> None:
+        """Proximal segments should decelerate faster (braking effect).
+
+        In a proper kinematic chain, proximal segments 'brake' to
+        transfer energy to the next segment. This means their
+        deceleration rate should be relatively high.
+        """
+        times = np.linspace(0, 1.0, 1000)
+
+        # Narrow Gaussian = faster deceleration post-peak
+        pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.002) * 10  # Narrow peak
+        torso_vel = np.exp(-((times - 0.3) ** 2) / 0.003) * 15
+        arm_vel = np.exp(-((times - 0.4) ** 2) / 0.004) * 20
+        club_vel = np.exp(-((times - 0.5) ** 2) / 0.010) * 30  # Broad peak
+
+        data = {
+            "Pelvis": pelvis_vel,
+            "Torso": torso_vel,
+            "Arm": arm_vel,
+            "Club": club_vel,
+        }
+        analyzer = KinematicSequenceAnalyzer(
+            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+        )
+        result = analyzer.analyze(data, times)
+
+        peak_map = {p.name: p for p in result.peaks}
+
+        # Pelvis should decelerate faster than Club
+        assert peak_map["Pelvis"].deceleration_rate is not None
+        assert peak_map["Club"].deceleration_rate is not None
+        assert peak_map["Pelvis"].deceleration_rate > peak_map["Club"].deceleration_rate
+
+    def test_deceleration_units(self) -> None:
+        """Deceleration rate should have correct magnitude (velocity/time units)."""
+        times = np.linspace(0, 1.0, 1000)
+        # Peak velocity ~10 at t=0.2, using Gaussian
+        pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.005) * 10
+
+        data = {"Pelvis": pelvis_vel}
+        analyzer = KinematicSequenceAnalyzer(expected_order=["Pelvis"])
+        result = analyzer.analyze(data, times)
+
+        peak = result.peaks[0]
+        assert peak.deceleration_rate is not None
+        # Should be a reasonable magnitude (not 0, not infinity)
+        assert 0 < peak.deceleration_rate < 1e6
