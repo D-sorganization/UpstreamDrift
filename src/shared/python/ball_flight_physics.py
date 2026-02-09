@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 from src.shared.python.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
 from src.shared.python.engine_availability import NUMBA_AVAILABLE
 from src.shared.python.logging_config import get_logger
+from src.shared.python.physics_constants import SPIN_DECAY_RATE_S
 
 # Performance: Optional Numba JIT compilation
 if NUMBA_AVAILABLE:
@@ -63,6 +64,7 @@ class BallProperties:
     cl0: float = 0.00
     cl1: float = 0.38
     cl2: float = 0.08
+    spin_decay_rate: float = float(SPIN_DECAY_RATE_S)
 
     @property
     def radius(self) -> float:
@@ -260,6 +262,12 @@ def _compute_rk4_step(
 
 
 @jit(nopython=True, cache=True)
+def _apply_spin_decay(omega: float, decay_rate: float, dt: float) -> float:
+    """Apply exponential spin decay: omega(t+dt) = omega(t) * exp(-lambda * dt)."""
+    return omega * np.exp(-decay_rate * dt)
+
+
+@jit(nopython=True, cache=True)
 def _solve_rk4_loop(
     initial_state: np.ndarray,
     dt: float,
@@ -271,10 +279,13 @@ def _solve_rk4_loop(
     coeffs: tuple[float, float, float, float, float, float],
     omega: float,
     spin_axis: np.ndarray,
+    spin_decay_rate: float = 0.0,
 ) -> np.ndarray:
-    """Numba-optimized RK4 loop.
+    """Numba-optimized RK4 loop with spin decay.
 
-    Refactored to improve orthogonality by delegating step math to a helper.
+    Spin decays exponentially at each step: omega(t+dt) = omega(t) * exp(-lambda * dt).
+    This models aerodynamic torque on the dimpled ball surface causing angular
+    deceleration. Typical decay: ~20-30% over 4 seconds of flight.
     """
     out = np.empty((max_steps, 7))
     curr = initial_state.copy()
@@ -299,6 +310,11 @@ def _solve_rk4_loop(
         t += dt
         out[i, 0], out[i, 1:] = t, curr
         actual_steps += 1
+
+        # Apply spin decay
+        if spin_decay_rate > 0.0:
+            omega = _apply_spin_decay(omega, spin_decay_rate, dt)
+
         if curr[2] <= 0:
             break
 
@@ -353,6 +369,7 @@ class BallFlightSimulator:
             self._get_coeffs(),
             omega,
             launch.spin_axis,
+            self.ball.spin_decay_rate,
         )
 
         return self._post_process(raw_data, launch)
