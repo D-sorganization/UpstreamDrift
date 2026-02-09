@@ -94,9 +94,8 @@ _tracer = RequestTracer()
 app.middleware("http")(_tracer.trace_request)
 
 
-# Note: Services are now stored in app.state for proper dependency injection.
-# The global variables below are kept for backward compatibility but should
-# not be used directly in routes - use Depends() instead.
+# All services are stored in app.state and accessed via Depends() in routes.
+# No module-level mutable state in route modules.
 
 
 class TaskManager:
@@ -239,6 +238,11 @@ async def startup_event() -> None:
             video_pipeline = VideoPosePipeline(video_config)
         except ImportError as e:
             logger.info("MediaPipe not installed, video features disabled: %s", e)
+        except AttributeError as e:
+            logger.warning(
+                "MediaPipe installed but incompatible, video features disabled: %s",
+                e,
+            )
         except OSError as e:
             logger.warning(
                 "Video pipeline failed to initialize (camera/device issue): %s", e
@@ -248,13 +252,8 @@ async def startup_event() -> None:
 
         app.state.video_pipeline = video_pipeline
 
-        # Legacy configure() calls - will be removed after routes migration to Depends()
-        core_routes.configure(engine_manager)
-        engine_routes.configure(engine_manager, logger)
-        simulation_routes.configure(app.state.simulation_service, active_tasks, logger)  # type: ignore[arg-type]
-        analysis_routes.configure(app.state.analysis_service, logger)
-        video_routes.configure(video_pipeline, active_tasks, logger)  # type: ignore[arg-type]
-        export_routes.configure(active_tasks)  # type: ignore[arg-type]
+        # All routes now use FastAPI Depends() for dependency injection.
+        # No legacy configure() calls needed.
 
         logger.info("Golf Modeling Suite API started successfully")
 

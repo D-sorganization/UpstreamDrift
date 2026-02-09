@@ -1,7 +1,8 @@
 """Analysis routes.
 
 Provides endpoints for biomechanical analysis.
-Uses FastAPI's Depends() for dependency injection.
+All dependencies are injected via FastAPI's Depends() mechanism.
+No module-level mutable state.
 """
 
 from __future__ import annotations
@@ -18,20 +19,6 @@ if TYPE_CHECKING:
     from ..services.analysis_service import AnalysisService
 
 router = APIRouter()
-
-# Legacy globals for backward compatibility during migration
-_analysis_service: AnalysisService | None = None
-_logger: Any = None
-
-
-def configure(analysis_service: AnalysisService | None, logger: Any) -> None:
-    """Configure dependencies for analysis routes (legacy).
-
-    Note: This function is deprecated. New code should use Depends() instead.
-    """
-    global _analysis_service, _logger
-    _analysis_service = analysis_service
-    _logger = logger
 
 
 @router.post("/analyze/biomechanics", response_model=AnalysisResponse)

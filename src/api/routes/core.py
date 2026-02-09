@@ -1,24 +1,25 @@
-"""Core health and root routes."""
+"""Core health and root routes.
+
+All dependencies are injected via FastAPI's Depends() mechanism.
+No module-level mutable state.
+"""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from src.api.utils.datetime_compat import iso_format, utc_now
-from src.shared.python.engine_manager import EngineManager
+
+from ..dependencies import get_engine_manager
+
+if TYPE_CHECKING:
+    from src.shared.python.engine_manager import EngineManager
 
 router = APIRouter()
-
-_engine_manager: EngineManager | None = None
-
-
-def configure(engine_manager: EngineManager | None) -> None:
-    """Configure dependencies for core routes."""
-    global _engine_manager
-    _engine_manager = engine_manager
 
 
 @router.get("/")
@@ -33,13 +34,20 @@ async def root() -> dict[str, str]:
 
 
 @router.get("/health")
-async def health_check() -> dict[str, str | int]:
-    """Health check endpoint."""
+async def health_check(
+    engine_manager: EngineManager = Depends(get_engine_manager),
+) -> dict[str, str | int]:
+    """Health check endpoint.
+
+    Args:
+        engine_manager: Injected engine manager.
+
+    Returns:
+        Health status with engine count and timestamp.
+    """
     return {
         "status": "healthy",
-        "engines_available": (
-            len(_engine_manager.get_available_engines()) if _engine_manager else 0
-        ),
+        "engines_available": len(engine_manager.get_available_engines()),
         "timestamp": iso_format(utc_now()),
     }
 
