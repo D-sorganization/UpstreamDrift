@@ -204,11 +204,14 @@ def add_type_ignore(line: str, code: str) -> str:
     if "# type: ignore" in stripped:
         # Already has type ignore - add our code to existing bracket
         if re.search(r"# type: ignore\[([^\]]+)\]", stripped):
-            return re.sub(
-                r"# type: ignore\[([^\]]+)\]",
-                rf"# type: ignore[\1, {code}]",
-                stripped,
-            ) + "\n"
+            return (
+                re.sub(
+                    r"# type: ignore\[([^\]]+)\]",
+                    rf"# type: ignore[\1, {code}]",
+                    stripped,
+                )
+                + "\n"
+            )
         return stripped + "\n"  # Has blanket ignore, leave it
     if "#" in stripped:
         # Has another comment - add before existing comment's content
@@ -575,7 +578,9 @@ def run_agent(
                     f"  [{fix.strategy}] {fix.file}:{fix.line} - {fix.description}"
                 )
                 if verbose:
-                    print(f"  FIX: {fix.file}:{fix.line} [{fix.strategy}] {fix.description}")
+                    print(
+                        f"  FIX: {fix.file}:{fix.line} [{fix.strategy}] {fix.description}"
+                    )
             else:
                 report.skipped_reasons.append(
                     f"No fix available: {error.file}:{error.line} [{error.code}] {error.message[:60]}"
