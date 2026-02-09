@@ -24,6 +24,7 @@ from src.shared.python.logging_config import get_logger
 
 from .physics_constants import (
     DRIVER_COR,
+    DRIVER_MOI_KG_M2,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_MOMENT_OF_INERTIA_KG_M2,
     GOLF_BALL_RADIUS_M,
@@ -67,6 +68,8 @@ class PreImpactState:
         clubhead_mass: Effective clubhead mass [kg]
         clubhead_loft: Clubface loft angle [rad]
         clubhead_lie: Clubface lie angle [rad]
+        clubhead_moi: Clubhead moment of inertia about CG [kg·m²]
+        impact_offset: Impact location offset from CG on clubface [m] (2,) [horizontal, vertical]
     """
 
     clubhead_velocity: np.ndarray
@@ -78,6 +81,8 @@ class PreImpactState:
     clubhead_mass: float = 0.200  # [kg] Typical driver head
     clubhead_loft: float = np.radians(10.5)  # [rad] Driver loft
     clubhead_lie: float = np.radians(60.0)  # [rad] Lie angle
+    clubhead_moi: float = float(DRIVER_MOI_KG_M2)  # [kg·m²] MOI about CG
+    impact_offset: np.ndarray | None = None  # [m] (2,) offset from CG
 
 
 @dataclass
@@ -159,11 +164,15 @@ class RigidBodyImpactModel(ImpactModel):
         pre_state: PreImpactState,
         params: ImpactParameters,
     ) -> PostImpactState:
-        """Solve impact using rigid body collision model.
+        """Solve impact using rigid body collision model with MOI.
 
-        The impact is modeled as an instantaneous impulse along
-        the contact normal (clubface normal), with COR determining
-        the relationship between approach and separation velocities.
+        The clubhead is modeled as a rigid body with moment of inertia.
+        For off-center impacts, the effective mass at the impact point
+        is reduced: m_eff_at_point = 1 / (1/m + r²/I), which reduces
+        energy transfer to the ball (ball speed drop-off).
+
+        For center impacts (offset=0), this reduces to the standard
+        point-mass collision.
 
         Args:
             pre_state: Pre-impact state
@@ -175,6 +184,19 @@ class RigidBodyImpactModel(ImpactModel):
         # Masses
         m_ball = GOLF_BALL_MASS
         m_club = pre_state.clubhead_mass
+        I_club = pre_state.clubhead_moi
+
+        # Compute effective clubhead mass at impact point
+        # For a rigid body, the effective mass at a point offset r from CG is:
+        # m_eff_at_point = 1 / (1/m + r²/I)
+        if pre_state.impact_offset is not None and I_club > 0:
+            r_offset = float(np.linalg.norm(pre_state.impact_offset))
+            if r_offset > 1e-6:
+                m_club_effective = 1.0 / (1.0 / m_club + r_offset**2 / I_club)
+            else:
+                m_club_effective = m_club
+        else:
+            m_club_effective = m_club
 
         # Contact normal (clubface normal, pointing away from club)
         n = pre_state.clubhead_orientation / np.linalg.norm(
@@ -191,8 +213,8 @@ class RigidBodyImpactModel(ImpactModel):
         # Combined with momentum conservation
         e = params.cor
 
-        # Effective mass
-        m_eff = (m_ball * m_club) / (m_ball + m_club)
+        # Effective mass for the collision (using effective clubhead mass at impact point)
+        m_eff = (m_ball * m_club_effective) / (m_ball + m_club_effective)
 
         # Impulse magnitude
         j = (1 + e) * m_eff * v_approach
@@ -226,6 +248,12 @@ class RigidBodyImpactModel(ImpactModel):
         ke_ball_post = 0.5 * m_ball * np.dot(v_ball_post, v_ball_post)
         energy_transfer = ke_ball_post - ke_ball_pre
 
+        impact_loc = (
+            pre_state.impact_offset.copy()
+            if pre_state.impact_offset is not None
+            else np.zeros(2)
+        )
+
         return PostImpactState(
             ball_velocity=v_ball_post,
             ball_angular_velocity=ball_spin,
@@ -233,7 +261,7 @@ class RigidBodyImpactModel(ImpactModel):
             clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
             contact_duration=0.0,  # Instantaneous
             energy_transfer=energy_transfer,
-            impact_location=np.zeros(2),  # Center impact
+            impact_location=impact_loc,
         )
 
 
