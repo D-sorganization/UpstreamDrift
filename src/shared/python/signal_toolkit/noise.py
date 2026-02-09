@@ -86,7 +86,7 @@ class NoiseGenerator:
 
         elif noise_type == NoiseType.PERIODIC:
             frequency = kwargs.get("frequency", 60.0)  # Default 60 Hz (line noise)
-            fs = 1.0 / np.mean(np.diff(t)) if len(t) > 1 else 1000.0
+            fs = float(1.0 / np.mean(np.diff(t))) if len(t) > 1 else 1000.0
             values = self._generate_periodic_noise(n, amplitude, frequency, fs)
 
         else:
@@ -244,9 +244,9 @@ def add_noise_to_signal(
         # Calculate amplitude from SNR
         signal_power = np.mean(signal.values**2)
         noise_power = signal_power / (10 ** (snr_db / 10))
-        amplitude = np.sqrt(noise_power)
+        amplitude = float(np.sqrt(noise_power))
     elif amplitude is None:
-        amplitude = 0.1 * np.std(signal.values)
+        amplitude = float(0.1 * np.std(signal.values))
 
     noise = generator.generate(
         signal.time,

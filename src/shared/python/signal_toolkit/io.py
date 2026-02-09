@@ -91,7 +91,7 @@ class SignalImporter:
 
         # Parse data
         time_data = []
-        value_data = {i: [] for i in value_indices}
+        value_data: dict[int, list[float]] = {i: [] for i in value_indices}
 
         for row in data_rows:
             if len(row) <= time_idx:
@@ -352,9 +352,9 @@ class SignalExporter:
             data[sig.name] = sig.values
 
         if compressed:
-            np.savez_compressed(file_path, **data)
+            np.savez_compressed(file_path, **data)  # type: ignore[arg-type]
         else:
-            np.savez(file_path, **data)
+            np.savez(file_path, **data)  # type: ignore[arg-type]
 
     @staticmethod
     def to_json(
@@ -600,7 +600,7 @@ class BatchProcessor:
         output_dir: str | Path | None = None,
         output_format: str = "csv",
         **kwargs,
-    ) -> dict[str, Signal]:
+    ) -> dict[str, Signal | list[Signal]]:
         """Load, process, and optionally save all signals.
 
         Args:
@@ -614,7 +614,7 @@ class BatchProcessor:
             Dictionary mapping file names to processed signals.
         """
         files = self.find_files(pattern)
-        results = {}
+        results: dict[str, Signal | list[Signal]] = {}
 
         if output_dir:
             output_dir = Path(output_dir)
@@ -625,6 +625,7 @@ class BatchProcessor:
                 signal = SignalLoader.load(file_path, **kwargs)
 
                 # Handle multiple signals
+                processed: Signal | list[Signal]
                 if isinstance(signal, list):
                     processed = [processor(s) for s in signal]
                 else:
@@ -638,9 +639,10 @@ class BatchProcessor:
                     if output_format == "csv":
                         SignalExporter.to_csv(processed, output_path)
                     elif output_format == "json":
-                        if isinstance(processed, list):
-                            processed = processed[0]  # JSON only supports single signal
-                        SignalExporter.to_json(processed, output_path)
+                        json_signal = (
+                            processed[0] if isinstance(processed, list) else processed
+                        )
+                        SignalExporter.to_json(json_signal, output_path)
                     elif output_format == "npz":
                         SignalExporter.to_npz(processed, output_path)
 
