@@ -21,7 +21,7 @@ Usage:
     )
 """
 
-from src.engines.common.capabilities import (
+from src.shared.python.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )
