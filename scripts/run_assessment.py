@@ -18,6 +18,9 @@ from scripts.script_utils import (
 
 logger = setup_script_logging(__name__)
 
+_CHECK = "\u2713"
+_CROSS = "\u2717"
+
 ASSESSMENTS = {
     "A": {"name": "Architecture", "description": "Code structure and organization"},
     "B": {
@@ -29,74 +32,78 @@ ASSESSMENTS = {
 }
 
 
-def run_assessment(assessment_id: str, output_path: Path) -> int:
-    """Run a specific assessment and generate report."""
-    assessment = ASSESSMENTS.get(
-        assessment_id, {"name": "General", "description": "Manual review required"}
+def _assess_architecture(py_files: list) -> tuple[list[str], int]:
+    """Run architecture assessment (A)."""
+    has_src = Path("src").exists() or Path("python").exists()
+    has_tests = Path("tests").exists()
+    findings = [
+        f"- Python files found: {len(py_files)}",
+        f"- Source directory structure: {_CHECK if has_src else _CROSS}",
+        f"- Tests directory: {_CHECK if has_tests else _CROSS}",
+    ]
+    penalty = (0 if has_src else 2) + (0 if has_tests else 1)
+    return findings, 10 - penalty
+
+
+def _assess_hygiene() -> tuple[list[str], int]:
+    """Run hygiene & quality assessment (B)."""
+    ruff = run_tool_check(["ruff", "check", ".", "--statistics"])
+    black = run_tool_check(["black", "--check", "--quiet", "."])
+    findings = [
+        f"- Ruff check: {_CHECK + ' passed' if ruff['exit_code'] == 0 else _CROSS + ' issues found'}",
+        f"- Black formatting: {_CHECK + ' formatted' if black['exit_code'] == 0 else _CROSS + ' needs formatting'}",
+    ]
+    penalty = (0 if ruff["exit_code"] == 0 else 2) + (
+        0 if black["exit_code"] == 0 else 1
     )
-    logger.info(f"Running Assessment {assessment_id}: {assessment['name']}...")
+    return findings, 10 - penalty
 
-    findings = []
-    score = 10
-    py_files = find_python_files()
 
-    if assessment_id == "A":
-        has_src = Path("src").exists() or Path("python").exists()
-        has_tests = Path("tests").exists()
-        findings = [
-            f"- Python files found: {len(py_files)}",
-            f"- Source directory structure: {'✓' if has_src else '✗'}",
-            f"- Tests directory: {'✓' if has_tests else '✗'}",
-        ]
-        score -= (0 if has_src else 2) + (0 if has_tests else 1)
+def _assess_documentation() -> tuple[list[str], int]:
+    """Run documentation assessment (C)."""
+    docs = check_docs_status()
+    findings = [
+        f"- README.md: {_CHECK if docs['readme'] else _CROSS}",
+        f"- docs/ directory: {_CHECK if docs['docs_dir'] else _CROSS}",
+        f"- CHANGELOG.md: {_CHECK if docs['changelog'] else _CROSS}",
+    ]
+    penalty = (0 if docs["readme"] else 3) + (0 if docs["docs_dir"] else 1)
+    return findings, 10 - penalty
 
-    elif assessment_id == "B":
-        ruff = run_tool_check(["ruff", "check", ".", "--statistics"])
-        black = run_tool_check(["black", "--check", "--quiet", "."])
-        findings = [
-            f"- Ruff check: {'✓ passed' if ruff['exit_code'] == 0 else '✗ issues found'}",
-            f"- Black formatting: {'✓ formatted' if black['exit_code'] == 0 else '✗ needs formatting'}",
-        ]
-        score -= (0 if ruff["exit_code"] == 0 else 2) + (
-            0 if black["exit_code"] == 0 else 1
-        )
 
-    elif assessment_id == "C":
-        docs = check_docs_status()
-        findings = [
-            f"- README.md: {'✓' if docs['readme'] else '✗'}",
-            f"- docs/ directory: {'✓' if docs['docs_dir'] else '✗'}",
-            f"- CHANGELOG.md: {'✓' if docs['changelog'] else '✗'}",
-        ]
-        score -= (0 if docs["readme"] else 3) + (0 if docs["docs_dir"] else 1)
+def _assess_testing() -> tuple[list[str], int]:
+    """Run testing assessment (G)."""
+    cnt = count_test_files()
+    findings = [
+        f"- Test files found: {cnt}",
+        "- Test coverage: Run pytest --cov for details",
+    ]
+    penalty = 5 if cnt == 0 else (2 if cnt < 5 else 0)
+    return findings, 10 - penalty
 
-    elif assessment_id == "G":
-        cnt = count_test_files()
-        findings = [
-            f"- Test files found: {cnt}",
-            "- Test coverage: Run pytest --cov for details",
-        ]
-        score -= 5 if cnt == 0 else (2 if cnt < 5 else 0)
 
-    else:
-        # No automated checks available for this category
-        # DO NOT fabricate a score - require real bot/manual review
-        score = None  # Explicitly unscored - requires real review
-        findings = [
-            f"- Python files analyzed: {len(py_files)}",
-            "- **REQUIRES REVIEW**: No automated checks available for this category",
-            "- Score must be assigned by Jules bot or manual code review",
-            "- Do NOT use a default score - real analysis is required",
-        ]
+def _assess_unsupported(py_files: list) -> tuple[list[str], int | None]:
+    """Return placeholder for unsupported assessment categories."""
+    findings = [
+        f"- Python files analyzed: {len(py_files)}",
+        "- **REQUIRES REVIEW**: No automated checks available for this category",
+        "- Score must be assigned by Jules bot or manual code review",
+        "- Do NOT use a default score - real analysis is required",
+    ]
+    return findings, None
 
-    # Format score display
+
+def _format_report(
+    assessment_id: str, name: str, findings: list[str], score: int | None
+) -> str:
+    """Format an assessment report as markdown."""
     if score is not None:
         score = max(0, min(10, score))
         score_display = f"{score}/10"
     else:
         score_display = "PENDING REVIEW"
 
-    report = f"""# Assessment {assessment_id}: {assessment["name"]}
+    return f"""# Assessment {assessment_id}: {name}
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Score**: {score_display}
 
@@ -104,12 +111,35 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
 {chr(10).join(findings)}
 
 ## Recommendations
-- Review findings and address ✗ items.
+- Review findings and address {_CROSS} items.
 """
+
+
+def run_assessment(assessment_id: str, output_path: Path) -> int:
+    """Run a specific assessment and generate report."""
+    assessment = ASSESSMENTS.get(
+        assessment_id, {"name": "General", "description": "Manual review required"}
+    )
+    logger.info(f"Running Assessment {assessment_id}: {assessment['name']}...")
+
+    py_files = find_python_files()
+
+    handlers = {
+        "A": lambda: _assess_architecture(py_files),
+        "B": lambda: _assess_hygiene(),
+        "C": lambda: _assess_documentation(),
+        "G": lambda: _assess_testing(),
+    }
+    handler = handlers.get(assessment_id, lambda: _assess_unsupported(py_files))
+    findings, score = handler()
+
+    report = _format_report(assessment_id, assessment["name"], findings, score)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report)
+
+    score_display = f"{score}/10" if score is not None else "PENDING REVIEW"
     logger.info(
-        f"✓ Assessment {assessment_id} saved to {output_path} (Score: {score_display})"
+        f"\u2713 Assessment {assessment_id} saved to {output_path} (Score: {score_display})"
     )
     return 0
 
