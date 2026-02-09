@@ -74,7 +74,12 @@ def client(_reset_startup_metrics):
 @pytest.fixture()
 def manifest_path() -> Path:
     """Return the path to the launcher manifest."""
-    return Path(__file__).parent.parent.parent / "src" / "config" / "launcher_manifest.json"
+    return (
+        Path(__file__).parent.parent.parent
+        / "src"
+        / "config"
+        / "launcher_manifest.json"
+    )
 
 
 @pytest.fixture()
@@ -147,9 +152,9 @@ class TestLaunchEndpoint:
         """Every tile in the manifest can be launched (handler returns True)."""
         for tile in manifest["tiles"]:
             resp = client.post(f"/api/launcher/launch/{tile['id']}")
-            assert resp.status_code == 200, (
-                f"Failed to launch tile '{tile['id']}': {resp.json()}"
-            )
+            assert (
+                resp.status_code == 200
+            ), f"Failed to launch tile '{tile['id']}': {resp.json()}"
             data = resp.json()
             assert data["tile_id"] == tile["id"]
 
@@ -185,7 +190,9 @@ class TestProcessesEndpoint:
         mock_proc = MagicMock()
         mock_proc.pid = 12345
         mock_proc.poll.return_value = None  # still running
-        client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = mock_proc
+        client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = (
+            mock_proc
+        )
 
         resp = client.get("/api/launcher/processes")
         assert resp.status_code == 200
@@ -234,7 +241,9 @@ class TestStopEndpoint:
         """Stopping a running process returns 200 with status=stopped."""
         mock_proc = MagicMock()
         mock_proc.pid = 12345
-        client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = mock_proc
+        client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = (
+            mock_proc
+        )
 
         with patch("src.api.local_server.kill_process_tree"):
             resp = client.post("/api/launcher/stop/MuJoCo Humanoid Golf")
@@ -383,7 +392,9 @@ class TestEdgeCases:
         """Process names with spaces (like 'MuJoCo Humanoid Golf') work."""
         mock_proc = MagicMock()
         mock_proc.pid = 33333
-        client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = mock_proc
+        client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = (
+            mock_proc
+        )
 
         with patch("src.api.local_server.kill_process_tree"):
             resp = client.post("/api/launcher/stop/MuJoCo Humanoid Golf")
