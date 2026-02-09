@@ -3,11 +3,13 @@ name: Jules PR AutoFix (Direct Push with CI Verification)
 # This workflow pushes fixes DIRECTLY to PR branches (like Cursor bugbot)
 # and ITERATES until CI passes or max attempts reached.
 #
-# Key improvements over previous version:
-# 1. Iterates up to 10 times until CI passes
+# Key features:
+# 1. Iterates up to 5 times until CI passes (with safeguards)
 # 2. Waits for CI to complete and checks results
-# 3. Applies comprehensive fixes (linting, types, tests, placeholders)
-# 4. Verification gate - only marks success when CI passes
+# 3. Applies comprehensive fixes: ruff, black, import sorting, autoflake
+# 4. Mypy autofix agent: intelligent type error resolution (real fixes + targeted suppressions)
+# 5. Verification gate - only marks success when CI passes
+# 6. Safeguards: job timeout, iteration caps, max-files-per-commit limits
 
 on:
   workflow_run:
@@ -25,9 +27,9 @@ on:
         default: false
         type: boolean
       max_iterations:
-        description: "Maximum fix iterations (1-10)"
+        description: "Maximum fix iterations (1-5)"
         required: false
-        default: "10"
+        default: "5"
         type: string
 
 permissions:
@@ -42,17 +44,18 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Maximum fix attempts - increased from 3 to 10 for complex CI failures
-  MAX_FIX_ATTEMPTS: 10
+  # Maximum fix attempts per window (reduced from 10 for cost control)
+  MAX_FIX_ATTEMPTS: 5
   FIX_WINDOW_HOURS: 4
-  # Time to wait for CI to complete (in seconds)
-  CI_WAIT_TIMEOUT: 900
+  # Time to wait for CI to complete (in seconds) - 10 min max
+  CI_WAIT_TIMEOUT: 600
   CI_POLL_INTERVAL: 30
 
 jobs:
   iterative-fix:
     name: Fix and Verify CI (Iterative)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Only run on failures (not success) for workflow_run events
     if: |
       github.event_name == 'workflow_dispatch' ||
@@ -143,7 +146,10 @@ jobs:
       - name: Install Fix Tools
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         run: |
-          pip install ruff==0.14.10 black==26.1.0 mypy autoflake
+          # Pin versions to match CI Standard quality gate
+          pip install ruff==0.14.10 black==26.1.0 mypy==1.13.0 autoflake
+          # Install project deps so mypy can resolve imports
+          pip install -e ".[dev]" 2>/dev/null || pip install -e . 2>/dev/null || true
 
       # ============================================================
       # ITERATIVE FIX LOOP - The core improvement
@@ -172,8 +178,10 @@ jobs:
             CHANGES_MADE=""
             git_status_before=$(git status --porcelain | wc -l)
 
-            # ----- FIX 1: Ruff linting -----
-            echo ">>> Running ruff check --fix..."
+            # ===== PHASE 1: Formatting & Linting (deterministic, safe) =====
+
+            # ----- FIX 1: Ruff linting + import sorting -----
+            echo ">>> Running ruff check --fix (linting + import sorting)..."
             ruff check --fix . 2>&1 || true
             if ! git diff --quiet; then
               CHANGES_MADE="$CHANGES_MADE ruff"
@@ -196,28 +204,33 @@ jobs:
               git add -A
             fi
 
-            # ----- FIX 4: Re-run ruff to ensure consistency after other tools -----
-            echo ">>> Re-running ruff check --fix (post-cleanup)..."
+            # ----- FIX 4: Re-run ruff + black for consistency after autoflake -----
+            echo ">>> Re-running ruff + black (post-cleanup)..."
             ruff check --fix . 2>&1 || true
+            black . 2>&1 || true
             if ! git diff --quiet; then
-              CHANGES_MADE="$CHANGES_MADE ruff-post"
+              CHANGES_MADE="$CHANGES_MADE post-cleanup"
               git add -A
             fi
 
-            # ----- FIX 5: TODO/FIXME placeholders -----
-            echo ">>> Checking for TODO/FIXME placeholders..."
-            # Find files with TODOs and try to resolve simple ones
-            TODO_FILES=$(grep -rl "TODO\|FIXME" --include="*.py" . 2>/dev/null | grep -v __pycache__ | grep -v .git || true)
-            if [ -n "$TODO_FILES" ]; then
-              echo "Found TODO/FIXME in: $TODO_FILES"
-              # For now, just report - complex TODO resolution requires AI
-            fi
+            # ===== PHASE 2: Mypy Agent (intelligent type error fixing) =====
 
-            # ----- FIX 6: Common type hint fixes -----
-            echo ">>> Applying common type hint fixes..."
-            # Add Optional imports where None is used
-            find . -name "*.py" -not -path "./.git/*" -not -path "./__pycache__/*" -exec \
-              sed -i 's/def \([^(]*\)(\([^)]*\)) -> None:/def \1(\2) -> None:/g' {} \; 2>/dev/null || true
+            echo ">>> Running mypy autofix agent..."
+            if [ -f "scripts/mypy_autofix_agent.py" ]; then
+              python scripts/mypy_autofix_agent.py \
+                --max-fixes 20 --max-files 15 --verbose \
+                --config-file pyproject.toml 2>&1 || true
+
+              if ! git diff --quiet; then
+                CHANGES_MADE="$CHANGES_MADE mypy-agent"
+                # Re-run ruff + black on mypy agent's changes for formatting consistency
+                ruff check --fix . 2>&1 || true
+                black . 2>&1 || true
+                git add -A
+              fi
+            else
+              echo "  (mypy_autofix_agent.py not found, skipping mypy fixes)"
+            fi
 
             # Check if any changes were made this iteration
             git_status_after=$(git status --porcelain | wc -l)
@@ -333,12 +346,13 @@ jobs:
           $MESSAGE
 
           **Iterations used:** $ITERATIONS / ${{ env.MAX_FIX_ATTEMPTS }}
-          **Fix types applied:** ruff, black, autoflake
+          **Fix types applied:** ruff, black, autoflake, mypy-agent
 
           ### What was fixed:
           - Code formatting (black)
           - Linting & import sorting (ruff --fix)
           - Unused imports (autoflake)
+          - Type errors (mypy autofix agent - real fixes + targeted suppressions)
 
           ---
           *Jules PR AutoFix with CI Verification Loop*"
