@@ -325,6 +325,64 @@ class DatasetExporter:
         logger.info("Exported %d records to JSON: %s", len(self._records), output_path)
         return output_path
 
+    def export_hdf5(self, output_path: Path) -> Path:
+        """Export collected records as HDF5.
+
+        Requires the ``h5py`` package. Stores arrays in columnar format
+        for efficient random access and analysis.
+
+        Args:
+            output_path: Path for output HDF5 file
+
+        Returns:
+            Path to the written file
+
+        Raises:
+            ValueError: If no records have been collected
+            ImportError: If h5py is not installed
+        """
+        if not self._records:
+            raise ValueError("No records to export")
+
+        import h5py
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        times = np.array([r.time for r in self._records])
+        positions = np.array([r.positions for r in self._records])
+        velocities = np.array([r.velocities for r in self._records])
+
+        with h5py.File(output_path, "w") as f:
+            f.create_dataset("time", data=times)
+            f.create_dataset("positions", data=positions)
+            f.create_dataset("velocities", data=velocities)
+
+            if self._records[0].accelerations is not None:
+                accel = np.array(
+                    [
+                        r.accelerations
+                        for r in self._records
+                        if r.accelerations is not None
+                    ]
+                )
+                f.create_dataset("accelerations", data=accel)
+
+            if self._records[0].forces is not None:
+                forces = np.array(
+                    [r.forces for r in self._records if r.forces is not None]
+                )
+                f.create_dataset("forces", data=forces)
+
+            # Store metadata as HDF5 attributes
+            for key, value in self._metadata.items():
+                f.attrs[key] = value
+
+            if self._joint_names:
+                f.attrs["joint_names"] = self._joint_names
+
+        logger.info("Exported %d records to HDF5: %s", len(self._records), output_path)
+        return output_path
+
     def clear(self) -> None:
         """Clear all collected records (for reuse)."""
         self._records.clear()
