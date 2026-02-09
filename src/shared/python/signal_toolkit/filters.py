@@ -131,6 +131,7 @@ class FilterDesigner:
         nyquist = fs / 2
         btype = filter_type.value
 
+        wn: float | tuple[float, float]
         if filter_type in (FilterType.BANDPASS, FilterType.BANDSTOP):
             if not isinstance(cutoff, tuple):
                 msg = "Bandpass/bandstop filters require (low, high) cutoff tuple"
@@ -184,6 +185,7 @@ class FilterDesigner:
         nyquist = fs / 2
         btype = filter_type.value
 
+        wn: float | tuple[float, float]
         if filter_type in (FilterType.BANDPASS, FilterType.BANDSTOP, FilterType.NOTCH):
             if not isinstance(cutoff, tuple):
                 msg = "Bandpass/bandstop/notch filters require (low, high) cutoff tuple"
@@ -233,6 +235,7 @@ class FilterDesigner:
         nyquist = fs / 2
         btype = filter_type.value
 
+        wn: float | tuple[float, float]
         if filter_type in (FilterType.BANDPASS, FilterType.BANDSTOP, FilterType.NOTCH):
             if not isinstance(cutoff, tuple):
                 msg = "Bandpass/bandstop/notch filters require (low, high) cutoff tuple"
@@ -284,6 +287,7 @@ class FilterDesigner:
         nyquist = fs / 2
         btype = filter_type.value
 
+        wn: float | tuple[float, float]
         if filter_type in (FilterType.BANDPASS, FilterType.BANDSTOP, FilterType.NOTCH):
             if not isinstance(cutoff, tuple):
                 msg = "Bandpass/bandstop/notch filters require (low, high) cutoff tuple"
@@ -331,6 +335,7 @@ class FilterDesigner:
         nyquist = fs / 2
         btype = filter_type.value
 
+        wn: float | tuple[float, float]
         if filter_type in (FilterType.BANDPASS, FilterType.BANDSTOP, FilterType.NOTCH):
             if not isinstance(cutoff, tuple):
                 msg = "Bandpass/bandstop/notch filters require (low, high) cutoff tuple"

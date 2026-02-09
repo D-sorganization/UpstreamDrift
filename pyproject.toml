@@ -164,7 +164,6 @@ exclude = [
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model",
     "src/shared/models/opensim/opensim-models",
     # Pending type annotation cleanup (consolidated PR 2026-01-31)
-    "src/shared/python/signal_toolkit/",
     "src/shared/python/plotting/",
     "src/shared/python/tests/",
     "src/shared/python/ui/qt/widgets/",
@@ -186,7 +185,6 @@ exclude = [
 # Mypy overrides for modules with pre-existing type issues
 [[tool.mypy.overrides]]
 module = [
-    "src.shared.python.signal_toolkit.*",
     "src.shared.python.plotting.*",
     "src.shared.python.ui.*",
     "src.shared.python.spatial_algebra.*",
