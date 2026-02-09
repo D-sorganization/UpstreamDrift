@@ -89,6 +89,10 @@ dev = [
     "pytest-asyncio>=0.23.0",
     # Required for symbolic math in controls tab
     "sympy>=1.12",
+    # Required for multipart form data in API tests
+    "python-multipart>=0.0.6",
+    # Required for video/image processing tests
+    "opencv-python-headless>=4.8.0",
 ]
 
 # GUI testing (requires PyQt6)
