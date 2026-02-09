@@ -17,6 +17,11 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.analysis.dataclasses import (
+    CITATION_KINEMATIC_SEQUENCE,
+    MethodCitation,
+)
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -46,6 +51,7 @@ class KinematicSequenceResult:
         default_factory=dict
     )  # Time diff between peaks
     is_valid_sequence: bool = False  # True if order matches expected
+    methodology: MethodCitation | None = None
 
 
 class SegmentTimingAnalyzer:
@@ -219,6 +225,7 @@ class SegmentTimingAnalyzer:
             sequence_consistency=sequence_consistency,
             timing_gaps=timing_gaps,
             is_valid_sequence=is_valid,
+            methodology=CITATION_KINEMATIC_SEQUENCE,
         )
 
     def extract_velocities_from_recorder(
