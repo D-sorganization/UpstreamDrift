@@ -438,8 +438,9 @@ def extract_grf_from_contacts(
 ) -> GroundReactionForce:
     """Extract GRF from physics engine contact forces.
 
-    Synthetic GRF computed from model contact elements when force plates
-    are unavailable.
+    Tries the engine's native contact solver first (``compute_contact_forces``).
+    Falls back to static gravity approximation when the engine does not
+    report contact data (returns zero vector).
 
     Args:
         engine: Physics engine with active simulation
@@ -453,22 +454,36 @@ def extract_grf_from_contacts(
     total_moment = np.zeros(3)
     total_weighted_pos = np.zeros(3)
 
-    # Compute gravity forces ONCE outside loop (gravity doesn't change per body)
-    # Performance optimization: Avoids N redundant expensive physics engine calls
-    g = engine.compute_gravity_forces()
+    # --- Primary path: query the engine's native contact solver -----------
+    contact_force = engine.compute_contact_forces()
+    has_contact_data = float(np.linalg.norm(contact_force)) > 1e-10
 
-    for body_name in contact_body_names:
-        jac_dict = engine.compute_jacobian(body_name)
-        if jac_dict is None:
-            continue
+    if has_contact_data:
+        total_force[: len(contact_force)] = contact_force[:3]
 
-        # For now, estimate contact force from gravity compensation
-        # This is a simplified approach - real implementation would
-        # query actual contact forces from the physics engine
+        # Compute COP from body Jacobians when contact data is available
+        for body_name in contact_body_names:
+            jac_dict = engine.compute_jacobian(body_name)
+            if jac_dict is None:
+                continue
+            # Use linear Jacobian row-means as proxy for body position
+            if "linear" in jac_dict:
+                body_pos = np.mean(jac_dict["linear"], axis=1)
+                total_weighted_pos += body_pos * abs(total_force[2])
 
-        # Approximate: GRF opposes gravity at contact points
-        if len(g) > 0:
-            total_force[2] += abs(np.sum(g))
+        logger.debug("GRF extracted from engine contact solver")
+    else:
+        # --- Fallback: static gravity approximation -----------------------
+        g = engine.compute_gravity_forces()
+
+        for body_name in contact_body_names:
+            jac_dict = engine.compute_jacobian(body_name)
+            if jac_dict is None:
+                continue
+            if len(g) > 0:
+                total_force[2] += abs(np.sum(g))
+
+        logger.debug("GRF estimated from gravity approximation (no contact data)")
 
     # Compute COP
     if total_force[2] > 10.0:  # Minimum force threshold
@@ -481,6 +496,11 @@ def extract_grf_from_contacts(
         )
     else:
         cop = np.array([0.0, 0.0, ground_height])
+
+    # Compute moment from force and COP
+    if has_contact_data and total_force[2] > 10.0:
+        r = cop - np.array([0.0, 0.0, ground_height])
+        total_moment = np.cross(r, total_force)
 
     return GroundReactionForce(
         force=total_force,
