@@ -25,10 +25,12 @@ class TestMuJoCoProtocol(unittest.TestCase):
 
         # 3. Import the engine module to ensure it binds to our mock
         # We remove it from sys.modules first to force a fresh import that sees our mock
-        module_name = (
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
-        )
-        sys.modules.pop(module_name, None)
+        # Clear both possible module paths (with and without 'src.' prefix)
+        for module_name in [
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine",
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine",
+        ]:
+            sys.modules.pop(module_name, None)
 
         # 4. Get the class
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (

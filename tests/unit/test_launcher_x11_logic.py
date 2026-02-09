@@ -10,6 +10,13 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+# These tests verify Windows-specific X11 forwarding behavior (VcXSrv + DISPLAY).
+# They must be skipped on non-Windows platforms where the Docker command format differs.
+pytestmark = pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="X11 forwarding tests are Windows-specific (DISPLAY=host.docker.internal:0)",
+)
+
 
 # Dummy Qt Logic for Headless Testing
 class MockQCheckBox:

@@ -7,9 +7,10 @@ with syntax highlighting, line numbers, validation, and auto-completion.
 from __future__ import annotations
 
 import re
+import xml.etree.ElementTree as ET
 from typing import Any
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import QRect, QRegularExpression, QSize, Qt, pyqtSignal
 from PyQt6.QtGui import (
     QColor,
@@ -401,7 +402,7 @@ class URDFCodeEditor(QPlainTextEdit):
 
         errors = []
         try:
-            ET.fromstring(content)
+            DefusedET.fromstring(content)
             self.validation_result.emit(True, [])
             return True, []
         except ET.ParseError as e:
@@ -430,7 +431,7 @@ class URDFCodeEditor(QPlainTextEdit):
         errors: list[str] = []
 
         try:
-            root = ET.fromstring(content)
+            root = DefusedET.fromstring(content)
         except ET.ParseError:
             # XML parsing errors handled by validate_xml
             return False, ["Invalid XML - cannot validate URDF structure"]
@@ -674,7 +675,7 @@ class URDFCodeEditorWidget(QWidget):
 
         try:
             # Parse and re-format XML
-            root = ET.fromstring(content)
+            root = DefusedET.fromstring(content)
             ET.indent(root, space="  ")
             formatted = ET.tostring(root, encoding="unicode", xml_declaration=True)
             self.editor.set_content(formatted)

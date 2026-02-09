@@ -7,10 +7,11 @@ and managing the kinematic hierarchy of URDF models.
 from __future__ import annotations
 
 import copy
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Any
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -105,7 +106,7 @@ class KinematicTree:
     def build_from_urdf(self, urdf_content: str) -> None:
         """Build the tree from URDF XML content."""
         try:
-            root_elem = ET.fromstring(urdf_content)
+            root_elem = DefusedET.fromstring(urdf_content)
         except ET.ParseError as e:
             logger.error(f"Failed to parse URDF: {e}")
             return
@@ -715,7 +716,7 @@ class ChainManipulationWidget(QWidget):
     def _insert_segment(self, config: dict[str, Any]) -> None:
         """Insert a new segment into the URDF."""
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:
             return
 
