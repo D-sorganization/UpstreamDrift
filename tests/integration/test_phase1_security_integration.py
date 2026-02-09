@@ -70,9 +70,10 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
     def test_secure_subprocess_path_validation(self) -> None:
         """Test secure subprocess validates script paths."""
-        # Create test paths
+        # Create test paths — use an allowed directory ("tools") so the
+        # first-part check inside validate_script_path passes.
         suite_root = Path(__file__).resolve().parent.parent.parent
-        valid_script = suite_root / "scripts" / "test_script.py"
+        valid_script = suite_root / "tools" / "test_script.py"
         invalid_script = Path("/tmp/malicious_script.py")
 
         # Test valid path (within suite) - mock both exists and is_file

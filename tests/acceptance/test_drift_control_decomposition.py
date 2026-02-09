@@ -70,9 +70,18 @@ class TestDriftControlDecomposition:
             v_initial[0] = 0.5
 
         engine.set_state(q_initial, v_initial)
-        tau_control = np.zeros(len(v_initial))
-        tau_control[0] = 0.5
-        engine.set_control(tau_control)
+
+        # Determine control dimension: MuJoCo URDFs without <actuator> have nu=0
+        model = engine.get_model() if hasattr(engine, "get_model") else None
+        nu = getattr(model, "nu", len(v_initial)) if model else len(v_initial)
+        if nu == 0:
+            # Unactuated model — use Pinocchio-style torque vector (nv-sized)
+            tau_control = np.zeros(len(v_initial))
+            tau_control[0] = 0.5
+        else:
+            tau_control = np.zeros(nu)
+            tau_control[0] = 0.5
+            engine.set_control(tau_control)
 
         # 1. Full Dynamics
         engine.forward()
@@ -114,6 +123,10 @@ class TestDriftControlDecomposition:
         engine.set_state(q_initial, v_initial)
         a_drift = engine.compute_drift_acceleration()
 
+        # Determine control dimension (MuJoCo URDFs without actuators have nu=0)
+        model = engine.get_model() if hasattr(engine, "get_model") else None
+        nu = getattr(model, "nu", len(v_initial)) if model else len(v_initial)
+
         # Compute full with zero torque
         tau_zero = np.zeros(len(v_initial))
         if engine_name == "pinocchio":
@@ -123,7 +136,8 @@ class TestDriftControlDecomposition:
                 engine.model, engine.data, engine.q, engine.v, tau_zero
             )
         else:
-            engine.set_control(tau_zero)
+            if nu > 0:
+                engine.set_control(np.zeros(nu))
             engine.forward()
             a_full_zero = engine.get_data().qacc.copy()
 

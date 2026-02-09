@@ -31,10 +31,10 @@ class MockQtBase:
     def setFont(self, f):
         pass
 
-    def resize(self, w, h):
+    def resize(self, *args):
         pass
 
-    def setFixedSize(self, w, h):
+    def setFixedSize(self, *args):
         pass
 
     def setAlignment(self, a):
@@ -43,7 +43,7 @@ class MockQtBase:
     def setWordWrap(self, b):
         pass
 
-    def setAttribute(self, a):
+    def setAttribute(self, *args):
         pass
 
     def setLayout(self, layout):
@@ -261,6 +261,8 @@ class TestGolfLauncherLogic:
     def setup_launcher_module(self, mock_pyqt):
         """
         Reload the module to ensure it uses the patched sys.modules.
+        After re-import, patch QDockWidget at the module level so the
+        real QDockWidget (which checks parent types) is never called.
         """
         import sys
 
@@ -270,7 +272,9 @@ class TestGolfLauncherLogic:
 
         import src.launchers.golf_launcher  # noqa: F401
 
-        yield
+        # Patch QDockWidget AFTER import so it overrides the real reference
+        with patch.object(src.launchers.golf_launcher, "QDockWidget", MagicMock()):
+            yield
         # patch.dict handles sys.modules restoration automatically
 
     @patch("src.shared.python.model_registry.ModelRegistry")

@@ -12,6 +12,9 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+# sympy is needed by some transitive imports; skip module if unavailable
+pytest.importorskip("sympy", reason="sympy not installed")
+
 from src.shared.python.engine_availability import (
     PYQT6_AVAILABLE,
     skip_if_unavailable,

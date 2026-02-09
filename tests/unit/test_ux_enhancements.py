@@ -4,10 +4,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# Mock Qt classes
+# Mock Qt classes — use __getattr__ catch-all to handle any missing Qt methods
 class MockQWidget:
     def __init__(self, parent=None):
         pass
+
+    def __getattr__(self, name):
+        """Return a no-op callable for any missing Qt method."""
+        return lambda *args, **kwargs: None
 
     def setAccessibleName(self, name):
         pass
@@ -64,13 +68,16 @@ class MockQVBoxLayout:
     def __init__(self, parent=None):
         pass
 
-    def setAlignment(self, align):
+    def setAlignment(self, *args):
         pass
 
-    def addWidget(self, widget):
+    def addWidget(self, widget, *args, **kwargs):
         pass
 
-    def addLayout(self, layout):
+    def addLayout(self, layout, *args, **kwargs):
+        pass
+
+    def setContentsMargins(self, *args):
         pass
 
 
@@ -78,13 +85,16 @@ class MockQHBoxLayout:
     def __init__(self, parent=None):
         pass
 
-    def addStretch(self):
+    def addStretch(self, *args):
         pass
 
-    def addWidget(self, widget):
+    def addWidget(self, widget, *args, **kwargs):
         pass
 
-    def addLayout(self, layout):
+    def addLayout(self, layout, *args, **kwargs):
+        pass
+
+    def setContentsMargins(self, *args):
         pass
 
 
@@ -158,9 +168,12 @@ def test_status_info_contrast(mocked_launcher_module):
         ("urdf_generator", "#6c757d", "#ffffff"),  # Gray -> White
     ]
 
+    mock_parent_launcher = MagicMock()
+    mock_parent_launcher.layout_edit_mode = False
+
     for m_type, exp_bg, exp_text in test_cases:
         model = MockModel(m_type)
-        card = mocked_launcher_module.DraggableModelCard(model)
+        card = mocked_launcher_module.DraggableModelCard(model, mock_parent_launcher)
 
         # We expect _get_status_info to return 3 values now
         status_info = card._get_status_info()

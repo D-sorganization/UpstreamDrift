@@ -81,6 +81,14 @@ dev = [
     "pytest-anyio>=0.0.0; python_version>='3.10'",
     # Required for config tests
     "PyYAML>=6.0",
+    # Required for pydantic email validation in auth models
+    "email-validator>=2.0.0",
+    # Required for API rate limiting tests
+    "slowapi>=0.1.9",
+    # Required for async streaming tests
+    "pytest-asyncio>=0.23.0",
+    # Required for symbolic math in controls tab
+    "sympy>=1.12",
 ]
 
 # GUI testing (requires PyQt6)
@@ -190,6 +198,7 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --strict-markers --strict-config"
+asyncio_mode = "auto"
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
     "src",
@@ -208,6 +217,7 @@ markers = [
     "slow_numba: Tests that require numba JIT or are heavy",
     "asyncio: marks tests as async tests",
     "benchmark: marks tests as performance benchmarks",
+    "serial: marks tests that must not run in parallel (sys.modules manipulation)",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
