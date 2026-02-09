@@ -170,7 +170,7 @@ class AerodynamicsCalculator:
         Returns:
             Drag force vector [N] (opposes velocity)
         """
-        speed = np.linalg.norm(velocity)
+        speed = float(np.linalg.norm(velocity))
         if speed < 1e-6:
             return np.zeros(3)
 
@@ -196,7 +196,7 @@ class AerodynamicsCalculator:
         Returns:
             Lift force vector [N]
         """
-        speed = np.linalg.norm(velocity)
+        speed = float(np.linalg.norm(velocity))
         if speed < 1e-6:
             return np.zeros(3)
 
@@ -235,8 +235,8 @@ class AerodynamicsCalculator:
         Returns:
             Magnus force vector [N]
         """
-        speed = np.linalg.norm(velocity)
-        spin_mag = np.linalg.norm(spin)
+        speed = float(np.linalg.norm(velocity))
+        spin_mag = float(np.linalg.norm(spin))
 
         if speed < 1e-6 or spin_mag < 1e-6:
             return np.zeros(3)
