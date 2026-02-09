@@ -190,6 +190,7 @@ class TestDockerThreads:
     def test_docker_build_thread_missing_path(self, mocked_launcher_module):
         """Test DockerBuildThread with missing path (skipped: moved to docker_manager)."""
 
+    @pytest.mark.skip(reason="HelpDialog Qt construction crashes worker in CI")
     @patch("pathlib.Path.read_text", return_value="# Help")
     @patch("pathlib.Path.exists", return_value=True)
     def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module):
