@@ -173,7 +173,6 @@ exclude = [
     "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/",
     "src/api/",
     "src/launchers/",
-    "src/engines/common/",
     # Additional directories with complex typing issues (pre-existing)
     "src/shared/python/pose_editor/",
     "src/shared/python/ai/gui/",
