@@ -440,6 +440,46 @@ def _build_default_glossary() -> dict[str, GlossaryEntry]:
         related_terms=["inverse_dynamics", "muscle_contribution", "energy"],
     )
 
+    # Load extended glossary entries from data files
+    _level_map = {
+        "b": ExpertiseLevel.BEGINNER,
+        "i": ExpertiseLevel.INTERMEDIATE,
+        "a": ExpertiseLevel.ADVANCED,
+        "e": ExpertiseLevel.EXPERT,
+    }
+
+    def _load_entries(entries: list[dict]) -> None:
+        for entry_dict in entries:
+            key = entry_dict["key"]
+            if key in glossary:
+                continue  # Don't overwrite detailed inline entries
+            definitions = {}
+            for short_key, level in _level_map.items():
+                if short_key in entry_dict:
+                    definitions[level] = entry_dict[short_key]
+            glossary[key] = GlossaryEntry(
+                term=entry_dict["term"],
+                category=entry_dict["cat"],
+                definitions=definitions,
+                related_terms=entry_dict.get("r", []),
+                formula=entry_dict.get("f"),
+                units=entry_dict.get("u"),
+            )
+
+    try:
+        from src.shared.python.ai.glossary_data_core import get_core_entries
+
+        _load_entries(get_core_entries())
+    except ImportError:
+        logger.debug("Core glossary data not available")
+
+    try:
+        from src.shared.python.ai.glossary_data_extended import get_extended_entries
+
+        _load_entries(get_extended_entries())
+    except ImportError:
+        logger.debug("Extended glossary data not available")
+
     return glossary
 
 
