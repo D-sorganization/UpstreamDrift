@@ -1814,9 +1814,7 @@ except Exception as e:
 
             manager = ThemeManager.instance()
             c = manager.colors
-            self.setStyleSheet(
-                manager.get_stylesheet()
-                + f"""
+            self.setStyleSheet(manager.get_stylesheet() + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -1834,8 +1832,7 @@ except Exception as e:
                 QLabel#CardDescription {{
                     color: {c.text_secondary};
                 }}
-            """
-            )
+            """)
         except Exception:
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
