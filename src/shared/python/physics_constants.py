@@ -130,6 +130,11 @@ IRON_7_LOFT_DEG = PhysicalConstant(
 )
 PUTTER_LOFT_DEG = PhysicalConstant(3.0, "degrees", "Standard", "Standard putter loft")
 
+# Clubhead MOI — Typical driver head about CG (perpendicular to face)
+DRIVER_MOI_KG_M2 = PhysicalConstant(
+    4.5e-4, "kg·m²", "Typical Driver Specs", "Driver clubhead MOI about CG"
+)
+
 # Course conditions
 GREEN_SPEED_STIMP = PhysicalConstant(10.0, "ft", "USGA Stimpmeter", "Fast green speed")
 ROUGH_HEIGHT_MM = PhysicalConstant(
