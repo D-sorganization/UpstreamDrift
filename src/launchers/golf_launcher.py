@@ -1292,10 +1292,46 @@ except Exception as e:
                 lambda: self.toggle_ai_assistant(False)
             )
 
+            # Sync active chat session ID with the shared server
+            self._sync_chat_session()
+
         except Exception as e:
             logger.error(f"Failed to initialize AI panel: {e}")
             self.btn_ai.setEnabled(False)
             self.btn_ai.setToolTip(f"AI Assistant unavailable: {e}")
+
+    def _sync_chat_session(self) -> None:
+        """Sync the launcher's chat session with the shared FastAPI server.
+
+        Writes the active session ID to a shared file so engine modules
+        launched later can join the same conversation.
+        """
+        import json
+
+        try:
+            import urllib.request
+
+            # Try to create or retrieve a session from the server
+            url = "http://127.0.0.1:8000/api/chat/sessions"
+            req = urllib.request.Request(url, method="GET")
+            with urllib.request.urlopen(req, timeout=2) as resp:
+                sessions = json.loads(resp.read().decode("utf-8"))
+
+            if sessions:
+                session_id = sessions[0]["session_id"]
+            else:
+                session_id = None
+
+            # Write the active session ID for cross-process sharing
+            session_file = (
+                Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
+            )
+            session_file.parent.mkdir(parents=True, exist_ok=True)
+            if session_id:
+                session_file.write_text(session_id, encoding="utf-8")
+                logger.info("Synced chat session: %s", session_id)
+        except Exception as e:
+            logger.debug("Chat server sync skipped (server may not be running): %s", e)
 
     def toggle_ai_assistant(self, checked: bool) -> None:
         """Toggle the AI Assistant panel visibility via the content splitter.

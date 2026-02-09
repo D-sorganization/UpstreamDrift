@@ -48,6 +48,19 @@ def launch_dashboard(
             # Continue with empty engine, but warn
 
     window = UnifiedDashboardWindow(engine, title=title)
+
+    # Add AI Chat dock widget (connects to FastAPI chat server)
+    try:
+        from PyQt6.QtCore import Qt
+
+        from src.shared.python.ai.gui.chat_dock_widget import ChatDockWidget
+
+        engine_name = engine_class.__name__.lower().replace("physicsengine", "")
+        chat_dock = ChatDockWidget(engine_context=engine_name, parent=window)
+        window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, chat_dock)
+    except Exception as e:
+        logger.debug("AI Chat dock not available: %s", e)
+
     window.show()
 
     sys.exit(app.exec())
