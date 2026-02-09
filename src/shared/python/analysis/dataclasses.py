@@ -11,6 +11,70 @@ from dataclasses import dataclass
 import numpy as np
 
 
+@dataclass(frozen=True)
+class MethodCitation:
+    """Methodology reference for a biomechanical metric.
+
+    Provides structured, machine-readable citation metadata so that
+    downstream consumers (reports, cross-engine validators, audit logs)
+    can trace every metric back to its methodological source.
+
+    Attributes:
+        name: Short identifier (e.g. "X-Factor Stretch").
+        authors: Primary author list (e.g. "Cheetham et al.").
+        year: Publication year.
+        title: Paper or textbook title.
+        doi: Digital Object Identifier (optional).
+        notes: Implementation-specific notes (optional).
+    """
+
+    name: str
+    authors: str
+    year: int
+    title: str
+    doi: str | None = None
+    notes: str | None = None
+
+
+# ---------------------------------------------------------------------------
+# Pre-defined citations for reuse across the codebase (Section U1-U3)
+# ---------------------------------------------------------------------------
+
+CITATION_KINEMATIC_SEQUENCE = MethodCitation(
+    name="Proximal-to-Distal Sequencing",
+    authors="Putnam",
+    year=1993,
+    title="Sequential motions of body segments in striking and throwing skills",
+    doi="10.1016/0021-9290(93)90084-R",
+    notes="User-supplied expected order; no proprietary methodology.",
+)
+
+CITATION_X_FACTOR = MethodCitation(
+    name="X-Factor",
+    authors="Cheetham et al.",
+    year=2001,
+    title="The importance of stretching the X-Factor in the downswing of golf",
+    notes="Pelvis-thorax separation angle and stretch-shortening cycle.",
+)
+
+CITATION_CRUNCH_FACTOR = MethodCitation(
+    name="Crunch Factor",
+    authors="McHardy & Pollard",
+    year=2005,
+    title="Muscle activity during the golf swing",
+    doi="10.1136/bjsm.2004.014514",
+    notes="Lateral bend + axial rotation coupling metric.",
+)
+
+CITATION_SPINAL_LOAD = MethodCitation(
+    name="Spinal Load Analysis",
+    authors="Hosea et al.",
+    year=1990,
+    title="Biomechanical analysis of the golfer's back",
+    notes="Up to 8x body weight compression; validated by Lindsay et al. (2002).",
+)
+
+
 @dataclass
 class PeakInfo:
     """Information about a detected peak."""
@@ -193,9 +257,70 @@ class JerkMetrics:
     dimensionless_jerk: float  # Normalized for duration and amplitude
 
 
+# ---------------------------------------------------------------------------
+# Cross-engine validation utilities (Section U)
+# ---------------------------------------------------------------------------
+
+# Default tolerances for cross-engine metric comparison
+TIMING_TOLERANCE_S = 0.005  # 5 ms for peak timing
+ANGLE_TOLERANCE_DEG = 2.0  # 2 degrees for angle metrics
+
+
+def validate_timing_cross_engine(
+    times_a: np.ndarray,
+    times_b: np.ndarray,
+    tolerance_s: float = TIMING_TOLERANCE_S,
+) -> dict[str, bool | float]:
+    """Validate peak-timing consistency between two engines.
+
+    Args:
+        times_a: Peak times from engine A [s] (N,)
+        times_b: Peak times from engine B [s] (N,)
+        tolerance_s: Maximum acceptable difference per peak [s]
+
+    Returns:
+        Dictionary with ``passed`` bool and ``max_diff_s`` float.
+    """
+    if len(times_a) != len(times_b):
+        return {"passed": False, "max_diff_s": float("inf")}
+
+    diffs = np.abs(np.asarray(times_a) - np.asarray(times_b))
+    max_diff = float(np.max(diffs)) if len(diffs) > 0 else 0.0
+    return {"passed": bool(max_diff <= tolerance_s), "max_diff_s": max_diff}
+
+
+def validate_angle_cross_engine(
+    angles_a: np.ndarray,
+    angles_b: np.ndarray,
+    tolerance_deg: float = ANGLE_TOLERANCE_DEG,
+) -> dict[str, bool | float]:
+    """Validate angle-metric consistency between two engines.
+
+    Args:
+        angles_a: Angle time series from engine A [deg] (N,)
+        angles_b: Angle time series from engine B [deg] (N,)
+        tolerance_deg: Maximum acceptable peak difference [deg]
+
+    Returns:
+        Dictionary with ``passed`` bool and ``max_diff_deg`` float.
+    """
+    a = np.asarray(angles_a)
+    b = np.asarray(angles_b)
+    if a.shape != b.shape:
+        return {"passed": False, "max_diff_deg": float("inf")}
+
+    diffs = np.abs(a - b)
+    max_diff = float(np.max(diffs)) if diffs.size > 0 else 0.0
+    return {"passed": bool(max_diff <= tolerance_deg), "max_diff_deg": max_diff}
+
+
 # Re-export all for convenience
 __all__ = [
     "AngularMomentumMetrics",
+    "CITATION_CRUNCH_FACTOR",
+    "CITATION_KINEMATIC_SEQUENCE",
+    "CITATION_SPINAL_LOAD",
+    "CITATION_X_FACTOR",
     "CoordinationMetrics",
     "GRFMetrics",
     "ImpulseMetrics",
@@ -203,6 +328,7 @@ __all__ = [
     "JointPowerMetrics",
     "JointStiffnessMetrics",
     "KinematicSequenceInfo",
+    "MethodCitation",
     "PCAResult",
     "PeakInfo",
     "RQAMetrics",
@@ -210,4 +336,6 @@ __all__ = [
     "SummaryStatistics",
     "SwingPhase",
     "SwingProfileMetrics",
+    "validate_angle_cross_engine",
+    "validate_timing_cross_engine",
 ]

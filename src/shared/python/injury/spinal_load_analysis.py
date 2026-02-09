@@ -29,6 +29,12 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.analysis.dataclasses import (
+    CITATION_CRUNCH_FACTOR,
+    CITATION_SPINAL_LOAD,
+    CITATION_X_FACTOR,
+    MethodCitation,
+)
 from src.shared.python.constants import GRAVITY_M_S2
 
 
@@ -63,6 +69,7 @@ class XFactorMetrics:
     x_factor_stretch_time: float  # time of maximum stretch (s)
     separation_rate: float  # rate of change at transition (deg/s)
     transition_duration: float  # time from top to impact (s)
+    methodology: MethodCitation = CITATION_X_FACTOR
 
 
 @dataclass
@@ -75,6 +82,7 @@ class CrunchFactorMetrics:
     peak_crunch: float  # maximum crunch factor value
     peak_crunch_time: float  # time of peak crunch (s)
     asymmetry_ratio: float  # left vs right side loading ratio
+    methodology: MethodCitation = CITATION_CRUNCH_FACTOR
 
 
 @dataclass
@@ -108,6 +116,9 @@ class SpinalLoadResult:
     # Cumulative load (for tracking over sessions)
     cumulative_compression_impulse: float = 0.0  # N*s
     cumulative_shear_impulse: float = 0.0  # N*s
+
+    # Methodology citation
+    methodology: MethodCitation = CITATION_SPINAL_LOAD
 
 
 class SpinalLoadAnalyzer:
