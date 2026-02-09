@@ -76,15 +76,15 @@ class TestLauncherDiagnostics:
         diag = LauncherDiagnostics()
         expected_ids = diag.EXPECTED_TILE_IDS
 
-        assert len(expected_ids) == 8
+        assert len(expected_ids) == 17
         assert "mujoco_unified" in expected_ids
         assert "drake_golf" in expected_ids
         assert "pinocchio_golf" in expected_ids
         assert "opensim_golf" in expected_ids
         assert "myosim_suite" in expected_ids
-        assert "matlab_unified" in expected_ids
-        assert "motion_capture" in expected_ids
+        assert "putting_green" in expected_ids
         assert "model_explorer" in expected_ids
+        assert "c3d_viewer" in expected_ids
 
     def test_expected_tile_names(self) -> None:
         """Test that expected tile names are defined correctly."""
@@ -93,7 +93,7 @@ class TestLauncherDiagnostics:
 
         assert names["mujoco_unified"] == "MuJoCo"
         assert names["drake_golf"] == "Drake"
-        assert names["matlab_unified"] == "Matlab Models"
+        assert names["putting_green"] == "Putting Green"
 
     def test_diagnostics_initialization(self) -> None:
         """Test LauncherDiagnostics initialization."""
@@ -113,7 +113,7 @@ class TestLauncherDiagnostics:
         assert "status" in summary
         assert "timestamp" in summary
         assert "expected_tiles" in summary
-        assert summary["expected_tiles"] == 8
+        assert summary["expected_tiles"] == 17
 
         # Verify counts add up
         assert (
@@ -344,10 +344,10 @@ class TestResetLayoutConfig:
 class TestTileLoadingVerification:
     """Tests specifically for tile loading verification."""
 
-    def test_all_eight_tiles_in_expected_ids(self) -> None:
-        """Verify all 8 expected tiles are defined."""
+    def test_all_tiles_in_expected_ids(self) -> None:
+        """Verify all 17 expected tiles are defined."""
         diag = LauncherDiagnostics()
-        assert len(diag.EXPECTED_TILE_IDS) == 8
+        assert len(diag.EXPECTED_TILE_IDS) == 17
 
     def test_tile_ids_match_models_yaml(self) -> None:
         """Verify expected tile IDs match models.yaml configuration."""
@@ -419,7 +419,7 @@ class TestTileLoadingVerification:
                 result = diag.check_layout_config()
 
             assert result.status == "pass"
-            assert result.details["saved_model_count"] == 8
+            assert result.details["saved_model_count"] == 17
         finally:
             temp_path.unlink()
 
@@ -448,7 +448,7 @@ class TestTileLoadingVerification:
 
             assert result.status == "warning"
             assert result.details["saved_model_count"] == 4
-            assert len(result.details["missing_from_saved"]) == 4
+            assert len(result.details["missing_from_saved"]) == 13
         finally:
             temp_path.unlink()
 

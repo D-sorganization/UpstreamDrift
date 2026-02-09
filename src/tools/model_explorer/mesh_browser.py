@@ -7,11 +7,12 @@ in URDFs and copying mesh references between models.
 from __future__ import annotations
 
 import shutil
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -161,7 +162,7 @@ class MeshExtractor:
             List of MeshReference objects
         """
         try:
-            root = ET.fromstring(urdf_content)
+            root = DefusedET.fromstring(urdf_content)
         except ET.ParseError:
             return []
 
@@ -585,7 +586,7 @@ class MeshBrowserWidget(QWidget):
             return
 
         try:
-            target_root = ET.fromstring(target_content)
+            target_root = DefusedET.fromstring(target_content)
         except ET.ParseError:
             self.status_label.setText("Invalid target URDF")
             return
@@ -613,7 +614,7 @@ class MeshBrowserWidget(QWidget):
         target_path = self.right_panel.get_urdf_path()
 
         try:
-            root = ET.fromstring(target_content)
+            root = DefusedET.fromstring(target_content)
         except ET.ParseError:
             return
 
@@ -711,7 +712,7 @@ class MeshBrowserWidget(QWidget):
         unique_meshes = MeshExtractor.get_unique_mesh_files(meshes)
 
         try:
-            root = ET.fromstring(target_content)
+            root = DefusedET.fromstring(target_content)
         except ET.ParseError:
             return
 

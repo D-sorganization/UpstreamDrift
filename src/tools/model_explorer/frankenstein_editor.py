@@ -8,11 +8,12 @@ of components between them.
 from __future__ import annotations
 
 import copy
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
@@ -57,7 +58,7 @@ class URDFModel:
     @classmethod
     def from_file(cls, file_path: Path) -> URDFModel:
         """Load a URDF model from file."""
-        tree = ET.parse(file_path)
+        tree = DefusedET.parse(file_path)
         root = tree.getroot()
         return cls.from_element(root, file_path)
 

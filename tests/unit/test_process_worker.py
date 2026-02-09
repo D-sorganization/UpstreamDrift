@@ -42,7 +42,9 @@ def test_run_success(mock_popen, worker):
     process = MagicMock()
     # readline returns lines then empty string
     process.stdout.readline.side_effect = ["line1\n", "line2\n", ""]
-    process.communicate.return_value = ("", "")
+    # stderr.read() must return a real string, not MagicMock, because
+    # finished_signal.emit(int, str) validates the type
+    process.stderr.read.return_value = ""
     process.returncode = 0
     process.poll.return_value = 0
 

@@ -7,11 +7,12 @@ changing attachment points, and managing end effector configurations.
 from __future__ import annotations
 
 import copy
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DefusedET
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -183,17 +184,17 @@ class EndEffectorLibrary:
         definition = self._builtin_definitions[key]
 
         # Parse link XML
-        link_elem = ET.fromstring(definition["link_xml"].strip())
+        link_elem = DefusedET.fromstring(definition["link_xml"].strip())
 
         # Parse child links
         child_links = []
         for link_xml in definition["child_links"]:
-            child_links.append(ET.fromstring(link_xml.strip()))
+            child_links.append(DefusedET.fromstring(link_xml.strip()))
 
         # Parse child joints
         child_joints = []
         for joint_xml in definition["child_joints"]:
-            child_joints.append(ET.fromstring(joint_xml.strip()))
+            child_joints.append(DefusedET.fromstring(joint_xml.strip()))
 
         return EndEffector(
             name=definition["name"],
@@ -233,7 +234,7 @@ class EndEffectorLibrary:
             Extracted end effector, or None if not found
         """
         try:
-            root = ET.fromstring(urdf_content)
+            root = DefusedET.fromstring(urdf_content)
         except ET.ParseError:
             return None
 
@@ -542,7 +543,7 @@ class EndEffectorManagerWidget(QWidget):
             return
 
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:
             return
 
@@ -648,7 +649,7 @@ class EndEffectorManagerWidget(QWidget):
             return
 
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:
             return
 
@@ -713,7 +714,7 @@ class EndEffectorManagerWidget(QWidget):
 
         try:
             content = Path(file_path).read_text(encoding="utf-8")
-            root = ET.fromstring(content)
+            root = DefusedET.fromstring(content)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load file: {e}")
             return
@@ -780,7 +781,7 @@ class EndEffectorManagerWidget(QWidget):
 
         # Get available links for attachment
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:
             return
 
@@ -801,7 +802,7 @@ class EndEffectorManagerWidget(QWidget):
     def _attach_end_effector(self, ee: EndEffector, config: dict[str, Any]) -> None:
         """Attach an end effector to the model."""
         try:
-            root = ET.fromstring(self.urdf_content)
+            root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:
             return
 

@@ -11,9 +11,17 @@ import pytest
 mock_opensim = MagicMock()
 sys.modules["opensim"] = mock_opensim
 
-from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-    OpenSimPhysicsEngine,
-)
+# Also patch OPENSIM_AVAILABLE so the engine module picks up the mock
+with patch("src.shared.python.engine_availability.OPENSIM_AVAILABLE", True):
+    from src.engines.physics_engines.opensim.python import (  # noqa: E402
+        opensim_physics_engine as osim_module,
+    )
+    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+        OpenSimPhysicsEngine,
+    )
+
+    # Force the module-level opensim reference to use our mock
+    osim_module.opensim = mock_opensim
 
 
 def teardown_module(module):
@@ -26,8 +34,8 @@ def teardown_module(module):
 def engine():
     # Reset mock_opensim for each test
     mock_opensim.reset_mock()
-    # Ensure the mock is not None-like
-    mock_opensim.__bool__ = lambda: True
+    # Ensure the engine module's opensim ref points to our mock
+    osim_module.opensim = mock_opensim
     return OpenSimPhysicsEngine()
 
 
@@ -38,35 +46,16 @@ def test_initialization(engine):
 def test_load_from_path(engine):
     path = "test_model.osim"
 
-    # Mock os.path.exists
+    mock_model = MagicMock()
+    mock_model.getName.return_value = "TestModel"
+    mock_opensim.Model.return_value = mock_model
+
     with patch("os.path.exists", return_value=True):
-        # Mock OpenSim Model and Manager
-        mock_model = MagicMock()
-        mock_model.getName.return_value = "TestModel"
+        engine.load_from_path(path)
 
-        # Need to add the engines module hierarchy to sys.modules for patching to work
-        with patch.dict(
-            sys.modules,
-            {
-                "engines": MagicMock(),
-                "engines.physics_engines": MagicMock(),
-                "engines.physics_engines.opensim": MagicMock(),
-                "engines.physics_engines.opensim.python": MagicMock(),
-                "engines.physics_engines.opensim.python.opensim_physics_engine": MagicMock(),
-            },
-        ):
-            # Patch the opensim module in the engine module
-            with patch(
-                "engines.physics_engines.opensim.python.opensim_physics_engine.opensim",
-                mock_opensim,
-            ):
-                mock_opensim.Model.return_value = mock_model
-
-                engine.load_from_path(path)
-
-                mock_opensim.Model.assert_called_with(path)
-                mock_model.initSystem.assert_called_once()
-                assert engine.model_name == "TestModel"
+    mock_opensim.Model.assert_called_with(path)
+    mock_model.initSystem.assert_called_once()
+    assert engine.model_name == "TestModel"
 
 
 @patch("tempfile.NamedTemporaryFile")
