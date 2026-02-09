@@ -364,6 +364,15 @@ def main() -> None:
     # Use advanced GUI by default
     win = AdvancedGolfAnalysisWindow()
 
+    # Add AI Chat dock widget (connects to FastAPI chat server)
+    try:
+        from src.shared.python.ai.gui.chat_dock_widget import ChatDockWidget
+
+        chat_dock = ChatDockWidget(engine_context="mujoco", parent=win)
+        win.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, chat_dock)
+    except Exception:
+        pass  # Server not running — engine works fine without chat
+
     win.show()
     sys.exit(app.exec())
 

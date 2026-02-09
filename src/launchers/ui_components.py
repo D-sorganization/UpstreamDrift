@@ -6,7 +6,6 @@ to improve the modularity and maintainability of the launcher.
 
 from __future__ import annotations
 
-import os
 import subprocess
 import time
 from pathlib import Path
@@ -45,6 +44,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.docker_manager import DockerBuildThread
 from src.shared.python.logging_config import get_logger
 from src.shared.python.secure_subprocess import (
     secure_run,
@@ -590,64 +590,18 @@ class DockerCheckThread(QThread):
             self.result.emit(False)
 
 
-class DockerBuildThread(QThread):
-    log_signal = pyqtSignal(str)
-    finished_signal = pyqtSignal(bool, str)
-
-    def __init__(self, target_stage: str = "all") -> None:
-        super().__init__()
-        self.target_stage = target_stage
-
-    def run(self) -> None:
-        mujoco_path = REPOS_ROOT / "src/engines/physics_engines/mujoco"
-        if not mujoco_path.exists():
-            self.finished_signal.emit(False, f"Path not found: {mujoco_path}")
-            return
-
-        cmd = [
-            "docker",
-            "build",
-            "-t",
-            DOCKER_IMAGE_NAME,
-            "--target",
-            self.target_stage,
-            "--progress=plain",
-            ".",
-        ]
-        self.log_signal.emit(f"Starting build for {self.target_stage}...")
-
-        try:
-            process = subprocess.Popen(
-                cmd,
-                cwd=str(mujoco_path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
-                creationflags=(
-                    subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
-                    if os.name == "nt"
-                    else 0
-                ),
-            )
-
-            if process.stdout:
-                for line in iter(process.stdout.readline, ""):
-                    self.log_signal.emit(line.strip())
-
-            process.wait()
-            self.finished_signal.emit(process.returncode == 0, "Build finished.")
-        except Exception as e:
-            self.finished_signal.emit(False, str(e))
-
-
 class EnvironmentDialog(QDialog):
     """Dialog to manage Docker environment and view dependencies."""
+
+    _DOCKER_CONTEXT = REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco"
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Manage Environment")
         self.resize(700, 500)
+        self.build_thread: DockerBuildThread | None = None
+        self._build_start_time: float = 0.0
+        self._elapsed_timer_id: int | None = None
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -663,9 +617,19 @@ class EnvironmentDialog(QDialog):
         build_layout.addWidget(QLabel("Target Stage:"))
         build_layout.addWidget(self.combo_stage)
 
-        btn_build = QPushButton("Build Environment")
-        btn_build.clicked.connect(self.start_build)
-        build_layout.addWidget(btn_build)
+        btn_row = QHBoxLayout()
+        self.btn_build = QPushButton("Build Environment")
+        self.btn_build.clicked.connect(self.start_build)
+        btn_row.addWidget(self.btn_build)
+
+        self.btn_cancel = QPushButton("Cancel Build")
+        self.btn_cancel.setEnabled(False)
+        self.btn_cancel.clicked.connect(self._cancel_build)
+        btn_row.addWidget(self.btn_cancel)
+        build_layout.addLayout(btn_row)
+
+        self.build_status_label = QLabel("")
+        build_layout.addWidget(self.build_status_label)
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
@@ -681,9 +645,52 @@ class EnvironmentDialog(QDialog):
 
     def start_build(self) -> None:
         self.console.clear()
-        self.build_thread = DockerBuildThread(self.combo_stage.currentText())
-        self.build_thread.log_signal.connect(self.console.append)
+        self.btn_build.setEnabled(False)
+        self.btn_cancel.setEnabled(True)
+        self._build_start_time = time.monotonic()
+        self._elapsed_timer_id = self.startTimer(1000)
+        self.build_status_label.setText("Building...")
+
+        self.build_thread = DockerBuildThread(
+            target_stage=self.combo_stage.currentText(),
+            image_name=DOCKER_IMAGE_NAME,
+            context_path=self._DOCKER_CONTEXT,
+        )
+        self.build_thread.log_signal.connect(self._on_build_log)
+        self.build_thread.finished_signal.connect(self._on_build_finished)
         self.build_thread.start()
+
+    def _on_build_log(self, line: str) -> None:
+        self.console.append(line)
+        # Auto-scroll to bottom
+        sb = self.console.verticalScrollBar()
+        if sb:
+            sb.setValue(sb.maximum())
+
+    def _on_build_finished(self, success: bool, message: str) -> None:
+        self.btn_build.setEnabled(True)
+        self.btn_cancel.setEnabled(False)
+        if self._elapsed_timer_id is not None:
+            self.killTimer(self._elapsed_timer_id)
+            self._elapsed_timer_id = None
+        elapsed = time.monotonic() - self._build_start_time
+        status = "SUCCESS" if success else "FAILED"
+        self.build_status_label.setText(f"Build {status} ({elapsed:.0f}s): {message}")
+        self.console.append(f"\n=== Build {status} ({elapsed:.0f}s) ===")
+
+    def _cancel_build(self) -> None:
+        if self.build_thread and self.build_thread.isRunning():
+            self.build_thread.terminate()
+            self.build_status_label.setText("Build cancelled.")
+            self.btn_build.setEnabled(True)
+            self.btn_cancel.setEnabled(False)
+            if self._elapsed_timer_id is not None:
+                self.killTimer(self._elapsed_timer_id)
+                self._elapsed_timer_id = None
+
+    def timerEvent(self, event: Any) -> None:
+        elapsed = time.monotonic() - self._build_start_time
+        self.build_status_label.setText(f"Building... ({elapsed:.0f}s elapsed)")
 
 
 class SettingsDialog(QDialog):
@@ -831,9 +838,19 @@ class SettingsDialog(QDialog):
         stage_row.addWidget(self.combo_stage)
         build_inner.addLayout(stage_row)
 
-        btn_build = QPushButton("Build Environment")
-        btn_build.clicked.connect(self._start_build)
-        build_inner.addWidget(btn_build)
+        btn_row = QHBoxLayout()
+        self._btn_build = QPushButton("Build Environment")
+        self._btn_build.clicked.connect(self._start_build)
+        btn_row.addWidget(self._btn_build)
+
+        self._btn_cancel_build = QPushButton("Cancel")
+        self._btn_cancel_build.setEnabled(False)
+        self._btn_cancel_build.clicked.connect(self._cancel_build)
+        btn_row.addWidget(self._btn_cancel_build)
+        build_inner.addLayout(btn_row)
+
+        self._build_status = QLabel("")
+        build_inner.addWidget(self._build_status)
 
         self.build_console = QTextEdit()
         self.build_console.setReadOnly(True)
@@ -1116,9 +1133,57 @@ class SettingsDialog(QDialog):
 
     def _start_build(self) -> None:
         self.build_console.clear()
-        self.build_thread = DockerBuildThread(self.combo_stage.currentText())
-        self.build_thread.log_signal.connect(self.build_console.append)
+        self._btn_build.setEnabled(False)
+        self._btn_cancel_build.setEnabled(True)
+        self._build_start_time = time.monotonic()
+        self._build_timer_id = self.startTimer(1000)
+        self._build_status.setText("Building...")
+
+        context = REPOS_ROOT / "src" / "engines" / "physics_engines" / "mujoco"
+        self.build_thread = DockerBuildThread(
+            target_stage=self.combo_stage.currentText(),
+            image_name=DOCKER_IMAGE_NAME,
+            context_path=context,
+        )
+        self.build_thread.log_signal.connect(self._on_build_log)
+        self.build_thread.finished_signal.connect(self._on_build_finished)
         self.build_thread.start()
+
+    def _on_build_log(self, line: str) -> None:
+        self.build_console.append(line)
+        sb = self.build_console.verticalScrollBar()
+        if sb:
+            sb.setValue(sb.maximum())
+
+    def _on_build_finished(self, success: bool, message: str) -> None:
+        self._btn_build.setEnabled(True)
+        self._btn_cancel_build.setEnabled(False)
+        if hasattr(self, "_build_timer_id") and self._build_timer_id is not None:
+            self.killTimer(self._build_timer_id)
+            self._build_timer_id = None
+        elapsed = time.monotonic() - self._build_start_time
+        status = "SUCCESS" if success else "FAILED"
+        self._build_status.setText(f"Build {status} ({elapsed:.0f}s): {message}")
+        self.build_console.append(f"\n=== Build {status} ({elapsed:.0f}s) ===")
+
+    def _cancel_build(self) -> None:
+        if (
+            hasattr(self, "build_thread")
+            and self.build_thread
+            and self.build_thread.isRunning()
+        ):
+            self.build_thread.terminate()
+            self._build_status.setText("Build cancelled.")
+            self._btn_build.setEnabled(True)
+            self._btn_cancel_build.setEnabled(False)
+            if hasattr(self, "_build_timer_id") and self._build_timer_id is not None:
+                self.killTimer(self._build_timer_id)
+                self._build_timer_id = None
+
+    def timerEvent(self, event: Any) -> None:
+        if hasattr(self, "_build_start_time"):
+            elapsed = time.monotonic() - self._build_start_time
+            self._build_status.setText(f"Building... ({elapsed:.0f}s elapsed)")
 
 
 class HelpDialog(QDialog):
