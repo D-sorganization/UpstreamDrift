@@ -33,6 +33,7 @@ from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )
+from src.shared.python.pose_estimation.joint_angle_utils import compute_joint_angles
 from src.shared.python.signal_processing import KalmanFilter
 
 logger = get_logger(__name__)
@@ -322,61 +323,20 @@ class MediaPipeEstimator(PoseEstimator):
     ) -> dict[str, float]:
         """Convert 3D keypoints to joint angles for biomechanical analysis.
 
+        Computes elbow, shoulder, hip, and knee flexion angles plus
+        trunk rotation (X-factor) using shared utility.
+
         Args:
-            keypoints_3d: 3D keypoint positions
+            keypoints_3d: 3D keypoint positions keyed by MediaPipe names.
 
         Returns:
-            Dictionary of joint angles in radians
+            Dictionary of joint angles in radians.
         """
-        joint_angles = {}
-
-        # Calculate key joint angles for golf swing analysis
         try:
-            # Right elbow flexion (example calculation)
-            if all(
-                k in keypoints_3d
-                for k in ["right_shoulder", "right_elbow", "right_wrist"]
-            ):
-                shoulder = keypoints_3d["right_shoulder"]
-                elbow = keypoints_3d["right_elbow"]
-                wrist = keypoints_3d["right_wrist"]
-
-                # Vector from elbow to shoulder
-                v1 = shoulder - elbow
-                # Vector from elbow to wrist
-                v2 = wrist - elbow
-
-                # Calculate angle between vectors
-                cos_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-                cos_angle = np.clip(cos_angle, -1.0, 1.0)  # Handle numerical errors
-                angle = np.arccos(cos_angle)
-
-                joint_angles["right_elbow_flexion"] = angle
-
-            # Left elbow flexion
-            if all(
-                k in keypoints_3d for k in ["left_shoulder", "left_elbow", "left_wrist"]
-            ):
-                shoulder = keypoints_3d["left_shoulder"]
-                elbow = keypoints_3d["left_elbow"]
-                wrist = keypoints_3d["left_wrist"]
-
-                v1 = shoulder - elbow
-                v2 = wrist - elbow
-
-                cos_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-                cos_angle = np.clip(cos_angle, -1.0, 1.0)
-                angle = np.arccos(cos_angle)
-
-                joint_angles["left_elbow_flexion"] = angle
-
-            # Add more joint angle calculations as needed
-            # (shoulder flexion, hip flexion, knee flexion, etc.)
-
+            return compute_joint_angles(keypoints_3d)
         except Exception as e:
             logger.warning(f"Error calculating joint angles: {e}")
-
-        return joint_angles
+            return {}
 
     def reset_temporal_state(self) -> None:
         """Reset temporal smoothing state (call between videos)."""
