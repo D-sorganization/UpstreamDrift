@@ -11,8 +11,12 @@
             "path": "src/tools/model_explorer/launch_model_explorer.py",
             "logo": "urdf_icon.svg",
             "status": "utility",
-            "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
-            "order": 1,
+            "capabilities": [
+                "model_browsing",
+                "urdf_generation",
+                "open_in_engine"
+            ],
+            "order": 1
         },
         {
             "id": "mujoco_unified",
@@ -37,9 +41,9 @@
                 "wrench",
                 "screw_theory",
                 "video_export",
-                "dataset_export",
+                "dataset_export"
             ],
-            "order": 2,
+            "order": 2
         },
         {
             "id": "drake_golf",
@@ -56,9 +60,9 @@
                 "optimization",
                 "contact",
                 "mass_matrix",
-                "jacobian",
+                "jacobian"
             ],
-            "order": 3,
+            "order": 3
         },
         {
             "id": "pinocchio_golf",
@@ -74,9 +78,9 @@
                 "rigid_body",
                 "inverse_kinematics",
                 "mass_matrix",
-                "jacobian",
+                "jacobian"
             ],
-            "order": 4,
+            "order": 4
         },
         {
             "id": "opensim_golf",
@@ -93,9 +97,9 @@
                 "inverse_kinematics",
                 "muscle_analysis",
                 "mass_matrix",
-                "jacobian",
+                "jacobian"
             ],
-            "order": 5,
+            "order": 5
         },
         {
             "id": "myosim_suite",
@@ -112,9 +116,9 @@
                 "muscle_control",
                 "neural_activation",
                 "mass_matrix",
-                "jacobian",
+                "jacobian"
             ],
-            "order": 6,
+            "order": 6
         },
         {
             "id": "putting_green",
@@ -126,8 +130,12 @@
             "engine_type": "putting_green",
             "logo": "putting_green.svg",
             "status": "simulator",
-            "capabilities": ["surface_modeling", "ball_physics", "terrain"],
-            "order": 7,
+            "capabilities": [
+                "surface_modeling",
+                "ball_physics",
+                "terrain"
+            ],
+            "order": 7
         },
         {
             "id": "matlab_unified",
@@ -138,8 +146,12 @@
             "path": "src/launchers/matlab_launcher_unified.py",
             "logo": "matlab_logo.svg",
             "status": "external",
-            "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
-            "order": 8,
+            "capabilities": [
+                "simscape_2d",
+                "simscape_3d",
+                "analysis_tools"
+            ],
+            "order": 8
         },
         {
             "id": "motion_capture",
@@ -150,8 +162,13 @@
             "path": "src/launchers/motion_capture_launcher.py",
             "logo": "c3d_icon.svg",
             "status": "utility",
-            "capabilities": ["c3d_viewer", "openpose", "mediapipe", "pose_estimation"],
-            "order": 9,
+            "capabilities": [
+                "c3d_viewer",
+                "openpose",
+                "mediapipe",
+                "pose_estimation"
+            ],
+            "order": 9
         },
         {
             "id": "video_analyzer",
@@ -166,9 +183,9 @@
                 "video_processing",
                 "pose_estimation",
                 "motion_tracking",
-                "frame_analysis",
+                "frame_analysis"
             ],
-            "order": 10,
+            "order": 10
         },
         {
             "id": "data_explorer",
@@ -179,8 +196,13 @@
             "path": "src/tools/data_explorer/data_explorer_app.py",
             "logo": "data_explorer.svg",
             "status": "utility",
-            "capabilities": ["data_import", "filtering", "visualization", "export"],
-            "order": 11,
+            "capabilities": [
+                "data_import",
+                "filtering",
+                "visualization",
+                "export"
+            ],
+            "order": 11
         },
         {
             "id": "project_map",
@@ -191,8 +213,12 @@
             "path": "docs/PROJECT_MAP.md",
             "logo": "golf_logo.svg",
             "status": "utility",
-            "capabilities": ["documentation", "feature_discovery", "project_overview"],
-            "order": 12,
-        },
-    ],
+            "capabilities": [
+                "documentation",
+                "feature_discovery",
+                "project_overview"
+            ],
+            "order": 12
+        }
+    ]
 }

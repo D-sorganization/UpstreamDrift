@@ -7,9 +7,12 @@ engine-vs-API consistency testing.
 from __future__ import annotations
 
 import pytest
-from fastapi.testclient import TestClient
 
-from src.api.server import app
+try:
+    from fastapi.testclient import TestClient
+    from src.api.server import app
+except ImportError as _exc:
+    pytest.skip(f"API server deps not available: {_exc}", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")

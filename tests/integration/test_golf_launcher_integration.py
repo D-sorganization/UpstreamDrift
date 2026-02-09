@@ -127,6 +127,8 @@ mock_widgets.QVBoxLayout = MockQWidget
 mock_widgets.QHBoxLayout = MockQWidget
 mock_widgets.QGridLayout = MockQWidget
 mock_widgets.QMessageBox = MagicMock()
+mock_widgets.QDockWidget = MagicMock()
+mock_widgets.QLineEdit = MockQWidget
 
 
 @pytest.fixture(scope="module", autouse=True)

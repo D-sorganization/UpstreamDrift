@@ -267,15 +267,18 @@ class TestGolfLauncherLogic:
         import sys
 
         # Remove from sys.modules to force a fresh import that picks up the mocks
-        # This avoids potential ImportErrors with reload() if the module wasn't previously loaded
         sys.modules.pop("src.launchers.golf_launcher", None)
+
+        # Also ensure QDockWidget in the mocked QtWidgets is a plain MagicMock
+        qt_widgets_mod = sys.modules.get("PyQt6.QtWidgets")
+        if qt_widgets_mod is not None:
+            qt_widgets_mod.QDockWidget = MagicMock()
 
         import src.launchers.golf_launcher  # noqa: F401
 
         # Patch QDockWidget AFTER import so it overrides the real reference
-        with patch.object(src.launchers.golf_launcher, "QDockWidget", MagicMock()):
-            yield
-        # patch.dict handles sys.modules restoration automatically
+        src.launchers.golf_launcher.QDockWidget = MagicMock()
+        yield
 
     @patch("src.shared.python.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
