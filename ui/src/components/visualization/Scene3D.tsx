@@ -1,13 +1,40 @@
+/**
+ * Scene3D - 3D visualization of golf swing simulation.
+ *
+ * Renders either a URDF model (when available) or falls back to
+ * hardcoded capsule/sphere geometry. Supports joint angle animation,
+ * club trajectory trails, and force/torque overlays.
+ *
+ * See issue #1201
+ */
+
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import type { SimulationFrame } from '@/api/client';
+import { URDFViewer } from './URDFViewer';
+import type { URDFModel } from './URDFViewer';
 
 interface Props {
   engine: string;
   frame: SimulationFrame | null;
   frames?: SimulationFrame[];
+  /** Optional URDF model to render instead of hardcoded geometry. See issue #1201 */
+  urdfModel?: URDFModel | null;
+  /** Whether to show joint axes on the URDF model */
+  showJointAxes?: boolean;
+  /** Force vectors to display as overlays. See issue #1179 */
+  forceOverlays?: ForceOverlay[];
+}
+
+/** Force/torque overlay data for visualization. See issue #1179 */
+export interface ForceOverlay {
+  origin: [number, number, number];
+  direction: [number, number, number];
+  magnitude: number;
+  color?: string;
+  label?: string;
 }
 
 // Store trajectory history for trail visualization
@@ -150,13 +177,66 @@ function ClubTrajectory({ frames }: { frames?: SimulationFrame[] }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function Scene3D({ engine: _engine, frame, frames }: Props) {
-  // Note: _engine prop is currently unused but kept in props for API compatibility.
-  // Using a stable key instead of key={engine} to avoid expensive Canvas recreation
-  // on engine changes. The Canvas persists and scene content updates based on new data.
-  // If a full reset is needed when switching engines, consider resetting frame/frames state
-  // in the parent component instead of remounting the entire Canvas.
+/**
+ * ForceArrow renders a single force/torque vector as an arrow.
+ * See issue #1179
+ */
+function ForceArrow({ overlay }: { overlay: ForceOverlay }) {
+  const arrowRef = useRef<THREE.Group>(null);
+  const color = overlay.color ?? '#ff4444';
+  const scale = Math.min(overlay.magnitude * 0.01, 2.0); // Scale arrow length
+
+  const direction = useMemo(() => {
+    const dir = new THREE.Vector3(...overlay.direction).normalize();
+    return dir;
+  }, [overlay.direction]);
+
+  return (
+    <group ref={arrowRef} position={overlay.origin}>
+      {/* Arrow shaft */}
+      <mesh
+        position={direction.clone().multiplyScalar(scale * 0.5).toArray() as [number, number, number]}
+        quaternion={new THREE.Quaternion().setFromUnitVectors(
+          new THREE.Vector3(0, 1, 0),
+          direction,
+        )}
+      >
+        <cylinderGeometry args={[0.01, 0.01, scale, 8]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      {/* Arrow head */}
+      <mesh
+        position={direction.clone().multiplyScalar(scale).toArray() as [number, number, number]}
+        quaternion={new THREE.Quaternion().setFromUnitVectors(
+          new THREE.Vector3(0, 1, 0),
+          direction,
+        )}
+      >
+        <coneGeometry args={[0.03, 0.08, 8]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </group>
+  );
+}
+
+export function Scene3D({
+  // Note: engine prop reserved for future engine-specific rendering.
+  engine: _engine, // eslint-disable-line @typescript-eslint/no-unused-vars
+  frame,
+  frames,
+  urdfModel,
+  showJointAxes = false,
+  forceOverlays,
+}: Props) {
+  // Build joint angles from frame for URDF model
+  const urdfJointAngles = useMemo(() => {
+    if (!frame?.analysis?.joint_angles) return undefined;
+    return frame.analysis.joint_angles;
+  }, [frame]);
+
+  // Determine whether to use URDF model or fallback
+  const useURDF = urdfModel != null && urdfModel.links.length > 0;
+
   return (
     <div
       role="img"
@@ -187,8 +267,22 @@ export function Scene3D({ engine: _engine, frame, frames }: Props) {
         fadeDistance={30}
       />
 
-      <GolferModel frame={frame} />
+      {/* See issue #1201: Use URDF model when available, fallback to capsule geometry */}
+      {useURDF ? (
+        <URDFViewer
+          model={urdfModel}
+          jointAngles={urdfJointAngles}
+          showAxes={showJointAxes}
+        />
+      ) : (
+        <GolferModel frame={frame} />
+      )}
       <ClubTrajectory frames={frames} />
+
+      {/* See issue #1179: Force/torque overlays */}
+      {forceOverlays?.map((overlay, idx) => (
+        <ForceArrow key={idx} overlay={overlay} />
+      ))}
 
       {/* Add axes for reference */}
       <axesHelper args={[1]} />

@@ -35,12 +35,14 @@ from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
 from .routes import analysis as analysis_routes
+from .routes import analysis_tools as analysis_tools_routes
 from .routes import auth as auth_routes
 from .routes import core as core_routes
 from .routes import dataset as dataset_routes
 from .routes import engines as engine_routes
 from .routes import export as export_routes
 from .routes import launcher as launcher_routes
+from .routes import models as model_routes
 from .routes import physics as physics_routes
 from .routes import simulation as simulation_routes
 from .routes import terrain as terrain_routes
@@ -284,6 +286,8 @@ app.include_router(launcher_routes.router)
 app.include_router(terrain_routes.router)
 app.include_router(dataset_routes.router)
 app.include_router(physics_routes.router)
+app.include_router(model_routes.router)
+app.include_router(analysis_tools_routes.router)
 
 
 if __name__ == "__main__":

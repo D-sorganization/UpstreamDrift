@@ -283,3 +283,212 @@ class TrajectoryRecordResponse(BaseModel):
     frame_count: int = Field(..., description="Frames recorded so far")
     status: str = Field(..., description="Status message")
     export_path: str | None = Field(None, description="Path to exported file")
+
+
+# ──────────────────────────────────────────────────────────────
+#  Phase 3: URDF/MJCF Rendering, Analysis Tools, Simulation Controls
+#  (#1201, #1203, #1179)
+# ──────────────────────────────────────────────────────────────
+
+
+class URDFLinkGeometry(BaseModel):
+    """Geometry descriptor for a single URDF link visual.
+
+    See issue #1201
+    """
+
+    link_name: str = Field(..., description="Name of the link")
+    geometry_type: str = Field(
+        ..., description="Geometry type: box, cylinder, sphere, or mesh"
+    )
+    dimensions: dict[str, float] = Field(
+        default_factory=dict,
+        description="Geometry dimensions (size, radius, length, etc.)",
+    )
+    origin: list[float] = Field(
+        default_factory=lambda: [0.0, 0.0, 0.0],
+        description="Translation [x, y, z]",
+    )
+    rotation: list[float] = Field(
+        default_factory=lambda: [0.0, 0.0, 0.0],
+        description="Rotation [roll, pitch, yaw] in radians",
+    )
+    color: list[float] = Field(
+        default_factory=lambda: [0.5, 0.5, 0.5, 1.0],
+        description="RGBA color [r, g, b, a]",
+    )
+    mesh_path: str | None = Field(None, description="Path to mesh file if type=mesh")
+
+
+class URDFJointDescriptor(BaseModel):
+    """Descriptor for a single URDF joint.
+
+    See issue #1201
+    """
+
+    name: str = Field(..., description="Joint name")
+    joint_type: str = Field(
+        ..., description="Joint type: revolute, prismatic, fixed, continuous, floating"
+    )
+    parent_link: str = Field(..., description="Parent link name")
+    child_link: str = Field(..., description="Child link name")
+    origin: list[float] = Field(
+        default_factory=lambda: [0.0, 0.0, 0.0],
+        description="Joint origin [x, y, z]",
+    )
+    rotation: list[float] = Field(
+        default_factory=lambda: [0.0, 0.0, 0.0],
+        description="Joint orientation [roll, pitch, yaw]",
+    )
+    axis: list[float] = Field(
+        default_factory=lambda: [0.0, 0.0, 1.0],
+        description="Joint rotation axis [x, y, z]",
+    )
+    lower_limit: float | None = Field(None, description="Lower position limit (rad)")
+    upper_limit: float | None = Field(None, description="Upper position limit (rad)")
+
+
+class URDFModelResponse(BaseModel):
+    """Response model for parsed URDF model data.
+
+    Provides all the information needed to render the model
+    in the frontend Three.js scene without direct XML parsing.
+
+    See issue #1201
+    """
+
+    model_name: str = Field(..., description="Name of the robot model")
+    links: list[URDFLinkGeometry] = Field(..., description="Visual geometries for links")
+    joints: list[URDFJointDescriptor] = Field(..., description="Joint descriptors")
+    root_link: str = Field(..., description="Root link name (no parent)")
+    urdf_raw: str | None = Field(
+        None, description="Raw URDF XML for advanced clients"
+    )
+
+
+class ModelListResponse(BaseModel):
+    """Response model for listing available models.
+
+    See issue #1201
+    """
+
+    models: list[dict[str, str]] = Field(
+        ..., description="List of available models with name and format"
+    )
+
+
+class AnalysisMetricsSummary(BaseModel):
+    """Response model for aggregated analysis metrics.
+
+    Provides statistical summary of simulation metrics over time.
+
+    See issue #1203
+    """
+
+    metric_name: str = Field(..., description="Name of the metric")
+    current: float = Field(..., description="Current value")
+    minimum: float = Field(..., description="Minimum observed value")
+    maximum: float = Field(..., description="Maximum observed value")
+    mean: float = Field(..., description="Mean value over time window")
+    std_dev: float = Field(0.0, description="Standard deviation")
+
+
+class AnalysisStatisticsResponse(BaseModel):
+    """Response model for analysis statistics endpoint.
+
+    See issue #1203
+    """
+
+    sim_time: float = Field(..., description="Current simulation time")
+    sample_count: int = Field(..., description="Number of samples collected")
+    metrics: list[AnalysisMetricsSummary] = Field(
+        ..., description="Statistical summaries per metric"
+    )
+    time_series: dict[str, list[float]] | None = Field(
+        None, description="Time series data for plotting (metric_name -> values)"
+    )
+
+
+class DataExportResponse(BaseModel):
+    """Response model for data export.
+
+    See issue #1203
+    """
+
+    format: str = Field(..., description="Export format (csv, json)")
+    filename: str = Field(..., description="Generated filename")
+    size_bytes: int = Field(..., description="File size in bytes")
+    download_url: str = Field(..., description="URL to download the file")
+    record_count: int = Field(..., description="Number of records exported")
+
+
+class BodyPositionRequest(BaseModel):
+    """Request for positioning a body in the simulation.
+
+    See issue #1179
+    """
+
+    body_name: str = Field(..., description="Name of the body to position")
+    position: list[float] | None = Field(
+        None, description="Target position [x, y, z]"
+    )
+    rotation: list[float] | None = Field(
+        None, description="Target rotation [roll, pitch, yaw] in radians"
+    )
+
+
+class BodyPositionResponse(BaseModel):
+    """Response model for body positioning.
+
+    See issue #1179
+    """
+
+    body_name: str = Field(..., description="Name of the positioned body")
+    position: list[float] = Field(..., description="Applied position [x, y, z]")
+    rotation: list[float] = Field(
+        ..., description="Applied rotation [roll, pitch, yaw]"
+    )
+    status: str = Field(..., description="Status message")
+
+
+class MeasurementResult(BaseModel):
+    """Response model for measurement between bodies.
+
+    See issue #1179
+    """
+
+    body_a: str = Field(..., description="First body name")
+    body_b: str = Field(..., description="Second body name")
+    distance: float = Field(..., description="Euclidean distance (m)")
+    position_a: list[float] = Field(..., description="Position of body A [x, y, z]")
+    position_b: list[float] = Field(..., description="Position of body B [x, y, z]")
+    delta: list[float] = Field(
+        ..., description="Position difference [dx, dy, dz]"
+    )
+
+
+class JointAngleDisplay(BaseModel):
+    """Response model for joint angle display.
+
+    See issue #1179
+    """
+
+    joint_name: str = Field(..., description="Joint name")
+    angle_rad: float = Field(..., description="Joint angle in radians")
+    angle_deg: float = Field(..., description="Joint angle in degrees")
+    velocity: float = Field(0.0, description="Joint velocity (rad/s)")
+    torque: float = Field(0.0, description="Applied torque (N*m)")
+
+
+class MeasurementToolsResponse(BaseModel):
+    """Response model for measurement tools data.
+
+    See issue #1179
+    """
+
+    joint_angles: list[JointAngleDisplay] = Field(
+        ..., description="All joint angle displays"
+    )
+    measurements: list[MeasurementResult] = Field(
+        default_factory=list, description="Distance measurements"
+    )

@@ -296,3 +296,81 @@ class TrajectoryRecordRequest(BaseModel):
                 f"Unknown action '{v}'. Valid actions: start, stop, export"
             )
         return normalized
+
+
+# ──────────────────────────────────────────────────────────────
+#  Phase 3: URDF/MJCF Rendering, Analysis Tools, Simulation Controls
+#  (#1201, #1203, #1179)
+# ──────────────────────────────────────────────────────────────
+
+VALID_EXPORT_DOWNLOAD_FORMATS = {"csv", "json"}
+
+
+class DataExportRequest(BaseModel):
+    """Request model for data export.
+
+    Preconditions:
+        - format must be csv or json
+
+    See issue #1203
+    """
+
+    format: str = Field("csv", description="Export format (csv, json)")
+    include_metrics: bool = Field(True, description="Include metrics data")
+    include_time_series: bool = Field(True, description="Include time series")
+    time_range: list[float] | None = Field(
+        None, description="Optional time range [start, end] in seconds"
+    )
+
+    @field_validator("format")
+    @classmethod
+    def validate_format(cls, v: str) -> str:
+        """Precondition: format must be a supported export format."""
+        normalized = v.lower().strip()
+        if normalized not in VALID_EXPORT_DOWNLOAD_FORMATS:
+            raise ValueError(
+                f"Unsupported format '{v}'. "
+                f"Supported: {sorted(VALID_EXPORT_DOWNLOAD_FORMATS)}"
+            )
+        return normalized
+
+
+class BodyPositionUpdateRequest(BaseModel):
+    """Request model for updating body position in simulation.
+
+    See issue #1179
+    """
+
+    body_name: str = Field(..., description="Name of the body to reposition")
+    position: list[float] | None = Field(
+        None, description="New position [x, y, z]"
+    )
+    rotation: list[float] | None = Field(
+        None, description="New rotation [roll, pitch, yaw] in radians"
+    )
+
+    @field_validator("position")
+    @classmethod
+    def validate_position(cls, v: list[float] | None) -> list[float] | None:
+        """Precondition: position must have 3 elements."""
+        if v is not None and len(v) != 3:
+            raise ValueError("Position must be [x, y, z] (3 elements)")
+        return v
+
+    @field_validator("rotation")
+    @classmethod
+    def validate_rotation(cls, v: list[float] | None) -> list[float] | None:
+        """Precondition: rotation must have 3 elements."""
+        if v is not None and len(v) != 3:
+            raise ValueError("Rotation must be [roll, pitch, yaw] (3 elements)")
+        return v
+
+
+class MeasurementRequest(BaseModel):
+    """Request model for distance measurement between bodies.
+
+    See issue #1179
+    """
+
+    body_a: str = Field(..., description="First body name")
+    body_b: str = Field(..., description="Second body name")
