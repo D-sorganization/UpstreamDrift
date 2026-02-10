@@ -40,6 +40,7 @@ from .routes import analysis as analysis_routes
 from .routes import analysis_tools as analysis_tools_routes
 from .routes import auth as auth_routes
 from .routes import core as core_routes
+from .routes import data_explorer as data_explorer_routes
 from .routes import dataset as dataset_routes
 from .routes import engines as engine_routes
 from .routes import export as export_routes
@@ -47,7 +48,9 @@ from .routes import force_overlays as force_overlay_routes
 from .routes import launcher as launcher_routes
 from .routes import model_explorer as model_explorer_routes
 from .routes import models as model_routes
+from .routes import motion_capture as motion_capture_routes
 from .routes import physics as physics_routes
+from .routes import putting_green as putting_green_routes
 from .routes import simulation as simulation_routes
 from .routes import terrain as terrain_routes
 from .routes import video as video_routes
@@ -297,6 +300,10 @@ app.include_router(force_overlay_routes.router)
 app.include_router(actuator_controls_routes.router)
 app.include_router(model_explorer_routes.router)
 app.include_router(aip_routes.router)
+# Phase 5: Tool pages - Putting Green, Data Explorer, Motion Capture (#1206)
+app.include_router(putting_green_routes.router)
+app.include_router(data_explorer_routes.router)
+app.include_router(motion_capture_routes.router)
 
 
 if __name__ == "__main__":
