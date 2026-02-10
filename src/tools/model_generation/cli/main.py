@@ -12,16 +12,16 @@ import logging
 import sys
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s: %(message)s",
-)
-logger = logging.getLogger(__name__)
+from src.shared.python.logger_utils import get_logger
+from src.shared.python.logging_config import setup_logging as _setup_logging
+
+# Configure logging using centralized config
+_setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 
 def setup_logging(verbose: bool = False, quiet: bool = False) -> None:
-    """Configure logging level."""
+    """Configure logging level based on CLI flags."""
     if quiet:
         logging.getLogger().setLevel(logging.ERROR)
     elif verbose:

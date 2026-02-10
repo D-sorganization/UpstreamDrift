@@ -1,5 +1,11 @@
 """Unified theme system for UpstreamDrift.
 
+Source of Truth: UpstreamDrift (this repository)
+Consumers:
+    - Tools repo: src/shared/theme/ (vendored copy)
+    - Gasification_Model: vendor/ud-tools/ (vendored copy)
+Cross-repo install: pip install upstream-drift-shared[theme]
+
 This package provides a consistent, sophisticated visual identity across
 all components of the application:
 
