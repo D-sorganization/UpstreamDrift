@@ -29,7 +29,9 @@ from fastapi.testclient import TestClient  # noqa: E402
 # ---------------------------------------------------------------------------
 
 API_ROUTES_DIR = Path(__file__).parent.parent.parent.parent / "src" / "api" / "routes"
-API_SERVER_FILE = Path(__file__).parent.parent.parent.parent / "src" / "api" / "server.py"
+API_SERVER_FILE = (
+    Path(__file__).parent.parent.parent.parent / "src" / "api" / "server.py"
+)
 
 # Route modules that previously had configure() + module-level globals
 MIGRATED_ROUTE_MODULES = [
@@ -86,10 +88,7 @@ class TestNoConfigure:
             if isinstance(node, ast.Call):
                 func = node.func
                 # Look for <name>.configure(...) calls
-                if (
-                    isinstance(func, ast.Attribute)
-                    and func.attr == "configure"
-                ):
+                if isinstance(func, ast.Attribute) and func.attr == "configure":
                     configure_calls.append(node.lineno)
         assert not configure_calls, (
             f"server.py still contains configure() calls at lines {configure_calls}. "

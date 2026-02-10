@@ -10,8 +10,6 @@ See issue #1201, #1203, #1179
 
 from __future__ import annotations
 
-import math
-
 import pytest
 from pydantic import ValidationError
 
@@ -24,7 +22,6 @@ from src.api.models.responses import (
     AnalysisMetricsSummary,
     AnalysisStatisticsResponse,
     BodyPositionResponse,
-    DataExportResponse,
     JointAngleDisplay,
     MeasurementResult,
     MeasurementToolsResponse,
@@ -33,7 +30,6 @@ from src.api.models.responses import (
     URDFLinkGeometry,
     URDFModelResponse,
 )
-
 
 # ──────────────────────────────────────────────────────────────
 #  Contract Tests: URDF Model Responses (#1201)
