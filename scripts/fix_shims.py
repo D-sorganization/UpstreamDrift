@@ -48,7 +48,9 @@ def get_public_names(module_path: Path) -> list[str]:
                 if isinstance(target, ast.Name) and target.id == "__all__":
                     if isinstance(node.value, ast.List):
                         for elt in node.value.elts:
-                            if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                            if isinstance(elt, ast.Constant) and isinstance(
+                                elt.value, str
+                            ):
                                 if elt.value not in names:
                                     names.append(elt.value)
 
@@ -101,12 +103,16 @@ def fix_shim_file(shim_path: Path) -> bool:
 
     # Build new content
     docstring_match = re.search(r'(""".*?""")', content, re.DOTALL)
-    docstring = docstring_match.group(1) if docstring_match else f'"""Backward compatibility shim for {module_name}."""'
+    docstring = (
+        docstring_match.group(1)
+        if docstring_match
+        else f'"""Backward compatibility shim for {module_name}."""'
+    )
 
     # Format the explicit imports
     import_lines = ",\n".join(f"    {name}" for name in names)
 
-    new_content = f'''{docstring}
+    new_content = f"""{docstring}
 
 import sys as _sys
 
@@ -117,7 +123,7 @@ from {import_from} import (  # noqa: F401
 from {parent_path} import {module_name} as _real_module  # noqa: E402
 
 _sys.modules[__name__] = _real_module
-'''
+"""
 
     shim_path.write_text(new_content, encoding="utf-8")
     print(f"  FIXED: {shim_path.name} ({len(names)} exports from {import_from})")
