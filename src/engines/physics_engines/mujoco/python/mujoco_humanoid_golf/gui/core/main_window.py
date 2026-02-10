@@ -18,6 +18,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from src.shared.python.dashboard.widgets import LivePlotWidget
 from src.shared.python.logging_config import get_logger
 from src.shared.python.ui.overlay import OverlayWidget
+from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 
 from ...advanced_gui_methods import AdvancedGuiMethodsMixin
 from ...grip_modelling_tab import GripModellingTab
@@ -34,7 +35,7 @@ from ..tabs.visualization_tab import VisualizationTab
 logger = get_logger(__name__)
 
 
-class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin):
+class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     """Professional golf swing analysis application with comprehensive features."""
 
     SIMPLIFIED_ACTUATOR_THRESHOLD: typing.Final[int] = 60
@@ -487,3 +488,72 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             self.manipulation_tab.update_body_lists()
         if hasattr(self, "visualization_tab"):
             self.visualization_tab.update_body_list()
+
+    # ==================================================================
+    # SimulationGUIBase overrides
+    # ==================================================================
+
+    def _build_base_ui(self) -> None:
+        """Override base UI construction.
+
+        MuJoCo builds its own comprehensive tab-based UI in
+        ``_load_stylesheet``, so we skip the generic skeleton.
+        """
+        # No-op: MuJoCo builds its own UI entirely
+
+    def step_simulation(self) -> None:
+        """Advance the MuJoCo simulation by one step."""
+        self.sim_widget.step()
+
+    def reset_simulation(self) -> None:
+        """Reset the MuJoCo simulation state."""
+        self.sim_widget.reset_state()
+
+    def update_visualization(self) -> None:
+        """Refresh the MuJoCo visualization."""
+        self.sim_widget.update()
+
+    def load_model(self, index: int) -> None:
+        """Load a model at the given index via PhysicsTab."""
+        if hasattr(self, "physics_tab"):
+            self.physics_tab.model_combo.setCurrentIndex(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """Synchronize kinematic slider values with model state."""
+        if hasattr(self, "manipulation_tab"):
+            self.manipulation_tab.sync_sliders()
+
+    def start_recording(self) -> None:
+        """Start recording simulation data."""
+        recorder = self.sim_widget.get_recorder()
+        recorder.start_recording()
+
+    def stop_recording(self) -> None:
+        """Stop recording simulation data."""
+        recorder = self.sim_widget.get_recorder()
+        recorder.stop_recording()
+
+    def get_recording_frame_count(self) -> int:
+        """Return the number of recorded frames."""
+        recorder = self.sim_widget.get_recorder()
+        return recorder.get_num_frames()
+
+    def export_data(self, filename: str) -> None:
+        """Export recorded data to the given filename."""
+        recorder = self.sim_widget.get_recorder()
+        data_dict = recorder.export_to_dict()
+        try:
+            from src.shared.python.export import export_recording_all_formats
+
+            export_recording_all_formats(filename, data_dict)
+        except ImportError:
+            logger.warning("Export module not available")
+
+    def get_joint_names(self) -> list[str]:
+        """Return joint names from the MuJoCo model."""
+        if self.sim_widget.model is not None:
+            return [
+                self.sim_widget.model.joint(i).name
+                for i in range(self.sim_widget.model.njnt)
+            ]
+        return []
