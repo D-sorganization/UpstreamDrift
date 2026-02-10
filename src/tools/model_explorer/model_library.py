@@ -26,6 +26,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.security_utils import validate_url_scheme
+
 # Add project root to path for src imports when run as standalone script
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
@@ -364,6 +366,7 @@ class ModelLibrary:
         try:
             # Download URDF file
             logger.info(f"Downloading URDF: {model_info['urdf_url']}")
+            validate_url_scheme(model_info["urdf_url"])
             with urllib.request.urlopen(model_info["urdf_url"]) as response:
                 urdf_content = response.read().decode("utf-8")
                 urdf_path.write_text(urdf_content, encoding="utf-8")

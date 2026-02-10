@@ -14,6 +14,7 @@ from src.shared.python.common_utils import GolfModelingError
 from src.shared.python.constants import DEG_TO_RAD
 from src.shared.python.io_utils import ensure_directory
 from src.shared.python.logging_config import get_logger
+from src.shared.python.security_utils import validate_url_scheme
 
 logger = get_logger(__name__)
 
@@ -149,6 +150,7 @@ class StandardModelManager:
                 local_path = human_models_dir / local_filename
 
                 logger.info(f"Downloading {url} -> {local_path}")
+                validate_url_scheme(url)
                 urllib.request.urlretrieve(url, local_path)
 
             # Download mesh files (this is a simplified approach - in practice you'd want

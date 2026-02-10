@@ -328,14 +328,14 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 vels = np.asarray(vels)
                 n_joints = vels.shape[1] if len(vels) > 0 else 0
                 if n_joints >= 3:
-                    # Assume Pelvis (0), Thorax (1), Arm (2)...
+                    # Map first joints to generic proximal-to-distal labels
                     indices = {
-                        "Pelvis": 0,
-                        "Thorax": 1,
-                        "Arm": min(2, n_joints - 1),
+                        "proximal": 0,
+                        "mid_proximal": 1,
+                        "mid_distal": min(2, n_joints - 1),
                     }
                     if n_joints > 3:
-                        indices["Club"] = n_joints - 1
+                        indices["distal"] = n_joints - 1
                     self.plotter.plot_kinematic_sequence_bars(
                         self.static_canvas.fig, indices
                     )

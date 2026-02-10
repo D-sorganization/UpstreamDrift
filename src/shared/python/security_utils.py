@@ -1,6 +1,7 @@
 """Security utilities for path validation and subprocess hardening."""
 
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 def validate_path(
@@ -44,3 +45,28 @@ def validate_path(
             )
 
     return resolved_path
+
+
+def validate_url_scheme(
+    url: str,
+    allowed_schemes: tuple[str, ...] = ("http", "https"),
+) -> str:
+    """Validate that a URL uses an allowed scheme (SSRF prevention).
+
+    Args:
+        url: The URL to validate.
+        allowed_schemes: Tuple of allowed URL schemes.
+
+    Returns:
+        The validated URL string.
+
+    Raises:
+        ValueError: If the URL scheme is not in allowed_schemes.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in allowed_schemes:
+        raise ValueError(
+            f"URL scheme '{parsed.scheme}' is not allowed. "
+            f"Allowed schemes: {', '.join(allowed_schemes)}"
+        )
+    return url

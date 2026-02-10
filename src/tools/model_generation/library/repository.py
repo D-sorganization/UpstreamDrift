@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.security_utils import validate_url_scheme
+
 logger = logging.getLogger(__name__)
 
 
@@ -219,6 +221,7 @@ class GitHubRepository(Repository):
         api_url = f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{path}"
 
         try:
+            validate_url_scheme(api_url)
             req = urllib.request.Request(api_url)
             req.add_header("Accept", "application/vnd.github.v3+json")
 
@@ -262,6 +265,7 @@ class GitHubRepository(Repository):
         local_path = destination / filename
 
         try:
+            validate_url_scheme(urdf_url)
             urllib.request.urlretrieve(urdf_url, local_path)
             logger.info(f"Downloaded: {filename}")
 
@@ -283,6 +287,7 @@ class GitHubRepository(Repository):
         )
 
         try:
+            validate_url_scheme(api_url)
             req = urllib.request.Request(api_url)
             with urllib.request.urlopen(req, timeout=10) as response:
                 contents = json.loads(response.read().decode())
@@ -297,6 +302,7 @@ class GitHubRepository(Repository):
                         or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
                     )
                     local_file = local_mesh_dir / item["name"]
+                    validate_url_scheme(raw_url)
                     urllib.request.urlretrieve(raw_url, local_file)
 
         except Exception:
@@ -310,6 +316,7 @@ class GitHubRepository(Repository):
 
         try:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+                validate_url_scheme(archive_url)
                 urllib.request.urlretrieve(archive_url, tmp.name)
 
                 with zipfile.ZipFile(tmp.name, "r") as zf:

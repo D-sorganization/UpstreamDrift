@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from src.shared.python.analysis.dataclasses import (
-    CITATION_KINEMATIC_SEQUENCE,
+    CITATION_SEGMENT_TIMING,
     MethodCitation,
 )
 
@@ -40,8 +40,8 @@ class SegmentPeak:
 
 
 @dataclass
-class KinematicSequenceResult:
-    """Result of a kinematic sequence analysis."""
+class SegmentTimingResult:
+    """Result of a segment timing analysis."""
 
     peaks: list[SegmentPeak]
     sequence_order: list[str]  # Names in order of peak time
@@ -52,6 +52,10 @@ class KinematicSequenceResult:
     )  # Time diff between peaks
     is_valid_sequence: bool = False  # True if order matches expected
     methodology: MethodCitation | None = None
+
+
+# Backward-compatible alias
+KinematicSequenceResult = SegmentTimingResult
 
 
 class SegmentTimingAnalyzer:
@@ -76,7 +80,7 @@ class SegmentTimingAnalyzer:
         self,
         segment_velocities: dict[str, np.ndarray],
         times: np.ndarray,
-    ) -> KinematicSequenceResult:
+    ) -> SegmentTimingResult:
         """Analyze the kinematic sequence from velocity data.
 
         Args:
@@ -119,7 +123,7 @@ class SegmentTimingAnalyzer:
         # 3. Calculate extended metrics (Speed Gain, Deceleration)
         peak_map = {p.name: p for p in peaks}
 
-        # 3a. Speed Gain — requires expected_order to identify proximal segments
+        # 3a. Speed Gain â€” requires expected_order to identify proximal segments
         if self.expected_order:
             for i, name in enumerate(self.expected_order):
                 if name not in peak_map:
@@ -134,7 +138,7 @@ class SegmentTimingAnalyzer:
                                 current_peak.peak_velocity / proximal_peak.peak_velocity
                             )
 
-        # 3b. Deceleration Rate — computed for ALL segments (independent of expected_order)
+        # 3b. Deceleration Rate â€” computed for ALL segments (independent of expected_order)
         window_duration = 0.03  # 30ms post-peak window
         for name, peak_info in peak_map.items():
             if name in segment_velocities:
@@ -218,14 +222,14 @@ class SegmentTimingAnalyzer:
 
                 is_valid = sequence_consistency == 1.0 and len(peaks) >= 2
 
-        return KinematicSequenceResult(
+        return SegmentTimingResult(
             peaks=peaks,
             sequence_order=actual_order,
             expected_order=self.expected_order,
             sequence_consistency=sequence_consistency,
             timing_gaps=timing_gaps,
             is_valid_sequence=is_valid,
-            methodology=CITATION_KINEMATIC_SEQUENCE,
+            methodology=CITATION_SEGMENT_TIMING,
         )
 
     def extract_velocities_from_recorder(

@@ -5,84 +5,89 @@ from src.shared.python.kinematic_sequence import KinematicSequenceAnalyzer
 
 class TestKinematicSequence:
     def test_perfect_sequence(self) -> None:
-        """Test a perfectly ordered kinematic sequence."""
-        # Pelvis -> Torso -> Arm -> Club
+        """Test a perfectly ordered segment timing sequence."""
+        # proximal -> mid_proximal -> mid_distal -> distal
         times = np.linspace(0, 1, 100)
-
-        # Create peaks at different times
-        # 0.2, 0.4, 0.6, 0.8
 
         from typing import cast
 
         def gaussian(t: np.ndarray, center: float, width: float = 0.1) -> np.ndarray:
             return cast(np.ndarray, np.exp(-((t - center) ** 2) / (2 * width**2)))
 
-        vel_pelvis = gaussian(times, 0.2)
-        vel_torso = gaussian(times, 0.4)
-        vel_arm = gaussian(times, 0.6)
-        vel_club = gaussian(times, 0.8)
+        vel_proximal = gaussian(times, 0.2)
+        vel_mid_proximal = gaussian(times, 0.4)
+        vel_mid_distal = gaussian(times, 0.6)
+        vel_distal = gaussian(times, 0.8)
 
         data = {
-            "Pelvis": vel_pelvis,
-            "Torso": vel_torso,
-            "Arm": vel_arm,
-            "Club": vel_club,
+            "proximal": vel_proximal,
+            "mid_proximal": vel_mid_proximal,
+            "mid_distal": vel_mid_distal,
+            "distal": vel_distal,
         }
 
         analyzer = KinematicSequenceAnalyzer(
-            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+            expected_order=["proximal", "mid_proximal", "mid_distal", "distal"]
         )
         result = analyzer.analyze(data, times)
 
         assert result.is_valid_sequence
         assert result.sequence_consistency == 1.0
-        assert result.sequence_order == ["Pelvis", "Torso", "Arm", "Club"]
+        assert result.sequence_order == [
+            "proximal",
+            "mid_proximal",
+            "mid_distal",
+            "distal",
+        ]
         assert len(result.peaks) == 4
-        assert result.peaks[3].name == "Club"  # Last peak
+        assert result.peaks[3].name == "distal"  # Last peak
 
         # Check timing gaps
-        assert "Pelvis->Torso" in result.timing_gaps
-        gap = result.timing_gaps["Pelvis->Torso"]
+        assert "proximal->mid_proximal" in result.timing_gaps
+        gap = result.timing_gaps["proximal->mid_proximal"]
         assert abs(gap - 0.2) < 0.05
 
     def test_out_of_order_sequence(self) -> None:
-        """Test a sequence that is out of order (e.g., casting)."""
-        # Pelvis -> Arm -> Torso -> Club
-        # Arm fires before Torso
+        """Test a sequence that is out of order."""
         times = np.linspace(0, 1, 100)
 
-        vel_pelvis = np.zeros(100)
-        vel_pelvis[20] = 10.0  # t=0.2
+        vel_proximal = np.zeros(100)
+        vel_proximal[20] = 10.0
 
-        vel_arm = np.zeros(100)
-        vel_arm[40] = 10.0  # t=0.4
+        vel_mid_distal = np.zeros(100)
+        vel_mid_distal[40] = 10.0
 
-        vel_torso = np.zeros(100)
-        vel_torso[60] = 10.0  # t=0.6
+        vel_mid_proximal = np.zeros(100)
+        vel_mid_proximal[60] = 10.0
 
-        vel_club = np.zeros(100)
-        vel_club[80] = 10.0  # t=0.8
+        vel_distal = np.zeros(100)
+        vel_distal[80] = 10.0
 
         data = {
-            "Pelvis": vel_pelvis,
-            "Torso": vel_torso,
-            "Arm": vel_arm,
-            "Club": vel_club,
+            "proximal": vel_proximal,
+            "mid_proximal": vel_mid_proximal,
+            "mid_distal": vel_mid_distal,
+            "distal": vel_distal,
         }
 
         analyzer = KinematicSequenceAnalyzer(
-            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+            expected_order=["proximal", "mid_proximal", "mid_distal", "distal"]
         )
         result = analyzer.analyze(data, times)
 
         assert not result.is_valid_sequence
         assert result.sequence_consistency < 1.0
-        assert result.sequence_order == ["Pelvis", "Arm", "Torso", "Club"]
+        assert result.sequence_order == [
+            "proximal",
+            "mid_distal",
+            "mid_proximal",
+            "distal",
+        ]
 
     def test_missing_data(self) -> None:
         """Test with empty data."""
         times = np.linspace(0, 1, 100)
-        data = {"Pelvis": np.array([]), "Torso": np.array([])}
+        data = {"proximal": np.array([]), "mid_proximal": np.array([])}
 
         analyzer = KinematicSequenceAnalyzer()
         result = analyzer.analyze(data, times)
@@ -93,21 +98,21 @@ class TestKinematicSequence:
     def test_subset_of_segments(self) -> None:
         """Test with only a subset of expected segments."""
         times = np.linspace(0, 1, 100)
-        vel_pelvis = np.zeros(100)
-        vel_pelvis[20] = 1.0
-        vel_club = np.zeros(100)
-        vel_club[80] = 1.0
+        vel_proximal = np.zeros(100)
+        vel_proximal[20] = 1.0
+        vel_distal = np.zeros(100)
+        vel_distal[80] = 1.0
 
-        data = {"Pelvis": vel_pelvis, "Club": vel_club}
+        data = {"proximal": vel_proximal, "distal": vel_distal}
 
         analyzer = KinematicSequenceAnalyzer(
-            expected_order=["Pelvis", "Torso", "Arm", "Club"]
+            expected_order=["proximal", "mid_proximal", "mid_distal", "distal"]
         )
         result = analyzer.analyze(data, times)
 
-        assert result.is_valid_sequence  # Subsets that respect order are valid
+        assert result.is_valid_sequence
         assert result.sequence_consistency == 1.0
-        assert result.sequence_order == ["Pelvis", "Club"]
+        assert result.sequence_order == ["proximal", "distal"]
 
     def test_extract_velocities_helper(self) -> None:
         """Test extraction helper."""
@@ -115,17 +120,16 @@ class TestKinematicSequence:
         class MockRecorder:
             def get_time_series(self, key: str) -> tuple[np.ndarray, np.ndarray]:
                 if key == "joint_velocities":
-                    # 100 samples, 4 joints
                     return np.linspace(0, 1, 100), np.ones((100, 4))
                 return np.array([]), np.array([])
 
         recorder = MockRecorder()
-        indices = {"Pelvis": 0, "Torso": 1}
+        indices = {"proximal": 0, "mid_proximal": 1}
 
         analyzer = KinematicSequenceAnalyzer()
         data, times = analyzer.extract_velocities_from_recorder(recorder, indices)
 
         assert len(times) == 100
-        assert "Pelvis" in data
-        assert "Torso" in data
-        assert len(data["Pelvis"]) == 100
+        assert "proximal" in data
+        assert "mid_proximal" in data
+        assert len(data["proximal"]) == 100

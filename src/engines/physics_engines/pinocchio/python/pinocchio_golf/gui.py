@@ -354,8 +354,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.viewer: viz.Visualizer | None = None
         if MESHCAT_AVAILABLE:
             try:
-                # Force Meshcat to use port 7000 to match Docker exposure
-                # and bind to 0.0.0.0 to allow external connections
+                # Force Meshcat to use port 7000 to match Docker exposure.
+                # Note: Meshcat binds to localhost by default; 0.0.0.0 is
+                # only used inside Docker containers (see docker_manager.py).
                 try:
                     self.viewer = viz.Visualizer(server_args=["--port", "7000"])
                 except TypeError:
