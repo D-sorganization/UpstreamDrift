@@ -162,3 +162,137 @@ class ModelFittingRequest(BaseModel):
     parameters: dict[str, Any] = Field(
         default_factory=dict, description="Fitting parameters"
     )
+
+
+# ──────────────────────────────────────────────────────────────
+#  Phase 2: Shared Physics Backend API Requests (#1209, #1202)
+# ──────────────────────────────────────────────────────────────
+
+VALID_CONTROL_STRATEGIES = {
+    "zero",
+    "direct_torque",
+    "pd",
+    "pid",
+    "computed_torque",
+    "gravity_compensation",
+    "whole_body",
+    "impedance",
+}
+
+VALID_CAMERA_PRESETS = {"side", "front", "top", "follow_ball", "follow_club"}
+
+
+class ActuatorUpdateRequest(BaseModel):
+    """Request model for per-actuator parameter updates.
+
+    Preconditions:
+        - strategy must be a known control strategy
+        - torques, if provided, must be a list of floats
+        - gains must be positive when provided
+
+    See issue #1209
+    """
+
+    strategy: str | None = Field(
+        None, description="Control strategy (pd, pid, zero, etc.)"
+    )
+    torques: list[float] | None = Field(
+        None, description="Per-joint torque values"
+    )
+    kp: float | list[float] | None = Field(
+        None, description="Proportional gain(s)", gt=0
+    )
+    kd: float | list[float] | None = Field(
+        None, description="Derivative gain(s)", gt=0
+    )
+    ki: float | list[float] | None = Field(
+        None, description="Integral gain(s)", ge=0
+    )
+    target_positions: list[float] | None = Field(
+        None, description="Target joint positions (rad)"
+    )
+    target_velocities: list[float] | None = Field(
+        None, description="Target joint velocities (rad/s)"
+    )
+
+    @field_validator("strategy")
+    @classmethod
+    def validate_strategy(cls, v: str | None) -> str | None:
+        """Precondition: strategy must be a recognized control strategy."""
+        if v is None:
+            return v
+        normalized = v.lower().strip()
+        if normalized not in VALID_CONTROL_STRATEGIES:
+            raise ValueError(
+                f"Unknown strategy '{v}'. "
+                f"Valid strategies: {sorted(VALID_CONTROL_STRATEGIES)}"
+            )
+        return normalized
+
+
+class SpeedControlRequest(BaseModel):
+    """Request model for simulation speed control.
+
+    Preconditions:
+        - speed_factor must be in [0.1, 10.0]
+
+    See issue #1202
+    """
+
+    speed_factor: float = Field(
+        1.0,
+        description="Simulation speed multiplier (0.1x to 10x)",
+        ge=0.1,
+        le=10.0,
+    )
+
+
+class CameraPresetRequest(BaseModel):
+    """Request model for camera preset selection.
+
+    Preconditions:
+        - preset must be a known camera preset
+
+    See issue #1202
+    """
+
+    preset: str = Field(
+        ..., description="Camera preset (side, front, top, follow_ball, follow_club)"
+    )
+
+    @field_validator("preset")
+    @classmethod
+    def validate_preset(cls, v: str) -> str:
+        """Precondition: preset must be a recognized camera preset."""
+        normalized = v.lower().strip()
+        if normalized not in VALID_CAMERA_PRESETS:
+            raise ValueError(
+                f"Unknown preset '{v}'. "
+                f"Valid presets: {sorted(VALID_CAMERA_PRESETS)}"
+            )
+        return normalized
+
+
+class TrajectoryRecordRequest(BaseModel):
+    """Request model for trajectory recording control.
+
+    See issue #1202
+    """
+
+    action: str = Field(
+        ..., description="Recording action: start, stop, or export"
+    )
+    export_format: str = Field(
+        "json", description="Export format for trajectory data"
+    )
+
+    @field_validator("action")
+    @classmethod
+    def validate_action(cls, v: str) -> str:
+        """Precondition: action must be start, stop, or export."""
+        normalized = v.lower().strip()
+        if normalized not in {"start", "stop", "export"}:
+            raise ValueError(
+                f"Unknown action '{v}'. Valid actions: start, stop, export"
+            )
+        return normalized
