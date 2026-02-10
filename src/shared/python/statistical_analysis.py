@@ -376,7 +376,7 @@ class StatisticalAnalyzer(
         """Analyze the kinematic sequence of the swing.
 
         The kinematic sequence refers to the proximal-to-distal sequencing of
-        peak rotational velocities (e.g., Pelvis -> Thorax -> Arm -> Club).
+        peak rotational velocities (e.g., proximal -> mid_proximal -> mid_distal -> distal).
 
         Args:
             segment_indices: Dictionary mapping segment names to joint indices.
@@ -862,7 +862,7 @@ class StatisticalAnalyzer(
         else:
             efficiency_score = 0.0
 
-        # 5. Power Score (vectorized computation - 2-3× faster)
+        # 5. Power Score (vectorized computation - 2-3Ã— faster)
         # Peak total power
         power_score = 0.0
         if self.joint_torques.shape[1] > 0 and self.joint_velocities.shape[1] > 0:
@@ -1109,7 +1109,7 @@ class StatisticalAnalyzer(
             threshold_ratio: Threshold distance as ratio of max phase space diameter.
             metric: Distance metric (e.g., 'euclidean', 'cityblock').
             use_sparse: If True, uses cKDTree for O(n log n) memory-efficient
-                       computation instead of O(n²) dense matrix. Default False
+                       computation instead of O(nÂ²) dense matrix. Default False
                        for backward compatibility.
 
         Returns:
@@ -1135,7 +1135,7 @@ class StatisticalAnalyzer(
 
         N = len(normalized_state)
 
-        # PERFORMANCE FIX: Use cKDTree for large datasets to avoid O(n²) memory
+        # PERFORMANCE FIX: Use cKDTree for large datasets to avoid O(nÂ²) memory
         if use_sparse and metric == "euclidean" and N > 100:
             # Build KD-tree for efficient neighbor queries
             tree = cKDTree(normalized_state)
@@ -1165,7 +1165,7 @@ class StatisticalAnalyzer(
                 np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
             )
 
-        # Original O(n²) method for small datasets or non-euclidean metrics
+        # Original O(nÂ²) method for small datasets or non-euclidean metrics
         # 3. Compute Distance Matrix
         dists = pdist(normalized_state, metric=metric)
         dist_matrix = squareform(dists)

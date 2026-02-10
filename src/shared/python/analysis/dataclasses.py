@@ -40,7 +40,7 @@ class MethodCitation:
 # Pre-defined citations for reuse across the codebase (Section U1-U3)
 # ---------------------------------------------------------------------------
 
-CITATION_KINEMATIC_SEQUENCE = MethodCitation(
+CITATION_SEGMENT_TIMING = MethodCitation(
     name="Proximal-to-Distal Sequencing",
     authors="Putnam",
     year=1993,
@@ -48,6 +48,9 @@ CITATION_KINEMATIC_SEQUENCE = MethodCitation(
     doi="10.1016/0021-9290(93)90084-R",
     notes="User-supplied expected order; no proprietary methodology.",
 )
+
+# Backward-compatible alias
+CITATION_KINEMATIC_SEQUENCE = CITATION_SEGMENT_TIMING
 
 CITATION_X_FACTOR = MethodCitation(
     name="X-Factor",
@@ -114,14 +117,18 @@ class SwingPhase:
 
 
 @dataclass
-class KinematicSequenceInfo:
-    """Information about the kinematic sequence."""
+class SegmentTimingInfo:
+    """Information about segment timing in the kinematic chain."""
 
     segment_name: str
     peak_velocity: float
     peak_time: float
     peak_index: int
     order_index: int
+
+
+# Backward-compatible alias
+KinematicSequenceInfo = SegmentTimingInfo
 
 
 @dataclass

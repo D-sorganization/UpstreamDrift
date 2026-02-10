@@ -18,6 +18,8 @@ from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 
+from src.shared.python.security_utils import validate_url_scheme
+
 logger = logging.getLogger(__name__)
 
 
@@ -512,6 +514,7 @@ class ModelLibrary:
         try:
             import urllib.request
 
+            validate_url_scheme(api_url)
             with urllib.request.urlopen(api_url) as response:
                 contents = json.loads(response.read().decode())
 
@@ -535,6 +538,7 @@ class ModelLibrary:
                     # Check subdirectory for URDF
                     subdir_url = item["url"]
                     try:
+                        validate_url_scheme(subdir_url)
                         with urllib.request.urlopen(subdir_url) as sub_response:
                             sub_contents = json.loads(sub_response.read().decode())
                         for sub_item in sub_contents:
@@ -603,6 +607,7 @@ class ModelLibrary:
             urdf_filename = entry.source_url.split("/")[-1]
             local_path = cache_dir / urdf_filename
 
+            validate_url_scheme(entry.source_url)
             urllib.request.urlretrieve(entry.source_url, local_path)
 
             entry.urdf_path = local_path
