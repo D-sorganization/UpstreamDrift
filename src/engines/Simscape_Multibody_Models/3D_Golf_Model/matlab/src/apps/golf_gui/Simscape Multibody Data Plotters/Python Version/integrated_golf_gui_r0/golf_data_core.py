@@ -4,6 +4,7 @@ Golf Swing Visualizer - Core Data Structures and Processing
 High-performance data handling with optimized MATLAB loading and frame processing
 """
 
+import logging
 import threading
 import time
 import warnings
@@ -19,6 +20,8 @@ from golf_inverse_dynamics import (
     savitzky_golay_filter,
 )
 from numba import njit
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # OPTIMIZED DATA STRUCTURES
@@ -220,12 +223,12 @@ class MatlabDataLoader:
         datasets = {}
 
         for name, filepath in files.items():
-            print(f"[LOAD] Loading {name} from {filepath}...")
+            logger.info("[LOAD] Loading %s from %s...", name, filepath)
             try:
                 dataset = self._load_single_file(filepath, name)
                 datasets[name] = dataset
-                print(f"[OK] {name}: {len(dataset)} frames loaded")
-            except Exception as e:
+                logger.info("[OK] %s: %s frames loaded", name, len(dataset))
+            except (RuntimeError, TypeError, ValueError) as e:
                 raise RuntimeError(
                     f"[ERROR] Failed to load {name} from {filepath}: {e}"
                 ) from e
@@ -234,7 +237,7 @@ class MatlabDataLoader:
         self._validate_dataset_consistency(datasets)
 
         load_time = time.time() - start_time
-        print(f"[INFO] Total load time: {load_time:.2f}s")
+        logger.info("[INFO] Total load time: %ss", load_time)
 
         return datasets["BASEQ"], datasets["ZTCFQ"], datasets["DELTAQ"]
 
@@ -356,7 +359,7 @@ class MatlabDataLoader:
                         stacklevel=2,
                     )
 
-            except Exception as e:
+            except (ValueError, TypeError, RuntimeError) as e:
                 processed_vectors.append(np.zeros(3, dtype=np.float32))
                 warnings.warn(
                     f"Error processing vector at row {i} in {col_name}: {e}",
@@ -397,7 +400,7 @@ class MatlabDataLoader:
                     result = np.zeros(num_rows, dtype=np.float32)
                     result[: min(len(flattened), num_rows)] = flattened[:num_rows]
                     return result
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             warnings.warn(
                 f"Error processing scalar column {col_name}: {e}", stacklevel=2
             )
@@ -489,7 +492,7 @@ class FrameProcessor:
         """Invalidate cached dynamics data."""
         with self._dynamics_cache_lock:
             self.dynamics_cache = {}
-        print(f"Cache invalidated due to filter change to {self.current_filter}")
+        logger.info("Cache invalidated due to filter change to %s", self.current_filter)
 
     def get_frame_data(self, frame_idx: int) -> FrameData:
         """Get processed frame data, including calculated dynamics."""
@@ -519,7 +522,7 @@ class FrameProcessor:
 
         Note: Must be called while holding self._dynamics_cache_lock.
         """
-        print(f"Calculating dynamics with filter: {self.current_filter}...")
+        logger.info("Calculating dynamics with filter: %s...", self.current_filter)
         start_time = time.time()
 
         # Extract full position and orientation data
@@ -549,7 +552,7 @@ class FrameProcessor:
         )
 
         end_time = time.time()
-        print(f"Dynamics calculation took {end_time - start_time:.2f}s")
+        logger.info("Dynamics calculation took %ss", end_time - start_time)
 
     def _process_raw_frame(self, frame_idx: int) -> FrameData:
         """Process a single frame from raw data sources."""
@@ -601,7 +604,7 @@ class FrameProcessor:
             z_val = df.iloc[row_idx][z_col] if z_col in df.columns else 0.0
 
             return np.array([x_val, y_val, z_val], dtype=np.float32)
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             print(
                 f"Error extracting position vector for {prefix} from row {row_idx}: {e}"
             )
@@ -655,8 +658,8 @@ class FrameProcessor:
                         return np.array([data, 0, 0], dtype=np.float32)
             else:
                 return np.zeros(3, dtype=np.float32)
-        except Exception as e:
-            print(f"Error extracting {col_name} from row {row_idx}: {e}")
+        except ImportError as e:
+            logger.error("Error extracting %s from row %s: %s", col_name, row_idx, e)
             return np.zeros(3, dtype=np.float32)
 
     def get_num_frames(self) -> int:
@@ -931,7 +934,7 @@ if __name__ == "__main__":
         print(f"   Frame 0 valid: {frame_data.is_valid}")
         print(f"   Shaft length: {frame_data.shaft_length:.3f}")
 
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         print(f"\n📝 Note: MATLAB files not found for testing ({e})")
         print("   This is expected if running without data files")
 

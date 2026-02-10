@@ -126,7 +126,7 @@ def _simulation_start(
     try:
         if engine_manager and hasattr(engine_manager, "load_engine"):
             engine_manager.load_engine(engine_type)
-    except Exception as exc:
+    except (RuntimeError, ValueError, OSError) as exc:
         return {
             "status": "error",
             "message": f"Failed to load engine: {str(exc)}",
@@ -181,7 +181,7 @@ def _simulation_step(
                     engine.step()
             if engine and hasattr(engine, "get_state"):
                 state = engine.get_state()
-        except Exception as exc:
+        except (ValueError, RuntimeError, AttributeError) as exc:
             return {"status": "error", "message": str(exc)}
 
     return {
@@ -216,7 +216,7 @@ def _simulation_status(
                     "sim_time": state.get("time", 0.0),
                     "state_keys": list(state.keys()),
                 }
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
     return {"running": False, "engine": None, "sim_time": 0.0}
@@ -250,7 +250,7 @@ def _simulation_set_control(
                     "actuator_index": actuator_index,
                     "applied_value": value,
                 }
-        except Exception as exc:
+        except (ValueError, RuntimeError, AttributeError) as exc:
             return {"status": "error", "message": str(exc)}
 
     return {
@@ -312,7 +312,7 @@ def _model_query(
                     return {"joints": list(engine.joint_names)}
                 if property_name == "joints" and hasattr(engine, "get_joint_names"):
                     return {"joints": list(engine.get_joint_names())}
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
     return {"property": property_name, "data": None, "note": "No active model"}
@@ -335,7 +335,7 @@ def _model_list(
     try:
         models = _discover_models()
         return {"models": models, "count": len(models)}
-    except Exception as exc:
+    except (RuntimeError, ValueError, OSError) as exc:
         return {"models": [], "count": 0, "error": str(exc)}
 
 
@@ -367,7 +367,7 @@ def _analysis_metrics(
                     "velocities": state.get("velocities", []),
                     "torques": state.get("torques", []),
                 }
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
     return {"sim_time": 0.0, "note": "No active simulation"}

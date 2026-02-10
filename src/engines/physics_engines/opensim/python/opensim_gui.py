@@ -272,7 +272,7 @@ class OpenSimGolfGUI(QMainWindow):
                 f"OpenSim simulation is not yet fully implemented.\n\n{e}",
             )
             self.lbl_details.setText("Simulation not available - see error message.")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Simulation Error", str(e))
             self.lbl_details.setText("Error occurred - see error message.")
         finally:
@@ -347,7 +347,7 @@ class OpenSimGolfGUI(QMainWindow):
             try:
                 content = help_path.read_text(encoding="utf-8")
                 text_widget.setMarkdown(content)
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 text_widget.setPlainText(self._get_fallback_help())
         else:
             text_widget.setPlainText(self._get_fallback_help())

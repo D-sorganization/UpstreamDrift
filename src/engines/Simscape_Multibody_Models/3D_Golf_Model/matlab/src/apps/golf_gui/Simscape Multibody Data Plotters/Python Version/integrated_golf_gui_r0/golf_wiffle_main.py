@@ -4,6 +4,7 @@ Golf Swing Visualizer - Wiffle_ProV1 Main Application
 Enhanced main application with Excel data loading and advanced visualization
 """
 
+import logging
 import sys
 from pathlib import Path
 
@@ -30,6 +31,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from wiffle_data_loader import WiffleDataConfig, WiffleDataLoader
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # DATA LOADING THREAD
@@ -65,7 +68,7 @@ class DataLoadingThread(QThread):
             self.loadingProgress.emit("Data loading completed!")
             self.dataLoaded.emit(baseq, ztcfq, deltaq)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self.loadingError.emit(f"Error loading data: {str(e)}")
 
 
@@ -103,7 +106,7 @@ class WiffleGolfMainWindow(QMainWindow):
         # Auto-load default data if available
         self._try_auto_load_data()
 
-        print("🎯 Wiffle Golf Main Window initialized")
+        logger.info("🎯 Wiffle Golf Main Window initialized")
 
     def _create_ui(self):
         """Create the main user interface"""
@@ -552,7 +555,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
             self.metrics_label.setText(metrics_text)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self.metrics_label.setText(f"Error calculating metrics: {str(e)}")
 
     def _calculate_max_speed(self, data) -> float:
@@ -614,7 +617,7 @@ class WiffleGolfMainWindow(QMainWindow):
                 f"Distance: {distance:.3f}m"
             )
 
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             pass
 
     def _export_comparison(self):
@@ -656,7 +659,7 @@ class WiffleGolfMainWindow(QMainWindow):
                     self, "Export Complete", f"Data exported to {file_path}"
                 )
 
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QMessageBox.critical(
                     self, "Export Error", f"Error exporting data: {str(e)}"
                 )

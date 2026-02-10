@@ -127,7 +127,7 @@ class OpenSimMuscleAnalyzer:
                         # Moment arm = dL/dq (change in muscle length per unit coordinate change)
                         moment_arm = muscle.computeMomentArm(self.state, coord)
                         moment_arms[muscle_name][coord_name] = float(moment_arm)
-                    except Exception as e:
+                    except (RuntimeError, ValueError, OSError) as e:
                         logger.debug(
                             f"Could not compute moment arm for {muscle_name} about {coord_name}: {e}"
                         )
@@ -174,7 +174,7 @@ class OpenSimMuscleAnalyzer:
                     # Clamp to [0, 1]
                     activation_clamped = max(0.0, min(1.0, activation))
                     muscle.setActivation(self.state, activation_clamped)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning(f"Could not set activation for {muscle_name}: {e}")
 
     def compute_muscle_joint_torques(self) -> dict[str, np.ndarray]:
@@ -348,7 +348,7 @@ class OpenSimGripModel:
 
             logger.info(f"Added cylindrical wrap for {muscle_name} on {grip_body_name}")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to add wrap geometry: {e}")
 
     def compute_grip_constraint_forces(

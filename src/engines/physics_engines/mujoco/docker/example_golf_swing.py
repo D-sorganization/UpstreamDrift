@@ -1,5 +1,9 @@
+import logging
+
 import imageio
 from dm_control import suite
+
+logger = logging.getLogger(__name__)
 
 # Define key poses for a golf swing (simplified kinematic targets)
 # The CMU humanoid has 56 joints. We will target major joints for the swing.
@@ -89,7 +93,7 @@ def get_cmu_joint_names(env) -> list[str]:
     try:
         names = env.physics.named.data.qpos.axes.row.names
         return list(names)
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         return []
 
 
@@ -104,18 +108,18 @@ def interpolate_pose(start_pose, end_pose, alpha) -> dict[str, float]:
 
 def main() -> None:
     """Run the golf swing example."""
-    print("Loading humanoid_CMU:stand task...")
+    logger.info("Loading humanoid_CMU:stand task...")
     try:
         env = suite.load(domain_name="humanoid_CMU", task_name="stand")
-    except Exception as e:
-        print(f"Error loading humanoid_CMU: {e}")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Error loading humanoid_CMU: %s", e)
         return
 
     # Print available joints to help debugging/tuning
-    print("Available joints (qpos lines):")
+    logger.info("Available joints (qpos lines):")
     joint_names = get_cmu_joint_names(env)
     for name in joint_names:
-        print(name)
+        logger.info("%s", name)
 
     # Initialize simulation
     env.reset()
@@ -126,7 +130,7 @@ def main() -> None:
     # Current state of joints (starts at 0)
     current_pose: dict[str, float] = {}
 
-    print("Simulating golf swing...")
+    logger.info("Simulating golf swing...")
 
     total_steps = 0
     for i, phase_name in enumerate(SWING_SEQUENCE):
@@ -152,7 +156,7 @@ def main() -> None:
                 try:
                     if joint_name in env.physics.named.data.qpos:
                         env.physics.named.data.qpos[joint_name] = angle
-                except Exception:
+                except (RuntimeError, ValueError, AttributeError):
                     pass
 
             # Kinematics update (computes geoms/sites positions from qpos)
@@ -167,18 +171,18 @@ def main() -> None:
             frames.append(pixels)
             total_steps += 1
 
-        print(f"Completed phase: {phase_name}")
+        logger.info("Completed phase: %s", phase_name)
 
-    print(f"Captured {len(frames)} frames.")
+    logger.info("Captured %s frames.", len(frames))
 
     filename = "humanoid_golf_swing.mp4"
     imageio.mimsave(filename, frames, fps=30)
-    print(f"Saved to {filename}")
+    logger.info("Saved to %s", filename)
 
 
 def colorize_humanoid(env) -> None:
     """Apply custom colors to the humanoid key body parts."""
-    print("Applying custom outfit colors...")
+    logger.info("Applying custom outfit colors...")
     # Colors (R, G, B, A)
     BLUE_SHIRT = [0.0, 0.0, 1.0, 1.0]
     BROWN_PANTS = [0.6, 0.3, 0.0, 1.0]
@@ -243,8 +247,8 @@ def colorize_humanoid(env) -> None:
             elif any(part in name for part in ["foot", "feet", "toe", "ankle"]):
                 env.physics.model.geom_rgba[i] = BLACK_SHOES
 
-    except Exception as e:
-        print(f"Error coloring model: {e}")
+    except ImportError as e:
+        logger.error("Error coloring model: %s", e)
 
 
 if __name__ == "__main__":

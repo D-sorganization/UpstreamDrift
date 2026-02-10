@@ -141,7 +141,7 @@ class SinusoidFitter:
             )
             success = True
             message = "Fit converged successfully"
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -297,7 +297,7 @@ class ExponentialFitter:
             )
             success = True
             message = "Fit converged"
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -367,7 +367,7 @@ class ExponentialFitter:
             )
             success = True
             message = "Fit converged"
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -598,7 +598,7 @@ class CustomFunctionFitter:
             )
             success = True
             message = "Fit converged"
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -807,7 +807,7 @@ class FunctionFitter:
                     results[candidate] = self.fit_exponential_decay(signal)
                 elif candidate == "exp_growth":
                     results[candidate] = self.fit_exponential_growth(signal)
-            except Exception:
+            except (RuntimeError, TypeError, ValueError):
                 continue
 
         if not results:

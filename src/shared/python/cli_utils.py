@@ -606,6 +606,6 @@ def run_main(
         logger.info("Interrupted by user")
         return 130
 
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Error: {e}")
         return 1

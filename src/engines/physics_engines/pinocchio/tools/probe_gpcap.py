@@ -1,7 +1,10 @@
 """Probe .gpcap file structure."""
 
+import logging
 import struct
 import sys
+
+logger = logging.getLogger(__name__)
 
 
 def probe(filepath: str) -> None:
@@ -23,7 +26,7 @@ def probe(filepath: str) -> None:
                 if i - len(s) >= 4:
                     pre_bytes = data[i - len(s) - 4 : i - len(s)]
                     pre_value = struct.unpack("<I", pre_bytes)[0]
-                    print(f"  Preceding 4 bytes (int): {pre_value}")
+                    logger.info("  Preceding 4 bytes (int): %s", pre_value)
 
             current_string = []
 

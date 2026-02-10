@@ -76,7 +76,7 @@ class AnalysisService:
                 export_path="",
             )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Analysis failed: {e}", exc_info=True)
             return AnalysisResponse(
                 analysis_type=request.analysis_type,
@@ -135,7 +135,7 @@ class AnalysisService:
                 result["metadata"]["engine_type"] = type(engine).__name__
                 result["metadata"]["data_source"] = "engine"
 
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(f"Could not extract kinematics from engine: {e}")
                 result["metadata"]["engine_error"] = str(e)
                 result["metadata"]["data_source"] = "none"
@@ -194,7 +194,7 @@ class AnalysisService:
                 result["metadata"]["engine_type"] = type(engine).__name__
                 result["metadata"]["data_source"] = "engine"
 
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(f"Could not extract kinetics from engine: {e}")
                 result["metadata"]["engine_error"] = str(e)
                 result["metadata"]["data_source"] = "none"
@@ -259,7 +259,7 @@ class AnalysisService:
                 result["metadata"]["engine_type"] = type(engine).__name__
                 result["metadata"]["data_source"] = "engine"
 
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(f"Could not extract energetics from engine: {e}")
                 result["metadata"]["engine_error"] = str(e)
                 result["metadata"]["data_source"] = "none"
@@ -321,7 +321,7 @@ class AnalysisService:
                 result["metadata"]["engine_type"] = type(engine).__name__
                 result["metadata"]["data_source"] = "engine"
 
-            except Exception as e:
+            except ImportError as e:
                 logger.warning(f"Could not analyze swing sequence from engine: {e}")
                 result["metadata"]["engine_error"] = str(e)
                 result["metadata"]["data_source"] = "none"

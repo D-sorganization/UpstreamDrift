@@ -139,7 +139,7 @@ class VideoExporter:
             self.frame_count = 0
             return True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to start video recording: {e}")
             return False
 
@@ -267,7 +267,7 @@ class VideoExporter:
             self.finish_recording(output_path)
             return True
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed during video export: {e}")
             self.finish_recording()
             return False
@@ -332,7 +332,7 @@ def create_metrics_overlay(
 
             cv2.putText(frame, text, (10, y_offset), font, font_scale, color, thickness)
             y_offset += line_height
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             # Skip metric if extraction fails
             pass
 
@@ -424,7 +424,7 @@ def export_simulation_video(
                         vel = jacp @ data.qvel
                         speed = np.linalg.norm(vel) * 2.237  # m/s to mph
                         metrics["Club Speed"] = lambda d, s=speed: int(s)  # type: ignore[assignment]
-                except Exception:
+                except (ValueError, TypeError, RuntimeError):
                     # Ignore club speed if club head not found
                     pass
 
@@ -454,7 +454,7 @@ def export_simulation_video(
         exporter.finish_recording(output_path)
         return True
 
-    except Exception as e:
+    except (ValueError, TypeError, RuntimeError) as e:
         logger.error(f"Failed to export simulation video: {e}")
         exporter.finish_recording()
         return False

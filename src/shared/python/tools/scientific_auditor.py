@@ -90,7 +90,7 @@ def run_audit(target_path: Path) -> list[dict[str, object]]:
         try:
             tree = ast.parse(py_file.read_text(encoding="utf-8"))
             auditor.visit(tree)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to audit {py_file}: {e}")
 
     return auditor.risks

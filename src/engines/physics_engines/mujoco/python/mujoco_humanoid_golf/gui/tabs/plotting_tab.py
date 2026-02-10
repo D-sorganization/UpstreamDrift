@@ -397,7 +397,7 @@ class PlottingTab(QtWidgets.QWidget):
             self.current_plot_canvas = canvas
             self.plot_container_layout.addWidget(canvas)
 
-        except Exception as e:
+        except ImportError as e:
             QtWidgets.QMessageBox.critical(
                 self,
                 "Plot Error",

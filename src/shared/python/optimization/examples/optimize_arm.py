@@ -160,7 +160,7 @@ def main() -> None:
         print(f"Trajectory saved to {out_file_q}, {out_file_v}, and {out_file_u}")
         print("\nTest passed: CasADi + Pinocchio integration is working.")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CasADi solver may raise various errors
         print("\nFAILURE: Optimization failed.")
         print(e)
         # Debug info

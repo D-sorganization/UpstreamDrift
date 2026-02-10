@@ -280,7 +280,7 @@ class VideoProcessor:
             else:
                 cv2.imwrite(output_path, frame)
             return True
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             logger.error(f"Failed to export frame: {e}")
             return False
 
@@ -322,7 +322,7 @@ class VideoProcessor:
             logger.info(f"Exported clip to: {output_path}")
             return True
 
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             logger.error(f"Failed to export clip: {e}")
             return False
 

@@ -154,7 +154,7 @@ class DraggableTabWidget(QTabWidget):
                 self.addTab(widget, tab_name)
                 self.setCurrentIndex(self.count() - 1)
                 del self.closed_tabs[tab_name]
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to reopen tab '{tab_name}': {e}")
 
     def reopen_all_closed_tabs(self) -> None:

@@ -100,7 +100,7 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
             )
             try:
                 engine.load_from_path(str(urdf_path))
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(
                     f"Failed to load default URDF into Drake (expected if missing meshes): {e}"
                 )

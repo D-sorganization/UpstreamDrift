@@ -265,7 +265,7 @@ class OutputManager:
             )
             return file_path
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(
                 "simulation_save_failed",
                 filename=filename,
@@ -312,7 +312,7 @@ class OutputManager:
                 if callback:
                     callback(path)
                 return path
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 if callback:
                     callback(e)
                 raise
@@ -425,7 +425,7 @@ class OutputManager:
             elif format_type == OutputFormat.PARQUET:
                 return pd.read_parquet(file_path)
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Error loading simulation results: {e}")
             raise
 
@@ -518,7 +518,7 @@ class OutputManager:
             logger.info(f"Analysis report exported to: {file_path}")
             return file_path
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Error exporting analysis report: {e}")
             raise
 

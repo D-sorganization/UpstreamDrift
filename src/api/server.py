@@ -276,7 +276,7 @@ async def startup_event() -> None:
     except RuntimeError as e:
         logger.error("Engine initialization failed: %s", e)
         raise
-    except Exception as e:
+    except (TypeError, AttributeError) as e:
         logger.exception("Unexpected error during API initialization: %s", e)
         raise
 

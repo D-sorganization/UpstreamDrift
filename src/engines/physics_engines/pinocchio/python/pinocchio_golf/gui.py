@@ -389,7 +389,7 @@ class PinocchioGUI(SimulationGUIBase):
                     self.log_write("Open this URL in your browser:")
                     self.log_write(f"{host_url}")
                     self.log_write("=" * 40)
-                except Exception:
+                except (PermissionError, OSError):
                     logger.info("Could not determine host URL from: %s", url)
             except (ConnectionError, OSError, RuntimeError) as exc:
                 logger.error(f"Failed to initialize Meshcat viewer: {exc}")
@@ -438,7 +438,7 @@ class PinocchioGUI(SimulationGUIBase):
                     self.available_models.append(
                         {"name": f"URDF: {name}", "path": str(urdf_file)}
                     )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to scan URDF models: {e}")
 
     def _setup_ui(self) -> None:
@@ -965,7 +965,7 @@ class PinocchioGUI(SimulationGUIBase):
             QtWidgets.QMessageBox.information(self, "Export Complete", msg)
             self.log_write(f"Data exported to {filename}")
 
-        except Exception as e:
+        except ImportError as e:
             self.log_write(f"Error exporting data: {e}")
             logger.exception("Export failed")
 
@@ -1070,7 +1070,7 @@ class PinocchioGUI(SimulationGUIBase):
                 self.collision_model = pin.buildGeomFromUrdf(
                     self.model, fname, pin.GeometryType.COLLISION
                 )
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 self.log_write(f"Warning: Failed to load geometries: {e}")
                 self.visual_model = None
                 self.collision_model = None
@@ -1107,7 +1107,7 @@ class PinocchioGUI(SimulationGUIBase):
                     )
                     self.viz.initViewer(viewer=self.viewer, open=False)
                     self.viz.loadViewerModel()
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     self.log_write(f"Warning: Visualizer init failed: {e}")
                     self.viz = None
             else:
@@ -1139,7 +1139,7 @@ class PinocchioGUI(SimulationGUIBase):
 
         except (ValueError, RuntimeError) as e:
             self.log_write(f"Error loading URDF (Pinocchio): {e}")
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             # Catch-all for unexpected errors
             self.log_write(f"Unexpected error loading URDF: {e}")
             logger.exception("Unexpected error loading URDF")
@@ -1546,14 +1546,14 @@ class PinocchioGUI(SimulationGUIBase):
             s = np.linalg.svd(J, compute_uv=False)
             cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
             self.lbl_cond.setText(f"{cond:.2f}")
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             self.lbl_cond.setText("Error")
 
         M = pin.crba(self.model, self.data, self.q)
         try:
             rank = np.linalg.matrix_rank(M)
             self.lbl_rank.setText(f"{rank} / {self.model.nv}")
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             self.lbl_rank.setText("Error")
 
     def _draw_ellipsoids(self) -> None:
@@ -1569,7 +1569,7 @@ class PinocchioGUI(SimulationGUIBase):
         # Clear previous ellipsoids to prevent ghosting
         try:
             self.viewer["overlays/ellipsoids"].delete()
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():

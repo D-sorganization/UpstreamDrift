@@ -316,7 +316,7 @@ class ModelGenerationAPI:
                 request.query_params.update(params)
                 try:
                     return route.handler(request)
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     logger.exception("Error handling request")
                     return APIResponse.error(str(e), 500)
 
@@ -507,7 +507,7 @@ class ModelGenerationAPI:
 
         try:
             urdf_string = converter.mjcf_to_urdf(content)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return APIResponse.error(f"Conversion failed: {e}", 422)
 
         robot_name = body.get("robot_name", "converted")
@@ -534,7 +534,7 @@ class ModelGenerationAPI:
 
         try:
             mjcf_string = converter.urdf_to_mjcf(content)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return APIResponse.error(f"Conversion failed: {e}", 422)
 
         robot_name = body.get("robot_name", "converted")
@@ -614,7 +614,7 @@ class ModelGenerationAPI:
 
         try:
             model = parser.parse(content)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return APIResponse.error(f"Parse failed: {e}", 422)
 
         root = model.get_root_link()
@@ -675,7 +675,7 @@ class ModelGenerationAPI:
             else:
                 return APIResponse.error(f"Unknown shape: {shape}")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return APIResponse.error(f"Calculation failed: {e}")
 
         return APIResponse.ok(
@@ -755,7 +755,7 @@ class ModelGenerationAPI:
                 "trimesh library not available for mesh-based inertia calculation",
                 501,
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             return APIResponse.error(f"Mesh processing failed: {e}")
 
     # ============================================================
@@ -934,7 +934,7 @@ class ModelGenerationAPI:
         for model_id, content in sources.items():
             try:
                 editor.load_model(model_id, content, read_only=True)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 return APIResponse.error(f"Failed to load model '{model_id}': {e}")
 
         # Create output model
@@ -1079,7 +1079,7 @@ class FastAPIAdapter:
                     body = None
                     try:
                         body = await request.json()
-                    except Exception:
+                    except (RuntimeError, ValueError, AttributeError):
                         pass
 
                     files = {}

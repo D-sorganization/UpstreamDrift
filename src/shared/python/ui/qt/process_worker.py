@@ -107,7 +107,7 @@ class ProcessWorker(QThread):
             return_code = self.process.returncode
             self.finished_signal.emit(return_code, stderr_output)
 
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError, ValueError) as e:
             self.log_signal.emit(f"Error starting process: {e}")
             self.finished_signal.emit(-1, str(e))
         finally:
@@ -117,11 +117,11 @@ class ProcessWorker(QThread):
                     try:
                         self.process.terminate()
                         self.process.wait(timeout=5)
-                    except Exception as e:
+                    except (RuntimeError, ValueError, OSError) as e:
                         self.log_signal.emit(f"Error terminating process: {e}")
                         try:
                             self.process.kill()
-                        except Exception as kill_err:
+                        except (RuntimeError, ValueError, OSError) as kill_err:
                             logger.debug("Failed to kill process: %s", kill_err)
                 # Close file handles to prevent resource leaks
                 try:
@@ -129,7 +129,7 @@ class ProcessWorker(QThread):
                         self.process.stdout.close()
                     if self.process.stderr:
                         self.process.stderr.close()
-                except Exception as close_err:
+                except (RuntimeError, ValueError, OSError) as close_err:
                     logger.debug("Failed to close process handles: %s", close_err)
 
     def stop(self) -> None:

@@ -1,5 +1,9 @@
+import logging
+
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 def analyze_coordinate_system():
@@ -9,8 +13,8 @@ def analyze_coordinate_system():
     filename = "Wiffle_ProV1_club_3D_data.xlsx"
     sheet_name = "TW_wiffle"  # Use one of the available sheets
 
-    print(f"Analyzing coordinate system for {sheet_name}")
-    print("=" * 50)
+    logger.info("Analyzing coordinate system for %s", sheet_name)
+    logger.info("%s", "=" * 50)
 
     # Read the data
     df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
@@ -56,14 +60,14 @@ def analyze_coordinate_system():
                     continue
 
     if not data:
-        print("No data found!")
+        logger.info("No data found!")
         return
 
-    print(f"Analyzing {len(data)} frames")
+    logger.info("Analyzing %s frames", len(data))
 
     # Analyze overall motion patterns
-    print("\nOverall motion analysis:")
-    print("-" * 30)
+    logger.info("\nOverall motion analysis:")
+    logger.info("%s", "-" * 30)
 
     mid_x_range = [min(d["mid_X"] for d in data), max(d["mid_X"] for d in data)]
     mid_y_range = [min(d["mid_Y"] for d in data), max(d["mid_Y"] for d in data)]
@@ -73,7 +77,7 @@ def analyze_coordinate_system():
     club_y_range = [min(d["club_Y"] for d in data), max(d["club_Y"] for d in data)]
     club_z_range = [min(d["club_Z"] for d in data), max(d["club_Z"] for d in data)]
 
-    print("Mid-hands motion ranges:")
+    logger.info("Mid-hands motion ranges:")
     print(
         f"  X: {mid_x_range[0]:.3f} to {mid_x_range[1]:.3f} "
         f"(range: {mid_x_range[1] - mid_x_range[0]:.3f})"
@@ -87,7 +91,7 @@ def analyze_coordinate_system():
         f"(range: {mid_z_range[1] - mid_z_range[0]:.3f})"
     )
 
-    print("Club head motion ranges:")
+    logger.info("Club head motion ranges:")
     print(
         f"  X: {club_x_range[0]:.3f} to {club_x_range[1]:.3f} "
         f"(range: {club_x_range[1] - club_x_range[0]:.3f})"
@@ -114,7 +118,7 @@ def analyze_coordinate_system():
         club_z_range[1] - club_z_range[0],
     ]
 
-    print("\nMotion analysis:")
+    logger.info("\nMotion analysis:")
     # Determine the axis with largest motion range using explicit if-elif-else
     # for clarity (avoiding nested ternary operators)
     max_mid_range = max(mid_motion_ranges)
@@ -132,36 +136,38 @@ def analyze_coordinate_system():
         largest_club_axis = "Y"
     else:
         largest_club_axis = "Z"
-    print(f"  Mid-hands largest motion: {largest_mid_axis}")
-    print(f"  Club head largest motion: {largest_club_axis}")
+    logger.info("  Mid-hands largest motion: %s", largest_mid_axis)
+    logger.info("  Club head largest motion: %s", largest_club_axis)
 
     # Check if this looks like a golf swing
-    print("\nGolf swing interpretation:")
+    logger.info("\nGolf swing interpretation:")
     if max(club_motion_ranges) > max(mid_motion_ranges) * 1.5:
-        print("  ✓ Club head has larger motion than hands (typical of golf swing)")
+        logger.info(
+            "  ✓ Club head has larger motion than hands (typical of golf swing)"
+        )
     else:
-        print("  ✗ Club head motion similar to hands (unusual for golf swing)")
+        logger.info("  ✗ Club head motion similar to hands (unusual for golf swing)")
 
     # Determine target line direction
     if max(club_motion_ranges) == club_motion_ranges[0]:  # X direction
-        print("  Primary swing motion is in X direction")
+        logger.info("  Primary swing motion is in X direction")
         print(
             "  If X is target line: Face-on view should look at +X, "
             "Down-the-line should look at -Y"
         )
     elif max(club_motion_ranges) == club_motion_ranges[1]:  # Y direction
-        print("  Primary swing motion is in Y direction")
+        logger.info("  Primary swing motion is in Y direction")
         print(
             "  If Y is target line: Face-on view should look at +Y, "
             "Down-the-line should look at -X"
         )
     else:  # Z direction
-        print("  Primary swing motion is in Z direction (vertical)")
-        print("  This seems unusual for a golf swing")
+        logger.info("  Primary swing motion is in Z direction (vertical)")
+        logger.info("  This seems unusual for a golf swing")
 
     # Look at key frames (start, middle, end)
-    print("\nKey frame analysis:")
-    print("-" * 30)
+    logger.info("\nKey frame analysis:")
+    logger.info("%s", "-" * 30)
 
     # Find frames at different times
     start_frame = data[0]
@@ -173,7 +179,7 @@ def analyze_coordinate_system():
         ("Middle", mid_frame),
         ("End", end_frame),
     ]:
-        print(f"{name} frame (t={frame['time']:.3f}s):")
+        logger.info("%s frame (t=%ss):", name, frame["time"])
         print(
             f"  Mid-hands: X={frame['mid_X']:.3f}, Y={frame['mid_Y']:.3f}, "
             f"Z={frame['mid_Z']:.3f}"
@@ -192,11 +198,11 @@ def analyze_coordinate_system():
             ]
         )
         club_length = np.linalg.norm(club_vector)
-        print(f"  Club vector: {club_vector}")
-        print(f"  Club length: {club_length:.3f}m")
+        logger.info("  Club vector: %s", club_vector)
+        logger.info("  Club length: %sm", club_length)
 
         # Analyze direction cosines for mid-hands
-        print("  Mid-hands direction cosines:")
+        logger.info("  Mid-hands direction cosines:")
         print(
             f"    X-axis: [{frame['mid_Xx']:.3f}, {frame['mid_Xy']:.3f}, "
             f"{frame['mid_Xz']:.3f}]"
@@ -228,8 +234,8 @@ def analyze_coordinate_system():
         # Check if this is a right-handed coordinate system
         cross_product = np.cross(X_vec, Y_vec)
         dot_cross_Z = np.dot(cross_product, Z_vec)
-        print(f"    Right-handed check (should be ~1): {dot_cross_Z:.3f}")
-        print()
+        logger.info("    Right-handed check (should be ~1): %s", dot_cross_Z)
+        logger.info("")
 
 
 if __name__ == "__main__":

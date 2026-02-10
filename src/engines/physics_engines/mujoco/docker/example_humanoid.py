@@ -1,11 +1,15 @@
+import logging
+
 import imageio
 import numpy as np
 from dm_control import suite
 
+logger = logging.getLogger(__name__)
+
 
 def main() -> None:
     """Run the humanoid walking example."""
-    print("Loading humanoid:walk task...")
+    logger.info("Loading humanoid:walk task...")
     # Load the environment
     env = suite.load(domain_name="humanoid", task_name="walk")
 
@@ -15,7 +19,7 @@ def main() -> None:
     # Create action specification
     action_spec = env.action_spec()
 
-    print("Simulating and rendering...")
+    logger.info("Simulating and rendering...")
     frames = []
 
     # Simulate for a few seconds (Control timestep is usually 0.02s)
@@ -33,13 +37,13 @@ def main() -> None:
         pixels = env.physics.render(height=480, width=640, camera_id=0)
         frames.append(pixels)
 
-    print(f"Captured {len(frames)} frames.")
+    logger.info("Captured %s frames.", len(frames))
 
     # Save the frames as a video
     video_filename = "humanoid_walk.mp4"
-    print(f"Saving video to {video_filename}...")
+    logger.info("Saving video to %s...", video_filename)
     imageio.mimsave(video_filename, frames, fps=30)
-    print("Done!")
+    logger.info("Done!")
 
 
 if __name__ == "__main__":

@@ -197,7 +197,7 @@ class URDFParser:
             try:
                 link = self._parse_link(link_elem, materials, source_path)
                 links.append(link)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 warnings.append(f"Failed to parse link: {e}")
 
         # Parse joints
@@ -206,7 +206,7 @@ class URDFParser:
             try:
                 joint = self._parse_joint(joint_elem)
                 joints.append(joint)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 warnings.append(f"Failed to parse joint: {e}")
 
         return ParsedModel(

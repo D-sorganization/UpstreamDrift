@@ -4,12 +4,15 @@ Golf Swing Visualizer - Fixed OpenGL Renderer
 Fixed for moderngl 5.x compatibility with correct uniform API
 """
 
+import logging
 import time
 import traceback
 from dataclasses import dataclass
 
 import moderngl as mgl
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # FIXED SHADER DEFINITIONS
@@ -172,35 +175,35 @@ class GeometryManager:
     def _create_standard_meshes(self):
         """Create simple mesh library"""
         try:
-            print("🔧 Creating standard meshes...")
+            logger.info("🔧 Creating standard meshes...")
 
             # Import geometry utilities from the core module
             from golf_data_core import GeometryUtils
 
-            print("  [OK] GeometryUtils imported")
+            logger.info("  [OK] GeometryUtils imported")
 
             # Create simple meshes
-            print("  Creating cylinder mesh...")
+            logger.info("  Creating cylinder mesh...")
             self.mesh_library["cylinder"] = GeometryUtils.create_cylinder_mesh(
                 radius=1.0, height=1.0, segments=8
             )
-            print("  [OK] Cylinder mesh created")
+            logger.info("  [OK] Cylinder mesh created")
 
-            print("  Creating sphere mesh...")
+            logger.info("  Creating sphere mesh...")
             self.mesh_library["sphere"] = GeometryUtils.create_sphere_mesh(
                 radius=1.0, lat_segments=8, lon_segments=8
             )
-            print("  [OK] Sphere mesh created")
+            logger.info("  [OK] Sphere mesh created")
 
             # Ground plane
-            print("  Creating ground mesh...")
+            logger.info("  Creating ground mesh...")
             self._create_ground_mesh()
-            print("  [OK] Ground mesh created")
+            logger.info("  [OK] Ground mesh created")
 
-            print(f"[OK] Created {len(self.mesh_library)} standard meshes")
+            logger.info("[OK] Created %s standard meshes", len(self.mesh_library))
 
-        except Exception as e:
-            print(f"[ERROR] Failed to create standard meshes: {e}")
+        except ImportError as e:
+            logger.error("[ERROR] Failed to create standard meshes: %s", e)
             traceback.print_exc()
             raise
 
@@ -241,28 +244,32 @@ class GeometryManager:
     def _compile_shaders(self):
         """Compile fixed shader programs"""
         try:
-            print("🔧 Compiling shader programs...")
+            logger.info("🔧 Compiling shader programs...")
 
             # Simple shader
-            print("  Compiling simple shader...")
+            logger.info("  Compiling simple shader...")
             self.programs["simple"] = self.ctx.program(
                 vertex_shader=ShaderLibrary.get_simple_vertex_shader(),
                 fragment_shader=ShaderLibrary.get_simple_fragment_shader(),
             )
-            print(f"  [OK] Simple shader compiled: {type(self.programs['simple'])}")
+            logger.info(
+                "  [OK] Simple shader compiled: %s", type(self.programs["simple"])
+            )
 
             # Ground shader
-            print("  Compiling ground shader...")
+            logger.info("  Compiling ground shader...")
             self.programs["ground"] = self.ctx.program(
                 vertex_shader=ShaderLibrary.get_ground_vertex_shader(),
                 fragment_shader=ShaderLibrary.get_ground_fragment_shader(),
             )
-            print(f"  [OK] Ground shader compiled: {type(self.programs['ground'])}")
+            logger.info(
+                "  [OK] Ground shader compiled: %s", type(self.programs["ground"])
+            )
 
-            print(f"[OK] Compiled {len(self.programs)} shader programs")
+            logger.info("[OK] Compiled %s shader programs", len(self.programs))
 
-        except Exception as e:
-            print(f"[ERROR] Failed to compile shaders: {e}")
+        except (RuntimeError, TypeError, ValueError) as e:
+            logger.error("[ERROR] Failed to compile shaders: %s", e)
             traceback.print_exc()
             raise RuntimeError(f"Failed to compile shaders: {e}") from e
 
@@ -409,9 +416,9 @@ class OpenGLRenderer:
         # Create standard geometry objects
         self._create_standard_objects()
 
-        print("[OK] OpenGL renderer initialized")
-        print(f"   OpenGL Version: {self.ctx.info['GL_VERSION']}")
-        print(f"   Renderer: {self.ctx.info['GL_RENDERER']}")
+        logger.info("[OK] OpenGL renderer initialized")
+        logger.info("   OpenGL Version: %s", self.ctx.info["GL_VERSION"])
+        logger.info("   Renderer: %s", self.ctx.info["GL_RENDERER"])
 
     def _create_standard_objects(self):
         """Create standard geometry objects for rendering"""
@@ -518,8 +525,8 @@ class OpenGLRenderer:
                 np.array([0.3, 0.3, 0.3], dtype=np.float32).tobytes()
             )
             program["gridSpacing"].value = 0.5  # 50cm grid spacing
-        except Exception as e:
-            print(f"[WARN] Ground uniform error: {e}")
+        except (PermissionError, OSError) as e:
+            logger.error("[WARN] Ground uniform error: %s", e)
             return
 
         # Create ground plane at proper level
@@ -542,8 +549,8 @@ class OpenGLRenderer:
                 ground_obj.vao.render()
                 self.render_stats["draw_calls"] += 1
                 self.render_stats["triangles_rendered"] += ground_obj.index_count // 3
-        except Exception as e:
-            print(f"[WARN] Ground render error: {e}")
+        except (PermissionError, OSError) as e:
+            logger.error("[WARN] Ground render error: %s", e)
 
     def _render_body_segments(
         self,
@@ -575,8 +582,8 @@ class OpenGLRenderer:
                 np.array([1.0, 1.0, 1.0], dtype=np.float32).tobytes()
             )
             program["viewPosition"].write(view_position.astype(np.float32).tobytes())
-        except Exception as e:
-            print(f"[WARN] Body segments uniform error: {e}")
+        except (PermissionError, OSError) as e:
+            logger.error("[WARN] Body segments uniform error: %s", e)
             return
 
         # Define body segments with their properties
@@ -737,8 +744,8 @@ class OpenGLRenderer:
 
             self.render_stats["draw_calls"] += 1
             self.render_stats["triangles_rendered"] += obj.index_count // 3
-        except Exception as e:
-            print(f"[WARN] Cylinder render error: {e}")
+        except (PermissionError, OSError) as e:
+            logger.error("[WARN] Cylinder render error: %s", e)
 
     def _render_sphere_at_point(
         self,
@@ -777,8 +784,8 @@ class OpenGLRenderer:
 
             self.render_stats["draw_calls"] += 1
             self.render_stats["triangles_rendered"] += obj.index_count // 3
-        except Exception as e:
-            print(f"[WARN] Sphere render error: {e}")
+        except (PermissionError, OSError) as e:
+            logger.error("[WARN] Sphere render error: %s", e)
 
     def _render_club(
         self,
@@ -810,8 +817,8 @@ class OpenGLRenderer:
                 np.array([1.0, 1.0, 1.0], dtype=np.float32).tobytes()
             )
             program["viewPosition"].write(view_position.astype(np.float32).tobytes())
-        except Exception as e:
-            print(f"[WARN] Club uniform error: {e}")
+        except (PermissionError, OSError) as e:
+            logger.error("[WARN] Club uniform error: %s", e)
             return
 
         # Render shaft with realistic proportions
@@ -898,7 +905,7 @@ class OpenGLRenderer:
         if self.geometry_manager:
             self.geometry_manager.cleanup()
 
-        print("🧹 OpenGL renderer cleaned up")
+        logger.info("🧹 OpenGL renderer cleaned up")
 
 
 # ============================================================================
@@ -919,7 +926,7 @@ if __name__ == "__main__":
         )
 
         print("[OK] Shader compilation test passed")
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         print(f"[ERROR] Shader compilation test failed: {e}")
 
     print("\n🎉 Fixed OpenGL renderer ready for integration!")

@@ -13,6 +13,7 @@ Diagnostic Features:
 
 from __future__ import annotations
 
+import logging
 import mimetypes
 import os
 import time
@@ -55,6 +56,8 @@ from src.api.routes import (  # noqa: E402
 from src.api.services.chat_service import ChatService  # noqa: E402
 from src.shared.python.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_config import get_logger  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 logger = get_logger(__name__)
 
@@ -521,22 +524,22 @@ def print_logo_animated():
         r"╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ",
     ]
 
-    print()
+    logger.info("")
     try:
         for line in logo:
-            print(f"    {ORANGE}{line}{RESET}")
+            logger.info("    %s%s%s", ORANGE, line, RESET)
             sys.stdout.flush()
             time.sleep(0.03)  # Scroll effect
     except UnicodeEncodeError:
-        print(f"    {ORANGE}UPSTREAM DRIFT{RESET}")
-    print()
+        logger.info("    %sUPSTREAM DRIFT%s", ORANGE, RESET)
+    logger.info("")
 
 
 def print_matrix_status(message: str, indent: int = 4):
     """Print status message in matrix green style."""
     GREEN = "\033[38;5;46m"  # Bright matrix green
     RESET = "\033[0m"
-    print(f"{' ' * indent}{GREEN}>{RESET} {GREEN}{message}{RESET}")
+    logger.info("%s%s>%s %s%s%s", " " * indent, GREEN, RESET, GREEN, message, RESET)
 
 
 def print_server_info(host: str, port: int):
@@ -557,11 +560,11 @@ def print_server_info(host: str, port: int):
     └─────────────────────────────────────────────────────────┘{RESET}
     """)
     except UnicodeEncodeError:
-        print("\n    Golf Modeling Suite - Local Server")
-        print(f"    Running at: http://{host}:{port}")
-        print(f"    API Docs:   http://{host}:{port}/api/docs")
-        print("    Mode: LOCAL (no auth required)")
-        print("    Press Ctrl+C to stop.\n")
+        logger.info("\n    Golf Modeling Suite - Local Server")
+        logger.info("    Running at: http://%s:%s", host, port)
+        logger.info("    API Docs:   http://%s:%s/api/docs", host, port)
+        logger.info("    Mode: LOCAL (no auth required)")
+        logger.info("    Press Ctrl+C to stop.\n")
 
 
 def main():
@@ -575,7 +578,7 @@ def main():
     DIM = "\033[2m"
     RESET = "\033[0m"
 
-    print(f"\n{DIM}Initializing Golf Modeling Suite...{RESET}\n")
+    logger.info("\n%sInitializing Golf Modeling Suite...%s\n", DIM, RESET)
 
     app = create_local_app()
 
@@ -590,7 +593,7 @@ def main():
     print_matrix_status("Configuring static file server...")
     time.sleep(0.1)
     print_matrix_status(f"Server ready on port {port}")
-    print()
+    logger.info("")
 
     # Open browser after server starts
     def open_browser():

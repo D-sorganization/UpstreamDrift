@@ -127,7 +127,7 @@ class MyoConverter:
                 O2MPipeline(
                     osim_file_str, geometry_folder_str, output_folder_str, **config
                 )
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 self._handle_conversion_error(e, osim_file, geometry_folder)
 
             # Find converted XML file

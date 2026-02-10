@@ -13,11 +13,14 @@ launcher issues including:
 from __future__ import annotations
 
 import json
+import logging
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     pass
@@ -256,7 +259,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-        except Exception as e:
+        except ImportError as e:
             details["error"] = str(e)
             result = DiagnosticResult(
                 name="models_yaml",
@@ -327,7 +330,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             details["error"] = str(e)
             result = DiagnosticResult(
                 name="model_registry",
@@ -411,7 +414,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             details["error"] = str(e)
             result = DiagnosticResult(
                 name="layout_config",
@@ -567,7 +570,7 @@ class LauncherDiagnostics:
                         engine_info["missing_deps"] = probe_result.missing_dependencies
                         engine_info["diagnostic"] = probe_result.diagnostic_message
                         engine_info["installed"] = probe_result.is_available()
-                    except Exception as e:
+                    except (RuntimeError, ValueError, OSError) as e:
                         engine_info["probe_status"] = "error"
                         engine_info["diagnostic"] = str(e)
                         engine_info["installed"] = False
@@ -608,7 +611,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             details["error"] = str(e)
             result = DiagnosticResult(
                 name="engine_availability",
@@ -669,12 +672,12 @@ def reset_layout_config() -> bool:
             # Backup existing config
             backup_path = LAYOUT_CONFIG_FILE.with_suffix(".json.bak")
             LAYOUT_CONFIG_FILE.rename(backup_path)
-            print(f"Backed up existing config to {backup_path}")
+            logger.info("Backed up existing config to %s", backup_path)
 
-        print("Layout config reset - launcher will use defaults (17 tiles)")
+        logger.info("Layout config reset - launcher will use defaults (17 tiles)")
         return True
-    except Exception as e:
-        print(f"Failed to reset layout config: {e}")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Failed to reset layout config: %s", e)
         return False
 
 
@@ -722,10 +725,10 @@ def run_cli_diagnostics() -> None:
     print()
     print("Recommendations:")
     for rec in results["recommendations"]:
-        print(f"  → {rec}")
+        print(f"  \u2192 {rec}")
 
-    print()
-    print("=" * 60)
+    logger.info("")
+    logger.info("%s", "=" * 60)
 
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ for name, xml_str, expected_actuators in models:
 
         logger.info("  ✓ %s validated successfully!\n", name)
 
-    except Exception as e:  # noqa: BLE001
+    except (RuntimeError, ValueError, OSError) as e:
         logger.info("  ✗ ERROR: %s\n", e)
         all_valid = False
 

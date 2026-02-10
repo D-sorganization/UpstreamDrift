@@ -84,7 +84,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             self.model = mujoco.MjModel.from_xml_string(content)
             self.data = mujoco.MjData(self.model)
             self.xml_path = None
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load model from XML string: %s", e)
             raise
 
@@ -99,7 +99,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             self.model = mujoco.MjModel.from_xml_path(path_str)
             self.data = mujoco.MjData(self.model)
             self.xml_path = path_str
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load model from path %s: %s", path, e)
             raise
 

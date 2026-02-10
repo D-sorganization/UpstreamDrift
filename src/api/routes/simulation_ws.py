@@ -152,14 +152,14 @@ async def simulation_stream(
 
     except WebSocketDisconnect:
         pass  # Client disconnected
-    except Exception as e:
+    except (ValueError, RuntimeError, AttributeError) as e:
         # Best effort error reporting
         try:
             await websocket.send_json({"error": str(e)})
-        except Exception:
+        except (ConnectionError, TimeoutError, OSError):
             pass
     finally:
         try:
             await websocket.close()
-        except Exception:
+        except (ConnectionError, TimeoutError, OSError):
             pass

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Script to add Qt system dependencies to robotics_env."""
 
+import logging
 import os
 import subprocess
 import sys
 import tempfile
+
+logger = logging.getLogger(__name__)
 
 
 def create_qt_dockerfile() -> str:
@@ -42,7 +45,7 @@ RUN /opt/mujoco-env/bin/pip install "PyQt6>=6.6.0" "PyQt6-Qt6>=6.6.0"
 
 def update_robotics_env_qt() -> bool:
     """Update robotics_env with Qt dependencies."""
-    print("🎨 Adding Qt dependencies to robotics_env...")
+    logger.info("🎨 Adding Qt dependencies to robotics_env...")
 
     with tempfile.TemporaryDirectory() as temp_dir:
         dockerfile_path = os.path.join(temp_dir, "Dockerfile")
@@ -50,27 +53,27 @@ def update_robotics_env_qt() -> bool:
         with open(dockerfile_path, "w") as f:
             f.write(create_qt_dockerfile())
 
-        print(f"📝 Created Qt Dockerfile: {dockerfile_path}")
+        logger.info("📝 Created Qt Dockerfile: %s", dockerfile_path)
 
         cmd = ["docker", "build", "-t", "robotics_env", "."]
 
         try:
-            print(f"🚀 Running: {' '.join(cmd)}")
-            print("📦 Installing Qt system libraries and PyQt6...")
+            logger.info("🚀 Running: %s", " ".join(cmd))
+            logger.info("📦 Installing Qt system libraries and PyQt6...")
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)
 
-            print("✅ Successfully added Qt dependencies to robotics_env!")
+            logger.info("✅ Successfully added Qt dependencies to robotics_env!")
             return True
 
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to update robotics_env: {e}")
+            logger.error("❌ Failed to update robotics_env: %s", e)
             return False
 
 
 def test_qt_environment() -> bool:
     """Test Qt functionality in the updated environment."""
-    print("\n🧪 Testing Qt environment...")
+    logger.info("\n🧪 Testing Qt environment...")
 
     try:
         # Test PyQt6 import (headless)
@@ -92,7 +95,7 @@ def test_qt_environment() -> bool:
             check=True,
         )
 
-        print(result.stdout.strip())
+        logger.info("%s", result.stdout.strip())
 
         # Test creating a QApplication (headless)
         result = subprocess.run(
@@ -114,19 +117,19 @@ def test_qt_environment() -> bool:
             check=True,
         )
 
-        print(result.stdout.strip())
+        logger.info("%s", result.stdout.strip())
 
         return True
 
     except subprocess.CalledProcessError as e:
-        print(f"❌ Qt test failed: {e.stderr}")
+        logger.error("❌ Qt test failed: %s", e.stderr)
         return False
 
 
 def main() -> int:
     """Main function."""
-    print("🤖 Qt Dependencies Installer for Robotics Environment")
-    print("=" * 60)
+    logger.info("🤖 Qt Dependencies Installer for Robotics Environment")
+    logger.info("%s", "=" * 60)
 
     success = update_robotics_env_qt()
 
@@ -134,12 +137,12 @@ def main() -> int:
         test_success = test_qt_environment()
 
         if test_success:
-            print("\n🎉 Success! PyQt6 is now fully functional in robotics_env.")
-            print("💡 MuJoCo GUI simulations should now work properly!")
+            logger.info("\n🎉 Success! PyQt6 is now fully functional in robotics_env.")
+            logger.info("💡 MuJoCo GUI simulations should now work properly!")
         else:
-            print("\n⚠️  Qt installed but tests failed. May work in GUI mode.")
+            logger.error("\n⚠️  Qt installed but tests failed. May work in GUI mode.")
     else:
-        print("\n💥 Failed to install Qt dependencies.")
+        logger.error("\n💥 Failed to install Qt dependencies.")
 
     return 0 if success else 1
 

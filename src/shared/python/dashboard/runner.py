@@ -78,7 +78,7 @@ class SimulationRunner(QtCore.QThread):
                     # (Emit every frame for smooth plot, but might overwhelm if too fast)
                     self.frame_ready.emit()
 
-                except Exception as e:
+                except (ValueError, RuntimeError, AttributeError) as e:
                     logger.error("Simulation error: %s", e)
                     self.status_message.emit(f"Error: {e}")
                     break

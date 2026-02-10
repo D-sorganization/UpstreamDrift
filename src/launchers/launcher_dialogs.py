@@ -231,7 +231,7 @@ class LauncherDialogsMixin:
                 "docker_available": self.docker_available,
                 "registry_loaded": self.registry is not None,
             }
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Failed to run diagnostics: {e}")
 
         dialog = SettingsDialog(
@@ -267,7 +267,7 @@ class LauncherDialogsMixin:
             self.show_toast("Layout reset to defaults", "success")
             logger.info("Layout reset to defaults")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to reset layout: {e}")
             self.show_toast(f"Failed to reset layout: {e}", "error")
 
@@ -382,7 +382,7 @@ class LauncherDialogsMixin:
 
                 if result.returncode != 0 or "Ubuntu" not in output:
                     raise RuntimeError("Ubuntu not found in WSL")
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 QMessageBox.warning(
                     self,
                     "WSL Not Available",

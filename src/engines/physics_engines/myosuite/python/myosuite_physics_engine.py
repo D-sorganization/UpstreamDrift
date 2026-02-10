@@ -102,7 +102,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             if self.sim:
                 self._dt = self.sim.model.opt.timestep
 
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load MyoSuite environment '%s': %s", env_id, e)
             raise
 
@@ -200,13 +200,13 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             try:
                 self.sim.data.qpos[:] = q
                 self.sim.data.qvel[:] = v
-            except Exception as fallback_error:
+            except (RuntimeError, ValueError, OSError) as fallback_error:
                 # Log instead of silent pass - helps debugging test failures
                 logger.debug(f"Fallback state assignment failed: {fallback_error}")
 
         try:
             self.sim.forward()
-        except Exception as forward_error:
+        except (RuntimeError, ValueError, OSError) as forward_error:
             # Log instead of silent pass - helps debugging test failures
             logger.debug(f"Forward dynamics failed (may be mocked): {forward_error}")
 
@@ -228,7 +228,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             logger.debug(f"Primary control assignment failed (may be mocked): {e}")
             try:
                 self.sim.data.ctrl[:] = u
-            except Exception as fallback_error:
+            except (RuntimeError, ValueError, OSError) as fallback_error:
                 # Log instead of silent pass - helps debugging test failures
                 logger.debug(f"Fallback control assignment failed: {fallback_error}")
 
@@ -266,7 +266,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 M = np.eye(nv)
 
             return M
-        except Exception as e:
+        except ImportError as e:
             logger.error("Failed to compute mass matrix: %s", e)
             return np.array([])
 
@@ -294,7 +294,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             self.sim.data.qacc[:] = qacc
             mujoco.mj_inverse(self.sim.model, self.sim.data)
             return np.array(self.sim.data.qfrc_inverse)
-        except Exception as e:
+        except ImportError as e:
             logger.error("Failed to compute inverse dynamics: %s", e)
             return np.array([])
 
@@ -316,7 +316,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)
 
             return {"linear": jacp, "angular": jacr, "spatial": np.vstack([jacr, jacp])}
-        except Exception as e:
+        except ImportError as e:
             logger.error("Failed to compute Jacobian for body '%s': %s", body_name, e)
             return None
 
@@ -357,7 +357,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             return a_drift
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute drift acceleration: {e}")
             return np.array([])
 
@@ -388,7 +388,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             a_control = np.linalg.solve(M, tau)
             return a_control
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute control acceleration: {e}")
             return np.zeros_like(tau)
 
@@ -471,7 +471,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             except ValueError:
                 logger.warning(f"Muscle '{muscle_name}' not found")
-            except Exception as e:
+            except (RuntimeError, OSError) as e:
                 logger.error(f"Failed to set activation for '{muscle_name}': {e}")
 
     def compute_muscle_induced_accelerations(self) -> dict[str, np.ndarray]:
@@ -563,7 +563,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             return a_ztcf
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZTCF: {e}")
             return np.array([])
 
@@ -608,7 +608,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             return a_zvcf
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])
 

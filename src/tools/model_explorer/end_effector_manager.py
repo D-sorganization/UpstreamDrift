@@ -715,7 +715,7 @@ class EndEffectorManagerWidget(QWidget):
         try:
             content = Path(file_path).read_text(encoding="utf-8")
             root = DefusedET.fromstring(content)
-        except Exception as e:
+        except (FileNotFoundError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Failed to load file: {e}")
             return
 

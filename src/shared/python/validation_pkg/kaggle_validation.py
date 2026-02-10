@@ -221,7 +221,7 @@ def validate_model_against_dataset(
             )
             predictions_list.append(pred)
             actuals_list.append(float(row["carry_distance_yards"]))
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Prediction failed: {e}")
 
     predictions = np.array(predictions_list)
@@ -306,7 +306,7 @@ def compare_all_models_to_dataset(
                 f"{model.name}: MAE={metrics['mae_yards']:.1f} yd, "
                 f"RMSE={metrics['rmse_yards']:.1f} yd, R²={metrics['r2']:.3f}"
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.exception(f"Validation failed for {model.name}: {e}")
 
     return results

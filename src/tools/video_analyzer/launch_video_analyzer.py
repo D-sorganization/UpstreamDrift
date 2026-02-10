@@ -46,7 +46,7 @@ def main() -> int:
     except ImportError as e:
         logger.error("Failed to import Video Analyzer: %s", e)
         return 1
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         logger.error("Video Analyzer launch failed: %s", e)
         return 1
 

@@ -222,7 +222,7 @@ class ThemeManagerDialog(QDialog):
                 item.set_current(n == name)
             self._update_info()
             self._on_selection_changed()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Failed to apply theme: {e}")
 
     def _create_new(self) -> None:
@@ -300,7 +300,7 @@ class ThemeManagerDialog(QDialog):
                 QMessageBox.information(
                     self, "Exported", f"Theme exported to:\n{filename}"
                 )
-            except Exception as e:
+            except (FileNotFoundError, PermissionError, OSError) as e:
                 QMessageBox.critical(self, "Error", f"Export failed: {e}")
 
     def _import_theme(self) -> None:
@@ -342,7 +342,7 @@ class ThemeManagerDialog(QDialog):
             if name in self.theme_items:
                 self.theme_list.setCurrentItem(self.theme_items[name])
             QMessageBox.information(self, "Imported", f"Theme '{name}' imported!")
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Import failed: {e}")
 
     def _on_theme_created(self, theme_name: str) -> None:

@@ -723,7 +723,7 @@ User imported model. Right-click in the list to Rename or Delete.
                     QMessageBox.warning(
                         self, "Download Failed", "Failed to download model files."
                     )
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Download error: {e}")
                 QMessageBox.critical(
                     self, "Error", f"Download failed with error:\n{str(e)}"

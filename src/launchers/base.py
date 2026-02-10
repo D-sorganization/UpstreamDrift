@@ -184,7 +184,7 @@ class BaseLauncher(QMainWindow):
                 subprocess.run(["xdg-open", str(file_path)], check=True)
             logger.info(f"Launched file: {file_path}")
             return True
-        except Exception as e:
+        except (OSError, ValueError) as e:
             self.show_error("Launch Failed", f"Could not launch file:\n{e}")
             logger.exception(f"Failed to launch file: {file_path}")
             return False
@@ -235,7 +235,7 @@ class BaseLauncher(QMainWindow):
             # Custom action
             try:
                 item.action()
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 self.show_error("Action Failed", f"Failed to execute action:\n{e}")
         elif item.path:
             # File launch

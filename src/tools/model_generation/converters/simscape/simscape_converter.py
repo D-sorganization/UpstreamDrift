@@ -193,7 +193,7 @@ class SimscapeToURDFConverter:
                 output_path.write_text(result.urdf_string)
                 logger.info(f"Wrote URDF to {output_path}")
 
-        except Exception as e:
+        except (FileNotFoundError, OSError) as e:
             result.errors.append(f"Conversion failed: {e}")
             logger.exception("Conversion error")
 
@@ -229,7 +229,7 @@ class SimscapeToURDFConverter:
                 result.urdf_string = self._generate_urdf(result)
                 result.success = True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             result.errors.append(f"Conversion failed: {e}")
             logger.exception("Conversion error")
 

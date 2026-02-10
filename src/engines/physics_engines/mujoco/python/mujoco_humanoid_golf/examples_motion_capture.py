@@ -466,7 +466,7 @@ def run_all_examples() -> None:
     for _i, (_name, example_func) in enumerate(examples, 1):
         try:
             example_func()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             traceback.print_exc()
 
 

@@ -132,7 +132,7 @@ class LayoutManager:
 
             logger.info(f"Layout saved to {self.config_file}")
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to save layout: {e}")
 
     def load_layout(self) -> dict[str, Any] | None:
@@ -161,7 +161,7 @@ class LayoutManager:
 
             return layout_data
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load layout: {e}")
             return None
 

@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 import platform
 import subprocess
@@ -8,14 +9,16 @@ import tempfile
 import threading
 from functools import partial
 
+logger = logging.getLogger(__name__)
+
 try:
     import queue
     import tkinter as tk
     from tkinter import colorchooser, filedialog, messagebox, ttk
 except ImportError:
-    print("Error: 'tkinter' module not found.")
+    logger.error("Error: 'tkinter' module not found.")
     if platform.system() == "Linux":
-        print("Please install it by running: sudo apt-get install python3-tk")
+        logger.info("Please install it by running: sudo apt-get install python3-tk")
     sys.exit(1)
 
 # Default Config
@@ -44,7 +47,7 @@ class GolfSimulationGUI:
         try:
             # Try to set a modern window style
             self.root.tk.call("tk", "scaling", 1.2)
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         # Detect Environment
@@ -138,8 +141,8 @@ class GolfSimulationGUI:
                         data.get("articulated_fingers", False)
                     )
 
-            except Exception as e:
-                print(f"Error loading config: {e}")
+            except (FileNotFoundError, PermissionError, OSError) as e:
+                logger.error("Error loading config: %s", e)
 
     def save_config(self) -> None:
         """Save configuration to JSON."""
@@ -160,8 +163,8 @@ class GolfSimulationGUI:
         try:
             with open(self.config_path, "w") as f:
                 json.dump(data, f, indent=4)
-            print(f"Saved config to {self.config_path}")
-        except Exception as e:
+            logger.info("Saved config to %s", self.config_path)
+        except (FileNotFoundError, PermissionError, OSError) as e:
             messagebox.showerror("Error", f"Could not save config: {e}")
 
     def setup_styles(self) -> None:
@@ -1039,7 +1042,7 @@ class GolfSimulationGUI:
                             f"❌ Update failed with code {result.returncode}",
                         )
 
-            except Exception as e:
+            except ImportError as e:
                 self.root.after(0, self.log, f"❌ Update failed: {e}")
             finally:
                 self.root.after(0, lambda: self.btn_rebuild.config(state=tk.NORMAL))
@@ -1145,13 +1148,13 @@ class GolfSimulationGUI:
                     for line in iter(out.readline, ""):
                         queue.put(line)
                     out.close()
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     # Log the exception so it is not silently swallowed
                     try:
                         self.root.after(
                             0, self.log, f"Exception in enqueue_output: {e}"
                         )
-                    except Exception:
+                    except (RuntimeError, ValueError, AttributeError):
                         pass
                 queue.put(None)  # Sentinel
 
@@ -1226,7 +1229,7 @@ class GolfSimulationGUI:
                 self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
                 self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
 
-        except Exception as e:
+        except ImportError as e:
             self.root.after(0, self.log, f"Failed to run subprocess: {e}")
             self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
             self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))

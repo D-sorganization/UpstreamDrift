@@ -490,7 +490,7 @@ class MotionCapturePlotter(QMainWindow):
             else:
                 print("No valid swing data found in the file")
 
-        except Exception as e:
+        except ImportError as e:
             print(f"Error loading file: {str(e)}")
             QMessageBox.critical(self, "Error", f"Failed to load file: {str(e)}")
 
@@ -608,7 +608,7 @@ class MotionCapturePlotter(QMainWindow):
             else:
                 print("No valid swing data found in the file")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             print(f"Error loading Simscape CSV file: {str(e)}")
             QMessageBox.critical(
                 self, "Error", f"Failed to load Simscape CSV file: {str(e)}"

@@ -87,7 +87,7 @@ def test_native_mujoco(model_path: str) -> None:
         mujoco.mj_step(mj_model, mj_data)
         logger.info("Basic simulation step successful.")
 
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         logger.exception("Native Mujoco load/step failed")
 
 
@@ -112,7 +112,7 @@ def test_pinocchio(model_path: str) -> None:
             "Your Pinocchio version might not support 'buildModelFromMJCF'. "
             "Ensure you are using Pinocchio 3.x."
         )
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         logger.exception("Pinocchio load failed")
         logger.info(
             "Note: Pinocchio's MJCF support is evolving. "

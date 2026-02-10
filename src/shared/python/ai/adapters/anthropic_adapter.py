@@ -168,7 +168,7 @@ class AnthropicAdapter(BaseAgentAdapter):
             response = client.messages.create(**kwargs)
             return self._parse_response(response)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return self._handle_error(e)
 
     def stream_response(
@@ -222,7 +222,7 @@ class AnthropicAdapter(BaseAgentAdapter):
                                 index=index,
                             )
 
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Anthropic streaming error: %s", e)
             raise AIProviderError(
                 f"Anthropic streaming error: {e}",
@@ -276,7 +276,7 @@ class AnthropicAdapter(BaseAgentAdapter):
             return False, (
                 "anthropic package not installed. Install with: pip install anthropic"
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             error_str = str(e).lower()
             if "authentication" in error_str or "api key" in error_str:
                 return False, "Invalid API key. Check your Anthropic API key."

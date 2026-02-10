@@ -61,7 +61,7 @@ def get_user_manual_content() -> str:
     if USER_MANUAL_PATH.exists():
         try:
             return USER_MANUAL_PATH.read_text(encoding="utf-8")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return f"# Error Loading Manual\n\nFailed to load USER_MANUAL.md: {e}"
     return "# User Manual Not Found\n\nThe USER_MANUAL.md file could not be found."
 
@@ -83,7 +83,7 @@ def get_help_topic_content(topic: str) -> str:
             # Add link back to main manual
             content += "\n\n---\n\n*See also: [Full User Manual](../USER_MANUAL.md)*"
             return content
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return f"# Error Loading Topic\n\nFailed to load {topic}.md: {e}"
 
     # Fallback: try to extract section from USER_MANUAL.md
@@ -140,7 +140,7 @@ def list_help_topics() -> list[tuple[str, str]]:
             try:
                 first_line = md_file.read_text(encoding="utf-8").split("\n")[0]
                 title = first_line.lstrip("#").strip()
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 title = topic_id.replace("_", " ").title()
             topics.append((topic_id, title))
 

@@ -82,7 +82,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             self.tau = np.zeros(self.model.nv)
             self.time = 0.0
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error("Failed to load Pinocchio model from path %s: %s", path, e)
             raise
 
@@ -102,7 +102,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             self.tau = np.zeros(self.model.nv)
             self.time = 0.0
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error("Failed to load Pinocchio model from string: %s", e)
             raise
 

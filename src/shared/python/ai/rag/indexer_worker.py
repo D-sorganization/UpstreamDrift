@@ -69,7 +69,7 @@ class IndexerWorker(QThread):
                             count += 1
                             if count % 10 == 0:
                                 self.progress.emit(f"Indexed {count} files...")
-                        except Exception as e:
+                        except (RuntimeError, ValueError, OSError) as e:
                             logger.warning(f"Failed to read {file_path}: {e}")
 
             self.progress.emit(f"Building TF-IDF index for {count} documents...")
@@ -81,6 +81,6 @@ class IndexerWorker(QThread):
 
             self.finished.emit(count)
 
-        except Exception as e:
+        except (FileNotFoundError, OSError) as e:
             logger.exception("Indexing failed")
             self.error.emit(str(e))

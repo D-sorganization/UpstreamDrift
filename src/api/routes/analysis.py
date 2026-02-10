@@ -43,7 +43,7 @@ async def analyze_biomechanics(
     try:
         result = await service.analyze_biomechanics(request)
         return result
-    except Exception as exc:
+    except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Analysis error: %s", exc)
         raise HTTPException(

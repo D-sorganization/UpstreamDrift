@@ -233,7 +233,7 @@ class ModelLibrary:
                     entry = ModelEntry.from_dict(entry_data)
                     self._entries[entry.id] = entry
                 logger.info(f"Loaded {len(self._entries)} models from index")
-            except Exception as e:
+            except ImportError as e:
                 logger.warning(f"Failed to load index: {e}")
 
     def _save_index(self) -> None:
@@ -244,7 +244,7 @@ class ModelLibrary:
                 "version": "1.0",
             }
             self.config.index_file.write_text(json.dumps(data, indent=2))
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             logger.error(f"Failed to save index: {e}")
 
     def list_models(
@@ -330,7 +330,7 @@ class ModelLibrary:
         try:
             model = self._parser.parse(entry.urdf_path, read_only=entry.is_read_only)
             return model
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to load model {model_id}: {e}")
             return None
 
@@ -374,7 +374,7 @@ class ModelLibrary:
             link_count = len(parsed.links)
             joint_count = len(parsed.joints)
             dof_count = sum(j.get_dof_count() for j in parsed.joints)
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             link_count = joint_count = dof_count = 0
 
         # Copy to library if requested
@@ -559,10 +559,10 @@ class ModelLibrary:
                                     )
                                 )
                                 break
-                    except Exception:
+                    except (FileNotFoundError, PermissionError, OSError):
                         pass
 
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Failed to fetch from GitHub: {e}")
 
         return models
@@ -617,7 +617,7 @@ class ModelLibrary:
             logger.info(f"Downloaded model: {entry.id}")
             return True
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to download {entry.id}: {e}")
             return False
 

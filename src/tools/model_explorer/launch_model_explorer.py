@@ -34,6 +34,6 @@ if __name__ == "__main__":
 
     try:
         main()
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Failed to start Model Explorer: {e}")
         sys.exit(1)

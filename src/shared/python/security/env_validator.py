@@ -456,6 +456,6 @@ if __name__ == "__main__":
         # Exit with error code if validation failed
         sys.exit(0 if results["valid"] else 1)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Validation error: {e}")
         sys.exit(1)

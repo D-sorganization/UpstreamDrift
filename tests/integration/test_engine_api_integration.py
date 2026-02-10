@@ -103,9 +103,9 @@ class TestEngineRegistryConsistency:
         for engine_type in EngineType:
             if engine_type in skip_types:
                 continue
-            assert (
-                engine_type in LOADER_MAP
-            ), f"{engine_type.value} missing from LOADER_MAP"
+            assert engine_type in LOADER_MAP, (
+                f"{engine_type.value} missing from LOADER_MAP"
+            )
 
     def test_loader_map_values_are_callable(self) -> None:
         """All LOADER_MAP values are callable functions."""

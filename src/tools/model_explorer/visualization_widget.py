@@ -77,7 +77,7 @@ class VisualizationWidget(QWidget):
                 self.mujoco_widget = MuJoCoViewerWidget()
                 layout.addWidget(self.mujoco_widget)
                 logger.info("Using MuJoCo 3D viewer")
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning(f"Failed to create MuJoCo widget: {e}")
                 self.use_mujoco = False
 
@@ -127,7 +127,7 @@ class VisualizationWidget(QWidget):
                 if self.mujoco_widget:
                     try:
                         self.mujoco_widget.update_visualization(urdf_content, urdf_path)
-                    except Exception as e:
+                    except (RuntimeError, ValueError, OSError) as e:
                         logger.warning(f"Failed to render in MuJoCo: {e}")
                         self.info_label.setText(
                             f"Links: {link_count} | Joints: {joint_count} (MuJoCo render failed)"

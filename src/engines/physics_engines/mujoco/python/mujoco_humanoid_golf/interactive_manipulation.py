@@ -764,7 +764,7 @@ class InteractiveManipulator:
                 count += 1
 
             return count
-        except Exception:
+        except (FileNotFoundError, PermissionError, OSError):
             return 0
 
     def list_poses(self) -> list[str]:
