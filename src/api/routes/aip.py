@@ -112,19 +112,25 @@ async def handle_rpc(
         responses: list[dict[str, Any]] = []
         for item in body:
             if not isinstance(item, dict):
-                responses.append(make_response(
-                    error=make_error(INVALID_REQUEST, "Invalid request in batch"),
-                    request_id=None,
-                ))
+                responses.append(
+                    make_response(
+                        error=make_error(INVALID_REQUEST, "Invalid request in batch"),
+                        request_id=None,
+                    )
+                )
                 continue
 
             result = await dispatch(_registry, item, context)
             if result is not None:  # Notifications return None
                 responses.append(result)
 
-        return responses if responses else make_response(
-            error=make_error(INVALID_REQUEST, "All requests were notifications"),
-            request_id=None,
+        return (
+            responses
+            if responses
+            else make_response(
+                error=make_error(INVALID_REQUEST, "All requests were notifications"),
+                request_id=None,
+            )
         )
 
     # Handle single request
@@ -154,10 +160,12 @@ async def list_methods() -> dict[str, Any]:
     """
     methods = []
     for name in _registry.list_methods():
-        methods.append({
-            "name": name,
-            "description": _registry.get_description(name),
-        })
+        methods.append(
+            {
+                "name": name,
+                "description": _registry.get_description(name),
+            }
+        )
 
     return {
         "methods": methods,

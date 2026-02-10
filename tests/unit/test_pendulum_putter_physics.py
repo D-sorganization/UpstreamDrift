@@ -11,8 +11,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-# Skip entire module if model_generation is not installed
-pytest.importorskip("model_generation", reason="model_generation package not installed")
+# Skip entire module if model_generation.models.pendulum_putter is not available
+pytest.importorskip(
+    "model_generation.models.pendulum_putter",
+    reason="model_generation.models.pendulum_putter package not available",
+)
 
 
 # Check if mujoco is available without causing module-level skip

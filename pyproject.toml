@@ -135,6 +135,8 @@ target-version = "py310"
 exclude = [
     "src/shared/models/opensim/opensim-models/**",
     "shared/models/opensim/opensim-models/**",
+    "shared/models/myosuite/**",
+    "vendor/ud-tools/**",
 ]
 
 [tool.ruff.lint]
@@ -149,6 +151,8 @@ exclude = '''
 /(
     src/shared/models/opensim/opensim-models
   | shared/models/opensim/opensim-models
+  | shared/models/myosuite
+  | vendor/ud-tools
 )/
 '''
 

@@ -282,7 +282,10 @@ class TestGolfLauncherLogic:
         # Patch QDockWidget AFTER import so it overrides the real reference
         src.launchers.golf_launcher.QDockWidget = MagicMock()
         # Patch ContextHelpDock to avoid TypeError from real QDockWidget parent
-        src.launchers.golf_launcher.ContextHelpDock = MagicMock()
+        # ContextHelpDock was refactored from golf_launcher into ui_components
+        import src.launchers.ui_components  # noqa: F401
+
+        src.launchers.ui_components.ContextHelpDock = MagicMock()
         yield
 
     @patch("src.shared.python.model_registry.ModelRegistry")

@@ -72,7 +72,7 @@ class BiomechanicalAnalyzer:
             self._jacr_flat = np.zeros(3 * self.model.nv)
 
         # Import locally to avoid circular import at module level
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (  # noqa: E501
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (  # noqa: E501
             MuJoCoInducedAccelerationAnalyzer,
         )
 

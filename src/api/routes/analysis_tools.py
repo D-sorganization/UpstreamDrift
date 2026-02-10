@@ -170,9 +170,7 @@ async def get_analysis_metrics(
         ) from exc
 
 
-@router.get(
-    "/analysis/statistics", response_model=AnalysisStatisticsResponse
-)
+@router.get("/analysis/statistics", response_model=AnalysisStatisticsResponse)
 async def get_analysis_statistics(
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
@@ -223,14 +221,16 @@ async def get_analysis_statistics(
             import numpy as np
 
             arr = np.array(values)
-            metric_summaries.append(AnalysisMetricsSummary(
-                metric_name=key,
-                current=values[-1],
-                minimum=float(np.min(arr)),
-                maximum=float(np.max(arr)),
-                mean=float(np.mean(arr)),
-                std_dev=float(np.std(arr)),
-            ))
+            metric_summaries.append(
+                AnalysisMetricsSummary(
+                    metric_name=key,
+                    current=values[-1],
+                    minimum=float(np.min(arr)),
+                    maximum=float(np.max(arr)),
+                    mean=float(np.mean(arr)),
+                    std_dev=float(np.std(arr)),
+                )
+            )
 
             time_series[key] = values
 
@@ -284,10 +284,7 @@ async def export_analysis_data(
     filtered = history
     if request.time_range and len(request.time_range) == 2:
         t_start, t_end = request.time_range
-        filtered = [
-            s for s in history
-            if t_start <= s.get("sim_time", 0) <= t_end
-        ]
+        filtered = [s for s in history if t_start <= s.get("sim_time", 0) <= t_end]
 
     try:
         if request.format == "csv":
@@ -469,9 +466,7 @@ async def measure_distance(
         ) from exc
 
 
-@router.get(
-    "/simulation/measurements", response_model=MeasurementToolsResponse
-)
+@router.get("/simulation/measurements", response_model=MeasurementToolsResponse)
 async def get_measurement_tools(
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
@@ -519,13 +514,15 @@ async def get_measurement_tools(
             vel = v_list[i] if i < len(v_list) else 0.0
             torque = torques[i] if i < len(torques) else 0.0
 
-            joint_angles.append(JointAngleDisplay(
-                joint_name=name,
-                angle_rad=angle_rad,
-                angle_deg=math.degrees(angle_rad),
-                velocity=vel,
-                torque=torque,
-            ))
+            joint_angles.append(
+                JointAngleDisplay(
+                    joint_name=name,
+                    angle_rad=angle_rad,
+                    angle_deg=math.degrees(angle_rad),
+                    velocity=vel,
+                    torque=torque,
+                )
+            )
 
         return MeasurementToolsResponse(
             joint_angles=joint_angles,
