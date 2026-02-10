@@ -196,12 +196,18 @@ class ActuatorUpdateRequest(BaseModel):
     strategy: str | None = Field(
         None, description="Control strategy (pd, pid, zero, etc.)"
     )
-    torques: list[float] | None = Field(None, description="Per-joint torque values")
+    torques: list[float] | None = Field(
+        None, description="Per-joint torque values"
+    )
     kp: float | list[float] | None = Field(
         None, description="Proportional gain(s)", gt=0
     )
-    kd: float | list[float] | None = Field(None, description="Derivative gain(s)", gt=0)
-    ki: float | list[float] | None = Field(None, description="Integral gain(s)", ge=0)
+    kd: float | list[float] | None = Field(
+        None, description="Derivative gain(s)", gt=0
+    )
+    ki: float | list[float] | None = Field(
+        None, description="Integral gain(s)", ge=0
+    )
     target_positions: list[float] | None = Field(
         None, description="Target joint positions (rad)"
     )
@@ -273,8 +279,12 @@ class TrajectoryRecordRequest(BaseModel):
     See issue #1202
     """
 
-    action: str = Field(..., description="Recording action: start, stop, or export")
-    export_format: str = Field("json", description="Export format for trajectory data")
+    action: str = Field(
+        ..., description="Recording action: start, stop, or export"
+    )
+    export_format: str = Field(
+        "json", description="Export format for trajectory data"
+    )
 
     @field_validator("action")
     @classmethod
@@ -332,7 +342,9 @@ class BodyPositionUpdateRequest(BaseModel):
     """
 
     body_name: str = Field(..., description="Name of the body to reposition")
-    position: list[float] | None = Field(None, description="New position [x, y, z]")
+    position: list[float] | None = Field(
+        None, description="New position [x, y, z]"
+    )
     rotation: list[float] | None = Field(
         None, description="New rotation [roll, pitch, yaw] in radians"
     )

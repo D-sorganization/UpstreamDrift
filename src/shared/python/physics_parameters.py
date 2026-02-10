@@ -1,5 +1,4 @@
 """Backward compatibility shim - module moved to physics.physics_parameters."""
-
 import sys as _sys
 
 from .physics import physics_parameters as _real_module  # noqa: E402

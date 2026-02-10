@@ -520,12 +520,12 @@ class TestURDFParser:
         assert result.root_link == "base"
 
         # Check link parsing
-        base_link = next(l for l in result.links if l.link_name == "base")
+        base_link = next(link for link in result.links if link.link_name == "base")
         assert base_link.geometry_type == "box"
         assert base_link.dimensions["width"] == 0.2
         assert base_link.color == [0.0, 0.0, 0.8, 1.0]  # From material
 
-        arm_link = next(l for l in result.links if l.link_name == "arm")
+        arm_link = next(link for link in result.links if link.link_name == "arm")
         assert arm_link.geometry_type == "cylinder"
         assert arm_link.dimensions["radius"] == 0.05
 

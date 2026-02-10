@@ -227,13 +227,17 @@ class TestGameLoop:
         assert gui._step_count == 1
         assert gui._vis_count == 1
 
-    def test_game_loop_skips_step_when_paused(self, gui: ConcreteSimGUI) -> None:
+    def test_game_loop_skips_step_when_paused(
+        self, gui: ConcreteSimGUI
+    ) -> None:
         gui.is_running = False
         gui._game_loop()
         assert gui._step_count == 0
         assert gui._vis_count == 1  # vis always called
 
-    def test_game_loop_skips_step_in_kinematic_mode(self, gui: ConcreteSimGUI) -> None:
+    def test_game_loop_skips_step_in_kinematic_mode(
+        self, gui: ConcreteSimGUI
+    ) -> None:
         gui.operating_mode = "kinematic"
         gui.is_running = True
         gui._game_loop()

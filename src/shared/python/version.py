@@ -1,5 +1,4 @@
 """Backward compatibility shim - module moved to core.version."""
-
 import sys as _sys
 
 from .core import version as _real_module  # noqa: E402

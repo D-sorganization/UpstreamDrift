@@ -530,7 +530,8 @@ class SimulinkModelTab(QWidget):
 
         # TODO: Implement full Simulink integration
         # Needs schema for Simulink output data and visualization logic.
-        # This will require a data loader similar to MotionDataLoader but for Simulink CSV/MAT files.
+        # This will require a data loader similar to MotionDataLoader but for
+        # Simulink CSV/MAT files.
 
         # Placeholder for future Simulink integration
         placeholder = QLabel(

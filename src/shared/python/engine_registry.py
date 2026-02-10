@@ -1,5 +1,4 @@
 """Backward compatibility shim - module moved to engine_core.engine_registry."""
-
 import sys as _sys
 
 from .engine_core import engine_registry as _real_module  # noqa: E402

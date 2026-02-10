@@ -174,8 +174,12 @@ class BiomechanicsMetricsResponse(BaseModel):
     """
 
     sim_time: float = Field(..., description="Current simulation time")
-    club_head_speed: float | None = Field(None, description="Club head speed (m/s)")
-    kinetic_energy: float | None = Field(None, description="Total kinetic energy (J)")
+    club_head_speed: float | None = Field(
+        None, description="Club head speed (m/s)"
+    )
+    kinetic_energy: float | None = Field(
+        None, description="Total kinetic energy (J)"
+    )
     potential_energy: float | None = Field(
         None, description="Total potential energy (J)"
     )
@@ -208,7 +212,9 @@ class EngineCapabilitiesResponse(BaseModel):
     capabilities: list[CapabilityLevelResponse] = Field(
         ..., description="All capabilities with support levels"
     )
-    summary: dict[str, int] = Field(..., description="Counts: full, partial, none")
+    summary: dict[str, int] = Field(
+        ..., description="Counts: full, partial, none"
+    )
 
 
 class ControlFeaturesResponse(BaseModel):
@@ -235,8 +241,12 @@ class SimulationStatsResponse(BaseModel):
     sim_time: float = Field(..., description="Current simulation time (s)")
     wall_time: float = Field(..., description="Wall clock time elapsed (s)")
     fps: float = Field(..., description="Simulation frames per second")
-    real_time_factor: float = Field(..., description="Sim time / wall time ratio")
-    speed_factor: float = Field(..., description="Current speed multiplier")
+    real_time_factor: float = Field(
+        ..., description="Sim time / wall time ratio"
+    )
+    speed_factor: float = Field(
+        ..., description="Current speed multiplier"
+    )
     is_recording: bool = Field(..., description="Whether trajectory is being recorded")
     frame_count: int = Field(..., description="Total frames simulated")
 
@@ -348,12 +358,12 @@ class URDFModelResponse(BaseModel):
     """
 
     model_name: str = Field(..., description="Name of the robot model")
-    links: list[URDFLinkGeometry] = Field(
-        ..., description="Visual geometries for links"
-    )
+    links: list[URDFLinkGeometry] = Field(..., description="Visual geometries for links")
     joints: list[URDFJointDescriptor] = Field(..., description="Joint descriptors")
     root_link: str = Field(..., description="Root link name (no parent)")
-    urdf_raw: str | None = Field(None, description="Raw URDF XML for advanced clients")
+    urdf_raw: str | None = Field(
+        None, description="Raw URDF XML for advanced clients"
+    )
 
 
 class ModelListResponse(BaseModel):
@@ -419,7 +429,9 @@ class BodyPositionRequest(BaseModel):
     """
 
     body_name: str = Field(..., description="Name of the body to position")
-    position: list[float] | None = Field(None, description="Target position [x, y, z]")
+    position: list[float] | None = Field(
+        None, description="Target position [x, y, z]"
+    )
     rotation: list[float] | None = Field(
         None, description="Target rotation [roll, pitch, yaw] in radians"
     )
@@ -450,7 +462,9 @@ class MeasurementResult(BaseModel):
     distance: float = Field(..., description="Euclidean distance (m)")
     position_a: list[float] = Field(..., description="Position of body A [x, y, z]")
     position_b: list[float] = Field(..., description="Position of body B [x, y, z]")
-    delta: list[float] = Field(..., description="Position difference [dx, dy, dz]")
+    delta: list[float] = Field(
+        ..., description="Position difference [dx, dy, dz]"
+    )
 
 
 class JointAngleDisplay(BaseModel):

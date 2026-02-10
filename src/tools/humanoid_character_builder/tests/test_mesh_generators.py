@@ -23,7 +23,10 @@ if _tools_dir not in sys.path:
 # anything pytest is currently loading (i.e. anything containing "src." or
 # ".tests").
 for _key in list(sys.modules.keys()):
-    if _key.startswith("humanoid_character_builder") and "tests" not in _key:
+    if (
+        _key.startswith("humanoid_character_builder")
+        and "tests" not in _key
+    ):
         del sys.modules[_key]
 
 import json  # noqa: E402
@@ -182,15 +185,12 @@ class TestSMPLXAvailability:
             assert "smplx" in result.error_message.lower()
 
     def test_returns_error_when_trimesh_missing(self):
-        with (
-            patch(
-                "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
-                True,
-            ),
-            patch(
-                "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE",
-                False,
-            ),
+        with patch(
+            "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
+            True,
+        ), patch(
+            "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE",
+            False,
         ):
             gen = SMPLXMeshGenerator(model_dir="/nonexistent")
             result = gen.generate(_default_params(), Path("/tmp/out"))
@@ -500,7 +500,9 @@ class TestMakeHumanGenerate:
 
             # Write vertex groups
             groups = {"head": [0, 1, 2]}
-            groups_path.write_text(json.dumps(groups), encoding="utf-8")
+            groups_path.write_text(
+                json.dumps(groups), encoding="utf-8"
+            )
             return True
 
         with patch.object(gen, "_run_makehuman_script", side_effect=mock_run):

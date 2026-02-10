@@ -372,7 +372,9 @@ class NonlinearDynamicsMixin:
 
         nearest_neighbors = np.argmin(dists_mat, axis=1)
 
-        max_steps = min(M, int(1.0 / self.dt * 0.5)) if self.dt > 0 else 10
+        max_steps = (
+            min(M, int(1.0 / self.dt * 0.5)) if self.dt > 0 else 10
+        )
 
         divergence = np.zeros(max_steps)
         counts = np.zeros(max_steps)
