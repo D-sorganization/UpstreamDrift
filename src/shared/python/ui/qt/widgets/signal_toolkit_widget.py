@@ -1186,7 +1186,9 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                             "pi": np.pi,
                             "t": t,
                         }
-                        values = eval(expr, {"__builtins__": {}}, safe_dict)  # noqa: S307
+                        values = eval(
+                            expr, {"__builtins__": {}}, safe_dict
+                        )  # noqa: S307
                         self.current_signal = Signal(t, values, name="custom")
                     else:
                         return

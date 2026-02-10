@@ -238,11 +238,11 @@ class CustomThemeEditor(QDialog):
         preset_layout.addWidget(QLabel("Start from an existing theme and modify it:"))
         preset_btn_layout = QHBoxLayout()
         for theme_name in self.theme_manager.get_builtin_themes()[:6]:
-            btn = QPushButton(theme_name)
-            btn.clicked.connect(
+            preset_btn = QPushButton(theme_name)
+            preset_btn.clicked.connect(
                 lambda checked, n=theme_name: self._load_preset_theme(n)
             )
-            preset_btn_layout.addWidget(btn)
+            preset_btn_layout.addWidget(preset_btn)
         preset_layout.addLayout(preset_btn_layout)
         left_layout.addWidget(preset_group)
 
@@ -252,9 +252,9 @@ class CustomThemeEditor(QDialog):
         # Right side - Preview
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
-        right_layout.addWidget(
-            QLabel("Live Preview", styleSheet="font-size: 14px; font-weight: bold;")
-        )
+        preview_label = QLabel("Live Preview")
+        preview_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        right_layout.addWidget(preview_label)
         self.preview_widget = ThemePreviewWidget()
         right_layout.addWidget(self.preview_widget, 1)
         layout.addWidget(right_widget, 1)

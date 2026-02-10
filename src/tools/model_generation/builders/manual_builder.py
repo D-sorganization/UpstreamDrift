@@ -88,7 +88,7 @@ class ManualBuilder(BaseURDFBuilder):
         """Set handedness."""
         self._handedness = value
 
-    def add_link(self, link: Link) -> ManualBuilder:
+    def add_link(self, link: Link) -> ManualBuilder:  # type: ignore[override]
         """
         Add a link to the model.
 
@@ -116,7 +116,7 @@ class ManualBuilder(BaseURDFBuilder):
         self._links.append(link)
         return self
 
-    def add_joint(self, joint: Joint) -> ManualBuilder:
+    def add_joint(self, joint: Joint) -> ManualBuilder:  # type: ignore[override]
         """
         Add a joint to the model.
 
@@ -285,13 +285,15 @@ class ManualBuilder(BaseURDFBuilder):
             # Mirror visual origin
             new_xyz = list(link.visual_origin.xyz)
             new_xyz[axis_idx] = -new_xyz[axis_idx]
-            link.visual_origin = Origin(xyz=tuple(new_xyz), rpy=link.visual_origin.rpy)
+            link.visual_origin = Origin(
+                xyz=(new_xyz[0], new_xyz[1], new_xyz[2]), rpy=link.visual_origin.rpy
+            )
 
             # Mirror collision origin
             new_xyz = list(link.collision_origin.xyz)
             new_xyz[axis_idx] = -new_xyz[axis_idx]
             link.collision_origin = Origin(
-                xyz=tuple(new_xyz), rpy=link.collision_origin.rpy
+                xyz=(new_xyz[0], new_xyz[1], new_xyz[2]), rpy=link.collision_origin.rpy
             )
 
             # Mirror COM
@@ -305,19 +307,21 @@ class ManualBuilder(BaseURDFBuilder):
                 ixz=-link.inertia.ixz if axis_idx != 1 else link.inertia.ixz,
                 iyz=-link.inertia.iyz if axis_idx != 0 else link.inertia.iyz,
                 mass=link.inertia.mass,
-                center_of_mass=tuple(new_com),
+                center_of_mass=(new_com[0], new_com[1], new_com[2]),
             )
 
         # Mirror joint origins and axes
         for joint in self._joints:
             new_xyz = list(joint.origin.xyz)
             new_xyz[axis_idx] = -new_xyz[axis_idx]
-            joint.origin = Origin(xyz=tuple(new_xyz), rpy=joint.origin.rpy)
+            joint.origin = Origin(
+                xyz=(new_xyz[0], new_xyz[1], new_xyz[2]), rpy=joint.origin.rpy
+            )
 
             # Mirror axis
             new_axis = list(joint.axis)
             new_axis[axis_idx] = -new_axis[axis_idx]
-            joint.axis = tuple(new_axis)
+            joint.axis = (new_axis[0], new_axis[1], new_axis[2])
 
         # Toggle handedness
         self._handedness = (

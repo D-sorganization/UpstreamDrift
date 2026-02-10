@@ -38,7 +38,7 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        engine = MuJoCoPhysicsEngine()
+        engine = MuJoCoPhysicsEngine()  # type: ignore[abstract]
 
         # Load default model to verify engine readiness
         model_path = (
@@ -82,7 +82,7 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        engine = DrakePhysicsEngine()
+        engine = DrakePhysicsEngine()  # type: ignore[abstract]
 
         # Try to load the shared golfer URDF if available
         urdf_path = (
@@ -132,7 +132,7 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        engine = PinocchioPhysicsEngine()
+        engine = PinocchioPhysicsEngine()  # type: ignore[abstract]
 
         # Load default golfer URDF
         model_path = (
@@ -173,7 +173,7 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        engine = OpenSimPhysicsEngine()
+        engine = OpenSimPhysicsEngine()  # type: ignore[abstract]
         return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
@@ -197,7 +197,7 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        return MyoSuitePhysicsEngine()  # type: ignore[no-any-return]
+        return MyoSuitePhysicsEngine()  # type: ignore[abstract,no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("MyoSim requirements not met.") from e

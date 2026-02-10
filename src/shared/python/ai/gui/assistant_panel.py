@@ -254,8 +254,10 @@ class ChatInput(QPlainTextEdit):
 
     submit_requested = pyqtSignal()
 
-    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+    def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:
         """Handle key press events."""
+        if event is None:
+            return
         if (
             event.key() == Qt.Key.Key_Return
             and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier

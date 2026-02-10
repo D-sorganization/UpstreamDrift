@@ -394,8 +394,19 @@ class URDFParser:
         xyz_str = elem.get("xyz", "0 0 0")
         rpy_str = elem.get("rpy", "0 0 0")
 
-        xyz = tuple(float(v) for v in xyz_str.split())
-        rpy = tuple(float(v) for v in rpy_str.split())
+        xyz_parts = [float(v) for v in xyz_str.split()]
+        rpy_parts = [float(v) for v in rpy_str.split()]
+
+        xyz: tuple[float, float, float] = (
+            xyz_parts[0],
+            xyz_parts[1],
+            xyz_parts[2] if len(xyz_parts) > 2 else 0.0,
+        )
+        rpy: tuple[float, float, float] = (
+            rpy_parts[0],
+            rpy_parts[1],
+            rpy_parts[2] if len(rpy_parts) > 2 else 0.0,
+        )
 
         return Origin(xyz=xyz, rpy=rpy)
 
@@ -428,7 +439,12 @@ class URDFParser:
         if mesh_elem is not None:
             filename = mesh_elem.get("filename", "")
             scale_str = mesh_elem.get("scale", "1 1 1")
-            scale = tuple(float(v) for v in scale_str.split())
+            scale_parts = [float(v) for v in scale_str.split()]
+            scale: tuple[float, float, float] = (
+                scale_parts[0],
+                scale_parts[1] if len(scale_parts) > 1 else 1.0,
+                scale_parts[2] if len(scale_parts) > 2 else 1.0,
+            )
 
             # Resolve mesh path
             if self.resolve_meshes and base_path and filename:

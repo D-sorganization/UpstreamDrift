@@ -1647,7 +1647,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 self.visualizer.update_frame_transforms(context)
                 self.visualizer.update_com_transforms(context)
 
-    def _toggle_recording(self, checked: bool) -> None:  # noqa: FBT001
+    def _toggle_recording(self, checked: bool) -> None:  # type: ignore[override]  # noqa: FBT001
         if checked:
             self.recorder.start()
             self.btn_record.setText("Stop Recording")

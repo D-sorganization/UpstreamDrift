@@ -423,7 +423,12 @@ class MJCFConverter:
 
             # Parse position
             pos_str = body_elem.get("pos", "0 0 0")
-            pos = tuple(float(v) for v in pos_str.split())
+            pos_parts = [float(v) for v in pos_str.split()]
+            pos: tuple[float, float, float] = (
+                pos_parts[0],
+                pos_parts[1],
+                pos_parts[2] if len(pos_parts) > 2 else 0.0,
+            )
 
             # Parse inertial
             inertia = Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=1.0)
@@ -432,7 +437,12 @@ class MJCFConverter:
                 mass = float(inertial_elem.get("mass", 1.0))
 
                 com_str = inertial_elem.get("pos", "0 0 0")
-                com = tuple(float(v) for v in com_str.split())
+                com_parts = [float(v) for v in com_str.split()]
+                com: tuple[float, float, float] = (
+                    com_parts[0],
+                    com_parts[1],
+                    com_parts[2] if len(com_parts) > 2 else 0.0,
+                )
 
                 diag_str = inertial_elem.get("diaginertia")
                 full_str = inertial_elem.get("fullinertia")
@@ -476,7 +486,12 @@ class MJCFConverter:
                     joint_type = MJCF_TO_URDF_JOINT.get(mjcf_type, JointType.REVOLUTE)
 
                     axis_str = joint_elem.get("axis", "0 0 1")
-                    axis = tuple(float(v) for v in axis_str.split())
+                    axis_parts = [float(v) for v in axis_str.split()]
+                    axis: tuple[float, float, float] = (
+                        axis_parts[0],
+                        axis_parts[1],
+                        axis_parts[2] if len(axis_parts) > 2 else 0.0,
+                    )
 
                     joint = Joint(
                         name=joint_name,

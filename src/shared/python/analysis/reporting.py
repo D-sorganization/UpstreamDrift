@@ -169,7 +169,7 @@ class ReportingMixin:
             return np.array([]), np.array([])
 
         try:
-            from shared.python import signal_processing
+            from shared.python import signal_processing  # type: ignore[attr-defined]
 
             result = signal_processing.compute_psd(data, fs, window=window)
             return result  # type: ignore[no-any-return]
@@ -193,7 +193,7 @@ class ReportingMixin:
             return 0.0
 
         try:
-            from shared.python import signal_processing
+            from shared.python import signal_processing  # type: ignore[attr-defined]
 
             result = signal_processing.compute_spectral_arc_length(data, fs)
             return result  # type: ignore[no-any-return]
@@ -326,7 +326,7 @@ class ReportingMixin:
             return None
 
         try:
-            from shared.python import signal_processing
+            from shared.python import signal_processing  # type: ignore[attr-defined]
 
             jerk = signal_processing.compute_jerk(accel, fs)
         except ImportError:
