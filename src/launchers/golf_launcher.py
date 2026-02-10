@@ -308,6 +308,7 @@ class GolfLauncher(
 
     def create_model_card(self, model: Any) -> None:
         """Creates a clickable card widget (placeholder)."""
+        pass
 
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
