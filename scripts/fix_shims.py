@@ -7,7 +7,6 @@ and adds explicit re-exports so mypy can resolve them.
 
 import ast
 import re
-import sys
 from pathlib import Path
 
 
