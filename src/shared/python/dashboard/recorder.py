@@ -673,12 +673,12 @@ class GenericPhysicsRecorder:
                 "cop_range_ap": grf_summary.cop_range_ap,
                 "cop_range_ml": grf_summary.cop_range_ml,
             }
-            result["grf_analysis"]["linear_impulse_magnitude"] = (
-                grf_summary.linear_impulse.linear_impulse_magnitude
-            )
-            result["grf_analysis"]["angular_impulse_magnitude"] = (
-                grf_summary.linear_impulse.angular_impulse_magnitude
-            )
+            result["grf_analysis"][
+                "linear_impulse_magnitude"
+            ] = grf_summary.linear_impulse.linear_impulse_magnitude
+            result["grf_analysis"][
+                "angular_impulse_magnitude"
+            ] = grf_summary.linear_impulse.angular_impulse_magnitude
             result["grf_analysis"]["duration"] = grf_summary.linear_impulse.duration
 
         if fsp is not None:
