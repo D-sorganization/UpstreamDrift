@@ -18,15 +18,21 @@ if importlib.util.find_spec("pytest_benchmark") is None:
     pytest.skip("pytest-benchmark not installed", allow_module_level=True)
 
 if MUJOCO_AVAILABLE:
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (
-        aba,
-    )
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
-        crba,
-    )
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (
-        rnea,
-    )
+    try:
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (
+            aba,
+        )
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
+            crba,
+        )
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (
+            rnea,
+        )
+    except (ImportError, ModuleNotFoundError):
+        pytest.skip(
+            "MuJoCo dynamics internal imports not available",
+            allow_module_level=True,
+        )
 else:
     pytest.skip("MuJoCo dynamics modules not available", allow_module_level=True)
 

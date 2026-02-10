@@ -196,18 +196,12 @@ class ActuatorUpdateRequest(BaseModel):
     strategy: str | None = Field(
         None, description="Control strategy (pd, pid, zero, etc.)"
     )
-    torques: list[float] | None = Field(
-        None, description="Per-joint torque values"
-    )
+    torques: list[float] | None = Field(None, description="Per-joint torque values")
     kp: float | list[float] | None = Field(
         None, description="Proportional gain(s)", gt=0
     )
-    kd: float | list[float] | None = Field(
-        None, description="Derivative gain(s)", gt=0
-    )
-    ki: float | list[float] | None = Field(
-        None, description="Integral gain(s)", ge=0
-    )
+    kd: float | list[float] | None = Field(None, description="Derivative gain(s)", gt=0)
+    ki: float | list[float] | None = Field(None, description="Integral gain(s)", ge=0)
     target_positions: list[float] | None = Field(
         None, description="Target joint positions (rad)"
     )
@@ -267,8 +261,7 @@ class CameraPresetRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_CAMERA_PRESETS:
             raise ValueError(
-                f"Unknown preset '{v}'. "
-                f"Valid presets: {sorted(VALID_CAMERA_PRESETS)}"
+                f"Unknown preset '{v}'. Valid presets: {sorted(VALID_CAMERA_PRESETS)}"
             )
         return normalized
 
@@ -279,12 +272,8 @@ class TrajectoryRecordRequest(BaseModel):
     See issue #1202
     """
 
-    action: str = Field(
-        ..., description="Recording action: start, stop, or export"
-    )
-    export_format: str = Field(
-        "json", description="Export format for trajectory data"
-    )
+    action: str = Field(..., description="Recording action: start, stop, or export")
+    export_format: str = Field("json", description="Export format for trajectory data")
 
     @field_validator("action")
     @classmethod
@@ -342,9 +331,7 @@ class BodyPositionUpdateRequest(BaseModel):
     """
 
     body_name: str = Field(..., description="Name of the body to reposition")
-    position: list[float] | None = Field(
-        None, description="New position [x, y, z]"
-    )
+    position: list[float] | None = Field(None, description="New position [x, y, z]")
     rotation: list[float] | None = Field(
         None, description="New rotation [roll, pitch, yaw] in radians"
     )
@@ -407,9 +394,7 @@ class ForceOverlayRequest(BaseModel):
         gt=0,
         le=1.0,
     )
-    color_by_magnitude: bool = Field(
-        True, description="Color-code arrows by magnitude"
-    )
+    color_by_magnitude: bool = Field(True, description="Color-code arrows by magnitude")
     body_filter: list[str] | None = Field(
         None, description="Only show forces on these bodies (None = all)"
     )
@@ -423,8 +408,7 @@ class ForceOverlayRequest(BaseModel):
         for ft in normalized:
             if ft not in VALID_FORCE_TYPES:
                 raise ValueError(
-                    f"Unknown force type '{ft}'. "
-                    f"Valid: {sorted(VALID_FORCE_TYPES)}"
+                    f"Unknown force type '{ft}'. Valid: {sorted(VALID_FORCE_TYPES)}"
                 )
         return normalized
 
@@ -442,9 +426,12 @@ class ActuatorCommandRequest(BaseModel):
     actuator_index: int = Field(
         ..., description="Index of the actuator to command", ge=0
     )
-    value: float = Field(..., description="Command value (meaning depends on control_type)")
+    value: float = Field(
+        ..., description="Command value (meaning depends on control_type)"
+    )
     control_type: str = Field(
-        "constant", description="Control type: constant, polynomial, pd_gains, trajectory"
+        "constant",
+        description="Control type: constant, polynomial, pd_gains, trajectory",
     )
     parameters: dict[str, Any] | None = Field(
         None,
@@ -508,7 +495,9 @@ class AIPJsonRpcRequest(BaseModel):
     params: dict[str, Any] | list[Any] | None = Field(
         None, description="Method parameters"
     )
-    id: int | str | None = Field(None, description="Request ID (null for notifications)")
+    id: int | str | None = Field(
+        None, description="Request ID (null for notifications)"
+    )
 
     @field_validator("jsonrpc")
     @classmethod

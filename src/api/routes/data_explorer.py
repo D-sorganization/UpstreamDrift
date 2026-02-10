@@ -132,9 +132,7 @@ async def list_datasets() -> DatasetListResponse:
                     if filepath.suffix.lower() == ".csv":
                         with open(filepath, encoding="utf-8") as f:
                             header = f.readline().strip()
-                        columns = [
-                            c.strip().strip('"') for c in header.split(",")
-                        ]
+                        columns = [c.strip().strip('"') for c in header.split(",")]
                     elif filepath.suffix.lower() == ".json":
                         with open(filepath, encoding="utf-8") as f:
                             data = json.load(f)
@@ -239,9 +237,7 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
         output_dir = _get_output_dir()
         matches = list(output_dir.rglob(name))
         if not matches:
-            raise HTTPException(
-                status_code=404, detail=f"Dataset '{name}' not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
         filepath = matches[0]
         try:
             content = filepath.read_text(encoding="utf-8")
@@ -348,9 +344,7 @@ async def filter_dataset(
         output_dir = _get_output_dir()
         matches = list(output_dir.rglob(name))
         if not matches:
-            raise HTTPException(
-                status_code=404, detail=f"Dataset '{name}' not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
         filepath = matches[0]
         content = filepath.read_text(encoding="utf-8")
         if filepath.suffix.lower() == ".csv":

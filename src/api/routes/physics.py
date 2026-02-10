@@ -562,7 +562,9 @@ async def control_recording(
                     indent=2,
                 )
             if logger:
-                logger.info("Trajectory exported to %s (%d frames)", export_path, frame_count)
+                logger.info(
+                    "Trajectory exported to %s (%d frames)", export_path, frame_count
+                )
 
         return TrajectoryRecordResponse(
             recording=getattr(engine_manager, "_is_recording", False),

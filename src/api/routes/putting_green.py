@@ -201,9 +201,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
             height=request.green_height,
             turf=turf,
         )
-        green.set_hole_position(
-            np.array([request.target_x, request.target_y])
-        )
+        green.set_hole_position(np.array([request.target_x, request.target_y]))
 
         sim = PuttingGreenSimulator(green=green)
         reading = sim.read_green(
@@ -273,12 +271,7 @@ async def scatter_analysis(
         holed_count = sum(1 for r in results if r.holed)
         hole_pos = green.hole_position
         avg_dist = float(
-            np.mean(
-                [
-                    np.linalg.norm(r.final_position - hole_pos)
-                    for r in results
-                ]
-            )
+            np.mean([np.linalg.norm(r.final_position - hole_pos) for r in results])
         )
 
         return ScatterAnalysisResponse(
@@ -286,9 +279,7 @@ async def scatter_analysis(
             holed_count=holed_count,
             total_simulations=len(results),
             average_distance_from_hole=avg_dist,
-            make_percentage=(
-                holed_count / len(results) * 100 if results else 0
-            ),
+            make_percentage=(holed_count / len(results) * 100 if results else 0),
         )
 
     except Exception as exc:

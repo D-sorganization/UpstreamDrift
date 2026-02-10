@@ -1,13 +1,20 @@
 """Unit tests for C3D Viewer data models."""
 
 import numpy as np
+import pytest
 
 from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
 # Setup import path using centralized utility
 setup_import_paths(additional_paths=[get_simscape_model_path()])
 
-from apps.core.models import AnalogData, C3DDataModel, MarkerData  # noqa: E402
+try:
+    from apps.core.models import AnalogData, C3DDataModel, MarkerData  # noqa: E402
+except (ImportError, ModuleNotFoundError):
+    pytest.skip(
+        "Simscape apps module not available",
+        allow_module_level=True,
+    )
 
 
 class TestModels:

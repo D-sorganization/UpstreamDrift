@@ -216,7 +216,7 @@ models:
 
         # Mock AIAssistantPanel before importing to prevent Qt crashes
         # Clear modules first so patches take effect
-        sys.modules.pop("launchers.golf_launcher", None)
+        sys.modules.pop("src.launchers.golf_launcher", None)
         sys.modules.pop("src.launchers.golf_launcher", None)
         sys.modules.pop("src.launchers.ui_components", None)
         sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
@@ -236,8 +236,9 @@ models:
         ai_panel_patcher.start()
 
         # Patch ContextHelpDock to avoid TypeError from real QDockWidget parent
+        # ContextHelpDock was refactored from golf_launcher into ui_components
         context_help_patcher = patch(
-            "src.launchers.golf_launcher.ContextHelpDock",
+            "src.launchers.ui_components.ContextHelpDock",
             MagicMock(),
         )
         context_help_patcher.start()

@@ -17,11 +17,15 @@ pytestmark = skip_if_unavailable("mediapipe")
 sys.modules["cv2"] = MagicMock()
 
 # Mock shared.python.pose_estimation.mediapipe_estimator before import
+# Both prefixed and unprefixed paths must be mocked because the source uses
+# bare imports (without 'src.' prefix) in some modules.
 mock_mp_module = MagicMock()
 sys.modules["src.shared.python.pose_estimation.mediapipe_estimator"] = mock_mp_module
+sys.modules["shared.python.pose_estimation.mediapipe_estimator"] = mock_mp_module
 
 mock_op_module = MagicMock()
 sys.modules["src.shared.python.pose_estimation.openpose_estimator"] = mock_op_module
+sys.modules["shared.python.pose_estimation.openpose_estimator"] = mock_op_module
 
 
 from src.shared.python.pose_estimation.interface import (  # noqa: E402

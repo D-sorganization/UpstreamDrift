@@ -209,11 +209,7 @@ def _simulation_status(
         try:
             engine = engine_manager.get_active_engine()
             if engine:
-                state = (
-                    engine.get_state()
-                    if hasattr(engine, "get_state")
-                    else {}
-                )
+                state = engine.get_state() if hasattr(engine, "get_state") else {}
                 return {
                     "running": True,
                     "engine": str(getattr(engine, "engine_type", "unknown")),
@@ -442,11 +438,13 @@ def _system_capabilities(
 
     capabilities = []
     for ns, methods in namespaces.items():
-        capabilities.append({
-            "name": ns,
-            "version": "1.0",
-            "methods": methods,
-        })
+        capabilities.append(
+            {
+                "name": ns,
+                "version": "1.0",
+                "methods": methods,
+            }
+        )
 
     return {
         "server_name": "UpstreamDrift AIP Server",

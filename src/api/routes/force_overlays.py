@@ -31,10 +31,10 @@ router = APIRouter()
 
 # Color mapping for force types. See issue #1199
 FORCE_TYPE_COLORS: dict[str, list[float]] = {
-    "applied": [1.0, 0.2, 0.2, 1.0],   # Red
-    "gravity": [0.2, 0.6, 1.0, 1.0],    # Blue
-    "contact": [0.2, 1.0, 0.2, 1.0],    # Green
-    "bias": [1.0, 0.8, 0.2, 1.0],       # Yellow
+    "applied": [1.0, 0.2, 0.2, 1.0],  # Red
+    "gravity": [0.2, 0.6, 1.0, 1.0],  # Blue
+    "contact": [0.2, 1.0, 0.2, 1.0],  # Green
+    "bias": [1.0, 0.8, 0.2, 1.0],  # Yellow
 }
 
 
@@ -120,15 +120,17 @@ def _build_force_vectors(
             y_pos = 0.5 + i * 0.3
             direction = [0.0, 0.0, 1.0] if torque_val > 0 else [0.0, 0.0, -1.0]
 
-            vectors.append(ForceVector3D(
-                body_name=body_name,
-                force_type="applied",
-                origin=[0.0, y_pos, 0.0],
-                direction=direction,
-                magnitude=abs(torque_val),
-                color=FORCE_TYPE_COLORS["applied"],
-                label=f"{torque_val:.1f} N*m" if config.show_labels else None,
-            ))
+            vectors.append(
+                ForceVector3D(
+                    body_name=body_name,
+                    force_type="applied",
+                    origin=[0.0, y_pos, 0.0],
+                    direction=direction,
+                    magnitude=abs(torque_val),
+                    color=FORCE_TYPE_COLORS["applied"],
+                    label=f"{torque_val:.1f} N*m" if config.show_labels else None,
+                )
+            )
 
     # Build gravity vectors
     if "gravity" in config.force_types or "all" in config.force_types:
@@ -140,15 +142,17 @@ def _build_force_vectors(
             y_pos = 0.5 + i * 0.3
             # Gravity is always downward
             gravity_mag = 9.81 * (0.5 + 0.1 * i)  # Approximate per-body mass * g
-            vectors.append(ForceVector3D(
-                body_name=body_name,
-                force_type="gravity",
-                origin=[0.0, y_pos, 0.0],
-                direction=[0.0, -1.0, 0.0],
-                magnitude=gravity_mag,
-                color=FORCE_TYPE_COLORS["gravity"],
-                label=f"{gravity_mag:.1f} N" if config.show_labels else None,
-            ))
+            vectors.append(
+                ForceVector3D(
+                    body_name=body_name,
+                    force_type="gravity",
+                    origin=[0.0, y_pos, 0.0],
+                    direction=[0.0, -1.0, 0.0],
+                    magnitude=gravity_mag,
+                    color=FORCE_TYPE_COLORS["gravity"],
+                    label=f"{gravity_mag:.1f} N" if config.show_labels else None,
+                )
+            )
 
     # Apply magnitude-based coloring if enabled
     if config.color_by_magnitude and vectors:
@@ -179,27 +183,31 @@ def _build_demo_vectors(config: ForceOverlayRequest) -> list[ForceVector3D]:
 
         if "applied" in config.force_types or "all" in config.force_types:
             mag = 10.0 + i * 5.0
-            vectors.append(ForceVector3D(
-                body_name=body,
-                force_type="applied",
-                origin=[0.0, y_pos, 0.0],
-                direction=[math.sin(i * 0.5), 0.0, math.cos(i * 0.5)],
-                magnitude=mag,
-                color=FORCE_TYPE_COLORS["applied"],
-                label=f"{mag:.1f} N*m" if config.show_labels else None,
-            ))
+            vectors.append(
+                ForceVector3D(
+                    body_name=body,
+                    force_type="applied",
+                    origin=[0.0, y_pos, 0.0],
+                    direction=[math.sin(i * 0.5), 0.0, math.cos(i * 0.5)],
+                    magnitude=mag,
+                    color=FORCE_TYPE_COLORS["applied"],
+                    label=f"{mag:.1f} N*m" if config.show_labels else None,
+                )
+            )
 
         if "gravity" in config.force_types or "all" in config.force_types:
             grav_mag = 9.81 * (1.0 + 0.2 * i)
-            vectors.append(ForceVector3D(
-                body_name=body,
-                force_type="gravity",
-                origin=[0.0, y_pos, 0.0],
-                direction=[0.0, -1.0, 0.0],
-                magnitude=grav_mag,
-                color=FORCE_TYPE_COLORS["gravity"],
-                label=f"{grav_mag:.1f} N" if config.show_labels else None,
-            ))
+            vectors.append(
+                ForceVector3D(
+                    body_name=body,
+                    force_type="gravity",
+                    origin=[0.0, y_pos, 0.0],
+                    direction=[0.0, -1.0, 0.0],
+                    magnitude=grav_mag,
+                    color=FORCE_TYPE_COLORS["gravity"],
+                    label=f"{grav_mag:.1f} N" if config.show_labels else None,
+                )
+            )
 
     return vectors
 
@@ -249,12 +257,8 @@ async def get_force_overlays(
     try:
         vectors = _build_force_vectors(engine_manager, config)
 
-        total_force = sum(
-            v.magnitude for v in vectors if v.force_type != "bias"
-        )
-        total_torque = sum(
-            v.magnitude for v in vectors if v.force_type == "applied"
-        )
+        total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")
+        total_torque = sum(v.magnitude for v in vectors if v.force_type == "applied")
 
         # Get simulation time
         sim_time = 0.0
@@ -311,12 +315,8 @@ async def update_force_overlay_config(
     try:
         vectors = _build_force_vectors(engine_manager, config)
 
-        total_force = sum(
-            v.magnitude for v in vectors if v.force_type != "bias"
-        )
-        total_torque = sum(
-            v.magnitude for v in vectors if v.force_type == "applied"
-        )
+        total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")
+        total_torque = sum(v.magnitude for v in vectors if v.force_type == "applied")
 
         sim_time = 0.0
         try:

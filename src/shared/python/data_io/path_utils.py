@@ -34,18 +34,28 @@ def get_repo_root() -> Path:
     """
     global _REPO_ROOT
     if _REPO_ROOT is None:
-        # Start from this file and go up to find repo root
+        # Start from this file and go up to find repo root.
+        # Prefer .git directory (unique to repo root) over pyproject.toml
+        # since pyproject.toml can exist in subdirectories too.
         current = Path(__file__).resolve()
+        pyproject_candidate: Path | None = None
         while current.parent != current:
-            if (current / ".git").exists() or (current / "pyproject.toml").exists():
+            if (current / ".git").exists():
                 _REPO_ROOT = current
-                logger.debug(f"Repository root: {_REPO_ROOT}")
+                logger.debug(f"Repository root (via .git): {_REPO_ROOT}")
                 break
+            if (current / "pyproject.toml").exists():
+                # Track the highest pyproject.toml seen (overwrite each time)
+                pyproject_candidate = current
             current = current.parent
         else:
-            # Fallback: assume standard structure
-            _REPO_ROOT = Path(__file__).resolve().parents[3]
-            logger.warning(f"Could not find .git, using fallback: {_REPO_ROOT}")
+            if pyproject_candidate is not None:
+                _REPO_ROOT = pyproject_candidate
+                logger.debug(f"Repository root (via pyproject.toml): {_REPO_ROOT}")
+            else:
+                # Fallback: assume standard structure
+                _REPO_ROOT = Path(__file__).resolve().parents[3]
+                logger.warning(f"Could not find .git, using fallback: {_REPO_ROOT}")
 
     return _REPO_ROOT
 

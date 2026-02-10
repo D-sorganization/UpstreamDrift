@@ -29,7 +29,7 @@ def mock_mujoco_dependencies():
         "sys.modules",
         {
             "mujoco": mock_mujoco,
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces": mock_interfaces,
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces": mock_interfaces,
         },
     ):
         yield mock_mujoco, mock_interfaces
@@ -39,7 +39,7 @@ def mock_mujoco_dependencies():
 def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
     """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
     # Ensure module is imported
-    import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
+    import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
     # Manually patch the module's globals to use our mocks
     mock_mujoco, mock_interfaces = mock_mujoco_dependencies
@@ -70,7 +70,7 @@ def test_initialization(engine):
 
 
 @patch(
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
 )
 def test_load_from_string(mock_mujoco, engine):
     xml = "<mujoco/>"
@@ -82,14 +82,14 @@ def test_load_from_string(mock_mujoco, engine):
 
 
 @patch(
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
 )
 def test_load_from_path(mock_mujoco, engine):
     path = "model.xml"
 
     # Mock the security validation to allow test paths - patch where it's imported
     with patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
     ) as mock_validate:
         mock_validate.return_value = Path(path).resolve()
 
@@ -103,7 +103,7 @@ def test_load_from_path(mock_mujoco, engine):
 
 
 @patch(
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
 )
 def test_step(mock_mujoco, engine):
     # Setup mock model/data
@@ -116,7 +116,7 @@ def test_step(mock_mujoco, engine):
 
 
 @patch(
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
 )
 def test_reset(mock_mujoco, engine):
     # Setup mock model/data
@@ -159,7 +159,7 @@ def test_compute_mass_matrix(engine):
     engine.data.qM = np.zeros(2)
 
     with patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
     ) as mock_mujoco:
         M = engine.compute_mass_matrix()
         assert M.shape == (2, 2)
@@ -192,7 +192,7 @@ def test_compute_inverse_dynamics(engine):
     engine.data.qacc = np.zeros(2)  # Real array for slice assignment
 
     with patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
     ) as mock_mujoco:
         qacc = np.array([0.1, 0.2])
         tau = engine.compute_inverse_dynamics(qacc)
@@ -210,7 +210,7 @@ def test_compute_affine_drift(engine):
     engine.data.qacc = np.array([0.5])  # Simulated drift acc
 
     with patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
     ) as mock_mujoco:
         drift = engine.compute_affine_drift()
 
@@ -229,7 +229,7 @@ def test_compute_jacobian(engine):
     engine.data = MagicMock()
 
     with patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
     ) as mock_mujoco:
         mock_mujoco.mj_name2id.return_value = 1
 

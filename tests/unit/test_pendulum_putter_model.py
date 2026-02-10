@@ -21,8 +21,13 @@ import pytest
 if TYPE_CHECKING:
     pass
 
-# Skip entire module if model_generation is not available
-pytest.importorskip("model_generation", reason="model_generation package not installed")
+# Skip entire module if model_generation.models.pendulum_putter is not available
+# Note: model_generation can resolve from Tools repo via sys.path, but the
+# pendulum_putter submodule only exists at src/tools/model_generation in this repo.
+pytest.importorskip(
+    "model_generation.models.pendulum_putter",
+    reason="model_generation.models.pendulum_putter package not available",
+)
 
 
 class TestPendulumPutterModelConstruction:

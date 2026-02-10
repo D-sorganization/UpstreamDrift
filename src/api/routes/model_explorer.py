@@ -93,14 +93,16 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
             if mass_elem is not None:
                 properties["mass"] = float(mass_elem.get("value", "0"))
 
-        nodes.append(URDFTreeNode(
-            id=f"link_{link_name}",
-            name=link_name,
-            node_type="link",
-            parent_id=None,  # Filled in during joint processing
-            children=[],
-            properties=properties,
-        ))
+        nodes.append(
+            URDFTreeNode(
+                id=f"link_{link_name}",
+                name=link_name,
+                node_type="link",
+                parent_id=None,  # Filled in during joint processing
+                children=[],
+                properties=properties,
+            )
+        )
 
     # Parse joints and build parent-child relationships
     child_links: set[str] = set()
@@ -148,14 +150,16 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
         parent_node_id = f"link_{parent_link}"
         child_node_id = f"link_{child_link}"
 
-        nodes.append(URDFTreeNode(
-            id=f"joint_{joint_name}",
-            name=joint_name,
-            node_type="joint",
-            parent_id=parent_node_id,
-            children=[child_node_id],
-            properties=properties,
-        ))
+        nodes.append(
+            URDFTreeNode(
+                id=f"joint_{joint_name}",
+                name=joint_name,
+                node_type="joint",
+                parent_id=parent_node_id,
+                children=[child_node_id],
+                properties=properties,
+            )
+        )
 
         # Update parent link's children
         for node in nodes:
@@ -171,8 +175,10 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
 
     # Find root link (not a child of any joint)
     root_links = link_names - child_links
-    root_link_name = next(iter(root_links)) if root_links else (
-        next(iter(link_names)) if link_names else "base"
+    root_link_name = (
+        next(iter(root_links))
+        if root_links
+        else (next(iter(link_names)) if link_names else "base")
     )
 
     # Mark root node
@@ -352,12 +358,8 @@ async def compare_models(
         model_b = _parse_urdf_tree(content_b, request.model_b_path)
 
         # Find shared and unique joints
-        joints_a = {
-            node.name for node in model_a.tree if node.node_type == "joint"
-        }
-        joints_b = {
-            node.name for node in model_b.tree if node.node_type == "joint"
-        }
+        joints_a = {node.name for node in model_a.tree if node.node_type == "joint"}
+        joints_b = {node.name for node in model_b.tree if node.node_type == "joint"}
 
         shared = sorted(joints_a & joints_b)
         only_a = sorted(joints_a - joints_b)

@@ -85,16 +85,18 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
             except Exception:
                 pass
 
-        actuators.append(ActuatorInfo(
-            index=i,
-            name=name,
-            control_type="constant",
-            value=current_torque,
-            min_value=min_val,
-            max_value=max_val,
-            units="N*m",
-            joint_type="revolute",
-        ))
+        actuators.append(
+            ActuatorInfo(
+                index=i,
+                name=name,
+                control_type="constant",
+                value=current_torque,
+                min_value=min_val,
+                max_value=max_val,
+                units="N*m",
+                joint_type="revolute",
+            )
+        )
 
     return actuators if actuators else _demo_actuators()
 
@@ -165,7 +167,10 @@ async def get_actuator_panel(
             n_actuators=len(actuators),
             actuators=actuators,
             available_control_types=[
-                "constant", "polynomial", "pd_gains", "trajectory"
+                "constant",
+                "polynomial",
+                "pd_gains",
+                "trajectory",
             ],
             engine_name=engine_name,
         )
@@ -278,13 +283,15 @@ async def send_actuator_batch(
 
     for cmd in batch.commands:
         if cmd.actuator_index >= len(actuators):
-            results.append(ActuatorCommandResponse(
-                actuator_index=cmd.actuator_index,
-                applied_value=0.0,
-                control_type=cmd.control_type,
-                status=f"error: index {cmd.actuator_index} out of range",
-                clamped=False,
-            ))
+            results.append(
+                ActuatorCommandResponse(
+                    actuator_index=cmd.actuator_index,
+                    applied_value=0.0,
+                    control_type=cmd.control_type,
+                    status=f"error: index {cmd.actuator_index} out of range",
+                    clamped=False,
+                )
+            )
             continue
 
         actuator = actuators[cmd.actuator_index]
@@ -305,12 +312,14 @@ async def send_actuator_batch(
         except Exception:
             pass
 
-        results.append(ActuatorCommandResponse(
-            actuator_index=cmd.actuator_index,
-            applied_value=applied_value,
-            control_type=cmd.control_type,
-            status="ok",
-            clamped=clamped,
-        ))
+        results.append(
+            ActuatorCommandResponse(
+                actuator_index=cmd.actuator_index,
+                applied_value=applied_value,
+                control_type=cmd.control_type,
+                status="ok",
+                clamped=clamped,
+            )
+        )
 
     return results

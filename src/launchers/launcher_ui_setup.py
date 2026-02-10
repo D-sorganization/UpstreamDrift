@@ -185,9 +185,7 @@ class LauncherUISetupMixin:
             ("&Analysis Tools", "analysis_tools"),
         ]:
             action = QAction(label, self)
-            action.triggered.connect(
-                lambda checked, t=topic: self._show_help_dialog(t)
-            )
+            action.triggered.connect(lambda checked, t=topic: self._show_help_dialog(t))
             help_menu.addAction(action)
 
         help_menu.addSeparator()
@@ -326,22 +324,26 @@ class LauncherUISetupMixin:
             from src.shared.python.help_system import TooltipManager
 
             TooltipManager.register_tooltip(
-                self.chk_live, "Live Visualization",
+                self.chk_live,
+                "Live Visualization",
                 "Enable real-time 3D visualization during simulation.",
                 "visualization",
             )
             TooltipManager.register_tooltip(
-                self.chk_gpu, "GPU Acceleration",
+                self.chk_gpu,
+                "GPU Acceleration",
                 "Use GPU for physics computation when available.",
                 "engine_selection",
             )
             TooltipManager.register_tooltip(
-                self.chk_docker, "Docker Mode",
+                self.chk_docker,
+                "Docker Mode",
                 "Run physics engines in Docker containers.",
                 "engine_selection",
             )
             TooltipManager.register_tooltip(
-                self.chk_wsl, "WSL Mode",
+                self.chk_wsl,
+                "WSL Mode",
                 "Run in WSL2 Ubuntu environment for full Linux engine support.",
                 "engine_selection",
             )

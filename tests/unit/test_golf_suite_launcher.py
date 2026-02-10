@@ -17,8 +17,8 @@ os.environ["QT_QPA_PLATFORM"] = "offscreen"
 def cleanup_imports():
     """Clean up imports after tests to prevent mock leakage."""
     yield
-    sys.modules.pop("launchers.golf_suite_launcher", None)
-    sys.modules.pop("launchers.golf_launcher", None)
+    sys.modules.pop("src.launchers.golf_suite_launcher", None)
+    sys.modules.pop("src.launchers.golf_launcher", None)
 
 
 # Create mocks for PyQt6 modules
@@ -188,9 +188,9 @@ with patch.dict(
     import sys
 
     # Use sys.modules.pop instead of reload to avoid C-extension corruption
-    sys.modules.pop("launchers.golf_suite_launcher", None)
+    sys.modules.pop("src.launchers.golf_suite_launcher", None)
 
-    from launchers import golf_suite_launcher
+    from src.launchers import golf_suite_launcher
 
 
 @pytest.fixture

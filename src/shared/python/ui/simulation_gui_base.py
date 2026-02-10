@@ -61,12 +61,8 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
     TIMER_INTERVAL_MS: int = 10  # ~100 Hz default
 
     # Styles for run/stop button
-    STYLE_BUTTON_RUN: str = (
-        "QPushButton { background-color: #4CAF50; color: white; }"
-    )
-    STYLE_BUTTON_STOP: str = (
-        "QPushButton { background-color: #f44336; color: white; }"
-    )
+    STYLE_BUTTON_RUN: str = "QPushButton { background-color: #4CAF50; color: white; }"
+    STYLE_BUTTON_STOP: str = "QPushButton { background-color: #f44336; color: white; }"
 
     def __init__(self) -> None:
         """Initialize the base simulation GUI.
@@ -219,9 +215,7 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
 
         self.controls_stack.addWidget(page)
 
-    def _build_visualization_group(
-        self, parent_layout: QtWidgets.QVBoxLayout
-    ) -> None:
+    def _build_visualization_group(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the common visualization toggles group."""
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
@@ -249,9 +243,7 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         vis_layout.addLayout(ellip_layout)
 
         # Live analysis toggle
-        self.chk_live_analysis = QtWidgets.QCheckBox(
-            "Live Analysis (Induced/CF)"
-        )
+        self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
         self.chk_live_analysis.setToolTip(
             "Compute Induced Accelerations and Counterfactuals in real-time "
             "(may slow down simulation)"
@@ -372,9 +364,7 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
 
         Call this from the game loop during recording.
         """
-        self.lbl_rec_status.setText(
-            f"Frames: {self.get_recording_frame_count()}"
-        )
+        self.lbl_rec_status.setText(f"Frames: {self.get_recording_frame_count()}")
 
     # ==================================================================
     # Game loop
@@ -433,9 +423,7 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
             self.export_data(filename)
             self._update_status(f"Data exported to {filename}")
         except Exception as exc:
-            QtWidgets.QMessageBox.critical(
-                self, "Export Error", str(exc)
-            )
+            QtWidgets.QMessageBox.critical(self, "Export Error", str(exc))
             logger.exception("Export failed")
 
     # ==================================================================

@@ -26,8 +26,8 @@ Exit codes:
 
 from __future__ import annotations
 
-import ast
 import argparse
+import ast
 import sys
 from pathlib import Path
 
@@ -35,7 +35,7 @@ from pathlib import Path
 # because they exist solely for backward compatibility
 ALLOWED_SHIMS = {
     "shared/python/engine_loaders.py",  # re-exports from src.engines.loaders
-    "engines/common/capabilities.py",   # re-exports from src.shared.python.capabilities
+    "engines/common/capabilities.py",  # re-exports from src.shared.python.capabilities
 }
 
 # Rules: (source_dir_relative_to_src, forbidden_target_prefix, description)

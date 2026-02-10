@@ -380,19 +380,13 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         )
 
         # Hip width
-        modifiers["macrodetails-proportions/HipWidth"] = (
-            params.hip_width_factor - 1.0
-        )
+        modifiers["macrodetails-proportions/HipWidth"] = params.hip_width_factor - 1.0
 
         # Arm length
-        modifiers["macrodetails-proportions/ArmLength"] = (
-            params.arm_length_factor - 1.0
-        )
+        modifiers["macrodetails-proportions/ArmLength"] = params.arm_length_factor - 1.0
 
         # Leg length
-        modifiers["macrodetails-proportions/LegLength"] = (
-            params.leg_length_factor - 1.0
-        )
+        modifiers["macrodetails-proportions/LegLength"] = params.leg_length_factor - 1.0
 
         return modifiers
 
@@ -618,9 +612,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         try:
-            return self._generate_impl(
-                modifiers, height_scale, output_dir, **kwargs
-            )
+            return self._generate_impl(modifiers, height_scale, output_dir, **kwargs)
         except Exception as exc:
             logger.exception("MakeHuman mesh generation failed")
             return GeneratedMeshResult(
@@ -664,10 +656,8 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
                 )
 
             vertices, faces = self._parse_obj_file(obj_path)
-            mesh_paths, collision_paths, vertex_groups = (
-                self._segment_by_vertex_groups(
-                    vertices, faces, groups_path, output_dir, height_scale
-                )
+            mesh_paths, collision_paths, vertex_groups = self._segment_by_vertex_groups(
+                vertices, faces, groups_path, output_dir, height_scale
             )
 
         return GeneratedMeshResult(

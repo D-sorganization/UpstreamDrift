@@ -1,4 +1,5 @@
 """Backward compatibility shim - module moved to spatial_algebra.indexed_acceleration."""
+
 import sys as _sys
 
 from .spatial_algebra import indexed_acceleration as _real_module  # noqa: E402

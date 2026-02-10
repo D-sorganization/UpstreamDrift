@@ -10,8 +10,6 @@ See issue #1201, #1203, #1179
 
 from __future__ import annotations
 
-import math
-
 import pytest
 from pydantic import ValidationError
 
@@ -24,7 +22,6 @@ from src.api.models.responses import (
     AnalysisMetricsSummary,
     AnalysisStatisticsResponse,
     BodyPositionResponse,
-    DataExportResponse,
     JointAngleDisplay,
     MeasurementResult,
     MeasurementToolsResponse,
@@ -33,7 +30,6 @@ from src.api.models.responses import (
     URDFLinkGeometry,
     URDFModelResponse,
 )
-
 
 # ──────────────────────────────────────────────────────────────
 #  Contract Tests: URDF Model Responses (#1201)
@@ -524,12 +520,12 @@ class TestURDFParser:
         assert result.root_link == "base"
 
         # Check link parsing
-        base_link = next(l for l in result.links if l.link_name == "base")
+        base_link = next(lnk for lnk in result.links if lnk.link_name == "base")
         assert base_link.geometry_type == "box"
         assert base_link.dimensions["width"] == 0.2
         assert base_link.color == [0.0, 0.0, 0.8, 1.0]  # From material
 
-        arm_link = next(l for l in result.links if l.link_name == "arm")
+        arm_link = next(lnk for lnk in result.links if lnk.link_name == "arm")
         assert arm_link.geometry_type == "cylinder"
         assert arm_link.dimensions["radius"] == 0.05
 

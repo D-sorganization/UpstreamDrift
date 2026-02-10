@@ -248,9 +248,7 @@ async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
     See issue #1206
     """
     if session_id not in _sessions:
-        raise HTTPException(
-            status_code=404, detail=f"Session '{session_id}' not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found")
 
     session = _sessions[session_id]
     session["status"] = "stopped"
