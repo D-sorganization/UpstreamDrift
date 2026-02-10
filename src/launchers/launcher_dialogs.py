@@ -32,7 +32,7 @@ from src.launchers.ui_components import (
 from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from src.shared.python.ui import ToastManager
+    pass
 
 logger = get_logger(__name__)
 
