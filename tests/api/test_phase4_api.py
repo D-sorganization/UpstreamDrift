@@ -380,7 +380,9 @@ class TestModelExplorerResponseContract:
             tree=[
                 URDFTreeNode(id="link_base", name="base", node_type="root"),
                 URDFTreeNode(
-                    id="joint_hip", name="hip", node_type="joint",
+                    id="joint_hip",
+                    name="hip",
+                    node_type="joint",
                     parent_id="link_base",
                 ),
             ],
@@ -591,12 +593,15 @@ class TestAIPDispatcher:
         registry = MethodRegistry()
         registry.register("test.add", lambda a, b, **kw: a + b)
 
-        result = await dispatch(registry, {
-            "jsonrpc": "2.0",
-            "method": "test.add",
-            "params": [3, 4],
-            "id": 1,
-        })
+        result = await dispatch(
+            registry,
+            {
+                "jsonrpc": "2.0",
+                "method": "test.add",
+                "params": [3, 4],
+                "id": 1,
+            },
+        )
 
         assert result is not None
         assert result["result"] == 7
@@ -609,11 +614,14 @@ class TestAIPDispatcher:
 
         registry = MethodRegistry()
 
-        result = await dispatch(registry, {
-            "jsonrpc": "2.0",
-            "method": "nonexistent",
-            "id": 1,
-        })
+        result = await dispatch(
+            registry,
+            {
+                "jsonrpc": "2.0",
+                "method": "nonexistent",
+                "id": 1,
+            },
+        )
 
         assert result is not None
         assert result["error"]["code"] == METHOD_NOT_FOUND
@@ -625,11 +633,14 @@ class TestAIPDispatcher:
 
         registry = MethodRegistry()
 
-        result = await dispatch(registry, {
-            "jsonrpc": "1.0",
-            "method": "test",
-            "id": 1,
-        })
+        result = await dispatch(
+            registry,
+            {
+                "jsonrpc": "1.0",
+                "method": "test",
+                "id": 1,
+            },
+        )
 
         assert result is not None
         assert result["error"]["code"] == INVALID_REQUEST
@@ -642,10 +653,13 @@ class TestAIPDispatcher:
         registry = MethodRegistry()
         registry.register("test.noop", lambda **kw: None)
 
-        result = await dispatch(registry, {
-            "jsonrpc": "2.0",
-            "method": "test.noop",
-        })
+        result = await dispatch(
+            registry,
+            {
+                "jsonrpc": "2.0",
+                "method": "test.noop",
+            },
+        )
 
         assert result is None
 
@@ -660,12 +674,15 @@ class TestAIPDispatcher:
             lambda name="world", **kw: f"hello {name}",
         )
 
-        result = await dispatch(registry, {
-            "jsonrpc": "2.0",
-            "method": "test.greet",
-            "params": {"name": "alice"},
-            "id": 42,
-        })
+        result = await dispatch(
+            registry,
+            {
+                "jsonrpc": "2.0",
+                "method": "test.greet",
+                "params": {"name": "alice"},
+                "id": 42,
+            },
+        )
 
         assert result is not None
         assert result["result"] == "hello alice"

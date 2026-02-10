@@ -71,11 +71,13 @@ def _discover_models() -> list[dict[str, str]]:
                 seen_names.add(name)
 
                 fmt = "urdf" if filepath.suffix == ".urdf" else "mjcf"
-                models.append({
-                    "name": name,
-                    "format": fmt,
-                    "path": str(filepath.relative_to(root)),
-                })
+                models.append(
+                    {
+                        "name": name,
+                        "format": fmt,
+                        "path": str(filepath.relative_to(root)),
+                    }
+                )
 
     return models
 
@@ -195,10 +197,12 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
         visual_elem = link_elem.find("visual")
         if visual_elem is not None:
             geom_data = _parse_urdf_geometry(visual_elem, materials)
-            links.append(URDFLinkGeometry(
-                link_name=link_name,
-                **geom_data,
-            ))
+            links.append(
+                URDFLinkGeometry(
+                    link_name=link_name,
+                    **geom_data,
+                )
+            )
 
     # Parse joints
     joints: list[URDFJointDescriptor] = []
@@ -235,23 +239,27 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
             lower_limit = float(limit_elem.get("lower", "0"))
             upper_limit = float(limit_elem.get("upper", "0"))
 
-        joints.append(URDFJointDescriptor(
-            name=joint_name,
-            joint_type=joint_type,
-            parent_link=parent_link,
-            child_link=child_link,
-            origin=origin,
-            rotation=rotation,
-            axis=axis,
-            lower_limit=lower_limit,
-            upper_limit=upper_limit,
-        ))
+        joints.append(
+            URDFJointDescriptor(
+                name=joint_name,
+                joint_type=joint_type,
+                parent_link=parent_link,
+                child_link=child_link,
+                origin=origin,
+                rotation=rotation,
+                axis=axis,
+                lower_limit=lower_limit,
+                upper_limit=upper_limit,
+            )
+        )
 
     # Find root link (not a child of any joint)
     all_link_names = {link.link_name for link in links}
     root_candidates = all_link_names - child_links
-    root_link = next(iter(root_candidates)) if root_candidates else (
-        links[0].link_name if links else "base"
+    root_link = (
+        next(iter(root_candidates))
+        if root_candidates
+        else (links[0].link_name if links else "base")
     )
 
     return URDFModelResponse(

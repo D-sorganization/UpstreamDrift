@@ -13,7 +13,13 @@ from src.shared.python.path_utils import get_simscape_model_path, setup_import_p
 # Setup import path using centralized utility
 setup_import_paths(additional_paths=[get_simscape_model_path()])
 
-from c3d_reader import SCHEMA_VERSION, C3DDataReader  # noqa: E402
+try:
+    from c3d_reader import SCHEMA_VERSION, C3DDataReader  # noqa: E402
+except (ImportError, ModuleNotFoundError):
+    pytest.skip(
+        "c3d_reader module not available (requires c3d/ezc3d)",
+        allow_module_level=True,
+    )
 
 
 class TestC3DExportFeatures:

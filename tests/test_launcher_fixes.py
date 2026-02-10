@@ -264,7 +264,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
     @patch("src.launchers.golf_launcher.GolfLauncher._load_layout")
     @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.ui_components.ContextHelpDock")
     @patch("src.launchers.golf_launcher._lazy_load_model_registry")
     @patch("src.launchers.golf_launcher._lazy_load_engine_manager")
     def test_model_order_tracking(
@@ -299,7 +299,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
     @patch("src.launchers.golf_launcher.GolfLauncher._rebuild_grid")
     @patch("src.launchers.golf_launcher.GolfLauncher._load_layout")
     @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.ui_components.ContextHelpDock")
     @patch("src.launchers.golf_launcher._lazy_load_model_registry")
     @patch("src.launchers.golf_launcher._lazy_load_engine_manager")
     def test_model_swap_functionality(

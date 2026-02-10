@@ -215,8 +215,11 @@ class TestDatasetListResponseContract:
         resp = DatasetListResponse(
             datasets=[
                 DatasetInfo(
-                    name="a.csv", path="/a.csv", format="csv",
-                    size_bytes=100, columns=["x"],
+                    name="a.csv",
+                    path="/a.csv",
+                    format="csv",
+                    size_bytes=100,
+                    columns=["x"],
                 ),
             ],
             total=1,

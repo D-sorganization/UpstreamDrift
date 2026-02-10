@@ -8,7 +8,13 @@ from src.shared.python.path_utils import get_simscape_model_path, setup_import_p
 # Setup import paths including Simscape model
 setup_import_paths(additional_paths=[get_simscape_model_path("3D_Golf_Model")])
 
-from apps.services.analysis import compute_marker_statistics  # noqa: E402
+try:
+    from apps.services.analysis import compute_marker_statistics  # noqa: E402
+except (ImportError, ModuleNotFoundError):
+    pytest.skip(
+        "Simscape 3D_Golf_Model apps module not available",
+        allow_module_level=True,
+    )
 
 
 class TestAnalysisRobustness:

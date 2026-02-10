@@ -168,10 +168,7 @@ class TestPhysicsParameters:
 
     def test_physics_parameters_accessible(self):
         """Verify physics parameters are accessible."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
-        from physics_parameters import get_registry
+        from src.shared.python.physics.physics_parameters import get_registry
 
         registry = get_registry()
 
@@ -180,10 +177,7 @@ class TestPhysicsParameters:
 
     def test_ball_parameters_present(self):
         """Test that ball parameters are defined."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
-        from physics_parameters import get_registry
+        from src.shared.python.physics.physics_parameters import get_registry
 
         registry = get_registry()
 
@@ -200,10 +194,7 @@ class TestPhysicsParameters:
 
     def test_gravity_parameter(self):
         """Test gravity parameter."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
-        from physics_parameters import get_registry
+        from src.shared.python.physics.physics_parameters import get_registry
 
         registry = get_registry()
 
@@ -215,10 +206,7 @@ class TestPhysicsParameters:
 
     def test_parameter_validation(self):
         """Test parameter validation."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
-        from physics_parameters import get_registry
+        from src.shared.python.physics.physics_parameters import get_registry
 
         registry = get_registry()
 
@@ -238,10 +226,10 @@ class TestPhysicsParameters:
 
     def test_parameter_categories(self):
         """Test parameter categorization."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
-        from physics_parameters import ParameterCategory, get_registry
+        from src.shared.python.physics.physics_parameters import (
+            ParameterCategory,
+            get_registry,
+        )
 
         registry = get_registry()
 

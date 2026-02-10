@@ -16,6 +16,7 @@ from ..data_io.common_utils import (
     get_logger,
     setup_structured_logging,
 )
+from ..data_io.path_utils import get_src_root
 from .engine_registry import (
     EngineRegistration,
     EngineStatus,
@@ -42,7 +43,7 @@ class EngineManager:
             suite_root: Root directory of the Golf Modeling Suite
         """
         if suite_root is None:
-            suite_root = Path(__file__).parent.parent.parent
+            suite_root = get_src_root()
         self.suite_root = Path(suite_root)
         self.engines_root = self.suite_root / "engines"
 
