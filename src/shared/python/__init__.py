@@ -1,5 +1,11 @@
 """Golf Modeling Suite - Shared Python Utilities.
 
+Source of Truth: UpstreamDrift (this repository)
+Cross-repo package: upstream-drift-shared (see pyproject.toml in this directory)
+Consumers:
+    - Tools repo: src/shared/theme/, src/shared/python/plot_theme/
+    - Gasification_Model: vendor/ud-tools/
+
 This module provides common functionality shared across all physics engines
 and modeling approaches in the Golf Modeling Suite.
 """

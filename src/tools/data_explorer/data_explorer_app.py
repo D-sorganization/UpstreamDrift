@@ -21,12 +21,13 @@ Design by Contract:
 
 from __future__ import annotations
 
-import logging
 import sys
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logger_utils import get_logger
+
+logger = get_logger(__name__)
 
 # Supported file extensions for data import
 SUPPORTED_EXTENSIONS: set[str] = {".csv", ".json", ".hdf5", ".h5", ".c3d"}
@@ -163,5 +164,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    from src.shared.python.logging_config import setup_logging
+
+    setup_logging()
     sys.exit(main())

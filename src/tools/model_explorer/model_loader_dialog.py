@@ -6,7 +6,6 @@ including human models and golf clubs.
 
 from __future__ import annotations
 
-import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -31,13 +30,7 @@ from PyQt6.QtWidgets import (  # noqa: E402
     QWidget,
 )
 
-try:
-    from src.shared.python.logging_config import get_logger
-except ImportError:
-
-    def get_logger(name: str | None = None) -> logging.Logger:
-        return logging.getLogger(name)
-
+from src.shared.python.logger_utils import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 

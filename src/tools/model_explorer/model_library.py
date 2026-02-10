@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import importlib
 import json
-import logging
 import math
 import os
 import sys
@@ -33,13 +32,7 @@ _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-try:
-    from src.shared.python.logging_config import get_logger
-except ImportError:
-
-    def get_logger(name: str | None = None) -> logging.Logger:
-        return logging.getLogger(name)
-
+from src.shared.python.logger_utils import get_logger  # noqa: E402
 
 try:
     import robot_descriptions

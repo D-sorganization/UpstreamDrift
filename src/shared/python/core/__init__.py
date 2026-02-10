@@ -1,5 +1,9 @@
 """Core utilities: errors, constants, logging, and version.
 
+Source of Truth: UpstreamDrift (this repository)
+Consumers: Tools, Gasification_Model (via upstream-drift-shared package)
+Cross-repo install: pip install upstream-drift-shared
+
 This package groups fundamental modules:
 - _core: logging setup, base error re-exports
 - constants: suite-wide path constants
