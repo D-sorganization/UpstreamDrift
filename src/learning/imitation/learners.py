@@ -20,8 +20,8 @@ try:
     GYMNASIUM_AVAILABLE = True
 except ImportError:
     GYMNASIUM_AVAILABLE = False
-    gym = None
-    spaces = None
+    gym = None  # type: ignore[assignment]
+    spaces = None  # type: ignore[assignment]
 
 from src.learning.imitation.dataset import Demonstration, DemonstrationDataset
 

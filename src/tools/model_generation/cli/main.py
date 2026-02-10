@@ -38,14 +38,14 @@ def cmd_generate(args: argparse.Namespace) -> int:
 
     # Apply parameters
     if args.height:
-        builder.set_height(args.height)
+        builder.set_parameters(height_m=args.height)
     if args.mass:
-        builder.set_mass(args.mass)
+        builder.set_parameters(mass_kg=args.mass)
     if args.proportions:
         # Parse proportions as JSON
         try:
             proportions = json.loads(args.proportions)
-            builder.set_proportions(**proportions)
+            builder.set_parameters(**proportions)
         except json.JSONDecodeError as e:
             logger.error(f"Invalid proportions JSON: {e}")
             return 1
@@ -58,13 +58,14 @@ def cmd_generate(args: argparse.Namespace) -> int:
     result = builder.build()
 
     if not result.success:
-        logger.error("Build failed:")
-        for error in result.errors:
-            logger.error(f"  - {error}")
+        logger.error("Build failed: %s", result.error_message or "Unknown error")
         return 1
 
     # Output
-    urdf_string = result.to_urdf()
+    urdf_string = result.urdf_xml
+    if not urdf_string:
+        logger.error("Build succeeded but produced no URDF output")
+        return 1
 
     if args.output:
         output_path = Path(args.output)
@@ -126,8 +127,8 @@ def cmd_convert(args: argparse.Namespace) -> int:
         elif args.from_format == "mjcf" and args.to_format == "urdf":
             from model_generation.converters.mjcf_converter import MJCFConverter
 
-            converter = MJCFConverter()
-            urdf_string = converter.mjcf_to_urdf(source_path, output_path)
+            mjcf_converter = MJCFConverter()
+            urdf_string = mjcf_converter.mjcf_to_urdf(source_path, output_path)
 
             if not output_path:
                 logger.info("%s", urdf_string)
@@ -135,8 +136,8 @@ def cmd_convert(args: argparse.Namespace) -> int:
         elif args.from_format == "urdf" and args.to_format == "mjcf":
             from model_generation.converters.mjcf_converter import MJCFConverter
 
-            converter = MJCFConverter()
-            mjcf_string = converter.urdf_to_mjcf(source_path, output_path)
+            mjcf_converter = MJCFConverter()
+            mjcf_string = mjcf_converter.urdf_to_mjcf(source_path, output_path)
 
             if not output_path:
                 logger.info("%s", mjcf_string)
@@ -338,7 +339,7 @@ def cmd_library_list(args: argparse.Namespace) -> int:
             "count": len(models),
             "models": [
                 {
-                    "id": m.model_id,
+                    "id": m.id,
                     "name": m.name,
                     "category": m.category.value,
                     "source": m.source.value if m.source else None,
@@ -353,7 +354,7 @@ def cmd_library_list(args: argparse.Namespace) -> int:
             logger.info("Found %s models:\n", len(models))
             for model in models:
                 source = f"[{model.source.value}]" if model.source else ""
-                logger.info("  %s %s %s", model.model_id, model.category.value, source)
+                logger.info("  %s %s %s", model.id, model.category.value, source)
                 if args.verbose:
                     logger.info("    Path: %s", model.urdf_path)
                     if model.tags:
@@ -376,7 +377,7 @@ def cmd_library_add(args: argparse.Namespace) -> int:
         return 1
 
     # Parse category
-    category = None
+    category = ModelCategory.OTHER
     if args.category:
         try:
             category = ModelCategory(args.category)
@@ -395,7 +396,7 @@ def cmd_library_add(args: argparse.Namespace) -> int:
     )
 
     if entry:
-        logger.info(f"Added model: {entry.model_id}")
+        logger.info(f"Added model: {entry.id}")
         return 0
     else:
         logger.error("Failed to add model")

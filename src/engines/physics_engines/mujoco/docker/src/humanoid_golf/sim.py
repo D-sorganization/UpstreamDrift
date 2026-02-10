@@ -17,7 +17,7 @@ try:
 
     HAS_VIEWER = True
 except ImportError as e:
-    logger.error("%s", f"DEBUG: Failed to import dm_control.viewer: {e}", flush=True)
+    logger.error("%s", f"DEBUG: Failed to import dm_control.viewer: {e}")
     import traceback
 
     traceback.print_exc()
@@ -315,7 +315,7 @@ def run_simulation(
 ) -> None:
     """Run the golf simulation."""
     # 1. Load Config
-    logger.info("Loading configuration...", flush=True)
+    logger.info("Loading configuration...")
     config = {}
     if os.path.exists("simulation_config.json"):
         try:
@@ -324,9 +324,9 @@ def run_simulation(
         except (FileNotFoundError, PermissionError, OSError):
             pass
 
-    print(
-        f"DISPLAY environment variable: {os.environ.get('DISPLAY', 'Not Set')}",
-        flush=True,
+    logger.info(
+        "DISPLAY environment variable: %s",
+        os.environ.get("DISPLAY", "Not Set"),
     )
 
     # Extract Params
@@ -351,7 +351,7 @@ def run_simulation(
         logger.info("  [C]         : Toggle Contact Constraints")
         logger.info("  [T]         : Toggle Translucency")
         logger.info("  [H]         : Toggle Help info")
-        logger.info("=" * 50 + "\n", flush=True)
+        logger.info("=" * 50 + "\n")
 
     club_params = {
         "length": float(config.get("club_length", 1.0)),
@@ -416,14 +416,12 @@ def run_simulation(
         controller = PDController(actuators, TARGET_POSE)
 
     # 5. Run Loop
-    logger.debug(
-        "%s", f"DEBUG: use_viewer={use_viewer}, HAS_VIEWER={HAS_VIEWER}", flush=True
-    )
+    logger.debug("DEBUG: use_viewer=%s, HAS_VIEWER=%s", use_viewer, HAS_VIEWER)
 
     if use_viewer and HAS_VIEWER:
-        logger.info("Launching Live Viewer...", flush=True)
+        logger.info("Launching Live Viewer...")
         try:
-            logger.info("Connecting to display servers...", flush=True)
+            logger.info("Connecting to display servers...")
 
             def policy(time_step) -> np.ndarray:
                 """Policy function for the viewer."""
@@ -437,7 +435,7 @@ def run_simulation(
             env_wrapper = PhysicsEnvWrapper(physics, initializer=initialize_episode)
             viewer.launch(env_wrapper, policy)
         except (ValueError, TypeError, RuntimeError) as e:
-            logger.error("%s", f"Failed to launch viewer: {e}", flush=True)
+            logger.error("%s", f"Failed to launch viewer: {e}")
             import traceback
 
             traceback.print_exc()
@@ -496,13 +494,12 @@ def run_simulation(
                     "mass_matrix": mass_matrix,
                 }
                 logger.info(
-                    "%s",
-                    f"DATA_JSON:{json.dumps(packet, default=np_encoder)}",
-                    flush=True,
+                    "DATA_JSON:%s",
+                    json.dumps(packet, default=np_encoder),
                 )
             except (OSError, ValueError, TypeError) as e:
                 # Avoid crashing loop on serialization error, just log
-                logger.error("%s", f"DEBUG: Data serialization failed: {e}", flush=True)
+                logger.error("%s", f"DEBUG: Data serialization failed: {e}")
 
             # Log Data (CSV)
             row = [physics.data.time]

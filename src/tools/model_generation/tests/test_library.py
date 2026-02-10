@@ -67,7 +67,7 @@ class TestModelLibrary:
         from model_generation.library import ModelCategory, ModelLibrary
 
         library = ModelLibrary()
-        models = library.list_models(category="humanoid")
+        models = library.list_models(category=ModelCategory.HUMANOID)
         # All returned should be humanoid category
         for m in models:
             if m.category:

@@ -117,6 +117,7 @@ class TestFrankensteinEditor:
 
         # Modifications to copy shouldn't affect original
         original = editor.get_model("original")
+        assert original is not None
         assert len(original.links) == len(copy.links)
 
     def test_copy_link(self):
@@ -164,6 +165,7 @@ class TestFrankensteinEditor:
         assert len(created) >= 1
 
         target = editor.get_model("target")
+        assert target is not None
         link_names = [link.name for link in target.links]
         assert "arm_link" in link_names or any("arm" in n for n in link_names)
 
@@ -181,6 +183,7 @@ class TestFrankensteinEditor:
         assert result is True
 
         model = editor.get_model("editable")
+        assert model is not None
         link_names = [link.name for link in model.links]
         assert "arm_link" not in link_names
 
@@ -196,6 +199,7 @@ class TestFrankensteinEditor:
         assert result is True
 
         model = editor.get_model("editable")
+        assert model is not None
         link_names = [link.name for link in model.links]
         assert "new_arm_name" in link_names
         assert "arm_link" not in link_names
@@ -212,21 +216,29 @@ class TestFrankensteinEditor:
         editor.load_model("test", SIMPLE_URDF)
         editor.duplicate_model("test", "editable")
 
-        original_count = len(editor.get_model("editable").links)
+        model = editor.get_model("editable")
+        assert model is not None
+        original_count = len(model.links)
 
         # Delete a link
         editor.delete_link("editable", "arm_link", reparent_children=False)
-        assert len(editor.get_model("editable").links) < original_count
+        model = editor.get_model("editable")
+        assert model is not None
+        assert len(model.links) < original_count
 
         # Undo
         result = editor.undo()
         assert result is True
-        assert len(editor.get_model("editable").links) == original_count
+        model = editor.get_model("editable")
+        assert model is not None
+        assert len(model.links) == original_count
 
         # Redo
         result = editor.redo()
         assert result is True
-        assert len(editor.get_model("editable").links) < original_count
+        model = editor.get_model("editable")
+        assert model is not None
+        assert len(model.links) < original_count
 
     def test_export_model(self):
         """Test exporting a model to URDF string."""

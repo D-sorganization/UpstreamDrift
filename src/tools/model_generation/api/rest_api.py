@@ -377,6 +377,7 @@ class ModelGenerationAPI:
             return APIResponse.error(result.error_message or "Build failed")
 
         urdf_string = result.urdf_xml
+        assert urdf_string is not None
 
         # Return as file or JSON based on query param
         if request.query_params.get("download") == "true":
@@ -423,6 +424,7 @@ class ModelGenerationAPI:
             return APIResponse.error(result.error_message or "Build failed")
 
         urdf_string = result.urdf_xml
+        assert urdf_string is not None
 
         if request.query_params.get("download") == "true":
             return APIResponse.file(urdf_string, f"{robot_name}.urdf")
@@ -468,6 +470,7 @@ class ModelGenerationAPI:
         config = ConversionConfig(robot_name=robot_name)
 
         converter = SimscapeToURDFConverter(config)
+        assert content is not None
         result = converter.convert_string(content, format_type)
 
         if not result.success:
@@ -486,6 +489,7 @@ class ModelGenerationAPI:
         }
 
         if request.query_params.get("download") == "true":
+            assert result.urdf_string is not None
             return APIResponse.file(result.urdf_string, f"{result.robot_name}.urdf")
 
         return APIResponse.ok(response_data)
@@ -704,8 +708,8 @@ class ModelGenerationAPI:
         if not mesh_content:
             return APIResponse.error("Missing mesh file")
 
-        mass = body.get("mass")
-        density = body.get("density")
+        mass: float | None = body.get("mass")
+        density: float | None = body.get("density")
 
         if not mass and not density:
             return APIResponse.error("Must provide either 'mass' or 'density'")
@@ -720,16 +724,18 @@ class ModelGenerationAPI:
                 temp_path = f.name
 
             mesh = trimesh.load(temp_path)
+            assert isinstance(mesh, trimesh.Trimesh)
 
             if density:
                 mesh.density = density
                 inertia_tensor = mesh.moment_inertia
-                calculated_mass = mesh.mass
+                calculated_mass = float(mesh.mass)
             else:
                 # Scale inertia to specified mass
+                assert mass is not None
                 volume = mesh.volume
                 inertia_tensor = mesh.moment_inertia * (mass / mesh.mass)
-                calculated_mass = mass
+                calculated_mass = float(mass)
 
             # Clean up
             Path(temp_path).unlink()
@@ -764,18 +770,25 @@ class ModelGenerationAPI:
 
     def library_list_models(self, request: APIRequest) -> APIResponse:
         """List models in library."""
-        from model_generation.library import ModelLibrary
+        from model_generation.library import (
+            ModelCategory,
+            ModelLibrary,
+            RepositorySource,
+        )
 
         library = ModelLibrary()
 
-        category = request.query_params.get("category")
-        source = request.query_params.get("source")
+        category_str = request.query_params.get("category")
+        source_str = request.query_params.get("source")
         search = request.query_params.get("search")
         tags = (
             request.query_params.get("tags", "").split(",")
             if request.query_params.get("tags")
             else None
         )
+
+        category = ModelCategory(category_str) if category_str else None
+        source = RepositorySource(source_str) if source_str else None
 
         models = library.list_models(
             category=category,
@@ -813,10 +826,10 @@ class ModelGenerationAPI:
         models = library.list_models()
 
         for m in models:
-            if m.model_id == model_id:
+            if m.id == model_id:
                 return APIResponse.ok(
                     {
-                        "id": m.model_id,
+                        "id": m.id,
                         "name": m.name,
                         "category": m.category.value,
                         "source": m.source.value if m.source else None,
@@ -869,7 +882,7 @@ class ModelGenerationAPI:
             if entry:
                 return APIResponse.created(
                     {
-                        "id": entry.model_id,
+                        "id": entry.id,
                         "name": entry.name,
                         "category": entry.category.value,
                     }

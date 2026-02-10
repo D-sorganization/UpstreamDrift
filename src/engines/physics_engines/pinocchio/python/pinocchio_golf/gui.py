@@ -1307,7 +1307,7 @@ class PinocchioGUI(SimulationGUIBase):
             self.btn_run.setChecked(False)
             self._sync_kinematic_controls()
 
-    def _toggle_run(self) -> None:
+    def _toggle_run(self, checked: bool = False) -> None:
         self.is_running = not self.is_running
         self.btn_run.setText(
             "Pause Simulation" if self.is_running else "Run Simulation"
