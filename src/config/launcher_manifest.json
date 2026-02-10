@@ -130,6 +130,7 @@
             "engine_type": "putting_green",
             "logo": "putting_green.svg",
             "status": "simulator",
+            "web_route": "/tools/putting-green",
             "capabilities": [
                 "surface_modeling",
                 "ball_physics",
@@ -162,6 +163,7 @@
             "path": "src/launchers/motion_capture_launcher.py",
             "logo": "c3d_icon.svg",
             "status": "utility",
+            "web_route": "/tools/motion-capture",
             "capabilities": [
                 "c3d_viewer",
                 "openpose",
@@ -179,6 +181,7 @@
             "path": "src/tools/video_analyzer/launch_video_analyzer.py",
             "logo": "video_analyzer.svg",
             "status": "utility",
+            "web_route": "/tools/video-analyzer",
             "capabilities": [
                 "video_processing",
                 "pose_estimation",
@@ -196,6 +199,7 @@
             "path": "src/tools/data_explorer/data_explorer_app.py",
             "logo": "data_explorer.svg",
             "status": "utility",
+            "web_route": "/tools/data-explorer",
             "capabilities": [
                 "data_import",
                 "filtering",
