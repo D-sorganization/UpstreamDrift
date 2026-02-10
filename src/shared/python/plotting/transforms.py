@@ -57,7 +57,7 @@ class DataManager:
                 times, values = self.get_series(field)
                 if len(times) > 0:
                     self._data_cache[field] = (times, values)
-            except Exception as e:
+            except (KeyError, RuntimeError, ValueError, OSError) as e:
                 # Field may not exist in all recorders
                 logger.debug(f"Could not pre-load field '{field}': {e}")
 

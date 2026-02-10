@@ -28,7 +28,9 @@ class LauncherThemeMixin:
 
             manager = ThemeManager.instance()
             c = manager.colors
-            self.setStyleSheet(manager.get_stylesheet() + f"""
+            self.setStyleSheet(
+                manager.get_stylesheet()
+                + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -46,8 +48,9 @@ class LauncherThemeMixin:
                 QLabel#CardDescription {{
                     color: {c.text_secondary};
                 }}
-            """)
-        except Exception:
+            """
+            )
+        except ImportError:
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
                 "QMainWindow { background-color: #1E1E1E; }"
@@ -70,7 +73,7 @@ class LauncherThemeMixin:
             # Register callback for dynamic theme switching
             self._theme_manager.on_theme_changed(self._on_theme_changed)
 
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Theme system unavailable: {e}")
 
     def _on_theme_changed(self, colors: object) -> None:
@@ -172,7 +175,7 @@ class LauncherThemeMixin:
             if plot_menu:
                 self._setup_plot_theme_menu(plot_menu)
 
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Could not populate theme menu: {e}")
             fallback = QAction("(Theme system unavailable)", self)
             fallback.setEnabled(False)
@@ -188,7 +191,7 @@ class LauncherThemeMixin:
             dialog = ThemeManagerDialog(manager, self)
             dialog.theme_changed.connect(lambda _: self._on_theme_changed(None))
             dialog.exec()
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Could not open Theme Manager: {e}")
 
     def _setup_plot_theme_menu(self, plot_menu: QMenu) -> None:
@@ -250,12 +253,12 @@ class LauncherThemeMixin:
                 from src.shared.python.theme import apply_golf_suite_style
 
                 apply_golf_suite_style()
-            except Exception:
+            except ImportError:
                 pass
         else:
             try:
                 import matplotlib.pyplot as plt
 
                 plt.style.use(theme_name)
-            except Exception:
+            except ImportError:
                 pass

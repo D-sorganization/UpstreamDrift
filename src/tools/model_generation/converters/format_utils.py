@@ -187,7 +187,7 @@ def validate_urdf(source: str | Path) -> list[str]:
         errors.extend(model.warnings)
 
         return errors
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         return [str(e)]
 
 
@@ -222,5 +222,5 @@ def validate_mjcf(source: str | Path) -> list[str]:
             return []
         except ET.ParseError as e:
             return [f"XML parse error: {e}"]
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         return [str(e)]

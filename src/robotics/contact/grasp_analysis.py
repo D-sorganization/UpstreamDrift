@@ -221,7 +221,7 @@ def _check_origin_in_hull(
             return True, margin
         else:
             return False, 0.0
-    except Exception:
+    except (ValueError, TypeError, RuntimeError):
         return _heuristic_closure_check(generators)
 
 
@@ -367,5 +367,5 @@ def required_contact_forces(
             return result.x
         else:
             return None
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         return None

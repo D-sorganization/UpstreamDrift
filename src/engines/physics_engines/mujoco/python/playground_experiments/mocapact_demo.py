@@ -45,7 +45,7 @@ def check_mocapact_installation() -> bool:
         logger.exception("❌ MoCapAct import failed")
         logger.info("Ensure it is installed using the Dockerfile instructions.")
         return False
-    except Exception:
+    except (RuntimeError, TypeError, AttributeError):
         logger.exception("Error during inspection")
         return False
 
@@ -81,7 +81,7 @@ def inspect_mocapact_model() -> None:
             f.write(xml)
         logger.info("Saved CMU Humanoid XML to %s", output_path)
 
-    except Exception:
+    except ImportError:
         logger.exception("Failed to inspect walker model")
 
 

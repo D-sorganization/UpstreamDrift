@@ -49,7 +49,7 @@ class GeppettoViewer:
             self.client = gepetto.corbaserver.Client()
             self.client.gui.createWindow("golfer_viewer")
             logger.info("Geppetto viewer initialized")
-        except Exception as e:  # noqa: BLE001
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning("Failed to connect to Geppetto server: %s", e)
             logger.info("Start Geppetto server with: gepetto-gui")
 

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Script to add defusedxml to the existing robotics_env Docker image."""
 
+import logging
 import os
 import subprocess
 import sys
 import tempfile
+
+logger = logging.getLogger(__name__)
 
 
 def create_minimal_dockerfile() -> str:
@@ -24,7 +27,7 @@ ENV VIRTUAL_ENV="/opt/mujoco-env"
 
 def update_robotics_env() -> bool:
     """Update the robotics_env image with defusedxml."""
-    print("🔧 Adding defusedxml to existing robotics_env Docker image...")
+    logger.info("🔧 Adding defusedxml to existing robotics_env Docker image...")
 
     # Create temporary directory for Dockerfile
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -34,31 +37,33 @@ def update_robotics_env() -> bool:
         with open(dockerfile_path, "w") as f:
             f.write(create_minimal_dockerfile())
 
-        print(f"📝 Created temporary Dockerfile: {dockerfile_path}")
+        logger.info("📝 Created temporary Dockerfile: %s", dockerfile_path)
 
         # Build the updated image
         cmd = ["docker", "build", "-t", "robotics_env", "."]
 
         try:
-            print(f"🚀 Running: {' '.join(cmd)}")
-            print("📦 This should be quick since we're just adding one package...")
+            logger.info("🚀 Running: %s", " ".join(cmd))
+            logger.info(
+                "📦 This should be quick since we're just adding one package..."
+            )
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)
 
-            print("✅ Successfully added defusedxml to robotics_env!")
+            logger.info("✅ Successfully added defusedxml to robotics_env!")
             return True
 
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to update robotics_env: {e}")
+            logger.error("❌ Failed to update robotics_env: %s", e)
             return False
         except FileNotFoundError:
-            print("❌ Docker not found. Please install Docker Desktop.")
+            logger.info("❌ Docker not found. Please install Docker Desktop.")
             return False
 
 
 def test_updated_environment() -> bool:
     """Test that defusedxml is now available in the updated environment."""
-    print("\n🧪 Testing updated robotics_env...")
+    logger.info("\n🧪 Testing updated robotics_env...")
 
     try:
         # Test defusedxml import
@@ -77,7 +82,7 @@ def test_updated_environment() -> bool:
             check=True,
         )
 
-        print(result.stdout.strip())
+        logger.info("%s", result.stdout.strip())
 
         # Test defusedxml.ElementTree import
         result = subprocess.run(
@@ -96,10 +101,10 @@ def test_updated_environment() -> bool:
             check=True,
         )
 
-        print(result.stdout.strip())
+        logger.info("%s", result.stdout.strip())
 
         # Show what robotics libraries are available
-        print("\n📚 Available robotics libraries:")
+        logger.info("\n📚 Available robotics libraries:")
         result = subprocess.run(
             ["docker", "run", "--rm", "robotics_env", "pip", "list"],
             capture_output=True,
@@ -126,19 +131,19 @@ def test_updated_environment() -> bool:
 
         for pkg in robotics_packages:
             if pkg.strip():
-                print(f"  {pkg}")
+                logger.info("  %s", pkg)
 
         return True
 
     except subprocess.CalledProcessError as e:
-        print(f"❌ Test failed: {e.stderr}")
+        logger.error("❌ Test failed: %s", e.stderr)
         return False
 
 
 def main() -> int:
     """Main function."""
-    print("🤖 Robotics Environment Updater")
-    print("=" * 50)
+    logger.info("🤖 Robotics Environment Updater")
+    logger.info("%s", "=" * 50)
 
     # Update the environment
     success = update_robotics_env()
@@ -148,12 +153,16 @@ def main() -> int:
         test_success = test_updated_environment()
 
         if test_success:
-            print("\n🎉 Success! The robotics_env now has all required dependencies.")
-            print("💡 You can now run MuJoCo, Drake, and Pinocchio simulations!")
+            logger.info(
+                "\n🎉 Success! The robotics_env now has all required dependencies."
+            )
+            logger.info("💡 You can now run MuJoCo, Drake, and Pinocchio simulations!")
         else:
-            print("\n⚠️  Update completed but tests failed. Check the output above.")
+            logger.error(
+                "\n⚠️  Update completed but tests failed. Check the output above."
+            )
     else:
-        print("\n💥 Failed to update robotics_env. Check error messages above.")
+        logger.error("\n💥 Failed to update robotics_env. Check error messages above.")
 
     return 0 if success else 1
 

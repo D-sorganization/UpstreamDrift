@@ -127,7 +127,7 @@ class MyoSuiteMuscleAnalyzer:
                     # Fallback: assume all actuators are muscles for MyoSuite
                     muscle_ids.append(i)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Could not identify muscle actuators: {e}")
             # Fallback: treat all as muscles
             muscle_ids = list(range(self.model.nu))
@@ -155,7 +155,7 @@ class MyoSuiteMuscleAnalyzer:
                 else:
                     names.append(f"muscle_{actuator_id}")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Could not extract muscle names: {e}")
             names = [f"muscle_{i}" for i in self.muscle_actuator_ids]
 
@@ -190,7 +190,7 @@ class MyoSuiteMuscleAnalyzer:
 
             return np.clip(activations, 0.0, 1.0)
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to extract activations: {e}")
             return np.zeros(len(self.muscle_names))
 
@@ -215,7 +215,7 @@ class MyoSuiteMuscleAnalyzer:
 
             return forces
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to extract muscle forces: {e}")
             return np.zeros(len(self.muscle_names))
 
@@ -240,7 +240,7 @@ class MyoSuiteMuscleAnalyzer:
 
             return lengths
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to extract muscle lengths: {e}")
             return np.zeros(len(self.muscle_names))
 
@@ -264,7 +264,7 @@ class MyoSuiteMuscleAnalyzer:
 
             return velocities
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to extract muscle velocities: {e}")
             return np.zeros(len(self.muscle_names))
 
@@ -314,7 +314,7 @@ class MyoSuiteMuscleAnalyzer:
             self.data.qpos[:] = qpos_original
             mujoco.mj_forward(self.model, self.data)
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute moment arms: {e}")
 
         return moment_arms

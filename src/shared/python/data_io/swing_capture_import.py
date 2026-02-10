@@ -625,7 +625,7 @@ class SwingCaptureImporter:
                     "impact": phases.impact,
                     "follow_through_end": phases.follow_through_end,
                 }
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Failed to detect swing phases: %s", e)
 
             demonstrations.append(demo)
@@ -677,7 +677,7 @@ class SwingCaptureImporter:
                 "impact": phases.impact,
                 "follow_through_end": phases.follow_through_end,
             }
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         with open(output_path, "w", encoding="utf-8") as f:

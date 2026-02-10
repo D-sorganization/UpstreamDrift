@@ -83,7 +83,7 @@ class HumanoidConfigTab(QWidget):
         self.config_manager = ConfigurationManager(self.config_path)
         try:
             self.config = self.config_manager.load()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             from src.shared.python.configuration_manager import SimulationConfig
 
             self.config = SimulationConfig()
@@ -404,7 +404,7 @@ class HumanoidConfigTab(QWidget):
             self.config_manager.save(self.config)
             self._log(f"Config saved to {self.config_path}")
             self.config_saved.emit()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self._log(f"Error saving config: {e}")
 
     # ------------------------------------------------------------------
@@ -466,7 +466,7 @@ class HumanoidConfigTab(QWidget):
                 spec.loader.exec_module(module)
 
             PolynomialGeneratorWidget = module.PolynomialGeneratorWidget  # type: ignore[attr-defined]
-        except Exception as e:
+        except ImportError as e:
             QMessageBox.warning(self, "Unavailable", str(e))
             return
 
@@ -496,7 +496,7 @@ class HumanoidConfigTab(QWidget):
             from src.shared.python.ui.qt.widgets.signal_toolkit_widget import (
                 SignalToolkitWidget,
             )
-        except Exception as e:
+        except ImportError as e:
             QMessageBox.warning(self, "Unavailable", str(e))
             return
 

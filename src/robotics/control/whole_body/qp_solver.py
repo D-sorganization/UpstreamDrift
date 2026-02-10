@@ -285,7 +285,7 @@ class ScipyQPSolver(QPSolver):
                 status=result.message,
             )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return QPSolution(
                 success=False,
                 x=None,

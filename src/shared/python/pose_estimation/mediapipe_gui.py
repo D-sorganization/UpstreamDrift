@@ -98,7 +98,7 @@ class _AnalysisWorker(QThread):
                 f"MediaPipe dependency not installed: {e}\n"
                 "Install with: pip install mediapipe opencv-python"
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             self.error.emit(f"Analysis failed: {e}")
 
 

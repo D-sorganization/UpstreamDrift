@@ -285,7 +285,7 @@ async def get_model_explorer(
         raise HTTPException(
             status_code=422, detail=f"Failed to parse model: {str(exc)}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Error in model explorer for %s: %s", model_name, exc)
         raise HTTPException(
@@ -320,7 +320,7 @@ async def inspect_model(
         raise HTTPException(
             status_code=422, detail=f"Failed to parse model: {str(exc)}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Error inspecting model: %s", exc)
         raise HTTPException(
@@ -378,7 +378,7 @@ async def compare_models(
         raise HTTPException(
             status_code=422, detail=f"Failed to parse models: {str(exc)}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Error comparing models: %s", exc)
         raise HTTPException(

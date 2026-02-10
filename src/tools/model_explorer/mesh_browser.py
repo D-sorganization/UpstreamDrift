@@ -299,7 +299,7 @@ class MeshBrowserPanel(QWidget):
             self.file_label.setText(f"File: {file_path.name}")
             logger.info(f"Loaded {len(self.meshes)} meshes from {file_path}")
             return True
-        except Exception as e:
+        except ImportError as e:
             QMessageBox.critical(self, "Error", f"Failed to load file: {e}")
             return False
 
@@ -641,7 +641,7 @@ class MeshBrowserWidget(QWidget):
                 shutil.copy2(mesh.absolute_path, target_mesh_path)
                 new_filename = f"{mesh_subdir}/{mesh.absolute_path.name}"
                 logger.info(f"Copied mesh file to {target_mesh_path}")
-            except Exception as e:
+            except (FileNotFoundError, OSError, PermissionError) as e:
                 logger.error(f"Failed to copy mesh file: {e}")
 
         # Create mesh element(s)

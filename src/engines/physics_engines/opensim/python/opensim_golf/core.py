@@ -135,7 +135,7 @@ class GolfSwingModel:
                 # Some versions might need setInitialTime
 
             logger.info(f"Loaded OpenSim model from {self.model_path}")
-        except Exception as e:
+        except ImportError as e:
             raise OpenSimModelLoadError(
                 f"Failed to load OpenSim model: {self.model_path}\n"
                 f"Error: {e}\n"

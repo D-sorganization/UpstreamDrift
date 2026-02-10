@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 from collections.abc import Callable
@@ -12,6 +13,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from src.deployment.realtime.state import ControlCommand, ControlMode, RobotState
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -175,8 +178,8 @@ class RealTimeController:
             self._is_connected = True
             return True
 
-        except Exception as e:
-            print(f"Failed to connect: {e}")
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("Failed to connect: %s", e)
             self._is_connected = False
             return False
 
@@ -287,8 +290,8 @@ class RealTimeController:
                     with self._command_lock:
                         self._last_command = command
 
-            except Exception as e:
-                print(f"Control loop error: {e}")
+            except (RuntimeError, ValueError, OSError) as e:
+                logger.error("Control loop error: %s", e)
 
             # Record timing
             cycle_end = time.perf_counter()

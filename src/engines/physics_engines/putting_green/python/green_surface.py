@@ -180,7 +180,7 @@ class GreenSurface:
                 kernel="thin_plate_spline",
                 smoothing=0.01,
             )
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             # Fallback to linear interpolation
             self._heightmap_interpolator = interpolate.LinearNDInterpolator(
                 np.column_stack([x, y]), z, fill_value=0.0

@@ -114,7 +114,7 @@ class DockerBuildThread(QThread):
                     False, f"Build failed with code {process.returncode}"
                 )
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             self.finished_signal.emit(False, str(e))
 
 
@@ -154,7 +154,7 @@ class DockerLauncher:
                 timeout=10,
             )
             return result.returncode == 0
-        except Exception as e:
+        except (OSError, ValueError) as e:
             self.logger.warning(f"Failed to check Docker image: {e}")
             return False
 
@@ -215,9 +215,7 @@ class DockerLauncher:
 
         # Port mapping for MeshCat (Drake/Pinocchio)
         if model_type in ("drake", "pinocchio"):
-            cmd.extend(
-                ["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"]
-            )  # nosec: Docker container networking requires 0.0.0.0
+            cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
 
         # Working Directory
         work_dir = (
@@ -282,6 +280,6 @@ class DockerLauncher:
                     ),
                 )
             return process
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             self.logger.error(f"Failed to launch Docker container: {e}")
             return None

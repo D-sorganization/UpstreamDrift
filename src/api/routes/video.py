@@ -109,7 +109,7 @@ async def analyze_video(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except (FileNotFoundError, OSError) as e:
         if logger:
             logger.error("Video analysis error: %s", e)
         raise HTTPException(
@@ -244,7 +244,7 @@ async def _process_video_background(
             },
         }
 
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 

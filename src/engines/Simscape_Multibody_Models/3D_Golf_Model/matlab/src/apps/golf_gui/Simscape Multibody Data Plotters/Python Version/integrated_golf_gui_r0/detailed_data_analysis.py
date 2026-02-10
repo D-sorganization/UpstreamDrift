@@ -81,7 +81,7 @@ def deep_analyze_matlab_file(filename):
 
         return True
 
-    except Exception as e:
+    except (ValueError, TypeError, RuntimeError) as e:
         print(f"❌ Error analyzing {filename}: {e}")
         import traceback
 
@@ -143,7 +143,7 @@ def extract_actual_data(filename):
 
         return None
 
-    except Exception as e:
+    except ImportError as e:
         print(f"❌ Error extracting data from {filename}: {e}")
         return None
 

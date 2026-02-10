@@ -158,7 +158,7 @@ class ContactManager(ContractChecker):
                 info = engine.get_contact_info(i)
                 contact = self._create_contact_from_info(info)
                 contacts.append(contact)
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 raise ContactError(
                     f"Failed to get contact info for index {i}: {e}",
                     contact_id=i,
@@ -354,7 +354,7 @@ def _convex_hull_2d(points: NDArray[np.float64]) -> NDArray[np.float64]:
         return points[hull.vertices]
     except ImportError:
         pass
-    except Exception:
+    except (RuntimeError, TypeError, AttributeError):
         # Fall through to manual algorithm
         pass
 

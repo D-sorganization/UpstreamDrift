@@ -502,7 +502,7 @@ class LauncherUISetupMixin:
                 lambda: self.toggle_ai_assistant(False)
             )
             self._sync_chat_session()
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to initialize AI panel: {e}")
             self.btn_ai.setEnabled(False)
             self.btn_ai.setToolTip(f"AI Assistant unavailable: {e}")
@@ -532,7 +532,7 @@ class LauncherUISetupMixin:
             if session_id:
                 session_file.write_text(session_id, encoding="utf-8")
                 logger.info("Synced chat session: %s", session_id)
-        except Exception as e:
+        except ImportError as e:
             logger.debug("Chat server sync skipped (server may not be running): %s", e)
 
     # -- Context Help --

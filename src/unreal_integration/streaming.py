@@ -536,7 +536,7 @@ class UnrealStreamingServer:
             logger.info(
                 f"Streaming server started on {self.config.host}:{self.config.port}"
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             self._state = StreamingState.ERROR
             logger.error(f"Failed to start streaming server: {e}")
             raise
@@ -587,7 +587,7 @@ class UnrealStreamingServer:
         for client in self._clients:
             try:
                 await client.send(json_msg)
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 disconnected.append(client)
 
         # Remove disconnected clients

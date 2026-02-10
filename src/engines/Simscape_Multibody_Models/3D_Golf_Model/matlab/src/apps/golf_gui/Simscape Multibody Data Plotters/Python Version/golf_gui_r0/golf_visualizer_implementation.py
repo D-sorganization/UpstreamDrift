@@ -114,7 +114,7 @@ class DataProcessor:
                 var_name = self._find_table_variable(mat_data, name)
                 datasets[name] = self._extract_dataframe(mat_data[var_name])
                 print(f"✅ Loaded {name}: {len(datasets[name])} frames")
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 raise RuntimeError(f"Failed to load {filepath}: {e}") from e
 
         self._calculate_scaling_factors(datasets["BASEQ"])
@@ -147,7 +147,7 @@ class DataProcessor:
                 f"✅ Scaling factors set: Force={self.max_force_magnitude}N, "
                 f"Torque={self.max_torque_magnitude}Nm"
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             print(f"⚠️ Error calculating scaling factors: {e}")
             self.max_force_magnitude = 1000.0
             self.max_torque_magnitude = 100.0
@@ -411,7 +411,7 @@ class OpenGLRenderer:
             self.programs["ground"] = self.ctx.program(
                 vertex_shader=ground_vertex, fragment_shader=ground_fragment
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             print(f"⚠️ Failed to compile ground shader: {e}")
 
     def _setup_geometry(self):
@@ -656,7 +656,7 @@ class OpenGLRenderer:
                     prog["materialSpecular"].value = 0.5
                 if "materialShininess" in prog:
                     prog["materialShininess"].value = 32.0
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 print(f"⚠️ Lighting setup warning: {e}")
 
     def render_frame(
@@ -1124,7 +1124,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             self.current_frame = 0
             print(f"✅ Data loaded: {self.num_frames} frames")
             self.update()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             print(f"❌ Failed to load data: {e}")
 
     def play_animation(self):
@@ -1448,7 +1448,7 @@ def main():
     # Load sample data (if available)
     try:
         window.gl_widget.load_data("BASEQ.mat", "ZTCFQ.mat", "DELTAQ.mat")
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         print(f"Note: Sample data not found - {e}")
         print("Please load data using File -> Load Data")
 

@@ -111,7 +111,7 @@ async def probe_engine(
             "version": "1.0.0" if is_available else None,
             "capabilities": ["physics"] if is_available else [],
         }
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         return {"available": False, "error": str(e)}
 
 
@@ -151,7 +151,7 @@ async def load_engine_lazy(
         }
     except HTTPException:
         raise
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -195,7 +195,7 @@ async def load_engine(
         raise HTTPException(
             status_code=400, detail=f"Unknown engine type: {engine_type}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(
             status_code=500, detail=f"Error loading engine: {str(exc)}"
         ) from exc

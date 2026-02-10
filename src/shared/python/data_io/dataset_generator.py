@@ -345,7 +345,7 @@ class DatasetGenerator:
         # Save original state
         try:
             self._original_state = self.engine.get_state()
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             self._original_state = None
 
         # Get model info
@@ -380,7 +380,7 @@ class DatasetGenerator:
                 if progress_callback is not None:
                     progress_callback(i + 1, config.num_samples)
 
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 logger.warning("Sample %d failed: %s", i, e)
                 failed_count += 1
                 continue
@@ -401,7 +401,7 @@ class DatasetGenerator:
         if self._original_state is not None:
             try:
                 self.engine.set_state(*self._original_state)
-            except Exception:
+            except (ValueError, RuntimeError, AttributeError):
                 pass
 
         dataset = TrainingDataset(
@@ -495,26 +495,26 @@ class DatasetGenerator:
             if config.record_mass_matrix and mass_matrices is not None:
                 try:
                     mass_matrices[step] = self.engine.compute_mass_matrix()
-                except Exception:
+                except (ValueError, RuntimeError, AttributeError):
                     pass
 
             if config.record_bias_forces and bias_forces_arr is not None:
                 try:
                     bias_forces_arr[step] = self.engine.compute_bias_forces()
-                except Exception:
+                except (ValueError, RuntimeError, AttributeError):
                     pass
 
             if config.record_gravity and gravity_arr is not None:
                 try:
                     gravity_arr[step] = self.engine.compute_gravity_forces()
-                except Exception:
+                except (ValueError, RuntimeError, AttributeError):
                     pass
 
             if config.record_contact_forces and contact_arr is not None:
                 try:
                     cf = self.engine.compute_contact_forces()
                     contact_arr[step, : len(cf)] = cf[:3]
-                except Exception:
+                except (ValueError, RuntimeError, AttributeError):
                     pass
 
             if config.record_drift_control:
@@ -525,14 +525,14 @@ class DatasetGenerator:
                         control_accel_arr[step] = (
                             self.engine.compute_control_acceleration(tau)
                         )
-                except Exception:
+                except (ValueError, RuntimeError, AttributeError):
                     pass
 
             # Compute energies
             try:
                 M = self.engine.compute_mass_matrix()
                 ke_arr[step] = 0.5 * float(v.T @ M @ v)
-            except Exception:
+            except (ValueError, RuntimeError, AttributeError):
                 pass
 
             # Step simulation
@@ -542,7 +542,7 @@ class DatasetGenerator:
             try:
                 q_new, v_new = self.engine.get_state()
                 accelerations[step] = (v_new - v) / config.timestep
-            except Exception:
+            except (ValueError, RuntimeError, AttributeError):
                 pass
 
         # Build metadata
@@ -640,7 +640,7 @@ class DatasetGenerator:
         try:
             q, v = self.engine.get_state()
             return len(q), len(v)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             return 7, 7  # Reasonable default for a 7-DOF arm
 
     def _get_joint_names(self) -> list[str]:
@@ -653,7 +653,7 @@ class DatasetGenerator:
             names = self.engine.get_joint_names()
             if names:
                 return names
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
         n_q, _ = self._get_dimensions()
         return [f"joint_{i}" for i in range(n_q)]

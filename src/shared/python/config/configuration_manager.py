@@ -97,7 +97,7 @@ class ConfigurationManager:
             config = SimulationConfig(**filtered_data)
             config.validate()
             return config
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             # Fallback to default if load fails, or raise?
             # Raising is safer to alert user of corruption
             raise GolfModelingError(f"Failed to load config: {e}") from e
@@ -108,5 +108,5 @@ class ConfigurationManager:
             data = asdict(config)
             with open(self.config_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4)
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             raise GolfModelingError(f"Failed to save config: {e}") from e

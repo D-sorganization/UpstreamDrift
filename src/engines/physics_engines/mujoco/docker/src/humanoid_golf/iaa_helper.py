@@ -1,6 +1,9 @@
+import logging
 from typing import Any
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
@@ -60,7 +63,9 @@ def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     tau_control = data.qfrc_actuator.copy()
     # Check shape
     if tau_control.shape[0] != nv:
-        print(f"WARNING: tau_control shape {tau_control.shape} != nv {nv}. Resizing.")
+        logger.warning(
+            "WARNING: tau_control shape %s != nv %s. Resizing.", tau_control.shape, nv
+        )
         tmp = np.zeros(nv, dtype=np.float64)
         tmp[: min(nv, tau_control.shape[0])] = tau_control[
             : min(nv, tau_control.shape[0])
@@ -190,7 +195,7 @@ def _solve_m(model: Any, data: Any, dst: Any, src: Any, mjlib: Any) -> None:
             break
         except TypeError as e:
             last_err = e
-        except Exception as e:
+        except (RuntimeError, ValueError) as e:
             last_err = e  # type: ignore[assignment]
 
     if not success and last_err is not None:

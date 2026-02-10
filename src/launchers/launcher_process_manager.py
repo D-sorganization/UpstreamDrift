@@ -136,7 +136,7 @@ class ProcessManager:
                 self._log_file_path.write_text(
                     "\n".join(lines[-500:]) + "\n", encoding="utf-8"
                 )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.debug("Could not init log file: %s", e)
 
     @classmethod
@@ -150,7 +150,7 @@ class ProcessManager:
             ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             with open(self._log_file_path, "a", encoding="utf-8") as f:
                 f.write(f"[{ts}] [{name}] {line}\n")
-        except Exception:
+        except (FileNotFoundError, PermissionError, OSError):
             pass  # Never let logging crash the app
 
     def _emit_output(self, name: str, line: str) -> None:
@@ -195,7 +195,7 @@ class ProcessManager:
                     if line:
                         self._emit_output(name, f"STDERR: {line}")
                 process.stderr.close()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.debug("Output stream ended for %s: %s", name, e)
 
         return_code = process.wait()
@@ -268,7 +268,7 @@ class ProcessManager:
             logger.info(f"Launched {name} (PID: {process.pid})")
             return process
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
@@ -357,7 +357,7 @@ class ProcessManager:
             logger.info(f"Launched module {name} (PID: {process.pid})")
             return process
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
@@ -400,7 +400,7 @@ python "{wsl_script_path}"
                 subprocess.Popen(cmd)
             return True
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"WSL launch failed: {e}")
             return False
 
@@ -447,7 +447,7 @@ python -m {module_name}
                 subprocess.Popen(cmd)
             return True
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"WSL module launch failed: {e}")
             return False
 
@@ -481,7 +481,7 @@ python -m {module_name}
                         except subprocess.TimeoutExpired:
                             logger.warning(f"Force killing process: {name}")
                             proc.kill()
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 logger.error(f"Error terminating {name}: {e}")
 
         self.running_processes.clear()
@@ -517,7 +517,7 @@ def is_vcxsrv_running() -> bool:
             creationflags=CREATE_NO_WINDOW,
         )
         return "vcxsrv.exe" in result.stdout.lower()
-    except Exception:
+    except (OSError, ValueError):
         return False
 
 
@@ -543,7 +543,7 @@ def start_vcxsrv() -> bool:
                 )
                 logger.info(f"Started VcXsrv from {vcx_path}")
                 return True
-            except Exception as e:
+            except ImportError as e:
                 logger.error(f"Failed to start VcXsrv: {e}")
 
     logger.warning("VcXsrv not found")

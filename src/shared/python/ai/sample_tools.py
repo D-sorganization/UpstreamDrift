@@ -143,7 +143,7 @@ def _register_data_tools(registry: ToolRegistry) -> None:
                     ),
                 }
 
-        except Exception as e:
+        except ImportError as e:
             return {"success": False, "error": f"Failed to load C3D: {e}"}
 
     @registry.register(

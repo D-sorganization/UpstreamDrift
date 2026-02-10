@@ -99,7 +99,7 @@ class ChatService:
                     "ChatService: no adapter configured, falling back to Ollama"
                 )
                 self._fallback_to_ollama()
-        except Exception as e:
+        except ImportError as e:
             logger.warning(
                 "ChatService: failed to load settings (%s), falling back to Ollama", e
             )
@@ -112,7 +112,7 @@ class ChatService:
 
             self._adapter = OllamaAdapter()
             logger.info("ChatService using default OllamaAdapter")
-        except Exception as e:
+        except ImportError as e:
             logger.error("ChatService: could not create fallback adapter: %s", e)
 
     def get_or_create_session(self, session_id: str | None) -> ConversationContext:
@@ -238,7 +238,7 @@ class ChatService:
                     if chunk.content:
                         chunk_queue.put(chunk.content)
                         full_response.append(chunk.content)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 chunk_queue.put(f"\n[Error: {e}]")
             finally:
                 chunk_queue.put(None)  # Sentinel
@@ -249,7 +249,7 @@ class ChatService:
         while True:
             try:
                 item = await asyncio.to_thread(chunk_queue.get, timeout=60.0)
-            except Exception:
+            except (FileNotFoundError, OSError):
                 break
             if item is None:
                 break
@@ -315,7 +315,7 @@ class ChatService:
             self.PERSIST_DIR.mkdir(parents=True, exist_ok=True)
             path = self.PERSIST_DIR / f"{session_id}.json"
             ctx.save_to_file(path)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning("Failed to persist session %s: %s", session_id, e)
 
     def _load_session(self, session_id: str) -> ConversationContext | None:
@@ -326,7 +326,7 @@ class ChatService:
         if path.exists():
             try:
                 return ConversationContext.load_from_file(path)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Failed to load session %s: %s", session_id, e)
         return None
 

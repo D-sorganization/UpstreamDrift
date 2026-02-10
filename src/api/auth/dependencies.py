@@ -123,7 +123,7 @@ async def get_current_user_from_api_key(
                 .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
                 .all()
             )
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             # Fallback: prefix_hash column doesn't exist yet (migration pending)
             # This maintains backward compatibility
             active_keys = db.query(APIKey).filter(APIKey.is_active).all()

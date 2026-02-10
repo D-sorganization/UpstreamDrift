@@ -48,7 +48,7 @@ def analyze_matlab_files():
                     else:
                         print(f"  {key}: {type(value).__name__}")
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             print(f"❌ Error loading {filename}: {e}")
             return False
 
@@ -92,7 +92,7 @@ def check_signal_bus_structure():
 
         return False
 
-    except Exception as e:
+    except (ValueError, TypeError, RuntimeError) as e:
         print(f"❌ Error analyzing signal bus structure: {e}")
         return False
 
@@ -137,7 +137,7 @@ def check_required_signals():
 
         return True
 
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         print(f"❌ Error checking required signals: {e}")
         return False
 
@@ -163,7 +163,7 @@ def main():
         print(f"\n{'=' * 20} {test_name} {'=' * 20}")
         try:
             results[test_name] = test_func()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             print(f"❌ {test_name} failed: {e}")
             results[test_name] = False
 

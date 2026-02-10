@@ -223,7 +223,7 @@ def precondition(
             # Evaluate the condition
             try:
                 result = condition(*args, **kwargs)
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 # If condition evaluation fails, report it
                 raise PreconditionError(
                     f"Failed to evaluate precondition: {e}",
@@ -284,7 +284,7 @@ def postcondition(
             # Evaluate the postcondition
             try:
                 check_result = condition(result)
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 raise PostconditionError(
                     f"Failed to evaluate postcondition: {e}",
                     function_name=func.__qualname__,
@@ -488,7 +488,7 @@ class ContractChecker:
                     )
             except InvariantError:
                 raise
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 raise InvariantError(
                     f"Failed to evaluate invariant: {e}",
                     class_name=self.__class__.__name__,
@@ -518,7 +518,7 @@ class ContractChecker:
                     )
             except InvariantError:
                 raise
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 raise InvariantError(
                     f"Failed to evaluate invariant after {method_name}: {e}",
                     class_name=self.__class__.__name__,

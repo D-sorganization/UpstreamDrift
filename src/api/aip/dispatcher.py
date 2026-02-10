@@ -213,7 +213,7 @@ async def dispatch(
             ),
             request_id=request_id,
         )
-    except Exception as exc:
+    except ImportError as exc:
         return make_response(
             error=make_error(
                 INTERNAL_ERROR,

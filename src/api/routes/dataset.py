@@ -215,7 +215,7 @@ async def generate_dataset(
             export_format=request.export_format,
         )
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -246,7 +246,7 @@ async def import_swing_capture(
                 "impact": phase_labels.impact,
                 "follow_through_end": phase_labels.follow_through_end,
             }
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         rl_export_path = None
@@ -271,7 +271,7 @@ async def import_swing_capture(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -293,7 +293,7 @@ async def get_control_state(
         ctrl = ControlInterface(engine)
         return ctrl.get_state()
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -333,7 +333,7 @@ async def configure_control(
 
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -373,7 +373,7 @@ async def list_features(
         registry = ControlFeaturesRegistry(engine)
         return registry.list_features(category=category, available_only=available_only)
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -390,7 +390,7 @@ async def features_summary(
         registry = ControlFeaturesRegistry(engine)
         return registry.get_summary()
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -415,7 +415,7 @@ async def execute_feature(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 

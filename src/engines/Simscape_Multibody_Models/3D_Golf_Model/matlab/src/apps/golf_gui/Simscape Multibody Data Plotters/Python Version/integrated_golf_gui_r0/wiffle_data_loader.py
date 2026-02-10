@@ -4,12 +4,15 @@ Wiffle_ProV1 Data Loader for Golf Swing Visualizer
 Handles Excel-based motion capture data and converts to the GUI's expected format
 """
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 def _to_numpy(series: Any) -> np.ndarray:
@@ -173,7 +176,7 @@ class MotionDataLoader:
         if not filepath_path.exists():
             raise FileNotFoundError(f"Excel file not found: {filepath}")
 
-        print(f"[INFO] Loading Wiffle_ProV1 data from: {filepath}")
+        logger.info("[INFO] Loading Wiffle_ProV1 data from: %s", filepath)
 
         try:
             # Read both sheets
@@ -184,8 +187,8 @@ class MotionDataLoader:
                 filepath_path, sheet_name=self.config.wiffle_sheet
             )
 
-            print(f"[OK] Loaded ProV1 data: {prov1_data.shape}")
-            print(f"[OK] Loaded Wiffle data: {wiffle_data.shape}")
+            logger.info("[OK] Loaded ProV1 data: %s", prov1_data.shape)
+            logger.info("[OK] Loaded Wiffle data: %s", wiffle_data.shape)
 
             # Process and clean data
             prov1_processed = self._process_sheet_data(prov1_data, "ProV1")
@@ -193,12 +196,12 @@ class MotionDataLoader:
 
             return {"ProV1": prov1_processed, "Wiffle": wiffle_processed}
 
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"Error loading Excel data: {e}") from e
 
     def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         """Process and clean sheet data"""
-        print(f"[PROC] Processing {sheet_name} data...")
+        logger.info("[PROC] Processing %s data...", sheet_name)
 
         # Based on the analysis, the structure is:
         # Row 0: Metadata (ball type, parameters)
@@ -208,7 +211,9 @@ class MotionDataLoader:
         # Row 3+: Actual data
 
         if len(df) < 3:
-            print(f"[WARN] Insufficient rows in {sheet_name}, creating dummy data")
+            logger.info(
+                "[WARN] Insufficient rows in %s, creating dummy data", sheet_name
+            )
             return self._create_dummy_data(100)
 
         # Extract headers from row 2 (index 2)
@@ -225,9 +230,11 @@ class MotionDataLoader:
         # Time column (column 1)
         if len(data_df.columns) >= 2:
             processed_data["time"] = pd.to_numeric(data_df.iloc[:, 1], errors="coerce")
-            print(f"[OK] Extracted time data from column 1 for {sheet_name}")
+            logger.info("[OK] Extracted time data from column 1 for %s", sheet_name)
         else:
-            print(f"[WARN] No Time column found in {sheet_name}, creating linear time")
+            logger.info(
+                "[WARN] No Time column found in %s, creating linear time", sheet_name
+            )
             processed_data["time"] = np.linspace(0, 1, len(data_df))
 
         # Map the actual columns to our expected format
@@ -441,8 +448,8 @@ class MotionDataLoader:
                 try:
                     filtered_data = savgol_filter(df[col].ffill(), window_length, 3)
                     df[col] = filtered_data
-                except Exception as e:
-                    print(f"[WARN] Could not filter {col}: {e}")
+                except (RuntimeError, ValueError, OSError) as e:
+                    logger.error("[WARN] Could not filter %s: %s", col, e)
 
         return df
 
@@ -472,7 +479,7 @@ class MotionDataLoader:
         Returns:
             Tuple of (BASEQ, ZTCFQ, DELTAQ) DataFrames for GUI compatibility
         """
-        print("[CONV] Converting to GUI format...")
+        logger.info("[CONV] Converting to GUI format...")
 
         # Use ProV1 data as the primary dataset (BASEQ equivalent)
         prov1_df = excel_data["ProV1"]
@@ -487,10 +494,10 @@ class MotionDataLoader:
         # Create DELTAQ format (difference between ProV1 and Wiffle)
         deltaq_data = self._create_deltaq_format(prov1_df, wiffle_df)
 
-        print("[OK] Converted to GUI format:")
-        print(f"   BASEQ: {baseq_data.shape}")
-        print(f"   ZTCFQ: {ztcfq_data.shape}")
-        print(f"   DELTAQ: {deltaq_data.shape}")
+        logger.info("[OK] Converted to GUI format:")
+        logger.info("   BASEQ: %s", baseq_data.shape)
+        logger.info("   ZTCFQ: %s", ztcfq_data.shape)
+        logger.info("   DELTAQ: %s", deltaq_data.shape)
 
         return baseq_data, ztcfq_data, deltaq_data
 
@@ -595,7 +602,7 @@ class MotionDataLoader:
 
 def main():
     """Test the Wiffle data loader"""
-    print("[TEST] Testing Wiffle Data Loader")
+    logger.info("[TEST] Testing Wiffle Data Loader")
 
     # Find the Excel file - try multiple possible paths
     possible_paths = [
@@ -613,9 +620,9 @@ def main():
             break
 
     if excel_file is None:
-        print("[ERROR] Excel file not found. Tried paths:")
+        logger.info("[ERROR] Excel file not found. Tried paths:")
         for path in possible_paths:
-            print(f"   {path}")
+            logger.info("   %s", path)
         return
 
     try:
@@ -626,18 +633,18 @@ def main():
         # Convert to GUI format
         baseq, ztcfq, deltaq = loader.convert_to_gui_format(excel_data)
 
-        print("\n[SUMMARY] Data Summary:")
-        print(f"ProV1 data points: {len(excel_data['ProV1'])}")
-        print(f"Wiffle data points: {len(excel_data['Wiffle'])}")
+        logger.info("\n[SUMMARY] Data Summary:")
+        logger.info("ProV1 data points: %s", len(excel_data["ProV1"]))
+        logger.info("Wiffle data points: %s", len(excel_data["Wiffle"]))
         print(
             f"Time range: {excel_data['ProV1']['time'].min():.3f} - "
             f"{excel_data['ProV1']['time'].max():.3f}"
         )
 
-        print("\n[OK] Wiffle data loader test completed successfully!")
+        logger.info("\n[OK] Wiffle data loader test completed successfully!")
 
-    except Exception as e:
-        print(f"[ERROR] Error during testing: {e}")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("[ERROR] Error during testing: %s", e)
         import traceback
 
         traceback.print_exc()

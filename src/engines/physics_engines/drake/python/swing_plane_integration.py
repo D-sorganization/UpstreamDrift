@@ -261,7 +261,7 @@ class DrakeSwingPlaneAnalyzer:
                 "pydrake.geometry not available; Meshcat visualization skipped. "
                 "Install Drake to enable 3D visualization."
             )
-        except Exception as exc:  # noqa: BLE001
+        except (RuntimeError, TypeError, AttributeError) as exc:
             self.logger.warning(f"Meshcat visualization failed: {exc}")
 
     def export_for_analysis(

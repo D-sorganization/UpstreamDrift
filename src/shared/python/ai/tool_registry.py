@@ -222,7 +222,7 @@ class Tool:
                 result=result,
                 execution_time=time.perf_counter() - start_time,
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.exception("Tool execution failed: %s", self.name)
             return ToolResult(
                 tool_call_id="",
@@ -328,7 +328,7 @@ class ToolRegistry:
         # Try to get type hints
         try:
             hints = get_type_hints(func)
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             hints = {}
 
         # Extract parameter info

@@ -67,7 +67,7 @@ class GeminiAdapter(BaseAgentAdapter):
             chat = self._build_chat_session(context)
             response = chat.send_message(message)
             return AgentResponse(content=response.text)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini API error: {e}")
             return AgentResponse(content=f"Error: {e}")
 
@@ -88,7 +88,7 @@ class GeminiAdapter(BaseAgentAdapter):
                 if chunk.text:
                     yield AgentChunk(content=chunk.text)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini streaming error: {e}")
             yield AgentChunk(content=f"\n[Error: {e}]")
 
@@ -117,7 +117,7 @@ class GeminiAdapter(BaseAgentAdapter):
             # Simple prompt to test
             self._model.generate_content("Hello")
             return True, "Connected successfully"
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini validation error: {e}")
             return False, f"Connection failed: {e}"
 

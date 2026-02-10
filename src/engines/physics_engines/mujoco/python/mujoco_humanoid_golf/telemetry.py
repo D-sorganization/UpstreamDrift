@@ -268,7 +268,7 @@ def export_telemetry_json(filename: str, data_dict: dict[str, Any]) -> bool:
         with open(filename, "w") as f:
             json.dump(serializable_dict, f, indent=2)
         return True
-    except Exception:
+    except (FileNotFoundError, PermissionError, OSError):
         return False
 
 
@@ -317,5 +317,5 @@ def export_telemetry_csv(filename: str, data_dict: dict[str, Any]) -> bool:
                         row.append("")
                 writer.writerow(row)
         return True
-    except Exception:
+    except (FileNotFoundError, PermissionError, OSError):
         return False

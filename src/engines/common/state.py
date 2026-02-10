@@ -307,7 +307,7 @@ class EngineStateMixin:
         for callback in self._lifecycle_callbacks:
             try:
                 callback(state)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Lifecycle callback error: {e}")
 
     def _require_lifecycle(

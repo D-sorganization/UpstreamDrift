@@ -526,7 +526,7 @@ class DoublePendulumApp:
                     result = float(val)
                 except ValueError:
                     logger.exception("Error converting '%s' to float", label)
-                except Exception:
+                except (RuntimeError, OSError):
                     logger.exception("Unexpected error reading '%s'", label)
             return result
 
@@ -836,7 +836,7 @@ class DoublePendulumApp:
 
         try:
             self.ax.clear()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             logger.exception("Error clearing axes")
             return
 

@@ -352,5 +352,5 @@ class GaitStateMachine:
         for callback in self._callbacks.get(event_type, []):
             try:
                 callback(self.state, event)
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 pass  # Don't let callback errors break state machine

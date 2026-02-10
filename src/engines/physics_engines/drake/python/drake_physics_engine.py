@@ -111,7 +111,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         try:
             # Add model to plant
             parser.AddModels(path)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load Drake model from path %s: %s", path, e)
             raise
 
@@ -129,7 +129,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         try:
             parser.AddModelsFromString(content, ext)
             self.model_name_str = "StringLoadedModel"
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Failed to load Drake model from string: %s", e)
             raise
 
@@ -195,7 +195,7 @@ class DrakePhysicsEngine(PhysicsEngine):
                 )
 
             logger.debug("Drake forward dynamics computation completed")
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error("Failed to compute forward dynamics: %s", e)
             raise
 
@@ -385,7 +385,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         try:
             body = self.plant.GetBodyByName(body_name)
             frame = body.body_frame()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             return None
 
         # CalcJacobianSpatialVelocity

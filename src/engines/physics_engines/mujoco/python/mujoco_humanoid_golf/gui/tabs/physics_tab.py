@@ -471,7 +471,7 @@ class PhysicsTab(QtWidgets.QWidget):
                 # If sync, manually trigger finalize
                 self._finalize_model_change()
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QtWidgets.QMessageBox.warning(self, "Error", f"Failed to load model: {e}")
             logger.error("Failed to load model: %s", e)
             return

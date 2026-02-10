@@ -88,11 +88,11 @@ class ForceVisualizer:
 
             try:
                 body1_name = self.model.body(body1_id).name
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 body1_name = f"body_{body1_id}"
             try:
                 body2_name = self.model.body(body2_id).name
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 body2_name = f"body_{body2_id}"
 
             contacts.append(
@@ -114,7 +114,7 @@ class ForceVisualizer:
         for i in range(self.model.nu):
             try:
                 name = self.model.actuator(i).name
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 name = f"actuator_{i}"
             torques[name] = float(self.data.actuator_force[i])
         return torques
@@ -258,7 +258,7 @@ def add_visualization_overlays(
             try:
                 body_id = physics.model.body(body_name).id
                 tracer.add_point(body_name, physics.data.xpos[body_id].copy())
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
 
     # Helper: safely add a geom
@@ -315,7 +315,7 @@ def add_visualization_overlays(
                     if physics.model.joint(j).name == name:
                         jnt_idx = j
                         break
-                except Exception:
+                except (RuntimeError, ValueError, AttributeError):
                     pass
             # Fallback: use actuator index as body proxy
             body_id = min(i + 1, physics.model.nbody - 1)

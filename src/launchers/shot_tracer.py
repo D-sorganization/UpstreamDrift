@@ -346,7 +346,7 @@ class MultiModelShotTracerWidget(QWidget):
             self.results = compare_models(launch, models)
             self._update_visualization()
             self._update_results_table()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.exception("Comparison failed")
             QMessageBox.warning(self, "Simulation Error", str(e))
 

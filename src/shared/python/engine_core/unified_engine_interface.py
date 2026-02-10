@@ -75,7 +75,7 @@ class UnifiedEngineInterface:
 
             return True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Error loading engine {engine_type}: {e}")
             return False
 
@@ -100,7 +100,7 @@ class UnifiedEngineInterface:
             logger.info(f"Loaded standard humanoid into {self.current_engine_type}")
             return True
 
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to load standard humanoid: {e}")
             return False
 
@@ -125,7 +125,7 @@ class UnifiedEngineInterface:
             logger.info(f"Golf club {club_type} available at {club_path}")
             return True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to load golf club {club_type}: {e}")
             return False
 
@@ -167,7 +167,7 @@ class UnifiedEngineInterface:
                 "compatibility": compatibility,
             }
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return {"valid": False, "error": str(e)}
 
     def get_model_info(self) -> dict[str, Any]:
@@ -196,12 +196,12 @@ class UnifiedEngineInterface:
                 q, v = self.current_engine.get_state()
                 info["dof"] = len(q)
                 info["state_size"] = {"positions": len(q), "velocities": len(v)}
-            except Exception:
+            except (ValueError, RuntimeError, AttributeError):
                 pass
 
             return info
 
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             return {"error": str(e)}
 
     def reset_simulation(self) -> bool:
@@ -216,7 +216,7 @@ class UnifiedEngineInterface:
         try:
             self.current_engine.reset()
             return True
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to reset simulation: {e}")
             return False
 
@@ -235,7 +235,7 @@ class UnifiedEngineInterface:
         try:
             self.current_engine.step(dt)
             return True
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to step simulation: {e}")
             return False
 
@@ -250,7 +250,7 @@ class UnifiedEngineInterface:
 
         try:
             return self.current_engine.get_state()
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to get state: {e}")
             return None
 
@@ -270,7 +270,7 @@ class UnifiedEngineInterface:
         try:
             self.current_engine.set_state(positions, velocities)
             return True
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to set state: {e}")
             return False
 
@@ -289,7 +289,7 @@ class UnifiedEngineInterface:
         try:
             self.current_engine.set_control(control_inputs)
             return True
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to apply control: {e}")
             return False
 

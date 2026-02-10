@@ -43,8 +43,12 @@ try:
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
 
+import logging
+
 from motion_training.club_trajectory_parser import ClubTrajectory
 from motion_training.dual_hand_ik_solver import TrajectoryIKResult
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -108,7 +112,7 @@ class MotionVisualizer:
 
         # Initialize Meshcat viewer
         self.viewer = meshcat.Visualizer()
-        print(f"Meshcat viewer: {self.viewer.url()}")
+        logger.info("Meshcat viewer: %s", self.viewer.url())
 
         # Setup scene
         self._setup_scene()
@@ -164,8 +168,8 @@ class MotionVisualizer:
             self.pin_viz.initViewer(viewer=self.viewer)
             self.pin_viz.loadViewerModel(rootNodeName="humanoid")
 
-        except Exception as e:
-            print(f"Warning: Could not load humanoid model: {e}")
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("Warning: Could not load humanoid model: %s", e)
             self.pin_viz = None
 
     def _add_coordinate_frame(
@@ -365,8 +369,10 @@ class MotionVisualizer:
         if trajectory.frames:
             self.add_club_at_frame(trajectory.frames[0])
 
-        print(f"Playing {trajectory.num_frames} frames at {s.playback_speed}x speed")
-        print("Press Ctrl+C to stop")
+        logger.info(
+            "Playing %s frames at %sx speed", trajectory.num_frames, s.playback_speed
+        )
+        logger.info("Press Ctrl+C to stop")
 
         try:
             while True:
@@ -400,7 +406,7 @@ class MotionVisualizer:
                     break
 
         except KeyboardInterrupt:
-            print("\nPlayback stopped")
+            logger.info("\nPlayback stopped")
 
     def show_static_trajectory(
         self,

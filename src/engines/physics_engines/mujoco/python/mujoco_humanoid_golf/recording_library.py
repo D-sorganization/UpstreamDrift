@@ -285,7 +285,7 @@ class RecordingLibrary:
                 shutil.copy2(data_path, temp_dest)
                 # Atomic replacement
                 temp_dest.replace(dest_file)
-            except Exception:
+            except (FileNotFoundError, OSError, PermissionError):
                 # Cleanup temp file on failure
                 if temp_dest.exists():
                     temp_dest.unlink()
@@ -625,9 +625,7 @@ class RecordingLibrary:
         cursor = conn.cursor()
 
         # Safe: field is validated against whitelist above (allowed_fields)
-        cursor.execute(
-            f"SELECT DISTINCT {field} FROM recordings WHERE {field} != ''"
-        )  # nosec B608
+        cursor.execute(f"SELECT DISTINCT {field} FROM recordings WHERE {field} != ''")  # nosec B608
         values = [row[0] for row in cursor.fetchall()]
 
         return sorted(values)

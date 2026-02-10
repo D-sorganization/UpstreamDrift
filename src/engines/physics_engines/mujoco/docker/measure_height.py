@@ -1,9 +1,13 @@
+import logging
+
 from dm_control import suite
+
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
     """Measure the height of the humanoid."""
-    print("Loading humanoid_CMU:stand...")
+    logger.info("Loading humanoid_CMU:stand...")
     env = suite.load(domain_name="humanoid_CMU", task_name="stand")
     physics = env.physics
 
@@ -44,14 +48,14 @@ def main() -> None:
                 max_z = max(max_z, top)
 
         height = max_z - min_z
-        print("\n--- MEASUREMENTS ---")
-        print(f"Head Top Z: {max_z:.4f} m")
-        print(f"Foot Low Z: {min_z:.4f} m")
-        print(f"Total Height: {height:.4f} m (approx {height * 3.28084:.2f} ft)")
-        print("--------------------")
+        logger.info("\n--- MEASUREMENTS ---")
+        logger.info("Head Top Z: %s m", max_z)
+        logger.info("Foot Low Z: %s m", min_z)
+        logger.info("Total Height: %s m (approx %s ft)", height, height * 3.28084)
+        logger.info("--------------------")
 
-    except Exception as e:
-        print(f"Error measuring: {e}")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Error measuring: %s", e)
 
 
 if __name__ == "__main__":

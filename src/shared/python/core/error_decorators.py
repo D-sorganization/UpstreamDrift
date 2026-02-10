@@ -57,7 +57,7 @@ def log_errors(
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
-            except Exception as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 logger.error(f"{message}: {e}", exc_info=True)
                 if reraise:
                     raise

@@ -57,7 +57,7 @@ class PINKBackend:
                 self.robot.model, self.robot.data, self.robot.q0
             )
             logger.info(f"PINK backend initialized with model: {self.model_path}")
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error(f"Failed to load model for PINK: {e}")
             raise
 
@@ -110,6 +110,6 @@ class PINKBackend:
 
             return q_next
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"PINK IK solve failed: {e}")
             return q_init

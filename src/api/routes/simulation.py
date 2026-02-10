@@ -63,7 +63,7 @@ async def run_simulation(
         raise HTTPException(
             status_code=500, detail=f"Simulation failed: {str(exc)}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.exception("Unexpected simulation error: %s", exc)
         raise HTTPException(

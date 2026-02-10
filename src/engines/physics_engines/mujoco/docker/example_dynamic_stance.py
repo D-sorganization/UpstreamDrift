@@ -1,9 +1,12 @@
+import logging
 import os
 
 import dm_control
 import imageio
 import numpy as np
 from dm_control import mjcf, suite
+
+logger = logging.getLogger(__name__)
 
 # Path to CMU Humanoid XMl in the container
 # We need to find it first. Usually in dm_control/suite/humanoid_CMU.xml
@@ -54,7 +57,7 @@ def pd_control(physics, target_pose, actuators, kp=10.0, kd=1.0) -> np.ndarray:
             torque = (kp * error) - (kd * current_v)
             if joint_name in actuators:
                 action[actuators[joint_name]] = torque
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
     return action
 
@@ -152,7 +155,7 @@ def customize_model(physics) -> None:
 
 def main() -> None:
     """Run the dynamic stance example."""
-    print("Locating CMU Humanoid MJCF...")
+    logger.info("Locating CMU Humanoid MJCF...")
     xml_path = get_cmu_xml_path()
 
     physics = None
@@ -162,15 +165,15 @@ def main() -> None:
         if not os.path.exists(xml_path):
             raise FileNotFoundError(f"XML not found at {xml_path}")
 
-        print(f"Found XML: {xml_path}")
+        logger.info("Found XML: %s", xml_path)
 
         # READ AND PATCH XML
         with open(xml_path) as f:
             xml_string = f.read()
 
-        print("--- XML HEADER DEBUG ---")
-        print("\n".join(xml_string.split("\n")[:20]))
-        print("------------------------")
+        logger.info("--- XML HEADER DEBUG ---")
+        logger.info("%s", "\n".join(xml_string.split("\n")[:20]))
+        logger.info("------------------------")
 
         # FIX ASSET PATHS
         # The XML uses <include file="./common/skybox.xml"/>
@@ -216,7 +219,7 @@ def main() -> None:
         # Add Golf Club
         rhand = root.find("body", "rhand")
         if rhand:
-            print("Attaching golf club to rhand...")
+            logger.info("Attaching golf club to rhand...")
             # Club Shaft (Silver)
             # Reduced length 0.9 -> 0.5 (Total length ~1m)
             rhand.add(
@@ -245,7 +248,7 @@ def main() -> None:
         # "back" camera is usually behind. "side" is side.
         # Let's try placing one at X=3, Y=0, Z=1.5 looking at target.
         if worldbody:
-            print("Adding 'face_on' camera...")
+            logger.info("Adding 'face_on' camera...")
             # mode="targetbody" target="root"
             worldbody.add(
                 "camera",
@@ -257,11 +260,11 @@ def main() -> None:
 
         # Compile
         physics = mjcf.Physics.from_mjcf_model(root)
-        print("Successfully compiled modified model with Golf Club and Camera!")
+        logger.info("Successfully compiled modified model with Golf Club and Camera!")
 
-    except Exception as e:
-        print(f"⚠️ Warning: MJCF patching failed: {e}")
-        print("Falling back to standard suite.load (No Club/Camera).")
+    except ImportError as e:
+        logger.error("⚠️ Warning: MJCF patching failed: %s", e)
+        logger.info("Falling back to standard suite.load (No Club/Camera).")
         env = suite.load(domain_name="humanoid_CMU", task_name="stand")
         physics = env.physics
 
@@ -273,12 +276,12 @@ def main() -> None:
             actuators[name] = i
 
     # List Cameras
-    print("\nAvailable Cameras:")
+    logger.info("\nAvailable Cameras:")
     ncam = physics.model.ncam
     camera_id = 0
     for i in range(ncam):
         name = physics.model.id2name(i, "camera")
-        print(f"Camera {i}: {name}")
+        logger.info("Camera %s: %s", i, name)
         if name == "face_on":
             camera_id = i
 
@@ -305,10 +308,10 @@ def main() -> None:
                 # returns value
                 if joint in physics.named.data.qpos:
                     physics.named.data.qpos[joint] = angle
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
 
-    print("Simulating...")
+    logger.info("Simulating...")
     frames = []
     fps = 30
     duration_sec = 8  # Running longer
@@ -333,11 +336,11 @@ def main() -> None:
         frames.append(pixels)
 
         if i % 30 == 0:
-            print(f"Frame {i}/{steps}")
+            logger.info("Frame %s/%s", i, steps)
 
     filename = "humanoid_dynamic_stance.mp4"
     imageio.mimsave(filename, frames, fps=fps)
-    print(f"Saved to {filename}")
+    logger.info("Saved to %s", filename)
 
 
 if __name__ == "__main__":

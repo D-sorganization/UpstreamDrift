@@ -151,7 +151,7 @@ class MediaPipeEstimator(PoseEstimator):
             self._is_loaded = True
             logger.info("MediaPipe Pose model loaded successfully")
 
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error(f"Failed to load MediaPipe Pose model: {e}")
             raise
 
@@ -334,7 +334,7 @@ class MediaPipeEstimator(PoseEstimator):
         """
         try:
             return compute_joint_angles(keypoints_3d)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Error calculating joint angles: {e}")
             return {}
 
