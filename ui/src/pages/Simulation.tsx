@@ -4,10 +4,7 @@ import { useEngineManager } from '@/api/useEngineManager';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
-import { ActuatorPanel } from '@/components/simulation/ActuatorPanel';
 import { Scene3D } from '@/components/visualization/Scene3D';
-import { ForceOverlayPanel } from '@/components/visualization/ForceOverlayPanel';
-import type { ForceVector3D } from '@/components/visualization/ForceOverlay';
 import { LivePlot } from '@/components/analysis/LivePlot';
 import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
 import { useToast } from '@/components/ui/Toast';
@@ -21,8 +18,6 @@ export function SimulationPage() {
     gpuAcceleration: false,
   });
   const { showSuccess, showError, showInfo } = useToast();
-  // See issue #1199: Force overlay vectors
-  const [forceVectors, setForceVectors] = useState<ForceVector3D[]>([]);
 
   // Lazy engine manager — no engines loaded on startup
   const { engines, loadedEngines, requestLoad, unloadEngine } = useEngineManager();
@@ -102,17 +97,6 @@ export function SimulationPage() {
     }
   }, [connectionStatus, showSuccess, showError]);
 
-  // See issue #1199: Convert force vectors to Scene3D overlay format
-  const sceneForceOverlays = useMemo(() => {
-    return forceVectors.map((v) => ({
-      origin: v.origin as [number, number, number],
-      direction: v.direction as [number, number, number],
-      magnitude: v.magnitude,
-      color: `rgb(${Math.round(v.color[0] * 255)}, ${Math.round(v.color[1] * 255)}, ${Math.round(v.color[2] * 255)})`,
-      label: v.label ?? undefined,
-    }));
-  }, [forceVectors]);
-
   const canStart = effectiveEngine !== null && !isRunning;
 
   return (
@@ -151,11 +135,6 @@ export function SimulationPage() {
           />
         </div>
 
-        {/* See issue #1198: Per-actuator controls */}
-        <div className="mb-6 border-t border-gray-700 pt-4">
-          <ActuatorPanel isRunning={isRunning} />
-        </div>
-
         <div className="mt-auto pt-6 border-t border-gray-700">
           <SimulationControls
             isRunning={isRunning}
@@ -177,7 +156,6 @@ export function SimulationPage() {
             engine={effectiveEngine || 'mujoco'}
             frame={currentFrame}
             frames={frames}
-            forceOverlays={sceneForceOverlays}
           />
 
           {/* Overlay: Status */}
@@ -217,15 +195,7 @@ export function SimulationPage() {
       </main>
 
       {/* Right Sidebar - Live Data */}
-      <aside className="w-72 bg-gray-800 border-l border-gray-700 p-4 flex-shrink-0 z-10 overflow-y-auto">
-        {/* See issue #1199: Force overlay controls */}
-        <div className="mb-4">
-          <ForceOverlayPanel
-            onVectorsChange={setForceVectors}
-            isRunning={isRunning}
-          />
-        </div>
-
+      <aside className="w-72 bg-gray-800 border-l border-gray-700 p-4 flex-shrink-0 z-10">
         <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Live Analysis</h3>
 
         {currentFrame ? (
