@@ -353,6 +353,10 @@ class PinocchioGUI(SimulationGUIBase):
         pin_version = getattr(pin, "__version__", "unknown")
         logger.info(f"Pinocchio Version: {pin_version}")
         logger.info(f"Python Executable: {sys.executable}")
+
+        # Initialize log panel early so log_write() works during init
+        self.log = LogPanel()
+
         # Meshcat viewer
         self.viewer: viz.Visualizer | None = None
         if MESHCAT_AVAILABLE:
