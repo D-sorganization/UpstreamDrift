@@ -666,8 +666,14 @@ def create_viewer(
     elif backend_type == BackendType.MOCK:
         return MockBackend(config)
     elif backend_type == BackendType.PYVISTA:
+        # TODO: Implement PyVista backend
+        # Requires 'pyvista' and 'vtk' packages.
+        # This backend is intended for high-performance desktop visualization.
         raise NotImplementedError("PyVista backend not yet implemented")
     elif backend_type == BackendType.UNREAL_BRIDGE:
+        # TODO: Implement Unreal Engine bridge
+        # Requires TCP/UDP socket communication with Unreal Engine instance.
+        # This backend allows high-fidelity rendering via game engine.
         raise NotImplementedError("Unreal Bridge backend not yet implemented")
     else:
         raise ValueError(f"Unknown backend type: {backend_type}")

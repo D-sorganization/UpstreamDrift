@@ -528,6 +528,10 @@ class SimulinkModelTab(QWidget):
         """Setup the Simulink model tab UI"""
         layout = QVBoxLayout()
 
+        # TODO: Implement full Simulink integration
+        # Needs schema for Simulink output data and visualization logic.
+        # This will require a data loader similar to MotionDataLoader but for Simulink CSV/MAT files.
+
         # Placeholder for future Simulink integration
         placeholder = QLabel(
             "Simulink Model Integration\n\nThis tab will support:\n"
@@ -563,6 +567,10 @@ class ComparisonTab(QWidget):
     def _setup_ui(self):
         """Setup the comparison tab UI"""
         layout = QVBoxLayout()
+
+        # TODO: Implement data comparison logic
+        # Needs metrics for comparing two datasets (e.g., RMSE of trajectories).
+        # Should allow selecting two loaded datasets and visualizing differences.
 
         # Placeholder for comparison functionality
         placeholder = QLabel(
