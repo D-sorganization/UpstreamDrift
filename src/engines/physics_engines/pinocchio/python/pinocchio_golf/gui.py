@@ -27,6 +27,7 @@ from src.shared.python.logging_config import (  # noqa: E402
 )
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas  # noqa: E402
 from src.shared.python.statistical_analysis import StatisticalAnalyzer  # noqa: E402
+from src.shared.python.ui.simulation_gui_base import SimulationGUIBase  # noqa: E402
 
 from .manipulability import PinocchioManipulabilityAnalyzer  # noqa: E402
 
@@ -307,14 +308,16 @@ class PinocchioRecorder:
         return export_data
 
 
-class PinocchioGUI(QtWidgets.QMainWindow):
+class PinocchioGUI(SimulationGUIBase):
     """Main GUI widget for Pinocchio robot visualization and computation."""
+
+    WINDOW_TITLE = "Pinocchio Golf Model (Dynamics & Kinematics)"
+    WINDOW_WIDTH = 1000
+    WINDOW_HEIGHT = 900
 
     def __init__(self) -> None:
         """Initialize the Pinocchio GUI."""
         super().__init__()
-        self.setWindowTitle("Pinocchio Golf Model (Dynamics & Kinematics)")
-        self.resize(1000, 900)  # Increased size for analysis tabs
 
         # Internal state
         self.model: pin.Model | None = None
@@ -1891,6 +1894,64 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if not checked:
             self.viewer["overlays/torques"].delete()
         self._update_viewer()
+
+    # ==================================================================
+    # SimulationGUIBase overrides
+    # ==================================================================
+
+    def _build_base_ui(self) -> None:
+        """Override base UI construction.
+
+        Pinocchio builds its own comprehensive UI in ``_setup_ui``,
+        so we skip the generic skeleton.
+        """
+        # No-op: Pinocchio builds its own UI entirely
+
+    def step_simulation(self) -> None:
+        """Advance the Pinocchio simulation by one time step."""
+        if (
+            self.model is not None
+            and self.data is not None
+            and self.q is not None
+            and self.v is not None
+        ):
+            tau = np.zeros(self.model.nv)
+            a = pin.aba(self.model, self.data, self.q, self.v, tau)
+            self.v += a * self.dt
+            self.q = pin.integrate(self.model, self.q, self.v * self.dt)
+            self.sim_time += self.dt
+
+    def reset_simulation(self) -> None:
+        """Reset the Pinocchio simulation state."""
+        self._reset_simulation()
+
+    def update_visualization(self) -> None:
+        """Refresh the Pinocchio visualization."""
+        self._update_viewer()
+
+    def load_model(self, index: int) -> None:
+        """Load a model at the given index."""
+        self._on_model_combo_changed(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """Synchronize kinematic slider values with model state."""
+        self._sync_kinematic_controls()
+
+    def start_recording(self) -> None:
+        """Start recording simulation data."""
+        self.recorder.start_recording()
+
+    def stop_recording(self) -> None:
+        """Stop recording simulation data."""
+        self.recorder.stop_recording()
+
+    def get_recording_frame_count(self) -> int:
+        """Return the number of recorded frames."""
+        return self.recorder.get_num_frames()
+
+    def export_data(self, filename: str) -> None:
+        """Export recorded data to the given filename."""
+        self._export_statistics()
 
 
 def main() -> None:
