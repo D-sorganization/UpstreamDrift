@@ -1,4 +1,5 @@
 """Backward compatibility shim - module moved to data_io.export."""
+
 import sys as _sys
 
 from .data_io import export as _real_module  # noqa: E402

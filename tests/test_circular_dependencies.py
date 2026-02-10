@@ -93,11 +93,13 @@ class TestApiDoesNotImportLaunchers:
             assert hasattr(mod, "LauncherService")
 
             # Check that launcher modules were NOT loaded
-            for mod_name in ["src.launchers.launcher_model_handlers",
-                             "src.launchers.launcher_process_manager"]:
-                assert mod_name not in sys.modules, (
-                    f"{mod_name} was imported eagerly by LauncherService module"
-                )
+            for mod_name in [
+                "src.launchers.launcher_model_handlers",
+                "src.launchers.launcher_process_manager",
+            ]:
+                assert (
+                    mod_name not in sys.modules
+                ), f"{mod_name} was imported eagerly by LauncherService module"
         finally:
             sys.modules.update(saved)
 
@@ -166,13 +168,12 @@ class TestNoCircularImportsStaticAnalysis:
             imports = _get_top_level_imports(py_file)
             for imp in imports:
                 if imp.startswith(("src.engines", "engines")):
-                    violations.append(
-                        f"{py_file.relative_to(src_root)}: imports {imp}"
-                    )
+                    violations.append(f"{py_file.relative_to(src_root)}: imports {imp}")
 
-        assert not violations, (
-            "shared/python/ files import from engines at module level:\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert (
+            not violations
+        ), "shared/python/ files import from engines at module level:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
     def test_shared_does_not_import_robotics_at_module_level(self):
@@ -185,13 +186,12 @@ class TestNoCircularImportsStaticAnalysis:
             imports = _get_top_level_imports(py_file)
             for imp in imports:
                 if imp.startswith(("src.robotics", "robotics")):
-                    violations.append(
-                        f"{py_file.relative_to(src_root)}: imports {imp}"
-                    )
+                    violations.append(f"{py_file.relative_to(src_root)}: imports {imp}")
 
-        assert not violations, (
-            "shared/python/ files import from robotics at module level:\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert (
+            not violations
+        ), "shared/python/ files import from robotics at module level:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
     def test_api_does_not_import_launchers_at_module_level(self):
@@ -208,11 +208,10 @@ class TestNoCircularImportsStaticAnalysis:
             imports = _get_top_level_imports(py_file)
             for imp in imports:
                 if imp.startswith(("src.launchers", "launchers")):
-                    violations.append(
-                        f"{py_file.relative_to(src_root)}: imports {imp}"
-                    )
+                    violations.append(f"{py_file.relative_to(src_root)}: imports {imp}")
 
-        assert not violations, (
-            "api/ files import from launchers at module level:\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert (
+            not violations
+        ), "api/ files import from launchers at module level:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
