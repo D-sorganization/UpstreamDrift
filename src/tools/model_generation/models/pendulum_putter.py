@@ -630,6 +630,8 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
         # Save to file
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
+        if result.urdf_xml is None:
+            raise RuntimeError("Build produced no URDF XML output")
         path.write_text(result.urdf_xml)
 
         return path

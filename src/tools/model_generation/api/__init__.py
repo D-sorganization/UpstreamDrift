@@ -38,8 +38,8 @@ except ImportError:
     BuildResult = None
     ManualBuilder = None
     ParametricBuilder = None
-    quick_build = None
-    quick_urdf = None
+    quick_build = None  # type: ignore[assignment]
+    quick_urdf = None  # type: ignore[assignment]
 
 # REST API components
 from model_generation.api.rest_api import (

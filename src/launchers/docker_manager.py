@@ -215,7 +215,9 @@ class DockerLauncher:
 
         # Port mapping for MeshCat (Drake/Pinocchio)
         if model_type in ("drake", "pinocchio"):
-            cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
+            cmd.extend(
+                ["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"]
+            )  # nosec: Docker container networking requires 0.0.0.0
 
         # Working Directory
         work_dir = (

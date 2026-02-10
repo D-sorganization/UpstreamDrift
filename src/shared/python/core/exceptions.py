@@ -23,7 +23,10 @@ from .error_utils import (
     ValidationError,
 )
 
-# Re-export with old names for backwards compatibility
+# Re-export with old names for backwards compatibility (static aliases for mypy)
+GolfModelingError = GolfSuiteError
+EngineNotFoundError = EngineNotAvailableError
+ValidationConstraintError = ValidationError
 
 
 class ArrayDimensionError(GolfSuiteError):
@@ -66,6 +69,10 @@ __all__ = [
     "DataFormatError",
     "ValidationError",
     "ArrayDimensionError",
+    # Deprecated aliases (kept for backwards compatibility)
+    "GolfModelingError",
+    "EngineNotFoundError",
+    "ValidationConstraintError",
 ]
 
 

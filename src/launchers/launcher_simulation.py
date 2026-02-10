@@ -447,7 +447,7 @@ except ImportError as e:
             self.lbl_status.setText("> URDF Generator Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
 
-        except (ValueError, RuntimeError) as e:
+        except (ValueError, RuntimeError, OSError) as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
             self.lbl_status.setText("! Launch Error")

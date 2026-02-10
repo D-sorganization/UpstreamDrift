@@ -363,7 +363,7 @@ class URDFWriter:
         """Expand gimbal joint to 3 revolute joints."""
         # Default axes: Z-Y-X Euler sequence
         axes = joint.composite_axes or [(0, 0, 1), (0, 1, 0), (1, 0, 0)]
-        limits = joint.composite_limits or [joint.limits] * 3
+        limits = joint.composite_limits or [joint.limits or JointLimits()] * 3
 
         intermediate_links: list[Link] = []
         revolute_joints: list[Joint] = []
@@ -415,7 +415,7 @@ class URDFWriter:
         """Expand universal joint to 2 revolute joints."""
         # Default axes: perpendicular
         axes = joint.composite_axes or [(1, 0, 0), (0, 1, 0)]
-        limits = joint.composite_limits or [joint.limits] * 2
+        limits = joint.composite_limits or [joint.limits or JointLimits()] * 2
 
         intermediate_links: list[Link] = []
         revolute_joints: list[Joint] = []

@@ -3,5 +3,11 @@
 import sys as _sys
 
 from .data_io import marker_mapping as _real_module  # noqa: E402
+from .data_io.marker_mapping import (  # noqa: F401
+    MarkerMapping,
+    MarkerToModelMapper,
+    RegistrationResult,
+    logger,
+)
 
 _sys.modules[__name__] = _real_module

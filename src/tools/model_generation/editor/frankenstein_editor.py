@@ -1139,14 +1139,14 @@ class FrankensteinEditor:
                 xyz = list(new_link.visual_origin.xyz)
                 xyz[axis_idx] = -xyz[axis_idx]
                 new_link.visual_origin = Origin(
-                    xyz=tuple(xyz), rpy=new_link.visual_origin.rpy
+                    xyz=(xyz[0], xyz[1], xyz[2]), rpy=new_link.visual_origin.rpy
                 )
 
             if new_link.collision_origin:
                 xyz = list(new_link.collision_origin.xyz)
                 xyz[axis_idx] = -xyz[axis_idx]
                 new_link.collision_origin = Origin(
-                    xyz=tuple(xyz), rpy=new_link.collision_origin.rpy
+                    xyz=(xyz[0], xyz[1], xyz[2]), rpy=new_link.collision_origin.rpy
                 )
 
             model.links.append(new_link)
@@ -1169,13 +1169,15 @@ class FrankensteinEditor:
             # Mirror origin
             xyz = list(new_joint.origin.xyz)
             xyz[axis_idx] = -xyz[axis_idx]
-            new_joint.origin = Origin(xyz=tuple(xyz), rpy=new_joint.origin.rpy)
+            new_joint.origin = Origin(
+                xyz=(xyz[0], xyz[1], xyz[2]), rpy=new_joint.origin.rpy
+            )
 
             # Mirror axis for revolute joints
             if new_joint.joint_type in (JointType.REVOLUTE, JointType.CONTINUOUS):
                 axis = list(new_joint.axis)
                 axis[axis_idx] = -axis[axis_idx]
-                new_joint.axis = tuple(axis)
+                new_joint.axis = (axis[0], axis[1], axis[2])
 
             model.joints.append(new_joint)
 

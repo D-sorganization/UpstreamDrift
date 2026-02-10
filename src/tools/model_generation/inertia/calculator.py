@@ -441,6 +441,9 @@ class InertiaCalculator:
                 source=str(mesh_path),
             )
 
+        # Type narrow: after Scene handling, mesh should be a Trimesh
+        assert isinstance(mesh, trimesh.Trimesh), f"Expected Trimesh, got {type(mesh)}"
+
         is_watertight = mesh.is_watertight
         if not is_watertight:
             logger.warning(

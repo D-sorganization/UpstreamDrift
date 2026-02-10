@@ -326,8 +326,10 @@ class ChatDockWidget(QDockWidget):
         # Remove existing bubbles (keep the stretch)
         while self._message_layout.count() > 1:
             item = self._message_layout.takeAt(0)
-            if item and item.widget():
-                item.widget().deleteLater()
+            if item is not None:
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
 
         for msg in messages:
             role = msg.get("role", "user")
@@ -337,16 +339,13 @@ class ChatDockWidget(QDockWidget):
 
     def _scroll_to_bottom(self) -> None:
         """Scroll message area to bottom."""
-        QTimer.singleShot(
-            10,
-            lambda: (
-                self._scroll_area.verticalScrollBar().setValue(
-                    self._scroll_area.verticalScrollBar().maximum()
-                )
-                if self._scroll_area.verticalScrollBar()
-                else None
-            ),
-        )
+
+        def _do_scroll() -> None:
+            scrollbar = self._scroll_area.verticalScrollBar()
+            if scrollbar is not None:
+                scrollbar.setValue(scrollbar.maximum())
+
+        QTimer.singleShot(10, _do_scroll)
 
     # ── Cleanup ──────────────────────────────────────────────────────
 

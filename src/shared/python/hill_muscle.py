@@ -3,5 +3,11 @@
 import sys as _sys
 
 from .biomechanics import hill_muscle as _real_module  # noqa: E402
+from .biomechanics.hill_muscle import (  # noqa: F401
+    HillMuscleModel,
+    MuscleParameters,
+    MuscleState,
+    logger,
+)
 
 _sys.modules[__name__] = _real_module

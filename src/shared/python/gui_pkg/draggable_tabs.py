@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
-from PyQt6.QtCore import QEvent, QPoint, Qt, pyqtSignal
+from PyQt6.QtCore import QEvent, QObject, QPoint, Qt, pyqtSignal
 from PyQt6.QtGui import QAction, QCursor, QIcon, QMouseEvent
 from PyQt6.QtWidgets import (
     QApplication,
@@ -164,9 +164,9 @@ class DraggableTabWidget(QTabWidget):
 
     # ── Drag-to-detach ──────────────────────────────────────────────
 
-    def eventFilter(self, watched: object, event: QEvent) -> bool:
+    def eventFilter(self, watched: QObject | None, event: QEvent | None) -> bool:
         """Detect tab drag outside the bar to trigger detachment."""
-        if watched != self.tabBar():
+        if watched != self.tabBar() or event is None:
             return super().eventFilter(watched, event)
 
         if event.type() == QEvent.Type.MouseButtonPress:

@@ -2,6 +2,10 @@
 Tests for the REST API module.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 SIMPLE_URDF = """<?xml version="1.0"?>
 <robot name="test_robot">
     <link name="base_link">
@@ -12,6 +16,13 @@ SIMPLE_URDF = """<?xml version="1.0"?>
     </link>
 </robot>
 """
+
+
+def _body(response: Any) -> dict[str, Any]:
+    """Extract response body as dict, with runtime assertion."""
+    body = response.body
+    assert isinstance(body, dict), f"Expected dict body, got {type(body)}"
+    return body
 
 
 class TestAPIClasses:
@@ -38,7 +49,7 @@ class TestAPIClasses:
         response = APIResponse.ok({"status": "healthy"})
 
         assert response.status_code == 200
-        assert response.body["status"] == "healthy"
+        assert _body(response)["status"] == "healthy"
 
     def test_api_response_error(self):
         """Test APIResponse.error factory."""
@@ -47,7 +58,7 @@ class TestAPIClasses:
         response = APIResponse.error("Something went wrong", 400)
 
         assert response.status_code == 400
-        assert "error" in response.body
+        assert "error" in _body(response)
 
     def test_api_response_not_found(self):
         """Test APIResponse.not_found factory."""
@@ -104,7 +115,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert response.body["status"] == "healthy"
+        assert _body(response)["status"] == "healthy"
 
     def test_info_endpoint(self):
         """Test API info endpoint."""
@@ -119,8 +130,8 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert "name" in response.body
-        assert "endpoints" in response.body
+        assert "name" in _body(response)
+        assert "endpoints" in _body(response)
 
     def test_generate_humanoid_endpoint(self):
         """Test humanoid generation endpoint."""
@@ -140,9 +151,9 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert "urdf" in response.body
-        assert "links" in response.body
-        assert response.body["robot_name"] == "test_humanoid"
+        assert "urdf" in _body(response)
+        assert "links" in _body(response)
+        assert _body(response)["robot_name"] == "test_humanoid"
 
     def test_validate_endpoint_valid_urdf(self):
         """Test validation endpoint with valid URDF."""
@@ -158,7 +169,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert response.body["valid"] is True
+        assert _body(response)["valid"] is True
 
     def test_validate_endpoint_invalid_urdf(self):
         """Test validation endpoint with invalid URDF."""
@@ -174,8 +185,8 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert response.body["valid"] is False
-        assert response.body["error_count"] > 0
+        assert _body(response)["valid"] is False
+        assert _body(response)["error_count"] > 0
 
     def test_parse_endpoint(self):
         """Test URDF parsing endpoint."""
@@ -191,9 +202,9 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert response.body["name"] == "test_robot"
-        assert "links" in response.body
-        assert "joints" in response.body
+        assert _body(response)["name"] == "test_robot"
+        assert "links" in _body(response)
+        assert "joints" in _body(response)
 
     def test_inertia_calculation_endpoint(self):
         """Test inertia calculation endpoint."""
@@ -213,9 +224,9 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert "inertia" in response.body
-        assert "ixx" in response.body["inertia"]
-        assert response.body["is_positive_definite"] is True
+        assert "inertia" in _body(response)
+        assert "ixx" in _body(response)["inertia"]
+        assert _body(response)["is_positive_definite"] is True
 
     def test_inertia_sphere(self):
         """Test inertia calculation for sphere."""
@@ -236,7 +247,7 @@ class TestModelGenerationAPI:
 
         assert response.status_code == 200
         # Sphere should have equal ixx, iyy, izz
-        inertia = response.body["inertia"]
+        inertia = _body(response)["inertia"]
         assert abs(inertia["ixx"] - inertia["iyy"]) < 1e-10
         assert abs(inertia["iyy"] - inertia["izz"]) < 1e-10
 
@@ -254,7 +265,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 400
-        assert "error" in response.body
+        assert "error" in _body(response)
 
     def test_library_list_endpoint(self):
         """Test library listing endpoint."""
@@ -269,8 +280,8 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert "models" in response.body
-        assert "count" in response.body
+        assert "models" in _body(response)
+        assert "count" in _body(response)
 
     def test_diff_endpoint(self):
         """Test diff endpoint."""
@@ -293,8 +304,8 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert response.body["has_changes"] is True
-        assert "unified_diff" in response.body
+        assert _body(response)["has_changes"] is True
+        assert "unified_diff" in _body(response)
 
     def test_not_found_route(self):
         """Test handling of non-existent route."""
@@ -355,9 +366,9 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
-        assert response.body["robot_name"] == "custom_robot"
-        assert response.body["links"] == 2
-        assert response.body["joints"] == 1
+        assert _body(response)["robot_name"] == "custom_robot"
+        assert _body(response)["links"] == 2
+        assert _body(response)["joints"] == 1
 
 
 class TestRoute:

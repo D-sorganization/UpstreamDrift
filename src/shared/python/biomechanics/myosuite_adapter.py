@@ -280,7 +280,7 @@ def train_muscle_policy(env: MuscleDrivenEnv, total_timesteps: int = 100000) -> 
         # SAC is good for continuous control
         model = SAC(
             "MlpPolicy",
-            env,
+            env,  # type: ignore[arg-type]
             verbose=1,
             learning_rate=3e-4,
             buffer_size=100000,

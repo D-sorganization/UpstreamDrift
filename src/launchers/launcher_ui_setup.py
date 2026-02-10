@@ -532,8 +532,12 @@ class LauncherUISetupMixin:
             if session_id:
                 session_file.write_text(session_id, encoding="utf-8")
                 logger.info("Synced chat session: %s", session_id)
-        except ImportError as e:
+        except (ImportError, OSError) as e:
             logger.debug("Chat server sync skipped (server may not be running): %s", e)
+        except Exception as e:
+            # Catch any other unexpected errors (e.g. urllib.error.HTTPError)
+            # to prevent crashing the launcher during initialization
+            logger.debug("Chat session sync failed: %s", e)
 
     # -- Context Help --
 

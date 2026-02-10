@@ -93,7 +93,9 @@ def test_mujoco_iaa_logic():
     try:
         import mujoco
 
-        from engines.physics_engines.mujoco.docker.src.humanoid_golf import iaa_helper
+        from engines.physics_engines.mujoco.docker.src.humanoid_golf import (  # type: ignore[attr-defined]
+            iaa_helper,
+        )
     except (ImportError, OSError):
         pytest.skip("MuJoCo or helper not found or DLL failed")
 

@@ -258,6 +258,9 @@ def quick_urdf(
     if not result.success:
         raise ValueError(f"Failed to generate URDF: {result.error_message}")
 
+    if result.urdf_xml is None:
+        raise ValueError("Build succeeded but produced no URDF XML")
+
     return result.urdf_xml
 
 
@@ -304,7 +307,8 @@ def quick_build(
 
         path = Path(output_path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(result.urdf_xml)
+        if result.urdf_xml is not None:
+            path.write_text(result.urdf_xml)
         result.output_path = path
 
     return result

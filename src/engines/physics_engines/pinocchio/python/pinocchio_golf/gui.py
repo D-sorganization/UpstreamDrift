@@ -353,6 +353,10 @@ class PinocchioGUI(SimulationGUIBase):
         pin_version = getattr(pin, "__version__", "unknown")
         logger.info(f"Pinocchio Version: {pin_version}")
         logger.info(f"Python Executable: {sys.executable}")
+
+        # Initialize log panel early so log_write() works during init
+        self.log = LogPanel()
+
         # Meshcat viewer
         self.viewer: viz.Visualizer | None = None
         if MESHCAT_AVAILABLE:
@@ -1307,7 +1311,7 @@ class PinocchioGUI(SimulationGUIBase):
             self.btn_run.setChecked(False)
             self._sync_kinematic_controls()
 
-    def _toggle_run(self) -> None:
+    def _toggle_run(self, checked: bool = False) -> None:
         self.is_running = not self.is_running
         self.btn_run.setText(
             "Pause Simulation" if self.is_running else "Run Simulation"
