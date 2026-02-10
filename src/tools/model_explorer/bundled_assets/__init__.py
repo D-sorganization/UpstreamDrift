@@ -16,7 +16,6 @@ Usage:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -26,13 +25,7 @@ _project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-try:
-    from src.shared.python.logging_config import get_logger
-except ImportError:
-    # Fallback if logging module not available
-    def get_logger(name: str | None = None) -> logging.Logger:
-        return logging.getLogger(name)
-
+from src.shared.python.logger_utils import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 

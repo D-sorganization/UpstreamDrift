@@ -1,0 +1,40 @@
+[project]
+name = "upstream-drift-shared"
+version = "1.0.0"
+description = "Shared modules for the Golf Modeling Suite (UpstreamDrift)"
+readme = "README_PACKAGE.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["golf", "biomechanics", "shared", "theme", "logging", "plotting"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "structlog>=24.1.0",
+]
+
+[project.optional-dependencies]
+theme = ["PyQt6>=6.5.0"]
+plotting = ["matplotlib>=3.8.0", "numpy>=1.26.4"]
+all = ["upstream-drift-shared[theme,plotting]"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "core",
+    "theme",
+    "plotting",
+    "logging_pkg",
+    "validation_pkg",
+    "security",
+    "engine_core",
+]

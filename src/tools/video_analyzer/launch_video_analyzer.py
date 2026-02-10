@@ -13,10 +13,11 @@ Design by Contract:
 
 from __future__ import annotations
 
-import logging
 import sys
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logger_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def main() -> int:
@@ -51,5 +52,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    from src.shared.python.logging_config import setup_logging
+
+    setup_logging()
     sys.exit(main())
