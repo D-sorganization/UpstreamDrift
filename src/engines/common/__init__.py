@@ -21,10 +21,6 @@ Usage:
     )
 """
 
-from src.shared.python.capabilities import (
-    CapabilityLevel,
-    EngineCapabilities,
-)
 from src.engines.common.export import (
     DatasetExporter,
     DatasetRecord,
@@ -42,6 +38,10 @@ from src.engines.common.state import (
     EngineStateMixin,
     ForceAccumulator,
     StateManager,
+)
+from src.shared.python.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
 )
 
 __all__ = [
