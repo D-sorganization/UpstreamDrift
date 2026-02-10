@@ -41,6 +41,7 @@ from .routes import dataset as dataset_routes
 from .routes import engines as engine_routes
 from .routes import export as export_routes
 from .routes import launcher as launcher_routes
+from .routes import physics as physics_routes
 from .routes import simulation as simulation_routes
 from .routes import terrain as terrain_routes
 from .routes import video as video_routes
@@ -282,6 +283,7 @@ app.include_router(export_routes.router)
 app.include_router(launcher_routes.router)
 app.include_router(terrain_routes.router)
 app.include_router(dataset_routes.router)
+app.include_router(physics_routes.router)
 
 
 if __name__ == "__main__":
