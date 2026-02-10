@@ -284,7 +284,7 @@ class AdvancedGuiMethodsMixin:
                 # qvel index address
                 return int(model.jnt_dofadr[j_id])
 
-            # Try to map typical chain: Pelvis -> Thorax -> Arm -> Club
+            # Try to map typical chain: proximal -> mid_proximal -> mid_distal -> distal
             # Adjust names based on actual XML joint names
             # Full Body XML: pelvis (free), spine_rotation, right_shoulder_swing, \
             # right_wrist, club_wrist

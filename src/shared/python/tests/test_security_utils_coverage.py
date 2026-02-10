@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from shared.python.security_utils import validate_path
+from src.shared.python.security_utils import validate_path, validate_url_scheme
 
 
 def test_validate_path_success(tmp_path: Path) -> None:
@@ -88,3 +88,52 @@ def test_validate_path_invalid_format() -> None:
         assert isinstance(result, Path)
         # Compare as Path for cross-platform compatibility (Windows uses backslashes)
         assert result == Path("some/path")
+
+
+# =========================================================================
+# URL Scheme Validation Tests (Issue #1255 - SSRF Prevention)
+# =========================================================================
+
+
+def test_validate_url_scheme_http() -> None:
+    """HTTP URLs should be allowed by default."""
+    result = validate_url_scheme("http://example.com/model.urdf")
+    assert result == "http://example.com/model.urdf"
+
+
+def test_validate_url_scheme_https() -> None:
+    """HTTPS URLs should be allowed by default."""
+    result = validate_url_scheme("https://github.com/repo/model.urdf")
+    assert result == "https://github.com/repo/model.urdf"
+
+
+def test_validate_url_scheme_file_blocked() -> None:
+    """file:// scheme should be blocked by default."""
+    with pytest.raises(ValueError, match="not allowed"):
+        validate_url_scheme("file:///etc/passwd")
+
+
+def test_validate_url_scheme_ftp_blocked() -> None:
+    """ftp:// scheme should be blocked by default."""
+    with pytest.raises(ValueError, match="not allowed"):
+        validate_url_scheme("ftp://malicious.com/payload")
+
+
+def test_validate_url_scheme_javascript_blocked() -> None:
+    """javascript: scheme should be blocked."""
+    with pytest.raises(ValueError, match="not allowed"):
+        validate_url_scheme("javascript:alert(1)")
+
+
+def test_validate_url_scheme_custom_allowed() -> None:
+    """Custom allowed schemes should work."""
+    result = validate_url_scheme(
+        "ftp://files.example.com", allowed_schemes=("ftp", "ftps")
+    )
+    assert result == "ftp://files.example.com"
+
+
+def test_validate_url_scheme_empty_string() -> None:
+    """Empty string has empty scheme, should be blocked."""
+    with pytest.raises(ValueError, match="not allowed"):
+        validate_url_scheme("")
