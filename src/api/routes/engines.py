@@ -18,7 +18,11 @@ from ..auth.middleware import OptionalAuth, is_local_mode
 from ..dependencies import get_engine_manager
 
 # We keep using the existing response models where appropriate, or define new ones if needed by the plan
-from ..models.responses import EngineStatusResponse
+from ..models.responses import (
+    CapabilityLevelResponse,
+    EngineCapabilitiesResponse,
+    EngineStatusResponse,
+)
 from ..utils.path_validation import validate_model_path
 
 router = APIRouter()
@@ -218,3 +222,81 @@ async def unload_engine(
         raise HTTPException(
             status_code=400, detail=f"Invalid engine type: {engine_type}"
         ) from exc
+
+
+# ──────────────────────────────────────────────────────────────
+#  Engine Capabilities (See issue #1204)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/engines/{engine_type}/capabilities",
+    response_model=EngineCapabilitiesResponse,
+)
+async def get_engine_capabilities(
+    engine_type: str,
+    engine_manager: EngineManager = Depends(get_engine_manager),
+) -> EngineCapabilitiesResponse:
+    """Get detailed capabilities for a specific engine.
+
+    Returns the EngineCapabilities dataclass serialized with support levels
+    for each optional feature (mass matrix, Jacobian, contact forces, etc.).
+
+    Args:
+        engine_type: Engine type identifier (e.g., "mujoco", "pendulum").
+        engine_manager: Injected engine manager.
+
+    Returns:
+        Detailed capabilities with support levels.
+
+    Raises:
+        HTTPException: If engine type is invalid or engine cannot be queried.
+    """
+    try:
+        engine_enum = EngineType(engine_type.lower())
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400, detail=f"Unknown engine type: {engine_type}"
+        ) from exc
+
+    # Check if this engine is currently loaded to get live capabilities
+    current = engine_manager.get_current_engine()
+    engine = None
+    if current == engine_enum:
+        engine = engine_manager.get_active_physics_engine()
+
+    if engine is not None and hasattr(engine, "get_capabilities"):
+        caps = engine.get_capabilities()
+        caps_dict = caps.to_dict()
+    else:
+        # Return default capabilities for engines not currently loaded
+        from src.shared.python.engine_core.capabilities import (
+            EngineCapabilities,
+        )
+
+        default_caps = EngineCapabilities(engine_name=engine_type)
+        caps_dict = default_caps.to_dict()
+
+    # Build capability list
+    capability_list = []
+    summary = {"full": 0, "partial": 0, "none": 0}
+
+    for key, level in caps_dict.items():
+        if key == "engine_name":
+            continue
+        supported = level != "none"
+        capability_list.append(
+            CapabilityLevelResponse(
+                name=key,
+                level=level,
+                supported=supported,
+            )
+        )
+        summary[level] = summary.get(level, 0) + 1
+
+    return EngineCapabilitiesResponse(
+        engine_name=caps_dict.get("engine_name", engine_type),
+        engine_type=engine_type,
+        capabilities=capability_list,
+        summary=summary,
+    )
