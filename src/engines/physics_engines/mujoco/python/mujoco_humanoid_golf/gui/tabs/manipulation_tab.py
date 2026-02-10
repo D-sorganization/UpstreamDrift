@@ -625,7 +625,7 @@ class ManipulationTab(QtWidgets.QWidget):
                     "Export Successful",
                     f"Pose library exported to {filename}",
                 )
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QtWidgets.QMessageBox.critical(
                     self,
                     "Export Error",
@@ -654,7 +654,7 @@ class ManipulationTab(QtWidgets.QWidget):
                     "Import Successful",
                     f"Imported {count} poses from {filename}",
                 )
-            except Exception as e:
+            except ImportError as e:
                 QtWidgets.QMessageBox.critical(
                     self,
                     "Import Error",

@@ -4,6 +4,7 @@ Golf Swing Visualizer - Advanced Camera System
 Sophisticated camera controls with smooth animations, presets, and cinematic features
 """
 
+import logging
 import math
 import time
 from collections.abc import Callable
@@ -12,6 +13,8 @@ from enum import Enum
 
 import numpy as np
 from PyQt6.QtCore import QEasingCurve, QObject, QTimer, pyqtSignal
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # CAMERA DATA STRUCTURES
@@ -225,7 +228,7 @@ class CameraController(QObject):
         # Preset configurations
         self._setup_presets()
 
-        print("📷 Advanced camera controller initialized")
+        logger.info("📷 Advanced camera controller initialized")
 
     def _setup_presets(self):
         """Setup predefined camera presets"""
@@ -489,7 +492,7 @@ class CameraController(QObject):
     ):
         """Set camera to predefined preset"""
         if preset not in self.presets:
-            print(f"Warning: Preset {preset} not found")
+            logger.warning("Warning: Preset %s not found", preset)
             return
 
         target_state = self.presets[preset]
@@ -501,7 +504,7 @@ class CameraController(QObject):
             self._apply_constraints()
             self.cameraChanged.emit()
 
-        print(f"📷 Camera preset: {preset.value}")
+        logger.info("📷 Camera preset: %s", preset.value)
 
     def animate_to_state(
         self,
@@ -524,7 +527,7 @@ class CameraController(QObject):
         self.animation_timer.start(16)  # ~60 FPS
         self.current_state.is_animating = True
 
-        print(f"📷 Animating camera over {duration:.1f}s")
+        logger.info("📷 Animating camera over %ss", duration)
 
     def _update_animation(self):
         """Update ongoing camera animation"""
@@ -626,19 +629,19 @@ class CameraController(QObject):
         if not inserted:
             self.keyframes.append(keyframe)
 
-        print(f"📷 Added keyframe at {time:.1f}s")
+        logger.info("📷 Added keyframe at %ss", time)
 
     def clear_keyframes(self):
         """Clear all cinematic keyframes"""
         self.keyframes.clear()
-        print("📷 Cleared all keyframes")
+        logger.info("📷 Cleared all keyframes")
 
     def start_cinematic_playback(
         self, duration: float | None = None, loop: bool = False
     ):
         """Start cinematic camera playback"""
         if not self.keyframes:
-            print("Warning: No keyframes defined for cinematic playback")
+            logger.warning("Warning: No keyframes defined for cinematic playback")
             return
 
         self.mode = CameraMode.CINEMATIC
@@ -653,7 +656,7 @@ class CameraController(QObject):
         self.animation_timer.start(16)  # ~60 FPS
         self.modeChanged.emit(self.mode.value)
 
-        print(f"📷 Started cinematic playback: {self.cinematic_duration:.1f}s")
+        logger.info("📷 Started cinematic playback: %ss", self.cinematic_duration)
 
     def update_cinematic_camera(self, time_delta: float):
         """Update camera position during cinematic playback"""
@@ -712,7 +715,7 @@ class CameraController(QObject):
         self.mode = CameraMode.ORBIT
         self.animation_timer.stop()
         self.modeChanged.emit(self.mode.value)
-        print("📷 Stopped cinematic playback")
+        logger.info("📷 Stopped cinematic playback")
 
     def _interpolate_between_states(
         self, state1: CameraState, state2: CameraState, t: float
@@ -848,7 +851,7 @@ class CameraController(QObject):
         if mode != self.mode:
             self.mode = mode
             self.modeChanged.emit(mode.value)
-            print(f"📷 Camera mode: {mode.value}")
+            logger.info("📷 Camera mode: %s", mode.value)
 
     def reset_to_default(self, animate: bool = True):
         """Reset camera to default position"""

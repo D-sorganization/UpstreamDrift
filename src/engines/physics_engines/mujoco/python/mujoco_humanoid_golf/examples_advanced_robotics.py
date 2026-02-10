@@ -314,7 +314,11 @@ def run_all_examples() -> None:
     for _i, example_func in enumerate(examples, 1):
         try:
             example_func()
-        except Exception:  # noqa: BLE001 - Example runner should continue on any error
+        except (
+            RuntimeError,
+            ValueError,
+            OSError,
+        ):  # Example runner should continue on any error
             traceback.print_exc()
 
 

@@ -284,7 +284,7 @@ class GenericPhysicsRecorder:
         if M is not None and M.size > 0:
             try:
                 ke = 0.5 * v.T @ M @ v
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Failed to compute kinetic energy: %s", e)
                 ke = 0.0
         else:
@@ -297,21 +297,21 @@ class GenericPhysicsRecorder:
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
             try:
                 self.data["ztcf_accel"][idx] = self.engine.compute_ztcf(q, v)
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Failed to compute ZTCF at frame %d: %s", idx, e)
 
         # ZVCF
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
             try:
                 self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Failed to compute ZVCF at frame %d: %s", idx, e)
 
         # Drift Accel
         if self.analysis_config["track_drift"] and self.data["drift_accel"] is not None:
             try:
                 self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(
                     "Failed to compute drift acceleration at frame %d: %s", idx, e
                 )
@@ -325,7 +325,7 @@ class GenericPhysicsRecorder:
                 self.data["control_accel"][idx] = (
                     self.engine.compute_control_acceleration(tau)
                 )
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(
                     "Failed to compute control acceleration at frame %d: %s", idx, e
                 )
@@ -344,7 +344,7 @@ class GenericPhysicsRecorder:
                         self.data["induced_accelerations"][src_idx][idx] = (
                             M_inv[:, src_idx] * tau[src_idx]
                         )
-            except Exception as e:
+            except (ValueError, TypeError, RuntimeError) as e:
                 logger.warning(
                     "Failed to compute induced accelerations at frame %d: %s", idx, e
                 )
@@ -358,7 +358,7 @@ class GenericPhysicsRecorder:
                         self.data["induced_accelerations"][src_idx][idx] = (
                             self.engine.compute_control_acceleration(tau_single)
                         )
-                    except Exception as e:
+                    except (ValueError, TypeError, RuntimeError) as e:
                         logger.warning(
                             "Failed to compute induced acceleration for source %d: %s",
                             src_idx,
@@ -380,7 +380,7 @@ class GenericPhysicsRecorder:
                 # Some engines return a 6-vector [force(3), moment(3)]
                 if len(grf) >= 6:
                     self.data["ground_moments"][idx] = grf[3:6]
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.warning("Failed to compute ground forces at frame %d: %s", idx, e)
 
         self.current_idx += 1
@@ -595,7 +595,7 @@ class GenericPhysicsRecorder:
 
         try:
             grf_summary = analyzer.analyze(FootSide.COMBINED)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning("GRF analysis failed: %s", e)
             grf_summary = None
 
@@ -615,7 +615,7 @@ class GenericPhysicsRecorder:
                 fsp = fit_functional_swing_plane(
                     clubhead_traj, times, impact_time, window_ms=fsp_window_ms
                 )
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("FSP fitting failed: %s", e)
 
         # --- Wrench Decomposition ---
@@ -673,12 +673,12 @@ class GenericPhysicsRecorder:
                 "cop_range_ap": grf_summary.cop_range_ap,
                 "cop_range_ml": grf_summary.cop_range_ml,
             }
-            result["grf_analysis"][
-                "linear_impulse_magnitude"
-            ] = grf_summary.linear_impulse.linear_impulse_magnitude
-            result["grf_analysis"][
-                "angular_impulse_magnitude"
-            ] = grf_summary.linear_impulse.angular_impulse_magnitude
+            result["grf_analysis"]["linear_impulse_magnitude"] = (
+                grf_summary.linear_impulse.linear_impulse_magnitude
+            )
+            result["grf_analysis"]["angular_impulse_magnitude"] = (
+                grf_summary.linear_impulse.angular_impulse_magnitude
+            )
             result["grf_analysis"]["duration"] = grf_summary.linear_impulse.duration
 
         if fsp is not None:
@@ -716,7 +716,7 @@ class GenericPhysicsRecorder:
             elif isinstance(v, list) and v:
                 try:
                     export_data[k] = np.array(v)
-                except Exception as e:
+                except (ValueError, TypeError, RuntimeError) as e:
                     logger.debug("Failed to convert list '%s' to numpy array: %s", k, e)
                     export_data[k] = v
             else:

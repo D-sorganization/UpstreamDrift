@@ -479,7 +479,7 @@ class URDFEditorWindow(QMainWindow):
             logger.info(f"Loaded URDF: {file_path}")
             return True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Failed to load file: {e}")
             logger.error(f"Failed to load URDF: {e}")
             return False
@@ -518,7 +518,7 @@ class URDFEditorWindow(QMainWindow):
             self._show_status(f"Saved: {file_path.name}")
             logger.info(f"Saved URDF: {file_path}")
 
-        except Exception as e:
+        except ImportError as e:
             QMessageBox.critical(self, "Error", f"Failed to save file: {e}")
             logger.error(f"Failed to save URDF: {e}")
 

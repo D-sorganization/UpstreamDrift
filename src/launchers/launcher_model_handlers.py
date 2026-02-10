@@ -454,7 +454,7 @@ class MatlabFileHandler:
                 subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
             logger.info("Opened MATLAB file: %s", file_path.name)
             return True
-        except Exception:
+        except (FileNotFoundError, PermissionError, OSError):
             logger.exception("Failed to open MATLAB file: %s", file_path)
             return False
 
@@ -511,7 +511,7 @@ class DocumentHandler:
                 subprocess.Popen(["xdg-open", str(file_path)])  # noqa: S603, S607
             logger.info("Opened document: %s", file_path.name)
             return True
-        except Exception:
+        except (FileNotFoundError, PermissionError, OSError):
             logger.exception("Failed to open document: %s", file_path)
             return False
 

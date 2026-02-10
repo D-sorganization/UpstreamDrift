@@ -14,7 +14,7 @@ try:
 
     if suite_root and str(suite_root) not in sys.path:
         sys.path.insert(0, str(suite_root))
-except Exception:
+except (FileNotFoundError, OSError):
     pass
 
 from src.engines.physics_engines.drake.python.drake_physics_engine import (

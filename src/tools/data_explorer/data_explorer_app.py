@@ -108,7 +108,7 @@ def _get_csv_columns(filepath: Path) -> list[str]:
         with open(filepath, encoding="utf-8") as f:
             header_line = f.readline().strip()
         return [col.strip().strip('"') for col in header_line.split(",")]
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, OSError) as e:
         logger.warning("Could not parse CSV headers from %s: %s", filepath, e)
         return []
 
@@ -130,7 +130,7 @@ def _get_json_keys(filepath: Path) -> list[str]:
         if isinstance(data, dict):
             return list(data.keys())
         return []
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, OSError) as e:
         logger.warning("Could not parse JSON keys from %s: %s", filepath, e)
         return []
 

@@ -79,7 +79,7 @@ class URDFGeneratorWindow(QMainWindow):
                     )
                 else:
                     logger.warning(f"Default model {default_model} not found")
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load default model: {e}")
 
     def _setup_ui(self) -> None:
@@ -304,7 +304,7 @@ class URDFGeneratorWindow(QMainWindow):
             self.segment_added.emit(segment_data)
             self.status_bar.showMessage(f"Added segment: {segment_data['name']}")
             logger.info(f"Segment added: {segment_data['name']}")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Error adding segment: {e}")
             QMessageBox.warning(self, "Error", f"Failed to add segment: {e}")
 
@@ -320,7 +320,7 @@ class URDFGeneratorWindow(QMainWindow):
             self.segment_removed.emit(segment_name)
             self.status_bar.showMessage(f"Removed segment: {segment_name}")
             logger.info(f"Segment removed: {segment_name}")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Error removing segment: {e}")
             QMessageBox.warning(self, "Error", f"Failed to remove segment: {e}")
 
@@ -335,7 +335,7 @@ class URDFGeneratorWindow(QMainWindow):
             self.visualization_widget.update_visualization(self.urdf_builder.get_urdf())
             self.status_bar.showMessage(f"Modified segment: {segment_data['name']}")
             logger.info(f"Segment modified: {segment_data['name']}")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Error modifying segment: {e}")
             QMessageBox.warning(self, "Error", f"Failed to modify segment: {e}")
 
@@ -367,7 +367,7 @@ class URDFGeneratorWindow(QMainWindow):
                 # Parse URDF and populate segments (future enhancement)
                 self.status_bar.showMessage(f"Opened: {file_path}")
                 logger.info(f"URDF opened from: {file_path}")
-            except Exception as e:
+            except (FileNotFoundError, OSError) as e:
                 logger.error(f"Error opening URDF: {e}")
                 QMessageBox.critical(self, "Error", f"Failed to open URDF: {e}")
 
@@ -460,7 +460,7 @@ class URDFGeneratorWindow(QMainWindow):
                             )
                             logger.info(f"Loaded embedded model: {model_info['name']}")
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Error loading from library: {e}")
             QMessageBox.critical(self, "Error", f"Failed to load from library: {e}")
 
@@ -488,7 +488,7 @@ class URDFGeneratorWindow(QMainWindow):
             self.current_file_path = file_path
             self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
             logger.info(f"URDF loaded: {file_path}")
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error(f"Error loading URDF file: {e}")
             raise
 
@@ -526,7 +526,7 @@ class URDFGeneratorWindow(QMainWindow):
             self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
             self.status_bar.showMessage(f"Saved: {file_path}")
             logger.info(f"URDF saved to: {file_path}")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Error saving URDF: {e}")
             QMessageBox.critical(self, "Error", f"Failed to save URDF: {e}")
 
@@ -551,7 +551,7 @@ class URDFGeneratorWindow(QMainWindow):
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for MuJoCo: {file_path}")
                 logger.info(f"MuJoCo export saved to: {file_path}")
-            except Exception as e:
+            except (FileNotFoundError, OSError) as e:
                 logger.error(f"Error exporting for MuJoCo: {e}")
                 QMessageBox.critical(self, "Error", f"Failed to export for MuJoCo: {e}")
 
@@ -576,7 +576,7 @@ class URDFGeneratorWindow(QMainWindow):
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for Drake: {file_path}")
                 logger.info(f"Drake export saved to: {file_path}")
-            except Exception as e:
+            except (FileNotFoundError, OSError) as e:
                 logger.error(f"Error exporting for Drake: {e}")
                 QMessageBox.critical(self, "Error", f"Failed to export for Drake: {e}")
 
@@ -600,7 +600,7 @@ class URDFGeneratorWindow(QMainWindow):
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for Pinocchio: {file_path}")
                 logger.info(f"Pinocchio export saved to: {file_path}")
-            except Exception as e:
+            except (FileNotFoundError, OSError) as e:
                 logger.error(f"Error exporting for Pinocchio: {e}")
                 QMessageBox.critical(
                     self, "Error", f"Failed to export for Pinocchio: {e}"
@@ -638,7 +638,7 @@ class URDFGeneratorWindow(QMainWindow):
 
             self._editor_window.show()
             self.status_bar.showMessage("Opened Advanced URDF Editor")
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to open advanced editor: {e}")
             QMessageBox.critical(self, "Error", f"Failed to open editor: {e}")
 
@@ -663,7 +663,7 @@ class URDFGeneratorWindow(QMainWindow):
 
             dialog.exec()
             self.status_bar.showMessage("Frankenstein mode closed")
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to open Frankenstein mode: {e}")
             QMessageBox.critical(
                 self, "Error", f"Failed to open Frankenstein mode: {e}"
@@ -691,7 +691,7 @@ class URDFGeneratorWindow(QMainWindow):
 
             dialog.exec()
             self.status_bar.showMessage("Code editor closed")
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to open code editor: {e}")
             QMessageBox.critical(self, "Error", f"Failed to open code editor: {e}")
 

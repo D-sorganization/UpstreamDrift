@@ -339,7 +339,7 @@ class ModelPanel(QWidget):
             self._refresh_tree()
             logger.info(f"Loaded URDF: {file_path}")
             return True
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Failed to load URDF: {e}")
             logger.error(f"Failed to load URDF: {e}")
             return False
@@ -376,7 +376,7 @@ class ModelPanel(QWidget):
             self.model.is_modified = False
             self.file_label.setText(f"File: {file_path.name}")
             logger.info(f"Saved URDF: {file_path}")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Failed to save URDF: {e}")
 
     def _on_selection_changed(self) -> None:
@@ -555,7 +555,7 @@ class ModelPanel(QWidget):
             self.save_btn.setEnabled(True)
             return result
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to add component: {e}")
             return None
 

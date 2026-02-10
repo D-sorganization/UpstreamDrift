@@ -643,7 +643,7 @@ class ThemeManager:
             settings.endGroup()
             if raw:
                 self._custom_themes = json.loads(raw)
-        except Exception:
+        except ImportError:
             self._custom_themes = {}
 
     def _save_custom_themes(self) -> None:
@@ -655,7 +655,7 @@ class ThemeManager:
             settings.beginGroup(self._SETTINGS_GROUP)
             settings.setValue(self._CUSTOM_THEME_KEY, json.dumps(self._custom_themes))
             settings.endGroup()
-        except Exception as e:
+        except ImportError as e:
             logger.warning("Failed to save custom themes: %s", e)
 
     def get_builtin_themes(self) -> list[str]:
@@ -733,7 +733,7 @@ class ThemeManager:
                 fleet_names = self.get_available_fleet_themes()
                 if name in fleet_names:
                     return fleet_to_theme_colors(name)
-        except Exception:
+        except ImportError:
             pass
 
         return None
@@ -790,7 +790,7 @@ class ThemeManager:
             if name in fleet_names:
                 self.set_fleet_theme(name)
                 return
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         # Custom theme
@@ -871,7 +871,7 @@ class ThemeManager:
             settings.beginGroup(self._SETTINGS_GROUP)
             settings.setValue("current_theme", self.theme_name)
             settings.endGroup()
-        except Exception as e:
+        except ImportError as e:
             logger.debug("Could not save theme preference: %s", e)
 
     def load_saved_theme(self) -> None:
@@ -885,7 +885,7 @@ class ThemeManager:
             settings.endGroup()
             if saved:
                 self.change_theme(saved)
-        except Exception as e:
+        except ImportError as e:
             logger.debug("Could not load saved theme: %s", e)
 
 

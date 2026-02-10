@@ -193,7 +193,7 @@ class MATLABQualityChecker:
                     if in_func:
                         self._check_function_unsafe(stripped, i, file_path.name, issues)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             issues.append(f"{file_path.name}: Failed analysis - {e}")
         return issues
 

@@ -358,6 +358,6 @@ class CustomThemeEditor(QDialog):
                 msg += " and applied"
             QMessageBox.information(self, "Theme Saved", f"{msg}!")
             return True
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Error", f"Failed to save theme: {e}")
             return False

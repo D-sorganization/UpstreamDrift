@@ -186,7 +186,7 @@ def safe_str(
         if empty_as_none and not result:
             return default
         return result
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         return default
 
 

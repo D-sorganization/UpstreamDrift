@@ -1426,7 +1426,7 @@ def load_humanoid_cm_xml() -> str | None:
 
         env = suite.load(domain_name="humanoid", task_name="stand")
         return env.physics.model.get_xml()
-    except Exception:
+    except ImportError:
         return None
 
 

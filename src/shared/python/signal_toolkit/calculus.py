@@ -184,7 +184,7 @@ class Differentiator:
             try:
                 spline = UnivariateSpline(t, y, s=0)
                 dy = spline.derivative()(t)
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 dy = np.gradient(y, t)
 
         else:

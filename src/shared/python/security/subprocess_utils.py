@@ -145,7 +145,7 @@ class ProcessManager:
                 self.processes[name] = process
                 return True
 
-            except Exception as e:
+            except (FileNotFoundError, PermissionError, OSError) as e:
                 logger.error(f"Failed to start process '{name}': {e}")
                 return False
 
@@ -186,7 +186,7 @@ class ProcessManager:
                 logger.info(f"Process '{name}' stopped")
                 return True
 
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 logger.error(f"Failed to stop process '{name}': {e}")
                 return False
 
@@ -224,7 +224,7 @@ class ProcessManager:
             stdout = process.stdout.read().decode() if process.stdout else ""
             stderr = process.stderr.read().decode() if process.stderr else ""
             return stdout, stderr
-        except Exception as e:
+        except (FileNotFoundError, OSError) as e:
             logger.error(f"Failed to read output from '{name}': {e}")
             return "", ""
 
@@ -330,7 +330,7 @@ class CommandRunner:
 
             return process
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to run async command: {e}")
             return None
 
@@ -413,10 +413,10 @@ def kill_process_tree(pid: int, timeout: float = 5.0) -> bool:
 
             os.kill(pid, signal.SIGTERM)
             return True
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to kill process {pid}: {e}")
             return False
 
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         logger.error(f"Failed to kill process tree {pid}: {e}")
         return False

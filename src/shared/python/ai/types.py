@@ -436,7 +436,7 @@ class ConversationContext:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
             return cls.from_dict(data)
-        except Exception:
+        except ImportError:
             # If load fails, return empty context
             return cls()
 

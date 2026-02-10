@@ -474,7 +474,7 @@ class VRInteractionManager:
             for callback in self._callbacks[event_type]:
                 try:
                     callback(event)
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Error in VR event callback: {e}")
 
         # Also emit to wildcard handlers
@@ -482,7 +482,7 @@ class VRInteractionManager:
             for callback in self._callbacks["*"]:
                 try:
                     callback(event)
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Error in VR event callback: {e}")
 
     def on(

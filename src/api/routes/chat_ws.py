@@ -91,11 +91,11 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
 
     except WebSocketDisconnect:
         logger.debug("Chat WebSocket disconnected: session=%s", session_id)
-    except Exception as e:
+    except (ConnectionError, TimeoutError, OSError) as e:
         logger.error("Chat WebSocket error: %s", e)
         try:
             await websocket.send_json({"type": "error", "detail": str(e)})
-        except Exception:
+        except (ConnectionError, TimeoutError, OSError):
             pass
 
 

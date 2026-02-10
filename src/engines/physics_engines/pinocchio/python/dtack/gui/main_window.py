@@ -51,7 +51,7 @@ class GuiRecorder(RecorderInterface):
             # Generic fallback for scalar or simple arrays
             try:
                 values = [val if val is not None else 0.0 for val in values]
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
 
         return times, values
@@ -348,7 +348,7 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
                 self.data = self.model.createData()
                 self.dynamics_engine = DynamicsEngine(self.model, self.data)
                 logger.info("Pinocchio model loaded successfully")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to load model: {e}")
             QtWidgets.QMessageBox.critical(self, "Error", f"Failed to load model: {e}")
 

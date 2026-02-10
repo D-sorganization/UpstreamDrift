@@ -408,7 +408,7 @@ class APIDiagnostics:
             details["import_error"] = str(e)
             status = "fail"
             message = f"Engine manager import failed: {e}"
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             details["engine_manager_available"] = False
             details["error"] = str(e)
             status = "warning"
@@ -600,5 +600,5 @@ def _format_details(details: dict[str, Any], indent: int = 2) -> str:
 
     try:
         return json.dumps(details, indent=indent, default=str)
-    except Exception:
+    except (OSError, ValueError, TypeError):
         return str(details)

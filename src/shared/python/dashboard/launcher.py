@@ -35,7 +35,7 @@ def launch_dashboard(
 
     try:
         engine = engine_class(*args, **kwargs)
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Failed to initialize engine {engine_class.__name__}: {e}")
         return
 
@@ -43,7 +43,7 @@ def launch_dashboard(
         try:
             logger.info(f"Loading model: {model_path}")
             engine.load_from_path(model_path)
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Failed to load model: {e}")
             # Continue with empty engine, but warn
 
@@ -58,7 +58,7 @@ def launch_dashboard(
         engine_name = engine_class.__name__.lower().replace("physicsengine", "")
         chat_dock = ChatDockWidget(engine_context=engine_name, parent=window)
         window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, chat_dock)
-    except Exception as e:
+    except ImportError as e:
         logger.debug("AI Chat dock not available: %s", e)
 
     window.show()

@@ -160,7 +160,7 @@ class StandardModelManager:
             logger.info("Standard humanoid model downloaded successfully")
             return True
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to download standard humanoid model: {e}")
             return False
 
@@ -329,7 +329,7 @@ class StandardModelManager:
             # Convert URDF to MJCF and test loading
             mujoco.MjModel.from_xml_path(str(urdf_path))
             results["mujoco"] = True
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"MuJoCo compatibility issue: {e}")
             results["mujoco"] = False
 
@@ -343,7 +343,7 @@ class StandardModelManager:
             parser.AddModelFromFile(str(urdf_path))
             plant.Finalize()
             results["drake"] = True
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Drake compatibility issue: {e}")
             results["drake"] = False
 
@@ -353,7 +353,7 @@ class StandardModelManager:
 
             pin.buildModelFromUrdf(str(urdf_path))
             results["pinocchio"] = True
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Pinocchio compatibility issue: {e}")
             results["pinocchio"] = False
 
@@ -389,7 +389,7 @@ class StandardModelManager:
         for club_type in self.config["golf_clubs"]:
             try:
                 self.get_golf_club_path(club_type)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Failed to setup {club_type}: {e}")
                 success = False
 

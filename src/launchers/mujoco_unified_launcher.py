@@ -56,7 +56,7 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT)
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             self.show_error("Launch Error", str(e))
 
     def _launch_python_module(
@@ -77,7 +77,7 @@ class MujocoUnifiedLauncher(BaseLauncher):
                 [sys.executable, "-m", module_name],
                 cwd=cwd,
             )
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             self.show_error("Launch Error", str(e))
 
 

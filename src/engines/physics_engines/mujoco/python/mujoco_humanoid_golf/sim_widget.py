@@ -65,7 +65,7 @@ class ModelLoaderThread(QtCore.QThread):
 
             data = mujoco.MjData(model)
             self.finished_loading.emit(model, data, "")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self.finished_loading.emit(None, None, str(e))
 
 
@@ -137,7 +137,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.meshcat_adapter: MuJoCoMeshcatAdapter | None = None
         try:
             self.meshcat_adapter = MuJoCoMeshcatAdapter()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             logger.warning("Could not initialize Meshcat adapter")
 
         self.telemetry: TelemetryRecorder | None = None
@@ -260,7 +260,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         try:
             self._finalize_model_load(model, data)
             self.loading_finished.emit(True)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error("Finalization failed: %s", e)
             self.label.setText(f"Error initializing renderer: {e}")
             self.loading_finished.emit(False)
@@ -327,7 +327,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             new_model = mujoco.MjModel.from_xml_string(xml_string)
             new_data = mujoco.MjData(new_model)
             self._finalize_model_load(new_model, new_data)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("Sync load failed: %s", e)
             raise
 
@@ -346,7 +346,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             new_model = mujoco.MjModel.from_xml_path(xml_path)
             new_data = mujoco.MjData(new_model)
             self._finalize_model_load(new_model, new_data)
-        except Exception as e:
+        except (FileNotFoundError, OSError) as e:
             logger.error("Sync load failed: %s", e)
             raise
 
@@ -496,7 +496,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 "size": np.array([2.0, 2.0, 2.0]),
             }
 
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             # Fallback to default
             return {
                 "center": np.array([0.0, 0.0, 1.0]),
@@ -765,7 +765,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                             plane_vis.normal_arrow_end,
                             color=0x4488FF,
                         )
-                    except Exception:
+                    except (RuntimeError, ValueError, AttributeError):
                         pass
 
         # Reference trajectory overlay
@@ -825,7 +825,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         try:
             s = np.linalg.svd(J, compute_uv=False)
             cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             cond = 0.0
 
         nefc = self.data.nefc
@@ -834,7 +834,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             try:
                 Jc = self.data.efc_J.reshape((nefc, self.model.nv))
                 rank = np.linalg.matrix_rank(Jc, tol=1e-5)
-            except Exception:
+            except (ValueError, TypeError, RuntimeError):
                 rank = 0
 
         if self.telemetry:
@@ -922,7 +922,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                     opacity=0.3,
                 )
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.warning(f"Failed to compute ellipsoids: {e}")
 
     # -------- Internal stepping / rendering --------
@@ -1103,7 +1103,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 else:
                     self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
 
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
 
         if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:

@@ -306,7 +306,7 @@ class InverseKinematicsSolver:
                 cond = float(s[0] / s[-1]) if s[-1] > 1e-10 else float("inf")
             else:
                 cond = float("inf")
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             cond = float("inf")
 
         return FitResult(
@@ -651,7 +651,7 @@ class SensitivityAnalyzer:
                 output_metric
             ]
             output_nominal = model_func({parameter_name: nominal_value})[output_metric]
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Sensitivity computation failed: {e}")
             return SensitivityResult(
                 parameter_name=parameter_name,

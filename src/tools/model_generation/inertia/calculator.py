@@ -430,7 +430,7 @@ class InertiaCalculator:
                     mesh = trimesh.util.concatenate(meshes)
                 else:
                     raise ValueError("Scene contains no geometry")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Failed to load mesh {mesh_path}: {e}")
             return InertiaResult(
                 ixx=DEFAULT_INERTIA_KG_M2,
@@ -452,7 +452,7 @@ class InertiaCalculator:
             raw_inertia = mesh.moment_inertia
             volume = float(mesh.volume) if is_watertight else None
             com = mesh.center_mass if is_watertight else mesh.centroid
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Failed to compute mesh properties: {e}")
             return InertiaResult(
                 ixx=DEFAULT_INERTIA_KG_M2,

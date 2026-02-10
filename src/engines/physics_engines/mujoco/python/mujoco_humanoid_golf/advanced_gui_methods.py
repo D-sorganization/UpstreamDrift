@@ -30,7 +30,7 @@ class AdvancedGuiMethodsMixin:
                         config_data = json.load(f)
                     logger.info("Loaded configuration from %s", path)
                     break
-                except Exception as e:
+                except ImportError as e:
                     logger.warning("Failed to parse config file: %s (%s)", path, e)
 
         if not config_data:
@@ -335,7 +335,7 @@ class AdvancedGuiMethodsMixin:
                     va="center",
                 )
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to plot kinematic sequence: {e}")
             ax = fig4.add_subplot(111)
             ax.text(0.5, 0.5, f"Error: {str(e)}", ha="center", va="center")
@@ -419,7 +419,7 @@ class AdvancedGuiMethodsMixin:
                     va="center",
                 )
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to plot coordination: {e}")
             ax = fig5.add_subplot(111)
             ax.text(0.5, 0.5, f"Error: {str(e)}", ha="center", va="center")

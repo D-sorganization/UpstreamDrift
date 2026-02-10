@@ -249,7 +249,7 @@ class WholeBodyController:
 
             return solution
 
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             return WBCSolution(
                 success=False,
                 status=f"Solve failed: {e}",

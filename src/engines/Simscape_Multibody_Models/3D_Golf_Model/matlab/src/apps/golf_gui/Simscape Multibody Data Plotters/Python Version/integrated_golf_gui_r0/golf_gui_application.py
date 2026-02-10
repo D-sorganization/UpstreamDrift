@@ -4,6 +4,7 @@ Golf Swing Visualizer - Tabular GUI Application
 Supports multiple data sources including motion capture and future Simulink models
 """
 
+import logging
 import sys
 import traceback
 from copy import copy
@@ -47,6 +48,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from wiffle_data_loader import MotionDataLoader
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # SMOOTH PLAYBACK CONTROLLER
@@ -450,7 +453,7 @@ class MotionCaptureTab(QWidget):
                 f"Loaded {swing_type} data successfully - Smooth playback ready!"
             )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self.status_label.setText(f"Error loading data: {str(e)}")
             traceback.print_exc()
 
@@ -512,7 +515,7 @@ class MotionCaptureTab(QWidget):
             # Update 3D visualization with interpolated frame
             self.opengl_widget.update_frame(frame_data, render_config)
 
-        except Exception as e:
+        except ImportError as e:
             self.status_label.setText(f"Visualization error: {str(e)}")
 
 
@@ -632,13 +635,13 @@ class GolfVisualizerWidget(QOpenGLWidget):
             # Set viewport
             self.renderer.set_viewport(self.width(), self.height())
 
-            print("✅ OpenGL context initialized")
-            print(f"   Version: {self.ctx.info['GL_VERSION']}")
-            print(f"   Vendor: {self.ctx.info['GL_VENDOR']}")
-            print(f"   Renderer: {self.ctx.info['GL_RENDERER']}")
+            logger.info("✅ OpenGL context initialized")
+            logger.info("   Version: %s", self.ctx.info["GL_VERSION"])
+            logger.info("   Vendor: %s", self.ctx.info["GL_VENDOR"])
+            logger.info("   Renderer: %s", self.ctx.info["GL_RENDERER"])
 
-        except Exception as e:
-            print(f"❌ OpenGL initialization failed: {e}")
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("❌ OpenGL initialization failed: %s", e)
             traceback.print_exc()
 
     def resizeGL(self, w: int, h: int):
@@ -671,8 +674,8 @@ class GolfVisualizerWidget(QOpenGLWidget):
                 view_position,
             )
 
-        except Exception as e:
-            print(f"❌ Render error: {e}")
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("❌ Render error: %s", e)
 
     def _calculate_view_matrix(self) -> np.ndarray:
         """Calculate view matrix from camera parameters"""
@@ -779,10 +782,12 @@ class GolfVisualizerWidget(QOpenGLWidget):
                 # Trigger redraw
                 self.update()
 
-                print(f"✅ Loaded {len(self.frame_processor.time_vector)} frames")
+                logger.info(
+                    "✅ Loaded %s frames", len(self.frame_processor.time_vector)
+                )
 
-        except Exception as e:
-            print(f"❌ Data loading failed: {e}")
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("❌ Data loading failed: %s", e)
             traceback.print_exc()
 
     def update_frame(self, frame_data: FrameData, render_config: RenderConfig):
@@ -838,28 +843,28 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.camera_azimuth = 0.0
         self.camera_elevation = 15.0
         self.update()
-        print("📷 Camera: Face-on view")
+        logger.info("📷 Camera: Face-on view")
 
     def set_down_the_line_view(self):
         """Set camera to down-the-line view (90° from face-on)"""
         self.camera_azimuth = 90.0  # 90° from face-on, not 180°
         self.camera_elevation = 15.0
         self.update()
-        print("📷 Camera: Down-the-line view")
+        logger.info("📷 Camera: Down-the-line view")
 
     def set_behind_view(self):
         """Set camera to behind view (180° from face-on)"""
         self.camera_azimuth = 180.0
         self.camera_elevation = 15.0
         self.update()
-        print("📷 Camera: Behind view")
+        logger.info("📷 Camera: Behind view")
 
     def set_above_view(self):
         """Set camera to overhead view"""
         self.camera_azimuth = 0.0
         self.camera_elevation = 80.0
         self.update()
-        print("📷 Camera: Overhead view")
+        logger.info("📷 Camera: Overhead view")
 
     def mousePressEvent(self, event):
         """Handle mouse press events"""
@@ -953,7 +958,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         self._setup_menu()
         self._setup_status_bar()
 
-        print("[*] Golf Visualizer main window created")
+        logger.info("[*] Golf Visualizer main window created")
 
     def _setup_ui(self):
         """Setup the main UI with tabular structure"""
@@ -1325,10 +1330,10 @@ def main():
     window = GolfVisualizerMainWindow()
     window.show()
 
-    print("[*] Golf Swing Visualizer started")
-    print("   Tabular interface ready for multi-data analysis")
-    print("   Motion capture data visualization active")
-    print("   Simulink model integration prepared for future use")
+    logger.info("[*] Golf Swing Visualizer started")
+    logger.info("   Tabular interface ready for multi-data analysis")
+    logger.info("   Motion capture data visualization active")
+    logger.info("   Simulink model integration prepared for future use")
 
     # Start event loop
     sys.exit(app.exec())

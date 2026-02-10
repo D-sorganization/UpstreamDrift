@@ -242,7 +242,7 @@ class StreamWorker(QThread):
             ):
                 if chunk.content:
                     self.chunk_received.emit(chunk.content)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.exception("Streaming error")
             self.error.emit(str(e))
         finally:
@@ -314,14 +314,14 @@ class AIAssistantPanel(QWidget):
             try:
                 self._context = ConversationContext.load_from_file(self._history_file)
                 logger.info(f"Loaded chat history from {self._history_file}")
-            except Exception as e:
+            except ImportError as e:
                 logger.error(f"Failed to load chat history: {e}")
 
     def _save_history(self) -> None:
         """Save conversation history to file."""
         try:
             self._context.save_to_file(self._history_file)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Failed to save chat history: {e}")
 
     def _restore_ui_messages(self) -> None:
@@ -399,7 +399,7 @@ class AIAssistantPanel(QWidget):
 
             settings = AISettings.load()
             self.apply_settings(settings)
-        except Exception as e:
+        except ImportError as e:
             logger.warning(f"Failed to auto-load AI settings: {e}")
 
     def _create_header(self) -> QWidget:

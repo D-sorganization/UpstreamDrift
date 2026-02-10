@@ -100,7 +100,7 @@ def setup_plot_style(style: str = "seaborn-v0_8-darkgrid") -> None:
     try:
         plt.style.use(style)
         logger.debug(f"Applied plot style: {style}")
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.warning(f"Could not apply style {style}: {e}")
 
 

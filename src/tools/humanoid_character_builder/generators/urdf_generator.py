@@ -353,7 +353,7 @@ class HumanoidURDFGenerator:
                         )
                     else:
                         return self.mesh_inertia_calc.compute_from_mesh(mesh_path)
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     logger.warning(
                         f"Mesh inertia calculation failed for {segment_name}: {e}"
                     )

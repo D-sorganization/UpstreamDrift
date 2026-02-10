@@ -171,7 +171,7 @@ class AnalysisTab(QtWidgets.QWidget):
                     f"Data exported to {filename}",
                 )
 
-            except Exception as e:
+            except (FileNotFoundError, PermissionError, OSError) as e:
                 QtWidgets.QMessageBox.critical(
                     self,
                     "Export Error",
@@ -210,7 +210,7 @@ class AnalysisTab(QtWidgets.QWidget):
                     f"Data exported to {filename}",
                 )
 
-            except Exception as e:
+            except (FileNotFoundError, PermissionError, OSError) as e:
                 QtWidgets.QMessageBox.critical(
                     self,
                     "Export Error",

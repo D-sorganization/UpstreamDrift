@@ -256,7 +256,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
             try:
                 clubs = load_club_data(file_path)
                 self.load_clubs(clubs)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QtWidgets.QMessageBox.critical(
                     self, "Load Error", f"Failed to load club data: {e}"
                 )
@@ -276,7 +276,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
                 loader = ClubDataLoader()
                 players = loader.load_player_data_from_excel(file_path)
                 self.load_players(players)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QtWidgets.QMessageBox.critical(
                     self, "Load Error", f"Failed to load player data: {e}"
                 )

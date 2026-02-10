@@ -195,7 +195,7 @@ class PlotGenerator:
                 path = self._generate_plot(data, plot_type, output_dir)
                 if path is not None:
                     generated.append(path)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Failed to generate %s plot: %s", plot_type, e)
 
         logger.info(
@@ -608,7 +608,7 @@ class PlotGenerator:
             if np.any(M != 0):
                 try:
                     condition_numbers[i] = np.linalg.cond(M)
-                except Exception:
+                except (ValueError, TypeError, RuntimeError):
                     condition_numbers[i] = np.nan
 
         fig, ax = plt.subplots(figsize=self.config.figsize)

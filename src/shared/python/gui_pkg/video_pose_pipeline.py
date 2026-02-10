@@ -111,7 +111,7 @@ class VideoPosePipeline:
                 self.estimator.load_model()
             logger.info(f"Loaded {self.config.estimator_type} estimator")
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load estimator: {e}")
             raise
 
@@ -207,7 +207,7 @@ class VideoPosePipeline:
             try:
                 result = self.process_video(video_path, output_dir)
                 results.append(result)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Failed to process {video_path}: {e}")
                 continue
 
@@ -285,7 +285,7 @@ class VideoPosePipeline:
                 num_markers_used=len(marker_names),
                 condition_number=report.fit_result.condition_number,
             )
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"A3 fitting failed: {e}")
             return RegistrationResult(
                 success=False,
@@ -334,7 +334,7 @@ class VideoPosePipeline:
                     logger.error("Estimator not initialized")
                     break
 
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning(f"Failed to process frame {frame_idx}: {e}")
 
             frame_idx += 1

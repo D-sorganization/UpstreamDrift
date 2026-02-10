@@ -262,7 +262,7 @@ class ParametricBuilder(BaseURDFBuilder):
             if use_anthropometry:
                 try:
                     return get_segment_mass_ratio(name, self._gender_factor)
-                except Exception:
+                except (RuntimeError, ValueError, AttributeError):
                     pass
             return default
 
@@ -270,7 +270,7 @@ class ParametricBuilder(BaseURDFBuilder):
             if use_anthropometry:
                 try:
                     return get_segment_length_ratio(name, self._gender_factor)
-                except Exception:
+                except (RuntimeError, ValueError, AttributeError):
                     pass
             return default
 

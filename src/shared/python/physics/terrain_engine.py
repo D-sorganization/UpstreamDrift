@@ -888,5 +888,5 @@ def register_terrain_parameters() -> None:
 # Auto-register on import
 try:
     register_terrain_parameters()
-except Exception as e:
+except (RuntimeError, ValueError, OSError) as e:
     logger.debug(f"Could not register terrain parameters: {e}")

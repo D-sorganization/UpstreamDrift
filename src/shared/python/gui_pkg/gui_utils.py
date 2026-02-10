@@ -463,5 +463,5 @@ def apply_stylesheet(widget: QWidget, stylesheet: str) -> None:
     """
     try:
         widget.setStyleSheet(stylesheet)
-    except Exception as e:
+    except (ValueError, RuntimeError) as e:
         logger.warning(f"Failed to apply stylesheet: {e}")

@@ -121,7 +121,7 @@ class ModelCache:
                     if entry.local_path.exists():
                         self._entries[entry.model_id] = entry
                 logger.debug(f"Loaded {len(self._entries)} cached models")
-            except Exception as e:
+            except (ValueError, KeyError, json.JSONDecodeError) as e:
                 logger.warning(f"Failed to load cache index: {e}")
 
     def _save_index(self) -> None:
@@ -133,7 +133,7 @@ class ModelCache:
                 "version": "1.0",
             }
             index_path.write_text(json.dumps(data, indent=2))
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             logger.error(f"Failed to save cache index: {e}")
 
     def get(self, model_id: str) -> CacheEntry | None:
@@ -221,7 +221,7 @@ class ModelCache:
                     parent = entry.local_path.parent
                     if parent != self.config.cache_dir and not any(parent.iterdir()):
                         parent.rmdir()
-            except Exception as e:
+            except (FileNotFoundError, OSError, PermissionError) as e:
                 logger.warning(f"Failed to delete cached files: {e}")
 
         del self._entries[model_id]

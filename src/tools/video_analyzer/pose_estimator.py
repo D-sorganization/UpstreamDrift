@@ -121,7 +121,7 @@ class PoseEstimator:
             self._initialized = True
             logger.info("PoseEstimator initialized successfully")
             return True
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to initialize PoseEstimator: {e}")
             return False
 

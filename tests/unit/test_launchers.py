@@ -126,9 +126,9 @@ class TestLauncherUtilities:
         for dir_name in expected_dirs_either:
             root_path = project_root / dir_name
             src_path = project_root / "src" / dir_name
-            assert (
-                root_path.exists() or src_path.exists()
-            ), f"Directory {dir_name} should exist at root or under src/"
+            assert root_path.exists() or src_path.exists(), (
+                f"Directory {dir_name} should exist at root or under src/"
+            )
 
         for dir_name in expected_src_dirs:
             dir_path = project_root / "src" / dir_name

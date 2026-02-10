@@ -70,7 +70,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
                 logger.warning(
                     "Stylesheet not found: %s; using default Qt styling", style_path
                 )
-        except Exception:
+        except ImportError:
             logger.exception("Failed to load stylesheet, using default Qt styling")
 
         # Model configurations

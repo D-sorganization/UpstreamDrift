@@ -197,7 +197,7 @@ def get_api_key(provider: AIProvider) -> str | None:
     except ImportError:
         logger.warning("keyring package not installed for secure key storage")
         return None
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         logger.warning("Failed to get API key from keyring: %s", e)
         return None
 
@@ -229,7 +229,7 @@ def set_api_key(provider: AIProvider, key: str) -> bool:
     except ImportError:
         logger.warning("keyring package not installed for secure key storage")
         return False
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         logger.warning("Failed to store API key: %s", e)
         return False
 
@@ -259,7 +259,7 @@ def delete_api_key(provider: AIProvider) -> bool:
         return True
     except ImportError:
         return False
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError) as e:
         logger.warning("Failed to delete API key: %s", e)
         return False
 
@@ -421,7 +421,7 @@ class ProviderConfigWidget(QWidget):
                 self._status_label.setText(f"✗ {message}")
                 self._status_label.setStyleSheet("color: red;")
 
-        except Exception as e:
+        except ImportError as e:
             self._status_label.setText(f"✗ Error: {e}")
             self._status_label.setStyleSheet("color: red;")
 

@@ -371,7 +371,7 @@ class ClubDataLoader:
 
         try:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise ValueError(f"Failed to read Excel file: {e}") from e
 
         clubs = []
@@ -408,7 +408,7 @@ class ClubDataLoader:
 
         try:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise ValueError(f"Failed to read Excel file: {e}") from e
 
         players = []

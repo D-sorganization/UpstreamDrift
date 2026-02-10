@@ -264,7 +264,7 @@ class ModelLibrary:
                     logger.info(f"Using bundled model: {model_key}")
                     path = bundled.get_human_model_path(model_key)
                     return path  # type: ignore[no-any-return]
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.debug(f"Bundled asset check failed: {e}")
 
         # Check if model exists locally (previously downloaded)
@@ -312,7 +312,7 @@ class ModelLibrary:
             file_path.write_text(content, encoding="utf-8")
             logger.info(f"Cached embedded model to: {file_path}")
             return file_path
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to cache embedded model: {e}")
             return None
 
@@ -389,7 +389,7 @@ class ModelLibrary:
 
             return urdf_path
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to download model {model_key}: {e}")
             return None
 
@@ -694,7 +694,7 @@ class ModelLibrary:
                                         "config_key": f"repo_{file}_{hash(str(file_path))}",
                                     }
                                 )
-                    except Exception:
+                    except (FileNotFoundError, PermissionError, OSError):
                         pass  # reading error, skip
 
         return sorted(models, key=lambda x: x["name"])
@@ -735,7 +735,7 @@ class ModelLibrary:
                                 "package": "robot_descriptions",
                             }
                         )
-                except Exception:
+                except ImportError:
                     continue
 
         return sorted(models, key=lambda x: x["name"])
@@ -775,7 +775,7 @@ class ModelLibrary:
             logger.warning(
                 "Could not import mujoco_humanoid_golf.models - embedded models unavailable"
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             logger.error(f"Error loading embedded models: {e}")
 
         return models
@@ -812,7 +812,7 @@ class ModelLibrary:
                             ) as f:
                                 if "<mujoco" in f.read(500):
                                     m_type = "mjcf"
-                        except Exception:
+                        except (FileNotFoundError, PermissionError, OSError):
                             pass
 
                     models.append(
@@ -864,7 +864,7 @@ class ModelLibrary:
                 shutil.copy2(src, dest)
                 logger.info(f"Imported file to: {dest}")
                 return dest
-        except Exception as e:
+        except (FileNotFoundError, OSError, PermissionError) as e:
             logger.error(f"Failed to import model: {e}")
             return None
 
@@ -896,7 +896,7 @@ class ModelLibrary:
                 shutil.rmtree(path)
             logger.info(f"Deleted imported model: {path}")
             return True
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to delete model: {e}")
             return False
 
@@ -928,6 +928,6 @@ class ModelLibrary:
             path.rename(new_path)
             logger.info(f"Renamed {path.name} to {new_name}")
             return new_path
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to rename model: {e}")
             return None

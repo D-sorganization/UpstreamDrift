@@ -352,7 +352,7 @@ class ClubTargetManager:
         for callback in self._update_callbacks:
             try:
                 callback()
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Callback error: %s", e)
 
     # -------- Rendering Helpers --------

@@ -51,7 +51,7 @@ class ModelRegistry:
             self._loaded = True
             logger.info(f"Loaded {len(self.models)} models from registry")
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load model registry: {e}")
 
     def get_all_models(self) -> list[ModelSpec]:

@@ -60,7 +60,7 @@ def _get_theme_colors() -> ThemeColors:
         from src.shared.python.theme import get_current_colors
 
         return get_current_colors()
-    except Exception:
+    except ImportError:
         from src.shared.python.theme import DARK_THEME
 
         return DARK_THEME
@@ -326,7 +326,7 @@ class AsyncStartupWorker(QThread):
                 self.results.engine_manager = EngineManager(self.repos_root)
                 # Skip probing to avoid hanging - engines will be probed on demand
                 # self.results.engine_manager.probe_all_engines()
-            except Exception as e:
+            except ImportError as e:
                 logger.warning(f"Engine manager init failed: {e}")
                 self.results.engine_manager = None
 
@@ -334,14 +334,14 @@ class AsyncStartupWorker(QThread):
             try:
                 secure_run(["docker", "--version"], timeout=2.0, check=True)
                 self.results.docker_available = True
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 self.results.docker_available = False
                 logger.debug("Docker not available or timed out")
 
             self.progress_signal.emit("Ready", 100)
             time.sleep(0.5)
             self.finished_signal.emit(self.results)
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Startup failed: {e}")
             self.error_signal.emit(str(e))
 
@@ -586,7 +586,7 @@ class DockerCheckThread(QThread):
                 stderr=subprocess.DEVNULL,
             )
             self.result.emit(True)
-        except Exception:
+        except (OSError, ValueError):
             self.result.emit(False)
 
 
@@ -970,7 +970,7 @@ class SettingsDialog(QDialog):
                         self._log_viewer.textCursor().End  # type: ignore[arg-type]
                     )
                     return
-                except Exception:
+                except (RuntimeError, ValueError, AttributeError):
                     pass
         self._log_viewer.setPlainText("(No log file found)")
 
@@ -987,7 +987,7 @@ class SettingsDialog(QDialog):
                     self._proc_log_viewer.textCursor().End  # type: ignore[arg-type]
                 )
                 return
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
         self._proc_log_viewer.setPlainText(
             "(No process output log yet — launch a model to generate output)"
@@ -1123,7 +1123,7 @@ class SettingsDialog(QDialog):
 
             self._diagnostics_data = results
             self._render_diagnostics(results)
-        except Exception as e:
+        except ImportError as e:
             self._diag_browser.setHtml(
                 f"<p style='color:#f85149;'>Error running diagnostics: {e}</p>"
             )
@@ -1308,7 +1308,7 @@ class ContextHelpDock(QDockWidget):
             try:
                 content = doc_file.read_text(encoding="utf-8")
                 self.text_area.setMarkdown(content)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 self.text_area.setText(f"Failed to load documentation: {e}")
         else:
             self.text_area.setMarkdown(

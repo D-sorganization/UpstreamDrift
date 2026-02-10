@@ -89,7 +89,7 @@ async def handle_rpc(
     # Parse request body
     try:
         body = await request.json()
-    except Exception as exc:
+    except (RuntimeError, ValueError, OSError) as exc:
         return make_response(
             error=make_error(PARSE_ERROR, f"Parse error: {str(exc)}"),
             request_id=None,

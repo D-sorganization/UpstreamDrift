@@ -221,7 +221,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
                 collision_mesh.export(str(collision_path))
                 collision_paths[segment_name] = collision_path
 
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning(f"Failed to generate mesh for {segment_name}: {e}")
 
         return GeneratedMeshResult(
@@ -571,7 +571,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
 
             try:
                 collision_mesh = mesh.convex_hull
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 collision_mesh = mesh
             collision_path = collision_dir / f"{segment_name}.stl"
             collision_mesh.export(str(collision_path))
@@ -613,7 +613,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
 
         try:
             return self._generate_impl(modifiers, height_scale, output_dir, **kwargs)
-        except Exception as exc:
+        except (RuntimeError, ValueError, OSError) as exc:
             logger.exception("MakeHuman mesh generation failed")
             return GeneratedMeshResult(
                 success=False,
@@ -923,7 +923,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
         try:
             return self._generate_impl(params, Path(output_dir), model_dir, **kwargs)
-        except Exception as exc:
+        except (FileNotFoundError, OSError) as exc:
             logger.exception("SMPL-X mesh generation failed")
             return GeneratedMeshResult(
                 success=False,
@@ -987,7 +987,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             # Collision mesh (convex hull)
             try:
                 collision_mesh = mesh.convex_hull
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 collision_mesh = mesh
             collision_path = collision_dir / f"{segment_name}.stl"
             collision_mesh.export(str(collision_path))
@@ -1067,7 +1067,7 @@ class MeshGenerator:
                 generator = generator_class()
                 if generator.is_available:
                     available.append(backend)
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
         return available
 
@@ -1089,7 +1089,7 @@ class MeshGenerator:
                 generator = cls.create(backend)
                 if generator.is_available:
                     return generator
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 continue
 
         # Final fallback

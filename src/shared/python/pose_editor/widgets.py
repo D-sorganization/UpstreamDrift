@@ -487,7 +487,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
                     "Export Complete",
                     f"Exported {count} poses to {filename}",
                 )
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QtWidgets.QMessageBox.critical(
                     self, "Export Error", f"Failed to export: {e}"
                 )
@@ -510,7 +510,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
                     "Import Complete",
                     f"Imported {count} poses from {filename}",
                 )
-            except Exception as e:
+            except ImportError as e:
                 QtWidgets.QMessageBox.critical(
                     self, "Import Error", f"Failed to import: {e}"
                 )

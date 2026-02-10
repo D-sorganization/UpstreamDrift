@@ -482,7 +482,7 @@ class MeshLoader:
 
         except UnsupportedFormatError:
             raise
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise MeshLoadError(f"Failed to load mesh: {e}", path, e) from e
 
     def _load_obj(self, path: Path) -> LoadedMesh:

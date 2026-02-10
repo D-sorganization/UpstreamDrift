@@ -318,7 +318,7 @@ class CharacterBuilder:
                 mesh_result=mesh_result,
             )
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Character build failed: {e}")
             return CharacterBuildResult(
                 success=False,

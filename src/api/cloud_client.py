@@ -49,7 +49,7 @@ class CloudClient:
                     self._save_token()
                     return True
                 return False
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 # Fail gracefully in local mode
                 return False
 

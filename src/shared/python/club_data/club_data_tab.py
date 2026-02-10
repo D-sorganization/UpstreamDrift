@@ -264,7 +264,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
                 current = Path(__file__).resolve()
                 project_root = current.parent.parent.parent.parent.parent
                 self._data_dir = project_root / "data"
-            except Exception:
+            except (FileNotFoundError, OSError):
                 return
 
         # Try to load default club data
@@ -317,7 +317,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
                 f"Required libraries not installed:\n{e}\n\n"
                 "Install with: pip install pandas openpyxl",
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             QtWidgets.QMessageBox.critical(
                 self, "Load Error", f"Failed to load club data:\n{e}"
             )
@@ -418,7 +418,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
             logger.info("Loaded %d players from %s", len(self._players), file_path)
 
-        except Exception as e:
+        except ImportError as e:
             QtWidgets.QMessageBox.critical(
                 self, "Load Error", f"Failed to load player data:\n{e}"
             )
@@ -439,7 +439,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
             logger.info("Loaded trajectory for %s from %s", player_name, file_path)
 
-        except Exception as e:
+        except ImportError as e:
             QtWidgets.QMessageBox.critical(
                 self, "Load Error", f"Failed to load trajectory:\n{e}"
             )

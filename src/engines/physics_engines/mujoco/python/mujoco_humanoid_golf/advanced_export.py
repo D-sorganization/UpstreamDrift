@@ -89,7 +89,7 @@ def export_recording_all_formats(
 
             results[fmt] = success
 
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             results[fmt] = False
 
     return results

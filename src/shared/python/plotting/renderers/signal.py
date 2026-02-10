@@ -363,7 +363,7 @@ class SignalRenderer(BaseRenderer):
             freqs, _, cwt_matrix = signal_processing.compute_cwt(
                 signal_data, fs, freq_range=freq_range
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, f"CWT Error: {e}", ha="center", va="center")
             return
@@ -436,7 +436,7 @@ class SignalRenderer(BaseRenderer):
             freqs, _, xwt_matrix = signal_processing.compute_xwt(
                 s1, s2, fs, freq_range=freq_range
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, f"XWT Error: {e}", ha="center", va="center")
             return

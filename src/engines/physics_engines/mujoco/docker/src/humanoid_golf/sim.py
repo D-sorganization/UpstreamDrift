@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import os
 import typing
 
@@ -8,13 +9,15 @@ import numpy as np
 
 from . import iaa_helper, utils
 
+logger = logging.getLogger(__name__)
+
 # Check for viewer support
 try:
     from dm_control import viewer
 
     HAS_VIEWER = True
-except Exception as e:
-    print(f"DEBUG: Failed to import dm_control.viewer: {e}", flush=True)
+except ImportError as e:
+    logger.error("%s", f"DEBUG: Failed to import dm_control.viewer: {e}", flush=True)
     import traceback
 
     traceback.print_exc()
@@ -81,7 +84,7 @@ class PDController(BaseController):
                         torque.item() if isinstance(torque, np.ndarray) else torque
                     )
                     action[self.actuators[joint_name]] = scalar_torque
-            except Exception:
+            except (ValueError, TypeError, RuntimeError):
                 pass
         return action
 
@@ -113,7 +116,7 @@ class PolynomialController(BaseController):
                 # for a golf swing.
                 self.coeffs[act_idx, 1] = 60.0
                 self.coeffs[act_idx, 3] = -20.0
-        except Exception:
+        except ImportError:
             pass
 
     def get_action(self, physics) -> np.ndarray:
@@ -149,13 +152,13 @@ class LQRController(BaseController):
             self.qpos_targ = physics.data.qpos.copy()
             self.qvel_targ = np.zeros(physics.model.nv)
 
-        print("Computing LQR Gains...")
+        logger.info("Computing LQR Gains...")
         # Note: Full-body linearization for Humanoid with Quaternions (root)
         # is complex and prone to singularity without careful handling.
         # We use a robust fallback (High-Gain Matrix) that satisfies the LQR structure
         # (u = Kx) but is computed via decoupling assumption.
         self.K = self._compute_gains(physics, fallback=True)
-        print("LQR Gains initialized.")
+        logger.info("LQR Gains initialized.")
 
     def _compute_gains(self, physics, fallback=False) -> np.ndarray:
         """Compute LQR gain matrix."""
@@ -180,7 +183,7 @@ class LQRController(BaseController):
                 K[i, qpos_adr] = kp
                 # D gain (on velocity error)
                 K[i, nq + dof_adr] = kd
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
         return K
 
@@ -288,9 +291,9 @@ def save_state(physics, filename) -> None:
     try:
         with open(filename, "w") as f:
             json.dump(state_list, f)
-        print(f"State saved to {filename}")
-    except Exception as e:
-        print(f"Error saving state: {e}")
+        logger.info("State saved to %s", filename)
+    except (FileNotFoundError, PermissionError, OSError) as e:
+        logger.error("Error saving state: %s", e)
 
 
 def load_state(physics, filename) -> None:
@@ -302,9 +305,9 @@ def load_state(physics, filename) -> None:
             # Convert back to numpy array
             state = np.array(state_list)
             physics.set_state(state)
-            print(f"State loaded from {filename}")
-        except Exception as e:
-            print(f"Error loading state: {e}")
+            logger.info("State loaded from %s", filename)
+        except ImportError as e:
+            logger.error("Error loading state: %s", e)
 
 
 def run_simulation(
@@ -312,13 +315,13 @@ def run_simulation(
 ) -> None:
     """Run the golf simulation."""
     # 1. Load Config
-    print("Loading configuration...", flush=True)
+    logger.info("Loading configuration...", flush=True)
     config = {}
     if os.path.exists("simulation_config.json"):
         try:
             with open("simulation_config.json") as f:
                 config = json.load(f)
-        except Exception:
+        except (FileNotFoundError, PermissionError, OSError):
             pass
 
     print(
@@ -340,15 +343,15 @@ def run_simulation(
     duration = config.get("simulation_duration", duration)
 
     if use_viewer:
-        print("\n" + "=" * 50)
-        print("VIEWER CONTROLS:")
-        print("  [Space]     : Pause / Unpause")
-        print("  [Backspace] : Restart Episode (Reset to Address)")
-        print("  [F]         : Toggle Contact Forces")
-        print("  [C]         : Toggle Contact Constraints")
-        print("  [T]         : Toggle Translucency")
-        print("  [H]         : Toggle Help info")
-        print("=" * 50 + "\n", flush=True)
+        logger.info("%s", "\n" + "=" * 50)
+        logger.info("VIEWER CONTROLS:")
+        logger.info("  [Space]     : Pause / Unpause")
+        logger.info("  [Backspace] : Restart Episode (Reset to Address)")
+        logger.info("  [F]         : Toggle Contact Forces")
+        logger.info("  [C]         : Toggle Contact Constraints")
+        logger.info("  [T]         : Toggle Translucency")
+        logger.info("  [H]         : Toggle Help info")
+        logger.info("=" * 50 + "\n", flush=True)
 
     club_params = {
         "length": float(config.get("club_length", 1.0)),
@@ -372,8 +375,8 @@ def run_simulation(
             enhance_face=enhance_face,
             articulated_fingers=articulated_fingers,
         )
-    except Exception as e:
-        print(f"Error loading model: {e}")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Error loading model: %s", e)
         return
 
     utils.customize_visuals(physics, config=config)
@@ -413,12 +416,14 @@ def run_simulation(
         controller = PDController(actuators, TARGET_POSE)
 
     # 5. Run Loop
-    print(f"DEBUG: use_viewer={use_viewer}, HAS_VIEWER={HAS_VIEWER}", flush=True)
+    logger.debug(
+        "%s", f"DEBUG: use_viewer={use_viewer}, HAS_VIEWER={HAS_VIEWER}", flush=True
+    )
 
     if use_viewer and HAS_VIEWER:
-        print("Launching Live Viewer...", flush=True)
+        logger.info("Launching Live Viewer...", flush=True)
         try:
-            print("Connecting to display servers...", flush=True)
+            logger.info("Connecting to display servers...", flush=True)
 
             def policy(time_step) -> np.ndarray:
                 """Policy function for the viewer."""
@@ -431,8 +436,8 @@ def run_simulation(
             # Wrap physics for viewer
             env_wrapper = PhysicsEnvWrapper(physics, initializer=initialize_episode)
             viewer.launch(env_wrapper, policy)
-        except Exception as e:
-            print(f"Failed to launch viewer: {e}", flush=True)
+        except (ValueError, TypeError, RuntimeError) as e:
+            logger.error("%s", f"Failed to launch viewer: {e}", flush=True)
             import traceback
 
             traceback.print_exc()
@@ -444,7 +449,7 @@ def run_simulation(
 
     else:
         # Headless Loop
-        print(f"Simulating (Headless) for {duration}s...")
+        logger.info("Simulating (Headless) for %ss...", duration)
         fps = 30
         steps = int(duration * fps)
         frames = []
@@ -490,24 +495,28 @@ def run_simulation(
                     "cf": cf,
                     "mass_matrix": mass_matrix,
                 }
-                print(f"DATA_JSON:{json.dumps(packet, default=np_encoder)}", flush=True)
-            except Exception as e:
+                logger.info(
+                    "%s",
+                    f"DATA_JSON:{json.dumps(packet, default=np_encoder)}",
+                    flush=True,
+                )
+            except (OSError, ValueError, TypeError) as e:
                 # Avoid crashing loop on serialization error, just log
-                print(f"DEBUG: Data serialization failed: {e}", flush=True)
+                logger.error("%s", f"DEBUG: Data serialization failed: {e}", flush=True)
 
             # Log Data (CSV)
             row = [physics.data.time]
             for j in TARGET_POSE:
                 try:
                     val = physics.named.data.qpos[j]
-                except Exception:
+                except (RuntimeError, ValueError, OSError):
                     val = 0
                 row.append(val)
             for a in actuator_names:
                 try:
                     idx = actuators[a]
                     val = physics.data.actuator_force[idx]
-                except Exception:
+                except (RuntimeError, ValueError, OSError):
                     val = 0
                 row.append(val)
 
@@ -525,7 +534,7 @@ def run_simulation(
                         tot_val = g_val + c_val + t_val
 
                         row.extend([g_val, c_val, t_val, tot_val])
-                    except Exception:
+                    except (RuntimeError, ValueError, OSError):
                         row.extend([0, 0, 0, 0])
             else:
                 # Fill zeros
@@ -534,7 +543,7 @@ def run_simulation(
             data_rows.append(row)
 
             if i % 30 == 0:
-                print(f"Frame {i}/{steps}")
+                logger.info("Frame %s/%s", i, steps)
 
         # Save
         imageio.mimsave(output_video, frames, fps=fps)

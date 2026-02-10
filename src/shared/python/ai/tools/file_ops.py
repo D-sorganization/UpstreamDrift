@@ -39,7 +39,7 @@ def register_file_tools(registry: ToolRegistry) -> None:
                 return f.read()
         except UnicodeDecodeError:
             return "Error: File appears to be binary."
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             return f"Error reading file: {e}"
 
     @registry.register(
@@ -70,5 +70,5 @@ def register_file_tools(registry: ToolRegistry) -> None:
                 type_str = "<DIR>" if item.is_dir() else "<FILE>"
                 items.append(f"{type_str:6} {item.name}")
             return "\n".join(sorted(items))
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return f"Error listing directory: {e}"

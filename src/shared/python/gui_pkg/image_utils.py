@@ -253,5 +253,5 @@ def analyze_image_quality(image_path: Path) -> dict[str, Any]:
             "contrast": float(contrast),
             "file_size_kb": image_path.stat().st_size / 1024,
         }
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, OSError) as e:
         return {"error": str(e)}

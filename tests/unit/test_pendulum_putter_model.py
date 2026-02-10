@@ -134,9 +134,9 @@ class TestPendulumPutterModelPhysics:
 
         for link in result.links:
             if link.inertia.mass > 1e-6:  # Skip negligible mass links
-                assert (
-                    link.inertia.is_positive_definite()
-                ), f"Link {link.name} has non-positive-definite inertia"
+                assert link.inertia.is_positive_definite(), (
+                    f"Link {link.name} has non-positive-definite inertia"
+                )
 
     def test_pendulum_joint_has_appropriate_limits(self):
         """Pendulum joint should have reasonable angle limits."""
@@ -321,9 +321,9 @@ class TestURDFGeneration:
             if link.attrib["name"] != "world":
                 # Should have inertial (except world)
                 inertial = link.find("inertial")
-                assert (
-                    inertial is not None
-                ), f"Link {link.attrib['name']} missing inertial"
+                assert inertial is not None, (
+                    f"Link {link.attrib['name']} missing inertial"
+                )
 
     def test_can_save_to_file(self, tmp_path: Path):
         """Should be able to save URDF to file."""
@@ -412,9 +412,9 @@ class TestValidation:
         result = builder.build()
 
         assert result.validation is not None
-        assert (
-            result.validation.is_valid
-        ), f"Validation failed: {result.validation.get_error_messages()}"
+        assert result.validation.is_valid, (
+            f"Validation failed: {result.validation.get_error_messages()}"
+        )
 
     def test_validation_catches_invalid_parameters(self):
         """Should catch invalid configuration parameters."""

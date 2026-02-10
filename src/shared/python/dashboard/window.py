@@ -226,7 +226,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 names = self.engine.get_joint_names()  # type: ignore
                 if names:
                     return names
-            except Exception as e:
+            except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning(f"Failed to get joint names from engine: {e}")
 
         return []
@@ -380,7 +380,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                     raise ValueError("No data available")
             elif plot_type == "Summary Dashboard":
                 self.plotter.plot_summary_dashboard(self.static_canvas.fig)
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             ax = self.static_canvas.fig.add_subplot(111)
             ax.text(0.5, 0.5, f"Plot Error: {e}", ha="center", va="center")
             logger.error(f"Error generating static plot '{plot_type}': {e}")
@@ -403,7 +403,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         try:
             self.recorder.compute_analysis_post_hoc()
             self.status_label.setText("Analysis complete.")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self.status_label.setText(f"Analysis failed: {e}")
             logger.error("Analysis error: %s", e)
         finally:
@@ -435,7 +435,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 )
             elif analysis_type == "Stability Metrics":
                 self.plotter.plot_stability_metrics(self.analysis_canvas.fig)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             ax = self.analysis_canvas.fig.add_subplot(111)
             ax.text(0.5, 0.5, f"Error: {e}", ha="center")
 

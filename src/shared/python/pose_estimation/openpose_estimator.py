@@ -110,7 +110,7 @@ class OpenPoseEstimator(PoseEstimator):
             self.wrapper.start()
             self._is_loaded = True
             logger.info("OpenPose wrapper started successfully.")
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error(f"Failed to start OpenPose wrapper: {e}")
             raise
 
@@ -160,7 +160,7 @@ class OpenPoseEstimator(PoseEstimator):
                 joint_angles=joint_angles,
             )
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Error during OpenPose inference: {e}")
             raise
 

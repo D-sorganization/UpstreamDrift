@@ -76,7 +76,7 @@ def export_to_matlab(
 
         return True
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - savemat may raise various errors
         logger.error(f"Failed to export to MATLAB: {e}")
         return False
 
@@ -138,7 +138,7 @@ def export_to_hdf5(
 
         return True
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - h5py may raise various errors
         logger.error(f"Failed to export to HDF5: {e}")
         return False
 
@@ -197,7 +197,7 @@ def export_to_c3d(
             frame_rate,
             units,
         )
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Failed to export to C3D: {e}")
         return False
 
@@ -381,7 +381,7 @@ def export_recording_all_formats(
 
             results[fmt] = success
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Export format {fmt} failed: {e}")
             results[fmt] = False
 

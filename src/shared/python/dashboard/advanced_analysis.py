@@ -434,7 +434,7 @@ class CorrelationTab(QtWidgets.QWidget):
         # Handle constant columns (std=0) to avoid NaNs
         try:
             corr_mat = np.corrcoef(X, rowvar=False)
-        except Exception:
+        except (ValueError, TypeError, RuntimeError):
             self.ax.text(0.5, 0.5, "Computation Error", ha="center")
             self.canvas.draw()
             return

@@ -422,7 +422,7 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         try:
             self.export_data(filename)
             self._update_status(f"Data exported to {filename}")
-        except Exception as exc:
+        except (RuntimeError, ValueError, OSError) as exc:
             QtWidgets.QMessageBox.critical(self, "Export Error", str(exc))
             logger.exception("Export failed")
 

@@ -151,7 +151,7 @@ class DrakePoseEditor(BasePoseEditor):
                 if hasattr(joint, "position_lower_limit"):
                     lower_limit = joint.position_lower_limit()
                     upper_limit = joint.position_upper_limit()
-            except Exception:
+            except (RuntimeError, ValueError, AttributeError):
                 pass
 
             # Determine group from name
@@ -326,7 +326,7 @@ class DrakePoseEditor(BasePoseEditor):
             self._state.gravity_enabled = enabled
             self._notify("gravity_changed", enabled)
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.warning("Could not modify gravity: %s", e)
 
     def is_gravity_enabled(self) -> bool:
@@ -366,7 +366,7 @@ class DrakePoseEditor(BasePoseEditor):
             body = self._plant.GetBodyByName(body_name)
             X_WB = self._plant.EvalBodyPoseInWorld(self._context, body)
             return X_WB.translation()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             return None
 
 

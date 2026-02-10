@@ -127,7 +127,7 @@ class VideoExporter(QObject):
                 print(f"❌ {error_msg}")
                 self.error.emit(error_msg)
 
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             error_msg = f"Video export failed: {str(e)}"
             print(f"❌ {error_msg}")
             import traceback

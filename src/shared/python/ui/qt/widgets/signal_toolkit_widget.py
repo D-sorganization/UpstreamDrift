@@ -54,6 +54,8 @@ try:
 except ImportError:
     HAS_PYQT = False
 
+import logging
+
 from src.shared.python.signal_toolkit.calculus import (
     Differentiator,
     Integrator,
@@ -71,6 +73,8 @@ from src.shared.python.signal_toolkit.fitting import FunctionFitter
 from src.shared.python.signal_toolkit.io import SignalExporter, SignalImporter
 from src.shared.python.signal_toolkit.limits import SaturationMode, apply_saturation
 from src.shared.python.signal_toolkit.noise import NoiseType, add_noise_to_signal
+
+logger = logging.getLogger(__name__)
 
 # Dark theme stylesheet
 DARK_STYLESHEET = """
@@ -1182,9 +1186,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                             "pi": np.pi,
                             "t": t,
                         }
-                        values = eval(
-                            expr, {"__builtins__": {}}, safe_dict
-                        )  # noqa: S307
+                        values = eval(expr, {"__builtins__": {}}, safe_dict)  # noqa: S307
                         self.current_signal = Signal(t, values, name="custom")
                     else:
                         return
@@ -1193,7 +1195,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                 self._update_plot()
                 self._log(f"Generated {signal_type} signal")
 
-            except Exception as e:
+            except (ValueError, TypeError, RuntimeError) as e:
                 QMessageBox.warning(self, "Error", f"Failed to generate signal: {e}")
 
         def _fit_function(self) -> None:
@@ -1244,7 +1246,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                 # Plot fitted curve
                 self._update_plot(fitted_signal=result.fitted_signal)
 
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QMessageBox.warning(self, "Fit Error", f"Failed to fit: {e}")
 
         def _auto_fit(self) -> None:
@@ -1264,7 +1266,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
                 self._update_plot(fitted_signal=result.fitted_signal)
 
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QMessageBox.warning(self, "Auto-fit Error", f"Failed: {e}")
 
         def _apply_saturation(self) -> None:
@@ -1460,7 +1462,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                 self._update_plot()
                 self._log(f"Applied {design} {filter_type} filter")
 
-            except Exception as e:
+            except ImportError as e:
                 QMessageBox.warning(self, "Filter Error", f"Failed: {e}")
 
         def _show_frequency_response(self) -> None:
@@ -1529,7 +1531,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
                 self._log(f"Showing frequency response for {design} {filter_type}")
 
-            except Exception as e:
+            except ImportError as e:
                 QMessageBox.warning(
                     self, "Error", f"Failed to compute frequency response: {e}"
                 )
@@ -1608,7 +1610,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                 self._update_plot()
                 self._log(f"Imported signal from {Path(path).name}")
 
-            except Exception as e:
+            except ImportError as e:
                 QMessageBox.warning(self, "Import Error", f"Failed: {e}")
 
         def _apply_to_joint(self) -> None:
@@ -1647,7 +1649,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                     else:
                         SignalExporter.to_csv(self.current_signal, path)
                     self._log(f"Exported to {Path(path).name}")
-                except Exception as e:
+                except (FileNotFoundError, OSError) as e:
                     QMessageBox.warning(self, "Export Error", f"Failed: {e}")
 
         def _update_plot(
@@ -1760,7 +1762,7 @@ else:
 
     def main() -> None:
         """Stub main function."""
-        print("SignalToolkitWidget requires PyQt6 and matplotlib")
+        logger.info("SignalToolkitWidget requires PyQt6 and matplotlib")
 
 
 if __name__ == "__main__":

@@ -96,7 +96,7 @@ def _get_control_interface(
         ctrl = ControlInterface(engine)
         engine_manager._control_interface = ctrl  # type: ignore[attr-defined]
         return ctrl
-    except Exception:
+    except ImportError:
         return None
 
 
@@ -123,7 +123,7 @@ def _get_features_registry(
         registry = ControlFeaturesRegistry(engine)
         engine_manager._features_registry = registry  # type: ignore[attr-defined]
         return registry
-    except Exception:
+    except ImportError:
         return None
 
 
@@ -184,7 +184,7 @@ async def update_actuators(
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Actuator update error: %s", exc)
         raise HTTPException(
@@ -252,7 +252,7 @@ async def get_forces(
         try:
             g = engine.compute_gravity_forces()
             gravity = g.tolist() if hasattr(g, "tolist") else list(g)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
         # Contact forces
@@ -260,7 +260,7 @@ async def get_forces(
         try:
             c = engine.compute_contact_forces()
             contact = c.tolist() if hasattr(c, "tolist") else list(c)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
         # Applied torques from control interface
@@ -274,7 +274,7 @@ async def get_forces(
         try:
             b = engine.compute_bias_forces()
             bias = b.tolist() if hasattr(b, "tolist") else list(b)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
         return ForceVectorResponse(
@@ -284,7 +284,7 @@ async def get_forces(
             applied_torques=applied,
             bias_forces=bias,
         )
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Force query error: %s", exc)
         raise HTTPException(
@@ -330,7 +330,7 @@ async def get_metrics(
 
                 linear_vel = jac["linear"] @ v
                 club_head_speed = float(np.linalg.norm(linear_vel))
-        except Exception:
+        except ImportError:
             pass
 
         # Energy calculations
@@ -341,7 +341,7 @@ async def get_metrics(
 
             M = engine.compute_mass_matrix()
             kinetic_energy = float(0.5 * v @ M @ v)
-        except Exception:
+        except ImportError:
             pass
 
         # Torque metrics
@@ -365,7 +365,7 @@ async def get_metrics(
             peak_torque=peak_torque,
             total_torque_magnitude=total_torque_magnitude,
         )
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Metrics query error: %s", exc)
         raise HTTPException(

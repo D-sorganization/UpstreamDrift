@@ -32,7 +32,11 @@ try:
 except ImportError:
     PINK_AVAILABLE = False
 
+import logging
+
 from motion_training.club_trajectory_parser import ClubFrame, ClubTrajectory
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -333,11 +337,11 @@ class DualHandIKSolver:
         )
 
         if verbose:
-            print("\nTrajectory IK complete:")
-            print(f"  Frames: {trajectory.num_frames}")
-            print(f"  Convergence rate: {result.convergence_rate * 100:.1f}%")
-            print(f"  Mean left error: {np.mean(result.left_hand_errors):.4f} m")
-            print(f"  Mean right error: {np.mean(result.right_hand_errors):.4f} m")
+            logger.info("\nTrajectory IK complete:")
+            logger.info("  Frames: %s", trajectory.num_frames)
+            logger.info("  Convergence rate: %s%%", result.convergence_rate * 100)
+            logger.error("  Mean left error: %s m", np.mean(result.left_hand_errors))
+            logger.error("  Mean right error: %s m", np.mean(result.right_hand_errors))
 
         return result
 
@@ -499,7 +503,7 @@ class DualHandIKSolverFallback:
             q = ik_result.q
 
             if verbose and (i + 1) % 50 == 0:
-                print(f"Frame {i + 1}/{trajectory.num_frames}")
+                logger.info("Frame %s/%s", i + 1, trajectory.num_frames)
 
         result.convergence_rate = (
             num_converged / trajectory.num_frames if trajectory.num_frames > 0 else 0.0
@@ -527,7 +531,7 @@ def create_ik_solver(
     if PINK_AVAILABLE:
         return DualHandIKSolver(urdf_path, left_hand_frame, right_hand_frame, settings)
     else:
-        print("Pink not available, using fallback damped least-squares solver")
+        logger.info("Pink not available, using fallback damped least-squares solver")
         return DualHandIKSolverFallback(
             urdf_path, left_hand_frame, right_hand_frame, settings
         )

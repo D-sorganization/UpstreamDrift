@@ -228,7 +228,7 @@ class MeshInertiaCalculator:
         # Load mesh
         try:
             mesh = trimesh.load(str(mesh_path))
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise ValueError(f"Failed to load mesh: {e}") from e
 
         # Handle scene objects (multiple meshes)
@@ -296,7 +296,7 @@ class MeshInertiaCalculator:
             # Get inertia at center of mass (unit density)
             inertia_unit = mesh.moment_inertia
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Failed to compute mesh properties: {e}. Using defaults.")
             return InertiaResult.create_default(mass or 1.0)
 
@@ -360,7 +360,7 @@ class MeshInertiaCalculator:
             # Merge close vertices
             mesh.merge_vertices()
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Mesh repair partially failed: {e}")
 
         return mesh

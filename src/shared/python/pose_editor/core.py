@@ -271,7 +271,7 @@ class BasePoseEditor(ABC):
         for callback in self._callbacks.get(event, []):
             try:
                 callback(*args)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Callback error for %s: %s", event, e)
 
     def enter_edit_mode(self) -> None:

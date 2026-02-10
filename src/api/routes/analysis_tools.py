@@ -72,7 +72,7 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
 
             metrics["max_velocity"] = float(np.max(np.abs(v)))
             metrics["rms_velocity"] = float(np.sqrt(np.mean(v**2)))
-    except Exception:
+    except ImportError:
         pass
 
     # Energy
@@ -83,7 +83,7 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
 
             q, v = engine.get_state()
             metrics["kinetic_energy"] = float(0.5 * v @ M @ v)
-    except Exception:
+    except ImportError:
         pass
 
     # Club head speed
@@ -95,7 +95,7 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
             _, v = engine.get_state()
             linear_vel = jac["linear"] @ v
             metrics["club_head_speed"] = float(np.linalg.norm(linear_vel))
-    except Exception:
+    except ImportError:
         pass
 
     return metrics
@@ -162,7 +162,7 @@ async def get_analysis_metrics(
         metrics = _collect_metrics(engine_manager)
         _store_metric_snapshot(engine_manager, metrics)
         return {"status": "ok", "metrics": metrics}
-    except Exception as exc:
+    except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Metrics collection error: %s", exc)
         raise HTTPException(
@@ -240,7 +240,7 @@ async def get_analysis_statistics(
             metrics=metric_summaries,
             time_series=time_series,
         )
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Statistics computation error: %s", exc)
         raise HTTPException(
@@ -332,7 +332,7 @@ async def export_analysis_data(
                     "Content-Disposition": "attachment; filename=analysis_export.json"
                 },
             )
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Export error: %s", exc)
         raise HTTPException(
@@ -393,7 +393,7 @@ async def set_body_position(
         raise HTTPException(
             status_code=404, detail=f"Body not found: {str(exc)}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Body positioning error: %s", exc)
         raise HTTPException(
@@ -458,7 +458,7 @@ async def measure_distance(
             position_b=pos_b,
             delta=delta,
         )
-    except Exception as exc:
+    except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Measurement error: %s", exc)
         raise HTTPException(
@@ -528,7 +528,7 @@ async def get_measurement_tools(
             joint_angles=joint_angles,
             measurements=[],
         )
-    except Exception as exc:
+    except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Measurement tools error: %s", exc)
         raise HTTPException(

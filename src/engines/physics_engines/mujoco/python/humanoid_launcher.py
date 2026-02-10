@@ -121,7 +121,7 @@ class RemoteRecorder(RecorderInterface):
                 self.data["ztcf_accel"].append(np.array(cf["ztcf"]))
             if "zvcf" in cf:
                 self.data["zvcf_accel"].append(np.array(cf["zvcf"]))
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logging.error(f"Error processing packet: {e}")
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
@@ -598,7 +598,7 @@ class HumanoidLauncher(QMainWindow):
                 data = json.loads(json_str)
                 self.recorder.process_packet(data)
                 self.live_plot.update_plot()
-            except Exception as e:
+            except (ValueError, KeyError, json.JSONDecodeError) as e:
                 # Fallback logging if parsing fails
                 timestamp = datetime.datetime.now().strftime("%H:%M:%S")
                 self.txt_log.append(f"[{timestamp}] Error parsing stream: {e}")
@@ -684,7 +684,7 @@ class HumanoidLauncher(QMainWindow):
                 "Please ensure mujoco_humanoid_golf/polynomial_generator.py exists.",
             )
             return
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             QMessageBox.warning(
                 self,
                 "Loading Error",
@@ -755,7 +755,7 @@ class HumanoidLauncher(QMainWindow):
                 "Please ensure matplotlib and PyQt6 are installed.",
             )
             return
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             QMessageBox.warning(
                 self,
                 "Loading Error",
@@ -865,7 +865,7 @@ class HumanoidLauncher(QMainWindow):
 
             self.config_manager.save(self.config)
             self.log(f"Config saved to {self.config_path}")
-        except Exception as e:
+        except ImportError as e:
             self.log(f"Error saving config: {e}")
 
     def get_simulation_command(self) -> tuple[list[str], dict[str, str] | None]:
@@ -1044,7 +1044,7 @@ class HumanoidLauncher(QMainWindow):
             plt.grid(True)
             plt.show()
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             QMessageBox.critical(self, "Plot Error", str(e))
 
     def start_simulation(self) -> None:

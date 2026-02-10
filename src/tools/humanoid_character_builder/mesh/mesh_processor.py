@@ -223,7 +223,7 @@ class MeshProcessor:
                     success=True,
                 )
 
-            except Exception as e:
+            except (ValueError, TypeError, RuntimeError) as e:
                 logger.error(f"Failed to segment {segment_name}: {e}")
                 results[segment_name] = MeshSegmentResult(
                     segment_name=segment_name,
@@ -338,7 +338,7 @@ class MeshProcessor:
         try:
             simplified = mesh.simplify_quadric_decimation(target_faces)
             return simplified
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         # Fallback: vertex clustering
@@ -352,7 +352,7 @@ class MeshProcessor:
                 mesh.vertices, pitch=pitch
             )
             return simplified
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             # Return original if simplification fails
             logger.warning("Mesh simplification failed, returning original")
             return mesh
@@ -622,7 +622,7 @@ class LODGenerator:
                 success=True, source_mesh=mesh_path, levels=levels
             )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"LOD generation failed for {mesh_path}: {e}")
             return LODGenerationResult(
                 success=False,
@@ -721,7 +721,7 @@ class LODGenerator:
                 success=True, source_mesh=mesh_path, levels=levels
             )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return LODGenerationResult(
                 success=False,
                 source_mesh=mesh_path,

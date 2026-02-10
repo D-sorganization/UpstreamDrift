@@ -180,7 +180,7 @@ class OpenAIAdapter(BaseAgentAdapter):
 
             return self._parse_response(response)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             return self._handle_error(e)
 
     def stream_response(
@@ -251,7 +251,7 @@ class OpenAIAdapter(BaseAgentAdapter):
                     )
                     index += 1
 
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             logger.error("OpenAI streaming error: %s", e)
             raise AIProviderError(
                 f"OpenAI streaming error: {e}",
@@ -308,7 +308,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             return False, (
                 "openai package not installed. Install with: pip install openai"
             )
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             error_str = str(e).lower()
             if "authentication" in error_str or "api key" in error_str:
                 return False, "Invalid API key. Check your OpenAI API key."

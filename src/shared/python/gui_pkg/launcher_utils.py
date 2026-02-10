@@ -37,7 +37,7 @@ def invoke_main(main_func: Callable[[], int | None]) -> None:
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
         sys.exit(0)
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.critical(f"Fatal launcher error: {e}", exc_info=True)
         sys.exit(1)
 
@@ -72,7 +72,7 @@ def check_python_dependencies(
             if result and result.returncode == 0:
                 logger.info("Successfully installed missing dependencies.")
                 return True
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to install dependencies: {e}")
 
     logger.error(f"Dependency check failed. Missing: {missing}")
@@ -106,7 +106,7 @@ def git_sync_repository(repo_path: Path | None = None) -> bool:
         else:
             logger.warning("Git pull failed.")
             return False
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.warning(f"Git sync failed (might be offline or have conflicts): {e}")
         return False
 

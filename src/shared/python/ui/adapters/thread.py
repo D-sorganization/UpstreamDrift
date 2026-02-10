@@ -129,7 +129,7 @@ class BackgroundWorker(ABC):
         if self._on_complete and self._error is None:
             try:
                 self._on_complete(self._result)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Error in completion callback: {e}")
 
     def _invoke_error(self) -> None:
@@ -137,7 +137,7 @@ class BackgroundWorker(ABC):
         if self._on_error and self._error is not None:
             try:
                 self._on_error(self._error)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Error in error callback: {e}")
 
 
@@ -170,7 +170,7 @@ class ThreadWorker(BackgroundWorker):
         try:
             self._result = self.target(*self.args, **self.kwargs)
             self._invoke_complete()
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             self._error = e
             logger.error(f"Background task failed: {e}")
             self._invoke_error()
@@ -247,7 +247,7 @@ class QtWorker(BackgroundWorker):
                         # Check for cancellation before emitting result
                         if not self._cancelled and not self.isInterruptionRequested():
                             self.finished_signal.emit(result)
-                    except Exception as e:
+                    except (RuntimeError, ValueError, OSError) as e:
                         if not self._cancelled and not self.isInterruptionRequested():
                             self.error_signal.emit(e)
 

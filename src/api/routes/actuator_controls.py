@@ -64,7 +64,7 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
     # Get current state
     try:
         state = engine.get_state() if hasattr(engine, "get_state") else {}
-    except Exception:
+    except (ValueError, RuntimeError, AttributeError):
         state = {}
 
     torques = state.get("torques", [0.0] * n_joints)
@@ -82,7 +82,7 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
                 limits = engine.get_joint_limits()
                 if i < len(limits):
                     min_val, max_val = limits[i]
-            except Exception:
+            except (ValueError, RuntimeError, AttributeError):
                 pass
 
         actuators.append(
@@ -160,7 +160,7 @@ async def get_actuator_panel(
                 engine_name = str(active.engine_type)
             elif active:
                 engine_name = type(active).__name__
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
         return ActuatorPanelResponse(
@@ -174,7 +174,7 @@ async def get_actuator_panel(
             ],
             engine_name=engine_name,
         )
-    except Exception as exc:
+    except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Error getting actuator panel: %s", exc)
         raise HTTPException(
@@ -233,7 +233,7 @@ async def send_actuator_command(
                 engine.set_control(command.actuator_index, applied_value)
             elif engine and hasattr(engine, "apply_torque"):
                 engine.apply_torque(command.actuator_index, applied_value)
-        except Exception as engine_err:
+        except (ValueError, RuntimeError, AttributeError) as engine_err:
             if logger:
                 logger.warning(
                     "Could not apply actuator command to engine: %s",
@@ -249,7 +249,7 @@ async def send_actuator_command(
         )
     except HTTPException:
         raise
-    except Exception as exc:
+    except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Error sending actuator command: %s", exc)
         raise HTTPException(
@@ -309,7 +309,7 @@ async def send_actuator_batch(
             engine = engine_manager.get_active_engine()
             if engine and hasattr(engine, "set_control"):
                 engine.set_control(cmd.actuator_index, applied_value)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
         results.append(

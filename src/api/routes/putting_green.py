@@ -174,7 +174,7 @@ async def simulate_putt(request: PuttSimulationRequest) -> PuttSimulationRespons
             duration=result.duration,
         )
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -218,7 +218,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
             slopes=[s.tolist() for s in reading["slopes"]],
         )
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -282,7 +282,7 @@ async def scatter_analysis(
             make_percentage=(holed_count / len(results) * 100 if results else 0),
         )
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -326,5 +326,5 @@ async def get_green_contours(
             hole_position=green.hole_position.tolist(),
         )
 
-    except Exception as exc:
+    except ImportError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc

@@ -84,7 +84,7 @@ except ImportError as e:
     print(f"ImportError: {{e}}")
 except OSError as e:
     print(f"OSError: {{e}}")
-except Exception as e:
+except ImportError as e:
     print(f"Error: {{type(e).__name__}}: {{e}}")
 """
         try:
@@ -103,7 +103,7 @@ except Exception as e:
                 return False, f"{display_name} dependency check failed:\n{output}"
         except subprocess.TimeoutExpired:
             return False, f"{display_name} dependency check timed out"
-        except Exception as e:
+        except (OSError, ValueError) as e:
             return False, f"Failed to check {display_name} dependencies: {e}"
 
     def _show_dependency_error(self, model_name: str, error_msg: str) -> None:
@@ -171,7 +171,7 @@ except Exception as e:
                 else:
                     self.show_toast("Model path missing for Docker launch.", "error")
                 return
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.error(f"Docker launch failed: {e}")
                 self.show_toast(f"Docker Launch Failed: {e}", "error")
                 self.lbl_status.setText("> Ready")
@@ -241,7 +241,7 @@ except Exception as e:
             else:
                 self.show_toast("Model path missing.", "error")
 
-        except Exception as e:
+        except (ValueError, RuntimeError) as e:
             logger.error(f"Launch failed: {e}")
             self.show_toast(f"Launch Failed: {e}", "error")
             self.lbl_status.setText("> Ready")
@@ -278,7 +278,7 @@ except Exception as e:
                 )
                 mujoco.viewer.launch(m, d)
 
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"Failed to launch MJCF: {e}") from e
 
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
@@ -342,7 +342,7 @@ except Exception as e:
                     f"Failed to launch {model.name} in Docker",
                 )
 
-        except Exception as e:
+        except (ValueError, RuntimeError) as e:
             logger.error(f"Failed to launch Docker container: {e}")
             QMessageBox.critical(
                 self,
@@ -447,7 +447,7 @@ except Exception as e:
             self.lbl_status.setText("> URDF Generator Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
 
-        except Exception as e:
+        except (ValueError, RuntimeError) as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
             self.lbl_status.setText("! Launch Error")
@@ -478,7 +478,7 @@ except Exception as e:
                 raise RuntimeError("ProcessManager returned None")
             self.show_toast("C3D Viewer launched.", "success")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to launch C3D Viewer: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
 
@@ -504,7 +504,7 @@ except Exception as e:
                 raise RuntimeError("ProcessManager returned None")
             self.show_toast("Shot Tracer launched.", "success")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to launch Shot Tracer: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
 
@@ -551,6 +551,6 @@ except Exception as e:
 
         except FileNotFoundError:
             self.show_toast("MATLAB executable not found in PATH.", "error")
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             logger.error(f"Failed to launch MATLAB app: {e}")
             self.show_toast(f"Launch failed: {e}", "error")

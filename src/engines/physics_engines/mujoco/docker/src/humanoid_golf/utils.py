@@ -1,8 +1,11 @@
+import logging
 import os
 
 import dm_control.suite
 import numpy as np
 from dm_control import mjcf
+
+logger = logging.getLogger(__name__)
 
 SHIRT_PARTS = [
     "chest",
@@ -106,8 +109,8 @@ def load_humanoid_with_props(
     height_scale = target_height / 1.56
     width_scale = np.sqrt(weight_percent / 100.0) * height_scale
 
-    print(f"Scaling Height by {height_scale:.3f} (Target: {target_height}m)")
-    print(f"Scaling Width by {width_scale:.3f} (Weight: {weight_percent}%)")
+    logger.info("Scaling Height by %s (Target: %sm)", height_scale, target_height)
+    logger.info("Scaling Width by %s (Weight: %s%%)", width_scale, weight_percent)
 
     # Recursively scale positions and size
     for body in root.find_all("body"):

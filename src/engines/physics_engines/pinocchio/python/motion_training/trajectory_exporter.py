@@ -19,8 +19,12 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+import logging
+
 from motion_training.club_trajectory_parser import ClubTrajectory
 from motion_training.dual_hand_ik_solver import TrajectoryIKResult
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -340,8 +344,8 @@ class TrajectoryExporter:
             try:
                 path = self.export(output_dir / base_name, format=fmt)
                 results[fmt] = path
-            except Exception as e:
-                print(f"Warning: Failed to export {fmt}: {e}")
+            except (RuntimeError, ValueError, OSError) as e:
+                logger.error("Warning: Failed to export %s: %s", fmt, e)
 
         return results
 

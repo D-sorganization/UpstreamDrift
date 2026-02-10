@@ -393,7 +393,7 @@ class WorkflowEngine:
                     execution.step_results.append(result)
                     execution.current_step_index += 1
                     return result
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Condition check failed for step %s: %s", step.id, e)
 
         # Execute tool if specified
@@ -406,7 +406,7 @@ class WorkflowEngine:
                     step.tool_name,
                     arguments,
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - tools may raise anything
                 result = StepResult(
                     step_id=step.id,
                     status=StepStatus.FAILED,
@@ -443,7 +443,7 @@ class WorkflowEngine:
                     )
                     execution.step_results.append(result)
                     return self._handle_failure(execution, step, result)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Validation failed for step %s: %s", step.id, e)
 
         # Success!

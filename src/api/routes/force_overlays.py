@@ -88,7 +88,7 @@ def _build_force_vectors(
     # Try to get force data from engine state
     try:
         state = engine.get_state() if hasattr(engine, "get_state") else {}
-    except Exception:
+    except (ValueError, RuntimeError, AttributeError):
         state = {}
 
     positions = state.get("positions", [])
@@ -267,7 +267,7 @@ async def get_force_overlays(
             if active and hasattr(active, "get_state"):
                 state = active.get_state()
                 sim_time = state.get("time", 0.0)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
         return ForceOverlayResponse(
@@ -282,7 +282,7 @@ async def get_force_overlays(
                 "body_filter": config.body_filter,
             },
         )
-    except Exception as exc:
+    except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Error building force overlays: %s", exc)
         raise HTTPException(
@@ -324,7 +324,7 @@ async def update_force_overlay_config(
             if active and hasattr(active, "get_state"):
                 state = active.get_state()
                 sim_time = state.get("time", 0.0)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             pass
 
         return ForceOverlayResponse(
@@ -340,7 +340,7 @@ async def update_force_overlay_config(
                 "show_labels": config.show_labels,
             },
         )
-    except Exception as exc:
+    except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Error updating force overlay config: %s", exc)
         raise HTTPException(

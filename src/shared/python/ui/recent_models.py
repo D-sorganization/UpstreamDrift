@@ -300,7 +300,7 @@ class RecentModelsPanel(QFrame):
                 data = json.loads(RECENT_FILE.read_text())
                 self._recent_models = [(m["id"], m["name"]) for m in data[:MAX_RECENT]]
                 self._refresh_list()
-            except Exception as e:
+            except (ValueError, KeyError, json.JSONDecodeError) as e:
                 logger.warning(f"Failed to load recent models: {e}")
 
     def _save_recent(self) -> None:
@@ -309,7 +309,7 @@ class RecentModelsPanel(QFrame):
             RECENT_FILE.parent.mkdir(parents=True, exist_ok=True)
             data = [{"id": m[0], "name": m[1]} for m in self._recent_models]
             RECENT_FILE.write_text(json.dumps(data, indent=2))
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             logger.warning(f"Failed to save recent models: {e}")
 
     def _refresh_list(self) -> None:

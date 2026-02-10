@@ -95,7 +95,7 @@ class UserPreferences:
                 return cls(
                     **{k: v for k, v in data.items() if k in cls.__dataclass_fields__}
                 )
-            except Exception as e:
+            except (ValueError, KeyError, json.JSONDecodeError) as e:
                 logger.warning(f"Failed to load preferences: {e}")
         return cls()
 
@@ -105,7 +105,7 @@ class UserPreferences:
             PREFS_DIR.mkdir(parents=True, exist_ok=True)
             PREFS_FILE.write_text(json.dumps(asdict(self), indent=2))
             logger.info("Preferences saved")
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             logger.error(f"Failed to save preferences: {e}")
 
 
@@ -181,7 +181,7 @@ class PreferencesDialog(QDialog):
             for name in fleet:
                 if name not in theme_items:
                     theme_items.append(name)
-        except Exception:
+        except ImportError:
             pass
 
         self.theme_combo.addItems(theme_items)
@@ -424,7 +424,7 @@ class PreferencesDialog(QDialog):
                 manager.set_theme(preset_map[theme_name])
             else:
                 manager.set_fleet_theme(theme_name)
-        except Exception as e:
+        except ImportError as e:
             logger.debug(f"Theme preview failed: {e}")
 
 

@@ -203,7 +203,7 @@ class EngineManager:
                 status="loaded",
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - engine factories may raise anything
             self.engine_status[engine_type] = EngineStatus.ERROR
             logger.error(
                 "engine_load_failed",
@@ -259,7 +259,7 @@ class EngineManager:
             try:
                 self._matlab_engine.quit()
                 logger.info("matlab_engine_shutdown", status="success")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - cleanup must not propagate
                 logger.warning(
                     "matlab_engine_shutdown_failed", error=str(e), exc_info=True
                 )

@@ -283,7 +283,7 @@ async def list_models(
     try:
         models = _discover_models()
         return ModelListResponse(models=models)
-    except Exception as exc:
+    except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Error listing models: %s", exc)
         raise HTTPException(
@@ -351,7 +351,7 @@ async def get_model_urdf(
         raise HTTPException(
             status_code=422, detail=f"Failed to parse URDF: {str(exc)}"
         ) from exc
-    except Exception as exc:
+    except ImportError as exc:
         if logger:
             logger.error("Error loading model %s: %s", model_name, exc)
         raise HTTPException(

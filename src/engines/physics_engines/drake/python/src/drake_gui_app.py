@@ -538,7 +538,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                     self.available_models.append(
                         {"name": f"URDF: {name}", "path": str(urdf_file)}
                     )
-        except Exception as e:
+        except (FileNotFoundError, OSError) as e:
             LOGGER.error(f"Failed to scan URDF models: {e}")
 
     def _init_simulation(self) -> None:
@@ -560,7 +560,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                             "skipping auto-browser open inside container."
                         )
 
-            except Exception:
+            except (FileNotFoundError, PermissionError, OSError):
                 LOGGER.exception("Failed to start Meshcat")
                 self.meshcat = None
 
@@ -686,7 +686,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 self._init_simulation()
                 self._build_kinematic_controls()
                 self._sync_kinematic_sliders()
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 QtWidgets.QMessageBox.critical(self, "Error Loading Model", str(e))
                 LOGGER.error(f"Error loading model: {e}")
             finally:
@@ -996,7 +996,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 # We need to access limits from the plant or joint model
                 joint_min = float(joint.position_lower_limits()[0])
                 joint_max = float(joint.position_upper_limits()[0])
-            except Exception:  # noqa: BLE001
+            except ImportError:
                 # Fallback to UI limits if joint does not provide limits
                 joint_min = JOINT_ANGLE_MIN_RAD
                 joint_max = JOINT_ANGLE_MAX_RAD
@@ -1273,7 +1273,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                                     )
                                     # Store result using source string as key
                                     res[source] = accels
-                        except Exception:
+                        except (ValueError, TypeError, RuntimeError):
                             pass
 
                     # We need to append to recorder lists
@@ -1585,7 +1585,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                     T = RigidTransform(R, pos)
                     self.meshcat.SetTransform(path, T)
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             LOGGER.warning(f"Ellipsoid calc error: {e}")
 
     def _show_overlay_dialog(self) -> None:  # noqa: PLR0915
@@ -1719,7 +1719,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                     spec = analyzer.compute_specific_control(self.eval_context, tau)
                     spec_induced.append(spec)
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             QtWidgets.QApplication.restoreOverrideCursor()
             QtWidgets.QMessageBox.critical(self, "Analysis Error", str(e))
             return
@@ -1787,7 +1787,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 ztcf_list.append(res["ztcf_accel"])
                 zvcf_list.append(res["zvcf_torque"])
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QtWidgets.QApplication.restoreOverrideCursor()
             QtWidgets.QMessageBox.critical(self, "Analysis Error", str(e))
             return
@@ -1832,7 +1832,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             QtWidgets.QMessageBox.information(self, "Export Complete", msg)
             self._update_status(f"Data exported to {filename}")
 
-        except Exception as e:
+        except ImportError as e:
             QtWidgets.QMessageBox.critical(self, "Export Error", str(e))
             LOGGER.error(f"Export failed: {e}")
 

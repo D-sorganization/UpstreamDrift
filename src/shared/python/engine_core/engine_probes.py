@@ -72,7 +72,7 @@ class EngineProbe:
         """Check availability via probe."""
         try:
             return self.probe().is_available()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             return False
 
     def probe(self) -> EngineProbeResult:

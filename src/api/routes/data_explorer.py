@@ -138,7 +138,7 @@ async def list_datasets() -> DatasetListResponse:
                             data = json.load(f)
                         if isinstance(data, dict):
                             columns = list(data.keys())
-                except Exception:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
 
                 datasets.append(
@@ -218,7 +218,7 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
 
     except HTTPException:
         raise
-    except Exception as exc:
+    except (RuntimeError, TypeError, AttributeError) as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
@@ -252,7 +252,7 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
                 )
         except HTTPException:
             raise
-        except Exception as exc:
+        except (RuntimeError, TypeError, AttributeError) as exc:
             raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     # Compute statistics per column
@@ -322,7 +322,7 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
             row_count=len(rows),
         )
 
-    except Exception as exc:
+    except (FileNotFoundError, OSError) as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 

@@ -96,7 +96,7 @@ class _AnalysisWorker(QThread):
                 f"OpenPose dependency not installed: {e}\n"
                 "Install pyopenpose and ensure model files are available."
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, AttributeError) as e:
             self.error.emit(f"Analysis failed: {e}")
 
 

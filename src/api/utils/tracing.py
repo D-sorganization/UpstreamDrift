@@ -212,7 +212,7 @@ class RequestTracer:
 
             return response
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             # Log error with trace context
             duration_ms = (time.time() - context.start_time) * 1000
             logger.error(

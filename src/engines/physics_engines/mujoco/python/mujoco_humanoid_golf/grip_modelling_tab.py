@@ -369,7 +369,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
         try:
             xml_content = self._prepare_scene_xml(scene_path, folder_path, is_both)
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             logger.exception("Failed to prepare XML model from %s", scene_path)
             return
 
@@ -382,7 +382,7 @@ class GripModellingTab(QtWidgets.QWidget):
                 self.sim_widget.load_model_from_xml(xml_content)
             finally:
                 os.chdir(current_dir)
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             logger.exception("Failed to load XML model")
             return
 
@@ -449,7 +449,7 @@ class GripModellingTab(QtWidgets.QWidget):
                         # (this is simple but effective for these hand models).
 
                 return content
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 logger.exception("Failed to process hand file %s", filename)
                 return ""  # Return empty only on catastrophic failure
 
@@ -653,9 +653,7 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(
-        self, i: int, model: mujoco.MjModel
-    ) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return
@@ -971,7 +969,7 @@ class GripModellingTab(QtWidgets.QWidget):
                 f"Slip Detected: {'Yes' if summary['any_slip_detected'] else 'No'}",
             )
 
-        except Exception as e:
+        except ImportError as e:
             logger.exception("Failed to export contact data")
             QtWidgets.QMessageBox.critical(
                 self, "Export Failed", f"Failed to export: {e}"

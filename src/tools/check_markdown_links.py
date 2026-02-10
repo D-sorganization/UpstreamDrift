@@ -18,7 +18,7 @@ def check_links(root_dir: Path) -> list[str]:
 
         try:
             content = md_file.read_text(encoding="utf-8")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             errors.append(f"Could not read {md_file}: {e}")
             continue
 
@@ -48,7 +48,7 @@ def check_links(root_dir: Path) -> list[str]:
             # link is relative to md_file
             try:
                 target = (md_file.parent / link_path).resolve()
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 errors.append(f"Invalid path in {md_file}: {link}")
                 continue
 

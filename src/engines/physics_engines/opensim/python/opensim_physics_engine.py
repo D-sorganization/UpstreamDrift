@@ -72,7 +72,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             self._state = self._model.initSystem()
             self._manager = opensim.Manager(self._model)
             logger.info(f"Loaded OpenSim model from {path}")
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load OpenSim model: {e}")
             raise
 
@@ -93,7 +93,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                 tmp_path = tmp.name
 
             self.load_from_path(tmp_path)
-        except Exception as e:
+        except (PermissionError, OSError) as e:
             logger.error(f"Failed to load OpenSim model from string: {e}")
             raise
         finally:
@@ -101,7 +101,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             if tmp_path and os.path.exists(tmp_path):
                 try:
                     os.remove(tmp_path)
-                except Exception as cleanup_error:
+                except (RuntimeError, ValueError, OSError) as cleanup_error:
                     logger.warning(
                         f"Failed to remove temporary file {tmp_path}: {cleanup_error}"
                     )
@@ -186,7 +186,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             if len(u) == controls.size():
                 for i in range(len(u)):
                     controls.set(i, float(u[i]))
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to set OpenSim controls: {e}")
 
     def get_time(self) -> float:
@@ -230,7 +230,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             zero_acc = np.zeros(n_u)
             bias = self.compute_inverse_dynamics(zero_acc)
             return bias
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute bias forces: {e}")
             return np.array([])
 
@@ -261,7 +261,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             self.set_state(q_current, v_saved)
 
             return gravity
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute gravity forces: {e}")
             return np.array([])
 
@@ -302,7 +302,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                 res[i] = tau.get(i)
 
             return res
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"OpenSim ID failed: {e}")
             return np.array([])
 
@@ -400,7 +400,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                 "spatial": np.vstack([jacr, jacp]),  # [Angular; Linear] convention
             }
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to compute Jacobian for '{body_name}': {e}")
             return None
 
@@ -456,7 +456,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
             return np.asarray(axis * angle)
 
-        except Exception:
+        except ImportError:
             return np.zeros(3)
 
     # -------- Section F: Drift-Control Decomposition --------
@@ -627,7 +627,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
             return a_ztcf
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZTCF: {e}")
             return np.array([])
 
@@ -667,6 +667,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
             return a_zvcf
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])

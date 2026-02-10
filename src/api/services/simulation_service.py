@@ -100,7 +100,7 @@ class SimulationService:
                 export_paths=[],  # Add required field
             )
 
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Simulation failed: {e}")
             return SimulationResponse(
                 success=False,
@@ -128,7 +128,7 @@ class SimulationService:
 
             active_tasks[task_id] = {"status": "completed", "result": result.dict()}
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - background tasks must not crash
             active_tasks[task_id] = {"status": "failed", "error": str(e)}
 
     def _extract_simulation_data(
@@ -170,10 +170,10 @@ class SimulationService:
                 data["control_inputs"] = (
                     controls.tolist() if hasattr(controls, "tolist") else controls
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - optional data
                 logger.debug("Control inputs not available: %s", e)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - recorder may raise various errors
             logger.warning(f"Error extracting simulation data: {e}")
 
         return data
@@ -214,7 +214,7 @@ class SimulationService:
                     drift.tolist() if hasattr(drift, "tolist") else drift
                 )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - recorder may raise various errors
             logger.warning(f"Error performing analysis: {e}")
 
         return results

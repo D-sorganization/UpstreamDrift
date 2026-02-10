@@ -280,7 +280,7 @@ def get_shared_urdf_path() -> Path | None:
         if urdf_dir.exists():
             return urdf_dir
 
-    except Exception:
+    except (FileNotFoundError, OSError):
         pass
 
     return None

@@ -4,14 +4,18 @@ Analyze Simscape CSV data to identify joint center positions
 for golf swing visualization.
 """
 
+import logging
+
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 def analyze_simscape_data(csv_file):
     """Analyze the Simscape CSV file and identify key joint positions."""
 
-    print(f"Analyzing Simscape data file: {csv_file}")
-    print("=" * 80)
+    logger.info("Analyzing Simscape data file: %s", csv_file)
+    logger.info("%s", "=" * 80)
 
     # Read the CSV file
     try:
@@ -19,10 +23,10 @@ def analyze_simscape_data(csv_file):
         print(
             f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns"
         )
-        print(f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds")
-        print()
-    except Exception as e:
-        print(f"Error reading CSV file: {e}")
+        logger.info("Time range: %s to %s seconds", df["time"].min(), df["time"].max())
+        logger.info("")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Error reading CSV file: %s", e)
         return
 
     # Get all column names
@@ -52,18 +56,18 @@ def analyze_simscape_data(csv_file):
         else:
             other_columns.append(col)
 
-    print("COLUMN ANALYSIS:")
-    print(f"Position columns: {len(position_columns)}")
-    print(f"Rotation columns: {len(rotation_columns)}")
-    print(f"Velocity columns: {len(velocity_columns)}")
-    print(f"Force columns: {len(force_columns)}")
-    print(f"Torque columns: {len(torque_columns)}")
-    print(f"Other columns: {len(other_columns)}")
-    print()
+    logger.info("COLUMN ANALYSIS:")
+    logger.info("Position columns: %s", len(position_columns))
+    logger.info("Rotation columns: %s", len(rotation_columns))
+    logger.info("Velocity columns: %s", len(velocity_columns))
+    logger.info("Force columns: %s", len(force_columns))
+    logger.info("Torque columns: %s", len(torque_columns))
+    logger.info("Other columns: %s", len(other_columns))
+    logger.info("")
 
     # Identify key joint centers for golf swing
-    print("KEY JOINT CENTER POSITIONS:")
-    print("-" * 50)
+    logger.info("KEY JOINT CENTER POSITIONS:")
+    logger.info("%s", "-" * 50)
 
     # Look for specific joint center positions
     joint_positions = {}
@@ -71,9 +75,9 @@ def analyze_simscape_data(csv_file):
     # Club-related positions
     club_positions = [col for col in position_columns if "Club" in col]
     if club_positions:
-        print("Club positions found:")
+        logger.info("Club positions found:")
         for pos in club_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["club"] = club_positions
 
     # Hand positions
@@ -83,9 +87,9 @@ def analyze_simscape_data(csv_file):
         if any(x in col for x in ["LHGlobalPosition", "RHGlobalPosition"])
     ]
     if hand_positions:
-        print("\nHand positions found:")
+        logger.info("\nHand positions found:")
         for pos in hand_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["hands"] = hand_positions
 
     # Wrist positions
@@ -93,9 +97,9 @@ def analyze_simscape_data(csv_file):
         col for col in position_columns if any(x in col for x in ["LWLogs", "RWLogs"])
     ]
     if wrist_positions:
-        print("\nWrist positions found:")
+        logger.info("\nWrist positions found:")
         for pos in wrist_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["wrists"] = wrist_positions
 
     # Elbow positions
@@ -103,9 +107,9 @@ def analyze_simscape_data(csv_file):
         col for col in position_columns if any(x in col for x in ["LELogs", "RELogs"])
     ]
     if elbow_positions:
-        print("\nElbow positions found:")
+        logger.info("\nElbow positions found:")
         for pos in elbow_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["elbows"] = elbow_positions
 
     # Shoulder positions
@@ -113,9 +117,9 @@ def analyze_simscape_data(csv_file):
         col for col in position_columns if any(x in col for x in ["LSLogs", "RSLogs"])
     ]
     if shoulder_positions:
-        print("\nShoulder positions found:")
+        logger.info("\nShoulder positions found:")
         for pos in shoulder_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["shoulders"] = shoulder_positions
 
     # Scapula positions
@@ -125,46 +129,46 @@ def analyze_simscape_data(csv_file):
         if any(x in col for x in ["LScapLogs", "RScapLogs"])
     ]
     if scapula_positions:
-        print("\nScapula positions found:")
+        logger.info("\nScapula positions found:")
         for pos in scapula_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["scapulae"] = scapula_positions
 
     # Hip positions
     hip_positions = [col for col in position_columns if "HipLogs" in col]
     if hip_positions:
-        print("\nHip positions found:")
+        logger.info("\nHip positions found:")
         for pos in hip_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["hips"] = hip_positions
 
     # Spine positions
     spine_positions = [col for col in position_columns if "SpineLogs" in col]
     if spine_positions:
-        print("\nSpine positions found:")
+        logger.info("\nSpine positions found:")
         for pos in spine_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["spine"] = spine_positions
 
     # Torso positions
     torso_positions = [col for col in position_columns if "TorsoLogs" in col]
     if torso_positions:
-        print("\nTorso positions found:")
+        logger.info("\nTorso positions found:")
         for pos in torso_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["torso"] = torso_positions
 
     # Hub positions
     hub_positions = [col for col in position_columns if "HUB" in col]
     if hub_positions:
-        print("\nHub positions found:")
+        logger.info("\nHub positions found:")
         for pos in hub_positions:
-            print(f"  {pos}")
+            logger.info("  %s", pos)
         joint_positions["hub"] = hub_positions
 
-    print("\n" + "=" * 80)
-    print("RECOMMENDED SEGMENTS FOR GOLF SWING VISUALIZATION:")
-    print("-" * 60)
+    logger.info("%s", "\n" + "=" * 80)
+    logger.info("RECOMMENDED SEGMENTS FOR GOLF SWING VISUALIZATION:")
+    logger.info("%s", "-" * 60)
 
     # Define the segments we want to visualize
     segments = {
@@ -264,17 +268,17 @@ def analyze_simscape_data(csv_file):
         available_cols = [col for col in required_cols if col in columns]
         if len(available_cols) == len(required_cols):
             available_segments[segment_name] = available_cols
-            print(f"✓ {segment_name}: AVAILABLE")
+            logger.info("✓ %s: AVAILABLE", segment_name)
         else:
             missing_cols = [col for col in required_cols if col not in columns]
-            print(f"✗ {segment_name}: MISSING {len(missing_cols)} columns")
+            logger.info("✗ %s: MISSING %s columns", segment_name, len(missing_cols))
             if len(missing_cols) <= 3:  # Show missing columns if not too many
                 for col in missing_cols:
-                    print(f"    Missing: {col}")
+                    logger.info("    Missing: %s", col)
 
-    print("\n" + "=" * 80)
-    print("DATA SAMPLE (first 3 rows):")
-    print("-" * 40)
+    logger.info("%s", "\n" + "=" * 80)
+    logger.info("DATA SAMPLE (first 3 rows):")
+    logger.info("%s", "-" * 40)
 
     # Show sample data for available segments
     if available_segments:
@@ -288,7 +292,7 @@ def analyze_simscape_data(csv_file):
         sample_cols = list(set(sample_cols))[:15]
         sample_cols.insert(0, "time")  # Always include time
 
-        print(df[sample_cols].head(3).to_string())
+        logger.info("%s", df[sample_cols].head(3).to_string())
 
     return joint_positions, available_segments
 

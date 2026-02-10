@@ -4,11 +4,14 @@ Golf Swing Visualizer - Main Application Entry Point
 Complete integration of all components with enhanced features and error handling
 """
 
+import logging
 import sys
 import time
 from pathlib import Path
 
 from src.shared.python.logging_config import configure_gui_logging, get_logger
+
+logger = logging.getLogger(__name__)
 
 # Configure logging
 configure_gui_logging()
@@ -20,8 +23,8 @@ try:
     from PyQt6.QtGui import QFont, QPixmap
     from PyQt6.QtWidgets import QApplication, QMessageBox, QSplashScreen
 except ImportError as e:
-    print("❌ PyQt6 not found. Please install it with: pip install PyQt6")
-    print(f"Error: {e}")
+    logger.info("❌ PyQt6 not found. Please install it with: pip install PyQt6")
+    logger.error("Error: %s", e)
     sys.exit(1)
 
 # OpenGL will be imported by the renderer modules as needed
@@ -35,7 +38,7 @@ except ImportError as e:
     print(
         "❌ Core modules not found. Please ensure all files are in the same directory."
     )
-    print(f"Error: {e}")
+    logger.error("Error: %s", e)
     sys.exit(1)
 
 # ============================================================================
@@ -117,7 +120,7 @@ class EnhancedGolfVisualizerApp(QApplication):
             logger.info("Application initialization complete")
             return True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Application initialization failed: {e}")
             QMessageBox.critical(
                 None, "Initialization Error", f"Failed to initialize application:\n{e}"
@@ -199,7 +202,7 @@ class PerformanceMonitor(QThread):
 
                 self.performanceUpdate.emit(self.stats.copy())
 
-            except Exception as e:
+            except ImportError as e:
                 logger.warning(f"Performance monitoring error: {e}")
 
             self.msleep(1000)  # Update every second
@@ -413,7 +416,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
                 )
                 return True
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Data loading failed: {e}")
             QMessageBox.critical(
                 self, "Data Loading Error", f"Failed to load data files:\n{e}"
@@ -507,7 +510,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             # This would start video recording
             self.statusBar().showMessage(f"Recording started: {filename}")
             logger.info(f"Recording started: {filename}")
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(
                 self, "Recording Error", f"Failed to start recording:\n{e}"
             )
@@ -646,7 +649,7 @@ class SessionManager:
             self.sessions[session_id] = session_data
             logger.info(f"Session loaded: {session_id}")
             return session_id
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load session: {e}")
             return None
 
@@ -724,7 +727,7 @@ def main():
                 f"An unexpected error occurred:\n{exc_value}\n\n"
                 f"Check golf_visualizer.log for details.",
             )
-        except Exception:
+        except (RuntimeError, ValueError, AttributeError):
             pass
 
     sys.excepthook = handle_exception
@@ -740,31 +743,31 @@ def main():
     logger.info("Golf Swing Visualizer Pro started successfully")
 
     # Show usage information
-    print("🏌️ Golf Swing Visualizer Pro")
-    print("=" * 50)
-    print("📁 File -> Load Data: Load MATLAB files (BASEQ, ZTCFQ, DELTAQ)")
-    print("🎥 Camera Presets: F1-F7 for quick camera positions")
-    print("🖱️ Mouse Controls:")
-    print("   • Left drag: Orbit camera")
-    print("   • Right drag: Pan camera")
-    print("   • Wheel: Zoom")
-    print("⌨️ Keyboard Shortcuts:")
-    print("   • Space: Play/Pause")
-    print("   • Arrow keys: Frame navigation")
-    print("   • Ctrl+Arrows: Jump 10 frames")
-    print("   • Shift+Arrows: Jump 100 frames")
-    print("   • R: Reset camera")
-    print("   • F: Frame data")
-    print("   • A: Toggle analysis")
-    print("   • M: Measurement mode")
-    print("=" * 50)
+    logger.info("🏌️ Golf Swing Visualizer Pro")
+    logger.info("%s", "=" * 50)
+    logger.info("📁 File -> Load Data: Load MATLAB files (BASEQ, ZTCFQ, DELTAQ)")
+    logger.info("🎥 Camera Presets: F1-F7 for quick camera positions")
+    logger.info("🖱️ Mouse Controls:")
+    logger.info("   • Left drag: Orbit camera")
+    logger.info("   • Right drag: Pan camera")
+    logger.info("   • Wheel: Zoom")
+    logger.info("⌨️ Keyboard Shortcuts:")
+    logger.info("   • Space: Play/Pause")
+    logger.info("   • Arrow keys: Frame navigation")
+    logger.info("   • Ctrl+Arrows: Jump 10 frames")
+    logger.info("   • Shift+Arrows: Jump 100 frames")
+    logger.info("   • R: Reset camera")
+    logger.info("   • F: Frame data")
+    logger.info("   • A: Toggle analysis")
+    logger.info("   • M: Measurement mode")
+    logger.info("%s", "=" * 50)
 
     # Run application
     try:
         exit_code = app.exec()
         logger.info(f"Application exited with code: {exit_code}")
         return exit_code
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Application crashed: {e}")
         return 1
     finally:

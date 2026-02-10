@@ -295,7 +295,7 @@ class MuJoCoOffscreenRenderer:
                 if temp_urdf.exists():
                     temp_urdf.unlink()
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load URDF file: {e}")
             self._model = None
             self._data = None
@@ -393,7 +393,7 @@ class MuJoCoOffscreenRenderer:
             logger.info("MuJoCo model loaded successfully")
             return True
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to load MJCF: {e}")
             self._model = None
             self._data = None
@@ -488,7 +488,7 @@ class MuJoCoOffscreenRenderer:
             image = self._renderer.render()
             return image
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Render failed: {e}")
             return None
 
@@ -908,7 +908,7 @@ class MuJoCoViewerWidget(QWidget):
             subprocess.Popen(cmd)
             logger.info("Launched external MuJoCo viewer")
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to launch viewer: {e}")
 
     def clear(self) -> None:

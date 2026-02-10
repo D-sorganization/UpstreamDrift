@@ -161,7 +161,7 @@ class GolfLauncher(
             try:
                 EM, _ = _lazy_load_engine_manager()
                 self.engine_manager = EM(REPOS_ROOT)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning(f"Failed to initialize EngineManager: {e}")
                 self.engine_manager = None
 
@@ -407,7 +407,7 @@ class GolfLauncher(
             from src.shared.python.theme import get_current_colors
 
             c = get_current_colors()
-        except Exception:
+        except ImportError:
             from src.shared.python.theme import (
                 DARK_THEME as c,  # type: ignore[assignment]
             )
@@ -449,7 +449,7 @@ class GolfLauncher(
             from src.shared.python.theme import get_current_colors
 
             c = get_current_colors()
-        except Exception:
+        except ImportError:
             from src.shared.python.theme import (
                 DARK_THEME as c,  # type: ignore[assignment]
             )
@@ -627,7 +627,7 @@ class GolfLauncher(
                 try:
                     if not kill_process_tree(process.pid):
                         process.terminate()
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Failed to terminate {key}: {e}")
 
         super().closeEvent(event)
@@ -642,7 +642,7 @@ def main() -> None:
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
                 "UpstreamDrift.GolfModelingSuite.Launcher.1"
             )
-        except Exception:
+        except ImportError:
             pass
 
     app = QApplication(sys.argv)

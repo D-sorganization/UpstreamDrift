@@ -471,7 +471,7 @@ class ControlInterface:
         """
         try:
             return self.engine.compute_gravity_forces()
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.warning("Gravity compensation failed: %s", e)
             return np.zeros(self._n_v)
 
@@ -498,7 +498,7 @@ class ControlInterface:
 
         try:
             return self.engine.compute_inverse_dynamics(a_desired)
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.warning("Computed torque failed, falling back to PD: %s", e)
             return self._compute_pd(q, v)
 
@@ -511,7 +511,7 @@ class ControlInterface:
         try:
             gravity = self.engine.compute_gravity_forces()
             return gravity + pd_torques
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             return pd_torques
 
     def _compute_whole_body(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
@@ -530,7 +530,7 @@ class ControlInterface:
                 if hasattr(solution, "torques")
                 else np.zeros(self._n_v)
             )
-        except Exception as e:
+        except ImportError as e:
             logger.debug("WBC not available, using computed torque: %s", e)
             return self._compute_computed_torque(q, v)
 
@@ -576,7 +576,7 @@ class ControlInterface:
         try:
             q, v = self.engine.get_state()
             return len(q), len(v)
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             return 7, 7
 
     def _build_joint_info(self, torque_limits: np.ndarray | None) -> list[JointInfo]:
@@ -592,7 +592,7 @@ class ControlInterface:
             names = self.engine.get_joint_names()
             if not names or len(names) != self._n_v:
                 names = [f"joint_{i}" for i in range(self._n_v)]
-        except Exception:
+        except (ValueError, RuntimeError, AttributeError):
             names = [f"joint_{i}" for i in range(self._n_v)]
 
         joints = []

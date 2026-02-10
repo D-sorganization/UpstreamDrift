@@ -316,7 +316,7 @@ class PinocchioPoseEditor(BasePoseEditor):
             self._state.gravity_enabled = enabled
             self._notify("gravity_changed", enabled)
 
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.warning("Could not modify gravity: %s", e)
 
     def is_gravity_enabled(self) -> bool:
@@ -334,7 +334,7 @@ class PinocchioPoseEditor(BasePoseEditor):
         if self._viz is not None and self._q is not None:
             try:
                 self._viz.display(self._q)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.debug("Visualization update failed: %s", e)
 
         if self._update_callback:
@@ -362,7 +362,7 @@ class PinocchioPoseEditor(BasePoseEditor):
                     return self._data.oMi[i].translation.copy()
 
             return None
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             return None
 
 

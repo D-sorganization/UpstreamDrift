@@ -365,7 +365,7 @@ def diagnose_task_points(
                 continue
 
             results[point] = compute_jacobian_diagnostics(J, body_name=point)
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.warning("Failed to compute Jacobian for %s: %s", point, e)
 
     return results

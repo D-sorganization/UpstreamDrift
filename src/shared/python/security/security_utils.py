@@ -22,7 +22,7 @@ def validate_path(
     """
     try:
         resolved_path = Path(path).resolve()
-    except Exception as e:
+    except (FileNotFoundError, OSError) as e:
         if strict:
             raise ValueError(f"Invalid path format: {path}") from e
         return Path(path)
@@ -34,7 +34,7 @@ def validate_path(
             if str(resolved_path).startswith(str(resolved_root)):
                 is_allowed = True
                 break
-        except Exception:
+        except (RuntimeError, TypeError, ValueError):
             continue
 
     if not is_allowed:

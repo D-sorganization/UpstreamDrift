@@ -417,7 +417,7 @@ class AsyncStartupWorker(QThread):
             time.sleep(0.5)  # Brief pause to show 100%
             self.finished_signal.emit(self.results)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Startup failed: {e}", exc_info=True)
             self.error_signal.emit(str(e))
             # Emit partial results even on failure
@@ -755,7 +755,7 @@ class DraggableModelCard(QFrame):
 
             # Execute drag
             drag.exec(Qt.DropAction.MoveAction)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Drag operation failed: {e}")
 
     def mouseDoubleClickEvent(self, event: QMouseEvent | None) -> None:
@@ -888,7 +888,7 @@ class DockerBuildThread(QThread):
                     False, f"Build failed with code {process.returncode}"
                 )
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             self.finished_signal.emit(False, str(e))
 
 
@@ -1202,7 +1202,7 @@ class ContextHelpDock(QDockWidget):
             try:
                 content = doc_file.read_text(encoding="utf-8")
                 self.text_area.setMarkdown(content)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 self.text_area.setText(f"Failed to load documentation: {e}")
         else:
             self.text_area.setMarkdown(
@@ -1280,9 +1280,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[str, subprocess.Popen] = (
-            {}
-        )  # Track running instances
+        self.running_processes: dict[
+            str, subprocess.Popen
+        ] = {}  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
@@ -1309,7 +1309,7 @@ class GolfLauncher(QMainWindow):
             try:
                 EM, _ = _lazy_load_engine_manager()
                 self.engine_manager = EM(REPOS_ROOT)
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning(f"Failed to initialize EngineManager: {e}")
                 self.engine_manager = None
 
@@ -1475,7 +1475,7 @@ class GolfLauncher(QMainWindow):
 
             logger.info(f"Layout saved to {LAYOUT_CONFIG_FILE}")
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to save layout: {e}")
 
     def _sync_model_cards(self) -> None:
@@ -1599,7 +1599,7 @@ class GolfLauncher(QMainWindow):
             self._rebuild_grid()  # Use _rebuild_grid as it exists
             logger.info("Layout loaded successfully")
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to load layout: {e}")
             self._center_window()
 
@@ -1700,7 +1700,7 @@ class GolfLauncher(QMainWindow):
                 logger.info(f"Terminating child process: {key}")
                 try:
                     process.terminate()
-                except Exception as e:
+                except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Failed to terminate {key}: {e}")
 
         super().closeEvent(event)
@@ -1921,7 +1921,7 @@ class GolfLauncher(QMainWindow):
         try:
             settings = AISettings.load()
             self.ai_panel.apply_settings(settings)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             logger.warning("Failed to load AI settings: %s", e)
 
     def toggle_ai_assistant(self, checked: bool) -> None:
@@ -2207,7 +2207,7 @@ class GolfLauncher(QMainWindow):
                 )
                 return
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             QMessageBox.critical(
                 self, "Launch Error", f"Failed to launch URDF Generator:\n{e}"
@@ -2285,7 +2285,7 @@ class GolfLauncher(QMainWindow):
             self.running_processes["c3d_viewer"] = process
             logger.info(f"C3D Motion Viewer launched with PID: {process.pid}")
 
-        except Exception as e:
+        except ImportError as e:
             logger.error(f"Failed to launch C3D Viewer: {e}")
             QMessageBox.critical(
                 self, "Launch Error", f"Failed to launch C3D Viewer:\n{e}"
@@ -2345,7 +2345,7 @@ class GolfLauncher(QMainWindow):
                 "MATLAB executable not found in PATH.\n"
                 "Please verify your MATLAB installation and environment variables.",
             )
-        except Exception as exc:
+        except (PermissionError, OSError) as exc:
             logger.error("Failed to launch MATLAB app %s: %s", app.name, exc)
             QMessageBox.critical(
                 self,
@@ -2658,7 +2658,7 @@ class GolfLauncher(QMainWindow):
             else:
                 # Force Docker Launch
                 self._launch_docker_container(model, path)
-        except Exception as e:
+        except (RuntimeError, ValueError, OSError) as e:
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _launch_generic_mjcf(self, path: Path) -> None:
@@ -2673,7 +2673,7 @@ class GolfLauncher(QMainWindow):
                 f"import mujoco; import mujoco.viewer; m=mujoco.MjModel.from_xml_path(r'{str(path)}'); mujoco.viewer.launch(m)",
             ]
             subprocess.Popen(cmd)
-        except Exception as e:
+        except ImportError as e:
             QMessageBox.critical(self, "Viewer Error", str(e))
 
     def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
@@ -2750,7 +2750,7 @@ class GolfLauncher(QMainWindow):
             )
             self.running_processes["drake_gui"] = process
             logger.info(f"Drake GUI launched with PID: {process.pid}")
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to launch Drake: {e}")
             QMessageBox.critical(self, "Launch Error", str(e))
 
@@ -2776,7 +2776,7 @@ class GolfLauncher(QMainWindow):
             )
             self.running_processes["pinocchio_gui"] = process
             logger.info(f"Pinocchio GUI launched with PID: {process.pid}")
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(f"Failed to launch Pinocchio: {e}")
             QMessageBox.critical(self, "Launch Error", str(e))
 
@@ -2799,7 +2799,7 @@ class GolfLauncher(QMainWindow):
                 creationflags=creation_flags,
             )
             self.running_processes["opensim_gui"] = process
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
@@ -2820,7 +2820,7 @@ class GolfLauncher(QMainWindow):
                 creationflags=creation_flags,
             )
             self.running_processes["myosim_gui"] = process
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
@@ -2841,7 +2841,7 @@ class GolfLauncher(QMainWindow):
                 creationflags=creation_flags,
             )
             self.running_processes["openpose_gui"] = process
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, OSError) as e:
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _launch_docker_container(self, model: Any, abs_repo_path: Path) -> None:
