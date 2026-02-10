@@ -2,7 +2,7 @@
 # Includes all engines, web UI, ready to run
 
 # Stage 1: Build UI
-FROM node:20-slim AS ui-builder
+FROM node:20.18-slim AS ui-builder
 
 WORKDIR /app/ui
 COPY ui/package*.json ./
@@ -13,7 +13,7 @@ RUN npm run build
 
 
 # Stage 2: Python runtime with all engines
-FROM mambaorg/micromamba:1.5-jammy AS runtime
+FROM mambaorg/micromamba:1.5.11-jammy AS runtime
 
 # Create non-root user
 ARG MAMBA_USER=golfer
