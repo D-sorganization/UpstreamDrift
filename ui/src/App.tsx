@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SimulationPage } from './pages/Simulation';
 import { DashboardPage } from './pages/Dashboard';
@@ -10,10 +9,11 @@ import { MotionCapturePage } from './pages/MotionCapture';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
+import { useUIStore } from './stores';
 
 function App() {
-  const [helpOpen, setHelpOpen] = useState(false);
-  const handleCloseHelp = useCallback(() => setHelpOpen(false), []);
+  const helpOpen = useUIStore((s) => s.helpOpen);
+  const setHelpOpen = useUIStore((s) => s.setHelpOpen);
 
   return (
     <BrowserRouter>
@@ -29,7 +29,7 @@ function App() {
           <Route path="/tools/motion-capture" element={<MotionCapturePage />} />
         </Routes>
         <DiagnosticsPanel />
-        <HelpPanel isOpen={helpOpen} onClose={handleCloseHelp} />
+        <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
       </ToastProvider>
     </BrowserRouter>
   );
