@@ -9,7 +9,7 @@ Refactored to use shared engine availability module (DRY principle).
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     PINOCCHIO_AVAILABLE,
     skip_if_unavailable,

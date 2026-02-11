@@ -9,7 +9,7 @@ MoCapAct uses a specialized version of the dm_control humanoid.
 
 from pathlib import Path
 
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 # Configure logging
 setup_logging()

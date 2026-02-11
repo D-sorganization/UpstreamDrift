@@ -26,11 +26,11 @@ from scipy.signal import (
     welch,
 )
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     FASTDTW_AVAILABLE,
     NUMBA_AVAILABLE,
 )
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Import optional libraries based on availability
 if FASTDTW_AVAILABLE:

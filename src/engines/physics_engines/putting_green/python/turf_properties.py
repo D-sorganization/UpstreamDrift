@@ -21,7 +21,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.physics_constants import GRAVITY_M_S2
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 
 class GrassType(Enum):

@@ -72,11 +72,11 @@ with patch.dict("sys.modules", module_patches):
     # Patch availability flags so engines initialize with mock modules
     with (
         patch(
-            "src.shared.python.engine_availability.OPENSIM_AVAILABLE",
+            "src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE",
             True,
         ),
         patch(
-            "src.shared.python.engine_availability.MYOSUITE_AVAILABLE",
+            "src.shared.python.engine_core.engine_availability.MYOSUITE_AVAILABLE",
             True,
         ),
     ):

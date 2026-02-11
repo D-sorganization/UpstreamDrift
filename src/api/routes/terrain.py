@@ -15,7 +15,7 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from src.shared.python.terrain import (
+from src.shared.python.physics.terrain import (
     MATERIALS,
     TERRAIN_MATERIAL_MAP,
     ElevationMap,

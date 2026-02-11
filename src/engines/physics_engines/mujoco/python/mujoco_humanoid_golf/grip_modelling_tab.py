@@ -14,7 +14,7 @@ import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.grip_contact_model import (
     GripContactExporter,
     GripContactModel,

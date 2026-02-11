@@ -5,7 +5,7 @@ import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from src.shared.python.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineType
 
 router = APIRouter()
 

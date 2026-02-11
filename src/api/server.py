@@ -20,10 +20,10 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_manager import EngineManager
 
 # Configure logging - use centralized logging config
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 from .config import (
     get_allowed_hosts,

@@ -14,7 +14,7 @@ from src.shared.python.biomechanics.muscle_analysis import (
     MuscleSynergyAnalyzer,
     SynergyResult,
 )
-from src.shared.python.engine_availability import skip_if_unavailable
+from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 
 class TestSynergyResult:

@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
@@ -723,7 +723,7 @@ class URDFGeneratorWindow(QMainWindow):
 
 def main() -> None:
     """Main entry point for the URDF Generator."""
-    from src.shared.python.logging_config import configure_gui_logging
+    from src.shared.python.logging_pkg.logging_config import configure_gui_logging
 
     app = QApplication(sys.argv)
     app.setApplicationName("URDF Generator")

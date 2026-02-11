@@ -21,8 +21,10 @@ __author__ = "Golf Modeling Suite Team"
 
 from typing import Any
 
+from .core import GolfModelingError, setup_logging
+
 # Suite-wide constants and paths are now in constants.py
-from .constants import (
+from .core.constants import (
     DRAKE_ROOT,
     ENGINES_ROOT,
     MATLAB_2D_ROOT,
@@ -34,13 +36,18 @@ from .constants import (
     SHARED_ROOT,
     SUITE_ROOT,
 )
-from .core import GolfModelingError, setup_logging
-from .engine_manager import EngineManager, EngineStatus, EngineType
+from .engine_core.engine_manager import EngineManager, EngineStatus, EngineType
 
 # Heavy imports are made available through lazy loading
 _HEAVY_IMPORTS = {
-    "ComparativeSwingAnalyzer": ("comparative_analysis", "ComparativeSwingAnalyzer"),
-    "ComparativePlotter": ("comparative_plotting", "ComparativePlotter"),
+    "ComparativeSwingAnalyzer": (
+        "validation_pkg.comparative_analysis",
+        "ComparativeSwingAnalyzer",
+    ),
+    "ComparativePlotter": (
+        "validation_pkg.comparative_plotting",
+        "ComparativePlotter",
+    ),
 }
 
 

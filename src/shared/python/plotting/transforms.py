@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting.base import RecorderInterface
 
 logger = get_logger(__name__)

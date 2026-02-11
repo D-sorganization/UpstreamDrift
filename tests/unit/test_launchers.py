@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.shared.python.path_utils import get_repo_root, setup_import_paths
+from src.shared.python.data_io.path_utils import get_repo_root, setup_import_paths
 
 # Setup import paths for launch_golf_suite module access
 setup_import_paths()
@@ -171,7 +171,7 @@ class TestLauncherUtilities:
         """Test logging configuration."""
         try:
             # Should be able to import logging utilities
-            from src.shared.python.common_utils import setup_logging
+            from src.shared.python.data_io.common_utils import setup_logging
 
             logger = setup_logging("test_launcher")
             assert logger is not None
@@ -220,7 +220,10 @@ class TestLauncherIntegration:
     def test_shared_utilities_integration(self):
         """Test integration with shared utilities."""
         try:
-            from src.shared.python.common_utils import GolfModelingError, setup_logging
+            from src.shared.python.data_io.common_utils import (
+                GolfModelingError,
+                setup_logging,
+            )
 
             # Test error handling
             assert issubclass(GolfModelingError, Exception)

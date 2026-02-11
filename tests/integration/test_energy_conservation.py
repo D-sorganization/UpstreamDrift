@@ -17,7 +17,7 @@ from src.shared.python.core.numerical_constants import (
     TOLERANCE_ENERGY_CONSERVATION,
     TOLERANCE_WORK_ENERGY_MISMATCH,
 )
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     skip_if_unavailable,
 )

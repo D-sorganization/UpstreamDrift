@@ -23,7 +23,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.integrate import solve_ivp
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.core.constants import GRAVITY_M_S2
 
 logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------

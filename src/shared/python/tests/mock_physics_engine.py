@@ -6,7 +6,7 @@ from typing import cast
 
 import numpy as np
 
-from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine:

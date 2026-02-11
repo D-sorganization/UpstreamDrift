@@ -44,13 +44,13 @@ from src.engines.physics_engines.putting_green.python.turf_properties import (
     GrassType,
     TurfProperties,
 )
-from src.shared.python.checkpoint import StateCheckpoint
-from src.shared.python.physics_constants import (
+from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_CROSS_SECTIONAL_AREA_M2,
     PUTTING_WIND_DRAG_COEFFICIENT,
     PUTTING_WIND_FORCE_SCALING,
 )
+from src.shared.python.engine_core.checkpoint import StateCheckpoint
 
 
 @dataclass

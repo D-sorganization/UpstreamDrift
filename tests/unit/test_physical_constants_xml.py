@@ -4,7 +4,7 @@ import defusedxml.ElementTree as ET
 import numpy as np
 import pytest
 
-from src.shared.python.constants import (
+from src.shared.python.core.constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_MASS_KG,
     GRAVITY_M_S2,
@@ -199,7 +199,7 @@ class TestPhysicalConstantEdgeCases:
 
     def test_very_large_physical_constant(self):
         """Large constants (e.g., speed of light) format correctly."""
-        from src.shared.python.constants import SPEED_OF_LIGHT_M_S
+        from src.shared.python.core.constants import SPEED_OF_LIGHT_M_S
 
         xml = f"<speed>{float(SPEED_OF_LIGHT_M_S)}</speed>"
         root = ET.fromstring(xml)

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.plotting import GolfSwingPlotter
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 
 class TestAdvancedAnalysis:

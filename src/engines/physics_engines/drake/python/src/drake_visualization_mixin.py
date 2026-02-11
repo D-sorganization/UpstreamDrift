@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     MATPLOTLIB_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 HAS_QT = PYQT6_AVAILABLE
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
@@ -608,7 +608,7 @@ class DrakeVisualizationMixin:
             return
 
         try:
-            from shared.python.export import export_recording_all_formats
+            from shared.python.data_io.export import export_recording_all_formats
 
             data_dict = self.recorder.export_to_dict()
             results = export_recording_all_formats(filename, data_dict)
@@ -652,7 +652,9 @@ class DrakeVisualizationMixin:
             return
 
         from shared.python.plotting import GolfSwingPlotter
-        from shared.python.statistical_analysis import StatisticalAnalyzer
+        from shared.python.validation_pkg.statistical_analysis import (
+            StatisticalAnalyzer,
+        )
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(

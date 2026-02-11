@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import HTTPException, Request
 
 if TYPE_CHECKING:
-    from src.shared.python.engine_manager import EngineManager
+    from src.shared.python.engine_core.engine_manager import EngineManager
     from src.shared.python.gui_pkg.video_pose_pipeline import VideoPosePipeline
 
     from .services.analysis_service import AnalysisService

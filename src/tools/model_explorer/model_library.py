@@ -25,8 +25,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logger_utils import get_logger
-from src.shared.python.security_utils import validate_url_scheme
+from src.shared.python.logging_pkg.logger_utils import get_logger
+from src.shared.python.security.security_utils import validate_url_scheme
 
 # Resolve project root for model path resolution (no sys.path mutation)
 _project_root = next(

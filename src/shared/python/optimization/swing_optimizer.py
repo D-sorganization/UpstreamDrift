@@ -29,7 +29,7 @@ from typing import cast
 import numpy as np
 from scipy import optimize
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.core.constants import GRAVITY_M_S2
 
 
 class OptimizationObjective(Enum):

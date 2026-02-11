@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from src.shared.python.terrain import (
+from src.shared.python.physics.terrain import (
     ElevationMap,
     Terrain,
     TerrainPatch,
@@ -22,7 +22,7 @@ class TestTerrainAwareEngineInterface:
 
     def test_engine_accepts_terrain_config(self) -> None:
         """Engine should accept terrain configuration."""
-        from src.shared.python.terrain_engine import TerrainAwareEngine
+        from src.shared.python.physics.terrain_engine import TerrainAwareEngine
 
         terrain = create_flat_terrain("Test", 100.0, 100.0, TerrainType.FAIRWAY)
         engine = TerrainAwareEngine()
@@ -33,7 +33,7 @@ class TestTerrainAwareEngineInterface:
 
     def test_engine_terrain_ground_height(self) -> None:
         """Engine should query terrain for ground height."""
-        from src.shared.python.terrain_engine import TerrainAwareEngine
+        from src.shared.python.physics.terrain_engine import TerrainAwareEngine
 
         terrain = create_sloped_terrain(
             "Sloped",
@@ -56,7 +56,7 @@ class TestTerrainAwareEngineInterface:
 
     def test_engine_terrain_contact_normal(self) -> None:
         """Engine should provide terrain contact normal."""
-        from src.shared.python.terrain_engine import TerrainAwareEngine
+        from src.shared.python.physics.terrain_engine import TerrainAwareEngine
 
         terrain = create_sloped_terrain(
             "Sloped",
@@ -81,7 +81,7 @@ class TestTerrainAwareEngineInterface:
 
     def test_engine_terrain_friction(self) -> None:
         """Engine should provide terrain-specific friction."""
-        from src.shared.python.terrain_engine import TerrainAwareEngine
+        from src.shared.python.physics.terrain_engine import TerrainAwareEngine
 
         elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
         patches = [
@@ -101,7 +101,7 @@ class TestTerrainAwareEngineInterface:
 
     def test_engine_terrain_restitution(self) -> None:
         """Engine should provide terrain-specific restitution."""
-        from src.shared.python.terrain_engine import TerrainAwareEngine
+        from src.shared.python.physics.terrain_engine import TerrainAwareEngine
 
         elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
         patches = [
@@ -125,7 +125,7 @@ class TestTerrainContactModel:
 
     def test_ground_contact_detection(self) -> None:
         """Detect when object contacts terrain."""
-        from src.shared.python.terrain_engine import TerrainContactModel
+        from src.shared.python.physics.terrain_engine import TerrainContactModel
 
         terrain = create_flat_terrain("Flat", 100.0, 100.0)
         contact = TerrainContactModel(terrain)
@@ -141,7 +141,7 @@ class TestTerrainContactModel:
 
     def test_contact_force_normal(self) -> None:
         """Contact force should be normal to terrain surface."""
-        from src.shared.python.terrain_engine import TerrainContactModel
+        from src.shared.python.physics.terrain_engine import TerrainContactModel
 
         terrain = create_sloped_terrain(
             "Sloped",
@@ -166,7 +166,7 @@ class TestTerrainContactModel:
 
     def test_contact_penetration_force(self) -> None:
         """Contact force should increase with penetration depth."""
-        from src.shared.python.terrain_engine import TerrainContactModel
+        from src.shared.python.physics.terrain_engine import TerrainContactModel
 
         terrain = create_flat_terrain("Flat", 100.0, 100.0)
         contact = TerrainContactModel(terrain, stiffness=1e5, damping=1e3)
@@ -182,7 +182,7 @@ class TestTerrainContactModel:
 
     def test_friction_force(self) -> None:
         """Friction force should oppose motion."""
-        from src.shared.python.terrain_engine import TerrainContactModel
+        from src.shared.python.physics.terrain_engine import TerrainContactModel
 
         terrain = create_flat_terrain("Flat", 100.0, 100.0)
         contact = TerrainContactModel(terrain)
@@ -204,7 +204,7 @@ class TestTerrainPhysicsParameters:
 
     def test_terrain_parameters_registered(self) -> None:
         """Terrain parameters should be in registry."""
-        from src.shared.python.physics_parameters import get_parameter_registry
+        from src.shared.python.physics.physics_parameters import get_parameter_registry
 
         registry = get_parameter_registry()
 
@@ -219,7 +219,7 @@ class TestTerrainPhysicsParameters:
 
     def test_terrain_friction_values(self) -> None:
         """Terrain friction values should be physically reasonable."""
-        from src.shared.python.physics_parameters import get_parameter_registry
+        from src.shared.python.physics.physics_parameters import get_parameter_registry
 
         registry = get_parameter_registry()
 
@@ -238,7 +238,7 @@ class TestTerrainGeometryGeneration:
 
     def test_generate_heightfield_mesh(self) -> None:
         """Generate mesh from elevation map."""
-        from src.shared.python.terrain_engine import TerrainGeometryGenerator
+        from src.shared.python.physics.terrain_engine import TerrainGeometryGenerator
 
         terrain = create_sloped_terrain(
             "Sloped",
@@ -266,7 +266,7 @@ class TestTerrainGeometryGeneration:
 
     def test_generate_mujoco_hfield(self) -> None:
         """Generate MuJoCo heightfield data."""
-        from src.shared.python.terrain_engine import TerrainGeometryGenerator
+        from src.shared.python.physics.terrain_engine import TerrainGeometryGenerator
 
         terrain = create_sloped_terrain(
             "Sloped",
@@ -289,7 +289,7 @@ class TestTerrainGeometryGeneration:
 
     def test_generate_mujoco_xml_snippet(self) -> None:
         """Generate MuJoCo XML for terrain."""
-        from src.shared.python.terrain_engine import TerrainGeometryGenerator
+        from src.shared.python.physics.terrain_engine import TerrainGeometryGenerator
 
         terrain = create_flat_terrain("Test", 50.0, 100.0)
 
@@ -306,7 +306,7 @@ class TestTerrainEngineIntegration:
 
     def test_apply_terrain_to_mock_engine(self) -> None:
         """Apply terrain to a mock physics engine."""
-        from src.shared.python.terrain_engine import apply_terrain_to_engine
+        from src.shared.python.physics.terrain_engine import apply_terrain_to_engine
 
         # Create a mock engine
         class MockEngine:
@@ -329,7 +329,7 @@ class TestTerrainEngineIntegration:
 
     def test_terrain_update_during_simulation(self) -> None:
         """Terrain properties should update as object moves."""
-        from src.shared.python.terrain_engine import TerrainAwareEngine
+        from src.shared.python.physics.terrain_engine import TerrainAwareEngine
 
         elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
         patches = [
@@ -354,7 +354,7 @@ class TestCompressibleTurf:
 
     def test_compressible_material_properties(self) -> None:
         """Materials should have compressibility properties."""
-        from src.shared.python.terrain import MATERIALS
+        from src.shared.python.physics.terrain import MATERIALS
 
         # Check compressibility is defined
         fairway = MATERIALS["fairway"]
@@ -369,7 +369,7 @@ class TestCompressibleTurf:
 
     def test_compressible_turf_contact(self) -> None:
         """Test contact force on compressible turf."""
-        from src.shared.python.terrain_engine import CompressibleTurfModel
+        from src.shared.python.physics.terrain_engine import CompressibleTurfModel
 
         terrain = create_flat_terrain("Test", 100.0, 100.0, TerrainType.FAIRWAY)
         turf = CompressibleTurfModel(terrain)
@@ -382,7 +382,7 @@ class TestCompressibleTurf:
 
     def test_compression_state(self) -> None:
         """Test compression state calculation."""
-        from src.shared.python.terrain_engine import CompressibleTurfModel
+        from src.shared.python.physics.terrain_engine import CompressibleTurfModel
 
         terrain = create_flat_terrain("Test", 100.0, 100.0, TerrainType.ROUGH)
         turf = CompressibleTurfModel(terrain)
@@ -396,7 +396,7 @@ class TestCompressibleTurf:
 
     def test_lie_quality_calculation(self) -> None:
         """Test ball lie quality on different surfaces."""
-        from src.shared.python.terrain_engine import CompressibleTurfModel
+        from src.shared.python.physics.terrain_engine import CompressibleTurfModel
 
         # Fairway should have good lie
         fairway_terrain = create_flat_terrain(
@@ -420,7 +420,7 @@ class TestCompressibleTurf:
 
     def test_energy_absorption(self) -> None:
         """Test energy absorption during impact."""
-        from src.shared.python.terrain_engine import CompressibleTurfModel
+        from src.shared.python.physics.terrain_engine import CompressibleTurfModel
 
         terrain = create_flat_terrain("Test", 100.0, 100.0, TerrainType.BUNKER)
         turf = CompressibleTurfModel(terrain)
@@ -445,7 +445,7 @@ class TestCompressibleTurf:
 
     def test_soft_turf_material(self) -> None:
         """Test soft turf material for wet conditions."""
-        from src.shared.python.terrain import MATERIALS
+        from src.shared.python.physics.terrain import MATERIALS
 
         assert "soft_turf" in MATERIALS
         soft = MATERIALS["soft_turf"]
@@ -456,7 +456,7 @@ class TestCompressibleTurf:
 
     def test_progressive_stiffening(self) -> None:
         """Test that stiffness increases with compression."""
-        from src.shared.python.terrain_engine import CompressibleTurfModel
+        from src.shared.python.physics.terrain_engine import CompressibleTurfModel
 
         terrain = create_flat_terrain("Test", 100.0, 100.0, TerrainType.FAIRWAY)
         turf = CompressibleTurfModel(terrain)
@@ -477,7 +477,7 @@ class TestTerrainValidation:
 
     def test_validate_terrain_dimensions(self) -> None:
         """Terrain dimensions should be validated."""
-        from src.shared.python.terrain_engine import validate_terrain
+        from src.shared.python.physics.terrain_engine import validate_terrain
 
         terrain = create_flat_terrain("Test", 100.0, 200.0)
         errors = validate_terrain(terrain)
@@ -486,7 +486,7 @@ class TestTerrainValidation:
 
     def test_validate_terrain_patches_within_bounds(self) -> None:
         """Patches should be within terrain bounds."""
-        from src.shared.python.terrain_engine import validate_terrain
+        from src.shared.python.physics.terrain_engine import validate_terrain
 
         elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
         # Patch extends beyond terrain
@@ -500,7 +500,7 @@ class TestTerrainValidation:
 
     def test_validate_terrain_resolution(self) -> None:
         """Terrain resolution should be reasonable."""
-        from src.shared.python.terrain_engine import validate_terrain
+        from src.shared.python.physics.terrain_engine import validate_terrain
 
         # Very low resolution terrain
         terrain = create_flat_terrain("Test", 100.0, 100.0, resolution=50.0)

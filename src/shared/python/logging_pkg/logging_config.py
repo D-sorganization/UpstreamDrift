@@ -5,7 +5,7 @@ across the codebase, addressing DRY violations identified in Pragmatic
 Programmer reviews.
 
 Usage:
-    from src.shared.python.logging_config import (
+    from src.shared.python.logging_pkg.logging_config import (
         setup_logging,
         get_logger,
         LogLevel,
@@ -195,7 +195,7 @@ def configure_test_logging(
 
     Example:
         # In conftest.py or test setup
-        from src.shared.python.logging_config import configure_test_logging
+        from src.shared.python.logging_pkg.logging_config import configure_test_logging
         configure_test_logging()
     """
     if capture_warnings:
@@ -228,7 +228,7 @@ def configure_gui_logging(
 
     Example:
         # In GUI application startup
-        from src.shared.python.logging_config import configure_gui_logging
+        from src.shared.python.logging_pkg.logging_config import configure_gui_logging
         configure_gui_logging()
     """
     return setup_logging(

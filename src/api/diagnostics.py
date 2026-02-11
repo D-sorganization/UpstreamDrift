@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -387,7 +387,7 @@ class APIDiagnostics:
         details: dict[str, Any] = {}
 
         try:
-            from src.shared.python.engine_manager import EngineManager
+            from src.shared.python.engine_core.engine_manager import EngineManager
 
             manager = EngineManager()
             engines = manager.get_available_engines()

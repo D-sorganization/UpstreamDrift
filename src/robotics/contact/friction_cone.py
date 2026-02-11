@@ -15,7 +15,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.core.contracts import postcondition, precondition
 
 
 @dataclass(frozen=True)

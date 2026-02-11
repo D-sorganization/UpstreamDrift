@@ -4,7 +4,7 @@ import sys
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 try:
     import pinocchio as pin

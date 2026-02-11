@@ -5,7 +5,7 @@ This shim preserves the old import path so existing code (e.g.
 ``engine_manager.py``) continues to work without changes.
 
 Migration:
-    Old: from src.shared.python.engine_loaders import LOADER_MAP
+    Old: from src.shared.python.engine_core.engine_loaders import LOADER_MAP
     New: from src.engines.loaders import LOADER_MAP
 """
 

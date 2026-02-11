@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.terrain import (
+from src.shared.python.physics.terrain import (
     ElevationMap,
     Terrain,
     TerrainPatch,
@@ -17,7 +17,7 @@ from src.shared.python.terrain import (
     create_flat_terrain,
     create_sloped_terrain,
 )
-from src.shared.python.terrain_engine import (
+from src.shared.python.physics.terrain_engine import (
     CompressibleTurfModel,
     TerrainAwareEngine,
     TerrainContactModel,

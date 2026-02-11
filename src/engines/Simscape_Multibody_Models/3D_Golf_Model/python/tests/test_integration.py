@@ -19,7 +19,7 @@ from src.c3d_reader import (
 )
 
 # Use centralized availability check
-from src.shared.python.engine_availability import EZC3D_AVAILABLE
+from src.shared.python.engine_core.engine_availability import EZC3D_AVAILABLE
 
 
 class TestPackageIntegration:

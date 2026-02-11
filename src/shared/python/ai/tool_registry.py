@@ -26,7 +26,7 @@ from typing import Any, get_type_hints
 
 from src.shared.python.ai.exceptions import ToolExecutionError
 from src.shared.python.ai.types import ToolResult
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

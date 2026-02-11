@@ -16,8 +16,8 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from src.shared.python.engine_availability import DRAKE_AVAILABLE
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 
 
 @unittest.skipUnless(DRAKE_AVAILABLE, "Drake not available")

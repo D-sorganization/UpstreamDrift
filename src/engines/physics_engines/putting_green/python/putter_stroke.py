@@ -23,7 +23,7 @@ from enum import Enum
 import numpy as np
 
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import BallState
-from src.shared.python.physics_constants import (
+from src.shared.python.core.physics_constants import (
     DEG_TO_RAD,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,

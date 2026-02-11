@@ -13,7 +13,10 @@ import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 from zmqRemoteApi import RemoteAPIClient
 
-from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
 
 # Set up logging
 configure_gui_logging()

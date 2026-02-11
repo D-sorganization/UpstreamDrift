@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
 

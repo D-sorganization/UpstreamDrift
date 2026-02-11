@@ -22,7 +22,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.subprocess_utils import kill_process_tree
 
 if TYPE_CHECKING:

@@ -5,7 +5,7 @@ Issue #755: Added comprehensive tests for MuJoCo preview and visualization toggl
 
 import pytest
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     PYQT6_AVAILABLE,
     PYTEST_QT_AVAILABLE,

@@ -9,7 +9,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from src.shared.python.path_utils import get_src_root
+from src.shared.python.data_io.path_utils import get_src_root
 
 # Directories to ignore
 IGNORE_DIRS = {

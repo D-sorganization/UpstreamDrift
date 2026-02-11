@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from src.shared.python.engine_availability import skip_if_unavailable
+from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 # Mock modules before importing
 sys.modules["pydrake"] = MagicMock()

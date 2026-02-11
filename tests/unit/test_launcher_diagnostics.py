@@ -380,7 +380,7 @@ class TestTileLoadingVerification:
         """Verify ModelRegistry loads all expected tiles."""
         try:
             from src.launchers.launcher_diagnostics import REPOS_ROOT
-            from src.shared.python.model_registry import ModelRegistry
+            from src.shared.python.config.model_registry import ModelRegistry
 
             registry_path = REPOS_ROOT / "src" / "config" / "models.yaml"
             if not registry_path.exists():

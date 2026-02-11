@@ -8,7 +8,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
 
 # Configure Logging using centralized module
 configure_gui_logging()
@@ -49,8 +52,8 @@ def _lazy_load_engine_manager() -> tuple[Any, Any]:
     """Lazily load EngineManager to speed up initial import."""
     global _EngineManager, _EngineType
     if _EngineManager is None:
-        from src.shared.python.engine_manager import EngineManager as _EM
-        from src.shared.python.engine_manager import EngineType as _ET
+        from src.shared.python.engine_core.engine_manager import EngineManager as _EM
+        from src.shared.python.engine_core.engine_manager import EngineType as _ET
 
         _EngineManager = _EM
         _EngineType = _ET
@@ -61,7 +64,7 @@ def _lazy_load_model_registry() -> Any:
     """Lazily load ModelRegistry to speed up initial import."""
     global _ModelRegistry
     if _ModelRegistry is None:
-        from src.shared.python.model_registry import ModelRegistry as _MR
+        from src.shared.python.config.model_registry import ModelRegistry as _MR
 
         _ModelRegistry = _MR
     return _ModelRegistry

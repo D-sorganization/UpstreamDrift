@@ -42,7 +42,7 @@ def test_load_mujoco_success(tmp_path: object) -> None:
             "shared.python.engine_probes": mock_probe_module,
         },
     ):
-        from shared.python.engine_loaders import load_mujoco_engine
+        from shared.python.engine_core.engine_loaders import load_mujoco_engine
 
         load_mujoco_engine(path)
 
@@ -84,7 +84,7 @@ def test_load_drake_missing(tmp_path: object) -> None:
                     "matlab.engine": MagicMock(),
                 },
             ):
-                from shared.python.engine_loaders import load_drake_engine
+                from shared.python.engine_core.engine_loaders import load_drake_engine
 
                 # load_drake_engine catches ImportError and raises GolfModelingError
                 with pytest.raises(Exception) as excinfo:

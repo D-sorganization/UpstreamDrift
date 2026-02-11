@@ -19,7 +19,7 @@ from typing import cast
 import numpy as np
 from scipy.integrate import solve_ivp  # type: ignore
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
@@ -80,7 +80,7 @@ class UnifiedLaunchConditions:
         wind_direction_deg: float = 0.0,
     ) -> UnifiedLaunchConditions:
         """Create launch conditions from imperial units."""
-        from src.shared.python.physics_constants import MPH_TO_MPS
+        from src.shared.python.core.physics_constants import MPH_TO_MPS
 
         return cls(
             ball_speed=ball_speed_mph * MPH_TO_MPS,

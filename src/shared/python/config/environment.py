@@ -32,7 +32,7 @@ from __future__ import annotations
 import os
 from typing import TypeVar
 
-from src.shared.python.error_utils import ConfigurationError
+from src.shared.python.core.error_utils import ConfigurationError
 
 T = TypeVar("T")
 

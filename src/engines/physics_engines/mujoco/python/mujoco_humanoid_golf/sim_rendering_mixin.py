@@ -14,7 +14,7 @@ import mujoco
 import numpy as np
 from PyQt6 import QtGui
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Lazy loading globals for OpenCV
 CV2_LIB = None

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 # Note: Import paths for the `src` package are configured at the test runner /
 # package level (e.g., via pyproject.toml or conftest.py), so no manual
-from src.shared.python.secure_subprocess import (
+from src.shared.python.security.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,
@@ -88,7 +88,7 @@ class TestSecureSubprocess(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             validate_script_path(nonexistent, self.suite_root)
 
-    @patch("src.shared.python.secure_subprocess.subprocess.Popen")
+    @patch("src.shared.python.security.secure_subprocess.subprocess.Popen")
     def test_secure_popen_valid_command(self, mock_popen):
         """Test secure_popen with valid command."""
         mock_process = MagicMock()
@@ -113,7 +113,7 @@ class TestSecureSubprocess(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             secure_popen(["echo", "test"], shell=True, suite_root=self.suite_root)
 
-    @patch("src.shared.python.secure_subprocess.subprocess.run")
+    @patch("src.shared.python.security.secure_subprocess.subprocess.run")
     def test_secure_run_valid_command(self, mock_run):
         """Test secure_run with valid command."""
         mock_result = MagicMock()

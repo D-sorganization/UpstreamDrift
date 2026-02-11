@@ -6,7 +6,7 @@ two-link inclined plane with universal joint, and gimbal joint demonstration.
 
 from __future__ import annotations
 
-from src.shared.python import constants
+from src.shared.python.core import constants
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)

@@ -45,7 +45,7 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

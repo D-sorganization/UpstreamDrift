@@ -62,7 +62,7 @@ def test_launch_function():
 
 def test_show_status():
     with (
-        patch("shared.python.engine_manager.EngineManager") as mock_mgr_cls,
+        patch("shared.python.engine_core.engine_manager.EngineManager") as mock_mgr_cls,
         patch("builtins.print") as mock_print,
     ):
         mock_mgr = mock_mgr_cls.return_value
@@ -95,7 +95,9 @@ def test_show_status():
         launcher = UnifiedLauncher()
 
         with (
-            patch("shared.python.engine_manager.EngineManager") as mock_mgr_cls,
+            patch(
+                "shared.python.engine_core.engine_manager.EngineManager"
+            ) as mock_mgr_cls,
             patch("builtins.print") as mock_print,
         ):
             mock_mgr = mock_mgr_cls.return_value

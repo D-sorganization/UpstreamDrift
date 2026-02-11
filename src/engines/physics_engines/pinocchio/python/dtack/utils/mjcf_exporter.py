@@ -8,8 +8,8 @@ from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
 
-from src.shared.python.constants import GRAVITY_M_S2
-from src.shared.python.logging_config import get_logger
+from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

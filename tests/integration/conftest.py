@@ -8,7 +8,7 @@ to all integration tests via pytest's automatic fixture discovery.
 
 from __future__ import annotations
 
-from src.shared.python.path_utils import get_tests_root, setup_import_paths
+from src.shared.python.data_io.path_utils import get_tests_root, setup_import_paths
 
 # Setup standard import paths and add fixtures directory
 FIXTURES_DIR = get_tests_root() / "fixtures"

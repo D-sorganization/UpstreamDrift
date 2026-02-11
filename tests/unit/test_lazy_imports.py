@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import skip_if_unavailable
-from src.shared.python.gui_utils import get_qapp
+from src.shared.python.engine_core.engine_availability import skip_if_unavailable
+from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 
 class TestSharedModuleLazyImports:
@@ -38,7 +38,7 @@ class TestSharedModuleLazyImports:
     def test_common_utils_imports(self):
         """Verify common_utils.py imports numpy/pandas but not matplotlib."""
         # Avoid deleting from sys.modules as it causes pandas C-API errors.
-        from src.shared.python import common_utils
+        from src.shared.python.data_io import common_utils
 
         # common_utils imports numpy and pandas at module level for utility functions
         # but NOT matplotlib (which is only imported where needed for plotting)

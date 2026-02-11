@@ -2,12 +2,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_manager import (
+from src.shared.python.data_io.path_utils import get_src_root
+from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
     EngineType,
 )
-from src.shared.python.path_utils import get_src_root
 
 
 @pytest.fixture
@@ -33,7 +33,9 @@ def test_mujoco_loading_success(mock_engine_manager):
     mock_registration = MagicMock()
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry
@@ -54,7 +56,9 @@ def test_mujoco_loading_failure_no_registration(mock_engine_manager):
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
     # Mock registry returning no registration
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = None
         mock_get_reg.return_value = mock_registry
@@ -75,7 +79,9 @@ def test_drake_loading_success(mock_engine_manager):
     mock_registration = MagicMock()
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry
@@ -100,7 +106,9 @@ def test_pinocchio_loading_success(mock_engine_manager):
     mock_registration = MagicMock()
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry

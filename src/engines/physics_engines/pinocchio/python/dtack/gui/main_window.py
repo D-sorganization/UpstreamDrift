@@ -8,8 +8,8 @@ import numpy as np
 import pinocchio as pin
 from PySide6 import QtWidgets
 
-from src.shared.python.biomechanics_data import BiomechanicalData
-from src.shared.python.logging_config import get_logger
+from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas, RecorderInterface
 
 from ..sim.dynamics import DynamicsEngine

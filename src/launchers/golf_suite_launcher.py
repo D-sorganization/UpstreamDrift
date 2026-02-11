@@ -16,8 +16,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
 
 # Configure logging for GUI application
 configure_gui_logging()

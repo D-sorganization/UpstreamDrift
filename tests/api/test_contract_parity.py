@@ -24,7 +24,7 @@ from src.api.models.responses import (
     AnalysisResponse,
     SimulationResponse,
 )
-from src.shared.python.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 # ──────────────────────────────────────────────────────────────

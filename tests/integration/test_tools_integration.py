@@ -126,7 +126,7 @@ class TestEngineModelCompatibility:
     def test_model_registry_available(self) -> None:
         """Verify model registry can enumerate available models."""
         try:
-            from src.shared.python.model_registry import ModelRegistry
+            from src.shared.python.config.model_registry import ModelRegistry
 
             registry = ModelRegistry()
             models = registry.get_all_models()

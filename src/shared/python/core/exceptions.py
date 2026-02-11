@@ -11,7 +11,7 @@ Migration:
     from src.shared.python.core.exceptions import GolfModelingError, EngineNotFoundError
 
     # New import (preferred):
-    from src.shared.python.error_utils import GolfSuiteError, EngineNotAvailableError
+    from src.shared.python.core.error_utils import GolfSuiteError, EngineNotAvailableError
 """
 
 import warnings

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.data_io.path_utils import get_repo_root
 
 # Import paths configured at test runner level via pyproject.toml/conftest.py
 project_root = get_repo_root()
@@ -35,7 +35,9 @@ example02_path = project_root / "examples" / "02_parameter_sweeps.py"
 def test_example_01_runs() -> None:
     """Test Example 01 runs without error (mocked)."""
     # Mock engine manager to simulate missing engine and return False
-    with patch("src.shared.python.engine_manager.EngineManager") as MockManager:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.EngineManager"
+    ) as MockManager:
         instance = MockManager.return_value
         instance.switch_engine.return_value = False
 

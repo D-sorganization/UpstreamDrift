@@ -10,14 +10,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.common_utils import GolfModelingError
-from src.shared.python.engine_loaders import (
+from src.shared.python.data_io.common_utils import GolfModelingError
+from src.shared.python.engine_core.engine_loaders import (
     LOADER_MAP,
     load_drake_engine,
     load_mujoco_engine,
     load_pinocchio_engine,
 )
-from src.shared.python.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 @pytest.fixture
@@ -56,7 +56,9 @@ def test_loader_map_from_canonical_location() -> None:
 def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of MuJoCo engine."""
     with (
-        patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls,
+        patch(
+            "src.shared.python.engine_core.engine_probes.MuJoCoProbe"
+        ) as mock_probe_cls,
         patch(
             "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
         ) as mock_engine_cls,
@@ -82,7 +84,9 @@ def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
 @patch.dict(sys.modules, {"mujoco": MagicMock()})
 def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
     """Test MuJoCo engine loading when probe fails."""
-    with patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls:
+    with patch(
+        "src.shared.python.engine_core.engine_probes.MuJoCoProbe"
+    ) as mock_probe_cls:
         # Setup Probe to fail
         mock_probe = mock_probe_cls.return_value
         mock_result = MagicMock()
@@ -112,7 +116,9 @@ def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
 def test_load_drake_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Drake engine."""
     with (
-        patch("src.shared.python.engine_probes.DrakeProbe") as mock_probe_cls,
+        patch(
+            "src.shared.python.engine_core.engine_probes.DrakeProbe"
+        ) as mock_probe_cls,
         patch(
             "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
         ) as mock_engine_cls,
@@ -141,7 +147,9 @@ def test_load_drake_engine_success(mock_suite_root: Path) -> None:
 def test_load_pinocchio_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Pinocchio engine."""
     with (
-        patch("src.shared.python.engine_probes.PinocchioProbe") as mock_probe_cls,
+        patch(
+            "src.shared.python.engine_core.engine_probes.PinocchioProbe"
+        ) as mock_probe_cls,
         patch(
             "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
         ) as mock_engine_cls,

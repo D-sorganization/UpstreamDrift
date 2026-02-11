@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from src.shared.python import constants
+from src.shared.python.core import constants
 
 # Default gravity vector (spatial acceleration)
 # -9.81 m/s^2 in z-direction (standard earth gravity)

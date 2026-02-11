@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.shared.python.security_utils import validate_path, validate_url_scheme
+from src.shared.python.security.security_utils import validate_path, validate_url_scheme
 
 
 def test_validate_path_success(tmp_path: Path) -> None:

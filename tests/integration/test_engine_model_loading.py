@@ -2,12 +2,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_manager import (
+from src.shared.python.data_io.path_utils import get_src_root
+from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
     EngineType,
 )
-from src.shared.python.path_utils import get_src_root
 
 
 @pytest.fixture
@@ -29,7 +29,9 @@ def test_mujoco_loads_default_model(mock_engine_manager):
     mock_registration = MagicMock()
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry
@@ -49,7 +51,9 @@ def test_pinocchio_loads_default_model(mock_engine_manager):
     mock_registration = MagicMock()
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry
@@ -69,7 +73,9 @@ def test_drake_loads_default_model(mock_engine_manager):
     mock_registration = MagicMock()
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock()
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry

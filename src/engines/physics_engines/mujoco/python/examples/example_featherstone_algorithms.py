@@ -8,7 +8,7 @@ import numpy as np
 from mujoco_humanoid_golf.rigid_body_dynamics import aba, crba, rnea
 from mujoco_humanoid_golf.spatial_algebra import mci, xlt
 
-from src.shared.python import constants
+from src.shared.python.core import constants
 
 
 def create_2link_model() -> dict:
