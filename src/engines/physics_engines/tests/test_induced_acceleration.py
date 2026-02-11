@@ -117,7 +117,7 @@ def test_mujoco_iaa_logic():
 
     try:
         phys = MockPhysics()
-    except Exception:
+    except (ImportError, ModuleNotFoundError):
         pytest.skip("Failed to initialize MuJoCo model")
 
     res = iaa_helper.compute_induced_accelerations(phys)

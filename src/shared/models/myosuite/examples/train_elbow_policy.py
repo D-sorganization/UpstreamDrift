@@ -132,7 +132,7 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             # Visualize (if display available)
             try:
                 env.mj_render()
-            except Exception:
+            except (ValueError, RuntimeError):
                 pass  # Headless mode
 
         logger.info(f"Episode {episode + 1}: Steps={step}, Reward={total_reward:.2f}")
