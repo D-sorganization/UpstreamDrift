@@ -3,6 +3,9 @@ import { render } from '@testing-library/react';
 import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from '@/components/ui/Toast';
+import { useEngineStore } from '@/stores/useEngineStore';
+import { useSimulationStore } from '@/stores/useSimulationStore';
+import type { ManagedEngine } from '@/stores/useEngineStore';
 
 // Mock the useSimulation hook
 const mockSimulation = {
@@ -19,52 +22,6 @@ const mockSimulation = {
 
 vi.mock('@/api/client', () => ({
   useSimulation: vi.fn(() => mockSimulation),
-}));
-
-// Mock the engine manager
-interface MockEngine {
-  name: string;
-  displayName: string;
-  description: string;
-  loadState: string;
-  available: boolean;
-  capabilities: string[];
-  version?: string;
-}
-
-const mockEngineManager: {
-  engines: MockEngine[];
-  loadedEngines: MockEngine[];
-  getEngine: ReturnType<typeof vi.fn>;
-  requestLoad: ReturnType<typeof vi.fn>;
-  unloadEngine: ReturnType<typeof vi.fn>;
-} = {
-  engines: [
-    {
-      name: 'mujoco',
-      displayName: 'MuJoCo',
-      description: 'High-performance physics',
-      loadState: 'idle',
-      available: true,
-      capabilities: ['rigid_body'],
-    },
-    {
-      name: 'drake',
-      displayName: 'Drake',
-      description: 'Optimization-based dynamics',
-      loadState: 'idle',
-      available: true,
-      capabilities: ['rigid_body'],
-    },
-  ],
-  loadedEngines: [],
-  getEngine: vi.fn(),
-  requestLoad: vi.fn(),
-  unloadEngine: vi.fn(),
-};
-
-vi.mock('@/api/useEngineManager', () => ({
-  useEngineManager: vi.fn(() => mockEngineManager),
 }));
 
 // Mock Scene3D
@@ -121,7 +78,12 @@ const createWrapper = () => {
 describe('SimulationPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset mock state
+
+    // Reset stores
+    useEngineStore.getState().resetEngines();
+    useSimulationStore.getState().resetParameters();
+
+    // Reset mock simulation state
     Object.assign(mockSimulation, {
       isRunning: false,
       isPaused: false,
@@ -132,31 +94,6 @@ describe('SimulationPage', () => {
       stop: vi.fn(),
       pause: vi.fn(),
       resume: vi.fn(),
-    });
-
-    // Reset engine manager to idle state (no engines loaded)
-    Object.assign(mockEngineManager, {
-      engines: [
-        {
-          name: 'mujoco',
-          displayName: 'MuJoCo',
-          description: 'High-performance physics',
-          loadState: 'idle',
-          available: true,
-          capabilities: ['rigid_body'],
-        },
-        {
-          name: 'drake',
-          displayName: 'Drake',
-          description: 'Optimization-based dynamics',
-          loadState: 'idle',
-          available: true,
-          capabilities: ['rigid_body'],
-        },
-      ],
-      loadedEngines: [],
-      requestLoad: vi.fn(),
-      unloadEngine: vi.fn(),
     });
   });
 
@@ -210,30 +147,15 @@ describe('SimulationPage', () => {
 
   describe('engine loaded state', () => {
     beforeEach(() => {
-      const loadedEngine = {
-        name: 'mujoco',
-        displayName: 'MuJoCo',
-        description: 'High-performance physics',
-        loadState: 'loaded' as const,
-        available: true,
-        capabilities: ['rigid_body'],
-        version: '3.1.0',
-      };
-
-      Object.assign(mockEngineManager, {
-        engines: [
-          loadedEngine,
-          {
-            name: 'drake',
-            displayName: 'Drake',
-            description: 'Optimization-based dynamics',
-            loadState: 'idle',
-            available: true,
-            capabilities: ['rigid_body'],
-          },
-        ],
-        loadedEngines: [loadedEngine],
-      });
+      // Set engine to loaded in the store
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco'
+            ? { ...e, loadState: 'loaded' as const, version: '3.1.0' }
+            : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
     });
 
     it('shows engine count for loaded engines', () => {
@@ -245,7 +167,6 @@ describe('SimulationPage', () => {
     it('shows "Ready" when engine loaded and selected', async () => {
       render(<SimulationPage />, { wrapper: createWrapper() });
 
-      // The auto-select effect runs and selects 'mujoco'
       await waitFor(() => {
         expect(screen.getByText('Ready')).toBeInTheDocument();
       });
@@ -261,19 +182,14 @@ describe('SimulationPage', () => {
     };
 
     beforeEach(() => {
-      const loadedEngine = {
-        name: 'mujoco',
-        displayName: 'MuJoCo',
-        description: 'High-performance physics',
-        loadState: 'loaded' as const,
-        available: true,
-        capabilities: ['rigid_body'],
-      };
-
-      Object.assign(mockEngineManager, {
-        engines: [loadedEngine],
-        loadedEngines: [loadedEngine],
-      });
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco'
+            ? { ...e, loadState: 'loaded' as const }
+            : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
 
       Object.assign(mockSimulation, {
         isRunning: true,
@@ -312,19 +228,14 @@ describe('SimulationPage', () => {
 
   describe('simulation controls interaction', () => {
     beforeEach(() => {
-      const loadedEngine = {
-        name: 'mujoco',
-        displayName: 'MuJoCo',
-        description: 'High-performance physics',
-        loadState: 'loaded' as const,
-        available: true,
-        capabilities: ['rigid_body'],
-      };
-
-      Object.assign(mockEngineManager, {
-        engines: [loadedEngine],
-        loadedEngines: [loadedEngine],
-      });
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco'
+            ? { ...e, loadState: 'loaded' as const }
+            : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
     });
 
     it('calls start when start button is clicked', async () => {
@@ -394,6 +305,46 @@ describe('SimulationPage', () => {
 
       const main = document.querySelector('main');
       expect(main?.className).toContain('flex-1');
+    });
+  });
+
+  describe('store integration', () => {
+    it('reads parameters from simulation store', () => {
+      useSimulationStore.getState().setParameters({ duration: 10.0 });
+
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      // The store's parameters should be used when start is clicked
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco'
+            ? { ...e, loadState: 'loaded' as const }
+            : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
+    });
+
+    it('marks run in store when simulation starts', async () => {
+      useEngineStore.setState((state) => ({
+        engines: state.engines.map((e: ManagedEngine) =>
+          e.name === 'mujoco'
+            ? { ...e, loadState: 'loaded' as const }
+            : e
+        ),
+        selectedEngine: 'mujoco',
+      }));
+
+      render(<SimulationPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        const startBtn = screen.getByRole('button', { name: /start simulation/i });
+        expect(startBtn).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /start simulation/i }));
+
+      expect(useSimulationStore.getState().hasRun).toBe(true);
     });
   });
 });

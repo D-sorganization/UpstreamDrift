@@ -10,6 +10,8 @@ import { render } from '@testing-library/react';
 import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from '@/components/ui/Toast';
+import { useEngineStore } from '@/stores/useEngineStore';
+import { useSimulationStore } from '@/stores/useSimulationStore';
 
 // Use actual components - don't mock the internal ones for integration tests
 // Only mock external dependencies (WebSocket, API calls)
@@ -145,6 +147,10 @@ describe('Simulation Workflow Integration', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     MockWebSocket.reset();
     vi.stubGlobal('WebSocket', MockWebSocket);
+
+    // Reset stores to clean state
+    useEngineStore.getState().resetEngines();
+    useSimulationStore.getState().resetParameters();
 
     // Mock fetch for engines API
     // Mock fetch for engines API
@@ -503,6 +509,10 @@ describe('Multi-session workflow', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     MockWebSocket.reset();
     vi.stubGlobal('WebSocket', MockWebSocket);
+
+    // Reset stores to clean state
+    useEngineStore.getState().resetEngines();
+    useSimulationStore.getState().resetParameters();
 
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url.includes('/probe')) {

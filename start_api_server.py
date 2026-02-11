@@ -17,9 +17,9 @@ from src.shared.python.launcher_utils import (
     get_repo_root,
     invoke_main,
 )
+from src.shared.python.logging_config import get_logger, setup_logging
 
 from api.server import app
-from src.shared.python.logging_config import get_logger, setup_logging
 
 setup_logging(use_simple_format=True)
 logger = get_logger(__name__)
