@@ -9,12 +9,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import skip_if_unavailable
-from src.shared.python.muscle_analysis import (
+from src.shared.python.biomechanics.muscle_analysis import (
     SKLEARN_AVAILABLE,
     MuscleSynergyAnalyzer,
     SynergyResult,
 )
+from src.shared.python.engine_availability import skip_if_unavailable
 
 
 class TestSynergyResult:

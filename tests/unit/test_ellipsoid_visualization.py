@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from src.shared.python.ellipsoid_visualization import (
+from src.shared.python.gui_pkg.ellipsoid_visualization import (
     EllipsoidData,
     EllipsoidSequence,
     EllipsoidVisualizer,

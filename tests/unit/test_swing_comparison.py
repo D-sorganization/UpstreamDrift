@@ -5,12 +5,12 @@ from unittest.mock import patch
 
 import numpy as np
 
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
-from src.shared.python.swing_comparison import (
+from src.shared.python.biomechanics.swing_comparison import (
     ComparisonMetric,
     DTWResult,
     SwingComparator,
 )
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 
 class TestSwingComparison(unittest.TestCase):
