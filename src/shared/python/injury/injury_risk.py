@@ -20,7 +20,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 import numpy as np
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 class RiskLevel(Enum):
     """Overall risk level categories."""
@@ -578,12 +581,12 @@ if __name__ == "__main__":
     report = scorer.score(spinal_result, joint_results, swing_metrics, training_load)
 
     for region, score in report.region_scores.items():
-        print(f"  {region.value}: {score:.1f}")  # noqa: T201
+        logger.info(f"  {region.value}: {score:.1f}")  # noqa: T201
 
-    print("\nTop Risks:")  # noqa: T201
+    logger.info("\nTop Risks:")  # noqa: T201
     for risk in report.top_risks:
-        print(f"  - {risk}")  # noqa: T201
+        logger.info(f"  - {risk}")  # noqa: T201
 
-    print("\nRecommendations:")  # noqa: T201
+    logger.info("\nRecommendations:")  # noqa: T201
     for rec in report.recommendations:
-        print(f"  - {rec}")  # noqa: T201
+        logger.info(f"  - {rec}")  # noqa: T201

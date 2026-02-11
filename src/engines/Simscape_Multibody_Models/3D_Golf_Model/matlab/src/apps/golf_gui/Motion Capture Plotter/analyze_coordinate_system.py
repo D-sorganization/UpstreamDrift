@@ -78,29 +78,29 @@ def analyze_coordinate_system():
     club_z_range = [min(d["club_Z"] for d in data), max(d["club_Z"] for d in data)]
 
     logger.info("Mid-hands motion ranges:")
-    print(
+    logger.info(
         f"  X: {mid_x_range[0]:.3f} to {mid_x_range[1]:.3f} "
         f"(range: {mid_x_range[1] - mid_x_range[0]:.3f})"
     )
-    print(
+    logger.info(
         f"  Y: {mid_y_range[0]:.3f} to {mid_y_range[1]:.3f} "
         f"(range: {mid_y_range[1] - mid_y_range[0]:.3f})"
     )
-    print(
+    logger.info(
         f"  Z: {mid_z_range[0]:.3f} to {mid_z_range[1]:.3f} "
         f"(range: {mid_z_range[1] - mid_z_range[0]:.3f})"
     )
 
     logger.info("Club head motion ranges:")
-    print(
+    logger.info(
         f"  X: {club_x_range[0]:.3f} to {club_x_range[1]:.3f} "
         f"(range: {club_x_range[1] - club_x_range[0]:.3f})"
     )
-    print(
+    logger.info(
         f"  Y: {club_y_range[0]:.3f} to {club_y_range[1]:.3f} "
         f"(range: {club_y_range[1] - club_y_range[0]:.3f})"
     )
-    print(
+    logger.info(
         f"  Z: {club_z_range[0]:.3f} to {club_z_range[1]:.3f} "
         f"(range: {club_z_range[1] - club_z_range[0]:.3f})"
     )
@@ -151,13 +151,13 @@ def analyze_coordinate_system():
     # Determine target line direction
     if max(club_motion_ranges) == club_motion_ranges[0]:  # X direction
         logger.info("  Primary swing motion is in X direction")
-        print(
+        logger.info(
             "  If X is target line: Face-on view should look at +X, "
             "Down-the-line should look at -Y"
         )
     elif max(club_motion_ranges) == club_motion_ranges[1]:  # Y direction
         logger.info("  Primary swing motion is in Y direction")
-        print(
+        logger.info(
             "  If Y is target line: Face-on view should look at +Y, "
             "Down-the-line should look at -X"
         )
@@ -180,11 +180,11 @@ def analyze_coordinate_system():
         ("End", end_frame),
     ]:
         logger.info("%s frame (t=%ss):", name, frame["time"])
-        print(
+        logger.info(
             f"  Mid-hands: X={frame['mid_X']:.3f}, Y={frame['mid_Y']:.3f}, "
             f"Z={frame['mid_Z']:.3f}"
         )
-        print(
+        logger.info(
             f"  Club head: X={frame['club_X']:.3f}, Y={frame['club_Y']:.3f}, "
             f"Z={frame['club_Z']:.3f}"
         )
@@ -203,15 +203,15 @@ def analyze_coordinate_system():
 
         # Analyze direction cosines for mid-hands
         logger.info("  Mid-hands direction cosines:")
-        print(
+        logger.info(
             f"    X-axis: [{frame['mid_Xx']:.3f}, {frame['mid_Xy']:.3f}, "
             f"{frame['mid_Xz']:.3f}]"
         )
-        print(
+        logger.info(
             f"    Y-axis: [{frame['mid_Yx']:.3f}, {frame['mid_Yy']:.3f}, "
             f"{frame['mid_Yz']:.3f}]"
         )
-        print(
+        logger.info(
             f"    Z-axis: [{frame['mid_Zx']:.3f}, {frame['mid_Zy']:.3f}, "
             f"{frame['mid_Zz']:.3f}]"
         )
@@ -226,7 +226,7 @@ def analyze_coordinate_system():
         dot_XZ = np.dot(X_vec, Z_vec)
         dot_YZ = np.dot(Y_vec, Z_vec)
 
-        print(
+        logger.info(
             f"    Orthogonality checks (should be ~0): XY={dot_XY:.3f}, "
             f"XZ={dot_XZ:.3f}, YZ={dot_YZ:.3f}"
         )
