@@ -11,14 +11,14 @@ from __future__ import annotations
 import os
 
 import uvicorn
-
-from api.server import app
 from src.shared.python.launcher_utils import (
     check_python_dependencies,
     ensure_environment_var,
     get_repo_root,
     invoke_main,
 )
+
+from api.server import app
 from src.shared.python.logging_config import get_logger, setup_logging
 
 setup_logging(use_simple_format=True)

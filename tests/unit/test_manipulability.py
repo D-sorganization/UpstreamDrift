@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.manipulability import (
+from src.shared.python.spatial_algebra.manipulability import (
     CATASTROPHIC_SINGULARITY_THRESHOLD,
     SINGULARITY_FALLBACK_THRESHOLD,
     SINGULARITY_WARNING_THRESHOLD,

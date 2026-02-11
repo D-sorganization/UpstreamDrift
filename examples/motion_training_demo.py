@@ -22,6 +22,8 @@ from pathlib import Path
 
 # Add the motion_training module to path
 PROJECT_ROOT = Path(__file__).parent.parent
+
+
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
