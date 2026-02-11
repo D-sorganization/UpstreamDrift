@@ -36,7 +36,7 @@ from src.shared.python.ai.rag.indexer_worker import IndexerWorker
 from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
 from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
 from src.shared.python.ai.tools.file_ops import register_file_tools
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from src.shared.python.ai.adapters.base import BaseAgentAdapter

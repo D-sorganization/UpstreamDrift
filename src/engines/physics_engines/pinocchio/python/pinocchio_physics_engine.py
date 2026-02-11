@@ -11,20 +11,20 @@ from typing import Any, cast
 
 import numpy as np
 
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     check_finite,
     postcondition,
     precondition,
 )
-from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import PINOCCHIO_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Pinocchio imports - only import if available
 if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
 
-from src.shared.python import constants
-from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.core import constants
+from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
 

@@ -15,12 +15,12 @@ import pytest
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 
-from src.shared.python.path_utils import get_src_root  # noqa: E402
+from src.shared.python.data_io.path_utils import get_src_root  # noqa: E402
 
 # Add root to path
 ROOT_DIR = get_src_root()
 
-from src.shared.python.engine_manager import EngineManager  # noqa: E402
+from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
 
 
 def run_verification() -> None:

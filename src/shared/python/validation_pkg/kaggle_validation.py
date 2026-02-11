@@ -17,12 +17,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.physics_constants import (
+from src.shared.python.core.physics_constants import (
     FEET_TO_METERS,
     MPH_TO_MPS,
     YARDS_TO_METERS,
 )
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -339,7 +339,7 @@ def print_validation_report(results: dict[str, dict[str, float]]) -> None:
 
 
 if __name__ == "__main__":
-    from src.shared.python.logging_config import setup_logging
+    from src.shared.python.logging_pkg.logging_config import setup_logging
 
     setup_logging()
 

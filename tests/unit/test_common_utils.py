@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pandas as pd
 
-from src.shared.python.common_utils import (
+from src.shared.python.data_io.common_utils import (
     convert_units,
     ensure_output_dir,
     get_shared_urdf_path,
@@ -21,7 +21,7 @@ from src.shared.python.common_utils import (
 class TestCommonUtilsHardening(unittest.TestCase):
     """Test suite for hardened utility functions."""
 
-    @patch("src.shared.python.common_utils.OUTPUT_ROOT", Path("/tmp/output"))
+    @patch("src.shared.python.data_io.common_utils.OUTPUT_ROOT", Path("/tmp/output"))
     def test_ensure_output_dir_traversal(self) -> None:
         """Test path traversal prevention in ensure_output_dir."""
         # Test that the function works with valid engine names
@@ -36,7 +36,7 @@ class TestCommonUtilsHardening(unittest.TestCase):
             self.assertEqual(path, Path("/tmp/output/engine_with_underscore"))
             mock_mkdir.assert_called_once()
 
-    @patch("src.shared.python.common_utils.OUTPUT_ROOT", Path("/tmp/output"))
+    @patch("src.shared.python.data_io.common_utils.OUTPUT_ROOT", Path("/tmp/output"))
     def test_ensure_output_dir_valid(self) -> None:
         """Test valid output dir creation."""
         with patch("pathlib.Path.mkdir") as mock_mkdir:

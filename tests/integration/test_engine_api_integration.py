@@ -22,7 +22,7 @@ try:
 except ImportError:
     pytest.skip("API server deps not available", allow_module_level=True)
 
-from src.shared.python.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 @pytest.fixture(scope="module")
@@ -96,7 +96,7 @@ class TestEngineRegistryConsistency:
 
     def test_all_engine_types_have_loaders(self) -> None:
         """Every non-MATLAB EngineType has a corresponding loader."""
-        from src.shared.python.engine_loaders import LOADER_MAP
+        from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
         skip_types = {EngineType.MATLAB_2D, EngineType.MATLAB_3D}
 
@@ -109,7 +109,7 @@ class TestEngineRegistryConsistency:
 
     def test_loader_map_values_are_callable(self) -> None:
         """All LOADER_MAP values are callable functions."""
-        from src.shared.python.engine_loaders import LOADER_MAP
+        from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
         for engine_type, loader in LOADER_MAP.items():
             assert callable(loader), f"Loader for {engine_type.value} is not callable"

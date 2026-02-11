@@ -20,7 +20,7 @@ class _FakeEngineManager:
 def test_show_status_logs_available_engines(monkeypatch, caplog) -> None:
     """show_status should log available engines and paths."""
     monkeypatch.setattr(
-        "src.shared.python.engine_manager.EngineManager",
+        "src.shared.python.engine_core.engine_manager.EngineManager",
         _FakeEngineManager,
     )
 

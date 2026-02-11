@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.shared.python.signal_processing import (
+from src.shared.python.signal_toolkit.signal_processing import (
     _morlet2_impl,
     compute_coherence,
     compute_cwt,

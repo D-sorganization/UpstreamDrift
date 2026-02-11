@@ -29,8 +29,8 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.biomechanics.multi_muscle import AntagonistPair, MuscleGroup
-from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -145,7 +145,7 @@ class MuscleDrivenEnv:
             )
 
         # Simple joint dynamics (pendulum-like)
-        from shared.python.constants import GRAVITY_M_S2
+        from shared.python.core.constants import GRAVITY_M_S2
 
         joint_inertia = 0.05  # Joint inertia [kg·m²]
         b = 0.5  # Damping [N·m·s/rad]

@@ -25,8 +25,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import PINOCCHIO_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .urdf_io import export_model_to_urdf
 

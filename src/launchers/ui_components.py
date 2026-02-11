@@ -45,8 +45,8 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.docker_manager import DockerBuildThread
-from src.shared.python.logging_config import get_logger
-from src.shared.python.secure_subprocess import (
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.secure_subprocess import (
     secure_run,
 )
 
@@ -314,14 +314,14 @@ class AsyncStartupWorker(QThread):
     def run(self) -> None:
         try:
             self.progress_signal.emit("Loading model registry...", 10)
-            from src.shared.python.model_registry import ModelRegistry
+            from src.shared.python.config.model_registry import ModelRegistry
 
             registry = ModelRegistry(self.repos_root / "src/config/models.yaml")
             self.results.registry = registry
 
             self.progress_signal.emit("Initializing engine manager...", 30)
             try:
-                from src.shared.python.engine_manager import EngineManager
+                from src.shared.python.engine_core.engine_manager import EngineManager
 
                 self.results.engine_manager = EngineManager(self.repos_root)
                 # Skip probing to avoid hanging - engines will be probed on demand

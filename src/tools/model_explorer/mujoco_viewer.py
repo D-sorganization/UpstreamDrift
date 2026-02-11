@@ -30,9 +30,11 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.constants import GRAVITY_M_S2  # DRY: Use centralized constant
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.core.constants import (
+    GRAVITY_M_S2,  # DRY: Use centralized constant
+)
+from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from typing import Any

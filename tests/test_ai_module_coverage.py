@@ -98,7 +98,7 @@ class TestRAGIntegration(unittest.TestCase):
 class TestAssistantPanel(unittest.TestCase):
     """Test AI Assistant Panel UI components."""
 
-    @patch("src.shared.python.engine_availability.PYQT6_AVAILABLE", True)
+    @patch("src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", True)
     def test_assistant_panel_import(self) -> None:
         """Test that assistant panel can be imported."""
         try:

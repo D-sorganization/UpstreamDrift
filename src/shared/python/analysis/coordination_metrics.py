@@ -314,7 +314,9 @@ class CoordinationMetricsMixin:
             return np.zeros((n_joints, n_joints)), []
 
         try:
-            from shared.python import signal_processing  # type: ignore[attr-defined]
+            from shared.python.signal_toolkit import (
+                signal_processing,  # type: ignore[attr-defined]
+            )
         except ImportError:
             return np.zeros((n_joints, n_joints)), []
 

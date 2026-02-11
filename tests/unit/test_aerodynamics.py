@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from src.shared.python.aerodynamics import (
+from src.shared.python.physics.aerodynamics import (
     AerodynamicsConfig,
     AerodynamicsEngine,
     DragModel,

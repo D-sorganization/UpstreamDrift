@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 from src.config.launcher_manifest_loader import ASSETS_DIR, LauncherManifest
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/launcher", tags=["launcher"])

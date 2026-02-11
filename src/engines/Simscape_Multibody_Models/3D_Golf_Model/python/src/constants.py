@@ -4,7 +4,7 @@ This module follows DRY principles from The Pragmatic Programmer.
 All constants are imported from the central src.shared.python.physics_constants module.
 """
 
-from src.shared.python.physics_constants import (
+from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     BUNKER_DEPTH_MM,
     DRIVER_LOFT_TYPICAL_DEG,

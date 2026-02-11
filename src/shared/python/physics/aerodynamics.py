@@ -32,7 +32,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.physics_constants import (
+from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     AIR_VISCOSITY_KG_M_S,
     GOLF_BALL_CROSS_SECTIONAL_AREA_M2,

@@ -15,11 +15,11 @@ import pytest
 # sympy is needed by some transitive imports; skip module if unavailable
 pytest.importorskip("sympy", reason="sympy not installed")
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
     skip_if_unavailable,
 )
-from src.shared.python.gui_utils import get_qapp
+from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
     pass

@@ -21,8 +21,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.io_utils import ensure_directory
-from src.shared.python.logging_config import get_logger
+from src.shared.python.data_io.io_utils import ensure_directory
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

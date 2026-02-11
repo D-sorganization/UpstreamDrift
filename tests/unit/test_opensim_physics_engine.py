@@ -12,7 +12,7 @@ mock_opensim = MagicMock()
 sys.modules["opensim"] = mock_opensim
 
 # Also patch OPENSIM_AVAILABLE so the engine module picks up the mock
-with patch("src.shared.python.engine_availability.OPENSIM_AVAILABLE", True):
+with patch("src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE", True):
     from src.engines.physics_engines.opensim.python import (  # noqa: E402
         opensim_physics_engine as osim_module,
     )

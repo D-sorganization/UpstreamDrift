@@ -7,7 +7,7 @@ from pathlib import Path
 
 from dtack.utils.optical_parser import OpticalParser
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import numpy as np

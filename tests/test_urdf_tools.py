@@ -3,8 +3,8 @@ import sys
 
 import pytest
 
-from src.shared.python.common_utils import get_shared_urdf_path
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.data_io.common_utils import get_shared_urdf_path
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 
 # Check if display is available for Qt tests
 HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"

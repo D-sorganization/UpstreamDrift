@@ -8,7 +8,10 @@ import defusedxml.ElementTree as ET
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
+from src.shared.python.engine_core.engine_availability import (
+    MUJOCO_AVAILABLE,
+    skip_if_unavailable,
+)
 
 pytestmark = skip_if_unavailable("mujoco")
 

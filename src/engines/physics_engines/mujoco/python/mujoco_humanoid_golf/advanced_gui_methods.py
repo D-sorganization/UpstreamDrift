@@ -3,7 +3,7 @@ from pathlib import Path
 
 import mujoco
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -116,7 +116,9 @@ class AdvancedGuiMethodsMixin:
 
         try:
             from shared.python.plotting import GolfSwingPlotter
-            from shared.python.statistical_analysis import StatisticalAnalyzer
+            from shared.python.validation_pkg.statistical_analysis import (
+                StatisticalAnalyzer,
+            )
         except ImportError:
             from PyQt6 import QtWidgets
 

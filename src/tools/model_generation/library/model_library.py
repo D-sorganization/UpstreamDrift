@@ -18,7 +18,7 @@ from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 
-from src.shared.python.security_utils import validate_url_scheme
+from src.shared.python.security.security_utils import validate_url_scheme
 
 logger = logging.getLogger(__name__)
 

@@ -19,9 +19,9 @@ from typing import Any, cast
 
 import numpy as np
 
-from src.shared.python.contracts import check_finite, postcondition, precondition
-from src.shared.python.engine_availability import DRAKE_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.core.contracts import check_finite, postcondition, precondition
+from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Pydrake imports - only import if available
 if DRAKE_AVAILABLE:
@@ -42,8 +42,8 @@ if DRAKE_AVAILABLE:
         RotationMatrix,  # noqa: F401
     )
 
-from src.shared.python import constants
-from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.core import constants
+from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
 

@@ -29,7 +29,7 @@ from pathlib import Path
 # Add repo root to path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-from src.shared.python.logging_config import get_logger  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -48,7 +48,10 @@ class DRYRefactorer:
             original_content = content
 
             # Check if file already uses get_logger
-            if "from src.shared.python.logging_config import get_logger" in content:
+            if (
+                "from src.shared.python.logging_pkg.logging_config import get_logger"
+                in content
+            ):
                 return False
 
             # Pattern 1: logger = logging.getLogger(__name__)
@@ -67,7 +70,7 @@ class DRYRefactorer:
                 # Replace import logging with get_logger import
                 content = re.sub(
                     r"^import logging$",
-                    "from src.shared.python.logging_config import get_logger",
+                    "from src.shared.python.logging_pkg.logging_config import get_logger",
                     content,
                     count=1,
                     flags=re.MULTILINE,
@@ -133,10 +136,10 @@ class DRYRefactorer:
 
             if (
                 needs_import
-                and "from src.shared.python.path_utils import" not in content
+                and "from src.shared.python.data_io.path_utils import" not in content
             ):
                 # Add import after other imports
-                import_line = "\nfrom src.shared.python.path_utils import get_repo_root, get_src_root\n"
+                import_line = "\nfrom src.shared.python.data_io.path_utils import get_repo_root, get_src_root\n"
                 # Find last import statement
                 import_match = list(
                     re.finditer(r"^(?:from|import) .+$", content, re.MULTILINE)
@@ -190,14 +193,16 @@ class DRYRefactorer:
             )
 
             # Add import if not present
-            if "from src.shared.python.gui_utils import" not in content:
+            if "from src.shared.python.gui_pkg.gui_utils import" not in content:
                 # Find PyQt6 imports
                 pyqt_import = re.search(
                     r"^from PyQt6\.QtWidgets import.*$", content, re.MULTILINE
                 )
                 if pyqt_import:
                     insert_pos = pyqt_import.end()
-                    import_line = "\nfrom src.shared.python.gui_utils import get_qapp\n"
+                    import_line = (
+                        "\nfrom src.shared.python.gui_pkg.gui_utils import get_qapp\n"
+                    )
                     content = content[:insert_pos] + import_line + content[insert_pos:]
 
             if content != original_content:
@@ -290,7 +295,7 @@ class DRYRefactorer:
             original_content = content
 
             # Skip if already uses path utilities
-            if "from src.shared.python.path_utils import" in content:
+            if "from src.shared.python.data_io.path_utils import" in content:
                 return False
 
             # Pattern: project_root = Path(__file__).parent.parent.parent
@@ -324,7 +329,7 @@ class DRYRefactorer:
                 if pathlib_import:
                     insert_pos = pathlib_import.end()
                     import_line = (
-                        "\nfrom src.shared.python.path_utils import "
+                        "\nfrom src.shared.python.data_io.path_utils import "
                         "get_repo_root, get_src_root\n"
                     )
                     content = content[:insert_pos] + import_line + content[insert_pos:]

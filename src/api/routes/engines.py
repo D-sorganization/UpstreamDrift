@@ -11,8 +11,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from src.shared.python.engine_manager import EngineManager
-from src.shared.python.engine_registry import EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 
 from ..auth.middleware import OptionalAuth, is_local_mode
 from ..dependencies import get_engine_manager

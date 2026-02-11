@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from src.shared.python.path_utils import (
+from src.shared.python.data_io.path_utils import (
     ensure_directory,
     find_file_in_parents,
     get_data_dir,
@@ -101,9 +101,11 @@ class TestGetOutputDir:
 
     def test_creates_directory(self, tmp_path: Path) -> None:
         """Test that output dir is created if it doesn't exist."""
-        with patch("src.shared.python.path_utils.get_repo_root", return_value=tmp_path):
+        with patch(
+            "src.shared.python.data_io.path_utils.get_repo_root", return_value=tmp_path
+        ):
             # Clear the cache to force recalculation
-            import src.shared.python.path_utils as path_utils
+            import src.shared.python.data_io.path_utils as path_utils
 
             old_root = path_utils._REPO_ROOT
             path_utils._REPO_ROOT = tmp_path

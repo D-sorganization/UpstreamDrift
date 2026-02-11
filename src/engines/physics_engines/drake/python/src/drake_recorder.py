@@ -9,7 +9,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.logging_config import (
+from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )

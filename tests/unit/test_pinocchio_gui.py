@@ -4,8 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
-from src.shared.python.gui_utils import get_qapp
+from src.shared.python.engine_core.engine_availability import (
+    PYQT6_AVAILABLE,
+    skip_if_unavailable,
+)
+from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
     pass

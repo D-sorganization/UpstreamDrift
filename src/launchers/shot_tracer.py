@@ -38,8 +38,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.logging_config import configure_gui_logging, get_logger
-from src.shared.python.path_utils import get_shared_python_root, setup_import_paths
+from src.shared.python.data_io.path_utils import (
+    get_shared_python_root,
+    setup_import_paths,
+)
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
 
 # Setup import paths for flight_models import
 setup_import_paths(additional_paths=[get_shared_python_root()])

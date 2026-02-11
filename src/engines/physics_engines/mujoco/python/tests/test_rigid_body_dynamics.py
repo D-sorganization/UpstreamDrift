@@ -14,7 +14,7 @@ from mujoco_humanoid_golf.rigid_body_dynamics.rnea import rnea
 from mujoco_humanoid_golf.spatial_algebra.inertia import mci
 from mujoco_humanoid_golf.spatial_algebra.transforms import xlt
 
-from src.shared.python import constants
+from src.shared.python.core import constants
 
 
 def create_2link_model() -> dict:

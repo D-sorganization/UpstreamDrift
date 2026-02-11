@@ -1,6 +1,6 @@
 """Project-wide constants and configuration.
 
-Physics constants are delegated to shared.python.physics_constants.
+Physics constants are delegated to shared.python.core.physics_constants.
 Pre-computed float values are provided to avoid repeated conversions.
 """
 

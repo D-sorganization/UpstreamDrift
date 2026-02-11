@@ -5,9 +5,18 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from src.shared.python.core import (
+    DataFormatError,
+    EngineNotFoundError,
+    GolfModelingError,
+    get_logger,
+    setup_logging,
+    setup_structured_logging,
+)
+
 # Import OUTPUT_ROOT from constants to avoid circular dependency
 # Import core utilities (exceptions, logging) from the lightweight module
-from src.shared.python.constants import (
+from src.shared.python.core.constants import (
     DEG_TO_RAD,
     KG_TO_LB,
     M_TO_FT,
@@ -16,14 +25,6 @@ from src.shared.python.constants import (
     MPS_TO_MPH,
     OUTPUT_ROOT,
     RAD_TO_DEG,
-)
-from src.shared.python.core import (
-    DataFormatError,
-    EngineNotFoundError,
-    GolfModelingError,
-    get_logger,
-    setup_logging,
-    setup_structured_logging,
 )
 
 # Re-export them for backward compatibility

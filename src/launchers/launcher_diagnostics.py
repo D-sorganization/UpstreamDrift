@@ -278,7 +278,7 @@ class LauncherDiagnostics:
         details: dict[str, Any] = {}
 
         try:
-            from src.shared.python.model_registry import ModelRegistry
+            from src.shared.python.config.model_registry import ModelRegistry
 
             registry_path = REPOS_ROOT / "src" / "config" / "models.yaml"
             registry = ModelRegistry(registry_path)
@@ -541,8 +541,8 @@ class LauncherDiagnostics:
         details: dict[str, Any] = {}
 
         try:
-            from src.shared.python.engine_manager import EngineManager
-            from src.shared.python.engine_registry import EngineStatus
+            from src.shared.python.engine_core.engine_manager import EngineManager
+            from src.shared.python.engine_core.engine_registry import EngineStatus
 
             manager = EngineManager()
             available = manager.get_available_engines()

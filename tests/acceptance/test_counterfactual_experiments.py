@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Check if pendulum engine dependencies are available
 try:
@@ -41,7 +41,7 @@ if not PENDULUM_ENGINE_AVAILABLE:
 PendulumPhysicsEngine = _PendulumPhysicsEngine
 
 if TYPE_CHECKING:
-    from src.shared.python.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
 

@@ -21,7 +21,7 @@ import math
 import numpy as np
 import pytest
 
-from src.shared.python.aerodynamics import (
+from src.shared.python.physics.aerodynamics import (
     AerodynamicsConfig,
     RandomizationConfig,
     WindConfig,

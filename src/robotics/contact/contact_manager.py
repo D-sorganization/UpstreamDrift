@@ -18,7 +18,7 @@ from numpy.typing import NDArray
 from src.robotics.core.exceptions import ContactError
 from src.robotics.core.protocols import ContactCapable, RoboticsCapable
 from src.robotics.core.types import ContactState, ContactType
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     ContractChecker,
     postcondition,
 )

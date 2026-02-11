@@ -17,7 +17,7 @@ from src.shared.python.biomechanics.myoconverter_integration import (
     MyoConverter,
     install_myoconverter_instructions,
 )
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
 

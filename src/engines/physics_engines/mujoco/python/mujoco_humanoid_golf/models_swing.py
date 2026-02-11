@@ -6,8 +6,8 @@ segments, two-handed grip, and multi-DOF joint hierarchies.
 
 from __future__ import annotations
 
-from src.shared.python import constants
-from src.shared.python.physics_parameters import get_parameter_registry
+from src.shared.python.core import constants
+from src.shared.python.physics.physics_parameters import get_parameter_registry
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)

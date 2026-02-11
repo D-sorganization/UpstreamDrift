@@ -2,7 +2,7 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.data_io.path_utils import setup_import_paths
 
 # Setup import paths for testing
 setup_import_paths()
@@ -23,7 +23,7 @@ sys.modules["pydrake.all"] = MagicMock()
 # Patch DRAKE_AVAILABLE to True so the drake_physics_engine module imports
 # the pydrake names (DiagramBuilder, etc.) into its namespace, making them patchable.
 _drake_avail_patcher = patch(
-    "src.shared.python.engine_availability.DRAKE_AVAILABLE", True
+    "src.shared.python.engine_core.engine_availability.DRAKE_AVAILABLE", True
 )
 _drake_avail_patcher.start()
 
@@ -159,7 +159,7 @@ class TestDrakeWrapper(unittest.TestCase):
 
     def test_forward_with_no_context(self):
         """Test forward() raises PreconditionError when context is missing."""
-        from src.shared.python.contracts import PreconditionError
+        from src.shared.python.core.contracts import PreconditionError
 
         self.engine.plant_context = None
 

@@ -7,7 +7,7 @@ Follows DRY principles from The Pragmatic Programmer - all fallback logic
 is centralized here instead of being duplicated in each engine module.
 
 Usage:
-    from src.shared.python.logger_utils import (
+    from src.shared.python.logging_pkg.logger_utils import (
         get_logger,
         setup_logging,
         set_seeds,
@@ -34,9 +34,13 @@ try:
         log_execution_time,  # Context manager - re-export directly
     )
     from src.shared.python.data_io.reproducibility import set_seeds as _set_seeds
-    from src.shared.python.logging_config import DEFAULT_LOG_FORMAT as LOG_FORMAT
-    from src.shared.python.logging_config import get_logger as _get_logger
-    from src.shared.python.logging_config import setup_logging as _setup_logging
+    from src.shared.python.logging_pkg.logging_config import (
+        DEFAULT_LOG_FORMAT as LOG_FORMAT,
+    )
+    from src.shared.python.logging_pkg.logging_config import get_logger as _get_logger
+    from src.shared.python.logging_pkg.logging_config import (
+        setup_logging as _setup_logging,
+    )
 
     _USING_FULL_IMPLEMENTATION = True
 

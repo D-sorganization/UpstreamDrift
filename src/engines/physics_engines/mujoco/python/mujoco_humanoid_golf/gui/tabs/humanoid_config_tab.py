@@ -44,9 +44,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.configuration_manager import ConfigurationManager
-from src.shared.python.logging_config import get_logger
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.config.configuration_manager import ConfigurationManager
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.ui.qt.process_worker import ProcessWorker
 
 if TYPE_CHECKING:
@@ -84,7 +84,7 @@ class HumanoidConfigTab(QWidget):
         try:
             self.config = self.config_manager.load()
         except (RuntimeError, ValueError, OSError):
-            from src.shared.python.configuration_manager import SimulationConfig
+            from src.shared.python.config.configuration_manager import SimulationConfig
 
             self.config = SimulationConfig()
 

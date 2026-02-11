@@ -12,7 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from src.shared.python import constants
+from src.shared.python.core import constants
 
 
 class ParameterCategory(Enum):

@@ -10,7 +10,11 @@ __email__ = "team@example.com"
 
 
 # Export commonly used functions and constants
-from src.shared.python.logger_utils import get_logger, set_seeds, setup_logging
+from src.shared.python.logging_pkg.logger_utils import (
+    get_logger,
+    set_seeds,
+    setup_logging,
+)
 
 __all__ = [
     "__author__",

@@ -5,7 +5,7 @@ This module re-exports the shared statistical analysis functionality.
 
 from __future__ import annotations
 
-from src.shared.python.statistical_analysis import (
+from src.shared.python.validation_pkg.statistical_analysis import (
     KinematicSequenceInfo,
     PeakInfo,
     StatisticalAnalyzer,

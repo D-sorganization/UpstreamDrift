@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 
 # Tests written first - imports will fail until implementation exists
-from src.shared.python.terrain import (
+from src.shared.python.physics.terrain import (
     ElevationMap,
     SurfaceMaterial,
     Terrain,
@@ -102,7 +102,7 @@ class TestSurfaceMaterial:
 
     def test_predefined_materials(self) -> None:
         """Predefined materials for common terrain types should exist."""
-        from src.shared.python.terrain import MATERIALS
+        from src.shared.python.physics.terrain import MATERIALS
 
         assert "fairway" in MATERIALS
         assert "rough" in MATERIALS
@@ -539,7 +539,7 @@ class TestTerrainPhysicsIntegration:
 
     def test_gravity_on_slope(self) -> None:
         """Calculate gravity component along slope."""
-        from src.shared.python.terrain import compute_gravity_on_slope
+        from src.shared.python.physics.terrain import compute_gravity_on_slope
 
         # 30 degree slope
         slope_angle_deg = 30.0
@@ -557,7 +557,7 @@ class TestTerrainPhysicsIntegration:
 
     def test_ball_roll_direction(self) -> None:
         """Calculate ball roll direction on sloped terrain."""
-        from src.shared.python.terrain import compute_roll_direction
+        from src.shared.python.physics.terrain import compute_roll_direction
 
         elevation = ElevationMap.sloped(
             width=100.0,
@@ -575,7 +575,7 @@ class TestTerrainPhysicsIntegration:
 
     def test_contact_normal_on_terrain(self) -> None:
         """Get contact normal for physics engine."""
-        from src.shared.python.terrain import get_contact_normal
+        from src.shared.python.physics.terrain import get_contact_normal
 
         elevation = ElevationMap.sloped(
             width=100.0,

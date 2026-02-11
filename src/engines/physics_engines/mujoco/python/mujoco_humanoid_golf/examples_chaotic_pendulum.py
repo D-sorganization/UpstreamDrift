@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
 
-from src.shared.python import constants
+from src.shared.python.core import constants
 
 from .models import CHAOTIC_PENDULUM_XML
 

@@ -10,14 +10,14 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     check_finite,
     postcondition,
     precondition,
 )
-from src.shared.python.engine_availability import OPENSIM_AVAILABLE
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Configure logging
 logger = get_logger(__name__)

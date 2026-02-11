@@ -7,7 +7,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 import defusedxml.minidom as minidom
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

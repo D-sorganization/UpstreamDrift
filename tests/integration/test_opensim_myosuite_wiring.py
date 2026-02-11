@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineType
 
 if TYPE_CHECKING:
     pass
@@ -36,7 +36,7 @@ class TestProbePaths:
 
     def test_opensim_probe_path(self, suite_root: Path) -> None:
         """OpenSim probe checks the correct engine directory."""
-        from src.shared.python.engine_probes import OpenSimProbe
+        from src.shared.python.engine_core.engine_probes import OpenSimProbe
 
         probe = OpenSimProbe(suite_root)
         result = probe.probe()
@@ -47,7 +47,7 @@ class TestProbePaths:
 
     def test_myosim_probe_path(self, suite_root: Path) -> None:
         """MyoSim probe checks the correct engine directory (myosuite/)."""
-        from src.shared.python.engine_probes import MyoSimProbe
+        from src.shared.python.engine_core.engine_probes import MyoSimProbe
 
         MyoSimProbe(suite_root)  # Ensures probe can be instantiated
         # Verify the probe checks for myosuite directory, not myosim
@@ -80,13 +80,13 @@ class TestLoaderWiring:
 
     def test_opensim_in_loader_map(self) -> None:
         """OpenSim has a loader in LOADER_MAP."""
-        from src.shared.python.engine_loaders import LOADER_MAP
+        from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
         assert EngineType.OPENSIM in LOADER_MAP
 
     def test_myosim_in_loader_map(self) -> None:
         """MyoSim has a loader in LOADER_MAP."""
-        from src.shared.python.engine_loaders import LOADER_MAP
+        from src.shared.python.engine_core.engine_loaders import LOADER_MAP
 
         assert EngineType.MYOSIM in LOADER_MAP
 
@@ -94,7 +94,7 @@ class TestLoaderWiring:
         """OpenSim loader references OpenSimPhysicsEngine."""
         import inspect
 
-        from src.shared.python.engine_loaders import load_opensim_engine
+        from src.shared.python.engine_core.engine_loaders import load_opensim_engine
 
         source = inspect.getsource(load_opensim_engine)
         assert "OpenSimPhysicsEngine" in source
@@ -103,7 +103,7 @@ class TestLoaderWiring:
         """MyoSim loader references MyoSuitePhysicsEngine."""
         import inspect
 
-        from src.shared.python.engine_loaders import load_myosim_engine
+        from src.shared.python.engine_core.engine_loaders import load_myosim_engine
 
         source = inspect.getsource(load_myosim_engine)
         assert "MyoSuitePhysicsEngine" in source
@@ -117,13 +117,13 @@ class TestEngineAvailability:
 
     def test_opensim_availability_flag_exists(self) -> None:
         """OPENSIM_AVAILABLE flag is defined."""
-        from src.shared.python.engine_availability import OPENSIM_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
 
         assert isinstance(OPENSIM_AVAILABLE, bool)
 
     def test_myosuite_availability_flag_exists(self) -> None:
         """MYOSUITE_AVAILABLE flag is defined."""
-        from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 
         assert isinstance(MYOSUITE_AVAILABLE, bool)
 

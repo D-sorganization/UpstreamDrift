@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+from src.shared.python.engine_core.engine_availability import PINOCCHIO_AVAILABLE
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray

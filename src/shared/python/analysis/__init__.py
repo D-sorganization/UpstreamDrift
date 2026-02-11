@@ -18,7 +18,7 @@ This package provides modular statistical analysis components:
 
 For backward compatibility, the main StatisticalAnalyzer class
 is still available via:
-    from shared.python.statistical_analysis import StatisticalAnalyzer
+    from shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 For new code, prefer importing specific modules:
     from shared.python.analysis.dataclasses import PeakInfo, SummaryStatistics

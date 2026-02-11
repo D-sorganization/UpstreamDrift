@@ -21,16 +21,20 @@ import numpy as np  # noqa: E402
 import pinocchio as pin  # type: ignore  # noqa: E402
 from PyQt6 import QtCore, QtWidgets  # noqa: E402
 
-from src.shared.python.biomechanics_data import BiomechanicalData  # noqa: E402
-from src.shared.python.common_utils import get_shared_urdf_path  # noqa: E402
+from src.shared.python.biomechanics.biomechanics_data import (  # noqa: E402
+    BiomechanicalData,
+)
 from src.shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
-from src.shared.python.logging_config import (  # noqa: E402
+from src.shared.python.data_io.common_utils import get_shared_urdf_path  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
     configure_gui_logging,
     get_logger,
 )
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas  # noqa: E402
-from src.shared.python.statistical_analysis import StatisticalAnalyzer  # noqa: E402
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase  # noqa: E402
+from src.shared.python.validation_pkg.statistical_analysis import (  # noqa: E402
+    StatisticalAnalyzer,
+)
 
 from .manipulability import PinocchioManipulabilityAnalyzer  # noqa: E402
 
@@ -960,7 +964,7 @@ class PinocchioGUI(SimulationGUIBase):
         self._ensure_analysis_data_populated()
 
         try:
-            from shared.python.export import export_recording_all_formats
+            from shared.python.data_io.export import export_recording_all_formats
 
             data_dict = self.recorder.export_to_dict()
             results = export_recording_all_formats(filename, data_dict)

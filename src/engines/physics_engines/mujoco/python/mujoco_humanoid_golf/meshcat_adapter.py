@@ -5,8 +5,8 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from src.shared.python.biomechanics_data import BiomechanicalData
-from src.shared.python.logging_config import get_logger
+from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 try:
     import meshcat

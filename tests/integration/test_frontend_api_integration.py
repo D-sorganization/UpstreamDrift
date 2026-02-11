@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_manager import EngineManager
 
 
 class TestEnginesEndpoint:
@@ -31,7 +31,10 @@ class TestEnginesEndpoint:
         #     { name: string, available: boolean, loaded: boolean, capabilities: string[] }
         #   ]
         # }
-        from src.shared.python.engine_registry import EngineStatus, EngineType
+        from src.shared.python.engine_core.engine_registry import (
+            EngineStatus,
+            EngineType,
+        )
 
         mock_engine_manager.get_available_engines.return_value = [EngineType.MUJOCO]
         mock_engine_manager.get_current_engine.return_value = EngineType.MUJOCO
@@ -73,7 +76,10 @@ class TestEnginesEndpoint:
 
     def test_engines_all_fields_present(self, mock_engine_manager):
         """Ensure all fields expected by frontend are present."""
-        from src.shared.python.engine_registry import EngineStatus, EngineType
+        from src.shared.python.engine_core.engine_registry import (
+            EngineStatus,
+            EngineType,
+        )
 
         mock_engine_manager.get_available_engines.return_value = [EngineType.MUJOCO]
         mock_engine_manager.get_current_engine.return_value = None
@@ -94,7 +100,7 @@ class TestEnginesEndpoint:
 
     def test_engine_types_match_frontend_expectations(self):
         """Verify engine type values match what frontend expects."""
-        from src.shared.python.engine_registry import EngineType
+        from src.shared.python.engine_core.engine_registry import EngineType
 
         # Frontend expects these engine names
         expected_engines = {"mujoco", "drake", "pinocchio", "opensim", "myosim"}

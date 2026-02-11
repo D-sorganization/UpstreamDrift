@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.path_utils import get_repo_root, get_src_root
+from src.shared.python.data_io.path_utils import get_repo_root, get_src_root
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

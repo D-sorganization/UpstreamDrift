@@ -15,8 +15,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
-from src.shared.python.secure_subprocess import (
+from src.shared.python.engine_core.engine_availability import (
+    PYQT6_AVAILABLE,
+    skip_if_unavailable,
+)
+from src.shared.python.security.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,
@@ -145,7 +148,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             secure_popen(["malicious_exe"])
 
     @skip_if_unavailable("pyqt6")
-    @patch("src.shared.python.secure_subprocess.secure_run")
+    @patch("src.shared.python.security.secure_subprocess.secure_run")
     @patch("src.launchers.golf_launcher.QApplication")
     @patch("src.launchers.golf_launcher.QIcon")
     def test_golf_launcher_security_integration(
@@ -250,7 +253,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         except SecureSubprocessError:
             self.skipTest("Python not available or not in whitelist")
 
-    @patch("src.shared.python.secure_subprocess.logger")
+    @patch("src.shared.python.security.secure_subprocess.logger")
     def test_security_logging(self, mock_logger) -> None:
         """Test security-related logging."""
         # Test blocked executable logging

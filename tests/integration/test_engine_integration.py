@@ -11,7 +11,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.shared.python.engine_manager import (
+from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
     EngineType,

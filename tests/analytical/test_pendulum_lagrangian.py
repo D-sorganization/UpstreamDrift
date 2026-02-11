@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.core.constants import GRAVITY_M_S2
 
 # Skip if pendulum engine not available
 pytest.importorskip("engines.physics_engines.pendulum")

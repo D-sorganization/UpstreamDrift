@@ -26,7 +26,7 @@ from src.shared.python.assessment.reporting import (  # noqa: E402
     generate_issue_document,
     generate_markdown_report,
 )
-from src.shared.python.path_utils import get_repo_root  # noqa: E402
+from src.shared.python.data_io.path_utils import get_repo_root  # noqa: E402
 
 # Setup paths
 REPO_ROOT = get_repo_root()

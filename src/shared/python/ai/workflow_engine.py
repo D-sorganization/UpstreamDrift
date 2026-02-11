@@ -24,7 +24,7 @@ from typing import Any
 from src.shared.python.ai.exceptions import WorkflowError
 from src.shared.python.ai.tool_registry import ToolRegistry
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 UTC = timezone.utc  # noqa: UP017
 

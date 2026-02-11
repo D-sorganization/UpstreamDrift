@@ -31,17 +31,17 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.checkpoint import StateCheckpoint
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     ContractChecker,
     StateError,
     invariant_checked,
     require_state,
 )
 from src.shared.python.core.error_decorators import ErrorContext, log_errors
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
-from src.shared.python.security_utils import validate_path
+from src.shared.python.engine_core.checkpoint import StateCheckpoint
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.security_utils import validate_path
 
 logger = get_logger(__name__)
 

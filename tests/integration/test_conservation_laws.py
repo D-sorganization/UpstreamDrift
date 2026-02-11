@@ -19,8 +19,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from src.shared.python.constants import GRAVITY_M_S2
-from src.shared.python.logging_config import get_logger
+from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.logging_pkg.logging_config import get_logger
 from tests.fixtures.fixtures_lib import _check_mujoco_available
 
 logger = get_logger(__name__)

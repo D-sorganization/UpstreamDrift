@@ -27,8 +27,8 @@ from pydantic import BaseModel, Field
 from src.api.dependencies import get_engine_manager, get_logger
 
 if TYPE_CHECKING:
-    from src.shared.python.engine_manager import EngineManager
-    from src.shared.python.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.engine_manager import EngineManager
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
 

@@ -292,7 +292,9 @@ class StabilityRenderer(BaseRenderer):
     ) -> None:
         """Plot local divergence rate (Local Stability) over time."""
         try:
-            from src.shared.python.statistical_analysis import StatisticalAnalyzer
+            from src.shared.python.validation_pkg.statistical_analysis import (
+                StatisticalAnalyzer,
+            )
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")

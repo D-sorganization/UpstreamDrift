@@ -30,7 +30,7 @@ from pydrake.all import (
     UnitInertia,
 )
 
-from src.shared.python.constants import (
+from src.shared.python.core.constants import (
     GOLF_BALL_DIAMETER_M,
 )
 

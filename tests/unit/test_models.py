@@ -3,7 +3,10 @@
 import numpy as np
 import pytest
 
-from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
+from src.shared.python.data_io.path_utils import (
+    get_simscape_model_path,
+    setup_import_paths,
+)
 
 # Setup import path using centralized utility
 setup_import_paths(additional_paths=[get_simscape_model_path()])

@@ -13,7 +13,7 @@ from typing import Any, cast
 import mujoco
 import numpy as np
 
-from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 
 
 class BiomechanicalAnalyzer:

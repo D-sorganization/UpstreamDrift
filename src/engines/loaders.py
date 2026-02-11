@@ -11,10 +11,10 @@ implementations at module level.
 
 from pathlib import Path
 
-from src.shared.python.common_utils import GolfModelingError
-from src.shared.python.engine_registry import EngineType
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
+from src.shared.python.data_io.common_utils import GolfModelingError
+from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -27,7 +27,7 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
-        from src.shared.python.engine_probes import MuJoCoProbe
+        from src.shared.python.engine_core.engine_probes import MuJoCoProbe
 
         probe = MuJoCoProbe(suite_root)
         result = probe.probe()
@@ -71,7 +71,7 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
-        from src.shared.python.engine_probes import DrakeProbe
+        from src.shared.python.engine_core.engine_probes import DrakeProbe
 
         probe = DrakeProbe(suite_root)
         result = probe.probe()
@@ -121,7 +121,7 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
         from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
             PinocchioPhysicsEngine,
         )
-        from src.shared.python.engine_probes import PinocchioProbe
+        from src.shared.python.engine_core.engine_probes import PinocchioProbe
 
         probe = PinocchioProbe(suite_root)
         result = probe.probe()
@@ -162,7 +162,7 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
         from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
             OpenSimPhysicsEngine,
         )
-        from src.shared.python.engine_probes import OpenSimProbe
+        from src.shared.python.engine_core.engine_probes import OpenSimProbe
 
         probe = OpenSimProbe(suite_root)
         result = probe.probe()
@@ -186,7 +186,7 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
         from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
             MyoSuitePhysicsEngine,
         )
-        from src.shared.python.engine_probes import MyoSimProbe
+        from src.shared.python.engine_core.engine_probes import MyoSimProbe
 
         probe = MyoSimProbe(suite_root)
         result = probe.probe()

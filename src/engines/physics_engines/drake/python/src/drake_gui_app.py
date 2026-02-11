@@ -22,11 +22,11 @@ bootstrap(__file__)
 
 import numpy as np  # noqa: E402
 
-from src.shared.python.engine_availability import (  # noqa: E402
+from src.shared.python.engine_core.engine_availability import (  # noqa: E402
     MATPLOTLIB_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_config import (  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
     configure_gui_logging,
     get_logger,
 )
@@ -102,7 +102,7 @@ if TYPE_CHECKING or HAS_QT:
 try:
     from shared.python.dashboard.widgets import LivePlotWidget
     from shared.python.plotting import GolfSwingPlotter
-    from shared.python.statistical_analysis import StatisticalAnalyzer
+    from shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 except ImportError:
     LivePlotWidget = None  # type: ignore[misc, assignment]
     GolfSwingPlotter = None  # type: ignore[misc, assignment]
@@ -1824,7 +1824,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             return
 
         try:
-            from shared.python.export import export_recording_all_formats
+            from shared.python.data_io.export import export_recording_all_formats
 
             data_dict = self.recorder.export_to_dict()
             results = export_recording_all_formats(filename, data_dict)
@@ -1868,7 +1868,9 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             return
 
         from shared.python.plotting import GolfSwingPlotter
-        from shared.python.statistical_analysis import StatisticalAnalyzer
+        from shared.python.validation_pkg.statistical_analysis import (
+            StatisticalAnalyzer,
+        )
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(

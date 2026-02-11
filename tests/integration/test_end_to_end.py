@@ -9,8 +9,8 @@ import sys
 
 import pytest
 
-from src.shared.python.engine_availability import skip_if_unavailable
-from src.shared.python.path_utils import get_repo_root, setup_import_paths
+from src.shared.python.data_io.path_utils import get_repo_root, setup_import_paths
+from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 # Import paths configured at test runner level
 setup_import_paths()
@@ -79,7 +79,7 @@ class TestEngineProbes:
         """Verify EngineManager has probe functionality."""
         get_repo_root()
 
-        from src.shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_core.engine_manager import EngineManager
 
         manager = EngineManager()
 
@@ -93,8 +93,8 @@ class TestEngineProbes:
 
         from unittest.mock import MagicMock, patch
 
-        from src.shared.python.engine_manager import EngineManager
-        from src.shared.python.engine_probes import ProbeStatus
+        from src.shared.python.engine_core.engine_manager import EngineManager
+        from src.shared.python.engine_core.engine_probes import ProbeStatus
 
         # Mock mujoco to avoid DLL errors in CI
         with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
@@ -116,7 +116,7 @@ class TestEngineProbes:
 
         from unittest.mock import MagicMock, patch
 
-        from src.shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_core.engine_manager import EngineManager
 
         # Mock mujoco to avoid DLL errors in CI
         with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
@@ -136,8 +136,8 @@ class TestEngineProbes:
 
         from unittest.mock import MagicMock, patch
 
-        from src.shared.python.engine_manager import EngineManager
-        from src.shared.python.engine_probes import ProbeStatus
+        from src.shared.python.engine_core.engine_manager import EngineManager
+        from src.shared.python.engine_core.engine_probes import ProbeStatus
 
         # Mock mujoco to avoid DLL errors in CI
         with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):

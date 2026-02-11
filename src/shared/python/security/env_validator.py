@@ -24,8 +24,10 @@ from src.shared.python.config.environment import (
     get_secret_key,
     is_production,
 )
-from src.shared.python.error_utils import EnvironmentError as EnvironmentValidationError
-from src.shared.python.logging_config import get_logger
+from src.shared.python.core.error_utils import (
+    EnvironmentError as EnvironmentValidationError,
+)
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

@@ -10,7 +10,7 @@ from typing import Any, ClassVar
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Try to import pyopenpose. If not found, we will fall back to mock/error behavior
 # explicitly handled in the class methods or via a probe.

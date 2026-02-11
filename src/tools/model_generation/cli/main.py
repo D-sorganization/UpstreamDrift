@@ -12,8 +12,8 @@ import logging
 import sys
 from pathlib import Path
 
-from src.shared.python.logger_utils import get_logger
-from src.shared.python.logging_config import setup_logging as _setup_logging
+from src.shared.python.logging_pkg.logger_utils import get_logger
+from src.shared.python.logging_pkg.logging_config import setup_logging as _setup_logging
 
 logger = logging.getLogger(__name__)
 

@@ -13,8 +13,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_manager import EngineManager, EngineStatus
-from src.shared.python.path_utils import get_src_root
+from src.shared.python.data_io.path_utils import get_src_root
+from src.shared.python.engine_core.engine_manager import EngineManager, EngineStatus
 
 
 # Helper to check if a module is mocked (from unit tests polluting sys.modules)

@@ -28,11 +28,11 @@ from _bootstrap import bootstrap  # noqa: E402
 
 bootstrap(__file__)
 
-from src.shared.python.engine_availability import (  # noqa: E402
+from src.shared.python.engine_core.engine_availability import (  # noqa: E402
     PINOCCHIO_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_config import get_logger  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 from src.shared.python.pose_editor.core import (  # noqa: E402
     BasePoseEditor,
     JointInfo,

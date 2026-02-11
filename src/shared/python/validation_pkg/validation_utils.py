@@ -23,7 +23,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -356,7 +356,7 @@ def validate_numeric(
 
 
 # Import from centralized error_utils module (DRY principle)
-from src.shared.python.error_utils import ValidationError  # noqa: E402, F811
+from src.shared.python.core.error_utils import ValidationError  # noqa: E402, F811
 
 
 def validate_all(*validations: tuple[Callable[..., None], tuple, dict]) -> None:

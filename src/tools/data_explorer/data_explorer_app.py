@@ -25,7 +25,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logger_utils import get_logger
+from src.shared.python.logging_pkg.logger_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -164,7 +164,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    from src.shared.python.logging_config import setup_logging
+    from src.shared.python.logging_pkg.logging_config import setup_logging
 
     setup_logging()
     sys.exit(main())

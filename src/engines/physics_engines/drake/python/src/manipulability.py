@@ -8,8 +8,8 @@ from dataclasses import dataclass
 import numpy as np
 
 # Import from centralized availability module (DRY compliance)
-from src.shared.python.engine_availability import DRAKE_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Try to import Drake types for actual usage
 if DRAKE_AVAILABLE:

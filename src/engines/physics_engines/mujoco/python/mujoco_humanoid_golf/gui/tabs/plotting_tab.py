@@ -5,7 +5,7 @@ import typing
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ...plotting import GolfSwingPlotter, MplCanvas
 from ...sim_widget import MuJoCoSimWidget

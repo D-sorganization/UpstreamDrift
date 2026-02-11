@@ -25,8 +25,8 @@ from typing import Any, Protocol
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.terrain import (
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics.terrain import (
     MATERIALS,
     TERRAIN_MATERIAL_MAP,
     Terrain,
@@ -838,7 +838,7 @@ def validate_terrain(
 # Register terrain parameters with physics registry
 def register_terrain_parameters() -> None:
     """Register terrain-related parameters with the physics registry."""
-    from src.shared.python.physics_parameters import (
+    from src.shared.python.physics.physics_parameters import (
         ParameterCategory,
         PhysicsParameter,
         get_parameter_registry,

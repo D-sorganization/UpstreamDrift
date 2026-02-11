@@ -8,7 +8,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.shared.python.common_utils import (
+from src.shared.python.core.constants import MPS_TO_MPH
+from src.shared.python.data_io.common_utils import (
     DataFormatError,
     convert_units,
     ensure_output_dir,
@@ -18,7 +19,6 @@ from src.shared.python.common_utils import (
     save_golf_data,
     standardize_joint_angles,
 )
-from src.shared.python.constants import MPS_TO_MPH
 
 # Use non-interactive backend for plots
 matplotlib.use("Agg")
@@ -28,7 +28,7 @@ class TestCommonUtils:
     @pytest.fixture
     def mock_output_root(self, tmp_path: Path) -> Generator[Path, None, None]:
         """Mock OUTPUT_ROOT in shared.python"""
-        with patch("shared.python.common_utils.OUTPUT_ROOT", tmp_path):
+        with patch("shared.python.data_io.common_utils.OUTPUT_ROOT", tmp_path):
             yield tmp_path
 
     def test_ensure_output_dir(self, mock_output_root: Path) -> None:

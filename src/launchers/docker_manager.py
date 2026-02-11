@@ -13,7 +13,10 @@ from pathlib import Path
 from PyQt6.QtCore import QThread, pyqtSignal
 
 # Reuse existing subprocess utilities
-from src.shared.python.secure_subprocess import SecureSubprocessError, secure_run
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_run,
+)
 
 
 class DockerCheckThread(QThread):
@@ -137,7 +140,7 @@ class DockerLauncher:
         """
         self.repo_root = repo_root
         self.image_name = image_name
-        from src.shared.python.logging_config import get_logger
+        from src.shared.python.logging_pkg.logging_config import get_logger
 
         self.logger = get_logger(__name__)
 

@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__name__)

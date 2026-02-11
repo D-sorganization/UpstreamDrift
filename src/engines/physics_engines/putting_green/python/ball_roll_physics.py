@@ -34,7 +34,7 @@ from src.engines.physics_engines.putting_green.python.green_surface import Green
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
-from src.shared.python.physics_constants import (
+from src.shared.python.core.physics_constants import (
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
     GRAVITY_M_S2,

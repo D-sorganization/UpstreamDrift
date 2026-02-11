@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 import numpy as np
 
-from src.shared.python.checkpoint import Checkpointable
+from src.shared.python.engine_core.checkpoint import Checkpointable
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.capabilities import EngineCapabilities

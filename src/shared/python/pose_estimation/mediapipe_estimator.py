@@ -20,8 +20,8 @@ except ImportError:
     cv2 = None
 import numpy as np
 
-from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import MEDIAPIPE_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Import mediapipe if available
 if MEDIAPIPE_AVAILABLE:
@@ -34,7 +34,7 @@ from src.shared.python.pose_estimation.interface import (
     PoseEstimator,
 )
 from src.shared.python.pose_estimation.joint_angle_utils import compute_joint_angles
-from src.shared.python.signal_processing import KalmanFilter
+from src.shared.python.signal_toolkit.signal_processing import KalmanFilter
 
 logger = get_logger(__name__)
 

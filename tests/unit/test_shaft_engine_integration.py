@@ -10,7 +10,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
+from src.shared.python.engine_core.engine_availability import (
+    MUJOCO_AVAILABLE,
+    skip_if_unavailable,
+)
 
 if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
@@ -144,7 +147,7 @@ class TestShaftInterfaceDefault:
 
     def test_interface_default_returns_false(self) -> None:
         """PhysicsEngine default implementation should return False."""
-        from src.shared.python.interfaces import PhysicsEngine
+        from src.shared.python.engine_core.interfaces import PhysicsEngine
 
         # Check that the protocol method has a default that returns False
         # This test verifies the interface definition

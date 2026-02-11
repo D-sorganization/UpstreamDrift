@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_manager import (
+from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
     EngineType,
@@ -22,12 +22,12 @@ class TestEngineManagerCoverage:
     def mock_manager(self):
         """Create an EngineManager with mocked probes and paths."""
         with (
-            patch("src.shared.python.engine_probes.MuJoCoProbe"),
-            patch("src.shared.python.engine_probes.DrakeProbe"),
-            patch("src.shared.python.engine_probes.PinocchioProbe"),
-            patch("src.shared.python.engine_probes.OpenSimProbe"),
-            patch("src.shared.python.engine_probes.PendulumProbe"),
-            patch("src.shared.python.engine_probes.MatlabProbe"),
+            patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe"),
+            patch("src.shared.python.engine_core.engine_probes.DrakeProbe"),
+            patch("src.shared.python.engine_core.engine_probes.PinocchioProbe"),
+            patch("src.shared.python.engine_core.engine_probes.OpenSimProbe"),
+            patch("src.shared.python.engine_core.engine_probes.PendulumProbe"),
+            patch("src.shared.python.engine_core.engine_probes.MatlabProbe"),
         ):
             manager = EngineManager(suite_root=Path("/tmp/fake_root"))
             # Mock engine paths to exist
@@ -43,7 +43,7 @@ class TestEngineManagerCoverage:
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
         # Mock the registry to return a working factory
-        from src.shared.python.engine_registry import get_registry
+        from src.shared.python.engine_core.engine_registry import get_registry
 
         registry = get_registry()
         mock_factory = MagicMock()
@@ -79,7 +79,7 @@ class TestEngineManagerCoverage:
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
         # Mock the registry to return a factory that raises an error
-        from src.shared.python.engine_registry import get_registry
+        from src.shared.python.engine_core.engine_registry import get_registry
 
         registry = get_registry()
 

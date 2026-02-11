@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from src.shared.python.constants import (
+from src.shared.python.core.constants import (
     DEFAULT_TIME_STEP,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,

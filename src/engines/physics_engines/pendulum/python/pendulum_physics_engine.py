@@ -11,14 +11,14 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
     DoublePendulumDynamics,
     DoublePendulumState,
 )
-from src.shared.python.checkpoint import StateCheckpoint
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     check_finite,
     postcondition,
     precondition,
 )
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.checkpoint import StateCheckpoint
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

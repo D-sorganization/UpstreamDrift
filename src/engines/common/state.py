@@ -23,8 +23,8 @@ from typing import Any, TypeVar
 
 import numpy as np
 
-from src.shared.python.contracts import StateError
-from src.shared.python.logging_config import get_logger
+from src.shared.python.core.contracts import StateError
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

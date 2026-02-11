@@ -4,11 +4,16 @@ import numpy as np
 import pytest
 from matplotlib.figure import Figure
 
-from src.shared.python.comparative_analysis import ComparativeSwingAnalyzer
 from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
-from src.shared.python.signal_processing import compute_jerk, compute_time_shift
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.signal_toolkit.signal_processing import (
+    compute_jerk,
+    compute_time_shift,
+)
+from src.shared.python.validation_pkg.comparative_analysis import (
+    ComparativeSwingAnalyzer,
+)
 from src.shared.python.validation_pkg.comparative_plotting import ComparativePlotter
+from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 
 class MockRecorder(RecorderInterface):

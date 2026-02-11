@@ -8,15 +8,15 @@ from typing import Any, cast  # noqa: F401
 import mujoco
 import numpy as np
 
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     PreconditionError,
     check_finite,
     postcondition,
     precondition,
 )
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
-from src.shared.python.security_utils import validate_path
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.security_utils import validate_path
 
 logger = get_logger(__name__)
 

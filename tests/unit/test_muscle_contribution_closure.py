@@ -21,7 +21,7 @@ import typing
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     MYOSUITE_AVAILABLE,
     skip_if_unavailable,
 )

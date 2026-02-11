@@ -10,11 +10,11 @@ from typing import Any
 
 import yaml  # type: ignore[import-untyped]
 
-from src.shared.python.common_utils import GolfModelingError
-from src.shared.python.constants import DEG_TO_RAD
-from src.shared.python.io_utils import ensure_directory
-from src.shared.python.logging_config import get_logger
-from src.shared.python.security_utils import validate_url_scheme
+from src.shared.python.core.constants import DEG_TO_RAD
+from src.shared.python.data_io.common_utils import GolfModelingError
+from src.shared.python.data_io.io_utils import ensure_directory
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.security_utils import validate_url_scheme
 
 logger = get_logger(__name__)
 

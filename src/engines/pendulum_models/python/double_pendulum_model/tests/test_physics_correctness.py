@@ -1,7 +1,7 @@
 import math
 from pathlib import Path
 
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.data_io.path_utils import setup_import_paths
 
 # Setup import paths - add the pendulum model Python directory
 _PENDULUM_PYTHON_ROOT = Path(__file__).resolve().parents[3]

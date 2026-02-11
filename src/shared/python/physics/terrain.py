@@ -33,8 +33,8 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.physics_constants import GRAVITY_M_S2
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

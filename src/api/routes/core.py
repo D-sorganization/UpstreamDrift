@@ -17,7 +17,7 @@ from src.api.utils.datetime_compat import iso_format, utc_now
 from ..dependencies import get_engine_manager
 
 if TYPE_CHECKING:
-    from src.shared.python.engine_manager import EngineManager
+    from src.shared.python.engine_core.engine_manager import EngineManager
 
 router = APIRouter()
 

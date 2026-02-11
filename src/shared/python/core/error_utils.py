@@ -4,7 +4,7 @@ This module consolidates common error handling patterns and provides
 standardized exception classes and error message factories.
 
 Usage:
-    from src.shared.python.error_utils import (
+    from src.shared.python.core.error_utils import (
         GolfSuiteError,
         EngineNotAvailableError,
         ConfigurationError,
@@ -29,7 +29,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     ContractViolationError,
     InvariantError,
     PostconditionError,

@@ -13,7 +13,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.contracts import (
+from src.shared.python.core.contracts import (
     ContractChecker,
     ContractViolationError,
     InvariantError,
@@ -345,7 +345,7 @@ class TestContractEnableDisable:
     def test_contracts_can_be_disabled(self):
         """Contracts should not be enforced when disabled."""
         # Save current state
-        import src.shared.python.contracts as contracts_module
+        import src.shared.python.core.contracts as contracts_module
 
         original_state = contracts_module.CONTRACTS_ENABLED
 

@@ -20,8 +20,8 @@ from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
 )
-from src.shared.python.logging_config import get_logger
-from src.shared.python.secure_subprocess import secure_popen
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.secure_subprocess import secure_popen
 
 logger = get_logger(__name__)
 
@@ -419,7 +419,7 @@ except ImportError as e:
 
     def _launch_urdf_generator(self) -> None:
         """Launch the URDF generator / Model Explorer application."""
-        from src.shared.python.constants import URDF_GENERATOR_SCRIPT
+        from src.shared.python.core.constants import URDF_GENERATOR_SCRIPT
 
         script_path = REPOS_ROOT / URDF_GENERATOR_SCRIPT
 

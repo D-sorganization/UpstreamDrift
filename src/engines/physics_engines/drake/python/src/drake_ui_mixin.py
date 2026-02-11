@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     MATPLOTLIB_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 HAS_QT = PYQT6_AVAILABLE
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE

@@ -3,9 +3,9 @@
 from typing import Any
 
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
-from src.shared.python.engine_manager import EngineManager
-from src.shared.python.engine_registry import EngineType
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..models.requests import SimulationRequest
 from ..models.responses import SimulationResponse

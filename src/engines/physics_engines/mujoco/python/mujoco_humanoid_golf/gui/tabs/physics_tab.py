@@ -5,8 +5,8 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
-from src.shared.python.common_utils import get_shared_urdf_path
-from src.shared.python.logging_config import get_logger
+from src.shared.python.data_io.common_utils import get_shared_urdf_path
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ...linkage_mechanisms import LINKAGE_CATALOG
 from ...models import (

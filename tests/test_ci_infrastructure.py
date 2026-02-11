@@ -61,7 +61,7 @@ class TestCoreModuleImports:
 
     def test_import_engine_availability(self) -> None:
         """Test that engine_availability module imports successfully."""
-        from src.shared.python import engine_availability
+        from src.shared.python.engine_core import engine_availability
 
         assert hasattr(engine_availability, "MUJOCO_AVAILABLE")
         assert hasattr(engine_availability, "STRUCTLOG_AVAILABLE")
@@ -76,7 +76,7 @@ class TestCoreModuleImports:
 
     def test_import_logging_config(self) -> None:
         """Test that logging_config module imports successfully."""
-        from src.shared.python import logging_config
+        from src.shared.python.logging_pkg import logging_config
 
         assert hasattr(logging_config, "get_logger")
 
@@ -119,26 +119,30 @@ class TestEngineAvailabilityFlags:
 
     def test_structlog_available_flag(self) -> None:
         """Test that structlog availability is properly detected."""
-        from src.shared.python.engine_availability import STRUCTLOG_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import (
+            STRUCTLOG_AVAILABLE,
+        )
 
         # Since we added structlog as a dependency, it should be True
         assert STRUCTLOG_AVAILABLE is True
 
     def test_numpy_available_flag(self) -> None:
         """Test that numpy availability is properly detected."""
-        from src.shared.python.engine_availability import NUMPY_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import NUMPY_AVAILABLE
 
         assert NUMPY_AVAILABLE is True
 
     def test_scipy_available_flag(self) -> None:
         """Test that scipy availability is properly detected."""
-        from src.shared.python.engine_availability import SCIPY_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import SCIPY_AVAILABLE
 
         assert SCIPY_AVAILABLE is True
 
     def test_is_engine_available_function(self) -> None:
         """Test is_engine_available function."""
-        from src.shared.python.engine_availability import is_engine_available
+        from src.shared.python.engine_core.engine_availability import (
+            is_engine_available,
+        )
 
         # These should always be true since they're core deps
         assert is_engine_available("numpy") is True
@@ -147,7 +151,9 @@ class TestEngineAvailabilityFlags:
 
     def test_get_available_engines_returns_list(self) -> None:
         """Test that get_available_engines returns a list."""
-        from src.shared.python.engine_availability import get_available_engines
+        from src.shared.python.engine_core.engine_availability import (
+            get_available_engines,
+        )
 
         available = get_available_engines()
         assert isinstance(available, list)
@@ -162,21 +168,23 @@ class TestOptionalDependencyHandling:
 
     def test_pyqt6_availability_flag_exists(self) -> None:
         """Test that PyQt6 availability flag exists."""
-        from src.shared.python.engine_availability import PYQT6_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 
         # Flag should exist (value depends on environment)
         assert isinstance(PYQT6_AVAILABLE, bool)
 
     def test_mujoco_availability_flag_exists(self) -> None:
         """Test that MuJoCo availability flag exists."""
-        from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+        from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 
         # Flag should exist (value depends on environment)
         assert isinstance(MUJOCO_AVAILABLE, bool)
 
     def test_skip_if_unavailable_decorator(self) -> None:
         """Test that skip_if_unavailable creates valid pytest marker."""
-        from src.shared.python.engine_availability import skip_if_unavailable
+        from src.shared.python.engine_core.engine_availability import (
+            skip_if_unavailable,
+        )
 
         # Should return a pytest marker, not raise
         marker = skip_if_unavailable("nonexistent_engine_xyz")

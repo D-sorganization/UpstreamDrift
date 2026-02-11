@@ -9,7 +9,10 @@ import sys
 import time
 from pathlib import Path
 
-from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
 
 logger = logging.getLogger(__name__)
 

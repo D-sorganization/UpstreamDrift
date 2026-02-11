@@ -17,14 +17,14 @@ from src.shared.python.dashboard.runner import SimulationRunner
 from src.shared.python.dashboard.widgets import ControlPanel, LivePlotWidget
 
 # Updated import to use generic export module
-from src.shared.python.export import (
+from src.shared.python.data_io.export import (
     export_recording_all_formats,
     get_available_export_formats,
 )
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 logger = get_logger(__name__)
 

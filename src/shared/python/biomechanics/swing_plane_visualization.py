@@ -24,8 +24,8 @@ from src.shared.python.biomechanics.swing_plane_analysis import (
     SwingPlaneAnalyzer,
     SwingPlaneMetrics,
 )
-from src.shared.python.io_utils import ensure_directory
-from src.shared.python.logging_config import get_logger
+from src.shared.python.data_io.io_utils import ensure_directory
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.spatial_algebra.reference_frames import (
     SwingPlaneFrame,
     fit_functional_swing_plane,

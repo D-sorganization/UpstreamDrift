@@ -58,7 +58,7 @@ class TestVerification(unittest.TestCase):
         """Verify signal processing fallbacks."""
         print("\nVerifying Signal Processing...")
         try:
-            from src.shared.python import signal_processing
+            from src.shared.python.signal_toolkit import signal_processing
 
             self.assertTrue(hasattr(signal_processing, "compute_dtw_distance"))
             print("✅ compute_dtw_distance available.")

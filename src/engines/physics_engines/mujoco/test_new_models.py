@@ -3,8 +3,8 @@
 import sys
 from pathlib import Path
 
-from src.shared.python.logging_config import get_logger, setup_logging
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.data_io.path_utils import setup_import_paths
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_import_paths(additional_paths=[Path(__file__).parent / "python"])
 

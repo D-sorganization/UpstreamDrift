@@ -14,7 +14,7 @@ import json
 import sys
 from pathlib import Path
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

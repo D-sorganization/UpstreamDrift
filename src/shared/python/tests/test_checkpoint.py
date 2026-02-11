@@ -3,14 +3,14 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from src.shared.python.checkpoint import (
-    Checkpointable,
-    CheckpointManager,
-    StateCheckpoint,
-)
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
     EngineState,
+)
+from src.shared.python.engine_core.checkpoint import (
+    Checkpointable,
+    CheckpointManager,
+    StateCheckpoint,
 )
 
 
