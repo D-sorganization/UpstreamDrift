@@ -1,3 +1,5 @@
+from typing import Any
+
 """Motion training module for inverse kinematics from club trajectory data.
 
 This module provides tools to:

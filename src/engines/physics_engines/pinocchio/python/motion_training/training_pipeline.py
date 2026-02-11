@@ -135,7 +135,9 @@ class MotionTrainingPipeline:
         # Step 3: Solve IK
         logger.info("\n[3/4] Solving inverse kinematics...")
         self.ik_result = self._solve_ik()
-        logger.info(f"      Convergence rate: {self.ik_result.convergence_rate * 100:.1f}%")
+        logger.info(
+            f"      Convergence rate: {self.ik_result.convergence_rate * 100:.1f}%"
+        )
         logger.info(
             f"      Mean left hand error: "
             f"{np.mean(self.ik_result.left_hand_errors) * 1000:.2f} mm"
@@ -312,10 +314,9 @@ def run_motion_training(
 # CLI entry point
 if __name__ == "__main__":
     import argparse
-import logging
+    import logging
 
-
-logger = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
     parser = argparse.ArgumentParser(
         description="Train body motion from club trajectory using IK"
     )

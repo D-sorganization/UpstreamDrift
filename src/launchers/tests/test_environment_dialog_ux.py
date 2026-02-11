@@ -1,8 +1,8 @@
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from typing import Any
 from PyQt6.QtWidgets import QApplication
 
 from src.launchers.golf_launcher import EnvironmentDialog

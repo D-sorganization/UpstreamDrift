@@ -1,11 +1,11 @@
 """Unit tests for Pinocchio Induced Acceleration Analyzer."""
 
 import sys
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from typing import Any
 
 # Mock pinocchio before importing
 mock_pin = MagicMock()

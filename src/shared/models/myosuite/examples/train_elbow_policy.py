@@ -1,9 +1,9 @@
 import argparse
-import sys
 import logging
+import sys
 
 try:
-    import gymnasium as gym
+
     from myosuite.utils import gym
 except ImportError:
     logging.basicConfig()

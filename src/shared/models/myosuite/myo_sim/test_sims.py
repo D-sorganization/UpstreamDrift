@@ -1,10 +1,9 @@
+import logging
 import os
 import unittest
 from typing import Any
 
 import mujoco
-import logging
-
 
 logger = logging.getLogger(__name__)
 model_paths = [

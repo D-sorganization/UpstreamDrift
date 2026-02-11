@@ -1,3 +1,4 @@
+
 """Parser for club trajectory data from motion capture Excel files.
 
 This module parses golf club motion capture data typically stored in Excel format
@@ -8,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 

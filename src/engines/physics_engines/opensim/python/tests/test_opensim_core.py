@@ -4,6 +4,7 @@ These tests verify that OpenSim failures produce clear errors, not silent fallba
 """
 
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest

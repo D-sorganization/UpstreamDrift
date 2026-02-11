@@ -1,20 +1,10 @@
-"""
-double_pendulum.py
+"""Standalone Double Pendulum Simulation.
 
-Planar double pendulum model with:
-
-- Dynamics: x_dot = f(x, u)
-- Natural torque field: tau_nat(q, qdot, qddot)
-- Example PD input and simulation
-- Optional end-effector wrench reconstruction
-
-State vector:
-    x = [q1, q2, q1dot, q2dot]
-
-This file is intended as a standalone module that you can
-import into a Streamlit app or run directly.
+This script demonstrates the Double Pendulum simulation using Pinocchio
+integration without relying on the full engine infrastructure.
 """
 
+import logging
 from collections.abc import Callable
 from typing import Any
 
@@ -23,8 +13,6 @@ import numpy.typing as npt
 from scipy.integrate import solve_ivp
 
 from src.shared.python.constants import GRAVITY_M_S2
-import logging
-
 
 logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------

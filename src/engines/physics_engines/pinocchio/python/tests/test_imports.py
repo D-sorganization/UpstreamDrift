@@ -1,7 +1,5 @@
 """Test that all modules can be imported."""
 
-import sys
-from pathlib import Path
 
 import pytest
 

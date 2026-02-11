@@ -1,8 +1,8 @@
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from typing import Any
 
 # We need to mock golf_launcher import inside unified_launcher because it might trigger Qt stuff
 # causing issues in headless env if not careful.
