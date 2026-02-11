@@ -6,6 +6,7 @@ extracting 33 body landmarks from video frames.
 """
 
 import logging
+from typing import Any
 
 import cv2
 import numpy as np

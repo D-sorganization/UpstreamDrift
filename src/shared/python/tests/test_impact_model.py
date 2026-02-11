@@ -1,4 +1,6 @@
+
 """Tests for the impact model implementation."""
+from typing import Any
 
 import numpy as np
 import pytest

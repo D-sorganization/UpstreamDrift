@@ -1,4 +1,6 @@
+
 """Tests for Advanced Analysis Features (Wavelet, Swing Plane, Correlation)."""
+from typing import Any
 
 import numpy as np
 import pytest

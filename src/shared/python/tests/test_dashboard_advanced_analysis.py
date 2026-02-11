@@ -1,4 +1,6 @@
+
 """Tests for Advanced Analysis Dialog."""
+from typing import Any
 
 import numpy as np
 import pytest

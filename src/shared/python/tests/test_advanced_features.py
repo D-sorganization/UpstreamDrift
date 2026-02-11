@@ -1,4 +1,6 @@
+
 """Tests for advanced features in statistical analysis and plotting."""
+from typing import Any
 
 import numpy as np
 import pytest

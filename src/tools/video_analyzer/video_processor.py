@@ -8,6 +8,7 @@ pipeline for swing analysis.
 import logging
 from collections.abc import Callable, Generator
 from pathlib import Path
+from typing import Any
 
 import cv2
 import numpy as np

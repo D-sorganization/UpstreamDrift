@@ -8,6 +8,7 @@ from pathlib import Path
 # Path: src/tools/model_explorer/launch_model_explorer.py -> need 4 parents
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
 
 # CRITICAL: Import MuJoCo BEFORE any Qt imports to avoid DLL conflicts on Windows.
 # Qt's OpenGL context initialization conflicts with MuJoCo's plugin loading.

@@ -7,6 +7,7 @@ for consistent data exchange between Python backend and JavaScript frontend.
 
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 
 class SwingPhase(Enum):
