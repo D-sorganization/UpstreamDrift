@@ -243,7 +243,9 @@ class ReportingMixin:
             and self.joint_torques.shape[1] > 0
             and self.joint_velocities.shape[1] > 0
         ):
-            ke = 0.5 * 1.0 * (self.club_head_speed**2)
+            # TODO: Make club mass configurable. Using 0.2 kg (typical driver head) instead of 1.0 kg.
+            club_mass = 0.2
+            ke = 0.5 * club_mass * (self.club_head_speed**2)
             n_joints = self.joint_torques.shape[1]
             n_samples = min(
                 self.joint_torques.shape[0],
