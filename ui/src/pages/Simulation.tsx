@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSimulation } from '@/api/client';
-import { useEngineManager } from '@/api/useEngineManager';
+import { useEngineStore } from '@/stores/useEngineStore';
+import { useSimulationStore } from '@/stores/useSimulationStore';
 import { EngineSelector } from '@/components/simulation/EngineSelector';
 import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { ParameterPanel, type SimulationParameters } from '@/components/simulation/ParameterPanel';
@@ -13,32 +14,40 @@ import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
 import { useToast } from '@/components/ui/Toast';
 
 export function SimulationPage() {
-  const [selectedEngine, setSelectedEngine] = useState<string | null>(null);
-  const [parameters, setParameters] = useState<SimulationParameters>({
-    duration: 3.0,
-    timestep: 0.002,
-    liveAnalysis: true,
-    gpuAcceleration: false,
-  });
-  const { showSuccess, showError, showInfo } = useToast();
-  // See issue #1199: Force overlay vectors
-  const [forceVectors, setForceVectors] = useState<ForceVector3D[]>([]);
+  // ── Global stores ─────────────────────────────────────────────────────
+  const engines = useEngineStore((s) => s.engines);
+  const selectedEngine = useEngineStore((s) => s.selectedEngine);
+  const selectEngine = useEngineStore((s) => s.selectEngine);
+  const requestLoad = useEngineStore((s) => s.requestLoad);
+  const unloadEngine = useEngineStore((s) => s.unloadEngine);
 
-  // Lazy engine manager — no engines loaded on startup
-  const { engines, loadedEngines, requestLoad, unloadEngine } = useEngineManager();
+  // Derive values with useMemo to avoid new-reference re-render loops
+  const loadedEngines = useMemo(
+    () => engines.filter((e) => e.loadState === 'loaded'),
+    [engines]
+  );
 
-  // Derive the effective engine: use explicit selection, or fall back to first loaded
   const effectiveEngine = useMemo(() => {
     if (selectedEngine) {
-      // Verify it's still loaded
-      const eng = loadedEngines.find((e) => e.name === selectedEngine);
+      const eng = engines.find(
+        (e) => e.name === selectedEngine && e.loadState === 'loaded'
+      );
       if (eng) return selectedEngine;
     }
-    return loadedEngines.length > 0 ? loadedEngines[0].name : null;
-  }, [selectedEngine, loadedEngines]);
+    const firstLoaded = engines.find((e) => e.loadState === 'loaded');
+    return firstLoaded ? firstLoaded.name : null;
+  }, [engines, selectedEngine]);
+
+  const parameters = useSimulationStore((s) => s.parameters);
+  const replaceParameters = useSimulationStore((s) => s.replaceParameters);
+  const markRun = useSimulationStore((s) => s.markRun);
+
+  // ── Local state (component-specific) ──────────────────────────────────
+  const { showSuccess, showError, showInfo } = useToast();
+  const [forceVectors, setForceVectors] = useState<ForceVector3D[]>([]);
 
   // Only connect to the simulation when an engine is selected AND loaded
-  const activeEngine = effectiveEngine || 'mujoco'; // fallback for hook (won't connect unless started)
+  const activeEngine = effectiveEngine || 'mujoco';
   const {
     isRunning,
     isPaused,
@@ -48,32 +57,35 @@ export function SimulationPage() {
     start,
     stop,
     pause,
-    resume
+    resume,
   } = useSimulation(activeEngine);
 
-  // Handle engine loading
-  const handleLoadEngine = useCallback(async (engineName: string) => {
-    showInfo(`Loading ${engineName}...`);
-    await requestLoad(engineName);
-    showSuccess(`${engineName} engine loaded`);
-  }, [requestLoad, showInfo, showSuccess]);
+  // ── Event handlers ────────────────────────────────────────────────────
 
-  // Handle engine unloading
-  const handleUnloadEngine = useCallback((engineName: string) => {
-    if (effectiveEngine === engineName) {
-      // Deselect if unloading the active engine
-      setSelectedEngine(null);
-    }
-    unloadEngine(engineName);
-    showInfo(`${engineName} engine unloaded`);
-  }, [effectiveEngine, unloadEngine, showInfo]);
+  const handleLoadEngine = useCallback(
+    async (engineName: string) => {
+      showInfo(`Loading ${engineName}...`);
+      await requestLoad(engineName);
+      showSuccess(`${engineName} engine loaded`);
+    },
+    [requestLoad, showInfo, showSuccess]
+  );
 
-  // Handle parameter changes
-  const handleParameterChange = useCallback((params: SimulationParameters) => {
-    setParameters(params);
-  }, []);
+  const handleUnloadEngine = useCallback(
+    (engineName: string) => {
+      unloadEngine(engineName);
+      showInfo(`${engineName} engine unloaded`);
+    },
+    [unloadEngine, showInfo]
+  );
 
-  // Start simulation with current parameters
+  const handleParameterChange = useCallback(
+    (params: SimulationParameters) => {
+      replaceParameters(params);
+    },
+    [replaceParameters]
+  );
+
   const handleStart = useCallback(() => {
     if (!effectiveEngine) {
       showError('Please load and select an engine first');
@@ -84,10 +96,10 @@ export function SimulationPage() {
       timestep: parameters.timestep,
       live_analysis: parameters.liveAnalysis,
     });
+    markRun();
     showInfo(`Starting ${effectiveEngine} simulation...`);
-  }, [start, parameters, effectiveEngine, showInfo, showError]);
+  }, [start, parameters, effectiveEngine, showInfo, showError, markRun]);
 
-  // Handle stop
   const handleStop = useCallback(() => {
     stop();
     showInfo('Simulation stopped');
@@ -135,7 +147,7 @@ export function SimulationPage() {
           <EngineSelector
             engines={engines}
             selectedEngine={effectiveEngine}
-            onSelect={setSelectedEngine}
+            onSelect={selectEngine}
             onLoad={handleLoadEngine}
             onUnload={handleUnloadEngine}
             disabled={isRunning}
