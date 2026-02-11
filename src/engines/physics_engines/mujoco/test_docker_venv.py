@@ -35,7 +35,7 @@ def test_docker_venv() -> bool:
             logger.info("❌ robotics_env Docker image not found")
             logger.info("   Run: docker build -t robotics_env . (from docker/ directory)")
             return False
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError):
         logger.info(f"❌ Failed to check Docker images: {e}")
         return False
 
@@ -51,7 +51,7 @@ def test_docker_venv() -> bool:
             logger.info("✓ Container uses virtual environment Python")
         else:
             logger.info("⚠️  Container may not be using virtual environment")
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError):
         logger.info(f"❌ Failed to check Python path: {e}")
 
     # Test 3: Check if defusedxml is available in container
@@ -74,7 +74,7 @@ def test_docker_venv() -> bool:
     except subprocess.CalledProcessError as e:
         logger.info(f"❌ defusedxml not available: {e.stderr}")
         return False
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError):
         logger.info(f"❌ Failed to test defusedxml: {e}")
         return False
 
@@ -98,7 +98,7 @@ def test_docker_venv() -> bool:
     except subprocess.CalledProcessError as e:
         logger.info(f"❌ defusedxml.ElementTree import failed: {e.stderr}")
         return False
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError):
         logger.info(f"❌ Failed to test defusedxml.ElementTree: {e}")
         return False
 
@@ -133,7 +133,7 @@ def test_docker_venv() -> bool:
         except subprocess.CalledProcessError as e:
             logger.info(f"❌ mujoco_golf_pendulum.urdf_io import failed: {e.stderr}")
             return False
-        except Exception as e:
+        except (ImportError, ModuleNotFoundError, OSError):
             logger.info(f"❌ Failed to test module import: {e}")
             return False
 

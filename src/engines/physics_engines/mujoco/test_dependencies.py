@@ -40,7 +40,7 @@ def test_numpy_compatibility() -> None:
     try:
         qpos = data.qpos
         assert isinstance(qpos, np.ndarray | object)  # Depending on binding version
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError):
         logger.warning(f"Direct numpy access check warning: {e}")
 
 
@@ -52,7 +52,7 @@ def test_rendering_backend() -> None:
         from mujoco import MjRenderContextOffscreen  # noqa: F401
     except ImportError:
         logger.warning("MjRenderContextOffscreen not available (might be old version)")
-    except Exception:
+    except (ImportError, ModuleNotFoundError):
         # It's okay if it fails to initialize in this test,
         # we just want to know if the symbol exists
         pass

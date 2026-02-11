@@ -34,7 +34,7 @@ def test_data_loading():
 
         return {"baseq": baseq_data, "ztcfq": ztcfq_data, "deltaq": deltaq_data}
 
-    except Exception as e:
+    except (FileNotFoundError, ValueError, KeyError, OSError):
         logger.info(f"❌ Data loading failed: {e}")
         return None
 
@@ -69,7 +69,7 @@ def test_gui_launch():
             logger.info("❌ No data available for GUI test")
             return False
 
-    except Exception as e:
+    except (FileNotFoundError, ValueError, KeyError, OSError):
         logger.info(f"❌ GUI launch failed: {e}")
         return False
 
