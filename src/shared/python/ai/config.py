@@ -37,7 +37,7 @@ Usage:
 
 from __future__ import annotations
 
-from src.shared.python.environment import get_env, get_env_float
+from src.shared.python.config.environment import get_env, get_env_float
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)

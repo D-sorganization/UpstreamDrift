@@ -12,7 +12,9 @@ from src.shared.python.constants import (
     SPEED_OF_LIGHT_M_S,
     E,
 )
-from src.shared.python.reproducibility import DEFAULT_SEED as DEFAULT_RANDOM_SEED
+from src.shared.python.data_io.reproducibility import (
+    DEFAULT_SEED as DEFAULT_RANDOM_SEED,
+)
 
 __all__ = [
     "DEFAULT_RANDOM_SEED",

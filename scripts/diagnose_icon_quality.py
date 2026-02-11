@@ -6,7 +6,7 @@ Diagnose icon quality issues and create ultra-sharp icons using shared utilities
 from pathlib import Path
 
 from scripts.script_utils import run_main, setup_script_logging
-from src.shared.python.image_utils import (
+from src.shared.python.gui_pkg.image_utils import (
     Image,
     analyze_image_quality,
     save_ico,

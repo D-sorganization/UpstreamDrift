@@ -5,9 +5,9 @@ import pytest
 from matplotlib.figure import Figure
 
 from src.shared.python.comparative_analysis import ComparativeSwingAnalyzer
-from src.shared.python.comparative_plotting import ComparativePlotter
 from src.shared.python.plotting import GolfSwingPlotter
 from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.validation_pkg.comparative_plotting import ComparativePlotter
 
 # sklearn/muscle_analysis is optional - check actual sklearn availability
 try:

@@ -13,7 +13,7 @@ import math
 import numpy as np
 import pytest
 
-from src.shared.python.flight_models import (
+from src.shared.python.physics.flight_models import (
     BallFlightModel,
     ConstantCoefficientModel,
     FlightModelRegistry,

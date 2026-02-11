@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from src.shared.python.ball_flight_physics import (
+from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
     BallProperties,
     EnvironmentalConditions,
@@ -778,7 +778,7 @@ class TestSpinDecay:
         With decay_rate=0.05, after 4s: spin(4) = spin(0) * exp(-0.05 * 4)
         = spin(0) * exp(-0.2) ≈ spin(0) * 0.819 → ~18% decay
         """
-        from src.shared.python.ball_flight_physics import _apply_spin_decay
+        from src.shared.python.physics.ball_flight_physics import _apply_spin_decay
 
         omega_initial = 261.8  # 2500 rpm in rad/s
         t_total = 4.0

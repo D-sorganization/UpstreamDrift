@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.shared.python.kinematic_sequence import KinematicSequenceAnalyzer
+from src.shared.python.biomechanics.kinematic_sequence import KinematicSequenceAnalyzer
 
 
 class TestKinematicSequence:

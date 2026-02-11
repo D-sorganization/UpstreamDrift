@@ -20,14 +20,17 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.biomechanics.swing_plane_analysis import (
+    SwingPlaneAnalyzer,
+    SwingPlaneMetrics,
+)
 from src.shared.python.io_utils import ensure_directory
 from src.shared.python.logging_config import get_logger
-from src.shared.python.reference_frames import (
+from src.shared.python.spatial_algebra.reference_frames import (
     SwingPlaneFrame,
     fit_functional_swing_plane,
     fit_instantaneous_swing_plane,
 )
-from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics
 
 if TYPE_CHECKING:
     pass

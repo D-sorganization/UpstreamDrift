@@ -14,6 +14,7 @@ from __future__ import annotations
 import numpy as np
 from PyQt6 import QtWidgets
 
+from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
 from src.shared.python.interfaces import RecorderInterface
 from src.shared.python.logging_config import get_logger
 from src.shared.python.plotting import MplCanvas
@@ -22,7 +23,6 @@ from src.shared.python.signal_processing import (
     compute_cwt,
     compute_spectrogram,
 )
-from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 logger = get_logger(__name__)
 

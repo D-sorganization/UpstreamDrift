@@ -725,7 +725,7 @@ class SettingsDialog(QDialog):
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
 
-        from src.shared.python.draggable_tabs import DraggableTabWidget
+        from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
         self.tabs = DraggableTabWidget(
             core_tabs={"Layout", "Configuration", "Diagnostics"}

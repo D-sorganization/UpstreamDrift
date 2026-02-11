@@ -4,7 +4,7 @@ This module provides reusable subprocess patterns to eliminate repeated
 process management code.
 
 Usage:
-    from src.shared.python.subprocess_utils import (
+    from src.shared.python.security.subprocess_utils import (
         ProcessManager,
         run_command,
         run_command_async,
@@ -26,7 +26,7 @@ import threading
 import time
 from pathlib import Path
 
-from src.shared.python.error_decorators import log_errors
+from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.logging_config import get_logger
 from src.shared.python.secure_subprocess import secure_run
 

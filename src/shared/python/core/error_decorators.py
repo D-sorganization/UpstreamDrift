@@ -4,7 +4,7 @@ This module provides reusable error handling patterns to eliminate
 repeated try-except-log blocks throughout the codebase.
 
 Usage:
-    from src.shared.python.error_decorators import log_errors, handle_import_error
+    from src.shared.python.core.error_decorators import log_errors, handle_import_error
 
     @log_errors("Failed to process data")
     def process_data(data):

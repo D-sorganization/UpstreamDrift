@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.shared.python.ball_flight_physics import (
+from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
     BallProperties,
     EnvironmentalConditions,

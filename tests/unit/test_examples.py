@@ -54,7 +54,7 @@ def test_example_02_runs() -> None:
     # Actually it writes to project_root/output by default.
     # We should mock OutputManager to prevent clutter or use temp dir.
 
-    with patch("src.shared.python.output_manager.OutputManager") as MockOutput:
+    with patch("src.shared.python.data_io.output_manager.OutputManager") as MockOutput:
         mod = load_module("ex02", example02_path)
         mod.main()
 

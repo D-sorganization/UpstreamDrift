@@ -8,8 +8,8 @@ from src.shared.python.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,
 )
-from src.shared.python.comparative_plotting import ComparativePlotter
 from src.shared.python.plotting import RecorderInterface
+from src.shared.python.validation_pkg.comparative_plotting import ComparativePlotter
 
 
 class MockRecorder(RecorderInterface):

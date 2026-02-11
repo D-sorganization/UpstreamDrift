@@ -10,8 +10,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.shared.python.reference_frames import SwingPlaneFrame
-from src.shared.python.swing_plane_visualization import (
+from src.shared.python.biomechanics.swing_plane_visualization import (
     SwingPlaneVisualizer,
     compute_trajectory_deviations,
     create_deviation_colormap,
@@ -19,6 +18,7 @@ from src.shared.python.swing_plane_visualization import (
     create_instantaneous_plane_visualization,
     generate_plane_vertices,
 )
+from src.shared.python.spatial_algebra.reference_frames import SwingPlaneFrame
 
 
 class TestPlaneVertices:

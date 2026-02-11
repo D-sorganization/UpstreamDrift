@@ -52,7 +52,7 @@ from src.launchers.ui_components import (
     GolfSplashScreen,
     StartupResults,
 )
-from src.shared.python.subprocess_utils import kill_process_tree
+from src.shared.python.security.subprocess_utils import kill_process_tree
 
 # Backward-compatible re-exports
 __all__ = [

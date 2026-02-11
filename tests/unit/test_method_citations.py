@@ -51,7 +51,9 @@ class TestKinematicSequenceCitation:
     """Kinematic sequence result carries methodology citation."""
 
     def test_result_has_methodology(self) -> None:
-        from src.shared.python.kinematic_sequence import SegmentTimingAnalyzer
+        from src.shared.python.biomechanics.kinematic_sequence import (
+            SegmentTimingAnalyzer,
+        )
 
         times = np.linspace(0, 1.0, 100)
         data = {
