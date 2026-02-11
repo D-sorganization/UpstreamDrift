@@ -261,12 +261,12 @@ class MotionDataLoader:
                 data_df.iloc[:, 4], errors="coerce"
             )
 
-            print(
+            logger.info(
                 f"[OK] Extracted position data from columns 2-4 (Mid-hands) "
                 f"for {sheet_name}"
             )
         else:
-            print(
+            logger.info(
                 f"[WARN] Insufficient columns in {sheet_name}, "
                 f"using first 3 numeric columns"
             )
@@ -282,7 +282,7 @@ class MotionDataLoader:
                     data_df[numeric_cols[2]], errors="coerce"
                 )
             else:
-                print(
+                logger.info(
                     f"[WARN] Insufficient numeric columns in {sheet_name}, "
                     f"creating dummy data"
                 )
@@ -316,7 +316,7 @@ class MotionDataLoader:
 
         time_min = processed_data["time"].min()
         time_max = processed_data["time"].max()
-        print(
+        logger.info(
             f"[OK] Processed {sheet_name}: {processed_data.shape}, "
             f"time range: [{time_min:.3f}, {time_max:.3f}]"
         )
@@ -389,7 +389,7 @@ class MotionDataLoader:
         processed_data["hub_y"] = ch_y_array + 0.37
         processed_data["hub_z"] = ch_z_array + 0.47
 
-        print(
+        logger.info(
             f"[CALC] Created body part estimates for {sheet_name} "
             f"based on clubhead position"
         )
@@ -636,7 +636,7 @@ def main():
         logger.info("\n[SUMMARY] Data Summary:")
         logger.info("ProV1 data points: %s", len(excel_data["ProV1"]))
         logger.info("Wiffle data points: %s", len(excel_data["Wiffle"]))
-        print(
+        logger.info(
             f"Time range: {excel_data['ProV1']['time'].min():.3f} - "
             f"{excel_data['ProV1']['time'].max():.3f}"
         )

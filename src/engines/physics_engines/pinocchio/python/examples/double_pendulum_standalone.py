@@ -23,7 +23,10 @@ import numpy.typing as npt
 from scipy.integrate import solve_ivp
 
 from src.shared.python.constants import GRAVITY_M_S2
+import logging
 
+
+logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Physical parameters for the double pendulum
 # ---------------------------------------------------------------------------
@@ -431,10 +434,10 @@ def run_example() -> None:
     )
 
     # Simple console output
-    print("Simulation completed.")  # noqa: T201
-    print(f"Number of time steps: {len(t_samples)}")  # noqa: T201
-    print("First few natural torque samples:")  # noqa: T201
-    print(tau_nat_traj[:5, :])  # noqa: T201
+    logger.info("Simulation completed.")  # noqa: T201
+    logger.info(f"Number of time steps: {len(t_samples)}")  # noqa: T201
+    logger.info("First few natural torque samples:")  # noqa: T201
+    logger.info(tau_nat_traj[:5, :])  # noqa: T201
 
 
 if __name__ == "__main__":

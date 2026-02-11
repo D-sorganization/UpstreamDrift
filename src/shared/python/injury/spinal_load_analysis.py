@@ -36,7 +36,10 @@ from src.shared.python.analysis.dataclasses import (
     MethodCitation,
 )
 from src.shared.python.constants import GRAVITY_M_S2
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 class SpinalRiskLevel(Enum):
     """Risk level categories for spinal loading."""
@@ -707,15 +710,15 @@ if __name__ == "__main__":
     analyzer, result = create_example_analysis()
 
     if result.x_factor:
-        print(  # noqa: T201
+        logger.info(  # noqa: T201
             f"X-Factor Stretch: {result.x_factor.x_factor_stretch:.1f} deg"
         )
 
     if result.crunch_factor:
-        print(  # noqa: T201
+        logger.info(  # noqa: T201
             f"Peak Crunch Factor: {result.crunch_factor.peak_crunch:.1f}"
         )
 
-    print("\nRecommendations:")  # noqa: T201
+    logger.info("\nRecommendations:")  # noqa: T201
     for rec in analyzer.get_recommendations(result):
-        print(f"  - {rec}")  # noqa: T201
+        logger.info(f"  - {rec}")  # noqa: T201

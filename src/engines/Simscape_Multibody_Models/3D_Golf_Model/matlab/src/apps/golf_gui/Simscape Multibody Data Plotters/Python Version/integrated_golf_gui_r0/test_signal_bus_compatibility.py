@@ -19,7 +19,7 @@ from golf_data_core import MatlabDataLoader
 
 def test_matlab_data_structure():
     """Test the current MATLAB data structure to understand what's available"""
-    print("=== Testing MATLAB Data Structure ===")
+    logger.info("=== Testing MATLAB Data Structure ===")
 
     # Check if the data files exist
     baseq_file = "BASEQ.mat"
@@ -27,36 +27,36 @@ def test_matlab_data_structure():
     delta_file = "DELTAQ.mat"
 
     files_exist = all(Path(f).exists() for f in [baseq_file, ztcfq_file, delta_file])
-    print(f"Data files exist: {files_exist}")
+    logger.info(f"Data files exist: {files_exist}")
 
     if not files_exist:
-        print("❌ Required data files not found!")
+        logger.info("❌ Required data files not found!")
         return False
 
     # Load and analyze each file
     for filename in [baseq_file, ztcfq_file, delta_file]:
-        print(f"\n--- Analyzing {filename} ---")
+        logger.info(f"\n--- Analyzing {filename} ---")
         try:
             mat_data = scipy.io.loadmat(filename)
 
-            print(f"Keys in {filename}:")
+            logger.info(f"Keys in {filename}:")
             for key in mat_data.keys():
                 if not key.startswith("__"):  # Skip metadata keys
                     value = mat_data[key]
                     if isinstance(value, np.ndarray):
-                        print(
+                        logger.info(
                             f"  {key}: {type(value).__name__} with shape {value.shape}"
                         )
                         if value.ndim == 2 and value.shape[1] > 10:
-                            print(
+                            logger.info(
                                 f"    Sample columns: "
                                 f"{list(range(min(5, value.shape[1])))}"
                             )
                     else:
-                        print(f"  {key}: {type(value).__name__}")
+                        logger.info(f"  {key}: {type(value).__name__}")
 
         except Exception as e:
-            print(f"❌ Error loading {filename}: {e}")
+            logger.info(f"❌ Error loading {filename}: {e}")
             return False
 
     return True
@@ -64,7 +64,7 @@ def test_matlab_data_structure():
 
 def test_data_loader():
     """Test the MatlabDataLoader with the current data structure"""
-    print("\n=== Testing MatlabDataLoader ===")
+    logger.info("\n=== Testing MatlabDataLoader ===")
 
     try:
         loader = MatlabDataLoader()
@@ -72,13 +72,13 @@ def test_data_loader():
 
         baseq_df, ztcfq_df, delta_df = datasets
 
-        print(f"BASEQ shape: {baseq_df.shape}")
-        print(f"ZTCFQ shape: {ztcfq_df.shape}")
-        print(f"DELTAQ shape: {delta_df.shape}")
+        logger.info(f"BASEQ shape: {baseq_df.shape}")
+        logger.info(f"ZTCFQ shape: {ztcfq_df.shape}")
+        logger.info(f"DELTAQ shape: {delta_df.shape}")
 
-        print(f"\nBASEQ columns (first 10): {list(baseq_df.columns[:10])}")
-        print(f"ZTCFQ columns (first 10): {list(ztcfq_df.columns[:10])}")
-        print(f"DELTAQ columns (first 10): {list(delta_df.columns[:10])}")
+        logger.info(f"\nBASEQ columns (first 10): {list(baseq_df.columns[:10])}")
+        logger.info(f"ZTCFQ columns (first 10): {list(ztcfq_df.columns[:10])}")
+        logger.info(f"DELTAQ columns (first 10): {list(delta_df.columns[:10])}")
 
         # Check for required columns
         required_columns = ["CHx", "CHy", "CHz", "MPx", "MPy", "MPz"]
@@ -89,14 +89,14 @@ def test_data_loader():
         ]:
             missing_cols = [col for col in required_columns if col not in df.columns]
             if missing_cols:
-                print(f"⚠️  {df_name} missing columns: {missing_cols}")
+                logger.info(f"⚠️  {df_name} missing columns: {missing_cols}")
             else:
-                print(f"✅ {df_name} has all required columns")
+                logger.info(f"✅ {df_name} has all required columns")
 
         return True
 
     except Exception as e:
-        print(f"❌ Error in data loader: {e}")
+        logger.info(f"❌ Error in data loader: {e}")
         import traceback
 
         traceback.print_exc()
@@ -105,7 +105,7 @@ def test_data_loader():
 
 def test_frame_processor():
     """Test the FrameProcessor with the current data"""
-    print("\n=== Testing FrameProcessor ===")
+    logger.info("\n=== Testing FrameProcessor ===")
 
     try:
         from golf_data_core import FrameProcessor, RenderConfig
@@ -116,8 +116,8 @@ def test_frame_processor():
         config = RenderConfig()
         processor = FrameProcessor(datasets, config)
 
-        print(f"Number of frames: {processor.get_num_frames()}")
-        print(f"Time vector length: {len(processor.get_time_vector())}")
+        logger.info(f"Number of frames: {processor.get_num_frames()}")
+        logger.info(f"Time vector length: {len(processor.get_time_vector())}")
 
         # Test getting a few frames
         for frame_idx in [
@@ -126,25 +126,28 @@ def test_frame_processor():
             processor.get_num_frames() - 1,
         ]:
             frame_data = processor.get_frame_data(frame_idx)
-            print(f"Frame {frame_idx}:")
-            print(f"  Clubhead: {frame_data.clubhead}")
-            print(f"  Midpoint: {frame_data.midpoint}")
-            print(f"  Shaft length: {frame_data.shaft_length:.3f}")
-            print(f"  Valid: {frame_data.is_valid}")
+            logger.info(f"Frame {frame_idx}:")
+            logger.info(f"  Clubhead: {frame_data.clubhead}")
+            logger.info(f"  Midpoint: {frame_data.midpoint}")
+            logger.info(f"  Shaft length: {frame_data.shaft_length:.3f}")
+            logger.info(f"  Valid: {frame_data.is_valid}")
 
         return True
 
     except Exception as e:
-        print(f"❌ Error in frame processor: {e}")
+        logger.info(f"❌ Error in frame processor: {e}")
         import traceback
+import logging
 
+
+logger = logging.getLogger(__name__)
         traceback.print_exc()
         return False
 
 
 def analyze_signal_bus_structure():
     """Analyze the signal bus structure to understand the new logging setup"""
-    print("\n=== Analyzing Signal Bus Structure ===")
+    logger.info("\n=== Analyzing Signal Bus Structure ===")
 
     try:
         # Load one of the files to see the structure
@@ -160,22 +163,22 @@ def analyze_signal_bus_structure():
                     if value.shape[1] > 20:  # Many columns suggest signal bus
                         signal_bus_indicators.append((key, value.shape))
 
-        print("Potential signal bus data:")
+        logger.info("Potential signal bus data:")
         for key, shape in signal_bus_indicators:
-            print(f"  {key}: {shape}")
+            logger.info(f"  {key}: {shape}")
 
         # Check for specific signal patterns
         if "BASEQ" in mat_data:
             baseq_data = mat_data["BASEQ"]
             if isinstance(baseq_data, np.ndarray) and baseq_data.ndim == 2:
-                print(f"\nBASEQ data shape: {baseq_data.shape}")
+                logger.info(f"\nBASEQ data shape: {baseq_data.shape}")
 
                 # Try to identify column patterns
                 if baseq_data.shape[1] > 10:
-                    print("Sample column analysis:")
+                    logger.info("Sample column analysis:")
                     for i in range(min(10, baseq_data.shape[1])):
                         col_data = baseq_data[:, i]
-                        print(
+                        logger.info(
                             f"  Column {i}: range [{col_data.min():.3f}, "
                             f"{col_data.max():.3f}], mean {col_data.mean():.3f}"
                         )
@@ -183,14 +186,14 @@ def analyze_signal_bus_structure():
         return True
 
     except Exception as e:
-        print(f"❌ Error analyzing signal bus structure: {e}")
+        logger.info(f"❌ Error analyzing signal bus structure: {e}")
         return False
 
 
 def main():
     """Main test function"""
-    print("🚀 Starting Signal Bus Compatibility Test")
-    print("=" * 50)
+    logger.info("🚀 Starting Signal Bus Compatibility Test")
+    logger.info("=" * 50)
 
     # Change to the script directory
     script_dir = Path(__file__).parent
@@ -206,42 +209,42 @@ def main():
 
     results = {}
     for test_name, test_func in tests:
-        print(f"\n{'=' * 20} {test_name} {'=' * 20}")
+        logger.info(f"\n{'=' * 20} {test_name} {'=' * 20}")
         try:
             results[test_name] = test_func()
         except Exception as e:
-            print(f"❌ {test_name} failed with exception: {e}")
+            logger.info(f"❌ {test_name} failed with exception: {e}")
             results[test_name] = False
 
     # Summary
-    print(f"\n{'=' * 50}")
-    print("TEST SUMMARY")
-    print("=" * 50)
+    logger.info(f"\n{'=' * 50}")
+    logger.info("TEST SUMMARY")
+    logger.info("=" * 50)
 
     all_passed = True
     for test_name, passed in results.items():
         status = "✅ PASS" if passed else "❌ FAIL"
-        print(f"{test_name}: {status}")
+        logger.info(f"{test_name}: {status}")
         if not passed:
             all_passed = False
 
-    print(
+    logger.info(
         f"\nOverall: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}"
     )
 
     if all_passed:
-        print(
+        logger.info(
             "\n🎉 The GUI should be compatible with the current signal bus structure!"
         )
-        print("Recommendations:")
-        print("1. The current data structure appears to be compatible")
-        print(
+        logger.info("Recommendations:")
+        logger.info("1. The current data structure appears to be compatible")
+        logger.info(
             "2. Consider adding a GUI option to disable Simscape Results "
             "Explorer for speed"
         )
-        print("3. Test with a full simulation run to verify all data is captured")
+        logger.info("3. Test with a full simulation run to verify all data is captured")
     else:
-        print("\n⚠️  Some compatibility issues detected. Review the errors above.")
+        logger.info("\n⚠️  Some compatibility issues detected. Review the errors above.")
 
     return all_passed
 

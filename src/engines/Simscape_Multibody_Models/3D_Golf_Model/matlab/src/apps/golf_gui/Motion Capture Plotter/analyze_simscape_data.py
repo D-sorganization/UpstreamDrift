@@ -20,7 +20,7 @@ def analyze_simscape_data(csv_file):
     # Read the CSV file
     try:
         df = pd.read_csv(csv_file)
-        print(
+        logger.info(
             f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns"
         )
         logger.info("Time range: %s to %s seconds", df["time"].min(), df["time"].max())

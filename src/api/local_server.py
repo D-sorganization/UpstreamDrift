@@ -548,7 +548,7 @@ def print_server_info(host: str, port: int):
     RESET = "\033[0m"
 
     try:
-        print(f"""
+        logger.info(f"""
 {CYAN}    ┌─────────────────────────────────────────────────────────┐
     │              Golf Modeling Suite - Local Server         │
     ├─────────────────────────────────────────────────────────┤

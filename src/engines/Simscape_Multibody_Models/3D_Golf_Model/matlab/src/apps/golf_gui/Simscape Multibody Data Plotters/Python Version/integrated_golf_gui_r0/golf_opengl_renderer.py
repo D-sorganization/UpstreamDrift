@@ -447,7 +447,7 @@ class OpenGLRenderer:
         # Ground
         self.geometry_manager.create_geometry_object("ground", "ground", "ground")
 
-        print(
+        logger.info(
             f"[OK] Created {len(self.geometry_manager.geometry_objects)} "
             f"geometry objects"
         )
@@ -913,20 +913,20 @@ class OpenGLRenderer:
 # ============================================================================
 
 if __name__ == "__main__":
-    print("🎨 Golf Swing Visualizer - Fixed OpenGL Renderer Test")
+    logger.info("🎨 Golf Swing Visualizer - Fixed OpenGL Renderer Test")
 
     # Test shader compilation
-    print("\n🔧 Testing shader compilation...")
+    logger.info("\n🔧 Testing shader compilation...")
     try:
         vertex_shader = ShaderLibrary.get_simple_vertex_shader()
         fragment_shader = ShaderLibrary.get_simple_fragment_shader()
-        print(
+        logger.info(
             f"   Simple shaders: {len(vertex_shader)} + "
             f"{len(fragment_shader)} characters"
         )
 
-        print("[OK] Shader compilation test passed")
+        logger.info("[OK] Shader compilation test passed")
     except (RuntimeError, ValueError, OSError) as e:
-        print(f"[ERROR] Shader compilation test failed: {e}")
+        logger.info(f"[ERROR] Shader compilation test failed: {e}")
 
-    print("\n🎉 Fixed OpenGL renderer ready for integration!")
+    logger.info("\n🎉 Fixed OpenGL renderer ready for integration!")

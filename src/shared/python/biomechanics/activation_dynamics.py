@@ -26,7 +26,10 @@ from __future__ import annotations
 import numpy as np
 
 from src.shared.python.logging_config import get_logger
+import logging
 
+
+logger = logging.getLogger(__name__)
 logger = get_logger(__name__)
 
 
@@ -127,14 +130,14 @@ if __name__ == "__main__":
 
     # Simulate
     a = 0.0
-    print("=" * 60)  # noqa: T201
-    print("Activation Dynamics Test")  # noqa: T201
-    print("=" * 60)  # noqa: T201
-    print("\\nTest 1: Step response (0 → 1)")  # noqa: T201
-    print(f"  τ_act = {dynamics.tau_act * 1000:.1f} ms")  # noqa: T201
+    logger.info("=" * 60)  # noqa: T201
+    logger.info("Activation Dynamics Test")  # noqa: T201
+    logger.info("=" * 60)  # noqa: T201
+    logger.info("\\nTest 1: Step response (0 → 1)")  # noqa: T201
+    logger.info(f"  τ_act = {dynamics.tau_act * 1000:.1f} ms")  # noqa: T201
 
-    print("\\n  Time [ms]  Activation [%]")  # noqa: T201
-    print("  ---------  --------------")  # noqa: T201
+    logger.info("\\n  Time [ms]  Activation [%]")  # noqa: T201
+    logger.info("  ---------  --------------")  # noqa: T201
 
     for i, _t in enumerate(times):
         u = u_signal[i]
@@ -143,24 +146,24 @@ if __name__ == "__main__":
 
         # Print check points
         if i % 20 == 0 and i < 120:
-            print(f"  {i * dt * 1000:5.0f}      {a * 100:5.1f}")  # noqa: T201
+            logger.info(f"  {i * dt * 1000:5.0f}      {a * 100:5.1f}")  # noqa: T201
 
-    print("\\nTest 2: Deactivation (1 → 0)")  # noqa: T201
-    print(f"  τ_deact = {dynamics.tau_deact * 1000:.1f} ms")  # noqa: T201
-    print("\\n  Time [ms]  Activation [%]")  # noqa: T201
-    print("  ---------  --------------")  # noqa: T201
+    logger.info("\\nTest 2: Deactivation (1 → 0)")  # noqa: T201
+    logger.info(f"  τ_deact = {dynamics.tau_deact * 1000:.1f} ms")  # noqa: T201
+    logger.info("\\n  Time [ms]  Activation [%]")  # noqa: T201
+    logger.info("  ---------  --------------")  # noqa: T201
 
     # Print check points for deactivation
     for i in range(100, 160, 10):
-        print(f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}")  # noqa: T201
+        logger.info(f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}")  # noqa: T201
 
-    print("\\n" + "=" * 60)  # noqa: T201
-    print("✓ Activation dynamics test complete")  # noqa: T201
-    print("=" * 60)  # noqa: T201
-    print("\\nKey observation:")  # noqa: T201
-    print(  # noqa: T201
+    logger.info("\\n" + "=" * 60)  # noqa: T201
+    logger.info("✓ Activation dynamics test complete")  # noqa: T201
+    logger.info("=" * 60)  # noqa: T201
+    logger.info("\\nKey observation:")  # noqa: T201
+    logger.info(  # noqa: T201
         "  Activation is faster (10ms) than deactivation (40ms)"
     )  # noqa: T201
-    print(  # noqa: T201
+    logger.info(  # noqa: T201
         "  This asymmetry is physiologically realistic (Ca²⁺ release vs. pump)"
     )

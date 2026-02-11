@@ -61,7 +61,7 @@ def test_data_loading_accuracy():
         ztcfq_missing = ztcfq.isna().sum().sum()
         deltaq_missing = deltaq.isna().sum().sum()
 
-        print(
+        logger.info(
             f"Missing values - BASEQ: {baseq_missing}, "
             f"ZTCFQ: {ztcfq_missing}, DELTAQ: {deltaq_missing}"
         )
@@ -133,7 +133,7 @@ def test_data_consistency():
             for col in clubhead_cols:
                 prov1_min, prov1_max = prov1_clubhead_range[col]
                 wiffle_min, wiffle_max = wiffle_clubhead_range[col]
-                print(
+                logger.info(
                     f"  {col}: ProV1[{prov1_min:.3f}, {prov1_max:.3f}], "
                     f"Wiffle[{wiffle_min:.3f}, {wiffle_max:.3f}]"
                 )
@@ -282,7 +282,7 @@ def generate_final_report():
         logger.info("\n🔧 RECOMMENDATIONS:")
         logger.info("1. The data loading system is ready for production use")
         logger.info("2. The simplified body part estimation is working as expected")
-        print(
+        logger.info(
             "3. Consider implementing more sophisticated biomechanical "
             "modeling for body parts"
         )

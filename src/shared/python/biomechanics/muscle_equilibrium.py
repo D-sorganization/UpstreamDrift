@@ -274,7 +274,10 @@ def compute_equilibrium_state(
 # Example usage / validation
 if __name__ == "__main__":
     from shared.python.hill_muscle import HillMuscleModel, MuscleParameters
+import logging
 
+
+logger = logging.getLogger(__name__)
     # Create muscle
     params = MuscleParameters(
         F_max=1000.0,  # N
@@ -291,27 +294,27 @@ if __name__ == "__main__":
     l_MT_test = params.l_opt + params.l_slack  # 0.37 m
     activation_test = 0.5
 
-    print("=" * 60)  # noqa: T201
-    print("Muscle Equilibrium Solver Test")  # noqa: T201
-    print("=" * 60)  # noqa: T201
-    print("Muscle parameters:")  # noqa: T201
-    print(f"  F_max = {params.F_max:.0f} N")  # noqa: T201
-    print(f"  l_opt = {params.l_opt * 100:.1f} cm")  # noqa: T201
-    print(f"  l_slack = {params.l_slack * 100:.1f} cm")  # noqa: T201
-    print("\\nTest case:")  # noqa: T201
-    print(f"  l_MT = {l_MT_test * 100:.2f} cm")  # noqa: T201
-    print(f"  activation = {activation_test * 100:.0f}%")  # noqa: T201
+    logger.info("=" * 60)  # noqa: T201
+    logger.info("Muscle Equilibrium Solver Test")  # noqa: T201
+    logger.info("=" * 60)  # noqa: T201
+    logger.info("Muscle parameters:")  # noqa: T201
+    logger.info(f"  F_max = {params.F_max:.0f} N")  # noqa: T201
+    logger.info(f"  l_opt = {params.l_opt * 100:.1f} cm")  # noqa: T201
+    logger.info(f"  l_slack = {params.l_slack * 100:.1f} cm")  # noqa: T201
+    logger.info("\\nTest case:")  # noqa: T201
+    logger.info(f"  l_MT = {l_MT_test * 100:.2f} cm")  # noqa: T201
+    logger.info(f"  activation = {activation_test * 100:.0f}%")  # noqa: T201
 
     l_CE_solution = solver.solve_fiber_length(l_MT_test, activation_test)
 
-    print("\\nSolution:")  # noqa: T201
-    print(f"  l_CE = {l_CE_solution * 100:.2f} cm")  # noqa: T201
-    print(f"  l_CE / l_opt = {l_CE_solution / params.l_opt:.3f}")  # noqa: T201
+    logger.info("\\nSolution:")  # noqa: T201
+    logger.info(f"  l_CE = {l_CE_solution * 100:.2f} cm")  # noqa: T201
+    logger.info(f"  l_CE / l_opt = {l_CE_solution / params.l_opt:.3f}")  # noqa: T201
 
     # Verify equilibrium
     residual = solver._equilibrium_residual(l_CE_solution, l_MT_test, activation_test)
-    print(f"  Residual = {residual:.2e} N (should be ~0)")  # noqa: T201
+    logger.info(f"  Residual = {residual:.2e} N (should be ~0)")  # noqa: T201
 
-    print("\\n" + "=" * 60)  # noqa: T201
-    print("✓ Equilibrium solver test complete")  # noqa: T201
-    print("=" * 60)  # noqa: T201
+    logger.info("\\n" + "=" * 60)  # noqa: T201
+    logger.info("✓ Equilibrium solver test complete")  # noqa: T201
+    logger.info("=" * 60)  # noqa: T201

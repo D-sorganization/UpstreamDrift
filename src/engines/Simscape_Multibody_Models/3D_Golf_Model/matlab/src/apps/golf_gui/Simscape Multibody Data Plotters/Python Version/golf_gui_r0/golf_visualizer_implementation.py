@@ -20,7 +20,10 @@ import scipy.io
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import (
+import logging
     QApplication,
+
+logger = logging.getLogger(__name__)
     QCheckBox,
     QDockWidget,
     QGroupBox,
@@ -113,7 +116,7 @@ class DataProcessor:
                 # Find the main table variable
                 var_name = self._find_table_variable(mat_data, name)
                 datasets[name] = self._extract_dataframe(mat_data[var_name])
-                print(f"✅ Loaded {name}: {len(datasets[name])} frames")
+                logger.info(f"✅ Loaded {name}: {len(datasets[name])} frames")
             except (RuntimeError, TypeError, ValueError) as e:
                 raise RuntimeError(f"Failed to load {filepath}: {e}") from e
 
@@ -143,12 +146,12 @@ class DataProcessor:
             self.max_force_magnitude = 2000.0  # N (approx 200kg force max)
             self.max_torque_magnitude = 200.0  # Nm
 
-            print(
+            logger.info(
                 f"✅ Scaling factors set: Force={self.max_force_magnitude}N, "
                 f"Torque={self.max_torque_magnitude}Nm"
             )
         except (RuntimeError, ValueError, OSError) as e:
-            print(f"⚠️ Error calculating scaling factors: {e}")
+            logger.info(f"⚠️ Error calculating scaling factors: {e}")
             self.max_force_magnitude = 1000.0
             self.max_torque_magnitude = 100.0
 
@@ -412,7 +415,7 @@ class OpenGLRenderer:
                 vertex_shader=ground_vertex, fragment_shader=ground_fragment
             )
         except (RuntimeError, ValueError, OSError) as e:
-            print(f"⚠️ Failed to compile ground shader: {e}")
+            logger.info(f"⚠️ Failed to compile ground shader: {e}")
 
     def _setup_geometry(self):
         """Create optimized geometry for body segments and club"""
@@ -657,7 +660,7 @@ class OpenGLRenderer:
                 if "materialShininess" in prog:
                     prog["materialShininess"].value = 32.0
             except (RuntimeError, ValueError, OSError) as e:
-                print(f"⚠️ Lighting setup warning: {e}")
+                logger.info(f"⚠️ Lighting setup warning: {e}")
 
     def render_frame(
         self,
@@ -1069,10 +1072,10 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         # Set up viewport
         self.ctx.viewport = (0, 0, self.width(), self.height())
 
-        print("✅ OpenGL initialized successfully")
-        print(f"   OpenGL Version: {self.ctx.info['GL_VERSION']}")
-        print(f"   Vendor: {self.ctx.info['GL_VENDOR']}")
-        print(f"   Renderer: {self.ctx.info['GL_RENDERER']}")
+        logger.info("✅ OpenGL initialized successfully")
+        logger.info(f"   OpenGL Version: {self.ctx.info['GL_VERSION']}")
+        logger.info(f"   Vendor: {self.ctx.info['GL_VENDOR']}")
+        logger.info(f"   Renderer: {self.ctx.info['GL_RENDERER']}")
 
     def paintGL(self):
         """Render the current frame"""
@@ -1122,10 +1125,10 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             }
             self.num_frames = len(datasets[0])
             self.current_frame = 0
-            print(f"✅ Data loaded: {self.num_frames} frames")
+            logger.info(f"✅ Data loaded: {self.num_frames} frames")
             self.update()
         except (RuntimeError, ValueError, OSError) as e:
-            print(f"❌ Failed to load data: {e}")
+            logger.info(f"❌ Failed to load data: {e}")
 
     def play_animation(self):
         """Start animation playback"""
@@ -1449,8 +1452,8 @@ def main():
     try:
         window.gl_widget.load_data("BASEQ.mat", "ZTCFQ.mat", "DELTAQ.mat")
     except (RuntimeError, ValueError, OSError) as e:
-        print(f"Note: Sample data not found - {e}")
-        print("Please load data using File -> Load Data")
+        logger.info(f"Note: Sample data not found - {e}")
+        logger.info("Please load data using File -> Load Data")
 
     sys.exit(app.exec())
 

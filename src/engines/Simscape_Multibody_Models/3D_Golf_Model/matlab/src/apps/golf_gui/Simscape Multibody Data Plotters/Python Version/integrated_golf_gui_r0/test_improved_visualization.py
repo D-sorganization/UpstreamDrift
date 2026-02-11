@@ -19,7 +19,10 @@ import pandas as pd
 
 from golf_gui_application import GolfVisualizerMainWindow
 from PyQt6.QtWidgets import QApplication
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 def create_sample_data():
     """Create sample golf swing data for testing"""
@@ -93,56 +96,56 @@ def create_sample_data():
 
 def main():
     """Main test function"""
-    print("🎯 Testing Improved Golf Visualization")
-    print("=" * 50)
+    logger.info("🎯 Testing Improved Golf Visualization")
+    logger.info("=" * 50)
 
     # Create sample data
-    print("📊 Creating sample golf swing data...")
+    logger.info("📊 Creating sample golf swing data...")
     baseq_df, ztcfq_df, deltaq_df = create_sample_data()
-    print(f"✅ Created {len(baseq_df)} frames of sample data")
+    logger.info(f"✅ Created {len(baseq_df)} frames of sample data")
 
     # Create Qt application
     app = QApplication(sys.argv)
 
     # Create main window
-    print("🖥️ Creating main window...")
+    logger.info("🖥️ Creating main window...")
     window = GolfVisualizerMainWindow()
 
     # Load sample data into the motion capture tab
-    print("📥 Loading sample data...")
+    logger.info("📥 Loading sample data...")
     motion_tab = window.tab_widget.widget(0)  # First tab is motion capture
     if hasattr(motion_tab, "opengl_widget"):
         motion_tab.opengl_widget.load_data_from_dataframes(
             (baseq_df, ztcfq_df, deltaq_df)
         )
-        print("✅ Sample data loaded successfully")
+        logger.info("✅ Sample data loaded successfully")
 
         # Set initial camera view
-        print("📷 Setting initial camera view...")
+        logger.info("📷 Setting initial camera view...")
         motion_tab.opengl_widget.set_face_on_view()
 
         # Print usage instructions
-        print("\n🎮 Usage Instructions:")
-        print("   Press 1: Face-on view")
-        print("   Press 2: Down-the-line view (90° from face-on)")
-        print("   Press 3: Behind view")
-        print("   Press 4: Overhead view")
-        print("   Press R: Reset camera")
-        print("   Mouse: Rotate camera")
-        print("   Mouse wheel: Zoom")
-        print("   Space: Toggle playback")
-        print("\n🎯 Features to test:")
-        print("   ✓ Face-on and down-the-line views are 90° apart")
-        print("   ✓ Ground level is at lowest Z point")
-        print("   ✓ Red face normal vector shows club face direction")
-        print("   ✓ White ball positioned for center strike")
-        print("   ✓ More realistic golf club proportions")
+        logger.info("\n🎮 Usage Instructions:")
+        logger.info("   Press 1: Face-on view")
+        logger.info("   Press 2: Down-the-line view (90° from face-on)")
+        logger.info("   Press 3: Behind view")
+        logger.info("   Press 4: Overhead view")
+        logger.info("   Press R: Reset camera")
+        logger.info("   Mouse: Rotate camera")
+        logger.info("   Mouse wheel: Zoom")
+        logger.info("   Space: Toggle playback")
+        logger.info("\n🎯 Features to test:")
+        logger.info("   ✓ Face-on and down-the-line views are 90° apart")
+        logger.info("   ✓ Ground level is at lowest Z point")
+        logger.info("   ✓ Red face normal vector shows club face direction")
+        logger.info("   ✓ White ball positioned for center strike")
+        logger.info("   ✓ More realistic golf club proportions")
     else:
-        print("❌ Could not find OpenGL widget")
+        logger.info("❌ Could not find OpenGL widget")
 
     # Show window
     window.show()
-    print("✅ Window displayed - test the visualization!")
+    logger.info("✅ Window displayed - test the visualization!")
 
     # Run application
     sys.exit(app.exec())

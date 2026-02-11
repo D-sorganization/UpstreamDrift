@@ -776,7 +776,7 @@ class CameraController(QObject):
         )
 
         self.cameraChanged.emit()
-        print(
+        logger.info(
             f"📷 Auto-framed data: center={center}, "
             f"distance={self.current_state.distance:.2f}"
         )
@@ -899,34 +899,34 @@ class CameraController(QObject):
 
 if __name__ == "__main__":
     """Test the camera system"""
-    print("📷 Golf Swing Visualizer - Camera System Test")
+    logger.info("📷 Golf Swing Visualizer - Camera System Test")
 
     # Create camera controller
     camera = CameraController()
 
     # Test presets
-    print("\n🎯 Testing camera presets...")
+    logger.info("\n🎯 Testing camera presets...")
     for preset in CameraPreset:
-        print(
+        logger.info(
             f"   {preset.value}: dist={camera.presets[preset].distance:.1f}, "
             f"azim={camera.presets[preset].azimuth:.0f}°, "
             f"elev={camera.presets[preset].elevation:.0f}°"
         )
 
     # Test matrix calculations
-    print("\n🔢 Testing matrix calculations...")
+    logger.info("\n🔢 Testing matrix calculations...")
     view_matrix = camera.get_view_matrix()
     proj_matrix = camera.get_projection_matrix(16 / 9)
     position = camera.get_camera_position()
 
-    print(
+    logger.info(
         f"   Camera position: [{position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f}]"
     )
-    print(f"   View matrix shape: {view_matrix.shape}")
-    print(f"   Projection matrix shape: {proj_matrix.shape}")
+    logger.info(f"   View matrix shape: {view_matrix.shape}")
+    logger.info(f"   Projection matrix shape: {proj_matrix.shape}")
 
     # Test animation
-    print("\n🎬 Testing animation system...")
+    logger.info("\n🎬 Testing animation system...")
     animator = SmoothAnimator()
 
     start_vec = np.array([0, 0, 0])
@@ -934,7 +934,7 @@ if __name__ == "__main__":
     mid_vec = animator.interpolate_vectors(
         start_vec, end_vec, 0.5, animator.ease_in_out_cubic
     )
-    print(f"   Interpolation test: {start_vec} -> {mid_vec} -> {end_vec}")
+    logger.info(f"   Interpolation test: {start_vec} -> {mid_vec} -> {end_vec}")
 
     # Test spherical interpolation
     start_spherical = (5.0, 45.0, 20.0)
@@ -942,9 +942,9 @@ if __name__ == "__main__":
     mid_spherical = animator.spherical_interpolation(
         start_spherical, end_spherical, 0.5
     )
-    print(
+    logger.info(
         f"   Spherical interpolation: {start_spherical} -> "
         f"{mid_spherical} -> {end_spherical}"
     )
 
-    print("\n🎉 Camera system ready for integration!")
+    logger.info("\n🎉 Camera system ready for integration!")

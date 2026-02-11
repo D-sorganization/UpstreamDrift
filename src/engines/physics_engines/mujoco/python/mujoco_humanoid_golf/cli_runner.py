@@ -15,7 +15,10 @@ import numpy as np
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .models import (
+import logging
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
+
+logger = logging.getLogger(__name__)
     CHAOTIC_PENDULUM_XML,
     DOUBLE_PENDULUM_XML,
     FULL_BODY_GOLF_SWING_XML,
@@ -244,9 +247,9 @@ def run_batch(batch_path: Path, base_args: argparse.Namespace) -> None:
         if summary is not None:
             # We use direct print here as this is a CLI tool explicitly asked for
             # summary output
-            print(f"[{name}] Summary:")  # noqa: T201
+            logger.info(f"[{name}] Summary:")  # noqa: T201
             for key, value in summary.items():
-                print(f"  {key}: {value:.6g}")  # noqa: T201
+                logger.info(f"  {key}: {value:.6g}")  # noqa: T201
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -312,9 +315,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if summary is not None:
         # We use direct print here as this is a CLI tool explicitly asked for
         # summary output
-        print("Summary:")  # noqa: T201
+        logger.info("Summary:")  # noqa: T201
         for key, value in summary.items():
-            print(f"  {key}: {value:.6g}")  # noqa: T201
+            logger.info(f"  {key}: {value:.6g}")  # noqa: T201
 
     return 0
 
