@@ -29,7 +29,7 @@ from src.launchers.ui_components import (
     LayoutManagerDialog,
     SettingsDialog,
 )
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     pass

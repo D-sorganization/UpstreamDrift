@@ -1,13 +1,13 @@
 """Unit tests for shared exceptions."""
 
-from src.shared.python.core.exceptions import (
-    ArrayDimensionError,
-)
-from src.shared.python.error_utils import (
+from src.shared.python.core.error_utils import (
     DataFormatError,
     EngineNotAvailableError,
     GolfSuiteError,
     ValidationError,
+)
+from src.shared.python.core.exceptions import (
+    ArrayDimensionError,
 )
 
 

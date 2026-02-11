@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.core.constants import GRAVITY_M_S2
 
 
 class AnalyticalPendulum:

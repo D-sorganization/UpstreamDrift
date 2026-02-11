@@ -16,7 +16,7 @@ from pathlib import Path
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.dashboard.widgets import LivePlotWidget
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.ui.overlay import OverlayWidget
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 
@@ -543,7 +543,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         recorder = self.sim_widget.get_recorder()
         data_dict = recorder.export_to_dict()
         try:
-            from src.shared.python.export import export_recording_all_formats
+            from src.shared.python.data_io.export import export_recording_all_formats
 
             export_recording_all_formats(filename, data_dict)
         except ImportError:

@@ -288,7 +288,7 @@ class TestGolfLauncherLogic:
         src.launchers.ui_components.ContextHelpDock = MagicMock()
         yield
 
-    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_initialization(self, mock_thread, mock_registry):
         """Test proper initialization of the launcher."""
@@ -313,7 +313,7 @@ class TestGolfLauncherLogic:
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
 
-    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, mock_registry):
         """Test that selecting a model updates the launch button."""
@@ -355,7 +355,7 @@ class TestGolfLauncherLogic:
         # The button text should contain the NAME, upper case
         assert "TEST MODEL" in launcher.btn_launch.text()
 
-    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
         """Test launch simulation logic."""
@@ -399,7 +399,7 @@ class TestGolfLauncherLogic:
                     idx = args.index("-w")
                     assert args[idx + 1] == "/workspace"
 
-    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, mock_registry):
         """Test launching a generic MJCF file."""

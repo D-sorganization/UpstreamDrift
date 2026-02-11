@@ -38,7 +38,7 @@ from src.shared.python.ai.config import (
     DEFAULT_OLLAMA_MODEL,
     get_ollama_host,
 )
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     # Import removed to avoid circular dependency

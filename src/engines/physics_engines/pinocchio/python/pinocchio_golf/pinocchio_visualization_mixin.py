@@ -12,7 +12,7 @@ import numpy as np
 import pinocchio as pin  # type: ignore
 from PyQt6 import QtWidgets
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Check meshcat availability
 try:

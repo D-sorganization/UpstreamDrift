@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 
 from src.shared.python.core.error_decorators import log_errors
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.validation_pkg.validation_utils import validate_file_exists
 
 logger = get_logger(__name__)

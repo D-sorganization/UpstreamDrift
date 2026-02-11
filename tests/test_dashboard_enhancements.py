@@ -5,7 +5,10 @@ import unittest
 import numpy as np
 import pytest  # noqa: F401 - required for pytestmark
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
+from src.shared.python.engine_core.engine_availability import (
+    PYQT6_AVAILABLE,
+    skip_if_unavailable,
+)
 
 if PYQT6_AVAILABLE:
     from PyQt6 import QtWidgets
@@ -18,7 +21,7 @@ if PYQT6_AVAILABLE:
     from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
     from src.shared.python.dashboard.widgets import LivePlotWidget
     from src.shared.python.dashboard.window import UnifiedDashboardWindow
-    from src.shared.python.interfaces import PhysicsEngine
+    from src.shared.python.engine_core.interfaces import PhysicsEngine
 
     # Mock Physics Engine - only defined when PyQt6 is available
     class MockPhysicsEngine(PhysicsEngine):

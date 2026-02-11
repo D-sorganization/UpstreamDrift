@@ -13,8 +13,8 @@ The launcher now features:
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     pass
@@ -68,7 +68,7 @@ class UnifiedLauncher:
 
         Shows available engines, their status, and configuration.
         """
-        from src.shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_core.engine_manager import EngineManager
 
         manager = EngineManager()
 

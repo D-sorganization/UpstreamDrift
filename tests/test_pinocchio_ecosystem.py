@@ -12,7 +12,7 @@ Tests cover:
 import unittest
 from pathlib import Path
 
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.data_io.path_utils import setup_import_paths
 
 # Setup import paths for testing
 setup_import_paths()
@@ -200,7 +200,7 @@ class TestPinocchioConstants(unittest.TestCase):
     def test_pinocchio_constants_defined(self) -> None:
         """Test that Pinocchio-related constants are properly defined."""
         try:
-            from src.shared.python.constants import PINOCCHIO_LAUNCHER_SCRIPT
+            from src.shared.python.core.constants import PINOCCHIO_LAUNCHER_SCRIPT
 
             self.assertIsInstance(PINOCCHIO_LAUNCHER_SCRIPT, Path)
             expected_path = (

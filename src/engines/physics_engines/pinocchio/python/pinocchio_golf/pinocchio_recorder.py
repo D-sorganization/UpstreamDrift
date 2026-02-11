@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 from PyQt6 import QtWidgets
 
-from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 
 
 class LogPanel(QtWidgets.QTextEdit):

@@ -33,7 +33,7 @@ class SignalRenderer(BaseRenderer):
         fs = 1.0 / dt
 
         try:
-            from src.shared.python import signal_processing
+            from src.shared.python.signal_toolkit import signal_processing
 
             use_sp = True
         except ImportError:
@@ -107,7 +107,7 @@ class SignalRenderer(BaseRenderer):
         fs = 1.0 / dt
 
         try:
-            from src.shared.python import signal_processing
+            from src.shared.python.signal_toolkit import signal_processing
 
             freqs, psd = signal_processing.compute_psd(signal_data, fs)
         except ImportError:
@@ -159,7 +159,7 @@ class SignalRenderer(BaseRenderer):
         fs = 1.0 / dt
 
         try:
-            from src.shared.python import signal_processing
+            from src.shared.python.signal_toolkit import signal_processing
 
             f, t, Sxx = signal_processing.compute_spectrogram(signal_data, fs)
         except ImportError:
@@ -189,7 +189,9 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot Multiscale Entropy (MSE) curves."""
         try:
-            from src.shared.python.statistical_analysis import StatisticalAnalyzer
+            from src.shared.python.validation_pkg.statistical_analysis import (
+                StatisticalAnalyzer,
+            )
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
@@ -241,7 +243,9 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot divergence of nearest neighbors over time to estimate Lyapunov Exponent."""
         try:
-            from src.shared.python.statistical_analysis import StatisticalAnalyzer
+            from src.shared.python.validation_pkg.statistical_analysis import (
+                StatisticalAnalyzer,
+            )
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
@@ -330,7 +334,7 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot Continuous Wavelet Transform (CWT) scalogram."""
         try:
-            from src.shared.python import signal_processing
+            from src.shared.python.signal_toolkit import signal_processing
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(
@@ -401,7 +405,7 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot Cross Wavelet Transform (XWT) between two signals."""
         try:
-            from src.shared.python import signal_processing
+            from src.shared.python.signal_toolkit import signal_processing
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(

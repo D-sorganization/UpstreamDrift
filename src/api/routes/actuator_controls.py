@@ -28,7 +28,7 @@ from ..models.responses import (
 )
 
 if TYPE_CHECKING:
-    from src.shared.python.engine_manager import EngineManager
+    from src.shared.python.engine_core.engine_manager import EngineManager
 
 router = APIRouter()
 

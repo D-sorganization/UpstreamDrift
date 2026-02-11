@@ -21,7 +21,7 @@ from src.shared.python.plotting.renderers.stability import StabilityRenderer
 from src.shared.python.plotting.transforms import DataManager, RecorderInterface
 
 if TYPE_CHECKING:
-    from src.shared.python.statistical_analysis import PCAResult
+    from src.shared.python.validation_pkg.statistical_analysis import PCAResult
 
 
 class GolfSwingPlotter:

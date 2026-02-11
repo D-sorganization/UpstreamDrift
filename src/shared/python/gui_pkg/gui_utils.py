@@ -4,7 +4,7 @@ This module provides reusable GUI patterns to eliminate repeated code
 across launcher and dashboard implementations.
 
 Usage:
-    from src.shared.python.gui_utils import (
+    from src.shared.python.gui_pkg.gui_utils import (
         get_qapp,
         BaseApplicationWindow,
         create_dialog,
@@ -38,8 +38,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

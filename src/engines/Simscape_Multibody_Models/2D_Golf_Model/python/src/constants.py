@@ -4,7 +4,7 @@ This module follows DRY principles from The Pragmatic Programmer.
 All constants are imported from the central src.shared.python.constants module.
 """
 
-from src.shared.python.constants import (
+from src.shared.python.core.constants import (
     GOLF_BALL_DIAMETER_M,
     GOLF_BALL_MASS_KG,
     GRAVITY_M_S2,

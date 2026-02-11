@@ -8,7 +8,7 @@ from src.shared.python.dashboard.widgets import (
     FrequencyAnalysisDialog,
     LivePlotWidget,
 )
-from src.shared.python.interfaces import RecorderInterface
+from src.shared.python.engine_core.interfaces import RecorderInterface
 
 
 class MockRecorder(RecorderInterface):

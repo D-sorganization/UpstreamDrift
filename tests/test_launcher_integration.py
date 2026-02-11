@@ -55,8 +55,10 @@ class TestLauncherIntegration(unittest.TestCase):
         try:
             from src.shared.python.process_worker import ProcessWorker
 
-            from src.shared.python.configuration_manager import ConfigurationManager
-            from src.shared.python.engine_manager import EngineManager
+            from src.shared.python.config.configuration_manager import (
+                ConfigurationManager,
+            )
+            from src.shared.python.engine_core.engine_manager import EngineManager
 
             # Test basic instantiation with required arguments
             config_manager = ConfigurationManager(Path("dummy_config.json"))
@@ -76,7 +78,7 @@ class TestLauncherIntegration(unittest.TestCase):
     def test_engine_discovery(self):
         """Test that engines are discovered correctly."""
         try:
-            from src.shared.python.engine_manager import EngineManager
+            from src.shared.python.engine_core.engine_manager import EngineManager
 
             manager = EngineManager()
             engines = manager.get_available_engines()

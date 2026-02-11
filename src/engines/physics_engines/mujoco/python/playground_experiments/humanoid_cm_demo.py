@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (
     DM_CONTROL_AVAILABLE,
     MUJOCO_AVAILABLE,
     PINOCCHIO_AVAILABLE,
 )
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 # Configure logging
 setup_logging()

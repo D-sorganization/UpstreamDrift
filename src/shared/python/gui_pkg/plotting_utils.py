@@ -23,8 +23,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.path_utils import ensure_directory
+from src.shared.python.data_io.path_utils import ensure_directory
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

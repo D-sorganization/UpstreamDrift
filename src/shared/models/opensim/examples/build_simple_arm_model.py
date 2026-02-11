@@ -28,7 +28,7 @@ Requirements:
 import math
 import sys
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.core.constants import GRAVITY_M_S2
 
 try:
     import opensim as osim

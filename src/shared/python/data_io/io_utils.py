@@ -4,7 +4,7 @@ This module consolidates common file I/O patterns across the codebase,
 addressing DRY violations identified in Pragmatic Programmer reviews.
 
 Usage:
-    from src.shared.python.io_utils import (
+    from src.shared.python.data_io.io_utils import (
         load_json,
         save_json,
         load_yaml,

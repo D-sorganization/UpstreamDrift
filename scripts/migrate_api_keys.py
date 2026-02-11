@@ -52,7 +52,7 @@ from src.api.auth.models import APIKey, User
 from src.api.auth.security import compute_prefix_hash, security_manager
 
 # Configure logging
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__name__)

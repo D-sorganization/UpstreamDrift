@@ -10,7 +10,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting.renderers.base import BaseRenderer
 
 logger = get_logger(__name__)
@@ -337,7 +337,9 @@ class CoordinationRenderer(BaseRenderer):
     ) -> None:
         """Plot time lag matrix between joints."""
         try:
-            from src.shared.python.statistical_analysis import StatisticalAnalyzer
+            from src.shared.python.validation_pkg.statistical_analysis import (
+                StatisticalAnalyzer,
+            )
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
@@ -746,7 +748,9 @@ class CoordinationRenderer(BaseRenderer):
     ) -> None:
         """Plot Rolling Correlation between two joint velocities."""
         try:
-            from src.shared.python.statistical_analysis import StatisticalAnalyzer
+            from src.shared.python.validation_pkg.statistical_analysis import (
+                StatisticalAnalyzer,
+            )
         except ImportError:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")

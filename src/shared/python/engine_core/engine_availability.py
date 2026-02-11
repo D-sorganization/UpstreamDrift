@@ -5,7 +5,7 @@ physics engine imports across the codebase, addressing DRY violations
 identified in Pragmatic Programmer reviews.
 
 Usage:
-    from src.shared.python.engine_availability import (
+    from src.shared.python.engine_core.engine_availability import (
         MUJOCO_AVAILABLE,
         PINOCCHIO_AVAILABLE,
         is_engine_available,
@@ -660,7 +660,7 @@ def skip_if_unavailable(engine_name: str) -> Any:
 
     Example:
         import pytest
-        from src.shared.python.engine_availability import skip_if_unavailable
+        from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
         @skip_if_unavailable("mujoco")
         def test_mujoco_jacobian():

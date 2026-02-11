@@ -14,9 +14,9 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.gui_utils import get_qapp
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.data_io.path_utils import setup_import_paths
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 # Setup import paths for testing
 setup_import_paths()
@@ -31,7 +31,9 @@ class TestSharedModuleImports(unittest.TestCase):
     def test_configuration_manager_import(self) -> None:
         """Test configuration manager import."""
         try:
-            from src.shared.python.configuration_manager import ConfigurationManager
+            from src.shared.python.config.configuration_manager import (
+                ConfigurationManager,
+            )
 
             # Test that we can instantiate it with required config_path
             config_manager = ConfigurationManager(Path("dummy_config.json"))
@@ -56,7 +58,10 @@ class TestSharedModuleImports(unittest.TestCase):
     def test_engine_manager_import(self) -> None:
         """Test engine manager import."""
         try:
-            from src.shared.python.engine_manager import EngineManager, EngineType
+            from src.shared.python.engine_core.engine_manager import (
+                EngineManager,
+                EngineType,
+            )
 
             # Test that we can instantiate it
             manager = EngineManager()
@@ -72,7 +77,7 @@ class TestEngineManager(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        from src.shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_core.engine_manager import EngineManager
 
         self.manager = EngineManager()
 
@@ -88,10 +93,12 @@ class TestEngineManager(unittest.TestCase):
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
-    @patch("src.shared.python.engine_manager.EngineManager.get_probe_result")
+    @patch(
+        "src.shared.python.engine_core.engine_manager.EngineManager.get_probe_result"
+    )
     def test_probe_system(self, mock_get_result: MagicMock) -> None:
         """Test engine probe system."""
-        from src.shared.python.engine_manager import EngineType
+        from src.shared.python.engine_core.engine_manager import EngineType
 
         # Setup mock return
         mock_result = MagicMock()

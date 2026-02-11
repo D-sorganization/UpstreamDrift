@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 # Import paths configured at test runner level via pyproject.toml/conftest.py
-from src.shared.python.export import (
+from src.shared.python.data_io.export import (
     export_recording_all_formats,
     export_to_hdf5,
     export_to_matlab,
@@ -57,8 +57,8 @@ class TestSharedExport:
         output_path = str(tmp_path / "test.mat")
 
         # Mock scipy.io.savemat
-        with patch("src.shared.python.export.savemat") as mock_savemat:
-            with patch("src.shared.python.export.SCIPY_AVAILABLE", True):
+        with patch("src.shared.python.data_io.export.savemat") as mock_savemat:
+            with patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", True):
                 success = export_to_matlab(output_path, sample_data)
                 assert success is True
                 mock_savemat.assert_called_once()
@@ -79,7 +79,7 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test behavior when scipy is missing."""
-        with patch("src.shared.python.export.SCIPY_AVAILABLE", False):
+        with patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", False):
             success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
             assert success is False
 
@@ -88,9 +88,10 @@ class TestSharedExport:
     ) -> None:
         """Test exception handling during export."""
         with patch(
-            "src.shared.python.export.savemat", side_effect=Exception("Disk full")
+            "src.shared.python.data_io.export.savemat",
+            side_effect=Exception("Disk full"),
         ):
-            with patch("src.shared.python.export.SCIPY_AVAILABLE", True):
+            with patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", True):
                 success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
                 assert success is False
 
@@ -108,7 +109,7 @@ class TestSharedExport:
         # Need to patch in sys.modules first so the attribute exists on the module
         with patch.dict(sys.modules, {"h5py": mock_h5py}):
             # Reload module to pick up the mocked h5py
-            import src.shared.python.export as export_module
+            import src.shared.python.data_io.export as export_module
 
             export_module.h5py = mock_h5py
             export_module.H5PY_AVAILABLE = True
@@ -127,7 +128,7 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test behavior when h5py is missing."""
-        with patch("src.shared.python.export.H5PY_AVAILABLE", False):
+        with patch("src.shared.python.data_io.export.H5PY_AVAILABLE", False):
             success = export_to_hdf5(str(tmp_path / "test.h5"), sample_data)
             assert success is False
 
@@ -140,7 +141,7 @@ class TestSharedExport:
 
         # Need to patch in sys.modules first so the attribute exists on the module
         with patch.dict(sys.modules, {"h5py": mock_h5py}):
-            import src.shared.python.export as export_module
+            import src.shared.python.data_io.export as export_module
 
             export_module.h5py = mock_h5py
             export_module.H5PY_AVAILABLE = True
@@ -202,7 +203,9 @@ class TestSharedExport:
         base_path = str(tmp_path / "recording")
 
         # Mock export_to_matlab to fail
-        with patch("src.shared.python.export.export_to_matlab", return_value=False):
+        with patch(
+            "src.shared.python.data_io.export.export_to_matlab", return_value=False
+        ):
             # Mock json dump to succeed (real file IO)
             results = export_recording_all_formats(
                 base_path, sample_data, formats=["json", "mat"]

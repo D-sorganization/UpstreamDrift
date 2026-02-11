@@ -11,8 +11,8 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python import common_utils, signal_processing
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.data_io import common_utils, signal_processing
+from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 # Constants for scoring
 EPSILON = 1e-9

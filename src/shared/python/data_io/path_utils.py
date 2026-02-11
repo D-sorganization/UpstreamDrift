@@ -3,7 +3,7 @@
 This module provides reusable path resolution patterns.
 
 Usage:
-    from src.shared.python.path_utils import get_repo_root, get_src_root
+    from src.shared.python.data_io.path_utils import get_repo_root, get_src_root
 
     repo_root = get_repo_root()
     src_root = get_src_root()
@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -274,7 +274,7 @@ def setup_import_paths(additional_paths: list[str | Path] | None = None) -> None
         additional_paths: Optional list of additional paths to add to sys.path
 
     Example:
-        from src.shared.python.path_utils import setup_import_paths
+        from src.shared.python.data_io.path_utils import setup_import_paths
         setup_import_paths()
 
         # With additional paths

@@ -18,16 +18,16 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 
 if TYPE_CHECKING:
-    from src.shared.python.aerodynamics import (
+    from src.shared.python.physics.aerodynamics import (
         AerodynamicsConfig,
         RandomizationConfig,
         WindConfig,
     )
 
-from src.shared.python.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
-from src.shared.python.engine_availability import NUMBA_AVAILABLE
-from src.shared.python.logging_config import get_logger
-from src.shared.python.physics_constants import SPIN_DECAY_RATE_S
+from src.shared.python.core.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
+from src.shared.python.core.physics_constants import SPIN_DECAY_RATE_S
+from src.shared.python.engine_core.engine_availability import NUMBA_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Performance: Optional Numba JIT compilation
 if NUMBA_AVAILABLE:
@@ -598,7 +598,7 @@ class EnhancedBallFlightSimulator:
     - Orthogonal: Aerodynamics, wind, and randomization are independent
 
     Example:
-        >>> from src.shared.python.aerodynamics import AerodynamicsConfig, WindConfig
+        >>> from src.shared.python.physics.aerodynamics import AerodynamicsConfig, WindConfig
         >>> config = AerodynamicsConfig(drag_enabled=True, lift_enabled=True)
         >>> wind = WindConfig(base_velocity=np.array([5.0, 0.0, 0.0]))
         >>> sim = EnhancedBallFlightSimulator(aero_config=config, wind_config=wind)
@@ -625,7 +625,7 @@ class EnhancedBallFlightSimulator:
             seed: Random seed for reproducibility
         """
         # Import here to avoid circular dependency
-        from src.shared.python.aerodynamics import (
+        from src.shared.python.physics.aerodynamics import (
             AerodynamicsConfig,
             AerodynamicsEngine,
             EnvironmentRandomizer,
@@ -817,7 +817,7 @@ class EnhancedBallFlightSimulator:
         Returns:
             Dictionary with 'with_aero' and 'without_aero' trajectories
         """
-        from src.shared.python.aerodynamics import AerodynamicsConfig
+        from src.shared.python.physics.aerodynamics import AerodynamicsConfig
 
         # Trajectory with current aerodynamics settings
         traj_with = self.simulate_trajectory(launch, max_time, dt)
@@ -857,7 +857,7 @@ class EnhancedBallFlightSimulator:
         Returns:
             List of analysis dictionaries for each run
         """
-        from src.shared.python.aerodynamics import (
+        from src.shared.python.physics.aerodynamics import (
             AerodynamicsEngine,
             EnvironmentRandomizer,
             WindModel,

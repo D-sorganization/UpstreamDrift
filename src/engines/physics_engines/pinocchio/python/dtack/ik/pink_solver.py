@@ -9,7 +9,7 @@ import pink
 import pinocchio as pin
 from pink import Task
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import numpy as np

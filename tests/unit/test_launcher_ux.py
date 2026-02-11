@@ -4,8 +4,8 @@
 import unittest
 from unittest.mock import Mock, patch  # noqa: F401
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.gui_utils import get_qapp
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import Qt  # noqa: F401

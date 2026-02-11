@@ -10,7 +10,10 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
-from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
 
 configure_gui_logging()
 logger = get_logger("GolfSuiteLauncher")

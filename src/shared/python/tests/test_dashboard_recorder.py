@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
-from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine(PhysicsEngine):

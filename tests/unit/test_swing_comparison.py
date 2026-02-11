@@ -10,7 +10,7 @@ from src.shared.python.biomechanics.swing_comparison import (
     DTWResult,
     SwingComparator,
 )
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 
 class TestSwingComparison(unittest.TestCase):
@@ -67,7 +67,7 @@ class TestSwingComparison(unittest.TestCase):
             self.assertAlmostEqual(metric.difference, 0.3)
             self.assertAlmostEqual(metric.percent_diff, 10.0)
 
-    @patch("src.shared.python.signal_processing.compute_dtw_path")
+    @patch("src.shared.python.signal_toolkit.signal_processing.compute_dtw_path")
     def test_compute_kinematic_similarity(self, mock_dtw):
         """Test kinematic similarity with mocked DTW."""
         # Mock DTW result (dist, path)

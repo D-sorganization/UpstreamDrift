@@ -20,7 +20,7 @@ from typing import Protocol
 
 import numpy as np
 
-from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.core.contracts import postcondition, precondition
 
 
 @dataclass(frozen=True)

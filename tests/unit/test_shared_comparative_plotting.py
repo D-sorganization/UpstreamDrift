@@ -4,7 +4,7 @@ import matplotlib.figure
 import numpy as np
 import pytest
 
-from src.shared.python.comparative_analysis import (
+from src.shared.python.validation_pkg.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,
     ComparisonMetric,

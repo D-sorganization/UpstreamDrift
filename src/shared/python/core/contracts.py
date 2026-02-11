@@ -9,7 +9,7 @@ Design by Contract Principles:
 - Invariants: What must always be true for an object's state
 
 Usage:
-    from src.shared.python.contracts import precondition, postcondition, invariant
+    from src.shared.python.core.contracts import precondition, postcondition, invariant
 
     @precondition(lambda self: self._is_initialized, "Engine must be initialized")
     @postcondition(lambda result: result.shape[0] > 0, "Result must be non-empty")
@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import numpy as np
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     pass

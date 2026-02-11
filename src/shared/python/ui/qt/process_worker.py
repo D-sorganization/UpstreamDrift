@@ -9,7 +9,7 @@ import subprocess
 import threading
 from typing import Any
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 
 logger = logging.getLogger(__name__)
 

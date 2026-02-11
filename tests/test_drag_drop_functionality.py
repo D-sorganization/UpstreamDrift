@@ -14,9 +14,9 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.gui_utils import get_qapp
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.data_io.path_utils import setup_import_paths
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 # Setup import paths for testing
 setup_import_paths()
@@ -378,7 +378,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
     def test_c3d_viewer_constants(self) -> None:
         """Test that C3D viewer constants are properly defined."""
-        from src.shared.python.constants import C3D_VIEWER_SCRIPT
+        from src.shared.python.core.constants import C3D_VIEWER_SCRIPT
 
         self.assertIsInstance(C3D_VIEWER_SCRIPT, Path)
         # C3D_VIEWER_SCRIPT includes the 'src/' prefix
@@ -560,7 +560,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         # Mock the URDF generator script path and subprocess
         with (
-            patch("src.shared.python.constants.URDF_GENERATOR_SCRIPT"),
+            patch("src.shared.python.core.constants.URDF_GENERATOR_SCRIPT"),
             patch("src.launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
             patch("src.launchers.golf_launcher.os.name", "nt"),
             patch("src.launchers.golf_launcher.logger") as mock_logger,

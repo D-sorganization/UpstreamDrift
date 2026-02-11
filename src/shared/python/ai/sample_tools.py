@@ -19,7 +19,7 @@ from typing import Any
 from src.shared.python.ai.education import EducationSystem
 from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 from src.shared.python.ai.types import ExpertiseLevel
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 

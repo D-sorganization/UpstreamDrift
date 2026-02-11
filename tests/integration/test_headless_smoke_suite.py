@@ -9,7 +9,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
+from src.shared.python.data_io.path_utils import (
+    get_simscape_model_path,
+    setup_import_paths,
+)
 
 # Setup import paths including Simscape model
 setup_import_paths(additional_paths=[get_simscape_model_path()])
@@ -78,7 +81,7 @@ class TestHeadlessSuite:
             # the fact that it resolves the path.
 
             with patch(
-                "src.shared.python.security_utils.validate_path"
+                "src.shared.python.security.security_utils.validate_path"
             ) as mock_validate:
                 # Mock validate to return the input path as absolute
                 abs_path = os.path.abspath("test_capture.c3d")

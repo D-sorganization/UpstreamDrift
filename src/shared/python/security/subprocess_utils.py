@@ -27,8 +27,8 @@ import time
 from pathlib import Path
 
 from src.shared.python.core.error_decorators import log_errors
-from src.shared.python.logging_config import get_logger
-from src.shared.python.secure_subprocess import secure_run
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.secure_subprocess import secure_run
 
 logger = get_logger(__name__)
 

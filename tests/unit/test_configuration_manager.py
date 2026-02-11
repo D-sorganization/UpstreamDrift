@@ -5,11 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from src.shared.python.common_utils import GolfModelingError
-from src.shared.python.configuration_manager import (
+from src.shared.python.config.configuration_manager import (
     ConfigurationManager,
     SimulationConfig,
 )
+from src.shared.python.data_io.common_utils import GolfModelingError
 
 
 def test_default_config():

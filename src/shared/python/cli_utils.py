@@ -29,7 +29,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from src.shared.python.logging_config import LogLevel, get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import (
+    LogLevel,
+    get_logger,
+    setup_logging,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

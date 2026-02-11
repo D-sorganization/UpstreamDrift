@@ -151,7 +151,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Load a C3D file from the given path."""
         # Security validation (F-004)
         # shared module import must be available
-        from shared.python.security_utils import validate_path
+        from shared.python.security.security_utils import validate_path
 
         suite_root = Path(__file__).parents[6]
         allowed = [

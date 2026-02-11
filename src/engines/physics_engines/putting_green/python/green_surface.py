@@ -27,7 +27,7 @@ from scipy import interpolate, ndimage
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
-from src.shared.python.physics_constants import GRAVITY_M_S2
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 
 @dataclass

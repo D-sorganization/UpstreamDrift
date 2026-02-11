@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.optimize import newton
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from shared.python.biomechanics.hill_muscle import HillMuscleModel
