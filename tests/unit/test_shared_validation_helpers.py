@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.shared.python.validation_helpers import (
+from src.shared.python.validation_pkg.validation_helpers import (
     MAX_CARTESIAN_ACCELERATION_M_S2,
     MAX_CARTESIAN_VELOCITY_M_S,
     MAX_JOINT_VELOCITY_RAD_S,

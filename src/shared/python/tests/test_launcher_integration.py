@@ -7,8 +7,8 @@ import pytest
 from PyQt6 import QtWidgets
 
 from src.shared.python import engine_availability
+from src.shared.python.config.environment import is_docker, is_production, is_wsl
 from src.shared.python.dashboard import launcher
-from src.shared.python.environment import is_docker, is_production, is_wsl
 
 
 @pytest.fixture(scope="session")

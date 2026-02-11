@@ -28,9 +28,9 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.biomechanics.multi_muscle import AntagonistPair, MuscleGroup
 from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.logging_config import get_logger
-from src.shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
 logger = get_logger(__name__)
 
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     print("=" * 60)  # noqa: T201
 
     # Create muscle system
-    from shared.python.multi_muscle import create_elbow_muscle_system
+    from shared.python.biomechanics.multi_muscle import create_elbow_muscle_system
 
     elbow = create_elbow_muscle_system()
 

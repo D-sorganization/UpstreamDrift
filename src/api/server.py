@@ -235,7 +235,7 @@ async def startup_event() -> None:
         # Initialize video pipeline with default config
         video_pipeline = None
         try:
-            from src.shared.python.video_pose_pipeline import (
+            from src.shared.python.gui_pkg.video_pose_pipeline import (
                 VideoPosePipeline,
                 VideoProcessingConfig,
             )

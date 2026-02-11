@@ -15,7 +15,7 @@ from src.shared.python.control_interface import (
     ControlInterface,
     ControlStrategy,
 )
-from src.shared.python.mock_engine import MockPhysicsEngine
+from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
 
 # ---- Fixtures ----
 

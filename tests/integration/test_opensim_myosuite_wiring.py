@@ -267,19 +267,19 @@ class TestMyoSuiteAdapter:
 
     def test_muscle_driven_env_class_exists(self) -> None:
         """MuscleDrivenEnv is importable from the adapter module."""
-        from src.shared.python.myosuite_adapter import MuscleDrivenEnv
+        from src.shared.python.biomechanics.myosuite_adapter import MuscleDrivenEnv
 
         assert MuscleDrivenEnv is not None
 
     def test_train_policy_function_exists(self) -> None:
         """train_muscle_policy function is importable."""
-        from src.shared.python.myosuite_adapter import train_muscle_policy
+        from src.shared.python.biomechanics.myosuite_adapter import train_muscle_policy
 
         assert callable(train_muscle_policy)
 
     def test_muscle_driven_env_init_with_mock(self) -> None:
         """MuscleDrivenEnv initializes with a mock muscle system."""
-        from src.shared.python.myosuite_adapter import MuscleDrivenEnv
+        from src.shared.python.biomechanics.myosuite_adapter import MuscleDrivenEnv
 
         mock_muscle = MagicMock()
         mock_muscle.muscles = {"biceps": MagicMock(), "triceps": MagicMock()}

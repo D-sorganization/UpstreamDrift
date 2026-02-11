@@ -17,7 +17,7 @@ Design by Contract:
         - Marker-to-joint mapping is consistent across imports
 
 Usage:
-    >>> from src.shared.python.swing_capture_import import SwingCaptureImporter
+    >>> from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
     >>> importer = SwingCaptureImporter()
     >>> demo = importer.import_c3d("swing_capture.c3d")
     >>> dataset = importer.build_demonstration_dataset([demo])

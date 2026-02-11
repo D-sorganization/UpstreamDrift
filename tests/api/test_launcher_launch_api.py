@@ -245,7 +245,7 @@ class TestStopEndpoint:
             mock_proc
         )
 
-        with patch("src.shared.python.subprocess_utils.kill_process_tree"):
+        with patch("src.shared.python.security.subprocess_utils.kill_process_tree"):
             resp = client.post("/api/launcher/stop/MuJoCo Humanoid Golf")
 
         assert resp.status_code == 200
@@ -265,7 +265,7 @@ class TestStopEndpoint:
         mock_proc.pid = 12345
         client._mock_process_manager.running_processes["Test Engine"] = mock_proc
 
-        with patch("src.shared.python.subprocess_utils.kill_process_tree"):
+        with patch("src.shared.python.security.subprocess_utils.kill_process_tree"):
             client.post("/api/launcher/stop/Test Engine")
 
         assert "Test Engine" not in client._mock_process_manager.running_processes
@@ -276,7 +276,7 @@ class TestStopEndpoint:
         mock_proc.pid = 54321
         client._mock_process_manager.running_processes["Drake Golf Model"] = mock_proc
 
-        with patch("src.shared.python.subprocess_utils.kill_process_tree") as mock_kill:
+        with patch("src.shared.python.security.subprocess_utils.kill_process_tree") as mock_kill:
             client.post("/api/launcher/stop/Drake Golf Model")
             mock_kill.assert_called_once_with(54321)
 
@@ -317,7 +317,7 @@ class TestLaunchLifecycle:
         assert "Drake Golf Model" in resp.json()["processes"]
 
         # Stop
-        with patch("src.shared.python.subprocess_utils.kill_process_tree"):
+        with patch("src.shared.python.security.subprocess_utils.kill_process_tree"):
             resp = client.post("/api/launcher/stop/Drake Golf Model")
         assert resp.status_code == 200
 
@@ -396,6 +396,6 @@ class TestEdgeCases:
             mock_proc
         )
 
-        with patch("src.shared.python.subprocess_utils.kill_process_tree"):
+        with patch("src.shared.python.security.subprocess_utils.kill_process_tree"):
             resp = client.post("/api/launcher/stop/MuJoCo Humanoid Golf")
         assert resp.status_code == 200

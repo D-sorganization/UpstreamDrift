@@ -16,7 +16,7 @@ Design by Contract:
         - Data is never modified during plotting
 
 Usage:
-    >>> from src.shared.python.plot_generator import PlotGenerator
+    >>> from src.shared.python.gui_pkg.plot_generator import PlotGenerator
     >>> gen = PlotGenerator()
     >>> gen.generate_standard_plots(data, output_dir="plots/")
 """

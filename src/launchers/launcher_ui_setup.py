@@ -321,7 +321,7 @@ class LauncherUISetupMixin:
 
         # Register enhanced tooltips
         if HELP_SYSTEM_AVAILABLE:
-            from src.shared.python.help_system import TooltipManager
+            from src.shared.python.gui_pkg.help_system import TooltipManager
 
             TooltipManager.register_tooltip(
                 self.chk_live,

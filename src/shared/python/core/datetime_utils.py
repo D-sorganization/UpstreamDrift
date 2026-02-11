@@ -4,7 +4,7 @@ This module consolidates common datetime/timestamp patterns across the codebase,
 addressing DRY violations identified in Pragmatic Programmer reviews.
 
 Usage:
-    from src.shared.python.datetime_utils import (
+    from src.shared.python.core.datetime_utils import (
         now_utc,
         now_local,
         timestamp_iso,

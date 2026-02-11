@@ -14,7 +14,7 @@ from src.shared.python.control_features_registry import (
     ControlFeaturesRegistry,
     FeatureCategory,
 )
-from src.shared.python.mock_engine import MockPhysicsEngine
+from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
 
 # ---- Fixtures ----
 

@@ -16,7 +16,7 @@ DESIGN PRINCIPLES:
 USAGE:
 ------
 ```python
-from src.shared.python.provenance import ProvenanceInfo, add_provenance_header
+from src.shared.python.data_io.provenance import ProvenanceInfo, add_provenance_header
 
 # Automatic capture
 provenance = ProvenanceInfo.capture()

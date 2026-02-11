@@ -39,7 +39,7 @@ from src.engines.common.state import (
     ForceAccumulator,
     StateManager,
 )
-from src.shared.python.capabilities import (
+from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )

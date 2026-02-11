@@ -232,7 +232,7 @@ class TestGolfSwingPlotter:
 
         # Mock SwingPlaneAnalyzer to avoid complex geometry calculations in unit test
         with patch(
-            "shared.python.swing_plane_analysis.SwingPlaneAnalyzer"
+            "shared.python.biomechanics.swing_plane_analysis.SwingPlaneAnalyzer"
         ) as MockAnalyzer:
             instance = MockAnalyzer.return_value
             instance.analyze.return_value.steepness_deg = 45.0

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import math
 
-from src.shared.python.flight_models import FlightModelRegistry, UnifiedLaunchConditions
+from src.shared.python.physics.flight_models import (
+    FlightModelRegistry,
+    UnifiedLaunchConditions,
+)
 
 
 def test_all_models_generate_trajectory() -> None:

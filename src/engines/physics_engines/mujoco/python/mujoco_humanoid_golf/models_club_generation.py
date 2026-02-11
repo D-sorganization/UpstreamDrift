@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from src.shared.python.equipment import CLUB_CONFIGS
+from src.shared.python.physics.equipment import CLUB_CONFIGS
 
 # ==============================================================================
 

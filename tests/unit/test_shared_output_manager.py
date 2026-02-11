@@ -9,7 +9,7 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 
-from src.shared.python.output_manager import OutputFormat, OutputManager
+from src.shared.python.data_io.output_manager import OutputFormat, OutputManager
 
 # Python 3.10 compatibility: datetime.UTC is only available in 3.11+
 UTC = timezone.utc  # noqa: UP017
@@ -145,7 +145,7 @@ class TestOutputManager(unittest.TestCase):
         # Use timezone-aware datetime since now_local returns timezone-aware
         fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=UTC)
         with patch(
-            "src.shared.python.output_manager.now_local", return_value=fixed_now
+            "src.shared.python.data_io.output_manager.now_local", return_value=fixed_now
         ):
             # Also mock unlink to verify it was called and avoid actual deletion
             with patch.object(Path, "unlink") as mock_unlink:

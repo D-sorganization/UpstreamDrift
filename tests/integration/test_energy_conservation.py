@@ -12,14 +12,14 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import (
-    MUJOCO_AVAILABLE,
-    skip_if_unavailable,
-)
-from src.shared.python.numerical_constants import (
+from src.shared.python.core.numerical_constants import (
     GRAVITY_STANDARD,
     TOLERANCE_ENERGY_CONSERVATION,
     TOLERANCE_WORK_ENERGY_MISMATCH,
+)
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    skip_if_unavailable,
 )
 
 # Skip these tests if MuJoCo is not available

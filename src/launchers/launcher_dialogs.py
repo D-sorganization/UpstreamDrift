@@ -83,7 +83,7 @@ class LauncherDialogsMixin:
             topic: Optional help topic to display initially.
         """
         if HELP_SYSTEM_AVAILABLE:
-            from src.shared.python.help_system import HelpDialog
+            from src.shared.python.gui_pkg.help_system import HelpDialog
 
             dialog = HelpDialog(self, initial_topic=topic)
             dialog.exec()
