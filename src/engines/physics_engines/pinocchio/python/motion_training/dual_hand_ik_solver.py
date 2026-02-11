@@ -325,7 +325,7 @@ class DualHandIKSolver:
             q = ik_result.q
 
             if verbose and (i + 1) % 50 == 0:
-                print(
+                logger.info(
                     f"Frame {i + 1}/{trajectory.num_frames}: "
                     f"L={ik_result.left_hand_error:.4f}, "
                     f"R={ik_result.right_hand_error:.4f}, "

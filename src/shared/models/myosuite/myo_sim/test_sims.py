@@ -2,7 +2,10 @@ import os
 import unittest
 
 import mujoco
+import logging
 
+
+logger = logging.getLogger(__name__)
 model_paths = [
     # Basic models
     "basic/myomuscle.xml",
@@ -75,7 +78,7 @@ class TestSims(unittest.TestCase):
 
     def test_sims(self):
         for model_path in model_paths:
-            print(f"Testing: {model_path}")
+            logger.info(f"Testing: {model_path}")
             self.get_sim(model_path)
 
 

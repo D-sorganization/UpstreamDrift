@@ -21,16 +21,19 @@ import sys
 try:
     from myosuite.utils import gym
 except ImportError:
-    print("ERROR: MyoSuite not installed.")
-    print("Installation: pip install myosuite")
+    logger.info("ERROR: MyoSuite not installed.")
+    logger.info("Installation: pip install myosuite")
     sys.exit(1)
 
 try:
     from stable_baselines3 import SAC
     from stable_baselines3.common.callbacks import EvalCallback
+import logging
 except ImportError:
-    print("ERROR: stable-baselines3 not installed.")
-    print("Installation: pip install stable-baselines3")
+
+logger = logging.getLogger(__name__)
+    logger.info("ERROR: stable-baselines3 not installed.")
+    logger.info("Installation: pip install stable-baselines3")
     sys.exit(1)
 
 
@@ -61,8 +64,8 @@ def train_policy(
     Returns:
         Trained SAC model.
     """
-    print(f"\nTraining SAC policy for {total_timesteps} timesteps...")
-    print("=" * 60)
+    logger.info(f"\nTraining SAC policy for {total_timesteps} timesteps...")
+    logger.info("=" * 60)
 
     # Create SAC model
     model = SAC(
@@ -95,7 +98,7 @@ def train_policy(
 
     # Save final model
     model.save(save_path)
-    print(f"\nModel saved to: {save_path}.zip")
+    logger.info(f"\nModel saved to: {save_path}.zip")
 
     return model
 
@@ -108,8 +111,8 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
         env: Gym environment.
         n_episodes: Number of evaluation episodes.
     """
-    print(f"\nEvaluating policy for {n_episodes} episodes...")
-    print("=" * 60)
+    logger.info(f"\nEvaluating policy for {n_episodes} episodes...")
+    logger.info("=" * 60)
 
     for episode in range(n_episodes):
         obs = env.reset()
@@ -132,7 +135,7 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             except Exception:
                 pass  # Headless mode
 
-        print(f"Episode {episode + 1}: Steps={step}, Reward={total_reward:.2f}")
+        logger.info(f"Episode {episode + 1}: Steps={step}, Reward={total_reward:.2f}")
 
     env.close()
 
@@ -165,31 +168,31 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    print("=" * 60)
-    print("MyoSuite Elbow Control Training")
-    print("Golf Modeling Suite - Muscle Control Example")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("MyoSuite Elbow Control Training")
+    logger.info("Golf Modeling Suite - Muscle Control Example")
+    logger.info("=" * 60)
 
     # Create environment
-    print(f"\n1. Creating environment: {args.env}")
+    logger.info(f"\n1. Creating environment: {args.env}")
     env = create_elbow_env(args.env)
-    print(f"   Observation space: {env.observation_space.shape}")
-    print(f"   Action space: {env.action_space.shape}")
+    logger.info(f"   Observation space: {env.observation_space.shape}")
+    logger.info(f"   Action space: {env.action_space.shape}")
 
     # Train policy
-    print("\n2. Training policy...")
+    logger.info("\n2. Training policy...")
     model = train_policy(env, args.timesteps, args.save)
 
     # Evaluate
     if args.evaluate:
-        print("\n3. Evaluating policy...")
+        logger.info("\n3. Evaluating policy...")
         eval_env = create_elbow_env(args.env)
         evaluate_policy(model, eval_env)
 
-    print("\n" + "=" * 60)
-    print("Training complete!")
-    print(f"Model saved to: {args.save}.zip")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("Training complete!")
+    logger.info(f"Model saved to: {args.save}.zip")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

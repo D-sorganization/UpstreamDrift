@@ -23,7 +23,10 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.logging_config import get_logger
+import logging
 
+
+logger = logging.getLogger(__name__)
 logger = get_logger(__name__)
 
 
@@ -204,16 +207,16 @@ if __name__ == "__main__":
     )
 
     force = muscle.compute_force(state)
-    print(f"Muscle force: {force:.1f} N")  # noqa: T201
+    logger.info(f"Muscle force: {force:.1f} N")  # noqa: T201
 
     # Verify scaling
     F_muscle = muscle.compute_force(state)
 
-    print("Biceps muscle force test:")  # noqa: T201
-    print(f"  Activation: {state.activation * 100:.0f}%")  # noqa: T201
-    print(  # noqa: T201
+    logger.info("Biceps muscle force test:")  # noqa: T201
+    logger.info(f"  Activation: {state.activation * 100:.0f}%")  # noqa: T201
+    logger.info(  # noqa: T201
         f"  Fiber length: {state.l_CE:.3f} m (opt: {biceps_params.l_opt:.3f} m)"
     )
-    print(f"  Fiber velocity: {state.v_CE:.3f} m/s")  # noqa: T201
-    print(f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)")  # noqa: T201
-    print(f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%")  # noqa: T201
+    logger.info(f"  Fiber velocity: {state.v_CE:.3f} m/s")  # noqa: T201
+    logger.info(f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)")  # noqa: T201
+    logger.info(f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%")  # noqa: T201

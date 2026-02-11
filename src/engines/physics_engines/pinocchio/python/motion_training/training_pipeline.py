@@ -110,16 +110,16 @@ class MotionTrainingPipeline:
         Returns:
             PipelineResult with trajectory and IK results
         """
-        print("=" * 60)
-        print("Motion Training Pipeline")
-        print("=" * 60)
+        logger.info("=" * 60)
+        logger.info("Motion Training Pipeline")
+        logger.info("=" * 60)
 
         # Step 1: Parse trajectory
-        print("\n[1/4] Parsing club trajectory...")
+        logger.info("\n[1/4] Parsing club trajectory...")
         self.trajectory = self._parse_trajectory()
-        print(f"      Loaded {self.trajectory.num_frames} frames")
-        print(f"      Duration: {self.trajectory.duration:.3f} seconds")
-        print(
+        logger.info(f"      Loaded {self.trajectory.num_frames} frames")
+        logger.info(f"      Duration: {self.trajectory.duration:.3f} seconds")
+        logger.info(
             f"      Events: A={self.trajectory.events.address}, "
             f"T={self.trajectory.events.top}, "
             f"I={self.trajectory.events.impact}, "
@@ -127,38 +127,38 @@ class MotionTrainingPipeline:
         )
 
         # Step 2: Initialize IK solver
-        print("\n[2/4] Initializing IK solver...")
+        logger.info("\n[2/4] Initializing IK solver...")
         self._init_ik_solver()
-        print(f"      Model: {self.config.golfer_urdf}")
-        print(f"      DOF: {self.ik_solver.model.nq}")
+        logger.info(f"      Model: {self.config.golfer_urdf}")
+        logger.info(f"      DOF: {self.ik_solver.model.nq}")
 
         # Step 3: Solve IK
-        print("\n[3/4] Solving inverse kinematics...")
+        logger.info("\n[3/4] Solving inverse kinematics...")
         self.ik_result = self._solve_ik()
-        print(f"      Convergence rate: {self.ik_result.convergence_rate * 100:.1f}%")
-        print(
+        logger.info(f"      Convergence rate: {self.ik_result.convergence_rate * 100:.1f}%")
+        logger.info(
             f"      Mean left hand error: "
             f"{np.mean(self.ik_result.left_hand_errors) * 1000:.2f} mm"
         )
-        print(
+        logger.info(
             f"      Mean right hand error: "
             f"{np.mean(self.ik_result.right_hand_errors) * 1000:.2f} mm"
         )
 
         # Step 4: Save/visualize results
-        print("\n[4/4] Processing results...")
+        logger.info("\n[4/4] Processing results...")
         if self.config.save_trajectory:
             self._save_results()
-            print(f"      Saved to: {self.config.output_dir}")
+            logger.info(f"      Saved to: {self.config.output_dir}")
 
         if self.config.visualize:
             self._visualize()
 
         success = self.ik_result.convergence_rate > 0.5
 
-        print("\n" + "=" * 60)
-        print(f"Pipeline complete. Success: {success}")
-        print("=" * 60)
+        logger.info("\n" + "=" * 60)
+        logger.info(f"Pipeline complete. Success: {success}")
+        logger.info("=" * 60)
 
         return PipelineResult(
             trajectory=self.trajectory,
@@ -256,7 +256,7 @@ class MotionTrainingPipeline:
             plt.close("all")
 
         except ImportError:
-            print("      Matplotlib not available, skipping plots")
+            logger.info("      Matplotlib not available, skipping plots")
 
     def _visualize(self) -> None:
         """Launch visualization."""
@@ -269,10 +269,10 @@ class MotionTrainingPipeline:
                 viz.play_motion(self.trajectory, self.ik_result)
             else:
                 viz.show_static_trajectory(self.trajectory, self.ik_result)
-                print(f"      Visualization URL: {viz.viewer.url()}")
+                logger.info(f"      Visualization URL: {viz.viewer.url()}")
 
         except ImportError as e:
-            print(f"      Visualization not available: {e}")
+            logger.info(f"      Visualization not available: {e}")
 
 
 def run_motion_training(
@@ -312,7 +312,10 @@ def run_motion_training(
 # CLI entry point
 if __name__ == "__main__":
     import argparse
+import logging
 
+
+logger = logging.getLogger(__name__)
     parser = argparse.ArgumentParser(
         description="Train body motion from club trajectory using IK"
     )
@@ -362,4 +365,4 @@ if __name__ == "__main__":
         playback=args.playback,
     )
 
-    print(f"\nResult: {'SUCCESS' if result.success else 'NEEDS REVIEW'}")
+    logger.info(f"\nResult: {'SUCCESS' if result.success else 'NEEDS REVIEW'}")
