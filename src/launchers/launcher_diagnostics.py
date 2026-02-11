@@ -683,10 +683,10 @@ def reset_layout_config() -> bool:
 
 def run_cli_diagnostics() -> None:
     """Run diagnostics and print results to console."""
-    logger.info("=" * 60)
-    logger.info("Golf Modeling Suite - Launcher Diagnostics")
-    logger.info("=" * 60)
-    logger.info()
+    print("=" * 60)  # noqa: T201
+    print("Golf Modeling Suite - Launcher Diagnostics")  # noqa: T201
+    print("=" * 60)  # noqa: T201
+    print()  # noqa: T201
 
     diag = LauncherDiagnostics()
     results = diag.run_all_checks()
@@ -694,11 +694,11 @@ def run_cli_diagnostics() -> None:
     # Print summary
     summary = results["summary"]
     status_icon = "✅" if summary["status"] == "healthy" else "⚠️"
-    logger.info(f"{status_icon} Status: {summary['status'].upper()}")
-    logger.info(f"   Passed: {summary['passed']}")
-    logger.info(f"   Failed: {summary['failed']}")
-    logger.info(f"   Warnings: {summary['warnings']}")
-    logger.info()
+    print(f"{status_icon} Status: {summary['status'].upper()}")  # noqa: T201
+    print(f"   Passed: {summary['passed']}")  # noqa: T201
+    print(f"   Failed: {summary['failed']}")  # noqa: T201
+    print(f"   Warnings: {summary['warnings']}")  # noqa: T201
+    print()  # noqa: T201
 
     # Print each check
     for check in results["checks"]:
@@ -709,7 +709,7 @@ def run_cli_diagnostics() -> None:
         else:
             icon = "⚠️"
 
-        logger.info(f"{icon} {check['name']}: {check['message']}")
+        print(f"{icon} {check['name']}: {check['message']}")  # noqa: T201
 
         # Print key details for failures/warnings
         if check["status"] in ("fail", "warning"):
@@ -720,15 +720,15 @@ def run_cli_diagnostics() -> None:
                 "missing_from_registry",
             ]:
                 if key in details and details[key]:
-                    logger.info(f"     {key}: {details[key]}")
+                    print(f"     {key}: {details[key]}")  # noqa: T201
 
-    logger.info()
-    logger.info("Recommendations:")
+    print()  # noqa: T201
+    print("Recommendations:")  # noqa: T201
     for rec in results["recommendations"]:
-        logger.info(f"  \u2192 {rec}")
+        print(f"  \u2192 {rec}")  # noqa: T201
 
-    logger.info("")
-    logger.info("%s", "=" * 60)
+    print()  # noqa: T201
+    print("=" * 60)  # noqa: T201
 
 
 if __name__ == "__main__":
@@ -749,6 +749,6 @@ if __name__ == "__main__":
     elif args.json:
         diag = LauncherDiagnostics()
         results = diag.run_all_checks()
-        logger.info(json.dumps(results, indent=2))
+        print(json.dumps(results, indent=2))  # noqa: T201
     else:
         run_cli_diagnostics()
