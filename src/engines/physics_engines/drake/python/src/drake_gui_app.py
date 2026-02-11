@@ -492,11 +492,9 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
                 if self.plant:
                     plant_context = self.plant.GetMyContextFromRoot(context)
                     com_pos = self.plant.CalcCenterOfMassPositionInWorld(plant_context)
-                    angular_momentum = (
-                        self.plant.CalcSpatialMomentumInWorldAboutPoint(
-                            plant_context, com_pos
-                        ).rotational()
-                    )
+                    angular_momentum = self.plant.CalcSpatialMomentumInWorldAboutPoint(
+                        plant_context, com_pos
+                    ).rotational()
 
                 self.recorder.record(
                     context.get_time(),
@@ -571,6 +569,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    from pydrake.all import JacobianWrtVariable  # Import here for use in method
-
     main()

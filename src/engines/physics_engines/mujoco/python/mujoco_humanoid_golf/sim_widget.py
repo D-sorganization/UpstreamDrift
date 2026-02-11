@@ -207,9 +207,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     # -------- MuJoCo setup --------
 
-    def load_model_async(
-        self, xml_source: str, is_file: bool = False
-    ) -> None:
+    def load_model_async(self, xml_source: str, is_file: bool = False) -> None:
         """Load a MuJoCo model asynchronously to prevent UI freeze."""
         if self.loader_thread and self.loader_thread.isRunning():
             logger.warning("Model loading already in progress.")
@@ -222,14 +220,10 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.loader_thread = ModelLoaderThread(xml_source, is_file)
-        self.loader_thread.finished_loading.connect(
-            self._on_model_loaded_async
-        )
+        self.loader_thread.finished_loading.connect(self._on_model_loaded_async)
         self.loader_thread.start()
 
-    def _on_model_loaded_async(
-        self, model: Any, data: Any, error_msg: str
-    ) -> None:
+    def _on_model_loaded_async(self, model: Any, data: Any, error_msg: str) -> None:
         """Handle completion of async model loading."""
         if error_msg:
             logger.error("Async load failed: %s", error_msg)
@@ -245,9 +239,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             self.label.setText(f"Error initializing renderer: {e}")
             self.loading_finished.emit(False)
 
-    def _finalize_model_load(
-        self, new_model: Any, new_data: Any
-    ) -> None:
+    def _finalize_model_load(self, new_model: Any, new_data: Any) -> None:
         """Finalize setup on main thread after model/data creation."""
         new_renderer = mujoco.Renderer(
             new_model,
@@ -305,9 +297,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 xml_path = str(project_root / xml_path)
 
             if not os.path.exists(xml_path):
-                raise FileNotFoundError(
-                    f"Model file not found: {xml_path}"
-                )
+                raise FileNotFoundError(f"Model file not found: {xml_path}")
 
             new_model = mujoco.MjModel.from_xml_path(xml_path)
             new_data = mujoco.MjData(new_model)
@@ -396,32 +386,19 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                     geom_pos = self.data.xpos[body_id].copy()
                     geom_size = self.model.geom_size[geom_id]
 
-                    if (
-                        self.model.geom_type[geom_id]
-                        == mujoco.mjtGeom.mjGEOM_SPHERE
-                    ):
+                    if self.model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_SPHERE:
                         extent = geom_size[0]
-                    elif (
-                        self.model.geom_type[geom_id]
-                        == mujoco.mjtGeom.mjGEOM_BOX
-                    ):
+                    elif self.model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_BOX:
                         extent = np.linalg.norm(geom_size)
-                    elif (
-                        self.model.geom_type[geom_id]
-                        == mujoco.mjtGeom.mjGEOM_CAPSULE
-                    ):
+                    elif self.model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_CAPSULE:
                         extent = geom_size[0] + geom_size[1]
                     else:
-                        extent = (
-                            np.max(geom_size) if len(geom_size) > 0 else 0.5
-                        )
+                        extent = np.max(geom_size) if len(geom_size) > 0 else 0.5
 
                     min_pos = np.minimum(min_pos, geom_pos - extent)
                     max_pos = np.maximum(max_pos, geom_pos + extent)
 
-            if np.all(np.isfinite(min_pos)) and np.all(
-                np.isfinite(max_pos)
-            ):
+            if np.all(np.isfinite(min_pos)) and np.all(np.isfinite(max_pos)):
                 center = (min_pos + max_pos) / 2.0
                 size = max_pos - min_pos
                 size = np.maximum(size, [0.5, 0.5, 0.5])
@@ -441,10 +418,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def set_operating_mode(self, mode: str) -> None:
         """Set the operating mode: 'dynamic' or 'kinematic'."""
         if mode not in ["dynamic", "kinematic"]:
-            msg = (
-                f"Invalid operating mode: {mode!r}. "
-                "Must be 'dynamic' or 'kinematic'."
-            )
+            msg = f"Invalid operating mode: {mode!r}. Must be 'dynamic' or 'kinematic'."
             raise ValueError(msg)
         self.operating_mode = mode
         if mode == "kinematic" and self.model is not None:
@@ -466,9 +440,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             ]:
                 continue
 
-            name = mujoco.mj_id2name(
-                self.model, mujoco.mjtObj.mjOBJ_JOINT, j
-            )
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, j)
             if not name:
                 name = f"Joint {j}"
 
@@ -490,9 +462,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if self.model is None or self.data is None:
             return
 
-        jid = mujoco.mj_name2id(
-            self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name
-        )
+        jid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
         if jid == -1:
             return
 
@@ -579,9 +549,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if show_reference is not None:
             self.show_reference_trajectory = show_reference
 
-    def set_reference_trajectory(
-        self, trajectory: np.ndarray | None
-    ) -> None:
+    def set_reference_trajectory(self, trajectory: np.ndarray | None) -> None:
         self.reference_trajectory = trajectory
 
     def reset_swing_plane(self) -> None:
@@ -604,9 +572,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         position = self.data.xpos[body_id].copy()
         timestamp = self.data.time
-        self.swing_plane_visualizer.record_trajectory_point(
-            position, timestamp
-        )
+        self.swing_plane_visualizer.record_trajectory_point(position, timestamp)
 
     def _update_swing_plane_overlays(self) -> None:  # noqa: PLR0912
         """Push swing plane and trajectory data to meshcat."""
@@ -617,9 +583,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             return
 
         if self.show_club_trajectory:
-            traj_vis = (
-                self.swing_plane_visualizer.get_trajectory_visualization()
-            )
+            traj_vis = self.swing_plane_visualizer.get_trajectory_visualization()
             if traj_vis is not None:
                 self.meshcat_adapter.draw_trajectory(
                     "club_trajectory", traj_vis.points, color=0x00FF00
@@ -640,30 +604,17 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                     vel_adr = self.model.body_dofadr[body_id]
                 else:
                     vel_adr = -1
-                if (
-                    vel_adr >= 0
-                    and vel_adr + 2 < len(self.data.qvel)
-                ):
-                    clubhead_velocity = self.data.qvel[
-                        vel_adr : vel_adr + 3
-                    ]
+                if vel_adr >= 0 and vel_adr + 2 < len(self.data.qvel):
+                    clubhead_velocity = self.data.qvel[vel_adr : vel_adr + 3]
                 else:
-                    hist = (
-                        self.swing_plane_visualizer.trajectory_history
-                    )
+                    hist = self.swing_plane_visualizer.trajectory_history
                     if len(hist) >= 2:
                         dt = (
-                            self.swing_plane_visualizer.timestamp_history[
-                                -1
-                            ]
-                            - self.swing_plane_visualizer.timestamp_history[
-                                -2
-                            ]
+                            self.swing_plane_visualizer.timestamp_history[-1]
+                            - self.swing_plane_visualizer.timestamp_history[-2]
                         )
                         if dt > 0:
-                            clubhead_velocity = (
-                                hist[-1] - hist[-2]
-                            ) / dt
+                            clubhead_velocity = (hist[-1] - hist[-2]) / dt
                         else:
                             clubhead_velocity = np.zeros(3)
                     else:
@@ -671,9 +622,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
                 clubhead_pos = self.data.xpos[body_id].copy()
                 parent_id = self.model.body_parentid[body_id]
-                grip_pos = self.data.xpos[
-                    max(parent_id, 1)
-                ].copy()
+                grip_pos = self.data.xpos[max(parent_id, 1)].copy()
 
                 if np.linalg.norm(clubhead_velocity) > 1e-3:
                     try:
@@ -702,10 +651,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                     ):
                         pass
 
-        if (
-            self.show_reference_trajectory
-            and self.reference_trajectory is not None
-        ):
+        if self.show_reference_trajectory and self.reference_trajectory is not None:
             self.meshcat_adapter.draw_trajectory(
                 "reference_trajectory",
                 self.reference_trajectory,
@@ -726,12 +672,8 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
         self.show_contact_forces = enabled
-        self.scene_option.flags[
-            mujoco.mjtVisFlag.mjVIS_CONTACTFORCE
-        ] = enabled
-        self.scene_option.flags[
-            mujoco.mjtVisFlag.mjVIS_CONTACTPOINT
-        ] = enabled
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled
 
     def set_isolate_forces_visualization(self, enabled: bool) -> None:
         self.isolate_forces_visualization = enabled
@@ -781,9 +723,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         if self.telemetry:
             self.telemetry.add_custom_metric("jacobian_cond", cond)
-            self.telemetry.add_custom_metric(
-                "constraint_rank", float(rank)
-            )
+            self.telemetry.add_custom_metric("constraint_rank", float(rank))
             self.telemetry.add_custom_metric("nefc", float(nefc))
 
         return {
@@ -792,14 +732,10 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             "nefc": nefc,
         }
 
-    def set_body_color(
-        self, body_name: str, rgba: list[float]
-    ) -> None:
+    def set_body_color(self, body_name: str, rgba: list[float]) -> None:
         if self.model is None:
             return
-        body_id = mujoco.mj_name2id(
-            self.model, mujoco.mjtObj.mjOBJ_BODY, body_name
-        )
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:
             return
         start_geom = self.model.body_geomadr[body_id]
@@ -815,8 +751,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def compute_ellipsoids(self) -> None:
         if (
-            not self.show_mobility_ellipsoid
-            and not self.show_force_ellipsoid
+            not self.show_mobility_ellipsoid and not self.show_force_ellipsoid
         ) or self.meshcat_adapter is None:
             if self.meshcat_adapter:
                 self.meshcat_adapter.clear_ellipsoids()
@@ -864,9 +799,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 )
 
             if self.show_force_ellipsoid:
-                radii_force = 1.0 / np.sqrt(
-                    np.maximum(eigvals, 1e-6)
-                )
+                radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
                 radii_force = np.clip(radii_force, 0.01, 5.0)
                 self.meshcat_adapter.draw_ellipsoid(
                     "force",
@@ -893,9 +826,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 self._render_once()
                 return
 
-            steps_per_frame = max(
-                1, int(1.0 / (self.fps * self.model.opt.timestep))
-            )
+            steps_per_frame = max(1, int(1.0 / (self.fps * self.model.opt.timestep)))
 
             for _ in range(steps_per_frame):
                 if self.control_system is not None:
@@ -907,10 +838,8 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                         if self.model.nu <= len(self.data.qvel)
                         else None
                     )
-                    control_torques = (
-                        self.control_system.compute_control_vector(
-                            velocities,
-                        )
+                    control_torques = self.control_system.compute_control_vector(
+                        velocities,
                     )
                     self.data.ctrl[:] = control_torques[:]
                 elif self.control_vector is not None:
@@ -948,23 +877,17 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                             config_selected_actuator = str(src)
                             break
 
-            should_compute = (
-                self.enable_live_analysis or config_requests_analysis
-            )
+            should_compute = self.enable_live_analysis or config_requests_analysis
 
             selected_actuator = config_selected_actuator
             if selected_actuator is None:
-                if (
-                    self.show_induced_vectors
-                    and self.induced_vector_source
-                    not in ["gravity", "actuator"]
-                ):
+                if self.show_induced_vectors and self.induced_vector_source not in [
+                    "gravity",
+                    "actuator",
+                ]:
                     selected_actuator = self.induced_vector_source
 
-            if (
-                self.analyzer is not None
-                and self.recorder.is_recording
-            ):
+            if self.analyzer is not None and self.recorder.is_recording:
                 bio_data = self.analyzer.extract_full_state(
                     selected_actuator_name=selected_actuator,
                     compute_advanced_metrics=should_compute,
@@ -984,11 +907,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self._render_once()
 
     def _enforce_interactive_constraints(self) -> None:
-        if (
-            self.manipulator is None
-            or self.model is None
-            or self.data is None
-        ):
+        if self.manipulator is None or self.model is None or self.data is None:
             return
         if not self.manipulator.constraints:
             return

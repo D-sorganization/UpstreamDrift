@@ -113,9 +113,7 @@ class DrakeInducedAccelerationAnalyzer:
 
         return {"ztcf_accel": ztcf_accel, "zvcf_torque": zvcf_torque}
 
-    def compute_specific_control(
-        self, context: Context, tau: np.ndarray
-    ) -> np.ndarray:
+    def compute_specific_control(self, context: Context, tau: np.ndarray) -> np.ndarray:
         """Compute induced acceleration for a specific control vector.
 
         Note:
@@ -272,9 +270,7 @@ class DrakeRecorder:
 
         return times, np.array(vals)
 
-    def get_counterfactual_series(
-        self, cf_name: str
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual data."""
         if cf_name not in self.counterfactuals:
             return np.array([]), np.array([])

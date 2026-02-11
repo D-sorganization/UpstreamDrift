@@ -65,9 +65,7 @@ class SimCameraMixin:
 
             if body_id is not None:
                 body_name = self.manipulator.get_body_name(body_id)
-                logger.debug(
-                    "Selected body via mouse: %s (id=%s)", body_name, body_id
-                )
+                logger.debug("Selected body via mouse: %s (id=%s)", body_name, body_id)
                 self._render_once()
             else:
                 self.last_mouse_pos = (x, y)
@@ -84,9 +82,7 @@ class SimCameraMixin:
                     self.camera,
                 )
                 if body_id is not None:
-                    self.show_context_menu(
-                        event.globalPosition().toPoint(), body_id
-                    )
+                    self.show_context_menu(event.globalPosition().toPoint(), body_id)
                     return
 
             self.last_mouse_pos = (x, y)
@@ -164,9 +160,7 @@ class SimCameraMixin:
 
         super().mouseMoveEvent(event)  # type: ignore[misc]
 
-    def mouseReleaseEvent(
-        self: Any, event: QtGui.QMouseEvent | None
-    ) -> None:
+    def mouseReleaseEvent(self: Any, event: QtGui.QMouseEvent | None) -> None:
         if event is None:
             return
         if self.is_dragging:
@@ -215,9 +209,7 @@ class SimCameraMixin:
             self.camera.distance = np.clip(distance, 0.1, 50.0)
             self._render_once()
 
-    def set_camera_lookat(
-        self: Any, x: float, y: float, z: float
-    ) -> None:
+    def set_camera_lookat(self: Any, x: float, y: float, z: float) -> None:
         if self.camera is not None:
             self.camera.lookat[:] = [x, y, z]
             self._render_once()
@@ -231,9 +223,7 @@ class SimCameraMixin:
             self.camera.lookat[:] = [0, 0, 1]
             self._render_once()
 
-    def show_context_menu(
-        self: Any, global_pos: QtCore.QPoint, body_id: int
-    ) -> None:
+    def show_context_menu(self: Any, global_pos: QtCore.QPoint, body_id: int) -> None:
         if self.manipulator is None:
             return
 
@@ -258,9 +248,7 @@ class SimCameraMixin:
         if action_com is not None:
             action_com.setCheckable(True)
             action_com.setChecked(body_id in self.visible_coms)
-            action_com.triggered.connect(
-                lambda: self.toggle_com_visibility(body_id)
-            )
+            action_com.triggered.connect(lambda: self.toggle_com_visibility(body_id))
 
         menu.exec(global_pos)
 

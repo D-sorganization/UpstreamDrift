@@ -108,9 +108,7 @@ class SignalToolkitUIMixin:
         joint_layout.addLayout(joint_row)
 
         self.apply_btn = QPushButton("Apply to Joint")
-        self.apply_btn.setStyleSheet(
-            "background-color: #107c10; font-weight: bold;"
-        )
+        self.apply_btn.setStyleSheet("background-color: #107c10; font-weight: bold;")
         joint_layout.addWidget(self.apply_btn)
 
         self.export_btn = QPushButton("Export Signal")
@@ -199,9 +197,7 @@ class SignalToolkitUIMixin:
         layout.addWidget(time_group)
 
         self.generate_btn = QPushButton("Generate Signal")
-        self.generate_btn.setStyleSheet(
-            "background-color: #0078d4; font-weight: bold;"
-        )
+        self.generate_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
         layout.addWidget(self.generate_btn)
         layout.addStretch()
         return tab
@@ -461,9 +457,7 @@ class SignalToolkitUIMixin:
         layout.addWidget(custom_group)
 
         self.fit_btn = QPushButton("Fit Function")
-        self.fit_btn.setStyleSheet(
-            "background-color: #0078d4; font-weight: bold;"
-        )
+        self.fit_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
         layout.addWidget(self.fit_btn)
 
         self.auto_fit_btn = QPushButton("Auto-Detect Best Fit")
@@ -641,9 +635,7 @@ class SignalToolkitUIMixin:
         type_layout.addWidget(self.filter_design_combo)
 
         self.filter_type_combo = QComboBox()
-        self.filter_type_combo.addItems(
-            ["Lowpass", "Highpass", "Bandpass", "Bandstop"]
-        )
+        self.filter_type_combo.addItems(["Lowpass", "Highpass", "Bandpass", "Bandstop"])
         type_layout.addWidget(self.filter_type_combo)
 
         layout.addWidget(type_group)
@@ -786,9 +778,7 @@ class SignalToolkitUIMixin:
         import_layout.addLayout(col_row)
 
         self.import_btn = QPushButton("Import Signal")
-        self.import_btn.setStyleSheet(
-            "background-color: #0078d4; font-weight: bold;"
-        )
+        self.import_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
         import_layout.addWidget(self.import_btn)
 
         layout.addWidget(import_group)

@@ -142,9 +142,7 @@ class SimRenderingMixin:
             return
 
         h, w, _ = rgb.shape
-        image = QtGui.QImage(
-            rgb.data, w, h, 3 * w, QtGui.QImage.Format.Format_RGB888
-        )
+        image = QtGui.QImage(rgb.data, w, h, 3 * w, QtGui.QImage.Format.Format_RGB888)
         image = image.copy()
         pixmap = QtGui.QPixmap.fromImage(image)
 
@@ -179,9 +177,7 @@ class SimRenderingMixin:
 
         cv2 = get_cv2()
         if cv2 is None:
-            logger.warning(
-                "OpenCV not installed, cannot draw force/torque overlays."
-            )
+            logger.warning("OpenCV not installed, cannot draw force/torque overlays.")
             return rgb
 
         img = rgb.copy()
@@ -284,11 +280,7 @@ class SimRenderingMixin:
 
     def _draw_induced_vectors(self: Any, draw_arrow_func: Callable) -> None:
         """Draw Induced Acceleration vectors (Magenta)."""
-        if (
-            self.model is None
-            or self.data is None
-            or self.latest_bio_data is None
-        ):
+        if self.model is None or self.data is None or self.latest_bio_data is None:
             return
 
         selected_id = None
@@ -328,11 +320,7 @@ class SimRenderingMixin:
 
     def _draw_cf_vectors(self: Any, draw_arrow_func: Callable) -> None:
         """Draw Counterfactual vectors (Yellow)."""
-        if (
-            self.model is None
-            or self.data is None
-            or self.latest_bio_data is None
-        ):
+        if self.model is None or self.data is None or self.latest_bio_data is None:
             return
         if self.cf_vector_type not in self.latest_bio_data.counterfactuals:
             return
@@ -373,9 +361,7 @@ class SimRenderingMixin:
             and self.manipulator is not None
             and self.manipulator.selected_body_id is not None
         ):
-            body_pos = self.data.xpos[
-                self.manipulator.selected_body_id
-            ].copy()
+            body_pos = self.data.xpos[self.manipulator.selected_body_id].copy()
             screen_pos = self._world_to_screen(body_pos)
             if screen_pos is not None:
                 x, y = screen_pos
@@ -420,9 +406,7 @@ class SimRenderingMixin:
 
         return img
 
-    def _world_to_screen(
-        self: Any, world_pos: np.ndarray
-    ) -> tuple[int, int] | None:
+    def _world_to_screen(self: Any, world_pos: np.ndarray) -> tuple[int, int] | None:
         cam_azimuth = np.deg2rad(self.camera.azimuth)
         cam_elevation = np.deg2rad(self.camera.elevation)
         cam_distance = self.camera.distance
@@ -460,17 +444,12 @@ class SimRenderingMixin:
         x_screen = int((x_ndc + 1.0) * 0.5 * self.frame_width)
         y_screen = int((1.0 - y_ndc) * 0.5 * self.frame_height)
 
-        if (
-            0 <= x_screen < self.frame_width
-            and 0 <= y_screen < self.frame_height
-        ):
+        if 0 <= x_screen < self.frame_width and 0 <= y_screen < self.frame_height:
             return (x_screen, y_screen)
 
         return None
 
-    def _add_swing_plane_overlays(
-        self: Any, rgb: np.ndarray
-    ) -> np.ndarray:
+    def _add_swing_plane_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
         """Overlay club trajectory and swing plane normal onto the pixel frame."""
         cv2 = get_cv2()
         if cv2 is None or self.model is None or self.data is None:
@@ -521,9 +500,7 @@ class SimRenderingMixin:
 
         return img
 
-    def _add_frame_and_com_overlays(
-        self: Any, rgb: np.ndarray
-    ) -> np.ndarray:
+    def _add_frame_and_com_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
         cv2 = get_cv2()
         if self.model is None or self.data is None or cv2 is None:
             return rgb

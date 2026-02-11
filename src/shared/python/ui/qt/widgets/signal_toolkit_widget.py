@@ -165,9 +165,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             self.axes.title.set_color("#ffffff")
             for spine in self.axes.spines.values():
                 spine.set_edgecolor("#555555")
-            self.axes.grid(
-                True, color="#444444", linestyle="--", linewidth=0.5
-            )
+            self.axes.grid(True, color="#444444", linestyle="--", linewidth=0.5)
 
     class SignalToolkitWidget(  # type: ignore[misc]
         SignalToolkitProcessingMixin,

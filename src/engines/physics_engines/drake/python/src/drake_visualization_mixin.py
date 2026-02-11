@@ -456,8 +456,9 @@ class DrakeVisualizationMixin:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
             return
 
-        from .drake_recorder import DrakeInducedAccelerationAnalyzer
         from shared.python.plotting import GolfSwingPlotter
+
+        from .drake_recorder import DrakeInducedAccelerationAnalyzer
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(
@@ -542,8 +543,9 @@ class DrakeVisualizationMixin:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
             return
 
-        from .drake_recorder import DrakeInducedAccelerationAnalyzer
         from shared.python.plotting import GolfSwingPlotter
+
+        from .drake_recorder import DrakeInducedAccelerationAnalyzer
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(

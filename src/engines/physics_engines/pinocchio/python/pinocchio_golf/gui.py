@@ -484,9 +484,7 @@ class PinocchioGUI(  # type: ignore[misc]
             self.sim_time = 0.0
 
             self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
-            self.manip_analyzer = PinocchioManipulabilityAnalyzer(
-                self.model, self.data
-            )
+            self.manip_analyzer = PinocchioManipulabilityAnalyzer(self.model, self.data)
             self._populate_manipulability_checkboxes()
 
             self.recorder.reset()
@@ -598,9 +596,7 @@ class PinocchioGUI(  # type: ignore[misc]
         slider.valueChanged.connect(
             lambda val, s=spin, k=idx: self._on_slider(val, s, k)
         )
-        spin.valueChanged.connect(
-            lambda val, s=slider, k=idx: self._on_spin(val, s, k)
-        )
+        spin.valueChanged.connect(lambda val, s=slider, k=idx: self._on_spin(val, s, k))
 
         r_layout.addWidget(slider)
         r_layout.addWidget(spin)
@@ -632,17 +628,13 @@ class PinocchioGUI(  # type: ignore[misc]
 
                 slider_idx += 1
 
-    def _on_slider(
-        self, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
-    ) -> None:
+    def _on_slider(self, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int) -> None:
         angle = val / SLIDER_SCALE
         with SignalBlocker(spin):
             spin.setValue(angle)
         self._update_q(idx, angle)
 
-    def _on_spin(
-        self, val: float, slider: QtWidgets.QSlider, idx: int
-    ) -> None:
+    def _on_spin(self, val: float, slider: QtWidgets.QSlider, idx: int) -> None:
         with SignalBlocker(slider):
             slider.setValue(int(val * SLIDER_SCALE))
         self._update_q(idx, val)
@@ -759,9 +751,7 @@ class PinocchioGUI(  # type: ignore[misc]
 
                 if self.chk_live_analysis.isChecked() or config_requests_analysis:
                     if self.analyzer and self.q is not None and self.v is not None:
-                        induced = self.analyzer.compute_components(
-                            self.q, self.v, tau
-                        )
+                        induced = self.analyzer.compute_components(self.q, self.v, tau)
                         self.latest_induced = induced
 
                         sources_to_compute = []
@@ -820,10 +810,8 @@ class PinocchioGUI(  # type: ignore[misc]
                                 induced[src] = spec_acc
 
                         if hasattr(self.analyzer, "compute_counterfactuals"):
-                            counterfactuals = (
-                                self.analyzer.compute_counterfactuals(
-                                    self.q, self.v
-                                )
+                            counterfactuals = self.analyzer.compute_counterfactuals(
+                                self.q, self.v
                             )
                             self.latest_cf = counterfactuals
 
@@ -839,9 +827,7 @@ class PinocchioGUI(  # type: ignore[misc]
                     induced_accelerations=induced,
                     counterfactuals=counterfactuals,
                 )
-                self.lbl_rec_status.setText(
-                    f"Frames: {self.recorder.get_num_frames()}"
-                )
+                self.lbl_rec_status.setText(f"Frames: {self.recorder.get_num_frames()}")
 
             self._update_viewer()
 

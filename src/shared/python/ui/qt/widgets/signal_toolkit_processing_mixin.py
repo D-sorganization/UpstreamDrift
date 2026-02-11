@@ -50,25 +50,17 @@ class SignalToolkitProcessingMixin:
         self.auto_fit_btn.clicked.connect(self._auto_fit)
 
         self.apply_sat_btn.clicked.connect(self._apply_saturation)
-        self.sat_preview_check.stateChanged.connect(
-            self._update_saturation_preview
-        )
+        self.sat_preview_check.stateChanged.connect(self._update_saturation_preview)
 
         self.show_derivative_btn.clicked.connect(self._show_derivative)
         self.show_integral_btn.clicked.connect(self._show_integral)
         self.tangent_slider.valueChanged.connect(self._update_tangent_position)
         self.show_tangent_check.stateChanged.connect(self._toggle_tangent)
-        self.int_lower_slider.valueChanged.connect(
-            self._update_integral_bounds
-        )
-        self.int_upper_slider.valueChanged.connect(
-            self._update_integral_bounds
-        )
+        self.int_lower_slider.valueChanged.connect(self._update_integral_bounds)
+        self.int_upper_slider.valueChanged.connect(self._update_integral_bounds)
 
         self.apply_filter_btn.clicked.connect(self._apply_filter)
-        self.show_freq_response_btn.clicked.connect(
-            self._show_frequency_response
-        )
+        self.show_freq_response_btn.clicked.connect(self._show_frequency_response)
 
         self.add_noise_btn.clicked.connect(self._add_noise)
         self.reset_signal_btn.clicked.connect(self._reset_signal)
@@ -188,9 +180,7 @@ class SignalToolkitProcessingMixin:
             self._log(f"Generated {signal_type} signal")
 
         except (ValueError, TypeError, RuntimeError) as e:
-            QMessageBox.warning(
-                self, "Error", f"Failed to generate signal: {e}"
-            )
+            QMessageBox.warning(self, "Error", f"Failed to generate signal: {e}")
 
     # ------------------------------------------------------------------
     # Fitting
@@ -303,9 +293,7 @@ class SignalToolkitProcessingMixin:
                 "Soft Clip (sigmoid)": SaturationMode.SOFT_SIGMOID,
                 "Polynomial": SaturationMode.POLYNOMIAL,
             }
-            mode = mode_map.get(
-                self.sat_mode_combo.currentText(), SaturationMode.HARD
-            )
+            mode = mode_map.get(self.sat_mode_combo.currentText(), SaturationMode.HARD)
 
             preview = apply_saturation(
                 (
@@ -359,9 +347,7 @@ class SignalToolkitProcessingMixin:
         if self.current_signal is None:
             return
 
-        t_range = (
-            self.current_signal.time[-1] - self.current_signal.time[0]
-        )
+        t_range = self.current_signal.time[-1] - self.current_signal.time[0]
         t_point = self.current_signal.time[0] + (value / 100) * t_range
         self.tangent_t_spin.setValue(t_point)
 
@@ -377,9 +363,7 @@ class SignalToolkitProcessingMixin:
         if self.current_signal is None:
             return
 
-        t_range = (
-            self.current_signal.time[-1] - self.current_signal.time[0]
-        )
+        t_range = self.current_signal.time[-1] - self.current_signal.time[0]
         t0 = self.current_signal.time[0]
 
         lower = t0 + (self.int_lower_slider.value() / 100) * t_range
@@ -416,9 +400,7 @@ class SignalToolkitProcessingMixin:
                         self.current_signal, window
                     )
                 elif design == "Savitzky-Golay":
-                    self.current_signal = apply_savgol(
-                        self.current_signal, window, 3
-                    )
+                    self.current_signal = apply_savgol(self.current_signal, window, 3)
                 elif design == "Median":
                     from src.shared.python.signal_toolkit.filters import (
                         apply_median_filter,
@@ -458,9 +440,7 @@ class SignalToolkitProcessingMixin:
                 else:
                     return
 
-                self.current_signal = apply_filter(
-                    self.current_signal, spec
-                )
+                self.current_signal = apply_filter(self.current_signal, spec)
 
             self._update_plot()
             self._log(f"Applied {design} {filter_type} filter")
@@ -521,24 +501,18 @@ class SignalToolkitProcessingMixin:
             else:
                 return
 
-            w, h = scipy_signal.freqz(
-                spec.b_coeffs, spec.a_coeffs, fs=fs
-            )
+            w, h = scipy_signal.freqz(spec.b_coeffs, spec.a_coeffs, fs=fs)
 
             self.canvas2.axes.clear()
             self.canvas2.setup_dark_theme()
-            self.canvas2.axes.semilogy(
-                w, np.abs(h), color="#4ecdc4", linewidth=1.5
-            )
+            self.canvas2.axes.semilogy(w, np.abs(h), color="#4ecdc4", linewidth=1.5)
             self.canvas2.axes.set_title("Frequency Response", fontsize=10)
             self.canvas2.axes.set_xlabel("Frequency (Hz)")
             self.canvas2.axes.set_ylabel("Magnitude")
             self.canvas2.axes.grid(True, alpha=0.3)
             self.canvas2.draw()
 
-            self._log(
-                f"Showing frequency response for {design} {filter_type}"
-            )
+            self._log(f"Showing frequency response for {design} {filter_type}")
 
         except ImportError as e:
             QMessageBox.warning(
@@ -642,9 +616,7 @@ class SignalToolkitProcessingMixin:
         fitter = FunctionFitter()
         result = fitter.fit_polynomial(self.current_signal, order=6)
 
-        coeffs = [
-            result.parameters.get(f"c{i}", 0.0) for i in range(7)
-        ]
+        coeffs = [result.parameters.get(f"c{i}", 0.0) for i in range(7)]
 
         self.signal_generated.emit(joint, coeffs)
         self._log(f"Applied to {joint}: {coeffs}")
@@ -669,9 +641,7 @@ class SignalToolkitProcessingMixin:
                     SignalExporter.to_csv(self.current_signal, path)
                 self._log(f"Exported to {Path(path).name}")
             except (FileNotFoundError, OSError) as e:
-                QMessageBox.warning(
-                    self, "Export Error", f"Failed: {e}"
-                )
+                QMessageBox.warning(self, "Export Error", f"Failed: {e}")
 
     # ------------------------------------------------------------------
     # Plotting
