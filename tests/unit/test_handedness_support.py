@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.handedness_support import (
+from src.shared.python.config.handedness_support import (
     SAGITTAL_MIRROR,
     Handedness,
     HandednessConverter,
