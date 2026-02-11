@@ -242,7 +242,7 @@ class FrameBuffer:
         >>> frame = buffer.get()
     """
 
-    def __init__(self, max_size: int = 10):
+    def __init__(self, max_size: int = 10) -> None:
         """Initialize frame buffer.
 
         Args:
@@ -444,7 +444,7 @@ class UnrealStreamingServer:
         ...     await server.broadcast(frame)
     """
 
-    def __init__(self, config: StreamingConfig | None = None):
+    def __init__(self, config: StreamingConfig | None = None) -> None:
         """Initialize streaming server.
 
         Args:
@@ -701,7 +701,7 @@ class SimulationStreamer:
         ...     await streamer.send_state(state, timestamp)
     """
 
-    def __init__(self, server: UnrealStreamingServer):
+    def __init__(self, server: UnrealStreamingServer) -> None:
         """Initialize simulation streamer.
 
         Args:

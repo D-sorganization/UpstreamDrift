@@ -78,7 +78,7 @@ class OutputManager:
             cls._io_executor.shutdown(wait=True)
             cls._io_executor = None
 
-    def __init__(self, base_path: str | Path | None = None):
+    def __init__(self, base_path: str | Path | None = None) -> None:
         """
         Initialize OutputManager.
 

@@ -12,7 +12,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry im
 
 
 @pytest.fixture
-def mock_mujoco_model_data():
+def mock_mujoco_model_data() -> tuple:
     """Create mock MuJoCo model and data."""
     model = MagicMock(spec=mujoco.MjModel)
     model.nbody = 2
@@ -40,7 +40,7 @@ def mock_mujoco_model_data():
     return model, data
 
 
-def test_telemetry_recorder_init(mock_mujoco_model_data):
+def test_telemetry_recorder_init(mock_mujoco_model_data) -> None:
     model, _ = mock_mujoco_model_data
 
     with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
@@ -51,7 +51,7 @@ def test_telemetry_recorder_init(mock_mujoco_model_data):
     assert len(recorder._actuator_dof_map) == 2
 
 
-def test_telemetry_recorder_record_step(mock_mujoco_model_data):
+def test_telemetry_recorder_record_step(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
     with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
@@ -73,7 +73,7 @@ def test_telemetry_recorder_record_step(mock_mujoco_model_data):
     assert sample.custom_metrics["test_metric"] == 123.45
 
 
-def test_telemetry_report_generation(mock_mujoco_model_data):
+def test_telemetry_report_generation(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
     with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
@@ -98,7 +98,7 @@ def test_telemetry_report_generation(mock_mujoco_model_data):
     assert report_dict["sample_count"] == 2
 
 
-def test_telemetry_reset(mock_mujoco_model_data):
+def test_telemetry_reset(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
     with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
@@ -110,7 +110,7 @@ def test_telemetry_reset(mock_mujoco_model_data):
         assert len(recorder.samples) == 0
 
 
-def test_export_telemetry_json():
+def test_export_telemetry_json() -> None:
     data = {"scalar": 1.0, "array": np.array([1, 2, 3])}
 
     with patch("builtins.open", mock_open()) as mock_file:
@@ -121,7 +121,7 @@ def test_export_telemetry_json():
     # Verify json dump called? (Implicit by success returning True)
 
 
-def test_export_telemetry_csv():
+def test_export_telemetry_csv() -> None:
     data = {"time": np.array([0.0, 0.1]), "vec3": np.array([[1, 2, 3], [4, 5, 6]])}
 
     with patch("builtins.open", mock_open()) as mock_file:
@@ -138,7 +138,7 @@ def test_export_telemetry_csv():
         assert success
 
 
-def test_export_fail_handling():
+def test_export_fail_handling() -> None:
     # Test exceptions
     with patch("builtins.open", side_effect=PermissionError):
         assert not export_telemetry_json("fail.json", {})

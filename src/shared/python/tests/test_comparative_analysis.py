@@ -11,15 +11,15 @@ from src.shared.python.comparative_analysis import (
 class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
-    def __init__(self, data_dict):
+    def __init__(self, data_dict) -> None:
         self.data = data_dict
 
-    def get_time_series(self, field_name: str):
+    def get_time_series(self, field_name: str) -> Any:
         return self.data.get(field_name, (np.array([]), np.array([])))
 
 
 @pytest.fixture
-def sample_data():
+def sample_data() -> tuple:
     t = np.linspace(0, 1, 10)
 
     # Swing A: linear
@@ -43,7 +43,7 @@ def sample_data():
     return data_a, data_b
 
 
-def test_align_signals(sample_data):
+def test_align_signals(sample_data) -> None:
     data_a, data_b = sample_data
     rec_a = MockRecorder(data_a)
     rec_b = MockRecorder(data_b)
@@ -73,7 +73,7 @@ def test_align_signals(sample_data):
     assert aligned_oob is None
 
 
-def test_compare_scalars():
+def test_compare_scalars() -> None:
     rec = MockRecorder({})
     analyzer = ComparativeSwingAnalyzer(rec, rec)
 
@@ -84,7 +84,7 @@ def test_compare_scalars():
     assert np.isclose(metric.percent_diff, (2.0 / 9.0) * 100)
 
 
-def test_generate_comparison_report(sample_data):
+def test_generate_comparison_report(sample_data) -> None:
     data_a, data_b = sample_data
     rec_a = MockRecorder(data_a)
     rec_b = MockRecorder(data_b)
@@ -105,7 +105,7 @@ def test_generate_comparison_report(sample_data):
     assert "CoP Path Length" in metric_names
 
 
-def test_missing_data_report():
+def test_missing_data_report() -> None:
     rec_empty = MockRecorder({})
     analyzer = ComparativeSwingAnalyzer(rec_empty, rec_empty)
 
@@ -113,7 +113,7 @@ def test_missing_data_report():
     assert len(report["metrics"]) == 0
 
 
-def test_compute_dtw_distance(sample_data):
+def test_compute_dtw_distance(sample_data) -> None:
     data_a, data_b = sample_data
     rec_a = MockRecorder(data_a)
     rec_b = MockRecorder(data_b)

@@ -136,7 +136,7 @@ class BaseApplicationWindow(QMainWindow):
         title: str,
         size: tuple[int, int] = (1400, 900),
         icon_path: Path | None = None,
-    ):
+    ) -> None:
         """Initialize base application window.
 
         Args:
@@ -358,7 +358,7 @@ class LayoutBuilder:
                   .build())
     """
 
-    def __init__(self, layout: Any):
+    def __init__(self, layout: Any) -> None:
         """Initialize layout builder.
 
         Args:

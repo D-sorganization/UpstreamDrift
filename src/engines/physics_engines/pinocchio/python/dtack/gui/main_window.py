@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 class GuiRecorder(RecorderInterface):
     """Recorder adapter for the GUI data."""
 
-    def __init__(self, data_store: list[BiomechanicalData]):
+    def __init__(self, data_store: list[BiomechanicalData]) -> None:
         self.data_store = data_store
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:

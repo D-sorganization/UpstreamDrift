@@ -11,7 +11,7 @@ from mujoco_humanoid_golf.inverse_dynamics import (
 class TestCSVExportValidation:
     """Test comprehensive input validation for CSV export (Finding A-007)."""
 
-    def test_export_validates_times_is_numpy_array(self, tmp_path):
+    def test_export_validates_times_is_numpy_array(self, tmp_path) -> None:
         """Test that times must be a numpy array."""
         results = [
             InverseDynamicsResult(joint_torques=np.array([1.0, 2.0]), success=True)
@@ -22,7 +22,7 @@ class TestCSVExportValidation:
         with pytest.raises(TypeError, match="times must be numpy array"):
             export_inverse_dynamics_to_csv([0.0], results, str(filepath))
 
-    def test_export_validates_results_is_list(self, tmp_path):
+    def test_export_validates_results_is_list(self, tmp_path) -> None:
         """Test that results must be a list."""
         times = np.array([0.0])
         result = InverseDynamicsResult(joint_torques=np.array([1.0, 2.0]), success=True)
@@ -32,7 +32,7 @@ class TestCSVExportValidation:
         with pytest.raises(TypeError, match="results must be list"):
             export_inverse_dynamics_to_csv(times, result, str(filepath))
 
-    def test_export_validates_non_empty_results(self, tmp_path):
+    def test_export_validates_non_empty_results(self, tmp_path) -> None:
         """Test that results list cannot be empty."""
         times = np.array([])
         results: list[InverseDynamicsResult] = []
@@ -41,7 +41,7 @@ class TestCSVExportValidation:
         with pytest.raises(ValueError, match="Cannot export empty results list"):
             export_inverse_dynamics_to_csv(times, results, str(filepath))
 
-    def test_export_validates_length_match(self, tmp_path):
+    def test_export_validates_length_match(self, tmp_path) -> None:
         """Test that times and results must have same length."""
         times = np.array([0.0, 1.0, 2.0])
         results = [
@@ -55,7 +55,7 @@ class TestCSVExportValidation:
         ):
             export_inverse_dynamics_to_csv(times, results, str(filepath))
 
-    def test_export_validates_result_types(self, tmp_path):
+    def test_export_validates_result_types(self, tmp_path) -> None:
         """Test that all results must be InverseDynamicsResult instances."""
         times = np.array([0.0, 1.0])
         results = [
@@ -67,7 +67,7 @@ class TestCSVExportValidation:
         with pytest.raises(TypeError, match=r"results\[1\] is dict, expected"):
             export_inverse_dynamics_to_csv(times, results, str(filepath))
 
-    def test_export_validates_consistent_joint_counts(self, tmp_path):
+    def test_export_validates_consistent_joint_counts(self, tmp_path) -> None:
         """Test that all results must have same number of joints."""
         times = np.array([0.0, 1.0])
         results = [
@@ -85,7 +85,7 @@ class TestCSVExportValidation:
         ):
             export_inverse_dynamics_to_csv(times, results, str(filepath))
 
-    def test_export_succeeds_with_valid_input(self, tmp_path):
+    def test_export_succeeds_with_valid_input(self, tmp_path) -> None:
         """Test that export succeeds with valid input."""
         times = np.array([0.0, 1.0, 2.0])
         results = [
@@ -129,7 +129,7 @@ class TestCSVExportValidation:
         assert "1.0,3.0" in content
         assert "2.0,5.0" in content
 
-    def test_export_handles_none_optional_fields(self, tmp_path):
+    def test_export_handles_none_optional_fields(self, tmp_path) -> None:
         """Test export with None values for optional fields."""
         times = np.array([0.0])
         results = [

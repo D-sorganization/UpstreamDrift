@@ -150,7 +150,7 @@ class GeometryObject:
     rotation: np.ndarray | None = None
     scale: np.ndarray | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.position is None:
             self.position = np.zeros(3, dtype=np.float32)
         if self.rotation is None:
@@ -162,7 +162,7 @@ class GeometryObject:
 class GeometryManager:
     """Fixed geometry management"""
 
-    def __init__(self, ctx: mgl.Context):
+    def __init__(self, ctx: mgl.Context) -> None:
         self.ctx = ctx
         self.geometry_objects: dict[str, GeometryObject] = {}
         self.mesh_library: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
@@ -172,7 +172,7 @@ class GeometryManager:
         self._create_standard_meshes()
         self._compile_shaders()
 
-    def _create_standard_meshes(self):
+    def _create_standard_meshes(self) -> None:
         """Create simple mesh library"""
         try:
             logger.info("🔧 Creating standard meshes...")
@@ -207,7 +207,7 @@ class GeometryManager:
             traceback.print_exc()
             raise
 
-    def _create_ground_mesh(self):
+    def _create_ground_mesh(self) -> None:
         """Create simple ground plane mesh"""
         size = 10.0
         vertices = [
@@ -241,7 +241,7 @@ class GeometryManager:
             np.array(indices, dtype=np.uint32),
         )
 
-    def _compile_shaders(self):
+    def _compile_shaders(self) -> None:
         """Compile fixed shader programs"""
         try:
             logger.info("🔧 Compiling shader programs...")
@@ -322,7 +322,7 @@ class GeometryManager:
         position: np.ndarray,
         rotation: np.ndarray,
         scale: float | np.ndarray,
-    ):
+    ) -> None:
         """Update object transformation efficiently"""
         if name not in self.geometry_objects:
             return
@@ -336,7 +336,7 @@ class GeometryManager:
         else:
             obj.scale = np.array(scale, dtype=np.float32)
 
-    def set_object_visibility(self, name: str, visible: bool):
+    def set_object_visibility(self, name: str, visible: bool) -> None:
         """Set object visibility"""
         if name in self.geometry_objects:
             self.geometry_objects[name].visible = visible
@@ -362,7 +362,7 @@ class GeometryManager:
 
         return T @ R @ S
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Clean up OpenGL resources"""
         for obj in self.geometry_objects.values():
             obj.vao.release()
@@ -381,7 +381,7 @@ class GeometryManager:
 class OpenGLRenderer:
     """High-performance OpenGL renderer with modern shaders"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.ctx = None
         self.geometry_manager = None
         self.programs = {}
@@ -399,7 +399,7 @@ class OpenGLRenderer:
             "render_time_ms": 0.0,
         }
 
-    def initialize(self, ctx: mgl.Context):
+    def initialize(self, ctx: mgl.Context) -> None:
         """Initialize OpenGL context and resources"""
         self.ctx = ctx
 
@@ -420,7 +420,7 @@ class OpenGLRenderer:
         logger.info("   OpenGL Version: %s", self.ctx.info["GL_VERSION"])
         logger.info("   Renderer: %s", self.ctx.info["GL_RENDERER"])
 
-    def _create_standard_objects(self):
+    def _create_standard_objects(self) -> None:
         """Create standard geometry objects for rendering"""
         if not self.geometry_manager:
             return
@@ -452,7 +452,7 @@ class OpenGLRenderer:
             f"geometry objects"
         )
 
-    def set_viewport(self, width: int, height: int):
+    def set_viewport(self, width: int, height: int) -> None:
         """Set viewport size"""
         self.viewport_size = (width, height)
         if self.ctx:
@@ -466,7 +466,7 @@ class OpenGLRenderer:
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
-    ):
+    ) -> None:
         """Render complete frame with all elements"""
         if not self.ctx or not self.geometry_manager:
             return
@@ -502,7 +502,7 @@ class OpenGLRenderer:
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
-    ):
+    ) -> None:
         """Render ground plane at proper level with golf grid"""
         if not self.geometry_manager:
             return
@@ -559,7 +559,7 @@ class OpenGLRenderer:
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
-    ):
+    ) -> None:
         """Render all body segments"""
         if not self.geometry_manager:
             return
@@ -687,7 +687,7 @@ class OpenGLRenderer:
         color: list[float],
         opacity: float,
         program: mgl.Program,
-    ):
+    ) -> None:
         """Render cylinder between two 3D points"""
         if not self.geometry_manager:
             return
@@ -755,7 +755,7 @@ class OpenGLRenderer:
         color: list[float],
         opacity: float,
         program: mgl.Program,
-    ):
+    ) -> None:
         """Render sphere at specific point"""
         if not self.geometry_manager:
             return
@@ -794,7 +794,7 @@ class OpenGLRenderer:
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
-    ):
+    ) -> None:
         """Render golf club with improved geometry and face normal"""
         if not self.geometry_manager:
             return
@@ -900,7 +900,7 @@ class OpenGLRenderer:
                 "ball", ball_position, ball_radius, ball_color, 1.0, program
             )
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Clean up OpenGL resources"""
         if self.geometry_manager:
             self.geometry_manager.cleanup()

@@ -46,7 +46,7 @@ class EnvironmentError(ConfigurationError):
         reason: str | None = None,
         expected: str | None = None,
         actual: str | None = None,
-    ):
+    ) -> None:
         super().__init__(
             config_key=var_name,
             reason=reason or "Environment variable not set or invalid",

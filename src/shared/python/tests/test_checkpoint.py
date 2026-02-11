@@ -12,7 +12,7 @@ from src.shared.python.checkpoint import (
 
 
 class TestStateCheckpoint(unittest.TestCase):
-    def test_creation(self):
+    def test_creation(self) -> None:
         cp = StateCheckpoint(timestamp=1.0)
         self.assertEqual(cp.timestamp, 1.0)
         self.assertIsNone(cp.engine_state)
@@ -32,7 +32,7 @@ class TestStateCheckpoint(unittest.TestCase):
 
 
 class MockCheckpointable(Checkpointable):
-    def __init__(self):
+    def __init__(self) -> None:
         self.current_state = 0
         self.time = 0.0
 
@@ -48,11 +48,11 @@ class MockCheckpointable(Checkpointable):
 
 
 class TestCheckpointManager(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.target = MockCheckpointable()
         self.manager = CheckpointManager(self.target, max_history=5)
 
-    def test_save_and_restore(self):
+    def test_save_and_restore(self) -> None:
         # Initial state
         self.target.current_state = 10
         self.target.time = 1.0
@@ -77,7 +77,7 @@ class TestCheckpointManager(unittest.TestCase):
         self.assertEqual(self.target.current_state, 10)
         self.assertEqual(self.target.time, 1.0)
 
-    def test_circular_buffer(self):
+    def test_circular_buffer(self) -> None:
         for i in range(10):
             self.target.current_state = i
             self.target.time = float(i)
@@ -89,7 +89,7 @@ class TestCheckpointManager(unittest.TestCase):
         # Newest should be i=9
         self.assertEqual(self.manager._history[-1].engine_state["val"], 9)
 
-    def test_restore_by_timestamp(self):
+    def test_restore_by_timestamp(self) -> None:
         self.target.time = 1.0
         self.manager.save_checkpoint()
         self.target.time = 2.0
@@ -103,7 +103,7 @@ class TestCheckpointManager(unittest.TestCase):
 
 
 class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         # Patch abstract methods so we can instantiate BasePhysicsEngine
         # We need to list all abstract methods
         patcher = patch.multiple(BasePhysicsEngine, __abstractmethods__=set())
@@ -118,7 +118,7 @@ class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
         self.engine.state.v = np.array([0.1, 0.2])
         self.engine.state.time = 1.5
 
-    def test_save_checkpoint(self):
+    def test_save_checkpoint(self) -> None:
         cp = self.engine.save_checkpoint()
         self.assertEqual(cp.timestamp, 1.5)
         self.assertIsNotNone(cp.engine_state)
@@ -126,7 +126,7 @@ class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
         np.testing.assert_array_equal(cp.engine_state["v"], np.array([0.1, 0.2]))
         self.assertEqual(cp.engine_state["t"], 1.5)
 
-    def test_restore_checkpoint(self):
+    def test_restore_checkpoint(self) -> None:
         cp = StateCheckpoint(
             timestamp=2.0,
             engine_state={
@@ -141,7 +141,7 @@ class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
         np.testing.assert_array_equal(self.engine.state.q, np.array([3.0, 4.0]))
         np.testing.assert_array_equal(self.engine.state.v, np.array([0.3, 0.4]))
 
-    def test_restore_checkpoint_partial(self):
+    def test_restore_checkpoint_partial(self) -> None:
         # Should handle missing engine_state gracefully
         original_time = self.engine.state.time
         cp = StateCheckpoint(timestamp=3.0, engine_state=None)

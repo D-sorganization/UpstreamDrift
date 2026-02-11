@@ -51,7 +51,7 @@ class ModelLoaderThread(QtCore.QThread):
     # Signal returns (model, data) on success, or (None, error_msg) on failure
     finished_loading = QtCore.pyqtSignal(object, object, str)
 
-    def __init__(self, xml_content: str, is_file: bool = False):
+    def __init__(self, xml_content: str, is_file: bool = False) -> None:
         super().__init__()
         self.xml_content = xml_content
         self.is_file = is_file

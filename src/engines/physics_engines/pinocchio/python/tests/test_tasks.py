@@ -20,7 +20,7 @@ def mock_pinocchio_env():
         yield
 
 
-def test_create_joint_coupling_task(mock_pinocchio_env):
+def test_create_joint_coupling_task(mock_pinocchio_env) -> None:
     """Verify that create_joint_coupling_task works as expected."""
     # This is the mocked pinocchio
     import pinocchio as pin  # noqa: I001

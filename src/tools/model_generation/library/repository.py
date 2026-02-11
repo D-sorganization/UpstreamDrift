@@ -90,7 +90,7 @@ class LocalRepository(Repository):
         path: Path | str,
         name: str | None = None,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize local repository.
 
@@ -170,7 +170,7 @@ class GitHubRepository(Repository):
         path: str = "",
         name: str | None = None,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize GitHub repository.
 
@@ -337,7 +337,7 @@ class CompositeRepository(Repository):
         repositories: list[Repository],
         name: str = "Combined",
         description: str = "Combined repository",
-    ):
+    ) -> None:
         """
         Initialize composite repository.
 

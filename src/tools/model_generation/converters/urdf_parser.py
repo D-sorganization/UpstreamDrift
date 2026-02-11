@@ -136,7 +136,7 @@ class URDFParser:
     - Preserves original XML for text editing
     """
 
-    def __init__(self, resolve_meshes: bool = True):
+    def __init__(self, resolve_meshes: bool = True) -> None:
         """
         Initialize parser.
 

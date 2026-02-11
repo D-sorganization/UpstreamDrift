@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 class StandardModelManager:
     """Manages standardized models for consistent cross-engine simulation."""
 
-    def __init__(self, suite_root: Path | None = None):
+    def __init__(self, suite_root: Path | None = None) -> None:
         """Initialize standard model manager.
 
         Args:

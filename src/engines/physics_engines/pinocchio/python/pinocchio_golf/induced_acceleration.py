@@ -18,7 +18,7 @@ class InducedAccelerationAnalyzer:
     - Total: q_ddot = q_ddot_g + q_ddot_v + q_ddot_t
     """
 
-    def __init__(self, model: pin.Model, data: pin.Data):
+    def __init__(self, model: pin.Model, data: pin.Data) -> None:
         self.model = model
         self.data = data
         self.nq = model.nq

@@ -94,7 +94,7 @@ class ModelCache:
 
     INDEX_FILE = "cache_index.json"
 
-    def __init__(self, config: CacheConfig | None = None):
+    def __init__(self, config: CacheConfig | None = None) -> None:
         """
         Initialize cache.
 

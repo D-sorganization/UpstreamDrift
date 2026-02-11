@@ -12,11 +12,11 @@ from src.shared.python.physics_parameters import (
 
 class TestPhysicsParameters:
     @pytest.fixture
-    def registry(self):
+    def registry(self) -> Any:
         """Create a new registry for each test."""
         return PhysicsParameterRegistry()
 
-    def test_parameter_validation(self):
+    def test_parameter_validation(self) -> None:
         """Test parameter validation logic."""
         param = PhysicsParameter(
             name="TEST_PARAM",
@@ -56,7 +56,7 @@ class TestPhysicsParameters:
         assert not valid
         assert "constant" in msg
 
-    def test_registry_initialization(self, registry):
+    def test_registry_initialization(self, registry) -> None:
         """Test that default parameters are loaded."""
         assert len(registry.parameters) > 0
 
@@ -65,7 +65,7 @@ class TestPhysicsParameters:
         assert registry.get("BALL_MASS") is not None
         assert registry.get("CLUB_LENGTH") is not None
 
-    def test_get_set_parameter(self, registry):
+    def test_get_set_parameter(self, registry) -> None:
         """Test getting and setting parameters."""
         # Get
         param = registry.get("CLUB_LENGTH")
@@ -88,7 +88,7 @@ class TestPhysicsParameters:
         assert not success
         assert "not found" in msg
 
-    def test_get_by_category(self, registry):
+    def test_get_by_category(self, registry) -> None:
         """Test filtering by category."""
         ball_params = registry.get_by_category(ParameterCategory.BALL)
         assert len(ball_params) > 0
@@ -98,7 +98,7 @@ class TestPhysicsParameters:
         env_params = registry.get_by_category(ParameterCategory.ENVIRONMENT)
         assert len(env_params) > 0
 
-    def test_export_import_json(self, registry, tmp_path):
+    def test_export_import_json(self, registry, tmp_path) -> None:
         """Test JSON export and import."""
         # Export
         json_path = tmp_path / "params.json"
@@ -120,14 +120,14 @@ class TestPhysicsParameters:
         assert count > 0
         assert registry.get("CLUB_LENGTH").value == 1.0
 
-    def test_get_summary(self, registry):
+    def test_get_summary(self, registry) -> None:
         """Test summary string generation."""
         summary = registry.get_summary()
         assert "Physics Parameter Registry" in summary
         assert "GRAVITY" in summary
         assert "BALL_MASS" in summary
 
-    def test_global_registry(self):
+    def test_global_registry(self) -> None:
         """Test singleton accessor."""
         reg1 = get_registry()
         reg2 = get_registry()

@@ -251,7 +251,7 @@ class ImportContext:
             from src.shared.python import utils
     """
 
-    def __init__(self, *paths: str | Path):
+    def __init__(self, *paths: str | Path) -> None:
         """Initialize import context.
 
         Args:

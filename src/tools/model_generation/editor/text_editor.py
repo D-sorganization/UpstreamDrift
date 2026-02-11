@@ -128,7 +128,7 @@ class URDFTextEditor:
         editor.save_file()
     """
 
-    def __init__(self, max_history: int = 100):
+    def __init__(self, max_history: int = 100) -> None:
         """
         Initialize the editor.
 

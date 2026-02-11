@@ -23,7 +23,7 @@ class ModelConfig:
 class ModelRegistry:
     """Registry for loading and accessing model configurations."""
 
-    def __init__(self, config_path: str | Path = "config/models.yaml"):
+    def __init__(self, config_path: str | Path = "config/models.yaml") -> None:
         """Initialize registry.
 
         Args:

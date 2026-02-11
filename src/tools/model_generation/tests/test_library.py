@@ -9,14 +9,14 @@ from pathlib import Path
 class TestModelLibrary:
     """Tests for ModelLibrary class."""
 
-    def test_library_creation(self):
+    def test_library_creation(self) -> None:
         """Test library instantiation."""
         from model_generation.library import ModelLibrary
 
         library = ModelLibrary()
         assert library is not None
 
-    def test_list_models_empty(self):
+    def test_list_models_empty(self) -> None:
         """Test listing models on fresh library."""
         from model_generation.library import ModelLibrary
 
@@ -25,7 +25,7 @@ class TestModelLibrary:
         # Should return empty or built-in models
         assert isinstance(models, list)
 
-    def test_add_local_model(self):
+    def test_add_local_model(self) -> None:
         """Test adding a local URDF model."""
         from model_generation.library import ModelCategory, ModelLibrary
 
@@ -62,7 +62,7 @@ class TestModelLibrary:
         finally:
             temp_path.unlink()
 
-    def test_list_models_with_filter(self):
+    def test_list_models_with_filter(self) -> None:
         """Test filtering models by category."""
         from model_generation.library import ModelCategory, ModelLibrary
 
@@ -77,7 +77,7 @@ class TestModelLibrary:
 class TestModelCache:
     """Tests for ModelCache class."""
 
-    def test_cache_creation(self):
+    def test_cache_creation(self) -> None:
         """Test cache instantiation."""
         from model_generation.library.cache import CacheConfig, ModelCache
 
@@ -88,7 +88,7 @@ class TestModelCache:
         cache = ModelCache(config)
         assert cache is not None
 
-    def test_cache_put_get(self):
+    def test_cache_put_get(self) -> None:
         """Test adding and retrieving from cache."""
         from model_generation.library.cache import CacheConfig, ModelCache
 
@@ -116,7 +116,7 @@ class TestModelCache:
         assert retrieved is not None
         assert retrieved.model_id == "test_model"
 
-    def test_cache_contains(self):
+    def test_cache_contains(self) -> None:
         """Test cache contains check."""
         from model_generation.library.cache import CacheConfig, ModelCache
 
@@ -132,7 +132,7 @@ class TestModelCache:
         assert cache.contains("existing")
         assert not cache.contains("nonexistent")
 
-    def test_cache_statistics(self):
+    def test_cache_statistics(self) -> None:
         """Test cache statistics."""
         from model_generation.library.cache import CacheConfig, ModelCache
 
@@ -149,7 +149,7 @@ class TestModelCache:
 class TestRepository:
     """Tests for Repository classes."""
 
-    def test_local_repository(self):
+    def test_local_repository(self) -> None:
         """Test LocalRepository."""
         from model_generation.library.repository import LocalRepository
 
@@ -170,7 +170,7 @@ class TestRepository:
         assert "robot1" in names
         assert "robot2" in names
 
-    def test_github_repository_list(self):
+    def test_github_repository_list(self) -> None:
         """Test GitHubRepository model listing (mocked)."""
         from model_generation.library.repository import GitHubRepository
 

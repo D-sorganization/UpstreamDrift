@@ -602,7 +602,7 @@ class Joint:
     composite_axes: list[tuple[float, float, float]] | None = None
     composite_limits: list[JointLimits] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure limits are set for limited joint types."""
         if self.joint_type == JointType.REVOLUTE and self.limits is None:
             self.limits = JointLimits()

@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 class SimulationService:
     """Service for managing physics simulations."""
 
-    def __init__(self, engine_manager: EngineManager):
+    def __init__(self, engine_manager: EngineManager) -> None:
         """Initialize simulation service.
 
         Args:

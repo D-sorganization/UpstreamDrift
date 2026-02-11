@@ -53,7 +53,7 @@ class ActivationDynamics:
         tau_act: float = 0.010,
         tau_deact: float = 0.040,
         min_activation: float = 0.001,
-    ):
+    ) -> None:
         """Initialize activation dynamics.
 
         Args:

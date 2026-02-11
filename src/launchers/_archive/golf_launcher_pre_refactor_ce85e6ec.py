@@ -383,7 +383,7 @@ class AsyncStartupWorker(QThread):
     finished_signal = pyqtSignal(object)  # StartupResults
     error_signal = pyqtSignal(str)  # Error message
 
-    def __init__(self, repos_root: Path):
+    def __init__(self, repos_root: Path) -> None:
         super().__init__()
         self.repos_root = repos_root
         self.results = StartupResults()
@@ -497,7 +497,7 @@ class StartupResults:
 class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
-    def __init__(self, model: Any, parent: Any = None):
+    def __init__(self, model: Any, parent: Any = None) -> None:
         # Check if parent is actually a QWidget by checking its type
         from unittest.mock import Mock
 

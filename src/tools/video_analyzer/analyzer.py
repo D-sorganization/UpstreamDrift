@@ -71,7 +71,7 @@ class SwingAnalyzer:
         self,
         min_confidence: float = 0.5,
         smoothing_window: int = 5,
-    ):
+    ) -> None:
         """
         Initialize the swing analyzer.
 
@@ -361,7 +361,7 @@ class SwingAnalyzer:
         finish_idx = len(poses) - 1
 
         # Build phase transitions
-        def add_phase(phase: SwingPhase, start: int, end: int):
+        def add_phase(phase: SwingPhase, start: int, end: int) -> None:
             if start < end:
                 phases.append(
                     PhaseTransition(

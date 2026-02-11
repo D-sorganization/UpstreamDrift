@@ -55,7 +55,7 @@ class ManipulabilityResult:
 class DrakeManipulabilityAnalyzer:
     """Computes manipulability metrics using Drake."""
 
-    def __init__(self, plant: MultibodyPlant):
+    def __init__(self, plant: MultibodyPlant) -> None:
         """Initialize with a Drake MultibodyPlant."""
         self.plant = plant
         if DRAKE_AVAILABLE:

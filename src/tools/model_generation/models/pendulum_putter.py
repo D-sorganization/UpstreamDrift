@@ -438,7 +438,7 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
         include_club: bool = True,
         club_config: ClubConfig | None = None,
         stand_config: StandConfig | None = None,
-    ):
+    ) -> None:
         """
         Initialize the pendulum putter builder.
 

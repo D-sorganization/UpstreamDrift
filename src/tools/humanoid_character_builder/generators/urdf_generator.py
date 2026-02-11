@@ -122,7 +122,7 @@ class HumanoidURDFGenerator:
     - Outputting valid URDF XML
     """
 
-    def __init__(self, config: URDFGeneratorConfig | None = None):
+    def __init__(self, config: URDFGeneratorConfig | None = None) -> None:
         """
         Initialize the generator.
 

@@ -24,7 +24,7 @@ StatisticalAnalyzer = statistical_analysis.StatisticalAnalyzer
 SummaryStatistics = statistical_analysis.SummaryStatistics
 
 
-def test_compute_summary_stats():
+def test_compute_summary_stats() -> None:
     data = np.array([0, 1, 2, 3, 4, 5, 100], dtype=float)
     times = np.arange(len(data), dtype=float)
     # Mock analyzer with just times
@@ -47,7 +47,7 @@ def test_compute_summary_stats():
     assert stats.std == np.std(data)
 
 
-def test_generate_comprehensive_report_consistency():
+def test_generate_comprehensive_report_consistency() -> None:
     N = 100
     nq = 2
     times = np.linspace(0, 1.0, N)
@@ -78,7 +78,7 @@ def test_generate_comprehensive_report_consistency():
     assert np.isclose(pos["max"], 180.0, atol=1e-5)
 
 
-def test_frequency_analysis_and_smoothness():
+def test_frequency_analysis_and_smoothness() -> None:
     N = 1000
     fs = 1000.0
     times = np.arange(N) / fs

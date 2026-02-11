@@ -808,7 +808,7 @@ class KalmanFilter:
         R: np.ndarray | None = None,
         P: np.ndarray | None = None,
         x: np.ndarray | None = None,
-    ):
+    ) -> None:
         """Initialize Kalman Filter.
 
         Args:
