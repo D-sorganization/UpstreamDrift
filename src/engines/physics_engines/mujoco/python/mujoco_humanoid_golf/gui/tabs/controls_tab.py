@@ -770,7 +770,7 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
         actuator_name: str,
         slider_sync: Callable[[float], None] | None,
         parent: QtWidgets.QWidget | None = None,
-    ):
+    ) -> None:
         """Build the detail dialog for a single actuator."""
         super().__init__(parent)
         self.control_system = control_system

@@ -187,7 +187,7 @@ class CameraController(QObject):
     animationFinished = pyqtSignal()
     modeChanged = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Core state
@@ -230,7 +230,7 @@ class CameraController(QObject):
 
         logger.info("📷 Advanced camera controller initialized")
 
-    def _setup_presets(self):
+    def _setup_presets(self) -> None:
         """Setup predefined camera presets"""
         self.presets = {
             CameraPreset.DEFAULT: CameraState(
@@ -363,7 +363,7 @@ class CameraController(QObject):
     # INTERACTION HANDLING
     # ========================================================================
 
-    def handle_mouse_orbit(self, dx: float, dy: float):
+    def handle_mouse_orbit(self, dx: float, dy: float) -> None:
         """Handle mouse orbital movement"""
         if self.mode != CameraMode.ORBIT:
             return
@@ -387,7 +387,7 @@ class CameraController(QObject):
         self._apply_constraints()
         self.cameraChanged.emit()
 
-    def handle_mouse_pan(self, dx: float, dy: float):
+    def handle_mouse_pan(self, dx: float, dy: float) -> None:
         """Handle mouse panning movement"""
         if self.mode not in [CameraMode.ORBIT, CameraMode.FLY]:
             return
@@ -414,7 +414,7 @@ class CameraController(QObject):
 
         self.cameraChanged.emit()
 
-    def handle_mouse_zoom(self, delta: float):
+    def handle_mouse_zoom(self, delta: float) -> None:
         """Handle mouse wheel zoom"""
         zoom_factor = 1.0 + (delta * self.zoom_sensitivity)
         new_distance = self.current_state.distance / zoom_factor
@@ -429,7 +429,7 @@ class CameraController(QObject):
 
         self.cameraChanged.emit()
 
-    def update_inertia(self):
+    def update_inertia(self) -> None:
         """Update camera movement with inertia"""
         if not self.inertia_enabled:
             return
@@ -489,7 +489,7 @@ class CameraController(QObject):
 
     def set_preset(
         self, preset: CameraPreset, animate: bool = True, duration: float = 1.0
-    ):
+    ) -> None:
         """Set camera to predefined preset"""
         if preset not in self.presets:
             logger.warning("Warning: Preset %s not found", preset)
@@ -511,7 +511,7 @@ class CameraController(QObject):
         target_state: CameraState,
         duration: float = 1.0,
         easing: Callable | None = None,
-    ):
+    ) -> None:
         """Animate camera to target state"""
         # Stop any current animation
         self.stop_animation()
@@ -529,7 +529,7 @@ class CameraController(QObject):
 
         logger.info("📷 Animating camera over %ss", duration)
 
-    def _update_animation(self):
+    def _update_animation(self) -> None:
         """Update ongoing camera animation"""
         if not self.current_state.is_animating:
             return
@@ -586,12 +586,12 @@ class CameraController(QObject):
         if progress >= 1.0:
             self.animationFinished.emit()
 
-    def stop_animation(self):
+    def stop_animation(self) -> None:
         """Stop any ongoing animation"""
         self.animation_timer.stop()
         self.current_state.is_animating = False
 
-    def _copy_state(self, source: CameraState, destination: CameraState):
+    def _copy_state(self, source: CameraState, destination: CameraState) -> None:
         """Copy camera state"""
         destination.position = source.position.copy()
         destination.target = source.target.copy()
@@ -610,7 +610,7 @@ class CameraController(QObject):
         time: float,
         state: CameraState | None = None,
         easing: QEasingCurve.Type = QEasingCurve.Type.InOutCubic,
-    ):
+    ) -> None:
         """Add a keyframe for cinematic animation"""
         if state is None:
             state = CameraState()
@@ -631,14 +631,14 @@ class CameraController(QObject):
 
         logger.info("📷 Added keyframe at %ss", time)
 
-    def clear_keyframes(self):
+    def clear_keyframes(self) -> None:
         """Clear all cinematic keyframes"""
         self.keyframes.clear()
         logger.info("📷 Cleared all keyframes")
 
     def start_cinematic_playback(
         self, duration: float | None = None, loop: bool = False
-    ):
+    ) -> None:
         """Start cinematic camera playback"""
         if not self.keyframes:
             logger.warning("Warning: No keyframes defined for cinematic playback")
@@ -658,7 +658,7 @@ class CameraController(QObject):
 
         logger.info("📷 Started cinematic playback: %ss", self.cinematic_duration)
 
-    def update_cinematic_camera(self, time_delta: float):
+    def update_cinematic_camera(self, time_delta: float) -> None:
         """Update camera position during cinematic playback"""
         if self.mode != CameraMode.CINEMATIC:
             return
@@ -710,7 +710,7 @@ class CameraController(QObject):
 
         self.cameraChanged.emit()
 
-    def stop_cinematic_playback(self):
+    def stop_cinematic_playback(self) -> None:
         """Stop cinematic camera playback"""
         self.mode = CameraMode.ORBIT
         self.animation_timer.stop()
@@ -719,7 +719,7 @@ class CameraController(QObject):
 
     def _interpolate_between_states(
         self, state1: CameraState, state2: CameraState, t: float
-    ):
+    ) -> None:
         """Interpolate between two camera states"""
         # Spherical interpolation
         spherical1 = (state1.distance, state1.azimuth, state1.elevation)
@@ -746,7 +746,7 @@ class CameraController(QObject):
     # AUTO-FRAMING AND SMART FEATURES
     # ========================================================================
 
-    def frame_data(self, data_points: list[np.ndarray], margin: float = 1.5):
+    def frame_data(self, data_points: list[np.ndarray], margin: float = 1.5) -> None:
         """Automatically frame camera to view all data points"""
         if not data_points:
             return
@@ -781,7 +781,7 @@ class CameraController(QObject):
             f"distance={self.current_state.distance:.2f}"
         )
 
-    def follow_point(self, point: np.ndarray, smooth_factor: float = 0.1):
+    def follow_point(self, point: np.ndarray, smooth_factor: float = 0.1) -> None:
         """Smoothly follow a moving point"""
         if self.mode != CameraMode.FOLLOW:
             return
@@ -798,7 +798,7 @@ class CameraController(QObject):
 
     def look_at_point(
         self, point: np.ndarray, animate: bool = True, duration: float = 0.5
-    ):
+    ) -> None:
         """Look at a specific point"""
         if not np.isfinite(point).all():
             return
@@ -818,7 +818,7 @@ class CameraController(QObject):
     # UTILITY METHODS
     # ========================================================================
 
-    def _apply_constraints(self):
+    def _apply_constraints(self) -> None:
         """Apply camera constraints"""
         # Distance constraints
         self.current_state.distance = np.clip(
@@ -846,14 +846,14 @@ class CameraController(QObject):
                 self.current_state.target, min_bounds, max_bounds
             )
 
-    def set_mode(self, mode: CameraMode):
+    def set_mode(self, mode: CameraMode) -> None:
         """Set camera operation mode"""
         if mode != self.mode:
             self.mode = mode
             self.modeChanged.emit(mode.value)
             logger.info("📷 Camera mode: %s", mode.value)
 
-    def reset_to_default(self, animate: bool = True):
+    def reset_to_default(self, animate: bool = True) -> None:
         """Reset camera to default position"""
         self.set_preset(CameraPreset.DEFAULT, animate)
 
@@ -869,7 +869,7 @@ class CameraController(QObject):
             "mode": self.mode.value,
         }
 
-    def load_state_dict(self, state_dict: dict, animate: bool = True):
+    def load_state_dict(self, state_dict: dict, animate: bool = True) -> None:
         """Load camera state from dictionary"""
         target_state = CameraState()
         target_state.position = np.array(

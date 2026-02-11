@@ -23,7 +23,7 @@ except ImportError:
 class MockRecorder:
     """Mock recorder for testing."""
 
-    def __init__(self, length: int = 100):
+    def __init__(self, length: int = 100) -> None:
         self.times = np.linspace(0, 1, length)
         # Create a simple sine wave
         self.position = np.sin(2 * np.pi * self.times)
@@ -62,7 +62,7 @@ class MockRecorder:
         return self.times, np.zeros_like(self.times)
 
 
-def test_poincare_map_3d():
+def test_poincare_map_3d() -> None:
     """Test Poincaré Map plotting."""
     recorder = MockRecorder()
     plotter = GolfSwingPlotter(recorder, joint_names=["J0", "J1", "J2"])  # type: ignore
@@ -87,7 +87,7 @@ def test_poincare_map_3d():
     assert len(fig.axes) > 0
 
 
-def test_phase_space_reconstruction():
+def test_phase_space_reconstruction() -> None:
     """Test Phase Space Reconstruction plotting."""
     recorder = MockRecorder()
     plotter = GolfSwingPlotter(recorder)  # type: ignore
@@ -102,7 +102,7 @@ def test_phase_space_reconstruction():
     assert len(fig.axes) > 0
 
 
-def test_lyapunov_exponent():
+def test_lyapunov_exponent() -> None:
     """Test Lyapunov Exponent estimation."""
     # Generate chaotic data (Lorenz system) or just random walk
     # Use simple sine wave -> LLE should be near 0
@@ -136,7 +136,7 @@ def test_lyapunov_exponent():
     assert isinstance(lle_exp, float)
 
 
-def test_dtw_analysis():
+def test_dtw_analysis() -> None:
     """Test Dynamic Time Warping analysis."""
     rec_a = MockRecorder(100)
     rec_b = MockRecorder(100)
@@ -163,7 +163,7 @@ def test_dtw_analysis():
 
 
 @pytest.mark.skipif(not SKLEARN_AVAILABLE, reason="sklearn not installed")
-def test_muscle_synergies():
+def test_muscle_synergies() -> None:
     """Test Muscle Synergy Analysis."""
     # Create synthetic synergy data
     # 2 Synergies, 4 Muscles

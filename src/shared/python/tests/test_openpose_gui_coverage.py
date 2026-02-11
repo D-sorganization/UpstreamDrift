@@ -32,26 +32,26 @@ def qapp():
 
 
 @pytest.fixture
-def gui(qapp, qtbot):
+def gui(qapp, qtbot) -> Any:
     window = OpenPoseGUI()
     qtbot.addWidget(window)
     return window
 
 
-def test_initial_state(gui):
+def test_initial_state(gui) -> None:
     assert gui.lbl_file.text() == "No file selected."
     assert not gui.btn_run.isEnabled()
     assert gui.progress.value() == 0
 
 
-def test_load_video_cancel(gui):
+def test_load_video_cancel(gui) -> None:
     with patch.object(QFileDialog, "getOpenFileName", return_value=("", "")):
         gui.load_video()
         assert gui.lbl_file.text() == "No file selected."
         assert not gui.btn_run.isEnabled()
 
 
-def test_load_video_success(gui):
+def test_load_video_success(gui) -> None:
     test_file = "/path/to/video.mp4"
     with patch.object(
         QFileDialog,
@@ -64,7 +64,7 @@ def test_load_video_success(gui):
         assert "Loaded video" in gui.log_area.toPlainText()
 
 
-def test_run_analysis(gui, qtbot):
+def test_run_analysis(gui, qtbot) -> None:
     # Setup state
     gui.lbl_file.setText("/path/to/video.mp4")
     gui.btn_run.setEnabled(True)
@@ -91,6 +91,6 @@ def test_run_analysis(gui, qtbot):
         mock_msg.assert_called_once()
 
 
-def test_log(gui):
+def test_log(gui) -> None:
     gui.log("Test message")
     assert "Test message" in gui.log_area.toPlainText()

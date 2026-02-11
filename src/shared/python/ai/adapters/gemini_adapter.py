@@ -34,7 +34,7 @@ except ImportError:
 class GeminiAdapter(BaseAgentAdapter):
     """Adapter for Google Gemini API."""
 
-    def __init__(self, api_key: str, model: str = "gemini-pro"):
+    def __init__(self, api_key: str, model: str = "gemini-pro") -> None:
         """Initialize Gemini adapter.
 
         Args:

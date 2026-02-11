@@ -143,7 +143,7 @@ def draw_rounded_rect_with_text(
     return pixels
 
 
-def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str):
+def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str) -> None:
     """Draw a simple blocky letter representation."""
     white = (255, 255, 255, 255)
     thickness = max(3, size // 6)
@@ -242,7 +242,7 @@ def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str):
                         pixels[idx] = white
 
 
-def generate_all_tiles():
+def generate_all_tiles() -> None:
     """Generate all tile images."""
     size = 200  # 200x200 pixels
 

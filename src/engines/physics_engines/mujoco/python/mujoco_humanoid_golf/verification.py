@@ -45,7 +45,7 @@ class EnergyMonitor:
     - User code modifying state (teleportation)
     """
 
-    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData):
+    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         self.model = model
         self.data = data
         self.history: list[EnergyState] = []
@@ -144,7 +144,7 @@ class JacobianTester:
     3. 'Observer Effect' where reading data modifies it.
     """
 
-    def __init__(self, model: mujoco.MjModel):
+    def __init__(self, model: mujoco.MjModel) -> None:
         self.model = model
         # Use a private MjData to avoid side effects (Phase 1 Fix)
         self.data = mujoco.MjData(model)

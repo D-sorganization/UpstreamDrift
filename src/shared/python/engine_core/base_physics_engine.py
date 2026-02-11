@@ -49,7 +49,7 @@ logger = get_logger(__name__)
 class EngineState:
     """Common state representation for physics engines."""
 
-    def __init__(self, nq: int = 0, nv: int = 0):
+    def __init__(self, nq: int = 0, nv: int = 0) -> None:
         """Initialize engine state.
 
         Args:
@@ -103,7 +103,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
     - reset()
     """
 
-    def __init__(self, allowed_dirs: list[Path] | None = None):
+    def __init__(self, allowed_dirs: list[Path] | None = None) -> None:
         """Initialize base physics engine.
 
         Args:

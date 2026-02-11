@@ -98,7 +98,7 @@ class BaseURDFBuilder(ABC):
     All builders (manual, parametric, composite) implement this interface.
     """
 
-    def __init__(self, robot_name: str = "robot"):
+    def __init__(self, robot_name: str = "robot") -> None:
         """
         Initialize builder.
 

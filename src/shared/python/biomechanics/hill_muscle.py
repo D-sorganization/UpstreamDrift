@@ -75,7 +75,7 @@ class HillMuscleModel:
     F_total = (F_CE + F_PEE) * cos(alpha)
     """
 
-    def __init__(self, params: MuscleParameters):
+    def __init__(self, params: MuscleParameters) -> None:
         """Initialize muscle model.
 
         Args:

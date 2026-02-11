@@ -12,7 +12,7 @@ from src.shared.python.dashboard.advanced_analysis import (
 
 
 class MockRecorder:
-    def get_time_series(self, key: str):
+    def get_time_series(self, key: str) -> tuple:
         t = np.linspace(0, 1, 100)
         data = np.sin(2 * np.pi * 10 * t)
         if key == "joint_positions":
@@ -25,16 +25,16 @@ class MockRecorder:
 
 
 @pytest.fixture
-def app(qapp):
+def app(qapp) -> Any:
     return qapp
 
 
 @pytest.fixture
-def recorder():
+def recorder() -> Any:
     return MockRecorder()
 
 
-def test_spectrogram_tab(recorder, qtbot):
+def test_spectrogram_tab(recorder, qtbot) -> None:
     tab = SpectrogramTab(recorder)
     qtbot.addWidget(tab)
 
@@ -48,7 +48,7 @@ def test_spectrogram_tab(recorder, qtbot):
     assert len(tab.ax.collections) > 0
 
 
-def test_phase_plane_tab(recorder, qtbot):
+def test_phase_plane_tab(recorder, qtbot) -> None:
     tab = PhasePlaneTab(recorder)
     qtbot.addWidget(tab)
 
@@ -61,7 +61,7 @@ def test_phase_plane_tab(recorder, qtbot):
     assert len(tab.ax.lines) >= 1
 
 
-def test_coherence_tab(recorder, qtbot):
+def test_coherence_tab(recorder, qtbot) -> None:
     tab = CoherenceTab(recorder)
     qtbot.addWidget(tab)
 
@@ -73,7 +73,7 @@ def test_coherence_tab(recorder, qtbot):
     assert len(tab.ax.lines) > 0
 
 
-def test_advanced_analysis_dialog(recorder, qtbot):
+def test_advanced_analysis_dialog(recorder, qtbot) -> None:
     dlg = AdvancedAnalysisDialog(None, recorder)
     qtbot.addWidget(dlg)
 

@@ -21,14 +21,14 @@ from humanoid_character_builder.mesh.primitive_inertia import (
 class TestInertiaResult:
     """Tests for InertiaResult class."""
 
-    def test_default_creation(self):
+    def test_default_creation(self) -> None:
         result = InertiaResult.create_default(mass=1.0)
         assert result.mass == 1.0
         assert result.ixx > 0
         assert result.iyy > 0
         assert result.izz > 0
 
-    def test_as_matrix(self):
+    def test_as_matrix(self) -> None:
         result = InertiaResult(
             ixx=1.0, iyy=2.0, izz=3.0, ixy=0.1, ixz=0.2, iyz=0.3, mass=1.0
         )
@@ -42,7 +42,7 @@ class TestInertiaResult:
         assert matrix[0, 2] == 0.2
         assert matrix[1, 2] == 0.3
 
-    def test_as_urdf_dict(self):
+    def test_as_urdf_dict(self) -> None:
         result = InertiaResult(
             ixx=1.0, iyy=2.0, izz=3.0, ixy=0.1, ixz=0.2, iyz=0.3, mass=1.0
         )
@@ -54,21 +54,21 @@ class TestInertiaResult:
         assert "ixy" in urdf_dict
         assert urdf_dict["ixx"] == 1.0
 
-    def test_is_valid_positive(self):
+    def test_is_valid_positive(self) -> None:
         # Valid inertia for a symmetric shape
         result = InertiaResult(ixx=1.0, iyy=1.0, izz=1.0, mass=1.0)
         assert result.is_valid()
 
-    def test_is_valid_negative_diagonal(self):
+    def test_is_valid_negative_diagonal(self) -> None:
         result = InertiaResult(ixx=-1.0, iyy=1.0, izz=1.0, mass=1.0)
         assert not result.is_valid()
 
-    def test_validate_positive_definite(self):
+    def test_validate_positive_definite(self) -> None:
         # Sphere-like inertia is positive definite
         result = InertiaResult(ixx=1.0, iyy=1.0, izz=1.0, mass=1.0)
         assert result.validate_positive_definite()
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         result = InertiaResult(
             ixx=1.0,
             iyy=2.0,
@@ -88,7 +88,7 @@ class TestInertiaResult:
 class TestPrimitiveInertiaCalculator:
     """Tests for PrimitiveInertiaCalculator."""
 
-    def test_box_inertia(self):
+    def test_box_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()
         result = calc.compute_box(mass=1.0, size_x=1.0, size_y=1.0, size_z=1.0)
 
@@ -99,7 +99,7 @@ class TestPrimitiveInertiaCalculator:
         assert abs(result.izz - expected_i) < 1e-10
         assert result.volume == 1.0
 
-    def test_cylinder_inertia(self):
+    def test_cylinder_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()
         mass = 1.0
         radius = 0.5
@@ -116,7 +116,7 @@ class TestPrimitiveInertiaCalculator:
         assert abs(result.ixx - expected_ixx) < 1e-10
         assert abs(result.iyy - expected_ixx) < 1e-10
 
-    def test_sphere_inertia(self):
+    def test_sphere_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()
         mass = 1.0
         radius = 1.0
@@ -133,7 +133,7 @@ class TestPrimitiveInertiaCalculator:
         expected_volume = (4.0 / 3.0) * math.pi * radius**3
         assert abs(result.volume - expected_volume) < 1e-10
 
-    def test_capsule_inertia(self):
+    def test_capsule_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()
         mass = 1.0
         radius = 0.1
@@ -147,7 +147,7 @@ class TestPrimitiveInertiaCalculator:
         assert result.izz > 0
         assert result.validate_positive_definite()
 
-    def test_ellipsoid_inertia(self):
+    def test_ellipsoid_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()
         mass = 1.0
         a, b, c = 1.0, 0.5, 0.25
@@ -158,7 +158,7 @@ class TestPrimitiveInertiaCalculator:
         expected_ixx = 0.2 * mass * (b**2 + c**2)
         assert abs(result.ixx - expected_ixx) < 1e-10
 
-    def test_compute_generic(self):
+    def test_compute_generic(self) -> None:
         calc = PrimitiveInertiaCalculator()
 
         # Test with string shape
@@ -173,18 +173,18 @@ class TestPrimitiveInertiaCalculator:
 class TestEstimateSegmentPrimitive:
     """Tests for segment primitive estimation."""
 
-    def test_head_is_sphere(self):
+    def test_head_is_sphere(self) -> None:
         shape, dims = estimate_segment_primitive("head", 0.2)
         assert shape == PrimitiveShape.SPHERE
         assert "radius" in dims
 
-    def test_thigh_is_capsule(self):
+    def test_thigh_is_capsule(self) -> None:
         shape, dims = estimate_segment_primitive("thigh", 0.4, 0.1)
         assert shape == PrimitiveShape.CAPSULE
         assert "radius" in dims
         assert "length" in dims
 
-    def test_torso_is_box(self):
+    def test_torso_is_box(self) -> None:
         shape, dims = estimate_segment_primitive("thorax", 0.3, 0.25, 0.15)
         assert shape == PrimitiveShape.BOX
         assert "x" in dims
@@ -195,23 +195,23 @@ class TestEstimateSegmentPrimitive:
 class TestValidateInertiaTensor:
     """Tests for inertia tensor validation."""
 
-    def test_valid_tensor(self):
+    def test_valid_tensor(self) -> None:
         # Valid diagonal tensor
         inertia = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         errors = validate_inertia_tensor(inertia)
         assert len(errors) == 0
 
-    def test_non_symmetric(self):
+    def test_non_symmetric(self) -> None:
         inertia = np.array([[1.0, 0.5, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         errors = validate_inertia_tensor(inertia)
         assert any("symmetric" in e for e in errors)
 
-    def test_negative_diagonal(self):
+    def test_negative_diagonal(self) -> None:
         inertia = np.array([[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         errors = validate_inertia_tensor(inertia)
         assert any("positive" in e.lower() for e in errors)
 
-    def test_wrong_shape(self):
+    def test_wrong_shape(self) -> None:
         inertia = np.array([[1.0, 0.0], [0.0, 1.0]])
         errors = validate_inertia_tensor(inertia)
         assert any("3x3" in e for e in errors)
@@ -220,7 +220,7 @@ class TestValidateInertiaTensor:
 class TestMeshInertiaCalculator:
     """Tests for MeshInertiaCalculator."""
 
-    def test_create_manual_inertia(self):
+    def test_create_manual_inertia(self) -> None:
         result = MeshInertiaCalculator.create_manual_inertia(
             ixx=1.0, iyy=2.0, izz=3.0, mass=5.0, com=(0.1, 0.2, 0.3)
         )
@@ -232,7 +232,7 @@ class TestMeshInertiaCalculator:
         assert result.center_of_mass == (0.1, 0.2, 0.3)
         assert result.mode == InertiaMode.MANUAL
 
-    def test_transform_inertia_rotation(self):
+    def test_transform_inertia_rotation(self) -> None:
         calc = MeshInertiaCalculator()
 
         # Create inertia
@@ -248,7 +248,7 @@ class TestMeshInertiaCalculator:
         assert abs(transformed.iyy - original.iyy) < 1e-10
         assert abs(transformed.izz - original.izz) < 1e-10
 
-    def test_check_trimesh_availability(self):
+    def test_check_trimesh_availability(self) -> None:
         calc = MeshInertiaCalculator()
         # Just verify it doesn't crash
         _ = calc._trimesh_available

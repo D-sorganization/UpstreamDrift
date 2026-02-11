@@ -36,7 +36,7 @@ class EngineManager:
     Refactored to use EngineRegistry (Decoupling Phase).
     """
 
-    def __init__(self, suite_root: Path | None = None):
+    def __init__(self, suite_root: Path | None = None) -> None:
         """Initialize the engine manager.
 
         Args:

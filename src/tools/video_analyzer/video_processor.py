@@ -37,7 +37,7 @@ class VideoProcessor:
 
     SUPPORTED_FORMATS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 
-    def __init__(self, video_path: str | None = None):
+    def __init__(self, video_path: str | None = None) -> None:
         """
         Initialize the video processor.
 
@@ -326,18 +326,18 @@ class VideoProcessor:
             logger.error(f"Failed to export clip: {e}")
             return False
 
-    def close(self):
+    def close(self) -> None:
         """Release video resources."""
         if self._cap:
             self._cap.release()
             self._cap = None
             self.video_path = None
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
         """Context manager exit."""
         self.close()
         return False

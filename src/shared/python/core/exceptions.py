@@ -41,7 +41,7 @@ class ArrayDimensionError(GolfSuiteError):
         expected_shape: tuple[int, ...] | None = None,
         actual_shape: tuple[int, ...] | None = None,
         message: str | None = None,
-    ):
+    ) -> None:
         self.expected_shape = expected_shape
         self.actual_shape = actual_shape
 

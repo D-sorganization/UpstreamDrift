@@ -296,7 +296,7 @@ class VRInteractionManager:
     def __init__(
         self,
         locomotion_mode: VRLocomotionMode = VRLocomotionMode.TELEPORT,
-    ):
+    ) -> None:
         """Initialize VR interaction manager.
 
         Args:

@@ -29,7 +29,7 @@ class AnalysisService:
     by interfacing with the active physics engine.
     """
 
-    def __init__(self, engine_manager: EngineManager):
+    def __init__(self, engine_manager: EngineManager) -> None:
         """Initialize analysis service.
 
         Args:

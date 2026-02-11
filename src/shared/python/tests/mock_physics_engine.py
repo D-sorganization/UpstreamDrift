@@ -12,7 +12,7 @@ from src.shared.python.interfaces import PhysicsEngine
 class MockPhysicsEngine:
     """Mock physics engine for testing purposes."""
 
-    def __init__(self, n_dof: int = 2):
+    def __init__(self, n_dof: int = 2) -> None:
         """Initialize mock engine.
 
         Args:

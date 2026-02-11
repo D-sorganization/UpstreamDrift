@@ -11,7 +11,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def analyze_simscape_data(csv_file):
+def analyze_simscape_data(csv_file) -> tuple | None:
     """Analyze the Simscape CSV file and identify key joint positions."""
 
     logger.info("Analyzing Simscape data file: %s", csv_file)

@@ -54,7 +54,7 @@ class OpenSimMuscleAnalyzer:
     - Muscle contribution to joint accelerations
     """
 
-    def __init__(self, model: opensim.Model, state: opensim.State):
+    def __init__(self, model: opensim.Model, state: opensim.State) -> None:
         """Initialize muscle analyzer.
 
         Args:
@@ -291,7 +291,7 @@ class OpenSimGripModel:
     - Muscle routing through contact points
     """
 
-    def __init__(self, model: opensim.Model):
+    def __init__(self, model: opensim.Model) -> None:
         """Initialize grip model.
 
         Args:

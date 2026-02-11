@@ -6,7 +6,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def analyze_coordinate_system():
+def analyze_coordinate_system() -> None:
     """Analyze the coordinate system and golfer orientation in the data"""
 
     # Load the Excel file

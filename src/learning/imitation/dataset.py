@@ -199,7 +199,7 @@ class DemonstrationDataset:
         """Get demonstration by index."""
         return self.demonstrations[idx]
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         """Iterate over demonstrations."""
         return iter(self.demonstrations)
 

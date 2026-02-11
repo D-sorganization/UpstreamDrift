@@ -178,7 +178,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
 
         return np.concatenate(obs_parts).astype(np.float32)
 
-    def _build_observation_space(self):
+    def _build_observation_space(self) -> Any:
         """Build observation space including object state."""
         from gymnasium import spaces
 
@@ -325,7 +325,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         """Dual arm has two end-effectors."""
         return 2
 
-    def _build_action_space(self):
+    def _build_action_space(self) -> Any:
         """Build action space for both arms."""
         from gymnasium import spaces
 

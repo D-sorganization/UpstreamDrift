@@ -12,7 +12,7 @@ from src.shared.python.interfaces import RecorderInterface
 
 
 class MockRecorder(RecorderInterface):
-    def __init__(self):
+    def __init__(self) -> None:
         self.engine = None
         self.data = {
             "joint_positions": (np.arange(100) * 0.1, np.random.rand(100, 3)),
@@ -20,55 +20,55 @@ class MockRecorder(RecorderInterface):
         }
         self.config = {}
 
-    def get_time_series(self, key):
+    def get_time_series(self, key) -> Any:
         return self.data.get(key, (np.array([]), None))
 
-    def get_induced_acceleration_series(self, src_idx):
+    def get_induced_acceleration_series(self, src_idx) -> tuple:
         return np.array([]), None
 
-    def set_analysis_config(self, config):
+    def set_analysis_config(self, config) -> None:
         self.config = config
 
-    def start(self):
+    def start(self) -> None:
         pass
 
-    def stop(self):
+    def stop(self) -> None:
         pass
 
-    def reset(self):
+    def reset(self) -> None:
         pass
 
-    def record_step(self):
+    def record_step(self) -> None:
         pass
 
-    def compute_analysis_post_hoc(self):
+    def compute_analysis_post_hoc(self) -> None:
         pass
 
-    def get_counterfactual_series(self, key):
+    def get_counterfactual_series(self, key) -> tuple:
         return np.array([]), None
 
-    def get_data_dict(self):
+    def get_data_dict(self) -> Any:
         # Fix: return the data dict so widget can initialize metrics if it uses this (it doesn't actually use this for init, it uses hardcoded keys, but good practice)
         return self.data
 
 
 @pytest.fixture
-def app(qapp):
+def app(qapp) -> Any:
     return qapp
 
 
 @pytest.fixture
-def recorder():
+def recorder() -> Any:
     return MockRecorder()
 
 
-def test_live_plot_widget_init(app, recorder):
+def test_live_plot_widget_init(app, recorder) -> None:
     widget = LivePlotWidget(recorder)
     assert widget.current_key == "joint_positions"
     assert widget.lbl_stats.text().startswith("Mean:")
 
 
-def test_live_plot_widget_stats_update(app, recorder):
+def test_live_plot_widget_stats_update(app, recorder) -> None:
     widget = LivePlotWidget(recorder)
     widget.update_plot()
 
@@ -80,7 +80,7 @@ def test_live_plot_widget_stats_update(app, recorder):
     assert text != "Mean: 0.00 | Std: 0.00 | Min: 0.00 | Max: 0.00"
 
 
-def test_live_plot_widget_xy_mode(app, recorder):
+def test_live_plot_widget_xy_mode(app, recorder) -> None:
     widget = LivePlotWidget(recorder)
 
     # Enable X-Y mode
@@ -104,7 +104,7 @@ def test_live_plot_widget_xy_mode(app, recorder):
     assert widget.ax2 is None
 
 
-def test_live_plot_widget_freq_analysis(app, recorder):
+def test_live_plot_widget_freq_analysis(app, recorder) -> None:
     widget = LivePlotWidget(recorder)
 
     # Mock QDialog.exec to prevent blocking
@@ -120,7 +120,7 @@ def test_live_plot_widget_freq_analysis(app, recorder):
             # widget.show_freq_analysis instantiates FrequencyAnalysisDialog which calls compute_psd
 
 
-def test_frequency_analysis_dialog(app):
+def test_frequency_analysis_dialog(app) -> None:
     data = np.random.rand(100, 2)
     fs = 10.0
 
@@ -139,12 +139,12 @@ def test_frequency_analysis_dialog(app):
 
 
 @pytest.fixture
-def control_panel(qapp):
+def control_panel(qapp) -> Any:
     """Fixture for ControlPanel widget."""
     return ControlPanel()
 
 
-def test_control_panel_init(control_panel):
+def test_control_panel_init(control_panel) -> None:
     """Test ControlPanel initializes with all buttons."""
     assert control_panel.btn_start is not None
     assert control_panel.btn_pause is not None
@@ -152,31 +152,31 @@ def test_control_panel_init(control_panel):
     assert control_panel.btn_reset is not None
 
 
-def test_control_panel_start_signal(control_panel, qtbot):
+def test_control_panel_start_signal(control_panel, qtbot) -> None:
     """Test start button emits start_requested signal."""
     with qtbot.waitSignal(control_panel.start_requested, timeout=1000):
         control_panel.btn_start.click()
 
 
-def test_control_panel_pause_signal(control_panel, qtbot):
+def test_control_panel_pause_signal(control_panel, qtbot) -> None:
     """Test pause button emits pause_requested signal."""
     with qtbot.waitSignal(control_panel.pause_requested, timeout=1000):
         control_panel.btn_pause.click()
 
 
-def test_control_panel_stop_signal(control_panel, qtbot):
+def test_control_panel_stop_signal(control_panel, qtbot) -> None:
     """Test stop button emits stop_requested signal."""
     with qtbot.waitSignal(control_panel.stop_requested, timeout=1000):
         control_panel.btn_stop.click()
 
 
-def test_control_panel_reset_signal(control_panel, qtbot):
+def test_control_panel_reset_signal(control_panel, qtbot) -> None:
     """Test reset button emits reset_requested signal."""
     with qtbot.waitSignal(control_panel.reset_requested, timeout=1000):
         control_panel.btn_reset.click()
 
 
-def test_control_panel_pause_checkable(control_panel):
+def test_control_panel_pause_checkable(control_panel) -> None:
     """Test pause button is checkable (toggle state)."""
     assert control_panel.btn_pause.isCheckable()
     control_panel.btn_pause.click()
@@ -185,7 +185,7 @@ def test_control_panel_pause_checkable(control_panel):
     assert not control_panel.btn_pause.isChecked()
 
 
-def test_control_panel_tooltips(control_panel):
+def test_control_panel_tooltips(control_panel) -> None:
     """Test buttons have appropriate tooltips with shortcuts."""
     assert "Ctrl+R" in control_panel.btn_start.toolTip()
     assert "Space" in control_panel.btn_pause.toolTip()
@@ -193,7 +193,7 @@ def test_control_panel_tooltips(control_panel):
     assert "R" in control_panel.btn_reset.toolTip()
 
 
-def test_control_panel_accessibility(control_panel):
+def test_control_panel_accessibility(control_panel) -> None:
     """Test ControlPanel has accessibility attributes."""
     assert control_panel.accessibleName() == "Simulation Control Panel"
     assert "Controls for starting" in control_panel.accessibleDescription()
@@ -204,7 +204,7 @@ def test_control_panel_accessibility(control_panel):
 # =============================================================================
 
 
-def test_live_plot_widget_metric_switching(app, recorder):
+def test_live_plot_widget_metric_switching(app, recorder) -> None:
     """Test switching between different metrics."""
     widget = LivePlotWidget(recorder)
 
@@ -217,7 +217,7 @@ def test_live_plot_widget_metric_switching(app, recorder):
     assert widget.current_key == "joint_positions"
 
 
-def test_live_plot_widget_plot_mode_norm(app, recorder):
+def test_live_plot_widget_plot_mode_norm(app, recorder) -> None:
     """Test 'Norm' plot mode (magnitude of vector)."""
     widget = LivePlotWidget(recorder)
     widget.combo_plot_mode.setCurrentText("Norm")
@@ -227,11 +227,11 @@ def test_live_plot_widget_plot_mode_norm(app, recorder):
     assert len(lines) == 1
 
 
-def test_live_plot_widget_empty_data(app):
+def test_live_plot_widget_empty_data(app) -> tuple:
     """Test widget handles empty data gracefully."""
 
     class EmptyRecorder(MockRecorder):
-        def get_time_series(self, key):
+        def get_time_series(self, key) -> tuple:
             return np.array([]), None
 
     empty_recorder = EmptyRecorder()
@@ -243,7 +243,7 @@ def test_live_plot_widget_empty_data(app):
     assert "Mean:" in text
 
 
-def test_live_plot_widget_single_dimension(app, recorder):
+def test_live_plot_widget_single_dimension(app, recorder) -> None:
     """Test 'Single Dimension' plot mode with dimension selector."""
     widget = LivePlotWidget(recorder)
     widget.combo_plot_mode.setCurrentText("Single Dimension")
@@ -257,7 +257,7 @@ def test_live_plot_widget_single_dimension(app, recorder):
     assert len(lines) == 1
 
 
-def test_live_plot_widget_snapshot(app, recorder, tmp_path, monkeypatch):
+def test_live_plot_widget_snapshot(app, recorder, tmp_path, monkeypatch) -> None:
     """Test snapshot capture functionality."""
     from PyQt6 import QtWidgets
 

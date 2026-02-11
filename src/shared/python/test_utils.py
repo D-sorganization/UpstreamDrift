@@ -334,7 +334,7 @@ class PerformanceTimer:
             engine.load_from_path("model.xml")
     """
 
-    def __init__(self, name: str, log_result: bool = True):
+    def __init__(self, name: str, log_result: bool = True) -> None:
         """Initialize timer.
 
         Args:

@@ -83,7 +83,7 @@ class MyoSuiteMuscleAnalyzer:
     - Activation-driven grip force modeling
     """
 
-    def __init__(self, sim: Any, model: Any = None):
+    def __init__(self, sim: Any, model: Any = None) -> None:
         """Initialize muscle analyzer.
 
         Args:
@@ -463,7 +463,7 @@ class MyoSuiteGripModel:
     - Activation-driven grip force control
     """
 
-    def __init__(self, sim: Any, analyzer: MyoSuiteMuscleAnalyzer):
+    def __init__(self, sim: Any, analyzer: MyoSuiteMuscleAnalyzer) -> None:
         """Initialize grip model.
 
         Args:

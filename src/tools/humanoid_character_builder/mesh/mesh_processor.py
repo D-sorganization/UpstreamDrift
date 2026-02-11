@@ -75,7 +75,7 @@ class MeshProcessor:
 
     SUPPORTED_FORMATS = {"stl", "obj", "ply", "dae", "glb", "gltf", "off"}
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the mesh processor."""
         self._trimesh_available = self._check_trimesh()
 
@@ -531,7 +531,7 @@ class LODGenerator:
     # Default LOD ratios (fraction of original faces to keep)
     DEFAULT_RATIOS = [1.0, 0.5, 0.25, 0.1, 0.05]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the LOD generator."""
         self._processor = MeshProcessor()
 

@@ -162,7 +162,7 @@ class SpinalLoadAnalyzer:
         height: float | None = None,
         trunk_length: float | None = None,
         lumbar_segments: list[str] | None = None,
-    ):
+    ) -> None:
         """
         Initialize the spinal load analyzer.
 

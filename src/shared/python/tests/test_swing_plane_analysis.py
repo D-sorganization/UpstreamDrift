@@ -5,7 +5,7 @@ from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 
 class TestSwingPlaneAnalysis:
-    def test_fit_plane_perfect(self):
+    def test_fit_plane_perfect(self) -> None:
         """Test fitting a plane to points that lie perfectly on it."""
         # Plane z = 0 (XY plane)
         points = np.array(
@@ -23,7 +23,7 @@ class TestSwingPlaneAnalysis:
         assert abs(normal[1]) < 1e-10
         assert abs(abs(normal[2]) - 1.0) < 1e-10
 
-    def test_fit_plane_inclined(self):
+    def test_fit_plane_inclined(self) -> None:
         """Test fitting to an inclined plane."""
         # Points: x=i, y=i, z=-x.
         # Vector on plane 1: (1, 1, -1) [from i=0 to i=1]
@@ -66,7 +66,7 @@ class TestSwingPlaneAnalysis:
         dot = np.abs(np.dot(normal, expected))
         np.testing.assert_allclose(dot, 1.0, atol=1e-10)
 
-    def test_calculate_deviation(self):
+    def test_calculate_deviation(self) -> None:
         """Test deviation calculation."""
         points = np.array(
             [
@@ -84,7 +84,7 @@ class TestSwingPlaneAnalysis:
         expected = np.array([1.0, -1.0, 0.0])
         np.testing.assert_allclose(devs, expected, atol=1e-10)
 
-    def test_full_analysis(self):
+    def test_full_analysis(self) -> None:
         """Test full analysis flow."""
         points = np.random.rand(10, 3)
         # Flatten to Z=0 to ensure perfect fit
@@ -100,7 +100,7 @@ class TestSwingPlaneAnalysis:
         # Wait, analyze ensures normal Z > 0.
         # If normal is [0, 0, 1], angle with [0, 0, 1] is 0.
 
-    def test_insufficient_points(self):
+    def test_insufficient_points(self) -> None:
         """Test error handling for too few points."""
         points = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])
         analyzer = SwingPlaneAnalyzer()

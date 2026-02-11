@@ -22,7 +22,7 @@ class SimulationFrame(BaseModel):
 async def simulation_stream(
     websocket: WebSocket,
     engine_type: str,
-):
+) -> None:
     """
     Stream simulation in real-time over WebSocket.
 

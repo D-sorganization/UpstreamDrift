@@ -103,7 +103,7 @@ class FrankensteinEditor:
         urdf_string = editor.export_model("cyborg")
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Frankenstein editor."""
         self._models: dict[str, ParsedModel] = {}
         self._parser = URDFParser()

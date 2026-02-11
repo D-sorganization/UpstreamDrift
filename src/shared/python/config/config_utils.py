@@ -182,7 +182,7 @@ class ConfigLoader:
         loader.save(config)
     """
 
-    def __init__(self, path: str | Path, format: str = "json"):
+    def __init__(self, path: str | Path, format: str = "json") -> None:
         """Initialize configuration loader.
 
         Args:

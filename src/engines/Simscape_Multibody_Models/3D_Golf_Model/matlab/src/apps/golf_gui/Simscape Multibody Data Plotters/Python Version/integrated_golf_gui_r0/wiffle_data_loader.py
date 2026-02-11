@@ -45,7 +45,7 @@ class MotionDataConfig:
     filter_noise: bool = True
     interpolate_missing: bool = True
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Set default column mappings if not provided"""
         if self.prov1_columns is None:
             self.prov1_columns = {
@@ -121,7 +121,7 @@ class MotionDataConfig:
 class MotionDataLoader:
     """Loader for motion capture Excel data"""
 
-    def __init__(self, config: MotionDataConfig | None = None):
+    def __init__(self, config: MotionDataConfig | None = None) -> None:
         self.config = config or MotionDataConfig()
         self.data_cache: dict[str, Any] = {}
 
@@ -600,7 +600,7 @@ class MotionDataLoader:
         return deltaq_data
 
 
-def main():
+def main() -> None:
     """Test the Wiffle data loader"""
     logger.info("[TEST] Testing Wiffle Data Loader")
 

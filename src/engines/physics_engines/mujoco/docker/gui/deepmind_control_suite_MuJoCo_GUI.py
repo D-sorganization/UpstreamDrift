@@ -968,7 +968,7 @@ class GolfSimulationGUI:
         self.log("Updating robotics_env with missing dependencies...")
         self.btn_rebuild.config(state=tk.DISABLED)
 
-        def run_update():
+        def run_update() -> None:
             try:
                 # Create a minimal Dockerfile to add defusedxml
                 dockerfile_content = (

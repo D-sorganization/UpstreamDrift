@@ -273,7 +273,7 @@ class CommandRunner:
 
     def __init__(
         self, cwd: str | Path | None = None, env: dict[str, str] | None = None
-    ):
+    ) -> None:
         """Initialize command runner.
 
         Args:

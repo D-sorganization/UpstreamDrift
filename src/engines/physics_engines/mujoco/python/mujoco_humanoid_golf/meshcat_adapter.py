@@ -23,7 +23,7 @@ class MuJoCoMeshcatAdapter:
     Adapts MuJoCo model/data to Meshcat for web-based visualization.
     """
 
-    def __init__(self, model: mujoco.MjModel | None = None):
+    def __init__(self, model: mujoco.MjModel | None = None) -> None:
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
             self.vis = None

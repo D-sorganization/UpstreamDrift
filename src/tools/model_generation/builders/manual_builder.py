@@ -65,7 +65,7 @@ class ManualBuilder(BaseURDFBuilder):
         robot_name: str = "robot",
         handedness: Handedness = Handedness.RIGHT,
         validate_on_add: bool = True,
-    ):
+    ) -> None:
         """
         Initialize manual builder.
 

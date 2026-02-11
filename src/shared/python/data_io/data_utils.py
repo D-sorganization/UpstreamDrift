@@ -219,7 +219,7 @@ class DataLoader:
         data = loader.load(use_cache=False)
     """
 
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path) -> None:
         """Initialize data loader.
 
         Args:

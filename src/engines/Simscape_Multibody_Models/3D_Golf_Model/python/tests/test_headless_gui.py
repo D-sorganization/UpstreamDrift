@@ -13,20 +13,20 @@ from apps.core.models import C3DDataModel  # noqa: E402
 
 
 @pytest.fixture
-def app(qtbot):
+def app(qtbot) -> Any:
     """Fixture to provide the main window."""
     window = C3DViewerMainWindow()
     qtbot.addWidget(window)
     return window
 
 
-def test_viewer_startup(app):
+def test_viewer_startup(app) -> None:
     """Smoke test: Verify the application starts up without crashing."""
     assert app.windowTitle() == "C3D Motion Analysis Viewer"
     assert app.tabs.count() == 5  # Ensure all 5 tabs are created
 
 
-def test_load_model_ui_update(app, qtbot):
+def test_load_model_ui_update(app, qtbot) -> None:
     """Verify UI updates when a model is loaded."""
     # Mock data model
     model = C3DDataModel(
@@ -48,7 +48,7 @@ def test_load_model_ui_update(app, qtbot):
 
 
 @patch("apps.c3d_viewer.C3DLoaderThread")
-def test_open_file_dialog_cancel(mock_loader, app, monkeypatch):
+def test_open_file_dialog_cancel(mock_loader, app, monkeypatch) -> None:
     """Test that cancelling the file dialog does nothing."""
     # Mock file dialog to return empty
     monkeypatch.setattr(

@@ -29,7 +29,7 @@ class SegmentPanel(QWidget):
     segment_removed = pyqtSignal(str)
     segment_modified = pyqtSignal(dict)
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the segment panel.
 
         Args:

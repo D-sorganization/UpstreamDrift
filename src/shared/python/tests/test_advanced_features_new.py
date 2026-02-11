@@ -10,14 +10,14 @@ from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 
 class MockRecorder(RecorderInterface):
-    def __init__(self, times, positions, velocities, accelerations, torques):
+    def __init__(self, times, positions, velocities, accelerations, torques) -> None:
         self.times = times
         self.positions = positions
         self.velocities = velocities
         self.accelerations = accelerations
         self.torques = torques
 
-    def get_time_series(self, field_name):
+    def get_time_series(self, field_name) -> tuple:
         if field_name == "joint_positions":
             return self.times, self.positions
         elif field_name == "joint_velocities":
@@ -28,15 +28,15 @@ class MockRecorder(RecorderInterface):
             return self.times, self.torques
         return [], []
 
-    def get_induced_acceleration_series(self, source_name: str | int):
+    def get_induced_acceleration_series(self, source_name: str | int) -> tuple:
         return [], []
 
-    def get_counterfactual_series(self, cf_name: str):
+    def get_counterfactual_series(self, cf_name: str) -> tuple:
         return [], []
 
 
 class TestAdvancedSignalProcessing:
-    def test_compute_jerk(self):
+    def test_compute_jerk(self) -> None:
         """Test jerk computation using cubic polynomial."""
         t = np.linspace(0, 1, 100)
         # Position x(t) = t^3
@@ -53,7 +53,7 @@ class TestAdvancedSignalProcessing:
         valid_jerk = jerk[10:-10]
         np.testing.assert_allclose(valid_jerk, 6.0, rtol=0.05)
 
-    def test_compute_time_shift(self):
+    def test_compute_time_shift(self) -> None:
         """Test time shift detection."""
         fs = 100.0
         t = np.linspace(0, 2, 200)
@@ -75,7 +75,7 @@ class TestAdvancedSignalProcessing:
 
 
 class TestAdvancedStatisticalAnalysis:
-    def test_compute_jerk_metrics(self):
+    def test_compute_jerk_metrics(self) -> None:
         """Test jerk metrics computation."""
         t = np.linspace(0, 1, 100)
         accel = 6 * t
@@ -99,7 +99,7 @@ class TestAdvancedStatisticalAnalysis:
         assert metrics.peak_jerk == pytest.approx(6.0, rel=0.1)
         assert metrics.rms_jerk == pytest.approx(6.0, rel=0.1)
 
-    def test_compute_lag_matrix(self):
+    def test_compute_lag_matrix(self) -> None:
         """Test lag matrix computation."""
         t = np.linspace(0, 2, 200)
 
@@ -126,7 +126,7 @@ class TestAdvancedStatisticalAnalysis:
         # matrix[0, 2] = lag(x, z) = 0.2
         assert matrix[0, 2] == pytest.approx(0.2, abs=0.01)
 
-    def test_compute_multiscale_entropy(self):
+    def test_compute_multiscale_entropy(self) -> None:
         """Test MSE computation."""
         # Random noise should have high entropy at scale 1, decay or stay high?
         # White noise: entropy decreases with scale.
@@ -151,7 +151,7 @@ class TestAdvancedStatisticalAnalysis:
 
 
 class TestAdvancedPlotting:
-    def test_plots(self):
+    def test_plots(self) -> None:
         """Test that new plots run without error."""
         t = np.linspace(0, 2, 200)
         x = np.sin(2 * np.pi * 2 * t)

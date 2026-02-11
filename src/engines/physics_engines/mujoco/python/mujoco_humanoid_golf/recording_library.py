@@ -36,7 +36,7 @@ class ConnectionPool:
     while ensuring thread safety.
     """
 
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str) -> None:
         self.db_path = db_path
         self._local = threading.local()
 

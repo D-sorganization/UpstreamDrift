@@ -472,7 +472,7 @@ class SkeletonMapper:
         >>> physics_pose = mapper.apply_pose(mixamo_pose)
     """
 
-    def __init__(self, profile: MappingProfile | None = None):
+    def __init__(self, profile: MappingProfile | None = None) -> None:
         """Initialize skeleton mapper.
 
         Args:

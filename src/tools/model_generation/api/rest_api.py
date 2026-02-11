@@ -121,7 +121,7 @@ class ModelGenerationAPI:
         FastAPIAdapter(api).register(app)
     """
 
-    def __init__(self, prefix: str = "/api/v1"):
+    def __init__(self, prefix: str = "/api/v1") -> None:
         """
         Initialize API.
 
@@ -1022,7 +1022,7 @@ class ModelGenerationAPI:
 class FlaskAdapter:
     """Adapter for Flask framework."""
 
-    def __init__(self, api: ModelGenerationAPI):
+    def __init__(self, api: ModelGenerationAPI) -> None:
         self.api = api
 
     def register(self, app: Any) -> None:
@@ -1033,8 +1033,8 @@ class FlaskAdapter:
         for route in self.api.get_routes():
             endpoint = route.path.replace("/", "_").replace("{", "").replace("}", "")
 
-            def make_handler(r: Route):
-                def handler(**kwargs):
+            def make_handler(r: Route) -> Any:
+                def handler(**kwargs) -> Any:
                     # Build APIRequest
                     api_request = APIRequest(
                         method=HTTPMethod(flask_request.method),
@@ -1077,7 +1077,7 @@ class FlaskAdapter:
 class FastAPIAdapter:
     """Adapter for FastAPI framework."""
 
-    def __init__(self, api: ModelGenerationAPI):
+    def __init__(self, api: ModelGenerationAPI) -> None:
         self.api = api
 
     def register(self, app: Any) -> None:
@@ -1087,8 +1087,8 @@ class FastAPIAdapter:
 
         for route in self.api.get_routes():
 
-            async def make_handler(r: Route):
-                async def handler(request: Request, **kwargs):
+            async def make_handler(r: Route) -> Any:
+                async def handler(request: Request, **kwargs) -> Any:
                     body = None
                     try:
                         body = await request.json()

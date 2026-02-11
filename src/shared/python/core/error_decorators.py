@@ -167,7 +167,7 @@ class ErrorContext:
         operation: str,
         reraise: bool = True,
         log_success: bool = False,
-    ):
+    ) -> None:
         """Initialize error context.
 
         Args:

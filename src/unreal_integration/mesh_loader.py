@@ -46,7 +46,7 @@ class MeshLoadError(Exception):
 
     def __init__(
         self, message: str, path: str | None = None, cause: Exception | None = None
-    ):
+    ) -> None:
         super().__init__(message)
         self.path = path
         self.cause = cause
@@ -55,7 +55,7 @@ class MeshLoadError(Exception):
 class UnsupportedFormatError(MeshLoadError):
     """Exception raised when mesh format is not supported."""
 
-    def __init__(self, extension: str, path: str | None = None):
+    def __init__(self, extension: str, path: str | None = None) -> None:
         super().__init__(f"Unsupported mesh format: {extension}", path)
         self.extension = extension
 
@@ -377,7 +377,7 @@ class MeshLoader:
         >>> print(f"Loaded {mesh.vertex_count} vertices")
     """
 
-    def __init__(self, enable_cache: bool = True):
+    def __init__(self, enable_cache: bool = True) -> None:
         """Initialize mesh loader.
 
         Args:

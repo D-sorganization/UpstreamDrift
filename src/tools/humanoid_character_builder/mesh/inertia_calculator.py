@@ -166,7 +166,7 @@ class MeshInertiaCalculator:
     # Default tissue density (kg/m^3) - approximately human tissue
     DEFAULT_DENSITY = 1050.0
 
-    def __init__(self, default_density: float = DEFAULT_DENSITY):
+    def __init__(self, default_density: float = DEFAULT_DENSITY) -> None:
         """
         Initialize the inertia calculator.
 

@@ -5,7 +5,7 @@ from mujoco_humanoid_golf.verification import EnergyMonitor, JacobianTester
 
 
 # Helper to create a simple pendulum model if none exists
-def create_pendulum_model():
+def create_pendulum_model() -> Any:
     xml = """
     <mujoco>
       <worldbody>
@@ -23,12 +23,12 @@ class TestVerificationEngine:
     """Test suite for Phase 2 Verification Tools."""
 
     @pytest.fixture
-    def model_and_data(self):
+    def model_and_data(self) -> tuple:
         model = create_pendulum_model()
         data = mujoco.MjData(model)
         return model, data
 
-    def test_energy_monitor_conservation(self, model_and_data):
+    def test_energy_monitor_conservation(self, model_and_data) -> None:
         """Test EnergyMonitor correctly tracks conservation on a passive pendulum."""
         model, data = model_and_data
         monitor = EnergyMonitor(model, data)
@@ -52,7 +52,7 @@ class TestVerificationEngine:
         assert passed, f"Energy drift too high: {drift}"
         assert len(monitor.history) > 100
 
-    def test_energy_monitor_work_tracking(self, model_and_data):
+    def test_energy_monitor_work_tracking(self, model_and_data) -> None:
         """Test that work input is correctly tracked."""
         model, data = model_and_data
         monitor = EnergyMonitor(model, data)
@@ -74,7 +74,7 @@ class TestVerificationEngine:
         # Work should be positive as we are adding energy
         assert monitor.cumulative_work > 0
 
-    def test_jacobian_tester(self, model_and_data):
+    def test_jacobian_tester(self, model_and_data) -> None:
         """Test that JacobianTester confirms analytical vs FD match."""
         model, _ = model_and_data
         tester = JacobianTester(model)

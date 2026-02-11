@@ -24,7 +24,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_sample_data():
+def create_sample_data() -> tuple:
     """Create sample golf swing data for testing"""
     num_frames = 100
 
@@ -94,7 +94,7 @@ def create_sample_data():
     return baseq_df, ztcfq_df, deltaq_df
 
 
-def main():
+def main() -> None:
     """Main test function"""
     logger.info("🎯 Testing Improved Golf Visualization")
     logger.info("=" * 50)

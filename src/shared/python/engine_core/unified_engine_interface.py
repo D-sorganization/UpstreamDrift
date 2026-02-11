@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 class UnifiedEngineInterface:
     """Unified interface for all physics engines with standardized model loading."""
 
-    def __init__(self, suite_root: Path | None = None):
+    def __init__(self, suite_root: Path | None = None) -> None:
         """Initialize unified engine interface.
 
         Args:

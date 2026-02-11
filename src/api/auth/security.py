@@ -84,7 +84,7 @@ def compute_prefix_hash(prefix: str) -> str:
 class SecurityManager:
     """Handles authentication and authorization security."""
 
-    def __init__(self, secret_key: str = SECRET_KEY):
+    def __init__(self, secret_key: str = SECRET_KEY) -> None:
         """Initialize security manager.
 
         Args:
@@ -247,7 +247,7 @@ class SecurityManager:
 class RoleChecker:
     """Role-based access control checker."""
 
-    def __init__(self, required_role: UserRole):
+    def __init__(self, required_role: UserRole) -> None:
         """Initialize role checker.
 
         Args:

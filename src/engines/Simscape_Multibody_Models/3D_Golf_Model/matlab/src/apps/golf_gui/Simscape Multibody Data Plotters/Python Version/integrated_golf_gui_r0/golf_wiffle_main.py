@@ -46,12 +46,12 @@ class DataLoadingThread(QThread):
     loadingProgress = pyqtSignal(str)
     loadingError = pyqtSignal(str)
 
-    def __init__(self, excel_file_path: str, config: WiffleDataConfig):
+    def __init__(self, excel_file_path: str, config: WiffleDataConfig) -> None:
         super().__init__()
         self.excel_file_path = excel_file_path
         self.config = config
 
-    def run(self):
+    def run(self) -> None:
         """Load data in background thread"""
         try:
             self.loadingProgress.emit("Initializing Wiffle data loader...")
@@ -80,7 +80,7 @@ class DataLoadingThread(QThread):
 class WiffleGolfMainWindow(QMainWindow):
     """Enhanced main window with Wiffle_ProV1 data support"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Window setup
@@ -108,7 +108,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
         logger.info("🎯 Wiffle Golf Main Window initialized")
 
-    def _create_ui(self):
+    def _create_ui(self) -> None:
         """Create the main user interface"""
         # Central widget
         central_widget = QWidget()
@@ -129,7 +129,7 @@ class WiffleGolfMainWindow(QMainWindow):
         # Connect signals
         self._connect_signals()
 
-    def _create_control_panels(self):
+    def _create_control_panels(self) -> None:
         """Create dockable control panels"""
         # Data loading panel
         self.data_panel = self._create_data_panel()
@@ -310,7 +310,7 @@ class WiffleGolfMainWindow(QMainWindow):
         layout.addStretch()
         return panel
 
-    def _create_menu_bar(self):
+    def _create_menu_bar(self) -> None:
         """Create menu bar"""
         menubar = self.menuBar()
 
@@ -343,7 +343,7 @@ class WiffleGolfMainWindow(QMainWindow):
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
 
-    def _create_toolbar(self):
+    def _create_toolbar(self) -> None:
         """Create toolbar"""
         toolbar = self.addToolBar("Main Toolbar")
 
@@ -370,11 +370,11 @@ class WiffleGolfMainWindow(QMainWindow):
         reset_camera_action.triggered.connect(self.visualizer_widget.reset_camera)
         toolbar.addAction(reset_camera_action)
 
-    def _create_status_bar(self):
+    def _create_status_bar(self) -> None:
         """Create status bar"""
         self.statusBar().showMessage("Ready to load Wiffle_ProV1 data")
 
-    def _connect_signals(self):
+    def _connect_signals(self) -> None:
         """Connect widget signals"""
         # Visualizer signals
         self.visualizer_widget.frameChanged.connect(self._on_frame_changed)
@@ -385,13 +385,13 @@ class WiffleGolfMainWindow(QMainWindow):
         self.show_wiffle_cb.toggled.connect(self._on_visibility_changed)
         self.show_difference_cb.toggled.connect(self._on_visibility_changed)
 
-    def _try_auto_load_data(self):
+    def _try_auto_load_data(self) -> None:
         """Try to automatically load the default Excel file"""
         default_file = Path("Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
         if default_file.exists():
             self._load_excel_file(str(default_file))
 
-    def _load_excel_file(self, file_path: str = None):
+    def _load_excel_file(self, file_path: str = None) -> None:
         """Load Excel file with Wiffle_ProV1 data"""
         if file_path is None:
             file_path, _ = QFileDialog.getOpenFileName(
@@ -425,12 +425,12 @@ class WiffleGolfMainWindow(QMainWindow):
         self.loading_thread.loadingError.connect(self._on_loading_error)
         self.loading_thread.start()
 
-    def _on_loading_progress(self, message: str):
+    def _on_loading_progress(self, message: str) -> None:
         """Handle loading progress updates"""
         self.progress_text.append(message)
         self.statusBar().showMessage(message)
 
-    def _on_data_loaded(self, baseq, ztcfq, deltaq):
+    def _on_data_loaded(self, baseq, ztcfq, deltaq) -> None:
         """Handle successful data loading"""
         self.baseq_data = baseq
         self.ztcfq_data = ztcfq
@@ -460,14 +460,14 @@ class WiffleGolfMainWindow(QMainWindow):
 
         self.statusBar().showMessage("Data loaded successfully!")
 
-    def _on_loading_error(self, error_message: str):
+    def _on_loading_error(self, error_message: str) -> None:
         """Handle loading errors"""
         self.progress_bar.setVisible(False)
         self.progress_text.setVisible(False)
         QMessageBox.critical(self, "Loading Error", error_message)
         self.statusBar().showMessage("Data loading failed")
 
-    def _on_ball_type_changed(self, ball_type: str):
+    def _on_ball_type_changed(self, ball_type: str) -> None:
         """Handle ball type selection change"""
         if not self.data_loaded:
             return
@@ -488,7 +488,7 @@ class WiffleGolfMainWindow(QMainWindow):
                 self.deltaq_data, self.baseq_data, self.ztcfq_data
             )
 
-    def _on_visibility_changed(self):
+    def _on_visibility_changed(self) -> None:
         """Handle visibility checkbox changes"""
         if not self.data_loaded:
             return
@@ -510,13 +510,13 @@ class WiffleGolfMainWindow(QMainWindow):
         # Trigger visualizer update
         self.visualizer_widget.update()
 
-    def _on_frame_changed(self, frame_idx: int):
+    def _on_frame_changed(self, frame_idx: int) -> None:
         """Handle frame change events"""
         if self.data_loaded:
             # Update metrics for current frame
             self._update_frame_metrics(frame_idx)
 
-    def _reload_data(self):
+    def _reload_data(self) -> None:
         """Reload data with current settings"""
         if hasattr(self, "loading_thread") and self.loading_thread:
             self.loading_thread.quit()
@@ -532,7 +532,7 @@ class WiffleGolfMainWindow(QMainWindow):
                 # This is a simplified approach - in practice you'd store the path
                 self._load_excel_file()
 
-    def _calculate_metrics(self):
+    def _calculate_metrics(self) -> None:
         """Calculate comparison metrics between ProV1 and Wiffle"""
         if not self.data_loaded:
             return
@@ -585,7 +585,7 @@ class WiffleGolfMainWindow(QMainWindow):
         except (KeyError, ValueError, IndexError):
             return 0.0
 
-    def _update_frame_metrics(self, frame_idx: int):
+    def _update_frame_metrics(self, frame_idx: int) -> None:
         """Update metrics for current frame"""
         if not self.data_loaded or frame_idx >= len(self.baseq_data):
             return
@@ -620,7 +620,7 @@ class WiffleGolfMainWindow(QMainWindow):
         except (ValueError, TypeError, RuntimeError):
             pass
 
-    def _export_comparison(self):
+    def _export_comparison(self) -> None:
         """Export comparison data"""
         if not self.data_loaded:
             QMessageBox.warning(self, "No Data", "No data loaded to export")
@@ -664,7 +664,7 @@ class WiffleGolfMainWindow(QMainWindow):
                     self, "Export Error", f"Error exporting data: {str(e)}"
                 )
 
-    def _show_about(self):
+    def _show_about(self) -> None:
         """Show about dialog"""
         QMessageBox.about(
             self,
@@ -681,7 +681,7 @@ class WiffleGolfMainWindow(QMainWindow):
             "Version: 1.0",
         )
 
-    def _apply_modern_style(self):
+    def _apply_modern_style(self) -> None:
         """Apply modern styling to the application"""
         self.setStyleSheet("""
             QMainWindow {
@@ -734,7 +734,7 @@ class WiffleGolfMainWindow(QMainWindow):
         """)
 
 
-def main():
+def main() -> None:
     """Main application entry point"""
     app = QApplication(sys.argv)
     app.setApplicationName("Golf Swing Visualizer - Wiffle_ProV1")
