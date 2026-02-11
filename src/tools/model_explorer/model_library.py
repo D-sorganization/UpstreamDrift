@@ -25,14 +25,14 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.logger_utils import get_logger
 from src.shared.python.security_utils import validate_url_scheme
 
-# Add project root to path for src imports when run as standalone script
-_project_root = Path(__file__).resolve().parent.parent.parent.parent
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-
-from src.shared.python.logger_utils import get_logger  # noqa: E402
+# Resolve project root for model path resolution (no sys.path mutation)
+_project_root = next(
+    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
+    Path(__file__).resolve().parent,
+)
 
 try:
     import robot_descriptions

@@ -5,14 +5,17 @@ import types
 from pathlib import Path
 from typing import Any
 
-# Add project root to path for src imports when run as standalone script
-# Path: src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py
-# Need 7 parents to reach root
-_project_root = (
-    Path(__file__).resolve().parent.parent.parent.parent.parent.parent.parent
+# Bootstrap: add repo root to sys.path for src.* imports
+_root = next(
+    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
+    Path(__file__).resolve().parent,
 )
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
+if str(_root) not in sys.path:
+    sys.path.insert(0, str(_root))
+
+from _bootstrap import bootstrap  # noqa: E402
+
+bootstrap(__file__)
 
 import numpy as np  # noqa: E402
 import pinocchio as pin  # type: ignore  # noqa: E402
