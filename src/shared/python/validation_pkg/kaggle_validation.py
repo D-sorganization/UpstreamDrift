@@ -268,7 +268,6 @@ def compare_all_models_to_dataset(
     from pathlib import Path
 
     # Import flight models
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "shared" / "python"))
 
     from flight_models import (
         BallFlightModel,

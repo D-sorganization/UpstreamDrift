@@ -8,7 +8,6 @@ import numpy as np
 from src.shared.python.logging_config import get_logger, setup_logging
 
 # Add project root to path
-sys.path.append(str(Path(__file__).parent.parent))
 
 try:
     import pinocchio as pin

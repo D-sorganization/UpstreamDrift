@@ -20,7 +20,6 @@ from typing import Any
 # Path: src/engines/physics_engines/mujoco/python/humanoid_launcher.py -> need 6 parents
 _project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
 
 import numpy as np  # noqa: E402
 from PyQt6.QtCore import Qt  # noqa: E402

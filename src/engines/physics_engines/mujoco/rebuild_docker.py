@@ -9,7 +9,6 @@ from pathlib import Path
 
 # Add repo root to path for imports
 _repo_root = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(_repo_root))
 
 from scripts.script_utils import run_command, setup_script_logging  # noqa: E402
 
