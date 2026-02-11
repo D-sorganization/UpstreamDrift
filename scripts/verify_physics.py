@@ -16,14 +16,11 @@ import pytest
 # Add project root to path first (script is in scripts/ directory)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
-sys.path.insert(0, str(_PROJECT_ROOT))
-sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 from src.shared.python.path_utils import get_src_root  # noqa: E402
 
 # Add root to path
 ROOT_DIR = get_src_root()
-sys.path.append(str(ROOT_DIR))
 
 from src.shared.python.engine_manager import EngineManager  # noqa: E402
 

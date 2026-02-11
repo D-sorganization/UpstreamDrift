@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any
 
 # Add current directory to path so we can import ui_components if needed locally
-sys.path.append(str(Path(__file__).parent))
 
 from PyQt6.QtCore import QEventLoop, QTimer
 from PyQt6.QtGui import QCloseEvent, QIcon

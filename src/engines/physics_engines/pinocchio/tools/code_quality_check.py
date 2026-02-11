@@ -10,7 +10,6 @@ from pathlib import Path
 
 # Add the repo root to path to enable importing the authoritative module
 repo_root = Path(__file__).resolve().parents[5]
-sys.path.insert(0, str(repo_root))
 
 # Import and run the authoritative quality check
 from src.tools.code_quality_check import main  # noqa: E402

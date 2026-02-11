@@ -13,7 +13,6 @@ from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 # Add project root to path
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
 
 from src.shared.python.engine_availability import MUJOCO_AVAILABLE  # noqa: E402
 from src.shared.python.logging_config import get_logger  # noqa: E402

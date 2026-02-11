@@ -6,7 +6,6 @@ Test script to verify data loading and GUI functionality
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from golf_gui_application import GolfVisualizerMainWindow
 from PyQt6.QtWidgets import QApplication

@@ -28,7 +28,6 @@ from pathlib import Path
 
 # Add repo root to path
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT))
 
 from src.shared.python.logging_config import get_logger  # noqa: E402
 

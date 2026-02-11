@@ -30,7 +30,6 @@ from src.shared.python.security_utils import validate_url_scheme
 # Add project root to path for src imports when run as standalone script
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
 
 from src.shared.python.logger_utils import get_logger  # noqa: E402
 

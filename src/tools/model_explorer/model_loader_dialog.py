@@ -13,7 +13,6 @@ from typing import Any
 # Add project root to path for src imports
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
 
 from PyQt6.QtCore import Qt, pyqtSignal  # noqa: E402
 from PyQt6.QtWidgets import (  # noqa: E402
