@@ -55,7 +55,7 @@ def test_matlab_data_structure():
                     else:
                         logger.info(f"  {key}: {type(value).__name__}")
 
-        except Exception as e:
+        except (FileNotFoundError, ValueError, KeyError, OSError):
             logger.info(f"❌ Error loading {filename}: {e}")
             return False
 
@@ -95,7 +95,7 @@ def test_data_loader():
 
         return True
 
-    except Exception as e:
+    except (FileNotFoundError, ValueError, KeyError, OSError):
         logger.info(f"❌ Error in data loader: {e}")
         import traceback
 
@@ -134,7 +134,7 @@ def test_frame_processor():
 
         return True
 
-    except Exception as e:
+    except (FileNotFoundError, ValueError, KeyError, OSError):
         logger.info(f"❌ Error in frame processor: {e}")
         import traceback
 import logging
@@ -185,7 +185,7 @@ def analyze_signal_bus_structure():
 
         return True
 
-    except Exception as e:
+    except (FileNotFoundError, ValueError, KeyError, OSError):
         logger.info(f"❌ Error analyzing signal bus structure: {e}")
         return False
 
@@ -212,7 +212,7 @@ def main():
         logger.info(f"\n{'=' * 20} {test_name} {'=' * 20}")
         try:
             results[test_name] = test_func()
-        except Exception as e:
+        except (FileNotFoundError, ValueError, KeyError, OSError):
             logger.info(f"❌ {test_name} failed with exception: {e}")
             results[test_name] = False
 

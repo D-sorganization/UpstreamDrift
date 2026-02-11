@@ -35,7 +35,7 @@ for i in range(len(osimpaths)):
     try:
         model = opensim.Model(filename)
         s = model.initSystem()
-    except Exception as e:
+    except (ImportError, OSError):
         logger.info(f"Oops, Model '{modelname}' failed:\n{e.message}")
         sys.exit(1)
 
@@ -48,7 +48,7 @@ for i in range(len(osimpaths)):
     try:
         reloadedModel = opensim.Model(filename_new)
         s2 = reloadedModel.initSystem()
-    except Exception as e:
+    except (ImportError, OSError):
         logger.info(f"Oops, 4.0 written Model '{modelname_new}' failed:\n{e.message}")
         sys.exit(1)
 

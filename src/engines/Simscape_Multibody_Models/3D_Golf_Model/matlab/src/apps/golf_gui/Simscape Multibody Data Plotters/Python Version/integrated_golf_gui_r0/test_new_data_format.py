@@ -42,7 +42,7 @@ def test_new_data_files():
 
                         return True
 
-        except Exception as e:
+        except (FileNotFoundError, ValueError, KeyError, OSError):
             logger.info(f"❌ Error testing {filename}: {e}")
 
     return False

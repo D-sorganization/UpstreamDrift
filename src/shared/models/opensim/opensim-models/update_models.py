@@ -34,7 +34,7 @@ for i in range(len(osimpaths)):
     try:
         model = opensim.Model(filename)
         s = model.initSystem()
-    except Exception:
+    except (ImportError, OSError):
         sys.exit(1)
 
     # Print the latest model to file
@@ -43,5 +43,5 @@ for i in range(len(osimpaths)):
     try:
         reloadedModel = opensim.Model(filename)
         s2 = reloadedModel.initSystem()
-    except Exception:
+    except (ImportError, OSError):
         sys.exit(1)

@@ -74,5 +74,5 @@ def test_mujoco_availability_logic():
     try:
         available = engine_availability.is_engine_available("mujoco")
         assert isinstance(available, bool)
-    except Exception as e:
+    except (ImportError, RuntimeError):
         pytest.fail(f"Checking MuJoCo availability raised exception: {e}")
