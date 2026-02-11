@@ -20,6 +20,7 @@ except (ImportError, ValueError):
     # target: src/
     src_path = Path(__file__).resolve().parent.parent.parent
     if str(src_path) not in sys.path:
+        sys.path.insert(0, str(src_path))
     try:
         from c3d_reader import C3DDataReader  # type: ignore[no-redef]
         from logger_utils import log_execution_time

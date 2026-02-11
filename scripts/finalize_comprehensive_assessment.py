@@ -12,6 +12,7 @@ from pathlib import Path
 # Add project root to path for imports
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.script_utils import run_main, setup_script_logging  # noqa: E402
 

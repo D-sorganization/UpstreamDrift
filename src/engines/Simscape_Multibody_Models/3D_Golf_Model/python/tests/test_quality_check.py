@@ -1,11 +1,9 @@
 """Tests for quality check script."""
 
 import importlib.util
-import sys
 import types
 from pathlib import Path
 
-# Add project root to path
 project_root = Path(__file__).parent.parent.parent
 scripts_path = project_root / "scripts"
 

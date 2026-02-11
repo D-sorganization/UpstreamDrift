@@ -5,7 +5,6 @@ This is a thin wrapper that delegates to src/tools/code_quality_check.py.
 This consolidation follows DRY principles from The Pragmatic Programmer.
 """
 
-import sys
 from pathlib import Path
 
 # Add the repo root to path to enable importing the authoritative module

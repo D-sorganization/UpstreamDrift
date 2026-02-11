@@ -79,7 +79,7 @@ class ConcreteSimGUI(SimulationGUIBase):
 
 
 @pytest.fixture(scope="module")
-def qapp() -> Any:
+def qapp():
     """Ensure a QApplication exists for the whole test module."""
     app = QtWidgets.QApplication.instance()
     if app is None:

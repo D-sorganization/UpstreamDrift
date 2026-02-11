@@ -6,7 +6,7 @@ from src.shared.python.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine(PhysicsEngine):
-    def __init__(self) -> None:
+    def __init__(self):
         # self.model_name = "MockEngine" # Handled by property
         self._time = 0.0
         self._q = np.array([0.0, 0.0])
@@ -18,126 +18,126 @@ class MockPhysicsEngine(PhysicsEngine):
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         return self._q, self._v
 
-    def set_state(self, q, v) -> None:
+    def set_state(self, q, v):
         self._q = q
         self._v = v
 
-    def forward(self) -> None:
+    def forward(self):
         pass
 
-    def set_control(self, u) -> None:
+    def set_control(self, u):
         pass
 
-    def compute_mass_matrix(self) -> Any:
+    def compute_mass_matrix(self):
         return np.eye(2)
 
-    def compute_ztcf(self, q, v) -> Any:
+    def compute_ztcf(self, q, v):
         return np.array([0.1, 0.2])
 
-    def compute_zvcf(self, q) -> Any:
+    def compute_zvcf(self, q):
         return np.array([0.3, 0.4])
 
-    def compute_drift_acceleration(self) -> Any:
+    def compute_drift_acceleration(self):
         return np.array([0.01, 0.02])
 
-    def compute_control_acceleration(self, tau) -> Any:
+    def compute_control_acceleration(self, tau):
         return tau  # Identity for simplicity
 
     # Implement other required abstract methods with dummy implementations
-    def compute_gravity_forces(self) -> Any:
+    def compute_gravity_forces(self):
         return np.zeros(2)
 
-    def compute_jacobian(self, body_name) -> dict:
+    def compute_jacobian(self, body_name):
         return {}
 
-    def compute_coriolis_centrifugal_forces(self) -> Any:
+    def compute_coriolis_centrifugal_forces(self):
         return np.zeros(2)
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         return np.zeros(2)
 
-    def compute_forward_dynamics(self, q, v, tau) -> Any:
+    def compute_forward_dynamics(self, q, v, tau):
         return np.zeros(2)
 
-    def compute_bias_forces(self) -> Any:
+    def compute_bias_forces(self):
         return np.zeros(2)
 
-    def load_from_path(self, path) -> None:
+    def load_from_path(self, path):
         pass
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         pass
 
     @property
-    def model_name(self) -> str:
+    def model_name(self):
         return "MockEngine"
 
     def step(self, dt: float | None = None) -> None:
         if dt is not None:
             self._time += dt
 
-    def reset(self) -> None:
+    def reset(self):
         self._time = 0.0
 
-    def get_joint_names(self) -> list:
+    def get_joint_names(self):
         return ["j1", "j2"]
 
-    def get_actuator_names(self) -> list:
+    def get_actuator_names(self):
         return ["a1", "a2"]
 
-    def get_body_names(self) -> list:
+    def get_body_names(self):
         return ["b1"]
 
-    def get_body_mass(self, body_name) -> float:
+    def get_body_mass(self, body_name):
         return 1.0
 
-    def get_body_inertia(self, body_name) -> Any:
+    def get_body_inertia(self, body_name):
         return np.eye(3)
 
-    def get_body_position(self, body_name) -> Any:
+    def get_body_position(self, body_name):
         return np.zeros(3)
 
-    def get_body_rotation(self, body_name) -> Any:
+    def get_body_rotation(self, body_name):
         return np.eye(3)
 
-    def get_body_velocity(self, body_name) -> Any:
+    def get_body_velocity(self, body_name):
         return np.zeros(6)
 
-    def get_contact_forces(self) -> list:
+    def get_contact_forces(self):
         return []
 
-    def get_joint_limits(self) -> Any:
+    def get_joint_limits(self):
         return np.zeros((2, 2))
 
-    def get_actuator_limits(self) -> Any:
+    def get_actuator_limits(self):
         return np.zeros((2, 2))
 
-    def get_dof(self) -> int:
+    def get_dof(self):
         return 2
 
-    def get_num_actuators(self) -> int:
+    def get_num_actuators(self):
         return 2
 
-    def get_num_bodies(self) -> int:
+    def get_num_bodies(self):
         return 1
 
 
 class TestGenericPhysicsRecorder:
     @pytest.fixture
-    def engine(self) -> Any:
+    def engine(self):
         return MockPhysicsEngine()
 
     @pytest.fixture
-    def recorder(self, engine) -> Any:
+    def recorder(self, engine):
         return GenericPhysicsRecorder(engine, max_samples=100)
 
-    def test_initialization(self, recorder) -> None:
+    def test_initialization(self, recorder):
         assert recorder.current_idx == 0
         assert not recorder.is_recording
         assert not recorder._buffers_initialized
         assert "times" in recorder.data
 
-    def test_recording_cycle(self, recorder, engine) -> None:
+    def test_recording_cycle(self, recorder, engine):
         recorder.start()
         assert recorder.is_recording
 
@@ -159,7 +159,7 @@ class TestGenericPhysicsRecorder:
         assert len(pos) == 10
         assert pos[9, 0] == 9.0
 
-    def test_buffer_allocation_on_first_step(self, recorder, engine) -> None:
+    def test_buffer_allocation_on_first_step(self, recorder, engine):
         recorder.start()
         recorder.record_step()
 
@@ -167,7 +167,7 @@ class TestGenericPhysicsRecorder:
         # Dynamic buffer sizing: starts at 1000 (or max_samples if smaller)
         assert recorder.data["joint_positions"].shape == (1000, 2)
 
-    def test_buffer_full(self, engine) -> None:
+    def test_buffer_full(self, engine):
         # Test with initial_capacity=5 to match max_samples
         recorder = GenericPhysicsRecorder(engine, max_samples=5, initial_capacity=5)
         recorder.start()
@@ -181,7 +181,7 @@ class TestGenericPhysicsRecorder:
         assert recorder.current_idx == 5
         assert not recorder.is_recording  # Auto-stopped when buffer full
 
-    def test_analysis_config_allocation(self, recorder, engine) -> None:
+    def test_analysis_config_allocation(self, recorder, engine):
         recorder.start()
         recorder.record_step()  # Initialize buffers
 
@@ -194,7 +194,7 @@ class TestGenericPhysicsRecorder:
         recorder.record_step()
         assert recorder.data["ztcf_accel"][1, 0] == 0.1  # Mock value
 
-    def test_post_hoc_analysis(self, recorder, engine) -> None:
+    def test_post_hoc_analysis(self, recorder, engine):
         recorder.start()
         for _i in range(5):
             recorder.record_step(control_input=np.array([1.0, 1.0]))
@@ -207,7 +207,7 @@ class TestGenericPhysicsRecorder:
         assert len(times) == 5
         assert len(vals) == 5
 
-    def test_get_data_dict(self, recorder, engine) -> None:
+    def test_get_data_dict(self, recorder, engine):
         recorder.start()
         recorder.record_step()
 

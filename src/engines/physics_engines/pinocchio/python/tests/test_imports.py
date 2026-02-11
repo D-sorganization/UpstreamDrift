@@ -1,11 +1,6 @@
 """Test that all modules can be imported."""
 
-import sys
-from pathlib import Path
-
 import pytest
-
-# Add project root to path
 
 
 def test_import_pinocchio_golf() -> None:

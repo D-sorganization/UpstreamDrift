@@ -6,49 +6,47 @@ Test script to verify data loading and GUI functionality
 import os
 import sys
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from golf_gui_application import GolfVisualizerMainWindow
 from PyQt6.QtWidgets import QApplication
 from wiffle_data_loader import WiffleDataLoader
-import logging
 
-
-logger = logging.getLogger(__name__)
 
 def test_data_loading():
     """Test the data loading functionality"""
-    logger.info("🧪 Testing data loading...")
+    print("🧪 Testing data loading...")
 
     try:
         # Load data
         loader = WiffleDataLoader()
         data = loader.load_data()
-        logger.info(f"✅ Data loaded successfully: {len(data)} datasets")
+        print(f"✅ Data loaded successfully: {len(data)} datasets")
 
         # Convert to GUI format
         baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(data)
-        logger.info("✅ GUI format conversion successful:")
-        logger.info(f"   BASEQ: {baseq_data.shape}")
-        logger.info(f"   ZTCFQ: {ztcfq_data.shape}")
-        logger.info(f"   DELTAQ: {deltaq_data.shape}")
+        print("✅ GUI format conversion successful:")
+        print(f"   BASEQ: {baseq_data.shape}")
+        print(f"   ZTCFQ: {ztcfq_data.shape}")
+        print(f"   DELTAQ: {deltaq_data.shape}")
 
         return {"baseq": baseq_data, "ztcfq": ztcfq_data, "deltaq": deltaq_data}
 
-    except (FileNotFoundError, ValueError, KeyError, OSError):
-        logger.info(f"❌ Data loading failed: {e}")
+    except Exception as e:
+        print(f"❌ Data loading failed: {e}")
         return None
 
 
 def test_gui_launch():
     """Test launching the GUI"""
-    logger.info("🧪 Testing GUI launch...")
+    print("🧪 Testing GUI launch...")
 
     try:
         QApplication(sys.argv)
 
         # Create main window
         window = GolfVisualizerMainWindow()
-        logger.info("✅ Main window created successfully")
+        print("✅ Main window created successfully")
 
         # Load test data
         gui_data = test_data_loading()
@@ -58,32 +56,32 @@ def test_gui_launch():
             )
 
             if success:
-                logger.info("✅ Data loaded into GUI successfully")
+                print("✅ Data loaded into GUI successfully")
                 window.show()
-                logger.info("✅ GUI window displayed")
+                print("✅ GUI window displayed")
                 return True
             else:
-                logger.info("❌ Failed to load data into GUI")
+                print("❌ Failed to load data into GUI")
                 return False
         else:
-            logger.info("❌ No data available for GUI test")
+            print("❌ No data available for GUI test")
             return False
 
-    except (FileNotFoundError, ValueError, KeyError, OSError):
-        logger.info(f"❌ GUI launch failed: {e}")
+    except Exception as e:
+        print(f"❌ GUI launch failed: {e}")
         return False
 
 
 if __name__ == "__main__":
-    logger.info("🚀 Starting Wiffle Swing Visualizer Tests")
-    logger.info("=" * 50)
+    print("🚀 Starting Wiffle Swing Visualizer Tests")
+    print("=" * 50)
 
     # Test data loading
     data = test_data_loading()
 
     if data:
-        logger.info("\n✅ All tests passed! The application should work correctly.")
-        logger.info("\nTo launch the full application:")
-        logger.info("   python simple_wiffle_launcher.py")
+        print("\n✅ All tests passed! The application should work correctly.")
+        print("\nTo launch the full application:")
+        print("   python simple_wiffle_launcher.py")
     else:
-        logger.info("\n❌ Tests failed. Please check the error messages above.")
+        print("\n❌ Tests failed. Please check the error messages above.")

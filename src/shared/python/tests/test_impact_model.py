@@ -18,12 +18,12 @@ from src.shared.python.impact_model import (
 
 
 @pytest.fixture
-def default_impact_params() -> Any:
+def default_impact_params():
     return ImpactParameters(cor=0.8, friction_coefficient=0.4)
 
 
 @pytest.fixture
-def basic_pre_state() -> Any:
+def basic_pre_state():
     return PreImpactState(
         clubhead_velocity=np.array([45.0, 0.0, 0.0]),  # 45 m/s (~100 mph)
         clubhead_angular_velocity=np.zeros(3),
@@ -37,7 +37,7 @@ def basic_pre_state() -> Any:
     )
 
 
-def test_rigid_body_impact_conservation(basic_pre_state, default_impact_params) -> None:
+def test_rigid_body_impact_conservation(basic_pre_state, default_impact_params):
     """Test momentum conservation in rigid body impact."""
     model = RigidBodyImpactModel()
     post_state = model.solve(basic_pre_state, default_impact_params)
@@ -56,7 +56,7 @@ def test_rigid_body_impact_conservation(basic_pre_state, default_impact_params) 
     np.testing.assert_allclose(p_initial, p_final, atol=1e-5)
 
 
-def test_rigid_body_impact_cor(basic_pre_state, default_impact_params) -> None:
+def test_rigid_body_impact_cor(basic_pre_state, default_impact_params):
     """Test coefficient of restitution logic."""
     model = RigidBodyImpactModel()
     post_state = model.solve(basic_pre_state, default_impact_params)
@@ -79,7 +79,7 @@ def test_rigid_body_impact_cor(basic_pre_state, default_impact_params) -> None:
     assert np.isclose(v_sep, expected_v_sep)
 
 
-def test_rigid_body_friction_spin(basic_pre_state, default_impact_params) -> None:
+def test_rigid_body_friction_spin(basic_pre_state, default_impact_params):
     """Test spin generation from glancing impact."""
     # Modify pre-state to have tangential velocity component
     # Club moving slightly up (launch angle)
@@ -180,7 +180,7 @@ def test_rigid_body_friction_spin(basic_pre_state, default_impact_params) -> Non
     assert post_state.ball_angular_velocity[1] == 0
 
 
-def test_finite_time_model(basic_pre_state, default_impact_params) -> None:
+def test_finite_time_model(basic_pre_state, default_impact_params):
     """Test finite time model delegates to rigid body but sets duration."""
     model = FiniteTimeImpactModel()
     post_state = model.solve(basic_pre_state, default_impact_params)
@@ -192,7 +192,7 @@ def test_finite_time_model(basic_pre_state, default_impact_params) -> None:
     np.testing.assert_array_equal(post_state.ball_velocity, rigid_post.ball_velocity)
 
 
-def test_spring_damper_model(basic_pre_state, default_impact_params) -> None:
+def test_spring_damper_model(basic_pre_state, default_impact_params):
     """Test spring damper model produces physical results."""
     # Use softer params for stability in test to avoid numerical blow-up
     # Stiff springs (1e7) require very small dt (<< 1e-6) for stability with simple integrators.
@@ -226,7 +226,7 @@ def test_spring_damper_model(basic_pre_state, default_impact_params) -> None:
     assert post_state.contact_duration > 0
 
 
-def test_gear_effect_spin() -> None:
+def test_gear_effect_spin():
     """Test gear effect spin calculation."""
     v_club = np.array([45.0, 0.0, 0.0])
     normal = np.array([1.0, 0.0, 0.0])
@@ -249,7 +249,7 @@ def test_gear_effect_spin() -> None:
     assert spin_heel[2] > 0
 
 
-def test_validate_energy_balance(basic_pre_state, default_impact_params) -> None:
+def test_validate_energy_balance(basic_pre_state, default_impact_params):
     """Test energy balance validation function."""
     model = RigidBodyImpactModel()
     post_state = model.solve(basic_pre_state, default_impact_params)
@@ -263,7 +263,7 @@ def test_validate_energy_balance(basic_pre_state, default_impact_params) -> None
     assert analysis["energy_lost"] > 0  # Inelastic collision (COR < 1)
 
 
-def test_create_impact_model() -> None:
+def test_create_impact_model():
     """Test factory function."""
     assert isinstance(
         create_impact_model(ImpactModelType.RIGID_BODY), RigidBodyImpactModel

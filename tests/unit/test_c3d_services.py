@@ -147,7 +147,6 @@ def test_load_c3d_file_not_found(mock_exists):
 def test_loader_thread(qtbot):
     """Test that thread emits signals."""
     # Since we can't reliably import the module statically due to path issues,
-    # we rely on the object imported via 'apps' from our sys.path hack.
 
     # Ensure C3DLoaderThread and its module are from the same context
     try:

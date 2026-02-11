@@ -1,12 +1,10 @@
 """Tests for constants_file module."""
 
 import math
-import sys
 from pathlib import Path
 
 import pytest
 
-# Add project root to path
 project_root = Path(__file__).parent.parent.parent
 
 # Import constants after adding to path

@@ -7,16 +7,7 @@ This script creates a professional Windows MSI installer with:
 - Uninstaller support
 """
 
-import sys
-from pathlib import Path
-from typing import Any
-
-from cx_Freeze import Executable, setup
-
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
+import sysfrom pathlib import Pathfrom typing import Anyfrom cx_Freeze import Executable, setupproject_root = Path(__file__).parent.parent.parent
 # Import version and metadata
 try:
     from shared.python.version import __description__, __version__

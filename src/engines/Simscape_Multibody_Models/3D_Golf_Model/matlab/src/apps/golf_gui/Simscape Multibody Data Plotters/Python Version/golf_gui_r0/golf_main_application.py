@@ -35,7 +35,7 @@ try:
     from golf_gui_application import GolfVisualizerMainWindow
 except ImportError as e:
     logger.error(f"Failed to import core modules: {e}")
-    logger.info(
+    print(
         "❌ Core modules not found. Please ensure all files are in the same directory."
     )
     logger.error("Error: %s", e)
@@ -49,7 +49,7 @@ except ImportError as e:
 class EnhancedGolfVisualizerApp(QApplication):
     """Enhanced main application with advanced features"""
 
-    def __init__(self, argv) -> None:
+    def __init__(self, argv):
         super().__init__(argv)
 
         # Application metadata
@@ -73,7 +73,7 @@ class EnhancedGolfVisualizerApp(QApplication):
 
         logger.info("Enhanced Golf Visualizer App initialized")
 
-    def _setup_application_style(self) -> None:
+    def _setup_application_style(self):
         """Setup application-wide styling and fonts"""
         # Set default font
         font = QFont("Segoe UI", 9)
@@ -148,7 +148,7 @@ class EnhancedGolfVisualizerApp(QApplication):
 
         return splash
 
-    def _auto_load_data(self) -> None:
+    def _auto_load_data(self):
         """Attempt to auto-load data files if they exist"""
         data_files = ["BASEQ.mat", "ZTCFQ.mat", "DELTAQ.mat"]
 
@@ -165,7 +165,7 @@ class PerformanceMonitor(QThread):
 
     performanceUpdate = pyqtSignal(dict)
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.monitoring = False
         self.stats = {
@@ -175,19 +175,19 @@ class PerformanceMonitor(QThread):
             "frame_rate": 0.0,
         }
 
-    def start_monitoring(self) -> None:
+    def start_monitoring(self):
         """Start performance monitoring"""
         self.monitoring = True
         self.start()
         logger.info("Performance monitoring started")
 
-    def stop_monitoring(self) -> None:
+    def stop_monitoring(self):
         """Stop performance monitoring"""
         self.monitoring = False
         self.wait()
         logger.info("Performance monitoring stopped")
 
-    def run(self) -> None:
+    def run(self):
         """Performance monitoring loop"""
         while self.monitoring:
             try:
@@ -211,7 +211,7 @@ class PerformanceMonitor(QThread):
 class EnhancedMainWindow(GolfVisualizerMainWindow):
     """Enhanced main window with additional features"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
 
         # Enhanced camera system
@@ -231,7 +231,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
 
         logger.info("Enhanced main window initialized")
 
-    def _integrate_camera_system(self) -> None:
+    def _integrate_camera_system(self):
         """Integrate advanced camera system"""
         if hasattr(self.gl_widget, "camera_controller"):
             # Replace the basic camera with our advanced system
@@ -247,7 +247,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         # Add camera preset menu
         self._add_camera_preset_menu()
 
-    def _add_camera_preset_menu(self) -> None:
+    def _add_camera_preset_menu(self):
         """Add camera preset menu to menubar"""
         menubar = self.menuBar()
         camera_menu = menubar.addMenu("Camera")
@@ -283,7 +283,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             self._demo_cinematic_tour
         )
 
-    def _setup_enhanced_features(self) -> None:
+    def _setup_enhanced_features(self):
         """Setup enhanced application features"""
         # Add toolbar extensions
         self._add_enhanced_toolbar()
@@ -294,7 +294,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         # Setup status monitoring
         self._setup_status_monitoring()
 
-    def _add_enhanced_toolbar(self) -> None:
+    def _add_enhanced_toolbar(self):
         """Add enhanced toolbar with additional controls"""
         toolbar = self.findChild(object, "MainToolBar")  # Find existing toolbar
         if toolbar:
@@ -315,7 +315,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             export_action.setToolTip("Export Data/Video")
             export_action.triggered.connect(self._show_export_dialog)
 
-    def _setup_enhanced_shortcuts(self) -> None:
+    def _setup_enhanced_shortcuts(self):
         """Setup enhanced keyboard shortcuts"""
         from PyQt6.QtGui import QKeySequence, QShortcut
 
@@ -350,7 +350,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             self._toggle_measurement_mode
         )
 
-    def _setup_status_monitoring(self) -> None:
+    def _setup_status_monitoring(self):
         """Setup enhanced status monitoring"""
         # Create timer for regular status updates
         self.status_timer = QTimer()
@@ -428,16 +428,16 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
     # ENHANCED FEATURE IMPLEMENTATIONS
     # ========================================================================
 
-    def _on_camera_mode_changed(self, mode: str) -> None:
+    def _on_camera_mode_changed(self, mode: str):
         """Handle camera mode changes"""
         self.statusBar().showMessage(f"Camera mode: {mode}")
         logger.info(f"Camera mode changed to: {mode}")
 
-    def _on_camera_animation_finished(self) -> None:
+    def _on_camera_animation_finished(self):
         """Handle camera animation completion"""
         self.statusBar().showMessage("Camera animation complete")
 
-    def _demo_orbit_animation(self) -> None:
+    def _demo_orbit_animation(self):
         """Demonstrate smooth orbit animation"""
         if not self.gl_widget.frame_processor:
             QMessageBox.information(self, "Info", "Please load data first")
@@ -458,7 +458,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         self.camera_controller.animate_to_state(target_state, duration=4.0)
         self.statusBar().showMessage("Demonstrating orbit animation...")
 
-    def _demo_cinematic_tour(self) -> None:
+    def _demo_cinematic_tour(self):
         """Demonstrate cinematic camera tour"""
         if not self.gl_widget.frame_processor:
             QMessageBox.information(self, "Info", "Please load data first")
@@ -485,25 +485,25 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         self.camera_controller.start_cinematic_playback(duration=10.0, loop=False)
         self.statusBar().showMessage("Playing cinematic tour...")
 
-    def _jump_frames(self, delta: int) -> None:
+    def _jump_frames(self, delta: int):
         """Jump multiple frames at once"""
         if self.gl_widget.frame_processor:
             new_frame = self.gl_widget.current_frame + delta
             new_frame = max(0, min(new_frame, self.gl_widget.num_frames - 1))
             self.gl_widget.set_frame(new_frame)
 
-    def _toggle_realtime_analysis(self) -> None:
+    def _toggle_realtime_analysis(self):
         """Toggle real-time analysis display"""
         # This would toggle additional analysis overlays
         self.statusBar().showMessage("Real-time analysis toggled")
         logger.info("Real-time analysis toggled")
 
-    def _toggle_measurement_mode(self) -> None:
+    def _toggle_measurement_mode(self):
         """Toggle measurement/annotation mode"""
         self.statusBar().showMessage("Measurement mode toggled")
         logger.info("Measurement mode toggled")
 
-    def _start_recording(self) -> None:
+    def _start_recording(self):
         """Start recording animation"""
         try:
             filename = f"golf_swing_recording_{int(time.time())}.mp4"
@@ -515,7 +515,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
                 self, "Recording Error", f"Failed to start recording:\n{e}"
             )
 
-    def _show_export_dialog(self) -> None:
+    def _show_export_dialog(self):
         """Show export options dialog"""
         from PyQt6.QtWidgets import (
             QCheckBox,
@@ -588,7 +588,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             self.statusBar().showMessage("Export started...")
             logger.info("Export dialog accepted")
 
-    def _update_enhanced_status(self) -> None:
+    def _update_enhanced_status(self):
         """Update enhanced status information"""
         if self.gl_widget.frame_processor:
             # Update performance panel with additional info
@@ -605,7 +605,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
 class SessionManager:
     """Manage analysis sessions and data persistence"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.sessions: dict[str, dict] = {}
         self.current_session: str | None = None
 
@@ -628,7 +628,7 @@ class SessionManager:
         logger.info(f"Created session: {session_id}")
         return session_id
 
-    def save_session(self, session_id: str, filepath: str) -> None:
+    def save_session(self, session_id: str, filepath: str):
         """Save session to file"""
         if session_id in self.sessions:
             import json
@@ -657,16 +657,16 @@ class SessionManager:
 class ExportManager:
     """Manage various export functionalities"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.export_queue: list[dict] = []
         self.is_exporting = False
 
-    def export_video(self, frames: list, output_path: str, fps: int = 30) -> None:
+    def export_video(self, frames: list, output_path: str, fps: int = 30):
         """Export frames as video"""
         # This would use OpenCV or similar to create video
         logger.info(f"Exporting video: {output_path}")
 
-    def export_data(self, data: dict, output_path: str, format: str = "csv") -> None:
+    def export_data(self, data: dict, output_path: str, format: str = "csv"):
         """Export analysis data"""
         if format.lower() == "csv":
             import pandas as pd
@@ -675,7 +675,7 @@ class ExportManager:
             df.to_csv(output_path, index=False)
         logger.info(f"Exported data: {output_path}")
 
-    def export_images(self, frames: list, output_dir: str, format: str = "png") -> None:
+    def export_images(self, frames: list, output_dir: str, format: str = "png"):
         """Export frame sequence as images"""
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         # Export logic here
@@ -685,17 +685,17 @@ class ExportManager:
 class PluginManager:
     """Manage plugins and extensions"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.plugins: dict[str, object] = {}
         self.plugin_dir = Path("plugins")
 
-    def load_plugins(self) -> None:
+    def load_plugins(self):
         """Load available plugins"""
         if self.plugin_dir.exists():
             logger.info("Loading plugins...")
             # Plugin loading logic here
 
-    def register_plugin(self, name: str, plugin: object) -> None:
+    def register_plugin(self, name: str, plugin: object):
         """Register a plugin"""
         self.plugins[name] = plugin
         logger.info(f"Plugin registered: {name}")
@@ -706,11 +706,11 @@ class PluginManager:
 # ============================================================================
 
 
-def main() -> Any:
+def main():
     """Enhanced main entry point with comprehensive error handling"""
 
     # Setup exception handling
-    def handle_exception(exc_type, exc_value, exc_traceback) -> None:
+    def handle_exception(exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return

@@ -3,7 +3,7 @@ from scipy import signal
 from scipy.interpolate import UnivariateSpline
 
 
-def butter_lowpass_filter(data, cutoff, fs, order=4) -> Any:
+def butter_lowpass_filter(data, cutoff, fs, order=4):
     """Apply a Butterworth low-pass filter."""
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
@@ -12,19 +12,19 @@ def butter_lowpass_filter(data, cutoff, fs, order=4) -> Any:
     return y
 
 
-def savitzky_golay_filter(data, window_length=9, polyorder=3) -> Any:
+def savitzky_golay_filter(data, window_length=9, polyorder=3):
     """Apply a Savitzky-Golay filter."""
     if window_length % 2 == 0:
         window_length += 1  # Must be odd
     return signal.savgol_filter(data, window_length, polyorder)
 
 
-def moving_average_filter(data, window_size=5) -> Any:
+def moving_average_filter(data, window_size=5):
     """Apply a moving average filter."""
     return np.convolve(data, np.ones(window_size) / window_size, mode="valid")
 
 
-def calculate_derivatives(data, time) -> tuple:
+def calculate_derivatives(data, time):
     """Calculate velocity and acceleration using splines for accuracy."""
     spline = UnivariateSpline(time, data, s=0)
     velocity = spline.derivative(n=1)(time)
@@ -34,7 +34,7 @@ def calculate_derivatives(data, time) -> tuple:
 
 def calculate_inverse_dynamics(
     position_data, orientation_data, time_vector, club_mass=0.2, eval_offset=0.0
-) -> dict:
+):
     """
     Calculate inverse dynamics (forces and torques).
 

@@ -5,7 +5,6 @@ to all integration tests via pytest's automatic fixture discovery.
 """
 
 # mypy: ignore-errors
-# The dynamic sys.path import cannot be resolved by mypy statically
 
 from __future__ import annotations
 

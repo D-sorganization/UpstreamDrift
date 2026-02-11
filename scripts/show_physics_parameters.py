@@ -1,9 +1,7 @@
 """CLI utility to display physics parameters."""
 
-import sys
 from pathlib import Path
 
-# Add project root to path first (script is in scripts/ directory)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 

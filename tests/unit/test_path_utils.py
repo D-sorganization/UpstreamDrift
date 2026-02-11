@@ -372,7 +372,6 @@ class TestSetupImportPaths:
         # Create a path that definitely doesn't have src_root
         clean_path = [p for p in sys.path if p != src_root]
 
-        # Patch sys.path to ensure clean state
         with patch("sys.path", clean_path):
             # Call twice
             setup_import_paths()

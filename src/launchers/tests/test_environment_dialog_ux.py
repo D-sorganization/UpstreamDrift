@@ -13,7 +13,7 @@ sys.modules["shared.python.secure_subprocess"] = MagicMock()
 
 
 @pytest.fixture
-def app() -> Any:
+def app():
     """Create a Qt application instance."""
     app = QApplication.instance()
     if not app:
@@ -30,7 +30,7 @@ def dialog(app):
         dlg.close()
 
 
-def test_build_button_feedback(dialog) -> None:
+def test_build_button_feedback(dialog):
     """Test that the build button text changes during build process."""
 
     # Initial state
@@ -57,7 +57,7 @@ def test_build_button_feedback(dialog) -> None:
         assert dialog.btn_build.isEnabled() is True
 
 
-def test_build_button_feedback_failure(dialog) -> None:
+def test_build_button_feedback_failure(dialog):
     """Test that the build button text restores even on failure."""
 
     # Start build

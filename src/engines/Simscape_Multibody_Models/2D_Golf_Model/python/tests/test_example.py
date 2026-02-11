@@ -6,8 +6,6 @@ including positive tests, negative tests, and edge cases.
 
 import logging
 import math
-import sys
-from pathlib import Path
 
 import pytest
 

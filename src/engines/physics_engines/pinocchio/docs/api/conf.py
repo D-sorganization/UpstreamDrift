@@ -1,8 +1,5 @@
 """Sphinx configuration for DTACK API documentation."""
 
-import sys
-from pathlib import Path
-
 # Add python directory to path
 
 project = "DTACK Golf Biomechanics Platform"

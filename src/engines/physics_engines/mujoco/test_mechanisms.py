@@ -23,7 +23,7 @@ def inclined_plane_model() -> mujoco.MjModel:
     try:
         model = mujoco.MjModel.from_xml_string(TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML)
         return model
-    except (ImportError, ModuleNotFoundError):
+    except Exception as e:
         pytest.fail(f"Failed to load inclined plane model: {e}")
 
 

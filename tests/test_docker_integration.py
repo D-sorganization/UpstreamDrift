@@ -58,7 +58,6 @@ class TestDockerBuild(unittest.TestCase):
 
         # Verify PYTHONPATH is set to the workspace root
         # The multi-stage Dockerfile sets PYTHONPATH="/workspace" in the runtime stage,
-        # enabling "from src.xxx" imports from the project root.
         pythonpath_line = [
             line for line in content.split("\n") if "PYTHONPATH=" in line
         ][0]
@@ -411,7 +410,6 @@ class TestContainerEnvironment(unittest.TestCase):
         )
 
         pythonpath_line = pythonpath_lines[0]
-        # The Dockerfile sets PYTHONPATH to /workspace (the project root)
         # so that "from src.xxx" imports work inside the container.
         self.assertEqual(
             pythonpath_line.strip(),
