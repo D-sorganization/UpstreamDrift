@@ -16,6 +16,14 @@ from __future__ import annotations
 import sys
 from pathlib import Path as _Path
 
+# Bootstrap: add repo root for src.* imports
+_root = next(
+    (p for p in _Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
+    _Path(__file__).resolve().parent,
+)
+if str(_root) not in sys.path:
+    sys.path.insert(0, str(_root))
+
 _tools_dir = str(_Path(__file__).resolve().parent.parent.parent)
 if _tools_dir not in sys.path:
     sys.path.insert(0, _tools_dir)

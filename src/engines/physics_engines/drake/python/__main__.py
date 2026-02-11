@@ -3,24 +3,22 @@
 import sys
 from pathlib import Path
 
-# Add suite root to sys.path
-try:
-    current_path = Path(__file__).resolve()
-    suite_root: Path | None = None
-    for parent in current_path.parents:
-        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
-            suite_root = parent
-            break
+# Bootstrap: add repo root to sys.path for src.* imports
+_root = next(
+    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
+    Path(__file__).resolve().parent,
+)
+if str(_root) not in sys.path:
+    sys.path.insert(0, str(_root))
 
-    if suite_root and str(suite_root) not in sys.path:
-        sys.path.insert(0, str(suite_root))
-except (FileNotFoundError, OSError):
-    pass
+from _bootstrap import bootstrap  # noqa: E402
 
-from src.engines.physics_engines.drake.python.drake_physics_engine import (
+bootstrap(__file__)
+
+from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
     DrakePhysicsEngine,
 )
-from src.shared.python.dashboard.launcher import launch_dashboard
+from src.shared.python.dashboard.launcher import launch_dashboard  # noqa: E402
 
 if __name__ == "__main__":
     launch_dashboard(DrakePhysicsEngine, title="Drake Physics Engine")  # type: ignore[type-abstract]

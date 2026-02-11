@@ -3,27 +3,24 @@
 import sys
 from pathlib import Path
 
-# Add suite root to sys.path to allow imports from shared.
-# Instead of assuming a fixed directory depth, search upwards for a repository marker.
-try:
-    current_path = Path(__file__).resolve()
-    suite_root: Path | None = None
-    for parent in current_path.parents:
-        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
-            suite_root = parent
-            break
+# Bootstrap: add repo root to sys.path for src.* imports
+_root = next(
+    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
+    Path(__file__).resolve().parent,
+)
+if str(_root) not in sys.path:
+    sys.path.insert(0, str(_root))
 
-    if suite_root and str(suite_root) not in sys.path:
-        sys.path.insert(0, str(suite_root))
-except (FileNotFoundError, OSError):
-    pass
+from _bootstrap import bootstrap  # noqa: E402
 
-from PyQt6 import QtCore, QtWidgets
+bootstrap(__file__)
 
-from .gui.core.main_window import AdvancedGolfAnalysisWindow
+from PyQt6 import QtCore, QtWidgets  # noqa: E402
+
+from .gui.core.main_window import AdvancedGolfAnalysisWindow  # noqa: E402
 
 # Legacy simple window for backwards compatibility
-from .models import (
+from .models import (  # noqa: E402
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
     CHAOTIC_PENDULUM_XML,
     DOUBLE_PENDULUM_XML,
@@ -31,7 +28,7 @@ from .models import (
     TRIPLE_PENDULUM_XML,
     UPPER_BODY_GOLF_SWING_XML,
 )
-from .sim_widget import MuJoCoSimWidget
+from .sim_widget import MuJoCoSimWidget  # noqa: E402
 
 
 class MainWindow(QtWidgets.QMainWindow):
