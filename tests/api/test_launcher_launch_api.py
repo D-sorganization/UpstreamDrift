@@ -276,7 +276,9 @@ class TestStopEndpoint:
         mock_proc.pid = 54321
         client._mock_process_manager.running_processes["Drake Golf Model"] = mock_proc
 
-        with patch("src.shared.python.security.subprocess_utils.kill_process_tree") as mock_kill:
+        with patch(
+            "src.shared.python.security.subprocess_utils.kill_process_tree"
+        ) as mock_kill:
             client.post("/api/launcher/stop/Drake Golf Model")
             mock_kill.assert_called_once_with(54321)
 

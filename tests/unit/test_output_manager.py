@@ -334,7 +334,9 @@ class TestOutputManager:
     def test_convenience_functions(self, temp_output_dir, sample_data):
         """Test global convenience functions."""
         # We need to patch OutputManager to use our temp dir
-        with patch("src.shared.python.data_io.output_manager.OutputManager") as MockManager:
+        with patch(
+            "src.shared.python.data_io.output_manager.OutputManager"
+        ) as MockManager:
             instance = MockManager.return_value
             instance.save_simulation_results.return_value = Path("test.csv")
 

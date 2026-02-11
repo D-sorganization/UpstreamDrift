@@ -50,9 +50,7 @@ def find_importers(
         rf"|(?:import\s+src\.shared\.python\.{shim_name}\b)"
     )
     # Also match relative imports in shared subpackages
-    rel_pattern = re.compile(
-        rf"(?:from\s+\.\.{shim_name}\s+import\s)"
-    )
+    rel_pattern = re.compile(rf"(?:from\s+\.\.{shim_name}\s+import\s)")
 
     for search_dir in search_dirs:
         for py_file in search_dir.rglob("*.py"):
@@ -183,7 +181,9 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
 def main() -> None:
     """Main entry point."""
     dry_run = "--dry-run" in sys.argv
-    max_imports = int(sys.argv[sys.argv.index("--max") + 1]) if "--max" in sys.argv else 999
+    max_imports = (
+        int(sys.argv[sys.argv.index("--max") + 1]) if "--max" in sys.argv else 999
+    )
 
     # Find all shim files
     shim_files = sorted(SHARED_DIR.glob("*.py"))

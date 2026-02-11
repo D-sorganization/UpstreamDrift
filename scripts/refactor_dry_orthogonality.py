@@ -234,7 +234,10 @@ class DRYRefactorer:
             original_content = content
 
             # Check if file already uses validation_utils
-            if "from src.shared.python.validation_pkg.validation_utils import" in content:
+            if (
+                "from src.shared.python.validation_pkg.validation_utils import"
+                in content
+            ):
                 return False
 
             # Pattern: if array.shape != expected_shape: raise ValueError
