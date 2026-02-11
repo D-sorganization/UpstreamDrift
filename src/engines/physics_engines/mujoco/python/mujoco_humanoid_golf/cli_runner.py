@@ -154,19 +154,39 @@ def summarize_run(recorder: SwingRecorder) -> MutableMapping[str, float]:
 
 
 def export_json(path: Path, payload: Mapping[str, Any]) -> None:
-    """Persist telemetry to a JSON file."""
+    """Persist telemetry to a JSON file with provenance metadata."""
+    from src.shared.python.data_io.provenance import ProvenanceInfo
+
+    provenance = ProvenanceInfo.capture()
+    output = {
+        "provenance": {
+            "software": f"{provenance.software_name} v{provenance.software_version}",
+            "timestamp_utc": provenance.timestamp_utc,
+            "git_commit": provenance.git_commit_sha,
+            "git_branch": provenance.git_branch,
+            "git_dirty": provenance.git_is_dirty,
+        },
+        **payload,
+    }
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as file:
-        json.dump(payload, file, indent=2)
+        json.dump(output, file, indent=2)
 
 
 def export_csv(path: Path, payload: Mapping[str, Any]) -> None:
-    """Persist telemetry to a CSV file."""
+    """Persist telemetry to a CSV file with provenance header."""
+    from src.shared.python.data_io.provenance import (
+        ProvenanceInfo,
+        add_provenance_header_file,
+    )
+
     path.parent.mkdir(parents=True, exist_ok=True)
     keys = [key for key, value in payload.items() if isinstance(value, Sequence)]
     max_len = max((len(payload[key]) for key in keys), default=0)
 
+    provenance = ProvenanceInfo.capture()
     with path.open("w", encoding="utf-8", newline="") as file:
+        add_provenance_header_file(file, provenance)
         writer = csv.writer(file)
         writer.writerow(keys)
         for row_idx in range(max_len):
