@@ -9,7 +9,7 @@ from src.shared.python.ball_flight_physics import (
 
 
 class TestBallFlightPhysics:
-    def test_trajectory_simulation(self):
+    def test_trajectory_simulation(self) -> None:
         """Test basic trajectory simulation."""
         simulator = BallFlightSimulator()
         launch = LaunchConditions(
@@ -33,7 +33,7 @@ class TestBallFlightPhysics:
         assert metrics["carry_distance"] > 100.0
         assert metrics["max_height"] > 10.0
 
-    def test_no_spin_trajectory(self):
+    def test_no_spin_trajectory(self) -> None:
         """Test trajectory without spin."""
         simulator = BallFlightSimulator()
         launch = LaunchConditions(
@@ -43,7 +43,7 @@ class TestBallFlightPhysics:
         trajectory = simulator.simulate_trajectory(launch)
         assert len(trajectory) > 0
 
-    def test_spin_axis_effect(self):
+    def test_spin_axis_effect(self) -> None:
         """Test that spin axis causes lateral movement."""
         simulator = BallFlightSimulator()
 
@@ -60,7 +60,7 @@ class TestBallFlightPhysics:
         # Should have significant Y deviation
         assert abs(final_pos[1]) > 0.1
 
-    def test_stop_condition(self):
+    def test_stop_condition(self) -> None:
         """Test that simulation stops at ground."""
         simulator = BallFlightSimulator()
         launch = LaunchConditions(velocity=10.0, launch_angle=np.radians(45.0))
@@ -69,7 +69,7 @@ class TestBallFlightPhysics:
         # Z should be close to 0 at end
         assert trajectory[-1].position[2] <= 0.1
 
-    def test_wind_effect(self):
+    def test_wind_effect(self) -> None:
         """Test that wind affects trajectory."""
         ball = BallProperties()
 
@@ -94,7 +94,7 @@ class TestBallFlightPhysics:
         # Headwind should reduce distance
         assert dist_wind < dist_calm
 
-    def test_physics_model_consistency(self):
+    def test_physics_model_consistency(self) -> None:
         """Verify that the reported forces match the simulated acceleration.
 
         This test ensures that the physics logic in `ode_func` (optimized closure)

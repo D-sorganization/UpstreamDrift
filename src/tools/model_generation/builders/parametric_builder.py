@@ -78,7 +78,7 @@ class ParametricBuilder(BaseURDFBuilder):
         self,
         robot_name: str = "humanoid",
         config: ParametricConfig | None = None,
-    ):
+    ) -> None:
         """
         Initialize parametric builder.
 

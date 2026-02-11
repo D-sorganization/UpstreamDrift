@@ -45,7 +45,7 @@ TARGET_POSE = {
 }
 
 
-def np_encoder(object):
+def np_encoder(object) -> Any:
     """JSON encoder for NumPy types."""
     if isinstance(object, np.generic):
         return object.item()
@@ -236,7 +236,7 @@ class TimeStep:
     def last(self) -> bool:
         return bool(self.step_type == 2)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Any:
         return getattr(self, key)
 
 
@@ -383,7 +383,7 @@ def run_simulation(
     actuators = utils.get_actuator_indices(physics)
 
     # 3. Setup Initialization Logic
-    def initialize_episode(phys):
+    def initialize_episode(phys) -> None:
         """Initialize episode state from file or default pose."""
         if load_path:
             load_state(phys, load_path)

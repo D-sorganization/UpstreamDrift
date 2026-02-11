@@ -18,7 +18,7 @@ from src.shared.python.signal_processing import (
 
 class TestSignalProcessing:
     @pytest.fixture
-    def sample_data(self):
+    def sample_data(self) -> tuple:
         # Generate a synthetic signal: 10 Hz sine wave + noise
         fs = 100.0
         t = np.arange(0, 5.0, 1 / fs)
@@ -26,7 +26,7 @@ class TestSignalProcessing:
         signal_clean = np.sin(2 * np.pi * freq * t)
         return t, signal_clean, fs
 
-    def test_compute_psd(self, sample_data):
+    def test_compute_psd(self, sample_data) -> None:
         t, data, fs = sample_data
         freqs, psd = compute_psd(data, fs=fs, nperseg=128)
 
@@ -38,7 +38,7 @@ class TestSignalProcessing:
         peak_freq = freqs[np.argmax(psd)]
         assert np.isclose(peak_freq, 10.0, atol=1.0)
 
-    def test_compute_spectrogram(self, sample_data):
+    def test_compute_spectrogram(self, sample_data) -> None:
         t, data, fs = sample_data
         f, t_spec, Sxx = compute_spectrogram(data, fs=fs, nperseg=64, noverlap=32)
 
@@ -47,7 +47,7 @@ class TestSignalProcessing:
         assert Sxx.shape[0] == len(f)
         assert Sxx.shape[1] == len(t_spec)
 
-    def test_compute_spectral_arc_length_smoothness(self):
+    def test_compute_spectral_arc_length_smoothness(self) -> None:
         # Smooth movement (Gaussian) vs Jerky movement
         fs = 100.0
         t = np.linspace(0, 1, 100)
@@ -68,13 +68,13 @@ class TestSignalProcessing:
         assert sal_smooth < 0
         assert sal_jerky < 0
 
-    def test_compute_spectral_arc_length_empty(self):
+    def test_compute_spectral_arc_length_empty(self) -> None:
         assert compute_spectral_arc_length(np.array([]), 100.0) == 0.0
 
-    def test_compute_spectral_arc_length_zeros(self):
+    def test_compute_spectral_arc_length_zeros(self) -> None:
         assert compute_spectral_arc_length(np.zeros(100), 100.0) == 0.0
 
-    def test_morlet2_impl(self):
+    def test_morlet2_impl(self) -> None:
         # Compare custom implementation with scipy if available, or just check properties
         M = 100
         s = 10.0
@@ -89,7 +89,7 @@ class TestSignalProcessing:
             or np.argmax(np.abs(wavelet)) == M // 2 - 1
         )
 
-    def test_compute_cwt(self, sample_data):
+    def test_compute_cwt(self, sample_data) -> None:
         t, data, fs = sample_data
         freq_range = (5.0, 20.0)
         num_freqs = 15
@@ -108,7 +108,7 @@ class TestSignalProcessing:
         avg_power = np.mean(np.abs(cwt), axis=1)
         assert avg_power[idx_10hz] > np.mean(avg_power)
 
-    def test_compute_xwt(self, sample_data):
+    def test_compute_xwt(self, sample_data) -> None:
         t, data1, fs = sample_data
         # data2 is data1 shifted + noise
         data2 = np.roll(data1, 10)
@@ -127,7 +127,7 @@ class TestSignalProcessing:
         # Just check it runs and produces output for now
         assert not np.all(phases == 0)
 
-    def test_compute_coherence(self, sample_data):
+    def test_compute_coherence(self, sample_data) -> None:
         t, data1, fs = sample_data
         # data2 is data1 + noise
         data2 = data1 + 0.1 * np.random.randn(len(data1))
@@ -142,7 +142,7 @@ class TestSignalProcessing:
 
     # --- New Tests ---
 
-    def test_compute_jerk(self):
+    def test_compute_jerk(self) -> None:
         """Test jerk computation."""
         fs = 100.0
         t = np.linspace(0, 2, 200)
@@ -162,7 +162,7 @@ class TestSignalProcessing:
         error = np.abs(jerk[10:-10] - expected[10:-10])
         assert np.mean(error) < 1.0  # Loose tolerance for discrete derivative
 
-    def test_compute_time_shift(self):
+    def test_compute_time_shift(self) -> None:
         """Test time shift calculation."""
         fs = 100.0
         t = np.linspace(0, 2, 200)
@@ -181,7 +181,7 @@ class TestSignalProcessing:
         expected_lag = shift_samples / fs
         assert np.isclose(tau, expected_lag, atol=0.02)
 
-    def test_compute_dtw_distance(self):
+    def test_compute_dtw_distance(self) -> None:
         """Test DTW distance."""
         s1 = np.array([0, 1, 2, 3, 2, 1, 0])
         s2 = np.array([0, 0, 1, 2, 3, 2, 1, 0])  # s1 stretched/shifted
@@ -194,7 +194,7 @@ class TestSignalProcessing:
         assert dist < euclidean
         assert dist >= 0
 
-    def test_compute_dtw_path(self):
+    def test_compute_dtw_path(self) -> None:
         """Test DTW path."""
         s1 = np.array([0, 1, 0])
         s2 = np.array([0, 0, 1, 0])

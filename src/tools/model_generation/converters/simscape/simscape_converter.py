@@ -138,7 +138,7 @@ class SimscapeToURDFConverter:
         SimscapeBlockType.SIX_DOF_JOINT: JointType.FLOATING,
     }
 
-    def __init__(self, config: ConversionConfig | None = None):
+    def __init__(self, config: ConversionConfig | None = None) -> None:
         """
         Initialize converter.
 

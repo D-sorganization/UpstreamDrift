@@ -32,7 +32,7 @@ class LocalUser:
 class OptionalAuth(HTTPBearer):
     """Bearer auth that's optional in local mode."""
 
-    def __init__(self, auto_error: bool = True):
+    def __init__(self, auto_error: bool = True) -> None:
         super().__init__(auto_error=auto_error)
 
     async def __call__(

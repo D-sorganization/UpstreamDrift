@@ -50,7 +50,7 @@ class EngineNotAvailableError(GolfSuiteError):
         engine_name: str,
         operation: str | None = None,
         install_hint: str | None = None,
-    ):
+    ) -> None:
         self.engine_name = engine_name
         self.operation = operation
 
@@ -85,7 +85,7 @@ class ConfigurationError(GolfSuiteError):
         reason: str | None = None,
         expected: Any = None,
         actual: Any = None,
-    ):
+    ) -> None:
         self.config_key = config_key
         self.reason = reason
         self.expected = expected
@@ -112,7 +112,7 @@ class ValidationError(GolfSuiteError):
         reason: str | None = None,
         valid_values: list[Any] | None = None,
         message: str | None = None,
-    ):
+    ) -> None:
         self.field = field
         self.value = value
         self.reason = reason
@@ -141,7 +141,7 @@ class ModelError(GolfSuiteError):
         model_name: str,
         operation: str,
         details: str | None = None,
-    ):
+    ) -> None:
         self.model_name = model_name
         self.operation = operation
         self.details = details
@@ -161,7 +161,7 @@ class SimulationError(GolfSuiteError):
         message: str,
         time_step: float | None = None,
         state: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         self.time_step = time_step
         self.state = state
 
@@ -180,7 +180,7 @@ class FileOperationError(GolfSuiteError):
         path: Path | str,
         operation: str,
         reason: str | None = None,
-    ):
+    ) -> None:
         self.path = Path(path)
         self.operation = operation
         self.reason = reason
@@ -382,7 +382,7 @@ class EnvironmentError(ConfigurationError):
         reason: str | None = None,
         expected: str | None = None,
         actual: str | None = None,
-    ):
+    ) -> None:
         super().__init__(
             config_key=var_name,
             reason=reason or "Environment variable not set or invalid",
@@ -398,7 +398,7 @@ class IOError(GolfSuiteError):
     Consolidated from io_utils.py.
     """
 
-    def __init__(self, message: str, path: Path | str | None = None):
+    def __init__(self, message: str, path: Path | str | None = None) -> None:
         self.path = Path(path) if path else None
         if self.path:
             message = f"{message}: {self.path}"
@@ -411,7 +411,7 @@ class FileNotFoundIOError(IOError):
     Consolidated from io_utils.py.
     """
 
-    def __init__(self, path: Path | str, context: str | None = None):
+    def __init__(self, path: Path | str, context: str | None = None) -> None:
         self.context = context
         message = "File not found"
         if context:
@@ -430,7 +430,7 @@ class FileParseError(IOError):
         path: Path | str,
         format_type: str,
         details: str | None = None,
-    ):
+    ) -> None:
         self.format_type = format_type
         self.details = details
         message = f"Failed to parse {format_type} file"
@@ -450,7 +450,7 @@ class PhysicalValidationError(ValidationError):
         field: str,
         value: Any = None,
         physical_constraint: str | None = None,
-    ):
+    ) -> None:
         super().__init__(
             field=field,
             value=value,
@@ -470,7 +470,7 @@ class DataFormatError(GolfSuiteError):
         message: str,
         expected_format: str | None = None,
         actual_format: str | None = None,
-    ):
+    ) -> None:
         self.expected_format = expected_format
         self.actual_format = actual_format
 
@@ -493,7 +493,7 @@ class TimeoutError(GolfSuiteError):
         operation: str,
         timeout_seconds: float,
         details: str | None = None,
-    ):
+    ) -> None:
         self.operation = operation
         self.timeout_seconds = timeout_seconds
         self.details = details
@@ -515,7 +515,7 @@ class ResourceError(GolfSuiteError):
         self,
         resource_type: str,
         reason: str | None = None,
-    ):
+    ) -> None:
         self.resource_type = resource_type
         self.reason = reason
 

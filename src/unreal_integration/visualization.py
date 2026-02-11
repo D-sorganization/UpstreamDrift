@@ -139,7 +139,7 @@ class ForceVectorRenderer:
         >>> render_data = renderer.render(forces)
     """
 
-    def __init__(self, config: VisualizationConfig | None = None):
+    def __init__(self, config: VisualizationConfig | None = None) -> None:
         """Initialize force vector renderer.
 
         Args:
@@ -296,7 +296,7 @@ class TrajectoryRenderer:
         >>> render_data = renderer.render(points)
     """
 
-    def __init__(self, config: VisualizationConfig | None = None):
+    def __init__(self, config: VisualizationConfig | None = None) -> None:
         """Initialize trajectory renderer.
 
         Args:
@@ -409,7 +409,7 @@ class HUDDataProvider:
         >>> hud_data = provider.get_hud_data(metrics, frame_data)
     """
 
-    def __init__(self, units: str = "metric"):
+    def __init__(self, units: str = "metric") -> None:
         """Initialize HUD data provider.
 
         Args:

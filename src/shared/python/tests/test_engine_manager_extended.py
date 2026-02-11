@@ -15,7 +15,7 @@ from src.shared.python.engine_manager import (
 
 
 @pytest.fixture
-def mock_suite_root(tmp_path):
+def mock_suite_root(tmp_path) -> Any:
     """Create a mock suite root directory structure."""
     root = tmp_path / "golf_suite"
     root.mkdir()
@@ -75,19 +75,19 @@ def engine_manager(mock_suite_root):
 # --- Tests ---
 
 
-def test_initialization(engine_manager, mock_suite_root):
+def test_initialization(engine_manager, mock_suite_root) -> None:
     assert engine_manager.suite_root == mock_suite_root
     assert engine_manager.current_engine is None
     assert len(engine_manager.engine_status) > 0
 
 
-def test_discover_engines(engine_manager):
+def test_discover_engines(engine_manager) -> None:
     # All directories were created in fixture, so all should be available
     for status in engine_manager.engine_status.values():
         assert status == EngineStatus.AVAILABLE
 
 
-def test_discover_engines_missing(mock_suite_root):
+def test_discover_engines_missing(mock_suite_root) -> None:
     # Remove a directory
     shutil.rmtree(mock_suite_root / "engines" / "physics_engines" / "mujoco")
 
@@ -105,16 +105,16 @@ def test_discover_engines_missing(mock_suite_root):
     assert manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.UNAVAILABLE
 
 
-def test_switch_engine_unknown(engine_manager):
+def test_switch_engine_unknown(engine_manager) -> None:
     assert engine_manager.switch_engine("unknown_engine") is False
 
 
-def test_switch_engine_unavailable(engine_manager):
+def test_switch_engine_unavailable(engine_manager) -> None:
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.UNAVAILABLE
     assert engine_manager.switch_engine(EngineType.MUJOCO) is False
 
 
-def test_switch_engine_success(engine_manager):
+def test_switch_engine_success(engine_manager) -> None:
     with patch.object(engine_manager, "_load_engine") as mock_load:
         result = engine_manager.switch_engine(EngineType.MUJOCO)
         assert result is True
@@ -122,7 +122,7 @@ def test_switch_engine_success(engine_manager):
         assert engine_manager.current_engine == EngineType.MUJOCO
 
 
-def test_switch_engine_failure(engine_manager):
+def test_switch_engine_failure(engine_manager) -> None:
     with patch.object(
         engine_manager, "_load_engine", side_effect=GolfModelingError("Load failed")
     ):
@@ -131,7 +131,7 @@ def test_switch_engine_failure(engine_manager):
         assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
 
 
-def test_load_engine_no_loader(engine_manager):
+def test_load_engine_no_loader(engine_manager) -> None:
     # Mock the registry to return None (no registration)
     from shared.python.engine_registry import get_registry
 
@@ -142,7 +142,7 @@ def test_load_engine_no_loader(engine_manager):
             engine_manager._load_engine(EngineType.MUJOCO)
 
 
-def test_load_mujoco_engine_success(engine_manager):
+def test_load_mujoco_engine_success(engine_manager) -> None:
     # Test using the current registry-based approach
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
@@ -164,7 +164,7 @@ def test_load_mujoco_engine_success(engine_manager):
             )
 
 
-def test_load_mujoco_engine_probe_fail(engine_manager):
+def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
     # Test probe failure through switch_engine
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
@@ -183,7 +183,7 @@ def test_load_mujoco_engine_probe_fail(engine_manager):
             assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
 
 
-def test_load_drake_engine_success(engine_manager):
+def test_load_drake_engine_success(engine_manager) -> None:
     # Test using the current registry-based approach
     engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
 
@@ -203,7 +203,7 @@ def test_load_drake_engine_success(engine_manager):
             assert engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
 
 
-def test_load_pinocchio_engine_success(engine_manager):
+def test_load_pinocchio_engine_success(engine_manager) -> None:
     # Test using the current registry-based approach
     engine_manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.AVAILABLE
 
@@ -226,7 +226,7 @@ def test_load_pinocchio_engine_success(engine_manager):
             )
 
 
-def test_load_matlab_engine_success(engine_manager):
+def test_load_matlab_engine_success(engine_manager) -> None:
     mock_matlab = MagicMock()
     mock_matlab_engine = MagicMock()
     mock_matlab.engine = mock_matlab_engine
@@ -239,35 +239,35 @@ def test_load_matlab_engine_success(engine_manager):
             assert engine_manager._matlab_engine is not None
 
 
-def test_load_pendulum_engine(engine_manager):
+def test_load_pendulum_engine(engine_manager) -> None:
     engine_manager._load_pendulum_engine()
 
 
-def test_cleanup(engine_manager):
+def test_cleanup(engine_manager) -> None:
     engine_manager._matlab_engine = MagicMock()
     engine_manager.cleanup()
     assert engine_manager._matlab_engine is None
     assert engine_manager.current_engine is None
 
 
-def test_get_engine_info(engine_manager):
+def test_get_engine_info(engine_manager) -> None:
     info = engine_manager.get_engine_info()
     assert "available_engines" in info
     assert "engine_status" in info
 
 
-def test_validate_engine_configuration(engine_manager):
+def test_validate_engine_configuration(engine_manager) -> None:
     assert engine_manager.validate_engine_configuration(EngineType.MUJOCO) is False
     (engine_manager.engine_paths[EngineType.MUJOCO] / "python").mkdir()
     assert engine_manager.validate_engine_configuration(EngineType.MUJOCO) is True
 
 
-def test_probe_all_engines(engine_manager):
+def test_probe_all_engines(engine_manager) -> None:
     engine_manager.probe_all_engines()
     assert len(engine_manager.probe_results) == len(EngineType)
 
 
-def test_get_diagnostic_report(engine_manager):
+def test_get_diagnostic_report(engine_manager) -> None:
     # Mock probes to have deterministic output
     for mock_cls in engine_manager._mocks.values():  # type: ignore[attr-defined]
         mock_instance = mock_cls.return_value

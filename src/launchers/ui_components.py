@@ -306,7 +306,7 @@ class AsyncStartupWorker(QThread):
     finished_signal = pyqtSignal(object)
     error_signal = pyqtSignal(str)
 
-    def __init__(self, repos_root: Path):
+    def __init__(self, repos_root: Path) -> None:
         super().__init__()
         self.repos_root = repos_root
         self.results = StartupResults()
@@ -349,7 +349,7 @@ class AsyncStartupWorker(QThread):
 class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
-    def __init__(self, model: Any, parent_launcher: Any):
+    def __init__(self, model: Any, parent_launcher: Any) -> None:
         super().__init__(None)
         self.model = model
         self.parent_launcher = parent_launcher

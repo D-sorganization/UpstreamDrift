@@ -329,7 +329,7 @@ class BallFlightSimulator:
         ball: BallProperties | None = None,
         env: EnvironmentalConditions | None = None,
         environment: EnvironmentalConditions | None = None,
-    ):
+    ) -> None:
         self.ball = ball or BallProperties()
         self.environment = env or environment or EnvironmentalConditions()
 

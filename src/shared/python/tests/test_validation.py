@@ -17,7 +17,7 @@ from src.shared.python.validation import (
 class TestValidation:
     """Tests for physical validation functions."""
 
-    def test_validate_mass(self):
+    def test_validate_mass(self) -> None:
         """Test validate_mass."""
         validate_mass(1.0)
         validate_mass(1e-6)
@@ -28,7 +28,7 @@ class TestValidation:
         with pytest.raises(PhysicalValidationError, match="mass > 0"):
             validate_mass(-1.0)
 
-    def test_validate_timestep(self):
+    def test_validate_timestep(self) -> None:
         """Test validate_timestep."""
         validate_timestep(0.01)
         validate_timestep(1e-4)
@@ -43,7 +43,7 @@ class TestValidation:
         # Assuming logger warning doesn't raise, checking logic passes
         validate_timestep(1.1)
 
-    def test_validate_inertia_matrix(self):
+    def test_validate_inertia_matrix(self) -> None:
         """Test validate_inertia_matrix."""
         # Valid: Identity
         validate_inertia_matrix(np.eye(3))
@@ -70,7 +70,7 @@ class TestValidation:
         with pytest.raises(PhysicalValidationError, match="positive definite"):
             validate_inertia_matrix(zero_eig)
 
-    def test_validate_joint_limits(self):
+    def test_validate_joint_limits(self) -> None:
         """Test validate_joint_limits."""
         q_min = np.array([-1.0, -1.0])
         q_max = np.array([1.0, 1.0])
@@ -86,7 +86,7 @@ class TestValidation:
         with pytest.raises(PhysicalValidationError, match="shape mismatch"):
             validate_joint_limits(np.zeros(3), q_max)
 
-    def test_validate_friction_coefficient(self):
+    def test_validate_friction_coefficient(self) -> None:
         """Test validate_friction_coefficient."""
         validate_friction_coefficient(0.0)
         validate_friction_coefficient(0.5)
@@ -107,37 +107,37 @@ class TestValidatePhysicalBoundsDecorator:
         friction: float = 0.5,
         q_min: np.ndarray | None = None,
         q_max: np.ndarray | None = None,
-    ):
+    ) -> bool:
         return True
 
-    def test_decorator_pass(self):
+    def test_decorator_pass(self) -> None:
         """Test valid inputs pass through."""
         assert self.dummy_func()
         assert self.dummy_func(mass=2.0)
         assert self.dummy_func(friction=0.0)
         assert self.dummy_func(inertia=np.eye(3))
 
-    def test_decorator_mass_validation(self):
+    def test_decorator_mass_validation(self) -> None:
         """Test mass validation via decorator."""
         with pytest.raises(PhysicalValidationError, match="mass > 0"):
             self.dummy_func(mass=-1.0)
 
-    def test_decorator_timestep_validation(self):
+    def test_decorator_timestep_validation(self) -> None:
         """Test timestep validation via decorator."""
         with pytest.raises(PhysicalValidationError, match="dt > 0"):
             self.dummy_func(dt=0.0)
 
-    def test_decorator_friction_validation(self):
+    def test_decorator_friction_validation(self) -> None:
         """Test friction validation via decorator."""
         with pytest.raises(PhysicalValidationError, match="friction coefficient >= 0"):
             self.dummy_func(friction=-0.5)
 
-    def test_decorator_inertia_validation(self):
+    def test_decorator_inertia_validation(self) -> None:
         """Test inertia validation via decorator."""
         with pytest.raises(PhysicalValidationError, match="positive definite"):
             self.dummy_func(inertia=np.diag([1.0, -1.0, 1.0]))
 
-    def test_decorator_joint_limits_validation(self):
+    def test_decorator_joint_limits_validation(self) -> None:
         """Test joint limits validation via decorator."""
         q_min = np.array([0.0])
         q_max = np.array([-1.0])

@@ -149,7 +149,7 @@ def create_local_app() -> FastAPI:
 
     # Launcher logos endpoint - serves tile logo images for React frontend
     @app.get("/api/launcher/logos/{logo_name:path}")
-    async def get_launcher_logo(logo_name: str):
+    async def get_launcher_logo(logo_name: str) -> Any:
         """Serve logo images from assets/logos directory."""
         from fastapi.responses import FileResponse
 
@@ -385,7 +385,7 @@ def create_local_app() -> FastAPI:
             from fastapi.responses import FileResponse
 
             @app.get("/{full_path:path}")
-            async def serve_spa(request: Request, full_path: str):
+            async def serve_spa(request: Request, full_path: str) -> Any:
                 """Serve the SPA index.html for all non-API routes."""
                 if full_path.startswith("api/"):
                     return JSONResponse(
@@ -499,7 +499,7 @@ def create_local_app() -> FastAPI:
     return app
 
 
-def print_logo_animated():
+def print_logo_animated() -> None:
     """Print the Upstream Drift logo with scroll animation."""
     import sys
     import time
@@ -535,14 +535,14 @@ def print_logo_animated():
     logger.info("")
 
 
-def print_matrix_status(message: str, indent: int = 4):
+def print_matrix_status(message: str, indent: int = 4) -> None:
     """Print status message in matrix green style."""
     GREEN = "\033[38;5;46m"  # Bright matrix green
     RESET = "\033[0m"
     logger.info("%s%s>%s %s%s%s", " " * indent, GREEN, RESET, GREEN, message, RESET)
 
 
-def print_server_info(host: str, port: int):
+def print_server_info(host: str, port: int) -> None:
     """Print server info box."""
     CYAN = "\033[38;5;51m"
     RESET = "\033[0m"
@@ -567,7 +567,7 @@ def print_server_info(host: str, port: int):
         logger.info("    Press Ctrl+C to stop.\n")
 
 
-def main():
+def main() -> None:
     """Launch local server with auto-open browser."""
     import time
     import webbrowser
@@ -596,7 +596,7 @@ def main():
     logger.info("")
 
     # Open browser after server starts
-    def open_browser():
+    def open_browser() -> None:
         if os.environ.get("GOLF_NO_BROWSER") != "true":
             webbrowser.open(f"http://{host}:{port}")
 

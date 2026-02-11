@@ -53,7 +53,7 @@ class ContractViolationError(Exception):
         message: str,
         function_name: str | None = None,
         details: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         self.contract_type = contract_type
         self.function_name = function_name
         self.details = details or {}
@@ -78,7 +78,7 @@ class PreconditionError(ContractViolationError):
         function_name: str | None = None,
         parameter: str | None = None,
         value: Any = None,
-    ):
+    ) -> None:
         details = {}
         if parameter:
             details["parameter"] = parameter
@@ -103,7 +103,7 @@ class PostconditionError(ContractViolationError):
         message: str,
         function_name: str | None = None,
         result: Any = None,
-    ):
+    ) -> None:
         details = {}
         if result is not None:
             # Avoid storing large arrays
@@ -130,7 +130,7 @@ class InvariantError(ContractViolationError):
         message: str,
         class_name: str | None = None,
         method_name: str | None = None,
-    ):
+    ) -> None:
         details = {}
         if class_name:
             details["class"] = class_name
@@ -156,7 +156,7 @@ class StateError(ContractViolationError):
         current_state: str | None = None,
         required_state: str | None = None,
         operation: str | None = None,
-    ):
+    ) -> None:
         details = {}
         if current_state:
             details["current_state"] = current_state

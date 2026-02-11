@@ -24,11 +24,11 @@ from humanoid_character_builder.presets.loader import (
 class TestCharacterBuilder:
     """Tests for CharacterBuilder class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         builder = CharacterBuilder()
         assert builder.urdf_config is not None
 
-    def test_build_default_params(self):
+    def test_build_default_params(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
 
@@ -38,7 +38,7 @@ class TestCharacterBuilder:
         assert result.urdf_xml is not None
         assert len(result.segments) > 0
 
-    def test_build_custom_params(self):
+    def test_build_custom_params(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters(
             height_m=1.85,
@@ -51,7 +51,7 @@ class TestCharacterBuilder:
         assert result.success
         assert result.params.height_m == 1.85
 
-    def test_generate_urdf(self):
+    def test_generate_urdf(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
 
@@ -60,7 +60,7 @@ class TestCharacterBuilder:
         assert urdf is not None
         assert "<robot" in urdf
 
-    def test_generate_urdf_to_file(self):
+    def test_generate_urdf_to_file(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
 
@@ -70,7 +70,7 @@ class TestCharacterBuilder:
 
             assert output_path.exists()
 
-    def test_compute_segment_inertia(self):
+    def test_compute_segment_inertia(self) -> None:
         builder = CharacterBuilder()
 
         inertia = builder.compute_segment_inertia("left_thigh", mass=10.0)
@@ -80,7 +80,7 @@ class TestCharacterBuilder:
         assert inertia.iyy > 0
         assert inertia.izz > 0
 
-    def test_compute_segment_inertia_with_dimensions(self):
+    def test_compute_segment_inertia_with_dimensions(self) -> None:
         builder = CharacterBuilder()
 
         inertia = builder.compute_segment_inertia(
@@ -92,7 +92,7 @@ class TestCharacterBuilder:
         assert inertia.mass == 10.0
         assert inertia.is_valid()
 
-    def test_compute_all_inertias(self):
+    def test_compute_all_inertias(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
 
@@ -107,13 +107,13 @@ class TestCharacterBuilder:
         for name, inertia in inertias.items():
             assert inertia.ixx > 0, f"{name} has invalid ixx"
 
-    def test_create_from_preset(self):
+    def test_create_from_preset(self) -> None:
         params = CharacterBuilder.create_from_preset("athletic")
 
         assert params.muscularity > 0.5
         assert params.body_fat_factor < 0.2
 
-    def test_create_from_preset_with_overrides(self):
+    def test_create_from_preset_with_overrides(self) -> None:
         params = CharacterBuilder.create_from_preset(
             "athletic", height_m=1.90, mass_kg=90.0
         )
@@ -121,14 +121,14 @@ class TestCharacterBuilder:
         assert params.height_m == 1.90
         assert params.mass_kg == 90.0
 
-    def test_list_presets(self):
+    def test_list_presets(self) -> None:
         presets = CharacterBuilder.list_presets()
 
         assert len(presets) > 0
         assert "athletic" in presets
         assert "average" in presets
 
-    def test_list_segments(self):
+    def test_list_segments(self) -> None:
         segments = CharacterBuilder.list_segments()
 
         assert len(segments) > 0
@@ -136,7 +136,7 @@ class TestCharacterBuilder:
         assert "head" in segments
         assert "left_hand" in segments
 
-    def test_get_segment_definition(self):
+    def test_get_segment_definition(self) -> None:
         definition = CharacterBuilder.get_segment_definition("pelvis")
 
         assert definition is not None
@@ -147,7 +147,7 @@ class TestCharacterBuilder:
 class TestCharacterBuildResult:
     """Tests for CharacterBuildResult class."""
 
-    def test_export_urdf(self):
+    def test_export_urdf(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
         result = builder.build(params, generate_meshes=False)
@@ -158,7 +158,7 @@ class TestCharacterBuildResult:
             assert urdf_path.exists()
             assert (Path(tmpdir) / "config").exists()
 
-    def test_export_urdf_custom_options(self):
+    def test_export_urdf_custom_options(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
         result = builder.build(params, generate_meshes=False)
@@ -175,7 +175,7 @@ class TestCharacterBuildResult:
             assert urdf_path.name == "custom.urdf"
             assert (Path(tmpdir) / "config" / "body_params.json").exists()
 
-    def test_get_segment(self):
+    def test_get_segment(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
         result = builder.build(params, generate_meshes=False)
@@ -186,7 +186,7 @@ class TestCharacterBuildResult:
         assert segment.segment_name == "pelvis"
         assert segment.mass_kg > 0
 
-    def test_get_total_mass(self):
+    def test_get_total_mass(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters(mass_kg=75.0)
         result = builder.build(params, generate_meshes=False)
@@ -196,7 +196,7 @@ class TestCharacterBuildResult:
         # Should be approximately the specified mass
         assert abs(total_mass - 75.0) < 5.0  # Allow some variance
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         builder = CharacterBuilder()
         params = BodyParameters()
         result = builder.build(params, generate_meshes=False)
@@ -212,45 +212,45 @@ class TestCharacterBuildResult:
 class TestQuickFunctions:
     """Tests for quick convenience functions."""
 
-    def test_quick_build_default(self):
+    def test_quick_build_default(self) -> None:
         result = quick_build()
 
         assert result.success
         assert result.params.height_m == 1.75
         assert result.params.mass_kg == 75.0
 
-    def test_quick_build_custom(self):
+    def test_quick_build_custom(self) -> None:
         result = quick_build(height_m=1.85, mass_kg=85.0)
 
         assert result.success
         assert result.params.height_m == 1.85
 
-    def test_quick_build_with_preset(self):
+    def test_quick_build_with_preset(self) -> None:
         result = quick_build(preset="athletic")
 
         assert result.success
         assert result.params.muscularity > 0.5
 
-    def test_quick_build_with_output(self):
+    def test_quick_build_with_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             result = quick_build(output_dir=tmpdir)
 
             assert result.success
             assert (Path(tmpdir) / "humanoid.urdf").exists()
 
-    def test_quick_urdf_default(self):
+    def test_quick_urdf_default(self) -> None:
         urdf = quick_urdf()
 
         assert urdf is not None
         assert "<robot" in urdf
 
-    def test_quick_urdf_custom(self):
+    def test_quick_urdf_custom(self) -> None:
         urdf = quick_urdf(height_m=1.90)
 
         assert urdf is not None
         assert "<robot" in urdf
 
-    def test_quick_urdf_with_preset(self):
+    def test_quick_urdf_with_preset(self) -> None:
         urdf = quick_urdf(preset="heavy")
 
         assert urdf is not None
@@ -260,7 +260,7 @@ class TestQuickFunctions:
 class TestPresets:
     """Tests for preset loading."""
 
-    def test_list_available_presets(self):
+    def test_list_available_presets(self) -> None:
         presets = list_available_presets()
 
         assert len(presets) > 0
@@ -268,18 +268,18 @@ class TestPresets:
         assert "average" in presets
         assert "heavy" in presets
 
-    def test_load_body_preset_athletic(self):
+    def test_load_body_preset_athletic(self) -> None:
         params = load_body_preset("athletic")
 
         assert params.muscularity > 0.5
         assert params.body_fat_factor < 0.2
 
-    def test_load_body_preset_average(self):
+    def test_load_body_preset_average(self) -> None:
         params = load_body_preset("average")
 
         assert params.muscularity == 0.5
 
-    def test_load_body_preset_with_overrides(self):
+    def test_load_body_preset_with_overrides(self) -> None:
         params = load_body_preset("athletic", height_m=2.0, mass_kg=100.0)
 
         assert params.height_m == 2.0
@@ -287,11 +287,11 @@ class TestPresets:
         # Should still have athletic properties
         assert params.muscularity > 0.5
 
-    def test_load_body_preset_invalid(self):
+    def test_load_body_preset_invalid(self) -> None:
         with pytest.raises(ValueError):
             load_body_preset("nonexistent_preset")
 
-    def test_get_preset_info(self):
+    def test_get_preset_info(self) -> None:
         info = get_preset_info("athletic")
 
         assert info["name"] == "athletic"
@@ -299,7 +299,7 @@ class TestPresets:
         assert "mass_kg" in info
         assert "description" in info
 
-    def test_preset_names_constant(self):
+    def test_preset_names_constant(self) -> None:
         assert len(PRESET_NAMES) > 0
         assert "athletic" in PRESET_NAMES
 
@@ -307,7 +307,7 @@ class TestPresets:
 class TestExportOptions:
     """Tests for ExportOptions."""
 
-    def test_default_values(self):
+    def test_default_values(self) -> None:
         options = ExportOptions()
 
         assert options.urdf_filename == "humanoid.urdf"
@@ -315,7 +315,7 @@ class TestExportOptions:
         assert options.generate_meshes is True
         assert options.mesh_format == "stl"
 
-    def test_custom_values(self):
+    def test_custom_values(self) -> None:
         options = ExportOptions(
             urdf_filename="robot.urdf",
             mesh_format="obj",

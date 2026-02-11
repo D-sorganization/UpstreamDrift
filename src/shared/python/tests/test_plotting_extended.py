@@ -9,7 +9,7 @@ from src.shared.python.tests.test_plotting import MockRecorder
 
 
 @pytest.fixture
-def extended_plotter():
+def extended_plotter() -> Any:
     # Seed for reproducible test data generation
     np.random.seed(42)
     recorder = MockRecorder()
@@ -19,11 +19,11 @@ def extended_plotter():
 
 
 @pytest.fixture
-def fig():
+def fig() -> Any:
     return Figure()
 
 
-def test_plot_dynamic_correlation(extended_plotter, fig):
+def test_plot_dynamic_correlation(extended_plotter, fig) -> None:
     extended_plotter.plot_dynamic_correlation(
         fig, joint_idx_1=0, joint_idx_2=1, window_size=5
     )
@@ -33,7 +33,7 @@ def test_plot_dynamic_correlation(extended_plotter, fig):
     assert ax.get_title().startswith("Dynamic Correlation")
 
 
-def test_plot_synergy_trajectory(extended_plotter, fig):
+def test_plot_synergy_trajectory(extended_plotter, fig) -> None:
     # Mock synergy result
     synergy_result = MagicMock()
     synergy_result.activations = np.random.rand(2, 10)
@@ -44,7 +44,7 @@ def test_plot_synergy_trajectory(extended_plotter, fig):
     assert ax.get_title() == "Synergy Space Trajectory"
 
 
-def test_plot_3d_vector_field(extended_plotter, fig):
+def test_plot_3d_vector_field(extended_plotter, fig) -> None:
     # Setup recorder with necessary data
     # Angular momentum and CoM position
     extended_plotter.recorder.data["angular_momentum"] = (
@@ -63,7 +63,7 @@ def test_plot_3d_vector_field(extended_plotter, fig):
     assert ax.get_title().startswith("3D Vector Field")
 
 
-def test_plot_local_stability(extended_plotter, fig):
+def test_plot_local_stability(extended_plotter, fig) -> None:
     # Setup data
     extended_plotter.recorder.data["joint_velocities"] = (
         np.linspace(0, 1, 50),
@@ -80,7 +80,7 @@ def test_plot_local_stability(extended_plotter, fig):
     assert ax.get_title().startswith("Local Stability")
 
 
-def test_plot_dynamic_correlation_insufficient_data(extended_plotter, fig):
+def test_plot_dynamic_correlation_insufficient_data(extended_plotter, fig) -> None:
     extended_plotter.recorder.data["joint_velocities"] = (np.array([]), np.array([]))
     extended_plotter.plot_dynamic_correlation(fig, 0, 1)
     assert len(fig.axes) > 0

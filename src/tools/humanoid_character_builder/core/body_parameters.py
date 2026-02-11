@@ -42,7 +42,7 @@ class Vector3:
         """Return as tuple."""
         return (self.x, self.y, self.z)
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         """Allow unpacking."""
         return iter([self.x, self.y, self.z])
 

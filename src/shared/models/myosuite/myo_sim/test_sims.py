@@ -47,7 +47,7 @@ model_paths = [
 
 
 class TestSims(unittest.TestCase):
-    def get_sim(self, model_path: str | None = None, model_xmlstr: str | None = None):
+    def get_sim(self, model_path: str | None = None, model_xmlstr: str | None = None) -> Any:
         """
         Get sim using model_path or model_xmlstr.
         """
@@ -76,7 +76,7 @@ class TestSims(unittest.TestCase):
 
         return model
 
-    def test_sims(self):
+    def test_sims(self) -> None:
         for model_path in model_paths:
             logger.info(f"Testing: {model_path}")
             self.get_sim(model_path)

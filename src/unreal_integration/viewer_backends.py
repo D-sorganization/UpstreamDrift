@@ -182,7 +182,7 @@ class ViewerBackend(ABC):
             - is_initialized reflects actual state
     """
 
-    def __init__(self, config: ViewerConfig | None = None):
+    def __init__(self, config: ViewerConfig | None = None) -> None:
         """Initialize backend.
 
         Args:
@@ -340,7 +340,7 @@ class MeshcatBackend(ViewerBackend):
         ...     backend.render()
     """
 
-    def __init__(self, config: ViewerConfig | None = None):
+    def __init__(self, config: ViewerConfig | None = None) -> None:
         """Initialize Meshcat backend.
 
         Args:
@@ -561,7 +561,7 @@ class MockBackend(ViewerBackend):
     any external dependencies.
     """
 
-    def __init__(self, config: ViewerConfig | None = None):
+    def __init__(self, config: ViewerConfig | None = None) -> None:
         """Initialize mock backend."""
         super().__init__(config)
         self._render_calls = 0

@@ -171,7 +171,7 @@ class JointStressAnalyzer:
         body_weight: float,
         handedness: str = "right",
         height: float | None = None,
-    ):
+    ) -> None:
         """
         Initialize the joint stress analyzer.
 

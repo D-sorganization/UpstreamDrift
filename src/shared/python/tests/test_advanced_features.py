@@ -12,7 +12,7 @@ from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 
 class MockRecorder(RecorderInterface):
-    def __init__(self, data_dict):
+    def __init__(self, data_dict) -> None:
         self.data = data_dict
         # Compatibility with new tests which might pass more args?
         # New tests MockRecorder takes (times, positions, velocities, accelerations, torques)
@@ -20,18 +20,18 @@ class MockRecorder(RecorderInterface):
         # I need to unify or rename the class in appended code.
         # I'll rename the new MockRecorder to MockRecorderNew in appended code.
 
-    def get_time_series(self, field_name):
+    def get_time_series(self, field_name) -> Any:
         return self.data.get(field_name, ([], []))
 
-    def get_induced_acceleration_series(self, source_name: str | int):
+    def get_induced_acceleration_series(self, source_name: str | int) -> tuple:
         return np.array([]), np.array([])
 
-    def get_counterfactual_series(self, cf_name: str):
+    def get_counterfactual_series(self, cf_name: str) -> tuple:
         return np.array([]), np.array([])
 
 
 @pytest.fixture
-def sample_data():
+def sample_data() -> tuple:
     t = np.linspace(0, 1, 100)
     # Simple sine wave
     pos = np.column_stack([np.sin(2 * np.pi * t), np.cos(2 * np.pi * t)])
@@ -45,7 +45,7 @@ def sample_data():
 
 
 @pytest.fixture
-def analyzer(sample_data):
+def analyzer(sample_data) -> Any:
     t, pos, vel, torque = sample_data
     return StatisticalAnalyzer(
         times=t,
@@ -55,7 +55,7 @@ def analyzer(sample_data):
     )
 
 
-def test_joint_stiffness_metrics(analyzer):
+def test_joint_stiffness_metrics(analyzer) -> None:
     """Test computation of joint stiffness."""
     metrics = analyzer.compute_joint_stiffness(0)
     assert metrics is not None
@@ -70,7 +70,7 @@ def test_joint_stiffness_metrics(analyzer):
     assert analyzer.compute_joint_stiffness(99) is None
 
 
-def test_dynamic_stiffness(analyzer):
+def test_dynamic_stiffness(analyzer) -> None:
     """Test computation of rolling stiffness."""
     t, k, r2 = analyzer.compute_dynamic_stiffness(0, window_size=20)
     assert len(t) > 0
@@ -81,7 +81,7 @@ def test_dynamic_stiffness(analyzer):
     assert np.all(r2 > 0.9)
 
 
-def test_fractal_dimension(analyzer):
+def test_fractal_dimension(analyzer) -> None:
     """Test Higuchi Fractal Dimension."""
     # Sine wave is smooth, FD should be close to 1
     # Re-generate clean sine
@@ -98,7 +98,7 @@ def test_fractal_dimension(analyzer):
     assert fd_noise > 1.5
 
 
-def test_sample_entropy(analyzer):
+def test_sample_entropy(analyzer) -> None:
     """Test Sample Entropy."""
     # Sine wave is regular -> low entropy
     t = np.linspace(0, 1, 200)
@@ -113,7 +113,7 @@ def test_sample_entropy(analyzer):
     assert samp_en_noise > 1.0
 
 
-def test_permutation_entropy(analyzer):
+def test_permutation_entropy(analyzer) -> None:
     """Test Permutation Entropy."""
     # Sine wave is regular -> low entropy
     t = np.linspace(0, 1, 200)
@@ -133,7 +133,7 @@ def test_permutation_entropy(analyzer):
     assert pe_noise > 2.0
 
 
-def test_plot_joint_stiffness(sample_data):
+def test_plot_joint_stiffness(sample_data) -> None:
     """Test plotting of joint stiffness."""
     t, pos, vel, torque = sample_data
     recorder = MockRecorder(
@@ -158,7 +158,7 @@ def test_plot_joint_stiffness(sample_data):
     )  # scatter points (collection) + regression line + maybe trajectory line
 
 
-def test_plot_dynamic_stiffness(sample_data):
+def test_plot_dynamic_stiffness(sample_data) -> None:
     """Test plotting of dynamic stiffness."""
     t, pos, vel, torque = sample_data
     recorder = MockRecorder(
@@ -177,7 +177,7 @@ def test_plot_dynamic_stiffness(sample_data):
     assert len(fig.axes) == 2
 
 
-def test_plot_bland_altman(sample_data):
+def test_plot_bland_altman(sample_data) -> None:
     """Test Bland-Altman plot."""
     t, pos, _, _ = sample_data
     # Create two slightly different signals
@@ -205,14 +205,14 @@ def test_plot_bland_altman(sample_data):
 
 
 class MockRecorderNew(RecorderInterface):
-    def __init__(self, times, positions, velocities, accelerations, torques):
+    def __init__(self, times, positions, velocities, accelerations, torques) -> None:
         self.times = times
         self.positions = positions
         self.velocities = velocities
         self.accelerations = accelerations
         self.torques = torques
 
-    def get_time_series(self, field_name):
+    def get_time_series(self, field_name) -> tuple:
         if field_name == "joint_positions":
             return self.times, self.positions
         elif field_name == "joint_velocities":
@@ -223,15 +223,15 @@ class MockRecorderNew(RecorderInterface):
             return self.times, self.torques
         return [], []
 
-    def get_induced_acceleration_series(self, source_name: str | int):
+    def get_induced_acceleration_series(self, source_name: str | int) -> tuple:
         return [], []
 
-    def get_counterfactual_series(self, cf_name: str):
+    def get_counterfactual_series(self, cf_name: str) -> tuple:
         return [], []
 
 
 class TestAdvancedSignalProcessing:
-    def test_compute_jerk(self):
+    def test_compute_jerk(self) -> None:
         """Test jerk computation using cubic polynomial."""
         t = np.linspace(0, 1, 100)
         # Position x(t) = t^3
@@ -248,7 +248,7 @@ class TestAdvancedSignalProcessing:
         valid_jerk = jerk[10:-10]
         np.testing.assert_allclose(valid_jerk, 6.0, rtol=0.05)
 
-    def test_compute_time_shift(self):
+    def test_compute_time_shift(self) -> None:
         """Test time shift detection."""
         fs = 100.0
         t = np.linspace(0, 2, 200)
@@ -270,7 +270,7 @@ class TestAdvancedSignalProcessing:
 
 
 class TestAdvancedStatisticalAnalysis:
-    def test_compute_jerk_metrics(self):
+    def test_compute_jerk_metrics(self) -> None:
         """Test jerk metrics computation."""
         t = np.linspace(0, 1, 100)
         accel = 6 * t
@@ -295,7 +295,7 @@ class TestAdvancedStatisticalAnalysis:
         assert metrics.peak_jerk == pytest.approx(6.0, rel=0.1)
         assert metrics.rms_jerk == pytest.approx(6.0, rel=0.1)
 
-    def test_compute_lag_matrix(self):
+    def test_compute_lag_matrix(self) -> None:
         """Test lag matrix computation."""
         t = np.linspace(0, 2, 200)
 
@@ -322,7 +322,7 @@ class TestAdvancedStatisticalAnalysis:
         # matrix[0, 2] = lag(x, z) = 0.2
         assert matrix[0, 2] == pytest.approx(0.2, abs=0.01)
 
-    def test_compute_multiscale_entropy(self):
+    def test_compute_multiscale_entropy(self) -> None:
         """Test MSE computation."""
         # Random noise should have high entropy at scale 1, decay or stay high?
         # White noise: entropy decreases with scale.
@@ -347,7 +347,7 @@ class TestAdvancedStatisticalAnalysis:
 
 
 class TestAdvancedPlotting:
-    def test_plots(self):
+    def test_plots(self) -> None:
         """Test that new plots run without error."""
         t = np.linspace(0, 2, 200)
         x = np.sin(2 * np.pi * 2 * t)

@@ -44,7 +44,7 @@ class PhysicalValidationError(ValidationError):
         message_or_field: str,
         value: Any = None,
         physical_constraint: str | None = None,
-    ):
+    ) -> None:
         # Support both old-style (single message) and new-style (field, value, constraint)
         if value is None and physical_constraint is None:
             # Old-style: message_or_field is the full error message

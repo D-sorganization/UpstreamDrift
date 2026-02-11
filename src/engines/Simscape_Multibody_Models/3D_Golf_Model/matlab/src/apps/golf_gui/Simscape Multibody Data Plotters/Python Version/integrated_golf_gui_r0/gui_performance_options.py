@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         self.parent = parent
         self.result = None
 
@@ -27,7 +27,7 @@ class PerformanceOptionsDialog:
 
         self.create_dialog()
 
-    def create_dialog(self):
+    def create_dialog(self) -> None:
         """Create the performance options dialog"""
         self.dialog = tk.Toplevel(self.parent)
         self.dialog.title("Simulation Performance Options")
@@ -120,7 +120,7 @@ class PerformanceOptionsDialog:
         # Initialize info display
         self.update_simscape_info()
 
-    def update_simscape_info(self):
+    def update_simscape_info(self) -> None:
         """Update the Simscape option info display"""
         if self.simscape_var.get():
             self.simscape_info.config(
@@ -135,7 +135,7 @@ class PerformanceOptionsDialog:
                 foreground="orange",
             )
 
-    def ok_clicked(self):
+    def ok_clicked(self) -> None:
         """Handle OK button click"""
         self.settings = {
             "disable_simscape_results": self.simscape_var.get(),
@@ -145,24 +145,24 @@ class PerformanceOptionsDialog:
         self.result = self.settings
         self.dialog.destroy()
 
-    def cancel_clicked(self):
+    def cancel_clicked(self) -> None:
         """Handle Cancel button click"""
         self.result = None
         self.dialog.destroy()
 
-    def show(self):
+    def show(self) -> Any:
         """Show the dialog and return the result"""
         self.dialog.wait_window()
         return self.result
 
 
-def get_performance_options(parent):
+def get_performance_options(parent) -> Any:
     """Show performance options dialog and return settings"""
     dialog = PerformanceOptionsDialog(parent)
     return dialog.show()
 
 
-def generate_matlab_performance_script(settings):
+def generate_matlab_performance_script(settings) -> Any:
     """Generate MATLAB script with performance settings"""
     script_lines = []
 

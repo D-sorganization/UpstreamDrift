@@ -255,7 +255,7 @@ class MDLParser:
         "simulink/Ports & Subsystems/Subsystem": SimscapeBlockType.SUBSYSTEM,
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize parser."""
         self._current_path: list[str] = []
 
