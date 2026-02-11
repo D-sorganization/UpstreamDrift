@@ -264,8 +264,6 @@ def compare_all_models_to_dataset(
     Returns:
         Dictionary mapping model name to validation metrics
     """
-    import sys
-    from pathlib import Path
 
     # Import flight models
 

@@ -6,15 +6,12 @@ Includes settings for optimizing simulation performance
 
 import tkinter as tk
 from tkinter import ttk
-import logging
 
-
-logger = logging.getLogger(__name__)
 
 class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent):
         self.parent = parent
         self.result = None
 
@@ -27,7 +24,7 @@ class PerformanceOptionsDialog:
 
         self.create_dialog()
 
-    def create_dialog(self) -> None:
+    def create_dialog(self):
         """Create the performance options dialog"""
         self.dialog = tk.Toplevel(self.parent)
         self.dialog.title("Simulation Performance Options")
@@ -120,7 +117,7 @@ class PerformanceOptionsDialog:
         # Initialize info display
         self.update_simscape_info()
 
-    def update_simscape_info(self) -> None:
+    def update_simscape_info(self):
         """Update the Simscape option info display"""
         if self.simscape_var.get():
             self.simscape_info.config(
@@ -135,7 +132,7 @@ class PerformanceOptionsDialog:
                 foreground="orange",
             )
 
-    def ok_clicked(self) -> None:
+    def ok_clicked(self):
         """Handle OK button click"""
         self.settings = {
             "disable_simscape_results": self.simscape_var.get(),
@@ -145,24 +142,24 @@ class PerformanceOptionsDialog:
         self.result = self.settings
         self.dialog.destroy()
 
-    def cancel_clicked(self) -> None:
+    def cancel_clicked(self):
         """Handle Cancel button click"""
         self.result = None
         self.dialog.destroy()
 
-    def show(self) -> Any:
+    def show(self):
         """Show the dialog and return the result"""
         self.dialog.wait_window()
         return self.result
 
 
-def get_performance_options(parent) -> Any:
+def get_performance_options(parent):
     """Show performance options dialog and return settings"""
     dialog = PerformanceOptionsDialog(parent)
     return dialog.show()
 
 
-def generate_matlab_performance_script(settings) -> Any:
+def generate_matlab_performance_script(settings):
     """Generate MATLAB script with performance settings"""
     script_lines = []
 
@@ -201,13 +198,13 @@ if __name__ == "__main__":
     settings = get_performance_options(root)
 
     if settings:
-        logger.info("Selected settings:")
+        print("Selected settings:")
         for key, value in settings.items():
-            logger.info(f"  {key}: {value}")
+            print(f"  {key}: {value}")
 
-        logger.info("\nGenerated MATLAB script:")
-        logger.info(generate_matlab_performance_script(settings))
+        print("\nGenerated MATLAB script:")
+        print(generate_matlab_performance_script(settings))
     else:
-        logger.info("Dialog cancelled")
+        print("Dialog cancelled")
 
     root.destroy()

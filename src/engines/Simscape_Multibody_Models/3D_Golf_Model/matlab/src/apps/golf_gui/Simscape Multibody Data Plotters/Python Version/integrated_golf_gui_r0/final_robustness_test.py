@@ -12,7 +12,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def test_data_loading_accuracy() -> bool:
+def test_data_loading_accuracy():
     """Test the accuracy of data loading"""
     logger.info("🔍 TESTING DATA LOADING ACCURACY")
     logger.info("%s", "=" * 60)
@@ -61,7 +61,7 @@ def test_data_loading_accuracy() -> bool:
         ztcfq_missing = ztcfq.isna().sum().sum()
         deltaq_missing = deltaq.isna().sum().sum()
 
-        logger.info(
+        print(
             f"Missing values - BASEQ: {baseq_missing}, "
             f"ZTCFQ: {ztcfq_missing}, DELTAQ: {deltaq_missing}"
         )
@@ -87,7 +87,7 @@ def test_data_loading_accuracy() -> bool:
         return False
 
 
-def test_data_consistency() -> bool:
+def test_data_consistency():
     """Test consistency between datasets"""
     logger.info("\n🔄 TESTING DATA CONSISTENCY")
     logger.info("%s", "=" * 60)
@@ -133,7 +133,7 @@ def test_data_consistency() -> bool:
             for col in clubhead_cols:
                 prov1_min, prov1_max = prov1_clubhead_range[col]
                 wiffle_min, wiffle_max = wiffle_clubhead_range[col]
-                logger.info(
+                print(
                     f"  {col}: ProV1[{prov1_min:.3f}, {prov1_max:.3f}], "
                     f"Wiffle[{wiffle_min:.3f}, {wiffle_max:.3f}]"
                 )
@@ -148,7 +148,7 @@ def test_data_consistency() -> bool:
         return False
 
 
-def test_error_handling() -> bool:
+def test_error_handling():
     """Test error handling capabilities"""
     logger.error("\n🛡️ TESTING ERROR HANDLING")
     logger.info("%s", "=" * 60)
@@ -191,7 +191,7 @@ def test_error_handling() -> bool:
         return False
 
 
-def test_performance() -> bool:
+def test_performance():
     """Test performance characteristics"""
     logger.info("\n⚡ TESTING PERFORMANCE")
     logger.info("%s", "=" * 60)
@@ -238,7 +238,7 @@ def test_performance() -> bool:
         return False
 
 
-def generate_final_report() -> Any:
+def generate_final_report():
     """Generate the final robustness report"""
     logger.info("📋 FINAL ROBUSTNESS AND ACCURACY ANALYSIS REPORT")
     logger.info("%s", "=" * 80)
@@ -282,7 +282,7 @@ def generate_final_report() -> Any:
         logger.info("\n🔧 RECOMMENDATIONS:")
         logger.info("1. The data loading system is ready for production use")
         logger.info("2. The simplified body part estimation is working as expected")
-        logger.info(
+        print(
             "3. Consider implementing more sophisticated biomechanical "
             "modeling for body parts"
         )

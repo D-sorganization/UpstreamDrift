@@ -23,11 +23,11 @@ Reference:
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 
 from src.shared.python.logging_config import get_logger
-import logging
-
 
 logger = logging.getLogger(__name__)
 logger = get_logger(__name__)
@@ -155,7 +155,9 @@ if __name__ == "__main__":
 
     # Print check points for deactivation
     for i in range(100, 160, 10):
-        logger.info(f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}")  # noqa: T201
+        logger.info(
+            f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}"
+        )  # noqa: T201
 
     logger.info("\\n" + "=" * 60)  # noqa: T201
     logger.info("✓ Activation dynamics test complete")  # noqa: T201

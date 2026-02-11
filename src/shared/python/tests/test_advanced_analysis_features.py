@@ -12,7 +12,7 @@ from src.shared.python.dashboard.advanced_analysis import (
 
 
 class MockRecorder:
-    def get_time_series(self, key: str) -> tuple:
+    def get_time_series(self, key: str):
         t = np.linspace(0, 1, 100)
 
         # Base signal
@@ -51,16 +51,16 @@ class MockRecorder:
 
 
 @pytest.fixture
-def app(qapp) -> Any:
+def app(qapp):
     return qapp
 
 
 @pytest.fixture
-def recorder() -> Any:
+def recorder():
     return MockRecorder()
 
 
-def test_wavelet_tab(recorder, qtbot) -> None:
+def test_wavelet_tab(recorder, qtbot):
     tab = WaveletTab(recorder)
     qtbot.addWidget(tab)
 
@@ -73,7 +73,7 @@ def test_wavelet_tab(recorder, qtbot) -> None:
     assert len(tab.ax.collections) > 0
 
 
-def test_swing_plane_tab(recorder, qtbot) -> None:
+def test_swing_plane_tab(recorder, qtbot):
     tab = SwingPlaneTab(recorder)
     qtbot.addWidget(tab)
 
@@ -87,7 +87,7 @@ def test_swing_plane_tab(recorder, qtbot) -> None:
     assert len(ax3d.collections) > 0 or len(ax3d.patches) > 0
 
 
-def test_correlation_tab(recorder, qtbot) -> None:
+def test_correlation_tab(recorder, qtbot):
     tab = CorrelationTab(recorder)
     qtbot.addWidget(tab)
 
@@ -105,7 +105,7 @@ def test_correlation_tab(recorder, qtbot) -> None:
     assert len(tab.ax.images) > 0
 
 
-def test_advanced_analysis_dialog_features(recorder, qtbot) -> None:
+def test_advanced_analysis_dialog_features(recorder, qtbot):
     dlg = AdvancedAnalysisDialog(None, recorder)
     qtbot.addWidget(dlg)
 

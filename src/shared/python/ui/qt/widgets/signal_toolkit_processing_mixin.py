@@ -168,9 +168,7 @@ class SignalToolkitProcessingMixin:
                         "pi": np.pi,
                         "t": t,
                     }
-                    values = eval(  # noqa: S307
-                        expr, {"__builtins__": {}}, safe_dict
-                    )
+                    values = eval(expr, {"__builtins__": {}}, safe_dict)  # noqa: S307
                     self.current_signal = Signal(t, values, name="custom")
                 else:
                     return

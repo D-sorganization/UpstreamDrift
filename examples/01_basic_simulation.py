@@ -20,7 +20,6 @@ from src.shared.python.path_utils import get_repo_root
 setup_logging()
 logger = get_logger(__name__)
 
-# Get project root using centralized path utilities
 project_root = get_repo_root()
 
 

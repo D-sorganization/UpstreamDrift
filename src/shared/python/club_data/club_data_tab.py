@@ -259,7 +259,6 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
     def _auto_load_data(self) -> None:
         """Automatically load data from default location if available."""
         if self._data_dir is None:
-            # Try to find project root
             try:
                 current = Path(__file__).resolve()
                 project_root = current.parent.parent.parent.parent.parent

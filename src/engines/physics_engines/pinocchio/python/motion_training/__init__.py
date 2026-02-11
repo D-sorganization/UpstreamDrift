@@ -53,7 +53,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str):
     """Lazy import for module components."""
     if name in (
         "ClubTrajectory",

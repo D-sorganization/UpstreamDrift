@@ -14,7 +14,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io impo
 
 
 @pytest.fixture
-def mock_mujoco_model() -> Any:
+def mock_mujoco_model():
     """Create a mock MuJoCo model."""
     model = MagicMock(spec=mujoco.MjModel)
 
@@ -60,7 +60,7 @@ def mock_mujoco_model() -> Any:
 
 
 @pytest.fixture
-def sample_urdf_xml() -> str:
+def sample_urdf_xml():
     return """
     <robot name="test_robot">
         <link name="base_link">
@@ -96,19 +96,19 @@ def sample_urdf_xml() -> str:
     """
 
 
-def test_urdf_exporter_init(mock_mujoco_model) -> None:
+def test_urdf_exporter_init(mock_mujoco_model):
     with patch("mujoco.MjData", autospec=True) as mock_data_cls:
         exporter = URDFExporter(mock_mujoco_model)
         assert exporter.model == mock_mujoco_model
         assert exporter.data == mock_data_cls.return_value
 
 
-def test_export_to_urdf(mock_mujoco_model) -> Any:
+def test_export_to_urdf(mock_mujoco_model):
     with patch("mujoco.MjData", autospec=True):
         exporter = URDFExporter(mock_mujoco_model)
 
         # Mock mj_id2name to return names
-        def id2name(m, obj_type, obj_id) -> Any:
+        def id2name(m, obj_type, obj_id):
             if obj_type == mujoco.mjtObj.mjOBJ_BODY:
                 return ["world", "link1", "link2"][obj_id]
             if obj_type == mujoco.mjtObj.mjOBJ_JOINT:
@@ -161,7 +161,7 @@ def test_export_to_urdf(mock_mujoco_model) -> Any:
             assert 'type="prismatic"' in urdf_str
 
 
-def test_export_model_to_urdf_function(mock_mujoco_model) -> None:
+def test_export_model_to_urdf_function(mock_mujoco_model):
     # Test convenience function
     with (
         patch("mujoco.mj_id2name", return_value="test_name"),
@@ -172,7 +172,7 @@ def test_export_model_to_urdf_function(mock_mujoco_model) -> None:
         assert len(urdf_str) > 0
 
 
-def test_urdf_importer_import(sample_urdf_xml) -> None:
+def test_urdf_importer_import(sample_urdf_xml):
     importer = URDFImporter()
 
     with (
@@ -192,7 +192,7 @@ def test_urdf_importer_import(sample_urdf_xml) -> None:
         assert 'pos="1 0 0"' in mjcf_str  # From joint origin
 
 
-def test_import_urdf_to_mujoco_function(sample_urdf_xml) -> None:
+def test_import_urdf_to_mujoco_function(sample_urdf_xml):
     with (
         patch("defusedxml.ElementTree.parse") as mock_parse,
         patch("pathlib.Path.exists", return_value=True),
@@ -205,13 +205,13 @@ def test_import_urdf_to_mujoco_function(sample_urdf_xml) -> None:
         assert len(mjcf_str) > 0
 
 
-def test_importer_file_not_found() -> None:
+def test_importer_file_not_found():
     importer = URDFImporter()
     with pytest.raises(FileNotFoundError):
         importer.import_from_urdf("nonexistent.urdf")
 
 
-def test_exporter_no_root_body(mock_mujoco_model) -> None:
+def test_exporter_no_root_body(mock_mujoco_model):
     # Setup model so find_root_body returns None
     mock_mujoco_model.nbody = 1  # Only world
 

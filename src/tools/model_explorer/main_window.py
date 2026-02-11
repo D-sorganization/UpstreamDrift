@@ -414,13 +414,11 @@ class URDFGeneratorWindow(QMainWindow):
                         # Generic handler for path-based models
                         model_info = library.get_model_info(category, model_key)
                         if model_info and "path" in model_info:
-                            # Resolve path relative to project root if needed
                             # ModelLibrary paths are relative to repo root in definitions usually
                             # but let's check if it exists absolute or relative
                             raw_path = model_info["path"]
                             path = Path(raw_path)
 
-                            # If not absolute, assume relative to project root
                             if not path.is_absolute():
                                 from src.tools.model_explorer.model_library import (
                                     _project_root,

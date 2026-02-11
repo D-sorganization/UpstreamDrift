@@ -1,13 +1,10 @@
 """Manual verification of the Unified Platform pipeline."""
 
 import sys
-from pathlib import Path
 
 import numpy as np
 
 from src.shared.python.logging_config import get_logger, setup_logging
-
-# Add project root to path
 
 try:
     import pinocchio as pin

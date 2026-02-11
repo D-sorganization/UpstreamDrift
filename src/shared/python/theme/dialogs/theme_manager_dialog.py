@@ -71,7 +71,9 @@ class ThemeManagerDialog(QDialog):
 
     theme_changed = pyqtSignal(str)
 
-    def __init__(self, theme_manager: ThemeManager, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, theme_manager: ThemeManager, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.theme_manager = theme_manager
         self.theme_items: dict[str, ThemeListItem] = {}

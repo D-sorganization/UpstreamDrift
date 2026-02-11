@@ -16,11 +16,9 @@ This module composes focused mixin classes into the GolfLauncher:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from typing import Any
 
 # Add current directory to path so we can import ui_components if needed locally
-
 from PyQt6.QtCore import QEventLoop, QTimer
 from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox

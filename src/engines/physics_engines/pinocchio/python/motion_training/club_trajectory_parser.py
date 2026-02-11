@@ -279,12 +279,12 @@ class ClubTrajectoryParser:
         # Access by index (works for both pandas Series and list)
         if hasattr(row, "iloc"):
 
-            def get(i) -> Any:
+            def get(i):
                 return row.iloc[i] if i < len(row) else None
 
         else:
 
-            def get(i) -> Any:
+            def get(i):
                 return row[i] if i < len(row) else None
 
         # Skip header rows or invalid data

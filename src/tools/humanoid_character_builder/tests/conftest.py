@@ -10,3 +10,4 @@ from pathlib import Path
 
 _tools_dir = str(Path(__file__).resolve().parent.parent.parent)
 if _tools_dir not in sys.path:
+    sys.path.insert(0, _tools_dir)

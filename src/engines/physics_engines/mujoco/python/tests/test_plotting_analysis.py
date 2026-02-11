@@ -26,7 +26,7 @@ GolfSwingPlotter = plotting.GolfSwingPlotter
 
 
 @pytest.fixture
-def mock_recorder() -> Any:
+def mock_recorder():
     recorder = MagicMock()
 
     # Mock data
@@ -39,7 +39,7 @@ def mock_recorder() -> Any:
     return recorder
 
 
-def test_plot_frequency_analysis(mock_recorder) -> None:
+def test_plot_frequency_analysis(mock_recorder):
     plotter = GolfSwingPlotter(mock_recorder)
     fig = MagicMock()
 
@@ -51,7 +51,7 @@ def test_plot_frequency_analysis(mock_recorder) -> None:
     assert ax.semilogy.called
 
 
-def test_plot_spectrogram(mock_recorder) -> None:
+def test_plot_spectrogram(mock_recorder):
     plotter = GolfSwingPlotter(mock_recorder)
     fig = MagicMock()
 

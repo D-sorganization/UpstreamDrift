@@ -16,14 +16,14 @@ Risk Categories:
 - Technique-related risk (modifiable factors)
 """
 
+import logging
 from dataclasses import dataclass, field
 from enum import Enum
 
 import numpy as np
-import logging
-
 
 logger = logging.getLogger(__name__)
+
 
 class RiskLevel(Enum):
     """Overall risk level categories."""
