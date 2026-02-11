@@ -1,0 +1,13 @@
+# CODEOWNERS - Protect critical infrastructure from automated changes
+#
+# GitHub Actions workflows require human review before merging.
+# This prevents automated agents from archiving, deleting, or
+# modifying CI/CD workflows without explicit human approval.
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Protect ALL workflow files - require owner review
+.github/workflows/ @dieterolson
+
+# Protect CODEOWNERS itself
+.github/CODEOWNERS @dieterolson
