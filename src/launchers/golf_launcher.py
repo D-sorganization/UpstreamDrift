@@ -16,7 +16,6 @@ This module composes focused mixin classes into the GolfLauncher:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from typing import Any
 
 # Add current directory to path so we can import ui_components if needed locally

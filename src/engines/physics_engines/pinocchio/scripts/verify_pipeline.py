@@ -1,7 +1,6 @@
 """Manual verification of the Unified Platform pipeline."""
 
 import sys
-from pathlib import Path
 
 import numpy as np
 

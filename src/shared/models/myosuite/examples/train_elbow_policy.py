@@ -1,26 +1,13 @@
-"""
-MyoSuite Elbow Control Training Example
-========================================
-
-This example demonstrates how to train a neural network policy
-to control elbow muscles using reinforcement learning.
-
-Use Case: Golf swing elbow mechanics
-
-Requirements:
-    - myosuite: pip install myosuite
-    - stable-baselines3: pip install stable-baselines3
-
-Usage:
-    python train_elbow_policy.py --timesteps 100000
-"""
-
 import argparse
 import sys
+import logging
 
 try:
+    import gymnasium as gym
     from myosuite.utils import gym
 except ImportError:
+    logging.basicConfig()
+    logger = logging.getLogger(__name__)
     logger.info("ERROR: MyoSuite not installed.")
     logger.info("Installation: pip install myosuite")
     sys.exit(1)
@@ -28,13 +15,14 @@ except ImportError:
 try:
     from stable_baselines3 import SAC
     from stable_baselines3.common.callbacks import EvalCallback
-import logging
 except ImportError:
-
-logger = logging.getLogger(__name__)
+    logging.basicConfig()
+    logger = logging.getLogger(__name__)
     logger.info("ERROR: stable-baselines3 not installed.")
     logger.info("Installation: pip install stable-baselines3")
     sys.exit(1)
+
+logger = logging.getLogger(__name__)
 
 
 def create_elbow_env(env_id: str = "myoElbowPose1D6MRandom-v0") -> gym.Env:
@@ -132,7 +120,7 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             # Visualize (if display available)
             try:
                 env.mj_render()
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError):
                 pass  # Headless mode
 
         logger.info(f"Episode {episode + 1}: Steps={step}, Reward={total_reward:.2f}")
