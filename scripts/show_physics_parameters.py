@@ -6,8 +6,6 @@ from pathlib import Path
 # Add project root to path first (script is in scripts/ directory)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
-sys.path.insert(0, str(_PROJECT_ROOT))
-sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 from src.shared.python.physics.physics_parameters import get_registry  # noqa: E402
 

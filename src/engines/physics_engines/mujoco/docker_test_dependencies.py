@@ -81,7 +81,6 @@ def test_specific_imports() -> bool:
         # Add the python directory to path
         python_dir = "/workspace/python"
         if python_dir not in sys.path:
-            sys.path.insert(0, python_dir)
             logger.info("  Added %s to Python path", python_dir)
 
         if importlib.util.find_spec("mujoco_humanoid_golf.urdf_io"):

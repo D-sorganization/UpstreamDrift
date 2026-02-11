@@ -199,6 +199,12 @@ ignore_errors = true
 [tool.pytest.ini_options]
 # Consolidated pytest configuration (replaces duplicate pytest.ini files)
 testpaths = ["tests"]
+pythonpath = [
+    ".",
+    "src",
+    "src/shared/python",
+    "vendor/ud-tools/src/shared/python",
+]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
