@@ -1,7 +1,6 @@
 """Pinocchio GUI Wrapper (PyQt6 + meshcat)."""
 
 import sys
-import types
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +31,7 @@ from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
 )
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas  # noqa: E402
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase  # noqa: E402
+from src.shared.python.ui.widgets import LogPanel, SignalBlocker  # noqa: E402
 from src.shared.python.validation_pkg.statistical_analysis import (  # noqa: E402
     StatisticalAnalyzer,
 )
@@ -67,18 +67,6 @@ configure_gui_logging()
 logger = get_logger(__name__)
 
 
-class LogPanel(QtWidgets.QTextEdit):
-    """Log panel widget for displaying messages."""
-
-    def __init__(self) -> None:
-        """Initialize the log panel."""
-        super().__init__()
-        self.setReadOnly(True)
-        self.setStyleSheet(
-            "background:#111; color:#0F0; font-family:Consolas; font-size:12px;"
-        )
-
-
 # Constants
 DT_DEFAULT = (
     0.01  # [s] Physics time step. 10ms is standard for real-time visualization.
@@ -87,29 +75,6 @@ SLIDER_RANGE_RAD = 10.0  # [rad] Range for joint sliders provided in UI
 SLIDER_SCALE = 100.0  # Scale factor for QSlider (int) -> rad (float)
 COM_SPHERE_RADIUS = 0.02  # [m] Radius for Center of Mass visualization spheres
 COM_COLOR = 0xFFFF00  # Yellow color for COMs
-
-
-class SignalBlocker:
-    """Context manager to block signals for a set of widgets."""
-
-    def __init__(self, *widgets: QtWidgets.QWidget) -> None:
-        """Initialize with widgets to block."""
-        self.widgets = widgets
-
-    def __enter__(self) -> None:
-        """Block signals for all widgets."""
-        for w in self.widgets:
-            w.blockSignals(True)  # noqa: FBT003
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: types.TracebackType | None,
-    ) -> None:
-        """Restore signals for all widgets."""
-        for w in self.widgets:
-            w.blockSignals(False)  # noqa: FBT003
 
 
 class PinocchioRecorder:

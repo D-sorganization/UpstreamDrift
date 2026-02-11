@@ -339,6 +339,8 @@ class MockRecorder(RecorderInterface):
     def __init__(self, data):
         self.data = data
         self.counter = 0
+        self.engine = None
+        self.analysis_config = {}
 
     def get_time_series(self, field_name):
         return self.data.get(field_name, (np.array([]), np.array([])))
@@ -348,6 +350,9 @@ class MockRecorder(RecorderInterface):
 
     def get_counterfactual_series(self, cf_name):
         return self.data.get(f"cf_{cf_name}", (np.array([]), np.array([])))
+
+    def set_analysis_config(self, config):
+        self.analysis_config = config
 
 
 @pytest.fixture

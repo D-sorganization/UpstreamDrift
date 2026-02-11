@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.ui.widgets import SignalBlocker
 
 logger = get_logger(__name__)
 
@@ -27,23 +28,6 @@ except ImportError:
 if TYPE_CHECKING:
     from .core import JointInfo, PoseEditorInterface
     from .library import PoseLibrary, StoredPose
-
-
-class SignalBlocker:
-    """Context manager to temporarily block widget signals."""
-
-    def __init__(self, *widgets: Any) -> None:
-        self.widgets = widgets
-
-    def __enter__(self) -> None:
-        for w in self.widgets:
-            if w is not None:
-                w.blockSignals(True)
-
-    def __exit__(self, *args: Any) -> None:
-        for w in self.widgets:
-            if w is not None:
-                w.blockSignals(False)
 
 
 class JointSliderWidget(QtWidgets.QWidget):  # type: ignore[misc]

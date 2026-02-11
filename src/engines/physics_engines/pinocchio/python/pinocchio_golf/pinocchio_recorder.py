@@ -5,48 +5,16 @@ Extracted from gui.py to reduce monolith size.
 
 from __future__ import annotations
 
-import types
 from typing import Any
 
 import numpy as np
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets  # noqa: F401
 
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
+from src.shared.python.ui.widgets import LogPanel, SignalBlocker
 
-
-class LogPanel(QtWidgets.QTextEdit):
-    """Log panel widget for displaying messages."""
-
-    def __init__(self) -> None:
-        """Initialize the log panel."""
-        super().__init__()
-        self.setReadOnly(True)
-        self.setStyleSheet(
-            "background:#111; color:#0F0; font-family:Consolas; font-size:12px;"
-        )
-
-
-class SignalBlocker:
-    """Context manager to block signals for a set of widgets."""
-
-    def __init__(self, *widgets: QtWidgets.QWidget) -> None:
-        """Initialize with widgets to block."""
-        self.widgets = widgets
-
-    def __enter__(self) -> None:
-        """Block signals for all widgets."""
-        for w in self.widgets:
-            w.blockSignals(True)  # noqa: FBT003
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: types.TracebackType | None,
-    ) -> None:
-        """Restore signals for all widgets."""
-        for w in self.widgets:
-            w.blockSignals(False)  # noqa: FBT003
+# Re-export for backward compatibility
+__all__ = ["LogPanel", "PinocchioRecorder", "SignalBlocker"]
 
 
 class PinocchioRecorder:

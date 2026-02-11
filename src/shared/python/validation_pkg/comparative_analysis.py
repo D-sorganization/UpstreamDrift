@@ -7,30 +7,16 @@ calculating differences in kinematics, kinetics, and timing.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from scipy import interpolate
 
+from src.shared.python.engine_core.interfaces import RecorderInterface
 from src.shared.python.signal_toolkit import signal_processing
 
 if TYPE_CHECKING:
     pass  # pragma: no cover
-
-
-class RecorderInterface(Protocol):
-    """Protocol for a recorder that provides time series data."""
-
-    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
-        """Extract time series for a specific field.
-
-        Args:
-            field_name: Name of the field
-
-        Returns:
-            Tuple of (times, values)
-        """
-        ...  # pragma: no cover
 
 
 @dataclass
