@@ -56,7 +56,7 @@ class TestLauncherIntegration:
     )
     def test_unified_launcher_show_status(self):
         """Test UnifiedLauncher.show_status() method."""
-        suite_root = get_repo_root()
+        get_repo_root()
 
         from unittest.mock import patch
 
@@ -77,7 +77,7 @@ class TestEngineProbes:
 
     def test_engine_manager_probes_available(self):
         """Verify EngineManager has probe functionality."""
-        suite_root = get_repo_root()
+        get_repo_root()
 
         from src.shared.python.engine_manager import EngineManager
 
@@ -89,7 +89,7 @@ class TestEngineProbes:
 
     def test_probe_all_engines(self):
         """Test probing all engines."""
-        suite_root = get_repo_root()
+        get_repo_root()
 
         from unittest.mock import MagicMock, patch
 
@@ -112,7 +112,7 @@ class TestEngineProbes:
 
     def test_diagnostic_report_generation(self):
         """Test generating diagnostic report."""
-        suite_root = get_repo_root()
+        get_repo_root()
 
         from unittest.mock import MagicMock, patch
 
@@ -132,7 +132,7 @@ class TestEngineProbes:
 
     def test_at_least_one_engine_available(self):
         """Verify at least one engine is available or properly diagnosed."""
-        suite_root = get_repo_root()
+        get_repo_root()
 
         from unittest.mock import MagicMock, patch
 
@@ -288,7 +288,7 @@ class TestOutputManager:
         """Test OutputManager with real file I/O."""
         import tempfile
 
-        suite_root = get_repo_root()
+        get_repo_root()
 
         from src.shared.python.output_manager import OutputFormat, OutputManager
 

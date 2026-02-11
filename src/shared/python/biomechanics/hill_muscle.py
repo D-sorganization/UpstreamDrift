@@ -18,13 +18,12 @@ Reference:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 import numpy as np
 
 from src.shared.python.logging_config import get_logger
-import logging
-
 
 logger = logging.getLogger(__name__)
 logger = get_logger(__name__)
@@ -218,5 +217,9 @@ if __name__ == "__main__":
         f"  Fiber length: {state.l_CE:.3f} m (opt: {biceps_params.l_opt:.3f} m)"
     )
     logger.info(f"  Fiber velocity: {state.v_CE:.3f} m/s")  # noqa: T201
-    logger.info(f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)")  # noqa: T201
-    logger.info(f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%")  # noqa: T201
+    logger.info(
+        f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)"
+    )  # noqa: T201
+    logger.info(
+        f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%"
+    )  # noqa: T201

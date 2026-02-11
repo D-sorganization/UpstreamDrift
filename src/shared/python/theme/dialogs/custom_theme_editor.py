@@ -40,7 +40,9 @@ class ColorPickerButton(QPushButton):
 
     color_changed = pyqtSignal(str)  # Emits hex color string
 
-    def __init__(self, initial_color: str = "#ffffff", parent: QWidget | None = None) -> None:
+    def __init__(
+        self, initial_color: str = "#ffffff", parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self._color = initial_color
         self.setFixedSize(60, 30)

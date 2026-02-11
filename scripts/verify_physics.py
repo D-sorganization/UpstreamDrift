@@ -6,14 +6,12 @@ runs validation tests, and generates a detailed compliance report.
 """
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-# Add project root to path first (script is in scripts/ directory)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 

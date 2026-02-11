@@ -71,7 +71,7 @@ class SmoothPlaybackController(QObject):
     frameUpdated = pyqtSignal(FrameData)  # Emits interpolated frame data
     positionChanged = pyqtSignal(float)  # Emits current position (0.0 to total_frames)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None):
         super().__init__(parent)
 
         # Frame data
@@ -89,7 +89,7 @@ class SmoothPlaybackController(QObject):
         self.is_playing = False
         self.loop_playback = True  # Default to looping
 
-    def load_frame_processor(self, frame_processor: FrameProcessor) -> None:
+    def load_frame_processor(self, frame_processor: FrameProcessor):
         """Load frame processor with motion data"""
         self.frame_processor = frame_processor
         self.stop()
@@ -105,7 +105,7 @@ class SmoothPlaybackController(QObject):
         return self._current_position
 
     @position.setter
-    def position(self, value: float) -> None:
+    def position(self, value: float):
         """Set playback position with interpolation"""
         if self.frame_processor is None:
             return
@@ -122,7 +122,7 @@ class SmoothPlaybackController(QObject):
     # Playback Control
     # ========================================================================
 
-    def play(self) -> None:
+    def play(self):
         """Start smooth playback"""
         if self.frame_processor is None:
             return
@@ -152,7 +152,7 @@ class SmoothPlaybackController(QObject):
 
         self.is_playing = True
 
-    def pause(self) -> None:
+    def pause(self):
         """Pause playback"""
         if not self.is_playing:
             return
@@ -160,20 +160,20 @@ class SmoothPlaybackController(QObject):
         self.animation.pause()
         self.is_playing = False
 
-    def stop(self) -> None:
+    def stop(self):
         """Stop playback and reset to beginning"""
         self.animation.stop()
         self.is_playing = False
         self.seek(0.0)
 
-    def toggle_playback(self) -> None:
+    def toggle_playback(self):
         """Toggle between play and pause"""
         if self.is_playing:
             self.pause()
         else:
             self.play()
 
-    def seek(self, position: float) -> None:
+    def seek(self, position: float):
         """Seek to specific frame position"""
         if self.frame_processor is None:
             return
@@ -188,7 +188,7 @@ class SmoothPlaybackController(QObject):
         if was_playing:
             self.play()
 
-    def set_playback_speed(self, speed: float) -> None:
+    def set_playback_speed(self, speed: float):
         """Set playback speed multiplier (0.5 = half speed, 2.0 = double speed)"""
         self._playback_speed = np.clip(speed, 0.1, 10.0)
 
@@ -307,11 +307,11 @@ class SmoothPlaybackController(QObject):
     # Internal Callbacks
     # ========================================================================
 
-    def _on_position_changed(self, value: float) -> None:
+    def _on_position_changed(self, value: float):
         """Called by QPropertyAnimation on every frame update"""
         # Position property setter handles the interpolation
 
-    def _on_animation_finished(self) -> None:
+    def _on_animation_finished(self):
         """Called when animation completes"""
         self.is_playing = False
 
@@ -328,7 +328,7 @@ class SmoothPlaybackController(QObject):
 class MotionCaptureTab(QWidget):
     """Tab for motion capture data visualization with smooth playback"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
         self.frame_processor = None
@@ -341,7 +341,7 @@ class MotionCaptureTab(QWidget):
         self._setup_ui()
         self._setup_connections()
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(self):
         """Setup the motion capture tab UI"""
         layout = QVBoxLayout()
 
@@ -359,7 +359,7 @@ class MotionCaptureTab(QWidget):
 
         self.setLayout(layout)
 
-    def _create_control_panel(self) -> Any:
+    def _create_control_panel(self):
         """Create the control panel for motion capture data"""
         panel = QGroupBox("Motion Capture Controls")
         layout = QGridLayout()
@@ -407,7 +407,7 @@ class MotionCaptureTab(QWidget):
         panel.setLayout(layout)
         return panel
 
-    def _setup_connections(self) -> None:
+    def _setup_connections(self):
         """Setup signal connections"""
         self.load_button.clicked.connect(self._load_motion_capture_data)
         self.play_button.clicked.connect(self._toggle_playback)
@@ -417,7 +417,7 @@ class MotionCaptureTab(QWidget):
         # Visualization checkboxes don't need connections anymore
         # (handled by smooth frame updates)
 
-    def _load_motion_capture_data(self) -> None:
+    def _load_motion_capture_data(self):
         """Load motion capture data"""
         try:
             swing_type = self.swing_combo.currentText()
@@ -457,12 +457,12 @@ class MotionCaptureTab(QWidget):
             self.status_label.setText(f"Error loading data: {str(e)}")
             traceback.print_exc()
 
-    def _on_swing_changed(self, swing_type: str) -> None:
+    def _on_swing_changed(self, swing_type: str):
         """Handle swing type change"""
         if self.frame_processor is not None:
             self._load_motion_capture_data()
 
-    def _toggle_playback(self) -> None:
+    def _toggle_playback(self):
         """Toggle smooth playback"""
         if not self.frame_processor:
             return
@@ -474,12 +474,12 @@ class MotionCaptureTab(QWidget):
         else:
             self.play_button.setText("Play")
 
-    def _on_slider_moved(self, value: int) -> None:
+    def _on_slider_moved(self, value: int):
         """Handle manual slider movement (scrubbing)"""
         # Seek to slider position for smooth scrubbing
         self.playback_controller.seek(float(value))
 
-    def _on_position_changed(self, position: float) -> None:
+    def _on_position_changed(self, position: float):
         """Update UI when playback position changes"""
         total_frames = (
             len(self.frame_processor.time_vector) if self.frame_processor else 0
@@ -493,7 +493,7 @@ class MotionCaptureTab(QWidget):
         self.frame_slider.setValue(int(position))
         self.frame_slider.blockSignals(False)
 
-    def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
+    def _on_smooth_frame_updated(self, frame_data: FrameData):
         """Called on every interpolated frame update (60+ FPS!)"""
         if not self.opengl_widget.renderer:
             return
@@ -522,12 +522,12 @@ class MotionCaptureTab(QWidget):
 class SimulinkModelTab(QWidget):
     """Tab for Simulink model data visualization (future)"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
         self._setup_ui()
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(self):
         """Setup the Simulink model tab UI"""
         layout = QVBoxLayout()
 
@@ -558,12 +558,12 @@ class SimulinkModelTab(QWidget):
 class ComparisonTab(QWidget):
     """Tab for comparing motion capture vs Simulink model data"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
         self._setup_ui()
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(self):
         """Setup the comparison tab UI"""
         layout = QVBoxLayout()
 
@@ -599,7 +599,7 @@ class ComparisonTab(QWidget):
 class GolfVisualizerWidget(QOpenGLWidget):
     """OpenGL widget for 3D golf swing visualization"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.renderer = None
         self.frame_processor = None
@@ -622,7 +622,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
         # Set focus policy for keyboard events
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-    def initializeGL(self) -> None:
+    def initializeGL(self):
         """Initialize OpenGL context"""
         try:
             # Create moderngl context
@@ -644,12 +644,12 @@ class GolfVisualizerWidget(QOpenGLWidget):
             logger.error("❌ OpenGL initialization failed: %s", e)
             traceback.print_exc()
 
-    def resizeGL(self, w: int, h: int) -> None:
+    def resizeGL(self, w: int, h: int):
         """Handle OpenGL widget resize"""
         if self.renderer:
             self.renderer.set_viewport(w, h)
 
-    def paintGL(self) -> None:
+    def paintGL(self):
         """Render the OpenGL scene"""
         if not self.renderer or not self.current_frame_data:
             return
@@ -760,7 +760,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def load_data_from_dataframes(
         self, dataframes: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-    ) -> None:
+    ):
         """Load data from pandas DataFrames"""
         try:
             baseq_df, ztcfq_df, deltaq_df = dataframes
@@ -790,13 +790,13 @@ class GolfVisualizerWidget(QOpenGLWidget):
             logger.error("❌ Data loading failed: %s", e)
             traceback.print_exc()
 
-    def update_frame(self, frame_data: FrameData, render_config: RenderConfig) -> None:
+    def update_frame(self, frame_data: FrameData, render_config: RenderConfig):
         """Update the current frame data and render config"""
         self.current_frame_data = frame_data
         self.current_render_config = render_config
         self.update()
 
-    def _frame_camera_to_data(self) -> None:
+    def _frame_camera_to_data(self):
         """Frame camera to show all data and set proper ground level"""
         if not self.current_frame_data:
             return
@@ -832,50 +832,50 @@ class GolfVisualizerWidget(QOpenGLWidget):
         )
         self.camera_distance = max_distance * 2.5
 
-        logger.info(
+        print(
             f"📷 Camera framed: center={center}, "
             f"ground_level={self.ground_level:.3f}, "
             f"distance={self.camera_distance:.2f}"
         )
 
-    def set_face_on_view(self) -> None:
+    def set_face_on_view(self):
         """Set camera to face-on view (looking at golfer from front)"""
         self.camera_azimuth = 0.0
         self.camera_elevation = 15.0
         self.update()
         logger.info("📷 Camera: Face-on view")
 
-    def set_down_the_line_view(self) -> None:
+    def set_down_the_line_view(self):
         """Set camera to down-the-line view (90° from face-on)"""
         self.camera_azimuth = 90.0  # 90° from face-on, not 180°
         self.camera_elevation = 15.0
         self.update()
         logger.info("📷 Camera: Down-the-line view")
 
-    def set_behind_view(self) -> None:
+    def set_behind_view(self):
         """Set camera to behind view (180° from face-on)"""
         self.camera_azimuth = 180.0
         self.camera_elevation = 15.0
         self.update()
         logger.info("📷 Camera: Behind view")
 
-    def set_above_view(self) -> None:
+    def set_above_view(self):
         """Set camera to overhead view"""
         self.camera_azimuth = 0.0
         self.camera_elevation = 80.0
         self.update()
         logger.info("📷 Camera: Overhead view")
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event):
         """Handle mouse press events"""
         self.last_mouse_pos = event.pos()
         self.mouse_pressed = True
 
-    def mouseReleaseEvent(self, event) -> None:
+    def mouseReleaseEvent(self, event):
         """Handle mouse release events"""
         self.mouse_pressed = False
 
-    def mouseMoveEvent(self, event) -> None:
+    def mouseMoveEvent(self, event):
         """Handle mouse move events"""
         if not self.mouse_pressed or not self.last_mouse_pos:
             return
@@ -906,14 +906,14 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.last_mouse_pos = event.pos()
         self.update()
 
-    def wheelEvent(self, event) -> None:
+    def wheelEvent(self, event):
         """Handle mouse wheel events"""
         zoom_factor = 1.1 if event.angleDelta().y() > 0 else 0.9
         self.camera_distance *= zoom_factor
         self.camera_distance = np.clip(self.camera_distance, 0.1, 50.0)
         self.update()
 
-    def keyPressEvent(self, event) -> None:
+    def keyPressEvent(self, event):
         """Handle keyboard shortcuts"""
         key = event.key()
 
@@ -945,7 +945,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 class GolfVisualizerMainWindow(QMainWindow):
     """Main window for the Golf Swing Visualizer with tabular interface"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.setWindowTitle("Golf Swing Visualizer - Multi-Data Analysis Platform")
         self.setGeometry(100, 100, 1200, 800)  # More reasonable window size
@@ -960,7 +960,7 @@ class GolfVisualizerMainWindow(QMainWindow):
 
         logger.info("[*] Golf Visualizer main window created")
 
-    def _setup_ui(self) -> None:
+    def _setup_ui(self):
         """Setup the main UI with tabular structure"""
         # Create central widget with tab widget
         self.central_widget = QWidget()
@@ -988,7 +988,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         global_controls = self._create_global_controls()
         main_layout.addWidget(global_controls)
 
-    def _create_global_controls(self) -> Any:
+    def _create_global_controls(self):
         """Create global control panel"""
         panel = QGroupBox("Global Controls")
         layout = QGridLayout()
@@ -1038,7 +1038,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         panel.setLayout(layout)
         return panel
 
-    def _setup_menu(self) -> None:
+    def _setup_menu(self):
         """Setup the menu bar"""
         menubar = self.menuBar()
 
@@ -1080,13 +1080,13 @@ class GolfVisualizerMainWindow(QMainWindow):
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
 
-    def _setup_status_bar(self) -> None:
+    def _setup_status_bar(self):
         """Setup the status bar"""
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Ready - Select a tab to begin analysis")
 
-    def _apply_modern_style(self) -> None:
+    def _apply_modern_style(self):
         """Apply modern white theme"""
         self.setStyleSheet("""
             QMainWindow {
@@ -1224,13 +1224,13 @@ class GolfVisualizerMainWindow(QMainWindow):
             }
         """)
 
-    def _load_motion_capture_data(self) -> None:
+    def _load_motion_capture_data(self):
         """Load motion capture data"""
         # This will be handled by the motion capture tab
         self.tab_widget.setCurrentIndex(0)
         self.motion_capture_tab._load_motion_capture_data()
 
-    def _export_video(self) -> None:
+    def _export_video(self):
         """Export current animation to high-quality video"""
         # Check if we have data loaded
         tab = self.motion_capture_tab
@@ -1250,33 +1250,33 @@ class GolfVisualizerMainWindow(QMainWindow):
         )
         dialog.exec()
 
-    def _reset_camera(self) -> None:
+    def _reset_camera(self):
         """Reset camera to default position"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget._frame_camera_to_data()
             self.gl_widget.update()
 
-    def _set_face_on_view(self) -> None:
+    def _set_face_on_view(self):
         """Set face-on camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_face_on_view()
 
-    def _set_down_line_view(self) -> None:
+    def _set_down_line_view(self):
         """Set down-the-line camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_down_the_line_view()
 
-    def _set_behind_view(self) -> None:
+    def _set_behind_view(self):
         """Set behind camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_behind_view()
 
-    def _set_above_view(self) -> None:
+    def _set_above_view(self):
         """Set overhead camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_above_view()
 
-    def _toggle_face_normal(self, state) -> None:
+    def _toggle_face_normal(self, state):
         """Toggle face normal visibility"""
         if (
             hasattr(self, "gl_widget")
@@ -1286,7 +1286,7 @@ class GolfVisualizerMainWindow(QMainWindow):
             self.gl_widget.current_render_config.show_face_normal = bool(state)
             self.gl_widget.update()
 
-    def _toggle_ball(self, state) -> None:
+    def _toggle_ball(self, state):
         """Toggle ball visibility"""
         if (
             hasattr(self, "gl_widget")
@@ -1296,7 +1296,7 @@ class GolfVisualizerMainWindow(QMainWindow):
             self.gl_widget.current_render_config.show_ball = bool(state)
             self.gl_widget.update()
 
-    def _show_about(self) -> None:
+    def _show_about(self):
         """Show about dialog"""
         QMessageBox.about(
             self,
@@ -1317,7 +1317,7 @@ class GolfVisualizerMainWindow(QMainWindow):
 # ============================================================================
 
 
-def main() -> None:
+def main():
     """Main application entry point"""
     app = QApplication(sys.argv)
 

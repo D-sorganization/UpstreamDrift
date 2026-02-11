@@ -15,6 +15,7 @@ This file is intended as a standalone module that you can
 import into a Streamlit app or run directly.
 """
 
+import logging
 from collections.abc import Callable
 from typing import Any
 
@@ -23,8 +24,6 @@ import numpy.typing as npt
 from scipy.integrate import solve_ivp
 
 from src.shared.python.constants import GRAVITY_M_S2
-import logging
-
 
 logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------

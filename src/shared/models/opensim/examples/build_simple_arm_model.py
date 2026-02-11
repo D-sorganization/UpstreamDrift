@@ -33,9 +33,9 @@ from src.shared.python.constants import GRAVITY_M_S2
 try:
     import opensim as osim
 except ImportError:
-    logger.info("ERROR: OpenSim Python package not installed.")
-    logger.info("Installation: conda install -c opensim-org opensim")
-    logger.info("Alternative: pip install opensim (if available)")
+    print("ERROR: OpenSim Python package not installed.")
+    print("Installation: conda install -c opensim-org opensim")
+    print("Alternative: pip install opensim (if available)")
     sys.exit(1)
 
 
@@ -187,56 +187,53 @@ def run_simulation(model: osim.Model, duration: float = 10.0) -> osim.State:
     state.setTime(0)
     manager.initialize(state)
 
-    logger.info(f"\nRunning simulation for {duration} seconds...")
-    logger.info("-" * 50)
+    print(f"\nRunning simulation for {duration} seconds...")
+    print("-" * 50)
 
     final_state = manager.integrate(duration)
 
-    logger.info("-" * 50)
-    logger.info("Simulation complete!")
+    print("-" * 50)
+    print("Simulation complete!")
 
     return final_state
 
 
 def main() -> None:
     """Main entry point."""
-    logger.info("=" * 60)
-    logger.info("OpenSim Simple Arm Model Example")
-    logger.info("Golf Modeling Suite - Physics Engine Integration")
-    logger.info("=" * 60)
+    print("=" * 60)
+    print("OpenSim Simple Arm Model Example")
+    print("Golf Modeling Suite - Physics Engine Integration")
+    print("=" * 60)
 
     # Build the model
-    logger.info("\n1. Building model...")
+    print("\n1. Building model...")
     arm = build_simple_arm_model()
-    logger.info(f"   Model name: {arm.getName()}")
-    logger.info(f"   Bodies: {arm.getBodySet().getSize()}")
-    logger.info(f"   Joints: {arm.getJointSet().getSize()}")
-    logger.info(f"   Muscles: {arm.getMuscles().getSize()}")
+    print(f"   Model name: {arm.getName()}")
+    print(f"   Bodies: {arm.getBodySet().getSize()}")
+    print(f"   Joints: {arm.getJointSet().getSize()}")
+    print(f"   Muscles: {arm.getMuscles().getSize()}")
 
     # Run simulation
-    logger.info("\n2. Running simulation...")
+    print("\n2. Running simulation...")
     final_state = run_simulation(arm, duration=10.0)
 
     # Save model to file
     output_path = "SimpleArm.osim"
     arm.printToXML(output_path)
     import os
-import logging
 
-
-logger = logging.getLogger(__name__)
-    logger.info(f"\n3. Model saved to: {os.path.abspath(output_path)}")
+    print(f"\n3. Model saved to: {os.path.abspath(output_path)}")
 
     # Summary
     elbow = arm.getJointSet().get("elbow")
     final_angle = elbow.getCoordinate().getValue(final_state)
-    logger.info(
+    print(
         f"\n4. Final elbow angle: {final_angle:.3f} rad ({math.degrees(final_angle):.1f}°)"
     )
 
-    logger.info("\n" + "=" * 60)
-    logger.info("Example complete! Try loading SimpleArm.osim in OpenSim GUI")
-    logger.info("=" * 60)
+    print("\n" + "=" * 60)
+    print("Example complete! Try loading SimpleArm.osim in OpenSim GUI")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

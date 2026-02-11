@@ -125,7 +125,6 @@ def main() -> int:
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()
 
-    # Find project root (parent of scripts/)
     script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent
     src_root = project_root / "src" if (project_root / "src").exists() else project_root

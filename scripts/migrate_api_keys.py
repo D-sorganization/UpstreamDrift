@@ -43,10 +43,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.path_utils import get_src_root
-
 # Add parent directory to path for imports
-
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import Session, sessionmaker

@@ -23,7 +23,6 @@ GOLF_BALL_RADIUS_FLOAT: float = float(GOLF_BALL_RADIUS_M)
 GOLF_BALL_DIAMETER_FLOAT: float = float(GOLF_BALL_DIAMETER_M)
 GOLF_BALL_MOMENT_INERTIA_FLOAT: float = float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
 
-# Project Root Paths
 SUITE_ROOT = Path(__file__).resolve().parent.parent.parent
 ENGINES_ROOT = SUITE_ROOT / "engines"
 SHARED_ROOT = SUITE_ROOT / "shared"

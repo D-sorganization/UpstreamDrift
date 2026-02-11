@@ -86,11 +86,9 @@ class OutputManager:
             base_path: Base directory for outputs. Defaults to 'output' in project root.
         """
         if base_path is None:
-            # Find project root and set default output path
             current_path = Path(__file__).resolve()
             project_root = current_path
 
-            # Navigate up to find project root (look for .git directory or engines/ folder)
             while project_root.parent != project_root:
                 if (project_root / ".git").exists() or (
                     project_root / "engines"

@@ -19,7 +19,7 @@ def mock_qapp():
 
 
 @pytest.fixture
-def mock_golf_launcher() -> Any:
+def mock_golf_launcher():
     # unified_launcher imports GolfLauncher from .golf_launcher locally
     # We need to patch the class where it is used.
     # Since it's imported inside __init__, we patch it there?
@@ -31,18 +31,18 @@ def mock_golf_launcher() -> Any:
     return mock_instance
 
 
-def test_init(mock_qapp, mock_golf_launcher) -> None:
+def test_init(mock_qapp, mock_golf_launcher):
     launcher = UnifiedLauncher()
     assert launcher is not None
 
 
-def test_init_no_pyqt() -> None:
+def test_init_no_pyqt():
     with patch("launchers.unified_launcher.PYQT6_AVAILABLE", False):
         with pytest.raises(ImportError, match="PyQt6 is required"):
             UnifiedLauncher()
 
 
-def test_mainloop(mock_qapp, mock_golf_launcher) -> None:
+def test_mainloop(mock_qapp, mock_golf_launcher):
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 
@@ -54,13 +54,13 @@ def test_mainloop(mock_qapp, mock_golf_launcher) -> None:
     sys.modules["launchers.golf_launcher"].main.assert_called_once()
 
 
-def test_launch_function() -> None:
+def test_launch_function():
     with patch("src.launchers.golf_launcher.main") as mock_main:
         launch()
         mock_main.assert_called_once()
 
 
-def test_show_status() -> None:
+def test_show_status():
     with (
         patch("shared.python.engine_manager.EngineManager") as mock_mgr_cls,
         patch("builtins.print") as mock_print,
@@ -116,7 +116,7 @@ def test_show_status() -> None:
             assert found
 
 
-def test_get_version() -> None:
+def test_get_version():
     with (
         patch("launchers.unified_launcher.QApplication"),
         patch("launchers.golf_launcher.GolfLauncher"),

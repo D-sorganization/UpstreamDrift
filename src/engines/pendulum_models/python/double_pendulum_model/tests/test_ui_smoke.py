@@ -11,5 +11,5 @@ def test_smoke() -> None:
     try:
         window = PendulumController()
         assert window is not None
-    except (ImportError, RuntimeError):  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
         pytest.fail(f"Could not instantiate PendulumController: {e}")

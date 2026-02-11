@@ -18,6 +18,7 @@ from pathlib import Path as _Path
 
 _tools_dir = str(_Path(__file__).resolve().parent.parent.parent)
 if _tools_dir not in sys.path:
+    sys.path.insert(0, _tools_dir)
 # Evict cached modules that resolve to the wrong location, but preserve
 # anything pytest is currently loading (i.e. anything containing "src." or
 # ".tests").

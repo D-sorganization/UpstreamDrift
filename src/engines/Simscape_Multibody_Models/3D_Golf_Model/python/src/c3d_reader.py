@@ -714,7 +714,6 @@ class C3DDataReader:
         path = Path(output_path).resolve()
 
         # Security: Normalize and validate path
-        # Enforce writing only within the current working directory tree (Project Root)
         # Allow test directories when running tests, but still enforce security for
         # security tests
         base_dir = Path.cwd().resolve()

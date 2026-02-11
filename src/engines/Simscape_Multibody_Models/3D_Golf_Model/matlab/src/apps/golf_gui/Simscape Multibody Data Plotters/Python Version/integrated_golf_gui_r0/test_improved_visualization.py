@@ -9,20 +9,18 @@ Demonstrates:
 - Ball positioned for center strike
 """
 
+import logging
 import sys
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 # Add the current directory to Python path
-
 from golf_gui_application import GolfVisualizerMainWindow
 from PyQt6.QtWidgets import QApplication
-import logging
-
 
 logger = logging.getLogger(__name__)
+
 
 def create_sample_data() -> tuple:
     """Create sample golf swing data for testing"""
