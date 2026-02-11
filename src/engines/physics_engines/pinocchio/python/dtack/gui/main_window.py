@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from typing import Any
 
 import numpy as np
 import pinocchio as pin
@@ -22,6 +23,12 @@ class GuiRecorder(RecorderInterface):
 
     def __init__(self, data_store: list[BiomechanicalData]) -> None:
         self.data_store = data_store
+        self.engine: Any = None
+        self.analysis_config: dict[str, Any] = {}
+
+    def set_analysis_config(self, config: dict[str, Any]) -> None:
+        """Configure which advanced metrics to record/compute."""
+        self.analysis_config = config
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         if not self.data_store:

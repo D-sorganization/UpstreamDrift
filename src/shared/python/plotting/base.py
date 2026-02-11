@@ -9,10 +9,7 @@ These are extracted from plotting.py for modularity.
 
 from __future__ import annotations
 
-from typing import Protocol
-
-import numpy as np
-
+from src.shared.python.engine_core.interfaces import RecorderInterface
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -33,49 +30,6 @@ except ImportError:
                 "MplCanvas requires Qt backend which is not available in headless envs"
             )
             raise RuntimeError(msg)
-
-
-class RecorderInterface(Protocol):
-    """Protocol for a recorder that provides time series data.
-
-    This protocol defines the interface that data sources must implement
-    to work with the golf swing plotting system.
-    """
-
-    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
-        """Extract time series for a specific field.
-
-        Args:
-            field_name: Name of the field
-
-        Returns:
-            Tuple of (times, values)
-        """
-        ...  # pragma: no cover
-
-    def get_induced_acceleration_series(
-        self, source_name: str | int
-    ) -> tuple[np.ndarray, np.ndarray]:
-        """Extract time series for a specific induced acceleration source.
-
-        Args:
-            source_name: Name or index of the force source (e.g. 'gravity', 0)
-
-        Returns:
-            Tuple of (times, acceleration_array)
-        """
-        ...  # pragma: no cover
-
-    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
-        """Extract time series for a specific counterfactual component.
-
-        Args:
-            cf_name: Name of the counterfactual (e.g. 'ztcf', 'zvcf')
-
-        Returns:
-            Tuple of (times, data_array)
-        """
-        ...  # pragma: no cover
 
 
 # Import color scheme from unified theme system
