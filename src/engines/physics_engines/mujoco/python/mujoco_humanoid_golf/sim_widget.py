@@ -1,15 +1,18 @@
-"""Qt widget encapsulating a MuJoCo simulation and renderer."""
+"""Qt widget encapsulating a MuJoCo simulation and renderer.
+
+Refactored: Rendering/overlay logic lives in ``sim_rendering_mixin.py``.
+Camera/mouse interaction lives in ``sim_camera_mixin.py``.
+"""
 
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Final
 
 import mujoco
 import numpy as np
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.biomechanics_data import BiomechanicalData
 from src.shared.python.logging_config import get_logger
@@ -20,35 +23,17 @@ from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .physics_engine import MuJoCoPhysicsEngine
+from .sim_camera_mixin import SimCameraMixin
+from .sim_rendering_mixin import SimRenderingMixin
 from .telemetry import TelemetryRecorder
 
-# Lazy loading globals for OpenCV
-CV2_LIB = None
-INVALID_CV2 = False
-
-
-def get_cv2() -> Any:
-    """Lazy import of OpenCV to speed up initial load."""
-    global CV2_LIB, INVALID_CV2
-    if CV2_LIB is None and not INVALID_CV2:
-        try:
-            import cv2
-
-            CV2_LIB = cv2
-        except ImportError:
-            INVALID_CV2 = True
-    return CV2_LIB
-
-
 logger = get_logger(__name__)
-MIN_CAMERA_DEPTH: Final[float] = 0.1
 FORCE_VISUALIZATION_THRESHOLD: Final[float] = 1e-5
 
 
 class ModelLoaderThread(QtCore.QThread):
     """Worker thread to load MuJoCo models asynchronously."""
 
-    # Signal returns (model, data) on success, or (None, error_msg) on failure
     finished_loading = QtCore.pyqtSignal(object, object, str)
 
     def __init__(self, xml_content: str, is_file: bool = False) -> None:
@@ -69,7 +54,11 @@ class ModelLoaderThread(QtCore.QThread):
             self.finished_loading.emit(None, None, str(e))
 
 
-class MuJoCoSimWidget(QtWidgets.QWidget):
+class MuJoCoSimWidget(  # type: ignore[misc]
+    SimCameraMixin,
+    SimRenderingMixin,
+    QtWidgets.QWidget,
+):
     """Widget that:
     - Holds a MuJoCo model + data
     - Steps the simulation
@@ -79,9 +68,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     - Records biomechanical data
     """
 
-    # Signal emitted when model loading starts/ends
     loading_started = QtCore.pyqtSignal()
-    loading_finished = QtCore.pyqtSignal(bool)  # True = success
+    loading_finished = QtCore.pyqtSignal(bool)
 
     def __init__(
         self,
@@ -114,7 +102,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.show_induced_vectors = False
         self.show_cf_vectors = False
         self.induced_vector_source = "gravity"
-        self.cf_vector_type = "ztcf_accel"  # or 'zvcf_torque'
+        self.cf_vector_type = "ztcf_accel"
         self.isolate_forces_visualization = False
 
         # Ellipsoid Visualization Toggles
@@ -126,8 +114,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.show_swing_plane = False
         self.show_club_trajectory = False
         self.show_reference_trajectory = False
-        self.swing_plane_body_name = "clubhead"  # Body to track for trajectory
-        self.reference_trajectory: np.ndarray | None = None  # (N, 3) desired path
+        self.swing_plane_body_name = "clubhead"
+        self.reference_trajectory: np.ndarray | None = None
 
         # Real-time Analysis
         self.enable_live_analysis = False
@@ -142,7 +130,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         self.telemetry: TelemetryRecorder | None = None
 
-        self.running = True  # start in "playing" mode
+        self.running = True
 
         # Biomechanical analysis
         self.analyzer: BiomechanicalAnalyzer | None = None
@@ -161,48 +149,40 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.show_selected_body = True
         self.show_constraints = True
 
-        # Per-body visualization flags (set of body IDs)
+        # Per-body visibility
         self.visible_frames: set[int] = set()
         self.visible_coms: set[int] = set()
 
-        # Operating Mode ("dynamic" or "kinematic")
+        # Operating Mode
         self.operating_mode = "dynamic"
 
-        # MuJoCo scene options for vector rendering
+        # MuJoCo scene options
         self.scene_option = mujoco.MjvOption()
         mujoco.mjv_defaultOption(self.scene_option)
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = False
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
 
-        # MuJoCo scene for rendering
         self.scene: mujoco.MjvScene | None = None
 
         # Background color settings (RGBA)
-        self.sky_color = np.array(
-            [0.2, 0.3, 0.4, 1.0],
-            dtype=np.float32,
-        )  # Default sky blue
-        self.ground_color = np.array(
-            [0.2, 0.2, 0.2, 1.0],
-            dtype=np.float32,
-        )  # Default dark gray
+        self.sky_color = np.array([0.2, 0.3, 0.4, 1.0], dtype=np.float32)
+        self.ground_color = np.array([0.2, 0.2, 0.2, 1.0], dtype=np.float32)
 
-        # UI: a simple label to show the image
+        # UI
         self.label = QtWidgets.QLabel(self)
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.label)
 
-        # Enable mouse tracking for smooth drag
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
 
         # Camera manipulation state
         self.last_mouse_pos: tuple[int, int] | None = None
-        self.camera_mode = "rotate"  # "rotate", "translate", "zoom"
+        self.camera_mode = "rotate"
         self.is_dragging = False
 
-        # Timer for stepping and rendering
+        # Timer
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self._on_timer)
         self.timer.start(int(1000 / self.fps))
@@ -227,13 +207,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     # -------- MuJoCo setup --------
 
-    def load_model_async(self, xml_source: str, is_file: bool = False) -> None:
-        """Load a MuJoCo model asynchronously to prevent UI freeze.
-
-        Args:
-            xml_source: XML string or file path.
-            is_file: True if xml_source is a path, False if string content.
-        """
+    def load_model_async(
+        self, xml_source: str, is_file: bool = False
+    ) -> None:
+        """Load a MuJoCo model asynchronously to prevent UI freeze."""
         if self.loader_thread and self.loader_thread.isRunning():
             logger.warning("Model loading already in progress.")
             return
@@ -241,15 +218,18 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.timer.stop()
         self.loading_started.emit()
 
-        # Show loading indicator in label?
         self.label.setText("Loading Model...")
         self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.loader_thread = ModelLoaderThread(xml_source, is_file)
-        self.loader_thread.finished_loading.connect(self._on_model_loaded_async)
+        self.loader_thread.finished_loading.connect(
+            self._on_model_loaded_async
+        )
         self.loader_thread.start()
 
-    def _on_model_loaded_async(self, model: Any, data: Any, error_msg: str) -> None:
+    def _on_model_loaded_async(
+        self, model: Any, data: Any, error_msg: str
+    ) -> None:
         """Handle completion of async model loading."""
         if error_msg:
             logger.error("Async load failed: %s", error_msg)
@@ -265,16 +245,16 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             self.label.setText(f"Error initializing renderer: {e}")
             self.loading_finished.emit(False)
 
-    def _finalize_model_load(self, new_model: Any, new_data: Any) -> None:
+    def _finalize_model_load(
+        self, new_model: Any, new_data: Any
+    ) -> None:
         """Finalize setup on main thread after model/data creation."""
-        # Create new renderer (must be on main thread with context)
         new_renderer = mujoco.Renderer(
             new_model,
             width=self.frame_width,
             height=self.frame_height,
         )
 
-        # Create new scene
         new_scene = mujoco.MjvScene(new_model, maxgeom=10000)
         mujoco.mjv_updateScene(
             new_model,
@@ -286,38 +266,23 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             new_scene,
         )
 
-        # Commit changes
         self.model = new_model
         self.data = new_data
         self.renderer = new_renderer
         self.scene = new_scene
 
-        # Important: Reset camera to ensure it points at the new model
         mujoco.mjv_defaultFreeCamera(self.model, self.camera)
-        # Apply custom defaults if we have them
         self._auto_position_camera()
-
-        # Apply background colors
         self._update_background_colors()
 
         self.telemetry = TelemetryRecorder(self.model)
-
-        # Reset control system
         self.control_system = ControlSystem(self.model.nu)
         self.control_vector = np.zeros(self.model.nu, dtype=np.float64)
-
-        # Reset Biomechanics
         self.analyzer = BiomechanicalAnalyzer(self.model, self.data)
         self.recorder.reset()
         self.latest_bio_data = None
-
-        # Reset swing plane tracking
         self.swing_plane_visualizer.reset()
-
-        # Reset Interaction
         self.manipulator = InteractiveManipulator(self.model, self.data)
-
-        # Restart timer
         self.timer.start(int(1000 / self.fps))
 
     def load_model_from_xml(self, xml_string: str) -> None:
@@ -335,13 +300,14 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         """(Legacy/Sync) Load from file."""
         self.timer.stop()
         try:
-            # Convert to absolute path if needed
             if not os.path.isabs(xml_path):
                 project_root = Path(__file__).parent.parent.parent
                 xml_path = str(project_root / xml_path)
 
             if not os.path.exists(xml_path):
-                raise FileNotFoundError(f"Model file not found: {xml_path}")
+                raise FileNotFoundError(
+                    f"Model file not found: {xml_path}"
+                )
 
             new_model = mujoco.MjModel.from_xml_path(xml_path)
             new_data = mujoco.MjData(new_model)
@@ -356,49 +322,28 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             return
 
         self.engine.reset()
-
-        # Zero all positions/velocities first
         self.data.qpos[:] = 0.0
         self.data.qvel[:] = 0.0
-
-        # Forward kinematics to update body positions
         self.engine.forward()
 
-        # Use nq to distinguish model types
         if self.model.nq == 2:
-            # DOUBLE PENDULUM top-of-backswing-ish:
-            shoulder = -1.2  # rad (~ -69 deg)
-            wrist = 1.3  # rad (~ 75 deg)
-
-            self.data.qpos[0] = shoulder
-            self.data.qpos[1] = wrist
-
+            self.data.qpos[0] = -1.2
+            self.data.qpos[1] = 1.3
         elif self.model.nq == 3:
-            # TRIPLE PENDULUM top-of-backswing-ish:
-            shoulder = -1.0  # rad
-            elbow = 0.7  # rad
-            wrist = 1.2  # rad
-
-            self.data.qpos[0] = shoulder
-            self.data.qpos[1] = elbow
-            self.data.qpos[2] = wrist
-
+            self.data.qpos[0] = -1.0
+            self.data.qpos[1] = 0.7
+            self.data.qpos[2] = 1.2
         elif self.model.nq >= 10:
-            # Complex models: Set to a neutral/address position
             if self.model.njnt > 0:
                 first_joint_type = self.model.jnt_type[0]
                 if first_joint_type == mujoco.mjtJoint.mjJNT_FREE:
                     if len(self.data.qpos) >= 3:
-                        self.data.qpos[2] = 0.9  # Z position (height)
-
+                        self.data.qpos[2] = 0.9
         elif self.model.nq >= 1:
             self.data.qpos[0] = 0.2
 
         self.data.qvel[:] = 0.0
-
-        # Forward kinematics to update positions
         self.engine.forward()
-
         self._render_once()
 
         if self.telemetry is not None:
@@ -410,7 +355,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if self.model is None or self.data is None:
             return
 
-        # Compute model bounds
         bounds = self._compute_model_bounds()
         if bounds is None:
             return
@@ -419,85 +363,76 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         size = bounds["size"]
         max_size = max(size)
 
-        # Set camera lookat to model center
         self.camera.lookat[:] = center
-
-        # Set camera distance based on model size
         if max_size > 0:
             self.camera.distance = max(2.0, max_size * 2.5)
         else:
             self.camera.distance = 3.0
 
-        # Set reasonable default viewing angle
         self.camera.azimuth = 90.0
         self.camera.elevation = -20.0
-
-        # Clamp distance to reasonable range
         self.camera.distance = np.clip(self.camera.distance, 0.5, 50.0)
 
     def _compute_model_bounds(self) -> dict | None:
-        """Compute bounding box of all geoms in the model.
-
-        Returns:
-            Dict with 'center' and 'size' keys, or None if computation fails
-        """
+        """Compute bounding box of all geoms in the model."""
         if self.model is None or self.data is None:
             return None
 
         try:
-            # Forward kinematics to get current positions
             mujoco.mj_forward(self.model, self.data)
 
-            # Get all body positions
             min_pos = np.array([np.inf, np.inf, np.inf])
             max_pos = np.array([-np.inf, -np.inf, -np.inf])
 
-            # Check all bodies, skipping world body (0)
             for i in range(1, self.model.nbody):
                 pos = self.data.xpos[i]
                 min_pos = np.minimum(min_pos, pos)
                 max_pos = np.maximum(max_pos, pos)
 
-            # Also check geom positions (they might extend beyond body centers)
             for i in range(self.model.ngeom):
                 geom_id = i
                 body_id = self.model.geom_bodyid[geom_id]
-                # Skip world body geoms (like huge ground planes)
                 if body_id > 0:
                     geom_pos = self.data.xpos[body_id].copy()
                     geom_size = self.model.geom_size[geom_id]
 
-                    # Approximate geom extent (conservative estimate)
-                    if self.model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_SPHERE:
+                    if (
+                        self.model.geom_type[geom_id]
+                        == mujoco.mjtGeom.mjGEOM_SPHERE
+                    ):
                         extent = geom_size[0]
-                    elif self.model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_BOX:
+                    elif (
+                        self.model.geom_type[geom_id]
+                        == mujoco.mjtGeom.mjGEOM_BOX
+                    ):
                         extent = np.linalg.norm(geom_size)
-                    elif self.model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_CAPSULE:
+                    elif (
+                        self.model.geom_type[geom_id]
+                        == mujoco.mjtGeom.mjGEOM_CAPSULE
+                    ):
                         extent = geom_size[0] + geom_size[1]
                     else:
-                        extent = np.max(geom_size) if len(geom_size) > 0 else 0.5
+                        extent = (
+                            np.max(geom_size) if len(geom_size) > 0 else 0.5
+                        )
 
                     min_pos = np.minimum(min_pos, geom_pos - extent)
                     max_pos = np.maximum(max_pos, geom_pos + extent)
 
-            # If we got valid bounds
-            if np.all(np.isfinite(min_pos)) and np.all(np.isfinite(max_pos)):
+            if np.all(np.isfinite(min_pos)) and np.all(
+                np.isfinite(max_pos)
+            ):
                 center = (min_pos + max_pos) / 2.0
                 size = max_pos - min_pos
-
-                # Ensure minimum size
                 size = np.maximum(size, [0.5, 0.5, 0.5])
-
                 return {"center": center, "size": size}
 
-            # Fallback: use default center and size
             return {
                 "center": np.array([0.0, 0.0, 1.0]),
                 "size": np.array([2.0, 2.0, 2.0]),
             }
 
         except (ValueError, TypeError, RuntimeError):
-            # Fallback to default
             return {
                 "center": np.array([0.0, 0.0, 1.0]),
                 "size": np.array([2.0, 2.0, 2.0]),
@@ -506,35 +441,38 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     def set_operating_mode(self, mode: str) -> None:
         """Set the operating mode: 'dynamic' or 'kinematic'."""
         if mode not in ["dynamic", "kinematic"]:
-            msg = f"Invalid operating mode: {mode!r}. Must be 'dynamic' or 'kinematic'."
+            msg = (
+                f"Invalid operating mode: {mode!r}. "
+                "Must be 'dynamic' or 'kinematic'."
+            )
             raise ValueError(msg)
         self.operating_mode = mode
-        # If switching to kinematic, ensure we are in a valid state
         if mode == "kinematic" and self.model is not None:
             mujoco.mj_forward(self.model, self.data)
 
-    def get_dof_info(self) -> list[tuple[str, tuple[float, float], float]]:
+    def get_dof_info(
+        self,
+    ) -> list[tuple[str, tuple[float, float], float]]:
         """Get info for all Degrees of Freedom (joints)."""
         if self.model is None or self.data is None:
             return []
 
         dofs = []
-        # Iterate over joints
         for j in range(self.model.njnt):
-            # Check joint type
             jtype = self.model.jnt_type[j]
-            # mjJNT_HINGE=2, mjJNT_SLIDE=3 are scalar 1-DOF
-            if jtype not in [mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE]:
+            if jtype not in [
+                mujoco.mjtJoint.mjJNT_HINGE,
+                mujoco.mjtJoint.mjJNT_SLIDE,
+            ]:
                 continue
 
-            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, j)
+            name = mujoco.mj_id2name(
+                self.model, mujoco.mjtObj.mjOBJ_JOINT, j
+            )
             if not name:
                 name = f"Joint {j}"
 
-            # Address in qpos
             qpos_adr = self.model.jnt_qposadr[j]
-
-            # Range
             range_min, range_max = self.model.jnt_range[j]
             if range_min == 0 and range_max == 0:
                 if jtype == mujoco.mjtJoint.mjJNT_HINGE:
@@ -552,22 +490,20 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if self.model is None or self.data is None:
             return
 
-        # Find joint ID
-        jid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
+        jid = mujoco.mj_name2id(
+            self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name
+        )
         if jid == -1:
             return
 
         qpos_adr = self.model.jnt_qposadr[jid]
         self.data.qpos[qpos_adr] = value
-
-        # Update kinematics immediately
         mujoco.mj_forward(self.model, self.data)
         self._render_once()
 
     # -------- Control interface --------
 
     def set_joint_torque(self, index: int, torque: float) -> None:
-        """Set desired constant torque for actuator index (if it exists)."""
         if self.control_system is not None:
             self.control_system.set_constant_value(index, torque)
             self.control_system.set_control_type(index, ControlType.CONSTANT)
@@ -595,47 +531,31 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     def set_camera(self, camera_name: str) -> None:
         """Set the active camera view."""
         self.camera_name = camera_name
-        if camera_name == "side":
-            self.camera.azimuth = 90.0
-            self.camera.elevation = -20.0
-            self.camera.distance = 3.0
-            self.camera.lookat[:] = [0, 0, 1]
-        elif camera_name == "front":
-            self.camera.azimuth = 0.0
-            self.camera.elevation = -20.0
-            self.camera.distance = 3.0
-            self.camera.lookat[:] = [0, 0, 1]
-        elif camera_name == "top":
-            self.camera.azimuth = 90.0
-            self.camera.elevation = -90.0
-            self.camera.distance = 4.0
-            self.camera.lookat[:] = [0, 0, 1]
-        elif camera_name == "follow":
-            self.camera.azimuth = 135.0
-            self.camera.elevation = -15.0
-            self.camera.distance = 2.5
-            self.camera.lookat[:] = [0, 0, 1]
-        elif camera_name == "down-the-line":
-            self.camera.azimuth = 180.0
-            self.camera.elevation = -10.0
-            self.camera.distance = 3.5
+        presets = {
+            "side": (90.0, -20.0, 3.0),
+            "front": (0.0, -20.0, 3.0),
+            "top": (90.0, -90.0, 4.0),
+            "follow": (135.0, -15.0, 2.5),
+            "down-the-line": (180.0, -10.0, 3.5),
+        }
+        if camera_name in presets:
+            az, el, dist = presets[camera_name]
+            self.camera.azimuth = az
+            self.camera.elevation = el
+            self.camera.distance = dist
             self.camera.lookat[:] = [0, 0, 1]
 
         self._render_once()
 
     def set_torque_visualization(
-        self,
-        enabled: bool,
-        scale: float | None = None,
+        self, enabled: bool, scale: float | None = None
     ) -> None:
         self.show_torque_vectors = enabled
         if scale is not None:
             self.torque_scale = scale
 
     def set_force_visualization(
-        self,
-        enabled: bool,
-        scale: float | None = None,
+        self, enabled: bool, scale: float | None = None
     ) -> None:
         self.show_force_vectors = enabled
         if scale is not None:
@@ -659,16 +579,12 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if show_reference is not None:
             self.show_reference_trajectory = show_reference
 
-    def set_reference_trajectory(self, trajectory: np.ndarray | None) -> None:
-        """Set or clear a desired/reference trajectory for overlay display.
-
-        Args:
-            trajectory: (N, 3) array of reference positions [m], or None to clear.
-        """
+    def set_reference_trajectory(
+        self, trajectory: np.ndarray | None
+    ) -> None:
         self.reference_trajectory = trajectory
 
     def reset_swing_plane(self) -> None:
-        """Clear recorded trajectory and swing plane state."""
         self.swing_plane_visualizer.reset()
 
     def _record_club_trajectory_point(self) -> None:
@@ -678,19 +594,21 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if not (self.show_swing_plane or self.show_club_trajectory):
             return
 
-        # Find the tracked body
         body_id = mujoco.mj_name2id(
-            self.model, mujoco.mjtObj.mjOBJ_BODY, self.swing_plane_body_name
+            self.model,
+            mujoco.mjtObj.mjOBJ_BODY,
+            self.swing_plane_body_name,
         )
         if body_id == -1:
-            # Fallback: use last body (likely end-effector)
             body_id = self.model.nbody - 1
 
         position = self.data.xpos[body_id].copy()
         timestamp = self.data.time
-        self.swing_plane_visualizer.record_trajectory_point(position, timestamp)
+        self.swing_plane_visualizer.record_trajectory_point(
+            position, timestamp
+        )
 
-    def _update_swing_plane_overlays(self) -> None:
+    def _update_swing_plane_overlays(self) -> None:  # noqa: PLR0912
         """Push swing plane and trajectory data to meshcat."""
         if self.meshcat_adapter is None:
             return
@@ -698,15 +616,15 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             self.meshcat_adapter.clear_swing_plane()
             return
 
-        # Trajectory overlay
         if self.show_club_trajectory:
-            traj_vis = self.swing_plane_visualizer.get_trajectory_visualization()
+            traj_vis = (
+                self.swing_plane_visualizer.get_trajectory_visualization()
+            )
             if traj_vis is not None:
                 self.meshcat_adapter.draw_trajectory(
                     "club_trajectory", traj_vis.points, color=0x00FF00
                 )
 
-        # Swing plane overlay (need at least 3 points)
         hist = self.swing_plane_visualizer.trajectory_history
         if self.show_swing_plane and len(hist) >= 3:
             if self.model is not None and self.data is not None:
@@ -718,32 +636,44 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 if body_id == -1:
                     body_id = self.model.nbody - 1
 
-                # Compute velocity for instantaneous plane
                 if body_id < self.model.nbody:
                     vel_adr = self.model.body_dofadr[body_id]
                 else:
                     vel_adr = -1
-                if vel_adr >= 0 and vel_adr + 2 < len(self.data.qvel):
-                    clubhead_velocity = self.data.qvel[vel_adr : vel_adr + 3]
+                if (
+                    vel_adr >= 0
+                    and vel_adr + 2 < len(self.data.qvel)
+                ):
+                    clubhead_velocity = self.data.qvel[
+                        vel_adr : vel_adr + 3
+                    ]
                 else:
-                    # Approximate velocity from recent trajectory
-                    hist = self.swing_plane_visualizer.trajectory_history
+                    hist = (
+                        self.swing_plane_visualizer.trajectory_history
+                    )
                     if len(hist) >= 2:
                         dt = (
-                            self.swing_plane_visualizer.timestamp_history[-1]
-                            - self.swing_plane_visualizer.timestamp_history[-2]
+                            self.swing_plane_visualizer.timestamp_history[
+                                -1
+                            ]
+                            - self.swing_plane_visualizer.timestamp_history[
+                                -2
+                            ]
                         )
                         if dt > 0:
-                            clubhead_velocity = (hist[-1] - hist[-2]) / dt
+                            clubhead_velocity = (
+                                hist[-1] - hist[-2]
+                            ) / dt
                         else:
                             clubhead_velocity = np.zeros(3)
                     else:
                         clubhead_velocity = np.zeros(3)
 
                 clubhead_pos = self.data.xpos[body_id].copy()
-                # Use a proxy for grip position (parent body or body 1)
                 parent_id = self.model.body_parentid[body_id]
-                grip_pos = self.data.xpos[max(parent_id, 1)].copy()
+                grip_pos = self.data.xpos[
+                    max(parent_id, 1)
+                ].copy()
 
                 if np.linalg.norm(clubhead_velocity) > 1e-3:
                     try:
@@ -765,11 +695,17 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                             plane_vis.normal_arrow_end,
                             color=0x4488FF,
                         )
-                    except (RuntimeError, ValueError, AttributeError):
+                    except (
+                        RuntimeError,
+                        ValueError,
+                        AttributeError,
+                    ):
                         pass
 
-        # Reference trajectory overlay
-        if self.show_reference_trajectory and self.reference_trajectory is not None:
+        if (
+            self.show_reference_trajectory
+            and self.reference_trajectory is not None
+        ):
             self.meshcat_adapter.draw_trajectory(
                 "reference_trajectory",
                 self.reference_trajectory,
@@ -783,7 +719,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         cf_enabled: bool,
         cf_type: str,
     ) -> None:
-        """Set visualization for Induced Accelerations and Counterfactuals."""
         self.show_induced_vectors = induced_enabled
         self.induced_vector_source = induced_source
         self.show_cf_vectors = cf_enabled
@@ -791,11 +726,14 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
         self.show_contact_forces = enabled
-        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
-        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled
+        self.scene_option.flags[
+            mujoco.mjtVisFlag.mjVIS_CONTACTFORCE
+        ] = enabled
+        self.scene_option.flags[
+            mujoco.mjtVisFlag.mjVIS_CONTACTPOINT
+        ] = enabled
 
     def set_isolate_forces_visualization(self, enabled: bool) -> None:
-        """Toggle whether to show forces only for the selected body."""
         self.isolate_forces_visualization = enabled
 
     def get_recorder(self) -> SwingRecorder:
@@ -807,7 +745,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     def get_jacobian_and_rank(self) -> dict[str, Any]:
         """Compute Jacobian and Constraint Jacobian Rank."""
         if self.model is None or self.data is None:
-            return {"jacobian_condition": 0.0, "constraint_rank": 0, "nefc": 0}
+            return {
+                "jacobian_condition": 0.0,
+                "constraint_rank": 0,
+                "nefc": 0,
+            }
 
         body_id = self.model.nbody - 1
         if (
@@ -839,15 +781,25 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         if self.telemetry:
             self.telemetry.add_custom_metric("jacobian_cond", cond)
-            self.telemetry.add_custom_metric("constraint_rank", float(rank))
+            self.telemetry.add_custom_metric(
+                "constraint_rank", float(rank)
+            )
             self.telemetry.add_custom_metric("nefc", float(nefc))
 
-        return {"jacobian_condition": cond, "constraint_rank": rank, "nefc": nefc}
+        return {
+            "jacobian_condition": cond,
+            "constraint_rank": rank,
+            "nefc": nefc,
+        }
 
-    def set_body_color(self, body_name: str, rgba: list[float]) -> None:
+    def set_body_color(
+        self, body_name: str, rgba: list[float]
+    ) -> None:
         if self.model is None:
             return
-        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+        body_id = mujoco.mj_name2id(
+            self.model, mujoco.mjtObj.mjOBJ_BODY, body_name
+        )
         if body_id == -1:
             return
         start_geom = self.model.body_geomadr[body_id]
@@ -863,7 +815,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     def compute_ellipsoids(self) -> None:
         if (
-            not self.show_mobility_ellipsoid and not self.show_force_ellipsoid
+            not self.show_mobility_ellipsoid
+            and not self.show_force_ellipsoid
         ) or self.meshcat_adapter is None:
             if self.meshcat_adapter:
                 self.meshcat_adapter.clear_ellipsoids()
@@ -911,7 +864,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 )
 
             if self.show_force_ellipsoid:
-                radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
+                radii_force = 1.0 / np.sqrt(
+                    np.maximum(eigvals, 1e-6)
+                )
                 radii_force = np.clip(radii_force, 0.01, 5.0)
                 self.meshcat_adapter.draw_ellipsoid(
                     "force",
@@ -923,11 +878,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 )
 
         except (ValueError, TypeError, RuntimeError) as e:
-            logger.warning(f"Failed to compute ellipsoids: {e}")
+            logger.warning("Failed to compute ellipsoids: %s", e)
 
-    # -------- Internal stepping / rendering --------
+    # -------- Internal stepping --------
 
-    def _on_timer(self) -> None:
+    def _on_timer(self) -> None:  # noqa: PLR0912, PLR0915
         """Handle timer event for simulation stepping."""
         if self.model is None or self.data is None:
             return
@@ -938,7 +893,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 self._render_once()
                 return
 
-            steps_per_frame = max(1, int(1.0 / (self.fps * self.model.opt.timestep)))
+            steps_per_frame = max(
+                1, int(1.0 / (self.fps * self.model.opt.timestep))
+            )
 
             for _ in range(steps_per_frame):
                 if self.control_system is not None:
@@ -950,8 +907,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                         if self.model.nu <= len(self.data.qvel)
                         else None
                     )
-                    control_torques = self.control_system.compute_control_vector(
-                        velocities,
+                    control_torques = (
+                        self.control_system.compute_control_vector(
+                            velocities,
+                        )
                     )
                     self.data.ctrl[:] = control_torques[:]
                 elif self.control_vector is not None:
@@ -961,8 +920,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 if self.telemetry is not None:
                     self.telemetry.record_step(self.data)
 
-            # Check recorder analysis config to see if advanced metrics are requested
-            # by LivePlotWidget or other consumers.
             config_requests_analysis = False
             config_selected_actuator = None
 
@@ -970,7 +927,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 self.recorder.analysis_config, dict
             ):
                 cfg = self.recorder.analysis_config
-                # Check flags
                 if (
                     cfg.get("ztcf")
                     or cfg.get("zvcf")
@@ -979,29 +935,36 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 ):
                     config_requests_analysis = True
 
-                # Check requested sources
                 sources = cfg.get("induced_accel_sources", [])
                 if sources:
                     config_requests_analysis = True
-                    # Pick first non-standard source as selected actuator
                     for src in sources:
-                        if src not in ["gravity", "velocity", "total", "actuator"]:
+                        if src not in [
+                            "gravity",
+                            "velocity",
+                            "total",
+                            "actuator",
+                        ]:
                             config_selected_actuator = str(src)
                             break
 
-            # Determine compute flag
-            should_compute = self.enable_live_analysis or config_requests_analysis
+            should_compute = (
+                self.enable_live_analysis or config_requests_analysis
+            )
 
-            # Determine selected actuator (prioritize config, fall back to UI)
             selected_actuator = config_selected_actuator
             if selected_actuator is None:
-                if self.show_induced_vectors and self.induced_vector_source not in [
-                    "gravity",
-                    "actuator",
-                ]:
+                if (
+                    self.show_induced_vectors
+                    and self.induced_vector_source
+                    not in ["gravity", "actuator"]
+                ):
                     selected_actuator = self.induced_vector_source
 
-            if self.analyzer is not None and self.recorder.is_recording:
+            if (
+                self.analyzer is not None
+                and self.recorder.is_recording
+            ):
                 bio_data = self.analyzer.extract_full_state(
                     selected_actuator_name=selected_actuator,
                     compute_advanced_metrics=should_compute,
@@ -1009,7 +972,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 self.recorder.record_frame(bio_data)
                 self.latest_bio_data = bio_data
             elif should_compute and self.analyzer:
-                # Even if not recording, compute metrics for visualization if needed
                 self.latest_bio_data = self.analyzer.extract_full_state(
                     selected_actuator_name=selected_actuator,
                     compute_advanced_metrics=True,
@@ -1021,418 +983,12 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self._update_swing_plane_overlays()
         self._render_once()
 
-    def render(self) -> None:  # type: ignore[override]
-        """Render the scene immediately."""
-        self._render_once()
-
-    def _render_once(self) -> None:
-        """Render one frame of the simulation."""
-        if self.renderer is None or self.model is None or self.data is None:
-            return
-
-        if self.scene is not None:
-            mujoco.mjv_updateScene(
-                self.model,
-                self.data,
-                self.scene_option,
-                None,
-                self.camera,
-                mujoco.mjtCatBit.mjCAT_ALL,
-                self.scene,
-            )
-            self._update_background_colors()
-
-        if hasattr(self, "camera") and self.camera is not None:
-            self.renderer.update_scene(
-                self.data,
-                camera=self.camera,
-                scene_option=self.scene_option,
-            )
-        else:
-            self.renderer.update_scene(
-                self.data,
-                camera=self.camera_name,
-                scene_option=self.scene_option,
-            )
-
-        rgb = self.renderer.render()
-
-        # Add force/torque/accel overlays
-        rgb = self._add_force_torque_overlays(rgb)
-
-        if self.manipulator is not None and (
-            self.show_selected_body or self.show_constraints
-        ):
-            rgb = self._add_manipulation_overlays(rgb)
-
-        if self.show_club_trajectory or self.show_swing_plane:
-            rgb = self._add_swing_plane_overlays(rgb)
-
-        if self.visible_frames or self.visible_coms:
-            rgb = self._add_frame_and_com_overlays(rgb)
-
-        if self.meshcat_adapter:
-            try:
-                self.meshcat_adapter.update(self.data)
-                self.meshcat_adapter.draw_vectors(
-                    self.data,
-                    self.show_force_vectors,
-                    self.show_torque_vectors,
-                    self.force_scale,
-                    self.torque_scale,
-                )
-
-                if self.show_induced_vectors:
-                    self.meshcat_adapter.draw_induced_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.induced_vector_source,
-                        self.torque_scale,
-                    )
-                else:
-                    # Passing None clears the vectors
-                    self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
-
-                if self.show_cf_vectors:
-                    self.meshcat_adapter.draw_cf_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.cf_vector_type,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
-
-            except (RuntimeError, ValueError, AttributeError):
-                pass
-
-        if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:
-            return
-
-        h, w, _ = rgb.shape
-        image = QtGui.QImage(rgb.data, w, h, 3 * w, QtGui.QImage.Format.Format_RGB888)
-        image = image.copy()
-        pixmap = QtGui.QPixmap.fromImage(image)
-
-        self.label.setPixmap(pixmap)
-
-    def _update_background_colors(self) -> None:
-        if self.scene is not None:
-            try:
-                if hasattr(self.scene, "sky_rgba"):
-                    self.scene.sky_rgba[:] = self.sky_color
-                if hasattr(self.scene, "ground_rgba"):
-                    self.scene.ground_rgba[:] = self.ground_color
-            except (AttributeError, TypeError):
-                pass
-
-    def set_background_color(
-        self, sky_color: Any = None, ground_color: Any = None
-    ) -> None:
-        if sky_color is not None:
-            self.sky_color = np.array(sky_color, dtype=np.float32)
-        if ground_color is not None:
-            self.ground_color = np.array(ground_color, dtype=np.float32)
-
-        if self.scene is not None:
-            self._update_background_colors()
-            self._render_once()
-
-    def _add_force_torque_overlays(self, rgb: np.ndarray) -> np.ndarray:
-        """Overlay torque/force/accel vectors using screen-space arrows."""
-        if self.model is None or self.data is None:
-            return rgb
-
-        cv2 = get_cv2()
-        if cv2 is None:
-            logger.warning("OpenCV not installed, cannot draw force/torque overlays.")
-            return rgb
-
-        img = rgb.copy()
-
-        def draw_arrow(
-            start: np.ndarray,
-            end: np.ndarray,
-            color: tuple[int, int, int],
-        ) -> None:
-            start_px = self._world_to_screen(start)
-            end_px = self._world_to_screen(end)
-            if start_px is None or end_px is None:
-                return
-            cv2.arrowedLine(
-                img,
-                start_px,
-                end_px,
-                color,
-                thickness=2,
-                tipLength=0.2,
-            )
-
-        if self.show_torque_vectors:
-            self._draw_torque_vectors(draw_arrow)
-
-        if self.show_force_vectors:
-            self._draw_force_vectors(draw_arrow)
-
-        if self.show_induced_vectors and self.latest_bio_data:
-            self._draw_induced_vectors(draw_arrow)
-
-        if self.show_cf_vectors and self.latest_bio_data:
-            self._draw_cf_vectors(draw_arrow)
-
-        return img
-
-    def _draw_torque_vectors(self, draw_arrow_func: Callable) -> None:
-        if self.model is None or self.data is None:
-            return
-
-        selected_id = None
-        if self.isolate_forces_visualization and self.manipulator:
-            selected_id = self.manipulator.selected_body_id
-
-        for i in range(self.model.nu):
-            joint_id = self.model.actuator_trnid[i, 0]
-            if joint_id < 0 or joint_id >= self.model.njnt:
-                continue
-            body_id = self.model.jnt_bodyid[joint_id]
-            if body_id < 0 or body_id >= self.model.nbody:
-                continue
-
-            # Isolation check
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            torque = float(self.data.ctrl[i])
-            if abs(torque) < 1e-6:
-                continue
-            joint_axis = self.data.xaxis[3 * joint_id : 3 * joint_id + 3]
-            joint_pos = self.data.xpos[body_id].copy()
-            arrow_length = abs(torque) * self.torque_scale
-            arrow_dir = joint_axis * np.sign(torque) * arrow_length
-            arrow_end = joint_pos + arrow_dir
-            color = (255, 0, 0) if torque >= 0 else (0, 0, 255)
-            draw_arrow_func(joint_pos, arrow_end, color)
-
-    def _draw_force_vectors(self, draw_arrow_func: Callable) -> None:
-        if self.data is None or self.model is None:
-            return
-
-        selected_id = None
-        if self.isolate_forces_visualization and self.manipulator:
-            selected_id = self.manipulator.selected_body_id
-
-        external_forces = self.data.cfrc_ext.reshape(-1, 6)
-        for body_id in range(1, self.model.nbody):
-            # Isolation check
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            world_force = external_forces[body_id, 3:6]
-            magnitude = float(np.linalg.norm(world_force))
-            if magnitude < FORCE_VISUALIZATION_THRESHOLD:
-                continue
-            body_pos = self.data.xpos[body_id].copy()
-            arrow_end = body_pos + world_force * self.force_scale
-            draw_arrow_func(body_pos, arrow_end, (0, 255, 0))
-
-        internal_forces = self.data.cfrc_int.reshape(-1, 6)
-        for body_id in range(1, self.model.nbody):
-            # Isolation check
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            joint_force = internal_forces[body_id, 3:6]
-            magnitude = float(np.linalg.norm(joint_force))
-            if magnitude < FORCE_VISUALIZATION_THRESHOLD:
-                continue
-            body_pos = self.data.xpos[body_id].copy()
-            arrow_end = body_pos + joint_force * self.force_scale
-            draw_arrow_func(body_pos, arrow_end, (0, 255, 255))
-
-    def _draw_induced_vectors(self, draw_arrow_func: Callable) -> None:
-        """Draw Induced Acceleration vectors (Magenta)."""
-        if self.model is None or self.data is None or self.latest_bio_data is None:
-            return
-
-        selected_id = None
-        if self.isolate_forces_visualization and self.manipulator:
-            selected_id = self.manipulator.selected_body_id
-
-        # Determine the key to use in the induced_accelerations dict
-        key = self.induced_vector_source
-        if key not in ["gravity", "actuator"]:
-            # If user typed specific actuator name, it's stored under
-            # 'selected_actuator'
-            key = "selected_actuator"
-
-        if key not in self.latest_bio_data.induced_accelerations:
-            return
-
-        accels = self.latest_bio_data.induced_accelerations[key]
-        # accels is ndarray of size nv (DoF accelerations)
-
-        # Iterate 1-DOF joints
-        for j in range(self.model.njnt):
-            # Isolation check via body
-            body_id = self.model.jnt_bodyid[j]
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            qvel_adr = self.model.jnt_dofadr[j]
-            if qvel_adr >= len(accels):
-                continue
-
-            acc = accels[qvel_adr]
-            if abs(acc) < 1e-3:
-                continue
-
-            joint_pos = self.data.xpos[body_id].copy()
-            joint_axis = self.data.xaxis[3 * j : 3 * j + 3]
-
-            # Scale for visualization (acceleration needs scale)
-            arrow_len = acc * self.torque_scale * 0.5
-            arrow_dir = joint_axis * arrow_len
-            arrow_end = joint_pos + arrow_dir
-
-            # Magenta for Induced
-            draw_arrow_func(joint_pos, arrow_end, (255, 0, 255))
-
-    def _draw_cf_vectors(self, draw_arrow_func: Callable) -> None:
-        """Draw Counterfactual vectors (Yellow)."""
-        if self.model is None or self.data is None or self.latest_bio_data is None:
-            return
-        if self.cf_vector_type not in self.latest_bio_data.counterfactuals:
-            return
-
-        values = self.latest_bio_data.counterfactuals[self.cf_vector_type]
-
-        for j in range(self.model.njnt):
-            # Map joint to DoF index
-            # Assuming 1-DOF joints mainly for visualization
-            qvel_adr = self.model.jnt_dofadr[j]
-            if qvel_adr >= len(values):
-                continue
-
-            val = values[qvel_adr]
-            if abs(val) < 1e-3:
-                continue
-
-            body_id = self.model.jnt_bodyid[j]
-            joint_pos = self.data.xpos[body_id].copy()
-            joint_axis = self.data.xaxis[3 * j : 3 * j + 3]
-
-            arrow_len = val * self.torque_scale * 0.5
-            arrow_dir = joint_axis * arrow_len
-            arrow_end = joint_pos + arrow_dir
-
-            # Yellow for CF
-            draw_arrow_func(joint_pos, arrow_end, (0, 255, 255))
-
-    def _add_manipulation_overlays(self, rgb: np.ndarray) -> np.ndarray:
-        cv2 = get_cv2()
-        if cv2 is None:
-            return rgb
-
-        if self.model is None or self.data is None:
-            return rgb
-
-        img = rgb.copy()
-
-        if (
-            self.show_selected_body
-            and self.manipulator is not None
-            and self.manipulator.selected_body_id is not None
-        ):
-            body_pos = self.data.xpos[self.manipulator.selected_body_id].copy()
-            screen_pos = self._world_to_screen(body_pos)
-            if screen_pos is not None:
-                x, y = screen_pos
-                cv2.circle(img, (x, y), 20, (0, 255, 255), 3)
-                cv2.circle(img, (x, y), 3, (0, 255, 255), -1)
-                body_name = self.manipulator.get_body_name(
-                    self.manipulator.selected_body_id,
-                )
-                cv2.putText(
-                    img,
-                    body_name,
-                    (x + 25, y - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 255, 255),
-                    2,
-                )
-
-        if self.show_constraints and self.manipulator is not None:
-            for body_id in self.manipulator.get_constrained_bodies():
-                body_pos = self.data.xpos[body_id].copy()
-                screen_pos = self._world_to_screen(body_pos)
-
-                if screen_pos is not None:
-                    x, y = screen_pos
-                    cv2.rectangle(
-                        img,
-                        (x - 15, y - 15),
-                        (x + 15, y + 15),
-                        (255, 0, 255),
-                        2,
-                    )
-                    cv2.putText(
-                        img,
-                        "FIXED",
-                        (x + 20, y + 20),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.4,
-                        (255, 0, 255),
-                        1,
-                    )
-
-        return img
-
-    def _world_to_screen(self, world_pos: np.ndarray) -> tuple[int, int] | None:
-        cam_azimuth = np.deg2rad(self.camera.azimuth)
-        cam_elevation = np.deg2rad(self.camera.elevation)
-        cam_distance = self.camera.distance
-        cam_lookat = self.camera.lookat.copy()
-
-        forward = np.array(
-            [
-                np.cos(cam_elevation) * np.sin(cam_azimuth),
-                np.cos(cam_elevation) * np.cos(cam_azimuth),
-                np.sin(cam_elevation),
-            ],
-        )
-        cam_pos = cam_lookat - forward * cam_distance
-
-        up_world = np.array([0, 0, 1])
-        right = np.cross(up_world, forward)
-        right = right / (np.linalg.norm(right) + 1e-8)
-        up = np.cross(forward, right)
-
-        to_point = world_pos - cam_pos
-        z = np.dot(to_point, forward)
-
-        if z < MIN_CAMERA_DEPTH:
-            return None
-
-        fovy = 45.0
-        aspect = self.frame_width / self.frame_height
-
-        x_cam = np.dot(to_point, right)
-        y_cam = np.dot(to_point, up)
-
-        x_ndc = x_cam / (z * np.tan(np.deg2rad(fovy / 2)) * aspect)
-        y_ndc = y_cam / (z * np.tan(np.deg2rad(fovy / 2)))
-
-        x_screen = int((x_ndc + 1.0) * 0.5 * self.frame_width)
-        y_screen = int((1.0 - y_ndc) * 0.5 * self.frame_height)
-
-        if 0 <= x_screen < self.frame_width and 0 <= y_screen < self.frame_height:
-            return (x_screen, y_screen)
-
-        return None
-
     def _enforce_interactive_constraints(self) -> None:
-        if self.manipulator is None or self.model is None or self.data is None:
+        if (
+            self.manipulator is None
+            or self.model is None
+            or self.data is None
+        ):
             return
         if not self.manipulator.constraints:
             return
@@ -1446,347 +1002,3 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     def get_manipulator(self) -> InteractiveManipulator | None:
         return self.manipulator
-
-    def mousePressEvent(self, event: QtGui.QMouseEvent | None) -> None:
-        if event is None:
-            return
-        modifiers = event.modifiers()
-        button = event.button()
-        pos = event.position()
-        x = int(pos.x())
-        y = int(pos.y())
-
-        if button == QtCore.Qt.MouseButton.MiddleButton or (
-            button == QtCore.Qt.MouseButton.LeftButton
-            and modifiers & QtCore.Qt.KeyboardModifier.ShiftModifier
-        ):
-            x = int(event.position().x())
-            y = int(event.position().y())
-            self.last_mouse_pos = (x, y)
-            self.is_dragging = True
-            self.camera_mode = "translate"
-            return
-
-        if (
-            button == QtCore.Qt.MouseButton.LeftButton
-            and modifiers == QtCore.Qt.KeyboardModifier.NoModifier
-            and self.manipulator is not None
-            and self.model is not None
-        ):
-            body_id = self.manipulator.select_body(
-                x,
-                y,
-                self.frame_width,
-                self.frame_height,
-                self.camera,
-            )
-
-            if body_id is not None:
-                body_name = self.manipulator.get_body_name(body_id)
-                logger.debug("Selected body via mouse: %s (id=%s)", body_name, body_id)
-                self._render_once()
-            else:
-                self.last_mouse_pos = (x, y)
-                self.is_dragging = True
-                self.camera_mode = "rotate"
-
-        if button == QtCore.Qt.MouseButton.RightButton:
-            if self.manipulator is not None and self.model is not None:
-                body_id = self.manipulator.select_body(
-                    x,
-                    y,
-                    self.frame_width,
-                    self.frame_height,
-                    self.camera,
-                )
-                if body_id is not None:
-                    self.show_context_menu(event.globalPosition().toPoint(), body_id)
-                    return
-
-            self.last_mouse_pos = (x, y)
-            self.is_dragging = True
-            self.camera_mode = "rotate"
-            return
-
-        if (
-            button == QtCore.Qt.MouseButton.LeftButton
-            and modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
-        ):
-            self.last_mouse_pos = (x, y)
-            self.is_dragging = True
-            self.camera_mode = "rotate"
-            return
-
-        super().mousePressEvent(event)
-
-    def mouseMoveEvent(self, event: QtGui.QMouseEvent | None) -> None:
-        if event is None:
-            return
-        pos = event.position()
-        x = int(pos.x())
-        y = int(pos.y())
-
-        if self.is_dragging and self.last_mouse_pos is not None:
-            dx = x - self.last_mouse_pos[0]
-            dy = y - self.last_mouse_pos[1]
-
-            if self.camera_mode == "rotate":
-                sensitivity = 0.5
-                self.camera.azimuth -= dx * sensitivity
-                self.camera.elevation = np.clip(
-                    self.camera.elevation + dy * sensitivity,
-                    -90.0,
-                    90.0,
-                )
-                self._render_once()
-            elif self.camera_mode == "translate":
-                sensitivity = 0.01 * self.camera.distance
-                az_rad = np.deg2rad(self.camera.azimuth)
-                el_rad = np.deg2rad(self.camera.elevation)
-                forward = np.array(
-                    [
-                        np.cos(el_rad) * np.sin(az_rad),
-                        np.cos(el_rad) * np.cos(az_rad),
-                        np.sin(el_rad),
-                    ],
-                )
-                up_world = np.array([0, 0, 1])
-                right = np.cross(up_world, forward)
-                right = right / (np.linalg.norm(right) + 1e-8)
-                up = np.cross(forward, right)
-
-                self.camera.lookat[:] += (
-                    -dx * sensitivity * right + dy * sensitivity * up
-                )
-                self._render_once()
-
-            self.last_mouse_pos = (x, y)
-            return
-
-        if self.manipulator is not None and self.model is not None:
-            if self.manipulator.selected_body_id is not None:
-                success = self.manipulator.drag_to(
-                    x,
-                    y,
-                    self.frame_width,
-                    self.frame_height,
-                    self.camera,
-                )
-
-                if success:
-                    self._render_once()
-
-        super().mouseMoveEvent(event)
-
-    def mouseReleaseEvent(self, event: QtGui.QMouseEvent | None) -> None:
-        if event is None:
-            return
-        if self.is_dragging:
-            self.is_dragging = False
-            self.last_mouse_pos = None
-
-        if (
-            self.manipulator is not None
-            and self.model is not None
-            and event.button() == QtCore.Qt.MouseButton.LeftButton
-            and self.manipulator.selected_body_id is not None
-        ):
-            body_name = self.manipulator.get_body_name(
-                self.manipulator.selected_body_id,
-            )
-            logger.debug("Released body via mouse: %s", body_name)
-            self.manipulator.deselect_body()
-            self._render_once()
-
-        super().mouseReleaseEvent(event)
-
-    def wheelEvent(self, event: QtGui.QWheelEvent | None) -> None:
-        if event is None:
-            return
-        if self.camera is not None:
-            delta = event.angleDelta().y()
-            zoom_factor = 1.0 + (delta / 1200.0)
-            self.camera.distance *= zoom_factor
-            self.camera.distance = max(0.1, min(50.0, self.camera.distance))
-            self._render_once()
-
-        super().wheelEvent(event)
-
-    def set_camera_azimuth(self, azimuth: float) -> None:
-        if self.camera is not None:
-            self.camera.azimuth = azimuth
-            self._render_once()
-
-    def set_camera_elevation(self, elevation: float) -> None:
-        if self.camera is not None:
-            self.camera.elevation = np.clip(elevation, -90.0, 90.0)
-            self._render_once()
-
-    def set_camera_distance(self, distance: float) -> None:
-        if self.camera is not None:
-            self.camera.distance = np.clip(distance, 0.1, 50.0)
-            self._render_once()
-
-    def set_camera_lookat(self, x: float, y: float, z: float) -> None:
-        if self.camera is not None:
-            self.camera.lookat[:] = [x, y, z]
-            self._render_once()
-
-    def reset_camera(self) -> None:
-        if self.camera is not None:
-            mujoco.mjv_defaultCamera(self.camera)
-            self.camera.azimuth = 90.0
-            self.camera.elevation = -20.0
-            self.camera.distance = 3.0
-            self.camera.lookat[:] = [0, 0, 1]
-            self._render_once()
-
-    def show_context_menu(self, global_pos: QtCore.QPoint, body_id: int) -> None:
-        if self.manipulator is None:
-            return
-
-        body_name = self.manipulator.get_body_name(body_id)
-        menu = QtWidgets.QMenu(self)
-        menu.setTitle(f"Body: {body_name}")
-
-        header = menu.addAction(f"Selected: {body_name}")
-        if header is not None:
-            header.setEnabled(False)
-        menu.addSeparator()
-
-        action_frame = menu.addAction("Show Coordinate System")
-        if action_frame is not None:
-            action_frame.setCheckable(True)
-            action_frame.setChecked(body_id in self.visible_frames)
-            action_frame.triggered.connect(
-                lambda: self.toggle_frame_visibility(body_id)
-            )
-
-        action_com = menu.addAction("Show Center of Mass")
-        if action_com is not None:
-            action_com.setCheckable(True)
-            action_com.setChecked(body_id in self.visible_coms)
-            action_com.triggered.connect(lambda: self.toggle_com_visibility(body_id))
-
-        menu.exec(global_pos)
-
-    def toggle_frame_visibility(self, body_id: int) -> None:
-        if body_id in self.visible_frames:
-            self.visible_frames.remove(body_id)
-        else:
-            self.visible_frames.add(body_id)
-        self._render_once()
-
-    def toggle_com_visibility(self, body_id: int) -> None:
-        if body_id in self.visible_coms:
-            self.visible_coms.remove(body_id)
-        else:
-            self.visible_coms.add(body_id)
-        self._render_once()
-
-    def _add_swing_plane_overlays(self, rgb: np.ndarray) -> np.ndarray:
-        """Overlay club trajectory and swing plane normal onto the pixel frame."""
-        cv2 = get_cv2()
-        if cv2 is None or self.model is None or self.data is None:
-            return rgb
-
-        img = rgb.copy()
-        history = self.swing_plane_visualizer.trajectory_history
-
-        # Draw trajectory as connected screen-space points
-        if self.show_club_trajectory and len(history) >= 2:
-            prev_px = None
-            for pt in history:
-                px = self._world_to_screen(np.asarray(pt))
-                if px is not None:
-                    cv2.circle(img, px, 2, (0, 255, 0), -1)  # Green dots
-                    if prev_px is not None:
-                        cv2.line(img, prev_px, px, (0, 255, 0), 1)
-                    prev_px = px
-
-        # Draw reference trajectory if enabled
-        if (
-            self.show_reference_trajectory
-            and self.reference_trajectory is not None
-            and len(self.reference_trajectory) >= 2
-        ):
-            prev_px = None
-            for pt in self.reference_trajectory:
-                px = self._world_to_screen(np.asarray(pt))
-                if px is not None:
-                    cv2.circle(img, px, 2, (0, 140, 255), -1)  # Orange dots
-                    if prev_px is not None:
-                        cv2.line(img, prev_px, px, (0, 140, 255), 1)
-                    prev_px = px
-
-        # Draw swing plane normal arrow
-        if self.show_swing_plane:
-            scene = self.swing_plane_visualizer.current_scene
-            if scene.instantaneous_plane is not None:
-                plane = scene.instantaneous_plane
-                start_px = self._world_to_screen(plane.normal_arrow_start)
-                end_px = self._world_to_screen(plane.normal_arrow_end)
-                if start_px is not None and end_px is not None:
-                    cv2.arrowedLine(
-                        img, start_px, end_px, (255, 136, 68), 2, tipLength=0.3
-                    )  # Blue-ish for plane normal
-
-        return img
-
-    def _add_frame_and_com_overlays(self, rgb: np.ndarray) -> np.ndarray:
-        cv2 = get_cv2()
-        if self.model is None or self.data is None or cv2 is None:
-            return rgb
-
-        img = rgb.copy()
-
-        def draw_line(
-            start_px: tuple[int, int],
-            end_px: tuple[int, int],
-            color: tuple[int, int, int],
-            thickness: int = 2,
-        ) -> None:
-            cv2.line(img, start_px, end_px, color, thickness)
-
-        axis_length = 0.2
-        for body_id in self.visible_frames:
-            pos = self.data.xpos[body_id].copy()
-            rot = self.data.xmat[body_id].reshape(3, 3)
-
-            origin = self._world_to_screen(pos)
-            if origin is None:
-                continue
-
-            x_end = pos + rot[:, 0] * axis_length
-            x_px = self._world_to_screen(x_end)
-            if x_px:
-                draw_line(origin, x_px, (255, 0, 0))
-
-            y_end = pos + rot[:, 1] * axis_length
-            y_px = self._world_to_screen(y_end)
-            if y_px:
-                draw_line(origin, y_px, (0, 255, 0))
-
-            z_end = pos + rot[:, 2] * axis_length
-            z_px = self._world_to_screen(z_end)
-            if z_px:
-                draw_line(origin, z_px, (0, 0, 255))
-
-        for body_id in self.visible_coms:
-            com_pos = self.data.xipos[body_id].copy()
-            screen_pos = self._world_to_screen(com_pos)
-            if screen_pos:
-                cv2.circle(img, screen_pos, 5, (0, 255, 255), -1)
-                cv2.circle(img, screen_pos, 7, (0, 0, 0), 1)
-
-                cv2.putText(
-                    img,
-                    "COM",
-                    (screen_pos[0] + 10, screen_pos[1]),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.4,
-                    (0, 255, 255),
-                    1,
-                )
-
-        return img
