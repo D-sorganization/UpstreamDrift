@@ -32,6 +32,7 @@ from ..core.datetime_utils import (
     timestamp_iso,
 )
 from .common_utils import get_logger, setup_structured_logging
+from .provenance import ProvenanceInfo, add_provenance_header_file
 
 # Configure structured logging
 setup_structured_logging()
@@ -160,6 +161,8 @@ class OutputManager:
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
         metadata: dict[str, Any] | None = None,
+        model_path: Path | str | None = None,
+        parameters: dict[str, Any] | None = None,
     ) -> Path:
         """
         Save simulation results to file.
@@ -195,21 +198,31 @@ class OutputManager:
         # Add extension based on format
         file_path = engine_dir / f"{filename}.{format_type.value}"
 
+        # Capture provenance metadata for reproducibility
+        provenance = ProvenanceInfo.capture(
+            model_path=model_path, parameters=parameters
+        )
+
         try:
             if format_type == OutputFormat.CSV:
                 is_df = False
                 try:
                     if isinstance(results, pd.DataFrame):
-                        results.to_csv(file_path, index=False)
+                        csv_text = results.to_csv(index=False)
                         is_df = True
                 except TypeError:
                     # Likely pd.DataFrame is a mock and not a type
-                    pass
+                    csv_text = ""
 
                 if not is_df:
                     # Convert dict to DataFrame if possible
                     df = pd.DataFrame(results)
-                    df.to_csv(file_path, index=False)
+                    csv_text = df.to_csv(index=False)
+
+                # Write provenance header followed by CSV data
+                with open(file_path, "w") as f:
+                    add_provenance_header_file(f, provenance)
+                    f.write(csv_text)
 
             elif format_type == OutputFormat.JSON:
                 # Handle numpy arrays in JSON serialization
@@ -226,6 +239,15 @@ class OutputManager:
 
                 output_data = {
                     "metadata": metadata or {},
+                    "provenance": {
+                        "software": f"{provenance.software_name} v{provenance.software_version}",
+                        "timestamp_utc": provenance.timestamp_utc,
+                        "git_commit": provenance.git_commit_sha,
+                        "git_branch": provenance.git_branch,
+                        "git_dirty": provenance.git_is_dirty,
+                        "python_version": provenance.python_version,
+                        "numpy_version": provenance.numpy_version,
+                    },
                     "results": results,
                     "timestamp": timestamp_iso(utc=False),
                     "engine": engine,
@@ -397,7 +419,7 @@ class OutputManager:
 
         try:
             if format_type == OutputFormat.CSV:
-                return pd.read_csv(file_path)
+                return pd.read_csv(file_path, comment="#")
 
             elif format_type == OutputFormat.JSON:
                 with open(file_path) as f:
@@ -486,6 +508,9 @@ class OutputManager:
         filename = f"{report_name}_{timestamp}.{format_type}"
         file_path = report_dir / filename
 
+        # Capture provenance metadata for reproducibility
+        provenance = ProvenanceInfo.capture()
+
         try:
             if format_type == "json":
 
@@ -500,8 +525,22 @@ class OutputManager:
                         f"Object of type {type(obj).__name__} is not JSON serializable"
                     )
 
+                # Embed provenance in report data
+                report_data = {
+                    "provenance": {
+                        "software": f"{provenance.software_name} v{provenance.software_version}",
+                        "timestamp_utc": provenance.timestamp_utc,
+                        "git_commit": provenance.git_commit_sha,
+                        "git_branch": provenance.git_branch,
+                        "git_dirty": provenance.git_is_dirty,
+                        "python_version": provenance.python_version,
+                        "numpy_version": provenance.numpy_version,
+                    },
+                    **analysis_data,
+                }
+
                 with open(file_path, "w") as f:
-                    json.dump(analysis_data, f, indent=2, default=json_serializer)
+                    json.dump(report_data, f, indent=2, default=json_serializer)
 
             elif format_type == "html":
                 # Basic HTML report generation

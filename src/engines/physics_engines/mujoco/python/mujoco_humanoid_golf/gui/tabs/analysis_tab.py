@@ -147,10 +147,17 @@ class AnalysisTab(QtWidgets.QWidget):
 
         if filename:
             try:
-                data_dict = recorder.export_to_dict()
+                from src.shared.python.data_io.provenance import (
+                    ProvenanceInfo,
+                    add_provenance_header_file,
+                )
 
-                # Write to CSV
+                data_dict = recorder.export_to_dict()
+                provenance = ProvenanceInfo.capture()
+
+                # Write provenance header followed by CSV data
                 with open(filename, "w", newline="") as csvfile:
+                    add_provenance_header_file(csvfile, provenance)
                     writer = csv.writer(csvfile)
 
                     # Write header
@@ -199,10 +206,27 @@ class AnalysisTab(QtWidgets.QWidget):
 
         if filename:
             try:
+                from src.shared.python.data_io.provenance import ProvenanceInfo
+
                 data_dict = recorder.export_to_dict()
+                provenance = ProvenanceInfo.capture()
+
+                output = {
+                    "provenance": {
+                        "software": (
+                            f"{provenance.software_name}"
+                            f" v{provenance.software_version}"
+                        ),
+                        "timestamp_utc": provenance.timestamp_utc,
+                        "git_commit": provenance.git_commit_sha,
+                        "git_branch": provenance.git_branch,
+                        "git_dirty": provenance.git_is_dirty,
+                    },
+                    **data_dict,
+                }
 
                 with open(filename, "w") as jsonfile:
-                    json.dump(data_dict, jsonfile, indent=2)
+                    json.dump(output, jsonfile, indent=2)
 
                 QtWidgets.QMessageBox.information(
                     self,

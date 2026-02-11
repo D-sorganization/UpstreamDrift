@@ -254,7 +254,7 @@ class TestOutputManager:
         path = output_manager.save_simulation_results(data, filename, OutputFormat.CSV)
         assert path.exists()
 
-        loaded_df = pd.read_csv(path)
+        loaded_df = pd.read_csv(path, comment="#")
         assert len(loaded_df) == 2
         assert list(loaded_df.columns) == ["col1", "col2"]
 
