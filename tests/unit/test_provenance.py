@@ -6,7 +6,7 @@ from unittest.mock import mock_open, patch
 
 import numpy as np
 
-from src.shared.python.provenance import (
+from src.shared.python.data_io.provenance import (
     ProvenanceInfo,
     add_provenance_header_file,
     add_provenance_to_csv,
@@ -16,9 +16,9 @@ from src.shared.python.provenance import (
 class TestProvenance(unittest.TestCase):
     """Test suite for provenance tracking."""
 
-    @patch("src.shared.python.provenance.subprocess.check_output")
-    @patch("src.shared.python.provenance.datetime")
-    @patch("src.shared.python.provenance.hashlib")
+    @patch("src.shared.python.data_io.provenance.subprocess.check_output")
+    @patch("src.shared.python.data_io.provenance.datetime")
+    @patch("src.shared.python.data_io.provenance.hashlib")
     def test_capture_provenance(self, mock_hashlib, mock_datetime, mock_subprocess):
         """Test capturing provenance with mocked environment."""
         # Mock datetime
@@ -95,7 +95,7 @@ class TestProvenance(unittest.TestCase):
         calls = [args[0] for args, _ in m().write.call_args_list]
         self.assertTrue(any("2025-01-01T12:00:00Z" in call for call in calls))
 
-    @patch("src.shared.python.provenance.ProvenanceInfo.capture")
+    @patch("src.shared.python.data_io.provenance.ProvenanceInfo.capture")
     def test_add_provenance_to_csv(self, mock_capture):
         """Test prepending provenance to CSV file."""
         mock_capture.return_value = ProvenanceInfo(

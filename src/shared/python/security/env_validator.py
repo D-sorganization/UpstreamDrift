@@ -17,7 +17,7 @@ Usage:
 import secrets
 from typing import TypedDict
 
-from src.shared.python.environment import (
+from src.shared.python.config.environment import (
     get_admin_password,
     get_database_url,
     get_environment,

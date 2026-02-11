@@ -262,7 +262,9 @@ class AdvancedGuiMethodsMixin:
         ks_layout.addWidget(canvas4)
 
         try:
-            from shared.python.kinematic_sequence import KinematicSequenceAnalyzer
+            from shared.python.biomechanics.kinematic_sequence import (
+                KinematicSequenceAnalyzer,
+            )
 
             # Define segments for the standard humanoid model
             # Note: Indices might need adjustment based on specific model loaded

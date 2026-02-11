@@ -11,11 +11,11 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from shared.python.swing_plane_analysis import SwingPlaneMetrics
+    from shared.python.biomechanics.swing_plane_analysis import SwingPlaneMetrics
 
 try:
+    from shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
     from shared.python.core import setup_logging
-    from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 except ImportError as e:
     raise ImportError(
         "Failed to import shared modules. Ensure shared.python is in PYTHONPATH."

@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 from matplotlib.figure import Figure
 
+from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
 from src.shared.python.plotting.renderers.base import BaseRenderer
-from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 
 class ClubRenderer(BaseRenderer):

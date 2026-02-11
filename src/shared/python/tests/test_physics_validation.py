@@ -11,7 +11,7 @@ class TestPhysicsValidationResult(unittest.TestCase):
 
     def test_energy_validation_result_str_pass(self) -> None:
         """Test EnergyValidationResult string representation for passing."""
-        from src.shared.python.physics_validation import EnergyValidationResult
+        from src.shared.python.physics.physics_validation import EnergyValidationResult
 
         result = EnergyValidationResult(
             energy_error=1e-5,
@@ -29,7 +29,7 @@ class TestPhysicsValidationResult(unittest.TestCase):
 
     def test_energy_validation_result_str_fail(self) -> None:
         """Test EnergyValidationResult string representation for failing."""
-        from src.shared.python.physics_validation import EnergyValidationResult
+        from src.shared.python.physics.physics_validation import EnergyValidationResult
 
         result = EnergyValidationResult(
             energy_error=0.1,
@@ -46,7 +46,9 @@ class TestPhysicsValidationResult(unittest.TestCase):
 
     def test_jacobian_validation_result_str(self) -> None:
         """Test JacobianValidationResult string representation."""
-        from src.shared.python.physics_validation import JacobianValidationResult
+        from src.shared.python.physics.physics_validation import (
+            JacobianValidationResult,
+        )
 
         result = JacobianValidationResult(
             jacobian_error=1e-8,
@@ -74,7 +76,7 @@ class TestPhysicsValidator(unittest.TestCase):
         self.mock_model.opt.timestep = 0.001
         self.mock_model.body_mass = [0, 1.0, 0.5, 0.3]
 
-    @patch("src.shared.python.physics_validation.mujoco", autospec=False)
+    @patch("src.shared.python.physics.physics_validation.mujoco", autospec=False)
     def test_compute_kinetic_energy(self, mock_mujoco_import: MagicMock) -> None:
         """Test kinetic energy computation."""
         # Skip if mujoco not available
@@ -83,7 +85,7 @@ class TestPhysicsValidator(unittest.TestCase):
         except ImportError:
             self.skipTest("MuJoCo not installed")
 
-    @patch("src.shared.python.physics_validation.mujoco", autospec=False)
+    @patch("src.shared.python.physics.physics_validation.mujoco", autospec=False)
     def test_compute_potential_energy(self, mock_mujoco_import: MagicMock) -> None:
         """Test potential energy computation."""
         # Skip if mujoco not available
@@ -115,7 +117,7 @@ class TestPhysicsValidatorIntegration(unittest.TestCase):
         try:
             import mujoco
 
-            from src.shared.python.physics_validation import PhysicsValidator
+            from src.shared.python.physics.physics_validation import PhysicsValidator
         except ImportError:
             self.skipTest("MuJoCo not installed")
 

@@ -559,12 +559,12 @@ class GenericPhysicsRecorder:
             Dictionary with GRF summary, FSP parameters, and per-frame
             wrench decompositions.
         """
-        from src.shared.python.ground_reaction_forces import (
+        from src.shared.python.physics.ground_reaction_forces import (
             FootSide,
             GRFAnalyzer,
             GRFTimeSeries,
         )
-        from src.shared.python.reference_frames import (
+        from src.shared.python.spatial_algebra.reference_frames import (
             ReferenceFrame,
             ReferenceFrameTransformer,
             WrenchInFrame,

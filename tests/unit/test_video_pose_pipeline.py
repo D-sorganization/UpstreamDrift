@@ -28,13 +28,13 @@ sys.modules["src.shared.python.pose_estimation.openpose_estimator"] = mock_op_mo
 sys.modules["shared.python.pose_estimation.openpose_estimator"] = mock_op_module
 
 
-from src.shared.python.pose_estimation.interface import (  # noqa: E402
-    PoseEstimationResult,
-)
-from src.shared.python.video_pose_pipeline import (  # noqa: E402
+from src.shared.python.gui_pkg.video_pose_pipeline import (  # noqa: E402
     VideoPosePipeline,
     VideoProcessingConfig,
     VideoProcessingResult,
+)
+from src.shared.python.pose_estimation.interface import (  # noqa: E402
+    PoseEstimationResult,
 )
 
 
@@ -45,7 +45,7 @@ def mock_cv2():
 
 @pytest.fixture
 def mock_output_manager():
-    with patch("src.shared.python.video_pose_pipeline.OutputManager") as mock:
+    with patch("src.shared.python.gui_pkg.video_pose_pipeline.OutputManager") as mock:
         yield mock
 
 

@@ -7,7 +7,7 @@ Uses shared image_utils with 'extreme' sharpening mode.
 from pathlib import Path
 
 from scripts.script_utils import run_main, setup_script_logging
-from src.shared.python.image_utils import (
+from src.shared.python.gui_pkg.image_utils import (
     Image,
     enhance_icon_source,
     save_ico,

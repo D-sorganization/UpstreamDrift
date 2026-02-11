@@ -12,7 +12,7 @@ Features:
     - Closed-tab memory with factory-based reopening
 
 Usage:
-    from src.shared.python.draggable_tabs import DraggableTabWidget
+    from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
     tabs = DraggableTabWidget(core_tabs={"Home", "Settings"})
     tabs.addTab(my_widget, "My Tab")

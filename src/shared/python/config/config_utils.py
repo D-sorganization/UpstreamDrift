@@ -23,7 +23,7 @@ import json
 from pathlib import Path
 from typing import Any, TypeVar
 
-from src.shared.python.error_decorators import log_errors
+from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)

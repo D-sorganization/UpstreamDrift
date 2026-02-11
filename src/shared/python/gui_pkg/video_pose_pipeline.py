@@ -15,10 +15,13 @@ from typing import Any
 import cv2
 import numpy as np
 
+from src.shared.python.data_io.marker_mapping import (
+    MarkerToModelMapper,
+    RegistrationResult,
+)
+from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.io_utils import ensure_directory
 from src.shared.python.logging_config import get_logger
-from src.shared.python.marker_mapping import MarkerToModelMapper, RegistrationResult
-from src.shared.python.output_manager import OutputManager
 from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
@@ -230,7 +233,7 @@ class VideoPosePipeline:
         Returns:
             Registration result with fitted parameters
         """
-        from src.shared.python.marker_mapping import RegistrationResult
+        from src.shared.python.data_io.marker_mapping import RegistrationResult
 
         # Convert pose keypoints to marker format
         marker_positions, marker_names, timestamps = self._convert_poses_to_markers(
@@ -252,7 +255,7 @@ class VideoPosePipeline:
             )
 
         # Initialize A3 fitting pipeline
-        from src.shared.python.data_fitting import A3FittingPipeline
+        from src.shared.python.validation_pkg.data_fitting import A3FittingPipeline
 
         pipeline = A3FittingPipeline()
 
@@ -442,7 +445,9 @@ class VideoPosePipeline:
                       marker_names [M],
                       timestamps [frames]).
         """
-        from src.shared.python.data_fitting import convert_poses_to_markers
+        from src.shared.python.validation_pkg.data_fitting import (
+            convert_poses_to_markers,
+        )
 
         if not pose_results:
             return np.array([]), [], np.array([])

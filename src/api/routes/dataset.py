@@ -175,7 +175,7 @@ async def generate_dataset(
     engine = _require_active_engine(engine_manager)
 
     try:
-        from src.shared.python.dataset_generator import (
+        from src.shared.python.data_io.dataset_generator import (
             ControlProfile,
             DatasetGenerator,
             GeneratorConfig,
@@ -230,7 +230,7 @@ async def import_swing_capture(
     capture data and converts it to joint-space trajectories.
     """
     try:
-        from src.shared.python.swing_capture_import import SwingCaptureImporter
+        from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
 
         importer = SwingCaptureImporter(target_frame_rate=request.target_frame_rate)
         trajectory = importer.import_file(request.file_path)
@@ -425,7 +425,7 @@ async def get_plot_types() -> list[dict[str, str]]:
 
     This is a static listing — no engine needed.
     """
-    from src.shared.python.plot_generator import PlotGenerator
+    from src.shared.python.gui_pkg.plot_generator import PlotGenerator
 
     gen = PlotGenerator()
     return gen.get_available_plot_types()

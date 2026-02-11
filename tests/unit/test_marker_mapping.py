@@ -5,13 +5,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.data_io.marker_mapping import (
+    MarkerMapping,
+    MarkerToModelMapper,
+)
 from src.shared.python.engine_availability import (
     MUJOCO_AVAILABLE,
     skip_if_unavailable,
-)
-from src.shared.python.marker_mapping import (
-    MarkerMapping,
-    MarkerToModelMapper,
 )
 
 pytestmark = skip_if_unavailable("mujoco")

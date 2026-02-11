@@ -18,7 +18,7 @@ Design by Contract:
         - All data is reproducible given the same seed
 
 Usage:
-    >>> from src.shared.python.dataset_generator import DatasetGenerator
+    >>> from src.shared.python.data_io.dataset_generator import DatasetGenerator
     >>> gen = DatasetGenerator(engine)
     >>> config = GeneratorConfig(
     ...     num_samples=1000,

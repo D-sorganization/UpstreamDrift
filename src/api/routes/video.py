@@ -21,7 +21,7 @@ from src.api.config import (
     VALID_ESTIMATOR_TYPES,
 )
 from src.api.utils.datetime_compat import UTC
-from src.shared.python.video_pose_pipeline import (
+from src.shared.python.gui_pkg.video_pose_pipeline import (
     VideoPosePipeline,
     VideoProcessingConfig,
 )

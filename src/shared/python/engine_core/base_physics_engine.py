@@ -10,7 +10,7 @@ Design by Contract:
     - Invariants: Properties that must always hold
 
 Usage:
-    from src.shared.python.base_physics_engine import BasePhysicsEngine
+    from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
 
     class MyPhysicsEngine(BasePhysicsEngine):
         def _load_from_path_impl(self, path: str) -> None:
@@ -38,7 +38,7 @@ from src.shared.python.contracts import (
     invariant_checked,
     require_state,
 )
-from src.shared.python.error_decorators import ErrorContext, log_errors
+from src.shared.python.core.error_decorators import ErrorContext, log_errors
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
 from src.shared.python.security_utils import validate_path

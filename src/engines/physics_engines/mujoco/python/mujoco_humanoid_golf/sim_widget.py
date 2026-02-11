@@ -14,9 +14,11 @@ import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
+from src.shared.python.biomechanics.swing_plane_visualization import (
+    SwingPlaneVisualizer,
+)
 from src.shared.python.biomechanics_data import BiomechanicalData
 from src.shared.python.logging_config import get_logger
-from src.shared.python.swing_plane_visualization import SwingPlaneVisualizer
 
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType

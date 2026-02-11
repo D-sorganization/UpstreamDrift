@@ -16,14 +16,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.shared.python.dataset_generator import (
+from src.shared.python.data_io.dataset_generator import (
     ControlProfile,
     DatasetGenerator,
     GeneratorConfig,
     ParameterRange,
     TrainingDataset,
 )
-from src.shared.python.mock_engine import MockPhysicsEngine
+from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
 
 # ---- Fixtures ----
 

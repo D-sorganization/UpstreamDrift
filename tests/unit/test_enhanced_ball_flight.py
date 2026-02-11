@@ -26,7 +26,7 @@ from src.shared.python.aerodynamics import (
     RandomizationConfig,
     WindConfig,
 )
-from src.shared.python.ball_flight_physics import (
+from src.shared.python.physics.ball_flight_physics import (
     BallProperties,
     EnhancedBallFlightSimulator,
     EnvironmentalConditions,

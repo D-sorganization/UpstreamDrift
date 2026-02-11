@@ -17,7 +17,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from src.shared.python.logging_config import get_logger
-from src.shared.python.subprocess_utils import run_command
+from src.shared.python.security.subprocess_utils import run_command
 
 logger = get_logger(__name__)
 

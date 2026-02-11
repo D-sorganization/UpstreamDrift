@@ -13,7 +13,7 @@ from src.shared.python.comparative_analysis import (
     ComparisonMetric,
     RecorderInterface,
 )
-from src.shared.python.comparative_plotting import ComparativePlotter
+from src.shared.python.validation_pkg.comparative_plotting import ComparativePlotter
 
 
 class MockRecorder(RecorderInterface):

@@ -8,7 +8,7 @@ the consolidated exception hierarchy.
 
 Migration:
     # Old import (deprecated):
-    from src.shared.python.exceptions import GolfModelingError, EngineNotFoundError
+    from src.shared.python.core.exceptions import GolfModelingError, EngineNotFoundError
 
     # New import (preferred):
     from src.shared.python.error_utils import GolfSuiteError, EngineNotAvailableError

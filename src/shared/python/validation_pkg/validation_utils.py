@@ -3,7 +3,7 @@
 This module provides reusable validation patterns.
 
 Usage:
-    from src.shared.python.validation_utils import (
+    from src.shared.python.validation_pkg.validation_utils import (
         validate_array_shape,
         validate_positive,
         validate_range,

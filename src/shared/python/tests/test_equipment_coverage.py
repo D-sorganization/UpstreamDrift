@@ -1,6 +1,6 @@
 import pytest
 
-from shared.python.equipment import CLUB_CONFIGS, get_club_config
+from shared.python.physics.equipment import CLUB_CONFIGS, get_club_config
 
 
 def test_get_club_config_success() -> None:

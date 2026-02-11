@@ -254,9 +254,9 @@ class TestGolfLauncherLogic:
         """
         # Patch where it is defined, so imports get the mock
         with (
-            patch("src.shared.python.help_system.HelpButton") as mock_btn,
-            patch("src.shared.python.help_system.HelpDialog"),
-            patch("src.shared.python.help_system.TooltipManager"),
+            patch("src.shared.python.gui_pkg.help_system.HelpButton") as mock_btn,
+            patch("src.shared.python.gui_pkg.help_system.HelpDialog"),
+            patch("src.shared.python.gui_pkg.help_system.TooltipManager"),
         ):
             yield mock_btn
 

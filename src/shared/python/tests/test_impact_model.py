@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from src.shared.python.impact_model import (
+from src.shared.python.physics.impact_model import (
     GOLF_BALL_MASS,
     FiniteTimeImpactModel,
     ImpactModelType,

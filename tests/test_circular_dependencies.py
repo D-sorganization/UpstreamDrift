@@ -46,7 +46,7 @@ class TestSharedDoesNotImportEngines:
             sys.modules.update(saved)
 
     def test_capabilities_in_shared(self):
-        """EngineCapabilities should be importable from shared.python.capabilities."""
+        """EngineCapabilities should be importable from shared.python.engine_core.capabilities."""
         mod = importlib.import_module("src.shared.python.capabilities")
         assert hasattr(mod, "EngineCapabilities")
         assert hasattr(mod, "CapabilityLevel")

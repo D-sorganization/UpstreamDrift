@@ -85,7 +85,7 @@ class LauncherService:
         Returns:
             True if process was found and stopped, False if not found.
         """
-        from src.shared.python.subprocess_utils import kill_process_tree
+        from src.shared.python.security.subprocess_utils import kill_process_tree
 
         proc = self.process_manager.running_processes.get(name)
         if proc is None:

@@ -12,8 +12,11 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.shared.python.multi_muscle import MuscleGroup
-from src.shared.python.myosuite_adapter import MuscleDrivenEnv, train_muscle_policy
+from src.shared.python.biomechanics.multi_muscle import MuscleGroup
+from src.shared.python.biomechanics.myosuite_adapter import (
+    MuscleDrivenEnv,
+    train_muscle_policy,
+)
 
 
 @pytest.fixture
@@ -108,14 +111,14 @@ class TestMuscleDrivenEnv:
 class TestTrainMusclePolicy:
     """Tests for train_muscle_policy function."""
 
-    @patch("src.shared.python.myosuite_adapter.MYOSUITE_AVAILABLE", False)
+    @patch("src.shared.python.biomechanics.myosuite_adapter.MYOSUITE_AVAILABLE", False)
     def test_train_policy_unavailable(self, mock_muscle_system):
         """Test training when MyoSuite is not available."""
         env = MuscleDrivenEnv(mock_muscle_system)
         model = train_muscle_policy(env)
         assert model is None
 
-    @patch("src.shared.python.myosuite_adapter.MYOSUITE_AVAILABLE", True)
+    @patch("src.shared.python.biomechanics.myosuite_adapter.MYOSUITE_AVAILABLE", True)
     def test_train_policy_available(self, mock_muscle_system):
         """Test training when MyoSuite is available."""
         # We need to mock stable_baselines3 import

@@ -3,8 +3,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.shared.python.hill_muscle import HillMuscleModel, MuscleParameters
-from src.shared.python.multi_muscle import AntagonistPair, MuscleGroup
+from src.shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
+from src.shared.python.biomechanics.multi_muscle import AntagonistPair, MuscleGroup
 
 
 class TestMultiMuscle(unittest.TestCase):
@@ -81,7 +81,9 @@ class TestMultiMuscle(unittest.TestCase):
 
     def test_factory_function(self) -> None:
         """Test the elbow muscle system factory."""
-        from src.shared.python.multi_muscle import create_elbow_muscle_system
+        from src.shared.python.biomechanics.multi_muscle import (
+            create_elbow_muscle_system,
+        )
 
         elbow = create_elbow_muscle_system()
         self.assertIsInstance(elbow, AntagonistPair)

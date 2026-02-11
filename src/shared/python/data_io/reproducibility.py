@@ -4,7 +4,7 @@ This module centralizes random seed management across the codebase,
 addressing DRY violations identified in Pragmatic Programmer reviews.
 
 Usage:
-    from src.shared.python.reproducibility import set_seeds, DEFAULT_SEED
+    from src.shared.python.data_io.reproducibility import set_seeds, DEFAULT_SEED
 
     # Set all random seeds
     set_seeds(42)
@@ -56,7 +56,7 @@ def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
         ValueError: If validate=True and seed is out of valid range
 
     Example:
-        from src.shared.python.reproducibility import set_seeds
+        from src.shared.python.data_io.reproducibility import set_seeds
 
         # At the start of your script/experiment
         set_seeds(42)

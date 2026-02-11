@@ -6,7 +6,7 @@ are not available.
 
 Usage:
     # In test fixtures
-    from shared.python.mock_engine import MockPhysicsEngine
+    from shared.python.engine_core.mock_engine import MockPhysicsEngine
     engine = MockPhysicsEngine()
 
     # For light development (set environment variable)

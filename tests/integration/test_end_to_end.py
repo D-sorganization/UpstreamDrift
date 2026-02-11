@@ -290,7 +290,7 @@ class TestOutputManager:
 
         get_repo_root()
 
-        from src.shared.python.output_manager import OutputFormat, OutputManager
+        from src.shared.python.data_io.output_manager import OutputFormat, OutputManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = OutputManager(tmpdir)

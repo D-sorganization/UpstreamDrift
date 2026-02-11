@@ -5,7 +5,7 @@ environment variables across the codebase, addressing DRY violations
 identified in Pragmatic Programmer reviews.
 
 Usage:
-    from src.shared.python.environment import (
+    from src.shared.python.config.environment import (
         get_env,
         get_env_bool,
         get_env_int,
