@@ -1,3 +1,10 @@
+"""Tests for MuJoCo physics engine.
+
+Uses a single module-level mock for the mujoco dependency, injected into
+the physics engine module's namespace.  Per-test patching is removed to
+avoid double-mocking conflicts that caused assertion failures in CI.
+"""
+
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -38,24 +45,28 @@ def mock_mujoco_dependencies():
 @pytest.fixture(scope="module")
 def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
     """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
-    # Ensure module is imported
     import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
-    # Manually patch the module's globals to use our mocks
-    mock_mujoco, mock_interfaces = mock_mujoco_dependencies
+    mock_mujoco, _mock_interfaces = mock_mujoco_dependencies
 
-    # Save originals
-    original_mujoco = getattr(mod, "mujoco", None)
-
-    # Inject mocks
+    # Inject the mock so module-level `mujoco.xxx` calls see it
     mod.mujoco = mock_mujoco
-    # Note: interfaces might not be imported directly in this module, but patching mostly for safety
 
     yield mod.MuJoCoPhysicsEngine
 
-    # Restore
-    if original_mujoco:
-        mod.mujoco = original_mujoco
+    # No restore needed – the module patch is torn down by the fixture above.
+
+
+@pytest.fixture
+def mock_mj(mock_mujoco_dependencies):
+    """Return the shared mujoco mock **and** reset its call tracking.
+
+    This avoids ghostly cross-test state while still using a single mock
+    object that the engine module resolves at call-time.
+    """
+    mock_mujoco, _ = mock_mujoco_dependencies
+    mock_mujoco.reset_mock()
+    return mock_mujoco
 
 
 @pytest.fixture
@@ -69,25 +80,19 @@ def test_initialization(engine):
     assert engine.data is None
 
 
-@patch(
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-)
-def test_load_from_string(mock_mujoco, engine):
+def test_load_from_string(engine, mock_mj):
     xml = "<mujoco/>"
     engine.load_from_string(xml)
 
-    mock_mujoco.MjModel.from_xml_string.assert_called_once_with(xml)
+    mock_mj.MjModel.from_xml_string.assert_called_once_with(xml)
     assert engine.model is not None
     assert engine.data is not None
 
 
-@patch(
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-)
-def test_load_from_path(mock_mujoco, engine):
+def test_load_from_path(engine, mock_mj):
     path = "model.xml"
 
-    # Mock the security validation to allow test paths - patch where it's imported
+    # Mock the security validation to allow test paths
     with patch(
         "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
     ) as mock_validate:
@@ -95,38 +100,29 @@ def test_load_from_path(mock_mujoco, engine):
 
         engine.load_from_path(path)
 
-        # The engine is likely converting to absolute path now
-        # We should check if called with SOMETHING ending in "model.xml"
-        args, _ = mock_mujoco.MjModel.from_xml_path.call_args
+        # Check if called with SOMETHING ending in "model.xml"
+        args, _ = mock_mj.MjModel.from_xml_path.call_args
         assert args[0].endswith("model.xml")
         assert engine.xml_path.endswith(path)
 
 
-@patch(
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-)
-def test_step(mock_mujoco, engine):
-    # Setup mock model/data
+def test_step(engine, mock_mj):
     engine.model = MagicMock()
     engine.data = MagicMock()
 
     engine.step()
 
-    mock_mujoco.mj_step.assert_called_once_with(engine.model, engine.data)
+    mock_mj.mj_step.assert_called_once_with(engine.model, engine.data)
 
 
-@patch(
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-)
-def test_reset(mock_mujoco, engine):
-    # Setup mock model/data
+def test_reset(engine, mock_mj):
     engine.model = MagicMock()
     engine.data = MagicMock()
 
     engine.reset()
 
-    mock_mujoco.mj_resetData.assert_called_once_with(engine.model, engine.data)
-    mock_mujoco.mj_forward.assert_called_once()  # called by forward()
+    mock_mj.mj_resetData.assert_called_once_with(engine.model, engine.data)
+    mock_mj.mj_forward.assert_called_once()  # called by forward()
 
 
 def test_set_control(engine):
@@ -152,18 +148,15 @@ def test_set_control_mismatch(engine):
         engine.set_control(ctrl)
 
 
-def test_compute_mass_matrix(engine):
+def test_compute_mass_matrix(engine, mock_mj):
     engine.model = MagicMock()
     engine.model.nv = 2
     engine.data = MagicMock()
     engine.data.qM = np.zeros(2)
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-    ) as mock_mujoco:
-        M = engine.compute_mass_matrix()
-        assert M.shape == (2, 2)
-        mock_mujoco.mj_fullM.assert_called_once()
+    M = engine.compute_mass_matrix()
+    assert M.shape == (2, 2)
+    mock_mj.mj_fullM.assert_called_once()
 
 
 def test_compute_bias_forces(engine):
@@ -184,60 +177,49 @@ def test_compute_gravity_forces(engine):
     np.testing.assert_array_equal(grav, np.array([0.0, -GRAVITY_M_S2]))
 
 
-def test_compute_inverse_dynamics(engine):
+def test_compute_inverse_dynamics(engine, mock_mj):
     engine.model = MagicMock()
     engine.model.nv = 2
     engine.data = MagicMock()
     engine.data.qfrc_inverse = np.array([10.0, 20.0])
     engine.data.qacc = np.zeros(2)  # Real array for slice assignment
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-    ) as mock_mujoco:
-        qacc = np.array([0.1, 0.2])
-        tau = engine.compute_inverse_dynamics(qacc)
+    qacc = np.array([0.1, 0.2])
+    tau = engine.compute_inverse_dynamics(qacc)
 
-        assert tau is not None
-        np.testing.assert_array_equal(tau, np.array([10.0, 20.0]))
-        np.testing.assert_array_equal(engine.data.qacc, qacc)
-        mock_mujoco.mj_inverse.assert_called_once()
+    assert tau is not None
+    np.testing.assert_array_equal(tau, np.array([10.0, 20.0]))
+    np.testing.assert_array_equal(engine.data.qacc, qacc)
+    mock_mj.mj_inverse.assert_called_once()
 
 
-def test_compute_affine_drift(engine):
+def test_compute_affine_drift(engine, mock_mj):
     engine.model = MagicMock()
     engine.data = MagicMock()
     engine.data.ctrl = np.array([1.0])
     engine.data.qacc = np.array([0.5])  # Simulated drift acc
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-    ) as mock_mujoco:
-        drift = engine.compute_affine_drift()
+    drift = engine.compute_affine_drift()
 
-        assert drift is not None
-        np.testing.assert_array_equal(drift, np.array([0.5]))
-        # Should have restored control
-        np.testing.assert_array_equal(engine.data.ctrl, np.array([1.0]))
-        assert (
-            mock_mujoco.mj_forward.call_count == 2
-        )  # Once for drift, once for restore
+    assert drift is not None
+    np.testing.assert_array_equal(drift, np.array([0.5]))
+    # Should have restored control
+    np.testing.assert_array_equal(engine.data.ctrl, np.array([1.0]))
+    assert mock_mj.mj_forward.call_count == 2  # Once for drift, once for restore
 
 
-def test_compute_jacobian(engine):
+def test_compute_jacobian(engine, mock_mj):
     engine.model = MagicMock()
     engine.model.nv = 2
     engine.data = MagicMock()
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-    ) as mock_mujoco:
-        mock_mujoco.mj_name2id.return_value = 1
+    mock_mj.mj_name2id.return_value = 1
 
-        jac = engine.compute_jacobian("torso")
+    jac = engine.compute_jacobian("torso")
 
-        assert jac is not None
-        assert "linear" in jac
-        assert "angular" in jac
-        assert "spatial" in jac
-        assert jac["linear"].shape == (3, 2)
-        mock_mujoco.mj_jacBody.assert_called_once()
+    assert jac is not None
+    assert "linear" in jac
+    assert "angular" in jac
+    assert "spatial" in jac
+    assert jac["linear"].shape == (3, 2)
+    mock_mj.mj_jacBody.assert_called_once()
