@@ -7,30 +7,25 @@ This example demonstrates how to:
 3. Export detailed analysis results
 """
 
-import sys
-from pathlib import Path
-
 import numpy as np
 
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
-
-# Configure logging
-from src.shared.python.logging_config import get_logger, setup_logging  # noqa: E402
-from src.shared.python.output_manager import OutputManager  # noqa: E402
-from src.shared.python.physics_parameters import (  # noqa: E402
+from src.shared.python.core import get_logger, setup_logging
+from src.shared.python.data_io.output_manager import OutputManager
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.physics.physics_parameters import (
     ParameterCategory,
     get_registry,
 )
 
-setup_logging()
+setup_logging(__name__)
 logger = get_logger(__name__)
 
 
 def main() -> None:
     """Run parameter sweep example."""
     logger.info("Starting Example 02: Parameter Sweeps")
+
+    project_root = get_repo_root()
 
     # 1. Access Registry
     registry = get_registry()
