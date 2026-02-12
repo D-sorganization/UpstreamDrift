@@ -193,6 +193,13 @@ sys.modules["moderngl"] = MagicMock()
 sys.modules["golf_opengl_renderer"] = MagicMock()
 sys.modules["golf_video_export"] = MagicMock()
 
+# Mock backend dependencies that might not be present in CI or minimal envs
+sys.modules["numba"] = MagicMock()
+sys.modules["scipy"] = MagicMock()
+sys.modules["scipy.io"] = MagicMock()
+sys.modules["golf_inverse_dynamics"] = MagicMock()
+sys.modules["wiffle_data_loader"] = MagicMock()
+
 # Import the module under test
 import golf_gui_application  # noqa: E402
 
