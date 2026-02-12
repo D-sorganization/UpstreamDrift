@@ -20,6 +20,7 @@ class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
     def __init__(self, duration=1.0, amplitude=1.0, offset=0.0) -> None:
+        self.engine = None  # Satisfies RecorderInterface.engine attribute
         self.times = np.linspace(0, duration, 100)
         norm_time = np.linspace(0, 1, 100)
 
