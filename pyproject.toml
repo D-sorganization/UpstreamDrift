@@ -222,6 +222,7 @@ norecursedirs = [
     "archive",
     "legacy",
     "node_modules",
+    "vendor",
     ".git",
     "*.egg-info",
 ]

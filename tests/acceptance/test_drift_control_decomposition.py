@@ -64,9 +64,9 @@ class TestDriftControlDecomposition:
         v_initial = np.array([0.5])
         # Pad q/v if engine has more DOFs than the single pendulum URDF
         if hasattr(engine, "get_model") and engine.get_model():
-            q_initial = np.zeros(engine.get_model().nq)
+            q_initial = np.atleast_1d(np.zeros(engine.get_model().nq))
             q_initial[0] = 0.1
-            v_initial = np.zeros(engine.get_model().nv)
+            v_initial = np.atleast_1d(np.zeros(engine.get_model().nv))
             v_initial[0] = 0.5
 
         engine.set_state(q_initial, v_initial)
@@ -112,9 +112,9 @@ class TestDriftControlDecomposition:
                 "model may not support clean decomposition"
             )
 
-        assert (
-            max_res < SUPERPOSITION_TOLERANCE
-        ), f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        assert max_res < SUPERPOSITION_TOLERANCE, (
+            f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        )
 
     def test_zero_control(self, engine_name, pendulum_urdf):
         """Verify full dynamics with tau=0 equals drift acceleration."""
@@ -126,9 +126,9 @@ class TestDriftControlDecomposition:
 
         q_initial, v_initial = np.array([0.3]), np.array([0.2])
         if hasattr(engine, "get_model") and engine.get_model():
-            q_initial = np.zeros(engine.get_model().nq)
+            q_initial = np.atleast_1d(np.zeros(engine.get_model().nq))
             q_initial[0] = 0.3
-            v_initial = np.zeros(engine.get_model().nv)
+            v_initial = np.atleast_1d(np.zeros(engine.get_model().nv))
             v_initial[0] = 0.2
 
         engine.set_state(q_initial, v_initial)
