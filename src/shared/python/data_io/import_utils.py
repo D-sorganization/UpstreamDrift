@@ -1,78 +1,20 @@
-"""Import utilities for eliminating sys.path manipulation duplication.
+"""Import utilities for checking module availability and versions.
 
-This module provides reusable import patterns.
+This module provides reusable import patterns for dependency checking.
 
 Usage:
-    from src.shared.python.import_utils import add_to_path, ensure_imports
+    from src.shared.python.data_io.import_utils import ensure_imports
 
-    add_to_path(get_repo_root())
-    ensure_imports(["numpy", "matplotlib"])
+    available = ensure_imports("numpy", "matplotlib")
 """
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from typing import Any
 
-from src.shared.python.data_io.path_utils import get_repo_root, get_src_root
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
-
-
-def add_to_path(path: str | Path, position: int = 0) -> None:
-    """Add directory to sys.path if not already present.
-
-    Args:
-        path: Path to add
-        position: Position in sys.path (0 = first)
-
-    Example:
-        add_to_path(get_repo_root())
-        add_to_path("/custom/path", position=1)
-    """
-    path_str = str(Path(path).resolve())
-
-    if path_str not in sys.path:
-        sys.path.insert(position, path_str)
-        logger.debug(f"Added to sys.path[{position}]: {path_str}")
-    else:
-        logger.debug(f"Path already in sys.path: {path_str}")
-
-
-def remove_from_path(path: str | Path) -> None:
-    """Remove directory from sys.path.
-
-    Args:
-        path: Path to remove
-
-    Example:
-        remove_from_path("/custom/path")
-    """
-    path_str = str(Path(path).resolve())
-
-    if path_str in sys.path:
-        sys.path.remove(path_str)
-        logger.debug(f"Removed from sys.path: {path_str}")
-
-
-def ensure_repo_in_path() -> None:
-    """Ensure repository root is in sys.path.
-
-    Example:
-        ensure_repo_in_path()
-    """
-    add_to_path(get_repo_root())
-
-
-def ensure_src_in_path() -> None:
-    """Ensure src directory is in sys.path.
-
-    Example:
-        ensure_src_in_path()
-    """
-    add_to_path(get_src_root())
 
 
 def ensure_imports(*modules: str) -> dict[str, bool]:
@@ -241,34 +183,3 @@ def check_minimum_version(
     except (RuntimeError, ValueError, OSError) as e:
         logger.error(f"Failed to compare versions: {e}")
         return False
-
-
-class ImportContext:
-    """Context manager for temporary sys.path modifications.
-
-    Example:
-        with ImportContext(get_repo_root()):
-            from src.shared.python import utils
-    """
-
-    def __init__(self, *paths: str | Path) -> None:
-        """Initialize import context.
-
-        Args:
-            *paths: Paths to add to sys.path
-        """
-        self.paths = [str(Path(p).resolve()) for p in paths]
-        self.original_path = sys.path.copy()
-
-    def __enter__(self) -> ImportContext:
-        """Enter context."""
-        for path in self.paths:
-            if path not in sys.path:
-                sys.path.insert(0, path)
-                logger.debug(f"Temporarily added to sys.path: {path}")
-        return self
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Exit context."""
-        sys.path = self.original_path
-        logger.debug("Restored original sys.path")

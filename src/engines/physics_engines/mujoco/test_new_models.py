@@ -1,12 +1,6 @@
 """Quick test script to verify new models load correctly."""
 
 import sys
-from pathlib import Path
-
-from src.shared.python.data_io.path_utils import setup_import_paths
-from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
-
-setup_import_paths(additional_paths=[Path(__file__).parent / "python"])
 
 import mujoco as mj  # noqa: E402
 from mujoco_golf_pendulum.models import (  # noqa: E402
@@ -17,6 +11,8 @@ from mujoco_golf_pendulum.models import (  # noqa: E402
     generate_flexible_club_xml,
     generate_rigid_club_xml,
 )
+
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_logging(use_simple_format=True)
 logger = get_logger(__name__)

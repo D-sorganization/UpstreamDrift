@@ -14,12 +14,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
-from src.shared.python.data_io.path_utils import setup_import_paths
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.gui_pkg.gui_utils import get_qapp
-
-# Setup import paths for testing
-setup_import_paths()
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QPoint

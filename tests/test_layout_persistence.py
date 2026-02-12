@@ -15,11 +15,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-from src.shared.python.data_io.path_utils import setup_import_paths
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
-
-# Setup import paths for testing
-setup_import_paths()
 
 
 class TestLayoutPersistence(unittest.TestCase):

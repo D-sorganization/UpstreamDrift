@@ -6,12 +6,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.core.constants import GRAVITY_M_S2
-from src.shared.python.data_io.path_utils import setup_import_paths
 from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
-
-# Import paths configured at test runner level via pyproject.toml/conftest.py
-# This is a fallback for benchmark runners that may not use the full test setup
-setup_import_paths()
 
 # Check if pytest-benchmark is installed, otherwise skip
 if importlib.util.find_spec("pytest_benchmark") is None:

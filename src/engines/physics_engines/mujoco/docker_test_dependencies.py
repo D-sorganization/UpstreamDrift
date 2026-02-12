@@ -78,11 +78,6 @@ def test_specific_imports() -> bool:
 
     # Test the problematic urdf_io module
     try:
-        # Add the python directory to path
-        python_dir = "/workspace/python"
-        if python_dir not in sys.path:
-            logger.info("  Added %s to Python path", python_dir)
-
         if importlib.util.find_spec("mujoco_humanoid_golf.urdf_io"):
             logger.info("✓ mujoco_humanoid_golf.urdf_io imported successfully")
         else:

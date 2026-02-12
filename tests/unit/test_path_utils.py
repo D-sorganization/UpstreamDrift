@@ -20,7 +20,6 @@ from src.shared.python.data_io.path_utils import (
     get_simscape_model_path,
     get_src_root,
     get_tests_root,
-    setup_import_paths,
 )
 
 
@@ -341,44 +340,3 @@ class TestGetSimscapeModelPath:
         assert "python" in str(result)
 
 
-class TestSetupImportPaths:
-    """Tests for setup_import_paths function."""
-
-    def test_adds_paths_to_sys_path(self) -> None:
-        """Test that paths are added to sys.path."""
-        import sys
-
-        setup_import_paths()
-
-        # Should have added some paths
-        src_root = str(get_src_root())
-        assert src_root in sys.path
-
-    def test_with_additional_paths(self, tmp_path: Path) -> None:
-        """Test adding additional custom paths."""
-        import sys
-
-        custom_path = tmp_path / "custom"
-        custom_path.mkdir()
-
-        setup_import_paths(additional_paths=[custom_path])
-
-        assert str(custom_path) in sys.path
-
-    def test_does_not_duplicate_paths(self) -> None:
-        """Test that paths are not duplicated."""
-        import sys
-
-        src_root = str(get_src_root())
-
-        # Create a path that definitely doesn't have src_root
-        clean_path = [p for p in sys.path if p != src_root]
-
-        with patch("sys.path", clean_path):
-            # Call twice
-            setup_import_paths()
-            setup_import_paths()
-
-            # Should only appear once
-            count = sys.path.count(src_root)
-            assert count == 1

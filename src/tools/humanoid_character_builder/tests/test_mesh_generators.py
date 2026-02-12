@@ -14,15 +14,15 @@ import json
 import textwrap
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch  # noqa: E402
+from unittest.mock import MagicMock, patch
 
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
-from humanoid_character_builder.core.body_parameters import (  # noqa: E402
+import numpy as np
+import pytest
+from humanoid_character_builder.core.body_parameters import (
     BodyParameters,
     GenderModel,
 )
-from humanoid_character_builder.generators.mesh_generator import (  # noqa: E402
+from humanoid_character_builder.generators.mesh_generator import (
     GeneratedMeshResult,
     MakeHumanMeshGenerator,
     MeshGenerator,

@@ -2,10 +2,6 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-from src.shared.python.data_io.path_utils import setup_import_paths
-
-# Setup import paths for testing
-setup_import_paths()
 
 # Mock pydrake structure before import
 mock_pydrake = MagicMock()
