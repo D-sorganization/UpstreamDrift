@@ -7,7 +7,7 @@ status: "open"
 
 # Issue Description
 
-The `BallProperties` class in `src/shared/python/ball_flight_physics.py` contains hardcoded aerodynamic coefficients without citation.
+The `BallProperties` class in `src/shared/python/physics/ball_flight_physics.py` contains hardcoded aerodynamic coefficients without citation.
 
 ## Technical Detail
 
