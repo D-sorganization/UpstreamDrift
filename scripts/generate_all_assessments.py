@@ -4,10 +4,9 @@ Generate General Assessment Reports (A-O) based on reference prompts.
 """
 
 import json
-import re
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add project root to path for imports
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -15,12 +14,12 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.script_utils import (
-    run_main,
-    setup_script_logging,
-    find_python_files,
-    run_tool_check,
-    count_test_files,
     check_docs_status,
+    count_test_files,
+    find_python_files,
+    run_main,
+    run_tool_check,
+    setup_script_logging,
 )
 
 logger = setup_script_logging(__name__)
@@ -47,6 +46,7 @@ CATEGORIES = {
     "O": "Maintainability & Refactoring",
 }
 
+
 def read_prompt(letter: str) -> str:
     """Read the reference prompt for a category."""
     prompt_path = DOCS_ARCHIVE / f"Assessment_Prompt_{letter}.md"
@@ -55,6 +55,7 @@ def read_prompt(letter: str) -> str:
     for p in DOCS_ARCHIVE.glob(f"Assessment_Prompt_{letter}*.md"):
         return p.read_text(encoding="utf-8")
     return f"# Assessment {letter}: {CATEGORIES.get(letter)}\n\n(Prompt missing)"
+
 
 class BaseChecker:
     def __init__(self, letter, name):
@@ -69,7 +70,8 @@ class BaseChecker:
         self.findings.append(f"- Scanned {len(py_files)} Python files.")
         return self.findings, self.score, self.metrics
 
-class ArchitectureChecker(BaseChecker): # A
+
+class ArchitectureChecker(BaseChecker):  # A
     def run(self):
         findings = []
         metrics = {}
@@ -97,35 +99,44 @@ class ArchitectureChecker(BaseChecker): # A
         score = 9.0 if has_src and has_tests else (7.0 if has_src else 4.0)
         return findings, score, metrics
 
-class HygieneChecker(BaseChecker): # B
+
+class HygieneChecker(BaseChecker):  # B
     def run(self):
         findings = []
         metrics = {}
 
         ruff = run_tool_check(["ruff", "check", ".", "--statistics"])
-        metrics["ruff_exit_code"] = ruff['exit_code']
+        metrics["ruff_exit_code"] = ruff["exit_code"]
 
-        if ruff['exit_code'] == 0:
-             findings.append("- Ruff: ✅ Passed")
+        if ruff["exit_code"] == 0:
+            findings.append("- Ruff: ✅ Passed")
         else:
-             findings.append("- Ruff: ❌ Issues Found")
-             findings.append("\n### Ruff Violations")
-             findings.append("```\n" + ruff['stdout'][:500] + "\n...```")
+            findings.append("- Ruff: ❌ Issues Found")
+            findings.append("\n### Ruff Violations")
+            findings.append("```\n" + ruff["stdout"][:500] + "\n...```")
 
         black = run_tool_check(["black", "--check", "--quiet", "."])
-        findings.append(f"- Black: {'✅ Formatted' if black['exit_code'] == 0 else '❌ Formatting Needed'}")
+        findings.append(
+            f"- Black: {'✅ Formatted' if black['exit_code'] == 0 else '❌ Formatting Needed'}"
+        )
 
         mypy = run_tool_check(["mypy", "."])
-        findings.append(f"- Mypy: {'✅ Passed' if mypy['exit_code'] == 0 else '❌ Type Errors'}")
+        findings.append(
+            f"- Mypy: {'✅ Passed' if mypy['exit_code'] == 0 else '❌ Type Errors'}"
+        )
 
         score = 10.0
-        if ruff['exit_code'] != 0: score -= 2
-        if black['exit_code'] != 0: score -= 1
-        if mypy['exit_code'] != 0: score -= 2
+        if ruff["exit_code"] != 0:
+            score -= 2
+        if black["exit_code"] != 0:
+            score -= 1
+        if mypy["exit_code"] != 0:
+            score -= 2
 
         return findings, max(0, score), metrics
 
-class DocumentationChecker(BaseChecker): # C
+
+class DocumentationChecker(BaseChecker):  # C
     def run(self):
         findings = []
         metrics = {}
@@ -138,12 +149,19 @@ class DocumentationChecker(BaseChecker): # C
         for p in py_files:
             try:
                 content = p.read_text(encoding="utf-8", errors="ignore")
-                if '"""' not in content and "'''" not in content and p.stat().st_size > 500:
+                if (
+                    '"""' not in content
+                    and "'''" not in content
+                    and p.stat().st_size > 500
+                ):
                     missing.append(p)
-            except: pass
+            except:
+                pass
 
         metrics["missing_docstrings"] = len(missing)
-        findings.append(f"- Found {len(missing)} significant files (>500b) without docstrings.")
+        findings.append(
+            f"- Found {len(missing)} significant files (>500b) without docstrings."
+        )
 
         if missing:
             findings.append("\n### Files Missing Docstrings (Sample)")
@@ -157,7 +175,8 @@ class DocumentationChecker(BaseChecker): # C
         score = 8.0 - (len(missing) * 0.05)
         return findings, max(0, score), metrics
 
-class TestingChecker(BaseChecker): # G
+
+class TestingChecker(BaseChecker):  # G
     def run(self):
         findings = []
         metrics = {}
@@ -165,11 +184,15 @@ class TestingChecker(BaseChecker): # G
         metrics["test_files"] = count
         findings.append(f"- Test files found: {count}")
 
-        if count > 20: score = 9.0
-        elif count > 5: score = 7.0
-        else: score = 2.0
+        if count > 20:
+            score = 9.0
+        elif count > 5:
+            score = 7.0
+        else:
+            score = 2.0
 
         return findings, score, metrics
+
 
 class KeywordChecker(BaseChecker):
     def __init__(self, letter, name, keywords):
@@ -191,10 +214,13 @@ class KeywordChecker(BaseChecker):
                         hits += 1
                         if len(samples) < 10:
                             samples.append(f"`{p.name}`: ...{kw}...")
-            except: pass
+            except:
+                pass
 
         metrics["keyword_hits"] = hits
-        findings.append(f"- Scanned {len(py_files)} files for keywords: {', '.join(self.keywords)}")
+        findings.append(
+            f"- Scanned {len(py_files)} files for keywords: {', '.join(self.keywords)}"
+        )
         findings.append(f"- Found {hits} occurrences.")
 
         if samples:
@@ -208,23 +234,36 @@ class KeywordChecker(BaseChecker):
         score = 7.0
         return findings, score, metrics
 
-class SecurityChecker(KeywordChecker): # F
+
+class SecurityChecker(KeywordChecker):  # F
     def __init__(self, letter, name):
-        super().__init__(letter, name, ["password =", "secret =", "eval(", "exec(", "subprocess.call("])
+        super().__init__(
+            letter,
+            name,
+            ["password =", "secret =", "eval(", "exec(", "subprocess.call("],
+        )
 
     def run(self):
         findings, _, metrics = super().run()
         hits = metrics["keyword_hits"]
         score = max(0, 10.0 - (hits * 0.5))
-        findings.append(f"\n**Security Risk Assessment**: {hits} potential vulnerabilities identified.")
+        findings.append(
+            f"\n**Security Risk Assessment**: {hits} potential vulnerabilities identified."
+        )
         return findings, score, metrics
 
+
 def get_checker(letter, name):
-    if letter == "A": return ArchitectureChecker(letter, name)
-    if letter == "B": return HygieneChecker(letter, name)
-    if letter == "C": return DocumentationChecker(letter, name)
-    if letter == "F": return SecurityChecker(letter, name)
-    if letter == "G": return TestingChecker(letter, name)
+    if letter == "A":
+        return ArchitectureChecker(letter, name)
+    if letter == "B":
+        return HygieneChecker(letter, name)
+    if letter == "C":
+        return DocumentationChecker(letter, name)
+    if letter == "F":
+        return SecurityChecker(letter, name)
+    if letter == "G":
+        return TestingChecker(letter, name)
 
     keywords = {
         "D": ["except Exception", "except:", "try:"],
@@ -236,9 +275,10 @@ def get_checker(letter, name):
         "L": ["logging.", "print("],
         "M": ["os.getenv", "config", ".env"],
         "N": ["async def", "await ", "Thread", "Process"],
-        "O": ["class ", "def ", "import "]
+        "O": ["class ", "def ", "import "],
     }
     return KeywordChecker(letter, name, keywords.get(letter, ["class "]))
+
 
 def generate_report(letter: str, name: str):
     logger.info(f"Generating Assessment {letter}: {name}...")
@@ -267,8 +307,11 @@ This is an automated assessment report generated based on the reference prompt r
 
 {prompt_text}
 """
-    (OUTPUT_DIR / f"Assessment_{letter}_Category.md").write_text(report_content, encoding="utf-8")
+    (OUTPUT_DIR / f"Assessment_{letter}_Category.md").write_text(
+        report_content, encoding="utf-8"
+    )
     return score, metrics
+
 
 def main():
     logger.info("Starting General Assessment Generation (A-O)...")
@@ -278,9 +321,10 @@ def main():
     summary = {}
     if SUMMARY_JSON.exists():
         try:
-            with open(SUMMARY_JSON, "r") as f:
+            with open(SUMMARY_JSON) as f:
                 summary = json.load(f)
-        except: pass
+        except:
+            pass
 
     if "category_scores" not in summary:
         summary["category_scores"] = {}
@@ -298,7 +342,7 @@ def main():
         summary["category_scores"][letter] = {
             "name": name,
             "score": score,
-            "status": "Satisfactory" if score >= 7 else "Needs Improvement"
+            "status": "Satisfactory" if score >= 7 else "Needs Improvement",
         }
 
         # Merge metrics
@@ -316,6 +360,7 @@ def main():
 
     logger.info(f"Assessments completed. Summary saved to {SUMMARY_JSON}")
     return 0
+
 
 if __name__ == "__main__":
     run_main(main, logger)
