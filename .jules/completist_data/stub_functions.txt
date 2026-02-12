@@ -2,6 +2,8 @@
 ./tests/test_tool_registry.py:71 tool
 ./tests/test_tool_registry.py:86 t1
 ./tests/test_tool_registry.py:90 t2
+./tests/test_golf_gui_tabs.py:24 show
+./tests/test_golf_gui_tabs.py:26 setFocusPolicy
 ./tests/test_urdf_tools.py:34 test_urdf_generation_logic
 ./tests/test_dashboard_enhancements.py:37 load_from_path
 ./tests/test_dashboard_enhancements.py:40 load_from_string
