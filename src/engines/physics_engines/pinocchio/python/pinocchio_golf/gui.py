@@ -4,39 +4,27 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Bootstrap: add repo root to sys.path for src.* imports
-_root = next(
-    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
-    Path(__file__).resolve().parent,
-)
-if str(_root) not in sys.path:
-    sys.path.insert(0, str(_root))
+import numpy as np
+import pinocchio as pin  # type: ignore
+from PyQt6 import QtCore, QtWidgets
 
-from _bootstrap import bootstrap  # noqa: E402
-
-bootstrap(__file__)
-
-import numpy as np  # noqa: E402
-import pinocchio as pin  # type: ignore  # noqa: E402
-from PyQt6 import QtCore, QtWidgets  # noqa: E402
-
-from src.shared.python.biomechanics.biomechanics_data import (  # noqa: E402
+from src.shared.python.biomechanics.biomechanics_data import (
     BiomechanicalData,
 )
-from src.shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
-from src.shared.python.data_io.common_utils import get_shared_urdf_path  # noqa: E402
-from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
+from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.data_io.common_utils import get_shared_urdf_path
+from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
-from src.shared.python.plotting import GolfSwingPlotter, MplCanvas  # noqa: E402
-from src.shared.python.ui.simulation_gui_base import SimulationGUIBase  # noqa: E402
-from src.shared.python.ui.widgets import LogPanel, SignalBlocker  # noqa: E402
-from src.shared.python.validation_pkg.statistical_analysis import (  # noqa: E402
+from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
+from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
+from src.shared.python.ui.widgets import LogPanel, SignalBlocker
+from src.shared.python.validation_pkg.statistical_analysis import (
     StatisticalAnalyzer,
 )
 
-from .manipulability import PinocchioManipulabilityAnalyzer  # noqa: E402
+from .manipulability import PinocchioManipulabilityAnalyzer
 
 # Check meshcat availability
 try:

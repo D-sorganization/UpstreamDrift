@@ -10,34 +10,10 @@ See issues #979 (MakeHuman) and #980 (SMPL-X).
 
 from __future__ import annotations
 
-# Ensure UpstreamDrift's local src/tools is first on sys.path so that
-# the local humanoid_character_builder package is loaded instead of any
-# externally installed copy (e.g. from a .pth file pointing at Tools repo).
-import sys
-from pathlib import Path as _Path
-
-# Bootstrap: add repo root for src.* imports
-_root = next(
-    (p for p in _Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
-    _Path(__file__).resolve().parent,
-)
-if str(_root) not in sys.path:
-    sys.path.insert(0, str(_root))
-
-_tools_dir = str(_Path(__file__).resolve().parent.parent.parent)
-if _tools_dir not in sys.path:
-    sys.path.insert(0, _tools_dir)
-# Evict cached modules that resolve to the wrong location, but preserve
-# anything pytest is currently loading (i.e. anything containing "src." or
-# ".tests").
-for _key in list(sys.modules.keys()):
-    if _key.startswith("humanoid_character_builder") and "tests" not in _key:
-        del sys.modules[_key]
-
-import json  # noqa: E402
-import textwrap  # noqa: E402
-from pathlib import Path  # noqa: E402
-from typing import Any  # noqa: E402
+import json
+import textwrap
+from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import numpy as np  # noqa: E402
@@ -215,9 +191,7 @@ class TestSMPLXGenerate:
         mock_output.vertices = MagicMock()
         mock_output.vertices.detach.return_value.cpu.return_value.numpy.return_value.squeeze.return_value = np.random.randn(
             n_verts, 3
-        ).astype(
-            np.float32
-        )
+        ).astype(np.float32)
 
         mock_model = MagicMock()
         mock_model.return_value = mock_output
