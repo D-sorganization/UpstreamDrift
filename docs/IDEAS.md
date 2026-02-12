@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-02-13
+**Last Updated**: 2026-02-14
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -25,6 +25,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Force plate data (Vertical, A-P, M-L forces) and clubhead speed.
   - _Outcome_: Efficiency ratio to guide strength vs. technique training.
 
+- **Force Vector Steering**: Analysis of how the ground reaction force vector is directed relative to the Center of Mass (CoM). This steering mechanism is critical for generating angular momentum (torque = r x F) about the CoM.
+  - _Data Needed_: 3D GRF vector and whole-body CoM position.
+  - _Outcome_: Understanding of rotational power generation mechanics.
+  - _Ref_: Kwon, Y.-H. (2018). "Ground reaction force and moment."
+
 - **Center of Pressure (CoP) Patterns**: Categorize foot pressure patterns (e.g., "Linear", "Heel-to-Toe", "Back-Foot") and correlate them with swing styles and power sources.
   - _Data Needed_: Force plate CoP coordinates ($x(t), y(t)$) throughout the swing.
   - _Outcome_: Classification algorithm linking ground interaction style to club delivery metrics.
@@ -42,6 +47,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Time-series activation data from multiple muscle groups.
   - _Outcome_: Understanding of motor control strategies and coordination complexity.
   - _Ref_: d'Avella, A., et al. (2003). "Combinations of muscle synergies in the construction of a natural motor behavior."
+
+- **Joint Quasi-Stiffness**: Estimate the dynamic joint stiffness (Slope of the Moment vs. Angle curve) during the swing. This quasi-stiffness reflects the net effect of passive structures and active muscle contraction.
+  - _Data Needed_: Joint moments and angles time-series.
+  - _Outcome_: Assessment of joint stability and injury risk.
+  - _Ref_: Latash, M. L., & Zatsiorsky, V. M. (1993). "Joint stiffness: Myth or reality?"
 
 ### Injury & Learning
 
@@ -69,6 +79,10 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Wind profile power law exponents.
   - _Outcome_: Improved accuracy for high-launching shots.
 
+- **Turbulence Modeling**: Model the effect of atmospheric turbulence intensity on the drag coefficient. High turbulence can trip the boundary layer earlier, potentially reducing drag (drag crisis) at lower speeds or increasing it via instability.
+  - _Data Needed_: Turbulence intensity parameters and modified Cd curves.
+  - _Outcome_: Robustness of trajectory prediction in gusty conditions.
+
 - **Variable Aerodynamic Coefficients**: Implement dynamic Lift ($C_L$) and Drag ($C_D$) coefficients that vary with Reynolds number ($Re$) and Spin Ratio ($S$). Constant coefficients fail to capture the "drag crisis" or low-speed behavior.
   - _Data Needed_: $C_L$ and $C_D$ surfaces as functions of $Re$ and $S$.
   - _Outcome_: High-fidelity trajectory simulation across all ball speeds (driver vs. wedge).
@@ -78,6 +92,10 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Water film thickness vs. impact pressure.
   - _Outcome_: Accurate "Wet Weather" mode predicting flyer lies and reduced spin.
   - _Ref_: Cross, R. (2004). "Physics of baseball and softball." (Relevant friction principles).
+
+- **Mud Ball Physics**: Simulate the flight of a ball with asymmetric mass distribution or surface roughness (mud adherence). This creates a wobbling spin axis and erratic lift forces.
+  - _Data Needed_: Perturbed inertia tensor and localized drag coefficients.
+  - _Outcome_: Simulation of "mud ball" deviation and flight stability analysis.
 
 - **Dimple Geometry Optimization**: Use surrogate models to predict aerodynamic coefficients ($C_L, C_D$) for custom dimple patterns without wind tunnel testing.
   - _Data Needed_: CFD training data linking geometry features to aero coefficients.
@@ -114,6 +132,10 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Polar Moment of Inertia ($J$) and Shear Modulus ($G$) profiles.
   - _Outcome_: Analysis of dynamic face closure variability due to shaft twist.
 
+- **Shaft Spine & Asymmetry**: Model non-uniform bending stiffness ($EI_{xx} \neq EI_{yy}$) caused by manufacturing tolerances ("spine"). This causes the shaft to bend out of the swing plane even with in-plane loading.
+  - _Data Needed_: Shaft oscillation frequency in multiple planes (FLO).
+  - _Outcome_: Prediction of impact inconsistency due to shaft orientation (puring).
+
 - **Clubhead MOI Tensor**: Replace point-mass clubhead approximations with a full 3D Moment of Inertia tensor. This is critical for accurately predicting the gear effect on off-center hits.
 
   - _Data Needed_: CAD-derived MOI tensors ($I_{xx}, I_{yy}, I_{zz}, I_{xy}, \dots$) for standard clubheads.
@@ -124,6 +146,10 @@ This document serves as the central registry for scientific research topics, tec
 
   - _Data Needed_: Full Inertia Tensor ($I_{xx}, I_{yy}, I_{zz}, I_{xy}, \dots$) and CG location.
   - _Outcome_: Physics-based prediction of gear effect and sweet spot sensitivity.
+
+- **Clubhead Aerodynamics**: Model the aerodynamic drag forces on the clubhead itself during the downswing. Bulky driver heads can experience significant drag near impact ($v > 100$ mph), reducing maximum speed.
+  - _Data Needed_: Drag area ($C_D A$) of the clubhead vs. yaw/pitch angles.
+  - _Outcome_: Calculation of clubhead speed loss due to head geometry.
 
 - **Kick Point Optimization**: Analyze shaft EI profiles to determine the dynamic "kick point" and its effect on dynamic loft.
 
@@ -174,6 +200,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Large dataset of swing metrics and outcomes.
   - _Outcome_: Identification of root causes vs. symptoms in swing faults.
 
+- **Tempo Ratios**: Statistical analysis of Backswing time to Downswing time ratio (Tempo) and its correlation with performance consistency.
+  - _Data Needed_: Swing event timestamps (Takeaway, Top, Impact) from large dataset.
+  - _Outcome_: Validation of the "3:1 Tempo" rule and identification of player-specific optimal tempos.
+  - _Ref_: Novosel, J., & Garrity, J. (2004). "Tour Tempo."
+
 - **Fatigue-Induced Kinematic Drift**: Model the progressive degradation of peak power and coordination (sequencing) over a simulation of 18 holes (approx. 4 hours).
   - _Data Needed_: Decay constants for fast-twitch muscle fibers.
   - _Outcome_: Prediction of "Back 9" scoring collapse risks.
@@ -190,6 +221,10 @@ This document serves as the central registry for scientific research topics, tec
 
   - _Data Needed_: Material properties (Young's Modulus, Poisson's ratio) and face thickness profile.
   - _Outcome_: Accurate smash factor prediction across the entire face (Variable Face Thickness modeling).
+
+- **Soft-Body Ball Compression**: Implement Explicit FEM or Material Point Method (MPM) modeling of the golf ball's core deformation at impact. This captures hysteresis (energy loss) and heat generation more accurately than simple COR coefficients.
+  - _Data Needed_: Hyperelastic material models (e.g., Mooney-Rivlin) for ball layers.
+  - _Outcome_: Detailed contact mechanics and compression/restitution analysis.
 
 - **Doppler Radar Emulation**: Simulate the raw radial velocity data seen by radar launch monitors (e.g., TrackMan) to study the difference between "measured" and "actual" impact parameters (e.g., Spin Loft vs. Dynamic Loft).
 
@@ -215,6 +250,10 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Target kinematic sequence (angular positions/velocities).
   - _Outcome_: Control inputs for a robotic swing device or biomechanical simulation.
 
+- **Iterative Learning Control (ILC)**: Apply ILC algorithms to robotic swing simulations. By using the error history from previous swings, the controller "learns" the optimal input to track a target trajectory perfectly.
+  - _Data Needed_: Error vectors from repeated trials.
+  - _Outcome_: Rapid convergence to target swing parameters for robot testing automation.
+
 - **Neuromuscular Noise Modeling**: Introduce signal-dependent noise into muscle torque actuators ($\sigma \propto u$) to simulate human motor variability. This reproduces the "speed-accuracy tradeoff" (Fitts's Law).
   - _Data Needed_: Noise scaling constants for different muscle groups.
   - _Outcome_: Realistic dispersion patterns generated from biomechanical simulations.
@@ -234,3 +273,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-01 | Added CoP, Aero Coeffs, Shaft Droop, Monte Carlo, Radar, Noise                                          | All      | Active |
 | 2026-02-13 | Added Power Flow, Muscle Synergy, Trajectory Opt, Flyer Lie, Rigid Impact, Bayesian, Causal, Neural ODE | All      | Active |
 | 2026-02-13 | Added Muscle Strain, Wet Play, Dimple Opt, Multi-Layer Ball, Fatigue, Synthetic Data, PPO               | All      | Active |
+| 2026-02-14 | Added Force Vector, Stiffness, Turbulence, Mud Ball, Spine, Head Aero, Tempo, Soft Body, ILC            | All      | Active |
