@@ -5,17 +5,10 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.shared.python.data_io.path_utils import (
-    get_simscape_model_path,
-    setup_import_paths,
-)
 from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
     PYTEST_QT_AVAILABLE,
 )
-
-# Add source directory to path using centralized path utility
-setup_import_paths(additional_paths=[get_simscape_model_path("3D_Golf_Model")])
 
 # Now we can import apps.*
 try:

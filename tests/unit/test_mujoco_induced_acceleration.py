@@ -2,11 +2,6 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from src.shared.python.data_io.path_utils import setup_import_paths
-
-# Import paths configured at test runner level and with setup_import_paths
-setup_import_paths()
-
 
 # Use a patch for the import since mujoco might not be installed
 @patch.dict("sys.modules", {"mujoco": MagicMock()})

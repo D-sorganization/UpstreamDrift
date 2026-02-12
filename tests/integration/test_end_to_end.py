@@ -9,11 +9,8 @@ import sys
 
 import pytest
 
-from src.shared.python.data_io.path_utils import get_repo_root, setup_import_paths
+from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
-
-# Import paths configured at test runner level
-setup_import_paths()
 
 
 class TestLauncherIntegration:
