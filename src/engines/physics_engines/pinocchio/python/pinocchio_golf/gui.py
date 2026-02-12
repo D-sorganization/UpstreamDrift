@@ -309,7 +309,11 @@ class PinocchioRecorder:
 
 
 class PinocchioGUI(SimulationGUIBase):
-    """Main GUI widget for Pinocchio robot visualization and computation."""
+    """Main GUI widget for Pinocchio robot visualization and computation.
+
+    Inherits common simulation controls, recording, visualization toggles,
+    and export infrastructure from :class:`SimulationGUIBase`.
+    """
 
     WINDOW_TITLE = "Pinocchio Golf Model (Dynamics & Kinematics)"
     WINDOW_WIDTH = 1000
@@ -430,6 +434,50 @@ class PinocchioGUI(SimulationGUIBase):
     def get_joint_names(self) -> list[str]:
         """Return joint names for LivePlotWidget."""
         return self.joint_names
+
+    # -- SimulationGUIBase abstract method implementations ----------------
+
+    def step_simulation(self) -> None:
+        """Advance Pinocchio simulation by one time step."""
+        if self.model is None or self.data is None or self.q is None or self.v is None:
+            return
+        tau = np.zeros(self.model.nv)
+        a = pin.aba(self.model, self.data, self.q, self.v, tau)
+        self.v += a * self.dt
+        self.q = pin.integrate(self.model, self.q, self.v * self.dt)
+        self.sim_time += self.dt
+
+    def reset_simulation(self) -> None:
+        """Reset Pinocchio simulation to initial state."""
+        self._reset_simulation()
+
+    def update_visualization(self) -> None:
+        """Refresh Pinocchio visualizations."""
+        self._update_viewer()
+
+    def load_model(self, index: int) -> None:
+        """Load model by index from available_models."""
+        self._on_model_combo_changed(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """Sync kinematic slider values with current model state."""
+        self._sync_kinematic_controls()
+
+    def start_recording(self) -> None:
+        """Start Pinocchio recording."""
+        self.recorder.start_recording()
+
+    def stop_recording(self) -> None:
+        """Stop Pinocchio recording."""
+        self.recorder.stop_recording()
+
+    def get_recording_frame_count(self) -> int:
+        """Return number of recorded frames."""
+        return self.recorder.get_num_frames()
+
+    def export_data(self, filename: str) -> None:
+        """Export Pinocchio recorded data."""
+        self._export_statistics()
 
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""

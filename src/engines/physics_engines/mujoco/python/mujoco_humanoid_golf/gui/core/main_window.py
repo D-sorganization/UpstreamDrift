@@ -36,7 +36,11 @@ logger = get_logger(__name__)
 
 
 class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
-    """Professional golf swing analysis application with comprehensive features."""
+    """Professional golf swing analysis application with comprehensive features.
+
+    Inherits common simulation GUI patterns from :class:`SimulationGUIBase`
+    and advanced analysis methods from :class:`AdvancedGuiMethodsMixin`.
+    """
 
     SIMPLIFIED_ACTUATOR_THRESHOLD: typing.Final[int] = 60
 
@@ -185,6 +189,62 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         # This ensures the plot updates whenever the simulation steps/renders
         if hasattr(self.sim_widget, "timer"):
             self.sim_widget.timer.timeout.connect(self.live_plot.update_plot)
+
+    # -- SimulationGUIBase overrides and implementations -------------------
+
+    def _build_base_ui(self) -> None:
+        """Override base UI construction.
+
+        MuJoCo uses its own comprehensive tab-based layout built
+        directly in ``__init__``, so we skip the base class skeleton.
+        """
+        # MuJoCo builds its entire UI in __init__ with dedicated tab classes.
+        # The base class skeleton is not used.
+
+    def step_simulation(self) -> None:
+        """Step handled by MuJoCoSimWidget timer."""
+
+    def reset_simulation(self) -> None:
+        """Reset MuJoCo simulation."""
+        self.sim_widget.reset_state()
+
+    def update_visualization(self) -> None:
+        """Visualization handled by MuJoCoSimWidget render loop."""
+
+    def load_model(self, index: int) -> None:
+        """Load model via PhysicsTab."""
+        if hasattr(self, "physics_tab"):
+            self.physics_tab.model_combo.setCurrentIndex(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """No separate kinematic controls in MuJoCo GUI."""
+
+    def start_recording(self) -> None:
+        """Start MuJoCo recording."""
+        recorder = self.sim_widget.get_recorder()
+        recorder.start_recording()
+
+    def stop_recording(self) -> None:
+        """Stop MuJoCo recording."""
+        recorder = self.sim_widget.get_recorder()
+        recorder.stop_recording()
+
+    def get_recording_frame_count(self) -> int:
+        """Return number of recorded frames."""
+        recorder = self.sim_widget.get_recorder()
+        return recorder.get_num_frames()
+
+    def export_data(self, filename: str) -> None:
+        """Export MuJoCo recorded data."""
+
+    def get_joint_names(self) -> list[str]:
+        """Return joint names from the simulation widget."""
+        if hasattr(self, "sim_widget") and self.sim_widget.model is not None:
+            return [
+                self.sim_widget.model.joint(i).name
+                for i in range(self.sim_widget.model.njnt)
+            ]
+        return []
 
     @property
     def model_configs(self) -> list[dict]:

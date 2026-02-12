@@ -446,7 +446,11 @@ class DrakeRecorder:
 
 
 class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
-    """Main GUI Window for Drake Golf Simulation."""
+    """Main GUI Window for Drake Golf Simulation.
+
+    Inherits common simulation controls, recording, visualization toggles,
+    and export infrastructure from :class:`SimulationGUIBase`.
+    """
 
     WINDOW_TITLE = "Drake Golf Swing Analysis"
     WINDOW_WIDTH = 1000
@@ -456,6 +460,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         # Pre-init state needed before super().__init__() triggers _build_base_ui
         self._drake_pre_init_done = False
         super().__init__()
+        # Note: super().__init__() calls _build_base_ui which creates
+        # common widgets. Drake-specific state is initialized below.
 
         # Simulation State
         self.simulator: Simulator | None = None  # type: ignore[no-any-unimported]
@@ -512,6 +518,49 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             if joint.num_velocities() == 1:
                 names.append(joint.name())
         return names
+
+    # -- SimulationGUIBase abstract method implementations ----------------
+
+    def step_simulation(self) -> None:
+        """Advance Drake simulation by one time step."""
+        simulator = self.simulator
+        context = self.context
+        if not simulator or not context:
+            return
+        t = context.get_time()
+        simulator.AdvanceTo(t + self.time_step)
+
+    def reset_simulation(self) -> None:
+        """Reset Drake simulation to initial state."""
+        self._reset_state()
+
+    def update_visualization(self) -> None:
+        """Refresh all Drake-specific visualizations."""
+        self._update_visualization()
+
+    def load_model(self, index: int) -> None:
+        """Load model by index from available_models."""
+        self._on_model_changed(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """Sync kinematic slider values with current plant state."""
+        self._sync_kinematic_sliders()
+
+    def start_recording(self) -> None:
+        """Start Drake recording."""
+        self.recorder.start()
+
+    def stop_recording(self) -> None:
+        """Stop Drake recording."""
+        self.recorder.stop()
+
+    def get_recording_frame_count(self) -> int:
+        """Return number of recorded frames."""
+        return len(self.recorder.times)
+
+    def export_data(self, filename: str) -> None:
+        """Export Drake recorded data."""
+        self._export_data()
 
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""
