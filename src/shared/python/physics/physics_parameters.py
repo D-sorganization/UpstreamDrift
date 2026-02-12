@@ -95,7 +95,14 @@ class PhysicsParameterRegistry:
 
     def _load_default_parameters(self) -> None:
         """Load default parameters from various sources."""
-        # Ball parameters (USGA Rules)
+        self._load_ball_parameters()
+        self._load_club_parameters()
+        self._load_environment_parameters()
+        self._load_biomechanics_parameters()
+        self._load_simulation_parameters()
+
+    def _load_ball_parameters(self) -> None:
+        """Load ball parameters (USGA Rules)."""
         self.register(
             PhysicsParameter(
                 name="BALL_MASS",
@@ -138,7 +145,22 @@ class PhysicsParameterRegistry:
             )
         )
 
-        # Club parameters
+        self.register(
+            PhysicsParameter(
+                name="DRAG_COEFFICIENT",
+                value=constants.GOLF_BALL_DRAG_COEFFICIENT,
+                unit="dimensionless",
+                category=ParameterCategory.BALL,
+                description="Golf ball drag coefficient (typical)",
+                source="Golf ball aerodynamics literature",
+                min_value=0.20,
+                max_value=0.30,
+                is_constant=False,
+            )
+        )
+
+    def _load_club_parameters(self) -> None:
+        """Load club parameters."""
         self.register(
             PhysicsParameter(
                 name="CLUB_MASS",
@@ -181,14 +203,15 @@ class PhysicsParameterRegistry:
             )
         )
 
-        # Environment parameters
+    def _load_environment_parameters(self) -> None:
+        """Load environment parameters."""
         self.register(
             PhysicsParameter(
                 name="GRAVITY",
                 value=constants.GRAVITY_M_S2,
-                unit="m/s²",
+                unit="m/s\u00b2",
                 category=ParameterCategory.ENVIRONMENT,
-                description="Standard gravity (sea level, 45° latitude)",
+                description="Standard gravity (sea level, 45\u00b0 latitude)",
                 source="NIST",
                 min_value=constants.GRAVITY_M_S2,
                 max_value=constants.GRAVITY_M_S2,
@@ -200,9 +223,9 @@ class PhysicsParameterRegistry:
             PhysicsParameter(
                 name="AIR_DENSITY",
                 value=constants.AIR_DENSITY_SEA_LEVEL_KG_M3,
-                unit="kg/m³",
+                unit="kg/m\u00b3",
                 category=ParameterCategory.ENVIRONMENT,
-                description="Air density at sea level, 15°C",
+                description="Air density at sea level, 15\u00b0C",
                 source="ISA Standard Atmosphere",
                 min_value=0.9,  # High altitude
                 max_value=1.3,  # Sea level, cold
@@ -210,21 +233,8 @@ class PhysicsParameterRegistry:
             )
         )
 
-        self.register(
-            PhysicsParameter(
-                name="DRAG_COEFFICIENT",
-                value=constants.GOLF_BALL_DRAG_COEFFICIENT,
-                unit="dimensionless",
-                category=ParameterCategory.BALL,
-                description="Golf ball drag coefficient (typical)",
-                source="Golf ball aerodynamics literature",
-                min_value=0.20,
-                max_value=0.30,
-                is_constant=False,
-            )
-        )
-
-        # Biomechanics parameters
+    def _load_biomechanics_parameters(self) -> None:
+        """Load biomechanics parameters."""
         self.register(
             PhysicsParameter(
                 name="HUMAN_HEIGHT",
@@ -253,7 +263,8 @@ class PhysicsParameterRegistry:
             )
         )
 
-        # Simulation parameters
+    def _load_simulation_parameters(self) -> None:
+        """Load simulation parameters."""
         self.register(
             PhysicsParameter(
                 name="TIMESTEP",

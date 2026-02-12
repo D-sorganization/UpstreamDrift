@@ -8,6 +8,7 @@ like height, weight, and body proportions.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -231,23 +232,17 @@ class ParametricBuilder(BaseURDFBuilder):
 
         return self
 
-    def add_humanoid_segments(self) -> ParametricBuilder:
-        """
-        Add standard humanoid body segments.
-
-        This adds a complete humanoid skeleton with:
-        - Pelvis (root)
-        - Spine (lumbar, thorax)
-        - Head and neck
-        - Arms (shoulder, upper arm, forearm, hand) x2
-        - Legs (thigh, shin, foot) x2
+    def _make_anthropometry_helpers(
+        self,
+    ) -> tuple[
+        Callable[[str, float], float],
+        Callable[[str, float], float],
+    ]:
+        """Create mass/length ratio helpers using anthropometry data when available.
 
         Returns:
-            Self for method chaining
+            A (get_mass, get_length) pair of callables.
         """
-        import math
-
-        # Load anthropometry data if available
         try:
             from model_generation.humanoid.anthropometry import (
                 get_segment_length_ratio,
@@ -258,10 +253,12 @@ class ParametricBuilder(BaseURDFBuilder):
         except ImportError:
             use_anthropometry = False
 
+        gender_factor = self._gender_factor
+
         def get_mass(name: str, default: float) -> float:
             if use_anthropometry:
                 try:
-                    return get_segment_mass_ratio(name, self._gender_factor)
+                    return get_segment_mass_ratio(name, gender_factor)
                 except (RuntimeError, ValueError, AttributeError):
                     pass
             return default
@@ -269,12 +266,25 @@ class ParametricBuilder(BaseURDFBuilder):
         def get_length(name: str, default: float) -> float:
             if use_anthropometry:
                 try:
-                    return get_segment_length_ratio(name, self._gender_factor)
+                    return get_segment_length_ratio(name, gender_factor)
                 except (RuntimeError, ValueError, AttributeError):
                     pass
             return default
 
-        # Pelvis (root)
+        return get_mass, get_length
+
+    def _add_torso_segments(
+        self,
+        get_mass: Callable[[str, float], float],
+        get_length: Callable[[str, float], float],
+    ) -> tuple[float, float, float]:
+        """Add pelvis, lumbar, thorax, neck, and head segments.
+
+        Returns:
+            Tuple of (pelvis_height, thorax_height, neck_height) for child offsets.
+        """
+        import math
+
         self.add_segment(
             name="pelvis",
             parent=None,
@@ -285,7 +295,6 @@ class ParametricBuilder(BaseURDFBuilder):
             material=Material.skin(),
         )
 
-        # Lumbar spine
         pelvis_height = self._height_m * get_length("pelvis", 0.078)
         self.add_segment(
             name="lumbar",
@@ -299,7 +308,6 @@ class ParametricBuilder(BaseURDFBuilder):
             origin_offset=(0, 0, pelvis_height / 2),
         )
 
-        # Thorax
         lumbar_height = self._height_m * get_length("lumbar", 0.108)
         self.add_segment(
             name="thorax",
@@ -313,7 +321,6 @@ class ParametricBuilder(BaseURDFBuilder):
             origin_offset=(0, 0, lumbar_height),
         )
 
-        # Neck
         thorax_height = self._height_m * get_length("thorax", 0.170)
         self.add_segment(
             name="neck",
@@ -327,7 +334,6 @@ class ParametricBuilder(BaseURDFBuilder):
             origin_offset=(0, 0, thorax_height),
         )
 
-        # Head
         neck_height = self._height_m * get_length("neck", 0.052)
         self.add_segment(
             name="head",
@@ -340,13 +346,22 @@ class ParametricBuilder(BaseURDFBuilder):
             origin_offset=(0, 0, neck_height),
         )
 
-        # Arms (left and right)
+        return pelvis_height, thorax_height, neck_height
+
+    def _add_arm_segments(
+        self,
+        get_mass: Callable[[str, float], float],
+        get_length: Callable[[str, float], float],
+        thorax_height: float,
+    ) -> None:
+        """Add shoulder, upper arm, forearm, and hand segments for both sides."""
+        import math
+
         shoulder_width = (
             self._height_m * 0.23 * self._proportions.get("shoulder_width_factor", 1.0)
         )
 
         for side, y_sign in [("left", 1), ("right", -1)]:
-            # Shoulder
             self.add_segment(
                 name=f"{side}_shoulder",
                 parent="thorax",
@@ -357,7 +372,6 @@ class ParametricBuilder(BaseURDFBuilder):
                 origin_offset=(0, y_sign * shoulder_width / 2, thorax_height * 0.9),
             )
 
-            # Upper arm
             self.add_segment(
                 name=f"{side}_upper_arm",
                 parent=f"{side}_shoulder",
@@ -370,7 +384,6 @@ class ParametricBuilder(BaseURDFBuilder):
                 origin_offset=(0, y_sign * 0.02, -0.02),
             )
 
-            # Forearm
             upper_arm_length = self._height_m * get_length("upper_arm", 0.186)
             self.add_segment(
                 name=f"{side}_forearm",
@@ -385,7 +398,6 @@ class ParametricBuilder(BaseURDFBuilder):
                 origin_offset=(0, 0, -upper_arm_length),
             )
 
-            # Hand
             forearm_length = self._height_m * get_length("forearm", 0.146)
             self.add_segment(
                 name=f"{side}_hand",
@@ -399,13 +411,20 @@ class ParametricBuilder(BaseURDFBuilder):
                 origin_offset=(0, 0, -forearm_length),
             )
 
-        # Legs (left and right)
+    def _add_leg_segments(
+        self,
+        get_mass: Callable[[str, float], float],
+        get_length: Callable[[str, float], float],
+        pelvis_height: float,
+    ) -> None:
+        """Add thigh, shin, and foot segments for both sides."""
+        import math
+
         hip_width = (
             self._height_m * 0.1 * self._proportions.get("hip_width_factor", 1.0)
         )
 
         for side, y_sign in [("left", 1), ("right", -1)]:
-            # Thigh
             self.add_segment(
                 name=f"{side}_thigh",
                 parent="pelvis",
@@ -418,7 +437,6 @@ class ParametricBuilder(BaseURDFBuilder):
                 origin_offset=(0, y_sign * hip_width, -pelvis_height / 2),
             )
 
-            # Shin
             thigh_length = self._height_m * get_length("thigh", 0.245)
             self.add_segment(
                 name=f"{side}_shin",
@@ -433,7 +451,6 @@ class ParametricBuilder(BaseURDFBuilder):
                 origin_offset=(0, 0, -thigh_length),
             )
 
-            # Foot
             shin_length = self._height_m * get_length("shin", 0.246)
             self.add_segment(
                 name=f"{side}_foot",
@@ -446,6 +463,28 @@ class ParametricBuilder(BaseURDFBuilder):
                 joint_limits=(-math.radians(45), math.radians(45)),
                 origin_offset=(0, 0, -shin_length),
             )
+
+    def add_humanoid_segments(self) -> ParametricBuilder:
+        """
+        Add standard humanoid body segments.
+
+        This adds a complete humanoid skeleton with:
+        - Pelvis (root)
+        - Spine (lumbar, thorax)
+        - Head and neck
+        - Arms (shoulder, upper arm, forearm, hand) x2
+        - Legs (thigh, shin, foot) x2
+
+        Returns:
+            Self for method chaining
+        """
+        get_mass, get_length = self._make_anthropometry_helpers()
+
+        pelvis_height, thorax_height, _neck_height = self._add_torso_segments(
+            get_mass, get_length
+        )
+        self._add_arm_segments(get_mass, get_length, thorax_height)
+        self._add_leg_segments(get_mass, get_length, pelvis_height)
 
         return self
 

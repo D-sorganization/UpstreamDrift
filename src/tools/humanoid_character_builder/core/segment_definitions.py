@@ -218,11 +218,10 @@ SEGMENT_HIERARCHY = {
 }
 
 
-def _create_segment_definitions() -> dict[str, SegmentDefinition]:
-    """Create the standard humanoid segment definitions."""
-    segments = {}
+def _create_torso_segments() -> dict[str, SegmentDefinition]:
+    """Create torso segment definitions (pelvis, lumbar, thorax, neck, head)."""
+    segments: dict[str, SegmentDefinition] = {}
 
-    # === Torso ===
     segments["pelvis"] = SegmentDefinition(
         name="pelvis",
         parent=None,
@@ -269,7 +268,14 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         is_end_effector=True,
     )
 
-    # === Shoulders ===
+    return segments
+
+
+def _create_arm_segments() -> dict[str, SegmentDefinition]:
+    """Create shoulder, arm, and hand segment definitions."""
+    segments: dict[str, SegmentDefinition] = {}
+
+    # Shoulders
     segments["left_shoulder"] = SegmentDefinition(
         name="left_shoulder",
         parent="thorax",
@@ -288,7 +294,7 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         vertex_group="shoulder.R",
     )
 
-    # === Arms ===
+    # Upper arms
     segments["left_upper_arm"] = SegmentDefinition(
         name="left_upper_arm",
         parent="left_shoulder",
@@ -307,6 +313,7 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         vertex_group="upperarm.R",
     )
 
+    # Forearms
     segments["left_forearm"] = SegmentDefinition(
         name="left_forearm",
         parent="left_upper_arm",
@@ -325,6 +332,7 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         vertex_group="forearm.R",
     )
 
+    # Hands
     segments["left_hand"] = SegmentDefinition(
         name="left_hand",
         parent="left_forearm",
@@ -345,7 +353,14 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         is_end_effector=True,
     )
 
-    # === Hips (virtual segments for joint placement) ===
+    return segments
+
+
+def _create_leg_segments() -> dict[str, SegmentDefinition]:
+    """Create hip, leg, and foot segment definitions."""
+    segments: dict[str, SegmentDefinition] = {}
+
+    # Hips (virtual segments for joint placement)
     segments["left_hip"] = SegmentDefinition(
         name="left_hip",
         parent="pelvis",
@@ -364,7 +379,7 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         vertex_group=None,
     )
 
-    # === Legs ===
+    # Thighs
     segments["left_thigh"] = SegmentDefinition(
         name="left_thigh",
         parent="left_hip",
@@ -383,6 +398,7 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         vertex_group="thigh.R",
     )
 
+    # Shins
     segments["left_shin"] = SegmentDefinition(
         name="left_shin",
         parent="left_thigh",
@@ -401,6 +417,7 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
         vertex_group="shin.R",
     )
 
+    # Feet
     segments["left_foot"] = SegmentDefinition(
         name="left_foot",
         parent="left_shin",
@@ -424,11 +441,19 @@ def _create_segment_definitions() -> dict[str, SegmentDefinition]:
     return segments
 
 
-def _create_joint_definitions() -> dict[str, JointDefinition]:
-    """Create the standard humanoid joint definitions."""
-    joints = {}
+def _create_segment_definitions() -> dict[str, SegmentDefinition]:
+    """Create the standard humanoid segment definitions."""
+    segments: dict[str, SegmentDefinition] = {}
+    segments.update(_create_torso_segments())
+    segments.update(_create_arm_segments())
+    segments.update(_create_leg_segments())
+    return segments
 
-    # === Spine Joints ===
+
+def _create_spine_joints() -> dict[str, JointDefinition]:
+    """Create spine and neck joint definitions."""
+    joints: dict[str, JointDefinition] = {}
+
     joints["pelvis_to_lumbar"] = JointDefinition(
         name="pelvis_to_lumbar",
         joint_type=JointType.UNIVERSAL,
@@ -474,7 +499,14 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=-1.0, upper=1.0),
     )
 
-    # === Shoulder Joints ===
+    return joints
+
+
+def _create_arm_joints() -> dict[str, JointDefinition]:
+    """Create shoulder, elbow, and wrist joint definitions."""
+    joints: dict[str, JointDefinition] = {}
+
+    # Shoulder joints (fixed attachment to thorax)
     joints["thorax_to_left_shoulder"] = JointDefinition(
         name="thorax_to_left_shoulder",
         joint_type=JointType.FIXED,
@@ -491,7 +523,7 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         origin_xyz=(-0.15, 0.0, 0.12),
     )
 
-    # === Arm Joints ===
+    # Shoulder-to-upper-arm (gimbal)
     joints["left_shoulder_to_upper_arm"] = JointDefinition(
         name="left_shoulder_to_upper_arm",
         joint_type=JointType.GIMBAL,
@@ -516,6 +548,7 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=-2.5, upper=2.5),
     )
 
+    # Elbows
     joints["left_elbow"] = JointDefinition(
         name="left_elbow",
         joint_type=JointType.REVOLUTE,
@@ -536,6 +569,7 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=0.0, upper=2.5),
     )
 
+    # Wrists
     joints["left_wrist"] = JointDefinition(
         name="left_wrist",
         joint_type=JointType.UNIVERSAL,
@@ -558,7 +592,14 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=-1.2, upper=1.2),
     )
 
-    # === Hip Joints ===
+    return joints
+
+
+def _create_leg_joints() -> dict[str, JointDefinition]:
+    """Create hip, knee, and ankle joint definitions."""
+    joints: dict[str, JointDefinition] = {}
+
+    # Hip joints (fixed attachment to pelvis)
     joints["pelvis_to_left_hip"] = JointDefinition(
         name="pelvis_to_left_hip",
         joint_type=JointType.FIXED,
@@ -575,7 +616,7 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         origin_xyz=(-0.09, 0.0, -0.05),
     )
 
-    # === Leg Joints ===
+    # Hip-to-thigh (gimbal)
     joints["left_hip_joint"] = JointDefinition(
         name="left_hip_joint",
         joint_type=JointType.GIMBAL,
@@ -600,6 +641,7 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=-2.0, upper=2.0),
     )
 
+    # Knees
     joints["left_knee"] = JointDefinition(
         name="left_knee",
         joint_type=JointType.REVOLUTE,
@@ -620,6 +662,7 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=-2.5, upper=0.0),
     )
 
+    # Ankles
     joints["left_ankle"] = JointDefinition(
         name="left_ankle",
         joint_type=JointType.UNIVERSAL,
@@ -642,6 +685,15 @@ def _create_joint_definitions() -> dict[str, JointDefinition]:
         limits=JointLimits(lower=-0.8, upper=0.8),
     )
 
+    return joints
+
+
+def _create_joint_definitions() -> dict[str, JointDefinition]:
+    """Create the standard humanoid joint definitions."""
+    joints: dict[str, JointDefinition] = {}
+    joints.update(_create_spine_joints())
+    joints.update(_create_arm_joints())
+    joints.update(_create_leg_joints())
     return joints
 
 

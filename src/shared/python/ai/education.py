@@ -62,385 +62,388 @@ class GlossaryEntry:
         return f"Definition for '{self.term}' not available."
 
 
-def _build_default_glossary() -> dict[str, GlossaryEntry]:
-    """Build the default glossary with core biomechanics terms.
+def _build_dynamics_entries() -> dict[str, GlossaryEntry]:
+    """Return inline glossary entries for dynamics concepts."""
+    return {
+        "inverse_dynamics": GlossaryEntry(
+            term="Inverse Dynamics",
+            category="dynamics",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "A way to figure out what forces caused a movement. "
+                    "By watching how someone moved, we can calculate the "
+                    "muscle forces they must have used. Think of it like "
+                    "being a detective - seeing the result and working backwards "
+                    "to find the cause."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "A computational method that calculates joint torques from "
+                    "measured kinematics. Given positions, velocities, and accelerations, "
+                    "inverse dynamics solves for the net torques at each joint."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "The solution of τ = M(q)q̈ + C(q,q̇)q̇ + g(q) for joint torques τ, "
+                    "given measured generalized coordinates q and their derivatives. "
+                    "Requires accurate segment inertial properties."
+                ),
+                ExpertiseLevel.EXPERT: (
+                    "Recursive Newton-Euler formulation: outward kinematics sweep "
+                    "followed by inward dynamics sweep. O(n) complexity for n bodies. "
+                    "Sensitive to noise amplification from numerical differentiation."
+                ),
+            },
+            formula="τ = M(q)q̈ + C(q,q̇) + g(q)",
+            units="N·m",
+            related_terms=["forward_dynamics", "joint_torque", "equations_of_motion"],
+        ),
+        "forward_dynamics": GlossaryEntry(
+            term="Forward Dynamics",
+            category="dynamics",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "Predicting how something will move when you apply forces. "
+                    "Like pushing a swing - you know how hard you pushed, "
+                    "and forward dynamics tells you how the swing will move."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Calculating motion from applied forces. Given joint torques, "
+                    "forward dynamics computes the resulting accelerations, which "
+                    "can be integrated to get velocities and positions."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Solving q̈ = M(q)⁻¹ [τ - C(q,q̇)q̇ - g(q)] for accelerations. "
+                    "Requires mass matrix inversion, typically using Cholesky decomposition."
+                ),
+            },
+            formula="q̈ = M(q)⁻¹ [τ - C(q,q̇) - g(q)]",
+            units="rad/s²",
+            related_terms=["inverse_dynamics", "simulation", "equations_of_motion"],
+        ),
+        "joint_torque": GlossaryEntry(
+            term="Joint Torque",
+            category="dynamics",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "The rotational force at a joint, like your elbow or knee. "
+                    "When you curl a weight, your bicep creates torque at your elbow. "
+                    "More torque means more rotational power."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "The net rotational force acting about a joint axis. "
+                    "Represents the sum of all muscle, ligament, and contact forces "
+                    "causing rotation at that joint."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Generalized force corresponding to a rotational degree of freedom. "
+                    "In inverse dynamics, it's the torque required to produce "
+                    "the observed angular acceleration given the inertial properties."
+                ),
+            },
+            units="N·m (Newton-meters)",
+            related_terms=["inverse_dynamics", "muscle_force", "moment_of_inertia"],
+        ),
+    }
 
-    Returns:
-        Dictionary mapping term names to GlossaryEntry objects.
+
+def _build_kinematics_data_entries() -> dict[str, GlossaryEntry]:
+    """Return inline glossary entries for kinematics and data concepts."""
+    return {
+        "kinematics": GlossaryEntry(
+            term="Kinematics",
+            category="kinematics",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "The study of motion without worrying about forces. "
+                    "It's about describing HOW things move - positions, speeds, "
+                    "and how fast things speed up or slow down."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "The branch of mechanics describing motion through degrees of "
+                    "freedom (joints) without considering forces. Includes position, "
+                    "velocity, and acceleration analysis."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Configuration space analysis: generalized coordinates q(t), "
+                    "generalized velocities q̇(t), and accelerations q̈(t). "
+                    "Foundation for dynamics computations."
+                ),
+            },
+            related_terms=["dynamics", "motion_capture", "joint_angles"],
+        ),
+        "c3d_file": GlossaryEntry(
+            term="C3D File",
+            category="data",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "A file format for storing motion capture data. "
+                    "Contains the 3D positions of markers placed on a person's body "
+                    "during movement, recorded many times per second."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "The standard binary format for 3D biomechanics data. "
+                    "Stores marker trajectories, analog data (like force plates), "
+                    "and metadata about the recording."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Binary format per Motion Lab Systems specification. "
+                    "Contains header (512 bytes), parameter section, and data section. "
+                    "Supports up to 65535 frames and multiple point/analog channels."
+                ),
+            },
+            related_terms=["motion_capture", "marker", "force_plate"],
+        ),
+        "marker": GlossaryEntry(
+            term="Marker",
+            category="data",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "Small reflective balls placed on the body during motion capture. "
+                    "Special cameras track these markers to record exactly how "
+                    "the body moved in 3D space."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Retro-reflective spheres (typically 10-25mm) placed at anatomical "
+                    "landmarks. Their 3D positions are tracked by infrared cameras "
+                    "to reconstruct body motion."
+                ),
+            },
+            related_terms=["c3d_file", "motion_capture", "anatomical_landmark"],
+        ),
+    }
+
+
+def _build_golf_entries() -> dict[str, GlossaryEntry]:
+    """Return inline glossary entries for golf-specific concepts."""
+    return {
+        "kinetic_chain": GlossaryEntry(
+            term="Kinetic Chain",
+            category="golf",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "How energy flows through your body during a golf swing. "
+                    "Power starts from your legs and ground contact, moves through "
+                    "your hips, torso, arms, and finally to the club head."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "The sequential activation and energy transfer from proximal "
+                    "to distal segments. In golf: lower body → trunk → arms → club. "
+                    "Proper timing maximizes club head speed."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Proximal-to-distal kinetic sequence enabling efficient "
+                    "angular momentum transfer. Peak angular velocities occur "
+                    "sequentially: pelvis → thorax → arm → club. "
+                    "Timing disruption reduces performance ~20%."
+                ),
+            },
+            related_terms=["x_factor", "ground_reaction_force", "club_head_speed"],
+        ),
+        "x_factor": GlossaryEntry(
+            term="X-Factor",
+            category="golf",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "The twist between your hips and shoulders at the top of the swing. "
+                    "A bigger X-Factor means you've stored more rotational energy, "
+                    "which can translate to more power."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "The difference between thorax and pelvis rotation angles "
+                    "at the top of backswing. Associated with increased club head speed, "
+                    "though individual optimal values vary."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Angular separation between thorax and pelvis in the transverse plane. "
+                    "Elite PGA: 45-55°. X-Factor Stretch (additional separation into "
+                    "downswing) correlates r=0.7 with ball speed."
+                ),
+            },
+            units="degrees",
+            related_terms=["kinetic_chain", "ground_reaction_force", "club_head_speed"],
+        ),
+        "ground_reaction_force": GlossaryEntry(
+            term="Ground Reaction Force (GRF)",
+            category="forces",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "The push-back from the ground when you push against it. "
+                    "In golf, you push down and the ground pushes back up and "
+                    "sideways, helping you rotate powerfully."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Forces measured by force plates during ground contact. "
+                    "Components: vertical (support weight + acceleration), "
+                    "anterior-posterior, and medio-lateral. Key for understanding "
+                    "how power originates from the ground."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Vector sum of distributed ground pressures. Analyzed as: "
+                    "vertical Fz (typically 1.2-1.5 BW at impact), "
+                    "shear forces Fx/Fy, and center of pressure trajectory. "
+                    "Moment about vertical axis indicates rotational demand."
+                ),
+            },
+            units="N or BW (Body Weight)",
+            related_terms=["kinetic_chain", "force_plate", "center_of_pressure"],
+        ),
+    }
+
+
+def _build_simulation_entries() -> dict[str, GlossaryEntry]:
+    """Return inline glossary entries for physics engine / simulation concepts."""
+    return {
+        "physics_engine": GlossaryEntry(
+            term="Physics Engine",
+            category="simulation",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "Software that simulates how things move and interact, "
+                    "like a virtual physics lab. The Golf Modeling Suite uses "
+                    "several engines to cross-check results for accuracy."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Software library implementing rigid body dynamics. "
+                    "Handles contact, constraints, and integration. "
+                    "Examples: MuJoCo, Drake, Pinocchio."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Numerical solver for constrained multibody dynamics. "
+                    "Core algorithms: articulated body (Featherstone), "
+                    "projected Gauss-Seidel for contacts. Time-stepping via "
+                    "symplectic Euler or semi-implicit RK."
+                ),
+            },
+            related_terms=["mujoco", "drake", "pinocchio", "simulation"],
+        ),
+        "mujoco": GlossaryEntry(
+            term="MuJoCo",
+            category="simulation",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "One of the physics engines we use. It's especially good at "
+                    "handling contacts (like feet on ground or hands on club)."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Multi-Joint dynamics with Contact. Physics engine optimized "
+                    "for robotics and biomechanics. Uses convex contact dynamics "
+                    "and implicit integration."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Recursive dynamics with complementarity contact model. "
+                    "PGS solver for contact forces. GPU-accelerated with MJX. "
+                    "Muscle models: first-order activation dynamics."
+                ),
+            },
+            see_also=["https://mujoco.org"],
+            related_terms=["physics_engine", "drake", "pinocchio"],
+        ),
+        "drake": GlossaryEntry(
+            term="Drake",
+            category="simulation",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "Another physics engine we use. It's especially good at "
+                    "optimization and ensuring physical consistency."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Model-Based Design for Robotics. MIT-developed toolkit for "
+                    "dynamics, control, and optimization. Uses symbolic computation "
+                    "for model analysis."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "AutoDiff-enabled multibody dynamics. Direct collocation "
+                    "and SNOPT integration for trajectory optimization. "
+                    "Focuses on mathematical rigor and guarantees."
+                ),
+            },
+            see_also=["https://drake.mit.edu"],
+            related_terms=["physics_engine", "mujoco", "pinocchio"],
+        ),
+        "pinocchio": GlossaryEntry(
+            term="Pinocchio",
+            category="simulation",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "A lightweight physics engine we use for fast calculations. "
+                    "Named after the famous puppet, it handles articulated bodies."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Efficient rigid body dynamics library. Implements Featherstone's "
+                    "algorithms with analytical derivatives. Focus on speed and "
+                    "differentiability."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "O(n) spatial algebra implementation. Supports CasADi and "
+                    "Ceres for automatic differentiation. Second-order derivatives "
+                    "for optimal control."
+                ),
+            },
+            see_also=["https://github.com/stack-of-tasks/pinocchio"],
+            related_terms=["physics_engine", "mujoco", "drake"],
+        ),
+    }
+
+
+def _build_validation_analysis_entries() -> dict[str, GlossaryEntry]:
+    """Return inline glossary entries for validation and analysis concepts."""
+    return {
+        "cross_engine_validation": GlossaryEntry(
+            term="Cross-Engine Validation",
+            category="validation",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "Checking our results are correct by running the same analysis "
+                    "on multiple physics engines. If they all agree, we can be "
+                    "confident the results are accurate."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Verification method comparing results across MuJoCo, Drake, "
+                    "and Pinocchio. Agreement within tolerance indicates reliable "
+                    "results. Disagreement signals potential issues."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Ensemble validation using heterogeneous solvers. "
+                    "Tolerance thresholds: τ ± 2%, KE ± 0.5%, position ± 1e-6. "
+                    "Discrepancies often indicate contact model differences."
+                ),
+            },
+            related_terms=["physics_engine", "tolerance", "validation"],
+        ),
+        "drift_control_decomposition": GlossaryEntry(
+            term="Drift-Control Decomposition",
+            category="analysis",
+            definitions={
+                ExpertiseLevel.BEGINNER: (
+                    "A way to understand which part of motion is 'passive' "
+                    "(would happen without muscles) versus 'controlled' "
+                    "(actively driven by muscles). Helps identify when "
+                    "muscles are really working versus just going along for the ride."
+                ),
+                ExpertiseLevel.INTERMEDIATE: (
+                    "Separating motion into: drift (gravity, inertia, passive dynamics) "
+                    "and control (active muscle contribution). The Drift-Control Ratio "
+                    "indicates how much active control a movement requires."
+                ),
+                ExpertiseLevel.ADVANCED: (
+                    "Affine decomposition: q̈ = drift(q, q̇) + B(q)u. "
+                    "Control contribution from null-space of drift solutions. "
+                    "DCR = ||control|| / (||drift|| + ||control||). "
+                    "Low DCR → gravity-assisted; High DCR → muscle-dominated."
+                ),
+            },
+            formula="DCR = ||control|| / (||drift|| + ||control||)",
+            related_terms=["inverse_dynamics", "muscle_contribution", "energy"],
+        ),
+    }
+
+
+def _load_data_file_entries(
+    glossary: dict[str, GlossaryEntry],
+) -> None:
+    """Load glossary entries from external data files into *glossary*.
+
+    Entries already present (inline definitions) are not overwritten.
     """
-    glossary: dict[str, GlossaryEntry] = {}
-
-    # === DYNAMICS ===
-
-    glossary["inverse_dynamics"] = GlossaryEntry(
-        term="Inverse Dynamics",
-        category="dynamics",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "A way to figure out what forces caused a movement. "
-                "By watching how someone moved, we can calculate the "
-                "muscle forces they must have used. Think of it like "
-                "being a detective - seeing the result and working backwards "
-                "to find the cause."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "A computational method that calculates joint torques from "
-                "measured kinematics. Given positions, velocities, and accelerations, "
-                "inverse dynamics solves for the net torques at each joint."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "The solution of τ = M(q)q̈ + C(q,q̇)q̇ + g(q) for joint torques τ, "
-                "given measured generalized coordinates q and their derivatives. "
-                "Requires accurate segment inertial properties."
-            ),
-            ExpertiseLevel.EXPERT: (
-                "Recursive Newton-Euler formulation: outward kinematics sweep "
-                "followed by inward dynamics sweep. O(n) complexity for n bodies. "
-                "Sensitive to noise amplification from numerical differentiation."
-            ),
-        },
-        formula="τ = M(q)q̈ + C(q,q̇) + g(q)",
-        units="N·m",
-        related_terms=["forward_dynamics", "joint_torque", "equations_of_motion"],
-    )
-
-    glossary["forward_dynamics"] = GlossaryEntry(
-        term="Forward Dynamics",
-        category="dynamics",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "Predicting how something will move when you apply forces. "
-                "Like pushing a swing - you know how hard you pushed, "
-                "and forward dynamics tells you how the swing will move."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Calculating motion from applied forces. Given joint torques, "
-                "forward dynamics computes the resulting accelerations, which "
-                "can be integrated to get velocities and positions."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Solving q̈ = M(q)⁻¹ [τ - C(q,q̇)q̇ - g(q)] for accelerations. "
-                "Requires mass matrix inversion, typically using Cholesky decomposition."
-            ),
-        },
-        formula="q̈ = M(q)⁻¹ [τ - C(q,q̇) - g(q)]",
-        units="rad/s²",
-        related_terms=["inverse_dynamics", "simulation", "equations_of_motion"],
-    )
-
-    glossary["joint_torque"] = GlossaryEntry(
-        term="Joint Torque",
-        category="dynamics",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "The rotational force at a joint, like your elbow or knee. "
-                "When you curl a weight, your bicep creates torque at your elbow. "
-                "More torque means more rotational power."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "The net rotational force acting about a joint axis. "
-                "Represents the sum of all muscle, ligament, and contact forces "
-                "causing rotation at that joint."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Generalized force corresponding to a rotational degree of freedom. "
-                "In inverse dynamics, it's the torque required to produce "
-                "the observed angular acceleration given the inertial properties."
-            ),
-        },
-        units="N·m (Newton-meters)",
-        related_terms=["inverse_dynamics", "muscle_force", "moment_of_inertia"],
-    )
-
-    # === KINEMATICS ===
-
-    glossary["kinematics"] = GlossaryEntry(
-        term="Kinematics",
-        category="kinematics",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "The study of motion without worrying about forces. "
-                "It's about describing HOW things move - positions, speeds, "
-                "and how fast things speed up or slow down."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "The branch of mechanics describing motion through degrees of "
-                "freedom (joints) without considering forces. Includes position, "
-                "velocity, and acceleration analysis."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Configuration space analysis: generalized coordinates q(t), "
-                "generalized velocities q̇(t), and accelerations q̈(t). "
-                "Foundation for dynamics computations."
-            ),
-        },
-        related_terms=["dynamics", "motion_capture", "joint_angles"],
-    )
-
-    glossary["c3d_file"] = GlossaryEntry(
-        term="C3D File",
-        category="data",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "A file format for storing motion capture data. "
-                "Contains the 3D positions of markers placed on a person's body "
-                "during movement, recorded many times per second."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "The standard binary format for 3D biomechanics data. "
-                "Stores marker trajectories, analog data (like force plates), "
-                "and metadata about the recording."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Binary format per Motion Lab Systems specification. "
-                "Contains header (512 bytes), parameter section, and data section. "
-                "Supports up to 65535 frames and multiple point/analog channels."
-            ),
-        },
-        related_terms=["motion_capture", "marker", "force_plate"],
-    )
-
-    glossary["marker"] = GlossaryEntry(
-        term="Marker",
-        category="data",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "Small reflective balls placed on the body during motion capture. "
-                "Special cameras track these markers to record exactly how "
-                "the body moved in 3D space."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Retro-reflective spheres (typically 10-25mm) placed at anatomical "
-                "landmarks. Their 3D positions are tracked by infrared cameras "
-                "to reconstruct body motion."
-            ),
-        },
-        related_terms=["c3d_file", "motion_capture", "anatomical_landmark"],
-    )
-
-    # === GOLF-SPECIFIC ===
-
-    glossary["kinetic_chain"] = GlossaryEntry(
-        term="Kinetic Chain",
-        category="golf",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "How energy flows through your body during a golf swing. "
-                "Power starts from your legs and ground contact, moves through "
-                "your hips, torso, arms, and finally to the club head."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "The sequential activation and energy transfer from proximal "
-                "to distal segments. In golf: lower body → trunk → arms → club. "
-                "Proper timing maximizes club head speed."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Proximal-to-distal kinetic sequence enabling efficient "
-                "angular momentum transfer. Peak angular velocities occur "
-                "sequentially: pelvis → thorax → arm → club. "
-                "Timing disruption reduces performance ~20%."
-            ),
-        },
-        related_terms=["x_factor", "ground_reaction_force", "club_head_speed"],
-    )
-
-    glossary["x_factor"] = GlossaryEntry(
-        term="X-Factor",
-        category="golf",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "The twist between your hips and shoulders at the top of the swing. "
-                "A bigger X-Factor means you've stored more rotational energy, "
-                "which can translate to more power."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "The difference between thorax and pelvis rotation angles "
-                "at the top of backswing. Associated with increased club head speed, "
-                "though individual optimal values vary."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Angular separation between thorax and pelvis in the transverse plane. "
-                "Elite PGA: 45-55°. X-Factor Stretch (additional separation into "
-                "downswing) correlates r=0.7 with ball speed."
-            ),
-        },
-        units="degrees",
-        related_terms=["kinetic_chain", "ground_reaction_force", "club_head_speed"],
-    )
-
-    glossary["ground_reaction_force"] = GlossaryEntry(
-        term="Ground Reaction Force (GRF)",
-        category="forces",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "The push-back from the ground when you push against it. "
-                "In golf, you push down and the ground pushes back up and "
-                "sideways, helping you rotate powerfully."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Forces measured by force plates during ground contact. "
-                "Components: vertical (support weight + acceleration), "
-                "anterior-posterior, and medio-lateral. Key for understanding "
-                "how power originates from the ground."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Vector sum of distributed ground pressures. Analyzed as: "
-                "vertical Fz (typically 1.2-1.5 BW at impact), "
-                "shear forces Fx/Fy, and center of pressure trajectory. "
-                "Moment about vertical axis indicates rotational demand."
-            ),
-        },
-        units="N or BW (Body Weight)",
-        related_terms=["kinetic_chain", "force_plate", "center_of_pressure"],
-    )
-
-    # === PHYSICS ENGINES ===
-
-    glossary["physics_engine"] = GlossaryEntry(
-        term="Physics Engine",
-        category="simulation",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "Software that simulates how things move and interact, "
-                "like a virtual physics lab. The Golf Modeling Suite uses "
-                "several engines to cross-check results for accuracy."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Software library implementing rigid body dynamics. "
-                "Handles contact, constraints, and integration. "
-                "Examples: MuJoCo, Drake, Pinocchio."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Numerical solver for constrained multibody dynamics. "
-                "Core algorithms: articulated body (Featherstone), "
-                "projected Gauss-Seidel for contacts. Time-stepping via "
-                "symplectic Euler or semi-implicit RK."
-            ),
-        },
-        related_terms=["mujoco", "drake", "pinocchio", "simulation"],
-    )
-
-    glossary["mujoco"] = GlossaryEntry(
-        term="MuJoCo",
-        category="simulation",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "One of the physics engines we use. It's especially good at "
-                "handling contacts (like feet on ground or hands on club)."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Multi-Joint dynamics with Contact. Physics engine optimized "
-                "for robotics and biomechanics. Uses convex contact dynamics "
-                "and implicit integration."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Recursive dynamics with complementarity contact model. "
-                "PGS solver for contact forces. GPU-accelerated with MJX. "
-                "Muscle models: first-order activation dynamics."
-            ),
-        },
-        see_also=["https://mujoco.org"],
-        related_terms=["physics_engine", "drake", "pinocchio"],
-    )
-
-    glossary["drake"] = GlossaryEntry(
-        term="Drake",
-        category="simulation",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "Another physics engine we use. It's especially good at "
-                "optimization and ensuring physical consistency."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Model-Based Design for Robotics. MIT-developed toolkit for "
-                "dynamics, control, and optimization. Uses symbolic computation "
-                "for model analysis."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "AutoDiff-enabled multibody dynamics. Direct collocation "
-                "and SNOPT integration for trajectory optimization. "
-                "Focuses on mathematical rigor and guarantees."
-            ),
-        },
-        see_also=["https://drake.mit.edu"],
-        related_terms=["physics_engine", "mujoco", "pinocchio"],
-    )
-
-    glossary["pinocchio"] = GlossaryEntry(
-        term="Pinocchio",
-        category="simulation",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "A lightweight physics engine we use for fast calculations. "
-                "Named after the famous puppet, it handles articulated bodies."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Efficient rigid body dynamics library. Implements Featherstone's "
-                "algorithms with analytical derivatives. Focus on speed and "
-                "differentiability."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "O(n) spatial algebra implementation. Supports CasADi and "
-                "Ceres for automatic differentiation. Second-order derivatives "
-                "for optimal control."
-            ),
-        },
-        see_also=["https://github.com/stack-of-tasks/pinocchio"],
-        related_terms=["physics_engine", "mujoco", "drake"],
-    )
-
-    # === VALIDATION ===
-
-    glossary["cross_engine_validation"] = GlossaryEntry(
-        term="Cross-Engine Validation",
-        category="validation",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "Checking our results are correct by running the same analysis "
-                "on multiple physics engines. If they all agree, we can be "
-                "confident the results are accurate."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Verification method comparing results across MuJoCo, Drake, "
-                "and Pinocchio. Agreement within tolerance indicates reliable "
-                "results. Disagreement signals potential issues."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Ensemble validation using heterogeneous solvers. "
-                "Tolerance thresholds: τ ± 2%, KE ± 0.5%, position ± 1e-6. "
-                "Discrepancies often indicate contact model differences."
-            ),
-        },
-        related_terms=["physics_engine", "tolerance", "validation"],
-    )
-
-    glossary["drift_control_decomposition"] = GlossaryEntry(
-        term="Drift-Control Decomposition",
-        category="analysis",
-        definitions={
-            ExpertiseLevel.BEGINNER: (
-                "A way to understand which part of motion is 'passive' "
-                "(would happen without muscles) versus 'controlled' "
-                "(actively driven by muscles). Helps identify when "
-                "muscles are really working versus just going along for the ride."
-            ),
-            ExpertiseLevel.INTERMEDIATE: (
-                "Separating motion into: drift (gravity, inertia, passive dynamics) "
-                "and control (active muscle contribution). The Drift-Control Ratio "
-                "indicates how much active control a movement requires."
-            ),
-            ExpertiseLevel.ADVANCED: (
-                "Affine decomposition: q̈ = drift(q, q̇) + B(q)u. "
-                "Control contribution from null-space of drift solutions. "
-                "DCR = ||control|| / (||drift|| + ||control||). "
-                "Low DCR → gravity-assisted; High DCR → muscle-dominated."
-            ),
-        },
-        formula="DCR = ||control|| / (||drift|| + ||control||)",
-        related_terms=["inverse_dynamics", "muscle_contribution", "energy"],
-    )
-
-    # Load extended glossary entries from data files
     _level_map = {
         "b": ExpertiseLevel.BEGINNER,
         "i": ExpertiseLevel.INTERMEDIATE,
@@ -479,6 +482,23 @@ def _build_default_glossary() -> dict[str, GlossaryEntry]:
         _load_entries(get_extended_entries())
     except ImportError:
         logger.debug("Extended glossary data not available")
+
+
+def _build_default_glossary() -> dict[str, GlossaryEntry]:
+    """Build the default glossary with core biomechanics terms.
+
+    Returns:
+        Dictionary mapping term names to GlossaryEntry objects.
+    """
+    glossary: dict[str, GlossaryEntry] = {}
+
+    glossary.update(_build_dynamics_entries())
+    glossary.update(_build_kinematics_data_entries())
+    glossary.update(_build_golf_entries())
+    glossary.update(_build_simulation_entries())
+    glossary.update(_build_validation_analysis_entries())
+
+    _load_data_file_entries(glossary)
 
     return glossary
 

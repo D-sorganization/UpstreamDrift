@@ -30,7 +30,20 @@ class VisualizationTab(QtWidgets.QWidget):
         viz_layout = QtWidgets.QVBoxLayout(self)
         viz_layout.setContentsMargins(8, 8, 8, 8)
 
-        # Camera controls
+        viz_layout.addWidget(self._setup_camera_controls())
+        viz_layout.addWidget(self._setup_background_controls())
+        viz_layout.addWidget(self._setup_meshcat_controls())
+        viz_layout.addWidget(self._setup_swing_plane_controls())
+        force_group, ellipsoid_group = self._setup_force_torque_controls()
+        viz_layout.addWidget(ellipsoid_group)
+        viz_layout.addWidget(force_group)
+        viz_layout.addWidget(self._setup_matrix_analysis())
+        viz_layout.addWidget(self._setup_body_appearance())
+
+        viz_layout.addStretch(1)
+
+    def _setup_camera_controls(self) -> QtWidgets.QGroupBox:
+        """Create camera view preset and advanced camera controls."""
         camera_group = QtWidgets.QGroupBox("Camera View")
         camera_layout = QtWidgets.QVBoxLayout(camera_group)
 
@@ -146,9 +159,10 @@ class VisualizationTab(QtWidgets.QWidget):
         advanced_cam_layout.addRow("", mouse_info)
 
         camera_layout.addWidget(advanced_cam_group)
-        viz_layout.addWidget(camera_group)
+        return camera_group
 
-        # Background color controls
+    def _setup_background_controls(self) -> QtWidgets.QGroupBox:
+        """Create background color controls for sky and ground."""
         bg_group = QtWidgets.QGroupBox("Background Color")
         bg_layout = QtWidgets.QVBoxLayout(bg_group)
 
@@ -185,9 +199,10 @@ class VisualizationTab(QtWidgets.QWidget):
         reset_bg_btn.clicked.connect(self.on_reset_background)
         bg_layout.addWidget(reset_bg_btn)
 
-        viz_layout.addWidget(bg_group)
+        return bg_group
 
-        # Meshcat Visualization
+    def _setup_meshcat_controls(self) -> QtWidgets.QGroupBox:
+        """Create Meshcat web visualization controls."""
         meshcat_group = QtWidgets.QGroupBox("Web Visualization (Meshcat)")
         meshcat_layout = QtWidgets.QVBoxLayout(meshcat_group)
 
@@ -202,9 +217,10 @@ class VisualizationTab(QtWidgets.QWidget):
         btn_meshcat.clicked.connect(self.on_open_meshcat)
         meshcat_layout.addWidget(btn_meshcat)
 
-        viz_layout.addWidget(meshcat_group)
+        return meshcat_group
 
-        # --- Swing Plane & Trajectory Visualization ---
+    def _setup_swing_plane_controls(self) -> QtWidgets.QGroupBox:
+        """Create swing plane and trajectory visualization controls."""
         swing_group = QtWidgets.QGroupBox("Swing Plane & Trajectory")
         swing_layout = QtWidgets.QVBoxLayout(swing_group)
 
@@ -252,9 +268,16 @@ class VisualizationTab(QtWidgets.QWidget):
         reset_traj_btn.clicked.connect(self.on_reset_trajectory)
         swing_layout.addWidget(reset_traj_btn)
 
-        viz_layout.addWidget(swing_group)
+        return swing_group
 
-        # Force/Torque visualization
+    def _setup_force_torque_controls(
+        self,
+    ) -> tuple[QtWidgets.QGroupBox, QtWidgets.QGroupBox]:
+        """Create force, torque, and vector visualization controls.
+
+        Returns a tuple of (force_group, ellipsoid_group) so the caller
+        can place them in the desired layout order.
+        """
         force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
         force_layout = QtWidgets.QVBoxLayout(force_group)
 
@@ -304,7 +327,7 @@ class VisualizationTab(QtWidgets.QWidget):
         force_scale_layout.addRow("", self.force_scale_label)
         force_layout.addLayout(force_scale_layout)
 
-        # --- Advanced Vector Visualization ---
+        # Advanced Vector Visualization
         advanced_vector_group = QtWidgets.QGroupBox("Advanced Vector Overlays")
         av_layout = QtWidgets.QFormLayout(advanced_vector_group)
 
@@ -342,7 +365,6 @@ class VisualizationTab(QtWidgets.QWidget):
         av_layout.addRow(self.show_cf_cb, self.cf_type_combo)
 
         force_layout.addWidget(advanced_vector_group)
-        # -------------------------------------
 
         # Contact forces
         self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
@@ -365,11 +387,11 @@ class VisualizationTab(QtWidgets.QWidget):
             self.on_ellipsoid_visualization_changed
         )
         ellipsoid_layout.addWidget(self.show_force_ellipsoid_cb)
-        viz_layout.addWidget(ellipsoid_group)
 
-        viz_layout.addWidget(force_group)
+        return force_group, ellipsoid_group
 
-        # Matrix Analysis
+    def _setup_matrix_analysis(self) -> QtWidgets.QGroupBox:
+        """Create matrix analysis display labels."""
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)
         self.jacobian_cond_label = QtWidgets.QLabel("Condition: --")
@@ -379,9 +401,10 @@ class VisualizationTab(QtWidgets.QWidget):
         matrix_layout.addRow("Jacobian Cond:", self.jacobian_cond_label)
         matrix_layout.addRow("Constraint Rank:", self.constraint_rank_label)
         matrix_layout.addRow("Active Constraints:", self.nefc_label)
-        viz_layout.addWidget(matrix_group)
+        return matrix_group
 
-        # Body Appearance Controls
+    def _setup_body_appearance(self) -> QtWidgets.QGroupBox:
+        """Create body appearance color controls."""
         appearance_group = QtWidgets.QGroupBox("Body Appearance")
         appearance_layout = QtWidgets.QVBoxLayout(appearance_group)
 
@@ -404,9 +427,7 @@ class VisualizationTab(QtWidgets.QWidget):
         color_layout.addWidget(self.viz_reset_color_btn)
 
         appearance_layout.addLayout(color_layout)
-        viz_layout.addWidget(appearance_group)
-
-        viz_layout.addStretch(1)
+        return appearance_group
 
     # -------- Callbacks --------
 

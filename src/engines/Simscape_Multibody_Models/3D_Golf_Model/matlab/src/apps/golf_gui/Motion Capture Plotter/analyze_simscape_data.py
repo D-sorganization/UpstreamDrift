@@ -11,13 +11,11 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def analyze_simscape_data(csv_file) -> tuple | None:
-    """Analyze the Simscape CSV file and identify key joint positions."""
+def _load_csv_data(csv_file):
+    """Load and validate Simscape CSV data.
 
-    logger.info("Analyzing Simscape data file: %s", csv_file)
-    logger.info("%s", "=" * 80)
-
-    # Read the CSV file
+    Returns the DataFrame on success, or None on failure.
+    """
     try:
         df = pd.read_csv(csv_file)
         logger.info(
@@ -25,153 +23,115 @@ def analyze_simscape_data(csv_file) -> tuple | None:
         )
         logger.info("Time range: %s to %s seconds", df["time"].min(), df["time"].max())
         logger.info("")
+        return df
     except (RuntimeError, ValueError, OSError) as e:
         logger.error("Error reading CSV file: %s", e)
-        return
+        return None
 
-    # Get all column names
-    columns = df.columns.tolist()
 
-    # Categorize columns by type
-    position_columns = []
-    rotation_columns = []
-    velocity_columns = []
-    force_columns = []
-    torque_columns = []
-    other_columns = []
+def _categorize_columns(columns):
+    """Categorize CSV columns by data type (position, rotation, etc.).
+
+    Returns a dict mapping category names to lists of column names.
+    """
+    categories = {
+        "position": [],
+        "rotation": [],
+        "velocity": [],
+        "force": [],
+        "torque": [],
+        "other": [],
+    }
 
     for col in columns:
         if col == "time":
             continue
         elif "GlobalPosition" in col:
-            position_columns.append(col)
+            categories["position"].append(col)
         elif "Rotation_Transform" in col:
-            rotation_columns.append(col)
+            categories["rotation"].append(col)
         elif "GlobalVelocity" in col:
-            velocity_columns.append(col)
+            categories["velocity"].append(col)
         elif "Force" in col and "Local" in col:
-            force_columns.append(col)
+            categories["force"].append(col)
         elif "Torque" in col and "Local" in col:
-            torque_columns.append(col)
+            categories["torque"].append(col)
         else:
-            other_columns.append(col)
+            categories["other"].append(col)
 
     logger.info("COLUMN ANALYSIS:")
-    logger.info("Position columns: %s", len(position_columns))
-    logger.info("Rotation columns: %s", len(rotation_columns))
-    logger.info("Velocity columns: %s", len(velocity_columns))
-    logger.info("Force columns: %s", len(force_columns))
-    logger.info("Torque columns: %s", len(torque_columns))
-    logger.info("Other columns: %s", len(other_columns))
+    logger.info("Position columns: %s", len(categories["position"]))
+    logger.info("Rotation columns: %s", len(categories["rotation"]))
+    logger.info("Velocity columns: %s", len(categories["velocity"]))
+    logger.info("Force columns: %s", len(categories["force"]))
+    logger.info("Torque columns: %s", len(categories["torque"]))
+    logger.info("Other columns: %s", len(categories["other"]))
     logger.info("")
 
-    # Identify key joint centers for golf swing
+    return categories
+
+
+def _identify_joint_positions(position_columns):
+    """Identify key joint center positions from position columns.
+
+    Returns a dict mapping joint group names to lists of matching columns.
+    """
     logger.info("KEY JOINT CENTER POSITIONS:")
     logger.info("%s", "-" * 50)
 
-    # Look for specific joint center positions
     joint_positions = {}
 
-    # Club-related positions
-    club_positions = [col for col in position_columns if "Club" in col]
-    if club_positions:
-        logger.info("Club positions found:")
-        for pos in club_positions:
-            logger.info("  %s", pos)
-        joint_positions["club"] = club_positions
-
-    # Hand positions
-    hand_positions = [
-        col
-        for col in position_columns
-        if any(x in col for x in ["LHGlobalPosition", "RHGlobalPosition"])
+    # Each entry: (joint_key, label, filter function)
+    joint_definitions = [
+        ("club", "Club", lambda col: "Club" in col),
+        (
+            "hands",
+            "Hand",
+            lambda col: any(x in col for x in ["LHGlobalPosition", "RHGlobalPosition"]),
+        ),
+        (
+            "wrists",
+            "Wrist",
+            lambda col: any(x in col for x in ["LWLogs", "RWLogs"]),
+        ),
+        (
+            "elbows",
+            "Elbow",
+            lambda col: any(x in col for x in ["LELogs", "RELogs"]),
+        ),
+        (
+            "shoulders",
+            "Shoulder",
+            lambda col: any(x in col for x in ["LSLogs", "RSLogs"]),
+        ),
+        (
+            "scapulae",
+            "Scapula",
+            lambda col: any(x in col for x in ["LScapLogs", "RScapLogs"]),
+        ),
+        ("hips", "Hip", lambda col: "HipLogs" in col),
+        ("spine", "Spine", lambda col: "SpineLogs" in col),
+        ("torso", "Torso", lambda col: "TorsoLogs" in col),
+        ("hub", "Hub", lambda col: "HUB" in col),
     ]
-    if hand_positions:
-        logger.info("\nHand positions found:")
-        for pos in hand_positions:
-            logger.info("  %s", pos)
-        joint_positions["hands"] = hand_positions
 
-    # Wrist positions
-    wrist_positions = [
-        col for col in position_columns if any(x in col for x in ["LWLogs", "RWLogs"])
-    ]
-    if wrist_positions:
-        logger.info("\nWrist positions found:")
-        for pos in wrist_positions:
-            logger.info("  %s", pos)
-        joint_positions["wrists"] = wrist_positions
+    for joint_key, label, filter_fn in joint_definitions:
+        matching = [col for col in position_columns if filter_fn(col)]
+        if matching:
+            logger.info("\n%s positions found:", label)
+            for pos in matching:
+                logger.info("  %s", pos)
+            joint_positions[joint_key] = matching
 
-    # Elbow positions
-    elbow_positions = [
-        col for col in position_columns if any(x in col for x in ["LELogs", "RELogs"])
-    ]
-    if elbow_positions:
-        logger.info("\nElbow positions found:")
-        for pos in elbow_positions:
-            logger.info("  %s", pos)
-        joint_positions["elbows"] = elbow_positions
+    return joint_positions
 
-    # Shoulder positions
-    shoulder_positions = [
-        col for col in position_columns if any(x in col for x in ["LSLogs", "RSLogs"])
-    ]
-    if shoulder_positions:
-        logger.info("\nShoulder positions found:")
-        for pos in shoulder_positions:
-            logger.info("  %s", pos)
-        joint_positions["shoulders"] = shoulder_positions
 
-    # Scapula positions
-    scapula_positions = [
-        col
-        for col in position_columns
-        if any(x in col for x in ["LScapLogs", "RScapLogs"])
-    ]
-    if scapula_positions:
-        logger.info("\nScapula positions found:")
-        for pos in scapula_positions:
-            logger.info("  %s", pos)
-        joint_positions["scapulae"] = scapula_positions
+def _build_segment_definitions():
+    """Build the dictionary of visualization segment definitions.
 
-    # Hip positions
-    hip_positions = [col for col in position_columns if "HipLogs" in col]
-    if hip_positions:
-        logger.info("\nHip positions found:")
-        for pos in hip_positions:
-            logger.info("  %s", pos)
-        joint_positions["hips"] = hip_positions
-
-    # Spine positions
-    spine_positions = [col for col in position_columns if "SpineLogs" in col]
-    if spine_positions:
-        logger.info("\nSpine positions found:")
-        for pos in spine_positions:
-            logger.info("  %s", pos)
-        joint_positions["spine"] = spine_positions
-
-    # Torso positions
-    torso_positions = [col for col in position_columns if "TorsoLogs" in col]
-    if torso_positions:
-        logger.info("\nTorso positions found:")
-        for pos in torso_positions:
-            logger.info("  %s", pos)
-        joint_positions["torso"] = torso_positions
-
-    # Hub positions
-    hub_positions = [col for col in position_columns if "HUB" in col]
-    if hub_positions:
-        logger.info("\nHub positions found:")
-        for pos in hub_positions:
-            logger.info("  %s", pos)
-        joint_positions["hub"] = hub_positions
-
-    logger.info("%s", "\n" + "=" * 80)
-    logger.info("RECOMMENDED SEGMENTS FOR GOLF SWING VISUALIZATION:")
-    logger.info("%s", "-" * 60)
-
-    # Define the segments we want to visualize
-    segments = {
+    Each segment maps a name to six column names (start XYZ + end XYZ).
+    """
+    return {
         "midpoint_to_clubhead": [
             "MidpointCalcsLogs_MPGlobalPosition_1",
             "MidpointCalcsLogs_MPGlobalPosition_2",
@@ -262,7 +222,12 @@ def analyze_simscape_data(csv_file) -> tuple | None:
         ],
     }
 
-    # Check which segments are available
+
+def _check_segment_availability(segments, columns):
+    """Check which segments have all required columns available.
+
+    Returns a dict of available segment names to their column lists.
+    """
     available_segments = {}
     for segment_name, required_cols in segments.items():
         available_cols = [col for col in required_cols if col in columns]
@@ -275,12 +240,15 @@ def analyze_simscape_data(csv_file) -> tuple | None:
             if len(missing_cols) <= 3:  # Show missing columns if not too many
                 for col in missing_cols:
                     logger.info("    Missing: %s", col)
+    return available_segments
 
+
+def _log_data_sample(df, available_segments):
+    """Log a sample of data from the available segments."""
     logger.info("%s", "\n" + "=" * 80)
     logger.info("DATA SAMPLE (first 3 rows):")
     logger.info("%s", "-" * 40)
 
-    # Show sample data for available segments
     if available_segments:
         sample_cols = []
         for segment_cols in available_segments.values():
@@ -293,6 +261,33 @@ def analyze_simscape_data(csv_file) -> tuple | None:
         sample_cols.insert(0, "time")  # Always include time
 
         logger.info("%s", df[sample_cols].head(3).to_string())
+
+
+def analyze_simscape_data(csv_file) -> tuple | None:
+    """Analyze the Simscape CSV file and identify key joint positions."""
+
+    logger.info("Analyzing Simscape data file: %s", csv_file)
+    logger.info("%s", "=" * 80)
+
+    df = _load_csv_data(csv_file)
+    if df is None:
+        return
+
+    columns = df.columns.tolist()
+
+    categories = _categorize_columns(columns)
+    position_columns = categories["position"]
+
+    joint_positions = _identify_joint_positions(position_columns)
+
+    logger.info("%s", "\n" + "=" * 80)
+    logger.info("RECOMMENDED SEGMENTS FOR GOLF SWING VISUALIZATION:")
+    logger.info("%s", "-" * 60)
+
+    segments = _build_segment_definitions()
+    available_segments = _check_segment_availability(segments, columns)
+
+    _log_data_sample(df, available_segments)
 
     return joint_positions, available_segments
 

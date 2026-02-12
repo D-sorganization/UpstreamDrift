@@ -201,15 +201,8 @@ class LauncherUISetupMixin:
         action_about.triggered.connect(self._show_about_dialog)
         help_menu.addAction(action_about)
 
-    def _setup_top_bar(self) -> QHBoxLayout:
-        """Set up the top tool bar."""
-        from src.launchers.launcher_constants import (
-            AI_AVAILABLE,
-            HELP_SYSTEM_AVAILABLE,
-        )
-
-        top_bar = QHBoxLayout()
-
+    def _setup_top_bar_status_and_search(self, top_bar: QHBoxLayout) -> None:
+        """Add status indicator, execution mode label, and search bar to top bar."""
         # Status Indicator
         self.lbl_status = QLabel("Checking Docker...")
         self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
@@ -237,7 +230,8 @@ class LauncherUISetupMixin:
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
-        # Hidden configuration checkboxes
+    def _setup_top_bar_config_checkboxes(self) -> None:
+        """Create hidden configuration checkboxes and layout controls."""
         self.chk_live = QCheckBox("Live Viz")
         self.chk_live.setChecked(True)
 
@@ -261,6 +255,10 @@ class LauncherUISetupMixin:
         self.btn_customize_tiles = QPushButton("Edit Tiles")
         self.btn_customize_tiles.setEnabled(False)
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
+
+    def _setup_top_bar_action_buttons(self, top_bar: QHBoxLayout) -> None:
+        """Add Help, Settings, and AI Assistant buttons to top bar."""
+        from src.launchers.launcher_constants import AI_AVAILABLE
 
         btn_help = QPushButton("Help")
         btn_help.setToolTip("View documentation and user guide (F1)")
@@ -316,37 +314,53 @@ class LauncherUISetupMixin:
                 """)
             top_bar.addWidget(self.btn_ai)
 
+    def _register_top_bar_tooltips(self) -> None:
+        """Register enhanced tooltips for configuration checkboxes."""
+        from src.launchers.launcher_constants import HELP_SYSTEM_AVAILABLE
+
+        if not HELP_SYSTEM_AVAILABLE:
+            return
+
+        from src.shared.python.gui_pkg.help_system import TooltipManager
+
+        TooltipManager.register_tooltip(
+            self.chk_live,
+            "Live Visualization",
+            "Enable real-time 3D visualization during simulation.",
+            "visualization",
+        )
+        TooltipManager.register_tooltip(
+            self.chk_gpu,
+            "GPU Acceleration",
+            "Use GPU for physics computation when available.",
+            "engine_selection",
+        )
+        TooltipManager.register_tooltip(
+            self.chk_docker,
+            "Docker Mode",
+            "Run physics engines in Docker containers.",
+            "engine_selection",
+        )
+        TooltipManager.register_tooltip(
+            self.chk_wsl,
+            "WSL Mode",
+            "Run in WSL2 Ubuntu environment for full Linux engine support.",
+            "engine_selection",
+        )
+
+    def _setup_top_bar(self) -> QHBoxLayout:
+        """Set up the top tool bar."""
+        top_bar = QHBoxLayout()
+
+        self._setup_top_bar_status_and_search(top_bar)
+        self._setup_top_bar_config_checkboxes()
+        self._setup_top_bar_action_buttons(top_bar)
+
         # Context Help Dock
         self._setup_context_help()
 
         # Register enhanced tooltips
-        if HELP_SYSTEM_AVAILABLE:
-            from src.shared.python.gui_pkg.help_system import TooltipManager
-
-            TooltipManager.register_tooltip(
-                self.chk_live,
-                "Live Visualization",
-                "Enable real-time 3D visualization during simulation.",
-                "visualization",
-            )
-            TooltipManager.register_tooltip(
-                self.chk_gpu,
-                "GPU Acceleration",
-                "Use GPU for physics computation when available.",
-                "engine_selection",
-            )
-            TooltipManager.register_tooltip(
-                self.chk_docker,
-                "Docker Mode",
-                "Run physics engines in Docker containers.",
-                "engine_selection",
-            )
-            TooltipManager.register_tooltip(
-                self.chk_wsl,
-                "WSL Mode",
-                "Run in WSL2 Ubuntu environment for full Linux engine support.",
-                "engine_selection",
-            )
+        self._register_top_bar_tooltips()
 
         return top_bar
 

@@ -12,6 +12,7 @@ and is treated as a neutral, user-defined parameter.
 
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -90,15 +91,55 @@ class SegmentTimingAnalyzer:
         Returns:
             KinematicSequenceResult object
         """
+        # 1. Detect peaks for each segment
+        peaks = self._detect_peaks(segment_velocities, times)
+
+        # 2. Calculate extended metrics (Speed Gain, Deceleration)
+        self._compute_extended_metrics(peaks, segment_velocities, times)
+
+        # 3. Sort by time to determine actual sequence
+        peaks.sort(key=lambda x: x.time)
+        actual_order = [p.name for p in peaks]
+
+        # 4. Calculate timing gaps
+        timing_gaps = self._compute_timing_gaps(peaks)
+
+        # 5. Evaluate against expected order
+        sequence_consistency, is_valid = self._evaluate_sequence_order(
+            peaks, segment_velocities
+        )
+
+        return SegmentTimingResult(
+            peaks=peaks,
+            sequence_order=actual_order,
+            expected_order=self.expected_order,
+            sequence_consistency=sequence_consistency,
+            timing_gaps=timing_gaps,
+            is_valid_sequence=is_valid,
+            methodology=CITATION_SEGMENT_TIMING,
+        )
+
+    @staticmethod
+    def _detect_peaks(
+        segment_velocities: dict[str, np.ndarray],
+        times: np.ndarray,
+    ) -> list[SegmentPeak]:
+        """Detect peak velocity for each segment and normalize.
+
+        Args:
+            segment_velocities: Dict mapping segment name to velocity array (1D)
+            times: Time array corresponding to velocities
+
+        Returns:
+            List of SegmentPeak objects with normalized velocities.
+        """
         peaks: list[SegmentPeak] = []
         max_overall_velocity = 0.0
 
-        # 1. Detect peaks for each segment
         for name, velocity_data in segment_velocities.items():
             if len(velocity_data) == 0:
                 continue
 
-            # Use absolute velocity for peak detection
             abs_vel = np.abs(velocity_data)
             max_idx = np.argmax(abs_vel)
             peak_val = float(abs_vel[max_idx])
@@ -115,15 +156,29 @@ class SegmentTimingAnalyzer:
                 )
             )
 
-        # 2. Normalize velocities
+        # Normalize velocities
         if max_overall_velocity > 0:
             for peak in peaks:
                 peak.normalized_velocity = peak.peak_velocity / max_overall_velocity
 
-        # 3. Calculate extended metrics (Speed Gain, Deceleration)
+        return peaks
+
+    def _compute_extended_metrics(
+        self,
+        peaks: list[SegmentPeak],
+        segment_velocities: dict[str, np.ndarray],
+        times: np.ndarray,
+    ) -> None:
+        """Compute speed gain and deceleration rate for each peak.
+
+        Args:
+            peaks: List of detected segment peaks.
+            segment_velocities: Dict mapping segment name to velocity array (1D)
+            times: Time array corresponding to velocities
+        """
         peak_map = {p.name: p for p in peaks}
 
-        # 3a. Speed Gain â€” requires expected_order to identify proximal segments
+        # Speed Gain -- requires expected_order to identify proximal segments
         if self.expected_order:
             for i, name in enumerate(self.expected_order):
                 if name not in peak_map:
@@ -138,7 +193,7 @@ class SegmentTimingAnalyzer:
                                 current_peak.peak_velocity / proximal_peak.peak_velocity
                             )
 
-        # 3b. Deceleration Rate â€” computed for ALL segments (independent of expected_order)
+        # Deceleration Rate -- computed for ALL segments (independent of expected_order)
         window_duration = 0.03  # 30ms post-peak window
         for name, peak_info in peak_map.items():
             if name in segment_velocities:
@@ -158,79 +213,71 @@ class SegmentTimingAnalyzer:
                         slope = (v_end - v_start) / dt
                         peak_info.deceleration_rate = -slope
 
-        # 4. Sort by time to determine actual sequence
-        peaks.sort(key=lambda x: x.time)
-        actual_order = [p.name for p in peaks]
+    @staticmethod
+    def _compute_timing_gaps(peaks: list[SegmentPeak]) -> dict[str, float]:
+        """Compute time gaps between consecutive peaks.
 
-        # 5. Calculate timing gaps
+        Args:
+            peaks: Sorted list of segment peaks.
+
+        Returns:
+            Dict mapping gap names to time differences.
+        """
         timing_gaps: dict[str, float] = {}
         for i in range(len(peaks) - 1):
             current = peaks[i]
             next_peak = peaks[i + 1]
             gap_name = f"{current.name}->{next_peak.name}"
             timing_gaps[gap_name] = next_peak.time - current.time
+        return timing_gaps
 
-        # 6. Evaluate against expected order
-        sequence_consistency = 0.0
-        is_valid = False
+    def _evaluate_sequence_order(
+        self,
+        peaks: list[SegmentPeak],
+        segment_velocities: dict[str, np.ndarray],
+    ) -> tuple[float, bool]:
+        """Evaluate actual peak order against expected order.
 
-        if self.expected_order:
-            # Filter expected order to only include segments present in data
-            relevant_expected = [
-                name for name in self.expected_order if name in segment_velocities
-            ]
+        Args:
+            peaks: Sorted list of segment peaks.
+            segment_velocities: Dict mapping segment name to velocity array.
 
-            if not relevant_expected:
-                sequence_consistency = 0.0
-                is_valid = False
-            else:
-                # Calculate simple match score
+        Returns:
+            Tuple of (sequence_consistency, is_valid_sequence).
+        """
+        if not self.expected_order:
+            return 0.0, False
 
-                # Check direct position matches
-                # Note: This is strict. If one is missing, it shifts everything.
-                # Better: Check relative ordering pairs.
+        # Filter expected order to only include segments present in data
+        relevant_expected = [
+            name for name in self.expected_order if name in segment_velocities
+        ]
 
-                # Pairwise ordering check (more robust than absolute index)
-                total_pairs = 0
-                correct_pairs = 0
+        if not relevant_expected:
+            return 0.0, False
 
-                # Create a map of name -> time for easy lookup
-                # Reuse existing peak_map if available (it stores SegmentPeak objects)
-                # If not, ensure we use a separate variable name to avoid MyPy type confusion
-                peak_times = {p.name: p.time for p in peaks}
+        # Pairwise ordering check (more robust than absolute index)
+        total_pairs = 0
+        correct_pairs = 0
 
-                import itertools
+        peak_times = {p.name: p.time for p in peaks}
 
-                for s1, s2 in itertools.combinations(relevant_expected, 2):
-                    if s1 in peak_times and s2 in peak_times:
-                        total_pairs += 1
-                        if peak_times[s1] < peak_times[s2]:
-                            correct_pairs += 1
+        for s1, s2 in itertools.combinations(relevant_expected, 2):
+            if s1 in peak_times and s2 in peak_times:
+                total_pairs += 1
+                if peak_times[s1] < peak_times[s2]:
+                    correct_pairs += 1
 
-                if total_pairs > 0:
-                    sequence_consistency = correct_pairs / total_pairs
-                else:
-                    # If no pairs could be compared (e.g. not enough peaks),
-                    # we can't determine consistency.
-                    # If we have 0 or 1 peak, it's technically "ordered", but implies missing data.
-                    # For strict analysis, if we expected a sequence but found nothing, score should be low.
-                    # However, if we just have 1 segment, it is perfectly ordered with itself.
-                    # Let's keep 1.0 for "no violations" but mark as invalid if < 2 peaks.
-                    # Wait, test expects 0.0 for empty data.
-                    # If len(peaks) == 0, consistency should be 0.0 (no sequence).
-                    sequence_consistency = 1.0 if len(peaks) == 1 else 0.0
+        if total_pairs > 0:
+            sequence_consistency = correct_pairs / total_pairs
+        else:
+            # If no pairs could be compared (e.g. not enough peaks),
+            # we can't determine consistency.
+            # If len(peaks) == 0, consistency should be 0.0 (no sequence).
+            sequence_consistency = 1.0 if len(peaks) == 1 else 0.0
 
-                is_valid = sequence_consistency == 1.0 and len(peaks) >= 2
-
-        return SegmentTimingResult(
-            peaks=peaks,
-            sequence_order=actual_order,
-            expected_order=self.expected_order,
-            sequence_consistency=sequence_consistency,
-            timing_gaps=timing_gaps,
-            is_valid_sequence=is_valid,
-            methodology=CITATION_SEGMENT_TIMING,
-        )
+        is_valid = sequence_consistency == 1.0 and len(peaks) >= 2
+        return sequence_consistency, is_valid
 
     def extract_velocities_from_recorder(
         self,

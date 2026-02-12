@@ -19,6 +19,10 @@ logger = get_logger(__name__)
 class PlottingTab(QtWidgets.QWidget):
     """Tab for advanced plotting and data visualization."""
 
+    PLOT_INDUCED_ACCEL: typing.ClassVar[str] = "Induced Accelerations"
+    PLOT_PHASE_DIAGRAM: typing.ClassVar[str] = "Phase Diagram"
+    PLOT_COUNTERFACTUAL: typing.ClassVar[str] = "Counterfactual Comparison"
+
     CF_MAP: typing.ClassVar[dict[str, str]] = {
         "ZTCF (Zero Torque)": "ztcf_accel",
         "ZVCF (Zero Velocity)": "zvcf_torque",
@@ -55,15 +59,15 @@ class PlottingTab(QtWidgets.QWidget):
                 "Joint Angles",
                 "Joint Velocities",
                 "Joint Torques",
-                "Induced Accelerations",
+                self.PLOT_INDUCED_ACCEL,
                 "Actuator Powers",
                 "Energy Analysis",
                 "Club Head Speed",
                 "Club Head Trajectory (3D)",
                 "Swing Plane Analysis",
-                "Phase Diagram",
+                self.PLOT_PHASE_DIAGRAM,
                 "Torque Comparison",
-                "Counterfactual Comparison",
+                self.PLOT_COUNTERFACTUAL,
             ]
         )
         plot_layout.addWidget(self.plot_combo)
@@ -172,13 +176,13 @@ class PlottingTab(QtWidgets.QWidget):
 
     def on_plot_type_changed(self, plot_type: str) -> None:
         """Handle plot type selection change."""
-        if plot_type == "Phase Diagram":
+        if plot_type == self.PLOT_PHASE_DIAGRAM:
             self.settings_stack.setCurrentWidget(self.joint_select_widget)
             if self.joint_select_combo.count() == 0:
                 self.update_joint_list()
-        elif plot_type == "Induced Accelerations":
+        elif plot_type == self.PLOT_INDUCED_ACCEL:
             self.settings_stack.setCurrentWidget(self.induced_widget)
-        elif plot_type == "Counterfactual Comparison":
+        elif plot_type == self.PLOT_COUNTERFACTUAL:
             self.settings_stack.setCurrentWidget(self.cf_widget)
         else:
             self.settings_stack.setCurrentWidget(self.empty_page)
@@ -201,29 +205,7 @@ class PlottingTab(QtWidgets.QWidget):
             self.sim_widget.set_running(False)
             was_running = True
 
-        # Clear existing plot
-        if self.current_plot_canvas is not None:
-            self.plot_container_layout.removeWidget(self.current_plot_canvas)
-            self.current_plot_canvas.deleteLater()
-            self.current_plot_canvas = None
-
-        # Create new canvas
-        canvas = MplCanvas(width=8, height=6, dpi=100)
-
-        # We should pass joint names if possible
-        joint_names = []
-        if self.sim_widget.model:
-            import mujoco
-
-            for i in range(self.sim_widget.model.njnt):
-                name = mujoco.mj_id2name(
-                    self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
-                )
-                joint_names.append(name or f"Joint {i}")
-
-        plotter = GolfSwingPlotter(recorder)
-
-        # Generate appropriate plot
+        canvas, plotter = self._prepare_plot_canvas(recorder)
         plot_type = self.plot_combo.currentText()
 
         # Feedback: Disable button and show loading state
@@ -234,164 +216,7 @@ class PlottingTab(QtWidgets.QWidget):
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
         try:
-            if plot_type == "Summary Dashboard":
-                plotter.plot_summary_dashboard(canvas.fig)
-            elif plot_type == "Joint Angles":
-                plotter.plot_joint_angles(canvas.fig)
-            elif plot_type == "Joint Velocities":
-                plotter.plot_joint_velocities(canvas.fig)
-            elif plot_type == "Joint Torques":
-                plotter.plot_joint_torques(canvas.fig)
-            elif plot_type == "Actuator Powers":
-                plotter.plot_actuator_powers(canvas.fig)
-            elif plot_type == "Energy Analysis":
-                plotter.plot_energy_analysis(canvas.fig)
-            elif plot_type == "Club Head Speed":
-                plotter.plot_club_head_speed(canvas.fig)
-            elif plot_type == "Club Head Trajectory (3D)":
-                plotter.plot_club_head_trajectory(canvas.fig)
-            elif plot_type == "Swing Plane Analysis":
-                plotter.plot_swing_plane(canvas.fig)
-            elif plot_type == "Phase Diagram":
-                joint_idx = self.joint_select_combo.currentIndex()
-                plotter.plot_phase_diagram(canvas.fig, joint_idx)
-            elif plot_type == "Torque Comparison":
-                plotter.plot_torque_comparison(canvas.fig)
-            elif plot_type == "Induced Accelerations":
-                source = self.induced_source_combo.currentText()
-                spec_act = self.induced_actuator_edit.text().strip()
-                if spec_act:
-                    # Check if present
-                    _, vals = recorder.get_induced_acceleration_series(spec_act)
-                    if len(vals) == 0:
-                        # Recompute using Analyzer if available
-                        analyzer = self.sim_widget.get_analyzer()
-                        if analyzer:
-                            times = []
-                            vals_list = []
-                            if (
-                                self.sim_widget.model is not None
-                                and self.sim_widget.data is not None
-                            ):
-                                total_frames = len(recorder.frames)
-                                progress = QtWidgets.QProgressDialog(
-                                    "Computing Induced Accelerations...",
-                                    "Cancel",
-                                    0,
-                                    total_frames,
-                                    self,
-                                )
-                                progress.setWindowModality(
-                                    QtCore.Qt.WindowModality.WindowModal
-                                )
-
-                                for i, frame in enumerate(recorder.frames):
-                                    if progress.wasCanceled():
-                                        raise RuntimeError("Operation canceled")
-                                    progress.setValue(i)
-
-                                    # Save current state
-                                    qpos_bak = self.sim_widget.data.qpos.copy()
-                                    qvel_bak = self.sim_widget.data.qvel.copy()
-                                    ctrl_bak = self.sim_widget.data.ctrl.copy()
-
-                                    self.sim_widget.data.qpos[:] = frame.joint_positions
-                                    self.sim_widget.data.qvel[:] = (
-                                        frame.joint_velocities
-                                    )
-                                    self.sim_widget.data.ctrl[:] = frame.joint_torques
-
-                                    import mujoco
-
-                                    mujoco.mj_forward(
-                                        self.sim_widget.model, self.sim_widget.data
-                                    )
-
-                                    compute_fn = analyzer.compute_induced_acceleration
-                                    res = compute_fn("actuator")  # Use source name
-                                    vals_list.append(res)
-                                    times.append(frame.time)
-
-                                    # Restore
-                                    self.sim_widget.data.qpos[:] = qpos_bak
-                                    self.sim_widget.data.qvel[:] = qvel_bak
-                                    self.sim_widget.data.ctrl[:] = ctrl_bak
-                                    mujoco.mj_forward(
-                                        self.sim_widget.model, self.sim_widget.data
-                                    )
-
-                                progress.setValue(total_frames)
-
-                            # Inject into recorder frames
-                            for i, val in enumerate(vals_list):
-                                recorder.frames[i].induced_accelerations[spec_act] = val
-
-                    source = spec_act
-
-                breakdown = source == "breakdown"
-                plotter.plot_induced_acceleration(
-                    canvas.fig, source, breakdown_mode=breakdown
-                )
-            elif plot_type == "Counterfactual Comparison":
-                cf_selection = self.cf_combo.currentText()
-                cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
-
-                # Ensure data exists (Recompute if missing)
-                _, vals = recorder.get_counterfactual_series(cf_name)
-                if len(vals) == 0:
-                    analyzer = self.sim_widget.get_analyzer()
-                    if analyzer:
-                        import mujoco
-
-                        if (
-                            self.sim_widget.model is not None
-                            and self.sim_widget.data is not None
-                        ):
-                            total_frames = len(recorder.frames)
-                            progress = QtWidgets.QProgressDialog(
-                                "Computing Counterfactuals...",
-                                "Cancel",
-                                0,
-                                total_frames,
-                                self,
-                            )
-                            progress.setWindowModality(
-                                QtCore.Qt.WindowModality.WindowModal
-                            )
-
-                            qpos_bak = self.sim_widget.data.qpos.copy()
-                            qvel_bak = self.sim_widget.data.qvel.copy()
-                            ctrl_bak = self.sim_widget.data.ctrl.copy()
-
-                            for i, frame in enumerate(recorder.frames):
-                                if progress.wasCanceled():
-                                    raise RuntimeError("Operation canceled")
-                                progress.setValue(i)
-
-                                self.sim_widget.data.qpos[:] = frame.joint_positions
-                                self.sim_widget.data.qvel[:] = frame.joint_velocities
-                                self.sim_widget.data.ctrl[:] = frame.joint_torques
-                                mujoco.mj_forward(
-                                    self.sim_widget.model, self.sim_widget.data
-                                )
-
-                                cf_results: dict[str, np.ndarray] = (
-                                    analyzer.compute_counterfactuals()
-                                )
-                                if cf_name in cf_results:
-                                    cf_value: np.ndarray = cf_results[cf_name]
-                                    frame.counterfactuals[cf_name] = cf_value
-
-                            progress.setValue(total_frames)
-
-                            self.sim_widget.data.qpos[:] = qpos_bak
-                            self.sim_widget.data.qvel[:] = qvel_bak
-                            self.sim_widget.data.ctrl[:] = ctrl_bak
-                            mujoco.mj_forward(
-                                self.sim_widget.model, self.sim_widget.data
-                            )
-
-                plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
+            self._dispatch_plot(plot_type, plotter, canvas, recorder)
 
             canvas.draw()
             self.current_plot_canvas = canvas
@@ -412,3 +237,201 @@ class PlottingTab(QtWidgets.QWidget):
             # Restore simulation state
             if was_running:
                 self.sim_widget.set_running(True)
+
+    def _prepare_plot_canvas(
+        self,
+        recorder: typing.Any,
+    ) -> tuple[MplCanvas, GolfSwingPlotter]:
+        """Clear old canvas and create a fresh canvas and plotter."""
+        if self.current_plot_canvas is not None:
+            self.plot_container_layout.removeWidget(self.current_plot_canvas)
+            self.current_plot_canvas.deleteLater()
+            self.current_plot_canvas = None
+
+        canvas = MplCanvas(width=8, height=6, dpi=100)
+        plotter = GolfSwingPlotter(recorder)
+        return canvas, plotter
+
+    def _dispatch_plot(
+        self,
+        plot_type: str,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+        recorder: typing.Any,
+    ) -> None:
+        """Route the plot type to the appropriate generation method."""
+        if plot_type == self.PLOT_INDUCED_ACCEL:
+            self._generate_induced_acceleration_plot(plotter, canvas, recorder)
+        elif plot_type == self.PLOT_COUNTERFACTUAL:
+            self._generate_counterfactual_plot(plotter, canvas, recorder)
+        else:
+            self._generate_standard_plot(plot_type, plotter, canvas)
+
+    def _generate_standard_plot(
+        self,
+        plot_type: str,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+    ) -> None:
+        """Generate one of the standard (non-recomputation) plot types."""
+        standard_plots: dict[str, typing.Callable[..., typing.Any]] = {
+            "Summary Dashboard": plotter.plot_summary_dashboard,
+            "Joint Angles": plotter.plot_joint_angles,
+            "Joint Velocities": plotter.plot_joint_velocities,
+            "Joint Torques": plotter.plot_joint_torques,
+            "Actuator Powers": plotter.plot_actuator_powers,
+            "Energy Analysis": plotter.plot_energy_analysis,
+            "Club Head Speed": plotter.plot_club_head_speed,
+            "Club Head Trajectory (3D)": plotter.plot_club_head_trajectory,
+            "Swing Plane Analysis": plotter.plot_swing_plane,
+            "Torque Comparison": plotter.plot_torque_comparison,
+        }
+        plot_fn = standard_plots.get(plot_type)
+        if plot_fn is not None:
+            plot_fn(canvas.fig)
+        elif plot_type == self.PLOT_PHASE_DIAGRAM:
+            joint_idx = self.joint_select_combo.currentIndex()
+            plotter.plot_phase_diagram(canvas.fig, joint_idx)
+
+    def _generate_induced_acceleration_plot(
+        self,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+        recorder: typing.Any,
+    ) -> None:
+        """Generate an induced acceleration plot, recomputing data if needed."""
+        source = self.induced_source_combo.currentText()
+        spec_act = self.induced_actuator_edit.text().strip()
+        if spec_act:
+            _, vals = recorder.get_induced_acceleration_series(spec_act)
+            if len(vals) == 0:
+                self._recompute_induced_accelerations(recorder, spec_act)
+            source = spec_act
+
+        breakdown = source == "breakdown"
+        plotter.plot_induced_acceleration(
+            canvas.fig,
+            source,
+            breakdown_mode=breakdown,
+        )
+
+    def _recompute_induced_accelerations(
+        self,
+        recorder: typing.Any,
+        spec_act: str,
+    ) -> None:
+        """Recompute induced accelerations frame-by-frame using the analyzer."""
+        analyzer = self.sim_widget.get_analyzer()
+        if not analyzer:
+            return
+        if self.sim_widget.model is None or self.sim_widget.data is None:
+            return
+
+        import mujoco
+
+        total_frames = len(recorder.frames)
+        progress = QtWidgets.QProgressDialog(
+            "Computing Induced Accelerations...",
+            "Cancel",
+            0,
+            total_frames,
+            self,
+        )
+        progress.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+
+        vals_list = []
+        for i, frame in enumerate(recorder.frames):
+            if progress.wasCanceled():
+                raise RuntimeError("Operation canceled")
+            progress.setValue(i)
+
+            # Save current state
+            qpos_bak = self.sim_widget.data.qpos.copy()
+            qvel_bak = self.sim_widget.data.qvel.copy()
+            ctrl_bak = self.sim_widget.data.ctrl.copy()
+
+            self.sim_widget.data.qpos[:] = frame.joint_positions
+            self.sim_widget.data.qvel[:] = frame.joint_velocities
+            self.sim_widget.data.ctrl[:] = frame.joint_torques
+            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
+            res = analyzer.compute_induced_acceleration("actuator")
+            vals_list.append(res)
+
+            # Restore
+            self.sim_widget.data.qpos[:] = qpos_bak
+            self.sim_widget.data.qvel[:] = qvel_bak
+            self.sim_widget.data.ctrl[:] = ctrl_bak
+            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
+        progress.setValue(total_frames)
+
+        # Inject into recorder frames
+        for i, val in enumerate(vals_list):
+            recorder.frames[i].induced_accelerations[spec_act] = val
+
+    def _generate_counterfactual_plot(
+        self,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+        recorder: typing.Any,
+    ) -> None:
+        """Generate a counterfactual comparison plot, recomputing if needed."""
+        cf_selection = self.cf_combo.currentText()
+        cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
+
+        _, vals = recorder.get_counterfactual_series(cf_name)
+        if len(vals) == 0:
+            self._recompute_counterfactuals(recorder, cf_name)
+
+        plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
+
+    def _recompute_counterfactuals(
+        self,
+        recorder: typing.Any,
+        cf_name: str,
+    ) -> None:
+        """Recompute counterfactual data frame-by-frame using the analyzer."""
+        analyzer = self.sim_widget.get_analyzer()
+        if not analyzer:
+            return
+        if self.sim_widget.model is None or self.sim_widget.data is None:
+            return
+
+        import mujoco
+
+        total_frames = len(recorder.frames)
+        progress = QtWidgets.QProgressDialog(
+            "Computing Counterfactuals...",
+            "Cancel",
+            0,
+            total_frames,
+            self,
+        )
+        progress.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+
+        qpos_bak = self.sim_widget.data.qpos.copy()
+        qvel_bak = self.sim_widget.data.qvel.copy()
+        ctrl_bak = self.sim_widget.data.ctrl.copy()
+
+        for i, frame in enumerate(recorder.frames):
+            if progress.wasCanceled():
+                raise RuntimeError("Operation canceled")
+            progress.setValue(i)
+
+            self.sim_widget.data.qpos[:] = frame.joint_positions
+            self.sim_widget.data.qvel[:] = frame.joint_velocities
+            self.sim_widget.data.ctrl[:] = frame.joint_torques
+            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
+            cf_results: dict[str, np.ndarray] = analyzer.compute_counterfactuals()
+            if cf_name in cf_results:
+                cf_value: np.ndarray = cf_results[cf_name]
+                frame.counterfactuals[cf_name] = cf_value
+
+        progress.setValue(total_frames)
+
+        self.sim_widget.data.qpos[:] = qpos_bak
+        self.sim_widget.data.qvel[:] = qvel_bak
+        self.sim_widget.data.ctrl[:] = ctrl_bak
+        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
