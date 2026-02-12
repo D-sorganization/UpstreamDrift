@@ -1973,55 +1973,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         plt.tight_layout()
         plt.show()
 
-    # ==================================================================
-    # SimulationGUIBase overrides
-    # ==================================================================
 
-    def _build_base_ui(self) -> None:
-        """Override base UI construction.
-
-        Drake builds its own comprehensive UI in ``_setup_ui``,
-        so we skip the generic skeleton.
-        """
-        # No-op: Drake builds its own UI entirely
-
-    def step_simulation(self) -> None:
-        """Advance the Drake simulation by one time step."""
-        if self.simulator and self.context:
-            t = self.context.get_time()
-            self.simulator.AdvanceTo(t + self.time_step)
-
-    def reset_simulation(self) -> None:
-        """Reset the Drake simulation state."""
-        self._reset_state()
-
-    def update_visualization(self) -> None:
-        """Refresh all Drake visualizations."""
-        self._update_visualization()
-
-    def load_model(self, index: int) -> None:
-        """Load a model at the given index."""
-        self._on_model_changed(index)
-
-    def sync_kinematic_controls(self) -> None:
-        """Synchronize kinematic slider values with model state."""
-        self._sync_kinematic_sliders()
-
-    def start_recording(self) -> None:
-        """Start recording simulation data."""
-        self.recorder.start()
-
-    def stop_recording(self) -> None:
-        """Stop recording simulation data."""
-        self.recorder.stop()
-
-    def get_recording_frame_count(self) -> int:
-        """Return the number of recorded frames."""
-        return len(self.recorder.times)
-
-    def export_data(self, filename: str) -> None:
-        """Export recorded data to the given filename."""
-        self._export_data()
 
     def _populate_manip_checkboxes(self) -> None:
         """Populate checkboxes for manipulability analysis."""
