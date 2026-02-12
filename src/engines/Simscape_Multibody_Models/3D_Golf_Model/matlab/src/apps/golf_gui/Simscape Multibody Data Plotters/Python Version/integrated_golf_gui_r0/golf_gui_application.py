@@ -641,7 +641,9 @@ class SimulinkModelTab(QWidget):
                 (baseq_data, ztcfq_data, deltaq_data)
             )
 
-            self.status_label.setText(f"Loaded {model_source} data successfully")
+            self.status_label.setText(
+                f"Loaded {model_source} data successfully"
+            )
 
         except (RuntimeError, ValueError, OSError) as e:
             self.status_label.setText(f"Error loading data: {str(e)}")
@@ -691,7 +693,8 @@ class SimulinkModelTab(QWidget):
             }
             render_config.show_club = self.show_club_check.isChecked()
             render_config.show_ground = self.show_ground_check.isChecked()
-            # Distinguish model data visually (e.g., could add color override in RenderConfig later)
+            # Distinguish model data visually
+            # (e.g., could add color override in RenderConfig later)
 
             self.opengl_widget.update_frame(frame_data, render_config)
 
@@ -785,9 +788,7 @@ class ComparisonTab(QWidget):
 
             # Load Data 1 (MoCap)
             loader1 = MotionDataLoader()
-            excel_data1 = (
-                loader1.load_data()
-            )  # Usually prompts file dialog, reused here
+            excel_data1 = loader1.load_data()  # Usually prompts file dialog
             baseq1, ztcfq1, deltaq1 = loader1.convert_to_gui_format(excel_data1)
             config1 = RenderConfig()
             self.frame_processor_mocap = FrameProcessor(
@@ -826,19 +827,19 @@ class ComparisonTab(QWidget):
         if not self.frame_processor_mocap:
             return
         self.playback_controller.toggle_playback()
-        self.play_button.setText(
+        text = (
             "Pause Sync" if self.playback_controller.is_playing else "Play Sync"
         )
+        self.play_button.setText(text)
 
     def _on_slider_moved(self, value: int):
         self.playback_controller.seek(float(value))
 
     def _on_position_changed(self, position: float):
-        total_frames = (
-            len(self.frame_processor_mocap.time_vector)
-            if self.frame_processor_mocap
-            else 0
-        )
+        if self.frame_processor_mocap:
+            total_frames = len(self.frame_processor_mocap.time_vector)
+        else:
+            total_frames = 0
         self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
         self.frame_slider.blockSignals(True)
         self.frame_slider.setValue(int(position))
@@ -857,11 +858,11 @@ class ComparisonTab(QWidget):
         # We manually use the controller's position to interpolate the model frame
         # assuming the controller position is valid for both (same frame rate/count)
         pos = self.playback_controller.position
-        # Use private method _get_interpolated_frame from controller is tricky because controller is bound to mocap processor
-        # Instead, we can create a temporary helper or just get the nearest frame if interpolation logic is coupled
-        # But wait, SmoothPlaybackController is designed to work with one processor.
-        # Workaround: Use the helper logic directly or subclass/modify controller to handle multiple?
-        # Simpler: Get frame from model processor using integer index for now, or implement lerp locally.
+        # Use private method _get_interpolated_frame from controller is tricky
+        # because controller is bound to mocap processor.
+        # Workaround: Use helper logic directly or subclass/modify controller.
+        # Simpler: Get frame from model processor using integer index for now,
+        # or implement lerp locally.
 
         # Let's implement local lerp for model frame to keep it smooth
         total_frames_model = len(self.frame_processor_model.time_vector)
@@ -881,11 +882,10 @@ class ComparisonTab(QWidget):
             self.model_widget.update_frame(frame_data_model, RenderConfig())
 
         # 3. Calculate Metrics (e.g. Midpoint Distance)
-        if (
-            np.isfinite(frame_data_mocap.midpoint).all()
-            and np.isfinite(frame_data_model.midpoint).all()
-        ):
-            dist = np.linalg.norm(frame_data_mocap.midpoint - frame_data_model.midpoint)
+        mp1 = frame_data_mocap.midpoint
+        mp2 = frame_data_model.midpoint
+        if np.isfinite(mp1).all() and np.isfinite(mp2).all():
+            dist = np.linalg.norm(mp1 - mp2)
             self.metrics_label.setText(
                 f"Comparison Metrics | Midpoint Error: {dist:.4f} m"
             )
