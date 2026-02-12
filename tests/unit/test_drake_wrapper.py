@@ -2,7 +2,6 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-
 # Mock pydrake structure before import
 mock_pydrake = MagicMock()
 sys.modules["pydrake"] = mock_pydrake

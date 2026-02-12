@@ -338,5 +338,3 @@ class TestGetSimscapeModelPath:
         result = get_simscape_model_path()
         assert "Simscape_Multibody_Models" in str(result)
         assert "python" in str(result)
-
-
