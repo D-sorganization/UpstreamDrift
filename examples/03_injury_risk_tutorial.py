@@ -12,22 +12,13 @@ We will:
 4. Generate a comprehensive report
 """
 
-import sys
-from pathlib import Path
-
-# Ensure we can import from the suite
-# Adjust this path if running from a different directory
-repo_root = Path(__file__).parent.parent
-sys.path.append(str(repo_root))
-
-
 # Setup logger for tutorial
-from src.shared.python.logging_config import get_logger, setup_logging  # noqa: E402
+from src.shared.python.logging_config import get_logger, setup_logging
 
-from src.shared.python.injury.injury_risk import (  # noqa: E402
+from src.shared.python.injury.injury_risk import (
     InjuryRiskScorer,
 )
-from src.shared.python.injury.spinal_load_analysis import (  # noqa: E402
+from src.shared.python.injury.spinal_load_analysis import (
     create_example_analysis,
 )
 

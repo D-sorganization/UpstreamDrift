@@ -1,14 +1,27 @@
-import os
 import sys
 import unittest
 from unittest.mock import MagicMock
 
-# Add the directory to sys.path
-gui_dir = os.path.abspath(
-    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/"
+from src.shared.python.data_io.path_utils import get_repo_root
+
+# Simscape GUI directory contains spaces and cannot be a proper Python package.
+# This is the one intentional sys.path.insert remaining in the codebase.
+_SIMSCAPE_GUI_DIR = str(
+    get_repo_root()
+    / "src"
+    / "engines"
+    / "Simscape_Multibody_Models"
+    / "3D_Golf_Model"
+    / "matlab"
+    / "src"
+    / "apps"
+    / "golf_gui"
+    / "Simscape Multibody Data Plotters"
+    / "Python Version"
+    / "integrated_golf_gui_r0"
 )
-if gui_dir not in sys.path:
-    sys.path.insert(0, gui_dir)
+if _SIMSCAPE_GUI_DIR not in sys.path:
+    sys.path.insert(0, _SIMSCAPE_GUI_DIR)
 
 
 # Define Mock Base Classes
