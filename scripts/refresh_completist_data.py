@@ -18,6 +18,7 @@ EXCLUDE_DIRS = [
     "output",
 ]
 
+
 def run_grep(pattern, output_file, extended_regex=False):
     cmd = ["grep", "-rn"]
     if extended_regex:
@@ -37,6 +38,7 @@ def run_grep(pattern, output_file, extended_regex=False):
     except Exception as e:
         print(f"Error running grep: {e}")
 
+
 def main():
     print("Refreshing completist data...")
 
@@ -48,7 +50,11 @@ def main():
         print("scripts/find_stubs.py not found!")
 
     # 2. Grep for TODOs
-    run_grep("TODO|FIXME|XXX|HACK|TEMP", os.path.join(DATA_DIR, "todo_markers.txt"), extended_regex=True)
+    run_grep(
+        "TODO|FIXME|XXX|HACK|TEMP",
+        os.path.join(DATA_DIR, "todo_markers.txt"),
+        extended_regex=True,
+    )
 
     # 3. Grep for NotImplementedError
     run_grep("NotImplementedError", os.path.join(DATA_DIR, "not_implemented.txt"))
@@ -57,6 +63,7 @@ def main():
     run_grep("@abstractmethod", os.path.join(DATA_DIR, "abstract_methods.txt"))
 
     print("Done.")
+
 
 if __name__ == "__main__":
     main()

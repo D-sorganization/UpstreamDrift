@@ -561,7 +561,9 @@ class SimulinkModelTab(QWidget):
         # Data selection
         layout.addWidget(QLabel("Model Source:"), 0, 0)
         self.model_combo = QComboBox()
-        self.model_combo.addItems(["Simscape Multibody", "MuJoCo", "Drake", "Pinocchio"])
+        self.model_combo.addItems(
+            ["Simscape Multibody", "MuJoCo", "Drake", "Pinocchio"]
+        )
         layout.addWidget(self.model_combo, 0, 1)
 
         # Load button
@@ -639,9 +641,7 @@ class SimulinkModelTab(QWidget):
                 (baseq_data, ztcfq_data, deltaq_data)
             )
 
-            self.status_label.setText(
-                f"Loaded {model_source} data successfully"
-            )
+            self.status_label.setText(f"Loaded {model_source} data successfully")
 
         except (RuntimeError, ValueError, OSError) as e:
             self.status_label.setText(f"Error loading data: {str(e)}")
@@ -741,7 +741,9 @@ class ComparisonTab(QWidget):
 
         # Metrics Panel
         self.metrics_label = QLabel("Comparison Metrics: Load data to begin analysis")
-        self.metrics_label.setStyleSheet("font-weight: bold; color: #333; padding: 5px;")
+        self.metrics_label.setStyleSheet(
+            "font-weight: bold; color: #333; padding: 5px;"
+        )
         layout.addWidget(self.metrics_label)
 
         self.setLayout(layout)
@@ -783,10 +785,14 @@ class ComparisonTab(QWidget):
 
             # Load Data 1 (MoCap)
             loader1 = MotionDataLoader()
-            excel_data1 = loader1.load_data() # Usually prompts file dialog, reused here
+            excel_data1 = (
+                loader1.load_data()
+            )  # Usually prompts file dialog, reused here
             baseq1, ztcfq1, deltaq1 = loader1.convert_to_gui_format(excel_data1)
             config1 = RenderConfig()
-            self.frame_processor_mocap = FrameProcessor((baseq1, ztcfq1, deltaq1), config1)
+            self.frame_processor_mocap = FrameProcessor(
+                (baseq1, ztcfq1, deltaq1), config1
+            )
 
             # Load Data 2 (Model) - Reusing same loader for prototype
             # ideally would prompt for second file or load specific model output
@@ -794,7 +800,9 @@ class ComparisonTab(QWidget):
             excel_data2 = loader2.load_data()
             baseq2, ztcfq2, deltaq2 = loader2.convert_to_gui_format(excel_data2)
             config2 = RenderConfig()
-            self.frame_processor_model = FrameProcessor((baseq2, ztcfq2, deltaq2), config2)
+            self.frame_processor_model = FrameProcessor(
+                (baseq2, ztcfq2, deltaq2), config2
+            )
 
             # Initialize visualizers
             self.mocap_widget.load_data_from_dataframes((baseq1, ztcfq1, deltaq1))
@@ -818,13 +826,19 @@ class ComparisonTab(QWidget):
         if not self.frame_processor_mocap:
             return
         self.playback_controller.toggle_playback()
-        self.play_button.setText("Pause Sync" if self.playback_controller.is_playing else "Play Sync")
+        self.play_button.setText(
+            "Pause Sync" if self.playback_controller.is_playing else "Play Sync"
+        )
 
     def _on_slider_moved(self, value: int):
         self.playback_controller.seek(float(value))
 
     def _on_position_changed(self, position: float):
-        total_frames = len(self.frame_processor_mocap.time_vector) if self.frame_processor_mocap else 0
+        total_frames = (
+            len(self.frame_processor_mocap.time_vector)
+            if self.frame_processor_mocap
+            else 0
+        )
         self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
         self.frame_slider.blockSignals(True)
         self.frame_slider.setValue(int(position))
@@ -858,16 +872,23 @@ class ComparisonTab(QWidget):
 
         frame_low = self.frame_processor_model.get_frame_data(low_idx)
         frame_high = self.frame_processor_model.get_frame_data(high_idx)
-        frame_data_model = SmoothPlaybackController._lerp_frame_data(frame_low, frame_high, t)
+        frame_data_model = SmoothPlaybackController._lerp_frame_data(
+            frame_low, frame_high, t
+        )
 
         # Update Model View
         if self.model_widget.renderer:
             self.model_widget.update_frame(frame_data_model, RenderConfig())
 
         # 3. Calculate Metrics (e.g. Midpoint Distance)
-        if np.isfinite(frame_data_mocap.midpoint).all() and np.isfinite(frame_data_model.midpoint).all():
+        if (
+            np.isfinite(frame_data_mocap.midpoint).all()
+            and np.isfinite(frame_data_model.midpoint).all()
+        ):
             dist = np.linalg.norm(frame_data_mocap.midpoint - frame_data_model.midpoint)
-            self.metrics_label.setText(f"Comparison Metrics | Midpoint Error: {dist:.4f} m")
+            self.metrics_label.setText(
+                f"Comparison Metrics | Midpoint Error: {dist:.4f} m"
+            )
 
 
 # ============================================================================
