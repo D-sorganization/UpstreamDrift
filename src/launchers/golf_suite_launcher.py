@@ -85,103 +85,86 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         self._setup_ui()
 
-    def _setup_ui(self) -> None:
-        central = QtWidgets.QWidget()
-        self.setCentralWidget(central)
-        layout = QtWidgets.QVBoxLayout(central)
+    def _create_engine_button(
+        self,
+        label: str,
+        tooltip: str,
+        accessible_name: str,
+        slot: object,
+        icon_pixmap: QtWidgets.QStyle.StandardPixmap = QtWidgets.QStyle.StandardPixmap.SP_MediaPlay,
+    ) -> QtWidgets.QPushButton:
+        """Create a standard engine launch button."""
+        btn = QtWidgets.QPushButton(label)
+        btn.setMinimumHeight(40)
+        btn.setIcon(self.style().standardIcon(icon_pixmap))
+        btn.setToolTip(tooltip)
+        btn.setAccessibleName(accessible_name)
+        btn.clicked.connect(slot)
+        return btn
 
-        title = QtWidgets.QLabel("Golf Modeling Suite (Local)")
-        title.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        font = title.font()
-        font.setPointSize(16)
-        font.setBold(True)
-        title.setFont(font)
-        layout.addWidget(title)
-
-        subtitle = QtWidgets.QLabel(
-            "Launches physics engines using local python environment"
+    def _setup_engine_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Create and add all engine launch buttons to the layout."""
+        self.btn_mujoco = self._create_engine_button(
+            "Launch &MuJoCo Engine",
+            "Launch the MuJoCo physics engine interface",
+            "Launch MuJoCo",
+            self._launch_mujoco,
         )
-        subtitle.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(subtitle)
-
-        layout.addSpacing(20)
-
-        # Buttons
-        self.btn_mujoco = QtWidgets.QPushButton("Launch &MuJoCo Engine")
-        self.btn_mujoco.setMinimumHeight(40)
-        self.btn_mujoco.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
-        )
-        self.btn_mujoco.setToolTip("Launch the MuJoCo physics engine interface")
-        self.btn_mujoco.setAccessibleName("Launch MuJoCo")
-        self.btn_mujoco.clicked.connect(self._launch_mujoco)
         layout.addWidget(self.btn_mujoco)
 
-        self.btn_drake = QtWidgets.QPushButton("Launch &Drake Engine")
-        self.btn_drake.setMinimumHeight(40)
-        self.btn_drake.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        self.btn_drake = self._create_engine_button(
+            "Launch &Drake Engine",
+            "Launch the Drake physics engine interface",
+            "Launch Drake",
+            self._launch_drake,
         )
-        self.btn_drake.setToolTip("Launch the Drake physics engine interface")
-        self.btn_drake.setAccessibleName("Launch Drake")
-        self.btn_drake.clicked.connect(self._launch_drake)
         layout.addWidget(self.btn_drake)
 
-        self.btn_pinocchio = QtWidgets.QPushButton("Launch &Pinocchio Engine")
-        self.btn_pinocchio.setMinimumHeight(40)
-        self.btn_pinocchio.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        self.btn_pinocchio = self._create_engine_button(
+            "Launch &Pinocchio Engine",
+            "Launch the Pinocchio physics engine interface",
+            "Launch Pinocchio",
+            self._launch_pinocchio,
         )
-        self.btn_pinocchio.setToolTip("Launch the Pinocchio physics engine interface")
-        self.btn_pinocchio.setAccessibleName("Launch Pinocchio")
-        self.btn_pinocchio.clicked.connect(self._launch_pinocchio)
         layout.addWidget(self.btn_pinocchio)
 
-        self.btn_opensim = QtWidgets.QPushButton("Launch &OpenSim Golf")
-        self.btn_opensim.setMinimumHeight(40)
-        self.btn_opensim.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        self.btn_opensim = self._create_engine_button(
+            "Launch &OpenSim Golf",
+            "Launch OpenSim musculoskeletal modeling",
+            "Launch OpenSim",
+            self._launch_opensim,
         )
-        self.btn_opensim.setToolTip("Launch OpenSim musculoskeletal modeling")
-        self.btn_opensim.setAccessibleName("Launch OpenSim")
-        self.btn_opensim.clicked.connect(self._launch_opensim)
         layout.addWidget(self.btn_opensim)
 
-        self.btn_myosim = QtWidgets.QPushButton("Launch &MyoSim Suite")
-        self.btn_myosim.setMinimumHeight(40)
-        self.btn_myosim.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        self.btn_myosim = self._create_engine_button(
+            "Launch &MyoSim Suite",
+            "Launch MyoSuite muscle-actuated simulation",
+            "Launch MyoSim",
+            self._launch_myosim,
         )
-        self.btn_myosim.setToolTip("Launch MyoSuite muscle-actuated simulation")
-        self.btn_myosim.setAccessibleName("Launch MyoSim")
-        self.btn_myosim.clicked.connect(self._launch_myosim)
         layout.addWidget(self.btn_myosim)
 
-        self.btn_openpose = QtWidgets.QPushButton("Launch Open&Pose Analysis")
-        self.btn_openpose.setMinimumHeight(40)
-        self.btn_openpose.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        self.btn_openpose = self._create_engine_button(
+            "Launch Open&Pose Analysis",
+            "Launch Pose estimation and motion capture",
+            "Launch OpenPose",
+            self._launch_openpose,
         )
-        self.btn_openpose.setToolTip("Launch Pose estimation and motion capture")
-        self.btn_openpose.setAccessibleName("Launch OpenPose")
-        self.btn_openpose.clicked.connect(self._launch_openpose)
         layout.addWidget(self.btn_openpose)
 
-        self.btn_urdf = QtWidgets.QPushButton("Launch &URDF Generator")
-        self.btn_urdf.setMinimumHeight(40)
-        self.btn_urdf.setIcon(
-            self.style().standardIcon(
-                QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton
-            )
+        self.btn_urdf = self._create_engine_button(
+            "Launch &URDF Generator",
+            "Launch Interactive URDF model builder",
+            "Launch URDF Generator",
+            self._launch_urdf,
+            icon_pixmap=QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton,
         )
-        self.btn_urdf.setToolTip("Launch Interactive URDF model builder")
-        self.btn_urdf.setAccessibleName("Launch URDF Generator")
-        self.btn_urdf.clicked.connect(self._launch_urdf)
         layout.addWidget(self.btn_urdf)
 
+    def _setup_shot_tracer_section(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Add separator and shot tracer button to the layout."""
         layout.addSpacing(10)
 
-        # Separator
         separator = QtWidgets.QFrame()
         separator.setFrameShape(QtWidgets.QFrame.Shape.HLine)
         separator.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
@@ -189,22 +172,19 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         layout.addSpacing(10)
 
-        # Shot Tracer - Ball Flight Visualization
-        self.btn_shot_tracer = QtWidgets.QPushButton("Launch &Shot Tracer")
-        self.btn_shot_tracer.setMinimumHeight(40)
-        self.btn_shot_tracer.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ArrowForward)
+        self.btn_shot_tracer = self._create_engine_button(
+            "Launch &Shot Tracer",
+            "Launch the ball flight visualization (Waterloo/Penner model)",
+            "Launch Shot Tracer",
+            self._launch_shot_tracer,
+            icon_pixmap=QtWidgets.QStyle.StandardPixmap.SP_ArrowForward,
         )
-        self.btn_shot_tracer.setToolTip(
-            "Launch the ball flight visualization (Waterloo/Penner model)"
-        )
-        self.btn_shot_tracer.setAccessibleName("Launch Shot Tracer")
-        self.btn_shot_tracer.clicked.connect(self._launch_shot_tracer)
         layout.addWidget(self.btn_shot_tracer)
 
+    def _setup_log_area(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the simulation log group box with copy/clear controls."""
         layout.addSpacing(20)
 
-        # Log area
         log_group = QtWidgets.QGroupBox("Simulation Log")
         log_layout = QtWidgets.QVBoxLayout(log_group)
 
@@ -245,6 +225,36 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         log_layout.addLayout(log_controls)
         layout.addWidget(log_group)
+
+    def _setup_ui(self) -> None:
+        central = QtWidgets.QWidget()
+        self.setCentralWidget(central)
+        layout = QtWidgets.QVBoxLayout(central)
+
+        title = QtWidgets.QLabel("Golf Modeling Suite (Local)")
+        title.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        font = title.font()
+        font.setPointSize(16)
+        font.setBold(True)
+        title.setFont(font)
+        layout.addWidget(title)
+
+        subtitle = QtWidgets.QLabel(
+            "Launches physics engines using local python environment"
+        )
+        subtitle.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(subtitle)
+
+        layout.addSpacing(20)
+
+        # Engine launch buttons
+        self._setup_engine_buttons(layout)
+
+        # Shot tracer section with separator
+        self._setup_shot_tracer_section(layout)
+
+        # Log area with copy/clear controls
+        self._setup_log_area(layout)
 
         layout.addStretch()
 
@@ -338,9 +348,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         try:
             # Launch detached process
             # Use same python interpreter
-            process = subprocess.Popen(
-                [sys.executable, str(path)], cwd=str(cwd)
-            )  # noqa: S603
+            process = subprocess.Popen([sys.executable, str(path)], cwd=str(cwd))  # noqa: S603
             self.log_message(f"{name} launched successfully (PID: {process.pid})")
             self.status.setText(f"{name} Launched")
         except (OSError, subprocess.SubprocessError) as e:

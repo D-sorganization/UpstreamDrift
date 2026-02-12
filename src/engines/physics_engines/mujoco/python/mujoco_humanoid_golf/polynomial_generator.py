@@ -158,7 +158,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
         # Left Panel: Controls
         left_panel = QtWidgets.QWidget()
-        left_panel.setFixedWidth(320)  # Slightly wider for better readability
+        left_panel.setFixedWidth(320)
         main_left_layout = QtWidgets.QVBoxLayout(left_panel)
         main_left_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -173,7 +173,26 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         content_layout = QtWidgets.QVBoxLayout(content_widget)
         content_layout.setSpacing(10)
 
-        # Joint Selection
+        self._setup_joint_selection(content_layout)
+        self._setup_scale_controls(content_layout)
+        self._setup_input_method_controls(content_layout)
+        self._setup_action_controls(content_layout)
+        self._setup_result_display(content_layout)
+
+        content_layout.addStretch()
+
+        # Add content to scroll area
+        scroll.setWidget(content_widget)
+        main_left_layout.addWidget(scroll)
+
+        layout.addWidget(left_panel)
+
+        # Right Panel: Plot
+        self.canvas = MplCanvas(self, width=5, height=4, dpi=100)
+        layout.addWidget(self.canvas, stretch=1)
+
+    def _setup_joint_selection(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the target joint selection group."""
         joint_group = QtWidgets.QGroupBox("Target Joint")
         joint_layout = QtWidgets.QVBoxLayout(joint_group)
         self.joint_combo = QtWidgets.QComboBox()
@@ -181,9 +200,10 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.joint_combo.setToolTip("Select the joint to generate the function for")
         self.joint_combo.setAccessibleName("Target Joint Selector")
         joint_layout.addWidget(self.joint_combo)
-        content_layout.addWidget(joint_group)
+        parent_layout.addWidget(joint_group)
 
-        # Plot Settings (Scale)
+    def _setup_scale_controls(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the plot scale settings group."""
         scale_group = QtWidgets.QGroupBox("Plot Scale")
         scale_layout = QtWidgets.QGridLayout(scale_group)
 
@@ -202,9 +222,12 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.apply_scale_btn = QtWidgets.QPushButton("Apply Scale")
         scale_layout.addWidget(self.apply_scale_btn, 2, 0, 1, 3)
 
-        content_layout.addWidget(scale_group)
+        parent_layout.addWidget(scale_group)
 
-        # Input Methods
+    def _setup_input_method_controls(
+        self, parent_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        """Create the input method selection group with mode radio buttons."""
         input_group = QtWidgets.QGroupBox("Input Method")
         input_layout = QtWidgets.QVBoxLayout(input_group)
 
@@ -252,9 +275,10 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         radio_layout.addWidget(self.btn_drag, 1, 0, 1, 2)
         input_layout.addLayout(radio_layout)
 
-        content_layout.addWidget(input_group)
+        parent_layout.addWidget(input_group)
 
-        # Actions
+    def _setup_action_controls(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the fitting and actions group with order selector and buttons."""
         action_group = QtWidgets.QGroupBox("Fitting & Actions")
         action_layout = QtWidgets.QVBoxLayout(action_group)
 
@@ -290,9 +314,10 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
         action_layout.addWidget(self.clear_btn)
         action_layout.addWidget(self.fit_btn)
-        content_layout.addWidget(action_group)
+        parent_layout.addWidget(action_group)
 
-        # Results
+    def _setup_result_display(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the result display group."""
         result_group = QtWidgets.QGroupBox("Result")
         result_layout = QtWidgets.QVBoxLayout(result_group)
         self.result_text = QtWidgets.QTextEdit()
@@ -300,19 +325,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.result_text.setMaximumHeight(100)
         self.result_text.setMinimumHeight(60)
         result_layout.addWidget(self.result_text)
-        content_layout.addWidget(result_group)
-
-        content_layout.addStretch()
-
-        # Add content to scroll area
-        scroll.setWidget(content_widget)
-        main_left_layout.addWidget(scroll)
-
-        layout.addWidget(left_panel)
-
-        # Right Panel: Plot
-        self.canvas = MplCanvas(self, width=5, height=4, dpi=100)
-        layout.addWidget(self.canvas, stretch=1)
+        parent_layout.addWidget(result_group)
 
     def _create_spinbox(
         self, min_val: float, max_val: float, val: float, tooltip: str

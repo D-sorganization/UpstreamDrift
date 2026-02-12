@@ -309,16 +309,18 @@ class GolfURDFGenerator:
         if axis is not None:
             ET.SubElement(joint, "axis", xyz=self._np_to_str(axis))
 
-    def generate(self) -> str:  # noqa: PLR0915
-        """Generate the URDF string."""
+    def _add_pelvis(self) -> None:
+        """Add the pelvis link to the model."""
         p = self.params
-
-        # 1. Pelvis
         pelvis_dims = np.array([0.3, 0.2, 0.2])
         I_pelvis = UnitInertia.SolidBox(pelvis_dims[0], pelvis_dims[1], pelvis_dims[2])
         self.add_link("pelvis", p.spine_mass, I_pelvis, "box", {"size": pelvis_dims})
 
-        # 2. Spine Base (Hip Joint)
+    def _add_spine(self) -> None:
+        """Add spine base, lower spine, upper spine, and torso hub."""
+        p = self.params
+
+        # Spine Base (Hip Joint)
         sb_dims = np.array([0.1, 0.1, 0.1])
         I_sb = UnitInertia.SolidBox(sb_dims[0], sb_dims[1], sb_dims[2])
         self.add_link("spine_base", 1.0, I_sb, "box", {"size": sb_dims})
@@ -326,7 +328,7 @@ class GolfURDFGenerator:
             "hip_yaw", "revolute", "pelvis", "spine_base", RigidTransform(), p.hip_axis
         )
 
-        # 3. Lower Spine
+        # Lower Spine
         ls_dims = np.array([0.2, 0.2, p.pelvis_to_shoulders * 0.5])
         I_ls = UnitInertia.SolidBox(ls_dims[0], ls_dims[1], ls_dims[2])
         self.add_link("spine_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01))
@@ -349,7 +351,7 @@ class GolfURDFGenerator:
             p.spine_universal_axis_2,
         )
 
-        # 4. Upper Spine
+        # Upper Spine
         us_dims = np.array([0.2, 0.2, p.pelvis_to_shoulders * 0.5])
         I_us = UnitInertia.SolidBox(us_dims[0], us_dims[1], us_dims[2])
         us_offset = np.array([0.0, 0.0, p.pelvis_to_shoulders * 0.25])
@@ -390,199 +392,221 @@ class GolfURDFGenerator:
             ),
         )
 
-        # 5. Arms
-        for side in ["left", "right"]:
-            sign = 1.0 if side == "right" else -1.0
+    def _add_arm(self, side: str) -> None:
+        """Add a single arm (scapula, shoulder, upper arm, elbow, forearm, wrist, hand).
 
-            # Scapula
-            scap_offset = np.array([0.0, sign * 0.18, 0.10], dtype=np.float64)  # type: ignore[arg-type]
-            scap_len = p.scapula_rod.length
+        Args:
+            side: 'left' or 'right'.
+        """
+        sign = 1.0 if side == "right" else -1.0
 
-            self.add_link(
-                f"{side}_scapula_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01)
-            )
+        self._add_scapula(side, sign)
+        self._add_shoulder(side)
+        self._add_upper_arm_and_elbow(side)
+        self._add_forearm_and_wrist(side)
 
-            scap_body_offset = np.array([0.0, 0.0, scap_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
-            I_scap = UnitInertia.SolidCylinder(
-                p.scapula_rod.radius,
-                scap_len,
-                np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
-            )
-            self.add_link(
-                f"{side}_scapula_rod",
-                p.scapula_rod.mass,
-                I_scap,
-                "cylinder",
-                {"radius": p.scapula_rod.radius, "length": scap_len},
-                com_offset=scap_body_offset,
-            )
+    def _add_scapula(self, side: str, sign: float) -> None:
+        """Add scapula links and joints for one arm side."""
+        p = self.params
+        scap_offset = np.array([0.0, sign * 0.18, 0.10], dtype=np.float64)  # type: ignore[arg-type]
+        scap_len = p.scapula_rod.length
 
-            self.add_joint(
-                f"{side}_scapula_universal_1",
-                "revolute",
-                "upper_torso_hub",
-                f"{side}_scapula_dummy",
-                RigidTransform(p=scap_offset),  # type: ignore[arg-type]
-                p.scap_axis_1,
-            )
-            self.add_joint(
-                f"{side}_scapula_universal_2",
-                "revolute",
-                f"{side}_scapula_dummy",
-                f"{side}_scapula_rod",
-                RigidTransform(),
-                p.scap_axis_2,
-            )
+        self.add_link(
+            f"{side}_scapula_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01)
+        )
 
-            # Shoulder
-            self.add_link(
-                f"{side}_shoulder_yaw_link",
-                0.1,
-                UnitInertia.SolidSphere(0.05),
-                "sphere",
-                {"radius": 0.05},
-            )
-            self.add_joint(
-                f"{side}_shoulder_yaw",
-                "revolute",
-                f"{side}_scapula_rod",
-                f"{side}_shoulder_yaw_link",
-                RigidTransform(
-                    p=np.array([0.0, 0.0, scap_len], dtype=np.float64)  # type: ignore[arg-type]
-                ),
-                p.shoulder_axes[0],
-            )
+        scap_body_offset = np.array([0.0, 0.0, scap_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
+        I_scap = UnitInertia.SolidCylinder(
+            p.scapula_rod.radius,
+            scap_len,
+            np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
+        )
+        self.add_link(
+            f"{side}_scapula_rod",
+            p.scapula_rod.mass,
+            I_scap,
+            "cylinder",
+            {"radius": p.scapula_rod.radius, "length": scap_len},
+            com_offset=scap_body_offset,
+        )
 
-            self.add_link(
-                f"{side}_shoulder_pitch_link",
-                0.1,
-                UnitInertia.SolidSphere(0.05),
-                "sphere",
-                {"radius": 0.05},
-            )
-            self.add_joint(
-                f"{side}_shoulder_pitch",
-                "revolute",
-                f"{side}_shoulder_yaw_link",
-                f"{side}_shoulder_pitch_link",
-                RigidTransform(),
-                p.shoulder_axes[1],
-            )
+        self.add_joint(
+            f"{side}_scapula_universal_1",
+            "revolute",
+            "upper_torso_hub",
+            f"{side}_scapula_dummy",
+            RigidTransform(p=scap_offset),  # type: ignore[arg-type]
+            p.scap_axis_1,
+        )
+        self.add_joint(
+            f"{side}_scapula_universal_2",
+            "revolute",
+            f"{side}_scapula_dummy",
+            f"{side}_scapula_rod",
+            RigidTransform(),
+            p.scap_axis_2,
+        )
 
-            self.add_link(
-                f"{side}_shoulder_roll_link",
-                0.1,
-                UnitInertia.SolidSphere(0.05),
-                "sphere",
-                {"radius": 0.05},
-            )
-            self.add_joint(
-                f"{side}_shoulder_roll",
-                "revolute",
-                f"{side}_shoulder_pitch_link",
-                f"{side}_shoulder_roll_link",
-                RigidTransform(),
-                p.shoulder_axes[2],
-            )
+    def _add_shoulder(self, side: str) -> None:
+        """Add shoulder gimbal (yaw, pitch, roll) links and joints for one arm side."""
+        p = self.params
+        scap_len = p.scapula_rod.length
 
-            # Upper Arm
-            ua_len = p.upper_arm.length
-            I_ua = UnitInertia.SolidCylinder(
-                p.upper_arm.radius,
-                ua_len,
-                np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
-            )
+        self.add_link(
+            f"{side}_shoulder_yaw_link",
+            0.1,
+            UnitInertia.SolidSphere(0.05),
+            "sphere",
+            {"radius": 0.05},
+        )
+        self.add_joint(
+            f"{side}_shoulder_yaw",
+            "revolute",
+            f"{side}_scapula_rod",
+            f"{side}_shoulder_yaw_link",
+            RigidTransform(
+                p=np.array([0.0, 0.0, scap_len], dtype=np.float64)  # type: ignore[arg-type]
+            ),
+            p.shoulder_axes[0],
+        )
 
-            self.add_link(
-                f"{side}_upper_arm",
-                p.upper_arm.mass,
-                I_ua,
-                "cylinder",
-                {"radius": p.upper_arm.radius, "length": ua_len},
-            )
+        self.add_link(
+            f"{side}_shoulder_pitch_link",
+            0.1,
+            UnitInertia.SolidSphere(0.05),
+            "sphere",
+            {"radius": 0.05},
+        )
+        self.add_joint(
+            f"{side}_shoulder_pitch",
+            "revolute",
+            f"{side}_shoulder_yaw_link",
+            f"{side}_shoulder_pitch_link",
+            RigidTransform(),
+            p.shoulder_axes[1],
+        )
 
-            self.add_joint(
-                f"{side}_upper_arm_weld",
-                "fixed",
-                f"{side}_shoulder_roll_link",
-                f"{side}_upper_arm",
-                RigidTransform(
-                    p=np.array([0.0, 0.0, -ua_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
-                ),
-            )
+        self.add_link(
+            f"{side}_shoulder_roll_link",
+            0.1,
+            UnitInertia.SolidSphere(0.05),
+            "sphere",
+            {"radius": 0.05},
+        )
+        self.add_joint(
+            f"{side}_shoulder_roll",
+            "revolute",
+            f"{side}_shoulder_pitch_link",
+            f"{side}_shoulder_roll_link",
+            RigidTransform(),
+            p.shoulder_axes[2],
+        )
 
-            # Elbow
-            # At -L/2 relative to Body (Bottom).
-            self.add_joint(
-                f"{side}_elbow",
-                "revolute",
-                f"{side}_upper_arm",
-                f"{side}_forearm",
-                RigidTransform(
-                    p=np.array([0.0, 0.0, -ua_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
-                ),
-                p.elbow_axis,
-            )
+    def _add_upper_arm_and_elbow(self, side: str) -> None:
+        """Add upper arm link, weld, and elbow joint for one arm side."""
+        p = self.params
+        ua_len = p.upper_arm.length
+        I_ua = UnitInertia.SolidCylinder(
+            p.upper_arm.radius,
+            ua_len,
+            np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
+        )
 
-            # Forearm
-            fa_len = p.forearm.length
-            I_fa = UnitInertia.SolidCylinder(
-                p.forearm.radius,
-                fa_len,
-                np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
-            )
-            fa_offset = np.array([0.0, 0.0, fa_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
+        self.add_link(
+            f"{side}_upper_arm",
+            p.upper_arm.mass,
+            I_ua,
+            "cylinder",
+            {"radius": p.upper_arm.radius, "length": ua_len},
+        )
 
-            self.add_link(
-                f"{side}_forearm",
-                p.forearm.mass,
-                I_fa,
-                "cylinder",
-                {"radius": p.forearm.radius, "length": fa_len},
-                com_offset=fa_offset,
-            )
+        self.add_joint(
+            f"{side}_upper_arm_weld",
+            "fixed",
+            f"{side}_shoulder_roll_link",
+            f"{side}_upper_arm",
+            RigidTransform(
+                p=np.array([0.0, 0.0, -ua_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
+            ),
+        )
 
-            # Wrist
-            self.add_link(
-                f"{side}_wrist_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01)
-            )
+        # Elbow - At -L/2 relative to Body (Bottom).
+        self.add_joint(
+            f"{side}_elbow",
+            "revolute",
+            f"{side}_upper_arm",
+            f"{side}_forearm",
+            RigidTransform(
+                p=np.array([0.0, 0.0, -ua_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
+            ),
+            p.elbow_axis,
+        )
 
-            hand_len = p.hand.length
-            I_hand = UnitInertia.SolidCylinder(
-                p.hand.radius,
-                hand_len,
-                np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
-            )
-            hand_offset = np.array([0.0, 0.0, hand_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
-            self.add_link(
-                f"{side}_hand",
-                p.hand.mass,
-                I_hand,
-                "cylinder",
-                {"radius": p.hand.radius, "length": hand_len},
-                com_offset=hand_offset,
-            )
+    def _add_forearm_and_wrist(self, side: str) -> None:
+        """Add forearm, wrist dummy, and hand links/joints for one arm side."""
+        p = self.params
 
-            self.add_joint(
-                f"{side}_wrist_universal_1",
-                "revolute",
-                f"{side}_forearm",
-                f"{side}_wrist_dummy",
-                RigidTransform(
-                    p=np.array([0.0, 0.0, fa_len], dtype=np.float64)  # type: ignore[arg-type]
-                ),
-                p.wrist_axis_1,
-            )
-            self.add_joint(
-                f"{side}_wrist_universal_2",
-                "revolute",
-                f"{side}_wrist_dummy",
-                f"{side}_hand",
-                RigidTransform(),
-                p.wrist_axis_2,
-            )
+        # Forearm
+        fa_len = p.forearm.length
+        I_fa = UnitInertia.SolidCylinder(
+            p.forearm.radius,
+            fa_len,
+            np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
+        )
+        fa_offset = np.array([0.0, 0.0, fa_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
 
-        # 6. Club (Attached to Left Hand)
+        self.add_link(
+            f"{side}_forearm",
+            p.forearm.mass,
+            I_fa,
+            "cylinder",
+            {"radius": p.forearm.radius, "length": fa_len},
+            com_offset=fa_offset,
+        )
+
+        # Wrist
+        self.add_link(
+            f"{side}_wrist_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01)
+        )
+
+        hand_len = p.hand.length
+        I_hand = UnitInertia.SolidCylinder(
+            p.hand.radius,
+            hand_len,
+            np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
+        )
+        hand_offset = np.array([0.0, 0.0, hand_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
+        self.add_link(
+            f"{side}_hand",
+            p.hand.mass,
+            I_hand,
+            "cylinder",
+            {"radius": p.hand.radius, "length": hand_len},
+            com_offset=hand_offset,
+        )
+
+        self.add_joint(
+            f"{side}_wrist_universal_1",
+            "revolute",
+            f"{side}_forearm",
+            f"{side}_wrist_dummy",
+            RigidTransform(
+                p=np.array([0.0, 0.0, fa_len], dtype=np.float64)  # type: ignore[arg-type]
+            ),
+            p.wrist_axis_1,
+        )
+        self.add_joint(
+            f"{side}_wrist_universal_2",
+            "revolute",
+            f"{side}_wrist_dummy",
+            f"{side}_hand",
+            RigidTransform(),
+            p.wrist_axis_2,
+        )
+
+    def _add_club(self) -> None:
+        """Add the club link and attach it to the left hand."""
+        p = self.params
         c_len = p.club.length
         I_club = UnitInertia.SolidCylinder(
             p.club.radius,
@@ -611,6 +635,21 @@ class GolfURDFGenerator:
                 p=np.array([0.0, 0.0, p.hand.length], dtype=np.float64)  # type: ignore[arg-type]
             ),
         )
+
+    def generate(self) -> str:
+        """Generate the URDF string."""
+        # 1. Pelvis
+        self._add_pelvis()
+
+        # 2-4. Spine (base, lower, upper) and torso hub
+        self._add_spine()
+
+        # 5. Arms (left and right)
+        for side in ["left", "right"]:
+            self._add_arm(side)
+
+        # 6. Club (attached to left hand)
+        self._add_club()
 
         xml_str = ET.tostring(self.root, encoding="utf-8")
         return str(minidom.parseString(xml_str).toprettyxml(indent="  "))  # noqa: S318

@@ -80,18 +80,8 @@ def _resolve_ui_dist_path() -> Path:
     return Path(__file__).parent.parent.parent / "ui" / "dist"
 
 
-def create_local_app() -> FastAPI:
-    """Create FastAPI app configured for local use."""
-
-    app = FastAPI(
-        title="Golf Modeling Suite",
-        description="Local physics simulation for golf biomechanics",
-        version="2.0.0",
-        docs_url="/api/docs",  # Swagger UI available locally
-        redoc_url="/api/redoc",
-    )
-
-    # CORS: Allow local origins only
+def _configure_cors(app: FastAPI) -> None:
+    """Configure CORS middleware for local origins."""
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
@@ -109,16 +99,9 @@ def create_local_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Initialize services (lazy loading)
-    # Using the existing EngineManager we saw in src.shared.python
-    engine_manager = EngineManager()
 
-    # Store in app state for dependency injection
-    app.state.engine_manager = engine_manager
-    app.state.chat_service = ChatService()
-
-    # Register routes (no auth required in local mode)
-    # Note: Routers already define their own paths (e.g., /engines), so prefix is just /api
+def _register_api_routers(app: FastAPI) -> None:
+    """Register all API route routers on the app."""
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
     app.include_router(simulation.router, prefix="/api", tags=["Simulation"])
     app.include_router(
@@ -128,12 +111,15 @@ def create_local_app() -> FastAPI:
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
 
-    # Store engine manager for diagnostics
-    _startup_metrics["engines_loaded"] = [
-        e.value for e in engine_manager.get_available_engines()
-    ]
 
-    # Launcher manifest endpoint - serves tile configuration for React frontend
+def _register_launcher_endpoints(app: FastAPI) -> None:
+    """Register launcher manifest, logo, launch, process, and stop endpoints."""
+    from src.api.services.launcher_service import LauncherService
+
+    _repo_root = Path(__file__).parent.parent.parent
+    _launcher_service = LauncherService(repo_root=_repo_root)
+    app.state.process_manager = _launcher_service.process_manager
+
     @app.get("/api/launcher/manifest")
     async def get_launcher_manifest() -> dict[str, Any]:
         """Return the launcher manifest (tile configuration) for the web UI."""
@@ -147,7 +133,6 @@ def create_local_app() -> FastAPI:
                 return json.load(f)
         return {"version": "1.0.0", "tiles": []}
 
-    # Launcher logos endpoint - serves tile logo images for React frontend
     @app.get("/api/launcher/logos/{logo_name:path}")
     async def get_launcher_logo(logo_name: str) -> Any:
         """Serve logo images from assets/logos directory."""
@@ -165,16 +150,6 @@ def create_local_app() -> FastAPI:
         return JSONResponse(
             status_code=404, content={"detail": f"Logo not found: {logo_name}"}
         )
-
-    # ── Launcher: launch engines/tools as subprocesses ────────────────
-    # Initialize launcher service (lazy-loads ProcessManager and
-    # ModelHandlerRegistry from src.launchers on first use, breaking the
-    # api -> launchers module-level dependency).
-    from src.api.services.launcher_service import LauncherService
-
-    _repo_root = Path(__file__).parent.parent.parent
-    _launcher_service = LauncherService(repo_root=_repo_root)
-    app.state.process_manager = _launcher_service.process_manager
 
     @app.post("/api/launcher/launch/{tile_id}")
     async def launch_tile(tile_id: str) -> dict[str, Any]:
@@ -280,7 +255,12 @@ def create_local_app() -> FastAPI:
             )
         return {"status": "stopped", "name": name}
 
-    # Health check
+
+def _register_health_and_diagnostic_endpoints(
+    app: FastAPI, engine_manager: EngineManager
+) -> None:
+    """Register health check and diagnostic endpoints."""
+
     @app.get("/api/health")
     async def health_check() -> dict[str, Any]:
         return {
@@ -291,7 +271,6 @@ def create_local_app() -> FastAPI:
             "ui_available": _startup_metrics.get("static_files_mounted", False),
         }
 
-    # Diagnostic endpoints
     @app.get("/api/diagnostics")
     async def get_diagnostics() -> dict[str, Any]:
         """Return comprehensive diagnostic information as JSON."""
@@ -346,7 +325,9 @@ def create_local_app() -> FastAPI:
 
         return details
 
-    # Serve static UI files in production
+
+def _mount_static_files_and_spa(app: FastAPI) -> None:
+    """Mount static UI files and SPA catch-all, or an error page if UI is not built."""
     ui_path = _resolve_ui_dist_path()
     _startup_metrics["ui_path"] = str(ui_path)
 
@@ -492,6 +473,45 @@ def create_local_app() -> FastAPI:
             </html>
             """
             return HTMLResponse(content=error_html, status_code=503)
+
+
+def create_local_app() -> FastAPI:
+    """Create FastAPI app configured for local use."""
+
+    app = FastAPI(
+        title="Golf Modeling Suite",
+        description="Local physics simulation for golf biomechanics",
+        version="2.0.0",
+        docs_url="/api/docs",  # Swagger UI available locally
+        redoc_url="/api/redoc",
+    )
+
+    # CORS: Allow local origins only
+    _configure_cors(app)
+
+    # Initialize services (lazy loading)
+    engine_manager = EngineManager()
+
+    # Store in app state for dependency injection
+    app.state.engine_manager = engine_manager
+    app.state.chat_service = ChatService()
+
+    # Register routes (no auth required in local mode)
+    _register_api_routers(app)
+
+    # Store engine manager for diagnostics
+    _startup_metrics["engines_loaded"] = [
+        e.value for e in engine_manager.get_available_engines()
+    ]
+
+    # Launcher endpoints (manifest, logos, launch, processes, stop)
+    _register_launcher_endpoints(app)
+
+    # Health check and diagnostic endpoints
+    _register_health_and_diagnostic_endpoints(app, engine_manager)
+
+    # Serve static UI files in production
+    _mount_static_files_and_spa(app)
 
     _startup_metrics["startup_time"] = time.strftime(
         "%Y-%m-%dT%H:%M:%SZ", time.gmtime()

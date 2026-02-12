@@ -398,72 +398,95 @@ class GripModellingTab(QtWidgets.QWidget):
         """Read scene file and inject absolute paths and cylinder object."""
         xml_content = scene_path.read_text("utf-8")
 
-        # 1. Create movable versions of hand files
-        # We need to inject <freejoint/> into the hand XMLs so they can be moved
-        # by the mocap bodies we will add.
+        # 1. Inline hand XML includes and extract worldbodies
+        xml_content = self._inline_hand_includes(
+            xml_content, scene_path, folder_path, is_both
+        )
 
-        # Helper function
-        def get_hand_content(filename: str, body_name_pattern: str) -> str:
-            full_path = folder_path / filename
-            if not full_path.exists():
-                return ""
+        # 2. Ensure offscreen framebuffer is large enough for renderer
+        xml_content = self._ensure_offscreen_visual(xml_content)
 
-            try:
-                content = full_path.read_text("utf-8")
+        # 3. Inject Cylinder Object (only if not present)
+        xml_content = self._inject_cylinder_object(xml_content)
 
-                # Check if freejoint already exists
-                if "freejoint" not in content:
-                    pattern = f'(<body[^>]*name="{body_name_pattern}"[^>]*>)'
-                    match = re.search(pattern, content)
-                    if match:
-                        logger.info("Injecting freejoint into %s", filename)
-                        insertion = match.group(1) + "\n      <freejoint/>"
-                        content = content.replace(match.group(1), insertion)
-                    else:
-                        logger.warning(
-                            "Could not find body '%s' in %s to inject freejoint",
-                            body_name_pattern,
-                            filename,
-                        )
+        # 4. Inject Mocap Bodies and Welds for Hands
+        xml_content = self._inject_mocap_bodies(xml_content, scene_path, is_both)
 
-                # Strip <mujoco> tags to allow embedding
-                content = re.sub(r"<mujoco[^>]*>", "", content)
-                content = content.replace("</mujoco>", "")
+        logger.info(
+            "Successfully prepared scene XML with movable hands and mocap bodies."
+        )
+        return xml_content
 
-                # When merging both hands, prefix default class names to avoid
-                # collisions
-                if is_both:
-                    hand_prefix = "right" if "right" in filename.lower() else "left"
-                    # Find all default class names
-                    class_names = re.findall(r'<default class="([^"]+)">', content)
-                    for class_name in set(class_names):
-                        new_name = f"{hand_prefix}_{class_name}"
-                        # Update definition
-                        content = content.replace(
-                            f'class="{class_name}"', f'class="{new_name}"'
-                        )
-                        # We don't need to update references inside the hand file
-                        # because they are typically local to the <default> block
-                        # or used in geoms/joints within the same subtree.
-                        # However, to be safe, we replace all class="..." strings
-                        # (this is simple but effective for these hand models).
+    def _get_hand_content(
+        self,
+        folder_path: Path,
+        filename: str,
+        body_name_pattern: str,
+        is_both: bool,
+    ) -> str:
+        """Read a hand XML file, inject freejoint, and strip mujoco tags."""
+        full_path = folder_path / filename
+        if not full_path.exists():
+            return ""
 
-                return content
-            except (RuntimeError, ValueError, OSError):
-                logger.exception("Failed to process hand file %s", filename)
-                return ""  # Return empty only on catastrophic failure
+        try:
+            content = full_path.read_text("utf-8")
 
-        extracted_bodies = []
+            # Check if freejoint already exists
+            if "freejoint" not in content:
+                pattern = f'(<body[^>]*name="{body_name_pattern}"[^>]*>)'
+                match = re.search(pattern, content)
+                if match:
+                    logger.info("Injecting freejoint into %s", filename)
+                    insertion = match.group(1) + "\n      <freejoint/>"
+                    content = content.replace(match.group(1), insertion)
+                else:
+                    logger.warning(
+                        "Could not find body '%s' in %s to inject freejoint",
+                        body_name_pattern,
+                        filename,
+                    )
+
+            # Strip <mujoco> tags to allow embedding
+            content = re.sub(r"<mujoco[^>]*>", "", content)
+            content = content.replace("</mujoco>", "")
+
+            # When merging both hands, prefix default class names to avoid
+            # collisions
+            if is_both:
+                hand_prefix = "right" if "right" in filename.lower() else "left"
+                # Find all default class names
+                class_names = re.findall(r'<default class="([^"]+)">', content)
+                for class_name in set(class_names):
+                    new_name = f"{hand_prefix}_{class_name}"
+                    content = content.replace(
+                        f'class="{class_name}"', f'class="{new_name}"'
+                    )
+
+            return content
+        except (RuntimeError, ValueError, OSError):
+            logger.exception("Failed to process hand file %s", filename)
+            return ""  # Return empty only on catastrophic failure
+
+    def _inline_hand_includes(
+        self,
+        xml_content: str,
+        scene_path: Path,
+        folder_path: Path,
+        is_both: bool,
+    ) -> str:
+        """Inline hand XML includes and inject extracted bodies into worldbody."""
+        extracted_bodies: list[str] = []
 
         def extract_worldbody_content(filename: str, body_pattern: str) -> str:
-            content = get_hand_content(filename, body_pattern)
-            # Extract worldbody content
+            content = self._get_hand_content(
+                folder_path, filename, body_pattern, is_both
+            )
             bodies_match = re.search(
                 r"<worldbody[^>]*>(.*?)</worldbody>", content, re.DOTALL
             )
             if bodies_match:
                 extracted_bodies.append(bodies_match.group(1))
-                # Remove worldbody from content, leaving defaults/assets
                 content = re.sub(
                     r"<worldbody[^>]*>.*?</worldbody>", "", content, flags=re.DOTALL
                 )
@@ -506,18 +529,20 @@ class GripModellingTab(QtWidgets.QWidget):
         # Inject extracted bodies into the scene's worldbody
         if extracted_bodies:
             bodies_str = "\n".join(extracted_bodies)
-            # Insert at the beginning of worldbody
             xml_content = re.sub(
                 r"(<worldbody[^>]*>)", r"\1\n" + bodies_str, xml_content, count=1
             )
 
-        # Ensure offscreen framebuffer is large enough for renderer
+        return xml_content
+
+    @staticmethod
+    def _ensure_offscreen_visual(xml_content: str) -> str:
+        """Ensure the XML has offscreen framebuffer settings for rendering."""
         offscreen_global = '<global offwidth="1920" offheight="1080"/>'
         if "<visual>" in xml_content:
             if "<global" in xml_content:
-                # Update existing global: strip slash, remove old attrs, add new ones
+
                 def update_global_tag(m: re.Match) -> str:
-                    # m.group(1) usually contains 'azimuth="..." /'
                     attrs = m.group(1).replace("/", "").strip()
                     attrs = re.sub(r'offwidth="[^"]*"', "", attrs)
                     attrs = re.sub(r'offheight="[^"]*"', "", attrs)
@@ -527,20 +552,20 @@ class GripModellingTab(QtWidgets.QWidget):
                     r"<global([^>]*)>", update_global_tag, xml_content, count=1
                 )
             else:
-                # Insert global into visual
                 xml_content = xml_content.replace(
                     "<visual>",
                     f"<visual>\n    {offscreen_global}",
                 )
         else:
-            # Add new visual section
             xml_content = xml_content.replace(
                 "</mujoco>",
                 f"<visual>\n  {offscreen_global}\n</visual>\n</mujoco>",
             )
+        return xml_content
 
-        # 2. Inject Cylinder Object (only if not present)
-        # Check for both the object name and unique geometry characteristics
+    @staticmethod
+    def _inject_cylinder_object(xml_content: str) -> str:
+        """Inject a cylinder grip object into the scene if not present."""
         if (
             "club_handle" not in xml_content
             and 'name="club_handle"' not in xml_content
@@ -553,7 +578,6 @@ class GripModellingTab(QtWidgets.QWidget):
             mass="0.3" condim="4" friction="1 0.5 0.5"/>
     </body>
         """
-            # Insert before the last </worldbody>
             last_worldbody_end = xml_content.rfind("</worldbody>")
             if last_worldbody_end != -1:
                 xml_content = (
@@ -561,9 +585,11 @@ class GripModellingTab(QtWidgets.QWidget):
                     + f"{cylinder_body}\n  "
                     + xml_content[last_worldbody_end:]
                 )
+        return xml_content
 
-        # 3. Inject Mocap Bodies and Welds for Hands
-        # This allows moving the hands "around in space" using the mocap bodies
+    @staticmethod
+    def _inject_mocap_bodies(xml_content: str, scene_path: Path, is_both: bool) -> str:
+        """Inject mocap bodies and weld constraints for hand positioning."""
         mocap_xml = ""
         equality_xml = "<equality>\n"
 
@@ -611,9 +637,6 @@ class GripModellingTab(QtWidgets.QWidget):
 
         # Insert Equality section before </mujoco> (or merge if exists)
         if "</equality>" in xml_content:
-            # If equality section exists, insert inside
-            # (Simplified check, might need robust parsing if complex)
-            # If equality section exists, insert inside
             equality_content = (
                 equality_xml.strip()
                 .replace("<equality>", "")
@@ -622,13 +645,9 @@ class GripModellingTab(QtWidgets.QWidget):
             xml_content = xml_content.replace(
                 "</equality>", f"{equality_content}\n  </equality>"
             )
-
         else:
             xml_content = xml_content.replace("</mujoco>", f"{equality_xml}\n</mujoco>")
 
-        logger.info(
-            "Successfully prepared scene XML with movable hands and mocap bodies."
-        )
         return xml_content
 
     def rebuild_joint_controls(self) -> None:
@@ -653,9 +672,7 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(
-        self, i: int, model: mujoco.MjModel
-    ) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return

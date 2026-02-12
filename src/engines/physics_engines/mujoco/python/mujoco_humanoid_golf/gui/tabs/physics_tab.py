@@ -60,10 +60,23 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _init_model_configs(self) -> None:
         """Initialize the list of available physics models."""
-        # Try to load the CMU Humanoid from dm_control (preferred default)
-        humanoid_cm_xml = load_humanoid_cm_xml()
+        self.model_configs = self._build_pendulum_and_golf_configs()
+        self._add_humanoid_cm_config()
+        self._add_musculoskeletal_configs()
+        self._add_linkage_mechanism_configs()
 
-        self.model_configs = [
+        # Add shared URDF models
+        self._load_shared_urdfs()
+
+        # Connect to sim_widget loading signals
+        if hasattr(self.sim_widget, "loading_started"):
+            self.sim_widget.loading_started.connect(self._on_loading_started)
+            self.sim_widget.loading_finished.connect(self._on_loading_finished)
+
+    @staticmethod
+    def _build_pendulum_and_golf_configs() -> list[dict]:
+        """Build configs for pendulum and golf swing models."""
+        return [
             {
                 "name": "chaotic_pendulum",
                 "xml": CHAOTIC_PENDULUM_XML,
@@ -153,7 +166,10 @@ class PhysicsTab(QtWidgets.QWidget):
             },
         ]
 
-        # Insert humanoid CM (CMU) model if dm_control is available
+    def _add_humanoid_cm_config(self) -> None:
+        """Add CMU Humanoid model if dm_control is available."""
+        humanoid_cm_xml = load_humanoid_cm_xml()
+
         if humanoid_cm_xml is not None:
             self.model_configs.append(
                 {
@@ -172,7 +188,8 @@ class PhysicsTab(QtWidgets.QWidget):
                 "dm_control not available; defaulting to advanced_biomech model"
             )
 
-        # Continue adding remaining models
+    def _add_musculoskeletal_configs(self) -> None:
+        """Add MyoSuite musculoskeletal model configs."""
         self.model_configs.extend(
             [
                 {
@@ -229,7 +246,8 @@ class PhysicsTab(QtWidgets.QWidget):
             ]
         )
 
-        # Add linkage mechanisms
+    def _add_linkage_mechanism_configs(self) -> None:
+        """Add linkage mechanism configs from the catalog."""
         for mech_name, mech_config in LINKAGE_CATALOG.items():
             self.model_configs.append(
                 {
@@ -244,14 +262,6 @@ class PhysicsTab(QtWidgets.QWidget):
                     "description": mech_config.get("description", ""),
                 }
             )
-
-        # Add shared URDF models
-        self._load_shared_urdfs()
-
-        # Connect to sim_widget loading signals
-        if hasattr(self.sim_widget, "loading_started"):
-            self.sim_widget.loading_started.connect(self._on_loading_started)
-            self.sim_widget.loading_finished.connect(self._on_loading_finished)
 
     def _load_shared_urdfs(self) -> None:
         """Load URDF models from shared/urdf directory."""

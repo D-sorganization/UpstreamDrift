@@ -556,23 +556,8 @@ def cmd_inertia(args: argparse.Namespace) -> int:
     return 0
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Create the argument parser."""
-    parser = argparse.ArgumentParser(
-        prog="model-gen",
-        description="URDF Model Generation and Manipulation Tools",
-    )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose output"
-    )
-    parser.add_argument(
-        "-q", "--quiet", action="store_true", help="Suppress non-error output"
-    )
-    parser.add_argument("--version", action="version", version="model-gen 1.0.0")
-
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
-
-    # Generate command
+def _add_generate_subparser(subparsers: argparse._SubParsersAction) -> None:
+    """Add the 'generate' subcommand parser."""
     gen_parser = subparsers.add_parser(
         "generate", aliases=["gen"], help="Generate URDF from parameters"
     )
@@ -586,7 +571,9 @@ def create_parser() -> argparse.ArgumentParser:
     )
     gen_parser.set_defaults(func=cmd_generate)
 
-    # Convert command
+
+def _add_convert_subparser(subparsers: argparse._SubParsersAction) -> None:
+    """Add the 'convert' subcommand parser."""
     conv_parser = subparsers.add_parser(
         "convert", aliases=["conv"], help="Convert between model formats"
     )
@@ -609,7 +596,9 @@ def create_parser() -> argparse.ArgumentParser:
     conv_parser.add_argument("-n", "--name", help="Override robot name")
     conv_parser.set_defaults(func=cmd_convert)
 
-    # Validate command
+
+def _add_validate_subparser(subparsers: argparse._SubParsersAction) -> None:
+    """Add the 'validate' subcommand parser."""
     val_parser = subparsers.add_parser(
         "validate", aliases=["val"], help="Validate URDF file"
     )
@@ -623,7 +612,9 @@ def create_parser() -> argparse.ArgumentParser:
     )
     val_parser.set_defaults(func=cmd_validate)
 
-    # Diff command
+
+def _add_diff_and_info_subparsers(subparsers: argparse._SubParsersAction) -> None:
+    """Add the 'diff' and 'info' subcommand parsers."""
     diff_parser = subparsers.add_parser("diff", help="Compare two URDF files")
     diff_parser.add_argument("file_a", help="First file")
     diff_parser.add_argument("file_b", help="Second file")
@@ -638,13 +629,14 @@ def create_parser() -> argparse.ArgumentParser:
     )
     diff_parser.set_defaults(func=cmd_diff)
 
-    # Info command
     info_parser = subparsers.add_parser("info", help="Show model information")
     info_parser.add_argument("input", help="URDF file")
     info_parser.add_argument("--json", action="store_true", help="Output as JSON")
     info_parser.set_defaults(func=cmd_info)
 
-    # Library commands
+
+def _add_library_subparser(subparsers: argparse._SubParsersAction) -> None:
+    """Add the 'library' subcommand parser with its sub-subcommands."""
     lib_parser = subparsers.add_parser(
         "library", aliases=["lib"], help="Model library operations"
     )
@@ -677,7 +669,9 @@ def create_parser() -> argparse.ArgumentParser:
     )
     lib_download.set_defaults(func=cmd_library_download)
 
-    # Compose command
+
+def _add_compose_and_inertia_subparsers(subparsers: argparse._SubParsersAction) -> None:
+    """Add the 'compose' and 'inertia' subcommand parsers."""
     compose_parser = subparsers.add_parser(
         "compose", help="Compose model from multiple sources"
     )
@@ -698,7 +692,6 @@ def create_parser() -> argparse.ArgumentParser:
     )
     compose_parser.set_defaults(func=cmd_edit_compose)
 
-    # Inertia calculator
     inertia_parser = subparsers.add_parser(
         "inertia", help="Calculate inertia for primitive shapes"
     )
@@ -716,6 +709,30 @@ def create_parser() -> argparse.ArgumentParser:
     )
     inertia_parser.add_argument("--json", action="store_true", help="Output as JSON")
     inertia_parser.set_defaults(func=cmd_inertia)
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create the argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="model-gen",
+        description="URDF Model Generation and Manipulation Tools",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose output"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress non-error output"
+    )
+    parser.add_argument("--version", action="version", version="model-gen 1.0.0")
+
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    _add_generate_subparser(subparsers)
+    _add_convert_subparser(subparsers)
+    _add_validate_subparser(subparsers)
+    _add_diff_and_info_subparsers(subparsers)
+    _add_library_subparser(subparsers)
+    _add_compose_and_inertia_subparsers(subparsers)
 
     return parser
 

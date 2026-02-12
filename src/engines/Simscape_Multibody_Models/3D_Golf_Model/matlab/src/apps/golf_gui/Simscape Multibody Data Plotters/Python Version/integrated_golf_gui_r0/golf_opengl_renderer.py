@@ -552,26 +552,17 @@ class OpenGLRenderer:
         except (PermissionError, OSError) as e:
             logger.error("[WARN] Ground render error: %s", e)
 
-    def _render_body_segments(
+    def _set_common_uniforms(
         self,
-        frame_data,
-        render_config,
+        program: mgl.Program,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
-    ) -> None:
-        """Render all body segments"""
-        if not self.geometry_manager:
-            return
+    ) -> bool:
+        """Set common lighting and view uniforms on a shader program.
 
-        if "simple" not in self.geometry_manager.programs:
-            return
-
-        program = self.geometry_manager.programs["simple"]
-        if program is None:
-            return
-
-        # Set common uniforms safely using correct moderngl 5.x API
+        Returns True on success, False on failure.
+        """
         try:
             program["view"].write(view_matrix.astype(np.float32).tobytes())
             program["projection"].write(proj_matrix.astype(np.float32).tobytes())
@@ -582,13 +573,18 @@ class OpenGLRenderer:
                 np.array([1.0, 1.0, 1.0], dtype=np.float32).tobytes()
             )
             program["viewPosition"].write(view_position.astype(np.float32).tobytes())
+            return True
         except (PermissionError, OSError) as e:
-            logger.error("[WARN] Body segments uniform error: %s", e)
-            return
+            logger.error("[WARN] Uniform error: %s", e)
+            return False
 
-        # Define body segments with their properties
-        segments = [
-            # (name, start_point, end_point, radius, color, is_skin)
+    @staticmethod
+    def _build_body_segment_definitions(frame_data):
+        """Build the list of body segment rendering definitions.
+
+        Returns a list of (name, start_point, end_point, radius, color, is_skin) tuples.
+        """
+        return [
             (
                 "left_forearm",
                 frame_data.left_wrist,
@@ -638,6 +634,32 @@ class OpenGLRenderer:
                 False,
             ),
         ]
+
+    def _render_body_segments(
+        self,
+        frame_data,
+        render_config,
+        view_matrix: np.ndarray,
+        proj_matrix: np.ndarray,
+        view_position: np.ndarray,
+    ) -> None:
+        """Render all body segments"""
+        if not self.geometry_manager:
+            return
+
+        if "simple" not in self.geometry_manager.programs:
+            return
+
+        program = self.geometry_manager.programs["simple"]
+        if program is None:
+            return
+
+        if not self._set_common_uniforms(
+            program, view_matrix, proj_matrix, view_position
+        ):
+            return
+
+        segments = self._build_body_segment_definitions(frame_data)
 
         for segment_name, start_pos, end_pos, radius, color, _is_skin in segments:
             if not render_config.show_body_segments.get(segment_name, True):
@@ -787,6 +809,58 @@ class OpenGLRenderer:
         except (PermissionError, OSError) as e:
             logger.error("[WARN] Sphere render error: %s", e)
 
+    @staticmethod
+    def _compute_club_face_normal(frame_data) -> np.ndarray:
+        """Compute the club face normal vector from shaft direction.
+
+        Returns a unit vector perpendicular to the shaft direction.
+        """
+        shaft_direction = frame_data.clubhead - frame_data.butt
+        shaft_direction = shaft_direction / np.linalg.norm(shaft_direction)
+
+        # Face normal points perpendicular to shaft
+        # (this is simplified - real clubs have loft)
+        face_normal = np.cross(
+            shaft_direction, np.array([0, 1, 0])
+        )  # Cross with up vector
+        if np.linalg.norm(face_normal) < 1e-6:
+            face_normal = np.cross(shaft_direction, np.array([1, 0, 0]))  # Fallback
+        face_normal = face_normal / np.linalg.norm(face_normal)
+
+        return face_normal
+
+    def _render_club_face_normal(self, frame_data, face_normal, program) -> None:
+        """Render the club face normal vector arrow."""
+        normal_length = 0.1  # 10cm normal vector
+        normal_end = frame_data.clubhead + face_normal * normal_length
+        normal_color = [1.0, 0.0, 0.0]  # Red for face normal
+
+        self._render_cylinder_between_points(
+            "face_normal",
+            frame_data.clubhead,
+            normal_end,
+            0.002,
+            normal_color,
+            0.8,
+            program,
+        )
+
+        # Add arrowhead to normal vector
+        self._render_sphere_at_point(
+            "normal_arrow", normal_end, 0.005, normal_color, 0.8, program
+        )
+
+    def _render_club_ball(self, frame_data, face_normal, program) -> None:
+        """Render the golf ball positioned for center strike."""
+        ball_offset = face_normal * 0.05  # 5cm in front of face
+        ball_position = frame_data.clubhead + ball_offset
+        ball_color = [1.0, 1.0, 1.0]  # White ball
+        ball_radius = 0.02135  # Standard golf ball diameter (42.67mm)
+
+        self._render_sphere_at_point(
+            "ball", ball_position, ball_radius, ball_color, 1.0, program
+        )
+
     def _render_club(
         self,
         frame_data,
@@ -806,19 +880,9 @@ class OpenGLRenderer:
         if program is None:
             return
 
-        # Set common uniforms safely using correct moderngl 5.x API
-        try:
-            program["view"].write(view_matrix.astype(np.float32).tobytes())
-            program["projection"].write(proj_matrix.astype(np.float32).tobytes())
-            program["lightPosition"].write(
-                np.array([2.0, 4.0, 1.0], dtype=np.float32).tobytes()
-            )
-            program["lightColor"].write(
-                np.array([1.0, 1.0, 1.0], dtype=np.float32).tobytes()
-            )
-            program["viewPosition"].write(view_position.astype(np.float32).tobytes())
-        except (PermissionError, OSError) as e:
-            logger.error("[WARN] Club uniform error: %s", e)
+        if not self._set_common_uniforms(
+            program, view_matrix, proj_matrix, view_position
+        ):
             return
 
         # Render shaft with realistic proportions
@@ -835,24 +899,8 @@ class OpenGLRenderer:
             program,
         )
 
-        # Render clubhead with more realistic geometry
+        # Render clubhead
         clubhead_color = [0.9, 0.9, 0.95]  # Polished steel
-
-        # Calculate club face normal (perpendicular to shaft direction)
-        shaft_direction = frame_data.clubhead - frame_data.butt
-        shaft_direction = shaft_direction / np.linalg.norm(shaft_direction)
-
-        # Face normal points perpendicular to shaft
-        # (this is simplified - real clubs have loft)
-        # For now, assume face points in the direction of swing (perpendicular to shaft)
-        face_normal = np.cross(
-            shaft_direction, np.array([0, 1, 0])
-        )  # Cross with up vector
-        if np.linalg.norm(face_normal) < 1e-6:
-            face_normal = np.cross(shaft_direction, np.array([1, 0, 0]))  # Fallback
-        face_normal = face_normal / np.linalg.norm(face_normal)
-
-        # Render clubhead as an elongated ellipsoid (more realistic than sphere)
         clubhead_radius = 0.02  # Smaller, more realistic head size
 
         self._render_sphere_at_point(
@@ -864,41 +912,18 @@ class OpenGLRenderer:
             program,
         )
 
+        face_normal = self._compute_club_face_normal(frame_data)
+
         # Render face normal vector if enabled
         if (
             hasattr(render_config, "show_face_normal")
             and render_config.show_face_normal
         ):
-            normal_length = 0.1  # 10cm normal vector
-            normal_end = frame_data.clubhead + face_normal * normal_length
-            normal_color = [1.0, 0.0, 0.0]  # Red for face normal
-
-            self._render_cylinder_between_points(
-                "face_normal",
-                frame_data.clubhead,
-                normal_end,
-                0.002,
-                normal_color,
-                0.8,
-                program,
-            )
-
-            # Add arrowhead to normal vector
-            self._render_sphere_at_point(
-                "normal_arrow", normal_end, 0.005, normal_color, 0.8, program
-            )
+            self._render_club_face_normal(frame_data, face_normal, program)
 
         # Render ball at center strike position
         if hasattr(render_config, "show_ball") and render_config.show_ball:
-            # Position ball slightly in front of clubface for center strike
-            ball_offset = face_normal * 0.05  # 5cm in front of face
-            ball_position = frame_data.clubhead + ball_offset
-            ball_color = [1.0, 1.0, 1.0]  # White ball
-            ball_radius = 0.02135  # Standard golf ball diameter (42.67mm)
-
-            self._render_sphere_at_point(
-                "ball", ball_position, ball_radius, ball_color, 1.0, program
-            )
+            self._render_club_ball(frame_data, face_normal, program)
 
     def cleanup(self) -> None:
         """Clean up OpenGL resources"""

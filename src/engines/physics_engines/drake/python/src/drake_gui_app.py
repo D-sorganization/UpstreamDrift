@@ -684,13 +684,35 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             finally:
                 self.timer.start(int(self.time_step * MS_PER_SECOND))
 
-    def _setup_ui(self) -> None:  # noqa: PLR0915
+    def _setup_ui(self) -> None:
         """Build the PyQt Interface."""
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
 
         # 0. Model Selector
+        self._setup_model_selector(layout)
+
+        # 1. Mode Selector
+        self._setup_mode_selector(layout)
+
+        # 2. Controls Area (Tabs + Stack)
+        self._setup_controls_tabs(layout)
+
+        # 3. Visualization Toggles
+        self._setup_visualization_panel(layout)
+
+        # 4. Matrix Analysis
+        self._setup_matrix_analysis_panel(layout)
+
+        # Status Bar
+        self._update_status("Ready")
+
+        # Populate Kinematic Sliders
+        self._build_kinematic_controls()
+
+    def _setup_model_selector(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the model selection group box."""
         model_group = QtWidgets.QGroupBox("Model Selection")
         model_layout = QtWidgets.QHBoxLayout()
         self.model_combo = QtWidgets.QComboBox()
@@ -702,7 +724,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         model_group.setLayout(model_layout)
         layout.addWidget(model_group)
 
-        # 1. Mode Selector
+    def _setup_mode_selector(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the operating mode group box."""
         mode_group = QtWidgets.QGroupBox("Operating Mode")
         mode_layout = QtWidgets.QHBoxLayout()
         self.mode_combo = QtWidgets.QComboBox()
@@ -719,7 +742,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         mode_group.setLayout(mode_layout)
         layout.addWidget(mode_group)
 
-        # 2. Controls Area (Stack)
+    def _setup_controls_tabs(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the main tab widget with simulation controls and live analysis."""
         self.main_tab_widget = QtWidgets.QTabWidget()
         layout.addWidget(self.main_tab_widget)
 
@@ -730,7 +754,23 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         self.controls_stack = QtWidgets.QStackedWidget()
         sim_tab_layout.addWidget(self.controls_stack)
 
-        # -- Page 1: Dynamic Controls
+        self._setup_dynamic_controls_page()
+        self._setup_kinematic_controls_page()
+
+        self.main_tab_widget.addTab(self.sim_tab, "Simulation Control")
+
+        # Tab 2: Live Analysis (LivePlotWidget)
+        if LivePlotWidget is not None:
+            self.live_tab = QtWidgets.QWidget()
+            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
+            self.live_plot = LivePlotWidget(self.recorder)
+            # Pre-populate joint names
+            self.live_plot.set_joint_names(self.get_joint_names())
+            live_layout.addWidget(self.live_plot)
+            self.main_tab_widget.addTab(self.live_tab, "Live Analysis")
+
+    def _setup_dynamic_controls_page(self) -> None:
+        """Build the dynamic simulation controls page."""
         dynamic_page = QtWidgets.QWidget()
         dyn_layout = QtWidgets.QVBoxLayout(dynamic_page)
 
@@ -753,6 +793,13 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         dyn_layout.addWidget(self.btn_reset)
 
         # Recording & Analysis
+        self._setup_analysis_group(dyn_layout)
+
+        dyn_layout.addStretch()
+        self.controls_stack.addWidget(dynamic_page)
+
+    def _setup_analysis_group(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the recording and post-hoc analysis group box."""
         analysis_group = QtWidgets.QGroupBox("Recording & Post-Hoc Analysis")
         analysis_layout = QtWidgets.QVBoxLayout()
 
@@ -807,12 +854,10 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         analysis_layout.addWidget(self.btn_export)
 
         analysis_group.setLayout(analysis_layout)
-        dyn_layout.addWidget(analysis_group)
+        parent_layout.addWidget(analysis_group)
 
-        dyn_layout.addStretch()
-        self.controls_stack.addWidget(dynamic_page)
-
-        # -- Page 2: Kinematic Controls
+    def _setup_kinematic_controls_page(self) -> None:
+        """Build the kinematic controls page with joint sliders scroll area."""
         kinematic_page = QtWidgets.QWidget()
         kin_layout = QtWidgets.QVBoxLayout(kinematic_page)
 
@@ -825,19 +870,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         kin_layout.addWidget(scroll)
         self.controls_stack.addWidget(kinematic_page)
 
-        self.main_tab_widget.addTab(self.sim_tab, "Simulation Control")
-
-        # Tab 2: Live Analysis (LivePlotWidget)
-        if LivePlotWidget is not None:
-            self.live_tab = QtWidgets.QWidget()
-            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
-            self.live_plot = LivePlotWidget(self.recorder)
-            # Pre-populate joint names
-            self.live_plot.set_joint_names(self.get_joint_names())
-            live_layout.addWidget(self.live_plot)
-            self.main_tab_widget.addTab(self.live_tab, "Live Analysis")
-
-        # 3. Visualization Toggles
+    def _setup_visualization_panel(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the visualization toggles group box."""
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
 
@@ -884,6 +918,13 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         vis_layout.addWidget(manip_group)
 
         # Advanced Vectors
+        self._setup_advanced_vectors(vis_layout)
+
+        vis_group.setLayout(vis_layout)
+        layout.addWidget(vis_group)
+
+    def _setup_advanced_vectors(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the advanced vector controls (induced accel, counterfactual combos)."""
         vec_grid = QtWidgets.QGridLayout()
 
         self.chk_induced_vec = QtWidgets.QCheckBox("Induced Vectors")
@@ -917,10 +958,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
         vis_layout.addLayout(vec_grid)
 
-        vis_group.setLayout(vis_layout)
-        layout.addWidget(vis_group)
-
-        # Matrix Analysis
+    def _setup_matrix_analysis_panel(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the matrix analysis group box (Jacobian condition, constraint rank)."""
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)
         self.lbl_cond = QtWidgets.QLabel("--")
@@ -928,12 +967,6 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         matrix_layout.addRow("Jacobian Cond:", self.lbl_cond)
         matrix_layout.addRow("Constraint Rank:", self.lbl_rank)
         layout.addWidget(matrix_group)
-
-        # Status Bar
-        self._update_status("Ready")
-
-        # Populate Kinematic Sliders
-        self._build_kinematic_controls()
 
     def _build_kinematic_controls(self) -> None:  # noqa: PLR0915
         """Create sliders for all joints."""
@@ -1160,150 +1193,160 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             self.live_plot.update_plot()
 
         if self.operating_mode == "dynamic" and self.is_running:
-            t = context.get_time()
-            simulator.AdvanceTo(t + self.time_step)
-
-            # Recording
-            if self.recorder.is_recording and self.plant:
-                plant_context = self.plant.GetMyContextFromRoot(context)
-                q = self.plant.GetPositions(plant_context)
-                v = self.plant.GetVelocities(plant_context)
-
-                # Get club head position
-                club_pos = None
-                body_names = ["clubhead", "club_body", "wrist", "hand", "link_7"]
-                for name in body_names:
-                    if self.plant.HasBodyNamed(name):
-                        body = self.plant.GetBodyByName(name)
-                        X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
-                        club_pos = X_WB.translation()
-                        break
-
-                if club_pos is None:
-                    # Fallback to last body
-                    body = self.plant.get_body(BodyIndex(self.plant.num_bodies() - 1))
-                    X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
-                    club_pos = X_WB.translation()
-
-                # Live Analysis if enabled OR if LivePlotWidget requested it via config
-                config_requests_analysis = False
-                if hasattr(self.recorder, "analysis_config") and isinstance(
-                    self.recorder.analysis_config, dict
-                ):
-                    cfg = self.recorder.analysis_config
-                    if (
-                        cfg.get("ztcf")
-                        or cfg.get("zvcf")
-                        or cfg.get("track_drift")
-                        or cfg.get("track_total_control")
-                        or cfg.get("induced_accel_sources")
-                    ):
-                        config_requests_analysis = True
-
-                analysis_enabled = (
-                    self.chk_live_analysis.isChecked() or config_requests_analysis
-                )
-
-                if analysis_enabled and self.eval_context:
-                    # Update eval context
-                    self.plant.SetPositions(self.eval_context, q)
-                    self.plant.SetVelocities(self.eval_context, v)
-
-                    analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
-
-                    # Compute Induced
-                    res = analyzer.compute_components(self.eval_context)
-
-                    # Check for specific actuator selection
-                    sources_to_compute = []
-
-                    # 1. From GUI combo
-                    if self.chk_induced_vec.isChecked():
-                        sources_to_compute.append(
-                            self.combo_induced_source.currentText()
-                        )
-
-                    # 2. From LivePlotWidget config
-                    if hasattr(self.recorder, "analysis_config") and isinstance(
-                        self.recorder.analysis_config, dict
-                    ):
-                        sources = self.recorder.analysis_config.get(
-                            "induced_accel_sources", []
-                        )
-                        if isinstance(sources, list):
-                            sources_to_compute.extend(sources)
-
-                    # Deduplicate and compute specific sources
-                    unique_sources = set()
-                    for src in sources_to_compute:
-                        if src:
-                            unique_sources.add(str(src))
-
-                    for source in unique_sources:
-                        if source in ["gravity", "velocity", "total"]:
-                            continue
-
-                        # Compute specific
-                        try:
-                            # Check if source is integer index or name
-                            act_idx = -1
-                            try:
-                                act_idx = int(source)
-                            except ValueError:
-                                # Try name match
-                                if self.plant.HasJointNamed(source):
-                                    joint = self.plant.GetJointByName(source)
-                                    if joint.num_velocities() == 1:
-                                        act_idx = joint.velocity_start()
-
-                            if act_idx >= 0:
-                                tau_vec = np.zeros(self.plant.num_velocities())
-                                if 0 <= act_idx < len(tau_vec):
-                                    tau_vec[act_idx] = 1.0
-                                    accels = analyzer.compute_specific_control(
-                                        self.eval_context, tau_vec
-                                    )
-                                    # Store result using source string as key
-                                    res[source] = accels
-                        except (ValueError, TypeError, RuntimeError):
-                            pass
-
-                    # We need to append to recorder lists
-                    # DrakeRecorder uses dict[str, list[np.ndarray]]
-                    for k, val in res.items():
-                        if k not in self.recorder.induced_accelerations:
-                            self.recorder.induced_accelerations[k] = []
-                        self.recorder.induced_accelerations[k].append(val)
-
-                    # Compute Counterfactuals
-                    cf_res = analyzer.compute_counterfactuals(self.eval_context)
-                    for k, val in cf_res.items():
-                        if k not in self.recorder.counterfactuals:
-                            self.recorder.counterfactuals[k] = []
-                        self.recorder.counterfactuals[k].append(val)
-
-                # Calculate CoM and Angular Momentum for recording
-                com_pos = None
-                angular_momentum = None
-                if self.plant:
-                    plant_context = self.plant.GetMyContextFromRoot(context)
-                    com_pos = self.plant.CalcCenterOfMassPositionInWorld(plant_context)
-                    angular_momentum = self.plant.CalcSpatialMomentumInWorldAboutPoint(
-                        plant_context, com_pos
-                    ).rotational()
-
-                self.recorder.record(
-                    context.get_time(),
-                    q,
-                    v,
-                    club_pos,
-                    com_pos=com_pos,
-                    angular_momentum=angular_momentum,
-                )
-                self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
+            self._advance_physics(simulator, context)
 
         # Visualization Update
         self._update_visualization()
+
+    def _advance_physics(self, simulator: Any, context: Any) -> None:
+        """Advance the physics simulation by one time step and record data."""
+        t = context.get_time()
+        simulator.AdvanceTo(t + self.time_step)
+
+        if self.recorder.is_recording and self.plant:
+            self._record_frame(context)
+
+    def _record_frame(self, context: Any) -> None:
+        """Record a single frame of simulation data."""
+        plant_context = self.plant.GetMyContextFromRoot(context)
+        q = self.plant.GetPositions(plant_context)
+        v = self.plant.GetVelocities(plant_context)
+
+        club_pos = self._find_club_head_position(plant_context)
+
+        # Live Analysis if enabled OR if LivePlotWidget requested it via config
+        if self._is_analysis_enabled() and self.eval_context:
+            self._compute_live_analysis(q, v)
+
+        # Calculate CoM and Angular Momentum for recording
+        com_pos = None
+        angular_momentum = None
+        if self.plant:
+            plant_context = self.plant.GetMyContextFromRoot(context)
+            com_pos = self.plant.CalcCenterOfMassPositionInWorld(plant_context)
+            angular_momentum = self.plant.CalcSpatialMomentumInWorldAboutPoint(
+                plant_context, com_pos
+            ).rotational()
+
+        self.recorder.record(
+            context.get_time(),
+            q,
+            v,
+            club_pos,
+            com_pos=com_pos,
+            angular_momentum=angular_momentum,
+        )
+        self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
+
+    def _find_club_head_position(self, plant_context: Any) -> np.ndarray:
+        """Find and return the club head position in world coordinates."""
+        body_names = ["clubhead", "club_body", "wrist", "hand", "link_7"]
+        for name in body_names:
+            if self.plant.HasBodyNamed(name):
+                body = self.plant.GetBodyByName(name)
+                X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
+                return X_WB.translation()
+
+        # Fallback to last body
+        body = self.plant.get_body(BodyIndex(self.plant.num_bodies() - 1))
+        X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
+        return X_WB.translation()
+
+    def _is_analysis_enabled(self) -> bool:
+        """Check whether live analysis should run based on UI and config."""
+        config_requests_analysis = False
+        if hasattr(self.recorder, "analysis_config") and isinstance(
+            self.recorder.analysis_config, dict
+        ):
+            cfg = self.recorder.analysis_config
+            if (
+                cfg.get("ztcf")
+                or cfg.get("zvcf")
+                or cfg.get("track_drift")
+                or cfg.get("track_total_control")
+                or cfg.get("induced_accel_sources")
+            ):
+                config_requests_analysis = True
+
+        return self.chk_live_analysis.isChecked() or config_requests_analysis
+
+    def _compute_live_analysis(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Compute induced accelerations and counterfactuals for the current state."""
+        # Update eval context
+        self.plant.SetPositions(self.eval_context, q)
+        self.plant.SetVelocities(self.eval_context, v)
+
+        analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
+
+        # Compute Induced
+        res = analyzer.compute_components(self.eval_context)
+
+        # Compute specific actuator sources
+        self._compute_specific_sources(analyzer, res)
+
+        # Append to recorder lists (DrakeRecorder uses dict[str, list[np.ndarray]])
+        for k, val in res.items():
+            if k not in self.recorder.induced_accelerations:
+                self.recorder.induced_accelerations[k] = []
+            self.recorder.induced_accelerations[k].append(val)
+
+        # Compute Counterfactuals
+        cf_res = analyzer.compute_counterfactuals(self.eval_context)
+        for k, val in cf_res.items():
+            if k not in self.recorder.counterfactuals:
+                self.recorder.counterfactuals[k] = []
+            self.recorder.counterfactuals[k].append(val)
+
+    def _compute_specific_sources(
+        self,
+        analyzer: DrakeInducedAccelerationAnalyzer,
+        res: dict[str, np.ndarray],
+    ) -> None:
+        """Compute induced accelerations for specific actuator sources."""
+        sources_to_compute: list[str] = []
+
+        # 1. From GUI combo
+        if self.chk_induced_vec.isChecked():
+            sources_to_compute.append(self.combo_induced_source.currentText())
+
+        # 2. From LivePlotWidget config
+        if hasattr(self.recorder, "analysis_config") and isinstance(
+            self.recorder.analysis_config, dict
+        ):
+            sources = self.recorder.analysis_config.get("induced_accel_sources", [])
+            if isinstance(sources, list):
+                sources_to_compute.extend(sources)
+
+        # Deduplicate and compute specific sources
+        unique_sources = set()
+        for src in sources_to_compute:
+            if src:
+                unique_sources.add(str(src))
+
+        for source in unique_sources:
+            if source in ["gravity", "velocity", "total"]:
+                continue
+
+            try:
+                act_idx = -1
+                try:
+                    act_idx = int(source)
+                except ValueError:
+                    if self.plant.HasJointNamed(source):
+                        joint = self.plant.GetJointByName(source)
+                        if joint.num_velocities() == 1:
+                            act_idx = joint.velocity_start()
+
+                if act_idx >= 0:
+                    tau_vec = np.zeros(self.plant.num_velocities())
+                    if 0 <= act_idx < len(tau_vec):
+                        tau_vec[act_idx] = 1.0
+                        accels = analyzer.compute_specific_control(
+                            self.eval_context, tau_vec
+                        )
+                        res[source] = accels
+            except (ValueError, TypeError, RuntimeError):
+                pass
 
     def _on_visualization_changed(self) -> None:
         """Handle toggling of visualization options."""

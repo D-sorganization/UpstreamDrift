@@ -112,17 +112,28 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.recorder = recorder
         self._main_layout = QtWidgets.QVBoxLayout(self)
 
-        # Create Matplotlib canvas
+        self._setup_canvas_and_plot()
+        self._setup_metric_options()
+        self._setup_stats_label()
+        self._setup_controls()
+
+        # Initial plot setup
+        self.ax.set_title("Live Data")
+        self.ax.set_xlabel("Time (s)")
+        self.ax.grid(True)
+
+    def _setup_canvas_and_plot(self) -> None:
+        """Create the Matplotlib canvas and initial plot axes."""
         self.canvas = MplCanvas(width=5, height=4, dpi=100)
         self._main_layout.addWidget(self.canvas)
 
-        # Setup plot
         self.ax = self.canvas.fig.add_subplot(111)
         self.ax2: Axes | None = None  # Secondary axis
         self.line_objects: list[Any] = []
         self.line_objects2: list[Any] = []
 
-        # Available metrics
+    def _setup_metric_options(self) -> None:
+        """Initialize metric options and current selection state."""
         self.metric_options = {
             "Joint Positions": "joint_positions",
             "Joint Velocities": "joint_velocities",
@@ -143,16 +154,28 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.comparison_key: str | None = None
         self.comparison_label: str | None = None
 
-        # Stats Labels
+    def _setup_stats_label(self) -> None:
+        """Create the statistics display label."""
         self.lbl_stats = QtWidgets.QLabel(
             "Mean: 0.00 | Std: 0.00 | Min: 0.00 | Max: 0.00"
         )
         self.lbl_stats.setStyleSheet("font-family: monospace;")
         self._main_layout.addWidget(self.lbl_stats)
 
-        # Controls Layout
+    def _setup_controls(self) -> None:
+        """Create the controls toolbar layout."""
         controls_layout = QtWidgets.QHBoxLayout()
 
+        self._setup_metric_selector(controls_layout)
+        self._setup_comparison_controls(controls_layout)
+        self._setup_plot_mode_controls(controls_layout)
+        self._setup_source_selector(controls_layout)
+        self._setup_action_buttons(controls_layout)
+
+        self._main_layout.addLayout(controls_layout)
+
+    def _setup_metric_selector(self, layout: QtWidgets.QHBoxLayout) -> None:
+        """Create the primary metric selector and compute checkbox."""
         # Selector for data type
         self.combo = QtWidgets.QComboBox()
         self.combo.addItems(list(self.metric_options.keys()))
@@ -163,51 +186,8 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         lbl_metric = QtWidgets.QLabel("Metric:")
         lbl_metric.setBuddy(self.combo)
-        controls_layout.addWidget(lbl_metric)
-        controls_layout.addWidget(self.combo)
-
-        # Comparison Selector
-        self.chk_compare = QtWidgets.QCheckBox("Compare:")
-        self.chk_compare.setToolTip("Enable comparison with another metric")
-        self.chk_compare.stateChanged.connect(self._toggle_comparison)
-        controls_layout.addWidget(self.chk_compare)
-
-        self.combo_compare = QtWidgets.QComboBox()
-        self.combo_compare.addItems(list(self.metric_options.keys()))
-        self.combo_compare.setToolTip("Select secondary metric to compare")
-        self.combo_compare.setEnabled(False)
-        self.combo_compare.currentTextChanged.connect(self._set_comparison_metric)
-        controls_layout.addWidget(self.combo_compare)
-
-        # X-Y Plot Mode (Parametric)
-        self.chk_xy = QtWidgets.QCheckBox("X-Y Plot")
-        self.chk_xy.setToolTip("Plot Primary Metric (X) vs Secondary Metric (Y)")
-        self.chk_xy.stateChanged.connect(self._toggle_xy_mode)
-        controls_layout.addWidget(self.chk_xy)
-
-        # Plot Mode Selector
-        self.mode_combo = QtWidgets.QComboBox()
-        self.mode_combo.addItems(["All Dimensions", "Single Dimension", "Norm"])
-        self.mode_combo.setToolTip("Select plot mode")
-        self.mode_combo.setStatusTip(
-            "Select how to display the data (All Dimensions, Single Dimension, or Norm)"
-        )
-        self.mode_combo.setAccessibleName("Plot Mode Selector")
-        self.mode_combo.currentTextChanged.connect(self._on_mode_changed)
-        controls_layout.addWidget(self.mode_combo)
-
-        # Selector for Dimension Index (Hidden by default)
-        self.dim_spin = QtWidgets.QSpinBox()
-        self.dim_spin.setAccessibleName("Dimension Index")
-        self.dim_spin.setAccessibleDescription("Select the dimension index to plot")
-        self.dim_spin.setRange(0, MAX_DIMENSIONS)
-        self.dim_spin.setPrefix("Dim: ")
-        self.dim_spin.setToolTip("Select dimension index")
-        self.dim_spin.setStatusTip("Select the specific dimension index to plot")
-        self.dim_spin.setAccessibleName("Dimension Index")
-        self.dim_spin.setVisible(False)  # Only for Single Dimension mode
-        self.dim_spin.valueChanged.connect(self.update_plot)
-        controls_layout.addWidget(self.dim_spin)
+        layout.addWidget(lbl_metric)
+        layout.addWidget(self.combo)
 
         # Checkbox for enabling computation (if expensive)
         # Initialize early to avoid AttributeError during signal callbacks
@@ -220,6 +200,55 @@ class LivePlotWidget(QtWidgets.QWidget):
         )
         self.chk_compute.stateChanged.connect(self.toggle_computation)
 
+    def _setup_comparison_controls(self, layout: QtWidgets.QHBoxLayout) -> None:
+        """Create comparison and X-Y plot controls."""
+        # Comparison Selector
+        self.chk_compare = QtWidgets.QCheckBox("Compare:")
+        self.chk_compare.setToolTip("Enable comparison with another metric")
+        self.chk_compare.stateChanged.connect(self._toggle_comparison)
+        layout.addWidget(self.chk_compare)
+
+        self.combo_compare = QtWidgets.QComboBox()
+        self.combo_compare.addItems(list(self.metric_options.keys()))
+        self.combo_compare.setToolTip("Select secondary metric to compare")
+        self.combo_compare.setEnabled(False)
+        self.combo_compare.currentTextChanged.connect(self._set_comparison_metric)
+        layout.addWidget(self.combo_compare)
+
+        # X-Y Plot Mode (Parametric)
+        self.chk_xy = QtWidgets.QCheckBox("X-Y Plot")
+        self.chk_xy.setToolTip("Plot Primary Metric (X) vs Secondary Metric (Y)")
+        self.chk_xy.stateChanged.connect(self._toggle_xy_mode)
+        layout.addWidget(self.chk_xy)
+
+    def _setup_plot_mode_controls(self, layout: QtWidgets.QHBoxLayout) -> None:
+        """Create plot mode selector and dimension spinner."""
+        # Plot Mode Selector
+        self.mode_combo = QtWidgets.QComboBox()
+        self.mode_combo.addItems(["All Dimensions", "Single Dimension", "Norm"])
+        self.mode_combo.setToolTip("Select plot mode")
+        self.mode_combo.setStatusTip(
+            "Select how to display the data (All Dimensions, Single Dimension, or Norm)"
+        )
+        self.mode_combo.setAccessibleName("Plot Mode Selector")
+        self.mode_combo.currentTextChanged.connect(self._on_mode_changed)
+        layout.addWidget(self.mode_combo)
+
+        # Selector for Dimension Index (Hidden by default)
+        self.dim_spin = QtWidgets.QSpinBox()
+        self.dim_spin.setAccessibleName("Dimension Index")
+        self.dim_spin.setAccessibleDescription("Select the dimension index to plot")
+        self.dim_spin.setRange(0, MAX_DIMENSIONS)
+        self.dim_spin.setPrefix("Dim: ")
+        self.dim_spin.setToolTip("Select dimension index")
+        self.dim_spin.setStatusTip("Select the specific dimension index to plot")
+        self.dim_spin.setAccessibleName("Dimension Index")
+        self.dim_spin.setVisible(False)  # Only for Single Dimension mode
+        self.dim_spin.valueChanged.connect(self.update_plot)
+        layout.addWidget(self.dim_spin)
+
+    def _setup_source_selector(self, layout: QtWidgets.QHBoxLayout) -> None:
+        """Create the induced acceleration source selector."""
         # Selector for Induced Accel Source (Hidden by default)
         # Using a ComboBox for user-friendly name selection
         self.source_combo = QtWidgets.QComboBox()
@@ -240,8 +269,11 @@ class LivePlotWidget(QtWidgets.QWidget):
         lbl_source.setVisible(False)
         self.source_label = lbl_source
 
-        controls_layout.addWidget(lbl_source)
-        controls_layout.addWidget(self.source_combo)
+        layout.addWidget(lbl_source)
+        layout.addWidget(self.source_combo)
+
+    def _setup_action_buttons(self, layout: QtWidgets.QHBoxLayout) -> None:
+        """Create snapshot, frequency analysis, advanced, and export buttons."""
         # Snapshot Button
         self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
         self.btn_snapshot.setToolTip("Copy current plot to clipboard")
@@ -250,13 +282,13 @@ class LivePlotWidget(QtWidgets.QWidget):
         )
         self.btn_snapshot.setAccessibleName("Snapshot Button")
         self.btn_snapshot.clicked.connect(self.copy_snapshot)
-        controls_layout.addWidget(self.btn_snapshot)
+        layout.addWidget(self.btn_snapshot)
 
         # Frequency Analysis Button
         self.btn_freq = QtWidgets.QPushButton("Freq Analysis")
         self.btn_freq.setToolTip("Show Power Spectral Density (PSD) of current view")
         self.btn_freq.clicked.connect(self.show_freq_analysis)
-        controls_layout.addWidget(self.btn_freq)
+        layout.addWidget(self.btn_freq)
 
         # Advanced Analysis Button
         self.btn_advanced = QtWidgets.QPushButton("Advanced...")
@@ -264,23 +296,16 @@ class LivePlotWidget(QtWidgets.QWidget):
             "Show Advanced Analysis Tools (Spectrogram, Phase Plane, Coherence)"
         )
         self.btn_advanced.clicked.connect(self.show_advanced_analysis)
-        controls_layout.addWidget(self.btn_advanced)
+        layout.addWidget(self.btn_advanced)
 
         # Export Button
         self.btn_export = QtWidgets.QPushButton("Export Data")
         self.btn_export.setToolTip("Export recording to CSV/JSON/MAT")
         self.btn_export.setStatusTip("Export the full recorded data set")
         self.btn_export.clicked.connect(self.export_data)
-        controls_layout.addWidget(self.btn_export)
+        layout.addWidget(self.btn_export)
 
-        controls_layout.addWidget(self.chk_compute)
-
-        self._main_layout.addLayout(controls_layout)
-
-        # Initial plot setup
-        self.ax.set_title("Live Data")
-        self.ax.set_xlabel("Time (s)")
-        self.ax.grid(True)
+        layout.addWidget(self.chk_compute)
 
     def _populate_source_combo(self) -> None:
         """Populate the source combo box with joint names or indices."""
@@ -524,7 +549,6 @@ class LivePlotWidget(QtWidgets.QWidget):
         times, data, dim_label = self._get_data_for_key(self.current_key)
 
         if len(times) == 0 or data is None:
-            # Update stats even if empty?
             return
 
         # Limit to recent history to keep it fast
@@ -534,6 +558,26 @@ class LivePlotWidget(QtWidgets.QWidget):
             data = data[-max_points:]
 
         # Update Statistics
+        self._update_stats_label(data)
+
+        plot_mode = self.mode_combo.currentText()
+        is_xy = self.chk_xy.isChecked()
+
+        # Handle X-Y Plot Mode
+        if is_xy:
+            self._update_xy_plot(data, dim_label, plot_mode, max_points)
+            return
+
+        # Standard Time Series Plot
+        self._update_primary_time_series(times, data, dim_label, plot_mode)
+
+        # Handle Comparison on secondary axis
+        self._update_comparison_overlay(plot_mode, max_points)
+
+        self.canvas.draw()
+
+    def _update_stats_label(self, data: np.ndarray) -> None:
+        """Update the statistics display from current data."""
         if data.size > 0:
             mean_val = np.mean(data)
             std_val = np.std(data)
@@ -543,64 +587,72 @@ class LivePlotWidget(QtWidgets.QWidget):
                 f"Mean: {mean_val:.2f} | Std: {std_val:.2f} | Min: {min_val:.2f} | Max: {max_val:.2f}"
             )
 
-        n_dims = data.shape[1]
-        plot_mode = self.mode_combo.currentText()
-        is_xy = self.chk_xy.isChecked()
-
-        # Handle X-Y Plot Mode
-        if is_xy:
-            if self.comparison_key:
-                times2, data2, dim_label2 = self._get_data_for_key(self.comparison_key)
-                if len(times2) > 0 and data2 is not None:
-                    # Sync lengths
-                    if len(times2) > max_points:
-                        times2 = times2[-max_points:]
-                        data2 = data2[-max_points:]
-
-                    min_len = min(len(data), len(data2))
-                    data = data[:min_len]
-                    data2 = data2[:min_len]
-
-                    # Initialize lines if needed
-                    # If dimensions mismatch, we can only plot matching dimensions
-                    n_common_dims = min(n_dims, data2.shape[1])
-
-                    if len(self.line_objects) != n_common_dims:
-                        self.ax.clear()
-                        self.line_objects = []
-                        # No secondary axis in XY mode (same plot)
-
-                        title = (
-                            f"{self.current_label} (X) vs {self.comparison_label} (Y)"
-                        )
-                        self.ax.set_title(title)
-                        self.ax.set_xlabel(self.current_label or "")
-                        self.ax.set_ylabel(self.comparison_label or "")
-                        self.ax.grid(True)
-
-                        for i in range(n_common_dims):
-                            label = f"Dim {i}" if n_common_dims > 1 else "Trajectory"
-                            if plot_mode == "Single Dimension":
-                                label = f"Dim {dim_label} vs {dim_label2}"
-                            elif plot_mode == "Norm":
-                                label = "Norm vs Norm"
-
-                            (line,) = self.ax.plot([], [], label=label)
-                            self.line_objects.append(line)
-
-                        if n_common_dims < 10 or plot_mode != "All Dimensions":
-                            self.ax.legend(loc="upper right")
-
-                    # Update lines
-                    for i, line in enumerate(self.line_objects):
-                        line.set_data(data[:, i], data2[:, i])
-
-                    self.ax.relim()
-                    self.ax.autoscale_view()
-                    self.canvas.draw()
+    def _update_xy_plot(
+        self,
+        data: np.ndarray,
+        dim_label: str,
+        plot_mode: str,
+        max_points: int,
+    ) -> None:
+        """Update the X-Y (parametric) plot mode."""
+        if not self.comparison_key:
             return
 
-        # Standard Time Series Plot
+        _, data2, dim_label2 = self._get_data_for_key(self.comparison_key)
+        if data2 is None or len(data2) == 0:
+            return
+
+        # Sync lengths
+        if len(data2) > max_points:
+            data2 = data2[-max_points:]
+
+        min_len = min(len(data), len(data2))
+        data = data[:min_len]
+        data2 = data2[:min_len]
+
+        n_dims = data.shape[1]
+        n_common_dims = min(n_dims, data2.shape[1])
+
+        if len(self.line_objects) != n_common_dims:
+            self.ax.clear()
+            self.line_objects = []
+
+            title = f"{self.current_label} (X) vs {self.comparison_label} (Y)"
+            self.ax.set_title(title)
+            self.ax.set_xlabel(self.current_label or "")
+            self.ax.set_ylabel(self.comparison_label or "")
+            self.ax.grid(True)
+
+            for i in range(n_common_dims):
+                label = f"Dim {i}" if n_common_dims > 1 else "Trajectory"
+                if plot_mode == "Single Dimension":
+                    label = f"Dim {dim_label} vs {dim_label2}"
+                elif plot_mode == "Norm":
+                    label = "Norm vs Norm"
+
+                (line,) = self.ax.plot([], [], label=label)
+                self.line_objects.append(line)
+
+            if n_common_dims < 10 or plot_mode != "All Dimensions":
+                self.ax.legend(loc="upper right")
+
+        # Update lines
+        for i, line in enumerate(self.line_objects):
+            line.set_data(data[:, i], data2[:, i])
+
+        self.ax.relim()
+        self.ax.autoscale_view()
+        self.canvas.draw()
+
+    def _update_primary_time_series(
+        self,
+        times: np.ndarray,
+        data: np.ndarray,
+        dim_label: str,
+        plot_mode: str,
+    ) -> None:
+        """Update the primary time-series lines on the main axis."""
+        n_dims = data.shape[1]
 
         # Initialize lines for primary axis
         if len(self.line_objects) != n_dims:
@@ -608,8 +660,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             self.ax.clear()
             self.line_objects = []
             if self.ax2:
-                if self.ax2:
-                    self.ax2.clear()
+                self.ax2.clear()
                 self.line_objects2 = []
 
             # Re-setup
@@ -624,12 +675,13 @@ class LivePlotWidget(QtWidgets.QWidget):
                 label = (
                     dim_label
                     if n_dims == 1
-                    else f"{dim_label} {i}" if plot_mode != "Norm" else "Norm"
+                    else f"{dim_label} {i}"
+                    if plot_mode != "Norm"
+                    else "Norm"
                 )
                 if plot_mode == "All Dimensions":
                     label = f"Dim {i}"
 
-                # Primary color cycle
                 (line,) = self.ax.plot([], [], label=label)
                 self.line_objects.append(line)
 
@@ -646,49 +698,53 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.relim()
         self.ax.autoscale_view()
 
-        # Handle Comparison
-        if self.comparison_key and self.ax2:
-            times2, data2, dim_label2 = self._get_data_for_key(self.comparison_key)
-            if len(times2) > 0 and data2 is not None:
-                # Sync lengths
-                if len(times2) > max_points:
-                    times2 = times2[-max_points:]
-                    data2 = data2[-max_points:]
+    def _update_comparison_overlay(
+        self,
+        plot_mode: str,
+        max_points: int,
+    ) -> None:
+        """Update the comparison metric on the secondary axis."""
+        if not self.comparison_key or not self.ax2:
+            return
 
-                n_dims2 = data2.shape[1]
+        times2, data2, dim_label2 = self._get_data_for_key(self.comparison_key)
+        if len(times2) == 0 or data2 is None:
+            return
 
-                # Init secondary lines
-                if len(self.line_objects2) != n_dims2:
-                    self.ax2.clear()
-                    self.line_objects2 = []
-                    for i in range(n_dims2):
-                        label2 = (
-                            f"{self.comparison_label} {i}"
-                            if n_dims2 > 1
-                            else self.comparison_label
-                        )
-                        if plot_mode == "Single Dimension":
-                            label2 = f"{self.comparison_label} {dim_label2}"
-                        elif plot_mode == "Norm":
-                            label2 = f"{self.comparison_label} Norm"
+        if len(times2) > max_points:
+            times2 = times2[-max_points:]
+            data2 = data2[-max_points:]
 
-                        # Secondary style (dashed)
-                        (line,) = self.ax2.plot(
-                            [], [], label=label2, linestyle="--", alpha=0.7
-                        )
-                        self.line_objects2.append(line)
+        n_dims2 = data2.shape[1]
 
-                    self.ax2.legend(loc="upper right")
+        # Init secondary lines
+        if len(self.line_objects2) != n_dims2:
+            self.ax2.clear()
+            self.line_objects2 = []
+            for i in range(n_dims2):
+                label2 = (
+                    f"{self.comparison_label} {i}"
+                    if n_dims2 > 1
+                    else self.comparison_label
+                )
+                if plot_mode == "Single Dimension":
+                    label2 = f"{self.comparison_label} {dim_label2}"
+                elif plot_mode == "Norm":
+                    label2 = f"{self.comparison_label} Norm"
 
-                # Update secondary lines
-                for i, line in enumerate(self.line_objects2):
-                    if i < data2.shape[1]:
-                        line.set_data(times2, data2[:, i])
+                # Secondary style (dashed)
+                (line,) = self.ax2.plot([], [], label=label2, linestyle="--", alpha=0.7)
+                self.line_objects2.append(line)
 
-                self.ax2.relim()
-                self.ax2.autoscale_view()
+            self.ax2.legend(loc="upper right")
 
-        self.canvas.draw()
+        # Update secondary lines
+        for i, line in enumerate(self.line_objects2):
+            if i < data2.shape[1]:
+                line.set_data(times2, data2[:, i])
+
+        self.ax2.relim()
+        self.ax2.autoscale_view()
 
     def show_freq_analysis(self) -> None:
         """Show Frequency Analysis Dialog."""

@@ -37,13 +37,35 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sim_widget = MuJoCoSimWidget(width=800, height=600, fps=60)
         h_layout.addWidget(self.sim_widget, stretch=2)
 
-        # Right: control panel with scroll area
+        # Right: control panel
+        control_panel, control_layout = self._create_control_panel()
+        self._setup_model_selector(control_layout)
+        self._setup_sim_buttons(control_layout)
+        self._setup_actuator_scroll_area(control_layout)
+        h_layout.addWidget(control_panel, stretch=1)
+
+        # Store sliders and labels for dynamic updates
+        self.actuator_sliders: list[QtWidgets.QSlider] = []
+        self.actuator_labels: list[QtWidgets.QLabel] = []
+        self.actuator_groups: list[QtWidgets.QGroupBox] = []
+
+        # Model configurations
+        self.model_configs = self._build_model_configs()
+
+        # Load default model
+        self.load_current_model()
+        self.sim_widget.reset_state()
+
+    def _create_control_panel(self) -> tuple[QtWidgets.QFrame, QtWidgets.QVBoxLayout]:
+        """Create the right-side control panel frame and layout."""
         control_panel = QtWidgets.QFrame(self)
         control_panel.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         control_layout = QtWidgets.QVBoxLayout(control_panel)
         control_layout.setContentsMargins(8, 8, 8, 8)
+        return control_panel, control_layout
 
-        # Model selector
+    def _setup_model_selector(self, control_layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the model selection combo box group."""
         model_group = QtWidgets.QGroupBox("Golf Swing Model")
         model_layout = QtWidgets.QVBoxLayout(model_group)
         self.model_combo = QtWidgets.QComboBox()
@@ -57,7 +79,8 @@ class MainWindow(QtWidgets.QMainWindow):
         model_layout.addWidget(self.model_combo)
         control_layout.addWidget(model_group)
 
-        # Play / Pause / Reset
+    def _setup_sim_buttons(self, control_layout: QtWidgets.QVBoxLayout) -> None:
+        """Create the play/pause and reset buttons."""
         buttons_group = QtWidgets.QGroupBox("Simulation Control")
         buttons_layout = QtWidgets.QHBoxLayout(buttons_group)
 
@@ -72,7 +95,10 @@ class MainWindow(QtWidgets.QMainWindow):
         buttons_layout.addWidget(self.reset_btn)
         control_layout.addWidget(buttons_group)
 
-        # Scrollable area for actuator controls
+    def _setup_actuator_scroll_area(
+        self, control_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        """Create the scrollable area for actuator control sliders."""
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(
@@ -85,15 +111,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         control_layout.addWidget(scroll_area, stretch=1)
 
-        h_layout.addWidget(control_panel, stretch=1)
-
-        # Store sliders and labels for dynamic updates
-        self.actuator_sliders: list[QtWidgets.QSlider] = []
-        self.actuator_labels: list[QtWidgets.QLabel] = []
-        self.actuator_groups: list[QtWidgets.QGroupBox] = []
-
-        # Model configurations
-        self.model_configs = [
+    @staticmethod
+    def _build_model_configs() -> list[dict]:
+        """Build the list of available model configurations."""
+        return [
             {
                 "name": "chaotic_pendulum",
                 "xml": CHAOTIC_PENDULUM_XML,
@@ -181,10 +202,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 ],
             },
         ]
-
-        # Load default model
-        self.load_current_model()
-        self.sim_widget.reset_state()
 
     # -------- Model management --------
 

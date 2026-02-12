@@ -35,16 +35,28 @@ class ManipulationTab(QtWidgets.QWidget):
         manip_layout = QtWidgets.QVBoxLayout(self)
         manip_layout.setContentsMargins(8, 8, 8, 8)
 
-        # Global Body Selection
+        manip_layout.addWidget(self._setup_target_selection())
+        manip_layout.addWidget(self._setup_drag_controls())
+        manip_layout.addWidget(self._setup_manual_transform())
+        manip_layout.addWidget(self._setup_constraint_controls())
+        manip_layout.addWidget(self._setup_pose_library())
+        manip_layout.addWidget(self._setup_ik_settings())
+        manip_layout.addWidget(self._setup_instructions())
+
+        manip_layout.addStretch(1)
+
+    def _setup_target_selection(self) -> QtWidgets.QGroupBox:
+        """Create the global body selection group."""
         sel_group = QtWidgets.QGroupBox("Target Selection")
         sel_layout = QtWidgets.QHBoxLayout(sel_group)
         sel_layout.addWidget(QtWidgets.QLabel("Select Body:"))
         self.manip_body_combo = QtWidgets.QComboBox()
         self.manip_body_combo.currentIndexChanged.connect(self.on_manip_body_selected)
         sel_layout.addWidget(self.manip_body_combo, stretch=1)
-        manip_layout.addWidget(sel_group)
+        return sel_group
 
-        # Drag mode controls
+    def _setup_drag_controls(self) -> QtWidgets.QGroupBox:
+        """Create drag mode controls with checkboxes."""
         drag_group = QtWidgets.QGroupBox("Drag Mode")
         drag_layout = QtWidgets.QVBoxLayout(drag_group)
 
@@ -70,9 +82,10 @@ class ManipulationTab(QtWidgets.QWidget):
         )
         drag_layout.addWidget(self.nullspace_posture_cb)
 
-        manip_layout.addWidget(drag_group)
+        return drag_group
 
-        # Manual Transform Controls
+    def _setup_manual_transform(self) -> QtWidgets.QGroupBox:
+        """Create manual position and rotation transform controls."""
         transform_group = QtWidgets.QGroupBox("Manual Transform (Selected Body)")
         transform_layout = QtWidgets.QVBoxLayout(transform_group)
 
@@ -134,9 +147,10 @@ class ManipulationTab(QtWidgets.QWidget):
         self.refresh_trans_btn.clicked.connect(self.update_manual_transform_values)
         transform_layout.addWidget(self.refresh_trans_btn)
 
-        manip_layout.addWidget(transform_group)
+        return transform_group
 
-        # Constraint controls
+    def _setup_constraint_controls(self) -> QtWidgets.QGroupBox:
+        """Create body constraint selection, buttons, and active list."""
         constraint_group = QtWidgets.QGroupBox("Body Constraints")
         constraint_layout = QtWidgets.QVBoxLayout(constraint_group)
 
@@ -206,9 +220,10 @@ class ManipulationTab(QtWidgets.QWidget):
         self.constraints_list.setMaximumHeight(100)
         constraint_layout.addWidget(self.constraints_list)
 
-        manip_layout.addWidget(constraint_group)
+        return constraint_group
 
-        # Pose library controls
+    def _setup_pose_library(self) -> QtWidgets.QGroupBox:
+        """Create pose library save/load/export controls and interpolation."""
         pose_group = QtWidgets.QGroupBox("Pose Library")
         pose_layout = QtWidgets.QVBoxLayout(pose_group)
 
@@ -274,9 +289,10 @@ class ManipulationTab(QtWidgets.QWidget):
 
         pose_layout.addWidget(interp_group)
 
-        manip_layout.addWidget(pose_group)
+        return pose_group
 
-        # IK settings
+    def _setup_ik_settings(self) -> QtWidgets.QGroupBox:
+        """Create IK solver damping and step size controls."""
         ik_group = QtWidgets.QGroupBox("IK Solver Settings (Advanced)")
         ik_layout = QtWidgets.QFormLayout(ik_group)
 
@@ -304,9 +320,10 @@ class ManipulationTab(QtWidgets.QWidget):
         ik_layout.addRow("Step Size:", self.ik_step_slider)
         ik_layout.addRow("", self.ik_step_label)
 
-        manip_layout.addWidget(ik_group)
+        return ik_group
 
-        # Instructions
+    def _setup_instructions(self) -> QtWidgets.QLabel:
+        """Create the quick start instructions label."""
         instructions = QtWidgets.QLabel(
             "<b>Quick Start:</b><br>"
             "• Click and drag any body part to move it<br>"
@@ -318,9 +335,7 @@ class ManipulationTab(QtWidgets.QWidget):
         instructions.setStyleSheet(
             "padding: 10px; background-color: #e8f4f8; border-radius: 5px;"
         )
-        manip_layout.addWidget(instructions)
-
-        manip_layout.addStretch(1)
+        return instructions
 
     def update_body_lists(self) -> None:
         """Update body selection combo boxes."""

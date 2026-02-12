@@ -6,7 +6,6 @@ import sys
 # Must be set BEFORE any imports that might load mujoco
 
 if "MUJOCO_PLUGIN_PATH" not in os.environ:
-
     os.environ["MUJOCO_PLUGIN_PATH"] = ""
 
 
@@ -71,7 +70,6 @@ HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
 # Third-party imports based on availability
 
 if HAS_MATPLOTLIB:
-
     import matplotlib.pyplot as plt
 
 
@@ -100,11 +98,9 @@ class RemoteRecorder(RecorderInterface):
     engine: Any = None
 
     def __init__(self) -> None:
-
         self.reset()
 
     def reset(self) -> None:
-
         self.data: dict[str, Any] = {
             "times": [],
             "joint_positions": [],
@@ -116,9 +112,7 @@ class RemoteRecorder(RecorderInterface):
         }
 
     def process_packet(self, packet: dict) -> None:
-
         try:
-
             t = packet["time"]
 
             self.data["times"].append(t)
@@ -128,19 +122,15 @@ class RemoteRecorder(RecorderInterface):
             self.data["joint_velocities"].append(np.array(packet["qvel"]))
 
             if "qfrc_actuator" in packet:
-
                 self.data["joint_torques"].append(np.array(packet["qfrc_actuator"]))
 
             else:
-
                 self.data["joint_torques"].append(np.zeros_like(packet["qvel"]))
 
             iaa = packet.get("iaa", {})
 
             for src, val in iaa.items():
-
                 if src not in self.data["induced_accelerations"]:
-
                     self.data["induced_accelerations"][src] = []
 
                 self.data["induced_accelerations"][src].append(np.array(val))
@@ -148,43 +138,33 @@ class RemoteRecorder(RecorderInterface):
             cf = packet.get("cf", {})
 
             if "ztcf" in cf:
-
                 self.data["ztcf_accel"].append(np.array(cf["ztcf"]))
 
             if "zvcf" in cf:
-
                 self.data["zvcf_accel"].append(np.array(cf["zvcf"]))
 
         except (ValueError, TypeError, RuntimeError) as e:
-
             logging.error(f"Error processing packet: {e}")
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
-
         if not self.data["times"]:
-
             return np.array([]), np.array([])
 
         times = np.array(self.data["times"])
 
         if field_name == "joint_positions":
-
             return times, np.array(self.data["joint_positions"])
 
         elif field_name == "joint_velocities":
-
             return times, np.array(self.data["joint_velocities"])
 
         elif field_name == "joint_torques":
-
             return times, np.array(self.data["joint_torques"])
 
         elif field_name == "ztcf_accel":
-
             return times, np.array(self.data["ztcf_accel"])
 
         elif field_name == "zvcf_accel":
-
             return times, np.array(self.data["zvcf_accel"])
 
         return times, np.array([])
@@ -192,9 +172,7 @@ class RemoteRecorder(RecorderInterface):
     def get_induced_acceleration_series(
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
-
         if not self.data["times"]:
-
             return np.array([]), np.array([])
 
         times = np.array(self.data["times"])
@@ -202,7 +180,6 @@ class RemoteRecorder(RecorderInterface):
         key = str(source_name)
 
         if key in self.data["induced_accelerations"]:
-
             return times, np.array(self.data["induced_accelerations"][key])
 
         return times, np.array([])
@@ -225,7 +202,6 @@ class RemoteRecorder(RecorderInterface):
         self._analysis_config = config
 
     def export_to_dict(self) -> dict[str, Any]:
-
         return self.data
 
 
@@ -233,7 +209,6 @@ class ModernDarkPalette(QPalette):
     """Custom Dark Palette for a modern look."""
 
     def __init__(self) -> None:
-
         super().__init__()
 
         self.setColor(QPalette.ColorRole.Window, QColor(43, 43, 43))
@@ -264,9 +239,7 @@ class ModernDarkPalette(QPalette):
 
 
 class HumanoidLauncher(QMainWindow):
-
     def __init__(self) -> None:
-
         super().__init__()
 
         self.setWindowTitle("Humanoid Golf Simulation Suite")
@@ -310,7 +283,6 @@ class HumanoidLauncher(QMainWindow):
         self.setup_ui()
 
     def setup_ui(self) -> None:
-
         central_widget = QWidget()
 
         self.setCentralWidget(central_widget)
@@ -372,7 +344,6 @@ class HumanoidLauncher(QMainWindow):
         self.setup_log_area(main_layout)
 
     def setup_sim_tab(self) -> None:
-
         tab = QWidget()
 
         layout = QVBoxLayout(tab)
@@ -381,7 +352,20 @@ class HumanoidLauncher(QMainWindow):
 
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # Simulation Settings Group
+        layout.addWidget(self._setup_sim_settings_group())
+
+        layout.addWidget(self._setup_sim_state_group())
+
+        layout.addLayout(self._setup_sim_action_buttons())
+
+        layout.addLayout(self._setup_sim_results_buttons())
+
+        layout.addStretch()
+
+        self.tabs.addTab(tab, "Simulation")
+
+    def _setup_sim_settings_group(self) -> QGroupBox:
+        """Create the simulation settings group with control mode and live view."""
 
         settings_group = QGroupBox("Simulation Settings")
 
@@ -413,10 +397,6 @@ class HumanoidLauncher(QMainWindow):
         )
 
         self.btn_signal_toolkit.clicked.connect(self.open_signal_toolkit)
-
-        # Helper for control mode help updates
-
-        # Check initial state later
 
         # Control Mode
 
@@ -466,9 +446,10 @@ class HumanoidLauncher(QMainWindow):
 
         settings_group.setLayout(settings_layout)
 
-        layout.addWidget(settings_group)
+        return settings_group
 
-        # State Management Group
+    def _setup_sim_state_group(self) -> QGroupBox:
+        """Create the state management group with load/save path controls."""
 
         state_group = QGroupBox("State Management")
 
@@ -513,9 +494,10 @@ class HumanoidLauncher(QMainWindow):
 
         state_group.setLayout(state_layout)
 
-        layout.addWidget(state_group)
+        return state_group
 
-        # Action Buttons
+    def _setup_sim_action_buttons(self) -> QHBoxLayout:
+        """Create the run/stop/rebuild action button row."""
 
         btn_layout = QHBoxLayout()
 
@@ -553,9 +535,10 @@ class HumanoidLauncher(QMainWindow):
 
         btn_layout.addWidget(self.btn_rebuild)
 
-        layout.addLayout(btn_layout)
+        return btn_layout
 
-        # Results Buttons
+    def _setup_sim_results_buttons(self) -> QHBoxLayout:
+        """Create the results button row (video, data, IAA plot)."""
 
         results_layout = QHBoxLayout()
 
@@ -589,11 +572,7 @@ class HumanoidLauncher(QMainWindow):
 
         results_layout.addStretch()
 
-        layout.addLayout(results_layout)
-
-        layout.addStretch()
-
-        self.tabs.addTab(tab, "Simulation")
+        return results_layout
 
     def setup_live_analysis_tab(self) -> None:
         """Setup the live analysis tab with plot widget."""
@@ -611,7 +590,6 @@ class HumanoidLauncher(QMainWindow):
         self.tabs.addTab(tab, "Live Analysis")
 
     def enable_results(self, enabled: bool) -> None:
-
         self.btn_video.setEnabled(enabled)
 
         self.btn_data.setEnabled(enabled)
@@ -619,7 +597,6 @@ class HumanoidLauncher(QMainWindow):
         self.btn_plot_iaa.setEnabled(enabled and HAS_MATPLOTLIB)
 
     def setup_appearance_tab(self) -> None:
-
         tab = QWidget()
 
         layout = QVBoxLayout(tab)
@@ -683,7 +660,6 @@ class HumanoidLauncher(QMainWindow):
         ]
 
         for i, (name, key) in enumerate(parts):
-
             self.color_layout.addWidget(QLabel(name), i, 0)
 
             btn = QPushButton()
@@ -721,7 +697,6 @@ class HumanoidLauncher(QMainWindow):
         self.tabs.addTab(tab, "Appearance")
 
     def setup_equip_tab(self) -> None:
-
         tab = QWidget()
 
         layout = QVBoxLayout(tab)
@@ -819,7 +794,6 @@ class HumanoidLauncher(QMainWindow):
         self.tabs.addTab(tab, "Equipment")
 
     def setup_log_area(self, parent_layout: QVBoxLayout) -> None:
-
         log_group = QGroupBox("Simulation Log")
 
         log_layout = QVBoxLayout()
@@ -854,13 +828,10 @@ class HumanoidLauncher(QMainWindow):
         parent_layout.addWidget(log_group)
 
     def log(self, msg: str) -> None:
-
         # Check for JSON data stream
 
         if msg.startswith("DATA_JSON:"):
-
             try:
-
                 json_str = msg.split("DATA_JSON:", 1)[1]
 
                 data = json.loads(json_str)
@@ -870,7 +841,6 @@ class HumanoidLauncher(QMainWindow):
                 self.live_plot.update_plot()
 
             except (ValueError, KeyError, json.JSONDecodeError) as e:
-
                 # Fallback logging if parsing fails
 
                 timestamp = datetime.datetime.now().strftime("%H:%M:%S")
@@ -886,13 +856,11 @@ class HumanoidLauncher(QMainWindow):
         self.txt_log.ensureCursorVisible()
 
     def clear_log(self) -> None:
-
         self.txt_log.clear()
 
         self.log("Log cleared.")
 
     def set_btn_color(self, btn: QPushButton, rgba: Sequence[float]) -> None:
-
         r, g, b = (int(c * 255) for c in rgba[:3])
 
         btn.setStyleSheet(
@@ -900,7 +868,6 @@ class HumanoidLauncher(QMainWindow):
         )
 
     def pick_color(self, key: str, btn: QPushButton) -> None:
-
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])
 
         initial = QColor(
@@ -912,7 +879,6 @@ class HumanoidLauncher(QMainWindow):
         color = QColorDialog.getColor(initial, self, f"Choose {key} Color")
 
         if color.isValid():
-
             new_rgba = [color.redF(), color.greenF(), color.blueF(), 1.0]
 
             self.config.colors[key] = new_rgba
@@ -944,7 +910,6 @@ class HumanoidLauncher(QMainWindow):
         # Lazy import to avoid MuJoCo DLL initialization on Windows
 
         try:
-
             # We import directly from the file to avoid importing the package
 
             # 'mujoco_humanoid_golf', which triggers 'import mujoco' in its __init__.
@@ -960,7 +925,6 @@ class HumanoidLauncher(QMainWindow):
             )
 
             if not target_file.exists():
-
                 raise FileNotFoundError(f"File not found: {target_file}")
 
             # Use a stable module name to allow caching and avoid memory leaks
@@ -968,15 +932,12 @@ class HumanoidLauncher(QMainWindow):
             module_name = "polynomial_generator_widget"
 
             if module_name in sys.modules:
-
                 module = sys.modules[module_name]
 
             else:
-
                 spec = importlib.util.spec_from_file_location(module_name, target_file)
 
                 if spec is None or spec.loader is None:
-
                     raise ImportError(f"Could not load spec from {target_file}")
 
                 module = importlib.util.module_from_spec(spec)
@@ -988,7 +949,6 @@ class HumanoidLauncher(QMainWindow):
             PolynomialGeneratorWidget = module.PolynomialGeneratorWidget  # type: ignore[attr-defined]
 
         except ImportError as e:
-
             QMessageBox.warning(
                 self,
                 "Polynomial Generator Unavailable",
@@ -999,7 +959,6 @@ class HumanoidLauncher(QMainWindow):
             return
 
         except (RuntimeError, TypeError, AttributeError) as e:
-
             QMessageBox.warning(
                 self,
                 "Loading Error",
@@ -1074,13 +1033,11 @@ class HumanoidLauncher(QMainWindow):
         """Open signal processing toolkit dialog."""
 
         try:
-
             from src.shared.python.ui.qt.widgets.signal_toolkit_widget import (
                 SignalToolkitWidget,
             )
 
         except ImportError as e:
-
             QMessageBox.warning(
                 self,
                 "Signal Toolkit Unavailable",
@@ -1091,7 +1048,6 @@ class HumanoidLauncher(QMainWindow):
             return
 
         except (RuntimeError, TypeError, AttributeError) as e:
-
             QMessageBox.warning(
                 self,
                 "Loading Error",
@@ -1163,21 +1119,17 @@ class HumanoidLauncher(QMainWindow):
         dialog.exec()
 
     def browse_file(self, line_edit: QLineEdit, save: bool = False) -> None:
-
         if save:
-
             path, _ = QFileDialog.getSaveFileName(
                 self, "Save State", "", "JSON State (*.json)"
             )
 
         else:
-
             path, _ = QFileDialog.getOpenFileName(
                 self, "Load State", "", "JSON State (*.json)"
             )
 
         if path:
-
             line_edit.setText(path)
 
     def load_config(self) -> None:
@@ -1197,7 +1149,6 @@ class HumanoidLauncher(QMainWindow):
         """Save current configuration to file."""
 
         try:
-
             # Update config object from UI
 
             self.config.height_m = self.spin_height.value()
@@ -1231,15 +1182,12 @@ class HumanoidLauncher(QMainWindow):
             text = self.combo_control.currentText()
 
             if "PD" in text:
-
                 self.config.control_mode = "pd"
 
             elif "LQR" in text:
-
                 self.config.control_mode = "lqr"
 
             elif "Polynomial" in text:
-
                 self.config.control_mode = "poly"
 
             self.config_manager.save(self.config)
@@ -1247,7 +1195,6 @@ class HumanoidLauncher(QMainWindow):
             self.log(f"Config saved to {self.config_path}")
 
         except ImportError as e:
-
             self.log(f"Error saving config: {e}")
 
     def get_simulation_command(self) -> tuple[list[str], dict[str, str] | None]:
@@ -1268,7 +1215,6 @@ class HumanoidLauncher(QMainWindow):
         env = None
 
         if in_docker:
-
             # Running inside the Mujoco Docker container:
 
             # - CWD set to /workspace/engines/physics_engines/mujoco/python
@@ -1302,11 +1248,9 @@ class HumanoidLauncher(QMainWindow):
         mount_path = abs_repo_path
 
         if is_windows:
-
             drive, tail = os.path.splitdrive(abs_repo_path)
 
             if drive:
-
                 drive_letter = drive[0].lower()
 
                 rel_path = tail.replace("\\", "/")
@@ -1318,7 +1262,6 @@ class HumanoidLauncher(QMainWindow):
                 mount_path = wsl_path
 
             else:
-
                 logging.warning(
                     "Repository path '%s' does not start with a drive letter; "
                     "using absolute path directly for Docker mount.",
@@ -1330,7 +1273,6 @@ class HumanoidLauncher(QMainWindow):
                 mount_path = abs_repo_path.replace("\\", "/")
 
         else:
-
             cmd = ["docker", "run"]
 
         cmd.extend(
@@ -1340,9 +1282,7 @@ class HumanoidLauncher(QMainWindow):
         # Display settings
 
         if self.config.live_view:
-
             if is_windows:
-
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
 
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
@@ -1358,7 +1298,6 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
 
             else:
-
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
 
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
@@ -1368,7 +1307,6 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])  # nosec B108
 
         else:
-
             cmd.extend(["-e", "MUJOCO_GL=osmesa"])
 
         # Image and Command
@@ -1403,25 +1341,21 @@ class HumanoidLauncher(QMainWindow):
         """Plot Induced Acceleration Analysis from CSV."""
 
         if not HAS_MATPLOTLIB:
-
             return
 
         csv_path = self.current_dir.parent / "docker" / "src" / "golf_data.csv"
 
         if not csv_path.exists():
-
             QMessageBox.warning(self, "No Data", "golf_data.csv not found.")
 
             return
 
         try:
-
             # Read CSV headers to find joints
 
             joints = set()
 
             with open(csv_path) as f:
-
                 reader = csv.reader(f)
 
                 headers = next(reader)
@@ -1431,21 +1365,17 @@ class HumanoidLauncher(QMainWindow):
             # type is g, c, t, total
 
             for h in headers:
-
                 if h.startswith("iaa_") and h.endswith("_total"):
-
                     # Extract joint name: iaa_HEAD_total
 
                     parts = h.split("_")
 
                     if len(parts) >= 3:
-
                         joint = "_".join(parts[1:-1])
 
                         joints.add(joint)
 
             if not joints:
-
                 QMessageBox.warning(
                     self,
                     "No IAA Data",
@@ -1463,7 +1393,6 @@ class HumanoidLauncher(QMainWindow):
             )
 
             if not ok or not joint:
-
                 return
 
             # Read Data
@@ -1489,15 +1418,11 @@ class HumanoidLauncher(QMainWindow):
             col_tot = f"iaa_{joint}_total"
 
             with open(csv_path) as f:
-
                 reader = csv.DictReader(f)  # type: ignore[assignment]
 
                 for row_dict in reader:
-
                     if isinstance(row_dict, dict):
-
                         try:
-
                             times.append(float(row_dict.get("time", "0")))
 
                             g_vals.append(float(row_dict.get(col_g, "0")))
@@ -1509,11 +1434,9 @@ class HumanoidLauncher(QMainWindow):
                             tot_vals.append(float(row_dict.get(col_tot, "0")))
 
                         except (ValueError, KeyError):
-
                             continue
 
             if not times:
-
                 return
 
             # Plot
@@ -1541,11 +1464,9 @@ class HumanoidLauncher(QMainWindow):
             plt.show()
 
         except (FileNotFoundError, PermissionError, OSError) as e:
-
             QMessageBox.critical(self, "Plot Error", str(e))
 
     def start_simulation(self) -> None:
-
         self.save_config()
 
         self.log("Starting simulation...")
@@ -1569,17 +1490,13 @@ class HumanoidLauncher(QMainWindow):
         self.btn_stop.setEnabled(True)
 
     def stop_simulation(self) -> None:
-
         if self.simulation_thread:
-
             self.log("Stopping simulation...")
 
             self.simulation_thread.stop()
 
     def on_simulation_finished(self, code: int, stderr: str) -> None:
-
         if code == 0:
-
             self.log("Simulation finished successfully.")
 
             self.btn_video.setEnabled(True)
@@ -1587,7 +1504,6 @@ class HumanoidLauncher(QMainWindow):
             self.btn_data.setEnabled(True)
 
         elif code == 139:
-
             self.log(f"Simulation failed with code {code} (Segmentation Fault).")
 
             self.log(
@@ -1604,7 +1520,6 @@ class HumanoidLauncher(QMainWindow):
             )
 
         else:
-
             self.log(f"Simulation failed with code {code}.")
 
         self.btn_run.setEnabled(True)
@@ -1614,7 +1529,6 @@ class HumanoidLauncher(QMainWindow):
         # Handle segmentation fault with user prompt for headless mode
 
         if code == 139:
-
             reply = QMessageBox.question(
                 self,
                 "Simulation Crashed (X11 Error)",
@@ -1628,7 +1542,6 @@ class HumanoidLauncher(QMainWindow):
             )
 
             if reply == QMessageBox.StandardButton.Yes:
-
                 self.log("Switching to Headless Mode and retrying...")
 
                 self.chk_live.setChecked(False)  # Uncheck box
@@ -1638,7 +1551,6 @@ class HumanoidLauncher(QMainWindow):
                 self.start_simulation()
 
     def rebuild_docker(self) -> None:
-
         reply = QMessageBox.question(
             self,
             "Rebuild Environment",
@@ -1647,7 +1559,6 @@ class HumanoidLauncher(QMainWindow):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-
             self.log(
                 "Rebuilding Docker environment... "
                 "(This functionality is simplified here, check terminal)"
@@ -1670,48 +1581,38 @@ class HumanoidLauncher(QMainWindow):
             self.build_thread.start()
 
     def open_video(self) -> None:
-
         vid_path = self.repo_path / "docker" / "src" / "humanoid_golf.mp4"
 
         self._open_file(vid_path)
 
     def open_data(self) -> None:
-
         csv_path = self.repo_path / "docker" / "src" / "golf_data.csv"
 
         self._open_file(csv_path)
 
     def _open_file(self, path: Path) -> None:
-
         if not path.exists():
-
             QMessageBox.warning(self, "Error", f"File not found: {path}")
 
             return
 
         if platform.system() == "Windows" and hasattr(os, "startfile"):
-
             # Ensure path exists before opening
 
             if path.exists():
-
                 os.startfile(str(path))
 
             else:
-
                 logging.error(f"Cannot open non-existent file: {path}")
 
         elif platform.system() == "Darwin":
-
             subprocess.run(["open", str(path)], check=False)
 
         else:
-
             subprocess.run(["xdg-open", str(path)], check=False)
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
 
     # Global Stylesheet for Rounded Buttons and Modern Look

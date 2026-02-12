@@ -78,7 +78,16 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
         main_layout.addWidget(splitter)
 
-        # -------- Club Data Section --------
+        splitter.addWidget(self._create_club_data_section())
+        splitter.addWidget(self._create_player_target_section())
+        splitter.addWidget(self._create_target_overlay_section())
+        splitter.addWidget(self._create_tracking_section())
+
+        # Set initial sizes
+        splitter.setSizes([200, 250, 150, 100])
+
+    def _create_club_data_section(self) -> QtWidgets.QGroupBox:
+        """Create the club specifications section."""
         club_group = QtWidgets.QGroupBox("Club Specifications")
         club_layout = QtWidgets.QVBoxLayout(club_group)
 
@@ -128,9 +137,10 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         details_layout.addRow("MOI:", self.lbl_club_moi)
 
         club_layout.addLayout(details_layout)
-        splitter.addWidget(club_group)
+        return club_group
 
-        # -------- Player Target Section --------
+    def _create_player_target_section(self) -> QtWidgets.QGroupBox:
+        """Create the professional player targets section."""
         player_group = QtWidgets.QGroupBox("Professional Player Targets")
         player_layout = QtWidgets.QVBoxLayout(player_group)
 
@@ -172,9 +182,10 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         metrics_layout.addRow("Smash Factor:", self.lbl_smash)
 
         player_layout.addWidget(metrics_group)
-        splitter.addWidget(player_group)
+        return player_group
 
-        # -------- Target Overlay Section --------
+    def _create_target_overlay_section(self) -> QtWidgets.QGroupBox:
+        """Create the target visualization overlay section."""
         overlay_group = QtWidgets.QGroupBox("Target Visualization")
         overlay_layout = QtWidgets.QVBoxLayout(overlay_group)
 
@@ -237,9 +248,10 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
         overlay_layout.addLayout(color_layout)
 
-        splitter.addWidget(overlay_group)
+        return overlay_group
 
-        # -------- Tracking Section --------
+    def _create_tracking_section(self) -> QtWidgets.QGroupBox:
+        """Create the real-time tracking error section."""
         tracking_group = QtWidgets.QGroupBox("Real-time Tracking Error")
         tracking_layout = QtWidgets.QFormLayout(tracking_group)
 
@@ -251,10 +263,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         tracking_layout.addRow("Velocity Error:", self.lbl_velocity_error)
         tracking_layout.addRow("Current Phase:", self.lbl_phase)
 
-        splitter.addWidget(tracking_group)
-
-        # Set initial sizes
-        splitter.setSizes([200, 250, 150, 100])
+        return tracking_group
 
     def _auto_load_data(self) -> None:
         """Automatically load data from default location if available."""

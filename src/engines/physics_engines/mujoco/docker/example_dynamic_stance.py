@@ -153,129 +153,106 @@ def customize_model(physics) -> None:
             physics.model.geom_rgba[i] = BLACK_SHOES
 
 
-def main() -> None:
-    """Run the dynamic stance example."""
-    logger.info("Locating CMU Humanoid MJCF...")
-    xml_path = get_cmu_xml_path()
+def _load_and_patch_xml(xml_path):
+    """Load the CMU Humanoid XML, patch it, and return compiled physics.
 
-    physics = None
-    env = None
+    Returns the compiled physics object, or None if patching fails.
+    """
+    if not os.path.exists(xml_path):
+        raise FileNotFoundError(f"XML not found at {xml_path}")
 
+    logger.info("Found XML: %s", xml_path)
+
+    with open(xml_path) as f:
+        xml_string = f.read()
+
+    logger.info("--- XML HEADER DEBUG ---")
+    logger.info("%s", "\n".join(xml_string.split("\n")[:20]))
+    logger.info("------------------------")
+
+    # Build assets dictionary for included files
+    suite_dir = os.path.dirname(xml_path)
+    common_dir = os.path.join(suite_dir, "common")
+    assets = {}
+    for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
+        path = os.path.join(common_dir, filename)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                assets[f"./common/{filename}"] = f.read()
+
+    # FIX XML ERROR: "repeated default class name"
+    xml_string = xml_string.replace('class="main"', 'class="main_custom"')
+
+    # Load directly from string with assets
+    root = mjcf.from_xml_string(xml_string, assets=assets)
+
+    # Add Golf Club
+    _attach_golf_club(root)
+
+    # Add Custom "Face-On" Camera
+    _add_face_on_camera(root)
+
+    # Compile
+    physics = mjcf.Physics.from_mjcf_model(root)
+    logger.info("Successfully compiled modified model with Golf Club and Camera!")
+    return physics
+
+
+def _attach_golf_club(root):
+    """Attach a golf club geometry to the right hand body."""
+    rhand = root.find("body", "rhand")
+    if rhand:
+        logger.info("Attaching golf club to rhand...")
+        # Club Shaft (Silver)
+        rhand.add(
+            "geom",
+            name="golf_club_shaft",
+            type="cylinder",
+            size=[0.02, 0.5],
+            pos=[0, 0, -0.6],
+            quat=[1, 0, 0, 0],
+            rgba=[0.8, 0.8, 0.8, 1],
+            mass=0.5,
+        )
+        # Club Head (Silver/Dark)
+        rhand.add(
+            "geom",
+            name="golf_club_head",
+            type="box",
+            size=[0.06, 0.12, 0.04],
+            pos=[0, 0.05, -1.1],
+            rgba=[0.7, 0.7, 0.7, 1],
+        )
+
+
+def _add_face_on_camera(root):
+    """Add a face-on camera to the worldbody."""
+    worldbody = root.find("worldbody", "world")
+    if worldbody:
+        logger.info("Adding 'face_on' camera...")
+        worldbody.add(
+            "camera",
+            name="face_on",
+            pos=[2.5, 0, 1.4],
+            mode="targetbody",
+            target="root",
+        )
+
+
+def _setup_physics(xml_path):
+    """Set up physics, falling back to suite.load if patching fails."""
     try:
-        if not os.path.exists(xml_path):
-            raise FileNotFoundError(f"XML not found at {xml_path}")
-
-        logger.info("Found XML: %s", xml_path)
-
-        # READ AND PATCH XML
-        with open(xml_path) as f:
-            xml_string = f.read()
-
-        logger.info("--- XML HEADER DEBUG ---")
-        logger.info("%s", "\n".join(xml_string.split("\n")[:20]))
-        logger.info("------------------------")
-
-        # FIX ASSET PATHS
-        # The XML uses <include file="./common/skybox.xml"/>
-        # We need to resolve these relative to the XML's directory.
-        suite_dir = os.path.dirname(xml_path)
-        common_dir = os.path.join(suite_dir, "common")
-
-        # Create an assets dictionary mapping filenames to content/paths?
-        # dm_control expects assets dict: { 'filename': binary_content } usually.
-        # But we can also pass the 'dir' to a loader? No, from_xml_string
-        # takes 'assets'.
-
-        # Easier fix: replace './common/' in the XML string with absolute path?
-        # No, mujoco doesn't always like absolute paths in includes if
-        # security dictating.
-        # But let's try replacing './common/' with the absolute path string.
-        # xml_string = xml_string.replace('./common/', f'{common_dir}/')
-
-        # BETTER: Use mjcf.from_path(xml_path) but patch the ElementTree
-        # *after* loading?
-        # But the error "repeated default class name" happened *during* load
-        # (validation).
-
-        # Let's try supplying the assets dictionary.
-        assets = {}
-        for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
-            path = os.path.join(common_dir, filename)
-            if os.path.exists(path):
-                with open(path, "rb") as f:
-                    # Key must match the include file attribute exactly?
-                    # <include file="./common/skybox.xml"/> -> key "./common/skybox.xml"
-                    assets[f"./common/{filename}"] = f.read()
-
-        # FIX XML ERROR: "repeated default class name"
-        xml_string = xml_string.replace('class="main"', 'class="main_custom"')
-
-        # Load directly from string with assets
-        root = mjcf.from_xml_string(xml_string, assets=assets)
-
-        # If we got here, great. If not, the previous code failed here.
-        # The PREVIOUS trace failed at `mjcf.from_path(xml_path)`.
-
-        # Add Golf Club
-        rhand = root.find("body", "rhand")
-        if rhand:
-            logger.info("Attaching golf club to rhand...")
-            # Club Shaft (Silver)
-            # Reduced length 0.9 -> 0.5 (Total length ~1m)
-            rhand.add(
-                "geom",
-                name="golf_club_shaft",
-                type="cylinder",
-                size=[0.02, 0.5],
-                pos=[0, 0, -0.6],
-                quat=[1, 0, 0, 0],
-                rgba=[0.8, 0.8, 0.8, 1],
-                mass=0.5,
-            )
-            # Club Head (Silver/Dark)
-            rhand.add(
-                "geom",
-                name="golf_club_head",
-                type="box",
-                size=[0.06, 0.12, 0.04],
-                pos=[0, 0.05, -1.1],
-                rgba=[0.7, 0.7, 0.7, 1],
-            )  # Adjusted pos for shorter shaft
-
-        # Add Custom "Face-On" Camera
-        worldbody = root.find("worldbody", "world")
-        # Assuming Humanoid faces +X or +Y?
-        # "back" camera is usually behind. "side" is side.
-        # Let's try placing one at X=3, Y=0, Z=1.5 looking at target.
-        if worldbody:
-            logger.info("Adding 'face_on' camera...")
-            # mode="targetbody" target="root"
-            worldbody.add(
-                "camera",
-                name="face_on",
-                pos=[2.5, 0, 1.4],
-                mode="targetbody",
-                target="root",
-            )
-
-        # Compile
-        physics = mjcf.Physics.from_mjcf_model(root)
-        logger.info("Successfully compiled modified model with Golf Club and Camera!")
-
+        physics = _load_and_patch_xml(xml_path)
     except ImportError as e:
-        logger.error("⚠️ Warning: MJCF patching failed: %s", e)
+        logger.error("Warning: MJCF patching failed: %s", e)
         logger.info("Falling back to standard suite.load (No Club/Camera).")
         env = suite.load(domain_name="humanoid_CMU", task_name="stand")
         physics = env.physics
+    return physics
 
-    # Map actuators
-    actuators = {}
-    for i in range(physics.model.nu):
-        name = physics.model.id2name(i, "actuator")
-        if name:
-            actuators[name] = i
 
-    # List Cameras
+def _find_face_on_camera(physics):
+    """Find the face_on camera id, defaulting to 0."""
     logger.info("\nAvailable Cameras:")
     ncam = physics.model.ncam
     camera_id = 0
@@ -284,18 +261,12 @@ def main() -> None:
         logger.info("Camera %s: %s", i, name)
         if name == "face_on":
             camera_id = i
+    return camera_id
 
-    # Customize (Colors + Size)
-    customize_model(physics)
 
-    # Reset and SET INITIAL POSE
+def _set_initial_pose(physics):
+    """Reset physics and set the initial address pose."""
     with physics.reset_context():
-        # Set Root Position (Height)
-        # Root is typically first qpos [0-6]
-        # Z-height is index 2.
-        # T-pose default is high. Let's start him lower so feet touch ground.
-        # Trial and error: 1.3 was too high. Try 0.95 (CMU model is often
-        # smaller/different scale).
         # Z-height 0.96 adjusted empirically for CMU model to ensure feet
         # contact ground.
         physics.data.qpos[2] = 0.96
@@ -304,13 +275,14 @@ def main() -> None:
         # This prevents the "T-pose" start.
         for joint, angle in TARGET_POSE.items():
             try:
-                # Direct named access is preferred and safer than .get() which
-                # returns value
                 if joint in physics.named.data.qpos:
                     physics.named.data.qpos[joint] = angle
             except (RuntimeError, ValueError, AttributeError):
                 pass
 
+
+def _run_simulation_loop(physics, actuators, camera_id):
+    """Run the simulation loop, recording frames and saving video."""
     logger.info("Simulating...")
     frames = []
     fps = 30
@@ -330,8 +302,6 @@ def main() -> None:
         physics.step()
 
         # Render
-        # Uses the camera_id found above (defaults to 0, sets to 'face_on'
-        # index if found)
         pixels = physics.render(height=480, width=640, camera_id=camera_id)
         frames.append(pixels)
 
@@ -341,6 +311,34 @@ def main() -> None:
     filename = "humanoid_dynamic_stance.mp4"
     imageio.mimsave(filename, frames, fps=fps)
     logger.info("Saved to %s", filename)
+
+
+def main() -> None:
+    """Run the dynamic stance example."""
+    logger.info("Locating CMU Humanoid MJCF...")
+    xml_path = get_cmu_xml_path()
+
+    # Setup physics (with XML patching or fallback)
+    physics = _setup_physics(xml_path)
+
+    # Map actuators
+    actuators = {}
+    for i in range(physics.model.nu):
+        name = physics.model.id2name(i, "actuator")
+        if name:
+            actuators[name] = i
+
+    # Find camera
+    camera_id = _find_face_on_camera(physics)
+
+    # Customize (Colors + Size)
+    customize_model(physics)
+
+    # Reset and SET INITIAL POSE
+    _set_initial_pose(physics)
+
+    # Run simulation loop and save video
+    _run_simulation_loop(physics, actuators, camera_id)
 
 
 if __name__ == "__main__":

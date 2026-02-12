@@ -199,55 +199,25 @@ class MotionDataLoader:
         except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"Error loading Excel data: {e}") from e
 
-    def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
-        """Process and clean sheet data"""
-        logger.info("[PROC] Processing %s data...", sheet_name)
+    def _extract_time_column(self, data_df, sheet_name):
+        """Extract or create the time column from processed sheet data.
 
-        # Based on the analysis, the structure is:
-        # Row 0: Metadata (ball type, parameters)
-        # Row 1: Point labels (Mid-hands, Center of club face)
-        # Row 2: Column headers (Sample #, Time, X, Y, Z, Xx, Xy, Xz,
-        #                        Yx, Yy, Yz, Zx, Zy, Zz)
-        # Row 3+: Actual data
-
-        if len(df) < 3:
-            logger.info(
-                "[WARN] Insufficient rows in %s, creating dummy data", sheet_name
-            )
-            return self._create_dummy_data(100)
-
-        # Extract headers from row 2 (index 2)
-        headers = df.iloc[2]
-        data_df = df.iloc[3:].copy()
-        data_df.columns = headers
-
-        # Reset index
-        data_df = data_df.reset_index(drop=True)
-
-        # Extract time and position data
-        processed_data = pd.DataFrame()
-
-        # Time column (column 1)
+        Returns a pandas Series for the time column.
+        """
         if len(data_df.columns) >= 2:
-            processed_data["time"] = pd.to_numeric(data_df.iloc[:, 1], errors="coerce")
             logger.info("[OK] Extracted time data from column 1 for %s", sheet_name)
-        else:
-            logger.info(
-                "[WARN] No Time column found in %s, creating linear time", sheet_name
-            )
-            processed_data["time"] = np.linspace(0, 1, len(data_df))
+            return pd.to_numeric(data_df.iloc[:, 1], errors="coerce")
 
-        # Map the actual columns to our expected format
-        # The data has position (X, Y, Z) and orientation
-        # (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) data
-        # We'll use the position data for the clubhead and create
-        # reasonable estimates for other body parts
+        logger.info(
+            "[WARN] No Time column found in %s, creating linear time", sheet_name
+        )
+        return pd.Series(np.linspace(0, 1, len(data_df)))
 
-        # Clubhead position (using X, Y, Z columns)
-        # The data has two sets of position data: columns 2-4 (Mid-hands)
-        # and 14-16 (Center of club face)
-        # We'll use the first set (Mid-hands) as the primary position data
+    def _extract_clubhead_position(self, data_df, processed_data, sheet_name):
+        """Extract clubhead XYZ position columns from the sheet data.
 
+        Modifies processed_data in place by adding clubhead_x/y/z columns.
+        """
         # Check for position columns by index (more reliable than name matching)
         if len(data_df.columns) >= 16:
             # Use the first set of X, Y, Z (columns 2, 3, 4)
@@ -290,11 +260,11 @@ class MotionDataLoader:
                 processed_data["clubhead_y"] = np.linspace(0, 1, len(processed_data))
                 processed_data["clubhead_z"] = np.linspace(0, 1, len(processed_data))
 
-        # Create reasonable estimates for other body parts based on clubhead position
-        # This is a simplified model - in a real application, you'd want
-        # more sophisticated biomechanical modeling
-        self._create_body_part_estimates(processed_data, sheet_name)
+    def _apply_post_processing(self, processed_data):
+        """Apply normalization, noise filtering, and interpolation to processed data.
 
+        Returns the post-processed DataFrame.
+        """
         # Convert to numeric and handle errors
         numeric_columns = [col for col in processed_data.columns if col != "time"]
         for col in numeric_columns:
@@ -313,6 +283,42 @@ class MotionDataLoader:
         # Interpolate missing values if requested
         if self.config.interpolate_missing:
             processed_data = self._interpolate_missing_values(processed_data)
+
+        return processed_data
+
+    def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
+        """Process and clean sheet data"""
+        logger.info("[PROC] Processing %s data...", sheet_name)
+
+        # Based on the analysis, the structure is:
+        # Row 0: Metadata (ball type, parameters)
+        # Row 1: Point labels (Mid-hands, Center of club face)
+        # Row 2: Column headers (Sample #, Time, X, Y, Z, Xx, Xy, Xz,
+        #                        Yx, Yy, Yz, Zx, Zy, Zz)
+        # Row 3+: Actual data
+
+        if len(df) < 3:
+            logger.info(
+                "[WARN] Insufficient rows in %s, creating dummy data", sheet_name
+            )
+            return self._create_dummy_data(100)
+
+        # Extract headers from row 2 (index 2)
+        headers = df.iloc[2]
+        data_df = df.iloc[3:].copy()
+        data_df.columns = headers
+        data_df = data_df.reset_index(drop=True)
+
+        # Extract time and position data
+        processed_data = pd.DataFrame()
+        processed_data["time"] = self._extract_time_column(data_df, sheet_name)
+
+        self._extract_clubhead_position(data_df, processed_data, sheet_name)
+
+        # Create reasonable estimates for other body parts based on clubhead position
+        self._create_body_part_estimates(processed_data, sheet_name)
+
+        processed_data = self._apply_post_processing(processed_data)
 
         time_min = processed_data["time"].min()
         time_max = processed_data["time"].max()

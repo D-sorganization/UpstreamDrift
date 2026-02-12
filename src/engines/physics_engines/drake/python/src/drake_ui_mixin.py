@@ -65,13 +65,35 @@ class DrakeUIMixin:
     - Overlay dialog for body frame/COM toggles
     """
 
-    def _setup_ui(self: Any) -> None:  # noqa: PLR0915
+    def _setup_ui(self: Any) -> None:
         """Build the PyQt Interface."""
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
 
         # 0. Model Selector
+        self._setup_model_selector(layout)
+
+        # 1. Mode Selector
+        self._setup_mode_selector(layout)
+
+        # 2. Controls Area (Tabs + Stack)
+        self._setup_controls_tabs(layout)
+
+        # 3. Visualization Toggles
+        self._setup_visualization_panel(layout)
+
+        # 4. Matrix Analysis
+        self._setup_matrix_analysis_panel(layout)
+
+        # Status Bar
+        self._update_status("Ready")
+
+        # Populate Kinematic Sliders
+        self._build_kinematic_controls()
+
+    def _setup_model_selector(self: Any, layout: Any) -> None:
+        """Build the model selection group box."""
         model_group = QtWidgets.QGroupBox("Model Selection")
         model_layout = QtWidgets.QHBoxLayout()
         self.model_combo = QtWidgets.QComboBox()
@@ -83,7 +105,8 @@ class DrakeUIMixin:
         model_group.setLayout(model_layout)
         layout.addWidget(model_group)
 
-        # 1. Mode Selector
+    def _setup_mode_selector(self: Any, layout: Any) -> None:
+        """Build the operating mode group box."""
         mode_group = QtWidgets.QGroupBox("Operating Mode")
         mode_layout = QtWidgets.QHBoxLayout()
         self.mode_combo = QtWidgets.QComboBox()
@@ -100,7 +123,8 @@ class DrakeUIMixin:
         mode_group.setLayout(mode_layout)
         layout.addWidget(mode_group)
 
-        # 2. Controls Area (Stack)
+    def _setup_controls_tabs(self: Any, layout: Any) -> None:
+        """Build the main tab widget with simulation controls and live analysis."""
         self.main_tab_widget = QtWidgets.QTabWidget()
         layout.addWidget(self.main_tab_widget)
 
@@ -111,7 +135,23 @@ class DrakeUIMixin:
         self.controls_stack = QtWidgets.QStackedWidget()
         sim_tab_layout.addWidget(self.controls_stack)
 
-        # -- Page 1: Dynamic Controls
+        self._setup_dynamic_controls_page()
+        self._setup_kinematic_controls_page()
+
+        self.main_tab_widget.addTab(self.sim_tab, "Simulation Control")
+
+        # Tab 2: Live Analysis (LivePlotWidget)
+        if LivePlotWidget is not None:
+            self.live_tab = QtWidgets.QWidget()
+            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
+            self.live_plot = LivePlotWidget(self.recorder)
+            # Pre-populate joint names
+            self.live_plot.set_joint_names(self.get_joint_names())
+            live_layout.addWidget(self.live_plot)
+            self.main_tab_widget.addTab(self.live_tab, "Live Analysis")
+
+    def _setup_dynamic_controls_page(self: Any) -> None:
+        """Build the dynamic simulation controls page."""
         dynamic_page = QtWidgets.QWidget()
         dyn_layout = QtWidgets.QVBoxLayout(dynamic_page)
 
@@ -134,6 +174,13 @@ class DrakeUIMixin:
         dyn_layout.addWidget(self.btn_reset)
 
         # Recording & Analysis
+        self._setup_analysis_group(dyn_layout)
+
+        dyn_layout.addStretch()
+        self.controls_stack.addWidget(dynamic_page)
+
+    def _setup_analysis_group(self: Any, parent_layout: Any) -> None:
+        """Build the recording and post-hoc analysis group box."""
         analysis_group = QtWidgets.QGroupBox("Recording & Post-Hoc Analysis")
         analysis_layout = QtWidgets.QVBoxLayout()
 
@@ -188,12 +235,10 @@ class DrakeUIMixin:
         analysis_layout.addWidget(self.btn_export)
 
         analysis_group.setLayout(analysis_layout)
-        dyn_layout.addWidget(analysis_group)
+        parent_layout.addWidget(analysis_group)
 
-        dyn_layout.addStretch()
-        self.controls_stack.addWidget(dynamic_page)
-
-        # -- Page 2: Kinematic Controls
+    def _setup_kinematic_controls_page(self: Any) -> None:
+        """Build the kinematic controls page with joint sliders scroll area."""
         kinematic_page = QtWidgets.QWidget()
         kin_layout = QtWidgets.QVBoxLayout(kinematic_page)
 
@@ -206,19 +251,8 @@ class DrakeUIMixin:
         kin_layout.addWidget(scroll)
         self.controls_stack.addWidget(kinematic_page)
 
-        self.main_tab_widget.addTab(self.sim_tab, "Simulation Control")
-
-        # Tab 2: Live Analysis (LivePlotWidget)
-        if LivePlotWidget is not None:
-            self.live_tab = QtWidgets.QWidget()
-            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
-            self.live_plot = LivePlotWidget(self.recorder)
-            # Pre-populate joint names
-            self.live_plot.set_joint_names(self.get_joint_names())
-            live_layout.addWidget(self.live_plot)
-            self.main_tab_widget.addTab(self.live_tab, "Live Analysis")
-
-        # 3. Visualization Toggles
+    def _setup_visualization_panel(self: Any, layout: Any) -> None:
+        """Build the visualization toggles group box."""
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
 
@@ -265,6 +299,13 @@ class DrakeUIMixin:
         vis_layout.addWidget(manip_group)
 
         # Advanced Vectors
+        self._setup_advanced_vectors(vis_layout)
+
+        vis_group.setLayout(vis_layout)
+        layout.addWidget(vis_group)
+
+    def _setup_advanced_vectors(self: Any, vis_layout: Any) -> None:
+        """Build the advanced vector controls (induced accel, counterfactual combos)."""
         vec_grid = QtWidgets.QGridLayout()
 
         self.chk_induced_vec = QtWidgets.QCheckBox("Induced Vectors")
@@ -298,10 +339,8 @@ class DrakeUIMixin:
 
         vis_layout.addLayout(vec_grid)
 
-        vis_group.setLayout(vis_layout)
-        layout.addWidget(vis_group)
-
-        # Matrix Analysis
+    def _setup_matrix_analysis_panel(self: Any, layout: Any) -> None:
+        """Build the matrix analysis group box (Jacobian condition, constraint rank)."""
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)
         self.lbl_cond = QtWidgets.QLabel("--")
@@ -309,12 +348,6 @@ class DrakeUIMixin:
         matrix_layout.addRow("Jacobian Cond:", self.lbl_cond)
         matrix_layout.addRow("Constraint Rank:", self.lbl_rank)
         layout.addWidget(matrix_group)
-
-        # Status Bar
-        self._update_status("Ready")
-
-        # Populate Kinematic Sliders
-        self._build_kinematic_controls()
 
     def _build_kinematic_controls(self: Any) -> None:  # noqa: PLR0915
         """Create sliders for all joints."""

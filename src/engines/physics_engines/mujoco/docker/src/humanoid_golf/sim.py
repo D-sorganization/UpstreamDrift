@@ -310,12 +310,8 @@ def load_state(physics, filename) -> None:
             logger.error("Error loading state: %s", e)
 
 
-def run_simulation(
-    output_video="humanoid_golf.mp4", output_data="golf_data.csv", duration=3.0
-) -> None:
-    """Run the golf simulation."""
-    # 1. Load Config
-    logger.info("Loading configuration...")
+def _load_simulation_config():
+    """Load and return the simulation configuration from disk."""
     config = {}
     if os.path.exists("simulation_config.json"):
         try:
@@ -323,13 +319,14 @@ def run_simulation(
                 config = json.load(f)
         except (FileNotFoundError, PermissionError, OSError):
             pass
+    return config
 
-    logger.info(
-        "DISPLAY environment variable: %s",
-        os.environ.get("DISPLAY", "Not Set"),
-    )
 
-    # Extract Params
+def _extract_simulation_params(config, duration):
+    """Extract simulation parameters from config dict.
+
+    Returns a dict with all extracted parameters.
+    """
     control_mode = config.get("control_mode", "pd")
     use_viewer = config.get("live_view", False)
     # Override: If the environment is set up for GLFW/Live, force viewer to avoid
@@ -342,38 +339,238 @@ def run_simulation(
     # Use duration from config if specified, otherwise use function parameter
     duration = config.get("simulation_duration", duration)
 
-    if use_viewer:
-        logger.info("%s", "\n" + "=" * 50)
-        logger.info("VIEWER CONTROLS:")
-        logger.info("  [Space]     : Pause / Unpause")
-        logger.info("  [Backspace] : Restart Episode (Reset to Address)")
-        logger.info("  [F]         : Toggle Contact Forces")
-        logger.info("  [C]         : Toggle Contact Constraints")
-        logger.info("  [T]         : Toggle Translucency")
-        logger.info("  [H]         : Toggle Help info")
-        logger.info("=" * 50 + "\n")
-
     club_params = {
         "length": float(config.get("club_length", 1.0)),
         "mass": float(config.get("club_mass", 0.5)),
         "head_size": 1.0,
     }
-    two_handed = config.get("two_handed", False)
-    enhance_face = config.get("enhance_face", False)
-    articulated_fingers = config.get("articulated_fingers", False)
 
-    target_height = float(config.get("height_m", 1.8))
-    weight_percent = float(config.get("weight_percent", 100.0))
+    return {
+        "control_mode": control_mode,
+        "use_viewer": use_viewer,
+        "save_path": save_path,
+        "load_path": load_path,
+        "duration": duration,
+        "club_params": club_params,
+        "two_handed": config.get("two_handed", False),
+        "enhance_face": config.get("enhance_face", False),
+        "articulated_fingers": config.get("articulated_fingers", False),
+        "target_height": float(config.get("height_m", 1.8)),
+        "weight_percent": float(config.get("weight_percent", 100.0)),
+    }
 
-    # 2. Setup Physics
+
+def _log_viewer_controls():
+    """Log the available viewer keyboard controls."""
+    logger.info("%s", "\n" + "=" * 50)
+    logger.info("VIEWER CONTROLS:")
+    logger.info("  [Space]     : Pause / Unpause")
+    logger.info("  [Backspace] : Restart Episode (Reset to Address)")
+    logger.info("  [F]         : Toggle Contact Forces")
+    logger.info("  [C]         : Toggle Contact Constraints")
+    logger.info("  [T]         : Toggle Translucency")
+    logger.info("  [H]         : Toggle Help info")
+    logger.info("=" * 50 + "\n")
+
+
+def _setup_controller(control_mode, physics, actuators, target_height):
+    """Create and return the appropriate controller based on mode."""
+    controller: BaseController
+    if control_mode == "lqr":
+        # Calculate height scale (assuming standard 1.56m ref)
+        h_scale = target_height / 1.56
+        controller = LQRController(
+            physics, TARGET_POSE, actuators, height_scale=h_scale
+        )
+    elif control_mode == "poly":
+        controller = PolynomialController(physics)
+    else:
+        # Default to PDController for 'pid' or unknown modes,
+        # ensuring controller is always initialized.
+        controller = PDController(actuators, TARGET_POSE)
+    return controller
+
+
+def _run_viewer_loop(physics, controller, initialize_episode, save_path):
+    """Run the simulation in live viewer mode."""
+    logger.info("Launching Live Viewer...")
+    try:
+        logger.info("Connecting to display servers...")
+
+        def policy(time_step) -> np.ndarray:
+            """Policy function for the viewer."""
+            action = controller.get_action(physics)
+            return action
+
+        # Wrap physics for viewer
+        env_wrapper = PhysicsEnvWrapper(physics, initializer=initialize_episode)
+        viewer.launch(env_wrapper, policy)
+    except (ValueError, TypeError, RuntimeError) as e:
+        logger.error("%s", f"Failed to launch viewer: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise e
+
+    # Post-viewer Save
+    if save_path:
+        save_state(physics, save_path)
+
+
+def _build_csv_header(actuator_names):
+    """Build the CSV header row for simulation data output."""
+    return (
+        ["time"]
+        + [f"pos_{j}" for j in TARGET_POSE]
+        + [f"force_{a}" for a in actuator_names]
+        + [f"iaa_{j}_g" for j in TARGET_POSE]
+        + [f"iaa_{j}_c" for j in TARGET_POSE]
+        + [f"iaa_{j}_t" for j in TARGET_POSE]
+        + [f"iaa_{j}_total" for j in TARGET_POSE]
+    )
+
+
+def _collect_step_data(physics, actuators, actuator_names, iaa):
+    """Collect one row of CSV data for the current simulation step."""
+    row = [physics.data.time]
+    for j in TARGET_POSE:
+        try:
+            val = physics.named.data.qpos[j]
+        except (RuntimeError, ValueError, OSError):
+            val = 0
+        row.append(val)
+    for a in actuator_names:
+        try:
+            idx = actuators[a]
+            val = physics.data.actuator_force[idx]
+        except (RuntimeError, ValueError, OSError):
+            val = 0
+        row.append(val)
+
+    # Append IAA
+    if iaa:
+        for j in TARGET_POSE:
+            try:
+                # Find DOF address
+                j_id = physics.model.name2id(j, "joint")
+                dof_adr = physics.model.jnt_dofadr[j_id]
+
+                g_val = iaa["gravity"][dof_adr]
+                c_val = iaa["coriolis"][dof_adr]
+                t_val = iaa["control"][dof_adr]
+                tot_val = g_val + c_val + t_val
+
+                row.extend([g_val, c_val, t_val, tot_val])
+            except (RuntimeError, ValueError, OSError):
+                row.extend([0, 0, 0, 0])
+    else:
+        # Fill zeros
+        row.extend([0] * (4 * len(TARGET_POSE)))
+
+    return row
+
+
+def _run_headless_loop(
+    physics, controller, actuators, duration, output_video, output_data, save_path
+):
+    """Run the simulation in headless mode, recording video and CSV data."""
+    logger.info("Simulating (Headless) for %ss...", duration)
+    fps = 30
+    steps = int(duration * fps)
+    frames = []
+    data_rows = []
+    actuator_names = sorted(actuators.keys())
+    header = _build_csv_header(actuator_names)
+
+    camera_id = 0
+    for i in range(physics.model.ncam):
+        if physics.model.id2name(i, "camera") == "face_on":
+            camera_id = i
+
+    for i in range(steps):
+        action = controller.get_action(physics)
+        physics.set_control(action)
+        physics.step()
+
+        # Record
+        pixels = physics.render(height=480, width=640, camera_id=camera_id)
+        frames.append(pixels)
+
+        # Compute IAA & CF
+        iaa = iaa_helper.compute_induced_accelerations(physics)
+        cf = iaa_helper.compute_counterfactuals(physics)
+        mass_matrix = iaa_helper.get_mass_matrix(physics)
+
+        # Emit Data Stream
+        try:
+            packet = {
+                "time": physics.data.time,
+                "qpos": physics.data.qpos,
+                "qvel": physics.data.qvel,
+                "qfrc_actuator": physics.data.qfrc_actuator,
+                "iaa": iaa,
+                "cf": cf,
+                "mass_matrix": mass_matrix,
+            }
+            logger.info(
+                "DATA_JSON:%s",
+                json.dumps(packet, default=np_encoder),
+            )
+        except (OSError, ValueError, TypeError) as e:
+            # Avoid crashing loop on serialization error, just log
+            logger.error("%s", f"DEBUG: Data serialization failed: {e}")
+
+        # Log Data (CSV)
+        row = _collect_step_data(physics, actuators, actuator_names, iaa)
+        data_rows.append(row)
+
+        if i % 30 == 0:
+            logger.info("Frame %s/%s", i, steps)
+
+    # Save
+    imageio.mimsave(output_video, frames, fps=fps)
+    with open(output_data, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        writer.writerows(data_rows)
+
+    if save_path:
+        save_state(physics, save_path)
+
+
+def run_simulation(
+    output_video="humanoid_golf.mp4", output_data="golf_data.csv", duration=3.0
+) -> None:
+    """Run the golf simulation."""
+    # 1. Load Config
+    logger.info("Loading configuration...")
+    config = _load_simulation_config()
+
+    logger.info(
+        "DISPLAY environment variable: %s",
+        os.environ.get("DISPLAY", "Not Set"),
+    )
+
+    # 2. Extract Params
+    params = _extract_simulation_params(config, duration)
+    use_viewer = params["use_viewer"]
+    save_path = params["save_path"]
+    load_path = params["load_path"]
+    duration = params["duration"]
+    target_height = params["target_height"]
+
+    if use_viewer:
+        _log_viewer_controls()
+
+    # 3. Setup Physics
     try:
         physics = utils.load_humanoid_with_props(
             target_height=target_height,
-            weight_percent=weight_percent,
-            club_params=club_params,
-            two_handed=two_handed,
-            enhance_face=enhance_face,
-            articulated_fingers=articulated_fingers,
+            weight_percent=params["weight_percent"],
+            club_params=params["club_params"],
+            two_handed=params["two_handed"],
+            enhance_face=params["enhance_face"],
+            articulated_fingers=params["articulated_fingers"],
         )
     except (RuntimeError, ValueError, OSError) as e:
         logger.error("Error loading model: %s", e)
@@ -382,7 +579,7 @@ def run_simulation(
     utils.customize_visuals(physics, config=config)
     actuators = utils.get_actuator_indices(physics)
 
-    # 3. Setup Initialization Logic
+    # 4. Setup Initialization Logic
     def initialize_episode(phys):
         """Initialize episode state from file or default pose."""
         if load_path:
@@ -400,157 +597,26 @@ def run_simulation(
     # Initialize for checking or headless run
     initialize_episode(physics)
 
-    # 4. Setup Controller
-    controller: BaseController
-    if control_mode == "lqr":
-        # Calculate height scale (assuming standard 1.56m ref)
-        h_scale = target_height / 1.56
-        controller = LQRController(
-            physics, TARGET_POSE, actuators, height_scale=h_scale
-        )
-    elif control_mode == "poly":
-        controller = PolynomialController(physics)
-    else:
-        # Default to PDController for 'pid' or unknown modes,
-        # ensuring controller is always initialized.
-        controller = PDController(actuators, TARGET_POSE)
+    # 5. Setup Controller
+    controller = _setup_controller(
+        params["control_mode"], physics, actuators, target_height
+    )
 
-    # 5. Run Loop
+    # 6. Run Loop
     logger.debug("DEBUG: use_viewer=%s, HAS_VIEWER=%s", use_viewer, HAS_VIEWER)
 
     if use_viewer and HAS_VIEWER:
-        logger.info("Launching Live Viewer...")
-        try:
-            logger.info("Connecting to display servers...")
-
-            def policy(time_step) -> np.ndarray:
-                """Policy function for the viewer."""
-                # The viewer passes a TimeStep, but we have access to controller/physics
-                # externally or via wrapper
-                # We need to return action
-                action = controller.get_action(physics)
-                return action
-
-            # Wrap physics for viewer
-            env_wrapper = PhysicsEnvWrapper(physics, initializer=initialize_episode)
-            viewer.launch(env_wrapper, policy)
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error("%s", f"Failed to launch viewer: {e}")
-            import traceback
-
-            traceback.print_exc()
-            raise e
-
-        # Post-viewer Save
-        if save_path:
-            save_state(physics, save_path)
-
+        _run_viewer_loop(physics, controller, initialize_episode, save_path)
     else:
-        # Headless Loop
-        logger.info("Simulating (Headless) for %ss...", duration)
-        fps = 30
-        steps = int(duration * fps)
-        frames = []
-        data_rows = []
-        actuator_names = sorted(actuators.keys())
-        header = (
-            ["time"]
-            + [f"pos_{j}" for j in TARGET_POSE]
-            + [f"force_{a}" for a in actuator_names]
-            + [f"iaa_{j}_g" for j in TARGET_POSE]
-            + [f"iaa_{j}_c" for j in TARGET_POSE]
-            + [f"iaa_{j}_t" for j in TARGET_POSE]
-            + [f"iaa_{j}_total" for j in TARGET_POSE]
+        _run_headless_loop(
+            physics,
+            controller,
+            actuators,
+            duration,
+            output_video,
+            output_data,
+            save_path,
         )
-
-        camera_id = 0
-        for i in range(physics.model.ncam):
-            if physics.model.id2name(i, "camera") == "face_on":
-                camera_id = i
-
-        for i in range(steps):
-            action = controller.get_action(physics)
-            physics.set_control(action)
-            physics.step()
-
-            # Record
-            pixels = physics.render(height=480, width=640, camera_id=camera_id)
-            frames.append(pixels)
-
-            # Compute IAA & CF
-            iaa = iaa_helper.compute_induced_accelerations(physics)
-            cf = iaa_helper.compute_counterfactuals(physics)
-            mass_matrix = iaa_helper.get_mass_matrix(physics)
-
-            # Emit Data Stream
-            try:
-                packet = {
-                    "time": physics.data.time,
-                    "qpos": physics.data.qpos,
-                    "qvel": physics.data.qvel,
-                    "qfrc_actuator": physics.data.qfrc_actuator,
-                    "iaa": iaa,
-                    "cf": cf,
-                    "mass_matrix": mass_matrix,
-                }
-                logger.info(
-                    "DATA_JSON:%s",
-                    json.dumps(packet, default=np_encoder),
-                )
-            except (OSError, ValueError, TypeError) as e:
-                # Avoid crashing loop on serialization error, just log
-                logger.error("%s", f"DEBUG: Data serialization failed: {e}")
-
-            # Log Data (CSV)
-            row = [physics.data.time]
-            for j in TARGET_POSE:
-                try:
-                    val = physics.named.data.qpos[j]
-                except (RuntimeError, ValueError, OSError):
-                    val = 0
-                row.append(val)
-            for a in actuator_names:
-                try:
-                    idx = actuators[a]
-                    val = physics.data.actuator_force[idx]
-                except (RuntimeError, ValueError, OSError):
-                    val = 0
-                row.append(val)
-
-            # Append IAA
-            if iaa:
-                for j in TARGET_POSE:
-                    try:
-                        # Find DOF address
-                        j_id = physics.model.name2id(j, "joint")
-                        dof_adr = physics.model.jnt_dofadr[j_id]
-
-                        g_val = iaa["gravity"][dof_adr]
-                        c_val = iaa["coriolis"][dof_adr]
-                        t_val = iaa["control"][dof_adr]
-                        tot_val = g_val + c_val + t_val
-
-                        row.extend([g_val, c_val, t_val, tot_val])
-                    except (RuntimeError, ValueError, OSError):
-                        row.extend([0, 0, 0, 0])
-            else:
-                # Fill zeros
-                row.extend([0] * (4 * len(TARGET_POSE)))
-
-            data_rows.append(row)
-
-            if i % 30 == 0:
-                logger.info("Frame %s/%s", i, steps)
-
-        # Save
-        imageio.mimsave(output_video, frames, fps=fps)
-        with open(output_data, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(header)
-            writer.writerows(data_rows)
-
-        if save_path:
-            save_state(physics, save_path)
 
 
 if __name__ == "__main__":

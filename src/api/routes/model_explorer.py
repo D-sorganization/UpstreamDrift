@@ -47,34 +47,24 @@ def _find_project_root() -> Path:
     return Path.cwd()
 
 
-def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse:
-    """Parse URDF XML into a tree structure for the model explorer.
+def _parse_urdf_link_nodes(
+    root: ElementTree.Element,
+) -> tuple[list[URDFTreeNode], set[str]]:
+    """Parse link elements into tree nodes.
 
     Args:
-        urdf_content: Raw URDF XML string.
-        file_path: Path to the URDF file.
+        root: The parsed XML root element.
 
     Returns:
-        Model explorer response with tree nodes.
-
-    Raises:
-        ValueError: If the URDF cannot be parsed.
+        Tuple of (link_nodes, link_names).
     """
-    try:
-        root = ElementTree.fromstring(urdf_content)  # noqa: S314
-    except ElementTree.ParseError as e:
-        raise ValueError(f"Invalid URDF XML: {e}") from e
-
-    model_name = root.get("name", "unknown")
     nodes: list[URDFTreeNode] = []
-
-    # Parse links
     link_names: set[str] = set()
+
     for link_elem in root.findall("link"):
         link_name = link_elem.get("name", "unnamed")
         link_names.add(link_name)
 
-        # Extract link properties
         properties: dict[str, Any] = {"type": "link"}
 
         # Visual geometry
@@ -104,9 +94,25 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
             )
         )
 
-    # Parse joints and build parent-child relationships
+    return nodes, link_names
+
+
+def _parse_urdf_joint_nodes(
+    root: ElementTree.Element,
+    nodes: list[URDFTreeNode],
+) -> tuple[int, set[str]]:
+    """Parse joint elements, create joint nodes, and wire parent-child relationships.
+
+    Args:
+        root: The parsed XML root element.
+        nodes: Existing node list (link nodes) to append to and update in place.
+
+    Returns:
+        Tuple of (joint_count, child_links).
+    """
     child_links: set[str] = set()
     joint_count = 0
+
     for joint_elem in root.findall("joint"):
         joint_name = joint_elem.get("name", "unnamed")
         joint_type = joint_elem.get("type", "fixed")
@@ -172,6 +178,33 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
             if node.id == child_node_id:
                 node.parent_id = f"joint_{joint_name}"
                 break
+
+    return joint_count, child_links
+
+
+def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse:
+    """Parse URDF XML into a tree structure for the model explorer.
+
+    Args:
+        urdf_content: Raw URDF XML string.
+        file_path: Path to the URDF file.
+
+    Returns:
+        Model explorer response with tree nodes.
+
+    Raises:
+        ValueError: If the URDF cannot be parsed.
+    """
+    try:
+        root = ElementTree.fromstring(urdf_content)  # noqa: S314
+    except ElementTree.ParseError as e:
+        raise ValueError(f"Invalid URDF XML: {e}") from e
+
+    model_name = root.get("name", "unknown")
+
+    # Parse links and joints into tree nodes
+    nodes, link_names = _parse_urdf_link_nodes(root)
+    joint_count, child_links = _parse_urdf_joint_nodes(root, nodes)
 
     # Find root link (not a child of any joint)
     root_links = link_names - child_links

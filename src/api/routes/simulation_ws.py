@@ -18,6 +18,150 @@ class SimulationFrame(BaseModel):
     analysis: dict | None = None
 
 
+async def _load_simulation_engine(
+    engine_manager: object,
+    engine_type: str,
+    websocket: WebSocket,
+) -> object | None:
+    """Load and return the physics engine, or send an error and return None.
+
+    Args:
+        engine_manager: The engine manager from app state.
+        engine_type: Engine type string from the URL path.
+        websocket: The active WebSocket connection.
+
+    Returns:
+        The active physics engine, or None if loading failed.
+    """
+    try:
+        enum_type = EngineType(engine_type.upper())
+        success = engine_manager.switch_engine(enum_type)
+        if not success:
+            raise ValueError("Could not load engine")
+
+        engine = engine_manager.get_active_physics_engine()
+        if not engine:
+            raise ValueError("Could not load engine")
+
+        return engine
+    except ValueError:
+        await websocket.send_json({"error": f"Invalid engine: {engine_type}"})
+        return None
+
+
+async def _handle_client_commands(
+    websocket: WebSocket,
+) -> str:
+    """Check for client commands (stop/pause) with a short timeout.
+
+    Returns:
+        One of "continue", "stop", or "pause".
+    """
+    try:
+        msg = await asyncio.wait_for(websocket.receive_json(), timeout=0.001)
+        if msg.get("action") == "stop":
+            return "stop"
+        if msg.get("action") == "pause":
+            return "pause"
+    except TimeoutError:
+        pass  # No message, continue simulation
+    return "continue"
+
+
+async def _wait_for_resume_or_stop(websocket: WebSocket) -> bool:
+    """Wait while paused for a resume or stop command.
+
+    Args:
+        websocket: The active WebSocket connection.
+
+    Returns:
+        True if the simulation should stop, False if it should resume.
+    """
+    await websocket.send_json({"status": "paused"})
+    while True:
+        msg = await websocket.receive_json()
+        if msg.get("action") == "resume":
+            return False
+        if msg.get("action") == "stop":
+            return True
+
+
+async def _run_simulation_loop(
+    websocket: WebSocket,
+    engine: object,
+    config: dict,
+) -> tuple[int, float]:
+    """Execute the simulation loop, streaming frames to the client.
+
+    Args:
+        websocket: The active WebSocket connection.
+        engine: The physics engine instance.
+        config: Simulation configuration dict.
+
+    Returns:
+        Tuple of (frame_count, time_elapsed).
+    """
+    duration = config.get("duration", 3.0)
+    timestep = config.get("timestep", 0.002)
+
+    await websocket.send_json({"status": "running", "duration": duration})
+
+    time_elapsed = 0.0
+    frame = 0
+
+    # Calculate frame skip for ~60fps UI updates
+    target_fps = 60
+    steps_per_second = 1.0 / timestep
+    frame_skip = max(1, int(steps_per_second / target_fps))
+
+    while time_elapsed < duration:
+        command = await _handle_client_commands(websocket)
+        if command == "stop":
+            break
+        if command == "pause":
+            stopped = await _wait_for_resume_or_stop(websocket)
+            if stopped:
+                break
+
+        # Step simulation
+        if hasattr(engine, "step"):
+            engine.step(timestep)
+
+        time_elapsed += timestep
+        frame += 1
+
+        # Send frame data (throttle to ~60fps for UI)
+        if frame % frame_skip == 0:
+            state = {}
+            if hasattr(engine, "get_state"):
+                state = engine.get_state()
+
+            frame_data: dict = {
+                "frame": frame,
+                "time": round(time_elapsed, 4),
+                "state": state,
+            }
+
+            # Include analysis if requested
+            if config.get("live_analysis"):
+                frame_data["analysis"] = {
+                    "joint_angles": (
+                        engine.get_joint_angles()
+                        if hasattr(engine, "get_joint_angles")
+                        else None
+                    ),
+                    "velocities": (
+                        engine.get_velocities()
+                        if hasattr(engine, "get_velocities")
+                        else None
+                    ),
+                }
+
+            await websocket.send_json(frame_data)
+
+    return frame, time_elapsed
+
+
 @router.websocket("/ws/simulate/{engine_type}")
 async def simulation_stream(
     websocket: WebSocket,
@@ -47,99 +191,16 @@ async def simulation_stream(
         config = start_msg.get("config", {})
 
         # Load engine
-        try:
-            enum_type = EngineType(engine_type.upper())
-            # Use switch_engine which is the public API
-            success = engine_manager.switch_engine(enum_type)
-            if not success:
-                raise ValueError("Could not load engine")
-
-            engine = engine_manager.get_active_physics_engine()
-            if not engine:
-                raise ValueError("Could not load engine")
-
-        except ValueError:
-            await websocket.send_json({"error": f"Invalid engine: {engine_type}"})
+        engine = await _load_simulation_engine(engine_manager, engine_type, websocket)
+        if engine is None:
             return
 
         # Set initial state if provided
         if "initial_state" in config and hasattr(engine, "set_state"):
             engine.set_state(config["initial_state"])
 
-        # Simulation parameters
-        duration = config.get("duration", 3.0)
-        timestep = config.get("timestep", 0.002)
-
-        await websocket.send_json({"status": "running", "duration": duration})
-
-        # Run simulation, streaming frames
-        time_elapsed = 0.0
-        frame = 0
-        stopped = False
-
-        # Calculate frame skip for ~60fps UI updates
-        # timestep=0.002 means 500 steps/sec, so skip ~8 frames for 60fps
-        target_fps = 60
-        steps_per_second = 1.0 / timestep
-        frame_skip = max(1, int(steps_per_second / target_fps))
-
-        while time_elapsed < duration and not stopped:
-            # Check for client commands (pause, stop, etc.)
-            try:
-                msg = await asyncio.wait_for(websocket.receive_json(), timeout=0.001)
-                if msg.get("action") == "stop":
-                    stopped = True
-                    break
-                if msg.get("action") == "pause":
-                    await websocket.send_json({"status": "paused"})
-                    # Wait for resume
-                    while True:
-                        msg = await websocket.receive_json()
-                        if msg.get("action") == "resume":
-                            break
-                        if msg.get("action") == "stop":
-                            stopped = True
-                            break
-                    if stopped:
-                        break
-            except TimeoutError:
-                pass  # No message, continue simulation
-
-            # Step simulation
-            if hasattr(engine, "step"):
-                engine.step(timestep)
-
-            time_elapsed += timestep
-            frame += 1
-
-            # Send frame data (throttle to ~60fps for UI)
-            if frame % frame_skip == 0:
-                state = {}
-                if hasattr(engine, "get_state"):
-                    state = engine.get_state()
-
-                frame_data = {
-                    "frame": frame,
-                    "time": round(time_elapsed, 4),
-                    "state": state,
-                }
-
-                # Include analysis if requested
-                if config.get("live_analysis"):
-                    frame_data["analysis"] = {
-                        "joint_angles": (
-                            engine.get_joint_angles()
-                            if hasattr(engine, "get_joint_angles")
-                            else None
-                        ),
-                        "velocities": (
-                            engine.get_velocities()
-                            if hasattr(engine, "get_velocities")
-                            else None
-                        ),
-                    }
-
-                await websocket.send_json(frame_data)
+        # Run simulation loop
+        frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)
 
         # Send completion
         await websocket.send_json(

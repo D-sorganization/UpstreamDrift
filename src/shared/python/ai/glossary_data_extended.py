@@ -7,10 +7,9 @@ Part of the expanded glossary (Issue #764). ~310 entries across 14 categories.
 from __future__ import annotations
 
 
-def get_extended_entries() -> list[dict]:  # noqa: C901
-    """Return extended glossary entries as compact dicts."""
+def _get_analysis_entries_part1() -> list[dict]:
+    """Return analysis glossary entries (part 1)."""
     return [
-        # === ANALYSIS (30) ===
         {
             "key": "drift_metric",
             "term": "Drift Metric",
@@ -92,6 +91,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Vector x satisfying Ax = lambda*x. Eigenvectors of the inertia tensor define principal axes of rotation.",
             "r": ["eigenvalue"],
         },
+    ]
+
+
+def _get_analysis_entries_part2() -> list[dict]:
+    """Return analysis glossary entries (part 2)."""
+    return [
         {
             "key": "principal_component_analysis",
             "term": "Principal Component Analysis (PCA)",
@@ -173,6 +178,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "u": "Hz",
             "r": ["low_pass_filter", "nyquist_frequency"],
         },
+    ]
+
+
+def _get_analysis_entries_part3() -> list[dict]:
+    """Return analysis glossary entries (part 3)."""
+    return [
         {
             "key": "sampling_rate",
             "term": "Sampling Rate",
@@ -255,7 +266,21 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "System output when input changes from 0 to 1 instantaneously. Integral of impulse response. Reveals damping and natural frequency.",
             "r": ["impulse_response", "transfer_function"],
         },
-        # === VALIDATION (20) ===
+    ]
+
+
+def _get_analysis_entries() -> list[dict]:
+    """Return analysis glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_analysis_entries_part1())
+    entries.extend(_get_analysis_entries_part2())
+    entries.extend(_get_analysis_entries_part3())
+    return entries
+
+
+def _get_validation_entries_part1() -> list[dict]:
+    """Return validation glossary entries (part 1)."""
+    return [
         {
             "key": "benchmark",
             "term": "Benchmark",
@@ -332,6 +357,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "CV = (std/mean)*100%. Expresses variability relative to the mean. Used to assess movement consistency across trials.",
             "f": "CV = (sigma/mu)*100%",
         },
+    ]
+
+
+def _get_validation_entries_part2() -> list[dict]:
+    """Return validation glossary entries (part 2)."""
+    return [
         {
             "key": "standard_error_measurement",
             "term": "Standard Error of Measurement",
@@ -407,7 +438,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "f": "F1 = 2PR/(P+R)",
             "r": ["precision_metric", "recall_metric"],
         },
-        # === CONTROL (25) ===
+    ]
+
+
+def _get_validation_entries() -> list[dict]:
+    """Return validation glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_validation_entries_part1())
+    entries.extend(_get_validation_entries_part2())
+    return entries
+
+
+def _get_control_entries_part1() -> list[dict]:
+    """Return control glossary entries (part 1)."""
+    return [
         {
             "key": "pid_controller",
             "term": "PID Controller",
@@ -488,6 +532,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Finding optimal state and control trajectories minimizing a cost functional. Methods: direct collocation, shooting, dynamic programming.",
             "r": ["direct_collocation", "shooting_method", "optimal_control"],
         },
+    ]
+
+
+def _get_control_entries_part2() -> list[dict]:
+    """Return control glossary entries (part 2)."""
+    return [
         {
             "key": "direct_collocation",
             "term": "Direct Collocation",
@@ -568,6 +618,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "V(s) = E[sum of future rewards from state s]. State-value V(s) and action-value Q(s,a) functions. Learned via temporal difference methods.",
             "r": ["bellman_equation", "reward_function"],
         },
+    ]
+
+
+def _get_control_entries_part3() -> list[dict]:
+    """Return control glossary entries (part 3)."""
+    return [
         {
             "key": "state_estimation",
             "term": "State Estimation",
@@ -608,7 +664,21 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Adjusting effective stiffness for safe interaction. Active compliance uses force feedback; passive uses mechanical elements.",
             "r": ["impedance_control"],
         },
-        # === ROBOTICS (20) ===
+    ]
+
+
+def _get_control_entries() -> list[dict]:
+    """Return control glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_control_entries_part1())
+    entries.extend(_get_control_entries_part2())
+    entries.extend(_get_control_entries_part3())
+    return entries
+
+
+def _get_robotics_entries_part1() -> list[dict]:
+    """Return robotics glossary entries (part 1)."""
+    return [
         {
             "key": "end_effector",
             "term": "End Effector",
@@ -688,6 +758,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "A motor with built-in position feedback for precise movement control.",
             "i": "Motor with integrated encoder and control loop for accurate position/velocity tracking. Used in robotic joints and motion platforms.",
         },
+    ]
+
+
+def _get_robotics_entries_part2() -> list[dict]:
+    """Return robotics glossary entries (part 2)."""
+    return [
         {
             "key": "rotary_encoder",
             "term": "Rotary Encoder",
@@ -765,7 +841,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "Simultaneous Localization And Mapping: building a map of the environment while tracking your position in it.",
             "i": "Simultaneous Localization and Mapping. Estimates sensor pose while building environment map. Used for autonomous navigation.",
         },
-        # === MATH (30) ===
+    ]
+
+
+def _get_robotics_entries() -> list[dict]:
+    """Return robotics glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_robotics_entries_part1())
+    entries.extend(_get_robotics_entries_part2())
+    return entries
+
+
+def _get_math_entries_part1() -> list[dict]:
+    """Return math glossary entries (part 1)."""
+    return [
         {
             "key": "matrix_algebra",
             "term": "Matrix",
@@ -842,6 +931,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "Flipping a matrix along its diagonal, swapping rows and columns.",
             "i": "A^T where (A^T)_ij = A_ji. For orthogonal matrices (rotations), the transpose equals the inverse.",
         },
+    ]
+
+
+def _get_math_entries_part2() -> list[dict]:
+    """Return math glossary entries (part 2)."""
+    return [
         {
             "key": "symmetric_matrix",
             "term": "Symmetric Matrix",
@@ -923,6 +1018,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "div(F) = dF_x/dx + dF_y/dy + dF_z/dz. Scalar field measuring net outward flux density.",
             "r": ["curl_operator"],
         },
+    ]
+
+
+def _get_math_entries_part3() -> list[dict]:
+    """Return math glossary entries (part 3)."""
+    return [
         {
             "key": "curl_operator",
             "term": "Curl",
@@ -1004,7 +1105,21 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "f": "R = I + sin(t)K + (1-cos(t))K^2",
             "r": ["exponential_map", "rotation_matrix"],
         },
-        # === DATA (20) ===
+    ]
+
+
+def _get_math_entries() -> list[dict]:
+    """Return math glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_math_entries_part1())
+    entries.extend(_get_math_entries_part2())
+    entries.extend(_get_math_entries_part3())
+    return entries
+
+
+def _get_data_entries_part1() -> list[dict]:
+    """Return data glossary entries (part 1)."""
+    return [
         {
             "key": "motion_capture_system",
             "term": "Motion Capture System",
@@ -1084,6 +1199,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Analog low-pass filter with cutoff below Nyquist frequency. Applied before A/D conversion to prevent aliasing artifacts.",
             "r": ["aliasing", "nyquist_frequency"],
         },
+    ]
+
+
+def _get_data_entries_part2() -> list[dict]:
+    """Return data glossary entries (part 2)."""
+    return [
         {
             "key": "data_acquisition",
             "term": "Data Acquisition (DAQ)",
@@ -1162,7 +1283,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Filtering or curve-fitting to reduce measurement noise. Methods: Butterworth filter, splines, Savitzky-Golay, moving average.",
             "r": ["butterworth_filter", "savitzky_golay_filter"],
         },
-        # === AI (25) ===
+    ]
+
+
+def _get_data_entries() -> list[dict]:
+    """Return data glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_data_entries_part1())
+    entries.extend(_get_data_entries_part2())
+    return entries
+
+
+def _get_ai_entries_part1() -> list[dict]:
+    """Return ai glossary entries (part 1)."""
+    return [
         {
             "key": "neural_network",
             "term": "Neural Network",
@@ -1241,6 +1375,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "Breaking text into smaller pieces (tokens) that a language model can process.",
             "i": "Splitting input into sub-word units using BPE, WordPiece, or SentencePiece. Vocabulary size trades expressiveness vs efficiency.",
         },
+    ]
+
+
+def _get_ai_entries_part2() -> list[dict]:
+    """Return ai glossary entries (part 2)."""
+    return [
         {
             "key": "prompt_engineering",
             "term": "Prompt Engineering",
@@ -1315,6 +1455,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Probabilistic autoencoder learning latent distribution. Enables sampling and interpolation in latent space for motion generation.",
             "r": ["autoencoder"],
         },
+    ]
+
+
+def _get_ai_entries_part3() -> list[dict]:
+    """Return ai glossary entries (part 3)."""
+    return [
         {
             "key": "bayesian_inference",
             "term": "Bayesian Inference",
@@ -1353,7 +1499,21 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Efficient gradient computation via chain rule through the computational graph. Enables gradient-based training of deep networks.",
             "r": ["gradient_descent", "neural_network"],
         },
-        # === VISUALIZATION (15) ===
+    ]
+
+
+def _get_ai_entries() -> list[dict]:
+    """Return ai glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_ai_entries_part1())
+    entries.extend(_get_ai_entries_part2())
+    entries.extend(_get_ai_entries_part3())
+    return entries
+
+
+def _get_visualization_entries_part1() -> list[dict]:
+    """Return visualization glossary entries (part 1)."""
+    return [
         {
             "key": "three_d_rendering",
             "term": "3D Rendering",
@@ -1425,6 +1585,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "Drawing the path that a body part or club follows through space over time.",
             "i": "Rendering 3D curves of marker or joint trajectories. Color-coding by time or velocity reveals swing dynamics.",
         },
+    ]
+
+
+def _get_visualization_entries_part2() -> list[dict]:
+    """Return visualization glossary entries (part 2)."""
+    return [
         {
             "key": "time_series_plot",
             "term": "Time Series Plot",
@@ -1460,7 +1626,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "Assigning colors to numerical values for intuitive visualization of data patterns.",
             "i": "Mapping scalar values to color via transfer functions (colormaps). Perceptually uniform maps (viridis) preferred for quantitative data.",
         },
-        # === MATERIALS (15) ===
+    ]
+
+
+def _get_visualization_entries() -> list[dict]:
+    """Return visualization glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_visualization_entries_part1())
+    entries.extend(_get_visualization_entries_part2())
+    return entries
+
+
+def _get_materials_entries_part1() -> list[dict]:
+    """Return materials glossary entries (part 1)."""
+    return [
         {
             "key": "bone_tissue",
             "term": "Bone",
@@ -1536,6 +1715,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Material with identical properties regardless of direction. Described by two constants (E, nu). Simplifying assumption for some tissues.",
             "r": ["anisotropic_material"],
         },
+    ]
+
+
+def _get_materials_entries_part2() -> list[dict]:
+    """Return materials glossary entries (part 2)."""
+    return [
         {
             "key": "composite_material",
             "term": "Composite Material",
@@ -1575,7 +1760,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "u": "MPa",
             "r": ["yield_strength"],
         },
-        # === INJURY (15) ===
+    ]
+
+
+def _get_materials_entries() -> list[dict]:
+    """Return materials glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_materials_entries_part1())
+    entries.extend(_get_materials_entries_part2())
+    return entries
+
+
+def _get_injury_entries_part1() -> list[dict]:
+    """Return injury glossary entries (part 1)."""
+    return [
         {
             "key": "injury_risk_assessment",
             "term": "Injury Risk Assessment",
@@ -1656,6 +1854,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Grade II-III muscle strain with macroscopic fiber disruption. Oblique abdominal and hamstring tears occur in golf from high rotational demands.",
             "r": ["muscle_strain_injury", "acute_injury"],
         },
+    ]
+
+
+def _get_injury_entries_part2() -> list[dict]:
+    """Return injury glossary entries (part 2)."""
+    return [
         {
             "key": "fatigue_failure",
             "term": "Fatigue Failure",
@@ -1695,7 +1899,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "b": "The process of safely getting back to sport after an injury, using objective criteria.",
             "i": "Graduated protocol for resuming sport after injury. Criteria-based progression using strength, ROM, functional, and sport-specific tests.",
         },
-        # === ANATOMY (25) ===
+    ]
+
+
+def _get_injury_entries() -> list[dict]:
+    """Return injury glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_injury_entries_part1())
+    entries.extend(_get_injury_entries_part2())
+    return entries
+
+
+def _get_anatomy_entries_part1() -> list[dict]:
+    """Return anatomy glossary entries (part 1)."""
+    return [
         {
             "key": "pelvis_anatomy",
             "term": "Pelvis",
@@ -1770,6 +1987,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Segmental spinal bone: body (load-bearing), arch (neural protection), processes (muscle/ligament attachment). 33 total (24 mobile).",
             "r": ["lumbar_spine", "thoracic_spine", "cervical_spine"],
         },
+    ]
+
+
+def _get_anatomy_entries_part2() -> list[dict]:
+    """Return anatomy glossary entries (part 2)."""
+    return [
         {
             "key": "lumbar_spine",
             "term": "Lumbar Spine",
@@ -1847,6 +2070,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Radiocarpal + midcarpal joints allowing flexion/extension, radial/ulnar deviation. Wrist mechanics directly affect club face angle at impact.",
             "r": ["wrist_cock", "wrist_release"],
         },
+    ]
+
+
+def _get_anatomy_entries_part3() -> list[dict]:
+    """Return anatomy glossary entries (part 3)."""
+    return [
         {
             "key": "glenohumeral_joint",
             "term": "Glenohumeral Joint",
@@ -1887,7 +2116,21 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Fibrocartilaginous structure between vertebral bodies. Nucleus pulposus (gel core) + annulus fibrosus (layered rings). Subject to injury in golf.",
             "r": ["lumbar_spine", "vertebra"],
         },
-        # === OPTIMIZATION (20) ===
+    ]
+
+
+def _get_anatomy_entries() -> list[dict]:
+    """Return anatomy glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_anatomy_entries_part1())
+    entries.extend(_get_anatomy_entries_part2())
+    entries.extend(_get_anatomy_entries_part3())
+    return entries
+
+
+def _get_optimization_entries_part1() -> list[dict]:
+    """Return optimization glossary entries (part 1)."""
+    return [
         {
             "key": "cost_function",
             "term": "Cost Function",
@@ -1967,6 +2210,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Quasi-Newton method building approximate Hessian from gradient evaluations. Superlinear convergence. L-BFGS variant for large-scale problems.",
             "r": ["newton_optimization", "gradient_based_optimization"],
         },
+    ]
+
+
+def _get_optimization_entries_part2() -> list[dict]:
+    """Return optimization glossary entries (part 2)."""
+    return [
         {
             "key": "newton_optimization",
             "term": "Newton's Method (Optimization)",
@@ -2046,7 +2295,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "In multi-objective optimization, a point on the Pareto front where no objective can improve without degrading another. Represents optimal trade-offs.",
             "r": ["objective_function"],
         },
-        # === SIGNAL PROCESSING (15) ===
+    ]
+
+
+def _get_optimization_entries() -> list[dict]:
+    """Return optimization glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_optimization_entries_part1())
+    entries.extend(_get_optimization_entries_part2())
+    return entries
+
+
+def _get_signal_processing_entries_part1() -> list[dict]:
+    """Return signal processing glossary entries (part 1)."""
+    return [
         {
             "key": "signal_noise",
             "term": "Signal and Noise",
@@ -2127,6 +2389,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Estimating derivatives from discrete data: central differences, polynomial fitting, or Savitzky-Golay. Amplifies high-frequency noise.",
             "r": ["savitzky_golay_filter"],
         },
+    ]
+
+
+def _get_signal_processing_entries_part2() -> list[dict]:
+    """Return signal processing glossary entries (part 2)."""
+    return [
         {
             "key": "numerical_integration_signal",
             "term": "Numerical Integration (Signal)",
@@ -2165,7 +2433,20 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Creates analytic signal z(t) = x(t) + jH{x(t)}. Envelope: |z(t)|. Instantaneous frequency: d(arg(z))/dt. Used for EMG and vibration analysis.",
             "r": ["signal_envelope"],
         },
-        # === MUSCLE (20) ===
+    ]
+
+
+def _get_signal_processing_entries() -> list[dict]:
+    """Return signal processing glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_signal_processing_entries_part1())
+    entries.extend(_get_signal_processing_entries_part2())
+    return entries
+
+
+def _get_muscle_entries_part1() -> list[dict]:
+    """Return muscle glossary entries (part 1)."""
+    return [
         {
             "key": "sarcomere",
             "term": "Sarcomere",
@@ -2247,6 +2528,12 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "i": "Intrafusal fiber receptor detecting muscle length changes. Primary (Ia) afferents sensitive to length and velocity; secondary (II) to length only.",
             "r": ["proprioception", "golgi_tendon_organ"],
         },
+    ]
+
+
+def _get_muscle_entries_part2() -> list[dict]:
+    """Return muscle glossary entries (part 2)."""
+    return [
         {
             "key": "golgi_tendon_organ",
             "term": "Golgi Tendon Organ",
@@ -2337,3 +2624,31 @@ def get_extended_entries() -> list[dict]:  # noqa: C901
             "r": ["motor_unit", "muscle_architecture"],
         },
     ]
+
+
+def _get_muscle_entries() -> list[dict]:
+    """Return muscle glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_muscle_entries_part1())
+    entries.extend(_get_muscle_entries_part2())
+    return entries
+
+
+def get_extended_entries() -> list[dict]:
+    """Return extended glossary entries as compact dicts."""
+    entries: list[dict] = []
+    entries.extend(_get_analysis_entries())
+    entries.extend(_get_validation_entries())
+    entries.extend(_get_control_entries())
+    entries.extend(_get_robotics_entries())
+    entries.extend(_get_math_entries())
+    entries.extend(_get_data_entries())
+    entries.extend(_get_ai_entries())
+    entries.extend(_get_visualization_entries())
+    entries.extend(_get_materials_entries())
+    entries.extend(_get_injury_entries())
+    entries.extend(_get_anatomy_entries())
+    entries.extend(_get_optimization_entries())
+    entries.extend(_get_signal_processing_entries())
+    entries.extend(_get_muscle_entries())
+    return entries
