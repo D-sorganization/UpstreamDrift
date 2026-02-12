@@ -9,15 +9,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.data_io.path_utils import (
-    get_simscape_model_path,
-    setup_import_paths,
-)
-
-# Setup import paths including Simscape model
-setup_import_paths(additional_paths=[get_simscape_model_path()])
-
-
 # Conditional import to handle potential import errors gracefully during collection
 try:
     from apps.c3d_viewer import C3DViewerMainWindow

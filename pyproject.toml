@@ -206,6 +206,10 @@ pythonpath = [
     "src/shared/python",
     "src/tools",
     "vendor/ud-tools/src/shared/python",
+    "src/engines/physics_engines/mujoco/python",
+    "src/engines/pendulum_models/python",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src",
+    "tests/fixtures",
 ]
 python_files = "test_*.py"
 python_classes = "Test*"

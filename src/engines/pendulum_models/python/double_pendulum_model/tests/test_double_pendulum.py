@@ -1,15 +1,7 @@
 import math
-from pathlib import Path
 
 import pytest
-
-from src.shared.python.data_io.path_utils import setup_import_paths
-
-# Setup import paths - add the pendulum model Python directory
-_PENDULUM_PYTHON_ROOT = Path(__file__).resolve().parents[3]
-setup_import_paths(additional_paths=[_PENDULUM_PYTHON_ROOT])
-
-from double_pendulum_model.physics.double_pendulum import (  # noqa: E402
+from double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
     DoublePendulumParameters,
     DoublePendulumState,

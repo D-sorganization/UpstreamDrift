@@ -19,13 +19,13 @@ from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.pose_editor.core import (  # noqa: E402
+from src.shared.python.pose_editor.core import (
     BasePoseEditor,
     JointInfo,
     JointType,
 )
-from src.shared.python.pose_editor.library import PoseLibrary, StoredPose  # noqa: E402
-from src.shared.python.pose_editor.widgets import (  # noqa: E402
+from src.shared.python.pose_editor.library import PoseLibrary, StoredPose
+from src.shared.python.pose_editor.widgets import (
     GravityControlWidget,
     JointSliderWidget,
     PoseLibraryWidget,
