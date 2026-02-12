@@ -1,19 +1,19 @@
 # Completist Report: 2026-02-12
 
 ## Executive Summary
-- **Critical Gaps**: 295
+- **Critical Gaps**: 293
 - **Feature Gaps (TODO)**: 58
 - **Technical Debt**: 20
-- **Documentation Gaps**: 685
+- **Documentation Gaps**: 683
 
 ## Visualization
 ### Status Overview
 ```mermaid
 pie title Completion Status
-    "Impl Gaps (Critical)" : 295
+    "Impl Gaps (Critical)" : 293
     "Feature Requests (TODO)" : 58
     "Technical Debt (FIXME)" : 20
-    "Doc Gaps" : 685
+    "Doc Gaps" : 683
 ```
 
 ### Top Impacted Modules
@@ -22,8 +22,8 @@ pie title Issues by Module
     "src" : 290
     "vendor" : 62
     "shared" : 14
-    "scripts" : 4
     "reports" : 2
+    "scripts" : 2
 ```
 
 ## Critical Incomplete (Top 50)

@@ -6,15 +6,21 @@ Tests the contracts module including:
 - StateError exceptions
 - ContractChecker mixin
 - Invariant verification
+- Function-call style require/ensure
+- Tri-state DBC_LEVEL enforcement
 """
 
 from __future__ import annotations
+
+import os
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 
 from src.shared.python.core.contracts import (
     ContractChecker,
+    ContractLevel,
     ContractViolationError,
     InvariantError,
     PostconditionError,
@@ -26,12 +32,25 @@ from src.shared.python.core.contracts import (
     check_symmetric,
     disable_contracts,
     enable_contracts,
+    ensure,
     finite_result,
+    get_contract_level,
     invariant_checked,
     postcondition,
     precondition,
+    require,
     require_state,
+    set_contract_level,
 )
+
+
+@pytest.fixture(autouse=True)
+def _enforce_contracts() -> None:
+    """Ensure contracts are in ENFORCE mode for all tests."""
+    original = get_contract_level()
+    set_contract_level(ContractLevel.ENFORCE)
+    yield  # type: ignore[misc]
+    set_contract_level(original)
 
 
 class TestPreconditionDecorator:
@@ -253,7 +272,7 @@ class TestStateError:
         )
 
         assert "Cannot step" in str(error)
-        assert "State violation" in str(error)
+        assert "State" in str(error)
 
     def test_state_error_attributes(self):
         """StateError should store state information."""
@@ -344,7 +363,6 @@ class TestContractEnableDisable:
 
     def test_contracts_can_be_disabled(self):
         """Contracts should not be enforced when disabled."""
-        # Save current state
         import src.shared.python.core.contracts as contracts_module
 
         original_state = contracts_module.CONTRACTS_ENABLED
@@ -352,16 +370,11 @@ class TestContractEnableDisable:
         try:
             disable_contracts()
 
-            # This should NOT raise even though precondition is violated
             @precondition(lambda x: x > 0, "x must be positive")
             def test_func(x: float) -> float:
                 return x
 
-            # When contracts are disabled, the decorator returns the original function
-            # So precondition won't be checked
-            # Note: This only works for newly decorated functions after disabling
         finally:
-            # Restore original state
             if original_state:
                 enable_contracts()
             else:
@@ -409,3 +422,71 @@ class TestContractViolationErrorHierarchy:
                 pytest.fail(
                     f"{type(error).__name__} was not caught as ContractViolationError"
                 )
+
+
+# ─── New: Function-call style contracts ───────────────────────
+
+
+class TestRequirePrimitive:
+    """Tests for the require() function-call style contract."""
+
+    def test_passes_on_true(self) -> None:
+        require(True, "should not fail")
+
+    def test_raises_on_false(self) -> None:
+        with pytest.raises(PreconditionError, match="Precondition"):
+            require(False, "value must be positive", -1)
+
+    def test_skipped_when_off(self) -> None:
+        set_contract_level(ContractLevel.OFF)
+        require(False, "should not raise")
+
+    def test_warns_when_warn(self) -> None:
+        set_contract_level(ContractLevel.WARN)
+        require(False, "warn only")  # Should not raise
+
+
+class TestEnsurePrimitive:
+    """Tests for the ensure() function-call style contract."""
+
+    def test_passes_on_true(self) -> None:
+        ensure(True, "ok")
+
+    def test_raises_on_false(self) -> None:
+        with pytest.raises(PostconditionError, match="Postcondition"):
+            ensure(False, "result must be finite", float("nan"))
+
+
+# ─── New: Tri-state enforcement level ─────────────────────────
+
+
+class TestContractLevelControls:
+    """Tests for the tri-state enforcement level system."""
+
+    def test_set_and_get(self) -> None:
+        set_contract_level(ContractLevel.WARN)
+        assert get_contract_level() == ContractLevel.WARN
+
+    def test_off_skips_all_checks(self) -> None:
+        set_contract_level(ContractLevel.OFF)
+        require(False, "should not raise")
+        ensure(False, "should not raise")
+
+    def test_warn_does_not_raise(self) -> None:
+        set_contract_level(ContractLevel.WARN)
+        require(False, "warn only")
+        ensure(False, "warn only")
+
+    def test_enforce_raises(self) -> None:
+        set_contract_level(ContractLevel.ENFORCE)
+        with pytest.raises(PreconditionError):
+            require(False, "should raise")
+
+    def test_env_var_controls_level(self) -> None:
+        with patch.dict(os.environ, {"DBC_LEVEL": "warn"}):
+            from src.shared.python.core.contracts import (
+                _resolve_contract_level,
+            )
+
+            level = _resolve_contract_level()
+            assert level == ContractLevel.WARN

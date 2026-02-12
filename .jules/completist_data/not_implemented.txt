@@ -13,9 +13,12 @@
 ./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
 ./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./AGENTS.md:415:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
+./.claude/skills/lint/SKILL.md:34:   - Search for `NotImplementedError` that should be implemented
+./.claude/skills/lint/SKILL.md:38:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
 ./scripts/analyze_completist_data.py:214:        "NotImplementedError": 4,
-./scripts/refresh_completist_data.py:53:    # 3. Grep for NotImplementedError
-./scripts/refresh_completist_data.py:54:    run_grep("NotImplementedError", os.path.join(DATA_DIR, "not_implemented.txt"))
+./.agent/skills/lint/SKILL.md:34:   - Search for `NotImplementedError` that should be implemented
+./.agent/skills/lint/SKILL.md:38:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./.agent/workflows/lint.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
 ./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:13654:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
 ./tests/integration/test_physics_interfaces.py:56:        except NotImplementedError:
@@ -26,8 +29,26 @@
 ./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:74:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
 ./vendor/ud-tools/.github/copilot-instructions.md:22:- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
 ./vendor/ud-tools/AGENTS.md:293:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
+./vendor/ud-tools/.claude/skills/lint/SKILL.md:30:   - Search for `NotImplementedError` that should be implemented
+./vendor/ud-tools/.claude/skills/lint/SKILL.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
 ./vendor/ud-tools/scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
 ./vendor/ud-tools/scripts/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/review_data/diffs.txt:113:+- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
+./vendor/ud-tools/.Jules/review_data/diffs.txt:3357:+- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
+./vendor/ud-tools/.Jules/review_data/diffs.txt:18576:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/review_data/diffs.txt:42312:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/review_data/diffs.txt:116534:+- No `pass` or `NotImplementedError`
+./vendor/ud-tools/.Jules/review_data/diffs.txt:130642:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/review_data/diffs.txt:134795:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/review_data/diffs.txt:152039:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/review_data/diffs.txt:153128:+- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
+./vendor/ud-tools/.Jules/review_data/diffs.txt:153304:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./vendor/ud-tools/.Jules/completist_data/todo_markers.txt:4:./.cursor/rules/.cursorrules.md:14:- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
+./vendor/ud-tools/.Jules/completist_data/todo_markers.txt:7:./tools/README.md:26:- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
+./vendor/ud-tools/.Jules/completist_data/todo_markers.txt:16:./.github/copilot-instructions.md:22:- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
+./vendor/ud-tools/.agent/skills/lint/SKILL.md:33:   - Search for `NotImplementedError` that should be implemented
+./vendor/ud-tools/.agent/skills/lint/SKILL.md:37:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+./vendor/ud-tools/.agent/workflows/lint.md:36:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
 ./vendor/ud-tools/.cursor/rules/.cursorrules.md:14:- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
 ./vendor/ud-tools/src/tools/README.md:26:- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
 ./vendor/ud-tools/src/tools/quality_utils.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),

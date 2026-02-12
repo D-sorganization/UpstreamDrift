@@ -20,6 +20,7 @@ class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
     def __init__(self, duration=1.0, amplitude=1.0, offset=0.0) -> None:
+        self.engine = None  # Satisfies RecorderInterface.engine attribute
         self.times = np.linspace(0, duration, 100)
         norm_time = np.linspace(0, 1, 100)
 
@@ -56,6 +57,15 @@ class MockRecorder(RecorderInterface):
         if hasattr(self, field_name):
             return self.times, getattr(self, field_name)
         return self.times, np.array([])
+
+    def get_induced_acceleration_series(
+        self, source_name: str | int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Return empty induced acceleration data for testing."""
+        return self.times, np.zeros(len(self.times))
+
+    def set_analysis_config(self, config: dict) -> None:
+        """Configure which advanced metrics to record/compute."""
 
 
 def test_alignment() -> None:

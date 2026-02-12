@@ -1,7 +1,6 @@
 ./.github/workflows/Jules-Comprehensive-Assessment.yml:83:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./.github/workflows/Jules-Completist.yml:62:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./scripts/analyze_completist_data.py:189:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
-./scripts/refresh_completist_data.py:57:    run_grep("@abstractmethod", os.path.join(DATA_DIR, "abstract_methods.txt"))
 ./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./vendor/ud-tools/scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:39:    @abstractmethod

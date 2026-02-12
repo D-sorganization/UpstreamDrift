@@ -24,8 +24,6 @@
 ./scripts/finalize_comprehensive_assessment.py:75 generate_recommendations
 ./scripts/finalize_comprehensive_assessment.py:121 main
 ./scripts/create_issues_from_assessment.py:135 main
-./scripts/refresh_completist_data.py:21 run_grep
-./scripts/refresh_completist_data.py:40 main
 ./scripts/run_assessment.py:147 main
 ./scripts/check_dependency_direction.py:123 main
 ./scripts/verify_physics.py:65 Plugin
