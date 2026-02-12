@@ -124,7 +124,9 @@ class MuscleDrivenEnv:
         excitations = self._action_to_excitations(action)
 
         # Update activations (with dynamics delay)
-        from src.shared.python.biomechanics.activation_dynamics import ActivationDynamics
+        from src.shared.python.biomechanics.activation_dynamics import (
+            ActivationDynamics,
+        )
 
         dynamics = ActivationDynamics()
         for muscle_name, u in excitations.items():

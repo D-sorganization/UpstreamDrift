@@ -53,7 +53,6 @@ class MockRecorder(RecorderInterface):
 
     def set_analysis_config(self, config: dict) -> None:
         """Set analysis configuration."""
-        pass
 
 
 def test_statistical_analyzer() -> None:
