@@ -1,97 +1,82 @@
 {
-  "timestamp": "2026-02-03T12:00:00.000000",
+  "timestamp": "2026-02-12T00:46:06.435045",
   "framework_version": "2.0",
-  "overall_score": 7.59,
+  "overall_score": 6.46,
   "category_scores": {
     "A": {
-      "score": 8.5,
       "name": "Architecture & Implementation",
-      "weight": 2.0,
-      "status": "Excellent"
+      "score": 9.0,
+      "status": "Satisfactory"
     },
     "B": {
-      "score": 7.5,
-      "name": "Code Quality & Hygiene",
-      "weight": 1.5,
-      "status": "Good"
-    },
-    "C": {
-      "score": 7.5,
-      "name": "Documentation & Comments",
-      "weight": 1.0,
-      "status": "Good"
-    },
-    "D": {
-      "score": 7.0,
-      "name": "User Experience & Developer Journey",
-      "weight": 2.0,
-      "status": "Good"
-    },
-    "E": {
-      "score": 7.5,
-      "name": "Performance & Scalability",
-      "weight": 1.5,
-      "status": "Good"
-    },
-    "F": {
-      "score": 7.0,
-      "name": "Installation & Deployment",
-      "weight": 1.5,
-      "status": "Good"
-    },
-    "G": {
-      "score": 7.0,
-      "name": "Testing & Validation",
-      "weight": 2.0,
-      "status": "Good"
-    },
-    "H": {
-      "score": 7.5,
-      "name": "Error Handling & Debugging",
-      "weight": 1.5,
-      "status": "Good"
-    },
-    "I": {
-      "score": 7.0,
-      "name": "Security & Input Validation",
-      "weight": 1.5,
-      "status": "Good"
-    },
-    "J": {
-      "score": 8.0,
-      "name": "Extensibility & Plugin Architecture",
-      "weight": 1.0,
-      "status": "Very Good"
-    },
-    "K": {
-      "score": 7.5,
-      "name": "Reproducibility & Provenance",
-      "weight": 1.5,
-      "status": "Good"
-    },
-    "L": {
-      "score": 8.0,
-      "name": "Long-Term Maintainability",
-      "weight": 1.0,
-      "status": "Very Good"
-    },
-    "M": {
-      "score": 6.5,
-      "name": "Educational Resources & Tutorials",
-      "weight": 1.0,
+      "name": "Hygiene, Security & Quality",
+      "score": 5.0,
       "status": "Needs Improvement"
     },
+    "C": {
+      "name": "Documentation & Integration",
+      "score": 3.8999999999999995,
+      "status": "Needs Improvement"
+    },
+    "D": {
+      "name": "Error Handling & Reliability",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "E": {
+      "name": "Performance & Optimization",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "F": {
+      "name": "Security & Safety",
+      "score": 0,
+      "status": "Needs Improvement"
+    },
+    "G": {
+      "name": "Testing & QA",
+      "score": 9.0,
+      "status": "Satisfactory"
+    },
+    "H": {
+      "name": "Dependencies & Environment",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "I": {
+      "name": "Code Style & Standards",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "J": {
+      "name": "API Design & Interfaces",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "K": {
+      "name": "Data Handling & Storage",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "L": {
+      "name": "Logging & Observability",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
+    "M": {
+      "name": "Configuration & Secrets",
+      "score": 7.0,
+      "status": "Satisfactory"
+    },
     "N": {
-      "score": 8.0,
-      "name": "Visualization & Export",
-      "weight": 1.0,
-      "status": "Very Good"
+      "name": "Scalability & Concurrency",
+      "score": 7.0,
+      "status": "Satisfactory"
     },
     "O": {
-      "score": 8.5,
-      "name": "CI/CD & DevOps",
-      "weight": 1.0,
-      "status": "Excellent"
+      "name": "Maintainability & Refactoring",
+      "score": 7.0,
+      "status": "Satisfactory"
     }
   },
   "group_scores": {
@@ -153,7 +138,22 @@
     "typing_files": 274,
     "try_blocks": 1038,
     "print_calls": 1332,
-    "logging_calls": 1536
+    "logging_calls": 1536,
+    "A_total_files": 1983,
+    "B_ruff_exit_code": 1,
+    "C_missing_docstrings": 82,
+    "D_keyword_hits": 986,
+    "E_keyword_hits": 268,
+    "F_keyword_hits": 126,
+    "G_test_files": 575,
+    "H_keyword_hits": 65,
+    "I_keyword_hits": 10,
+    "J_keyword_hits": 695,
+    "K_keyword_hits": 200,
+    "L_keyword_hits": 447,
+    "M_keyword_hits": 775,
+    "N_keyword_hits": 336,
+    "O_keyword_hits": 4195
   },
   "recommendation": "Production-ready for beta use. Security findings should be triaged and critical items remediated before production deployment.",
   "reports_analyzed": 15
