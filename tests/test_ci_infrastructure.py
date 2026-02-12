@@ -69,7 +69,7 @@ class TestCoreModuleImports:
 
     def test_import_exceptions(self) -> None:
         """Test that exceptions module imports successfully."""
-        from src.shared.python import exceptions
+        from src.shared.python.core import exceptions
 
         assert hasattr(exceptions, "GolfModelingError")
         assert hasattr(exceptions, "EngineNotFoundError")

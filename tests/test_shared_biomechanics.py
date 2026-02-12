@@ -51,6 +51,10 @@ class MockRecorder(RecorderInterface):
         """Return induced acceleration data series."""
         return self.times, np.zeros_like(self.times)
 
+    def set_analysis_config(self, config: dict) -> None:
+        """Set analysis configuration."""
+        pass
+
 
 def test_statistical_analyzer() -> None:
     """Test StatisticalAnalyzer metrics calculation."""

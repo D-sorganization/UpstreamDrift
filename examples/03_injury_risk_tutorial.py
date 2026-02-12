@@ -22,15 +22,13 @@ sys.path.append(str(repo_root))
 
 
 # Setup logger for tutorial
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging  # noqa: E402
+
 from src.shared.python.injury.injury_risk import (  # noqa: E402
     InjuryRiskScorer,
 )
 from src.shared.python.injury.spinal_load_analysis import (  # noqa: E402
     create_example_analysis,
-)
-from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
-    get_logger,
-    setup_logging,
 )
 
 setup_logging(use_simple_format=True)

@@ -11,10 +11,10 @@ This example demonstrates how to:
 import time
 
 from src.shared.python.core.constants import GRAVITY_M_S2
-from src.shared.python.data_io.output_manager import OutputManager
-from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
+from src.shared.python.data_io.output_manager import OutputManager
+from src.shared.python.data_io.path_utils import get_repo_root
 
 # Configure logging using centralized module
 setup_logging()

@@ -35,10 +35,10 @@ class TestSharedDoesNotImportEngines:
 
         try:
             # Force reimport
-            if "src.shared.python.interfaces" in sys.modules:
-                del sys.modules["src.shared.python.interfaces"]
+            if "src.shared.python.engine_core.interfaces" in sys.modules:
+                del sys.modules["src.shared.python.engine_core.interfaces"]
 
-            mod = importlib.import_module("src.shared.python.interfaces")
+            mod = importlib.import_module("src.shared.python.engine_core.interfaces")
             assert hasattr(mod, "PhysicsEngine")
             assert hasattr(mod, "RecorderInterface")
         finally:
@@ -47,7 +47,7 @@ class TestSharedDoesNotImportEngines:
 
     def test_capabilities_in_shared(self):
         """EngineCapabilities should be importable from shared.python.engine_core.capabilities."""
-        mod = importlib.import_module("src.shared.python.capabilities")
+        mod = importlib.import_module("src.shared.python.engine_core.capabilities")
         assert hasattr(mod, "EngineCapabilities")
         assert hasattr(mod, "CapabilityLevel")
 
@@ -65,7 +65,7 @@ class TestSharedDoesNotImportEngines:
 
     def test_engine_loaders_backward_compat(self):
         """Old import path shared.python.engine_loaders should still work."""
-        mod = importlib.import_module("src.shared.python.engine_loaders")
+        mod = importlib.import_module("src.shared.python.engine_core.engine_loaders")
         assert hasattr(mod, "LOADER_MAP")
 
 

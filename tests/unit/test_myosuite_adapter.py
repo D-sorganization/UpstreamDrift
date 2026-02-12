@@ -47,7 +47,7 @@ class TestMuscleDrivenEnv:
         assert len(obs) == 2 + 2  # q, v, + 2 muscles
         assert env.step_count == 0
 
-    @patch("src.shared.python.activation_dynamics.ActivationDynamics")
+    @patch("src.shared.python.biomechanics.activation_dynamics.ActivationDynamics")
     def test_step(self, mock_dynamics_cls, mock_muscle_system):
         """Test environment step."""
         # Mock ActivationDynamics
