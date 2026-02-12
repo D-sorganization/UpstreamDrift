@@ -130,14 +130,14 @@ if __name__ == "__main__":
 
     # Simulate
     a = 0.0
-    logger.info("=" * 60)  # noqa: T201
-    logger.info("Activation Dynamics Test")  # noqa: T201
-    logger.info("=" * 60)  # noqa: T201
-    logger.info("\\nTest 1: Step response (0 → 1)")  # noqa: T201
-    logger.info(f"  τ_act = {dynamics.tau_act * 1000:.1f} ms")  # noqa: T201
+    logger.info("=" * 60)
+    logger.info("Activation Dynamics Test")
+    logger.info("=" * 60)
+    logger.info("\\nTest 1: Step response (0 → 1)")
+    logger.info(f"  τ_act = {dynamics.tau_act * 1000:.1f} ms")
 
-    logger.info("\\n  Time [ms]  Activation [%]")  # noqa: T201
-    logger.info("  ---------  --------------")  # noqa: T201
+    logger.info("\\n  Time [ms]  Activation [%]")
+    logger.info("  ---------  --------------")
 
     for i, _t in enumerate(times):
         u = u_signal[i]
@@ -146,26 +146,20 @@ if __name__ == "__main__":
 
         # Print check points
         if i % 20 == 0 and i < 120:
-            logger.info(f"  {i * dt * 1000:5.0f}      {a * 100:5.1f}")  # noqa: T201
+            logger.info(f"  {i * dt * 1000:5.0f}      {a * 100:5.1f}")
 
-    logger.info("\\nTest 2: Deactivation (1 → 0)")  # noqa: T201
-    logger.info(f"  τ_deact = {dynamics.tau_deact * 1000:.1f} ms")  # noqa: T201
-    logger.info("\\n  Time [ms]  Activation [%]")  # noqa: T201
-    logger.info("  ---------  --------------")  # noqa: T201
+    logger.info("\\nTest 2: Deactivation (1 → 0)")
+    logger.info(f"  τ_deact = {dynamics.tau_deact * 1000:.1f} ms")
+    logger.info("\\n  Time [ms]  Activation [%]")
+    logger.info("  ---------  --------------")
 
     # Print check points for deactivation
     for i in range(100, 160, 10):
-        logger.info(
-            f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}"
-        )  # noqa: T201
+        logger.info(f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}")
 
-    logger.info("\\n" + "=" * 60)  # noqa: T201
-    logger.info("✓ Activation dynamics test complete")  # noqa: T201
-    logger.info("=" * 60)  # noqa: T201
-    logger.info("\\nKey observation:")  # noqa: T201
-    logger.info(  # noqa: T201
-        "  Activation is faster (10ms) than deactivation (40ms)"
-    )  # noqa: T201
-    logger.info(  # noqa: T201
-        "  This asymmetry is physiologically realistic (Ca²⁺ release vs. pump)"
-    )
+    logger.info("\\n" + "=" * 60)
+    logger.info("✓ Activation dynamics test complete")
+    logger.info("=" * 60)
+    logger.info("\\nKey observation:")
+    logger.info("  Activation is faster (10ms) than deactivation (40ms)")
+    logger.info("  This asymmetry is physiologically realistic (Ca²⁺ release vs. pump)")

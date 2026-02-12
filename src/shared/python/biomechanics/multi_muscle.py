@@ -191,21 +191,21 @@ if __name__ == "__main__":
     # K ≈ sum(F_i / l_opt_i * r_i^2)
 
     # Just printing results
-    print("=" * 60)  # noqa: T201
-    print("Multi-Muscle Coordination Test")  # noqa: T201
-    print("=" * 60)  # noqa: T201
-    print("\\nTest: Elbow flexion with antagonist co-contraction")  # noqa: T201
-    print(f"\\nFlexor activations: {flexor_act}")  # noqa: T201
-    print(f"Extensor activations: {extensor_act}")  # noqa: T201
+    logger.info("=" * 60)
+    logger.info("Multi-Muscle Coordination Test")
+    logger.info("=" * 60)
+    logger.info("\\nTest: Elbow flexion with antagonist co-contraction")
+    logger.info(f"\\nFlexor activations: {flexor_act}")
+    logger.info(f"Extensor activations: {extensor_act}")
 
-    print(f"\\nNet elbow torque: {tau_net:.2f} N·m")  # noqa: T201
-    print("  (Positive = flexion)")  # noqa: T201
+    logger.info(f"\\nNet elbow torque: {tau_net:.2f} N·m")
+    logger.info("  (Positive = flexion)")
 
     # Simple stiffness proxy
     K = (1000 * 0.5 + 800 * 0.5 + 1200 * 0.2) * 0.04  # Rough scaling
-    print(f"\\nEstimated joint stiffness: {K:.1f} N·m/rad")  # noqa: T201
-    print("  (Higher co-contraction → higher stiffness)")  # noqa: T201
+    logger.info(f"\\nEstimated joint stiffness: {K:.1f} N·m/rad")
+    logger.info("  (Higher co-contraction → higher stiffness)")
 
-    print("\\n" + "=" * 60)  # noqa: T201
-    print("✓ Multi-muscle test complete")  # noqa: T201
-    print("=" * 60)  # noqa: T201
+    logger.info("\\n" + "=" * 60)
+    logger.info("✓ Multi-muscle test complete")
+    logger.info("=" * 60)

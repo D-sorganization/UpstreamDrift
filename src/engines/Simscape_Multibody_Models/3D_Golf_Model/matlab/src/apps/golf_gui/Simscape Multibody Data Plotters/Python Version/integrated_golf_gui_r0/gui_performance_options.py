@@ -4,8 +4,11 @@ Performance options for the Golf GUI
 Includes settings for optimizing simulation performance
 """
 
+import logging
 import tkinter as tk
 from tkinter import ttk
+
+logger = logging.getLogger(__name__)
 
 
 class PerformanceOptionsDialog:
@@ -198,13 +201,13 @@ if __name__ == "__main__":
     settings = get_performance_options(root)
 
     if settings:
-        print("Selected settings:")
+        logger.info("Selected settings:")
         for key, value in settings.items():
-            print(f"  {key}: {value}")
+            logger.info(f"  {key}: {value}")
 
-        print("\nGenerated MATLAB script:")
-        print(generate_matlab_performance_script(settings))
+        logger.info("\nGenerated MATLAB script:")
+        logger.info(generate_matlab_performance_script(settings))
     else:
-        print("Dialog cancelled")
+        logger.info("Dialog cancelled")
 
     root.destroy()

@@ -710,15 +710,11 @@ if __name__ == "__main__":
     analyzer, result = create_example_analysis()
 
     if result.x_factor:
-        logger.info(  # noqa: T201
-            f"X-Factor Stretch: {result.x_factor.x_factor_stretch:.1f} deg"
-        )
+        logger.info(f"X-Factor Stretch: {result.x_factor.x_factor_stretch:.1f} deg")
 
     if result.crunch_factor:
-        logger.info(  # noqa: T201
-            f"Peak Crunch Factor: {result.crunch_factor.peak_crunch:.1f}"
-        )
+        logger.info(f"Peak Crunch Factor: {result.crunch_factor.peak_crunch:.1f}")
 
-    logger.info("\nRecommendations:")  # noqa: T201
+    logger.info("\nRecommendations:")
     for rec in analyzer.get_recommendations(result):
-        logger.info(f"  - {rec}")  # noqa: T201
+        logger.info(f"  - {rec}")

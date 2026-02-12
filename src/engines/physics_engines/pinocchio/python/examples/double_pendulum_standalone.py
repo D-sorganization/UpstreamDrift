@@ -433,10 +433,10 @@ def run_example() -> None:
     )
 
     # Simple console output
-    logger.info("Simulation completed.")  # noqa: T201
-    logger.info(f"Number of time steps: {len(t_samples)}")  # noqa: T201
-    logger.info("First few natural torque samples:")  # noqa: T201
-    logger.info(tau_nat_traj[:5, :])  # noqa: T201
+    logger.info("Simulation completed.")
+    logger.info(f"Number of time steps: {len(t_samples)}")
+    logger.info("First few natural torque samples:")
+    logger.info(tau_nat_traj[:5, :])
 
 
 if __name__ == "__main__":

@@ -581,12 +581,12 @@ if __name__ == "__main__":
     report = scorer.score(spinal_result, joint_results, swing_metrics, training_load)
 
     for region, score in report.region_scores.items():
-        logger.info(f"  {region.value}: {score:.1f}")  # noqa: T201
+        logger.info(f"  {region.value}: {score:.1f}")
 
-    logger.info("\nTop Risks:")  # noqa: T201
+    logger.info("\nTop Risks:")
     for risk in report.top_risks:
-        logger.info(f"  - {risk}")  # noqa: T201
+        logger.info(f"  - {risk}")
 
-    logger.info("\nRecommendations:")  # noqa: T201
+    logger.info("\nRecommendations:")
     for rec in report.recommendations:
-        logger.info(f"  - {rec}")  # noqa: T201
+        logger.info(f"  - {rec}")
