@@ -64,8 +64,8 @@ try:
     from . import sim_widget
 
     _has_gui = True
-except ImportError:
-    # GUI not available (e.g., in headless CI environments)
+except (ImportError, TypeError):
+    # GUI not available (e.g., in headless CI or PyQt6 metaclass conflict)
     # Don't expose these in __all__ to avoid AttributeErrors
     sim_widget = None  # type: ignore[assignment]
 

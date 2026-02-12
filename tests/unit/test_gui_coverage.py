@@ -7,6 +7,14 @@ Note: These tests require mujoco and PyQt6 to be installed. Tests are skipped
 if dependencies are missing rather than using extensive mocking.
 """
 
+import os
+
+# Ensure offscreen platform BEFORE any Qt imports so that a QApplication can be
+# created even when no X server / Wayland display is available (headless CI).
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+# Use EGL for MuJoCo rendering when no display is available (avoids gladLoadGL errors).
+os.environ.setdefault("MUJOCO_GL", "egl")
+
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -25,13 +33,30 @@ if PYQT6_AVAILABLE:
     pass
 
 
+def _load_model_or_skip(widget, xml_string: str) -> None:
+    """Call *widget.load_model_from_xml* and skip the test on GL errors.
+
+    In headless CI environments without EGL / OSMesa the MuJoCo renderer
+    cannot create an OpenGL context, raising ``mujoco.FatalError``.
+    """
+    try:
+        widget.load_model_from_xml(xml_string)
+    except Exception as exc:
+        # mujoco.FatalError (gladLoadGL) or RuntimeError from renderer init
+        if "gladLoadGL" in str(exc) or "OpenGL" in str(exc):
+            pytest.skip(f"MuJoCo GL unavailable (headless environment): {exc}")
+        raise
+
+
 @pytest.fixture(scope="module")
 def qapp():
     """Create a QApplication instance for tests that need it."""
     if not PYQT6_AVAILABLE:
         pytest.skip("PyQt6 not available")
-    # Check if QApplication already exists
-    app = get_qapp()
+    try:
+        app = get_qapp()
+    except Exception as exc:
+        pytest.skip(f"Qt initialisation failed (headless environment?): {exc}")
     yield app
 
 
@@ -86,7 +111,7 @@ class TestMuJoCoSimWidget:
         """
 
         # Load model
-        widget.load_model_from_xml(model_xml)
+        _load_model_or_skip(widget, model_xml)
 
         # Verify model loaded correctly
         assert widget.model is not None
@@ -113,7 +138,7 @@ class TestMuJoCoSimWidget:
             </worldbody>
         </mujoco>
         """
-        widget.load_model_from_xml(model_xml)
+        _load_model_or_skip(widget, model_xml)
 
         # Verify model and data are loaded
         assert (
@@ -157,7 +182,7 @@ class TestMuJoCoSimWidget:
             </worldbody>
         </mujoco>
         """
-        widget.load_model_from_xml(model_xml)
+        _load_model_or_skip(widget, model_xml)
 
         # Test various camera views - track which succeed and fail
         successful_views = []
@@ -195,7 +220,7 @@ class TestMuJoCoSimWidget:
             </worldbody>
         </mujoco>
         """
-        widget.load_model_from_xml(model_xml)
+        _load_model_or_skip(widget, model_xml)
 
         dof_info = widget.get_dof_info()
 
@@ -264,11 +289,11 @@ class TestControlsTab:
             ControlsTab,
         )
 
-        # ControlsTab requires parent and sim_widget
-        mock_parent = MagicMock()
+        # ControlsTab signature: (sim_widget, main_window, parent=None)
         mock_sim_widget = MagicMock()
+        mock_main_window = MagicMock()
 
-        tab = ControlsTab(mock_parent, mock_sim_widget)
+        tab = ControlsTab(mock_sim_widget, mock_main_window)
 
         # Verify tab was created
         assert tab is not None

@@ -1,6 +1,7 @@
 import sys
 import unittest
 from unittest.mock import MagicMock
+from unittest.mock import patch as _patch
 
 from src.shared.python.data_io.path_utils import get_repo_root
 
@@ -159,62 +160,69 @@ def mock_pyqt_property(type_):
 
 
 # -------------------------------------------------------------------------
-# MOCK MODULES
+# MOCK MODULES – scoped to the import of golf_gui_application only.
+#
+# We temporarily inject mock modules into sys.modules so that
+# golf_gui_application picks them up during import, then immediately
+# restore the originals.  This prevents poisoning later tests that depend
+# on real scipy, PyQt6, etc.
 # -------------------------------------------------------------------------
 
-# Create mocks for the modules
-mock_qt_widgets = MagicMock()
-mock_qt_widgets.QWidget = MockQWidget
-mock_qt_widgets.QOpenGLWidget = MockQOpenGLWidget
-mock_qt_widgets.QVBoxLayout = MockQVBoxLayout
-mock_qt_widgets.QHBoxLayout = MockQHBoxLayout
-mock_qt_widgets.QGridLayout = MockQGridLayout
-mock_qt_widgets.QGroupBox = MockQGroupBox
-mock_qt_widgets.QPushButton = MockQPushButton
-mock_qt_widgets.QLabel = MockQLabel
-mock_qt_widgets.QComboBox = MockQComboBox
-mock_qt_widgets.QSlider = MockQSlider
-mock_qt_widgets.QCheckBox = MockQCheckBox
-mock_qt_widgets.QMainWindow = MockQWidget
-mock_qt_widgets.QApplication = MagicMock()
-mock_qt_widgets.QMessageBox = MagicMock()
-mock_qt_widgets.QStatusBar = MockQWidget
-mock_qt_widgets.QTabWidget = MockQWidget  # Simplified
+# Build the mock module dict
+_mock_qt_widgets = MagicMock()
+_mock_qt_widgets.QWidget = MockQWidget
+_mock_qt_widgets.QOpenGLWidget = MockQOpenGLWidget
+_mock_qt_widgets.QVBoxLayout = MockQVBoxLayout
+_mock_qt_widgets.QHBoxLayout = MockQHBoxLayout
+_mock_qt_widgets.QGridLayout = MockQGridLayout
+_mock_qt_widgets.QGroupBox = MockQGroupBox
+_mock_qt_widgets.QPushButton = MockQPushButton
+_mock_qt_widgets.QLabel = MockQLabel
+_mock_qt_widgets.QComboBox = MockQComboBox
+_mock_qt_widgets.QSlider = MockQSlider
+_mock_qt_widgets.QCheckBox = MockQCheckBox
+_mock_qt_widgets.QMainWindow = MockQWidget
+_mock_qt_widgets.QApplication = MagicMock()
+_mock_qt_widgets.QMessageBox = MagicMock()
+_mock_qt_widgets.QStatusBar = MockQWidget
+_mock_qt_widgets.QTabWidget = MockQWidget  # Simplified
 
-mock_qt_core = MagicMock()
-mock_qt_core.QObject = MockQObject
-mock_qt_core.Qt = MagicMock()
-mock_qt_core.Qt.Orientation.Horizontal = 1
-mock_qt_core.Qt.AlignmentFlag.AlignCenter = 1
-mock_qt_core.Qt.FocusPolicy.StrongFocus = 1
-mock_qt_core.Qt.Key = MagicMock()
-mock_qt_core.Qt.MouseButton = MagicMock()
-mock_qt_core.pyqtSignal = MagicMock(return_value=MagicMock())
-mock_qt_core.pyqtProperty = MagicMock(side_effect=mock_pyqt_property)  # Decorator mock
-mock_qt_core.QPropertyAnimation = MockQPropertyAnimation
-mock_qt_core.QEasingCurve = MagicMock()
+_mock_qt_core = MagicMock()
+_mock_qt_core.QObject = MockQObject
+_mock_qt_core.Qt = MagicMock()
+_mock_qt_core.Qt.Orientation.Horizontal = 1
+_mock_qt_core.Qt.AlignmentFlag.AlignCenter = 1
+_mock_qt_core.Qt.FocusPolicy.StrongFocus = 1
+_mock_qt_core.Qt.Key = MagicMock()
+_mock_qt_core.Qt.MouseButton = MagicMock()
+_mock_qt_core.pyqtSignal = MagicMock(return_value=MagicMock())
+_mock_qt_core.pyqtProperty = MagicMock(side_effect=mock_pyqt_property)
+_mock_qt_core.QPropertyAnimation = MockQPropertyAnimation
+_mock_qt_core.QEasingCurve = MagicMock()
 
-# Inject into sys.modules
-sys.modules["PyQt6"] = MagicMock()
-sys.modules["PyQt6.QtCore"] = mock_qt_core
-sys.modules["PyQt6.QtGui"] = MagicMock()
-sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
-sys.modules["PyQt6.QtOpenGLWidgets"] = MagicMock()
-sys.modules["PyQt6.QtOpenGLWidgets"].QOpenGLWidget = MockQOpenGLWidget  # Important
+_mock_qt_opengl = MagicMock()
+_mock_qt_opengl.QOpenGLWidget = MockQOpenGLWidget
 
-sys.modules["moderngl"] = MagicMock()
-sys.modules["golf_opengl_renderer"] = MagicMock()
-sys.modules["golf_video_export"] = MagicMock()
+_MOCK_MODULES = {
+    "PyQt6": MagicMock(),
+    "PyQt6.QtCore": _mock_qt_core,
+    "PyQt6.QtGui": MagicMock(),
+    "PyQt6.QtWidgets": _mock_qt_widgets,
+    "PyQt6.QtOpenGLWidgets": _mock_qt_opengl,
+    "moderngl": MagicMock(),
+    "golf_opengl_renderer": MagicMock(),
+    "golf_video_export": MagicMock(),
+    "numba": MagicMock(),
+    "scipy": MagicMock(),
+    "scipy.io": MagicMock(),
+    "golf_inverse_dynamics": MagicMock(),
+    "wiffle_data_loader": MagicMock(),
+}
 
-# Mock backend dependencies that might not be present in CI or minimal envs
-sys.modules["numba"] = MagicMock()
-sys.modules["scipy"] = MagicMock()
-sys.modules["scipy.io"] = MagicMock()
-sys.modules["golf_inverse_dynamics"] = MagicMock()
-sys.modules["wiffle_data_loader"] = MagicMock()
-
-# Import the module under test
-import golf_gui_application  # noqa: E402
+# Import golf_gui_application inside a patch.dict context so that
+# sys.modules is automatically restored when the import completes.
+with _patch.dict("sys.modules", _MOCK_MODULES):
+    import golf_gui_application  # noqa: E402
 
 
 class TestGolfGuiTabs(unittest.TestCase):

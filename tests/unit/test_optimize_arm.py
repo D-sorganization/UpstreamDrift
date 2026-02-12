@@ -4,7 +4,14 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Mock dependencies
+# Save original modules so we can restore them after mocking.
+# This prevents pollution of sys.modules for other test modules.
+_saved_modules = {}
+for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
+    if _key in sys.modules:
+        _saved_modules[_key] = sys.modules[_key]
+
+# Mock dependencies temporarily to allow importing optimize_arm
 sys.modules["casadi"] = MagicMock()
 sys.modules["pinocchio"] = MagicMock()
 sys.modules["pinocchio.casadi"] = MagicMock()
@@ -17,11 +24,33 @@ import pinocchio.casadi as cpin  # noqa: E402
 sys.modules.pop("src.shared.python.optimization.examples.optimize_arm", None)
 from src.shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
+# Restore original modules IMMEDIATELY to prevent polluting other test modules.
+# The module-level code above runs at pytest collection time, so without this
+# restore, sys.modules["pinocchio"] would remain a MagicMock during the
+# entire collection phase, breaking any test that imports pinocchio afterward.
+for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
+    if _key in _saved_modules:
+        sys.modules[_key] = _saved_modules[_key]
+    elif _key in sys.modules:
+        del sys.modules[_key]
 
-def teardown_module(module):
-    """Clean up sys.modules pollution."""
+
+def setup_module(module):
+    """Re-install mocks for test execution in this module."""
     for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
         if key in sys.modules:
+            _saved_modules.setdefault(key, sys.modules[key])
+    sys.modules["casadi"] = ca
+    sys.modules["pinocchio"] = pin
+    sys.modules["pinocchio.casadi"] = cpin
+
+
+def teardown_module(module):
+    """Clean up sys.modules pollution by restoring original modules."""
+    for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
+        if key in _saved_modules:
+            sys.modules[key] = _saved_modules[key]
+        elif key in sys.modules:
             del sys.modules[key]
 
 
@@ -135,9 +164,11 @@ def test_main_missing_dependencies():
             create=True,
         ),
     ):
-        with patch("builtins.print") as mock_print:
+        with patch(
+            "src.shared.python.optimization.examples.optimize_arm.logger"
+        ) as mock_logger:
             main()
-            mock_print.assert_any_call(
+            mock_logger.error.assert_any_call(
                 "Skipping optimize_arm.py due to missing dependencies: Test Error"
             )
 

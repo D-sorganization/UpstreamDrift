@@ -1,34 +1,57 @@
-"""Unit tests for ProcessWorker."""
+"""Unit tests for ProcessWorker.
 
+Uses the fallback signal stubs (connect/emit pattern) so tests run
+regardless of whether PyQt6 is installed.
+"""
+
+import importlib
 import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
-# Skip entire module if PyQt6 is not available - the ProcessWorker tests require
-# proper Qt mocking that doesn't work reliably when PyQt6 is missing
-pytestmark = skip_if_unavailable("pyqt6")
+@pytest.fixture(autouse=True)
+def _force_fallback_signals():
+    """Force ProcessWorker to use the fallback (non-PyQt6) signal stubs.
+
+    This patches PYQT6_AVAILABLE to False and clears the cached module
+    so the fallback pyqtSignal/QThread stubs are used instead of real Qt.
+    """
+    mod_key = "src.shared.python.ui.qt.process_worker"
+    saved = sys.modules.pop(mod_key, None)
+
+    import src.shared.python.engine_core.engine_availability as ea_mod
+
+    orig = ea_mod.PYQT6_AVAILABLE
+    ea_mod.PYQT6_AVAILABLE = False
+    try:
+        yield
+    finally:
+        ea_mod.PYQT6_AVAILABLE = orig
+        if saved is not None:
+            sys.modules[mod_key] = saved
+        elif mod_key in sys.modules:
+            del sys.modules[mod_key]
 
 
 @pytest.fixture
-def mock_pyqt6():
-    """Provide ProcessWorker with mocked signals for testing."""
-    # Clear any cached module to ensure fresh import
-    if "src.shared.python.ui.qt.process_worker" in sys.modules:
-        del sys.modules["src.shared.python.ui.qt.process_worker"]
+def worker_cls():
+    """Import ProcessWorker using fallback signals."""
+    mod_key = "src.shared.python.ui.qt.process_worker"
+    if mod_key in sys.modules:
+        del sys.modules[mod_key]
 
-    from src.shared.python.ui.qt.process_worker import ProcessWorker
+    import src.shared.python.ui.qt.process_worker as pw_mod
 
-    yield ProcessWorker
+    importlib.reload(pw_mod)
+    return pw_mod.ProcessWorker
 
 
 @pytest.fixture
-def worker(mock_pyqt6):
-    # Since we use fallback, we can instantiate it directly
-    ProcessWorker = mock_pyqt6
-    return ProcessWorker(["echo", "hello"])
+def worker(worker_cls):
+    """Create a ProcessWorker instance with a simple command."""
+    return worker_cls(["echo", "hello"])
 
 
 def test_initialization(worker):
@@ -40,18 +63,13 @@ def test_initialization(worker):
 def test_run_success(mock_popen, worker):
     # Setup mock process
     process = MagicMock()
-    # readline returns lines then empty string
     process.stdout.readline.side_effect = ["line1\n", "line2\n", ""]
-    # stderr.read() must return a real string, not MagicMock, because
-    # finished_signal.emit(int, str) validates the type
     process.stderr.read.return_value = ""
     process.returncode = 0
     process.poll.return_value = 0
 
     mock_popen.return_value = process
 
-    # Use signal spies to capture emitted signals
-    # Since PyQt6 signals have read-only emit, we connect to slots
     log_messages: list[str] = []
     finished_calls: list[tuple[int, str]] = []
 
@@ -60,12 +78,10 @@ def test_run_success(mock_popen, worker):
 
     worker.run()
 
-    # Verify log messages were emitted
     assert "Running command: echo hello" in log_messages
     assert "line1" in log_messages
     assert "line2" in log_messages
 
-    # Verify finished signal was emitted
     assert len(finished_calls) == 1
     assert finished_calls[0] == (0, "")
 
@@ -74,13 +90,11 @@ def test_run_success(mock_popen, worker):
 def test_run_failure(mock_popen, worker):
     mock_popen.side_effect = OSError("Command not found")
 
-    # Use signal spies to capture emitted signals
     finished_calls: list[tuple[int, str]] = []
     worker.finished_signal.connect(lambda code, msg: finished_calls.append((code, msg)))
 
     worker.run()
 
-    # Verify finished signal was emitted with error
     assert len(finished_calls) == 1
     assert finished_calls[0] == (-1, "Command not found")
 

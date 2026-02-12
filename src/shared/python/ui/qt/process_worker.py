@@ -31,11 +31,23 @@ else:
             pass
 
     class pyqtSignal:  # type: ignore[no-redef]
+        """Minimal signal stub that supports connect/emit for headless testing."""
+
         def __init__(self, *args: Any) -> None:
-            pass
+            self._slots: list[Any] = []
+
+        def connect(self, slot: Any) -> None:
+            self._slots.append(slot)
+
+        def disconnect(self, slot: Any = None) -> None:
+            if slot is None:
+                self._slots.clear()
+            else:
+                self._slots.remove(slot)
 
         def emit(self, *args: Any) -> None:
-            pass
+            for slot in self._slots:
+                slot(*args)
 
 
 class ProcessWorker(QThread):

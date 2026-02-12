@@ -16,7 +16,7 @@ if MUJOCO_AVAILABLE:
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
             crba,
         )
-    except (ImportError, ModuleNotFoundError):
+    except (ImportError, ModuleNotFoundError, TypeError):
         pytest.skip(
             "MuJoCo CRBA internal imports not available",
             allow_module_level=True,

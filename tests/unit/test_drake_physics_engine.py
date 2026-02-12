@@ -71,7 +71,7 @@ def DrakePhysicsEngineClass(mock_drake_dependencies):
 
 @pytest.fixture
 def engine(DrakePhysicsEngineClass):
-    """Fixture to provide a DrakePhysicsEngine instance."""
+    """Fixture to provide an uninitialized DrakePhysicsEngine instance."""
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     ) as mock_add:
@@ -84,6 +84,20 @@ def engine(DrakePhysicsEngineClass):
         eng.scene_graph = mock_scene_graph
         eng.builder = MagicMock()
         return eng
+
+
+@pytest.fixture
+def initialized_engine(engine):
+    """Fixture providing a DrakePhysicsEngine that satisfies DBC preconditions.
+
+    Sets _is_finalized=True and plant_context so @precondition(is_initialized)
+    passes for step/reset/forward/compute_* methods.
+    """
+    engine._is_finalized = True
+    engine.plant_context = MagicMock()
+    engine.context = MagicMock()
+    engine.simulator = MagicMock()
+    return engine
 
 
 def test_initialization(engine):
@@ -123,32 +137,22 @@ def test_load_from_string(engine):
         assert engine.model_name == "StringLoadedModel"
 
 
-def test_step(engine):
-    # Prepare mocks for _ensure_finalized chain
-    mock_diagram = MagicMock()
-    mock_context = MagicMock()
+def test_step(initialized_engine):
+    """Test step method on an initialized engine (DBC: requires is_initialized)."""
+    engine = initialized_engine
 
-    # engine.builder is already a Mock from fixture
-    engine.builder.Build.return_value = mock_diagram
-    mock_diagram.CreateDefaultContext.return_value = mock_context
-
-    mock_context.get_time.return_value = 0.0
+    engine.context.get_time.return_value = 0.0
     engine.plant.time_step.return_value = 0.001
 
-    with patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.analysis.Simulator"
-    ) as mock_sim_cls:
-        mock_sim = MagicMock()
-        mock_sim_cls.return_value = mock_sim
+    engine.step(0.01)
 
-        engine.step(0.01)
-
-        mock_sim.Initialize.assert_called_once()
-        mock_sim.AdvanceTo.assert_called_once_with(0.01)
+    engine.simulator.AdvanceTo.assert_called_once_with(0.01)
 
 
-def test_get_state(engine):
-    engine.plant_context = MagicMock()
+def test_get_state(initialized_engine):
+    """Test get_state on an initialized engine."""
+    engine = initialized_engine
+
     engine.plant.GetPositions.return_value = np.array([1.0, 2.0])
     engine.plant.GetVelocities.return_value = np.array([3.0, 4.0])
 
@@ -159,8 +163,10 @@ def test_get_state(engine):
     engine.plant.GetPositions.assert_called_once()
 
 
-def test_compute_mass_matrix(engine):
-    engine.plant_context = MagicMock()
+def test_compute_mass_matrix(initialized_engine):
+    """Test compute_mass_matrix on an initialized engine (DBC: requires is_initialized)."""
+    engine = initialized_engine
+
     expected_M = np.eye(2)
     engine.plant.CalcMassMatrixViaInverseDynamics.return_value = expected_M
 
@@ -170,8 +176,10 @@ def test_compute_mass_matrix(engine):
     engine.plant.CalcMassMatrixViaInverseDynamics.assert_called_once()
 
 
-def test_compute_inverse_dynamics(engine):
-    engine.plant_context = MagicMock()
+def test_compute_inverse_dynamics(initialized_engine):
+    """Test compute_inverse_dynamics on an initialized engine (DBC: requires is_initialized)."""
+    engine = initialized_engine
+
     engine.plant.num_velocities.return_value = 2
 
     qacc = np.array([1.0, 1.0])
