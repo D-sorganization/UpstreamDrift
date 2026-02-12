@@ -1,160 +1,241 @@
 {
-  "timestamp": "2026-02-03T12:00:00.000000",
+  "timestamp": "2026-02-12T12:00:00.000000",
   "framework_version": "2.0",
-  "overall_score": 7.59,
+  "overall_score": 6.8,
+  "design_criteria_score": 5.1,
+  "weighted_overall": 5.8,
+  "prior_scores": {
+    "2026-02-03": 7.59,
+    "2026-02-10": 4.6,
+    "2026-02-12": 5.8
+  },
   "category_scores": {
     "A": {
-      "score": 8.5,
+      "score": 7.5,
       "name": "Architecture & Implementation",
       "weight": 2.0,
-      "status": "Excellent"
+      "status": "Good",
+      "trend": "up",
+      "change_from_feb10": "+0.5"
     },
     "B": {
-      "score": 7.5,
+      "score": 7.0,
       "name": "Code Quality & Hygiene",
       "weight": 1.5,
-      "status": "Good"
+      "status": "Good",
+      "trend": "up",
+      "change_from_feb10": "+2.0"
     },
     "C": {
-      "score": 7.5,
+      "score": 7.0,
       "name": "Documentation & Comments",
       "weight": 1.0,
-      "status": "Good"
+      "status": "Good",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "D": {
-      "score": 7.0,
+      "score": 6.5,
       "name": "User Experience & Developer Journey",
       "weight": 2.0,
-      "status": "Good"
+      "status": "Satisfactory",
+      "trend": "up",
+      "change_from_feb10": "+0.5"
     },
     "E": {
-      "score": 7.5,
+      "score": 6.0,
       "name": "Performance & Scalability",
       "weight": 1.5,
-      "status": "Good"
+      "status": "Needs Improvement",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "F": {
-      "score": 7.0,
+      "score": 6.0,
       "name": "Installation & Deployment",
       "weight": 1.5,
-      "status": "Good"
+      "status": "Needs Improvement",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "G": {
-      "score": 7.0,
+      "score": 6.0,
       "name": "Testing & Validation",
       "weight": 2.0,
-      "status": "Good"
+      "status": "Needs Improvement",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "H": {
       "score": 7.5,
       "name": "Error Handling & Debugging",
       "weight": 1.5,
-      "status": "Good"
+      "status": "Good",
+      "trend": "up",
+      "change_from_feb10": "+2.5"
     },
     "I": {
-      "score": 7.0,
+      "score": 8.0,
       "name": "Security & Input Validation",
       "weight": 1.5,
-      "status": "Good"
+      "status": "Very Good",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "J": {
       "score": 8.0,
       "name": "Extensibility & Plugin Architecture",
       "weight": 1.0,
-      "status": "Very Good"
+      "status": "Very Good",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "K": {
-      "score": 7.5,
+      "score": 6.5,
       "name": "Reproducibility & Provenance",
       "weight": 1.5,
-      "status": "Good"
+      "status": "Satisfactory",
+      "trend": "up",
+      "change_from_feb10": "+2.5"
     },
     "L": {
-      "score": 8.0,
+      "score": 6.5,
       "name": "Long-Term Maintainability",
       "weight": 1.0,
-      "status": "Very Good"
+      "status": "Satisfactory",
+      "trend": "up",
+      "change_from_feb10": "+1.5"
     },
     "M": {
-      "score": 6.5,
+      "score": 6.0,
       "name": "Educational Resources & Tutorials",
       "weight": 1.0,
-      "status": "Needs Improvement"
+      "status": "Needs Improvement",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "N": {
-      "score": 8.0,
+      "score": 7.0,
       "name": "Visualization & Export",
       "weight": 1.0,
-      "status": "Very Good"
+      "status": "Good",
+      "trend": "stable",
+      "change_from_feb10": "0"
     },
     "O": {
-      "score": 8.5,
+      "score": 7.0,
       "name": "CI/CD & DevOps",
       "weight": 1.0,
-      "status": "Excellent"
+      "status": "Good",
+      "trend": "stable",
+      "change_from_feb10": "0"
     }
   },
+  "design_criteria_scores": {
+    "DRY": { "score": 5.5, "prior": 4.0, "trend": "up" },
+    "Design_by_Contract": { "score": 4.5, "prior": 4.0, "trend": "up" },
+    "TDD": { "score": 5.5, "prior": 6.5, "trend": "down" },
+    "Orthogonality": { "score": 5.5, "prior": 4.0, "trend": "up" },
+    "Monolithic_Files": { "score": 3.0, "prior": 2.0, "trend": "up" },
+    "Reversibility": { "score": 5.0, "prior": 4.0, "trend": "up" },
+    "Reusability": { "score": 6.0, "prior": 5.5, "trend": "up" },
+    "Function_Length": { "score": 3.5, "prior": 3.5, "trend": "stable" },
+    "God_Functions": { "score": 3.5, "prior": 3.0, "trend": "up" },
+    "Magic_Numbers": { "score": 4.5, "prior": 4.5, "trend": "stable" },
+    "Name_Quality": { "score": 5.5, "prior": 5.5, "trend": "stable" },
+    "Comment_Quality": { "score": 5.0, "prior": 4.0, "trend": "up" },
+    "Deprecated_Code": { "score": 6.0, "prior": 3.5, "trend": "up" },
+    "Cleanup": { "score": 6.5, "prior": 3.5, "trend": "up" }
+  },
   "group_scores": {
-    "Core Technical (A-C)": 7.8,
-    "User-Facing (D-F)": 7.2,
-    "Reliability & Safety (G-I)": 7.4,
-    "Sustainability (J-L)": 7.8,
-    "Communication (M-O)": 7.9
+    "Core Technical (A-C)": 7.2,
+    "User-Facing (D-F)": 6.2,
+    "Reliability & Safety (G-I)": 7.2,
+    "Sustainability (J-L)": 7.0,
+    "Communication (M-O)": 6.7
   },
   "critical_issues": [
     {
       "priority": "P0",
-      "description": "Test suite collection failures in headless environments",
-      "category": "G",
-      "remediation": "Establish minimal reliable test slice"
+      "description": "Drake GUI (2,111 lines) and Pinocchio GUI (1,942 lines) are monolithic near-duplicates",
+      "category": "A, DRY",
+      "remediation": "Extract common _setup_ui() into SimulationGUIBase; split UI from simulation logic"
     },
     {
       "priority": "P0",
-      "description": "79 files flagged for potential hardcoded secrets",
-      "category": "I",
-      "remediation": "Audit and remediate immediately"
+      "description": "1,415 lines of new launcher modules have 0 unit tests (TDD violation)",
+      "category": "G, TDD",
+      "remediation": "Write tests for docker_dialog, help_dialogs, model_card, settings_dialog, startup"
+    },
+    {
+      "priority": "P0",
+      "description": "_bootstrap.py (critical import mechanism) has 0 test coverage",
+      "category": "G, TDD",
+      "remediation": "Write tests for repo root discovery and path management"
     },
     {
       "priority": "P1",
-      "description": "3/4 tutorial files are placeholders",
-      "category": "M",
-      "remediation": "Complete tutorials within 2 weeks"
+      "description": "Only 40 assert statements and 11 files use DbC decorators in production",
+      "category": "DbC",
+      "remediation": "Add preconditions to physics engine entry points; postconditions to exports"
     },
     {
       "priority": "P1",
-      "description": "Bandit findings (MD5, SQL, yaml.load)",
-      "category": "I",
-      "remediation": "Triage and fix within 2 weeks"
-    },
-    {
-      "priority": "P2",
-      "description": "No automated release pipeline",
-      "category": "O",
-      "remediation": "Implement PyPI release automation"
-    },
-    {
-      "priority": "P2",
-      "description": "6 files not Black-formatted",
+      "description": "231 print() calls remain in non-test src/ (AGENTS.md bans these)",
       "category": "B",
-      "remediation": "Run black --fix"
+      "remediation": "Convert remaining print() to logging"
+    },
+    {
+      "priority": "P1",
+      "description": "54 files >800 lines in src/ (AGENTS.md critical threshold)",
+      "category": "A",
+      "remediation": "Phase-split starting with >1,500 line files"
+    },
+    {
+      "priority": "P2",
+      "description": ".benchmarks/ directory still empty",
+      "category": "E",
+      "remediation": "Run benchmark suite and commit baseline"
+    },
+    {
+      "priority": "P2",
+      "description": "Docker uses unpinned pip versions",
+      "category": "F, K",
+      "remediation": "Generate lockfiles with pip-compile"
     }
   ],
   "metrics": {
-    "test_files": 196,
-    "test_functions": 2113,
-    "documentation_files": 399,
-    "ruff_issues": 8,
-    "black_non_compliant": 6,
-    "mypy_errors": 4,
-    "bare_except_blocks": 0,
-    "github_workflows": 63,
-    "physics_engines": 6,
-    "shared_modules": 90,
-    "typing_files": 274,
-    "try_blocks": 1038,
-    "print_calls": 1332,
-    "logging_calls": 1536
+    "test_files": 259,
+    "except_exception_production": 12,
+    "backward_compat_shims": 0,
+    "backward_compat_reexports": 11,
+    "sys_path_hacks": 14,
+    "print_calls_non_test": 231,
+    "files_over_400_lines": 286,
+    "files_over_800_lines": 54,
+    "assert_in_production": 40,
+    "dbc_decorator_files": 11,
+    "todo_fixme_comments": 0,
+    "zustand_stores": 3,
+    "provenance_call_sites": 4,
+    "physics_engines": 7
   },
-  "recommendation": "Production-ready for beta use. Security findings should be triaged and critical items remediated before production deployment.",
-  "reports_analyzed": 15
+  "refactoring_sprint_summary": {
+    "period": "2026-02-10 to 2026-02-11",
+    "prs_merged": 8,
+    "commits": 12,
+    "tdd_compliance": "2/6 PRs (33%)",
+    "key_improvements": [
+      "except Exception reduced 739 -> 12 (98.4%)",
+      "98 backward-compat shim files removed (100%)",
+      "sys.path hacks reduced 42 -> 14 (67%)",
+      "print() reduced 754 -> 231 (69%)",
+      "ProvenanceInfo wired into production (0 -> 4 call sites)",
+      "Zustand state management added (3 stores, 100% test coverage)",
+      "ui_components.py decomposed (1,373 -> 65 line facade + 5 modules)",
+      "data_models.py decomposed (1,368 -> 56 line facade + 4 modules)"
+    ]
+  },
+  "recommendation": "Address test debt from refactoring sprint before further feature work. Decompose Drake/Pinocchio GUIs as next major refactoring target. Expand DbC decorator usage to physics engine boundaries.",
+  "reports_analyzed": 18
 }
