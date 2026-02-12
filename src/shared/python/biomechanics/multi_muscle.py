@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from shared.python.biomechanics.hill_muscle import HillMuscleModel
+    from src.shared.python.biomechanics.hill_muscle import HillMuscleModel
 
 logger = get_logger(__name__)
 
@@ -82,7 +82,7 @@ class MuscleGroup:
             l_CE, v_CE = muscle_states.get(name, (muscle.params.l_opt, 0.0))
 
             # Create temporary state object for force computation
-            from shared.python.biomechanics.hill_muscle import MuscleState
+            from src.shared.python.biomechanics.hill_muscle import MuscleState
 
             state = MuscleState(
                 activation=activations[name],
@@ -150,7 +150,10 @@ def create_elbow_muscle_system() -> AntagonistPair:
     Returns:
         AntagonistPair with Biceps (flexor) and Triceps (extensor)
     """
-    from shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
+    from src.shared.python.biomechanics.hill_muscle import (
+        HillMuscleModel,
+        MuscleParameters,
+    )
 
     # Flexors (Biceps)
     flexors = MuscleGroup("Elbow Flexors")

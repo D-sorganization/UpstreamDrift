@@ -57,6 +57,15 @@ class MockRecorder(RecorderInterface):
             return self.times, getattr(self, field_name)
         return self.times, np.array([])
 
+    def get_induced_acceleration_series(
+        self, source_name: str | int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Return empty induced acceleration data for testing."""
+        return self.times, np.zeros(len(self.times))
+
+    def set_analysis_config(self, config: dict) -> None:
+        """Configure which advanced metrics to record/compute."""
+
 
 def test_alignment() -> None:
     """Test signal alignment."""
