@@ -9,15 +9,15 @@ This example demonstrates how to:
 
 import numpy as np
 
-from src.shared.python.core import get_logger, setup_logging
 from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 from src.shared.python.physics.physics_parameters import (
     ParameterCategory,
     get_registry,
 )
 
-setup_logging(__name__)
+setup_logging()
 logger = get_logger(__name__)
 
 
