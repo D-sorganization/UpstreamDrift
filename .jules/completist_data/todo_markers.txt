@@ -6,10 +6,10 @@
 ./.github/workflows/Jules-Conflict-Fix.yml:36:              if [ "$ATTEMPTS" -gt 3 ]; then
 ./.github/workflows/Jules-Conflict-Fix.yml:37:                 echo "Too many attempts ($ATTEMPTS) for PR $PR. Skipping."
 ./.github/workflows/Jules-Conflict-Fix.yml:46:                3. This is conflict resolution attempt #$((ATTEMPTS+1))."
-./.github/workflows/Jules-Comprehensive-Assessment.yml:68:          # Find TODO/FIXME markers
-./.github/workflows/Jules-Comprehensive-Assessment.yml:69:          grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
-./.github/workflows/Jules-Comprehensive-Assessment.yml:79:          grep -rn '""".*TODO\|""".*WIP\|# TODO:' --include="*.py" . \
-./.github/workflows/nightly-cross-engine.yml:210:          # TODO: Generate HTML dashboard showing:
+./.github/workflows/Jules-Comprehensive-Assessment.yml:67:          # Find TODO/FIXME markers
+./.github/workflows/Jules-Comprehensive-Assessment.yml:68:          grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
+./.github/workflows/Jules-Comprehensive-Assessment.yml:78:          grep -rn '""".*TODO\|""".*WIP\|# TODO:' --include="*.py" . \
+./.github/workflows/nightly-cross-engine.yml:226:          # TODO: Generate HTML dashboard showing:
 ./.github/workflows/Jules-DRY-Orthogonality.yml:10:# Note: Creates issues instead of PRs to avoid CI blocking on TODO comments
 ./.github/workflows/Jules-Completist.yml:40:          # Find TODO/FIXME/XXX comments
 ./.github/workflows/Jules-Completist.yml:41:          grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
@@ -21,19 +21,12 @@
 ./.github/workflows/Jules-Completist.yml:132:          - FIXME comments
 ./.github/workflows/Jules-Completist.yml:133:          - HACK/TEMP markers
 ./.github/workflows/Jules-Code-Quality-Reviewer.yml:100:          4. Placeholders (TODO, FIXME, NotImplemented)
-./.github/workflows/Jules-PR-AutoFix.yml:46:  MAX_FIX_ATTEMPTS: 10
-./.github/workflows/Jules-PR-AutoFix.yml:118:          MAX_ATTEMPTS="${{ github.event.inputs.max_iterations || env.MAX_FIX_ATTEMPTS }}"
-./.github/workflows/Jules-PR-AutoFix.yml:120:          if [ "$FIX_COUNT" -ge "$MAX_ATTEMPTS" ]; then
-./.github/workflows/Jules-PR-AutoFix.yml:121:            echo "::warning::Max fix attempts ($MAX_ATTEMPTS) reached for branch $BRANCH. Manual intervention required."
-./.github/workflows/Jules-PR-AutoFix.yml:124:            REMAINING=$((MAX_ATTEMPTS - FIX_COUNT))
-./.github/workflows/Jules-PR-AutoFix.yml:207:            # ----- FIX 5: TODO/FIXME placeholders -----
-./.github/workflows/Jules-PR-AutoFix.yml:208:            echo ">>> Checking for TODO/FIXME placeholders..."
-./.github/workflows/Jules-PR-AutoFix.yml:209:            # Find files with TODOs and try to resolve simple ones
-./.github/workflows/Jules-PR-AutoFix.yml:210:            TODO_FILES=$(grep -rl "TODO\|FIXME" --include="*.py" . 2>/dev/null | grep -v __pycache__ | grep -v .git || true)
-./.github/workflows/Jules-PR-AutoFix.yml:211:            if [ -n "$TODO_FILES" ]; then
-./.github/workflows/Jules-PR-AutoFix.yml:212:              echo "Found TODO/FIXME in: $TODO_FILES"
-./.github/workflows/Jules-PR-AutoFix.yml:213:              # For now, just report - complex TODO resolution requires AI
-./.github/workflows/Jules-PR-AutoFix.yml:335:          **Iterations used:** $ITERATIONS / ${{ env.MAX_FIX_ATTEMPTS }}
+./.github/workflows/Jules-PR-AutoFix.yml:48:  MAX_FIX_ATTEMPTS: 5
+./.github/workflows/Jules-PR-AutoFix.yml:121:          MAX_ATTEMPTS="${{ github.event.inputs.max_iterations || env.MAX_FIX_ATTEMPTS }}"
+./.github/workflows/Jules-PR-AutoFix.yml:123:          if [ "$FIX_COUNT" -ge "$MAX_ATTEMPTS" ]; then
+./.github/workflows/Jules-PR-AutoFix.yml:124:            echo "::warning::Max fix attempts ($MAX_ATTEMPTS) reached for branch $BRANCH. Manual intervention required."
+./.github/workflows/Jules-PR-AutoFix.yml:127:            REMAINING=$((MAX_ATTEMPTS - FIX_COUNT))
+./.github/workflows/Jules-PR-AutoFix.yml:348:          **Iterations used:** $ITERATIONS / ${{ env.MAX_FIX_ATTEMPTS }}
 ./.github/workflows/Jules-Auto-Refactor.yml:17:          echo "TODO: Implement DRY refactoring, code cleanup, and style fixes."
 ./.github/workflows/Jules-Auto-Repair.yml:45:  MAX_REPAIR_ATTEMPTS: 5
 ./.github/workflows/Jules-Auto-Repair.yml:115:          MAX_ATTEMPTS="${{ inputs.max_iterations || env.MAX_REPAIR_ATTEMPTS }}"
@@ -43,7 +36,8 @@
 ./.github/workflows/Jules-Auto-Repair.yml:426:          **Iterations:** $ITERATIONS / ${{ env.MAX_REPAIR_ATTEMPTS }}
 ./.github/workflows/Jules-Auto-Rebase.yml:17:          echo "TODO: Implement automatic rebase of stale PRs onto main."
 ./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./AGENTS.md:295:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
+./AGENTS.md:200:- ❌ **DO NOT** leave `TODO`/`FIXME` markers for more than one sprint.
+./AGENTS.md:415:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./.claude/skills/issues-10-sequential/SKILL.md:105:| 1   | #XXX - Title | #YYY | Merged |
 ./.claude/skills/issues-10-sequential/SKILL.md:106:| 2   | #XXX - Title | #YYY | Merged |
 ./.claude/skills/issues-5-combined/SKILL.md:67:- #XXX: <brief description>
@@ -69,17 +63,17 @@
 ./.claude/skills/update-issues/SKILL.md:143:| #XXX  | Title | High     | assessment.md |
 ./.claude/skills/update-issues/SKILL.md:149:| #XXX  | Title | Fixed in commit abc123 |
 ./.claude/skills/update-issues/SKILL.md:155:| Description | #XXX           |
-./scripts/analyze_completist_data.py:105:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
-./scripts/analyze_completist_data.py:113:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
-./scripts/analyze_completist_data.py:127:        if marker_item["type"] == "TODO":
-./scripts/analyze_completist_data.py:202:        "FIXME": 2,
-./scripts/analyze_completist_data.py:203:        "TODO": 3,
-./scripts/analyze_completist_data.py:276:    chart.append(f'    "Feature Requests (TODO)" : {len(todos)}')
-./scripts/analyze_completist_data.py:277:    chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
-./scripts/analyze_completist_data.py:322:        f"- **Feature Gaps (TODO)**: {len(todos)}",
-./scripts/pragmatic_programmer_review.py:206:            if "TODO" in content:
-./scripts/pragmatic_programmer_review.py:216:                "title": f"High TODO count ({len(todos)})",
-./scripts/pragmatic_programmer_review.py:219:                "recommendation": "Review TODOs",
+./scripts/analyze_completist_data.py:108:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
+./scripts/analyze_completist_data.py:120:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
+./scripts/analyze_completist_data.py:134:        if marker_item["type"] == "TODO":
+./scripts/analyze_completist_data.py:215:        "FIXME": 2,
+./scripts/analyze_completist_data.py:216:        "TODO": 3,
+./scripts/analyze_completist_data.py:289:    chart.append(f'    "Feature Requests (TODO)" : {len(todos)}')
+./scripts/analyze_completist_data.py:290:    chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
+./scripts/analyze_completist_data.py:436:        f"- **Feature Gaps (TODO)**: {len(todos)}",
+./scripts/pragmatic_programmer_review.py:178:            if "TODO" in content:
+./scripts/pragmatic_programmer_review.py:188:                "title": f"High TODO count ({len(todos)})",
+./scripts/pragmatic_programmer_review.py:191:                "recommendation": "Review TODOs",
 ./scripts/setup_hooks.py:106:  - quality-check (no TODOs/FIXMEs)
 ./.agent/skills/issues-10-sequential/SKILL.md:105:| 1   | #XXX - Title | #YYY | Merged |
 ./.agent/skills/issues-10-sequential/SKILL.md:106:| 2   | #XXX - Title | #YYY | Merged |
@@ -489,7 +483,7 @@
 ./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/constants.py:66:SCFM_60F_TEMPERATURE_K: Final[float] = 288.706  # 60°F
 ./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/constants.py:67:SCFM_70F_TEMPERATURE_K: Final[float] = 294.261  # 70°F
 ./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/constants.py:78:# TEMPERATURE CONVERSIONS
-./ui/package-lock.json:6082:      "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==",
+./ui/package-lock.json:6334:      "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==",
 ./ui/src/api/client.ts:33:const MAX_RECONNECT_ATTEMPTS = 5;
 ./ui/src/api/client.ts:170:      if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
 ./ui/src/api/client.ts:172:        console.log(`WebSocket closed unexpectedly. Reconnecting in ${Math.round(delay)}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
@@ -514,12 +508,12 @@
 ./src/engines/pendulum_models/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
 ./src/engines/pendulum_models/tools/matlab_utilities/README.md:261:- TODO, FIXME, HACK, XXX placeholders
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md:261:- TODO, FIXME, HACK, XXX placeholders
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:32:        TEMPERATURE_C,
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:53:        TEMPERATURE_C,
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:193:        assert TEMPERATURE_C == 20.0
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:195:        assert 15.0 <= TEMPERATURE_C <= 25.0
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:230:            TEMPERATURE_C,
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:254:            TEMPERATURE_C,
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:29:        TEMPERATURE_C,
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:50:        TEMPERATURE_C,
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:190:        assert TEMPERATURE_C == 20.0
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:192:        assert 15.0 <= TEMPERATURE_C <= 25.0
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:227:            TEMPERATURE_C,
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:251:            TEMPERATURE_C,
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/constants.py:23:    TEMPERATURE_C,
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/constants.py:47:    "TEMPERATURE_C",
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
@@ -565,6 +559,6 @@
 ./src/shared/models/opensim/opensim-models/CMakeLists.txt:45:# TODO subject01_metabolics* files?
 ./src/shared/models/opensim/opensim-models/CMakeLists.txt:82:    # TODO should we copy over the OutputReference folder?
 ./src/shared/models/opensim/opensim-models/CMakeLists.txt:104:        PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not?
-./src/shared/python/physics_constants.py:131:TEMPERATURE_C = PhysicalConstant(20.0, "C", "Standard", "Standard temperature")
+./src/shared/python/core/physics_constants.py:148:TEMPERATURE_C = PhysicalConstant(20.0, "C", "Standard", "Standard temperature")
 ./src/shared/python/theme/typography.py:83:    XXXL: ClassVar[int] = 32
 ./src/shared/tools/human-gazebo/legacy/control/src/HumanGazeboControlModule.cpp:131:  //TODO read the joint names list and then put then in the control board options
