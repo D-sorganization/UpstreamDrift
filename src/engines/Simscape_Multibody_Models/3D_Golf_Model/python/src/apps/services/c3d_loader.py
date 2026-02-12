@@ -1,31 +1,12 @@
 """Service for loading C3D files into application data models."""
 
 import os
-import sys
-from pathlib import Path
 
 import numpy as np
 
+from ...c3d_reader import C3DDataReader  # type: ignore
+from ...logger_utils import log_execution_time
 from ..core.models import AnalogData, C3DDataModel, MarkerData
-
-# Ensure we can import the shared reader
-try:
-    # Try relative import from src/c3d_reader
-    # from src.apps.services -> src is ../..
-    from ...c3d_reader import C3DDataReader  # type: ignore
-    from ...logger_utils import log_execution_time
-except (ImportError, ValueError):
-    # Fallback for direct execution
-    # current: src/apps/services
-    # target: src/
-    src_path = Path(__file__).resolve().parent.parent.parent
-    if str(src_path) not in sys.path:
-        sys.path.insert(0, str(src_path))
-    try:
-        from c3d_reader import C3DDataReader  # type: ignore[no-redef]
-        from logger_utils import log_execution_time
-    except ImportError as e:
-        raise ImportError("Could not find c3d_reader or logger_utils module.") from e
 
 
 def load_c3d_file(filepath: str) -> C3DDataModel:

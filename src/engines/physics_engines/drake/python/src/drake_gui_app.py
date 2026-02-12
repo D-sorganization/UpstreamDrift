@@ -8,29 +8,17 @@ import webbrowser
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-# Bootstrap: add repo root to sys.path for src.* imports
-_root = next(
-    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
-    Path(__file__).resolve().parent,
-)
-if str(_root) not in sys.path:
-    sys.path.insert(0, str(_root))
+import numpy as np
 
-from _bootstrap import bootstrap  # noqa: E402
-
-bootstrap(__file__)
-
-import numpy as np  # noqa: E402
-
-from src.shared.python.engine_core.engine_availability import (  # noqa: E402
+from src.shared.python.engine_core.engine_availability import (
     MATPLOTLIB_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
-from src.shared.python.ui.simulation_gui_base import SimulationGUIBase  # noqa: E402
+from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 
 # Use centralized availability flags
 HAS_QT = PYQT6_AVAILABLE

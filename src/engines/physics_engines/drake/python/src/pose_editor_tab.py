@@ -10,29 +10,15 @@ Provides a full-featured pose editing interface for Drake models including:
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-# Bootstrap: add repo root to sys.path for src.* imports
-_root = next(
-    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
-    Path(__file__).resolve().parent,
-)
-if str(_root) not in sys.path:
-    sys.path.insert(0, str(_root))
-
-from _bootstrap import bootstrap  # noqa: E402
-
-bootstrap(__file__)
-
-from src.shared.python.engine_core.engine_availability import (  # noqa: E402
+from src.shared.python.engine_core.engine_availability import (
     DRAKE_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.pose_editor.core import (  # noqa: E402
     BasePoseEditor,
     JointInfo,

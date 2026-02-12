@@ -1,26 +1,13 @@
 """Entry point and main window for the MuJoCo golf pendulum demo."""
 
 import sys
-from pathlib import Path
 
-# Bootstrap: add repo root to sys.path for src.* imports
-_root = next(
-    (p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists()),
-    Path(__file__).resolve().parent,
-)
-if str(_root) not in sys.path:
-    sys.path.insert(0, str(_root))
+from PyQt6 import QtCore, QtWidgets
 
-from _bootstrap import bootstrap  # noqa: E402
-
-bootstrap(__file__)
-
-from PyQt6 import QtCore, QtWidgets  # noqa: E402
-
-from .gui.core.main_window import AdvancedGolfAnalysisWindow  # noqa: E402
+from .gui.core.main_window import AdvancedGolfAnalysisWindow
 
 # Legacy simple window for backwards compatibility
-from .models import (  # noqa: E402
+from .models import (
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
     CHAOTIC_PENDULUM_XML,
     DOUBLE_PENDULUM_XML,
@@ -28,7 +15,7 @@ from .models import (  # noqa: E402
     TRIPLE_PENDULUM_XML,
     UPPER_BODY_GOLF_SWING_XML,
 )
-from .sim_widget import MuJoCoSimWidget  # noqa: E402
+from .sim_widget import MuJoCoSimWidget
 
 
 class MainWindow(QtWidgets.QMainWindow):
