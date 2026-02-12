@@ -8,10 +8,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.shared.python.data_io.path_utils import get_repo_root, setup_import_paths
-
-# Setup import paths for launch_golf_suite module access
-setup_import_paths()
+from src.shared.python.data_io.path_utils import get_repo_root
 
 
 class TestLauncherModule:

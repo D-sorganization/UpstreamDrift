@@ -9,18 +9,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.shared.python.data_io.path_utils import (
-    get_simscape_model_path,
-    setup_import_paths,
-)
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 # Mark all tests in this file as integration tests
 pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
-
-# Setup import paths using centralized utility
-setup_import_paths(additional_paths=[get_simscape_model_path()])
 
 # Import C3D modules if PyQt6 is available
 C3D_IMPORTS_AVAILABLE = False
