@@ -10,6 +10,8 @@ import math
 
 import pytest
 
+pytest.importorskip("pytest_benchmark")
+
 
 @pytest.mark.benchmark
 class TestPhysicsBaseline:

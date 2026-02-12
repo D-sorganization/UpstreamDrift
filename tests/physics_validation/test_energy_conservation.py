@@ -106,7 +106,27 @@ def test_pinocchio_energy_check():
     mass = 1.0
     inertia = pinocchio.Inertia.FromSphere(mass, 0.1)
     model.appendBodyToJoint(joint_id, inertia, pinocchio.SE3.Identity())
-    model.addBodyFrame("particle", joint_id, pinocchio.SE3.Identity(), 0)
+
+    # Use a valid parent frame index; the model may not have a frame at the
+    # hard-coded index after joint creation, so find a safe one.
+    try:
+        parent_frame = model.getFrameId("particle_joint")
+        if parent_frame >= model.nframes:
+            parent_frame = 0 if model.nframes > 0 else None
+    except Exception:
+        parent_frame = 0 if model.nframes > 0 else None
+
+    if parent_frame is not None and parent_frame < model.nframes:
+        try:
+            model.addBodyFrame(
+                "particle", joint_id, pinocchio.SE3.Identity(), parent_frame
+            )
+        except ValueError:
+            logger.warning(
+                "Could not add body frame 'particle'; continuing without it."
+            )
+    else:
+        logger.warning("No valid parent frame found; skipping addBodyFrame.")
 
     data = model.createData()
 
@@ -127,7 +147,8 @@ def test_pinocchio_energy_check():
     model.gravity = pinocchio.Motion(np.array([0, 0, -GRAVITY_M_S2, 0, 0, 0]))
 
     # Pre-compute initial energy
-    pinocchio.computeTotalEnergy(model, data, q, v)
+    pinocchio.computeKineticEnergy(model, data, q, v)
+    pinocchio.computePotentialEnergy(model, data, q)
     initial_energy = data.kinetic_energy + data.potential_energy
 
     errors = []
@@ -163,36 +184,42 @@ def test_drake_energy_conservation():
     if not is_engine_available(EngineType.DRAKE):
         pytest.skip("Drake not installed")
 
-    import pydrake
+    pytest.importorskip("pydrake")
 
-    if isinstance(pydrake, MagicMock):
-        pytest.skip("pydrake is mocked")
+    try:
+        from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
+        from pydrake.multibody.tree import (
+            PrismaticJoint,
+            RotationalInertia,
+            SpatialInertia,
+        )
+        from pydrake.systems.analysis import Simulator
+        from pydrake.systems.framework import DiagramBuilder
+    except ImportError as exc:
+        pytest.skip(f"Drake submodule import failed: {exc}")
 
     # 1. Create a MultibodyPlant (Standard Boilerplate)
-    builder = pydrake.systems.framework.DiagramBuilder()
-    plant, scene_graph = pydrake.multibody.plant.AddMultibodyPlantSceneGraph(
-        builder, time_step=0.0
-    )
+    builder = DiagramBuilder()
+    plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=0.0)
 
     # Add a particle (Body)
-    pydrake.multibody.tree.BodyIndex(plant.num_bodies())
     mass = 1.0
-    M = pydrake.multibody.tree.SpatialInertia.MakeFromCentralInertia(
+    M = SpatialInertia.MakeFromCentralInertia(
         mass=mass,
         p_PScm_E=[0, 0, 0],
-        I_SScm_E=pydrake.multibody.tree.RotationalInertia(0, 0, 0),
+        I_SScm_E=RotationalInertia(0, 0, 0),
     )
 
     body = plant.AddRigidBody("particle", M)
 
     # Add Prismatic Joint for falling in Z
+    # Use body_frame() directly instead of FixedOffsetFrame to avoid
+    # "does not belong to the supplied MultibodyTree" errors.
     plant.AddJoint(
-        pydrake.multibody.tree.PrismaticJoint(
+        PrismaticJoint(
             "joint",
-            plant.world_frame(),
-            pydrake.multibody.tree.FixedOffsetFrame(
-                "frame", body, pydrake.math.RigidTransform()
-            ),
+            plant.world_body().body_frame(),
+            body.body_frame(),
             [0, 0, 1],  # Z axis
         )
     )
@@ -215,7 +242,7 @@ def test_drake_energy_conservation():
     initial_energy = pe + ke
 
     # Simulate
-    simulator = pydrake.systems.analysis.Simulator(diagram, context)
+    simulator = Simulator(diagram, context)
     simulator.AdvanceTo(1.0)  # 1 second
 
     # Check Final Energy

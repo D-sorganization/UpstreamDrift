@@ -2,44 +2,65 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Mock pydrake structure before import
-mock_pydrake = MagicMock()
-sys.modules["pydrake"] = mock_pydrake
-sys.modules["pydrake.systems"] = MagicMock()
-sys.modules["pydrake.systems.analysis"] = MagicMock()
-sys.modules["pydrake.systems.framework"] = MagicMock()
-sys.modules["pydrake.multibody"] = MagicMock()
-sys.modules["pydrake.multibody.parsing"] = MagicMock()
-sys.modules["pydrake.multibody.plant"] = MagicMock()
-sys.modules["pydrake.geometry"] = MagicMock()
-sys.modules["pydrake.math"] = MagicMock()
-sys.modules["pydrake.all"] = MagicMock()
+# Temporarily mock pydrake to allow DrakePhysicsEngine import.
+# We MUST clean up afterwards to avoid polluting other test modules.
+_PYDRAKE_KEYS = [
+    "pydrake",
+    "pydrake.systems",
+    "pydrake.systems.analysis",
+    "pydrake.systems.framework",
+    "pydrake.multibody",
+    "pydrake.multibody.parsing",
+    "pydrake.multibody.plant",
+    "pydrake.geometry",
+    "pydrake.math",
+    "pydrake.all",
+]
+_saved_pydrake = {k: sys.modules[k] for k in _PYDRAKE_KEYS if k in sys.modules}
 
-# Patch DRAKE_AVAILABLE to True so the drake_physics_engine module imports
-# the pydrake names (DiagramBuilder, etc.) into its namespace, making them patchable.
+for _k in _PYDRAKE_KEYS:
+    sys.modules[_k] = MagicMock()
+
 _drake_avail_patcher = patch(
     "src.shared.python.engine_core.engine_availability.DRAKE_AVAILABLE", True
 )
 _drake_avail_patcher.start()
 
 # Force re-import of drake_physics_engine with DRAKE_AVAILABLE=True
-sys.modules.pop("src.engines.physics_engines.drake.python.drake_physics_engine", None)
+_ENGINE_MOD_NAME = "src.engines.physics_engines.drake.python.drake_physics_engine"
+sys.modules.pop(_ENGINE_MOD_NAME, None)
 
+_drake_engine_module = None  # will hold module reference for @patch usage
 try:
-    from src.engines.physics_engines.drake.python.drake_physics_engine import (
-        DrakePhysicsEngine,
+    from src.engines.physics_engines.drake.python import (
+        drake_physics_engine as _drake_engine_module,
     )
+
+    DrakePhysicsEngine = _drake_engine_module.DrakePhysicsEngine
 except ImportError:
-    # Handle case where import logic inside module fails due to complex dependencies
     DrakePhysicsEngine = None  # type: ignore[assignment,misc]
 finally:
     _drake_avail_patcher.stop()
+    # Restore pydrake sys.modules to prevent mock pydrake from leaking
+    for _k in _PYDRAKE_KEYS:
+        if _k in _saved_pydrake:
+            sys.modules[_k] = _saved_pydrake[_k]
+        else:
+            sys.modules.pop(_k, None)
+    # Remove the mock-backed engine module to prevent pollution during
+    # integration tests that run before this file's tests.
+    sys.modules.pop(_ENGINE_MOD_NAME, None)
 
 
 class TestDrakeWrapper(unittest.TestCase):
     def setUp(self):
         if DrakePhysicsEngine is None:
             self.skipTest("DrakePhysicsEngine could not be imported")
+
+        # Temporarily restore the engine module so @patch decorators can find it
+        if _drake_engine_module is not None:
+            sys.modules[_ENGINE_MOD_NAME] = _drake_engine_module
+            self.addCleanup(lambda: sys.modules.pop(_ENGINE_MOD_NAME, None))
 
         # Patch dependencies used in __init__
         self.patcher1 = patch(
@@ -71,9 +92,15 @@ class TestDrakeWrapper(unittest.TestCase):
         # Simulator starts None
         self.engine.simulator = None
 
-    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.analysis")
-    def test_step_caching(self, mock_analysis):
+    def test_step_caching(self):
         """Test that Simulator is cached and reused in step()."""
+        # Patch analysis directly on the module object to avoid sys.modules
+        # lookup issues that occur in full-suite ordering.
+        mock_analysis = MagicMock()
+        original_analysis = getattr(_drake_engine_module, "analysis", None)
+        _drake_engine_module.analysis = mock_analysis
+        self.addCleanup(setattr, _drake_engine_module, "analysis", original_analysis)
+
         mock_simulator_class = mock_analysis.Simulator
         mock_simulator_instance = mock_simulator_class.return_value
 

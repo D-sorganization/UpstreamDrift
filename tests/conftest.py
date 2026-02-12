@@ -6,9 +6,54 @@ and adherence to the DRY principle.
 
 from __future__ import annotations
 
+import sys
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+
+# Engine module prefixes whose sys.modules entries must be isolated between
+# tests.  Pinocchio's C extension (pinocchio_pywrap_default) is corrupted by
+# PinocchioProbe.probe(); Drake gets replaced with MagicMock objects by tests
+# that mock pydrake, causing downstream TypeError comparisons.
+_PROTECTED_PREFIXES = ("pinocchio", "pydrake")
+
+
+def _matches_protected(name: str) -> bool:
+    """Return True if *name* is a protected engine module."""
+    for prefix in _PROTECTED_PREFIXES:
+        if name == prefix or name.startswith(prefix + "."):
+            return True
+    return False
+
+
+@pytest.fixture(autouse=True)
+def _protect_engine_modules() -> Generator[None, None, None]:
+    """Prevent engine module state corruption from leaking between tests.
+
+    Several tests instantiate ``EngineManager`` or ``GolfLauncher`` which
+    trigger engine probes that import pinocchio/drake.  The probes can corrupt
+    C extension module state or leave MagicMock objects in ``sys.modules``.
+    Subsequent tests then fail with ``NameError`` or ``TypeError``.
+
+    This fixture snapshots all engine-related ``sys.modules`` entries before
+    each test and restores them afterward so that corruption cannot leak
+    across test boundaries.
+    """
+    protected_keys = {k for k in sys.modules if _matches_protected(k)}
+    saved = {k: sys.modules[k] for k in protected_keys}
+    yield
+    # Remove any engine modules added or mutated during the test
+    for k in list(sys.modules):  # list() needed: mutating dict during iteration
+        if _matches_protected(k):
+            if k in saved:
+                sys.modules[k] = saved[k]
+            else:
+                del sys.modules[k]
+    # Restore any that were removed during the test
+    for k, v in saved.items():
+        if k not in sys.modules:
+            sys.modules[k] = v
 
 
 @pytest.fixture
