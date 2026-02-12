@@ -29,7 +29,7 @@ class TestSharedModuleLazyImports:
 
     def test_output_manager_imports_dependencies(self):
         """Verify output_manager.py imports numpy and pandas directly."""
-        from src.shared.python import output_manager
+        from src.shared.python.data_io import output_manager
 
         # These should be available in the module
         assert hasattr(output_manager, "np")

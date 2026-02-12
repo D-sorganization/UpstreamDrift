@@ -799,6 +799,30 @@ class Terrain:
     regions: list[TerrainRegion] = field(default_factory=list)
     default_type: TerrainType = TerrainType.ROUGH
 
+    def get_elevation(self, x: float, y: float) -> float:
+        """Get interpolated elevation at a position (delegate to elevation map).
+
+        Args:
+            x: X coordinate (meters)
+            y: Y coordinate (meters)
+
+        Returns:
+            Elevation at the point (meters)
+        """
+        return self.elevation.get_elevation(x, y)
+
+    def get_normal(self, x: float, y: float) -> np.ndarray:
+        """Get surface normal vector at a position (delegate to elevation map).
+
+        Args:
+            x: X coordinate (meters)
+            y: Y coordinate (meters)
+
+        Returns:
+            Unit normal vector (3,)
+        """
+        return self.elevation.get_normal(x, y)
+
     def get_terrain_type(self, x: float, y: float) -> TerrainType:
         """Get terrain type at a position.
 

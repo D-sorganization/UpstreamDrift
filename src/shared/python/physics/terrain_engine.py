@@ -101,7 +101,7 @@ class TerrainAwareEngine:
             return 0.0
 
         try:
-            return self.terrain.elevation.get_elevation(x, y)
+            return self.terrain.get_elevation(x, y)
         except ValueError:
             # Out of bounds - return edge value
             return 0.0
@@ -120,7 +120,7 @@ class TerrainAwareEngine:
             return np.array([0.0, 0.0, 1.0])
 
         try:
-            return self.terrain.elevation.get_normal(x, y)
+            return self.terrain.get_normal(x, y)
         except ValueError:
             return np.array([0.0, 0.0, 1.0])
 
@@ -220,7 +220,7 @@ class TerrainContactModel:
         Returns:
             True if in contact
         """
-        ground_height = self.terrain.elevation.get_elevation(x, y)
+        ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
 
         return contact_height <= ground_height
@@ -243,7 +243,7 @@ class TerrainContactModel:
         Returns:
             Penetration depth (positive when penetrating, meters)
         """
-        ground_height = self.terrain.elevation.get_elevation(x, y)
+        ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
 
         return max(0.0, ground_height - contact_height)
@@ -276,7 +276,7 @@ class TerrainContactModel:
             return np.zeros(3)
 
         # Get terrain normal
-        normal = self.terrain.elevation.get_normal(x, y)
+        normal = self.terrain.get_normal(x, y)
 
         # Get terrain-specific stiffness from material
         contact_params = self.terrain.get_contact_params(x, y)
@@ -334,7 +334,7 @@ class TerrainContactModel:
             return np.zeros(3)
 
         # Get terrain normal
-        normal = self.terrain.elevation.get_normal(x, y)
+        normal = self.terrain.get_normal(x, y)
 
         # Get tangential velocity (perpendicular to normal)
         v_normal_component = np.dot(velocity, normal) * normal
@@ -396,7 +396,7 @@ class CompressibleTurfModel:
             max_compression, and compression_ratio
         """
         material = self.terrain.get_material(x, y)
-        ground_height = self.terrain.elevation.get_elevation(x, y)
+        ground_height = self.terrain.get_elevation(x, y)
 
         # Contact point
         contact_z = z - radius
@@ -459,7 +459,7 @@ class CompressibleTurfModel:
             return np.zeros(3)
 
         # Get terrain normal
-        normal = self.terrain.elevation.get_normal(x, y)
+        normal = self.terrain.get_normal(x, y)
 
         # Spring force with effective stiffness
         spring_force = state["effective_stiffness"] * compression
@@ -583,7 +583,7 @@ class CompressibleTurfModel:
             remaining_energy, and energy_absorption_ratio
         """
         material = self.terrain.get_material(x, y)
-        normal = self.terrain.elevation.get_normal(x, y)
+        normal = self.terrain.get_normal(x, y)
 
         # Kinetic energy
         speed = np.linalg.norm(impact_velocity)
@@ -773,7 +773,7 @@ def apply_terrain_to_engine(
         x: X position (meters)
         y: Y position (meters)
     """
-    height = terrain.elevation.get_elevation(x, y)
+    height = terrain.get_elevation(x, y)
     material = terrain.get_material(x, y)
 
     if hasattr(engine, "set_ground_properties"):

@@ -115,7 +115,7 @@ class TerrainMixin:
             return 0.0
 
         try:
-            return self._terrain.elevation.get_elevation(x, y)
+            return self._terrain.get_elevation(x, y)
         except ValueError:
             return 0.0
 
@@ -133,7 +133,7 @@ class TerrainMixin:
             return np.array([0.0, 0.0, 1.0])
 
         try:
-            return self._terrain.elevation.get_normal(x, y)
+            return self._terrain.get_normal(x, y)
         except ValueError:
             return np.array([0.0, 0.0, 1.0])
 
@@ -431,7 +431,7 @@ class TerrainAwareSimulation:
         # Get terrain properties
         terrain_type = self.terrain.get_terrain_type(x, y)
         material = self.terrain.get_material(x, y)
-        normal = self.terrain.elevation.get_normal(x, y)
+        normal = self.terrain.get_normal(x, y)
 
         # Decompose velocity into normal and tangential
         v_normal_mag = abs(np.dot(impact_velocity, normal))
