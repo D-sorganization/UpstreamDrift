@@ -1,30 +1,57 @@
 """Design by Contract (DbC) decorators and utilities.
 
-This module provides formal contract enforcement for the Golf Modeling Suite,
+This module provides formal contract enforcement for the UpstreamDrift platform,
 implementing preconditions, postconditions, and class invariants.
+
+Enforcement Levels (controlled via ``DBC_LEVEL`` environment variable):
+  - ``enforce`` (default): Raise contract violation errors on failure.
+  - ``warn``: Log violations at WARNING level but do not raise.
+  - ``off``: Skip all contract checks (maximum performance).
+
+The legacy ``CONTRACTS_ENABLED`` boolean is still available for backward
+compatibility; it is derived from ``DBC_LEVEL``.
 
 Design by Contract Principles:
 - Preconditions: What must be true before a method executes
 - Postconditions: What must be true after a method completes
 - Invariants: What must always be true for an object's state
 
-Usage:
-    from src.shared.python.core.contracts import precondition, postcondition, invariant
+Usage (decorator style):
+
+    from src.shared.python.core.contracts import precondition, postcondition
 
     @precondition(lambda self: self._is_initialized, "Engine must be initialized")
     @postcondition(lambda result: result.shape[0] > 0, "Result must be non-empty")
     def compute_acceleration(self) -> np.ndarray:
         ...
 
-    @invariant(lambda self: self.mass > 0, "Mass must be positive")
-    class PhysicsBody:
-        ...
+Usage (function-call style):
+
+    from src.shared.python.core.contracts import require, ensure
+
+    def step(self, dt: float) -> State:
+        require(dt > 0, "dt must be positive", dt)
+        result = self._integrate(dt)
+        ensure(result.is_valid(), "result must be valid", result)
+        return result
+
+Class invariant mixin:
+
+    from src.shared.python.core.contracts import ContractChecker
+
+    class PhysicsBody(ContractChecker):
+        def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+            return [
+                (lambda: self.mass > 0, "mass must be positive"),
+            ]
 """
 
 from __future__ import annotations
 
+import enum
 import functools
 import inspect
+import os
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
@@ -40,8 +67,61 @@ logger = get_logger(__name__)
 F = TypeVar("F", bound=Callable[..., Any])
 T = TypeVar("T")
 
-# Global flag to enable/disable contract checking (for performance in production)
-CONTRACTS_ENABLED = True
+
+# ─── Contract Enforcement Level ────────────────────────────────
+
+
+class ContractLevel(enum.Enum):
+    """Tri-state enforcement level for Design by Contract checks.
+
+    Attributes:
+        OFF: No checks (production hot path, maximum performance).
+        WARN: Log violations at WARNING level without raising.
+        ENFORCE: Raise contract violation errors on any failure.
+    """
+
+    OFF = "off"
+    WARN = "warn"
+    ENFORCE = "enforce"
+
+
+def _resolve_contract_level() -> ContractLevel:
+    """Determine the contract level from environment.
+
+    Reads ``DBC_LEVEL`` environment variable.  Falls back to ``enforce``
+    when ``__debug__`` is True (normal Python) or ``off`` when running
+    with ``python -O``.
+    """
+    env_val = os.environ.get("DBC_LEVEL", "").lower().strip()
+    if env_val in ("off", "warn", "enforce"):
+        return ContractLevel(env_val)
+    return ContractLevel.ENFORCE if __debug__ else ContractLevel.OFF
+
+
+DBC_LEVEL: ContractLevel = _resolve_contract_level()
+
+# Legacy compatibility flag (derived from DBC_LEVEL)
+CONTRACTS_ENABLED = DBC_LEVEL != ContractLevel.OFF
+
+
+def set_contract_level(level: ContractLevel) -> None:
+    """Set the global contract enforcement level at runtime.
+
+    Args:
+        level: The desired enforcement level.
+    """
+    global DBC_LEVEL, CONTRACTS_ENABLED  # noqa: PLW0603
+    DBC_LEVEL = level
+    CONTRACTS_ENABLED = level != ContractLevel.OFF
+    logger.info("Contract enforcement level set to %s", level.value)
+
+
+def get_contract_level() -> ContractLevel:
+    """Return the current global contract enforcement level."""
+    return DBC_LEVEL
+
+
+# ─── Exception Hierarchy ───────────────────────────────────────
 
 
 class ContractViolationError(Exception):
@@ -174,6 +254,64 @@ class StateError(ContractViolationError):
         self.operation = operation
 
 
+# ─── Core Contract Primitives (function-call style) ───────────
+
+
+def _handle_violation(
+    contract_type: str,
+    message: str,
+    function_name: str | None = None,
+    value: Any = None,
+) -> None:
+    """Handle a contract violation according to the current DBC_LEVEL."""
+    if DBC_LEVEL == ContractLevel.ENFORCE:
+        if contract_type == "Precondition":
+            raise PreconditionError(message, function_name=function_name, value=value)
+        elif contract_type == "Postcondition":
+            raise PostconditionError(message, function_name=function_name, result=value)
+        elif contract_type == "Invariant":
+            raise InvariantError(message)
+        else:
+            raise ContractViolationError(contract_type, message)
+    elif DBC_LEVEL == ContractLevel.WARN:
+        detail = f"[DbC {contract_type}] {message}"
+        if value is not None:
+            detail += f" (got: {value!r})"
+        logger.warning(detail)
+    # OFF: do nothing
+
+
+def require(condition: bool, message: str, value: Any = None) -> None:
+    """Assert a precondition at function entry.
+
+    Args:
+        condition: Boolean expression that must hold.
+        message: Descriptive message for the violated contract.
+        value: The offending value, for diagnostics.
+    """
+    if DBC_LEVEL == ContractLevel.OFF:
+        return
+    if not condition:
+        _handle_violation("Precondition", message, value=value)
+
+
+def ensure(condition: bool, message: str, value: Any = None) -> None:
+    """Assert a postcondition before function return.
+
+    Args:
+        condition: Boolean expression that must hold.
+        message: Descriptive message for the violated contract.
+        value: The offending value, for diagnostics.
+    """
+    if DBC_LEVEL == ContractLevel.OFF:
+        return
+    if not condition:
+        _handle_violation("Postcondition", message, value=value)
+
+
+# ─── Decorator-Based Contracts ─────────────────────────────────
+
+
 def precondition(
     condition: Callable[..., bool],
     message: str = "Precondition failed",
@@ -207,7 +345,7 @@ def precondition(
     """
 
     def decorator(func: F) -> F:
-        if not enabled or not CONTRACTS_ENABLED:
+        if not enabled or DBC_LEVEL == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
@@ -224,14 +362,16 @@ def precondition(
             try:
                 result = condition(*args, **kwargs)
             except (RuntimeError, TypeError, ValueError) as e:
-                # If condition evaluation fails, report it
-                raise PreconditionError(
+                _handle_violation(
+                    "Precondition",
                     f"Failed to evaluate precondition: {e}",
                     function_name=func.__qualname__,
-                ) from e
+                )
+                return func(*args, **kwargs)
 
             if not result:
-                raise PreconditionError(
+                _handle_violation(
+                    "Precondition",
                     message,
                     function_name=func.__qualname__,
                 )
@@ -274,7 +414,7 @@ def postcondition(
     """
 
     def decorator(func: F) -> F:
-        if not enabled or not CONTRACTS_ENABLED:
+        if not enabled or DBC_LEVEL == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
@@ -285,17 +425,20 @@ def postcondition(
             try:
                 check_result = condition(result)
             except (RuntimeError, TypeError, ValueError) as e:
-                raise PostconditionError(
+                _handle_violation(
+                    "Postcondition",
                     f"Failed to evaluate postcondition: {e}",
                     function_name=func.__qualname__,
-                    result=result,
-                ) from e
+                    value=result,
+                )
+                return result
 
             if not check_result:
-                raise PostconditionError(
+                _handle_violation(
+                    "Postcondition",
                     message,
                     function_name=func.__qualname__,
-                    result=result,
+                    value=result,
                 )
 
             return result
@@ -332,24 +475,34 @@ def require_state(
     """
 
     def decorator(func: F) -> F:
-        if not CONTRACTS_ENABLED:
+        if DBC_LEVEL == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             if not state_check(self):
                 operation = operation_desc or func.__name__
-                raise StateError(
-                    f"Cannot perform '{operation}' - engine not {state_name}",
-                    current_state="not " + state_name,
-                    required_state=state_name,
-                    operation=func.__qualname__,
-                )
+                if DBC_LEVEL == ContractLevel.ENFORCE:
+                    raise StateError(
+                        f"Cannot perform '{operation}' - engine not {state_name}",
+                        current_state="not " + state_name,
+                        required_state=state_name,
+                        operation=func.__qualname__,
+                    )
+                elif DBC_LEVEL == ContractLevel.WARN:
+                    logger.warning(
+                        "[DbC State] Cannot perform '%s' - not %s",
+                        operation,
+                        state_name,
+                    )
             return func(self, *args, **kwargs)
 
         return cast(F, wrapper)
 
     return decorator
+
+
+# ─── Array/Numeric Helpers ─────────────────────────────────────
 
 
 def check_finite(arr: np.ndarray | None) -> bool:
@@ -442,6 +595,9 @@ def check_positive_definite(matrix: np.ndarray) -> bool:
         return False
 
 
+# ─── Class Invariant Mixin ─────────────────────────────────────
+
+
 class ContractChecker:
     """Mixin class providing invariant checking for physics engines.
 
@@ -476,23 +632,31 @@ class ContractChecker:
         Raises:
             InvariantError: If any invariant is violated.
         """
-        if not CONTRACTS_ENABLED:
+        if DBC_LEVEL == ContractLevel.OFF:
             return True
 
         for condition, message in self._get_invariants():
             try:
                 if not condition():
-                    raise InvariantError(
-                        message,
-                        class_name=self.__class__.__name__,
-                    )
+                    if DBC_LEVEL == ContractLevel.ENFORCE:
+                        raise InvariantError(
+                            message,
+                            class_name=self.__class__.__name__,
+                        )
+                    else:
+                        logger.warning(
+                            "[DbC invariant] %s: %s",
+                            self.__class__.__name__,
+                            message,
+                        )
             except InvariantError:
                 raise
             except (RuntimeError, TypeError, ValueError) as e:
-                raise InvariantError(
-                    f"Failed to evaluate invariant: {e}",
-                    class_name=self.__class__.__name__,
-                ) from e
+                if DBC_LEVEL == ContractLevel.ENFORCE:
+                    raise InvariantError(
+                        f"Failed to evaluate invariant: {e}",
+                        class_name=self.__class__.__name__,
+                    ) from e
 
         return True
 
@@ -505,25 +669,34 @@ class ContractChecker:
         Raises:
             InvariantError: If any invariant is violated.
         """
-        if not CONTRACTS_ENABLED:
+        if DBC_LEVEL == ContractLevel.OFF:
             return
 
         for condition, message in self._get_invariants():
             try:
                 if not condition():
-                    raise InvariantError(
-                        message,
-                        class_name=self.__class__.__name__,
-                        method_name=method_name,
-                    )
+                    if DBC_LEVEL == ContractLevel.ENFORCE:
+                        raise InvariantError(
+                            message,
+                            class_name=self.__class__.__name__,
+                            method_name=method_name,
+                        )
+                    else:
+                        logger.warning(
+                            "[DbC invariant] %s.%s: %s",
+                            self.__class__.__name__,
+                            method_name,
+                            message,
+                        )
             except InvariantError:
                 raise
             except (RuntimeError, TypeError, ValueError) as e:
-                raise InvariantError(
-                    f"Failed to evaluate invariant after {method_name}: {e}",
-                    class_name=self.__class__.__name__,
-                    method_name=method_name,
-                ) from e
+                if DBC_LEVEL == ContractLevel.ENFORCE:
+                    raise InvariantError(
+                        f"Failed to evaluate invariant after {method_name}: {e}",
+                        class_name=self.__class__.__name__,
+                        method_name=method_name,
+                    ) from e
 
 
 def invariant_checked(func: F) -> F:
@@ -543,7 +716,7 @@ def invariant_checked(func: F) -> F:
             def set_mass(self, mass: float) -> None:
                 self._mass = mass
     """
-    if not CONTRACTS_ENABLED:
+    if DBC_LEVEL == ContractLevel.OFF:
         return func
 
     @functools.wraps(func)
@@ -601,17 +774,13 @@ def non_empty_result(func: F) -> F:
 
 
 def enable_contracts() -> None:
-    """Enable contract checking globally."""
-    global CONTRACTS_ENABLED
-    CONTRACTS_ENABLED = True
-    logger.info("Contract checking enabled")
+    """Enable contract checking globally (sets level to ENFORCE)."""
+    set_contract_level(ContractLevel.ENFORCE)
 
 
 def disable_contracts() -> None:
-    """Disable contract checking globally (for performance)."""
-    global CONTRACTS_ENABLED
-    CONTRACTS_ENABLED = False
-    logger.info("Contract checking disabled")
+    """Disable contract checking globally (sets level to OFF)."""
+    set_contract_level(ContractLevel.OFF)
 
 
 def contracts_enabled() -> bool:
