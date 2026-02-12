@@ -13,7 +13,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from scripts.script_utils import (
+from scripts.script_utils import (  # noqa: E402
     check_docs_status,
     count_test_files,
     find_python_files,
@@ -155,7 +155,7 @@ class DocumentationChecker(BaseChecker):  # C
                     and p.stat().st_size > 500
                 ):
                     missing.append(p)
-            except:
+            except Exception:
                 pass
 
         metrics["missing_docstrings"] = len(missing)
@@ -214,7 +214,7 @@ class KeywordChecker(BaseChecker):
                         hits += 1
                         if len(samples) < 10:
                             samples.append(f"`{p.name}`: ...{kw}...")
-            except:
+            except Exception:
                 pass
 
         metrics["keyword_hits"] = hits
@@ -323,7 +323,7 @@ def main():
         try:
             with open(SUMMARY_JSON) as f:
                 summary = json.load(f)
-        except:
+        except Exception:
             pass
 
     if "category_scores" not in summary:
