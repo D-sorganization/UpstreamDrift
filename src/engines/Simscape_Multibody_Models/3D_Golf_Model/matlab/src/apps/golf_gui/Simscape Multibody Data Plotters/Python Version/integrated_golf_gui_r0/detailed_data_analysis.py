@@ -5,41 +5,48 @@ This script will explore the actual structure of the .mat files
 to understand the data format.
 """
 
+import logging
 import os
 from pathlib import Path
 
 import numpy as np
 import scipy.io
 
+logger = logging.getLogger(__name__)
+
 
 def deep_analyze_matlab_file(filename):
     """Deep analysis of a MATLAB file structure"""
-    print(f"\n=== Deep Analysis of {filename} ===")
+    logger.debug(f"\n=== Deep Analysis of {filename} ===")
 
     try:
         mat_data = scipy.io.loadmat(filename)
 
-        print(f"File: {filename}")
-        print(f"Keys: {list(mat_data.keys())}")
+        logger.info(f"File: {filename}")
+        logger.info(f"Keys: {list(mat_data.keys())}")
 
         for key, value in mat_data.items():
             if key.startswith("__"):
                 continue
 
-            print(f"\nKey: {key}")
-            print(f"  Type: {type(value)}")
-            print(f"  Shape: {value.shape if hasattr(value, 'shape') else 'N/A'}")
-            print(f"  Dtype: {value.dtype if hasattr(value, 'dtype') else 'N/A'}")
+            logger.info(f"\nKey: {key}")
+            logger.debug(f"  Type: {type(value)}")
+            logger.debug(
+                f"  Shape: {value.shape if hasattr(value, 'shape') else 'N/A'}"
+            )
+            logger.debug(
+                f"  Dtype: {value.dtype if hasattr(value, 'dtype') else 'N/A'}"
+            )
 
             if isinstance(value, np.ndarray):
                 if value.dtype.names:  # Structured array
-                    print(f"  Structured array with fields: {value.dtype.names}")
+                    logger.info(f"  Structured array with fields: {value.dtype.names}")
                     for field_name in value.dtype.names:
                         field_data = value[field_name]
                         shape_info = (
                             field_data.shape if hasattr(field_data, "shape") else "N/A"
                         )
-                        print(
+                        logger.info(
                             f"    {field_name}: {type(field_data)}, shape {shape_info}"
                         )
 
@@ -47,42 +54,44 @@ def deep_analyze_matlab_file(filename):
                         if hasattr(
                             field_data, "dtype"
                         ) and field_data.dtype == np.dtype("O"):
-                            print(f"      Object array with {len(field_data)} elements")
+                            logger.info(
+                                f"      Object array with {len(field_data)} elements"
+                            )
                             for i, obj in enumerate(field_data[:3]):  # Show first 3
                                 obj_shape = (
                                     obj.shape if hasattr(obj, "shape") else "N/A"
                                 )
-                                print(
+                                logger.info(
                                     f"        Element {i}: {type(obj)}, "
                                     f"shape {obj_shape}"
                                 )
                                 if hasattr(obj, "dtype"):
-                                    print(f"        Dtype: {obj.dtype}")
+                                    logger.debug(f"        Dtype: {obj.dtype}")
 
                 elif value.dtype == np.dtype("O"):  # Object array
-                    print(f"  Object array with {len(value)} elements")
+                    logger.info(f"  Object array with {len(value)} elements")
                     for i, obj in enumerate(value[:3]):  # Show first 3
-                        print(
+                        logger.info(
                             f"    Element {i}: {type(obj)}, "
                             f"shape {obj.shape if hasattr(obj, 'shape') else 'N/A'}"
                         )
                         if hasattr(obj, "dtype"):
-                            print(f"    Dtype: {obj.dtype}")
+                            logger.debug(f"    Dtype: {obj.dtype}")
 
                 else:  # Regular numeric array
-                    print("  Numeric array")
+                    logger.info("  Numeric array")
                     if value.size > 0:
-                        print(
+                        logger.info(
                             f"    Min: {value.min()}, Max: {value.max()}, "
                             f"Mean: {value.mean()}"
                         )
                         if value.ndim <= 2 and value.size <= 20:
-                            print(f"    Data: {value}")
+                            logger.info(f"    Data: {value}")
 
         return True
 
     except (ValueError, TypeError, RuntimeError) as e:
-        print(f"❌ Error analyzing {filename}: {e}")
+        logger.error(f"❌ Error analyzing {filename}: {e}")
         import traceback
 
         traceback.print_exc()
@@ -91,7 +100,7 @@ def deep_analyze_matlab_file(filename):
 
 def extract_actual_data(filename):
     """Try to extract the actual data from the MATLAB file"""
-    print(f"\n=== Extracting Data from {filename} ===")
+    logger.debug(f"\n=== Extracting Data from {filename} ===")
 
     try:
         mat_data = scipy.io.loadmat(filename)
@@ -102,56 +111,56 @@ def extract_actual_data(filename):
                 continue
 
             if isinstance(value, np.ndarray) and value.dtype.names:
-                print(f"Found structured array in key '{key}'")
+                logger.info(f"Found structured array in key '{key}'")
 
                 # Try to extract data from structured array
                 for field_name in value.dtype.names:
                     field_data = value[field_name]
-                    print(f"  Field '{field_name}': {type(field_data)}")
+                    logger.info(f"  Field '{field_name}': {type(field_data)}")
 
                     if hasattr(field_data, "dtype") and field_data.dtype == np.dtype(
                         "O"
                     ):
                         # Object array - this might contain the actual data
-                        print(f"    Object array with {len(field_data)} elements")
+                        logger.info(f"    Object array with {len(field_data)} elements")
 
                         for i, obj in enumerate(field_data):
                             if hasattr(obj, "shape") and len(obj.shape) == 2:
-                                print(f"      Element {i}: shape {obj.shape}")
+                                logger.info(f"      Element {i}: shape {obj.shape}")
                                 if (
                                     obj.shape[1] > 10
                                 ):  # Many columns suggest signal data
-                                    print("        This looks like signal data!")
-                                    print(
+                                    logger.info("        This looks like signal data!")
+                                    logger.info(
                                         "        Sample (first 3 rows, first 5 cols):"
                                     )
-                                    print(f"        {obj[:3, :5]}")
+                                    logger.info(f"        {obj[:3, :5]}")
 
                                     # Check if this has the expected structure
                                     if obj.shape[0] > 100:  # Many time points
-                                        print(
+                                        logger.info(
                                             "        ✅ This appears to be "
                                             "the main dataset!"
                                         )
                                         return obj
 
                     elif hasattr(field_data, "shape") and len(field_data.shape) == 2:
-                        print(f"    Direct array: shape {field_data.shape}")
+                        logger.info(f"    Direct array: shape {field_data.shape}")
                         if field_data.shape[1] > 10:
-                            print("      This looks like signal data!")
+                            logger.info("      This looks like signal data!")
                             return field_data
 
         return None
 
     except ImportError as e:
-        print(f"❌ Error extracting data from {filename}: {e}")
+        logger.error(f"❌ Error extracting data from {filename}: {e}")
         return None
 
 
 def main():
     """Main analysis function"""
-    print("🔍 Detailed MATLAB Data Structure Analysis")
-    print("=" * 60)
+    logger.info("🔍 Detailed MATLAB Data Structure Analysis")
+    logger.info("=" * 60)
 
     # Change to script directory
     script_dir = Path(__file__).parent
@@ -165,9 +174,9 @@ def main():
             deep_analyze_matlab_file(filename)
 
     # Try to extract actual data
-    print("\n" + "=" * 60)
-    print("EXTRACTING ACTUAL DATA")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("EXTRACTING ACTUAL DATA")
+    logger.info("=" * 60)
 
     extracted_data = {}
     for filename in files:
@@ -175,31 +184,35 @@ def main():
             data = extract_actual_data(filename)
             if data is not None:
                 extracted_data[filename] = data
-                print(f"✅ Successfully extracted data from {filename}: {data.shape}")
+                logger.info(
+                    f"✅ Successfully extracted data from {filename}: {data.shape}"
+                )
             else:
-                print(f"❌ Could not extract data from {filename}")
+                logger.info(f"❌ Could not extract data from {filename}")
 
     # Summary
-    print(f"\n{'=' * 60}")
-    print("SUMMARY")
-    print("=" * 60)
+    logger.info(f"\n{'=' * 60}")
+    logger.info("SUMMARY")
+    logger.info("=" * 60)
 
     if extracted_data:
-        print("✅ Data extraction successful!")
-        print("The files contain structured data that can be accessed.")
-        print("\nData shapes:")
+        logger.info("✅ Data extraction successful!")
+        logger.info("The files contain structured data that can be accessed.")
+        logger.info("\nData shapes:")
         for filename, data in extracted_data.items():
-            print(f"  {filename}: {data.shape}")
+            logger.info(f"  {filename}: {data.shape}")
 
-        print("\n🎉 RECOMMENDATIONS:")
-        print("1. The data structure is compatible with signal bus logging")
-        print("2. The GUI should be able to handle this data format")
-        print("3. Consider adding a data extraction function to handle this structure")
-        print("4. Test the GUI with this data to verify compatibility")
+        logger.info("\n🎉 RECOMMENDATIONS:")
+        logger.info("1. The data structure is compatible with signal bus logging")
+        logger.info("2. The GUI should be able to handle this data format")
+        logger.info(
+            "3. Consider adding a data extraction function to handle this structure"
+        )
+        logger.info("4. Test the GUI with this data to verify compatibility")
 
     else:
-        print("❌ Could not extract usable data from the files")
-        print("The data structure may need special handling in the GUI")
+        logger.info("❌ Could not extract usable data from the files")
+        logger.info("The data structure may need special handling in the GUI")
 
     return len(extracted_data) > 0
 

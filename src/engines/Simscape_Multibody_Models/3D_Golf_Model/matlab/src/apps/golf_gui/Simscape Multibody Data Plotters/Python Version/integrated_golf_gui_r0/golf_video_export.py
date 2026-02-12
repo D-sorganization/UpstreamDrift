@@ -10,6 +10,7 @@ Features:
 - Background rendering (non-blocking UI)
 """
 
+import logging
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +31,8 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QVBoxLayout,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -84,12 +87,12 @@ class VideoExporter(QObject):
             end_frame = min(total_frames, config.end_frame or total_frames)
             frames_to_export = range(start_frame, end_frame)
 
-            print(
+            logger.info(
                 f"🎬 Exporting {len(frames_to_export)} frames to {config.output_path}"
             )
-            print(f"   Resolution: {config.resolution[0]}x{config.resolution[1]}")
-            print(f"   FPS: {config.fps}")
-            print(f"   Quality: {config.quality}")
+            logger.info(f"   Resolution: {config.resolution[0]}x{config.resolution[1]}")
+            logger.info(f"   FPS: {config.fps}")
+            logger.info(f"   Quality: {config.quality}")
 
             # Setup ffmpeg process
             ffmpeg_process = self._start_ffmpeg_process(config)
@@ -111,25 +114,27 @@ class VideoExporter(QObject):
                 self.progress.emit(i + 1, len(frames_to_export))
 
                 if (i + 1) % 10 == 0:
-                    print(f"   Rendered {i + 1}/{len(frames_to_export)} frames...")
+                    logger.info(
+                        f"   Rendered {i + 1}/{len(frames_to_export)} frames..."
+                    )
 
             # Finalize video
             ffmpeg_process.stdin.close()
             ffmpeg_process.wait()
 
             if ffmpeg_process.returncode == 0:
-                print(f"✅ Video exported successfully to {config.output_path}")
+                logger.info(f"✅ Video exported successfully to {config.output_path}")
                 self.finished.emit(config.output_path)
             else:
                 error_msg = (
                     f"ffmpeg failed with return code {ffmpeg_process.returncode}"
                 )
-                print(f"❌ {error_msg}")
+                logger.error(f"❌ {error_msg}")
                 self.error.emit(error_msg)
 
         except (PermissionError, OSError) as e:
             error_msg = f"Video export failed: {str(e)}"
-            print(f"❌ {error_msg}")
+            logger.error(f"❌ {error_msg}")
             import traceback
 
             traceback.print_exc()
@@ -181,7 +186,7 @@ class VideoExporter(QObject):
             output_abspath,
         ]
 
-        print(
+        logger.info(
             f"   Running ffmpeg with preset '{settings['preset']}', "
             f"CRF {settings['crf']}"
         )
@@ -266,7 +271,7 @@ class VideoExporter(QObject):
         )
         self._fbo_size = (width, height)
 
-        print(f"   Created offscreen framebuffer: {width}x{height}")
+        logger.info(f"   Created offscreen framebuffer: {width}x{height}")
 
     def _calculate_view_matrix(self) -> np.ndarray:
         """Calculate view matrix for camera (face-on view)"""
@@ -564,11 +569,11 @@ class VideoExportDialog(QDialog):
 
 
 if __name__ == "__main__":
-    print("🎥 Golf Video Export Module")
-    print("\nFeatures:")
-    print("  ✅ High-quality MP4 export (60/120 FPS)")
-    print("  ✅ Multiple resolutions (720p to 4K)")
-    print("  ✅ Background rendering (non-blocking UI)")
-    print("  ✅ Progress tracking")
-    print("\nRequirements:")
-    print("  - ffmpeg: sudo apt install ffmpeg")
+    logger.info("🎥 Golf Video Export Module")
+    logger.info("\nFeatures:")
+    logger.info("  ✅ High-quality MP4 export (60/120 FPS)")
+    logger.info("  ✅ Multiple resolutions (720p to 4K)")
+    logger.info("  ✅ Background rendering (non-blocking UI)")
+    logger.info("  ✅ Progress tracking")
+    logger.info("\nRequirements:")
+    logger.info("  - ffmpeg: sudo apt install ffmpeg")

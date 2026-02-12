@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -17,21 +18,24 @@ except ImportError as e:
     cpin = None
 
 
+logger = logging.getLogger(__name__)
+
+
 def main() -> None:
     """
     Example: Optimization of a 2-link arm swing using CasADi + Pinocchio.
     Objective: Swing from hanging down (0,0) to upright (pi, 0) with minimum effort.
     """
     if not DEPENDENCIES_AVAILABLE:
-        print(
+        logger.error(
             f"Skipping optimize_arm.py due to missing dependencies: {MISSING_DEP_ERROR}"
         )
-        print("Please install casadi and pinocchio:")
-        print("  pip install casadi")
-        print("  conda install pinocchio -c conda-forge")
+        logger.info("Please install casadi and pinocchio:")
+        logger.info("  pip install casadi")
+        logger.info("  conda install pinocchio -c conda-forge")
         return
 
-    print("Setting up optimization problem...")
+    logger.info("Setting up optimization problem...")
 
     # 1. Load Model
     # ----------------
@@ -39,13 +43,13 @@ def main() -> None:
     urdf_path = os.path.join(os.path.dirname(__file__), urdf_filename)
 
     if not os.path.exists(urdf_path):
-        print(f"Error: URDF file not found at {urdf_path}")
+        logger.error(f"Error: URDF file not found at {urdf_path}")
         sys.exit(1)
 
     # Load Pinocchio model
     model = pin.buildModelFromUrdf(urdf_path)
 
-    print(f"Model loaded: {model.nq} DOFs, {model.nv} velocities")
+    logger.debug(f"Model loaded: {model.nq} DOFs, {model.nv} velocities")
 
     # 2. Initialize CasADi Model
     # ---------------------------
@@ -128,7 +132,7 @@ def main() -> None:
 
     # 7. Solve
     # --------
-    print("Solving...")
+    logger.info("Solving...")
 
     # Use IPOPT solver
     # Suppress output for cleanliness, or keep for debug
@@ -138,7 +142,7 @@ def main() -> None:
 
     try:
         sol = opti.solve()
-        print("\nSUCCESS: Optimal trajectory found!")
+        logger.info("\nSUCCESS: Optimal trajectory found!")
 
         # Retrieve results
         q_opt = sol.value(Q)
@@ -146,8 +150,8 @@ def main() -> None:
         u_opt = sol.value(U)
         cost_opt = sol.value(cost)
 
-        print(f"Final Cost: {cost_opt:.4f}")
-        print(f"Final Joint Angles: {q_opt[:, -1]}")
+        logger.info(f"Final Cost: {cost_opt:.4f}")
+        logger.info(f"Final Joint Angles: {q_opt[:, -1]}")
 
         # Save results
         out_file_q = "trajectory_q.csv"
@@ -157,15 +161,15 @@ def main() -> None:
         np.savetxt(out_file_v, v_opt.T, delimiter=",", header="v1,v2")
         np.savetxt(out_file_u, u_opt.T, delimiter=",", header="u1,u2")
 
-        print(f"Trajectory saved to {out_file_q}, {out_file_v}, and {out_file_u}")
-        print("\nTest passed: CasADi + Pinocchio integration is working.")
+        logger.info(f"Trajectory saved to {out_file_q}, {out_file_v}, and {out_file_u}")
+        logger.info("\nTest passed: CasADi + Pinocchio integration is working.")
 
     except Exception as e:  # noqa: BLE001 - CasADi solver may raise various errors
-        print("\nFAILURE: Optimization failed.")
-        print(e)
+        logger.error("\nFAILURE: Optimization failed.")
+        logger.info(e)
         # Debug info
-        print("Debug values (last iteration):")
-        print(opti.debug.value(Q[:, -1]))
+        logger.debug("Debug values (last iteration):")
+        logger.debug(opti.debug.value(Q[:, -1]))
         sys.exit(1)
 
 

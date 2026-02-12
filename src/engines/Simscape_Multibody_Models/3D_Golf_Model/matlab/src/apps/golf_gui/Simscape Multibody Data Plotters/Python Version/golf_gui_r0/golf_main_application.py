@@ -38,7 +38,7 @@ try:
     from golf_gui_application import GolfVisualizerMainWindow
 except ImportError as e:
     logger.error(f"Failed to import core modules: {e}")
-    print(
+    logger.warning(
         "❌ Core modules not found. Please ensure all files are in the same directory."
     )
     logger.error("Error: %s", e)

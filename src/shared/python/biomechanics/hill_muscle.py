@@ -206,20 +206,16 @@ if __name__ == "__main__":
     )
 
     force = muscle.compute_force(state)
-    logger.info(f"Muscle force: {force:.1f} N")  # noqa: T201
+    logger.info(f"Muscle force: {force:.1f} N")
 
     # Verify scaling
     F_muscle = muscle.compute_force(state)
 
-    logger.info("Biceps muscle force test:")  # noqa: T201
-    logger.info(f"  Activation: {state.activation * 100:.0f}%")  # noqa: T201
-    logger.info(  # noqa: T201
+    logger.info("Biceps muscle force test:")
+    logger.info(f"  Activation: {state.activation * 100:.0f}%")
+    logger.info(
         f"  Fiber length: {state.l_CE:.3f} m (opt: {biceps_params.l_opt:.3f} m)"
     )
-    logger.info(f"  Fiber velocity: {state.v_CE:.3f} m/s")  # noqa: T201
-    logger.info(
-        f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)"
-    )  # noqa: T201
-    logger.info(
-        f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%"
-    )  # noqa: T201
+    logger.info(f"  Fiber velocity: {state.v_CE:.3f} m/s")
+    logger.info(f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)")
+    logger.info(f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%")
