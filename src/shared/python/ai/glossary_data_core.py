@@ -7,14 +7,9 @@ Part of the expanded glossary (Issue #764). Contains ~200 entries across
 from __future__ import annotations
 
 
-def get_core_entries() -> list[dict]:
-    """Return core glossary entries as compact dicts.
-
-    Each dict has: key, term, cat, b (beginner), i (intermediate).
-    Optional: a (advanced), f (formula), u (units), r (related keys list).
-    """
+def _get_dynamics_entries_part1() -> list[dict]:
+    """Return dynamics glossary entries (part 1)."""
     return [
-        # === DYNAMICS (35) ===
         {
             "key": "equations_of_motion",
             "term": "Equations of Motion",
@@ -108,6 +103,12 @@ def get_core_entries() -> list[dict]:
             "u": "N",
             "r": ["coriolis_effect", "angular_velocity"],
         },
+    ]
+
+
+def _get_dynamics_entries_part2() -> list[dict]:
+    """Return dynamics glossary entries (part 2)."""
+    return [
         {
             "key": "gravity_vector",
             "term": "Gravity Vector",
@@ -201,6 +202,12 @@ def get_core_entries() -> list[dict]:
             "u": "J (Joules)",
             "r": ["kinetic_energy", "work_energy_theorem"],
         },
+    ]
+
+
+def _get_dynamics_entries_part3() -> list[dict]:
+    """Return dynamics glossary entries (part 3)."""
+    return [
         {
             "key": "work_energy_theorem",
             "term": "Work-Energy Theorem",
@@ -284,6 +291,12 @@ def get_core_entries() -> list[dict]:
             "i": "Constraint expressible as f(q,t) = 0, depending only on coordinates and time. Joint constraints are typically holonomic.",
             "r": ["nonholonomic_constraint", "constraint_force"],
         },
+    ]
+
+
+def _get_dynamics_entries_part4() -> list[dict]:
+    """Return dynamics glossary entries (part 4)."""
+    return [
         {
             "key": "nonholonomic_constraint",
             "term": "Nonholonomic Constraint",
@@ -326,7 +339,22 @@ def get_core_entries() -> list[dict]:
             "u": "kg\u00b7m\u00b2",
             "r": ["moment_of_inertia", "mass_matrix"],
         },
-        # === KINEMATICS (30) ===
+    ]
+
+
+def _get_dynamics_entries() -> list[dict]:
+    """Return dynamics glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_dynamics_entries_part1())
+    entries.extend(_get_dynamics_entries_part2())
+    entries.extend(_get_dynamics_entries_part3())
+    entries.extend(_get_dynamics_entries_part4())
+    return entries
+
+
+def _get_kinematics_entries_part1() -> list[dict]:
+    """Return kinematics glossary entries (part 1)."""
+    return [
         {
             "key": "position",
             "term": "Position",
@@ -417,6 +445,12 @@ def get_core_entries() -> list[dict]:
             "i": "Convention using 4 parameters per joint (\u03b8, d, a, \u03b1) to define transformations between consecutive links in a kinematic chain.",
             "r": ["forward_kinematics_robot", "serial_chain"],
         },
+    ]
+
+
+def _get_kinematics_entries_part2() -> list[dict]:
+    """Return kinematics glossary entries (part 2)."""
+    return [
         {
             "key": "forward_kinematics_robot",
             "term": "Forward Kinematics",
@@ -500,6 +534,12 @@ def get_core_entries() -> list[dict]:
             "i": "Piecewise polynomial (cubic or quintic) fitting through waypoints with continuity constraints. Used to smooth motion capture data.",
             "r": ["trajectory", "data_smoothing"],
         },
+    ]
+
+
+def _get_kinematics_entries_part3() -> list[dict]:
+    """Return kinematics glossary entries (part 3)."""
+    return [
         {
             "key": "pose",
             "term": "Pose",
@@ -581,7 +621,21 @@ def get_core_entries() -> list[dict]:
             "i": "n-dimensional space of all generalized coordinates q. Each point represents a unique system configuration. Abbreviated C-space.",
             "r": ["generalized_coordinates", "degrees_of_freedom", "phase_space"],
         },
-        # === BIOMECHANICS (35) ===
+    ]
+
+
+def _get_kinematics_entries() -> list[dict]:
+    """Return kinematics glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_kinematics_entries_part1())
+    entries.extend(_get_kinematics_entries_part2())
+    entries.extend(_get_kinematics_entries_part3())
+    return entries
+
+
+def _get_biomechanics_entries_part1() -> list[dict]:
+    """Return biomechanics glossary entries (part 1)."""
+    return [
         {
             "key": "gait_analysis",
             "term": "Gait Analysis",
@@ -666,6 +720,12 @@ def get_core_entries() -> list[dict]:
             "i": "Mass, length, center of mass location, and moments of inertia for each segment. Estimated from regression equations or imaging.",
             "r": ["anthropometry", "segment_inertia"],
         },
+    ]
+
+
+def _get_biomechanics_entries_part2() -> list[dict]:
+    """Return biomechanics glossary entries (part 2)."""
+    return [
         {
             "key": "anthropometry",
             "term": "Anthropometry",
@@ -756,6 +816,12 @@ def get_core_entries() -> list[dict]:
             "i": "Parabolic relationship between muscle fiber length and isometric force. Peak at optimal sarcomere length (~2.7 \u03bcm in humans).",
             "r": ["hill_muscle_model", "sarcomere"],
         },
+    ]
+
+
+def _get_biomechanics_entries_part3() -> list[dict]:
+    """Return biomechanics glossary entries (part 3)."""
+    return [
         {
             "key": "hill_muscle_model",
             "term": "Hill Muscle Model",
@@ -844,6 +910,12 @@ def get_core_entries() -> list[dict]:
             "i": "Muscle assisting the agonist or stabilizing adjacent joints. Multiple synergists provide redundant control strategies.",
             "r": ["agonist", "antagonist"],
         },
+    ]
+
+
+def _get_biomechanics_entries_part4() -> list[dict]:
+    """Return biomechanics glossary entries (part 4)."""
+    return [
         {
             "key": "co_contraction",
             "term": "Co-contraction",
@@ -884,7 +956,22 @@ def get_core_entries() -> list[dict]:
             "i": "Relatively permanent changes in motor behavior through practice. Progresses from cognitive to associative to autonomous stages.",
             "r": ["motor_control", "proprioception"],
         },
-        # === GOLF (40) ===
+    ]
+
+
+def _get_biomechanics_entries() -> list[dict]:
+    """Return biomechanics glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_biomechanics_entries_part1())
+    entries.extend(_get_biomechanics_entries_part2())
+    entries.extend(_get_biomechanics_entries_part3())
+    entries.extend(_get_biomechanics_entries_part4())
+    return entries
+
+
+def _get_golf_entries_part1() -> list[dict]:
+    """Return golf glossary entries (part 1)."""
+    return [
         {
             "key": "club_head_speed",
             "term": "Club Head Speed",
@@ -975,6 +1062,12 @@ def get_core_entries() -> list[dict]:
             "u": "degrees",
             "r": ["club_path", "dynamic_loft"],
         },
+    ]
+
+
+def _get_golf_entries_part2() -> list[dict]:
+    """Return golf glossary entries (part 2)."""
+    return [
         {
             "key": "dynamic_loft",
             "term": "Dynamic Loft",
@@ -1060,6 +1153,12 @@ def get_core_entries() -> list[dict]:
             "i": "Inclined plane best fitting the club head trajectory. Analyzed via SVD/PCA fit. Deviations indicate compensatory patterns.",
             "r": ["club_path", "trajectory"],
         },
+    ]
+
+
+def _get_golf_entries_part3() -> list[dict]:
+    """Return golf glossary entries (part 3)."""
+    return [
         {
             "key": "lie_angle",
             "term": "Lie Angle",
@@ -1147,6 +1246,12 @@ def get_core_entries() -> list[dict]:
             "u": "degrees",
             "r": ["pelvis_tilt", "lateral_bend"],
         },
+    ]
+
+
+def _get_golf_entries_part4() -> list[dict]:
+    """Return golf glossary entries (part 4)."""
+    return [
         {
             "key": "address_position",
             "term": "Address Position",
@@ -1229,7 +1334,22 @@ def get_core_entries() -> list[dict]:
             "u": "degrees\u00b2/s",
             "r": ["lateral_bend", "hip_rotation_golf", "injury_risk_assessment"],
         },
-        # === SIMULATION (30) ===
+    ]
+
+
+def _get_golf_entries() -> list[dict]:
+    """Return golf glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_golf_entries_part1())
+    entries.extend(_get_golf_entries_part2())
+    entries.extend(_get_golf_entries_part3())
+    entries.extend(_get_golf_entries_part4())
+    return entries
+
+
+def _get_simulation_entries_part1() -> list[dict]:
+    """Return simulation glossary entries (part 1)."""
+    return [
         {
             "key": "timestep",
             "term": "Timestep",
@@ -1311,6 +1431,12 @@ def get_core_entries() -> list[dict]:
             "i": "Property that numerical errors remain bounded over time. Stiff systems require implicit methods or very small timesteps for stability.",
             "r": ["timestep", "convergence"],
         },
+    ]
+
+
+def _get_simulation_entries_part2() -> list[dict]:
+    """Return simulation glossary entries (part 2)."""
+    return [
         {
             "key": "convergence",
             "term": "Convergence",
@@ -1391,6 +1517,12 @@ def get_core_entries() -> list[dict]:
             "i": "Mathematical framework where for each pair (z_i, w_i), at least one must be zero. Generalizes LCP to nonlinear (NCP) and mixed (MCP) forms.",
             "r": ["linear_complementarity", "constraint_solver"],
         },
+    ]
+
+
+def _get_simulation_entries_part3() -> list[dict]:
+    """Return simulation glossary entries (part 3)."""
+    return [
         {
             "key": "gauss_seidel",
             "term": "Gauss-Seidel Solver",
@@ -1471,7 +1603,21 @@ def get_core_entries() -> list[dict]:
             "i": "Deterministic but unpredictable behavior with sensitive dependence on initial conditions. Double pendulum is a classic example.",
             "r": ["bifurcation", "numerical_stability"],
         },
-        # === FORCES (30) ===
+    ]
+
+
+def _get_simulation_entries() -> list[dict]:
+    """Return simulation glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_simulation_entries_part1())
+    entries.extend(_get_simulation_entries_part2())
+    entries.extend(_get_simulation_entries_part3())
+    return entries
+
+
+def _get_forces_entries_part1() -> list[dict]:
+    """Return forces glossary entries (part 1)."""
+    return [
         {
             "key": "force_plate",
             "term": "Force Plate",
@@ -1561,6 +1707,12 @@ def get_core_entries() -> list[dict]:
             "u": "N",
             "r": ["external_force"],
         },
+    ]
+
+
+def _get_forces_entries_part2() -> list[dict]:
+    """Return forces glossary entries (part 2)."""
+    return [
         {
             "key": "external_force",
             "term": "External Force",
@@ -1655,6 +1807,12 @@ def get_core_entries() -> list[dict]:
             "f": "\u03b5 = \u0394L/L",
             "r": ["stress_mechanics", "youngs_modulus"],
         },
+    ]
+
+
+def _get_forces_entries_part3() -> list[dict]:
+    """Return forces glossary entries (part 3)."""
+    return [
         {
             "key": "youngs_modulus",
             "term": "Young's Modulus",
@@ -1745,3 +1903,28 @@ def get_core_entries() -> list[dict]:
             "r": ["stress_mechanics", "friction"],
         },
     ]
+
+
+def _get_forces_entries() -> list[dict]:
+    """Return forces glossary entries."""
+    entries: list[dict] = []
+    entries.extend(_get_forces_entries_part1())
+    entries.extend(_get_forces_entries_part2())
+    entries.extend(_get_forces_entries_part3())
+    return entries
+
+
+def get_core_entries() -> list[dict]:
+    """Return core glossary entries as compact dicts.
+
+    Each dict has: key, term, cat, b (beginner), i (intermediate).
+    Optional: a (advanced), f (formula), u (units), r (related keys list).
+    """
+    entries: list[dict] = []
+    entries.extend(_get_dynamics_entries())
+    entries.extend(_get_kinematics_entries())
+    entries.extend(_get_biomechanics_entries())
+    entries.extend(_get_golf_entries())
+    entries.extend(_get_simulation_entries())
+    entries.extend(_get_forces_entries())
+    return entries

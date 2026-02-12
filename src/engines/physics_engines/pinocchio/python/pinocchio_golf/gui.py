@@ -411,6 +411,28 @@ class PinocchioGUI(SimulationGUIBase):
         layout = QtWidgets.QVBoxLayout(central)
 
         # 1. Top Bar: Load & Mode
+        self._setup_toolbar(layout)
+
+        # 2. Controls Stack (Main Tabs)
+        self.main_tabs = QtWidgets.QTabWidget()
+        layout.addWidget(self.main_tabs)
+
+        # Tab 1: Control & Simulation
+        self._setup_simulation_tab()
+
+        # Tab 2: Live Analysis (LivePlotWidget)
+        if LivePlotWidget is not None:
+            self.live_tab = QtWidgets.QWidget()
+            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
+            self.live_plot = LivePlotWidget(self.recorder)
+            live_layout.addWidget(self.live_plot)
+            self.main_tabs.addTab(self.live_tab, "Live Analysis")
+
+        # Tab 3: Post-Hoc Analysis & Plotting
+        self._setup_analysis_tab()
+
+    def _setup_toolbar(self, layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the top bar with model selector, load button, and mode selector."""
         top_layout = QtWidgets.QHBoxLayout()
 
         self.model_combo = QtWidgets.QComboBox()
@@ -433,11 +455,8 @@ class PinocchioGUI(SimulationGUIBase):
 
         layout.addLayout(top_layout)
 
-        # 2. Controls Stack (Main Tabs)
-        self.main_tabs = QtWidgets.QTabWidget()
-        layout.addWidget(self.main_tabs)
-
-        # Tab 1: Control & Simulation
+    def _setup_simulation_tab(self) -> None:
+        """Build the simulation tab with controls and viz."""
         sim_tab = QtWidgets.QWidget()
         sim_layout = QtWidgets.QVBoxLayout(sim_tab)
 
@@ -447,11 +466,48 @@ class PinocchioGUI(SimulationGUIBase):
         self._setup_dynamic_tab()
         self._setup_kinematic_tab()
 
-        # Visuals & Logs in Sim Tab
+        # Visualization panel
+        self._setup_visualization_panel(sim_layout)
+
+        # Matrix Analysis Panel
+        self._setup_matrix_analysis_panel(sim_layout)
+
+        self.log = LogPanel()
+        sim_layout.addWidget(self.log)
+
+        self.main_tabs.addTab(sim_tab, "Simulation")
+
+    def _setup_visualization_panel(self, sim_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the visualization group box."""
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
 
         # Checkboxes row
+        self._setup_overlay_checkboxes(vis_layout)
+
+        # Ellipsoids & Body Selection
+        self._setup_ellipsoid_controls(vis_layout)
+
+        # Advanced Vectors
+        self._setup_advanced_vectors(vis_layout)
+
+        # Vector Scales
+        self._setup_vector_scales(vis_layout)
+
+        # Live Analysis Toggle
+        self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
+        self.chk_live_analysis.setToolTip(
+            "Compute Induced Accelerations and Counterfactuals in real-time "
+            "(Can slow down sim)"
+        )
+        self.chk_live_analysis.toggled.connect(self._on_live_analysis_toggled)
+        vis_layout.addWidget(self.chk_live_analysis)
+
+        vis_group.setLayout(vis_layout)
+        sim_layout.addWidget(vis_group)
+
+    def _setup_overlay_checkboxes(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the frame/COM/force/torque overlay checkboxes."""
         chk_layout = QtWidgets.QHBoxLayout()
         self.chk_frames = QtWidgets.QCheckBox("Show Frames")
         self.chk_frames.toggled.connect(self._toggle_frames)
@@ -470,7 +526,8 @@ class PinocchioGUI(SimulationGUIBase):
         chk_layout.addWidget(self.chk_torques)
         vis_layout.addLayout(chk_layout)
 
-        # Ellipsoids & Body Selection
+    def _setup_ellipsoid_controls(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the manipulability ellipsoid toggles and body selection grid."""
         ellip_group = QtWidgets.QGroupBox("Manipulability Analysis")
         ellip_layout = QtWidgets.QVBoxLayout()
 
@@ -495,7 +552,8 @@ class PinocchioGUI(SimulationGUIBase):
         ellip_group.setLayout(ellip_layout)
         vis_layout.addWidget(ellip_group)
 
-        # Advanced Vectors
+    def _setup_advanced_vectors(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the induced acceleration and counterfactual vector controls."""
         adv_vec_layout = QtWidgets.QHBoxLayout()
         self.chk_induced = QtWidgets.QCheckBox("Induced Accel")
         self.chk_induced.toggled.connect(self._update_viewer)
@@ -526,7 +584,8 @@ class PinocchioGUI(SimulationGUIBase):
         adv_vec_layout.addWidget(self.combo_cf)
         vis_layout.addLayout(adv_vec_layout)
 
-        # Vector Scales
+    def _setup_vector_scales(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the force and torque scale spinboxes."""
         scale_layout = QtWidgets.QHBoxLayout()
         self.spin_force_scale = QtWidgets.QDoubleSpinBox()
         self.spin_force_scale.setRange(0.01, 10.0)
@@ -545,19 +604,8 @@ class PinocchioGUI(SimulationGUIBase):
         scale_layout.addWidget(self.spin_torque_scale)
         vis_layout.addLayout(scale_layout)
 
-        # Live Analysis Toggle
-        self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
-        self.chk_live_analysis.setToolTip(
-            "Compute Induced Accelerations and Counterfactuals in real-time "
-            "(Can slow down sim)"
-        )
-        self.chk_live_analysis.toggled.connect(self._on_live_analysis_toggled)
-        vis_layout.addWidget(self.chk_live_analysis)
-
-        vis_group.setLayout(vis_layout)
-        sim_layout.addWidget(vis_group)
-
-        # Matrix Analysis Panel
+    def _setup_matrix_analysis_panel(self, sim_layout: QtWidgets.QVBoxLayout) -> None:
+        """Build the matrix analysis group box."""
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)
         self.lbl_cond = QtWidgets.QLabel("--")
@@ -565,22 +613,6 @@ class PinocchioGUI(SimulationGUIBase):
         matrix_layout.addRow("Jacobian Cond:", self.lbl_cond)
         matrix_layout.addRow("Mass Matrix Rank:", self.lbl_rank)
         sim_layout.addWidget(matrix_group)
-
-        self.log = LogPanel()
-        sim_layout.addWidget(self.log)
-
-        self.main_tabs.addTab(sim_tab, "Simulation")
-
-        # Tab 2: Live Analysis (LivePlotWidget)
-        if LivePlotWidget is not None:
-            self.live_tab = QtWidgets.QWidget()
-            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
-            self.live_plot = LivePlotWidget(self.recorder)
-            live_layout.addWidget(self.live_plot)
-            self.main_tabs.addTab(self.live_tab, "Live Analysis")
-
-        # Tab 3: Post-Hoc Analysis & Plotting
-        self._setup_analysis_tab()
 
     def _on_live_analysis_toggled(self, checked: bool) -> None:
         """Handle live analysis toggle."""
@@ -1306,156 +1338,193 @@ class PinocchioGUI(SimulationGUIBase):
             self.live_plot.update_plot()
 
         if self.operating_mode == "dynamic" and self.is_running:
-            # --- Physics integration loop ---
-            tau = np.zeros(self.model.nv)
-            a = pin.aba(self.model, self.data, self.q, self.v, tau)
-            self.v += a * self.dt
-            self.q = pin.integrate(self.model, self.q, self.v * self.dt)
-            self.sim_time += self.dt
+            self._advance_physics()
 
-            # Recording
             if self.recorder.is_recording:
-                # Compute energies for recording
-                pin.computeKineticEnergy(self.model, self.data, self.q, self.v)
-                pin.computePotentialEnergy(self.model, self.data, self.q)
-
-                # Capture club head data if available
-                club_head_pos = None
-                club_head_vel = None
-
-                club_id = -1
-                for fid in range(self.model.nframes):
-                    name = self.model.frames[fid].name.lower()
-                    if "club" in name or "head" in name:
-                        club_id = fid
-                        break
-
-                if club_id == -1 and self.model.nframes > 0:
-                    club_id = self.model.nframes - 1
-
-                if club_id >= 0:
-                    pin.forwardKinematics(self.model, self.data, self.q, self.v)
-                    pin.updateFramePlacements(self.model, self.data)
-
-                    frame = self.data.oMf[club_id]
-                    club_head_pos = frame.translation.copy()
-
-                    v_frame = pin.getFrameVelocity(
-                        self.model,
-                        self.data,
-                        club_id,
-                        pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-                    )
-                    club_head_vel = v_frame.linear.copy()
-
-                q_for_recording = self.q if self.q is not None else np.array([])
-
-                # Induced / Counterfactuals
-                induced = None
-                counterfactuals = None
-
-                # Check "Live Analysis" toggle or Recorder Config
-                config_requests_analysis = False
-                if hasattr(self.recorder, "analysis_config") and isinstance(
-                    self.recorder.analysis_config, dict
-                ):
-                    cfg = self.recorder.analysis_config
-                    if (
-                        cfg.get("ztcf")
-                        or cfg.get("zvcf")
-                        or cfg.get("track_drift")
-                        or cfg.get("track_total_control")
-                        or cfg.get("induced_accel_sources")
-                    ):
-                        config_requests_analysis = True
-
-                if self.chk_live_analysis.isChecked() or config_requests_analysis:
-                    if self.analyzer and self.q is not None and self.v is not None:
-                        induced = self.analyzer.compute_components(self.q, self.v, tau)
-                        self.latest_induced = induced
-
-                        # Check for specific torque override from UI or Config
-                        sources_to_compute = []
-                        txt = self.combo_induced.currentText()
-                        if txt:
-                            sources_to_compute.append(txt)
-
-                        # From config
-                        has_config = hasattr(self.recorder, "analysis_config")
-                        config = getattr(self.recorder, "analysis_config", None)
-                        if has_config and isinstance(config, dict):
-                            sources = config.get("induced_accel_sources", [])
-                            if isinstance(sources, list):
-                                sources_to_compute.extend(sources)
-
-                        unique_sources = set()
-                        for s in sources_to_compute:
-                            if s:
-                                unique_sources.add(str(s))
-
-                        for src in unique_sources:
-                            if src in ["gravity", "velocity", "total"]:
-                                continue
-
-                            # Attempt to parse as comma-separated vector OR Joint Name
-                            spec_tau = np.zeros(self.model.nv)
-                            found_joint = False
-
-                            # Check if it's a joint name
-                            if self.model.existJointName(src):
-                                j_id = self.model.getJointId(src)
-                                joint = self.model.joints[j_id]
-                                if joint.nv == 1:
-                                    spec_tau[joint.idx_v] = 1.0
-                                    found_joint = True
-
-                            # Check if it's an int index
-                            if not found_joint:
-                                try:
-                                    act_idx = int(src)
-                                    if 0 <= act_idx < self.model.nv:
-                                        spec_tau[act_idx] = 1.0
-                                        found_joint = True
-                                except ValueError:
-                                    pass
-
-                            if not found_joint:
-                                try:
-                                    parts = [float(x) for x in src.split(",")]
-                                    if len(parts) == self.model.nv:
-                                        spec_tau = np.array(parts)
-                                        found_joint = True
-                                except ValueError:
-                                    pass
-
-                            if found_joint:
-                                spec_acc = self.analyzer.compute_specific_control(
-                                    self.q, spec_tau
-                                )
-                                # Store result using source string as key
-                                induced[src] = spec_acc
-
-                        if hasattr(self.analyzer, "compute_counterfactuals"):
-                            counterfactuals = self.analyzer.compute_counterfactuals(
-                                self.q, self.v
-                            )
-                            self.latest_cf = counterfactuals
-
-                self.recorder.record_frame(
-                    time=self.sim_time,
-                    q=q_for_recording,
-                    v=self.v,
-                    tau=tau,
-                    kinetic_energy=self.data.kinetic_energy,
-                    potential_energy=self.data.potential_energy,
-                    club_head_position=club_head_pos,
-                    club_head_velocity=club_head_vel,
-                    induced_accelerations=induced,
-                    counterfactuals=counterfactuals,
-                )
-                self.lbl_rec_status.setText(f"Frames: {self.recorder.get_num_frames()}")
+                self._record_frame()
 
             self._update_viewer()
+
+    def _advance_physics(self) -> None:
+        """Integrate physics forward by one time step."""
+        tau = np.zeros(self.model.nv)
+        a = pin.aba(self.model, self.data, self.q, self.v, tau)
+        self.v += a * self.dt
+        self.q = pin.integrate(self.model, self.q, self.v * self.dt)
+        self.sim_time += self.dt
+
+    def _record_frame(self) -> None:
+        """Record a single frame of simulation data."""
+        tau = np.zeros(self.model.nv)
+
+        # Compute energies for recording
+        pin.computeKineticEnergy(self.model, self.data, self.q, self.v)
+        pin.computePotentialEnergy(self.model, self.data, self.q)
+
+        # Capture club head data
+        club_head_pos, club_head_vel = self._find_club_head_state()
+
+        q_for_recording = self.q if self.q is not None else np.array([])
+
+        # Induced / Counterfactuals
+        induced, counterfactuals = self._compute_live_analysis(tau)
+
+        self.recorder.record_frame(
+            time=self.sim_time,
+            q=q_for_recording,
+            v=self.v,
+            tau=tau,
+            kinetic_energy=self.data.kinetic_energy,
+            potential_energy=self.data.potential_energy,
+            club_head_position=club_head_pos,
+            club_head_velocity=club_head_vel,
+            induced_accelerations=induced,
+            counterfactuals=counterfactuals,
+        )
+        self.lbl_rec_status.setText(f"Frames: {self.recorder.get_num_frames()}")
+
+    def _find_club_head_state(
+        self,
+    ) -> tuple[np.ndarray | None, np.ndarray | None]:
+        """Find the club head frame and return its position and velocity."""
+        club_head_pos = None
+        club_head_vel = None
+
+        club_id = -1
+        for fid in range(self.model.nframes):
+            name = self.model.frames[fid].name.lower()
+            if "club" in name or "head" in name:
+                club_id = fid
+                break
+
+        if club_id == -1 and self.model.nframes > 0:
+            club_id = self.model.nframes - 1
+
+        if club_id >= 0:
+            pin.forwardKinematics(self.model, self.data, self.q, self.v)
+            pin.updateFramePlacements(self.model, self.data)
+
+            frame = self.data.oMf[club_id]
+            club_head_pos = frame.translation.copy()
+
+            v_frame = pin.getFrameVelocity(
+                self.model,
+                self.data,
+                club_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+            )
+            club_head_vel = v_frame.linear.copy()
+
+        return club_head_pos, club_head_vel
+
+    def _is_analysis_enabled(self) -> bool:
+        """Check whether live analysis should run based on UI and config."""
+        config_requests_analysis = False
+        if hasattr(self.recorder, "analysis_config") and isinstance(
+            self.recorder.analysis_config, dict
+        ):
+            cfg = self.recorder.analysis_config
+            if (
+                cfg.get("ztcf")
+                or cfg.get("zvcf")
+                or cfg.get("track_drift")
+                or cfg.get("track_total_control")
+                or cfg.get("induced_accel_sources")
+            ):
+                config_requests_analysis = True
+
+        return self.chk_live_analysis.isChecked() or config_requests_analysis
+
+    def _compute_live_analysis(
+        self, tau: np.ndarray
+    ) -> tuple[dict[str, np.ndarray] | None, dict[str, np.ndarray] | None]:
+        """Compute induced accelerations and counterfactuals if analysis is enabled.
+
+        Returns:
+            Tuple of (induced_accelerations, counterfactuals), each may be None.
+        """
+        induced = None
+        counterfactuals = None
+
+        if not self._is_analysis_enabled():
+            return induced, counterfactuals
+
+        if self.analyzer and self.q is not None and self.v is not None:
+            induced = self.analyzer.compute_components(self.q, self.v, tau)
+            self.latest_induced = induced
+
+            # Compute specific actuator sources
+            self._compute_specific_sources(induced)
+
+            if hasattr(self.analyzer, "compute_counterfactuals"):
+                counterfactuals = self.analyzer.compute_counterfactuals(self.q, self.v)
+                self.latest_cf = counterfactuals
+
+        return induced, counterfactuals
+
+    def _compute_specific_sources(self, induced: dict[str, np.ndarray]) -> None:
+        """Compute induced accelerations for specific actuator sources."""
+        sources_to_compute: list[str] = []
+        txt = self.combo_induced.currentText()
+        if txt:
+            sources_to_compute.append(txt)
+
+        # From config
+        has_config = hasattr(self.recorder, "analysis_config")
+        config = getattr(self.recorder, "analysis_config", None)
+        if has_config and isinstance(config, dict):
+            sources = config.get("induced_accel_sources", [])
+            if isinstance(sources, list):
+                sources_to_compute.extend(sources)
+
+        unique_sources = set()
+        for s in sources_to_compute:
+            if s:
+                unique_sources.add(str(s))
+
+        for src in unique_sources:
+            if src in ["gravity", "velocity", "total"]:
+                continue
+
+            spec_tau = self._resolve_source_to_tau(src)
+            if spec_tau is not None:
+                spec_acc = self.analyzer.compute_specific_control(self.q, spec_tau)
+                induced[src] = spec_acc
+
+    def _resolve_source_to_tau(self, src: str) -> np.ndarray | None:
+        """Resolve an actuator source string to a torque vector.
+
+        Tries joint name, integer index, and comma-separated vector in order.
+        Returns None if the source cannot be resolved.
+        """
+        spec_tau = np.zeros(self.model.nv)
+
+        # Check if it's a joint name
+        if self.model.existJointName(src):
+            j_id = self.model.getJointId(src)
+            joint = self.model.joints[j_id]
+            if joint.nv == 1:
+                spec_tau[joint.idx_v] = 1.0
+                return spec_tau
+
+        # Check if it's an int index
+        try:
+            act_idx = int(src)
+            if 0 <= act_idx < self.model.nv:
+                spec_tau[act_idx] = 1.0
+                return spec_tau
+        except ValueError:
+            pass
+
+        # Check if it's a comma-separated vector
+        try:
+            parts = [float(x) for x in src.split(",")]
+            if len(parts) == self.model.nv:
+                return np.array(parts)
+        except ValueError:
+            pass
+
+        return None
 
     def _update_viewer(self) -> None:
         if (

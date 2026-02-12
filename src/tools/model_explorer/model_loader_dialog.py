@@ -66,10 +66,73 @@ class ModelLoaderDialog(QDialog):
 
         self._setup_ui()
 
+    def _setup_biomechanics_tab(self) -> QWidget:
+        """Create the Biomechanics tab with human models."""
+        biomech_tab = QWidget()
+        biomech_layout = QVBoxLayout(biomech_tab)
+        human_group = self._create_human_models_group()
+        biomech_layout.addWidget(human_group)
+        biomech_layout.addStretch()
+        return biomech_tab
+
+    def _setup_equipment_tab(self) -> QWidget:
+        """Create the Equipment tab with golf clubs and components."""
+        equipment_tab = QWidget()
+        equip_layout = QVBoxLayout(equipment_tab)
+        golf_group = self._create_golf_clubs_group()
+        equip_layout.addWidget(golf_group)
+        component_group = self._create_components_group()
+        equip_layout.addWidget(component_group)
+        equip_layout.addStretch()
+        return equipment_tab
+
+    def _setup_robotics_tab(self) -> QWidget:
+        """Create the Robotics tab with pendulums and manipulators."""
+        robotics_tab = QWidget()
+        robotics_layout = QVBoxLayout(robotics_tab)
+
+        pendulum_group = self._create_model_group(
+            "Simplified Physics Models",
+            "pendulum",
+            "Simple pendulum models for understanding swing mechanics.",
+            "Load Physics Model",
+        )
+        robotics_layout.addWidget(pendulum_group)
+
+        robot_group = self._create_model_group(
+            "Robotic Manipulators",
+            "robotic",
+            "Industrial robot arms with golf attachments.",
+            "Load Robot Model",
+        )
+        robotics_layout.addWidget(robot_group)
+
+        robotics_layout.addStretch()
+        return robotics_tab
+
+    def _setup_info_and_buttons(self, layout: QVBoxLayout) -> None:
+        """Set up the model info display and OK/Cancel buttons."""
+        info_label = QLabel("Model Information:")
+        info_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        layout.addWidget(info_label)
+
+        self.info_display = QTextEdit()
+        self.info_display.setReadOnly(True)
+        self.info_display.setMaximumHeight(150)
+        self.info_display.setPlainText(
+            "Select a model above to see its specifications..."
+        )
+        layout.addWidget(self.info_display)
+
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        button_box.accepted.connect(self._on_accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
     def _setup_ui(self) -> None:
         """Set up the user interface."""
-
-        # Update imports needed for UI changes
 
         from PyQt6.QtWidgets import (
             QTabWidget,
@@ -78,153 +141,40 @@ class ModelLoaderDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # Title
-
         title = QLabel("Select a Model to Load")
-
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         title.setStyleSheet("font-size: 14pt; font-weight: bold; margin: 10px;")
-
         layout.addWidget(title)
 
         # Tabs
-
         self.tabs = QTabWidget()
 
-        # Tab 1: Biomechanics (Human Models)
-
-        biomech_tab = QWidget()
-
-        biomech_layout = QVBoxLayout(biomech_tab)
-
-        human_group = self._create_human_models_group()
-
-        biomech_layout.addWidget(human_group)
-
-        biomech_layout.addStretch()
-
-        self.tabs.addTab(biomech_tab, "Biomechanics")
-
-        # Tab 2: Equipment (Clubs & Components)
-
-        equipment_tab = QWidget()
-
-        equip_layout = QVBoxLayout(equipment_tab)
-
-        golf_group = self._create_golf_clubs_group()
-
-        equip_layout.addWidget(golf_group)
-
-        # Components Group
-
-        component_group = self._create_components_group()
-
-        equip_layout.addWidget(component_group)
-
-        equip_layout.addStretch()
-
-        self.tabs.addTab(equipment_tab, "Equipment")
-
-        # Tab 3: Robotics (Pendulums & Manipulators)
-
-        robotics_tab = QWidget()
-
-        robotics_layout = QVBoxLayout(robotics_tab)
-
-        # Pendulums
-
-        pendulum_group = self._create_model_group(
-            "Simplified Physics Models",
-            "pendulum",
-            "Simple pendulum models for understanding swing mechanics.",
-            "Load Physics Model",
-        )
-
-        robotics_layout.addWidget(pendulum_group)
-
-        # Manipulators
-
-        robot_group = self._create_model_group(
-            "Robotic Manipulators",
-            "robotic",
-            "Industrial robot arms with golf attachments.",
-            "Load Robot Model",
-        )
-
-        robotics_layout.addWidget(robot_group)
-
-        robotics_layout.addStretch()
-
-        self.tabs.addTab(robotics_tab, "Robotics")
-
-        # Tab 4: Repository Models (Discovered)
+        self.tabs.addTab(self._setup_biomechanics_tab(), "Biomechanics")
+        self.tabs.addTab(self._setup_equipment_tab(), "Equipment")
+        self.tabs.addTab(self._setup_robotics_tab(), "Robotics")
 
         repo_tab = QWidget()
-
         self._setup_repo_tab(repo_tab)
-
         self.tabs.addTab(repo_tab, "Repository")
 
-        # Tab 5: Community Models (robot_descriptions)
-
         community_tab = QWidget()
-
         self._setup_community_tab(community_tab)
-
         self.tabs.addTab(community_tab, "Community")
 
-        # Tab 6: Imported Models (User managed)
-
         imported_tab = QWidget()
-
         self._setup_imported_tab(imported_tab)
-
         self.tabs.addTab(imported_tab, "Imported")
 
-        # Tab 7: Embedded Models (Python defined)
-
         embedded_tab = QWidget()
-
         self._setup_embedded_tab(embedded_tab)
-
         self.tabs.addTab(embedded_tab, "Embedded")
 
         layout.addWidget(self.tabs)
 
-        # Info display
-
-        info_label = QLabel("Model Information:")
-
-        info_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
-
-        layout.addWidget(info_label)
-
-        self.info_display = QTextEdit()
-
-        self.info_display.setReadOnly(True)
-
-        self.info_display.setMaximumHeight(150)
-
-        self.info_display.setPlainText(
-            "Select a model above to see its specifications..."
-        )
-
-        layout.addWidget(self.info_display)
-
-        # Button box
-
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-
-        button_box.accepted.connect(self._on_accept)
-
-        button_box.rejected.connect(self.reject)
-
-        layout.addWidget(button_box)
+        # Info display and dialog buttons
+        self._setup_info_and_buttons(layout)
 
     def _setup_repo_tab(self, parent: QWidget) -> None:
-
         from PyQt6.QtWidgets import QHeaderView, QLineEdit, QTreeWidget
 
         layout = QVBoxLayout(parent)
@@ -254,7 +204,6 @@ class ModelLoaderDialog(QDialog):
         header = self.repo_tree.header()
 
         if header:
-
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
 
             header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -280,13 +229,11 @@ class ModelLoaderDialog(QDialog):
         layout.addWidget(load_btn)
 
     def _populate_repo_tree(self, models: list) -> None:
-
         from PyQt6.QtWidgets import QTreeWidgetItem
 
         self.repo_tree.clear()
 
         for model in models:
-
             item = QTreeWidgetItem(
                 [model["name"], model["type"].upper(), model["path"]]
             )
@@ -296,7 +243,6 @@ class ModelLoaderDialog(QDialog):
             self.repo_tree.addTopLevelItem(item)
 
     def _filter_repo_list(self, text: str) -> None:
-
         text = text.lower()
 
         filtered = [
@@ -308,7 +254,6 @@ class ModelLoaderDialog(QDialog):
         self._populate_repo_tree(filtered)
 
     def _setup_embedded_tab(self, parent: QWidget) -> None:
-
         from PyQt6.QtWidgets import QListWidget
 
         layout = QVBoxLayout(parent)
@@ -328,7 +273,6 @@ class ModelLoaderDialog(QDialog):
         embedded_models = self.library.list_available_models()["embedded"]
 
         for key, model in embedded_models.items():
-
             from PyQt6.QtWidgets import QListWidgetItem
 
             item = QListWidgetItem(f"{model['name']} (MJCF)")
@@ -346,7 +290,6 @@ class ModelLoaderDialog(QDialog):
         layout.addWidget(load_btn)
 
     def _setup_community_tab(self, parent: QWidget) -> None:
-
         from PyQt6.QtWidgets import QListWidget, QListWidgetItem
 
         layout = QVBoxLayout(parent)
@@ -368,7 +311,6 @@ class ModelLoaderDialog(QDialog):
         )
 
         if not community_models:
-
             layout.addWidget(
                 QLabel(
                     "No community models found.\nEnsure 'robot_descriptions' is installed."
@@ -376,7 +318,6 @@ class ModelLoaderDialog(QDialog):
             )
 
         for model in community_models:
-
             item = QListWidgetItem(f"{model['name']} ({model['type'].upper()})")
 
             item.setData(Qt.ItemDataRole.UserRole, model["config_key"])
@@ -392,7 +333,6 @@ class ModelLoaderDialog(QDialog):
         layout.addWidget(load_btn)
 
     def _setup_imported_tab(self, parent: QWidget) -> None:
-
         from PyQt6.QtWidgets import QHeaderView, QTreeWidget
 
         layout = QVBoxLayout(parent)
@@ -414,7 +354,6 @@ class ModelLoaderDialog(QDialog):
         header = self.imported_tree.header()
 
         if header:
-
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
 
             header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -452,7 +391,6 @@ class ModelLoaderDialog(QDialog):
         self._reload_imported_models()
 
     def _reload_imported_models(self) -> None:
-
         from PyQt6.QtWidgets import QTreeWidgetItem
 
         self.imported_tree.clear()
@@ -460,7 +398,6 @@ class ModelLoaderDialog(QDialog):
         models = self.library.discover_imported_models()
 
         for model in models:
-
             item = QTreeWidgetItem(
                 [model["name"], model["type"].upper(), model["path"]]
             )
@@ -474,7 +411,6 @@ class ModelLoaderDialog(QDialog):
             self.imported_tree.addTopLevelItem(item)
 
     def _on_import_button(self) -> None:
-
         from PyQt6.QtWidgets import QFileDialog
 
         path, _ = QFileDialog.getOpenFileName(
@@ -485,25 +421,20 @@ class ModelLoaderDialog(QDialog):
         )
 
         if path:
-
             if self.library.import_model(path):
-
                 self._reload_imported_models()
 
                 QMessageBox.information(self, "Success", "Model imported successfully.")
 
             else:
-
                 QMessageBox.warning(self, "Error", "Failed to import model.")
 
     def _on_imported_context_menu(self, pos: Any) -> None:
-
         from PyQt6.QtWidgets import QInputDialog, QMenu
 
         item = self.imported_tree.itemAt(pos)
 
         if not item:
-
             return
 
         menu = QMenu(self)
@@ -515,7 +446,6 @@ class ModelLoaderDialog(QDialog):
         viewport = self.imported_tree.viewport()
 
         if viewport is None:
-
             return
 
         action = menu.exec(viewport.mapToGlobal(pos))
@@ -523,7 +453,6 @@ class ModelLoaderDialog(QDialog):
         model_path = item.data(0, Qt.ItemDataRole.UserRole + 1)
 
         if action == rename_action:
-
             old_name = item.text(0)
 
             new_name, ok = QInputDialog.getText(
@@ -531,17 +460,13 @@ class ModelLoaderDialog(QDialog):
             )
 
             if ok and new_name and new_name != old_name:
-
                 if self.library.rename_imported_model(model_path, new_name):
-
                     self._reload_imported_models()
 
                 else:
-
                     QMessageBox.warning(self, "Error", "Failed to rename model.")
 
         elif action == delete_action:
-
             reply = QMessageBox.question(
                 self,
                 "Confirm Delete",
@@ -550,39 +475,30 @@ class ModelLoaderDialog(QDialog):
             )
 
             if reply == QMessageBox.StandardButton.Yes:
-
                 if self.library.delete_imported_model(model_path):
-
                     self._reload_imported_models()
 
                 else:
-
                     QMessageBox.warning(self, "Error", "Failed to delete model.")
 
     def _on_accept(self) -> None:
-
         # Determine active tab and selected item
 
         idx = self.tabs.currentIndex()
 
         if idx == 0:  # Bundled
-
             pass
 
         if self.selected_model:
-
             self.accept()
 
         else:
-
             # Try to select from active tab
 
             if idx == 1:
-
                 self._load_selected_model("discovered")
 
             elif idx == 2:
-
                 self._load_selected_model("embedded")
 
     def _create_human_models_group(self) -> QGroupBox:
@@ -624,11 +540,9 @@ class ModelLoaderDialog(QDialog):
         available_models = self.library.list_available_models()
 
         for model_key in available_models["human"]:
-
             model_info = self.library.get_model_info("human", model_key)
 
             if model_info:
-
                 self.human_combo.addItem(model_info["name"], model_key)
 
         self.human_combo.currentIndexChanged.connect(
@@ -720,11 +634,9 @@ class ModelLoaderDialog(QDialog):
         available_models = self.library.list_available_models()
 
         for club_key in available_models["golf_clubs"]:
-
             club_info = self.library.get_model_info("golf_clubs", club_key)
 
             if club_info:
-
                 self.club_combo.addItem(club_info["name"], club_key)
 
         self.club_combo.currentIndexChanged.connect(
@@ -807,11 +719,9 @@ class ModelLoaderDialog(QDialog):
         setattr(self, f"{category}_combo", combo)
 
         for key in available_models.get(category, []):
-
             info = self.library.get_model_info(category, key)
 
             if info:
-
                 combo.addItem(info["name"], key)
 
         combo.currentIndexChanged.connect(lambda: self._on_model_selected(category))
@@ -844,15 +754,12 @@ class ModelLoaderDialog(QDialog):
         model_key = None
 
         if category == "human":
-
             model_key = self.human_combo.currentData()
 
         elif category == "golf_clubs":
-
             model_key = self.club_combo.currentData()
 
         elif hasattr(self, f"{category}_combo"):
-
             # Generic handling for pendulum, robotic, component
 
             combo = getattr(self, f"{category}_combo")
@@ -860,43 +767,33 @@ class ModelLoaderDialog(QDialog):
             model_key = combo.currentData()
 
         elif category == "discovered":
-
             repo_item = self.repo_tree.currentItem()
 
             if repo_item:
-
                 model_key = repo_item.data(0, Qt.ItemDataRole.UserRole)
 
         elif category == "embedded":
-
             embed_item = self.embedded_list.currentItem()
 
             if embed_item:
-
                 model_key = embed_item.data(Qt.ItemDataRole.UserRole)
 
         elif category == "robot_descriptions":
-
             comm_item = self.community_list.currentItem()
 
             if comm_item:
-
                 model_key = comm_item.data(Qt.ItemDataRole.UserRole)
 
         elif category == "imported":
-
             imp_item = self.imported_tree.currentItem()
 
             if imp_item:
-
                 model_key = imp_item.data(0, Qt.ItemDataRole.UserRole)
 
         if model_key:
-
             model_info = self.library.get_model_info(category, model_key)
 
             if model_info:
-
                 self._display_model_info(category, model_key, model_info)
 
             self.selected_category = category
@@ -921,7 +818,6 @@ class ModelLoaderDialog(QDialog):
         """
 
         if category == "human":
-
             info_text = f"""Name: {model_info["name"]}
 
 Description: {model_info["description"]}
@@ -935,7 +831,6 @@ Repository: https://github.com/gbionics/human-gazebo
 """
 
         elif category == "golf_clubs":
-
             info_text = f"""Club: {model_info["name"]}
 
 Loft: {model_info["loft"]}°
@@ -957,7 +852,6 @@ The URDF will be automatically generated with realistic geometry and inertial pr
 """
 
         elif category in ["pendulum", "robotic", "component"]:
-
             info_text = f"""Name: {model_info["name"]}
 
 Type: {model_info.get("type", "Unknown").upper()}
@@ -973,7 +867,6 @@ Click 'Load' to view this model.
 """
 
         elif category == "discovered":
-
             info_text = f"""Name: {model_info["name"]}
 
 Type: {model_info["type"].upper()}
@@ -987,7 +880,6 @@ Click 'Load Selected Repository Model' to view.
 """
 
         elif category == "embedded":
-
             content_preview = (
                 model_info["content"][:200] + "..."
                 if len(model_info["content"]) > 200
@@ -1009,7 +901,6 @@ Content Preview:
 """
 
         elif category == "robot_descriptions":
-
             info_text = f"""Name: {model_info["name"]}
 
 Type: {model_info["type"].upper()}
@@ -1025,7 +916,6 @@ Description: {model_info["description"]}
 """
 
         elif category == "imported":
-
             info_text = f"""Name: {model_info["name"]}
 
 Type: {model_info["type"].upper()}
@@ -1039,7 +929,6 @@ User imported model. Right-click in the list to Rename or Delete.
 """
 
         else:
-
             info_text = "No information available."
 
         self.info_display.setPlainText(info_text)
@@ -1050,7 +939,6 @@ User imported model. Right-click in the list to Rename or Delete.
         model_key = self.human_combo.currentData()
 
         if not model_key:
-
             return
 
         reply = QMessageBox.question(
@@ -1063,13 +951,10 @@ User imported model. Right-click in the list to Rename or Delete.
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-
             try:
-
                 urdf_path = self.library.download_human_model(model_key)
 
                 if urdf_path:
-
                     QMessageBox.information(
                         self,
                         "Download Complete",
@@ -1077,13 +962,11 @@ User imported model. Right-click in the list to Rename or Delete.
                     )
 
                 else:
-
                     QMessageBox.warning(
                         self, "Download Failed", "Failed to download model files."
                     )
 
             except (RuntimeError, ValueError, OSError) as e:
-
                 logger.error(f"Download error: {e}")
 
                 QMessageBox.critical(
@@ -1102,27 +985,22 @@ User imported model. Right-click in the list to Rename or Delete.
         """
 
         if category == "human":
-
             model_key = self.human_combo.currentData()
 
         elif category == "golf_clubs":
-
             model_key = self.club_combo.currentData()
 
         elif hasattr(self, f"{category}_combo"):
-
             combo = getattr(self, f"{category}_combo")
 
             model_key = combo.currentData()
 
         else:
-
             # Fallback for manual calls, though generic way is better
 
             return
 
         if model_key:
-
             self.selected_category = category
 
             self.selected_model = model_key
@@ -1134,7 +1012,6 @@ User imported model. Right-click in the list to Rename or Delete.
                 and hasattr(self, "default_human_chk")
                 and self.default_human_chk.isChecked()
             ):
-
                 from PyQt6.QtCore import QSettings
 
                 settings = QSettings("GolfModelingSuite", "URDFGenerator")
@@ -1159,7 +1036,6 @@ User imported model. Right-click in the list to Rename or Delete.
         """
 
         if self.selected_category and self.selected_model:
-
             return (self.selected_category, self.selected_model)
 
         return None

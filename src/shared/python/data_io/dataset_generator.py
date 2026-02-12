@@ -442,10 +442,8 @@ class DatasetGenerator:
         Returns:
             SimulationSample with all recorded data.
         """
-        # Reset engine
+        # Reset engine and set initial conditions
         self.engine.reset()
-
-        # Generate initial conditions
         q0, v0 = self._generate_initial_conditions(config, rng, n_q, n_v)
         self.engine.set_state(q0, v0)
 
@@ -455,97 +453,12 @@ class DatasetGenerator:
         control_sequence = profile.generate(n_v, n_steps, config.timestep, rng)
 
         # Pre-allocate recording arrays
-        times = np.zeros(n_steps)
-        positions = np.zeros((n_steps, n_q))
-        velocities = np.zeros((n_steps, n_v))
-        accelerations = np.zeros((n_steps, n_v))
-        torques = np.zeros((n_steps, n_v))
+        buffers = self._allocate_sim_buffers(config, n_steps, n_q, n_v)
 
-        mass_matrices = (
-            np.zeros((n_steps, n_v, n_v)) if config.record_mass_matrix else None
-        )
-        bias_forces_arr = (
-            np.zeros((n_steps, n_v)) if config.record_bias_forces else None
-        )
-        gravity_arr = np.zeros((n_steps, n_v)) if config.record_gravity else None
-        contact_arr = np.zeros((n_steps, 3)) if config.record_contact_forces else None
-        drift_arr = np.zeros((n_steps, n_v)) if config.record_drift_control else None
-        control_accel_arr = (
-            np.zeros((n_steps, n_v)) if config.record_drift_control else None
-        )
-        ke_arr = np.zeros(n_steps)
-        pe_arr = np.zeros(n_steps)
+        # Run simulation loop
+        self._execute_sim_loop(config, control_sequence, n_steps, buffers)
 
-        # Run simulation
-        for step in range(n_steps):
-            # Apply control
-            tau = control_sequence[step]
-            self.engine.set_control(tau)
-
-            # Record pre-step state
-            q, v = self.engine.get_state()
-            t = self.engine.get_time()
-
-            times[step] = t
-            positions[step] = q
-            velocities[step] = v
-            torques[step] = tau
-
-            # Record dynamics quantities
-            if config.record_mass_matrix and mass_matrices is not None:
-                try:
-                    mass_matrices[step] = self.engine.compute_mass_matrix()
-                except (ValueError, RuntimeError, AttributeError):
-                    pass
-
-            if config.record_bias_forces and bias_forces_arr is not None:
-                try:
-                    bias_forces_arr[step] = self.engine.compute_bias_forces()
-                except (ValueError, RuntimeError, AttributeError):
-                    pass
-
-            if config.record_gravity and gravity_arr is not None:
-                try:
-                    gravity_arr[step] = self.engine.compute_gravity_forces()
-                except (ValueError, RuntimeError, AttributeError):
-                    pass
-
-            if config.record_contact_forces and contact_arr is not None:
-                try:
-                    cf = self.engine.compute_contact_forces()
-                    contact_arr[step, : len(cf)] = cf[:3]
-                except (ValueError, RuntimeError, AttributeError):
-                    pass
-
-            if config.record_drift_control:
-                try:
-                    if drift_arr is not None:
-                        drift_arr[step] = self.engine.compute_drift_acceleration()
-                    if control_accel_arr is not None:
-                        control_accel_arr[step] = (
-                            self.engine.compute_control_acceleration(tau)
-                        )
-                except (ValueError, RuntimeError, AttributeError):
-                    pass
-
-            # Compute energies
-            try:
-                M = self.engine.compute_mass_matrix()
-                ke_arr[step] = 0.5 * float(v.T @ M @ v)
-            except (ValueError, RuntimeError, AttributeError):
-                pass
-
-            # Step simulation
-            self.engine.step(config.timestep)
-
-            # Record post-step accelerations
-            try:
-                q_new, v_new = self.engine.get_state()
-                accelerations[step] = (v_new - v) / config.timestep
-            except (ValueError, RuntimeError, AttributeError):
-                pass
-
-        # Build metadata
+        # Build metadata and return sample
         metadata = {
             "sample_id": sample_id,
             "seed": config.seed,
@@ -560,19 +473,167 @@ class DatasetGenerator:
         return SimulationSample(
             sample_id=sample_id,
             metadata=metadata,
-            times=times,
-            positions=positions,
-            velocities=velocities,
-            accelerations=accelerations,
-            torques=torques,
-            mass_matrices=mass_matrices,
-            bias_forces=bias_forces_arr,
-            gravity_forces=gravity_arr,
-            contact_forces=contact_arr,
-            drift_accelerations=drift_arr,
-            control_accelerations=control_accel_arr,
-            energies={"kinetic": ke_arr, "potential": pe_arr},
+            times=buffers["times"],
+            positions=buffers["positions"],
+            velocities=buffers["velocities"],
+            accelerations=buffers["accelerations"],
+            torques=buffers["torques"],
+            mass_matrices=buffers["mass_matrices"],
+            bias_forces=buffers["bias_forces"],
+            gravity_forces=buffers["gravity"],
+            contact_forces=buffers["contact"],
+            drift_accelerations=buffers["drift"],
+            control_accelerations=buffers["control_accel"],
+            energies={
+                "kinetic": buffers["kinetic_energy"],
+                "potential": buffers["potential_energy"],
+            },
         )
+
+    @staticmethod
+    def _allocate_sim_buffers(
+        config: GeneratorConfig,
+        n_steps: int,
+        n_q: int,
+        n_v: int,
+    ) -> dict[str, np.ndarray | None]:
+        """Pre-allocate all recording arrays for a simulation run.
+
+        Args:
+            config: Generator configuration.
+            n_steps: Number of simulation steps.
+            n_q: Number of position DOFs.
+            n_v: Number of velocity DOFs.
+
+        Returns:
+            Dictionary of named buffers.
+        """
+        return {
+            "times": np.zeros(n_steps),
+            "positions": np.zeros((n_steps, n_q)),
+            "velocities": np.zeros((n_steps, n_v)),
+            "accelerations": np.zeros((n_steps, n_v)),
+            "torques": np.zeros((n_steps, n_v)),
+            "mass_matrices": (
+                np.zeros((n_steps, n_v, n_v)) if config.record_mass_matrix else None
+            ),
+            "bias_forces": (
+                np.zeros((n_steps, n_v)) if config.record_bias_forces else None
+            ),
+            "gravity": np.zeros((n_steps, n_v)) if config.record_gravity else None,
+            "contact": (
+                np.zeros((n_steps, 3)) if config.record_contact_forces else None
+            ),
+            "drift": (
+                np.zeros((n_steps, n_v)) if config.record_drift_control else None
+            ),
+            "control_accel": (
+                np.zeros((n_steps, n_v)) if config.record_drift_control else None
+            ),
+            "kinetic_energy": np.zeros(n_steps),
+            "potential_energy": np.zeros(n_steps),
+        }
+
+    def _execute_sim_loop(
+        self,
+        config: GeneratorConfig,
+        control_sequence: np.ndarray,
+        n_steps: int,
+        buffers: dict[str, np.ndarray | None],
+    ) -> None:
+        """Execute the simulation loop, recording state and dynamics each step.
+
+        Args:
+            config: Generator configuration.
+            control_sequence: Control input array (n_steps, n_v).
+            n_steps: Number of simulation steps.
+            buffers: Pre-allocated recording buffers (modified in-place).
+        """
+        for step in range(n_steps):
+            tau = control_sequence[step]
+            self.engine.set_control(tau)
+
+            # Record pre-step state
+            q, v = self.engine.get_state()
+            t = self.engine.get_time()
+
+            buffers["times"][step] = t  # type: ignore[index]
+            buffers["positions"][step] = q  # type: ignore[index]
+            buffers["velocities"][step] = v  # type: ignore[index]
+            buffers["torques"][step] = tau  # type: ignore[index]
+
+            # Record dynamics quantities
+            self._record_dynamics_step(config, step, tau, v, buffers)
+
+            # Step simulation
+            self.engine.step(config.timestep)
+
+            # Record post-step accelerations
+            try:
+                q_new, v_new = self.engine.get_state()
+                buffers["accelerations"][step] = (v_new - v) / config.timestep  # type: ignore[index]
+            except (ValueError, RuntimeError, AttributeError):
+                pass
+
+    def _record_dynamics_step(
+        self,
+        config: GeneratorConfig,
+        step: int,
+        tau: np.ndarray,
+        v: np.ndarray,
+        buffers: dict[str, np.ndarray | None],
+    ) -> None:
+        """Record optional dynamics quantities for a single simulation step.
+
+        Args:
+            config: Generator configuration.
+            step: Current step index.
+            tau: Applied torque vector.
+            v: Current velocity vector.
+            buffers: Pre-allocated recording buffers (modified in-place).
+        """
+        if config.record_mass_matrix and buffers["mass_matrices"] is not None:
+            try:
+                buffers["mass_matrices"][step] = self.engine.compute_mass_matrix()
+            except (ValueError, RuntimeError, AttributeError):
+                pass
+
+        if config.record_bias_forces and buffers["bias_forces"] is not None:
+            try:
+                buffers["bias_forces"][step] = self.engine.compute_bias_forces()
+            except (ValueError, RuntimeError, AttributeError):
+                pass
+
+        if config.record_gravity and buffers["gravity"] is not None:
+            try:
+                buffers["gravity"][step] = self.engine.compute_gravity_forces()
+            except (ValueError, RuntimeError, AttributeError):
+                pass
+
+        if config.record_contact_forces and buffers["contact"] is not None:
+            try:
+                cf = self.engine.compute_contact_forces()
+                buffers["contact"][step, : len(cf)] = cf[:3]
+            except (ValueError, RuntimeError, AttributeError):
+                pass
+
+        if config.record_drift_control:
+            try:
+                if buffers["drift"] is not None:
+                    buffers["drift"][step] = self.engine.compute_drift_acceleration()
+                if buffers["control_accel"] is not None:
+                    buffers["control_accel"][step] = (
+                        self.engine.compute_control_acceleration(tau)
+                    )
+            except (ValueError, RuntimeError, AttributeError):
+                pass
+
+        # Compute energies
+        try:
+            M = self.engine.compute_mass_matrix()
+            buffers["kinetic_energy"][step] = 0.5 * float(v.T @ M @ v)  # type: ignore[index]
+        except (ValueError, RuntimeError, AttributeError):
+            pass
 
     def _generate_initial_conditions(
         self,

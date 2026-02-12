@@ -874,6 +874,95 @@ def generate_five_bar_parallel_xml(link_length: float = 1.5) -> str:
 """
 
 
+def _stewart_base_attachment_xml(base_radius: float) -> str:
+    """Generate XML for the 6 base attachment point spheres."""
+    angles = [0, np.pi / 3, 2 * np.pi / 3, np.pi, 4 * np.pi / 3, 5 * np.pi / 3]
+    lines = []
+    for angle in angles:
+        x = base_radius * np.cos(angle)
+        y = base_radius * np.sin(angle)
+        lines.append(
+            f'            <geom type="sphere" pos="{x} {y} 0.15"'
+            f'\n                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>'
+        )
+    return "\n".join(lines)
+
+
+def _stewart_leg_xml(
+    leg_num: int, base_radius: float, angle: float, leg_min: float, leg_max: float
+) -> str:
+    """Generate XML for a single Stewart platform leg (lower + upper)."""
+    x = base_radius * np.cos(angle)
+    y = base_radius * np.sin(angle)
+    return f"""
+            <!-- Leg {leg_num} -->
+            <body name="leg{leg_num}_lower" pos="{x} {y} 0.15">
+                <joint name="leg{leg_num}_base_ball" type="ball" damping="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+
+                <body name="leg{leg_num}_upper" pos="0 0 1.2">
+                    <joint name="leg{leg_num}_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
+                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
+                </body>
+            </body>"""
+
+
+def _stewart_platform_attachment_xml(platform_radius: float) -> str:
+    """Generate XML for the 6 platform attachment point spheres."""
+    angles = [
+        np.pi / 6,
+        np.pi / 2,
+        5 * np.pi / 6,
+        7 * np.pi / 6,
+        3 * np.pi / 2,
+        11 * np.pi / 6,
+    ]
+    lines = []
+    for angle in angles:
+        x = platform_radius * np.cos(angle)
+        y = platform_radius * np.sin(angle)
+        lines.append(
+            f'            <geom type="sphere"'
+            f'\n                  pos="{x} {y} -0.12"'
+            f'\n                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>'
+        )
+    return "\n".join(lines)
+
+
+def _stewart_equality_xml(platform_radius: float) -> str:
+    """Generate XML for leg-to-platform connect constraints."""
+    angles = [
+        np.pi / 6,
+        np.pi / 2,
+        5 * np.pi / 6,
+        7 * np.pi / 6,
+        3 * np.pi / 2,
+        11 * np.pi / 6,
+    ]
+    lines = []
+    for i, angle in enumerate(angles, start=1):
+        x = platform_radius * np.cos(angle)
+        y = platform_radius * np.sin(angle)
+        lines.append(
+            f'        <connect body1="leg{i}_upper" body2="platform" anchor="0 0 1.0"'
+            f'\n                 relpose="{x}'
+            f'\n                          {y} -0.12  1 0 0 0"/>'
+        )
+    return "\n".join(lines)
+
+
+def _stewart_actuator_xml() -> str:
+    """Generate XML for the 6 leg motor actuators."""
+    lines = []
+    for i in range(1, 7):
+        lines.append(
+            f'        <motor name="leg{i}_motor" joint="leg{i}_extend" gear="100"'
+            f'\n               ctrllimited="true" ctrlrange="-15 15"/>'
+        )
+    return "\n".join(lines)
+
+
 def generate_stewart_platform_xml(
     base_radius: float = 1.5, platform_radius: float = 0.8
 ) -> str:
@@ -889,6 +978,17 @@ def generate_stewart_platform_xml(
     """
     leg_min = 1.5
     leg_max = 3.0
+
+    base_attachments = _stewart_base_attachment_xml(base_radius)
+
+    leg_angles = [0, np.pi / 3, 2 * np.pi / 3, np.pi, 4 * np.pi / 3, 5 * np.pi / 3]
+    legs_xml = ""
+    for i, angle in enumerate(leg_angles, start=1):
+        legs_xml += _stewart_leg_xml(i, base_radius, angle, leg_min, leg_max)
+
+    platform_attachments = _stewart_platform_attachment_xml(platform_radius)
+    equality_xml = _stewart_equality_xml(platform_radius)
+    actuator_xml = _stewart_actuator_xml()
 
     return f"""
 <mujoco model="stewart_platform">
@@ -916,90 +1016,8 @@ def generate_stewart_platform_xml(
             <geom type="cylinder" size="{base_radius} 0.15" material="base_mat" mass="5.0"/>
 
             <!-- Base attachment points (6 around hexagon) -->
-            <geom type="sphere" pos="{base_radius * np.cos(0)} {base_radius * np.sin(0)} 0.15"
-                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius * np.cos(np.pi / 3)} {base_radius * np.sin(np.pi / 3)} 0.15"
-                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 0.15"
-                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius * np.cos(np.pi)} {base_radius * np.sin(np.pi)} 0.15"
-                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 0.15"
-                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius * np.cos(5 * np.pi / 3)} {base_radius * np.sin(5 * np.pi / 3)} 0.15"
-                  size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-
-            <!-- Leg 1 -->
-            <body name="leg1_lower" pos="{base_radius * np.cos(0)} {base_radius * np.sin(0)} 0.15">
-                <joint name="leg1_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
-
-                <body name="leg1_upper" pos="0 0 1.2">
-                    <joint name="leg1_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
-                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
-                </body>
-            </body>
-
-            <!-- Leg 2 -->
-            <body name="leg2_lower" pos="{base_radius * np.cos(np.pi / 3)} {base_radius * np.sin(np.pi / 3)} 0.15">
-                <joint name="leg2_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
-
-                <body name="leg2_upper" pos="0 0 1.2">
-                    <joint name="leg2_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
-                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
-                </body>
-            </body>
-
-            <!-- Leg 3 -->
-            <body name="leg3_lower" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 0.15">
-                <joint name="leg3_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
-
-                <body name="leg3_upper" pos="0 0 1.2">
-                    <joint name="leg3_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
-                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
-                </body>
-            </body>
-
-            <!-- Leg 4 -->
-            <body name="leg4_lower" pos="{base_radius * np.cos(np.pi)} {base_radius * np.sin(np.pi)} 0.15">
-                <joint name="leg4_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
-
-                <body name="leg4_upper" pos="0 0 1.2">
-                    <joint name="leg4_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
-                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
-                </body>
-            </body>
-
-            <!-- Leg 5 -->
-            <body name="leg5_lower" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 0.15">
-                <joint name="leg5_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
-
-                <body name="leg5_upper" pos="0 0 1.2">
-                    <joint name="leg5_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
-                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
-                </body>
-            </body>
-
-            <!-- Leg 6 -->
-            <body name="leg6_lower" pos="{base_radius * np.cos(5 * np.pi / 3)} {base_radius * np.sin(5 * np.pi / 3)} 0.15">
-                <joint name="leg6_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
-
-                <body name="leg6_upper" pos="0 0 1.2">
-                    <joint name="leg6_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
-                          rgba="0.1 0.6 0.8 1" mass="0.4"/>
-                </body>
-            </body>
+{base_attachments}
+{legs_xml}
         </body>
 
         <!-- Moving platform -->
@@ -1009,62 +1027,17 @@ def generate_stewart_platform_xml(
             <geom type="sphere" pos="0 0 0.2" size="0.15" rgba="1 0.5 0 1" mass="0.5"/>
 
             <!-- Platform attachment points -->
-            <geom type="sphere"
-                  pos="{platform_radius * np.cos(np.pi / 6)} {platform_radius * np.sin(np.pi / 6)} -0.12"
-                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere"
-                  pos="{platform_radius * np.cos(np.pi / 2)} {platform_radius * np.sin(np.pi / 2)} -0.12"
-                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere"
-                  pos="{platform_radius * np.cos(5 * np.pi / 6)} {platform_radius * np.sin(5 * np.pi / 6)} -0.12"
-                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere"
-                  pos="{platform_radius * np.cos(7 * np.pi / 6)} {platform_radius * np.sin(7 * np.pi / 6)} -0.12"
-                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere"
-                  pos="{platform_radius * np.cos(3 * np.pi / 2)} {platform_radius * np.sin(3 * np.pi / 2)} -0.12"
-                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere"
-                  pos="{platform_radius * np.cos(11 * np.pi / 6)} {platform_radius * np.sin(11 * np.pi / 6)} -0.12"
-                  size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
+{platform_attachments}
         </body>
     </worldbody>
 
     <equality>
         <!-- Connect leg tops to platform -->
-        <connect body1="leg1_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(np.pi / 6)}
-                          {platform_radius * np.sin(np.pi / 6)} -0.12  1 0 0 0"/>
-        <connect body1="leg2_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(np.pi / 2)}
-                          {platform_radius * np.sin(np.pi / 2)} -0.12  1 0 0 0"/>
-        <connect body1="leg3_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(5 * np.pi / 6)}
-                          {platform_radius * np.sin(5 * np.pi / 6)} -0.12  1 0 0 0"/>
-        <connect body1="leg4_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(7 * np.pi / 6)}
-                          {platform_radius * np.sin(7 * np.pi / 6)} -0.12  1 0 0 0"/>
-        <connect body1="leg5_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(3 * np.pi / 2)}
-                          {platform_radius * np.sin(3 * np.pi / 2)} -0.12  1 0 0 0"/>
-        <connect body1="leg6_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(11 * np.pi / 6)}
-                          {platform_radius * np.sin(11 * np.pi / 6)} -0.12  1 0 0 0"/>
+{equality_xml}
     </equality>
 
     <actuator>
-        <motor name="leg1_motor" joint="leg1_extend" gear="100"
-               ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg2_motor" joint="leg2_extend" gear="100"
-               ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg3_motor" joint="leg3_extend" gear="100"
-               ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg4_motor" joint="leg4_extend" gear="100"
-               ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg5_motor" joint="leg5_extend" gear="100"
-               ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg6_motor" joint="leg6_extend" gear="100"
-               ctrllimited="true" ctrlrange="-15 15"/>
+{actuator_xml}
     </actuator>
 </mujoco>
 """

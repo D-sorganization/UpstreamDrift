@@ -432,9 +432,22 @@ class URDFTextEditor:
                 )
             )
 
-        # Collect links and joints
-        links = {}
-        joints = {}
+        # Collect and validate links and joints
+        links = self._validate_urdf_links(root, messages)
+        joints = self._validate_urdf_joints(root, links, messages)
+
+        # Check for orphan links (no joint connection)
+        self._validate_urdf_orphan_links(root, links, joints, messages)
+
+        return messages
+
+    def _validate_urdf_links(
+        self,
+        root: ET.Element,
+        messages: list[ValidationMessage],
+    ) -> dict[str, ET.Element]:
+        """Validate all link elements and return a map of name to element."""
+        links: dict[str, ET.Element] = {}
 
         for _idx, link_elem in enumerate(root.findall("link")):
             name = link_elem.get("name")
@@ -463,48 +476,74 @@ class URDFTextEditor:
             else:
                 links[name] = link_elem
 
-            # Check inertial
-            inertial = link_elem.find("inertial")
-            if inertial is not None:
-                mass_elem = inertial.find("mass")
-                if mass_elem is not None:
-                    mass = mass_elem.get("value")
-                    if mass is not None:
-                        try:
-                            mass_val = float(mass)
-                            if mass_val < 0:
-                                line = self._find_element_line(mass_elem)
-                                messages.append(
-                                    ValidationMessage(
-                                        severity=ValidationSeverity.ERROR,
-                                        line=line,
-                                        column=0,
-                                        message=f"Negative mass value: {mass_val}",
-                                        element=name,
-                                    )
-                                )
-                            elif mass_val == 0:
-                                line = self._find_element_line(mass_elem)
-                                messages.append(
-                                    ValidationMessage(
-                                        severity=ValidationSeverity.WARNING,
-                                        line=line,
-                                        column=0,
-                                        message="Zero mass value",
-                                        element=name,
-                                    )
-                                )
-                        except ValueError:
-                            line = self._find_element_line(mass_elem)
-                            messages.append(
-                                ValidationMessage(
-                                    severity=ValidationSeverity.ERROR,
-                                    line=line,
-                                    column=0,
-                                    message=f"Invalid mass value: '{mass}'",
-                                    element=name,
-                                )
-                            )
+            # Check inertial mass
+            self._validate_link_inertial(link_elem, name, messages)
+
+        return links
+
+    def _validate_link_inertial(
+        self,
+        link_elem: ET.Element,
+        link_name: str | None,
+        messages: list[ValidationMessage],
+    ) -> None:
+        """Validate the inertial/mass properties of a single link element."""
+        inertial = link_elem.find("inertial")
+        if inertial is None:
+            return
+
+        mass_elem = inertial.find("mass")
+        if mass_elem is None:
+            return
+
+        mass = mass_elem.get("value")
+        if mass is None:
+            return
+
+        try:
+            mass_val = float(mass)
+            if mass_val < 0:
+                line = self._find_element_line(mass_elem)
+                messages.append(
+                    ValidationMessage(
+                        severity=ValidationSeverity.ERROR,
+                        line=line,
+                        column=0,
+                        message=f"Negative mass value: {mass_val}",
+                        element=link_name,
+                    )
+                )
+            elif mass_val == 0:
+                line = self._find_element_line(mass_elem)
+                messages.append(
+                    ValidationMessage(
+                        severity=ValidationSeverity.WARNING,
+                        line=line,
+                        column=0,
+                        message="Zero mass value",
+                        element=link_name,
+                    )
+                )
+        except ValueError:
+            line = self._find_element_line(mass_elem)
+            messages.append(
+                ValidationMessage(
+                    severity=ValidationSeverity.ERROR,
+                    line=line,
+                    column=0,
+                    message=f"Invalid mass value: '{mass}'",
+                    element=link_name,
+                )
+            )
+
+    def _validate_urdf_joints(
+        self,
+        root: ET.Element,
+        links: dict[str, ET.Element],
+        messages: list[ValidationMessage],
+    ) -> dict[str, ET.Element]:
+        """Validate all joint elements and return a map of name to element."""
+        joints: dict[str, ET.Element] = {}
 
         for _idx, joint_elem in enumerate(root.findall("joint")):
             name = joint_elem.get("name")
@@ -555,77 +594,99 @@ class URDFTextEditor:
                     )
                 )
 
-            # Check parent/child references
-            parent_elem = joint_elem.find("parent")
-            child_elem = joint_elem.find("child")
+            # Check parent/child references and limits
+            self._validate_joint_references(
+                joint_elem, name, joint_type, links, messages
+            )
 
-            if parent_elem is None:
-                line = self._find_element_line(joint_elem)
+        return joints
+
+    def _validate_joint_references(
+        self,
+        joint_elem: ET.Element,
+        name: str | None,
+        joint_type: str | None,
+        links: dict[str, ET.Element],
+        messages: list[ValidationMessage],
+    ) -> None:
+        """Validate parent/child references and limits for a single joint."""
+        parent_elem = joint_elem.find("parent")
+        child_elem = joint_elem.find("child")
+
+        if parent_elem is None:
+            line = self._find_element_line(joint_elem)
+            messages.append(
+                ValidationMessage(
+                    severity=ValidationSeverity.ERROR,
+                    line=line,
+                    column=0,
+                    message="Joint missing parent element",
+                    element=name,
+                )
+            )
+        else:
+            parent_link = parent_elem.get("link")
+            if parent_link and parent_link not in links:
+                line = self._find_element_line(parent_elem)
                 messages.append(
                     ValidationMessage(
                         severity=ValidationSeverity.ERROR,
                         line=line,
                         column=0,
-                        message="Joint missing parent element",
+                        message=f"Parent link not found: '{parent_link}'",
                         element=name,
                     )
                 )
-            else:
-                parent_link = parent_elem.get("link")
-                if parent_link and parent_link not in links:
-                    line = self._find_element_line(parent_elem)
-                    messages.append(
-                        ValidationMessage(
-                            severity=ValidationSeverity.ERROR,
-                            line=line,
-                            column=0,
-                            message=f"Parent link not found: '{parent_link}'",
-                            element=name,
-                        )
-                    )
 
-            if child_elem is None:
-                line = self._find_element_line(joint_elem)
+        if child_elem is None:
+            line = self._find_element_line(joint_elem)
+            messages.append(
+                ValidationMessage(
+                    severity=ValidationSeverity.ERROR,
+                    line=line,
+                    column=0,
+                    message="Joint missing child element",
+                    element=name,
+                )
+            )
+        else:
+            child_link = child_elem.get("link")
+            if child_link and child_link not in links:
+                line = self._find_element_line(child_elem)
                 messages.append(
                     ValidationMessage(
                         severity=ValidationSeverity.ERROR,
                         line=line,
                         column=0,
-                        message="Joint missing child element",
+                        message=f"Child link not found: '{child_link}'",
                         element=name,
                     )
                 )
-            else:
-                child_link = child_elem.get("link")
-                if child_link and child_link not in links:
-                    line = self._find_element_line(child_elem)
-                    messages.append(
-                        ValidationMessage(
-                            severity=ValidationSeverity.ERROR,
-                            line=line,
-                            column=0,
-                            message=f"Child link not found: '{child_link}'",
-                            element=name,
-                        )
-                    )
 
-            # Check limits for revolute/prismatic
-            if joint_type in {"revolute", "prismatic"}:
-                limit_elem = joint_elem.find("limit")
-                if limit_elem is None:
-                    line = self._find_element_line(joint_elem)
-                    messages.append(
-                        ValidationMessage(
-                            severity=ValidationSeverity.WARNING,
-                            line=line,
-                            column=0,
-                            message=f"{joint_type} joint missing limit element",
-                            element=name,
-                        )
+        # Check limits for revolute/prismatic
+        if joint_type in {"revolute", "prismatic"}:
+            limit_elem = joint_elem.find("limit")
+            if limit_elem is None:
+                line = self._find_element_line(joint_elem)
+                messages.append(
+                    ValidationMessage(
+                        severity=ValidationSeverity.WARNING,
+                        line=line,
+                        column=0,
+                        message=f"{joint_type} joint missing limit element",
+                        element=name,
                     )
+                )
 
-        # Check for orphan links (no joint connection)
-        child_links = set()
+    def _validate_urdf_orphan_links(
+        self,
+        root: ET.Element,
+        links: dict[str, ET.Element],
+        joints: dict[str, ET.Element],
+        messages: list[ValidationMessage],
+    ) -> None:
+        """Check for orphan links that have no joint connection."""
+        child_links: set[str | None] = set()
         for joint_elem in root.findall("joint"):
             child_elem = joint_elem.find("child")
             if child_elem is not None:
@@ -649,8 +710,6 @@ class URDFTextEditor:
                             element=link_name,
                         )
                     )
-
-        return messages
 
     def _find_element_line(self, elem: ET.Element) -> int:
         """Find the line number of an element (approximate)."""

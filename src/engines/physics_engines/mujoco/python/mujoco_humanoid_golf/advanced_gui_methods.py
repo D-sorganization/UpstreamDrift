@@ -143,25 +143,82 @@ class AdvancedGuiMethodsMixin:
             )
             return
 
-        # Prepare analyzer
-        # MuJoCo recorder should implement get_time_series correctly
-        # But we need full arrays for StatisticalAnalyzer constructor
+        # Prepare data and analysis objects
+        analyzer, _report, plotter, metrics = self._prepare_analysis_data(
+            recorder, np, StatisticalAnalyzer, GolfSwingPlotter
+        )
 
+        # Detect pelvis/torso DOF indices for coordination tabs
+        pelvis_idx, torso_idx = self._detect_pelvis_torso_indices()
+
+        # Create dialog with tabbed plots
+        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+        from matplotlib.figure import Figure
+        from PyQt6 import QtWidgets
+
+        dialog = QtWidgets.QDialog(None)
+        dialog.setWindowTitle("Advanced Swing Analysis")
+        dialog.resize(1000, 800)
+        layout = QtWidgets.QVBoxLayout(dialog)
+
+        tab_widget = QtWidgets.QTabWidget()
+        layout.addWidget(tab_widget)
+
+        tab_widget.addTab(
+            self._create_swing_profile_tab(plotter, metrics, Figure, FigureCanvasQTAgg),
+            "Swing Profile",
+        )
+        tab_widget.addTab(
+            self._create_cop_tab(plotter, recorder, Figure, FigureCanvasQTAgg),
+            "CoP Field",
+        )
+        tab_widget.addTab(
+            self._create_power_flow_tab(plotter, recorder, Figure, FigureCanvasQTAgg),
+            "Power Flow",
+        )
+        tab_widget.addTab(
+            self._create_kinematic_sequence_tab(
+                plotter, recorder, Figure, FigureCanvasQTAgg
+            ),
+            "Kinematic Sequence",
+        )
+        tab_widget.addTab(
+            self._create_coordination_tab(
+                plotter, analyzer, pelvis_idx, torso_idx, Figure, FigureCanvasQTAgg
+            ),
+            "Coordination",
+        )
+        tab_widget.addTab(
+            self._create_work_loop_tab(
+                plotter, analyzer, torso_idx, Figure, FigureCanvasQTAgg
+            ),
+            "Work Loop",
+        )
+        tab_widget.addTab(
+            self._create_ssc_tab(
+                plotter, pelvis_idx, torso_idx, Figure, FigureCanvasQTAgg
+            ),
+            "Stretch-Shortening",
+        )
+
+        dialog.exec()
+
+    def _prepare_analysis_data(self, recorder, np_mod, analyzer_cls, plotter_cls):
+        """Prepare analyzer, report, plotter, and radar metrics from recorded data."""
         times, positions = recorder.get_time_series("joint_positions")
         _, velocities = recorder.get_time_series("joint_velocities")
         _, torques = recorder.get_time_series("joint_torques")
         _, club_speed = recorder.get_time_series("club_head_speed")
         _, club_pos = recorder.get_time_series("club_head_position")
 
-        # Ensure arrays
-        times = np.asarray(times)
-        positions = np.asarray(positions)
-        velocities = np.asarray(velocities)
-        torques = np.asarray(torques)
-        club_speed = np.asarray(club_speed)
-        club_pos = np.asarray(club_pos)
+        times = np_mod.asarray(times)
+        positions = np_mod.asarray(positions)
+        velocities = np_mod.asarray(velocities)
+        torques = np_mod.asarray(torques)
+        club_speed = np_mod.asarray(club_speed)
+        club_pos = np_mod.asarray(club_pos)
 
-        analyzer = StatisticalAnalyzer(
+        analyzer = analyzer_cls(
             times,
             positions,
             velocities,
@@ -170,11 +227,8 @@ class AdvancedGuiMethodsMixin:
             club_head_position=club_pos,
         )
         report = analyzer.generate_comprehensive_report()
+        plotter = plotter_cls(recorder)
 
-        # Plotter
-        plotter = GolfSwingPlotter(recorder)
-
-        # Metrics for Radar
         metrics = {
             "Speed": 0.0,
             "Efficiency": 0.0,
@@ -182,124 +236,119 @@ class AdvancedGuiMethodsMixin:
             "Consistency": 0.0,
             "Power": 0.0,
         }
-
         if "club_head_speed" in report:
             peak = report["club_head_speed"]["peak_value"]
-            metrics["Speed"] = min(peak / 50.0, 1.0)  # Approx 110 mph = 50 m/s
-
+            metrics["Speed"] = min(peak / 50.0, 1.0)
         if "energy_efficiency" in report:
             metrics["Efficiency"] = report["energy_efficiency"] / 100.0
-
         if "tempo" in report:
             ratio = report["tempo"]["ratio"]
             err = abs(ratio - 3.0)
             metrics["Tempo"] = max(0.0, 1.0 - err / 2.0)
 
-        # Create dialog
+        return analyzer, report, plotter, metrics
+
+    def _detect_pelvis_torso_indices(self):
+        """Detect DOF indices for pelvis and torso joints in the model."""
+        pelvis_idx = None
+        torso_idx = None
+
+        if not hasattr(self, "sim_widget") or self.sim_widget.model is None:
+            return pelvis_idx, torso_idx
+
+        model = self.sim_widget.model
+
+        def get_dof_index(joint_name: str) -> int | None:
+            j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
+            if j_id == -1:
+                return None
+            return int(model.jnt_dofadr[j_id])
+
+        for cand in ["pelvis", "root", "waist"]:
+            idx = get_dof_index(cand)
+            if idx is not None:
+                pelvis_idx = idx
+                break
+
+        for cand in ["spine_rotation", "spine_yaw", "torso_twist"]:
+            idx = get_dof_index(cand)
+            if idx is not None:
+                torso_idx = idx
+                break
+
+        return pelvis_idx, torso_idx
+
+    def _create_swing_profile_tab(self, plotter, metrics, fig_cls, canvas_cls):
+        """Create the Swing Profile (radar chart) tab widget."""
         from PyQt6 import QtWidgets
 
-        dialog = QtWidgets.QDialog(None)  # Use None as parent instead of self
-        dialog.setWindowTitle("Advanced Swing Analysis")
-        dialog.resize(1000, 800)
-        layout = QtWidgets.QVBoxLayout(dialog)
-
-        # Matplotlib canvas
-        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-        from matplotlib.figure import Figure
-
-        fig = Figure(figsize=(10, 8))
-        canvas = FigureCanvasQTAgg(fig)
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
         layout.addWidget(canvas)
+        plotter.plot_radar_chart(fig, metrics)
+        return widget
 
-        fig.add_gridspec(2, 2)
+    def _create_cop_tab(self, plotter, recorder, fig_cls, canvas_cls):
+        """Create the Center of Pressure vector field tab widget."""
+        from PyQt6 import QtWidgets
 
-        # 1. Radar Chart
-        # This method centers the polar plot usually
-        layout.removeWidget(canvas)
-        canvas.deleteLater()
-
-        tab_widget = QtWidgets.QTabWidget()
-        layout.addWidget(tab_widget)
-
-        # Tab 1: Swing Profile
-        dna_widget = QtWidgets.QWidget()
-        dna_layout = QtWidgets.QVBoxLayout(dna_widget)
-        fig1 = Figure(figsize=(8, 6))
-        canvas1 = FigureCanvasQTAgg(fig1)
-        dna_layout.addWidget(canvas1)
-        plotter.plot_radar_chart(fig1, metrics)
-        tab_widget.addTab(dna_widget, "Swing Profile")
-
-        # Tab 2: CoP Field
-        cop_widget = QtWidgets.QWidget()
-        cop_layout = QtWidgets.QVBoxLayout(cop_widget)
-        fig2 = Figure(figsize=(8, 6))
-        canvas2 = FigureCanvasQTAgg(fig2)
-        cop_layout.addWidget(canvas2)
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
+        layout.addWidget(canvas)
         if any(f.cop_position is not None for f in recorder.frames):
-            plotter.plot_cop_vector_field(fig2)
+            plotter.plot_cop_vector_field(fig)
         else:
-            ax = fig2.add_subplot(111)
+            ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
-        tab_widget.addTab(cop_widget, "CoP Field")
+        return widget
 
-        # Tab 3: Power Flow
-        pwr_widget = QtWidgets.QWidget()
-        pwr_layout = QtWidgets.QVBoxLayout(pwr_widget)
-        fig3 = Figure(figsize=(8, 6))
-        canvas3 = FigureCanvasQTAgg(fig3)
-        pwr_layout.addWidget(canvas3)
+    def _create_power_flow_tab(self, plotter, recorder, fig_cls, canvas_cls):
+        """Create the Power Flow tab widget."""
+        from PyQt6 import QtWidgets
+
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
+        layout.addWidget(canvas)
         if any(f.actuator_powers.size > 0 for f in recorder.frames):
-            plotter.plot_power_flow(fig3)
+            plotter.plot_power_flow(fig)
         else:
-            ax = fig3.add_subplot(111)
+            ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
-        tab_widget.addTab(pwr_widget, "Power Flow")
+        return widget
 
-        # Tab 4: Kinematic Sequence
-        ks_widget = QtWidgets.QWidget()
-        ks_layout = QtWidgets.QVBoxLayout(ks_widget)
-        fig4 = Figure(figsize=(8, 6))
-        canvas4 = FigureCanvasQTAgg(fig4)
-        ks_layout.addWidget(canvas4)
+    def _create_kinematic_sequence_tab(self, plotter, recorder, fig_cls, canvas_cls):
+        """Create the Kinematic Sequence tab widget."""
+        from PyQt6 import QtWidgets
+
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
+        layout.addWidget(canvas)
 
         try:
             from shared.python.biomechanics.kinematic_sequence import (
                 KinematicSequenceAnalyzer,
             )
 
-            # Define segments for the standard humanoid model
-            # Note: Indices might need adjustment based on specific model loaded
-            # (full_body vs upper_body)
-            # This is a best-effort mapping for standard models.
-            # In a robust system, these would be defined in the model config/metadata.
-            # Default mapping for full body / upper body models in this repo
-            # Based on inspection of XMLs, joints are named.
-            # We need to find the qvel index for specific joints.
-            # joint_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i) \
-            #                for i in range(model.njnt)]
-            # Helper to find index
             model = self.sim_widget.model
 
             def get_dof_index(joint_name: str) -> int | None:
                 j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
                 if j_id == -1:
                     return None
-                # qvel index address
                 return int(model.jnt_dofadr[j_id])
 
-            # Try to map typical chain: proximal -> mid_proximal -> mid_distal -> distal
-            # Adjust names based on actual XML joint names
-            # Full Body XML: pelvis (free), spine_rotation, right_shoulder_swing, \
-            # right_wrist, club_wrist
-            # Upper Body XML: spine_rotation, ...
-
-            # Let's try to detect the chain dynamically or use known names
             potential_chain = {
                 "Pelvis": ["pelvis", "root", "waist"],
                 "Torso": ["spine_rotation", "spine_yaw", "torso_twist"],
                 "Lead Arm": ["left_shoulder_swing", "left_shoulder_flexion"],
-                # Assuming right-handed golfer
                 "Club": ["club_wrist", "wrist_flexion"],
             }
 
@@ -315,22 +364,18 @@ class AdvancedGuiMethodsMixin:
                 ks_analyzer = KinematicSequenceAnalyzer(
                     expected_order=["Pelvis", "Torso", "Lead Arm", "Club"]
                 )
-
-                # Extract velocities
-                # Use analyzer helper
                 ks_data, ks_times = ks_analyzer.extract_velocities_from_recorder(
                     recorder, segment_indices
                 )
-
                 if ks_data:
                     ks_result = ks_analyzer.analyze(ks_data, ks_times)
                     plotter.plot_kinematic_sequence(
-                        fig4, segment_indices, analyzer_result=ks_result
+                        fig, segment_indices, analyzer_result=ks_result
                     )
                 else:
-                    plotter.plot_kinematic_sequence(fig4, segment_indices)
+                    plotter.plot_kinematic_sequence(fig, segment_indices)
             else:
-                ax = fig4.add_subplot(111)
+                ax = fig.add_subplot(111)
                 ax.text(
                     0.5,
                     0.5,
@@ -341,80 +386,50 @@ class AdvancedGuiMethodsMixin:
 
         except ImportError as e:
             logger.error(f"Failed to plot kinematic sequence: {e}")
-            ax = fig4.add_subplot(111)
+            ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, f"Error: {str(e)}", ha="center", va="center")
 
-        tab_widget.addTab(ks_widget, "Kinematic Sequence")
+        return widget
 
-        # Tab 5: Coordination (Angle-Angle & Vector Coding)
-        coord_widget = QtWidgets.QWidget()
-        coord_layout = QtWidgets.QVBoxLayout(coord_widget)
-        fig5 = Figure(figsize=(8, 6))
-        canvas5 = FigureCanvasQTAgg(fig5)
-        coord_layout.addWidget(canvas5)
+    def _create_coordination_tab(
+        self, plotter, analyzer, pelvis_idx, torso_idx, fig_cls, canvas_cls
+    ):
+        """Create the Coordination (Angle-Angle and Vector Coding) tab widget."""
+        from PyQt6 import QtWidgets
 
-        # We need 2 joints to compare. For now, we try to find Pelvis vs Torso
-        # (similar to Kinematic Sequence logic)
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
+        layout.addWidget(canvas)
+
         try:
-            # Re-use detection logic or indices from KS
-            # If KS tab detected indices, we could reuse them, but scope is separate.
-            # Let's re-detect roughly.
-            model = self.sim_widget.model
-
-            def get_dof_index(joint_name: str) -> int | None:
-                j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
-                if j_id == -1:
-                    return None
-                return int(model.jnt_dofadr[j_id])
-
-            pelvis_idx = None
-            torso_idx = None
-
-            # Pelvis candidates
-            for cand in ["pelvis", "root", "waist"]:
-                idx = get_dof_index(cand)
-                if idx is not None:
-                    pelvis_idx = idx
-                    break
-
-            # Torso candidates
-            for cand in ["spine_rotation", "spine_yaw", "torso_twist"]:
-                idx = get_dof_index(cand)
-                if idx is not None:
-                    torso_idx = idx
-                    break
-
             if pelvis_idx is not None and torso_idx is not None:
-                # Create subplots: 1. Angle-Angle, 2. Coupling Angle
-                # Use gridspec explicitly to control layout
-                gs = fig5.add_gridspec(2, 1)
-                ax1 = fig5.add_subplot(gs[0, 0])
-                ax2 = fig5.add_subplot(gs[1, 0])
+                gs = fig.add_gridspec(2, 1)
+                ax1 = fig.add_subplot(gs[0, 0])
+                ax2 = fig.add_subplot(gs[1, 0])
 
-                # Plot Angle-Angle (Top)
                 plotter.plot_angle_angle_diagram(
-                    fig5,
+                    fig,
                     pelvis_idx,
                     torso_idx,
                     title="Coordination: Pelvis vs Torso (Angle-Angle)",
                     ax=ax1,
                 )
 
-                # Plot Coupling Angle (Bottom)
-                # Compute coupling angles first
                 coupling_angles = analyzer.compute_coupling_angles(
                     pelvis_idx, torso_idx
                 )
                 plotter.plot_coupling_angle(
-                    fig5,
+                    fig,
                     coupling_angles,
                     title="Coupling Angle (Vector Coding)",
                     ax=ax2,
                 )
 
-                fig5.tight_layout()
+                fig.tight_layout()
             else:
-                ax = fig5.add_subplot(111)
+                ax = fig.add_subplot(111)
                 ax.text(
                     0.5,
                     0.5,
@@ -425,24 +440,24 @@ class AdvancedGuiMethodsMixin:
 
         except ImportError as e:
             logger.error(f"Failed to plot coordination: {e}")
-            ax = fig5.add_subplot(111)
+            ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, f"Error: {str(e)}", ha="center", va="center")
 
-        tab_widget.addTab(coord_widget, "Coordination")
+        return widget
 
-        # Tab 6: Energetics (Work Loops)
-        work_widget = QtWidgets.QWidget()
-        work_layout = QtWidgets.QVBoxLayout(work_widget)
-        fig6 = Figure(figsize=(8, 6))
-        canvas6 = FigureCanvasQTAgg(fig6)
-        work_layout.addWidget(canvas6)
+    def _create_work_loop_tab(self, plotter, analyzer, torso_idx, fig_cls, canvas_cls):
+        """Create the Work Loop (Energetics) tab widget."""
+        from PyQt6 import QtWidgets
 
-        # Plot work loop for a key joint (e.g. Torso or Pelvis)
-        # Use detected torso_idx from above or default to 0
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
+        layout.addWidget(canvas)
+
         target_work_idx = torso_idx if torso_idx is not None else 0
-        plotter.plot_work_loop(fig6, target_work_idx)
+        plotter.plot_work_loop(fig, target_work_idx)
 
-        # Calculate metrics to display
         work_metrics = analyzer.compute_work_metrics(target_work_idx)
         if work_metrics:
             info_text = (
@@ -450,7 +465,7 @@ class AdvancedGuiMethodsMixin:
                 f"Pos Work: {work_metrics['positive_work']:.1f} J\n"
                 f"Neg Work: {work_metrics['negative_work']:.1f} J"
             )
-            ax_w = fig6.gca()
+            ax_w = fig.gca()
             ax_w.text(
                 0.05,
                 0.95,
@@ -461,19 +476,22 @@ class AdvancedGuiMethodsMixin:
                 verticalalignment="top",
             )
 
-        tab_widget.addTab(work_widget, "Work Loop")
+        return widget
 
-        # Tab 7: Stretch-Shortening Cycle (X-Factor Cycle)
-        ssc_widget = QtWidgets.QWidget()
-        ssc_layout = QtWidgets.QVBoxLayout(ssc_widget)
-        fig7 = Figure(figsize=(8, 6))
-        canvas7 = FigureCanvasQTAgg(fig7)
-        ssc_layout.addWidget(canvas7)
+    def _create_ssc_tab(self, plotter, pelvis_idx, torso_idx, fig_cls, canvas_cls):
+        """Create the Stretch-Shortening Cycle (X-Factor) tab widget."""
+        from PyQt6 import QtWidgets
+
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(widget)
+        fig = fig_cls(figsize=(8, 6))
+        canvas = canvas_cls(fig)
+        layout.addWidget(canvas)
 
         if pelvis_idx is not None and torso_idx is not None:
-            plotter.plot_x_factor_cycle(fig7, torso_idx, pelvis_idx)
+            plotter.plot_x_factor_cycle(fig, torso_idx, pelvis_idx)
         else:
-            ax = fig7.add_subplot(111)
+            ax = fig.add_subplot(111)
             ax.text(
                 0.5,
                 0.5,
@@ -482,6 +500,4 @@ class AdvancedGuiMethodsMixin:
                 va="center",
             )
 
-        tab_widget.addTab(ssc_widget, "Stretch-Shortening")
-
-        dialog.exec()
+        return widget

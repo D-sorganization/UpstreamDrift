@@ -289,8 +289,15 @@ class GolfSimulationGUI:
         main_container = ttk.Frame(self.tab_sim, style="Modern.TFrame")
         main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Title section
-        title_frame = ttk.Frame(main_container, style="Modern.TFrame")
+        self._setup_sim_title(main_container)
+        self._setup_sim_settings_card(main_container)
+        self._setup_sim_state_card(main_container)
+        self._setup_sim_action_buttons(main_container)
+        self._setup_sim_log_section(main_container)
+
+    def _setup_sim_title(self, parent) -> None:
+        """Create the simulation tab title section."""
+        title_frame = ttk.Frame(parent, style="Modern.TFrame")
         title_frame.pack(fill="x", pady=(0, 20))
 
         title = ttk.Label(
@@ -305,9 +312,10 @@ class GolfSimulationGUI:
         )
         subtitle.pack(anchor="center", pady=(5, 0))
 
-        # Settings card
+    def _setup_sim_settings_card(self, parent) -> None:
+        """Create the simulation settings card with control mode and live view."""
         settings_card = ttk.LabelFrame(
-            main_container, text="⚙️ Simulation Settings", style="Modern.TLabelframe"
+            parent, text="⚙️ Simulation Settings", style="Modern.TLabelframe"
         )
         settings_card.pack(fill="x", pady=(0, 15))
 
@@ -342,9 +350,10 @@ class GolfSimulationGUI:
             style="Modern.TCheckbutton",
         ).pack(side="left")
 
-        # State management card
+    def _setup_sim_state_card(self, parent) -> None:
+        """Create the state management card with load/save path entries."""
         state_card = ttk.LabelFrame(
-            main_container, text="💾 State Management", style="Modern.TLabelframe"
+            parent, text="💾 State Management", style="Modern.TLabelframe"
         )
         state_card.pack(fill="x", pady=(0, 15))
 
@@ -409,9 +418,10 @@ class GolfSimulationGUI:
             style="Modern.TButton",
         ).pack(side="right")
 
-        # Action buttons section
+    def _setup_sim_action_buttons(self, parent) -> None:
+        """Create the simulation control and results action buttons."""
         action_card = ttk.LabelFrame(
-            main_container, text="🎮 Simulation Controls", style="Modern.TLabelframe"
+            parent, text="🎮 Simulation Controls", style="Modern.TLabelframe"
         )
         action_card.pack(fill="x", pady=(0, 15))
 
@@ -513,9 +523,10 @@ class GolfSimulationGUI:
         )
         self.btn_open_data.pack(side="left")
 
-        # Log section
+    def _setup_sim_log_section(self, parent) -> None:
+        """Create the simulation log section with text area and scrollbar."""
         log_card = ttk.LabelFrame(
-            main_container, text="📋 Simulation Log", style="Modern.TLabelframe"
+            parent, text="📋 Simulation Log", style="Modern.TLabelframe"
         )
         log_card.pack(fill="both", expand=True)
 
@@ -590,17 +601,26 @@ class GolfSimulationGUI:
         )
         title.pack(pady=(0, 20))
 
-        # Dimensions card
+        self._setup_dimensions_card(main_container)
+        self._setup_colors_card(main_container)
+        self._setup_appearance_save_button(main_container)
+
+    def _setup_dimensions_card(self, parent: ttk.Frame) -> None:
+        """Create the physical dimensions card with height and weight controls."""
         dimensions_card = ttk.LabelFrame(
-            main_container, text="📏 Physical Dimensions", style="Modern.TLabelframe"
+            parent, text="📏 Physical Dimensions", style="Modern.TLabelframe"
         )
         dimensions_card.pack(fill="x", pady=(0, 20))
 
         dim_inner = ttk.Frame(dimensions_card, style="Modern.TFrame")
         dim_inner.pack(fill="x", padx=20, pady=15)
 
-        # Height control
-        height_frame = ttk.Frame(dim_inner, style="Modern.TFrame")
+        self._setup_height_control(dim_inner)
+        self._setup_weight_control(dim_inner)
+
+    def _setup_height_control(self, parent: ttk.Frame) -> None:
+        """Create the height spinbox control."""
+        height_frame = ttk.Frame(parent, style="Modern.TFrame")
         height_frame.pack(fill="x", pady=(0, 15))
 
         ttk.Label(height_frame, text="Height (meters):", style="Modern.TLabel").pack(
@@ -622,8 +642,9 @@ class GolfSimulationGUI:
         )
         height_spinbox.pack(side="right")
 
-        # Weight control
-        weight_frame = ttk.Frame(dim_inner, style="Modern.TFrame")
+    def _setup_weight_control(self, parent: ttk.Frame) -> None:
+        """Create the weight scale control with label."""
+        weight_frame = ttk.Frame(parent, style="Modern.TFrame")
         weight_frame.pack(fill="x")
 
         weight_label_frame = ttk.Frame(weight_frame, style="Modern.TFrame")
@@ -653,9 +674,10 @@ class GolfSimulationGUI:
         )
         weight_scale.pack(fill="x")
 
-        # Colors card
+    def _setup_colors_card(self, parent: ttk.Frame) -> None:
+        """Create the body colors card with color pickers for each body part."""
         colors_card = ttk.LabelFrame(
-            main_container, text="🎨 Body Colors", style="Modern.TLabelframe"
+            parent, text="🎨 Body Colors", style="Modern.TLabelframe"
         )
         colors_card.pack(fill="x", pady=(0, 20))
 
@@ -664,7 +686,6 @@ class GolfSimulationGUI:
 
         self.color_widgets = {}
 
-        # Color grid
         color_parts = [
             ("👕 Shirt", "shirt"),
             ("👖 Pants", "pants"),
@@ -674,49 +695,56 @@ class GolfSimulationGUI:
         ]
 
         for _, (display_name, part_key) in enumerate(color_parts):
-            color_row = ttk.Frame(colors_inner, style="Modern.TFrame")
-            color_row.pack(fill="x", pady=5)
+            self._create_color_picker_row(colors_inner, display_name, part_key)
 
-            # Label
-            ttk.Label(
-                color_row, text=display_name, style="Modern.TLabel", width=12
-            ).pack(side="left")
+    def _create_color_picker_row(
+        self, parent: ttk.Frame, display_name: str, part_key: str
+    ) -> None:
+        """Create a single color picker row with label, swatch, and pick button."""
+        color_row = ttk.Frame(parent, style="Modern.TFrame")
+        color_row.pack(fill="x", pady=5)
 
-            # Color swatch
-            swatch_frame = ttk.Frame(color_row, style="Modern.TFrame")
-            swatch_frame.pack(side="left", padx=(10, 15))
+        # Label
+        ttk.Label(color_row, text=display_name, style="Modern.TLabel", width=12).pack(
+            side="left"
+        )
 
-            canvas = tk.Canvas(
-                swatch_frame,
-                width=50,
-                height=30,
-                bg="white",
-                relief="solid",
-                borderwidth=2,
-                highlightthickness=0,
-            )
-            canvas.pack()
-            self.color_widgets[part_key] = canvas
-            self.update_swatch(part_key)
+        # Color swatch
+        swatch_frame = ttk.Frame(color_row, style="Modern.TFrame")
+        swatch_frame.pack(side="left", padx=(10, 15))
 
-            # Pick color button
-            color_btn = tk.Button(
-                color_row,
-                text="🎨 Pick Color",
-                command=partial(self.pick_color, part_key),
-                bg="#0078d4",
-                fg="white",
-                font=("Segoe UI", 9),
-                relief="flat",
-                bd=0,
-                padx=15,
-                pady=6,
-                cursor="hand2",
-            )
-            color_btn.pack(side="right")
+        canvas = tk.Canvas(
+            swatch_frame,
+            width=50,
+            height=30,
+            bg="white",
+            relief="solid",
+            borderwidth=2,
+            highlightthickness=0,
+        )
+        canvas.pack()
+        self.color_widgets[part_key] = canvas
+        self.update_swatch(part_key)
 
-        # Save button
-        save_frame = ttk.Frame(main_container, style="Modern.TFrame")
+        # Pick color button
+        color_btn = tk.Button(
+            color_row,
+            text="🎨 Pick Color",
+            command=partial(self.pick_color, part_key),
+            bg="#0078d4",
+            fg="white",
+            font=("Segoe UI", 9),
+            relief="flat",
+            bd=0,
+            padx=15,
+            pady=6,
+            cursor="hand2",
+        )
+        color_btn.pack(side="right")
+
+    def _setup_appearance_save_button(self, parent: ttk.Frame) -> None:
+        """Create the save appearance settings button."""
+        save_frame = ttk.Frame(parent, style="Modern.TFrame")
         save_frame.pack(fill="x", pady=20)
 
         save_btn = tk.Button(
@@ -1049,15 +1077,8 @@ class GolfSimulationGUI:
 
         threading.Thread(target=run_update, daemon=True).start()
 
-    def _run_docker_process(self) -> None:
-        """Run the simulation in a subprocess."""
-        # Determine command
-        # If running in windows, we use wsl docker.
-        # If running in linux, we use docker directly.
-        # NOTE: If we are running inside the environment that HAS mujoco/dm_control,
-        # we could just subprocess the python script directly instead of docker run?
-        # But let's stick to the existing architecture.
-
+    def _build_docker_command(self) -> list[str]:
+        """Build the docker run command for the simulation subprocess."""
         if self.is_windows:
             cmd = [
                 "wsl",
@@ -1072,12 +1093,10 @@ class GolfSimulationGUI:
 
             if self.live_view_var.get():
                 # Allow GUI to display on host Windows X Server (VcXsrv)
-                # OVERRIDE osmesa default to allow windowed rendering
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
             else:
-                # Headless mode - use osmesa to avoid X11 errors
                 cmd.extend(["-e", "MUJOCO_GL=osmesa"])
 
             cmd.extend(
@@ -1090,7 +1109,6 @@ class GolfSimulationGUI:
                 ]
             )
         else:
-            # Non-Windows path (Linux/Unix)
             cmd = [
                 "docker",
                 "run",
@@ -1102,16 +1120,13 @@ class GolfSimulationGUI:
             ]
 
             if self.live_view_var.get():
-                # Add X11 forwarding args
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
                 cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])  # nosec B108
             else:
-                # Headless mode
                 cmd.extend(["-e", "MUJOCO_GL=osmesa"])
 
-            # Append image and command LAST
             cmd.extend(
                 [
                     "robotics_env",
@@ -1121,14 +1136,95 @@ class GolfSimulationGUI:
                 ]
             )
 
+        return cmd
+
+    def _stream_process_output(self) -> None:
+        """Read subprocess stdout via a queue and log lines to the GUI."""
+        q: queue.Queue[str | None] = queue.Queue()
+
+        def enqueue_output(out, output_queue) -> None:
+            """Enqueue output from subprocess."""
+            try:
+                for line in iter(out.readline, ""):
+                    output_queue.put(line)
+                out.close()
+            except (RuntimeError, ValueError, OSError) as e:
+                try:
+                    self.root.after(0, self.log, f"Exception in enqueue_output: {e}")
+                except (RuntimeError, ValueError, AttributeError):
+                    pass
+            output_queue.put(None)  # Sentinel
+
+        t = threading.Thread(
+            target=enqueue_output, args=(self.process.stdout, q), daemon=True
+        )
+        t.start()
+
+        while True:
+            # Check user stop
+            if self.stop_event.is_set():
+                if self.process.poll() is None:
+                    self.process.terminate()
+
+            try:
+                output = q.get(timeout=0.1)
+            except queue.Empty:
+                if self.process.poll() is not None and not t.is_alive():
+                    break
+                continue
+
+            if output is None:  # Sentinel
+                break
+
+            self.root.after(0, self.log, output.strip())
+
+    def _handle_process_failure(self, rc) -> None:
+        """Log error details and suggest solutions for common failures."""
+        self.root.after(0, self.log, f"Process exited with code {rc}")
+        if self.process.stderr:
+            err = self.process.stderr.read()
+            if err:
+                self.root.after(0, self.log, f"ERROR: {err}")
+            # Check for specific common errors and provide solutions
+            if "defusedxml" in err:
+                self.root.after(
+                    0,
+                    self.log,
+                    "SOLUTION: Missing defusedxml dependency. "
+                    "Please rebuild Docker image.",
+                )
+                self.root.after(0, self.log, "Run: docker build -t robotics_env .")
+            elif "ModuleNotFoundError" in err:
+                self.root.after(
+                    0,
+                    self.log,
+                    "SOLUTION: Missing Python dependency. "
+                    "Check Dockerfile and rebuild.",
+                )
+            elif "DISPLAY" in err or "X11" in err:
+                self.root.after(
+                    0,
+                    self.log,
+                    "SOLUTION: X11/Display issue. "
+                    "Try disabling 'Live Interactive View'.",
+                )
+
+    def _reset_buttons_state(self) -> None:
+        """Reset run/stop buttons to their default enabled states."""
+        self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
+        self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+
+    def _run_docker_process(self) -> None:
+        """Run the simulation in a subprocess."""
+        cmd = self._build_docker_command()
+
         try:
             self.log(f"Running command: {' '.join(cmd)}")
 
             # Race condition fix: Check stop event before starting
             if self.stop_event.is_set():
                 self.log("Simulation cancelled.")
-                self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
-                self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+                self._reset_buttons_state()
                 return
 
             self.process = subprocess.Popen(
@@ -1139,100 +1235,23 @@ class GolfSimulationGUI:
                 bufsize=1,
             )
 
-            # Use a queue to read stdout non-blocking
-            q: queue.Queue[str | None] = queue.Queue()
-
-            def enqueue_output(out, queue) -> None:
-                """Enqueue output from subprocess."""
-                try:
-                    for line in iter(out.readline, ""):
-                        queue.put(line)
-                    out.close()
-                except (RuntimeError, ValueError, OSError) as e:
-                    # Log the exception so it is not silently swallowed
-                    try:
-                        self.root.after(
-                            0, self.log, f"Exception in enqueue_output: {e}"
-                        )
-                    except (RuntimeError, ValueError, AttributeError):
-                        pass
-                queue.put(None)  # Sentinel
-
-            t = threading.Thread(
-                target=enqueue_output, args=(self.process.stdout, q), daemon=True
-            )
-            t.start()
-
-            while True:
-                # Check user stop
-                if self.stop_event.is_set():
-                    if self.process.poll() is None:
-                        self.process.terminate()
-
-                try:
-                    # Non-blocking check with timeout to allow stop_event checking
-                    output = q.get(timeout=0.1)
-                except queue.Empty:
-                    # If process is dead and queue is empty, break
-                    # Actually sentinel is best.
-                    if self.process.poll() is not None and not t.is_alive():
-                        # If thread died without sentinel?
-                        break
-                    continue
-
-                if output is None:  # Sentinel
-                    break
-
-                self.root.after(0, self.log, output.strip())
+            self._stream_process_output()
 
             rc = self.process.poll()
 
             # Check if stopped by user
             if self.stop_event.is_set():
                 self.root.after(0, self.log, "Simulation stopped by user.")
-                self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
-                self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+                self._reset_buttons_state()
             elif rc == 0:
                 self.root.after(0, self.on_sim_success)
             else:
-                self.root.after(0, self.log, f"Process exited with code {rc}")
-                # Try reading stderr
-                if self.process.stderr:
-                    err = self.process.stderr.read()
-                    if err:
-                        self.root.after(0, self.log, f"ERROR: {err}")
-                    # Check for specific common errors and provide solutions
-                    if "defusedxml" in err:
-                        self.root.after(
-                            0,
-                            self.log,
-                            "SOLUTION: Missing defusedxml dependency. "
-                            "Please rebuild Docker image.",
-                        )
-                        self.root.after(
-                            0, self.log, "Run: docker build -t robotics_env ."
-                        )
-                    elif "ModuleNotFoundError" in err:
-                        self.root.after(
-                            0,
-                            self.log,
-                            "SOLUTION: Missing Python dependency. "
-                            "Check Dockerfile and rebuild.",
-                        )
-                    elif "DISPLAY" in err or "X11" in err:
-                        self.root.after(
-                            0,
-                            self.log,
-                            "SOLUTION: X11/Display issue. "
-                            "Try disabling 'Live Interactive View'.",
-                        )
-                self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
-                self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+                self._handle_process_failure(rc)
+                self._reset_buttons_state()
 
         except ImportError as e:
             self.root.after(0, self.log, f"Failed to run subprocess: {e}")
-            self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
-            self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+            self._reset_buttons_state()
 
     def on_sim_success(self) -> None:
         """Handle successful simulation completion."""

@@ -445,6 +445,22 @@ class ThemeManager:
             CSS-like stylesheet string for Qt widgets
         """
         c = self._current_theme
+        sections = [
+            self._stylesheet_base_widgets(c),
+            self._stylesheet_buttons(c),
+            self._stylesheet_inputs(c),
+            self._stylesheet_item_views(c),
+            self._stylesheet_scrollbars(c),
+            self._stylesheet_menus(c),
+            self._stylesheet_tabs_and_status(c),
+            self._stylesheet_containers(c),
+            self._stylesheet_indicators_and_sliders(c),
+        ]
+        return "\n".join(sections)
+
+    @staticmethod
+    def _stylesheet_base_widgets(c: ThemeColors) -> str:
+        """Generate styles for base widgets (QWidget, QMainWindow, QDialog)."""
         return f"""
             QWidget {{
                 background-color: {c.bg_base};
@@ -459,7 +475,12 @@ class ThemeManager:
             QDialog {{
                 background-color: {c.bg_surface};
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_buttons(c: ThemeColors) -> str:
+        """Generate styles for QPushButton states."""
+        return f"""
             QPushButton {{
                 background-color: {c.primary};
                 color: {c.text_primary};
@@ -480,7 +501,12 @@ class ThemeManager:
                 background-color: {c.bg_elevated};
                 color: {c.text_quaternary};
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_inputs(c: ThemeColors) -> str:
+        """Generate styles for text inputs and combo boxes."""
+        return f"""
             QLineEdit, QTextEdit, QPlainTextEdit {{
                 background-color: {c.bg_surface};
                 color: {c.text_primary};
@@ -508,7 +534,12 @@ class ThemeManager:
             QComboBox::drop-down {{
                 border: none;
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_item_views(c: ThemeColors) -> str:
+        """Generate styles for list, tree, and table widgets."""
+        return f"""
             QListWidget, QTreeWidget, QTableWidget {{
                 background-color: {c.bg_surface};
                 color: {c.text_primary};
@@ -518,7 +549,12 @@ class ThemeManager:
             QListWidget::item:selected, QTreeWidget::item:selected {{
                 background-color: {c.primary_muted};
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_scrollbars(c: ThemeColors) -> str:
+        """Generate styles for scrollbars."""
+        return f"""
             QScrollBar:vertical {{
                 background-color: {c.bg_base};
                 width: 12px;
@@ -533,7 +569,12 @@ class ThemeManager:
             QScrollBar::handle:vertical:hover {{
                 background-color: {c.border_strong};
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_menus(c: ThemeColors) -> str:
+        """Generate styles for menu bar and menus."""
+        return f"""
             QMenuBar {{
                 background-color: {c.bg_surface};
                 color: {c.text_primary};
@@ -552,7 +593,12 @@ class ThemeManager:
             QMenu::item:selected {{
                 background-color: {c.primary_muted};
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_tabs_and_status(c: ThemeColors) -> str:
+        """Generate styles for tabs, status bar, and labels."""
+        return f"""
             QTabWidget::pane {{
                 border: 1px solid {c.border_default};
                 background-color: {c.bg_surface};
@@ -578,7 +624,12 @@ class ThemeManager:
             QLabel {{
                 color: {c.text_primary};
             }}
+        """
 
+    @staticmethod
+    def _stylesheet_containers(c: ThemeColors) -> str:
+        """Generate styles for group boxes and tooltips."""
+        return f"""
             QGroupBox {{
                 border: 1px solid {c.border_subtle};
                 border-radius: 4px;
@@ -592,6 +643,18 @@ class ThemeManager:
                 left: 10px;
             }}
 
+            QToolTip {{
+                background-color: {c.bg_surface};
+                color: {c.text_primary};
+                border: 1px solid {c.border_default};
+                padding: 4px;
+            }}
+        """
+
+    @staticmethod
+    def _stylesheet_indicators_and_sliders(c: ThemeColors) -> str:
+        """Generate styles for checkboxes, radio buttons, progress bars, and sliders."""
+        return f"""
             QCheckBox::indicator, QRadioButton::indicator {{
                 width: 16px;
                 height: 16px;
@@ -620,13 +683,6 @@ class ThemeManager:
                 height: 16px;
                 margin: -6px 0;
                 border-radius: 8px;
-            }}
-
-            QToolTip {{
-                background-color: {c.bg_surface};
-                color: {c.text_primary};
-                border: 1px solid {c.border_default};
-                padding: 4px;
             }}
         """
 

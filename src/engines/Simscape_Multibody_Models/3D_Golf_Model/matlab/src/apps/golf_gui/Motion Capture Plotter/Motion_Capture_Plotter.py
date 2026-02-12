@@ -94,27 +94,8 @@ class MotionCapturePlotter(QMainWindow):
         plot_panel = self.create_plot_panel()
         main_layout.addWidget(plot_panel, stretch=1)
 
-    def create_control_panel(self):
-        """Create the left control panel with scroll area"""
-        # Create a scroll area to contain all controls
-        scroll_area = QScrollArea()
-        scroll_area.setMaximumWidth(400)
-        scroll_area.setMinimumWidth(350)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-
-        # Create the actual content widget
-        panel = QWidget()
-        layout = QVBoxLayout(panel)
-
-        # Title
-        title = QLabel("Motion Capture Plotter")
-        title.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
-
-        # File loading
+    def _create_data_loading_group(self):
+        """Create the data loading group box with source and file selectors."""
         file_group = QGroupBox("Data Loading")
         file_layout = QVBoxLayout(file_group)
 
@@ -141,17 +122,11 @@ class MotionCapturePlotter(QMainWindow):
         load_btn = QPushButton("Load File")
         load_btn.clicked.connect(self.load_file)
         file_layout.addWidget(load_btn)
-        layout.addWidget(file_group)
 
-        # Swing selection
-        swing_group = QGroupBox("Swing Selection")
-        swing_layout = QVBoxLayout(swing_group)
-        self.swing_combo = QComboBox()
-        self.swing_combo.currentTextChanged.connect(self.on_swing_change)
-        swing_layout.addWidget(self.swing_combo)
-        layout.addWidget(swing_group)
+        return file_group
 
-        # Playback controls
+    def _create_playback_controls_group(self):
+        """Create the playback controls group box with play, frame, and speed."""
         playback_group = QGroupBox("Playback Controls")
         playback_layout = QVBoxLayout(playback_group)
 
@@ -182,9 +157,10 @@ class MotionCapturePlotter(QMainWindow):
         speed_layout.addWidget(self.speed_label)
         playback_layout.addLayout(speed_layout)
 
-        layout.addWidget(playback_group)
+        return playback_group
 
-        # Visualization options
+    def _create_visualization_options_group(self):
+        """Create the visualization options group box with traces and sliders."""
         viz_group = QGroupBox("Visualization Options")
         viz_layout = QVBoxLayout(viz_group)
 
@@ -246,9 +222,10 @@ class MotionCapturePlotter(QMainWindow):
         club_layout.addWidget(self.club_label)
         viz_layout.addLayout(club_layout)
 
-        layout.addWidget(viz_group)
+        return viz_group
 
-        # Camera controls
+    def _create_camera_controls_group(self):
+        """Create the camera views group box with preset view buttons."""
         camera_group = QGroupBox("Camera Views")
         camera_layout = QVBoxLayout(camera_group)
 
@@ -265,15 +242,19 @@ class MotionCapturePlotter(QMainWindow):
             btn.clicked.connect(command)
             camera_layout.addWidget(btn)
 
-        layout.addWidget(camera_group)
+        return camera_group
 
+    def _create_info_and_help_groups(self):
+        """Create the frame data info and 3D plot help group boxes.
+
+        Returns (info_group, help_group) tuple.
+        """
         # Analysis info
         info_group = QGroupBox("Current Frame Data")
         info_layout = QVBoxLayout(info_group)
         self.info_text = QTextEdit()
         self.info_text.setMaximumHeight(150)
         info_layout.addWidget(self.info_text)
-        layout.addWidget(info_group)
 
         # Interactive controls help
         help_group = QGroupBox("3D Plot Controls")
@@ -286,6 +267,46 @@ class MotionCapturePlotter(QMainWindow):
         help_label = QLabel(help_text)
         help_label.setWordWrap(True)
         help_layout.addWidget(help_label)
+
+        return info_group, help_group
+
+    def create_control_panel(self):
+        """Create the left control panel with scroll area"""
+        # Create a scroll area to contain all controls
+        scroll_area = QScrollArea()
+        scroll_area.setMaximumWidth(400)
+        scroll_area.setMinimumWidth(350)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+        # Create the actual content widget
+        panel = QWidget()
+        layout = QVBoxLayout(panel)
+
+        # Title
+        title = QLabel("Motion Capture Plotter")
+        title.setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        # Add widget groups
+        layout.addWidget(self._create_data_loading_group())
+
+        # Swing selection
+        swing_group = QGroupBox("Swing Selection")
+        swing_layout = QVBoxLayout(swing_group)
+        self.swing_combo = QComboBox()
+        self.swing_combo.currentTextChanged.connect(self.on_swing_change)
+        swing_layout.addWidget(self.swing_combo)
+        layout.addWidget(swing_group)
+
+        layout.addWidget(self._create_playback_controls_group())
+        layout.addWidget(self._create_visualization_options_group())
+        layout.addWidget(self._create_camera_controls_group())
+
+        info_group, help_group = self._create_info_and_help_groups()
+        layout.addWidget(info_group)
         layout.addWidget(help_group)
 
         layout.addStretch()
@@ -382,103 +403,87 @@ class MotionCapturePlotter(QMainWindow):
             logger.info(f"Auto-loading Simscape CSV file: {filename}")
             self.load_simscape_csv(filename)
 
+    @staticmethod
+    def _safe_float(value, default=0.0):
+        """Safely convert a value to float, returning default on failure."""
+        if pd.isna(value):
+            return default
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def _parse_excel_row(row, row_index):
+        """Parse a single Excel row into a frame data dict.
+
+        Returns a dict with mid-hands and club head position/orientation data,
+        or None if the row has insufficient columns.
+        """
+        if len(row) < 25:
+            return None
+
+        sf = MotionCapturePlotter._safe_float
+
+        return {
+            "time": sf(row[1], row_index),  # Time is in column 1
+            # Mid-hands position (convert inches to meters) and orientation
+            "mid_X": sf(row[2]) * 0.0254,
+            "mid_Y": sf(row[3]) * 0.0254,
+            "mid_Z": sf(row[4]) * 0.0254,
+            "mid_Xx": sf(row[5]),  # Direction cosines (unitless)
+            "mid_Xy": sf(row[6]),
+            "mid_Xz": sf(row[7]),
+            "mid_Yx": sf(row[8]),
+            "mid_Yy": sf(row[9]),
+            "mid_Yz": sf(row[10]),
+            "mid_Zx": sf(row[11]),
+            "mid_Zy": sf(row[12]),
+            "mid_Zz": sf(row[13]),
+            # Club head position (convert inches to meters) and orientation
+            "club_X": sf(row[14]) * 0.0254,
+            "club_Y": sf(row[15]) * 0.0254,
+            "club_Z": sf(row[16]) * 0.0254,
+            "club_Xx": sf(row[17]),  # Direction cosines (unitless)
+            "club_Xy": sf(row[18]),
+            "club_Xz": sf(row[19]),
+            "club_Yx": sf(row[20]),
+            "club_Yy": sf(row[21]),
+            "club_Yz": sf(row[22]),
+            "club_Zx": sf(row[23]),
+            "club_Zy": sf(row[24]),
+            "club_Zz": sf(row[25]),
+        }
+
+    def _process_excel_sheet(self, filename, sheet_name):
+        """Process a single Excel sheet and store parsed frames in swing_data."""
+        df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
+
+        if len(df) <= 3:
+            return
+
+        # Extract position and orientation data for both mid-hands and club head
+        data = []
+        for i in range(3, len(df)):
+            frame_data = self._parse_excel_row(df.iloc[i], i - 3)
+            if frame_data is not None:
+                data.append(frame_data)
+
+        if data:
+            self.swing_data[sheet_name] = pd.DataFrame(data)
+            logger.debug(f"Successfully loaded {len(data)} frames for {sheet_name}")
+            self.print_data_debug(sheet_name)
+
     def load_excel_file(self, filename):
         """Load and process Excel file"""
         try:
             logger.info(f"Loading file: {filename}")
-            # Read all sheets
             excel_file = pd.ExcelFile(filename)
             logger.info(f"Available sheets: {excel_file.sheet_names}")
 
             for sheet_name in ["TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"]:
                 if sheet_name in excel_file.sheet_names:
-                    # Read the sheet
-                    df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
-
-                    # Extract key frames from first row
-                    key_frame_data = {}
-                    for col in range(2, min(10, len(df.columns))):
-                        if pd.notna(df.iloc[0, col]) and str(df.iloc[0, col]) in [
-                            "A",
-                            "T",
-                            "I",
-                            "F",
-                        ]:
-                            key_frame_data[str(df.iloc[0, col])] = col
-
-                    # Process data starting from row 3 (actual data starts here)
-                    if len(df) > 3:
-                        # Extract position and orientation data for both
-                        # mid-hands and club head
-                        data = []
-                        for i in range(3, len(df)):
-                            row = df.iloc[i]
-                            if (
-                                len(row) >= 25
-                            ):  # Ensure we have enough columns for both sets
-                                # Helper function to safely convert to float
-                                def safe_float(value, default=0.0):
-                                    if pd.isna(value):
-                                        return default
-                                    try:
-                                        return float(value)
-                                    except (ValueError, TypeError):
-                                        return default
-
-                                # Mid-hands data (columns 2-13) - Convert inches
-                                # to meters
-                                frame_data = {
-                                    "time": safe_float(
-                                        row[1], i - 3
-                                    ),  # Time is in column 1
-                                    # Mid-hands position (convert inches to meters)
-                                    # and orientation
-                                    "mid_X": safe_float(row[2])
-                                    * 0.0254,  # inches to meters
-                                    "mid_Y": safe_float(row[3])
-                                    * 0.0254,  # inches to meters
-                                    "mid_Z": safe_float(row[4])
-                                    * 0.0254,  # inches to meters
-                                    "mid_Xx": safe_float(
-                                        row[5]
-                                    ),  # Direction cosines (unitless)
-                                    "mid_Xy": safe_float(row[6]),
-                                    "mid_Xz": safe_float(row[7]),
-                                    "mid_Yx": safe_float(row[8]),
-                                    "mid_Yy": safe_float(row[9]),
-                                    "mid_Yz": safe_float(row[10]),
-                                    "mid_Zx": safe_float(row[11]),
-                                    "mid_Zy": safe_float(row[12]),
-                                    "mid_Zz": safe_float(row[13]),
-                                    # Club head position (convert inches to meters)
-                                    # and orientation (columns 14-25)
-                                    "club_X": safe_float(row[14])
-                                    * 0.0254,  # inches to meters
-                                    "club_Y": safe_float(row[15])
-                                    * 0.0254,  # inches to meters
-                                    "club_Z": safe_float(row[16])
-                                    * 0.0254,  # inches to meters
-                                    "club_Xx": safe_float(
-                                        row[17]
-                                    ),  # Direction cosines (unitless)
-                                    "club_Xy": safe_float(row[18]),
-                                    "club_Xz": safe_float(row[19]),
-                                    "club_Yx": safe_float(row[20]),
-                                    "club_Yy": safe_float(row[21]),
-                                    "club_Yz": safe_float(row[22]),
-                                    "club_Zx": safe_float(row[23]),
-                                    "club_Zy": safe_float(row[24]),
-                                    "club_Zz": safe_float(row[25]),
-                                }
-                                data.append(frame_data)
-
-                        if data:
-                            self.swing_data[sheet_name] = pd.DataFrame(data)
-                            logger.debug(
-                                f"Successfully loaded {len(data)} frames "
-                                f"for {sheet_name}"
-                            )
-                            self.print_data_debug(sheet_name)
+                    self._process_excel_sheet(filename, sheet_name)
 
             # Update swing selection
             self.swing_combo.clear()
@@ -497,12 +502,83 @@ class MotionCapturePlotter(QMainWindow):
             logger.error(f"Error loading file: {str(e)}")
             QMessageBox.critical(self, "Error", f"Failed to load file: {str(e)}")
 
+    @staticmethod
+    def _simscape_joint_position_definitions():
+        """Return the mapping of joint names to their CSV column names."""
+        return {
+            "club_head": [
+                "ClubLogs_CHGlobalPosition_1",
+                "ClubLogs_CHGlobalPosition_2",
+                "ClubLogs_CHGlobalPosition_3",
+            ],
+            "left_hand": [
+                "LWLogs_LHGlobalPosition_1",
+                "LWLogs_LHGlobalPosition_2",
+                "LWLogs_LHGlobalPosition_3",
+            ],
+            "right_hand": [
+                "RWLogs_RHGlobalPosition_1",
+                "RWLogs_RHGlobalPosition_2",
+                "RWLogs_RHGlobalPosition_3",
+            ],
+            "left_shoulder": [
+                "LSLogs_GlobalPosition_1",
+                "LSLogs_GlobalPosition_2",
+                "LSLogs_GlobalPosition_3",
+            ],
+            "right_shoulder": [
+                "RSLogs_GlobalPosition_1",
+                "RSLogs_GlobalPosition_2",
+                "RSLogs_GlobalPosition_3",
+            ],
+            "left_elbow": [
+                "LELogs_LArmonLForearmFGlobal_1",
+                "LELogs_LArmonLForearmFGlobal_2",
+                "LELogs_LArmonLForearmFGlobal_3",
+            ],
+            "right_elbow": [
+                "RELogs_RArmonLForearmFGlobal_1",
+                "RELogs_RArmonLForearmFGlobal_2",
+                "RELogs_RArmonLForearmFGlobal_3",
+            ],
+            "hub": [
+                "HipLogs_HUBGlobalPosition_1",
+                "HipLogs_HUBGlobalPosition_2",
+                "HipLogs_HUBGlobalPosition_3",
+            ],
+            "spine": [
+                "SpineLogs_GlobalPosition_1",
+                "SpineLogs_GlobalPosition_2",
+                "SpineLogs_GlobalPosition_3",
+            ],
+            "hip": [
+                "HipLogs_HipGlobalPosition_dim1",
+                "HipLogs_HipGlobalPosition_dim2",
+                "HipLogs_HipGlobalPosition_dim3",
+            ],
+        }
+
+    @staticmethod
+    def _find_available_joints(joint_positions, df_columns):
+        """Check which joint positions are available in the CSV columns.
+
+        Returns a dict of available joint names to their column lists.
+        """
+        available_joints = {}
+        for joint_name, columns in joint_positions.items():
+            if all(col in df_columns for col in columns):
+                available_joints[joint_name] = columns
+                logger.info(f"✓ {joint_name}: AVAILABLE")
+            else:
+                missing_cols = [col for col in columns if col not in df_columns]
+                logger.warning(f"✗ {joint_name}: MISSING {len(missing_cols)} columns")
+        return available_joints
+
     def load_simscape_csv(self, filename):
         """Load and process Simscape CSV file"""
         try:
             logger.info(f"Loading Simscape CSV file: {filename}")
 
-            # Read the CSV file
             df = pd.read_csv(filename)
             logger.debug(
                 f"Successfully loaded CSV with {len(df)} rows "
@@ -512,71 +588,8 @@ class MotionCapturePlotter(QMainWindow):
                 f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds"
             )
 
-            # Define the key joint positions for golf swing visualization
-            joint_positions = {
-                "club_head": [
-                    "ClubLogs_CHGlobalPosition_1",
-                    "ClubLogs_CHGlobalPosition_2",
-                    "ClubLogs_CHGlobalPosition_3",
-                ],
-                "left_hand": [
-                    "LWLogs_LHGlobalPosition_1",
-                    "LWLogs_LHGlobalPosition_2",
-                    "LWLogs_LHGlobalPosition_3",
-                ],
-                "right_hand": [
-                    "RWLogs_RHGlobalPosition_1",
-                    "RWLogs_RHGlobalPosition_2",
-                    "RWLogs_RHGlobalPosition_3",
-                ],
-                "left_shoulder": [
-                    "LSLogs_GlobalPosition_1",
-                    "LSLogs_GlobalPosition_2",
-                    "LSLogs_GlobalPosition_3",
-                ],
-                "right_shoulder": [
-                    "RSLogs_GlobalPosition_1",
-                    "RSLogs_GlobalPosition_2",
-                    "RSLogs_GlobalPosition_3",
-                ],
-                "left_elbow": [
-                    "LELogs_LArmonLForearmFGlobal_1",
-                    "LELogs_LArmonLForearmFGlobal_2",
-                    "LELogs_LArmonLForearmFGlobal_3",
-                ],
-                "right_elbow": [
-                    "RELogs_RArmonLForearmFGlobal_1",
-                    "RELogs_RArmonLForearmFGlobal_2",
-                    "RELogs_RArmonLForearmFGlobal_3",
-                ],
-                "hub": [
-                    "HipLogs_HUBGlobalPosition_1",
-                    "HipLogs_HUBGlobalPosition_2",
-                    "HipLogs_HUBGlobalPosition_3",
-                ],
-                "spine": [
-                    "SpineLogs_GlobalPosition_1",
-                    "SpineLogs_GlobalPosition_2",
-                    "SpineLogs_GlobalPosition_3",
-                ],
-                "hip": [
-                    "HipLogs_HipGlobalPosition_dim1",
-                    "HipLogs_HipGlobalPosition_dim2",
-                    "HipLogs_HipGlobalPosition_dim3",
-                ],
-            }
-
-            # Check which joint positions are available
-            available_joints = {}
-            for joint_name, columns in joint_positions.items():
-                if all(col in df.columns for col in columns):
-                    available_joints[joint_name] = columns
-                    logger.info(f"✓ {joint_name}: AVAILABLE")
-                else:
-                    missing_cols = [col for col in columns if col not in df.columns]
-                    logger.warning(
-                        f"✗ {joint_name}: MISSING {len(missing_cols)} columns"
-                    )
+            joint_positions = self._simscape_joint_position_definitions()
+            available_joints = self._find_available_joints(joint_positions, df.columns)
 
             if not available_joints:
                 raise ValueError("No valid joint position data found in the CSV file")
@@ -585,14 +598,11 @@ class MotionCapturePlotter(QMainWindow):
             data = []
             for _i, row in df.iterrows():
                 frame_data = {"time": row["time"]}
-
-                # Add available joint positions
                 for joint_name, columns in available_joints.items():
                     if all(col in df.columns for col in columns):
                         frame_data[f"{joint_name}_X"] = row[columns[0]]
                         frame_data[f"{joint_name}_Y"] = row[columns[1]]
                         frame_data[f"{joint_name}_Z"] = row[columns[2]]
-
                 data.append(frame_data)
 
             # Store the data
@@ -845,139 +855,12 @@ class MotionCapturePlotter(QMainWindow):
         # Redraw canvas
         self.canvas.draw()
 
-    def visualize_motion_capture_data(self, frame_data, data):
-        """Visualize motion capture data (Excel format)"""
-        # Use actual mid-hands and club head positions from the data
-        # For right-handed golfers: X should be flipped to show proper swing direction
-        mid_hands = np.array(
-            [
-                -frame_data["mid_X"]
-                * self.motion_scale,  # Flip X for right-handed swing
-                frame_data["mid_Y"] * self.motion_scale,
-                frame_data["mid_Z"] * self.motion_scale,
-            ]
-        )
+    def _draw_motion_capture_trajectory_paths(self, data):
+        """Draw mid-hands and club head trajectory paths for motion capture data.
 
-        club_head = np.array(
-            [
-                -frame_data["club_X"]
-                * self.motion_scale,  # Flip X for right-handed swing
-                frame_data["club_Y"] * self.motion_scale,
-                frame_data["club_Z"] * self.motion_scale,
-            ]
-        )
-
-        # Draw the club shaft (line from mid-hands to club head)
-        shaft_points = np.array([mid_hands, club_head])
-        self.ax.plot(
-            shaft_points[:, 0],
-            shaft_points[:, 1],
-            shaft_points[:, 2],
-            "gray",
-            linewidth=6,
-            alpha=0.9,
-            label="Club Shaft",
-        )
-
-        # Draw club head as a sphere at the actual club head position
-        u = np.linspace(0, 2 * np.pi, 8)
-        v = np.linspace(0, np.pi, 8)
-        head_size = 0.03  # Smaller, more realistic club head size
-        x_head = head_size * np.outer(np.cos(u), np.sin(v)) + club_head[0]
-        y_head = head_size * np.outer(np.sin(u), np.sin(v)) + club_head[1]
-        z_head = head_size * np.outer(np.ones(np.size(u)), np.cos(v)) + club_head[2]
-        self.ax.plot_surface(
-            x_head, y_head, z_head, color="darkgray", alpha=0.9, label="Club Head"
-        )
-
-        # Calculate and draw club face normal vector
-        shaft_direction = club_head - mid_hands
-        shaft_length = np.linalg.norm(shaft_direction)
-
-        if shaft_length > 0:
-            shaft_direction = shaft_direction / shaft_length
-
-            # Calculate face normal (perpendicular to shaft, simplified calculation)
-            # For a golf club, the face normal is typically perpendicular to the shaft
-            # We'll assume it points in the direction of the swing
-            # (positive Y direction)
-            up_vector = np.array([0, 0, 1])  # Vertical up
-            face_normal = np.cross(shaft_direction, up_vector)
-            face_normal_length = np.linalg.norm(face_normal)
-
-            if face_normal_length > 0:
-                face_normal = face_normal / face_normal_length
-
-                # Draw face normal vector (red arrow) - longer and more visible
-                normal_length = 0.25  # 25cm normal vector (longer)
-                normal_end = club_head + face_normal * normal_length
-
-                # Draw the normal vector as a thick line
-                normal_points = np.array([club_head, normal_end])
-                self.ax.plot(
-                    normal_points[:, 0],
-                    normal_points[:, 1],
-                    normal_points[:, 2],
-                    "red",
-                    linewidth=6,
-                    alpha=1.0,
-                    label="Face Normal",
-                )
-
-                # Add a larger arrowhead at the end
-                self.ax.scatter(
-                    normal_end[0],
-                    normal_end[1],
-                    normal_end[2],
-                    c="red",
-                    s=200,
-                    marker=">",
-                    alpha=1.0,
-                )
-
-                # Add a small sphere at the start of the normal for better visibility
-                self.ax.scatter(
-                    club_head[0],
-                    club_head[1],
-                    club_head[2],
-                    c="red",
-                    s=50,
-                    marker="o",
-                    alpha=0.8,
-                )
-
-                # Draw golf ball positioned for center strike
-                ball_offset_distance = 0.08  # 8cm in front of club face
-                ball_position = club_head + face_normal * ball_offset_distance
-
-                # Draw golf ball as a white sphere
-                ball_radius = 0.021  # Standard golf ball radius (42.7mm diameter)
-                u_ball = np.linspace(0, 2 * np.pi, 12)
-                v_ball = np.linspace(0, np.pi, 12)
-                x_ball = (
-                    ball_radius * np.outer(np.cos(u_ball), np.sin(v_ball))
-                    + ball_position[0]
-                )
-                y_ball = (
-                    ball_radius * np.outer(np.sin(u_ball), np.sin(v_ball))
-                    + ball_position[1]
-                )
-                z_ball = (
-                    ball_radius * np.outer(np.ones(np.size(u_ball)), np.cos(v_ball))
-                    + ball_position[2]
-                )
-                self.ax.plot_surface(
-                    x_ball,
-                    y_ball,
-                    z_ball,
-                    color="white",
-                    alpha=0.95,
-                    edgecolor="lightgray",
-                    linewidth=0.5,
-                    label="Golf Ball",
-                )
-
-        # Draw trajectory paths
+        Parameters:
+            data: full DataFrame of all frames
+        """
         if self.trajectory_check.isChecked() and len(data) > 1:
             # Mid-hands path (blue dashed) - flip X for right-handed swing
             trajectory = np.array(
@@ -1022,23 +905,41 @@ class MotionCapturePlotter(QMainWindow):
                 label="Club Head Path",
             )
 
-    def visualize_simscape_data(self, frame_data, data):
-        """Visualize Simscape multibody data (CSV format)"""
-        # Define colors for different body segments
-        colors = {
-            "club": "red",
-            "hands": "blue",
-            "arms": "green",
-            "shoulders": "orange",
-            "torso": "purple",
-            "hips": "brown",
-        }
+    def visualize_motion_capture_data(self, frame_data, data):
+        """Visualize motion capture data (Excel format)"""
+        # Use actual mid-hands and club head positions from the data
+        # For right-handed golfers: X should be flipped to show proper swing direction
+        mid_hands = np.array(
+            [
+                -frame_data["mid_X"]
+                * self.motion_scale,  # Flip X for right-handed swing
+                frame_data["mid_Y"] * self.motion_scale,
+                frame_data["mid_Z"] * self.motion_scale,
+            ]
+        )
 
-        # Draw golf swing skeleton
+        club_head = np.array(
+            [
+                -frame_data["club_X"]
+                * self.motion_scale,  # Flip X for right-handed swing
+                frame_data["club_Y"] * self.motion_scale,
+                frame_data["club_Z"] * self.motion_scale,
+            ]
+        )
+
+        # Draw the club shaft, head, face normal, and golf ball
+        self._draw_club_with_face_normal(club_head, mid_hands)
+
+        # Draw trajectory paths
+        self._draw_motion_capture_trajectory_paths(data)
+
+    def _extract_joint_positions(self, frame_data):
+        """Extract scaled joint positions from a Simscape frame.
+
+        Returns a dict mapping joint names to numpy position arrays.
+        """
         joints = {}
-
-        # Extract joint positions from frame data
-        for joint_name in [
+        joint_names = [
             "club_head",
             "left_hand",
             "right_hand",
@@ -1049,7 +950,8 @@ class MotionCapturePlotter(QMainWindow):
             "hub",
             "spine",
             "hip",
-        ]:
+        ]
+        for joint_name in joint_names:
             if f"{joint_name}_X" in frame_data:
                 joints[joint_name] = np.array(
                     [
@@ -1059,138 +961,137 @@ class MotionCapturePlotter(QMainWindow):
                         frame_data[f"{joint_name}_Z"] * self.motion_scale,
                     ]
                 )
+        return joints
 
-        # Draw segments connecting joints
-        segments = [
-            ("left_hand", "right_hand", colors["hands"]),  # Midpoint
-            ("left_hand", "left_elbow", colors["arms"]),
-            ("right_hand", "right_elbow", colors["arms"]),
-            ("left_elbow", "left_shoulder", colors["arms"]),
-            ("right_elbow", "right_shoulder", colors["arms"]),
-            ("left_shoulder", "right_shoulder", colors["shoulders"]),
-            ("left_shoulder", "hub", colors["torso"]),
-            ("right_shoulder", "hub", colors["torso"]),
-            ("hub", "spine", colors["torso"]),
-            ("spine", "hip", colors["torso"]),
-        ]
+    def _draw_club_with_face_normal(self, club_head_pos, grip_pos):
+        """Draw the club shaft, head sphere, face normal vector, and golf ball.
 
-        # Draw club if available
-        if "club_head" in joints and "left_hand" in joints:
-            # Draw club shaft from left hand to club head
-            club_points = np.array([joints["left_hand"], joints["club_head"]])
-            self.ax.plot(
-                club_points[:, 0],
-                club_points[:, 1],
-                club_points[:, 2],
-                color="gray",
-                linewidth=6,
-                alpha=0.9,
-                label="Club Shaft",
-            )
+        Parameters:
+            club_head_pos: numpy array of club head position [x, y, z]
+            grip_pos: numpy array of grip (left hand) position [x, y, z]
+        """
+        # Draw club shaft from grip to club head
+        club_points = np.array([grip_pos, club_head_pos])
+        self.ax.plot(
+            club_points[:, 0],
+            club_points[:, 1],
+            club_points[:, 2],
+            color="gray",
+            linewidth=6,
+            alpha=0.9,
+            label="Club Shaft",
+        )
 
-            # Draw club head as sphere with better appearance
-            u = np.linspace(0, 2 * np.pi, 8)
-            v = np.linspace(0, np.pi, 8)
-            head_size = 0.03  # Realistic club head size
-            x_head = head_size * np.outer(np.cos(u), np.sin(v)) + joints["club_head"][0]
-            y_head = head_size * np.outer(np.sin(u), np.sin(v)) + joints["club_head"][1]
-            z_head = (
-                head_size * np.outer(np.ones(np.size(u)), np.cos(v))
-                + joints["club_head"][2]
-            )
-            self.ax.plot_surface(
-                x_head, y_head, z_head, color="darkgray", alpha=0.9, label="Club Head"
-            )
+        # Draw club head as sphere with better appearance
+        u = np.linspace(0, 2 * np.pi, 8)
+        v = np.linspace(0, np.pi, 8)
+        head_size = 0.03  # Realistic club head size
+        x_head = head_size * np.outer(np.cos(u), np.sin(v)) + club_head_pos[0]
+        y_head = head_size * np.outer(np.sin(u), np.sin(v)) + club_head_pos[1]
+        z_head = head_size * np.outer(np.ones(np.size(u)), np.cos(v)) + club_head_pos[2]
+        self.ax.plot_surface(
+            x_head, y_head, z_head, color="darkgray", alpha=0.9, label="Club Head"
+        )
 
-            # Calculate and draw club face normal vector
-            club_head_pos = joints["club_head"]
-            left_hand_pos = joints["left_hand"]
-            shaft_direction = club_head_pos - left_hand_pos
-            shaft_length = np.linalg.norm(shaft_direction)
+        # Calculate and draw club face normal vector
+        shaft_direction = club_head_pos - grip_pos
+        shaft_length = np.linalg.norm(shaft_direction)
 
-            if shaft_length > 0:
-                shaft_direction = shaft_direction / shaft_length
+        if shaft_length > 0:
+            shaft_direction = shaft_direction / shaft_length
 
-                # Calculate face normal (perpendicular to shaft)
-                up_vector = np.array([0, 0, 1])  # Vertical up
-                face_normal = np.cross(shaft_direction, up_vector)
-                face_normal_length = np.linalg.norm(face_normal)
+            # Calculate face normal (perpendicular to shaft)
+            up_vector = np.array([0, 0, 1])  # Vertical up
+            face_normal = np.cross(shaft_direction, up_vector)
+            face_normal_length = np.linalg.norm(face_normal)
 
-                if face_normal_length > 0:
-                    face_normal = face_normal / face_normal_length
+            if face_normal_length > 0:
+                face_normal = face_normal / face_normal_length
+                self._draw_face_normal_and_ball(club_head_pos, face_normal)
 
-                    # Draw face normal vector (red arrow) - longer and more visible
-                    normal_length = 0.25  # 25cm normal vector (longer)
-                    normal_end = club_head_pos + face_normal * normal_length
+    def _draw_face_normal_and_ball(self, club_head_pos, face_normal):
+        """Draw the face normal vector arrow and a golf ball in front of the club.
 
-                    # Draw the normal vector as a thick line
-                    normal_points = np.array([club_head_pos, normal_end])
-                    self.ax.plot(
-                        normal_points[:, 0],
-                        normal_points[:, 1],
-                        normal_points[:, 2],
-                        "red",
-                        linewidth=6,
-                        alpha=1.0,
-                        label="Face Normal",
-                    )
+        Parameters:
+            club_head_pos: numpy array of club head position [x, y, z]
+            face_normal: unit numpy array of face normal direction
+        """
+        # Draw face normal vector (red arrow) - longer and more visible
+        normal_length = 0.25  # 25cm normal vector (longer)
+        normal_end = club_head_pos + face_normal * normal_length
 
-                    # Add a larger arrowhead at the end
-                    self.ax.scatter(
-                        normal_end[0],
-                        normal_end[1],
-                        normal_end[2],
-                        c="red",
-                        s=200,
-                        marker=">",
-                        alpha=1.0,
-                    )
+        # Draw the normal vector as a thick line
+        normal_points = np.array([club_head_pos, normal_end])
+        self.ax.plot(
+            normal_points[:, 0],
+            normal_points[:, 1],
+            normal_points[:, 2],
+            "red",
+            linewidth=6,
+            alpha=1.0,
+            label="Face Normal",
+        )
 
-                    # Add a small sphere at the start of the normal
-                    # for better visibility
-                    self.ax.scatter(
-                        club_head_pos[0],
-                        club_head_pos[1],
-                        club_head_pos[2],
-                        c="red",
-                        s=50,
-                        marker="o",
-                        alpha=0.8,
-                    )
+        # Add a larger arrowhead at the end
+        self.ax.scatter(
+            normal_end[0],
+            normal_end[1],
+            normal_end[2],
+            c="red",
+            s=200,
+            marker=">",
+            alpha=1.0,
+        )
 
-                    # Draw golf ball positioned for center strike
-                    ball_offset_distance = 0.08  # 8cm in front of club face
-                    ball_position = club_head_pos + face_normal * ball_offset_distance
+        # Add a small sphere at the start of the normal for better visibility
+        self.ax.scatter(
+            club_head_pos[0],
+            club_head_pos[1],
+            club_head_pos[2],
+            c="red",
+            s=50,
+            marker="o",
+            alpha=0.8,
+        )
 
-                    # Draw golf ball as a white sphere
-                    ball_radius = 0.021  # Standard golf ball radius
-                    u_ball = np.linspace(0, 2 * np.pi, 12)
-                    v_ball = np.linspace(0, np.pi, 12)
-                    x_ball = (
-                        ball_radius * np.outer(np.cos(u_ball), np.sin(v_ball))
-                        + ball_position[0]
-                    )
-                    y_ball = (
-                        ball_radius * np.outer(np.sin(u_ball), np.sin(v_ball))
-                        + ball_position[1]
-                    )
-                    z_ball = (
-                        ball_radius * np.outer(np.ones(np.size(u_ball)), np.cos(v_ball))
-                        + ball_position[2]
-                    )
-                    self.ax.plot_surface(
-                        x_ball,
-                        y_ball,
-                        z_ball,
-                        color="white",
-                        alpha=0.95,
-                        edgecolor="lightgray",
-                        linewidth=0.5,
-                        label="Golf Ball",
-                    )
+        # Draw golf ball positioned for center strike
+        ball_offset_distance = 0.08  # 8cm in front of club face
+        ball_position = club_head_pos + face_normal * ball_offset_distance
 
+        # Draw golf ball as a white sphere
+        ball_radius = 0.021  # Standard golf ball radius
+        u_ball = np.linspace(0, 2 * np.pi, 12)
+        v_ball = np.linspace(0, np.pi, 12)
+        x_ball = (
+            ball_radius * np.outer(np.cos(u_ball), np.sin(v_ball)) + ball_position[0]
+        )
+        y_ball = (
+            ball_radius * np.outer(np.sin(u_ball), np.sin(v_ball)) + ball_position[1]
+        )
+        z_ball = (
+            ball_radius * np.outer(np.ones(np.size(u_ball)), np.cos(v_ball))
+            + ball_position[2]
+        )
+        self.ax.plot_surface(
+            x_ball,
+            y_ball,
+            z_ball,
+            color="white",
+            alpha=0.95,
+            edgecolor="lightgray",
+            linewidth=0.5,
+            label="Golf Ball",
+        )
+
+    def _draw_body_segments_and_markers(self, joints, segment_definitions):
+        """Draw body segment lines and joint marker dots.
+
+        Parameters:
+            joints: dict mapping joint names to numpy position arrays
+            segment_definitions: list of (start_joint, end_joint, color) tuples
+        """
         # Draw body segments
-        for start_joint, end_joint, color in segments:
+        for start_joint, end_joint, color in segment_definitions:
             if start_joint in joints and end_joint in joints:
                 segment_points = np.array([joints[start_joint], joints[end_joint]])
                 self.ax.plot(
@@ -1208,7 +1109,13 @@ class MotionCapturePlotter(QMainWindow):
                 position[0], position[1], position[2], color="black", s=50, alpha=0.8
             )
 
-        # Draw trajectory paths if enabled
+    def _draw_simscape_trajectory_paths(self, joints, data):
+        """Draw club head and hands trajectory paths for Simscape data.
+
+        Parameters:
+            joints: dict mapping joint names to numpy position arrays
+            data: full DataFrame of all frames
+        """
         if self.trajectory_check.isChecked() and len(data) > 1:
             # Club head trajectory
             if "club_head" in joints:
@@ -1261,7 +1168,26 @@ class MotionCapturePlotter(QMainWindow):
                         label="Hands Path",
                     )
 
-        # Draw segment traces if enabled
+    def _draw_segment_traces(self, frame_data, data):
+        """Draw optional per-segment trace paths for Simscape data.
+
+        Parameters:
+            frame_data: current frame's data row
+            data: full DataFrame of all frames
+        """
+        trace_colors = {
+            "club_head": "red",
+            "left_hand": "blue",
+            "right_hand": "cyan",
+            "left_elbow": "green",
+            "right_elbow": "lime",
+            "left_shoulder": "orange",
+            "right_shoulder": "yellow",
+            "hub": "purple",
+            "spine": "magenta",
+            "hip": "brown",
+        }
+
         for segment_key, checkbox in self.segment_traces.items():
             if (
                 checkbox.isChecked()
@@ -1282,19 +1208,6 @@ class MotionCapturePlotter(QMainWindow):
                     ]
                 )
                 if len(segment_trajectory) > 1:
-                    # Use different colors for different segments
-                    trace_colors = {
-                        "club_head": "red",
-                        "left_hand": "blue",
-                        "right_hand": "cyan",
-                        "left_elbow": "green",
-                        "right_elbow": "lime",
-                        "left_shoulder": "orange",
-                        "right_shoulder": "yellow",
-                        "hub": "purple",
-                        "spine": "magenta",
-                        "hip": "brown",
-                    }
                     color = trace_colors.get(segment_key, "gray")
                     self.ax.plot(
                         segment_trajectory[:, 0],
@@ -1306,6 +1219,42 @@ class MotionCapturePlotter(QMainWindow):
                         linewidth=2,
                         label=f"{segment_key.replace('_', ' ').title()} Path",
                     )
+
+    def visualize_simscape_data(self, frame_data, data):
+        """Visualize Simscape multibody data (CSV format)"""
+        # Define colors for different body segments
+        colors = {
+            "club": "red",
+            "hands": "blue",
+            "arms": "green",
+            "shoulders": "orange",
+            "torso": "purple",
+            "hips": "brown",
+        }
+
+        joints = self._extract_joint_positions(frame_data)
+
+        # Define segments connecting joints
+        segment_definitions = [
+            ("left_hand", "right_hand", colors["hands"]),  # Midpoint
+            ("left_hand", "left_elbow", colors["arms"]),
+            ("right_hand", "right_elbow", colors["arms"]),
+            ("left_elbow", "left_shoulder", colors["arms"]),
+            ("right_elbow", "right_shoulder", colors["arms"]),
+            ("left_shoulder", "right_shoulder", colors["shoulders"]),
+            ("left_shoulder", "hub", colors["torso"]),
+            ("right_shoulder", "hub", colors["torso"]),
+            ("hub", "spine", colors["torso"]),
+            ("spine", "hip", colors["torso"]),
+        ]
+
+        # Draw club if available
+        if "club_head" in joints and "left_hand" in joints:
+            self._draw_club_with_face_normal(joints["club_head"], joints["left_hand"])
+
+        self._draw_body_segments_and_markers(joints, segment_definitions)
+        self._draw_simscape_trajectory_paths(joints, data)
+        self._draw_segment_traces(frame_data, data)
 
     def update_info_text(self, frame_data):
         """Update the information text display"""
