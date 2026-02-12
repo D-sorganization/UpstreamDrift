@@ -124,7 +124,9 @@ class MuscleDrivenEnv:
         excitations = self._action_to_excitations(action)
 
         # Update activations (with dynamics delay)
-        from shared.python.activation_dynamics import ActivationDynamics
+        from src.shared.python.biomechanics.activation_dynamics import (
+            ActivationDynamics,
+        )
 
         dynamics = ActivationDynamics()
         for muscle_name, u in excitations.items():
@@ -145,7 +147,7 @@ class MuscleDrivenEnv:
             )
 
         # Simple joint dynamics (pendulum-like)
-        from shared.python.core.constants import GRAVITY_M_S2
+        from src.shared.python.core.constants import GRAVITY_M_S2
 
         joint_inertia = 0.05  # Joint inertia [kg·m²]
         b = 0.5  # Damping [N·m·s/rad]
@@ -307,7 +309,7 @@ if __name__ == "__main__":
     print("=" * 60)  # noqa: T201
 
     # Create muscle system
-    from shared.python.biomechanics.multi_muscle import create_elbow_muscle_system
+    from src.shared.python.biomechanics.multi_muscle import create_elbow_muscle_system
 
     elbow = create_elbow_muscle_system()
 

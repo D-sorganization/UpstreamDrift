@@ -452,18 +452,23 @@ class TestModuleAccessibility(unittest.TestCase):
         shared_path = get_src_root() / "shared" / "python"
         self.assertTrue(shared_path.exists(), "Shared python directory should exist")
 
-        # Check for key modules that live directly in shared/python/
-        # Note: process_worker.py lives under ui/qt/, not at the top level.
+        # Check for key modules that live in shared/python/ subpackages
+        # Modules were reorganized into subpackages (config/, engine_core/, data_io/)
         key_modules = [
-            "configuration_manager.py",
-            "engine_manager.py",
-            "common_utils.py",
-            "__init__.py",
+            ("config", "configuration_manager.py"),
+            ("engine_core", "engine_manager.py"),
+            ("data_io", "common_utils.py"),
+            ("", "__init__.py"),
         ]
 
-        for module in key_modules:
-            module_path = shared_path / module
-            self.assertTrue(module_path.exists(), f"Key module {module} should exist")
+        for subdir, module in key_modules:
+            if subdir:
+                module_path = shared_path / subdir / module
+            else:
+                module_path = shared_path / module
+            self.assertTrue(
+                module_path.exists(), f"Key module {subdir}/{module} should exist"
+            )
 
     def test_engine_directory_structure(self):
         """Test engine directory structure."""

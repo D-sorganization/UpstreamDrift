@@ -31,7 +31,7 @@ from scipy.optimize import newton
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
-    from shared.python.biomechanics.hill_muscle import HillMuscleModel
+    from src.shared.python.biomechanics.hill_muscle import HillMuscleModel
 
 logger = get_logger(__name__)
 
@@ -48,7 +48,7 @@ class EquilibriumSolver:
     l_CE (contractile element length) such that fiber and tendon forces balance.
 
     Example:
-        >>> from shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
+        >>> from src.shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
         >>> params = MuscleParameters(F_max=1000.0, l_opt=0.12, l_slack=0.25, v_max=1.2)
         >>> muscle = HillMuscleModel(params)
         >>> solver = EquilibriumSolver(muscle)
@@ -248,8 +248,8 @@ def compute_equilibrium_state(
         Tuple of (l_CE, v_CE) at equilibrium [m, m/s]
 
     Example:
-        >>> from shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
-        >>> from shared.python.muscle_equilibrium import compute_equilibrium_state
+        >>> from src.shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
+        >>> from src.shared.python.muscle_equilibrium import compute_equilibrium_state
         >>> params = MuscleParameters(F_max=1000.0, l_opt=0.12, l_slack=0.25, v_max=1.2)
         >>> muscle = HillMuscleModel(params)
         >>> l_CE, v_CE = compute_equilibrium_state(muscle, l_MT=0.37, v_MT=0.0, activation=0.5)
@@ -273,7 +273,10 @@ def compute_equilibrium_state(
 
 # Example usage / validation
 if __name__ == "__main__":
-    from shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
+    from src.shared.python.biomechanics.hill_muscle import (
+        HillMuscleModel,
+        MuscleParameters,
+    )
 
     # Create muscle
     params = MuscleParameters(
