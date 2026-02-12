@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import logging
 from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,8 @@ from .models import (
     TRIPLE_PENDULUM_XML,
     UPPER_BODY_GOLF_SWING_XML,
 )
+
+logger = logging.getLogger(__name__)
 
 MODEL_SPECS: Mapping[str, Mapping[str, str]] = {
     "chaotic_pendulum": {"mode": "xml_string", "value": CHAOTIC_PENDULUM_XML},
@@ -264,9 +267,9 @@ def run_batch(batch_path: Path, base_args: argparse.Namespace) -> None:
         if summary is not None:
             # We use direct print here as this is a CLI tool explicitly asked for
             # summary output
-            print(f"[{name}] Summary:")  # noqa: T201
+            logger.info(f"[{name}] Summary:")
             for key, value in summary.items():
-                print(f"  {key}: {value:.6g}")  # noqa: T201
+                logger.debug(f"  {key}: {value:.6g}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -332,9 +335,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if summary is not None:
         # We use direct print here as this is a CLI tool explicitly asked for
         # summary output
-        print("Summary:")  # noqa: T201
+        logger.info("Summary:")
         for key, value in summary.items():
-            print(f"  {key}: {value:.6g}")  # noqa: T201
+            logger.debug(f"  {key}: {value:.6g}")
 
     return 0
 

@@ -605,7 +605,7 @@ class FrameProcessor:
 
             return np.array([x_val, y_val, z_val], dtype=np.float32)
         except (ValueError, TypeError, RuntimeError) as e:
-            print(
+            logger.error(
                 f"Error extracting position vector for {prefix} from row {row_idx}: {e}"
             )
             return np.zeros(3, dtype=np.float32)
@@ -898,28 +898,34 @@ class GeometryUtils:
 
 if __name__ == "__main__":
     # Example usage and testing
-    print("[TEST] Golf Swing Visualizer - Core Data System Test")
+    logger.info("[TEST] Golf Swing Visualizer - Core Data System Test")
 
     # Test geometry utilities
-    print("\n[TEST] Testing geometry utilities...")
+    logger.info("\n[TEST] Testing geometry utilities...")
     vertices, normals, indices = GeometryUtils.create_cylinder_mesh()
-    print(f"   Cylinder: {len(vertices) // 3} vertices, {len(indices) // 3} triangles")
+    logger.info(
+        f"   Cylinder: {len(vertices) // 3} vertices, {len(indices) // 3} triangles"
+    )
 
     vertices, normals, indices = GeometryUtils.create_sphere_mesh()
-    print(f"   Sphere: {len(vertices) // 3} vertices, {len(indices) // 3} triangles")
+    logger.info(
+        f"   Sphere: {len(vertices) // 3} vertices, {len(indices) // 3} triangles"
+    )
 
     vertices, normals, indices = GeometryUtils.create_arrow_mesh()
-    print(f"   Arrow: {len(vertices) // 3} vertices, {len(indices) // 3} triangles")
+    logger.info(
+        f"   Arrow: {len(vertices) // 3} vertices, {len(indices) // 3} triangles"
+    )
 
     # Test data structures
-    print("\n[TEST] Testing data structures...")
+    logger.info("\n[TEST] Testing data structures...")
     config = RenderConfig()
     stats = PerformanceStats()
 
-    print(
+    logger.info(
         f"   RenderConfig created with {len(config.show_body_segments)} body segments"
     )
-    print(f"   Vector scale: {config.vector_scale}")
+    logger.info(f"   Vector scale: {config.vector_scale}")
 
     # If MATLAB files are available, test loading
     try:
@@ -929,13 +935,13 @@ if __name__ == "__main__":
         processor = FrameProcessor(datasets, config)
         frame_data = processor.get_frame_data(0)
 
-        print("\n[OK] Successfully loaded and processed data:")
-        print(f"   Frames: {processor.num_frames}")
-        print(f"   Frame 0 valid: {frame_data.is_valid}")
-        print(f"   Shaft length: {frame_data.shaft_length:.3f}")
+        logger.debug("\n[OK] Successfully loaded and processed data:")
+        logger.info(f"   Frames: {processor.num_frames}")
+        logger.info(f"   Frame 0 valid: {frame_data.is_valid}")
+        logger.info(f"   Shaft length: {frame_data.shaft_length:.3f}")
 
     except (RuntimeError, ValueError, OSError) as e:
-        print(f"\n📝 Note: MATLAB files not found for testing ({e})")
-        print("   This is expected if running without data files")
+        logger.warning(f"\n📝 Note: MATLAB files not found for testing ({e})")
+        logger.info("   This is expected if running without data files")
 
-    print("\n🎉 Core data system ready for integration!")
+    logger.info("\n🎉 Core data system ready for integration!")

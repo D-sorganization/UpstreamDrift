@@ -304,9 +304,9 @@ def train_muscle_policy(env: MuscleDrivenEnv, total_timesteps: int = 100000) -> 
 
 # Example integration workflow
 if __name__ == "__main__":
-    print("=" * 60)  # noqa: T201
-    print("MyoSuite Integration Example")  # noqa: T201
-    print("=" * 60)  # noqa: T201
+    logger.info("=" * 60)
+    logger.info("MyoSuite Integration Example")
+    logger.info("=" * 60)
 
     # Create muscle system
     from src.shared.python.biomechanics.multi_muscle import create_elbow_muscle_system
@@ -316,28 +316,28 @@ if __name__ == "__main__":
     # Create RL environment
     env = MuscleDrivenEnv(elbow, task="tracking", dt=0.001)
 
-    print("\\nEnvironment created:")  # noqa: T201
-    print(f"  Task: {env.task}")  # noqa: T201
-    print(f"  Timestep: {env.dt * 1000:.1f} ms")  # noqa: T201
-    print(f"  Muscles: {len(env._get_muscle_names())}")  # noqa: T201
+    logger.info("\\nEnvironment created:")
+    logger.info(f"  Task: {env.task}")
+    logger.info(f"  Timestep: {env.dt * 1000:.1f} ms")
+    logger.info(f"  Muscles: {len(env._get_muscle_names())}")
 
     # Test manual control (no training)
-    print("\\nTesting manual control (no RL):")  # noqa: T201
+    logger.info("\\nTesting manual control (no RL):")
     obs = env.reset()
-    print(f"  Initial obs: {obs}")  # noqa: T201
+    logger.info(f"  Initial obs: {obs}")
 
     # Apply constant excitation
     action = np.array([0.5, 0.3, 0.1])  # Biceps, brachialis, triceps
     obs, reward, done, info = env.step(action)
 
-    print("  After step:")  # noqa: T201
-    print(f"    Observation: {obs}")  # noqa: T201
-    print(f"    Reward: {reward:.4f}")  # noqa: T201
-    print(f"    Torque: {info['tau_muscle']:.2f} N·m")  # noqa: T201
+    logger.info("  After step:")
+    logger.info(f"    Observation: {obs}")
+    logger.info(f"    Reward: {reward:.4f}")
+    logger.info(f"    Torque: {info['tau_muscle']:.2f} N·m")
 
-    print("\\n" + "=" * 60)  # noqa: T201
-    print("✓ MyoSuite integration test complete")  # noqa: T201
-    print("=" * 60)  # noqa: T201
-    print("\\nTo train a policy:")  # noqa: T201
-    print("  policy = train_muscle_policy(env, total_timesteps=50000)")  # noqa: T201
-    print("  # Then use: action, _states = policy.predict(observation)")  # noqa: T201
+    logger.info("\\n" + "=" * 60)
+    logger.info("✓ MyoSuite integration test complete")
+    logger.info("=" * 60)
+    logger.info("\\nTo train a policy:")
+    logger.info("  policy = train_muscle_policy(env, total_timesteps=50000)")
+    logger.info("  # Then use: action, _states = policy.predict(observation)")
