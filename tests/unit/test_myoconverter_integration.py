@@ -54,7 +54,7 @@ class TestMyoConverterInitialization:
     """Test MyoConverter initialization."""
 
     @patch(
-        "src.shared.python.myoconverter_integration.MyoConverter._check_availability"
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability"
     )
     def test_initialization_when_available(self, mock_check):
         """Test initialization when myoconverter is available."""
@@ -66,7 +66,7 @@ class TestMyoConverterInitialization:
         mock_check.assert_called_once()
 
     @patch(
-        "src.shared.python.myoconverter_integration.MyoConverter._check_availability"
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability"
     )
     def test_initialization_when_unavailable(self, mock_check, caplog):
         """Test initialization when myoconverter is not available."""
@@ -95,7 +95,7 @@ class TestCheckAvailability:
     def test_availability_when_not_installed(self):
         """Test that check returns False when import fails."""
         with patch(
-            "src.shared.python.myoconverter_integration.MyoConverter._check_availability",
+            "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
             return_value=False,
         ):
             converter = MyoConverter()
@@ -106,7 +106,7 @@ class TestValidateInputs:
     """Test _validate_inputs method."""
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_valid_inputs(
@@ -124,7 +124,7 @@ class TestValidateInputs:
         assert temp_output_folder.exists()
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_missing_osim_file(
@@ -140,7 +140,7 @@ class TestValidateInputs:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_wrong_file_extension(
@@ -157,7 +157,7 @@ class TestValidateInputs:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_invalid_xml(
@@ -176,7 +176,7 @@ class TestValidateInputs:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_wrong_root_element(
@@ -197,7 +197,7 @@ class TestValidateInputs:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_missing_geometry_folder_warning(
@@ -217,7 +217,7 @@ class TestConvertOsimToMujoco:
     """Test convert_osim_to_mujoco method."""
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_raises_error_when_unavailable(
@@ -233,7 +233,7 @@ class TestConvertOsimToMujoco:
 
     @skip_if_unavailable("myoconverter")
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
     )
     def test_successful_conversion(
@@ -245,7 +245,7 @@ class TestConvertOsimToMujoco:
 
     @skip_if_unavailable("myoconverter")
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
     )
     def test_custom_config_passed(
@@ -260,7 +260,7 @@ class TestHandleConversionError:
     """Test _handle_conversion_error method."""
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_geometry_error_handling(
@@ -276,7 +276,7 @@ class TestHandleConversionError:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_muscle_error_handling(
@@ -292,7 +292,7 @@ class TestHandleConversionError:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_constraint_error_handling(
@@ -308,7 +308,7 @@ class TestHandleConversionError:
             )
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_generic_error_handling(
@@ -328,7 +328,7 @@ class TestLoadConvertedModelKeyframe:
     """Test load_converted_model_keyframe method."""
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_generates_valid_code(self, mock_check, tmp_path):
@@ -344,7 +344,7 @@ class TestLoadConvertedModelKeyframe:
         assert str(model_path) in code
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_code_is_string(self, mock_check, tmp_path):
@@ -361,7 +361,7 @@ class TestGetExampleModels:
     """Test get_example_models method."""
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_returns_dict(self, mock_check):
@@ -372,7 +372,7 @@ class TestGetExampleModels:
         assert isinstance(models, dict)
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_contains_known_models(self, mock_check):
@@ -385,7 +385,7 @@ class TestGetExampleModels:
             assert model_name in models
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_urls_are_strings(self, mock_check):
@@ -402,7 +402,7 @@ class TestValidateConversion:
     """Test validate_conversion method."""
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_validation_passes_when_files_exist(
@@ -418,7 +418,7 @@ class TestValidateConversion:
         assert result is True
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_validation_fails_when_mujoco_missing(self, mock_check, temp_osim_file):
@@ -431,7 +431,7 @@ class TestValidateConversion:
         assert result is False
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_validation_fails_when_osim_missing(self, mock_check, tmp_path):
@@ -482,7 +482,7 @@ class TestEdgeCases:
 
     @skip_if_unavailable("myoconverter")
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
     )
     def test_no_output_file_generated(
@@ -493,7 +493,7 @@ class TestEdgeCases:
         pytest.skip("Requires myoconverter - pending implementation")
 
     @patch(
-        "shared.python.myoconverter_integration.MyoConverter._check_availability",
+        "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
     def test_output_folder_created_if_missing(

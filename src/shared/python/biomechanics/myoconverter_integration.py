@@ -200,7 +200,8 @@ class MyoConverter:
                     "\\nThis file may be corrupted or not a valid OpenSim model.\\n"
                     "Try opening it in OpenSim GUI to validate."
                 )
-        except ET.ParseError as e:
+        except Exception as e:
+            # Handle both ET.ParseError (if import succeeded) and other potential XML errors
             raise ValueError(
                 f"Failed to parse OpenSim XML: {e}\\n"
                 f"File: {osim_file}\\n"
