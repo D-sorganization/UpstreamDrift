@@ -1,25 +1,26 @@
 """Unit tests for Drake GUI App."""
 
-import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
-# Mock modules before importing
-sys.modules["pydrake"] = MagicMock()
-sys.modules["pydrake.all"] = MagicMock()
-sys.modules["pydrake.multibody"] = MagicMock()
-sys.modules["pydrake.multibody.plant"] = MagicMock()
-sys.modules["pydrake.multibody.tree"] = MagicMock()
+_PYDRAKE_MOCKS = {
+    "pydrake": MagicMock(),
+    "pydrake.all": MagicMock(),
+    "pydrake.multibody": MagicMock(),
+    "pydrake.multibody.plant": MagicMock(),
+    "pydrake.multibody.tree": MagicMock(),
+}
 
 
-def teardown_module(module):
-    """Clean up sys.modules pollution."""
-    for key in list(sys.modules.keys()):
-        if key.startswith("pydrake"):
-            del sys.modules[key]
+@pytest.fixture(autouse=True)
+def _mock_pydrake():
+    """Provide mock pydrake modules only during test execution."""
+    with patch.dict("sys.modules", _PYDRAKE_MOCKS):
+        yield
 
 
 @skip_if_unavailable("pyqt6")
