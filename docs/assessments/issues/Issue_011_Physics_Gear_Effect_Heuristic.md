@@ -8,7 +8,7 @@
 
 ## Description
 
-The gear effect (spin generation from off-center impact) is modeled in `shared/python/impact_model.py` using a linear heuristic function: `horizontal_spin = -gear_factor * h_offset * speed * h_scale`.
+The gear effect (spin generation from off-center impact) is modeled in `src/shared/python/physics/impact_model.py` using a linear heuristic function: `horizontal_spin = -gear_factor * h_offset * speed * h_scale`.
 
 This is a phenomenological approximation that lacks a rigorous physics derivation based on the clubhead's Center of Gravity (CG) location relative to the face and the resulting torque/rotation of the clubhead during the collision interval.
 
@@ -19,7 +19,7 @@ This is a phenomenological approximation that lacks a rigorous physics derivatio
 
 ## Affected Files
 
-- `shared/python/impact_model.py`
+- `src/shared/python/physics/impact_model.py`
 
 ## Recommended Fix
 
