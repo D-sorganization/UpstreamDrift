@@ -641,9 +641,7 @@ class SimulinkModelTab(QWidget):
                 (baseq_data, ztcfq_data, deltaq_data)
             )
 
-            self.status_label.setText(
-                f"Loaded {model_source} data successfully"
-            )
+            self.status_label.setText(f"Loaded {model_source} data successfully")
 
         except (RuntimeError, ValueError, OSError) as e:
             self.status_label.setText(f"Error loading data: {str(e)}")
@@ -827,9 +825,7 @@ class ComparisonTab(QWidget):
         if not self.frame_processor_mocap:
             return
         self.playback_controller.toggle_playback()
-        text = (
-            "Pause Sync" if self.playback_controller.is_playing else "Play Sync"
-        )
+        text = "Pause Sync" if self.playback_controller.is_playing else "Play Sync"
         self.play_button.setText(text)
 
     def _on_slider_moved(self, value: int):
