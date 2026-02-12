@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
+from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 
@@ -94,25 +95,30 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             mock_parser_instance = MagicMock()
             mock_parser_class.return_value = mock_parser_instance
 
-            # Mock simulator
-            mock_simulator = MagicMock()
-            mock_pydrake.systems.analysis.Simulator.return_value = mock_simulator
+            # Mock simulator via the analysis module
+            with patch(
+                "src.engines.physics_engines.drake.python.drake_physics_engine.analysis"
+            ) as mock_analysis:
+                mock_simulator = MagicMock()
+                mock_analysis.Simulator.return_value = mock_simulator
 
-            # Import and test loading
-            from src.engines.physics_engines.drake.python.drake_physics_engine import (
-                DrakePhysicsEngine,
-            )
+                # Import and test loading
+                from src.engines.physics_engines.drake.python.drake_physics_engine import (
+                    DrakePhysicsEngine,
+                )
 
-            engine = DrakePhysicsEngine()
+                engine = DrakePhysicsEngine()
 
-            # Set up the engine's plant attribute so the load method can access it
-            engine.plant = mock_plant
+                # Set up the engine's plant attribute so the load method can access it
+                engine.plant = mock_plant
 
-            engine.load_from_path(str(self.urdf_path))
+                engine.load_from_path(str(self.urdf_path))
 
-            # Verify loading was attempted
-            mock_parser_instance.AddModels.assert_called_once_with(str(self.urdf_path))
-            mock_plant.Finalize.assert_called_once()
+                # Verify loading was attempted
+                mock_parser_instance.AddModels.assert_called_once_with(
+                    str(self.urdf_path)
+                )
+                mock_plant.Finalize.assert_called_once()
 
     @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
     @patch(
@@ -134,16 +140,22 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_builder_instance = MagicMock()
         mock_builder.return_value = mock_builder_instance
 
-        from src.engines.physics_engines.drake.python.drake_physics_engine import (
-            DrakePhysicsEngine,
-        )
+        # Mock Parser to raise RuntimeError (Drake raises RuntimeError for bad files)
+        with patch(
+            "src.engines.physics_engines.drake.python.drake_physics_engine.Parser"
+        ) as mock_parser_class:
+            mock_parser_instance = MagicMock()
+            mock_parser_class.return_value = mock_parser_instance
+            mock_parser_instance.AddModels.side_effect = RuntimeError("File not found")
 
-        engine = DrakePhysicsEngine()
-        engine.plant = mock_plant
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
+                DrakePhysicsEngine,
+            )
 
-        # Mock the file check to raise FileNotFoundError
-        with patch("pathlib.Path.exists", return_value=False):
-            with self.assertRaises(FileNotFoundError):
+            engine = DrakePhysicsEngine()
+            engine.plant = mock_plant
+
+            with self.assertRaises(RuntimeError):
                 engine.load_from_path("nonexistent_file.urdf")
 
     @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
@@ -177,12 +189,13 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         engine = DrakePhysicsEngine()
 
-        # Setup engine state
+        # Setup engine state - must satisfy DBC precondition (is_initialized)
         engine.plant = mock_plant
         engine.diagram = mock_diagram
         engine.context = mock_context
         engine.plant_context = mock_plant_context
         engine.simulator = mock_simulator
+        engine._is_finalized = True
 
         # Test reset
         engine.reset()
@@ -223,9 +236,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         engine = DrakePhysicsEngine()
 
-        # Setup engine state
+        # Setup engine state - must satisfy DBC precondition (is_initialized)
         engine.plant = mock_plant
         engine.plant_context = mock_plant_context
+        engine._is_finalized = True
 
         # Test forward computation
         engine.forward()
@@ -258,6 +272,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         mock_diagram = MagicMock()
         mock_context = MagicMock()
+        mock_plant_context = MagicMock()
         mock_simulator = MagicMock()
         mock_plant.time_step.return_value = 0.001
 
@@ -269,10 +284,11 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         engine = DrakePhysicsEngine()
 
-        # Setup engine state to simulate finalized engine
+        # Setup engine state to simulate finalized engine (DBC precondition)
         engine.plant = mock_plant
         engine.diagram = mock_diagram
         engine.context = mock_context
+        engine.plant_context = mock_plant_context
         engine.simulator = mock_simulator
         engine._is_finalized = True
 
@@ -292,7 +308,11 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     def test_drake_engine_error_handling_no_model(
         self, mock_add_plant, mock_builder, mock_pydrake
     ) -> None:
-        """Test Drake engine handles operations without loaded model."""
+        """Test Drake engine handles operations without loaded model.
+
+        DBC preconditions on reset/forward/step raise PreconditionError
+        when the engine is not initialized (no model loaded).
+        """
         # Mock Drake components
         mock_plant = MagicMock()
         mock_scene_graph = MagicMock()
@@ -308,12 +328,17 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         engine = DrakePhysicsEngine()
 
-        # Test operations without model (should not crash)
-        engine.reset()
-        engine.forward()
-        engine.step(0.01)
+        # DBC preconditions should raise PreconditionError for uninitialized engine
+        with self.assertRaises(PreconditionError):
+            engine.reset()
 
-        # Test state operations
+        with self.assertRaises(PreconditionError):
+            engine.forward()
+
+        with self.assertRaises(PreconditionError):
+            engine.step(0.01)
+
+        # get_state has no precondition, returns empty arrays
         q, v = engine.get_state()
         self.assertEqual(len(q), 0)
         self.assertEqual(len(v), 0)
@@ -321,7 +346,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         # Test time
         self.assertEqual(engine.get_time(), 0.0)
 
-    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.LOGGER")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.logger")
     @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
     @patch(
         "src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder"
@@ -348,7 +373,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         ) as mock_parser_class:
             mock_parser_instance = MagicMock()
             mock_parser_class.return_value = mock_parser_instance
-            mock_parser_instance.AddModels.side_effect = Exception("File not found")
+            mock_parser_instance.AddModels.side_effect = RuntimeError("File not found")
 
             from src.engines.physics_engines.drake.python.drake_physics_engine import (
                 DrakePhysicsEngine,
@@ -358,7 +383,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             engine.plant = mock_plant
 
             # Test loading with exception
-            with self.assertRaises((FileNotFoundError, RuntimeError)):
+            with self.assertRaises(RuntimeError):
                 engine.load_from_path("nonexistent.urdf")
 
             # Verify error was logged
@@ -433,8 +458,8 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         engine = DrakePhysicsEngine()
 
-        # Test without model - should return "Drake_NoModel"
-        self.assertEqual(engine.model_name, "Drake_NoModel")
+        # Test without model - default is empty string
+        self.assertEqual(engine.model_name, "")
 
         # Test with model name set
         engine.model_name_str = "test_robot"
@@ -444,22 +469,21 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         """Test Drake engine integration with EngineManager."""
         manager = EngineManager()
 
-        # Mock the _load_drake_engine method to verify it's called
-        with patch.object(manager, "_load_drake_engine") as mock_load_drake:
-            mock_load_drake.return_value = MagicMock()
+        # Mock _load_engine (not _load_drake_engine) and set status to AVAILABLE
+        with patch.object(manager, "_load_engine") as mock_load:
+            mock_load.return_value = None
+            # Must set engine status to AVAILABLE for switch_engine to proceed
+            from src.shared.python.engine_core.engine_manager import EngineStatus
+
+            manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
 
             # Test engine switching
-            try:
-                manager.switch_engine(EngineType.DRAKE)
-                # Verify that the engine manager attempted to load Drake
-                mock_load_drake.assert_called_once()
-            except Exception:
-                # Expected to fail due to missing Drake dependencies
-                # but we verified the attempt was made
-                mock_load_drake.assert_called_once()
+            result = manager.switch_engine(EngineType.DRAKE)
 
-        # Verify that the engine manager has a current engine
-        self.assertIsNotNone(manager.current_engine)
+            # Verify the manager attempted to load the engine
+            mock_load.assert_called_once_with(EngineType.DRAKE)
+            self.assertTrue(result)
+            self.assertEqual(manager.current_engine, EngineType.DRAKE)
 
     def tearDown(self) -> None:
         """Clean up test fixtures."""

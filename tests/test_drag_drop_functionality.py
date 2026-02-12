@@ -48,7 +48,7 @@ class TestDragDropFunctionality(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        get_qapp()  # Simplified with utility
+        cls.app = get_qapp()  # Must store reference to prevent GC
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -122,7 +122,7 @@ class TestDragDropFunctionality(unittest.TestCase):
                 self.assertEqual(y_val, 10)
         except Exception as e:
             # Fallback for when Mock is behaving unexpectedly (common in heavy patch envs)
-            print(f"Warning: Mock behavior check failed: {e}")
+            print(f"Warning: Mock behavior check failed: {e}")  # noqa: T201
 
     def test_drop_event_triggers_swap(self) -> None:
         """Test that drop events trigger model swapping."""
@@ -203,7 +203,7 @@ class TestGridLayout(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        get_qapp()  # Simplified with utility
+        cls.app = get_qapp()  # Must store reference to prevent GC
 
     def test_grid_columns_constant(self) -> None:
         """Test that grid columns is set to 4."""
@@ -341,6 +341,14 @@ class TestGridLayout(unittest.TestCase):
 
 class TestC3DViewerIntegration(unittest.TestCase):
     """Test C3D viewer integration with the launcher."""
+
+    app: Any = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Set up QApplication for GUI tests that create QWidgets."""
+        if PYQT6_AVAILABLE:
+            cls.app = get_qapp()  # Must store reference to prevent GC
 
     def test_c3d_viewer_files_exist(self) -> None:
         """Test that C3D viewer files exist."""
@@ -489,6 +497,14 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
 class TestURDFGeneratorIntegration(unittest.TestCase):
     """Test URDF generator integration with the launcher."""
+
+    app: Any = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Set up QApplication for GUI tests that create QWidgets."""
+        if PYQT6_AVAILABLE:
+            cls.app = get_qapp()  # Must store reference to prevent GC
 
     def test_urdf_generator_files_exist(self) -> None:
         """Test that URDF generator files exist."""
@@ -691,7 +707,7 @@ if __name__ == "__main__":
             ]
         )
     else:
-        print("PyQt6 not available - skipping GUI tests")
+        print("PyQt6 not available - skipping GUI tests")  # noqa: T201
 
     for test_class in test_classes:
         suite.addTests(loader.loadTestsFromTestCase(test_class))
@@ -701,22 +717,22 @@ if __name__ == "__main__":
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'=' * 60}")
-    print("Drag-and-Drop Tests Summary")
-    print(f"{'=' * 60}")
-    print(f"Tests run: {result.testsRun}")
-    print(f"Failures: {len(result.failures)}")
-    print(f"Errors: {len(result.errors)}")
+    print(f"\n{'=' * 60}")  # noqa: T201
+    print("Drag-and-Drop Tests Summary")  # noqa: T201
+    print(f"{'=' * 60}")  # noqa: T201
+    print(f"Tests run: {result.testsRun}")  # noqa: T201
+    print(f"Failures: {len(result.failures)}")  # noqa: T201
+    print(f"Errors: {len(result.errors)}")  # noqa: T201
 
     if result.failures:
-        print("\nFAILURES:")
+        print("\nFAILURES:")  # noqa: T201
         for test, _ in result.failures:
-            print(f"  - {test}")
+            print(f"  - {test}")  # noqa: T201
 
     if result.errors:
-        print("\nERRORS:")
+        print("\nERRORS:")  # noqa: T201
         for test, _ in result.errors:
-            print(f"  - {test}")
+            print(f"  - {test}")  # noqa: T201
 
     if not result.failures and not result.errors:
-        print("\nAll drag-and-drop tests passed!")
+        print("\nAll drag-and-drop tests passed!")  # noqa: T201

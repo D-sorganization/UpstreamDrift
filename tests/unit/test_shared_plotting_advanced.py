@@ -12,6 +12,14 @@ from matplotlib import pyplot as plt
 
 from src.shared.python.plotting import GolfSwingPlotter
 
+# Check if 3D projection is available (broken on some numpy/matplotlib combos)
+try:
+    from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+
+    _HAS_3D = True
+except (ImportError, AttributeError):
+    _HAS_3D = False
+
 
 class MockRecorder:
     """Mock recorder for testing."""
@@ -58,6 +66,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
+    @unittest.skipUnless(_HAS_3D, "mpl_toolkits.mplot3d unavailable")
     def test_plot_grf_butterfly_diagram(self):
         """Test plotting GRF butterfly diagram."""
         self.plotter.plot_grf_butterfly_diagram(self.fig)
@@ -77,6 +86,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         self.assertTrue(len(self.fig.axes) > 0)
         # Should catch exception and not crash
 
+    @unittest.skipUnless(_HAS_3D, "mpl_toolkits.mplot3d unavailable")
     def test_plot_angular_momentum_3d(self):
         """Test plotting 3D angular momentum."""
         self.plotter.plot_angular_momentum_3d(self.fig)

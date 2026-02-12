@@ -30,7 +30,7 @@ REFERENCES:
 - Project Guidelines: docs/project_design_guidelines.qmd (Section P: Cross-Engine Validation)
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 import pytest
@@ -40,8 +40,12 @@ from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
 
-if TYPE_CHECKING:
+# Runtime imports guarded by availability flags (not TYPE_CHECKING)
+# so that test functions can call mujoco.* and pinocchio.* at runtime.
+if MUJOCO_AVAILABLE:
     import mujoco
+
+if PINOCCHIO_AVAILABLE:
     import pinocchio
 
 # Skip all tests if either engine is missing

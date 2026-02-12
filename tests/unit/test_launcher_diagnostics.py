@@ -12,8 +12,10 @@ Tests cover:
 from __future__ import annotations
 
 import json
+import logging
 import tempfile
 import time
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import patch
 
@@ -31,6 +33,30 @@ except ImportError as e:
     pytest.skip(
         f"Cannot import launcher_diagnostics module: {e}", allow_module_level=True
     )
+
+
+@pytest.fixture(autouse=True)
+def _reset_structured_logging() -> Generator[None, None, None]:
+    """Reset the global structured-logging flag before every test.
+
+    ``setup_structured_logging()`` in ``src.shared.python.core._core`` is
+    guarded by a module-level ``_structured_logging_configured`` flag.  When
+    other tests in the full suite import modules that trigger this function
+    (e.g. ``EngineManager``), the flag stays ``True`` for the rest of the
+    process, which can change logging behaviour and cause spurious failures
+    for tests that indirectly invoke the same code path.
+
+    Resetting the flag here ensures every test starts from the same state.
+    """
+    try:
+        import src.shared.python.core._core as _core_mod
+
+        saved = _core_mod._structured_logging_configured
+        _core_mod._structured_logging_configured = False
+        yield
+        _core_mod._structured_logging_configured = saved
+    except (ImportError, AttributeError):
+        yield
 
 
 class TestDiagnosticResult:
@@ -394,9 +420,9 @@ class TestTileLoadingVerification:
 
             missing = expected_ids - loaded_ids
             assert len(missing) == 0, f"Registry missing: {missing}"
-            assert (
-                len(all_models) >= 8
-            ), f"Expected at least 8 models, got {len(all_models)}"
+            assert len(all_models) >= 8, (
+                f"Expected at least 8 models, got {len(all_models)}"
+            )
 
         except ImportError as e:
             pytest.skip(f"Dependencies not available: {e}")
@@ -457,16 +483,21 @@ class TestCLIDiagnostics:
     """Tests for CLI diagnostic output."""
 
     def test_run_cli_diagnostics_no_errors(
-        self, capsys: pytest.CaptureFixture[str]
+        self, caplog: pytest.LogCaptureFixture
     ) -> None:
-        """Test CLI diagnostics runs without errors."""
-        # This should not raise any exceptions
-        run_cli_diagnostics()
+        """Test CLI diagnostics runs without errors.
 
-        captured = capsys.readouterr()
-        assert "Golf Modeling Suite" in captured.out
-        assert "Status:" in captured.out
-        assert "Recommendations:" in captured.out
+        run_cli_diagnostics() emits output via the ``logging`` module
+        (logger.info / logger.error / logger.warning), not via print().
+        We therefore capture with ``caplog`` rather than ``capsys``.
+        """
+        with caplog.at_level(logging.INFO, logger="src.launchers.launcher_diagnostics"):
+            run_cli_diagnostics()
+
+        log_text = caplog.text
+        assert "Golf Modeling Suite" in log_text
+        assert "Status:" in log_text
+        assert "Recommendations:" in log_text
 
 
 if __name__ == "__main__":

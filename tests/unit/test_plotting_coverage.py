@@ -6,6 +6,16 @@ from matplotlib.figure import Figure
 
 from src.shared.python.plotting import GolfSwingPlotter
 
+# Check if 3D projection is available (broken on some numpy/matplotlib combos)
+try:
+    from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+
+    _HAS_3D = True
+except (ImportError, AttributeError):
+    _HAS_3D = False
+
+_skip_no_3d = pytest.mark.skipif(not _HAS_3D, reason="mpl_toolkits.mplot3d unavailable")
+
 
 @pytest.fixture
 def mock_recorder():
@@ -112,6 +122,7 @@ def test_plot_club_head_speed(plotter):
     assert len(fig.axes) > 0
 
 
+@_skip_no_3d
 def test_plot_club_head_trajectory(plotter):
     fig = Figure()
     plotter.plot_club_head_trajectory(fig)
@@ -169,6 +180,7 @@ def test_plot_kinematic_sequence(plotter):
     assert len(fig.axes) > 0
 
 
+@_skip_no_3d
 def test_plot_3d_phase_space(plotter):
     fig = Figure()
     plotter.plot_3d_phase_space(fig, joint_idx=0)
@@ -181,6 +193,7 @@ def test_plot_correlation_matrix(plotter):
     assert len(fig.axes) > 0
 
 
+@_skip_no_3d
 def test_plot_swing_plane(plotter):
     fig = Figure()
     plotter.plot_swing_plane(fig)
