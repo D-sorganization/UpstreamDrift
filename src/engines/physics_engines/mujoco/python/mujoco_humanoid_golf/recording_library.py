@@ -625,7 +625,9 @@ class RecordingLibrary:
         cursor = conn.cursor()
 
         # Safe: field is validated against whitelist above (allowed_fields)
-        cursor.execute(f"SELECT DISTINCT {field} FROM recordings WHERE {field} != ''")  # nosec B608
+        cursor.execute(
+            f"SELECT DISTINCT {field} FROM recordings WHERE {field} != ''"
+        )  # nosec B608
         values = [row[0] for row in cursor.fetchall()]
 
         return sorted(values)
