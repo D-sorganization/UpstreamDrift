@@ -4,6 +4,8 @@ Golf Swing Visualizer - Fixed OpenGL Renderer
 Fixed for moderngl 5.x compatibility with correct uniform API
 """
 
+from __future__ import annotations
+
 import logging
 import time
 import traceback
@@ -579,7 +581,7 @@ class OpenGLRenderer:
             return False
 
     @staticmethod
-    def _build_body_segment_definitions(frame_data):
+    def _build_body_segment_definitions(frame_data) -> list:
         """Build the list of body segment rendering definitions.
 
         Returns a list of (name, start_point, end_point, radius, color, is_skin) tuples.

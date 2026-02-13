@@ -63,7 +63,7 @@ class VideoExporter(QObject):
     finished = pyqtSignal(str)  # output_path
     error = pyqtSignal(str)  # error_message
 
-    def __init__(self, renderer, frame_processor):
+    def __init__(self, renderer, frame_processor) -> None:
         super().__init__()
         self.renderer = renderer
         self.frame_processor = frame_processor
@@ -262,7 +262,7 @@ class VideoExporter(QObject):
 
         return pixels
 
-    def _create_offscreen_framebuffer(self, width: int, height: int):
+    def _create_offscreen_framebuffer(self, width: int, height: int) -> None:
         """Create offscreen framebuffer for rendering"""
         ctx = self.renderer.ctx
 
@@ -352,7 +352,7 @@ class VideoExportThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
 
-    def __init__(self, renderer, frame_processor, config: VideoExportConfig):
+    def __init__(self, renderer, frame_processor, config: VideoExportConfig) -> None:
         super().__init__()
         self.renderer = renderer
         self.frame_processor = frame_processor
@@ -384,7 +384,7 @@ class VideoExportDialog(QDialog):
     Simply create and show this dialog when user wants to export
     """
 
-    def __init__(self, parent, renderer, frame_processor):
+    def __init__(self, parent, renderer, frame_processor) -> None:
         super().__init__(parent)
         self.renderer = renderer
         self.frame_processor = frame_processor
@@ -394,7 +394,7 @@ class VideoExportDialog(QDialog):
         self.setMinimumWidth(500)
         self._setup_ui()
 
-    def _setup_ui(self):
+    def _setup_ui(self) -> None:
         """Setup dialog UI"""
         layout = QVBoxLayout()
 
@@ -473,7 +473,7 @@ class VideoExportDialog(QDialog):
 
         self.setLayout(layout)
 
-    def _browse_output_file(self):
+    def _browse_output_file(self) -> None:
         """Browse for output file"""
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save Video As", "golf_swing.mp4", "Video Files (*.mp4 *.avi *.mov)"
@@ -482,7 +482,7 @@ class VideoExportDialog(QDialog):
         if filename:
             self.file_input.setText(filename)
 
-    def _start_export(self):
+    def _start_export(self) -> None:
         """Start video export"""
         # Parse resolution
         res_text = self.res_combo.currentText()
@@ -547,7 +547,7 @@ class VideoExportDialog(QDialog):
         self.export_thread.start()
         progress_dialog.exec()
 
-    def _on_export_finished(self, progress_dialog, output_path):
+    def _on_export_finished(self, progress_dialog, output_path) -> None:
         """Handle export completion"""
         progress_dialog.close()
 
@@ -558,7 +558,7 @@ class VideoExportDialog(QDialog):
             f"You can now play the video in any media player.",
         )
 
-    def _on_export_error(self, progress_dialog, error_msg):
+    def _on_export_error(self, progress_dialog, error_msg) -> None:
         """Handle export error"""
         progress_dialog.close()
 

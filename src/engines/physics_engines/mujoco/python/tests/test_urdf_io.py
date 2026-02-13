@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import defusedxml.ElementTree as ET
@@ -115,7 +116,8 @@ def test_export_to_urdf(mock_mujoco_model) -> None:
         exporter = URDFExporter(mock_mujoco_model)
 
         # Mock mj_id2name to return names
-        def id2name(m, obj_type, obj_id):
+        def id2name(m: Any, obj_type: int, obj_id: int) -> str:
+            """Map MuJoCo object type and id to a name string."""
             if obj_type == mujoco.mjtObj.mjOBJ_BODY:
                 return ["world", "link1", "link2"][obj_id]
             if obj_type == mujoco.mjtObj.mjOBJ_JOINT:

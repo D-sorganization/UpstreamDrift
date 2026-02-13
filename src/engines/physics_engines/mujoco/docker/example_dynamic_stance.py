@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 
@@ -153,7 +155,7 @@ def customize_model(physics) -> None:
             physics.model.geom_rgba[i] = BLACK_SHOES
 
 
-def _load_and_patch_xml(xml_path):
+def _load_and_patch_xml(xml_path) -> mjcf.Physics:
     """Load the CMU Humanoid XML, patch it, and return compiled physics.
 
     Returns the compiled physics object, or None if patching fails.
@@ -198,7 +200,7 @@ def _load_and_patch_xml(xml_path):
     return physics
 
 
-def _attach_golf_club(root):
+def _attach_golf_club(root) -> None:
     """Attach a golf club geometry to the right hand body."""
     rhand = root.find("body", "rhand")
     if rhand:
@@ -225,7 +227,7 @@ def _attach_golf_club(root):
         )
 
 
-def _add_face_on_camera(root):
+def _add_face_on_camera(root) -> None:
     """Add a face-on camera to the worldbody."""
     worldbody = root.find("worldbody", "world")
     if worldbody:
@@ -239,7 +241,7 @@ def _add_face_on_camera(root):
         )
 
 
-def _setup_physics(xml_path):
+def _setup_physics(xml_path) -> mjcf.Physics:
     """Set up physics, falling back to suite.load if patching fails."""
     try:
         physics = _load_and_patch_xml(xml_path)
@@ -251,7 +253,7 @@ def _setup_physics(xml_path):
     return physics
 
 
-def _find_face_on_camera(physics):
+def _find_face_on_camera(physics) -> int:
     """Find the face_on camera id, defaulting to 0."""
     logger.info("\nAvailable Cameras:")
     ncam = physics.model.ncam
@@ -264,7 +266,7 @@ def _find_face_on_camera(physics):
     return camera_id
 
 
-def _set_initial_pose(physics):
+def _set_initial_pose(physics) -> None:
     """Reset physics and set the initial address pose."""
     with physics.reset_context():
         # Z-height 0.96 adjusted empirically for CMU model to ensure feet
@@ -281,7 +283,7 @@ def _set_initial_pose(physics):
                 pass
 
 
-def _run_simulation_loop(physics, actuators, camera_id):
+def _run_simulation_loop(physics, actuators, camera_id) -> None:
     """Run the simulation loop, recording frames and saving video."""
     logger.info("Simulating...")
     frames = []

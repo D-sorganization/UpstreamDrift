@@ -241,7 +241,7 @@ class TimeStep:
         """Return True if this is the final step of an episode."""
         return bool(self.step_type == 2)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> typing.Any:
         return getattr(self, key)
 
 
@@ -315,7 +315,7 @@ def load_state(physics, filename) -> None:
             logger.error("Error loading state: %s", e)
 
 
-def _load_simulation_config():
+def _load_simulation_config() -> dict:
     """Load and return the simulation configuration from disk."""
     config = {}
     if os.path.exists("simulation_config.json"):
@@ -327,7 +327,7 @@ def _load_simulation_config():
     return config
 
 
-def _extract_simulation_params(config, duration):
+def _extract_simulation_params(config, duration) -> dict:
     """Extract simulation parameters from config dict.
 
     Returns a dict with all extracted parameters.
@@ -365,7 +365,7 @@ def _extract_simulation_params(config, duration):
     }
 
 
-def _log_viewer_controls():
+def _log_viewer_controls() -> None:
     """Log the available viewer keyboard controls."""
     logger.info("%s", "\n" + "=" * 50)
     logger.info("VIEWER CONTROLS:")
@@ -378,7 +378,9 @@ def _log_viewer_controls():
     logger.info("=" * 50 + "\n")
 
 
-def _setup_controller(control_mode, physics, actuators, target_height):
+def _setup_controller(
+    control_mode, physics, actuators, target_height
+) -> BaseController:
     """Create and return the appropriate controller based on mode."""
     controller: BaseController
     if control_mode == "lqr":
@@ -396,7 +398,7 @@ def _setup_controller(control_mode, physics, actuators, target_height):
     return controller
 
 
-def _run_viewer_loop(physics, controller, initialize_episode, save_path):
+def _run_viewer_loop(physics, controller, initialize_episode, save_path) -> None:
     """Run the simulation in live viewer mode."""
     logger.info("Launching Live Viewer...")
     try:
@@ -422,7 +424,7 @@ def _run_viewer_loop(physics, controller, initialize_episode, save_path):
         save_state(physics, save_path)
 
 
-def _build_csv_header(actuator_names):
+def _build_csv_header(actuator_names) -> list[str]:
     """Build the CSV header row for simulation data output."""
     return (
         ["time"]
@@ -435,7 +437,7 @@ def _build_csv_header(actuator_names):
     )
 
 
-def _collect_step_data(physics, actuators, actuator_names, iaa):
+def _collect_step_data(physics, actuators, actuator_names, iaa) -> list:
     """Collect one row of CSV data for the current simulation step."""
     row = [physics.data.time]
     for j in TARGET_POSE:
@@ -477,7 +479,7 @@ def _collect_step_data(physics, actuators, actuator_names, iaa):
 
 def _run_headless_loop(
     physics, controller, actuators, duration, output_video, output_data, save_path
-):
+) -> None:
     """Run the simulation in headless mode, recording video and CSV data."""
     logger.info("Simulating (Headless) for %ss...", duration)
     fps = 30

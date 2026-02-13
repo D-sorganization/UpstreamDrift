@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 import numpy as np
@@ -6,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def _load_excel_frame_data(filename, sheet_name):
+def _load_excel_frame_data(filename, sheet_name) -> list:
     """Load and parse frame data from an Excel sheet.
 
     Returns a list of frame data dicts, or an empty list on failure.
@@ -58,7 +60,7 @@ def _load_excel_frame_data(filename, sheet_name):
     return data
 
 
-def _compute_motion_ranges(data):
+def _compute_motion_ranges(data) -> tuple:
     """Compute and log per-axis motion ranges for mid-hands and club head.
 
     Returns (mid_motion_ranges, club_motion_ranges) as lists of [X, Y, Z] range sizes.
@@ -117,7 +119,7 @@ def _compute_motion_ranges(data):
     return mid_motion_ranges, club_motion_ranges
 
 
-def _interpret_swing_motion(mid_motion_ranges, club_motion_ranges):
+def _interpret_swing_motion(mid_motion_ranges, club_motion_ranges) -> None:
     """Log interpretation of the swing motion directions and patterns."""
     logger.info("\nMotion analysis:")
     # Determine the axis with largest motion range using explicit if-elif-else
@@ -167,7 +169,7 @@ def _interpret_swing_motion(mid_motion_ranges, club_motion_ranges):
         logger.info("  This seems unusual for a golf swing")
 
 
-def _analyze_key_frame(name, frame):
+def _analyze_key_frame(name, frame) -> None:
     """Analyze and log position, club vector, and rotation matrix for a single frame."""
     logger.info("%s frame (t=%ss):", name, frame["time"])
     logger.info(

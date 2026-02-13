@@ -129,8 +129,8 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             # Visualize (if display available)
             try:
                 env.mj_render()
-            except Exception:
-                pass  # Headless mode
+            except Exception:  # noqa: BLE001 - render may fail in headless mode
+                pass
 
         print(f"Episode {episode + 1}: Steps={step}, Reward={total_reward:.2f}")
 
