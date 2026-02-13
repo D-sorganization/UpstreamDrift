@@ -45,13 +45,13 @@ class SkeletonConfig:
         if len(self.parent_indices) != n_joints:
             raise ValueError(
                 f"parent_indices length ({len(self.parent_indices)}) "
-                f"must match joint_names ({n_joints})"
+                f"must match joint_names ({n_joints})",
             )
 
         if self.joint_offsets.shape[0] != n_joints:
             raise ValueError(
                 f"joint_offsets rows ({self.joint_offsets.shape[0]}) "
-                f"must match joint_names ({n_joints})"
+                f"must match joint_names ({n_joints})",
             )
 
         if self.joint_axes is None:
@@ -120,108 +120,9 @@ class SkeletonConfig:
         Returns:
             Humanoid skeleton config.
         """
-        joint_names = [
-            "pelvis",
-            "spine_1",
-            "spine_2",
-            "spine_3",
-            "neck",
-            "head",
-            "left_hip",
-            "left_knee",
-            "left_ankle",
-            "left_foot",
-            "right_hip",
-            "right_knee",
-            "right_ankle",
-            "right_foot",
-            "left_shoulder",
-            "left_elbow",
-            "left_wrist",
-            "left_hand",
-            "right_shoulder",
-            "right_elbow",
-            "right_wrist",
-            "right_hand",
-        ]
-
-        parent_indices = [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            4,  # Spine chain
-            0,
-            6,
-            7,
-            8,  # Left leg
-            0,
-            10,
-            11,
-            12,  # Right leg
-            3,
-            14,
-            15,
-            16,  # Left arm
-            3,
-            18,
-            19,
-            20,  # Right arm
-        ]
-
-        # Approximate T-pose offsets (in meters)
-        joint_offsets = np.array(
-            [
-                [0, 0, 0],  # pelvis (root)
-                [0, 0, 0.1],  # spine_1
-                [0, 0, 0.1],  # spine_2
-                [0, 0, 0.1],  # spine_3
-                [0, 0, 0.1],  # neck
-                [0, 0, 0.1],  # head
-                [0.1, 0, 0],  # left_hip
-                [0, 0, -0.4],  # left_knee
-                [0, 0, -0.4],  # left_ankle
-                [0, 0.1, 0],  # left_foot
-                [-0.1, 0, 0],  # right_hip
-                [0, 0, -0.4],  # right_knee
-                [0, 0, -0.4],  # right_ankle
-                [0, 0.1, 0],  # right_foot
-                [0.15, 0, 0],  # left_shoulder
-                [0.3, 0, 0],  # left_elbow
-                [0.25, 0, 0],  # left_wrist
-                [0.1, 0, 0],  # left_hand
-                [-0.15, 0, 0],  # right_shoulder
-                [-0.3, 0, 0],  # right_elbow
-                [-0.25, 0, 0],  # right_wrist
-                [-0.1, 0, 0],  # right_hand
-            ]
-        )
-
-        semantic_labels = {
-            "pelvis": "pelvis",
-            "spine": "spine_2",
-            "chest": "spine_3",
-            "neck": "neck",
-            "head": "head",
-            "left_hip": "left_hip",
-            "left_knee": "left_knee",
-            "left_ankle": "left_ankle",
-            "left_foot": "left_foot",
-            "right_hip": "right_hip",
-            "right_knee": "right_knee",
-            "right_ankle": "right_ankle",
-            "right_foot": "right_foot",
-            "left_shoulder": "left_shoulder",
-            "left_elbow": "left_elbow",
-            "left_wrist": "left_wrist",
-            "left_hand": "left_hand",
-            "right_shoulder": "right_shoulder",
-            "right_elbow": "right_elbow",
-            "right_wrist": "right_wrist",
-            "right_hand": "right_hand",
-        }
-
+        joint_names, parent_indices = _humanoid_joint_names_and_parents()
+        joint_offsets = _humanoid_joint_offsets()
+        semantic_labels = _humanoid_semantic_labels()
         end_effectors = ["head", "left_hand", "right_hand", "left_foot", "right_foot"]
 
         return cls(
@@ -232,6 +133,114 @@ class SkeletonConfig:
             semantic_labels=semantic_labels,
             end_effectors=end_effectors,
         )
+
+
+def _humanoid_joint_names_and_parents() -> tuple[list[str], list[int]]:
+    joint_names = [
+        "pelvis",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "neck",
+        "head",
+        "left_hip",
+        "left_knee",
+        "left_ankle",
+        "left_foot",
+        "right_hip",
+        "right_knee",
+        "right_ankle",
+        "right_foot",
+        "left_shoulder",
+        "left_elbow",
+        "left_wrist",
+        "left_hand",
+        "right_shoulder",
+        "right_elbow",
+        "right_wrist",
+        "right_hand",
+    ]
+
+    parent_indices = [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,  # Spine chain
+        0,
+        6,
+        7,
+        8,  # Left leg
+        0,
+        10,
+        11,
+        12,  # Right leg
+        3,
+        14,
+        15,
+        16,  # Left arm
+        3,
+        18,
+        19,
+        20,  # Right arm
+    ]
+    return joint_names, parent_indices
+
+
+def _humanoid_joint_offsets() -> NDArray[np.floating]:
+    return np.array(
+        [
+            [0, 0, 0],  # pelvis (root)
+            [0, 0, 0.1],  # spine_1
+            [0, 0, 0.1],  # spine_2
+            [0, 0, 0.1],  # spine_3
+            [0, 0, 0.1],  # neck
+            [0, 0, 0.1],  # head
+            [0.1, 0, 0],  # left_hip
+            [0, 0, -0.4],  # left_knee
+            [0, 0, -0.4],  # left_ankle
+            [0, 0.1, 0],  # left_foot
+            [-0.1, 0, 0],  # right_hip
+            [0, 0, -0.4],  # right_knee
+            [0, 0, -0.4],  # right_ankle
+            [0, 0.1, 0],  # right_foot
+            [0.15, 0, 0],  # left_shoulder
+            [0.3, 0, 0],  # left_elbow
+            [0.25, 0, 0],  # left_wrist
+            [0.1, 0, 0],  # left_hand
+            [-0.15, 0, 0],  # right_shoulder
+            [-0.3, 0, 0],  # right_elbow
+            [-0.25, 0, 0],  # right_wrist
+            [-0.1, 0, 0],  # right_hand
+        ],
+    )
+
+
+def _humanoid_semantic_labels() -> dict[str, str]:
+    return {
+        "pelvis": "pelvis",
+        "spine": "spine_2",
+        "chest": "spine_3",
+        "neck": "neck",
+        "head": "head",
+        "left_hip": "left_hip",
+        "left_knee": "left_knee",
+        "left_ankle": "left_ankle",
+        "left_foot": "left_foot",
+        "right_hip": "right_hip",
+        "right_knee": "right_knee",
+        "right_ankle": "right_ankle",
+        "right_foot": "right_foot",
+        "left_shoulder": "left_shoulder",
+        "left_elbow": "left_elbow",
+        "left_wrist": "left_wrist",
+        "left_hand": "left_hand",
+        "right_shoulder": "right_shoulder",
+        "right_elbow": "right_elbow",
+        "right_wrist": "right_wrist",
+        "right_hand": "right_hand",
+    }
 
 
 class MotionRetargeter:
@@ -318,12 +327,11 @@ class MotionRetargeter:
         """
         if method == "direct":
             return self._retarget_direct(source_motion)
-        elif method == "optimization":
+        if method == "optimization":
             return self._retarget_optimization(source_motion)
-        elif method == "ik":
+        if method == "ik":
             return self._retarget_ik(source_motion)
-        else:
-            raise ValueError(f"Unknown retargeting method: {method}")
+        raise ValueError(f"Unknown retargeting method: {method}")
 
     def _retarget_direct(
         self,
@@ -381,7 +389,8 @@ class MotionRetargeter:
 
             # Compute source end-effector positions
             source_ee_positions = self._compute_end_effector_positions(
-                source_frame, self.source
+                source_frame,
+                self.source,
             )
 
             # Optimize target angles to match end-effector positions
@@ -426,7 +435,7 @@ class MotionRetargeter:
                         [c, -s, 0],
                         [s, c, 0],
                         [0, 0, 1],
-                    ]
+                    ],
                 )
 
                 position = rotation @ position + offset

@@ -110,25 +110,14 @@ class RRTStarPlanner(MotionPlanner):
         q_goal = np.asarray(q_goal)
         self._dimension = len(q_start)
 
-        # Reset state
         self._nodes = []
         self._num_collision_checks = 0
         start_time = time.perf_counter()
 
-        # Validate start and goal
-        if not self._is_valid(q_start):
-            return PlannerResult(
-                status=PlannerStatus.INVALID_START,
-                planning_time=time.perf_counter() - start_time,
-            )
+        validation_result = self._validate_start_goal(q_start, q_goal, start_time)
+        if validation_result is not None:
+            return validation_result
 
-        if not self._is_valid(q_goal):
-            return PlannerResult(
-                status=PlannerStatus.INVALID_GOAL,
-                planning_time=time.perf_counter() - start_time,
-            )
-
-        # Initialize tree with start
         self._nodes.append(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
 
         goal_idx = -1
@@ -136,76 +125,114 @@ class RRTStarPlanner(MotionPlanner):
         iterations = 0
 
         while iterations < self._config.max_iterations:
-            # Check time limit
             if time.perf_counter() - start_time > self._config.max_time:
                 break
-
             iterations += 1
 
-            # Sample random configuration with goal bias
-            q_rand = self._sample_with_goal_bias(q_goal)
-
-            # Find nearest node in tree
-            nearest_idx = self._find_nearest(q_rand)
-            q_nearest = self._nodes[nearest_idx].config
-
-            # Steer toward random sample
-            q_new = self._steer(q_nearest, q_rand)
-
-            # Check if new configuration is valid
-            self._num_collision_checks += 1
-            if not self._is_valid(q_new):
+            new_idx, new_cost = self._expand_tree_star(q_goal)
+            if new_idx < 0:
                 continue
 
-            # Find near neighbors for RRT* rewiring
-            near_indices = self._find_near(q_new)
-
-            # Choose best parent from near neighbors
-            best_parent_idx = self._choose_parent(q_new, near_indices)
-            if best_parent_idx < 0:
-                continue
-
-            # Add new node to tree
-            parent_node = self._nodes[best_parent_idx]
-            new_cost = parent_node.cost + self._distance(parent_node.config, q_new)
-            new_node = TreeNode(
-                config=q_new.copy(),
-                parent_idx=best_parent_idx,
-                cost=new_cost,
+            goal_idx, best_goal_cost = self._try_connect_goal(
+                new_idx,
+                new_cost,
+                q_goal,
+                goal_idx,
+                best_goal_cost,
             )
-            new_idx = len(self._nodes)
-            self._nodes.append(new_node)
 
-            # Rewire tree
-            self._rewire(new_idx, near_indices)
+        return self._build_result(goal_idx, iterations, start_time)
 
-            # Check if goal reached
-            dist_to_goal = self._distance(q_new, q_goal)
-            if dist_to_goal <= self._config.goal_tolerance:
-                # Try to connect to goal
-                self._num_collision_checks += self._config.collision_check_resolution
-                if self._is_path_valid(q_new, q_goal):
-                    goal_cost = new_cost + dist_to_goal
-                    if goal_cost < best_goal_cost:
-                        # Update or add goal node
-                        if goal_idx >= 0:
-                            # Skip if new_idx is a descendant of goal (would create cycle)
-                            if not self._is_ancestor(goal_idx, new_idx):
-                                self._nodes[goal_idx].parent_idx = new_idx
-                                self._nodes[goal_idx].cost = goal_cost
-                        else:
-                            goal_node = TreeNode(
-                                config=q_goal.copy(),
-                                parent_idx=new_idx,
-                                cost=goal_cost,
-                            )
-                            goal_idx = len(self._nodes)
-                            self._nodes.append(goal_node)
-                        best_goal_cost = goal_cost
+    def _validate_start_goal(
+        self,
+        q_start: np.ndarray,
+        q_goal: np.ndarray,
+        start_time: float,
+    ) -> PlannerResult | None:
+        if not self._is_valid(q_start):
+            return PlannerResult(
+                status=PlannerStatus.INVALID_START,
+                planning_time=time.perf_counter() - start_time,
+            )
+        if not self._is_valid(q_goal):
+            return PlannerResult(
+                status=PlannerStatus.INVALID_GOAL,
+                planning_time=time.perf_counter() - start_time,
+            )
+        return None
 
+    def _expand_tree_star(self, q_goal: np.ndarray) -> tuple[int, float]:
+        q_rand = self._sample_with_goal_bias(q_goal)
+        nearest_idx = self._find_nearest(q_rand)
+        q_nearest = self._nodes[nearest_idx].config
+        q_new = self._steer(q_nearest, q_rand)
+
+        self._num_collision_checks += 1
+        if not self._is_valid(q_new):
+            return -1, 0.0
+
+        near_indices = self._find_near(q_new)
+        best_parent_idx = self._choose_parent(q_new, near_indices)
+        if best_parent_idx < 0:
+            return -1, 0.0
+
+        parent_node = self._nodes[best_parent_idx]
+        new_cost = parent_node.cost + self._distance(parent_node.config, q_new)
+        new_node = TreeNode(
+            config=q_new.copy(),
+            parent_idx=best_parent_idx,
+            cost=new_cost,
+        )
+        new_idx = len(self._nodes)
+        self._nodes.append(new_node)
+
+        self._rewire(new_idx, near_indices)
+        return new_idx, new_cost
+
+    def _try_connect_goal(
+        self,
+        new_idx: int,
+        new_cost: float,
+        q_goal: np.ndarray,
+        goal_idx: int,
+        best_goal_cost: float,
+    ) -> tuple[int, float]:
+        q_new = self._nodes[new_idx].config
+        dist_to_goal = self._distance(q_new, q_goal)
+        if dist_to_goal > self._config.goal_tolerance:
+            return goal_idx, best_goal_cost
+
+        self._num_collision_checks += self._config.collision_check_resolution
+        if not self._is_path_valid(q_new, q_goal):
+            return goal_idx, best_goal_cost
+
+        goal_cost = new_cost + dist_to_goal
+        if goal_cost >= best_goal_cost:
+            return goal_idx, best_goal_cost
+
+        if goal_idx >= 0:
+            if not self._is_ancestor(goal_idx, new_idx):
+                self._nodes[goal_idx].parent_idx = new_idx
+                self._nodes[goal_idx].cost = goal_cost
+        else:
+            goal_node = TreeNode(
+                config=q_goal.copy(),
+                parent_idx=new_idx,
+                cost=goal_cost,
+            )
+            goal_idx = len(self._nodes)
+            self._nodes.append(goal_node)
+        best_goal_cost = goal_cost
+        return goal_idx, best_goal_cost
+
+    def _build_result(
+        self,
+        goal_idx: int,
+        iterations: int,
+        start_time: float,
+    ) -> PlannerResult:
         planning_time = time.perf_counter() - start_time
 
-        # Extract path if goal reached
         if goal_idx >= 0:
             path = self._extract_path(goal_idx)
             return PlannerResult(
@@ -398,7 +425,8 @@ class RRTStarPlanner(MotionPlanner):
                 if node.parent_idx == current_idx:
                     # Update child cost
                     node.cost = current_node.cost + self._distance(
-                        current_node.config, node.config
+                        current_node.config,
+                        node.config,
                     )
                     queue.append(i)
 

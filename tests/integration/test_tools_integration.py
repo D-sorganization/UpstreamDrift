@@ -98,9 +98,9 @@ class TestCrossRepoImportPaths:
 
         content = pyproject_path.read_text()
         # Check for Tools repo reference
-        assert (
-            "Tools" in content or "tools" in content.lower()
-        ), "Tools integration not documented in pyproject.toml"
+        assert "Tools" in content or "tools" in content.lower(), (
+            "Tools integration not documented in pyproject.toml"
+        )
 
 
 class TestEngineModelCompatibility:

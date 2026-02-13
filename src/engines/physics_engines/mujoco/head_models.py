@@ -6,7 +6,7 @@ with anthropometric body segments and two-handed grip.
 
 from __future__ import annotations
 
-from typing import cast
+from typing import Any, cast
 
 from src.shared.python.core.constants import (
     DEFAULT_TIME_STEP,
@@ -1433,43 +1433,67 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
     if club_type not in CLUB_CONFIGS:
         valid_types = ", ".join(CLUB_CONFIGS.keys())
         msg = f"Invalid club_type '{club_type}'. Must be one of: {valid_types}"
-        raise ValueError(
-            msg,
-        )
+        raise ValueError(msg)
 
     if not (1 <= num_segments <= 5):
         msg = f"num_segments must be between 1 and 5, got {num_segments}"
         raise ValueError(msg)
 
-    config = CLUB_CONFIGS[club_type]
+    config = _extract_club_config(club_type)
 
-    # Extract typed values for type checking
-    grip_length = cast("float", config["grip_length"])
-    grip_radius = cast("float", config["grip_radius"])
-    grip_mass = cast("float", config["grip_mass"])
-    shaft_length = cast("float", config["shaft_length"])
-    shaft_radius = cast("float", config["shaft_radius"])
-    shaft_mass = cast("float", config["shaft_mass"])
-    head_mass = cast("float", config["head_mass"])
-    club_loft = cast("float", config["club_loft"])
-    flex_stiffness = config["flex_stiffness"]
+    seg_length = config["shaft_length"] / num_segments
+    seg_mass = config["shaft_mass"] / num_segments
+
+    xml_parts = _generate_grip_xml(club_type, num_segments, config)
+    xml_parts.extend(
+        _generate_shaft_segments_xml(num_segments, config, seg_length, seg_mass)
+    )
+    xml_parts.extend(_generate_clubhead_xml(num_segments, config, seg_length))
+
+    for i in range(num_segments):
+        indent = "  " * (num_segments - i)
+        xml_parts.append(f"{indent}</body>")
+    xml_parts.append("</body>")
+
+    return "\n".join(xml_parts)
+
+
+def _extract_club_config(club_type: str) -> dict[str, Any]:
+    raw = CLUB_CONFIGS[club_type]
+    flex_stiffness = raw["flex_stiffness"]
     if not isinstance(flex_stiffness, list):
         msg = "flex_stiffness must be a list"
         raise TypeError(msg)
-    head_size = config["head_size"]
+    head_size = raw["head_size"]
     if not isinstance(head_size, list):
         msg = "head_size must be a list"
         raise TypeError(msg)
+    return {
+        "grip_length": cast("float", raw["grip_length"]),
+        "grip_radius": cast("float", raw["grip_radius"]),
+        "grip_mass": cast("float", raw["grip_mass"]),
+        "shaft_length": cast("float", raw["shaft_length"]),
+        "shaft_radius": cast("float", raw["shaft_radius"]),
+        "shaft_mass": cast("float", raw["shaft_mass"]),
+        "head_mass": cast("float", raw["head_mass"]),
+        "club_loft": cast("float", raw["club_loft"]),
+        "flex_stiffness": flex_stiffness,
+        "head_size": head_size,
+    }
 
-    # Calculate segment properties
-    seg_length = shaft_length / num_segments
-    seg_mass = shaft_mass / num_segments
 
-    # Grip inertia properties
+def _generate_grip_xml(
+    club_type: str, num_segments: int, config: dict[str, Any]
+) -> list[str]:
+    grip_length = config["grip_length"]
+    grip_radius = config["grip_radius"]
+    grip_mass = config["grip_mass"]
+    club_loft = config["club_loft"]
+
     g_ixx = grip_mass * grip_length**2 / 12
     g_izz = grip_mass * grip_radius**2 / 2
 
-    xml_parts = [
+    return [
         f"<!-- {club_type.upper()} - {num_segments} segment flexible shaft -->",
         f'<body name="club_grip" pos="0 0 -0.10" euler="0 -{club_loft:.3f} 0">',
         f'  <inertial pos="0 0 -{grip_length / 2:.4f}" mass="{grip_mass:.4f}"',
@@ -1479,12 +1503,23 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
         f'        size="{grip_radius:.4f}" material="club_grip_mat"/>',
     ]
 
-    # Generate shaft segments
+
+def _generate_shaft_segments_xml(
+    num_segments: int,
+    config: dict[str, Any],
+    seg_length: float,
+    seg_mass: float,
+) -> list[str]:
+    grip_length = config["grip_length"]
+    shaft_radius = config["shaft_radius"]
+    flex_stiffness = config["flex_stiffness"]
+
+    xml_parts: list[str] = []
     for i in range(num_segments):
         seg_name = f"shaft_seg{i + 1}"
         is_first = i == 0
 
-        stiffness_idx = min(i, 2)  # Use up to 3 stiffness values
+        stiffness_idx = min(i, 2)
         stiffness = float(flex_stiffness[stiffness_idx])
 
         if is_first:
@@ -1499,7 +1534,6 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
             )
 
         indent = "  " if is_first else "    "
-        # Ensure minimum damping to prevent instability (never less than 0.05)
         damping = max(0.4 - i * 0.1, 0.05)
         xml_parts.extend(
             [
@@ -1517,10 +1551,19 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
                 f'material="club_shaft_mat"/>',
             ],
         )
+    return xml_parts
 
-    # Add clubhead
+
+def _generate_clubhead_xml(
+    num_segments: int,
+    config: dict[str, Any],
+    seg_length: float,
+) -> list[str]:
+    head_mass = config["head_mass"]
+    club_loft = config["club_loft"]
+    head_size = config["head_size"]
+
     indent = "  " + "  " * num_segments
-    # Calculate properties for cleaner XML generation
     h_w = float(head_size[0])
     h_h = float(head_size[1])
     h_d = float(head_size[2])
@@ -1529,39 +1572,28 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
     iyy = head_mass * h_h**2 / 12
     izz = head_mass * h_d**2 / 12
 
-    xml_parts.extend(
-        [
-            f"\n{indent}<!-- Club Head -->",
-            f'{indent}<body name="hosel" pos="0 0 -{seg_length:.4f}"',
-            f'{indent}      euler="0 {club_loft:.3f} 0">',
-            f'{indent}  <inertial pos="0 0.02 -0.01" mass="0.010"',
-            f'{indent}            diaginertia="0.000005 0.000005 0.000002"/>',
-            f'{indent}  <geom name="hosel_geom" type="cylinder" '
-            f'fromto="0 0 0 0 0.030 -0.005"',
-            f'{indent}        size="0.008" material="club_head_mat"/>',
-            f'{indent}  <body name="clubhead" pos="0 0.040 -0.008">',
-            f'{indent}    <inertial pos="0 {h_h / 2:.4f} 0.002" mass="{head_mass:.4f}"',
-            f'{indent}              diaginertia="{ixx:.6f} {iyy:.6f} {izz:.6f}"/>',
-            f'{indent}    <geom name="head_body" type="box"',
-            f'{indent}          size="{h_w:.4f} {h_h:.4f} {h_d:.4f}"',
-            f'{indent}          pos="0 {h_h:.4f} 0" material="club_head_mat"/>',
-            f'{indent}    <geom name="face" type="box"',
-            f'{indent}          size="{h_w + 0.001:.4f} 0.003 {h_d + 0.001:.4f}"',
-            f'{indent}          pos="0 {h_h * 2 + 0.003:.4f} 0" '
-            f'rgba="0.85 0.15 0.15 0.9"/>',
-            f"{indent}  </body>",
-            f"{indent}</body>",
-        ],
-    )
-
-    # Close all body tags
-    for i in range(num_segments):
-        indent = "  " * (num_segments - i)
-        xml_parts.append(f"{indent}</body>")
-
-    xml_parts.append("</body>")
-
-    return "\n".join(xml_parts)
+    return [
+        f"\n{indent}<!-- Club Head -->",
+        f'{indent}<body name="hosel" pos="0 0 -{seg_length:.4f}"',
+        f'{indent}      euler="0 {club_loft:.3f} 0">',
+        f'{indent}  <inertial pos="0 0.02 -0.01" mass="0.010"',
+        f'{indent}            diaginertia="0.000005 0.000005 0.000002"/>',
+        f'{indent}  <geom name="hosel_geom" type="cylinder" '
+        f'fromto="0 0 0 0 0.030 -0.005"',
+        f'{indent}        size="0.008" material="club_head_mat"/>',
+        f'{indent}  <body name="clubhead" pos="0 0.040 -0.008">',
+        f'{indent}    <inertial pos="0 {h_h / 2:.4f} 0.002" mass="{head_mass:.4f}"',
+        f'{indent}              diaginertia="{ixx:.6f} {iyy:.6f} {izz:.6f}"/>',
+        f'{indent}    <geom name="head_body" type="box"',
+        f'{indent}          size="{h_w:.4f} {h_h:.4f} {h_d:.4f}"',
+        f'{indent}          pos="0 {h_h:.4f} 0" material="club_head_mat"/>',
+        f'{indent}    <geom name="face" type="box"',
+        f'{indent}          size="{h_w + 0.001:.4f} 0.003 {h_d + 0.001:.4f}"',
+        f'{indent}          pos="0 {h_h * 2 + 0.003:.4f} 0" '
+        f'rgba="0.85 0.15 0.15 0.9"/>',
+        f"{indent}  </body>",
+        f"{indent}</body>",
+    ]
 
 
 def generate_rigid_club_xml(club_type: str = "driver") -> str:

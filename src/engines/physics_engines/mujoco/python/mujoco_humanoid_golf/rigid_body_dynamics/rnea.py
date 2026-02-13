@@ -6,6 +6,8 @@ Computes the joint forces/torques required to produce a given motion.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 from mujoco_humanoid_golf.rigid_body_dynamics.common import (
     DEFAULT_GRAVITY,
@@ -19,7 +21,157 @@ from mujoco_humanoid_golf.spatial_algebra import (
 )
 
 
-def rnea(  # noqa: PLR0915
+@dataclass
+class _RneaModelCache:
+    parent: np.ndarray
+    jtype: list
+    xtree: list
+    inertia: list
+
+    @staticmethod
+    def from_model(model: dict) -> _RneaModelCache:
+        return _RneaModelCache(
+            parent=model["parent"],
+            jtype=model["jtype"],
+            xtree=model["Xtree"],
+            inertia=model["I"],
+        )
+
+
+@dataclass
+class _RneaScratchBuffers:
+    xj_buf: np.ndarray
+    scratch_vec: np.ndarray
+    i_v_buf: np.ndarray
+    cross_buf: np.ndarray
+
+    @staticmethod
+    def create() -> _RneaScratchBuffers:
+        return _RneaScratchBuffers(
+            xj_buf=np.empty((6, 6)),
+            scratch_vec=np.empty(6),
+            i_v_buf=np.empty(6),
+            cross_buf=np.empty(6),
+        )
+
+
+def _rnea_validate_inputs(
+    model: dict,
+    q: np.ndarray,
+    qd: np.ndarray,
+    qdd: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+    q = np.asarray(q).ravel()
+    qd = np.asarray(qd).ravel()
+    qdd = np.asarray(qdd).ravel()
+
+    nb = model["NB"]
+
+    if len(q) != nb:
+        msg = f"q must have length {nb}, got {len(q)}"
+        raise ValueError(msg)
+    if len(qd) != nb:
+        msg = f"qd must have length {nb}, got {len(qd)}"
+        raise ValueError(msg)
+    if len(qdd) != nb:
+        msg = f"qdd must have length {nb}, got {len(qdd)}"
+        raise ValueError(msg)
+
+    return q, qd, qdd, nb
+
+
+def _rnea_forward_pass_body(
+    i,
+    q,
+    qd,
+    qdd,
+    neg_a_grav,
+    mdl: _RneaModelCache,
+    xup,
+    v,
+    a,
+    s_subspace_list,
+    dof_indices,
+    buf: _RneaScratchBuffers,
+):
+    xj_transform, s_subspace, dof_idx = jcalc(mdl.jtype[i], q[i], out=buf.xj_buf)
+    s_subspace_list[i] = s_subspace
+    dof_indices[i] = dof_idx
+
+    if dof_idx != -1:
+        buf.i_v_buf.fill(0)
+        buf.i_v_buf[dof_idx] = qd[i]
+    else:
+        np.multiply(s_subspace, qd[i], out=buf.i_v_buf)
+    vj_velocity = buf.i_v_buf
+
+    if mdl.parent[i] == -1:
+        v[:, i] = vj_velocity
+        np.matmul(xj_transform, neg_a_grav, out=a[:, i])
+        if dof_idx != -1:
+            a[dof_idx, i] += qdd[i]
+        else:
+            np.multiply(s_subspace, qdd[i], out=buf.cross_buf)
+            a[:, i] += buf.cross_buf
+    else:
+        p = mdl.parent[i]
+        np.matmul(xj_transform, mdl.xtree[i], out=xup[i])
+        np.matmul(xup[i], v[:, p], out=v[:, i])
+        v[:, i] += vj_velocity
+        np.matmul(xup[i], a[:, p], out=a[:, i])
+        if dof_idx != -1:
+            a[dof_idx, i] += qdd[i]
+        else:
+            np.multiply(s_subspace, qdd[i], out=buf.cross_buf)
+            a[:, i] += buf.cross_buf
+        if dof_idx != -1:
+            cross_motion_axis(v[:, i], dof_idx, qd[i], out=buf.cross_buf)
+        else:
+            cross_motion_fast(v[:, i], vj_velocity, out=buf.cross_buf)
+        a[:, i] += buf.cross_buf
+
+
+def _rnea_backward_pass(
+    nb,
+    mdl: _RneaModelCache,
+    v,
+    a,
+    f,
+    tau,
+    xup,
+    s_subspace_list,
+    dof_indices,
+    f_ext,
+    buf: _RneaScratchBuffers,
+):
+    for i in range(nb - 1, -1, -1):
+        np.matmul(mdl.inertia[i], a[:, i], out=buf.scratch_vec)
+        f_body = buf.scratch_vec
+
+        np.matmul(mdl.inertia[i], v[:, i], out=buf.i_v_buf)
+
+        cross_force_fast(v[:, i], buf.i_v_buf, out=buf.cross_buf)
+        f_body += buf.cross_buf
+        if f_ext is not None:
+            f_body -= f_ext[:, i]
+
+        f[:, i] += f_body
+
+        s_subspace = s_subspace_list[i]
+        dof_idx = dof_indices[i]
+
+        if dof_idx != -1:
+            tau[i] = f[dof_idx, i]
+        else:
+            tau[i] = s_subspace @ f[:, i]
+
+        if mdl.parent[i] != -1:
+            p = mdl.parent[i]
+            np.matmul(xup[i].T, f[:, i], out=buf.scratch_vec)
+            f[:, p] += buf.scratch_vec
+
+
+def rnea(
     model: dict,
     q: np.ndarray,
     qd: np.ndarray,
@@ -64,174 +216,54 @@ def rnea(  # noqa: PLR0915
         >>> qdd = np.array([0.5, -0.2])
         >>> tau = rnea(model, q, qd, qdd)
     """
-    # Use ravel() to avoid copying data when possible
-    q = np.asarray(q).ravel()
-    qd = np.asarray(qd).ravel()
-    qdd = np.asarray(qdd).ravel()
+    q, qd, qdd, nb = _rnea_validate_inputs(model, q, qd, qdd)
 
-    nb = model["NB"]
-
-    if len(q) != nb:
-        msg = f"q must have length {nb}, got {len(q)}"
-        raise ValueError(msg)
-    if len(qd) != nb:
-        msg = f"qd must have length {nb}, got {len(qd)}"
-        raise ValueError(msg)
-    if len(qdd) != nb:
-        msg = f"qdd must have length {nb}, got {len(qdd)}"
-        raise ValueError(msg)
-
-    # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
-    # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
     if a_grav is DEFAULT_GRAVITY:
         neg_a_grav = NEG_DEFAULT_GRAVITY
     else:
         neg_a_grav = -a_grav
 
-    # Initialize arrays
-    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully
-    # overwritten
-    # OPTIMIZATION: Use 'F' order (Fortran-contiguous) so that columns (6, nb) are
-    # contiguous in memory. This allows efficient use of columns as 'out' parameters
-    # in matmul/multiply, avoiding internal temporary buffering and copying.
-    v = np.empty((6, nb), order="F")  # Spatial velocities
-    a = np.empty((6, nb), order="F")  # Spatial accelerations
-    f = np.zeros((6, nb), order="F")  # Spatial forces (must be zero for accumulation)
-    tau = np.empty(nb)  # Joint torques
-
-    # OPTIMIZATION: Pre-allocate buffers
-    # Stores transform from parent to i for each body
-    # Using a single 3D array is more cache-friendly than list of arrays
+    v = np.empty((6, nb), order="F")
+    a = np.empty((6, nb), order="F")
+    f = np.zeros((6, nb), order="F")
+    tau = np.empty(nb)
     xup = np.empty((nb, 6, 6))
 
-    # Pre-allocate temporary buffers to avoid allocation in loop
-    xj_buf = np.empty((6, 6))
-    scratch_vec = np.empty(6)
-    i_v_buf = np.empty(6)
-    cross_buf = np.empty(6)
+    s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item]
+    dof_indices: list[int] = [-1] * nb
 
-    s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache motion subspaces
-    dof_indices: list[int] = [-1] * nb  # Cache active DOF indices
+    mdl = _RneaModelCache.from_model(model)
+    buf = _RneaScratchBuffers.create()
 
-    # Pre-compute active indices for optimization
-
-    # OPTIMIZATION: Cache dictionary lookups to local variables
-    # This avoids repeated hashing and lookup in the tight loops (2.6x speedup)
-    model_parent = model["parent"]
-    model_jtype = model["jtype"]
-    model_xtree = model["Xtree"]
-    model_inertia = model["I"]
-
-    # --- Forward pass: kinematics ---
     for i in range(nb):
-        # Calculate joint transform and motion subspace
-        # OPTIMIZATION: Use pre-allocated buffer
-        # dof_idx from jcalc is the spatial axis index (0-5) or -1 if not standard
-        xj_transform, s_subspace, dof_idx = jcalc(model_jtype[i], q[i], out=xj_buf)
-        s_subspace_list[i] = s_subspace
-        dof_indices[i] = dof_idx
+        _rnea_forward_pass_body(
+            i,
+            q,
+            qd,
+            qdd,
+            neg_a_grav,
+            mdl,
+            xup,
+            v,
+            a,
+            s_subspace_list,
+            dof_indices,
+            buf,
+        )
 
-        # Joint velocity in joint frame
-        # OPTIMIZATION: Use active index to avoid full vector multiplication
-        # vj_velocity = s_subspace * qd[i]
-        if dof_idx != -1:
-            i_v_buf.fill(0)
-            i_v_buf[dof_idx] = qd[i]
-        else:
-            np.multiply(s_subspace, qd[i], out=i_v_buf)
-        vj_velocity = i_v_buf
-
-        # Composite transform from body i to parent/base
-        if model_parent[i] == -1:  # Python uses -1 for no parent
-            # Body i is connected to base
-            # Use Xj directly (not Xj * Xtree) per MATLAB reference
-            v[:, i] = vj_velocity
-
-            # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
-            # Write directly to a[:, i] to avoid copy
-            np.matmul(xj_transform, neg_a_grav, out=a[:, i])
-            # Optimization: Avoid allocation for s_subspace * qdd[i]
-
-            if dof_idx != -1:
-                # Direct addition to the specific component
-                a[dof_idx, i] += qdd[i]
-            else:
-                np.multiply(s_subspace, qdd[i], out=cross_buf)
-                a[:, i] += cross_buf
-        else:
-            # Body i has a parent
-            p = model_parent[i]
-
-            # Optimized xp_transform = xj_transform @ model["Xtree"][i]
-            # Write directly to pre-allocated xup buffer
-            np.matmul(xj_transform, model_xtree[i], out=xup[i])
-
-            # Velocity: transform parent velocity and add joint velocity
-            # Optimized v[:, i] = xup[i] @ v[:, p] + vj_velocity
-            # Write directly to v[:, i]
-            np.matmul(xup[i], v[:, p], out=v[:, i])
-            v[:, i] += vj_velocity
-
-            # Acceleration: transform parent accel + bias accel + joint accel
-            # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
-            # Write directly to a[:, i]
-            np.matmul(xup[i], a[:, p], out=a[:, i])
-
-            # Optimization: Avoid allocation for s_subspace * qdd[i]
-            if dof_idx != -1:
-                # Direct addition to the specific component
-                a[dof_idx, i] += qdd[i]
-            else:
-                np.multiply(s_subspace, qdd[i], out=cross_buf)
-                a[:, i] += cross_buf
-
-            # Optimization: Use pre-allocated buffer for cross product
-            # Overwrites cross_buf, which is fine as we are done with qdd term
-            if dof_idx != -1:
-                cross_motion_axis(v[:, i], dof_idx, qd[i], out=cross_buf)
-            else:
-                cross_motion_fast(v[:, i], vj_velocity, out=cross_buf)
-            a[:, i] += cross_buf
-
-    # --- Backward pass: dynamics ---
-    for i in range(nb - 1, -1, -1):
-        # Newton-Euler equation: f = I*a + v x* I*v - f_ext
-        # Compute body force using optimized buffers
-        # 1. inertia @ accel
-        np.matmul(model_inertia[i], a[:, i], out=scratch_vec)
-        f_body = scratch_vec  # Alias (copy will happen on += next if we aren't careful)
-
-        # 2. inertia @ vel -> i_v_buf
-        np.matmul(model_inertia[i], v[:, i], out=i_v_buf)
-
-        # 3. Add Coriolis (cross_force allocates, but we add to buffer)
-        # Optimization: Use pre-allocated buffer for cross product
-        cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
-        f_body += cross_buf
-        if f_ext is not None:
-            f_body -= f_ext[:, i]
-
-        # Accumulate with any forces already propagated from children
-        # (f is initialized to zero, but children may have already propagated forces)
-        f[:, i] += f_body
-
-        # Project force to joint torque
-        s_subspace = s_subspace_list[i]
-        dof_idx = dof_indices[i]
-
-        if dof_idx != -1:
-            # Optimized: tau[i] = f[dof_idx, i] (dot product with unit vector)
-            tau[i] = f[dof_idx, i]
-        else:
-            tau[i] = s_subspace @ f[:, i]
-
-        # Propagate force to parent
-        if model_parent[i] != -1:
-            p = model_parent[i]
-            # Optimized f[:, p] = f[:, p] + xup[i].T @ f[:, i]
-            # Note: f[:, p] is also F-contiguous, so column access is efficient
-            np.matmul(xup[i].T, f[:, i], out=scratch_vec)
-            f[:, p] += scratch_vec
+    _rnea_backward_pass(
+        nb,
+        mdl,
+        v,
+        a,
+        f,
+        tau,
+        xup,
+        s_subspace_list,
+        dof_indices,
+        f_ext,
+        buf,
+    )
 
     return tau

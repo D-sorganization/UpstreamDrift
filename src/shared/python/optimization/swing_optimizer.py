@@ -340,28 +340,35 @@ class SwingOptimizer(ContractChecker):
 
         start_time = time.time()
 
-        # Set up the optimization problem
-        n_joints = len(self.JOINTS)
-        n_nodes = self.config.n_nodes
-        n_joints * n_nodes * 2  # angles and velocities
+        x0 = self._prepare_initial_guess(initial_swing)
+        result, iteration_count = self._run_scipy_optimization(x0, callback)
 
-        # Initial guess
+        computation_time = time.time() - start_time
+
+        if result.success:
+            return self._build_success_result(result, iteration_count, computation_time)
+        return self._build_failure_result(result, iteration_count, computation_time)
+
+    def _prepare_initial_guess(
+        self, initial_swing: SwingTrajectory | None
+    ) -> np.ndarray:
+        """Build the initial decision-variable vector."""
         if initial_swing is not None:
-            x0 = self._trajectory_to_vector(initial_swing)
-        else:
-            x0 = self._generate_initial_guess()
+            return self._trajectory_to_vector(initial_swing)
+        return self._generate_initial_guess()
 
-        # Bounds
+    def _run_scipy_optimization(
+        self,
+        x0: np.ndarray,
+        callback: Callable[[int, float], None] | None,
+    ) -> tuple[optimize.OptimizeResult, int]:
+        """Execute the scipy minimization and return raw result + iterations."""
         bounds = self._get_bounds()
-
-        # Constraints
         constraints = self._build_constraints()
 
-        # Objective function
         def objective(x: np.ndarray) -> float:
             return self._compute_objective(x)
 
-        # Run optimization
         iteration_count = [0]
 
         def scipy_callback(xk: np.ndarray) -> None:
@@ -382,37 +389,48 @@ class SwingOptimizer(ContractChecker):
                 "ftol": self.config.tolerance,
             },
         )
+        return result, iteration_count[0]
 
-        computation_time = time.time() - start_time
+    def _build_success_result(
+        self,
+        result: optimize.OptimizeResult,
+        iterations: int,
+        computation_time: float,
+    ) -> OptimizationResult:
+        """Extract trajectory and metrics from a successful optimization."""
+        trajectory = self._vector_to_trajectory(result.x)
+        metrics = self._compute_metrics(trajectory)
 
-        # Extract results
-        if result.success:
-            trajectory = self._vector_to_trajectory(result.x)
-            metrics = self._compute_metrics(trajectory)
+        return OptimizationResult(
+            success=True,
+            message=result.message,
+            trajectory=trajectory,
+            predicted_clubhead_speed=metrics["clubhead_speed"],
+            predicted_ball_speed=metrics["ball_speed"],
+            predicted_carry_distance=metrics["carry_distance"],
+            predicted_launch_angle=metrics["launch_angle"],
+            predicted_spin_rate=metrics["spin_rate"],
+            peak_spinal_compression=metrics["spinal_compression"],
+            peak_spinal_shear=metrics["spinal_shear"],
+            injury_risk_score=metrics["injury_risk"],
+            objective_value=result.fun,
+            iterations=iterations,
+            computation_time=computation_time,
+        )
 
-            return OptimizationResult(
-                success=True,
-                message=result.message,
-                trajectory=trajectory,
-                predicted_clubhead_speed=metrics["clubhead_speed"],
-                predicted_ball_speed=metrics["ball_speed"],
-                predicted_carry_distance=metrics["carry_distance"],
-                predicted_launch_angle=metrics["launch_angle"],
-                predicted_spin_rate=metrics["spin_rate"],
-                peak_spinal_compression=metrics["spinal_compression"],
-                peak_spinal_shear=metrics["spinal_shear"],
-                injury_risk_score=metrics["injury_risk"],
-                objective_value=result.fun,
-                iterations=iteration_count[0],
-                computation_time=computation_time,
-            )
-        else:
-            return OptimizationResult(
-                success=False,
-                message=f"Optimization failed: {result.message}",
-                iterations=iteration_count[0],
-                computation_time=computation_time,
-            )
+    @staticmethod
+    def _build_failure_result(
+        result: optimize.OptimizeResult,
+        iterations: int,
+        computation_time: float,
+    ) -> OptimizationResult:
+        """Build an OptimizationResult for a failed optimization."""
+        return OptimizationResult(
+            success=False,
+            message=f"Optimization failed: {result.message}",
+            iterations=iterations,
+            computation_time=computation_time,
+        )
 
     def optimize_pareto(
         self,

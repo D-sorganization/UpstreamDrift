@@ -817,121 +817,94 @@ class ModelLoaderDialog(QDialog):
 
         """
 
-        if category == "human":
-            info_text = f"""Name: {model_info["name"]}
+        formatters: dict[str, Any] = {
+            "human": self._format_human_info,
+            "golf_clubs": self._format_golf_clubs_info,
+            "pendulum": self._format_generic_model_info,
+            "robotic": self._format_generic_model_info,
+            "component": self._format_generic_model_info,
+            "discovered": self._format_discovered_info,
+            "embedded": self._format_embedded_info,
+            "robot_descriptions": self._format_robot_descriptions_info,
+            "imported": self._format_imported_info,
+        }
 
-Description: {model_info["description"]}
-
-License: {model_info["license"]}
-
-
-
-Repository: https://github.com/gbionics/human-gazebo
-
-"""
-
-        elif category == "golf_clubs":
-            info_text = f"""Club: {model_info["name"]}
-
-Loft: {model_info["loft"]}°
-
-Length: {model_info["length"] * 100:.1f} cm ({model_info["length"] / 0.0254:.1f} inches)
-
-Total Mass: {model_info["mass"] * 1000:.1f} g
-
-  - Head: {model_info["head_mass"] * 1000:.1f} g
-
-  - Shaft: {model_info["shaft_mass"] * 1000:.1f} g
-
-  - Grip: {model_info["grip_mass"] * 1000:.1f} g
-
-
-
-The URDF will be automatically generated with realistic geometry and inertial properties.
-
-"""
-
-        elif category in ["pendulum", "robotic", "component"]:
-            info_text = f"""Name: {model_info["name"]}
-
-Type: {model_info.get("type", "Unknown").upper()}
-
-Description: {model_info["description"]}
-
-Path: {model_info.get("path", "N/A")}
-
-
-
-Click 'Load' to view this model.
-
-"""
-
-        elif category == "discovered":
-            info_text = f"""Name: {model_info["name"]}
-
-Type: {model_info["type"].upper()}
-
-Path: {model_info["description"]}
-
-
-
-Click 'Load Selected Repository Model' to view.
-
-"""
-
-        elif category == "embedded":
-            content_preview = (
-                model_info["content"][:200] + "..."
-                if len(model_info["content"]) > 200
-                else model_info["content"]
-            )
-
-            info_text = f"""Name: {model_info["name"]}
-
-Type: Embedded MJCF
-
-Description: {model_info["description"]}
-
-
-
-Content Preview:
-
-{content_preview}
-
-"""
-
-        elif category == "robot_descriptions":
-            info_text = f"""Name: {model_info["name"]}
-
-Type: {model_info["type"].upper()}
-
-Package: {model_info.get("package", "robot_descriptions")}
-
-Path: {model_info["path"]}
-
-
-
-Description: {model_info["description"]}
-
-"""
-
-        elif category == "imported":
-            info_text = f"""Name: {model_info["name"]}
-
-Type: {model_info["type"].upper()}
-
-Path: {model_info["path"]}
-
-
-
-User imported model. Right-click in the list to Rename or Delete.
-
-"""
-
+        formatter = formatters.get(category)
+        if formatter:
+            info_text = formatter(model_info)
         else:
             info_text = "No information available."
 
         self.info_display.setPlainText(info_text)
+
+    def _format_human_info(self, model_info: dict[str, Any]) -> str:
+        return (
+            f"Name: {model_info['name']}\n"
+            f"Description: {model_info['description']}\n"
+            f"License: {model_info['license']}\n\n"
+            f"Repository: https://github.com/gbionics/human-gazebo\n"
+        )
+
+    def _format_golf_clubs_info(self, model_info: dict[str, Any]) -> str:
+        return (
+            f"Club: {model_info['name']}\n"
+            f"Loft: {model_info['loft']}\u00b0\n"
+            f"Length: {model_info['length'] * 100:.1f} cm "
+            f"({model_info['length'] / 0.0254:.1f} inches)\n"
+            f"Total Mass: {model_info['mass'] * 1000:.1f} g\n"
+            f"  - Head: {model_info['head_mass'] * 1000:.1f} g\n"
+            f"  - Shaft: {model_info['shaft_mass'] * 1000:.1f} g\n"
+            f"  - Grip: {model_info['grip_mass'] * 1000:.1f} g\n\n"
+            f"The URDF will be automatically generated with realistic "
+            f"geometry and inertial properties.\n"
+        )
+
+    def _format_generic_model_info(self, model_info: dict[str, Any]) -> str:
+        return (
+            f"Name: {model_info['name']}\n"
+            f"Type: {model_info.get('type', 'Unknown').upper()}\n"
+            f"Description: {model_info['description']}\n"
+            f"Path: {model_info.get('path', 'N/A')}\n\n"
+            f"Click 'Load' to view this model.\n"
+        )
+
+    def _format_discovered_info(self, model_info: dict[str, Any]) -> str:
+        return (
+            f"Name: {model_info['name']}\n"
+            f"Type: {model_info['type'].upper()}\n"
+            f"Path: {model_info['description']}\n\n"
+            f"Click 'Load Selected Repository Model' to view.\n"
+        )
+
+    def _format_embedded_info(self, model_info: dict[str, Any]) -> str:
+        content_preview = (
+            model_info["content"][:200] + "..."
+            if len(model_info["content"]) > 200
+            else model_info["content"]
+        )
+        return (
+            f"Name: {model_info['name']}\n"
+            f"Type: Embedded MJCF\n"
+            f"Description: {model_info['description']}\n\n"
+            f"Content Preview:\n{content_preview}\n"
+        )
+
+    def _format_robot_descriptions_info(self, model_info: dict[str, Any]) -> str:
+        return (
+            f"Name: {model_info['name']}\n"
+            f"Type: {model_info['type'].upper()}\n"
+            f"Package: {model_info.get('package', 'robot_descriptions')}\n"
+            f"Path: {model_info['path']}\n\n"
+            f"Description: {model_info['description']}\n"
+        )
+
+    def _format_imported_info(self, model_info: dict[str, Any]) -> str:
+        return (
+            f"Name: {model_info['name']}\n"
+            f"Type: {model_info['type'].upper()}\n"
+            f"Path: {model_info['path']}\n\n"
+            f"User imported model. Right-click in the list to Rename or Delete.\n"
+        )
 
     def _download_human_model(self) -> None:
         """Download the currently selected human model."""

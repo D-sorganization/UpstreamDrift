@@ -618,129 +618,128 @@ class KineticsRenderer(BaseRenderer):
         ax = fig.add_subplot(111)
 
         if breakdown_mode:
-            if joint_idx is None:
-                joint_idx = 0
-
-            components = ["gravity", "velocity", "total"]
-            linestyles = ["--", "-.", "-"]
-            labels = ["Gravity", "Velocity (Coriolis)", "Total (Passive)"]
-            colors = [
-                self.colors["secondary"],
-                self.colors["tertiary"],
-                "black",
-            ]
-
-            has_data = False
-            times = np.array([])
-
-            for comp, ls, lbl, clr in zip(
-                components, linestyles, labels, colors, strict=True
-            ):
-                try:
-                    times, acc = self.data.get_induced_acceleration_series(comp)
-                    if len(times) > 0 and acc.size > 0 and joint_idx < acc.shape[1]:
-                        ax.plot(
-                            times,
-                            acc[:, joint_idx],
-                            label=lbl,
-                            linestyle=ls,
-                            color=clr,
-                            linewidth=2 if comp == "total" else 1.5,
-                        )
-                        has_data = True
-                except (AttributeError, KeyError):
-                    continue
-
-            try:
-                times_c, acc_c = self.data.get_induced_acceleration_series("control")
-                if len(times_c) > 0 and acc_c.size > 0 and joint_idx < acc_c.shape[1]:
-                    ax.plot(
-                        times_c,
-                        acc_c[:, joint_idx],
-                        label="Control",
-                        linestyle=":",
-                        color=self.colors["quaternary"],
-                        linewidth=1.5,
-                    )
-            except (AttributeError, KeyError):
-                pass
-
-            if not has_data:
-                ax.text(
-                    0.5,
-                    0.5,
-                    "No induced acceleration breakdown data",
-                    ha="center",
-                    va="center",
-                )
-                return
-
-            joint_name = self.data.get_joint_name(joint_idx)
-            ax.set_title(
-                f"Induced Accelerations Breakdown: {joint_name}",
-                fontsize=14,
-                fontweight="bold",
-            )
-
+            self._plot_induced_breakdown(ax, joint_idx if joint_idx is not None else 0)
         else:
-            try:
-                times, acc = self.data.get_induced_acceleration_series(source_name)
-            except (AttributeError, KeyError):
-                ax.text(
-                    0.5,
-                    0.5,
-                    f"No induced acceleration data for {source_name}",
-                    ha="center",
-                    va="center",
-                )
-                return
-
-            if len(times) == 0 or acc.size == 0:
-                ax.text(
-                    0.5, 0.5, f"No data for {source_name}", ha="center", va="center"
-                )
-                return
-
-            if joint_idx is not None:
-                if joint_idx < acc.shape[1]:
-                    ax.plot(
-                        times,
-                        acc[:, joint_idx],
-                        label=self.data.get_joint_name(joint_idx),
-                        linewidth=2,
-                        color=self.colors["primary"],
-                    )
-                    ax.set_ylabel(
-                        f"Joint {joint_idx} Acceleration (rad/s²)",
-                        fontsize=12,
-                        fontweight="bold",
-                    )
-                else:
-                    ax.text(
-                        0.5,
-                        0.5,
-                        f"Joint index {joint_idx} out of bounds",
-                        ha="center",
-                        va="center",
-                    )
-                    return
-            else:
-                norm = np.sqrt(np.sum(acc**2, axis=1))
-                ax.plot(
-                    times,
-                    norm,
-                    label="L2 Norm",
-                    linewidth=2,
-                    color=self.colors["primary"],
-                )
-                ax.set_ylabel(
-                    "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
-                )
-            ax.set_title(
-                f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
-            )
+            self._plot_induced_single(ax, source_name, joint_idx)
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
+
+    def _plot_induced_breakdown(self, ax: plt.Axes, joint_idx: int) -> None:
+        """Plot induced acceleration breakdown for a joint."""
+        components = ["gravity", "velocity", "total"]
+        linestyles = ["--", "-.", "-"]
+        labels = ["Gravity", "Velocity (Coriolis)", "Total (Passive)"]
+        colors = [self.colors["secondary"], self.colors["tertiary"], "black"]
+
+        has_data = False
+        for comp, ls, lbl, clr in zip(
+            components, linestyles, labels, colors, strict=True
+        ):
+            try:
+                times, acc = self.data.get_induced_acceleration_series(comp)
+                if len(times) > 0 and acc.size > 0 and joint_idx < acc.shape[1]:
+                    ax.plot(
+                        times,
+                        acc[:, joint_idx],
+                        label=lbl,
+                        linestyle=ls,
+                        color=clr,
+                        linewidth=2 if comp == "total" else 1.5,
+                    )
+                    has_data = True
+            except (AttributeError, KeyError):
+                continue
+
+        try:
+            times_c, acc_c = self.data.get_induced_acceleration_series("control")
+            if len(times_c) > 0 and acc_c.size > 0 and joint_idx < acc_c.shape[1]:
+                ax.plot(
+                    times_c,
+                    acc_c[:, joint_idx],
+                    label="Control",
+                    linestyle=":",
+                    color=self.colors["quaternary"],
+                    linewidth=1.5,
+                )
+        except (AttributeError, KeyError):
+            pass
+
+        if not has_data:
+            ax.text(
+                0.5,
+                0.5,
+                "No induced acceleration breakdown data",
+                ha="center",
+                va="center",
+            )
+            return
+
+        joint_name = self.data.get_joint_name(joint_idx)
+        ax.set_title(
+            f"Induced Accelerations Breakdown: {joint_name}",
+            fontsize=14,
+            fontweight="bold",
+        )
+
+    def _plot_induced_single(
+        self, ax: plt.Axes, source_name: str | int, joint_idx: int | None
+    ) -> None:
+        """Plot induced acceleration for a single source."""
+        try:
+            times, acc = self.data.get_induced_acceleration_series(source_name)
+        except (AttributeError, KeyError):
+            ax.text(
+                0.5,
+                0.5,
+                f"No induced acceleration data for {source_name}",
+                ha="center",
+                va="center",
+            )
+            return
+
+        if len(times) == 0 or acc.size == 0:
+            ax.text(0.5, 0.5, f"No data for {source_name}", ha="center", va="center")
+            return
+
+        if joint_idx is not None:
+            if joint_idx < acc.shape[1]:
+                ax.plot(
+                    times,
+                    acc[:, joint_idx],
+                    label=self.data.get_joint_name(joint_idx),
+                    linewidth=2,
+                    color=self.colors["primary"],
+                )
+                ax.set_ylabel(
+                    f"Joint {joint_idx} Acceleration (rad/s²)",
+                    fontsize=12,
+                    fontweight="bold",
+                )
+            else:
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"Joint index {joint_idx} out of bounds",
+                    ha="center",
+                    va="center",
+                )
+                return
+        else:
+            norm = np.sqrt(np.sum(acc**2, axis=1))
+            ax.plot(
+                times,
+                norm,
+                label="L2 Norm",
+                linewidth=2,
+                color=self.colors["primary"],
+            )
+            ax.set_ylabel(
+                "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
+            )
+
+        ax.set_title(
+            f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
+        )

@@ -164,6 +164,99 @@ def _parse_urdf_geometry(visual_elem: Any, materials: dict[str, list[float]]) ->
     return result
 
 
+def _parse_urdf_materials(root: Any) -> dict[str, list[float]]:
+    materials: dict[str, list[float]] = {}
+    for mat_elem in root.findall("material"):
+        mat_name = mat_elem.get("name", "")
+        color_elem = mat_elem.find("color")
+        if color_elem is not None:
+            rgba = color_elem.get("rgba", "0.5 0.5 0.5 1.0")
+            materials[mat_name] = [float(x) for x in rgba.split()]
+    return materials
+
+
+def _parse_urdf_links(
+    root: Any, materials: dict[str, list[float]]
+) -> list[URDFLinkGeometry]:
+    links: list[URDFLinkGeometry] = []
+    for link_elem in root.findall("link"):
+        link_name = link_elem.get("name", "unnamed")
+        visual_elem = link_elem.find("visual")
+        if visual_elem is not None:
+            geom_data = _parse_urdf_geometry(visual_elem, materials)
+            links.append(
+                URDFLinkGeometry(
+                    link_name=link_name,
+                    **geom_data,
+                )
+            )
+    return links
+
+
+def _parse_urdf_joint_element(joint_elem: Any) -> URDFJointDescriptor:
+    joint_name = joint_elem.get("name", "unnamed")
+    joint_type = joint_elem.get("type", "fixed")
+
+    parent_elem = joint_elem.find("parent")
+    child_elem = joint_elem.find("child")
+    parent_link = parent_elem.get("link", "") if parent_elem is not None else ""
+    child_link = child_elem.get("link", "") if child_elem is not None else ""
+
+    origin = [0.0, 0.0, 0.0]
+    rotation = [0.0, 0.0, 0.0]
+    origin_elem = joint_elem.find("origin")
+    if origin_elem is not None:
+        xyz = origin_elem.get("xyz", "0 0 0")
+        rpy = origin_elem.get("rpy", "0 0 0")
+        origin = [float(x) for x in xyz.split()]
+        rotation = [float(x) for x in rpy.split()]
+
+    axis = [0.0, 0.0, 1.0]
+    axis_elem = joint_elem.find("axis")
+    if axis_elem is not None:
+        axis_str = axis_elem.get("xyz", "0 0 1")
+        axis = [float(x) for x in axis_str.split()]
+
+    lower_limit = None
+    upper_limit = None
+    limit_elem = joint_elem.find("limit")
+    if limit_elem is not None:
+        lower_limit = float(limit_elem.get("lower", "0"))
+        upper_limit = float(limit_elem.get("upper", "0"))
+
+    return URDFJointDescriptor(
+        name=joint_name,
+        joint_type=joint_type,
+        parent_link=parent_link,
+        child_link=child_link,
+        origin=origin,
+        rotation=rotation,
+        axis=axis,
+        lower_limit=lower_limit,
+        upper_limit=upper_limit,
+    )
+
+
+def _parse_urdf_joints(root: Any) -> tuple[list[URDFJointDescriptor], set[str]]:
+    joints: list[URDFJointDescriptor] = []
+    child_links: set[str] = set()
+    for joint_elem in root.findall("joint"):
+        descriptor = _parse_urdf_joint_element(joint_elem)
+        joints.append(descriptor)
+        child_links.add(descriptor.child_link)
+    return joints, child_links
+
+
+def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str:
+    all_link_names = {link.link_name for link in links}
+    root_candidates = all_link_names - child_links
+    return (
+        next(iter(root_candidates))
+        if root_candidates
+        else (links[0].link_name if links else "base")
+    )
+
+
 @precondition(
     lambda urdf_content: urdf_content is not None and len(urdf_content) > 0,
     "URDF content must be a non-empty string",
@@ -186,87 +279,10 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
         raise ValueError(f"Invalid URDF XML: {e}") from e
 
     model_name = root.get("name", "unknown")
-
-    # Parse top-level materials
-    materials: dict[str, list[float]] = {}
-    for mat_elem in root.findall("material"):
-        mat_name = mat_elem.get("name", "")
-        color_elem = mat_elem.find("color")
-        if color_elem is not None:
-            rgba = color_elem.get("rgba", "0.5 0.5 0.5 1.0")
-            materials[mat_name] = [float(x) for x in rgba.split()]
-
-    # Parse links
-    links: list[URDFLinkGeometry] = []
-    for link_elem in root.findall("link"):
-        link_name = link_elem.get("name", "unnamed")
-        visual_elem = link_elem.find("visual")
-        if visual_elem is not None:
-            geom_data = _parse_urdf_geometry(visual_elem, materials)
-            links.append(
-                URDFLinkGeometry(
-                    link_name=link_name,
-                    **geom_data,
-                )
-            )
-
-    # Parse joints
-    joints: list[URDFJointDescriptor] = []
-    child_links: set[str] = set()
-    for joint_elem in root.findall("joint"):
-        joint_name = joint_elem.get("name", "unnamed")
-        joint_type = joint_elem.get("type", "fixed")
-
-        parent_elem = joint_elem.find("parent")
-        child_elem = joint_elem.find("child")
-        parent_link = parent_elem.get("link", "") if parent_elem is not None else ""
-        child_link = child_elem.get("link", "") if child_elem is not None else ""
-        child_links.add(child_link)
-
-        origin = [0.0, 0.0, 0.0]
-        rotation = [0.0, 0.0, 0.0]
-        origin_elem = joint_elem.find("origin")
-        if origin_elem is not None:
-            xyz = origin_elem.get("xyz", "0 0 0")
-            rpy = origin_elem.get("rpy", "0 0 0")
-            origin = [float(x) for x in xyz.split()]
-            rotation = [float(x) for x in rpy.split()]
-
-        axis = [0.0, 0.0, 1.0]
-        axis_elem = joint_elem.find("axis")
-        if axis_elem is not None:
-            axis_str = axis_elem.get("xyz", "0 0 1")
-            axis = [float(x) for x in axis_str.split()]
-
-        lower_limit = None
-        upper_limit = None
-        limit_elem = joint_elem.find("limit")
-        if limit_elem is not None:
-            lower_limit = float(limit_elem.get("lower", "0"))
-            upper_limit = float(limit_elem.get("upper", "0"))
-
-        joints.append(
-            URDFJointDescriptor(
-                name=joint_name,
-                joint_type=joint_type,
-                parent_link=parent_link,
-                child_link=child_link,
-                origin=origin,
-                rotation=rotation,
-                axis=axis,
-                lower_limit=lower_limit,
-                upper_limit=upper_limit,
-            )
-        )
-
-    # Find root link (not a child of any joint)
-    all_link_names = {link.link_name for link in links}
-    root_candidates = all_link_names - child_links
-    root_link = (
-        next(iter(root_candidates))
-        if root_candidates
-        else (links[0].link_name if links else "base")
-    )
+    materials = _parse_urdf_materials(root)
+    links = _parse_urdf_links(root, materials)
+    joints, child_links = _parse_urdf_joints(root)
+    root_link = _find_root_link(links, child_links)
 
     return URDFModelResponse(
         model_name=model_name,

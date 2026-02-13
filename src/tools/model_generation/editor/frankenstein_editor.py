@@ -21,6 +21,21 @@ from model_generation.core.types import Joint, JointType, Link, Material, Origin
 logger = logging.getLogger(__name__)
 
 
+def _mirror_name(name: str, replacements: dict[str, str]) -> str:
+    result = name
+    for old, new in replacements.items():
+        result = result.replace(old, new)
+    if result == name:
+        result = name + "_mirrored"
+    return result
+
+
+def _flip_origin(origin: Origin, axis_idx: int) -> Origin:
+    xyz = list(origin.xyz)
+    xyz[axis_idx] = -xyz[axis_idx]
+    return Origin(xyz=(xyz[0], xyz[1], xyz[2]), rpy=origin.rpy)
+
+
 class ComponentType(Enum):
     """Types of components that can be copied."""
 
@@ -494,80 +509,16 @@ class FrankensteinEditor:
         self._save_state()
 
         comp_type, links, joints, materials = self._clipboard[0]
-        created_links = []
 
-        # Build name mapping for renames
-        name_map = {}
-        existing_links = {link.name for link in model.links}
-        existing_joints = {j.name for j in model.joints}
+        name_map = self._build_paste_name_map(model, links, joints, prefix, suffix)
+        self._paste_materials(model, materials, prefix, suffix)
+        created_links = self._paste_links(model, links, name_map, prefix, suffix)
 
-        # Generate unique names
-        for link in links:
-            new_name = self._generate_unique_name(
-                prefix + link.name + suffix,
-                existing_links,
-            )
-            name_map[link.name] = new_name
-            existing_links.add(new_name)
-
-        for joint in joints:
-            new_name = self._generate_unique_name(
-                prefix + joint.name + suffix,
-                existing_joints,
-            )
-            name_map[joint.name] = new_name
-            existing_joints.add(new_name)
-
-        # Copy materials (with conflict handling)
-        for mat_name, mat in materials.items():
-            new_mat_name = prefix + mat_name + suffix
-            if new_mat_name not in model.materials:
-                new_mat = Material.from_dict(mat.to_dict())
-                new_mat.name = new_mat_name
-                model.materials[new_mat_name] = new_mat
-
-        # Create renamed copies of links
-        for link in links:
-            new_link = Link.from_dict(link.to_dict())
-            new_link.name = name_map[link.name]
-
-            # Update material reference
-            if new_link.visual_material:
-                new_link.visual_material.name = (
-                    prefix + new_link.visual_material.name + suffix
-                )
-
-            model.links.append(new_link)
-            created_links.append(new_link.name)
-
-        # Create renamed copies of joints
         first_link = name_map.get(links[0].name) if links else None
-        attachment_created = False
+        attachment_created = self._paste_joints(
+            model, links, joints, name_map, attach_to, attachment_origin, joint_type
+        )
 
-        for joint in joints:
-            new_joint = Joint.from_dict(joint.to_dict())
-            new_joint.name = name_map.get(joint.name, joint.name)
-
-            # Update parent/child references
-            if joint.parent in name_map:
-                new_joint.parent = name_map[joint.parent]
-            elif joint.child == links[0].name if links else None:
-                # This is the root attachment joint
-                if attach_to:
-                    new_joint.parent = attach_to
-                    new_joint.joint_type = joint_type
-                    if attachment_origin:
-                        new_joint.origin = attachment_origin
-                    attachment_created = True
-                else:
-                    continue  # Skip root joint if no attachment point
-
-            if joint.child in name_map:
-                new_joint.child = name_map[joint.child]
-
-            model.joints.append(new_joint)
-
-        # Create attachment joint if needed
         if attach_to and first_link and not attachment_created:
             attach_joint = Joint(
                 name=self._generate_unique_name(
@@ -583,6 +534,101 @@ class FrankensteinEditor:
 
         logger.info(f"Pasted {len(created_links)} links to '{target_model_id}'")
         return created_links
+
+    def _build_paste_name_map(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        joints: list[Joint],
+        prefix: str,
+        suffix: str,
+    ) -> dict[str, str]:
+        name_map: dict[str, str] = {}
+        existing_links = {link.name for link in model.links}
+        existing_joints = {j.name for j in model.joints}
+
+        for link in links:
+            new_name = self._generate_unique_name(
+                prefix + link.name + suffix, existing_links
+            )
+            name_map[link.name] = new_name
+            existing_links.add(new_name)
+
+        for joint in joints:
+            new_name = self._generate_unique_name(
+                prefix + joint.name + suffix, existing_joints
+            )
+            name_map[joint.name] = new_name
+            existing_joints.add(new_name)
+
+        return name_map
+
+    def _paste_materials(
+        self,
+        model: ParsedModel,
+        materials: dict[str, Material],
+        prefix: str,
+        suffix: str,
+    ) -> None:
+        for mat_name, mat in materials.items():
+            new_mat_name = prefix + mat_name + suffix
+            if new_mat_name not in model.materials:
+                new_mat = Material.from_dict(mat.to_dict())
+                new_mat.name = new_mat_name
+                model.materials[new_mat_name] = new_mat
+
+    def _paste_links(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        name_map: dict[str, str],
+        prefix: str,
+        suffix: str,
+    ) -> list[str]:
+        created_links = []
+        for link in links:
+            new_link = Link.from_dict(link.to_dict())
+            new_link.name = name_map[link.name]
+            if new_link.visual_material:
+                new_link.visual_material.name = (
+                    prefix + new_link.visual_material.name + suffix
+                )
+            model.links.append(new_link)
+            created_links.append(new_link.name)
+        return created_links
+
+    def _paste_joints(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        joints: list[Joint],
+        name_map: dict[str, str],
+        attach_to: str | None,
+        attachment_origin: Origin | None,
+        joint_type: JointType,
+    ) -> bool:
+        attachment_created = False
+        for joint in joints:
+            new_joint = Joint.from_dict(joint.to_dict())
+            new_joint.name = name_map.get(joint.name, joint.name)
+
+            if joint.parent in name_map:
+                new_joint.parent = name_map[joint.parent]
+            elif joint.child == links[0].name if links else None:
+                if attach_to:
+                    new_joint.parent = attach_to
+                    new_joint.joint_type = joint_type
+                    if attachment_origin:
+                        new_joint.origin = attachment_origin
+                    attachment_created = True
+                else:
+                    continue
+
+            if joint.child in name_map:
+                new_joint.child = name_map[joint.child]
+
+            model.joints.append(new_joint)
+        return attachment_created
 
     def paste_subtree(
         self,
@@ -1073,11 +1119,9 @@ class FrankensteinEditor:
         Returns:
             List of created link names
         """
-        # Copy subtree to clipboard
         if not self.copy_subtree(model_id, root_link):
             return []
 
-        # Get parent for attachment
         model = self._models.get(model_id)
         if not model:
             return []
@@ -1087,7 +1131,6 @@ class FrankensteinEditor:
             logger.error("Cannot mirror root link")
             return []
 
-        # Default replacements for left/right
         if name_replacements is None:
             name_replacements = {
                 "left": "right",
@@ -1100,89 +1143,93 @@ class FrankensteinEditor:
                 "_R_": "_L_",
             }
 
-        # Paste with mirrored positions
         self._save_state()
 
-        comp_type, links, joints, materials = self._clipboard[0]
+        _comp_type, links, joints, _materials = self._clipboard[0]
+        axis_idx = {"x": 0, "y": 1, "z": 2}[mirror_axis]
 
-        # Generate mirrored names
-        def mirror_name(name: str) -> str:
-            result = name
-            for old, new in name_replacements.items():
-                result = result.replace(old, new)
-            if result == name:
-                # No replacement found, add suffix
-                result = name + "_mirrored"
-            return result
+        name_map = self._build_mirror_name_map(model, links, name_replacements)
+        created_links = self._create_mirrored_links(model, links, name_map, axis_idx)
+        self._create_mirrored_joints(
+            model, links, joints, name_map, parent, name_replacements, axis_idx
+        )
 
-        # Build name map
-        name_map = {}
+        logger.info(f"Created mirrored subtree with {len(created_links)} links")
+        return created_links
+
+    def _build_mirror_name_map(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        name_replacements: dict[str, str],
+    ) -> dict[str, str]:
+        name_map: dict[str, str] = {}
         existing_links = {link.name for link in model.links}
 
         for link in links:
-            new_name = mirror_name(link.name)
+            new_name = _mirror_name(link.name, name_replacements)
             new_name = self._generate_unique_name(new_name, existing_links)
             name_map[link.name] = new_name
             existing_links.add(new_name)
 
-        # Mirror positions
-        axis_idx = {"x": 0, "y": 1, "z": 2}[mirror_axis]
+        return name_map
 
-        created_links = []
+    def _create_mirrored_links(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        name_map: dict[str, str],
+        axis_idx: int,
+    ) -> list[str]:
+        created_links: list[str] = []
 
         for link in links:
             new_link = Link.from_dict(link.to_dict())
             new_link.name = name_map[link.name]
 
-            # Mirror visual/collision origins
             if new_link.visual_origin:
-                xyz = list(new_link.visual_origin.xyz)
-                xyz[axis_idx] = -xyz[axis_idx]
-                new_link.visual_origin = Origin(
-                    xyz=(xyz[0], xyz[1], xyz[2]), rpy=new_link.visual_origin.rpy
-                )
+                new_link.visual_origin = _flip_origin(new_link.visual_origin, axis_idx)
 
             if new_link.collision_origin:
-                xyz = list(new_link.collision_origin.xyz)
-                xyz[axis_idx] = -xyz[axis_idx]
-                new_link.collision_origin = Origin(
-                    xyz=(xyz[0], xyz[1], xyz[2]), rpy=new_link.collision_origin.rpy
+                new_link.collision_origin = _flip_origin(
+                    new_link.collision_origin, axis_idx
                 )
 
             model.links.append(new_link)
             created_links.append(new_link.name)
 
-        # Copy and mirror joints
+        return created_links
+
+    def _create_mirrored_joints(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        joints: list[Joint],
+        name_map: dict[str, str],
+        parent: str,
+        name_replacements: dict[str, str],
+        axis_idx: int,
+    ) -> None:
         for joint in joints:
             new_joint = Joint.from_dict(joint.to_dict())
-            new_joint.name = mirror_name(joint.name)
+            new_joint.name = _mirror_name(joint.name, name_replacements)
 
-            # Update references
             if joint.parent in name_map:
                 new_joint.parent = name_map[joint.parent]
             elif joint.child == links[0].name:
-                new_joint.parent = parent  # Attach to same parent
+                new_joint.parent = parent
 
             if joint.child in name_map:
                 new_joint.child = name_map[joint.child]
 
-            # Mirror origin
-            xyz = list(new_joint.origin.xyz)
-            xyz[axis_idx] = -xyz[axis_idx]
-            new_joint.origin = Origin(
-                xyz=(xyz[0], xyz[1], xyz[2]), rpy=new_joint.origin.rpy
-            )
+            new_joint.origin = _flip_origin(new_joint.origin, axis_idx)
 
-            # Mirror axis for revolute joints
             if new_joint.joint_type in (JointType.REVOLUTE, JointType.CONTINUOUS):
                 axis = list(new_joint.axis)
                 axis[axis_idx] = -axis[axis_idx]
                 new_joint.axis = (axis[0], axis[1], axis[2])
 
             model.joints.append(new_joint)
-
-        logger.info(f"Created mirrored subtree with {len(created_links)} links")
-        return created_links
 
     # ============================================================
     # Undo/Redo

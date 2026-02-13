@@ -68,7 +68,7 @@ class QPProblem:
             self.b_eq = np.asarray(self.b_eq, dtype=np.float64)
             if self.A_eq.shape[1] != n:
                 raise ValueError(
-                    f"A_eq columns {self.A_eq.shape[1]} doesn't match n={n}"
+                    f"A_eq columns {self.A_eq.shape[1]} doesn't match n={n}",
                 )
 
         # Validate inequality constraints
@@ -76,7 +76,7 @@ class QPProblem:
             self.A_ineq = np.asarray(self.A_ineq, dtype=np.float64)
             if self.A_ineq.shape[1] != n:
                 raise ValueError(
-                    f"A_ineq columns {self.A_ineq.shape[1]} doesn't match n={n}"
+                    f"A_ineq columns {self.A_ineq.shape[1]} doesn't match n={n}",
                 )
 
     @property
@@ -193,75 +193,21 @@ class ScipyQPSolver(QPSolver):
                 status="scipy not available",
             )
 
-        from scipy.optimize import Bounds, minimize
+        from scipy.optimize import minimize
 
         start_time = time.perf_counter()
 
         n = problem.n_vars
 
-        # Objective function
         def objective(x: NDArray[np.float64]) -> float:
             return float(0.5 * x @ problem.H @ x + problem.g @ x)
 
         def gradient(x: NDArray[np.float64]) -> NDArray[np.float64]:
             return problem.H @ x + problem.g
 
-        # Initial guess
         x0 = np.zeros(n)
-
-        # Variable bounds
-        bounds = None
-        if problem.x_lb is not None or problem.x_ub is not None:
-            lb = problem.x_lb if problem.x_lb is not None else -np.inf * np.ones(n)
-            ub = problem.x_ub if problem.x_ub is not None else np.inf * np.ones(n)
-            bounds = Bounds(lb, ub)
-
-        # Constraints
-        constraints = []
-
-        if problem.A_eq is not None and problem.b_eq is not None:
-            constraints.append(
-                {
-                    "type": "eq",
-                    "fun": lambda x, A=problem.A_eq, b=problem.b_eq: A @ x - b,
-                    "jac": lambda x, A=problem.A_eq: A,
-                }
-            )
-
-        if problem.A_ineq is not None:
-            lb = (
-                problem.lb_ineq
-                if problem.lb_ineq is not None
-                else -np.inf * np.ones(problem.n_ineq)
-            )
-            ub = (
-                problem.ub_ineq
-                if problem.ub_ineq is not None
-                else np.inf * np.ones(problem.n_ineq)
-            )
-
-            # Convert to standard form: lb <= Ax <= ub
-            # scipy needs: c(x) >= 0, so we add two constraints:
-            # Ax - lb >= 0 and ub - Ax >= 0
-            for i in range(problem.n_ineq):
-                if lb[i] > -1e10:
-                    constraints.append(
-                        {
-                            "type": "ineq",
-                            "fun": lambda x, A=problem.A_ineq, lb=lb, i=i: A[i] @ x
-                            - lb[i],
-                            "jac": lambda x, A=problem.A_ineq, i=i: A[i],
-                        }
-                    )
-                if ub[i] < 1e10:
-                    constraints.append(
-                        {
-                            "type": "ineq",
-                            "fun": lambda x, A=problem.A_ineq, ub=ub, i=i: ub[i]
-                            - A[i] @ x,
-                            "jac": lambda x, A=problem.A_ineq, i=i: -A[i],
-                        }
-                    )
+        bounds = self._build_variable_bounds(problem)
+        constraints = self._build_constraints(problem)
 
         try:
             result = minimize(
@@ -291,6 +237,68 @@ class ScipyQPSolver(QPSolver):
                 x=None,
                 status=f"Solver error: {e}",
             )
+
+    def _build_variable_bounds(self, problem: QPProblem):
+        from scipy.optimize import Bounds
+
+        if problem.x_lb is None and problem.x_ub is None:
+            return None
+
+        n = problem.n_vars
+        lb = problem.x_lb if problem.x_lb is not None else -np.inf * np.ones(n)
+        ub = problem.x_ub if problem.x_ub is not None else np.inf * np.ones(n)
+        return Bounds(lb, ub)
+
+    def _build_constraints(self, problem: QPProblem) -> list[dict]:
+        constraints: list[dict] = []
+
+        if problem.A_eq is not None and problem.b_eq is not None:
+            constraints.append(
+                {
+                    "type": "eq",
+                    "fun": lambda x, A=problem.A_eq, b=problem.b_eq: A @ x - b,
+                    "jac": lambda x, A=problem.A_eq: A,
+                },
+            )
+
+        if problem.A_ineq is not None:
+            self._add_inequality_constraints(constraints, problem)
+
+        return constraints
+
+    def _add_inequality_constraints(
+        self,
+        constraints: list[dict],
+        problem: QPProblem,
+    ) -> None:
+        lb = (
+            problem.lb_ineq
+            if problem.lb_ineq is not None
+            else -np.inf * np.ones(problem.n_ineq)
+        )
+        ub = (
+            problem.ub_ineq
+            if problem.ub_ineq is not None
+            else np.inf * np.ones(problem.n_ineq)
+        )
+
+        for i in range(problem.n_ineq):
+            if lb[i] > -1e10:
+                constraints.append(
+                    {
+                        "type": "ineq",
+                        "fun": lambda x, A=problem.A_ineq, lb=lb, i=i: A[i] @ x - lb[i],
+                        "jac": lambda x, A=problem.A_ineq, i=i: A[i],
+                    },
+                )
+            if ub[i] < 1e10:
+                constraints.append(
+                    {
+                        "type": "ineq",
+                        "fun": lambda x, A=problem.A_ineq, ub=ub, i=i: ub[i] - A[i] @ x,
+                        "jac": lambda x, A=problem.A_ineq, i=i: -A[i],
+                    },
+                )
 
 
 class NullspaceQPSolver(QPSolver):
@@ -344,7 +352,7 @@ class NullspaceQPSolver(QPSolver):
                 [
                     [H, A.T],
                     [A, np.zeros((m, m))],
-                ]
+                ],
             )
 
             rhs = np.concatenate([-g, b])

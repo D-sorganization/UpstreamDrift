@@ -187,93 +187,95 @@ class SwingModificationRecommender:
         Returns:
             ModificationPlan with prioritized modifications
         """
-        plan = ModificationPlan()
-        applicable_mods = []
-
         if injury_report is None:
-            # No injury data, return generic plan
+            plan = ModificationPlan()
             plan.primary_modification = self.MODIFICATIONS["stabilize_spine"]
             return plan
 
-        # Check each risk factor and find applicable modifications
-        for factor in getattr(injury_report, "risk_factors", []):
-            if "x_factor" in factor.name.lower():
-                score = self._factor_score(factor)
-                if score > 30:
-                    applicable_mods.append(
-                        (self.MODIFICATIONS["reduce_x_factor"], score)
-                    )
-
-            if "shear" in factor.name.lower() or "compression" in factor.name.lower():
-                score = self._factor_score(factor)
-                if score > 30:
-                    applicable_mods.append(
-                        (self.MODIFICATIONS["stabilize_spine"], score)
-                    )
-                    applicable_mods.append(
-                        (self.MODIFICATIONS["slow_transition"], score * 0.8)
-                    )
-
-            if "elbow" in factor.name.lower():
-                score = self._factor_score(factor)
-                if score > 30:
-                    applicable_mods.append(
-                        (self.MODIFICATIONS["maintain_wrist_cock"], score)
-                    )
-
-            if "hip" in factor.name.lower():
-                score = self._factor_score(factor)
-                if score > 40:
-                    applicable_mods.append(
-                        (self.MODIFICATIONS["weight_forward"], score)
-                    )
-
-            if "shoulder" in factor.name.lower():
-                score = self._factor_score(factor)
-                if score > 40:
-                    applicable_mods.append(
-                        (self.MODIFICATIONS["reduce_backswing"], score * 0.7)
-                    )
-
-        # Sort by priority (risk score)
+        applicable_mods = self._collect_applicable_modifications(injury_report)
         applicable_mods.sort(key=lambda x: x[1], reverse=True)
 
-        # Apply performance requirements filter
         if performance_requirements:
-            max_performance_loss = performance_requirements.get(
-                "max_performance_loss", 10
+            applicable_mods = self._filter_by_performance(
+                applicable_mods,
+                performance_requirements,
             )
-            applicable_mods = [
-                (mod, score)
-                for mod, score in applicable_mods
-                if mod.expected_performance_impact > -max_performance_loss
-            ]
 
-        # Select modifications
+        return self._assemble_plan(applicable_mods)
+
+    def _collect_applicable_modifications(
+        self,
+        injury_report: object,
+    ) -> list[tuple[SwingModification, float]]:
+        """Match risk factors to applicable swing modifications."""
+        applicable_mods: list[tuple[SwingModification, float]] = []
+
+        for factor in getattr(injury_report, "risk_factors", []):
+            name_lower = factor.name.lower()
+            score = self._factor_score(factor)
+
+            if "x_factor" in name_lower and score > 30:
+                applicable_mods.append((self.MODIFICATIONS["reduce_x_factor"], score))
+
+            if ("shear" in name_lower or "compression" in name_lower) and score > 30:
+                applicable_mods.append((self.MODIFICATIONS["stabilize_spine"], score))
+                applicable_mods.append(
+                    (self.MODIFICATIONS["slow_transition"], score * 0.8)
+                )
+
+            if "elbow" in name_lower and score > 30:
+                applicable_mods.append(
+                    (self.MODIFICATIONS["maintain_wrist_cock"], score)
+                )
+
+            if "hip" in name_lower and score > 40:
+                applicable_mods.append((self.MODIFICATIONS["weight_forward"], score))
+
+            if "shoulder" in name_lower and score > 40:
+                applicable_mods.append(
+                    (self.MODIFICATIONS["reduce_backswing"], score * 0.7)
+                )
+
+        return applicable_mods
+
+    @staticmethod
+    def _filter_by_performance(
+        applicable_mods: list[tuple[SwingModification, float]],
+        performance_requirements: dict,
+    ) -> list[tuple[SwingModification, float]]:
+        """Remove modifications exceeding the allowed performance loss."""
+        max_loss = performance_requirements.get("max_performance_loss", 10)
+        return [
+            (mod, score)
+            for mod, score in applicable_mods
+            if mod.expected_performance_impact > -max_loss
+        ]
+
+    @staticmethod
+    def _assemble_plan(
+        applicable_mods: list[tuple[SwingModification, float]],
+    ) -> ModificationPlan:
+        """Select top modifications and compute plan-level estimates."""
+        plan = ModificationPlan()
+
         if applicable_mods:
             plan.primary_modification = applicable_mods[0][0]
             plan.secondary_modifications = [mod for mod, _ in applicable_mods[1:3]]
 
-        # Calculate totals
+        all_mods = [
+            m
+            for m in [plan.primary_modification] + plan.secondary_modifications
+            if m is not None
+        ]
+
         plan.estimated_total_risk_reduction = (
-            sum(
-                mod.expected_risk_reduction
-                for mod in [plan.primary_modification] + plan.secondary_modifications
-                if mod is not None
-            )
-            * 0.7
-        )  # Discount for overlap
-
+            sum(m.expected_risk_reduction for m in all_mods) * 0.7
+        )
         plan.estimated_performance_change = sum(
-            mod.expected_performance_impact
-            for mod in [plan.primary_modification] + plan.secondary_modifications
-            if mod is not None
+            m.expected_performance_impact for m in all_mods
         )
 
-        # Estimate difficulty
-        num_changes = len(
-            [m for m in [plan.primary_modification] + plan.secondary_modifications if m]
-        )
+        num_changes = len(all_mods)
         if num_changes == 1:
             plan.implementation_difficulty = "easy"
             plan.timeline_weeks = 2

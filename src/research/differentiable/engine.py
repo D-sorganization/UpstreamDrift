@@ -423,21 +423,23 @@ class ContactDifferentiableEngine(DifferentiableEngine):
                 controls_noisy = controls + noise
 
                 grad = super().compute_gradient(
-                    initial_state, controls_noisy, loss_fn, dt
+                    initial_state,
+                    controls_noisy,
+                    loss_fn,
+                    dt,
                 )
                 gradient += grad / n_samples
 
             return gradient
 
-        elif self.contact_method == "stochastic":
+        if self.contact_method == "stochastic":
             # Stochastic gradient with single sample
             noise = np.random.randn(*controls.shape) * self.smoothing_factor
             controls_noisy = controls + noise
             return super().compute_gradient(initial_state, controls_noisy, loss_fn, dt)
 
-        else:
-            # Standard smoothed gradient
-            return super().compute_gradient(initial_state, controls, loss_fn, dt)
+        # Standard smoothed gradient
+        return super().compute_gradient(initial_state, controls, loss_fn, dt)
 
     def optimize_through_contact(
         self,
@@ -476,12 +478,47 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         """
         original_smoothing = self.smoothing_factor
 
-        schedule = (
-            contact_schedule[:horizon]
-            if len(contact_schedule) >= horizon
-            else (contact_schedule + [False] * (horizon - len(contact_schedule)))
+        schedule = self._pad_contact_schedule(contact_schedule, horizon)
+        loss_fn = self._build_contact_loss(goal_state, schedule, contact_penalty_weight)
+
+        controls = np.zeros((horizon, self._n_u))
+        best_controls, best_loss, grad_norm, iteration = self._adam_optimize_contact(
+            initial_state,
+            controls,
+            loss_fn,
+            dt,
+            schedule,
+            original_smoothing,
+            contact_smoothing_multiplier,
         )
 
+        self.smoothing_factor = original_smoothing
+        optimal_trajectory = self.simulate_trajectory(initial_state, best_controls, dt)
+
+        return OptimizationResult(
+            success=best_loss < 0.1,
+            optimal_states=optimal_trajectory,
+            optimal_controls=best_controls,
+            final_cost=best_loss,
+            iterations=iteration + 1,
+            gradient_norm=grad_norm,
+        )
+
+    def _pad_contact_schedule(
+        self,
+        contact_schedule: list[bool],
+        horizon: int,
+    ) -> list[bool]:
+        if len(contact_schedule) >= horizon:
+            return contact_schedule[:horizon]
+        return contact_schedule + [False] * (horizon - len(contact_schedule))
+
+    def _build_contact_loss(
+        self,
+        goal_state: NDArray[np.floating],
+        schedule: list[bool],
+        contact_penalty_weight: float,
+    ) -> Callable[[NDArray[np.floating]], float]:
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
             final_error = float(np.sum((trajectory[-1] - goal_state) ** 2))
 
@@ -495,9 +532,18 @@ class ContactDifferentiableEngine(DifferentiableEngine):
 
             return final_error + contact_penalty_weight * contact_penalty
 
-        controls = np.zeros((horizon, self._n_u))
+        return loss_fn
 
-        # Adam state
+    def _adam_optimize_contact(
+        self,
+        initial_state: NDArray[np.floating],
+        controls: NDArray[np.floating],
+        loss_fn: Callable[[NDArray[np.floating]], float],
+        dt: float,
+        schedule: list[bool],
+        original_smoothing: float,
+        contact_smoothing_multiplier: float,
+    ) -> tuple[NDArray[np.floating], float, float, int]:
         m = np.zeros_like(controls)
         v = np.zeros_like(controls)
         beta1, beta2 = 0.9, 0.999
@@ -507,15 +553,14 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         best_loss = float("inf")
         best_controls = controls.copy()
         grad_norm = float("inf")
+        iteration = 0
 
         for iteration in range(100):
-            for t in range(horizon):
-                if t < len(schedule) and schedule[t]:
-                    self.smoothing_factor = (
-                        original_smoothing * contact_smoothing_multiplier
-                    )
-                else:
-                    self.smoothing_factor = original_smoothing
+            self._apply_phase_smoothing(
+                schedule,
+                original_smoothing,
+                contact_smoothing_multiplier,
+            )
 
             gradient = self.compute_gradient(initial_state, controls, loss_fn, dt)
             trajectory = self.simulate_trajectory(initial_state, controls, dt)
@@ -535,15 +580,15 @@ class ContactDifferentiableEngine(DifferentiableEngine):
             v_hat = v / (1 - beta2 ** (iteration + 1))
             controls = controls - lr * m_hat / (np.sqrt(v_hat) + eps_adam)
 
-        self.smoothing_factor = original_smoothing
+        return best_controls, best_loss, grad_norm, iteration
 
-        optimal_trajectory = self.simulate_trajectory(initial_state, best_controls, dt)
-
-        return OptimizationResult(
-            success=best_loss < 0.1,
-            optimal_states=optimal_trajectory,
-            optimal_controls=best_controls,
-            final_cost=best_loss,
-            iterations=iteration + 1,
-            gradient_norm=grad_norm,
-        )
+    def _apply_phase_smoothing(
+        self,
+        schedule: list[bool],
+        original_smoothing: float,
+        contact_smoothing_multiplier: float,
+    ) -> None:
+        if any(schedule):
+            self.smoothing_factor = original_smoothing * contact_smoothing_multiplier
+        else:
+            self.smoothing_factor = original_smoothing

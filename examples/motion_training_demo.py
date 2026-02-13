@@ -27,7 +27,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Motion Training Demo - Generate body motion from club trajectory"
+        description="Motion Training Demo - Generate body motion from club trajectory",
     )
     parser.add_argument(
         "--trajectory",
@@ -47,7 +47,7 @@ def parse_args():
         "-u",
         default=str(
             PROJECT_ROOT
-            / "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"
+            / "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf",
         ),
         help="Path to golfer URDF",
     )
@@ -124,41 +124,29 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
     return trajectory
 
 
-def run_ik_demo(
-    trajectory_path: Path,
-    sheet_name: str,
-    urdf_path: Path,
-    output_dir: Path,
-    subsample: int = 10,
-    visualize: bool = False,
-    playback: bool = False,
-):
-    """Run the full IK demo."""
+def _parse_and_subsample(trajectory_path, sheet_name, subsample):
     from motion_training.club_trajectory_parser import ClubTrajectoryParser
-    from motion_training.dual_hand_ik_solver import (
-        IKSolverSettings,
-        create_ik_solver,
-    )
-    from motion_training.trajectory_exporter import TrajectoryExporter
 
-    print("\n" + "=" * 60)
-    print("Motion Training Demo")
-    print("=" * 60)
-
-    # Step 1: Parse trajectory
     print("\n[1/5] Parsing club trajectory...")
     parser = ClubTrajectoryParser(trajectory_path)
     trajectory = parser.parse(sheet_name=sheet_name)
     print(
-        f"      Loaded {trajectory.num_frames} frames, {trajectory.duration:.2f}s duration"
+        f"      Loaded {trajectory.num_frames} frames, {trajectory.duration:.2f}s duration",
     )
 
-    # Subsample for faster processing
     if subsample > 1:
         trajectory.frames = trajectory.frames[::subsample]
         print(f"      Subsampled to {trajectory.num_frames} frames (1/{subsample})")
 
-    # Step 2: Initialize IK solver
+    return trajectory
+
+
+def _init_and_solve_ik(urdf_path, trajectory):
+    from motion_training.dual_hand_ik_solver import (
+        IKSolverSettings,
+        create_ik_solver,
+    )
+
     print("\n[2/5] Initializing IK solver...")
     settings = IKSolverSettings(
         dt=0.01,
@@ -177,7 +165,6 @@ def run_ik_demo(
         print("      Try running with --plot-only to skip IK")
         return None
 
-    # Step 3: Solve IK
     print("\n[3/5] Solving inverse kinematics...")
     print("      This may take a while for large trajectories...")
 
@@ -187,28 +174,29 @@ def run_ik_demo(
     print(
         f"      Mean position errors: "
         f"L={sum(ik_result.left_hand_errors) / len(ik_result.left_hand_errors) * 1000:.2f}mm, "
-        f"R={sum(ik_result.right_hand_errors) / len(ik_result.right_hand_errors) * 1000:.2f}mm"
+        f"R={sum(ik_result.right_hand_errors) / len(ik_result.right_hand_errors) * 1000:.2f}mm",
     )
+    return ik_result
 
-    # Step 4: Export results
+
+def _export_results(ik_result, trajectory, output_dir):
+    from motion_training.trajectory_exporter import TrajectoryExporter
+
     print("\n[4/5] Exporting results...")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     exporter = TrajectoryExporter(ik_result, trajectory)
 
-    # Export to MuJoCo format (primary)
     mujoco_path = exporter.export(output_dir / "swing_trajectory", format="mujoco")
     print(f"      MuJoCo: {mujoco_path}")
 
-    # Export to other formats
     csv_path = exporter.export(output_dir / "swing_trajectory", format="csv")
     print(f"      CSV: {csv_path}")
 
     npz_path = exporter.export(output_dir / "swing_trajectory", format="npz")
     print(f"      NPZ: {npz_path}")
 
-    # Generate plots
     try:
         from motion_training.motion_visualizer import MatplotlibVisualizer
 
@@ -231,7 +219,8 @@ def run_ik_demo(
     except ImportError:
         print("      Matplotlib not available for plots")
 
-    # Step 5: Visualization
+
+def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback):
     if visualize:
         print("\n[5/5] Launching visualization...")
         try:
@@ -251,6 +240,30 @@ def run_ik_demo(
             print(f"      Visualization not available: {e}")
     else:
         print("\n[5/5] Visualization skipped (use --visualize to enable)")
+
+
+def run_ik_demo(
+    trajectory_path: Path,
+    sheet_name: str,
+    urdf_path: Path,
+    output_dir: Path,
+    subsample: int = 10,
+    visualize: bool = False,
+    playback: bool = False,
+):
+    """Run the full IK demo."""
+    print("\n" + "=" * 60)
+    print("Motion Training Demo")
+    print("=" * 60)
+
+    trajectory = _parse_and_subsample(trajectory_path, sheet_name, subsample)
+
+    ik_result = _init_and_solve_ik(urdf_path, trajectory)
+    if ik_result is None:
+        return None
+
+    _export_results(ik_result, trajectory, output_dir)
+    _run_visualization(urdf_path, trajectory, ik_result, visualize, playback)
 
     print("\n" + "=" * 60)
     print("Demo complete!")

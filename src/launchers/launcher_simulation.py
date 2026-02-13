@@ -126,6 +126,93 @@ except ImportError as e:
 
         QMessageBox.warning(self, "Dependency Error", detailed_msg)
 
+    def _try_launch_special_app(self, model_id: str) -> bool:
+        if "urdf_generator" in model_id or "model_explorer" in model_id:
+            self._launch_urdf_generator()
+            return True
+        elif "c3d_viewer" in model_id:
+            self._launch_c3d_viewer()
+            return True
+        elif "shot_tracer" in model_id:
+            self._launch_shot_tracer()
+            return True
+        return False
+
+    def _try_launch_docker(self, model: Any) -> bool:
+        use_docker = hasattr(self, "chk_docker") and self.chk_docker.isChecked()
+        if not (use_docker and self.docker_available):
+            return False
+
+        self.lbl_status.setText(f"> Launching {model.name} in Docker...")
+        self.lbl_status.setStyleSheet(Styles.STATUS_INFO)
+        QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
+
+        try:
+            repo_path = getattr(model, "path", None)
+            if repo_path:
+                self._launch_docker_container(model, REPOS_ROOT / repo_path)
+            else:
+                self.show_toast("Model path missing for Docker launch.", "error")
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error(f"Docker launch failed: {e}")
+            self.show_toast(f"Docker Launch Failed: {e}", "error")
+            self.lbl_status.setText("> Ready")
+            self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
+        return True
+
+    def _check_local_dependencies(self, model: Any) -> bool:
+        use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
+        if use_wsl:
+            return True
+
+        self.lbl_status.setText(f"> Checking {model.name} dependencies...")
+        self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
+        QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
+
+        deps_ok, deps_error = self._check_module_dependencies(model.type)
+        if deps_ok:
+            return True
+
+        if self.docker_available:
+            response = QMessageBox.question(
+                self,
+                "Local Dependencies Missing",
+                f"{deps_error}\n\n"
+                "Would you like to try launching in Docker mode instead?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            if response == QMessageBox.StandardButton.Yes:
+                self.chk_docker.setChecked(True)
+                self.launch_simulation()
+                return False
+        self._show_dependency_error(model.name, deps_error)
+        self.lbl_status.setText("! Dependency Error")
+        self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+        return False
+
+    def _execute_local_launch(self, model: Any) -> None:
+        repo_path = getattr(model, "path", None)
+        if not repo_path:
+            self.show_toast("Model path missing.", "error")
+            return
+
+        abs_repo_path = REPOS_ROOT / repo_path
+        handler = self.model_handler_registry.get_handler(model.type)
+        if handler:
+            success = handler.launch(model, REPOS_ROOT, self.process_manager)
+            if success:
+                self.show_toast(f"{model.name} Launched", "success")
+                self.lbl_status.setText(f"* {model.name} Running")
+                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+            else:
+                self.show_toast(f"Failed to launch {model.name}", "error")
+                self.lbl_status.setText("* Launch Error")
+                self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+        elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
+            self._launch_generic_mjcf(abs_repo_path)
+        else:
+            self.show_toast(f"Unknown launch type: {model.type}", "warning")
+
     def launch_simulation(self) -> None:
         """Launch the selected simulation."""
         if not self.selected_model:
@@ -133,15 +220,7 @@ except ImportError as e:
 
         model_id = self.selected_model
 
-        # Handle Utility/Special Apps first
-        if "urdf_generator" in model_id or "model_explorer" in model_id:
-            self._launch_urdf_generator()
-            return
-        elif "c3d_viewer" in model_id:
-            self._launch_c3d_viewer()
-            return
-        elif "shot_tracer" in model_id:
-            self._launch_shot_tracer()
+        if self._try_launch_special_app(model_id):
             return
 
         model = self._get_model(model_id)
@@ -153,94 +232,17 @@ except ImportError as e:
             self._launch_matlab_app(model)
             return
 
-        # Handle Standard Physics Models
-        use_docker = hasattr(self, "chk_docker") and self.chk_docker.isChecked()
+        if self._try_launch_docker(model):
+            return
 
-        # Check if Docker mode is enabled
-        if use_docker and self.docker_available:
-            self.lbl_status.setText(f"> Launching {model.name} in Docker...")
-            self.lbl_status.setStyleSheet(Styles.STATUS_INFO)
-            QApplication.processEvents(
-                QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
-            )
-
-            try:
-                repo_path = getattr(model, "path", None)
-                if repo_path:
-                    self._launch_docker_container(model, REPOS_ROOT / repo_path)
-                else:
-                    self.show_toast("Model path missing for Docker launch.", "error")
-                return
-            except (RuntimeError, ValueError, OSError) as e:
-                logger.error(f"Docker launch failed: {e}")
-                self.show_toast(f"Docker Launch Failed: {e}", "error")
-                self.lbl_status.setText("> Ready")
-                self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
-                return
-
-        # Check if WSL mode is enabled
-        use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
-
-        # Local mode - check dependencies (only if not using WSL)
-        if not use_wsl:
-            self.lbl_status.setText(f"> Checking {model.name} dependencies...")
-            self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
-            QApplication.processEvents(
-                QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
-            )
-
-            # Check dependencies before launching
-            deps_ok, deps_error = self._check_module_dependencies(model.type)
-            if not deps_ok:
-                # Offer Docker as alternative if available
-                if self.docker_available:
-                    response = QMessageBox.question(
-                        self,
-                        "Local Dependencies Missing",
-                        f"{deps_error}\n\n"
-                        "Would you like to try launching in Docker mode instead?",
-                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                    )
-                    if response == QMessageBox.StandardButton.Yes:
-                        self.chk_docker.setChecked(True)
-                        self.launch_simulation()  # Retry with Docker
-                        return
-                self._show_dependency_error(model.name, deps_error)
-                self.lbl_status.setText("! Dependency Error")
-                self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
-                return
+        if not self._check_local_dependencies(model):
+            return
 
         self.lbl_status.setText(f"> Launching {model.name}...")
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
         try:
-            # Determine launch strategy
-            repo_path = getattr(model, "path", None)
-
-            # If path provided, use it
-            if repo_path:
-                abs_repo_path = REPOS_ROOT / repo_path
-
-                # Try to use the handler registry first (cleaner, extensible approach)
-                handler = self.model_handler_registry.get_handler(model.type)
-                if handler:
-                    success = handler.launch(model, REPOS_ROOT, self.process_manager)
-                    if success:
-                        self.show_toast(f"{model.name} Launched", "success")
-                        self.lbl_status.setText(f"* {model.name} Running")
-                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-                    else:
-                        self.show_toast(f"Failed to launch {model.name}", "error")
-                        self.lbl_status.setText("* Launch Error")
-                        self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
-                # Fallback for MJCF and unknown types
-                elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
-                    self._launch_generic_mjcf(abs_repo_path)
-                else:
-                    self.show_toast(f"Unknown launch type: {model.type}", "warning")
-            else:
-                self.show_toast("Model path missing.", "error")
-
+            self._execute_local_launch(model)
         except (ValueError, RuntimeError) as e:
             logger.error(f"Launch failed: {e}")
             self.show_toast(f"Launch Failed: {e}", "error")

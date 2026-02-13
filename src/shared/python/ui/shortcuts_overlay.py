@@ -153,11 +153,27 @@ class ShortcutsOverlay(QWidget):
 
     def _setup_ui(self) -> None:
         """Set up the overlay UI."""
-        # Main layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        # Centered content container
+        content = self._create_content_frame()
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(24, 20, 24, 20)
+        content_layout.setSpacing(16)
+
+        self._create_header(content_layout)
+        self._create_shortcuts_scroll(content_layout)
+        self._create_footer_hint(content_layout)
+
+        layout.addStretch()
+        h_layout = QHBoxLayout()
+        h_layout.addStretch()
+        h_layout.addWidget(content)
+        h_layout.addStretch()
+        layout.addLayout(h_layout)
+        layout.addStretch()
+
+    def _create_content_frame(self) -> QFrame:
         content = QFrame()
         content.setObjectName("shortcutsContent")
         content.setFixedSize(600, 500)
@@ -172,12 +188,9 @@ class ShortcutsOverlay(QWidget):
             )
         else:
             content.setStyleSheet(Styles.SHORTCUT_CONTENT)
+        return content
 
-        content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(24, 20, 24, 20)
-        content_layout.setSpacing(16)
-
-        # Header
+    def _create_header(self, content_layout: QVBoxLayout) -> None:
         header = QHBoxLayout()
         title = QLabel("Keyboard Shortcuts")
         if THEME_AVAILABLE:
@@ -189,7 +202,7 @@ class ShortcutsOverlay(QWidget):
             title.setFont(font)
             title.setStyleSheet(Styles.SHORTCUT_TITLE)
 
-        close_btn = QPushButton("\u2715")  # X character
+        close_btn = QPushButton("\u2715")
         close_btn.setFixedSize(28, 28)
         close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         close_btn.clicked.connect(self.close)
@@ -215,7 +228,7 @@ class ShortcutsOverlay(QWidget):
         header.addWidget(close_btn)
         content_layout.addLayout(header)
 
-        # Scrollable shortcuts list
+    def _create_shortcuts_scroll(self, content_layout: QVBoxLayout) -> None:
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -227,14 +240,12 @@ class ShortcutsOverlay(QWidget):
         shortcuts_layout.setContentsMargins(0, 0, 0, 0)
         shortcuts_layout.setSpacing(20)
 
-        # Group shortcuts by category
         categories: dict[str, list[Shortcut]] = {}
         for shortcut in self.shortcuts:
             if shortcut.category not in categories:
                 categories[shortcut.category] = []
             categories[shortcut.category].append(shortcut)
 
-        # Create sections for each category
         for category, cat_shortcuts in categories.items():
             section = self._create_category_section(category, cat_shortcuts)
             shortcuts_layout.addWidget(section)
@@ -243,7 +254,8 @@ class ShortcutsOverlay(QWidget):
         scroll.setWidget(shortcuts_widget)
         content_layout.addWidget(scroll)
 
-        # Footer hint
+    @staticmethod
+    def _create_footer_hint(content_layout: QVBoxLayout) -> None:
         hint = QLabel("Press Escape or click outside to close")
         if THEME_AVAILABLE:
             hint.setFont(get_qfont(size=Sizes.XS))
@@ -253,15 +265,6 @@ class ShortcutsOverlay(QWidget):
             hint.setStyleSheet(Styles.SHORTCUT_HINT)
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         content_layout.addWidget(hint)
-
-        # Center the content in the overlay
-        layout.addStretch()
-        h_layout = QHBoxLayout()
-        h_layout.addStretch()
-        h_layout.addWidget(content)
-        h_layout.addStretch()
-        layout.addLayout(h_layout)
-        layout.addStretch()
 
     def _create_category_section(
         self, category: str, shortcuts: list[Shortcut]

@@ -73,6 +73,56 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     loading_started = QtCore.pyqtSignal()
     loading_finished = QtCore.pyqtSignal(bool)
 
+    def _init_visualization_toggles(self) -> None:
+        self.show_force_vectors = False
+        self.show_torque_vectors = False
+        self.force_scale = 0.1
+        self.torque_scale = 0.1
+
+        self.show_induced_vectors = False
+        self.show_cf_vectors = False
+        self.induced_vector_source = "gravity"
+        self.cf_vector_type = "ztcf_accel"
+        self.isolate_forces_visualization = False
+
+        self.show_mobility_ellipsoid = False
+        self.show_force_ellipsoid = False
+
+        self.swing_plane_visualizer = SwingPlaneVisualizer()
+        self.show_swing_plane = False
+        self.show_club_trajectory = False
+        self.show_reference_trajectory = False
+        self.swing_plane_body_name = "clubhead"
+        self.reference_trajectory: np.ndarray | None = None
+
+        self.show_selected_body = True
+        self.show_constraints = True
+
+        self.visible_frames: set[int] = set()
+        self.visible_coms: set[int] = set()
+
+    def _init_scene_options(self) -> None:
+        self.scene_option = mujoco.MjvOption()
+        mujoco.mjv_defaultOption(self.scene_option)
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = False
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
+        self.scene: mujoco.MjvScene | None = None
+
+        self.sky_color = np.array([0.2, 0.3, 0.4, 1.0], dtype=np.float32)
+        self.ground_color = np.array([0.2, 0.2, 0.2, 1.0], dtype=np.float32)
+
+    def _init_camera(self) -> None:
+        self.camera = mujoco.MjvCamera()
+        mujoco.mjv_defaultCamera(self.camera)
+        self.camera.azimuth = 90.0
+        self.camera.elevation = -20.0
+        self.camera.distance = 3.0
+        self.camera.lookat[:] = [0, 0, 1]
+
+        self.last_mouse_pos: tuple[int, int] | None = None
+        self.camera_mode = "rotate"
+        self.is_dragging = False
+
     def __init__(
         self,
         parent: QtWidgets.QWidget | None = None,
@@ -94,36 +144,11 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.control_system: ControlSystem | None = None
         self.camera_name = "side"
 
-        # Visual toggles
-        self.show_force_vectors = False
-        self.show_torque_vectors = False
-        self.force_scale = 0.1
-        self.torque_scale = 0.1
+        self._init_visualization_toggles()
 
-        # Advanced Visual Toggles
-        self.show_induced_vectors = False
-        self.show_cf_vectors = False
-        self.induced_vector_source = "gravity"
-        self.cf_vector_type = "ztcf_accel"
-        self.isolate_forces_visualization = False
-
-        # Ellipsoid Visualization Toggles
-        self.show_mobility_ellipsoid = False
-        self.show_force_ellipsoid = False
-
-        # Swing Plane & Trajectory Visualization
-        self.swing_plane_visualizer = SwingPlaneVisualizer()
-        self.show_swing_plane = False
-        self.show_club_trajectory = False
-        self.show_reference_trajectory = False
-        self.swing_plane_body_name = "clubhead"
-        self.reference_trajectory: np.ndarray | None = None
-
-        # Real-time Analysis
         self.enable_live_analysis = False
         self.latest_bio_data: BiomechanicalData | None = None
 
-        # Meshcat integration
         self.meshcat_adapter: MuJoCoMeshcatAdapter | None = None
         try:
             self.meshcat_adapter = MuJoCoMeshcatAdapter()
@@ -131,44 +156,15 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             logger.warning("Could not initialize Meshcat adapter")
 
         self.telemetry: TelemetryRecorder | None = None
-
         self.running = True
 
-        # Biomechanical analysis
         self.analyzer: BiomechanicalAnalyzer | None = None
         self.recorder = SwingRecorder()
-
-        # Interactive manipulation
         self.manipulator: InteractiveManipulator | None = None
-        self.camera = mujoco.MjvCamera()
-        mujoco.mjv_defaultCamera(self.camera)
-        self.camera.azimuth = 90.0
-        self.camera.elevation = -20.0
-        self.camera.distance = 3.0
-        self.camera.lookat[:] = [0, 0, 1]
 
-        # Visualization for selected bodies and constraints
-        self.show_selected_body = True
-        self.show_constraints = True
-
-        # Per-body visibility
-        self.visible_frames: set[int] = set()
-        self.visible_coms: set[int] = set()
-
-        # Operating Mode
+        self._init_camera()
         self.operating_mode = "dynamic"
-
-        # MuJoCo scene options
-        self.scene_option = mujoco.MjvOption()
-        mujoco.mjv_defaultOption(self.scene_option)
-        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = False
-        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
-
-        self.scene: mujoco.MjvScene | None = None
-
-        # Background color settings (RGBA)
-        self.sky_color = np.array([0.2, 0.3, 0.4, 1.0], dtype=np.float32)
-        self.ground_color = np.array([0.2, 0.2, 0.2, 1.0], dtype=np.float32)
+        self._init_scene_options()
 
         # UI
         self.label = QtWidgets.QLabel(self)
@@ -178,11 +174,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
-
-        # Camera manipulation state
-        self.last_mouse_pos: tuple[int, int] | None = None
-        self.camera_mode = "rotate"
-        self.is_dragging = False
 
         # Timer
         self.timer = QtCore.QTimer(self)

@@ -107,19 +107,7 @@ class MultiModelShotTracerWidget(QWidget):
 
         main_layout.addWidget(splitter)
 
-    def _create_controls_panel(self) -> QWidget:
-        """Create the left control panel."""
-        panel = QWidget()
-        layout = QVBoxLayout(panel)
-        layout.setSpacing(10)
-
-        # Title
-        title = QLabel("Multi-Model Shot Tracer")
-        title.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
-
-        # Model Selection Group
+    def _create_model_selection_group(self) -> QGroupBox:
         model_group = QGroupBox("Physics Models")
         model_layout = QVBoxLayout()
 
@@ -128,18 +116,17 @@ class MultiModelShotTracerWidget(QWidget):
             model = FlightModelRegistry.get_model(model_type)
             checkbox = QCheckBox(f"{model.name}")
             checkbox.setToolTip(f"{model.description}\nRef: {model.reference}")
-            checkbox.setChecked(True)  # All models enabled by default
+            checkbox.setChecked(True)
             self.model_checkboxes[model_type.value] = checkbox
             model_layout.addWidget(checkbox)
 
         model_group.setLayout(model_layout)
-        layout.addWidget(model_group)
+        return model_group
 
-        # Launch Parameters Group
+    def _create_launch_parameters_group(self) -> QGroupBox:
         launch_group = QGroupBox("Launch Parameters")
         form = QFormLayout()
 
-        # Ball Speed
         self.speed_spin = QDoubleSpinBox()
         self.speed_spin.setRange(50.0, 200.0)
         self.speed_spin.setValue(163.0)
@@ -147,15 +134,13 @@ class MultiModelShotTracerWidget(QWidget):
         self.speed_spin.setDecimals(1)
         form.addRow("Ball Speed:", self.speed_spin)
 
-        # Launch Angle
         self.angle_spin = QDoubleSpinBox()
         self.angle_spin.setRange(-10.0, 45.0)
         self.angle_spin.setValue(11.0)
-        self.angle_spin.setSuffix("°")
+        self.angle_spin.setSuffix("\u00b0")
         self.angle_spin.setDecimals(1)
         form.addRow("Launch Angle:", self.angle_spin)
 
-        # Spin Rate
         self.spin_spin = QDoubleSpinBox()
         self.spin_spin.setRange(0.0, 12000.0)
         self.spin_spin.setValue(2500.0)
@@ -163,29 +148,27 @@ class MultiModelShotTracerWidget(QWidget):
         self.spin_spin.setDecimals(0)
         form.addRow("Backspin:", self.spin_spin)
 
-        # Azimuth Angle
         self.azimuth_spin = QDoubleSpinBox()
         self.azimuth_spin.setRange(-45.0, 45.0)
         self.azimuth_spin.setValue(0.0)
-        self.azimuth_spin.setSuffix("°")
+        self.azimuth_spin.setSuffix("\u00b0")
         self.azimuth_spin.setDecimals(1)
         form.addRow("Direction:", self.azimuth_spin)
 
-        # Spin Axis Angle (for sidespin)
         self.spin_axis_spin = QDoubleSpinBox()
         self.spin_axis_spin.setRange(-45.0, 45.0)
         self.spin_axis_spin.setValue(0.0)
-        self.spin_axis_spin.setSuffix("°")
+        self.spin_axis_spin.setSuffix("\u00b0")
         self.spin_axis_spin.setDecimals(1)
         self.spin_axis_spin.setToolTip(
-            "Spin axis tilt: 0° = pure backspin, ±45° = fade/draw"
+            "Spin axis tilt: 0\u00b0 = pure backspin, \u00b145\u00b0 = fade/draw"
         )
         form.addRow("Spin Axis Tilt:", self.spin_axis_spin)
 
         launch_group.setLayout(form)
-        layout.addWidget(launch_group)
+        return launch_group
 
-        # Presets Group
+    def _create_presets_group(self) -> QGroupBox:
         presets_group = QGroupBox("Club Presets")
         presets_layout = QHBoxLayout()
 
@@ -202,9 +185,9 @@ class MultiModelShotTracerWidget(QWidget):
         presets_layout.addWidget(pw_btn)
 
         presets_group.setLayout(presets_layout)
-        layout.addWidget(presets_group)
+        return presets_group
 
-        # Action Buttons
+    def _create_action_buttons(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
 
         self.simulate_btn = QPushButton("Compare Models")
@@ -216,9 +199,9 @@ class MultiModelShotTracerWidget(QWidget):
         self.clear_btn = QPushButton("Clear")
         button_layout.addWidget(self.clear_btn)
 
-        layout.addLayout(button_layout)
+        return button_layout
 
-        # Legend
+    def _create_legend_group(self) -> QGroupBox:
         legend_group = QGroupBox("Legend")
         legend_layout = QVBoxLayout()
 
@@ -227,14 +210,30 @@ class MultiModelShotTracerWidget(QWidget):
             model = FlightModelRegistry.get_model(model_type)
             color = TRAJECTORY_COLORS[i % len(TRAJECTORY_COLORS)]
             rgb = f"rgb({int(color[0] * 255)},{int(color[1] * 255)},{int(color[2] * 255)})"
-            label = QLabel(f"● {model.name}")
+            label = QLabel(f"\u25cf {model.name}")
             label.setStyleSheet(f"color: {rgb}; font-weight: bold;")
             legend_layout.addWidget(label)
             self.legend_labels.append(label)
 
         legend_group.setLayout(legend_layout)
-        layout.addWidget(legend_group)
+        return legend_group
 
+    def _create_controls_panel(self) -> QWidget:
+        """Create the left control panel."""
+        panel = QWidget()
+        layout = QVBoxLayout(panel)
+        layout.setSpacing(10)
+
+        title = QLabel("Multi-Model Shot Tracer")
+        title.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        layout.addWidget(self._create_model_selection_group())
+        layout.addWidget(self._create_launch_parameters_group())
+        layout.addWidget(self._create_presets_group())
+        layout.addLayout(self._create_action_buttons())
+        layout.addWidget(self._create_legend_group())
         layout.addStretch()
 
         return panel

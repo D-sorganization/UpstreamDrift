@@ -57,12 +57,20 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(4)
 
-        # Header
         header = QtWidgets.QLabel("<b>Club Data & Targets</b>")
         header.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(header)
 
-        # Load buttons
+        self._create_load_buttons(layout)
+        self._create_club_selection_group(layout)
+        self._create_player_selection_group(layout)
+        self._create_club_specs_group(layout)
+        self._create_target_metrics_group(layout)
+        self._create_target_overlay_group(layout)
+
+        layout.addStretch(1)
+
+    def _create_load_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:
         load_layout = QtWidgets.QHBoxLayout()
         self.btn_load_clubs = QtWidgets.QPushButton("Load Club Data")
         self.btn_load_clubs.setToolTip("Load club specifications from Excel file")
@@ -75,11 +83,10 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         load_layout.addWidget(self.btn_load_players)
         layout.addLayout(load_layout)
 
-        # Club selection group
+    def _create_club_selection_group(self, layout: QtWidgets.QVBoxLayout) -> None:
         club_group = QtWidgets.QGroupBox("Club Selection")
         club_layout = QtWidgets.QVBoxLayout(club_group)
 
-        # Club type filter
         filter_layout = QtWidgets.QHBoxLayout()
         filter_layout.addWidget(QtWidgets.QLabel("Type:"))
         self.combo_club_type = QtWidgets.QComboBox()
@@ -90,7 +97,6 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         filter_layout.addWidget(self.combo_club_type)
         club_layout.addLayout(filter_layout)
 
-        # Club list
         self.list_clubs = QtWidgets.QListWidget()
         self.list_clubs.setMaximumHeight(120)
         self.list_clubs.currentItemChanged.connect(self._on_club_changed)
@@ -98,7 +104,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
         layout.addWidget(club_group)
 
-        # Player selection group
+    def _create_player_selection_group(self, layout: QtWidgets.QVBoxLayout) -> None:
         player_group = QtWidgets.QGroupBox("Target Player Data")
         player_layout = QtWidgets.QVBoxLayout(player_group)
 
@@ -109,7 +115,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
         layout.addWidget(player_group)
 
-        # Club specifications display
+    def _create_club_specs_group(self, layout: QtWidgets.QVBoxLayout) -> None:
         spec_group = QtWidgets.QGroupBox("Club Specifications")
         spec_layout = QtWidgets.QFormLayout(spec_group)
 
@@ -129,7 +135,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
         layout.addWidget(spec_group)
 
-        # Target metrics display
+    def _create_target_metrics_group(self, layout: QtWidgets.QVBoxLayout) -> None:
         metrics_group = QtWidgets.QGroupBox("Target Metrics")
         metrics_layout = QtWidgets.QFormLayout(metrics_group)
 
@@ -147,7 +153,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
         layout.addWidget(metrics_group)
 
-        # Target overlay controls
+    def _create_target_overlay_group(self, layout: QtWidgets.QVBoxLayout) -> None:
         overlay_group = QtWidgets.QGroupBox("Target Overlay")
         overlay_layout = QtWidgets.QVBoxLayout(overlay_group)
 
@@ -158,7 +164,6 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         self.chk_show_target.toggled.connect(self._on_target_enabled)
         overlay_layout.addWidget(self.chk_show_target)
 
-        # Target display options
         options_layout = QtWidgets.QHBoxLayout()
         self.chk_show_path = QtWidgets.QCheckBox("Path")
         self.chk_show_path.setChecked(True)
@@ -176,7 +181,6 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
         overlay_layout.addLayout(options_layout)
 
-        # Opacity slider
         opacity_layout = QtWidgets.QHBoxLayout()
         opacity_layout.addWidget(QtWidgets.QLabel("Opacity:"))
         self.slider_opacity = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
@@ -190,8 +194,6 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         overlay_layout.addLayout(opacity_layout)
 
         layout.addWidget(overlay_group)
-
-        layout.addStretch(1)
 
     def load_clubs(self, clubs: list[ClubSpecification]) -> None:
         """Load club specifications into the widget."""

@@ -359,6 +359,81 @@ class SwingOptimizer:
 
         return objective
 
+    def _interpolate_trajectory(
+        self, trajectory: np.ndarray
+    ) -> tuple[np.ndarray, float, int]:
+        dt = self.model.opt.timestep
+        num_steps = int(self.swing_duration / dt)
+
+        knot_times = np.linspace(0, self.swing_duration, self.num_knot_points)
+        sim_times = np.linspace(0, self.swing_duration, num_steps)
+
+        trajectory_interp = np.zeros((num_steps, self.model.nv))
+        for dof in range(self.model.nv):
+            spline = CubicSpline(knot_times, trajectory[:, dof])
+            trajectory_interp[:, dof] = spline(sim_times)
+
+        return trajectory_interp, dt, num_steps
+
+    def _detect_jacobian_api(
+        self,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool]:
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+        jacp_flat = np.zeros(3 * self.model.nv)
+        jacr_flat = np.zeros(3 * self.model.nv)
+        use_flat_jac = False
+
+        if self.club_head_id is not None:
+            try:
+                mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
+            except TypeError:
+                use_flat_jac = True
+
+        return jacp, jacr, jacp_flat, jacr_flat, use_flat_jac
+
+    def _compute_club_speed(
+        self,
+        jacp: np.ndarray,
+        jacr: np.ndarray,
+        jacp_flat: np.ndarray,
+        jacr_flat: np.ndarray,
+        use_flat_jac: bool,
+    ) -> float:
+        if use_flat_jac:
+            mujoco.mj_jacBody(
+                self.model,
+                self.data,
+                jacp_flat,
+                jacr_flat,
+                self.club_head_id,
+            )
+            jacp[:] = jacp_flat.reshape(3, self.model.nv)
+        else:
+            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
+
+        vel = jacp @ self.data.qvel
+        return float(np.linalg.norm(vel))
+
+    def _collect_simulation_metrics(
+        self,
+        club_speeds: list,
+        club_positions: list,
+        controls: np.ndarray,
+        velocities: np.ndarray,
+    ) -> dict:
+        peak_club_speed = (
+            float(max(float(s) for s in club_speeds)) if club_speeds else 0.0
+        )
+        total_energy = np.sum(np.abs(controls) * np.abs(velocities[:, : self.model.nu]))
+        final_club_position = club_positions[-1] if club_positions else np.zeros(3)
+
+        return {
+            "peak_club_speed": peak_club_speed,
+            "total_energy": total_energy,
+            "final_club_position": final_club_position,
+        }
+
     def _simulate_trajectory(
         self,
         trajectory: np.ndarray,
@@ -371,47 +446,19 @@ class SwingOptimizer:
         Returns:
             Tuple of (velocities, controls, metrics_dict)
         """
-        # Interpolate trajectory to simulation timesteps
-        dt = self.model.opt.timestep
-        num_steps = int(self.swing_duration / dt)
+        trajectory_interp, dt, num_steps = self._interpolate_trajectory(trajectory)
 
-        knot_times = np.linspace(0, self.swing_duration, self.num_knot_points)
-        sim_times = np.linspace(0, self.swing_duration, num_steps)
-
-        # Cubic spline interpolation
-        trajectory_interp = np.zeros((num_steps, self.model.nv))
-        for dof in range(self.model.nv):
-            spline = CubicSpline(knot_times, trajectory[:, dof])
-            trajectory_interp[:, dof] = spline(sim_times)
-
-        # Simulate
         velocities = np.zeros((num_steps, self.model.nv))
         controls = np.zeros((num_steps, self.model.nu))
-        club_speeds = []
-        club_positions = []
+        club_speeds: list[float] = []
+        club_positions: list[np.ndarray] = []
 
-        # Reset simulation
         mujoco.mj_resetData(self.model, self.data)
-
-        # ⚡ Bolt Optimization: Pre-allocate Jacobian arrays to avoid allocation in loop
-        jacp = np.zeros((3, self.model.nv))
-        jacr = np.zeros((3, self.model.nv))
-        jacp_flat = np.zeros(3 * self.model.nv)
-        jacr_flat = np.zeros(3 * self.model.nv)
-        use_flat_jac = False
-
-        if self.club_head_id is not None:
-            try:
-                # Try the 2D array signature first (newer MuJoCo)
-                mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
-            except TypeError:
-                use_flat_jac = True
+        jacp, jacr, jacp_flat, jacr_flat, use_flat_jac = self._detect_jacobian_api()
 
         for step in range(num_steps):
-            # Set desired position
             self.data.qpos[:] = trajectory_interp[step]
 
-            # Simple PD control to track trajectory
             if step < num_steps - 1:
                 desired_vel = (
                     trajectory_interp[step + 1] - trajectory_interp[step]
@@ -419,62 +466,33 @@ class SwingOptimizer:
             else:
                 desired_vel = np.zeros(self.model.nv)
 
-            # PD gains
             kp = 100.0
             kd = 20.0
-
             pos_error = trajectory_interp[step] - self.data.qpos
             vel_error = desired_vel - self.data.qvel
-
-            ctrl = kp * pos_error + kd * vel_error
-            # Limit torques to reasonable range
-            max_torque = 100.0
-            ctrl = np.clip(ctrl, -max_torque, max_torque)
-
+            ctrl = np.clip(kp * pos_error + kd * vel_error, -100.0, 100.0)
             self.data.ctrl[:] = ctrl[: self.model.nu]
 
-            # Step simulation
             mujoco.mj_step(self.model, self.data)
 
-            # Record
             velocities[step] = self.data.qvel.copy()
             controls[step] = self.data.ctrl.copy()
 
-            # Club head speed
             if self.club_head_id is not None:
-                if use_flat_jac:
-                    mujoco.mj_jacBody(
-                        self.model,
-                        self.data,
+                club_speeds.append(
+                    self._compute_club_speed(
+                        jacp,
+                        jacr,
                         jacp_flat,
                         jacr_flat,
-                        self.club_head_id,
+                        use_flat_jac,
                     )
-                    jacp[:] = jacp_flat.reshape(3, self.model.nv)
-                else:
-                    mujoco.mj_jacBody(
-                        self.model, self.data, jacp, jacr, self.club_head_id
-                    )
-
-                vel = jacp @ self.data.qvel
-                club_speed = np.linalg.norm(vel)
-                club_speeds.append(club_speed)
-
+                )
                 club_positions.append(self.data.xpos[self.club_head_id].copy())
 
-        # Compute metrics
-        peak_club_speed = (
-            float(max(float(s) for s in club_speeds)) if club_speeds else 0.0
+        metrics = self._collect_simulation_metrics(
+            club_speeds, club_positions, controls, velocities
         )
-        total_energy = np.sum(np.abs(controls) * np.abs(velocities[:, : self.model.nu]))
-        final_club_position = club_positions[-1] if club_positions else np.zeros(3)
-
-        metrics = {
-            "peak_club_speed": peak_club_speed,
-            "total_energy": total_energy,
-            "final_club_position": final_club_position,
-        }
-
         return velocities, controls, metrics
 
     def _compute_jerk(self, trajectory: np.ndarray) -> float:

@@ -119,12 +119,20 @@ class HumanoidConfigTab(QWidget):
         tab_layout.setSpacing(10)
         tab_layout.setContentsMargins(10, 10, 10, 10)
 
-        # -- Simulation Settings --
+        self._create_sim_settings_group(tab_layout)
+        self._create_state_management_group(tab_layout)
+        self._create_docker_action_buttons(tab_layout)
+        self._create_results_section(tab_layout)
+        self._create_simulation_log(tab_layout)
+
+        tab_layout.addStretch()
+        self.sub_tabs.addTab(scroll, "Docker Simulation")
+
+    def _create_sim_settings_group(self, tab_layout: QVBoxLayout) -> None:
         settings_group = QGroupBox("Simulation Settings")
         settings_layout = QGridLayout()
         settings_layout.setSpacing(8)
 
-        # Control Mode
         settings_layout.addWidget(QLabel("Control Mode:"), 0, 0)
         self.combo_control = QComboBox()
         self.combo_control.addItems(["pd", "lqr", "poly"])
@@ -134,7 +142,6 @@ class HumanoidConfigTab(QWidget):
         self.combo_control.currentTextChanged.connect(self._on_control_mode_changed)
         settings_layout.addWidget(self.combo_control, 0, 1)
 
-        # Signal generator buttons
         self.btn_poly_generator = QPushButton("Polynomial Generator")
         self.btn_poly_generator.clicked.connect(self._open_polynomial_generator)
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
@@ -143,15 +150,12 @@ class HumanoidConfigTab(QWidget):
         self.btn_signal_toolkit.clicked.connect(self._open_signal_toolkit)
         settings_layout.addWidget(self.btn_signal_toolkit, 0, 3)
 
-        # Mode help
         self.mode_help_label = QLabel()
         self.mode_help_label.setWordWrap(True)
         settings_layout.addWidget(self.mode_help_label, 1, 1, 1, 3)
 
-        # Trigger initial state
         self._on_control_mode_changed(self.combo_control.currentText())
 
-        # Live view checkbox
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
         self.chk_live.setChecked(self.config.live_view)
         settings_layout.addWidget(self.chk_live, 2, 0, 1, 4)
@@ -159,7 +163,7 @@ class HumanoidConfigTab(QWidget):
         settings_group.setLayout(settings_layout)
         tab_layout.addWidget(settings_group)
 
-        # -- State Management --
+    def _create_state_management_group(self, tab_layout: QVBoxLayout) -> None:
         state_group = QGroupBox("State Management")
         state_layout = QGridLayout()
 
@@ -182,7 +186,7 @@ class HumanoidConfigTab(QWidget):
         state_group.setLayout(state_layout)
         tab_layout.addWidget(state_group)
 
-        # -- Action Buttons --
+    def _create_docker_action_buttons(self, tab_layout: QVBoxLayout) -> None:
         btn_layout = QHBoxLayout()
 
         self.btn_run = QPushButton("RUN DOCKER SIMULATION")
@@ -203,7 +207,7 @@ class HumanoidConfigTab(QWidget):
         btn_layout.addWidget(self.btn_rebuild)
         tab_layout.addLayout(btn_layout)
 
-        # -- Results --
+    def _create_results_section(self, tab_layout: QVBoxLayout) -> None:
         results_layout = QHBoxLayout()
         results_layout.addWidget(QLabel("Results:"))
 
@@ -220,7 +224,7 @@ class HumanoidConfigTab(QWidget):
         results_layout.addStretch()
         tab_layout.addLayout(results_layout)
 
-        # -- Simulation Log --
+    def _create_simulation_log(self, tab_layout: QVBoxLayout) -> None:
         log_group = QGroupBox("Simulation Log")
         log_layout = QVBoxLayout()
         header = QHBoxLayout()
@@ -238,9 +242,6 @@ class HumanoidConfigTab(QWidget):
         log_layout.addWidget(self.txt_log)
         log_group.setLayout(log_layout)
         tab_layout.addWidget(log_group)
-
-        tab_layout.addStretch()
-        self.sub_tabs.addTab(scroll, "Docker Simulation")
 
     # ------------------------------------------------------------------
     # Appearance Tab

@@ -265,17 +265,10 @@ def example_4_inverse_dynamics() -> None:
     return id_results  # type: ignore[return-value]
 
 
-def example_5_complete_analysis_pipeline() -> None:
-    """Example 5: Complete analysis from mocap to forces.
-
-    This is the full workflow you would use for analyzing a real
-    player's swing captured with motion capture.
-    """
-
-    # Step 1: Load mocap (simulated)
-
+def _generate_synthetic_mocap() -> MotionCaptureSequence:
     times_mocap = np.linspace(0, 1.5, 180)  # 120 Hz
     frames = []
+    marker_names = ["CLUB_HEAD", "RSHO", "LSHO"]
 
     for t in times_mocap:
         markers = {
@@ -288,33 +281,37 @@ def example_5_complete_analysis_pipeline() -> None:
         frame = MotionCaptureFrame(time=t, marker_positions=markers)
         frames.append(frame)
 
-    mocap_seq = MotionCaptureSequence(
+    return MotionCaptureSequence(
         frames=frames,
         frame_rate=120.0,
-        marker_names=list(markers.keys()),
+        marker_names=marker_names,
     )
 
-    # Step 2: Retarget
 
-    model = mujoco.MjModel.from_xml_string(ADVANCED_BIOMECHANICAL_GOLF_SWING_XML)
-    data = mujoco.MjData(model)
-
+def _retarget_mocap(
+    mocap_seq: MotionCaptureSequence,
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+) -> tuple[np.ndarray, np.ndarray]:
     marker_set = MarkerSet.golf_swing_marker_set()
     retargeting = MotionRetargeting(model, data, marker_set)
 
+    marker_names = list(mocap_seq.frames[0].marker_positions.keys())
     times_ret, joint_traj, success = retargeting.retarget_sequence(
         mocap_seq,
-        use_markers=list(markers.keys()),
+        use_markers=marker_names,
         ik_iterations=15,
     )
 
     100.0 * sum(success) / len(success)
+    return times_ret, joint_traj
 
-    # Step 3: Filter and compute derivatives
 
+def _filter_and_differentiate(
+    times_ret: np.ndarray, joint_traj: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     processor = MotionCaptureProcessor()
 
-    # Filter
     joint_traj_filtered = processor.filter_trajectory(
         times_ret,
         joint_traj,
@@ -322,7 +319,6 @@ def example_5_complete_analysis_pipeline() -> None:
         sampling_rate=120.0,
     )
 
-    # Compute velocities and accelerations
     velocities = processor.compute_velocities(
         times_ret,
         joint_traj_filtered,
@@ -334,7 +330,26 @@ def example_5_complete_analysis_pipeline() -> None:
         method="spline",
     )
 
-    # Step 4: Kinematic forces
+    return joint_traj_filtered, velocities, accelerations
+
+
+def example_5_complete_analysis_pipeline() -> None:
+    """Example 5: Complete analysis from mocap to forces.
+
+    This is the full workflow you would use for analyzing a real
+    player's swing captured with motion capture.
+    """
+
+    mocap_seq = _generate_synthetic_mocap()
+
+    model = mujoco.MjModel.from_xml_string(ADVANCED_BIOMECHANICAL_GOLF_SWING_XML)
+    data = mujoco.MjData(model)
+
+    times_ret, joint_traj = _retarget_mocap(mocap_seq, model, data)
+
+    joint_traj_filtered, velocities, accelerations = _filter_and_differentiate(
+        times_ret, joint_traj
+    )
 
     kin_analyzer = KinematicForceAnalyzer(model, data)
     force_data_list = kin_analyzer.analyze_trajectory(
@@ -343,10 +358,7 @@ def example_5_complete_analysis_pipeline() -> None:
         velocities,
         accelerations,
     )
-
     max(abs(fd.coriolis_power) for fd in force_data_list)
-
-    # Step 5: Inverse dynamics
 
     id_solver = InverseDynamicsSolver(model, data)
     id_results = id_solver.solve_inverse_dynamics_trajectory(
@@ -355,12 +367,8 @@ def example_5_complete_analysis_pipeline() -> None:
         velocities,
         accelerations,
     )
-
     max(np.max(np.abs(r.joint_torques)) for r in id_results)
 
-    # Step 6: Results
-
-    # Kinetic energy
     avg_rot_ke = np.mean([fd.rotational_kinetic_energy for fd in force_data_list])
     avg_trans_ke = np.mean([fd.translational_kinetic_energy for fd in force_data_list])
     avg_rot_ke + avg_trans_ke

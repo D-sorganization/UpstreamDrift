@@ -161,6 +161,68 @@ class LauncherDiagnostics:
         self.results.append(result)
         return result
 
+    def _validate_models_yaml_content(
+        self, data: Any, details: dict[str, Any]
+    ) -> DiagnosticResult | None:
+        details["raw_content_preview"] = str(data)[:500] if data else "empty"
+
+        if not data:
+            return DiagnosticResult(
+                name="models_yaml",
+                status="fail",
+                message="models.yaml is empty",
+                details=details,
+                duration_ms=0,
+            )
+
+        if "models" not in data:
+            return DiagnosticResult(
+                name="models_yaml",
+                status="fail",
+                message="models.yaml missing 'models' key",
+                details=details,
+                duration_ms=0,
+            )
+        return None
+
+    def _check_models_yaml_completeness(
+        self, models: list, details: dict[str, Any]
+    ) -> DiagnosticResult:
+        details["model_count"] = len(models)
+        details["model_ids"] = [m.get("id", "unknown") for m in models]
+
+        found_ids = set(details["model_ids"])
+        expected_ids = set(self.EXPECTED_TILE_IDS)
+        missing_ids = expected_ids - found_ids
+        extra_ids = found_ids - expected_ids
+
+        details["missing_expected_ids"] = list(missing_ids)
+        details["extra_ids"] = list(extra_ids)
+
+        if missing_ids:
+            return DiagnosticResult(
+                name="models_yaml",
+                status="fail",
+                message=f"Missing {len(missing_ids)} expected models: {missing_ids}",
+                details=details,
+                duration_ms=0,
+            )
+        elif len(models) < len(self.EXPECTED_TILE_IDS):
+            return DiagnosticResult(
+                name="models_yaml",
+                status="warning",
+                message=f"Only {len(models)} models defined (expected {len(self.EXPECTED_TILE_IDS)})",
+                details=details,
+                duration_ms=0,
+            )
+        return DiagnosticResult(
+            name="models_yaml",
+            status="pass",
+            message=f"models.yaml valid with {len(models)} models",
+            details=details,
+            duration_ms=0,
+        )
+
     def check_models_yaml(self) -> DiagnosticResult:
         """Check models.yaml configuration file."""
         start = time.time()
@@ -188,67 +250,13 @@ class LauncherDiagnostics:
             with open(models_yaml_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
-            details["raw_content_preview"] = str(data)[:500] if data else "empty"
+            early_result = self._validate_models_yaml_content(data, details)
+            if early_result is not None:
+                early_result.duration_ms = (time.time() - start) * 1000
+                self.results.append(early_result)
+                return early_result
 
-            if not data:
-                result = DiagnosticResult(
-                    name="models_yaml",
-                    status="fail",
-                    message="models.yaml is empty",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
-                self.results.append(result)
-                return result
-
-            if "models" not in data:
-                result = DiagnosticResult(
-                    name="models_yaml",
-                    status="fail",
-                    message="models.yaml missing 'models' key",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
-                self.results.append(result)
-                return result
-
-            models = data["models"]
-            details["model_count"] = len(models)
-            details["model_ids"] = [m.get("id", "unknown") for m in models]
-
-            # Check for expected models
-            found_ids = set(details["model_ids"])
-            expected_ids = set(self.EXPECTED_TILE_IDS)
-            missing_ids = expected_ids - found_ids
-            extra_ids = found_ids - expected_ids
-
-            details["missing_expected_ids"] = list(missing_ids)
-            details["extra_ids"] = list(extra_ids)
-
-            if missing_ids:
-                result = DiagnosticResult(
-                    name="models_yaml",
-                    status="fail",
-                    message=f"Missing {len(missing_ids)} expected models: {missing_ids}",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
-            elif len(models) < len(self.EXPECTED_TILE_IDS):
-                result = DiagnosticResult(
-                    name="models_yaml",
-                    status="warning",
-                    message=f"Only {len(models)} models defined (expected {len(self.EXPECTED_TILE_IDS)})",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
-            else:
-                result = DiagnosticResult(
-                    name="models_yaml",
-                    status="pass",
-                    message=f"models.yaml valid with {len(models)} models",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
+            result = self._check_models_yaml_completeness(data["models"], details)
 
         except yaml.YAMLError as e:
             details["yaml_error"] = str(e)
@@ -257,7 +265,7 @@ class LauncherDiagnostics:
                 status="fail",
                 message=f"YAML parsing error: {e}",
                 details=details,
-                duration_ms=(time.time() - start) * 1000,
+                duration_ms=0,
             )
         except ImportError as e:
             details["error"] = str(e)
@@ -266,9 +274,10 @@ class LauncherDiagnostics:
                 status="fail",
                 message=f"Error reading models.yaml: {e}",
                 details=details,
-                duration_ms=(time.time() - start) * 1000,
+                duration_ms=0,
             )
 
+        result.duration_ms = (time.time() - start) * 1000
         self.results.append(result)
         return result
 

@@ -106,90 +106,118 @@ class RRTPlanner(MotionPlanner):
         q_start = np.asarray(q_start)
         q_goal = np.asarray(q_goal)
 
-        # Reset state
         self._nodes = []
         self._num_collision_checks = 0
         start_time = time.perf_counter()
 
-        # Validate start and goal
-        if not self._is_valid(q_start):
-            return PlannerResult(
-                status=PlannerStatus.INVALID_START,
-                planning_time=time.perf_counter() - start_time,
-            )
+        validation_result = self._validate_start_goal(q_start, q_goal, start_time)
+        if validation_result is not None:
+            return validation_result
 
-        if not self._is_valid(q_goal):
-            return PlannerResult(
-                status=PlannerStatus.INVALID_GOAL,
-                planning_time=time.perf_counter() - start_time,
-            )
-
-        # Initialize tree with start
         self._nodes.append(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
 
         goal_idx = -1
         iterations = 0
 
         while iterations < self._config.max_iterations:
-            # Check time limit
             if time.perf_counter() - start_time > self._config.max_time:
-                return PlannerResult(
-                    status=PlannerStatus.TIMEOUT,
-                    num_iterations=iterations,
-                    planning_time=time.perf_counter() - start_time,
-                    num_nodes=len(self._nodes),
-                    num_collision_checks=self._num_collision_checks,
-                )
+                return self._timeout_result(iterations, start_time)
 
             iterations += 1
 
-            # Sample random configuration with goal bias
-            q_rand = self._sample_with_goal_bias(q_goal)
-
-            # Find nearest node in tree
-            nearest_idx = self._find_nearest(q_rand)
-            q_nearest = self._nodes[nearest_idx].config
-
-            # Steer toward random sample
-            q_new = self._steer(q_nearest, q_rand)
-
-            # Check if new configuration and path are valid
-            self._num_collision_checks += 1
-            if not self._is_valid(q_new):
+            new_idx, new_cost = self._expand_tree(q_goal)
+            if new_idx < 0:
                 continue
 
-            self._num_collision_checks += self._config.collision_check_resolution
-            if not self._is_path_valid(q_nearest, q_new):
-                continue
+            goal_idx = self._try_connect_goal(new_idx, new_cost, q_goal)
+            if goal_idx >= 0:
+                break
 
-            # Add new node to tree
-            new_cost = self._nodes[nearest_idx].cost + self._distance(q_nearest, q_new)
-            new_node = TreeNode(
-                config=q_new.copy(),
-                parent_idx=nearest_idx,
-                cost=new_cost,
+        return self._build_result(goal_idx, iterations, start_time)
+
+    def _validate_start_goal(
+        self,
+        q_start: np.ndarray,
+        q_goal: np.ndarray,
+        start_time: float,
+    ) -> PlannerResult | None:
+        if not self._is_valid(q_start):
+            return PlannerResult(
+                status=PlannerStatus.INVALID_START,
+                planning_time=time.perf_counter() - start_time,
             )
-            new_idx = len(self._nodes)
-            self._nodes.append(new_node)
+        if not self._is_valid(q_goal):
+            return PlannerResult(
+                status=PlannerStatus.INVALID_GOAL,
+                planning_time=time.perf_counter() - start_time,
+            )
+        return None
 
-            # Check if goal reached
-            if self._distance(q_new, q_goal) <= self._config.goal_tolerance:
-                # Try to connect directly to goal
-                self._num_collision_checks += self._config.collision_check_resolution
-                if self._is_path_valid(q_new, q_goal):
-                    goal_cost = new_cost + self._distance(q_new, q_goal)
-                    goal_node = TreeNode(
-                        config=q_goal.copy(),
-                        parent_idx=new_idx,
-                        cost=goal_cost,
-                    )
-                    goal_idx = len(self._nodes)
-                    self._nodes.append(goal_node)
-                    break
+    def _expand_tree(self, q_goal: np.ndarray) -> tuple[int, float]:
+        q_rand = self._sample_with_goal_bias(q_goal)
+        nearest_idx = self._find_nearest(q_rand)
+        q_nearest = self._nodes[nearest_idx].config
+        q_new = self._steer(q_nearest, q_rand)
 
+        self._num_collision_checks += 1
+        if not self._is_valid(q_new):
+            return -1, 0.0
+
+        self._num_collision_checks += self._config.collision_check_resolution
+        if not self._is_path_valid(q_nearest, q_new):
+            return -1, 0.0
+
+        new_cost = self._nodes[nearest_idx].cost + self._distance(q_nearest, q_new)
+        new_node = TreeNode(
+            config=q_new.copy(),
+            parent_idx=nearest_idx,
+            cost=new_cost,
+        )
+        new_idx = len(self._nodes)
+        self._nodes.append(new_node)
+        return new_idx, new_cost
+
+    def _try_connect_goal(
+        self,
+        new_idx: int,
+        new_cost: float,
+        q_goal: np.ndarray,
+    ) -> int:
+        q_new = self._nodes[new_idx].config
+        if self._distance(q_new, q_goal) > self._config.goal_tolerance:
+            return -1
+
+        self._num_collision_checks += self._config.collision_check_resolution
+        if not self._is_path_valid(q_new, q_goal):
+            return -1
+
+        goal_cost = new_cost + self._distance(q_new, q_goal)
+        goal_node = TreeNode(
+            config=q_goal.copy(),
+            parent_idx=new_idx,
+            cost=goal_cost,
+        )
+        goal_idx = len(self._nodes)
+        self._nodes.append(goal_node)
+        return goal_idx
+
+    def _timeout_result(self, iterations: int, start_time: float) -> PlannerResult:
+        return PlannerResult(
+            status=PlannerStatus.TIMEOUT,
+            num_iterations=iterations,
+            planning_time=time.perf_counter() - start_time,
+            num_nodes=len(self._nodes),
+            num_collision_checks=self._num_collision_checks,
+        )
+
+    def _build_result(
+        self,
+        goal_idx: int,
+        iterations: int,
+        start_time: float,
+    ) -> PlannerResult:
         planning_time = time.perf_counter() - start_time
 
-        # Extract path if goal reached
         if goal_idx >= 0:
             path = self._extract_path(goal_idx)
             return PlannerResult(

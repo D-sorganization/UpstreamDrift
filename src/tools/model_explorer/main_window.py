@@ -153,11 +153,34 @@ class URDFGeneratorWindow(QMainWindow):
         if menubar is None:
             return
 
-        # File menu
         file_menu = menubar.addMenu("&File")
         if file_menu is None:
             return
+        self._setup_file_menu(file_menu)
 
+        edit_menu = menubar.addMenu("&Edit")
+        if edit_menu is None:
+            return
+        self._setup_edit_menu(edit_menu)
+
+        view_menu = menubar.addMenu("&View")
+        if view_menu is None:
+            return
+        self._setup_view_menu(view_menu)
+
+        tools_menu = menubar.addMenu("&Tools")
+        if tools_menu is None:
+            return
+        self._setup_tools_menu(tools_menu)
+
+        help_menu = menubar.addMenu("&Help")
+        if help_menu is None:
+            return
+        about_action = QAction("&About", self)
+        about_action.triggered.connect(self.show_about)
+        help_menu.addAction(about_action)
+
+    def _setup_file_menu(self, file_menu: Any) -> None:
         new_action = QAction("&New", self)
         new_action.setShortcut("Ctrl+N")
         new_action.triggered.connect(self.new_urdf)
@@ -188,9 +211,17 @@ class URDFGeneratorWindow(QMainWindow):
         file_menu.addSeparator()
 
         export_menu = file_menu.addMenu("&Export")
-        if export_menu is None:
-            return
+        if export_menu is not None:
+            self._setup_export_menu(export_menu)
 
+        file_menu.addSeparator()
+
+        exit_action = QAction("E&xit", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+
+    def _setup_export_menu(self, export_menu: Any) -> None:
         export_mujoco_action = QAction("Export for MuJoCo", self)
         export_mujoco_action.triggered.connect(self.export_for_mujoco)
         export_menu.addAction(export_mujoco_action)
@@ -203,18 +234,7 @@ class URDFGeneratorWindow(QMainWindow):
         export_pinocchio_action.triggered.connect(self.export_for_pinocchio)
         export_menu.addAction(export_pinocchio_action)
 
-        file_menu.addSeparator()
-
-        exit_action = QAction("E&xit", self)
-        exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
-
-        # Edit menu
-        edit_menu = menubar.addMenu("&Edit")
-        if edit_menu is None:
-            return
-
+    def _setup_edit_menu(self, edit_menu: Any) -> None:
         undo_action = QAction("&Undo", self)
         undo_action.setShortcut("Ctrl+Z")
         undo_action.setEnabled(
@@ -229,21 +249,13 @@ class URDFGeneratorWindow(QMainWindow):
         )  # Undo/redo functionality planned for future release
         edit_menu.addAction(redo_action)
 
-        # View menu
-        view_menu = menubar.addMenu("&View")
-        if view_menu is None:
-            return
-
+    def _setup_view_menu(self, view_menu: Any) -> None:
         reset_view_action = QAction("&Reset View", self)
         reset_view_action.setShortcut("Ctrl+R")
         reset_view_action.triggered.connect(self.visualization_widget.reset_view)
         view_menu.addAction(reset_view_action)
 
-        # Tools menu
-        tools_menu = menubar.addMenu("&Tools")
-        if tools_menu is None:
-            return
-
+    def _setup_tools_menu(self, tools_menu: Any) -> None:
         advanced_editor_action = QAction("Advanced URDF &Editor...", self)
         advanced_editor_action.setShortcut("Ctrl+E")
         advanced_editor_action.triggered.connect(self._open_advanced_editor)
@@ -260,15 +272,6 @@ class URDFGeneratorWindow(QMainWindow):
         code_editor_action.setToolTip("Edit URDF XML directly with syntax highlighting")
         code_editor_action.triggered.connect(self._open_code_editor)
         tools_menu.addAction(code_editor_action)
-
-        # Help menu
-        help_menu = menubar.addMenu("&Help")
-        if help_menu is None:
-            return
-
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self.show_about)
-        help_menu.addAction(about_action)
 
     def _setup_status_bar(self) -> None:
         """Set up the status bar."""
