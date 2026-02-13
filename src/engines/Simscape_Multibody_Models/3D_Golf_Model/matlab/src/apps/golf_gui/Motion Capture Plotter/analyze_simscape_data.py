@@ -4,6 +4,8 @@ Analyze Simscape CSV data to identify joint center positions
 for golf swing visualization.
 """
 
+from __future__ import annotations
+
 import logging
 
 import pandas as pd
@@ -11,7 +13,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def _load_csv_data(csv_file):
+def _load_csv_data(csv_file) -> pd.DataFrame | None:
     """Load and validate Simscape CSV data.
 
     Returns the DataFrame on success, or None on failure.
@@ -29,7 +31,7 @@ def _load_csv_data(csv_file):
         return None
 
 
-def _categorize_columns(columns):
+def _categorize_columns(columns) -> dict:
     """Categorize CSV columns by data type (position, rotation, etc.).
 
     Returns a dict mapping category names to lists of column names.
@@ -71,7 +73,7 @@ def _categorize_columns(columns):
     return categories
 
 
-def _identify_joint_positions(position_columns):
+def _identify_joint_positions(position_columns) -> dict:
     """Identify key joint center positions from position columns.
 
     Returns a dict mapping joint group names to lists of matching columns.
@@ -126,7 +128,7 @@ def _identify_joint_positions(position_columns):
     return joint_positions
 
 
-def _build_segment_definitions():
+def _build_segment_definitions() -> dict:
     """Build the dictionary of visualization segment definitions.
 
     Each segment maps a name to six column names (start XYZ + end XYZ).
@@ -223,7 +225,7 @@ def _build_segment_definitions():
     }
 
 
-def _check_segment_availability(segments, columns):
+def _check_segment_availability(segments, columns) -> dict:
     """Check which segments have all required columns available.
 
     Returns a dict of available segment names to their column lists.
@@ -243,7 +245,7 @@ def _check_segment_availability(segments, columns):
     return available_segments
 
 
-def _log_data_sample(df, available_segments):
+def _log_data_sample(df, available_segments) -> None:
     """Log a sample of data from the available segments."""
     logger.info("%s", "\n" + "=" * 80)
     logger.info("DATA SAMPLE (first 3 rows):")

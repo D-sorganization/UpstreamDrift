@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
@@ -21,13 +23,9 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 class MockRecorder(RecorderInterface):
     """Mock recorder backed by a data dictionary."""
 
-    def __init__(self, data_dict) -> None:
+    def __init__(self, data_dict: dict) -> None:
+        """Initialize mock recorder from a data dictionary."""
         self.data = data_dict
-        # Compatibility with new tests which might pass more args?
-        # New tests MockRecorder takes (times, positions, velocities, accelerations, torques)
-        # But this one takes dict.
-        # I need to unify or rename the class in appended code.
-        # I'll rename the new MockRecorder to MockRecorderNew in appended code.
 
     def get_time_series(self, field_name) -> tuple:
         """Return time series data for the given field."""
@@ -221,7 +219,15 @@ def test_plot_bland_altman(sample_data) -> None:
 class MockRecorderNew(RecorderInterface):
     """Mock recorder with explicit time series arrays."""
 
-    def __init__(self, times, positions, velocities, accelerations, torques) -> None:
+    def __init__(
+        self,
+        times: Any,
+        positions: Any,
+        velocities: Any,
+        accelerations: Any,
+        torques: Any,
+    ) -> None:
+        """Initialize mock recorder with explicit time series arrays."""
         self.times = times
         self.positions = positions
         self.velocities = velocities

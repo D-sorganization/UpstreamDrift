@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -63,7 +64,10 @@ class TestPinocchioInducedAcceleration:
 
         # We need to control return values of pin.aba to verify the subtraction logic
 
-        def aba_side_effect(model, data, q_arg, v_arg, tau_arg):
+        def aba_side_effect(
+            model: Any, data: Any, q_arg: Any, v_arg: Any, tau_arg: Any
+        ) -> np.ndarray:
+            """Return acceleration based on which inputs are zeroed."""
             # Check inputs to return corresponding acceleration
             if np.array_equal(v_arg, np.zeros(2)) and np.array_equal(
                 tau_arg, np.zeros(2)
@@ -99,7 +103,10 @@ class TestPinocchioInducedAcceleration:
         q = np.zeros(2)
         specific_tau = np.array([5.0, 5.0])
 
-        def aba_side_effect(model, data, q_arg, v_arg, tau_arg):
+        def aba_side_effect(
+            model: Any, data: Any, q_arg: Any, v_arg: Any, tau_arg: Any
+        ) -> np.ndarray:
+            """Return gravity or gravity+torque acceleration."""
             if np.array_equal(tau_arg, np.zeros(2)):
                 return np.array([-9.8, 0])  # Gravity accel
             else:

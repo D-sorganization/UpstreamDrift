@@ -17,7 +17,8 @@ from src.shared.python.validation_pkg.comparative_plotting import ComparativePlo
 class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
-    def __init__(self, prefix="") -> None:
+    def __init__(self, prefix: str = "") -> None:
+        """Initialize mock recorder with random joint and club data."""
         self.prefix = prefix
         self.data = {
             "joint_positions": (np.linspace(0, 1, 10), np.random.rand(10, 3)),
@@ -52,7 +53,8 @@ def mock_analyzer() -> MagicMock:
     analyzer.name_b = "Swing B"
 
     # Mock align_signals
-    def mock_align(field_name, joint_idx=None):
+    def mock_align(field_name, joint_idx=None):  # noqa: ANN001, ANN202
+        """Return AlignedSignals for known fields, None otherwise."""
         if field_name not in rec_a.data:
             return None
 

@@ -8,6 +8,8 @@ Tests cover:
 - Edge cases
 """
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
@@ -300,7 +302,8 @@ def test_optimizer_callback(default_golfer, default_club, basic_config) -> None:
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     callback_calls = []
 
-    def my_callback(iteration, value):
+    def my_callback(iteration: int, value: float) -> None:
+        """Record each optimizer callback invocation."""
         callback_calls.append((iteration, value))
 
     optimizer.optimize(callback=my_callback)

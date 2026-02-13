@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -17,20 +18,25 @@ sys.modules["pydrake.all"] = mock_pydrake
 # Fix mocking for class methods and types
 # RotationMatrix needs to be a class with MakeYRotation classmethod
 class MockRotationMatrix:
+    """Mock RotationMatrix for Drake testing."""
+
     @staticmethod
-    def MakeXRotation(angle):
+    def MakeXRotation(angle: float) -> Any:
+        """Return a mock rotation about the X axis."""
         return MagicMock()
 
     @staticmethod
-    def MakeYRotation(angle):
+    def MakeYRotation(angle: float) -> Any:
+        """Return a mock rotation about the Y axis."""
         return MagicMock()
 
     @staticmethod
-    def MakeZRotation(angle):
+    def MakeZRotation(angle: float) -> Any:
+        """Return a mock rotation about the Z axis."""
         return MagicMock()
 
-    def __init__(self, *args):
-        pass
+    def __init__(self, *args: Any) -> None:
+        """Initialize mock rotation matrix."""
 
 
 mock_pydrake.RotationMatrix = MockRotationMatrix
@@ -40,8 +46,10 @@ mock_pydrake.RotationMatrix = MockRotationMatrix
 # coroutines (which causes ValueError on .T).
 # So we make it a simple class or function that returns a mock.
 class MockRigidTransform:
-    def __init__(self, *args, **kwargs):
-        pass
+    """Mock RigidTransform that accepts numpy arrays without inspection."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize mock rigid transform."""
 
 
 mock_pydrake.RigidTransform = MockRigidTransform
