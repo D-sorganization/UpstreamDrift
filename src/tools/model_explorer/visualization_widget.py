@@ -124,8 +124,7 @@ class VisualizationWidget(QWidget):
 
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.info_label.setStyleSheet(
-            """
+        self.info_label.setStyleSheet("""
 
             QLabel {
 
@@ -139,8 +138,7 @@ class VisualizationWidget(QWidget):
 
             }
 
-        """
-        )
+        """)
 
         layout.addWidget(self.info_label)
 

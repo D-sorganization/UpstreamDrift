@@ -94,7 +94,9 @@ def test_data_loader() -> bool:
 
         return True
 
-    except Exception as e:  # noqa: BLE001 - test helper; loader may raise various errors
+    except (
+        Exception
+    ) as e:  # noqa: BLE001 - test helper; loader may raise various errors
         logger.error(f"❌ Error in data loader: {e}")
         import traceback
 
@@ -133,7 +135,9 @@ def test_frame_processor() -> bool:
 
         return True
 
-    except Exception as e:  # noqa: BLE001 - test helper; frame processor may raise various errors
+    except (
+        Exception
+    ) as e:  # noqa: BLE001 - test helper; frame processor may raise various errors
         logger.error(f"❌ Error in frame processor: {e}")
         import traceback
 

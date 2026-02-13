@@ -27,11 +27,9 @@ else:
 
         def run(self) -> None:
             """Execute the thread work (no-op in fallback stub)."""
-            pass
 
         def wait(self) -> None:
             """Wait for the thread to finish (no-op in fallback stub)."""
-            pass
 
     class pyqtSignal:  # type: ignore[no-redef]
         """Minimal signal stub that supports connect/emit for headless testing."""
