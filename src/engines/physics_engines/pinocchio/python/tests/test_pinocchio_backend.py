@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 import numpy as np
@@ -15,6 +17,7 @@ class HelperPinocchioBackend(PinocchioBackend):  # type: ignore[misc, no-any-uni
     """Subclass to allow initialization with an existing model."""
 
     def __init__(self, model: typing.Any) -> None:  # noqa: ANN401
+        """Initialize directly from an existing Pinocchio model."""
         # Skip super().__init__ which requires a file
         self.model = model
         self.data = model.createData()

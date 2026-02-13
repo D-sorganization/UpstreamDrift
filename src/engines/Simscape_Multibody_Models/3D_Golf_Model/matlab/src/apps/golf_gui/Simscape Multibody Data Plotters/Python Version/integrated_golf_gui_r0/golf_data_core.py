@@ -74,12 +74,12 @@ class FrameData:
         default_factory=lambda: np.array([1, 0, 0], dtype=np.float32)
     )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Calculate derived properties after initialization"""
         self._calculate_shaft_properties()
         self._ensure_data_types()
 
-    def _calculate_shaft_properties(self):
+    def _calculate_shaft_properties(self) -> None:
         """Calculate shaft vector, length and ensure proper types"""
         if np.isfinite([self.butt, self.clubhead]).all():
             self.shaft_vector = self.clubhead - self.butt
@@ -88,7 +88,7 @@ class FrameData:
             self.shaft_vector = np.array([0, 0, 1], dtype=np.float32)
             self.shaft_length = 1.0
 
-    def _ensure_data_types(self):
+    def _ensure_data_types(self) -> None:
         """Ensure all arrays are float32 for OpenGL compatibility"""
         for attr_name in [
             "butt",
@@ -210,7 +210,7 @@ class PerformanceStats:
 class MatlabDataLoader:
     """High-performance MATLAB data loader with caching and validation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.cache = {}
         self.load_stats = {}
 
@@ -408,7 +408,7 @@ class MatlabDataLoader:
             )
             return np.zeros(num_rows, dtype=np.float32)
 
-    def _validate_dataframe(self, df: pd.DataFrame, dataset_name: str):
+    def _validate_dataframe(self, df: pd.DataFrame, dataset_name: str) -> None:
         """Validate DataFrame has required columns and data"""
         required_columns = [
             "Butt",
@@ -438,7 +438,7 @@ class MatlabDataLoader:
         if len(df) == 0:
             raise ValueError(f"No data rows in {dataset_name}")
 
-    def _validate_dataset_consistency(self, datasets: dict[str, pd.DataFrame]):
+    def _validate_dataset_consistency(self, datasets: dict[str, pd.DataFrame]) -> None:
         """Validate that all datasets have consistent frame counts"""
         frame_counts = {name: len(df) for name, df in datasets.items()}
 
@@ -519,7 +519,7 @@ class FrameProcessor:
 
         return frame_data
 
-    def _calculate_dynamics_for_filter(self):
+    def _calculate_dynamics_for_filter(self) -> None:
         """Calculate inverse dynamics for the entire dataset with the current filter.
 
         Note: Must be called while holding self._dynamics_cache_lock.

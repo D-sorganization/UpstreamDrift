@@ -1,3 +1,7 @@
+"""Tests for the KinematicSequenceAnalyzer."""
+
+from __future__ import annotations
+
 import numpy as np
 
 from src.shared.python.biomechanics.kinematic_sequence import KinematicSequenceAnalyzer
@@ -118,7 +122,10 @@ class TestKinematicSequence:
         """Test extraction helper."""
 
         class MockRecorder:
+            """Minimal recorder stub for velocity extraction tests."""
+
             def get_time_series(self, key: str) -> tuple[np.ndarray, np.ndarray]:
+                """Return constant joint velocities or empty arrays."""
                 if key == "joint_velocities":
                     return np.linspace(0, 1, 100), np.ones((100, 4))
                 return np.array([]), np.array([])

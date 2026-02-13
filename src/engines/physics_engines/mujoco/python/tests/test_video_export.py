@@ -87,6 +87,8 @@ def mock_imageio() -> Any:
 
 
 class TestVideoExporter:
+    """Tests for the VideoExporter class."""
+
     def test_init(self, mock_mujoco, mock_renderer) -> None:
         """Test VideoExporter initialization."""
         model, data = mock_mujoco
@@ -208,11 +210,12 @@ class TestVideoExporter:
 
         initial_state = np.zeros(4)  # nq=2 + nv=2
 
-        def control_func(t):
+        def control_func(t: float) -> np.ndarray:
+            """Return zero control for the given time."""
             return np.array([0.0])
 
-        def progress_cb(current, total):
-            pass
+        def progress_cb(current: int, total: int) -> None:
+            """No-op progress callback."""
 
         with (
             patch("mujoco.mj_forward"),

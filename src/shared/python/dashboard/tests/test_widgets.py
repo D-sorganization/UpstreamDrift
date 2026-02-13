@@ -18,6 +18,7 @@ class MockRecorder(RecorderInterface):
     """Mock recorder for widget testing."""
 
     def __init__(self) -> None:
+        """Initialize mock recorder with random joint data."""
         self.engine = None
         self.data = {
             "joint_positions": (np.arange(100) * 0.1, np.random.rand(100, 3)),
@@ -253,7 +254,10 @@ def test_live_plot_widget_empty_data(app) -> None:
     """Test widget handles empty data gracefully."""
 
     class EmptyRecorder(MockRecorder):
-        def get_time_series(self, key) -> tuple:
+        """MockRecorder that always returns empty data."""
+
+        def get_time_series(self, key: str) -> tuple:
+            """Return empty arrays for any key."""
             return np.array([]), None
 
     empty_recorder = EmptyRecorder()

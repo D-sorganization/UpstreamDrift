@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import unittest
@@ -47,10 +49,10 @@ model_paths = [
 
 
 class TestSims(unittest.TestCase):
-    def get_sim(self, model_path: str | None = None, model_xmlstr: str | None = None):
-        """
-        Get sim using model_path or model_xmlstr.
-        """
+    """Test loading and verifying MyoSuite MuJoCo models."""
+
+    def get_sim(self, model_path: str | None = None, model_xmlstr: str | None = None) -> mujoco.MjModel:
+        """Get sim using model_path or model_xmlstr."""
 
         # load from path
         if model_path:
@@ -76,7 +78,7 @@ class TestSims(unittest.TestCase):
 
         return model
 
-    def test_sims(self):
+    def test_sims(self) -> None:
         """Load and verify each registered MuJoCo model."""
         for model_path in model_paths:
             logger.info(f"Testing: {model_path}")

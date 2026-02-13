@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import mujoco
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from PyQt6.QtWidgets import QWidget
 
 logger = get_logger(__name__)
 
@@ -204,7 +210,9 @@ class AdvancedGuiMethodsMixin:
 
         dialog.exec()
 
-    def _prepare_analysis_data(self, recorder, np_mod, analyzer_cls, plotter_cls):
+    def _prepare_analysis_data(
+        self, recorder, np_mod, analyzer_cls, plotter_cls
+    ) -> tuple:
         """Prepare analyzer, report, plotter, and radar metrics from recorded data."""
         times, positions = recorder.get_time_series("joint_positions")
         _, velocities = recorder.get_time_series("joint_velocities")
@@ -249,7 +257,7 @@ class AdvancedGuiMethodsMixin:
 
         return analyzer, report, plotter, metrics
 
-    def _detect_pelvis_torso_indices(self):
+    def _detect_pelvis_torso_indices(self) -> tuple[int | None, int | None]:
         """Detect DOF indices for pelvis and torso joints in the model."""
         pelvis_idx = None
         torso_idx = None
@@ -280,7 +288,9 @@ class AdvancedGuiMethodsMixin:
 
         return pelvis_idx, torso_idx
 
-    def _create_swing_profile_tab(self, plotter, metrics, fig_cls, canvas_cls):
+    def _create_swing_profile_tab(
+        self, plotter, metrics, fig_cls, canvas_cls
+    ) -> QWidget:
         """Create the Swing Profile (radar chart) tab widget."""
         from PyQt6 import QtWidgets
 
@@ -292,7 +302,7 @@ class AdvancedGuiMethodsMixin:
         plotter.plot_radar_chart(fig, metrics)
         return widget
 
-    def _create_cop_tab(self, plotter, recorder, fig_cls, canvas_cls):
+    def _create_cop_tab(self, plotter, recorder, fig_cls, canvas_cls) -> QWidget:
         """Create the Center of Pressure vector field tab widget."""
         from PyQt6 import QtWidgets
 
@@ -308,7 +318,7 @@ class AdvancedGuiMethodsMixin:
             ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
         return widget
 
-    def _create_power_flow_tab(self, plotter, recorder, fig_cls, canvas_cls):
+    def _create_power_flow_tab(self, plotter, recorder, fig_cls, canvas_cls) -> QWidget:
         """Create the Power Flow tab widget."""
         from PyQt6 import QtWidgets
 
@@ -324,7 +334,9 @@ class AdvancedGuiMethodsMixin:
             ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
         return widget
 
-    def _create_kinematic_sequence_tab(self, plotter, recorder, fig_cls, canvas_cls):
+    def _create_kinematic_sequence_tab(
+        self, plotter, recorder, fig_cls, canvas_cls
+    ) -> QWidget:
         """Create the Kinematic Sequence tab widget."""
         from PyQt6 import QtWidgets
 
@@ -396,7 +408,7 @@ class AdvancedGuiMethodsMixin:
 
     def _create_coordination_tab(
         self, plotter, analyzer, pelvis_idx, torso_idx, fig_cls, canvas_cls
-    ):
+    ) -> QWidget:
         """Create the Coordination (Angle-Angle and Vector Coding) tab widget."""
         from PyQt6 import QtWidgets
 
@@ -448,7 +460,9 @@ class AdvancedGuiMethodsMixin:
 
         return widget
 
-    def _create_work_loop_tab(self, plotter, analyzer, torso_idx, fig_cls, canvas_cls):
+    def _create_work_loop_tab(
+        self, plotter, analyzer, torso_idx, fig_cls, canvas_cls
+    ) -> QWidget:
         """Create the Work Loop (Energetics) tab widget."""
         from PyQt6 import QtWidgets
 
@@ -481,7 +495,9 @@ class AdvancedGuiMethodsMixin:
 
         return widget
 
-    def _create_ssc_tab(self, plotter, pelvis_idx, torso_idx, fig_cls, canvas_cls):
+    def _create_ssc_tab(
+        self, plotter, pelvis_idx, torso_idx, fig_cls, canvas_cls
+    ) -> QWidget:
         """Create the Stretch-Shortening Cycle (X-Factor) tab widget."""
         from PyQt6 import QtWidgets
 

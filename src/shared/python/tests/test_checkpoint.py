@@ -1,3 +1,7 @@
+"""Tests for the checkpoint save/restore functionality."""
+
+from __future__ import annotations
+
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -35,23 +39,31 @@ class TestStateCheckpoint(unittest.TestCase):
 
 
 class MockCheckpointable(Checkpointable):
+    """Minimal Checkpointable implementation for testing."""
+
     def __init__(self) -> None:
+        """Initialize with zero state and time."""
         self.current_state = 0
         self.time = 0.0
 
     def save_checkpoint(self) -> StateCheckpoint:
+        """Save current state into a checkpoint."""
         return StateCheckpoint(
             timestamp=self.time, engine_state={"val": self.current_state}
         )
 
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
+        """Restore state from a checkpoint."""
         self.time = checkpoint.timestamp
         if checkpoint.engine_state:
             self.current_state = checkpoint.engine_state["val"]
 
 
 class TestCheckpointManager(unittest.TestCase):
+    """Tests for CheckpointManager save, restore, and history."""
+
     def setUp(self) -> None:
+        """Create a fresh MockCheckpointable and CheckpointManager."""
         self.target = MockCheckpointable()
         self.manager = CheckpointManager(self.target, max_history=5)
 
