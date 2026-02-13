@@ -4,6 +4,8 @@ Contains theme application, theme menu setup, plot theme management,
 and dynamic theme change handling.
 """
 
+# mypy: disable-error-code="attr-defined,call-overload,arg-type"
+
 from __future__ import annotations
 
 from PyQt6.QtGui import QAction
@@ -28,9 +30,7 @@ class LauncherThemeMixin:
 
             manager = ThemeManager.instance()
             c = manager.colors
-            self.setStyleSheet(
-                manager.get_stylesheet()
-                + f"""
+            self.setStyleSheet(manager.get_stylesheet() + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -48,8 +48,7 @@ class LauncherThemeMixin:
                 QLabel#CardDescription {{
                     color: {c.text_secondary};
                 }}
-            """
-            )
+            """)
         except ImportError:
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(

@@ -176,7 +176,7 @@ def _make_sensor_group_row() -> list[object]:
     return row
 
 
-def _make_column_names_row() -> list[object]:
+def _make_column_names_row() -> list[str]:
     """Build the third row: column names for sample data.
 
     Returns:
@@ -200,7 +200,7 @@ def _make_column_names_row() -> list[object]:
     return prefix + position_and_rotation + position_and_rotation
 
 
-def _make_sample_data_row() -> list[object]:
+def _make_sample_data_row() -> list[float | int | None]:
     """Build a single data row with sample index 1 at time 0.
 
     The grip (Mid-hands) is at (0, 50, 100) mm with partial identity rotation.

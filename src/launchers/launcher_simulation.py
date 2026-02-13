@@ -5,6 +5,8 @@ script processes, module processes, URDF generator, C3D viewer, shot tracer,
 MATLAB apps, and dependency checking.
 """
 
+# mypy: disable-error-code="attr-defined,arg-type"
+
 from __future__ import annotations
 
 import os

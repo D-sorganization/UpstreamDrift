@@ -447,7 +447,7 @@ class MatlabFileHandler:
 
         try:
             if platform.system() == "Windows":
-                os.startfile(str(file_path))  # noqa: S606
+                os.startfile(str(file_path))  # type: ignore[attr-defined]  # noqa: S606
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
             else:
@@ -504,7 +504,7 @@ class DocumentHandler:
 
         try:
             if platform.system() == "Windows":
-                os.startfile(str(file_path))  # noqa: S606
+                os.startfile(str(file_path))  # type: ignore[attr-defined]  # noqa: S606
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", str(file_path)])  # noqa: S603, S607
             else:

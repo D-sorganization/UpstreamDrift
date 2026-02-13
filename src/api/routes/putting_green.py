@@ -315,7 +315,7 @@ async def get_green_contours(
 
         for i in range(resolution):
             for j in range(resolution):
-                elevations[i, j] = green.get_elevation(grid_x[i, j], grid_y[i, j])
+                elevations[i, j] = green.get_elevation(grid_x[i, j], grid_y[i, j])  # type: ignore[attr-defined]
 
         return GreenContourResponse(
             width=width,

@@ -13,7 +13,7 @@ from src.shared.python.dashboard.launcher import launch_dashboard
 def main() -> None:
     """Main entry point."""
     launch_dashboard(
-        engine_class=MuJoCoPhysicsEngine,
+        engine_class=MuJoCoPhysicsEngine,  # type: ignore[type-abstract]
         title="MuJoCo Golf Analysis Dashboard (Unified)",
     )
 

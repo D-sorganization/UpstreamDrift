@@ -10,7 +10,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -118,7 +118,7 @@ class MotionVisualizer:
         self._setup_scene()
 
         # Pinocchio visualizer for humanoid
-        self.pin_viz = None
+        self.pin_viz: Any = None
         if self.urdf_path and PINOCCHIO_AVAILABLE:
             self._setup_humanoid()
 
@@ -425,7 +425,7 @@ class MotionVisualizer:
 
         # Select frames to show
         if trajectory.num_frames <= num_frames_to_show:
-            indices = list(range(trajectory.num_frames))
+            indices: list[int] | np.ndarray = list(range(trajectory.num_frames))
         else:
             indices = np.linspace(
                 0, trajectory.num_frames - 1, num_frames_to_show

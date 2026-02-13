@@ -274,8 +274,8 @@ class DualHandIKSolver:
             if left_error < s.position_tolerance and right_error < s.position_tolerance:
                 return IKResult(
                     q=q,
-                    left_hand_error=left_error,
-                    right_hand_error=right_error,
+                    left_hand_error=float(left_error),
+                    right_hand_error=float(right_error),
                     converged=True,
                     iterations=iteration + 1,
                 )
@@ -283,8 +283,8 @@ class DualHandIKSolver:
         # Return best result even if not converged
         return IKResult(
             q=q,
-            left_hand_error=left_error,
-            right_hand_error=right_error,
+            left_hand_error=float(left_error),
+            right_hand_error=float(right_error),
             converged=False,
             iterations=s.max_iterations,
         )
@@ -438,8 +438,8 @@ class DualHandIKSolverFallback:
             if left_error < s.position_tolerance and right_error < s.position_tolerance:
                 return IKResult(
                     q=q,
-                    left_hand_error=left_error,
-                    right_hand_error=right_error,
+                    left_hand_error=float(left_error),
+                    right_hand_error=float(right_error),
                     converged=True,
                     iterations=iteration + 1,
                 )
@@ -471,8 +471,8 @@ class DualHandIKSolverFallback:
 
         return IKResult(
             q=q,
-            left_hand_error=left_error,
-            right_hand_error=right_error,
+            left_hand_error=float(left_error),
+            right_hand_error=float(right_error),
             converged=False,
             iterations=s.max_iterations,
         )

@@ -981,7 +981,7 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
 
         # Instantiate generator
         generator = PolynomialGeneratorWidget(dialog)
-        generator.set_joints([self.control_system.actuator_names[self.actuator_index]])
+        generator.set_joints([self.control_system.actuator_names[self.actuator_index]])  # type: ignore[attr-defined]
 
         # Handle result
         def on_generated(name: str, coeffs: list[float]) -> None:

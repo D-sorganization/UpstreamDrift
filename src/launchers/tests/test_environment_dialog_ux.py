@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PyQt6.QtWidgets import QApplication
 
-from src.launchers.golf_launcher import EnvironmentDialog
+from src.launchers.golf_launcher import EnvironmentDialog  # type: ignore[attr-defined]
 
 # Mocking modules that might cause issues in headless environment
 sys.modules["shared.python.engine_manager"] = MagicMock()
@@ -18,7 +18,7 @@ def app() -> QApplication:
     app = QApplication.instance()
     if not app:
         app = QApplication([])
-    return app
+    return app  # type: ignore[return-value]
 
 
 @pytest.fixture
