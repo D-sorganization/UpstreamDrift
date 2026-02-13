@@ -1,61 +1,56 @@
 #!/usr/bin/env python3
-"""Check that dependency directions between top-level modules are correct.
-
-This script performs static analysis using Python's AST module to detect
-forbidden import directions. It does NOT execute any code, so it works
-even if optional dependencies (MuJoCo, Drake, etc.) are not installed.
-
-Forbidden directions (at module level, outside TYPE_CHECKING blocks):
-  - shared -> engines  (engines should depend on shared, not the reverse)
-  - shared -> robotics (robotics should depend on shared, not the reverse)
-  - api -> launchers   (should use api.services.launcher_service instead)
-
-Allowed exceptions:
-  - Backward-compatible shim files that re-export from new locations
-  - Imports inside function bodies (lazy imports)
-  - Imports inside TYPE_CHECKING blocks
-
-Usage:
-    python scripts/check_dependency_direction.py
-    python scripts/check_dependency_direction.py --verbose
-
-Exit codes:
-    0: No violations found
-    1: Violations found
-"""
+"""Check dependency direction via configurable architecture fitness rules."""
 
 from __future__ import annotations
 
 import argparse
 import ast
+import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
-# Shim files that are explicitly allowed to import across boundaries
-# because they exist solely for backward compatibility
-ALLOWED_SHIMS = {
-    "shared/python/engine_loaders.py",  # re-exports from src.engines.loaders
-    "engines/common/capabilities.py",  # re-exports from src.shared.python.capabilities
-}
+DEFAULT_RULES_PATH = Path("scripts/config/dependency_direction_rules.json")
 
-# Rules: (source_dir_relative_to_src, forbidden_target_prefix, description)
-RULES = [
-    (
-        "shared/python",
-        ("src.engines", "engines"),
-        "shared -> engines (inverted dependency)",
-    ),
-    (
-        "shared/python",
-        ("src.robotics", "robotics"),
-        "shared -> robotics (inverted dependency)",
-    ),
-    (
-        "api",
-        ("src.launchers", "launchers"),
-        "api -> launchers (should use api.services.launcher_service)",
-    ),
-]
+
+def load_rules(project_root: Path, rules_path: Path) -> dict:
+    """Load dependency-direction rule configuration."""
+    path = project_root / rules_path
+    with path.open(encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _is_exception_active(exc: dict, *, now: datetime) -> bool:
+    """Return True if an exception is currently valid."""
+    expires_on = exc.get("expires_on")
+    if not expires_on:
+        return True
+    try:
+        expiry = datetime.fromisoformat(expires_on).replace(tzinfo=timezone.utc)
+    except ValueError:
+        return False
+    return now <= expiry
+
+
+def build_exception_index(config: dict) -> tuple[set[str], list[str]]:
+    """Build active-exception index and list any expired/invalid exceptions."""
+    active: set[str] = set()
+    invalid: list[str] = []
+    now = datetime.now(tz=timezone.utc)
+    for exc in config.get("exceptions", []):
+        rel_path = exc.get("path", "")
+        owner = exc.get("owner", "").strip()
+        reason = exc.get("reason", "").strip()
+        if not rel_path or not owner or not reason:
+            invalid.append(f"Invalid exception entry missing required fields: {exc}")
+            continue
+        if _is_exception_active(exc, now=now):
+            active.add(rel_path.replace("\\", "/"))
+        else:
+            invalid.append(
+                f"Expired exception for {rel_path} (owner={owner}, expires_on={exc.get('expires_on')})"
+            )
+    return active, invalid
 
 
 def get_top_level_imports(filepath: Path) -> list[tuple[int, str]]:
@@ -90,11 +85,18 @@ def get_top_level_imports(filepath: Path) -> list[tuple[int, str]]:
     return results
 
 
-def check_rules(src_root: Path, verbose: bool = False) -> list[str]:
+def check_rules(src_root: Path, rules_path: Path, verbose: bool = False) -> list[str]:
     """Check all rules and return list of violation messages."""
-    violations = []
+    project_root = src_root.parent
+    config = load_rules(project_root, rules_path)
+    active_exceptions, invalid_exceptions = build_exception_index(config)
+    violations = list(invalid_exceptions)
 
-    for source_dir, forbidden_prefixes, description in RULES:
+    rules = config.get("rules", [])
+    for rule in rules:
+        source_dir = str(rule["source_dir"])
+        forbidden_prefixes = tuple(rule["forbidden_prefixes"])
+        description = str(rule["description"])
         source_path = src_root / source_dir
 
         if not source_path.exists():
@@ -105,10 +107,10 @@ def check_rules(src_root: Path, verbose: bool = False) -> list[str]:
         for py_file in source_path.rglob("*.py"):
             rel_path = str(py_file.relative_to(src_root)).replace("\\", "/")
 
-            # Skip allowed shims
-            if rel_path in ALLOWED_SHIMS:
+            # Skip active exceptions
+            if rel_path in active_exceptions:
                 if verbose:
-                    print(f"  SKIP (shim): {rel_path}")
+                    print(f"  SKIP (exception): {rel_path}")
                 continue
 
             imports = get_top_level_imports(py_file)
@@ -124,6 +126,12 @@ def main() -> int:
     """Check import dependency directions and report violations."""
     parser = argparse.ArgumentParser(description="Check dependency directions")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--rules-path",
+        type=Path,
+        default=DEFAULT_RULES_PATH,
+        help="Path to JSON rule config relative to project root",
+    )
     args = parser.parse_args()
 
     script_dir = Path(__file__).resolve().parent
@@ -134,7 +142,7 @@ def main() -> int:
         print(f"Checking dependency directions in: {src_root}")
         print()
 
-    violations = check_rules(src_root, verbose=args.verbose)
+    violations = check_rules(src_root, rules_path=args.rules_path, verbose=args.verbose)
 
     if violations:
         print(f"FAIL: {len(violations)} dependency direction violation(s) found:\n")
