@@ -315,6 +315,6 @@ class ControlSystem:
             if 0 <= actuator_index < self.num_actuators:
                 self.set_polynomial_coeffs(actuator_index, coeffs)
                 # Ensure control type is set to polynomial
-                self.actuator_controls[actuator_index].control_type = (
-                    ControlType.POLYNOMIAL
-                )
+                self.actuator_controls[
+                    actuator_index
+                ].control_type = ControlType.POLYNOMIAL
