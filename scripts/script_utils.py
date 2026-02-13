@@ -55,19 +55,16 @@ def run_main(main_func: Callable[[], int | None], logger: logging.Logger) -> Non
     """Standard execution wrapper for script 'main' functions."""
 
     try:
-
         exit_code = main_func()
 
         sys.exit(exit_code if exit_code is not None else 0)
 
     except KeyboardInterrupt:
-
         logger.info("\nOperation cancelled by user.")
 
         sys.exit(130)
 
     except Exception as e:
-
         logger.critical(f"FATAL ERROR: {e}", exc_info=True)
 
         sys.exit(1)
@@ -104,7 +101,6 @@ def count_test_files(root: Path | str = ".") -> int:
     test_files: set[Path] = set()
 
     for p in patterns:
-
         test_files.update(root_path.glob(p))
 
     return len(test_files)
@@ -114,13 +110,11 @@ def run_tool_check(cmd: list[str]) -> dict[str, Any]:
     """Execute a tool command and capture status/output."""
 
     try:
-
         res = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         return {"exit_code": res.returncode, "stdout": res.stdout, "stderr": res.stderr}
 
     except FileNotFoundError:
-
         return {"exit_code": -1, "stdout": "", "stderr": f"{cmd[0]} not found"}
 
 
@@ -156,17 +150,14 @@ def run_command(
     """
 
     if logger:
-
         logger.debug(f"Running command: {' '.join(cmd)}")
 
     result = subprocess.run(cmd, capture_output=True, text=True, check=False, cwd=cwd)
 
     if logger and result.stdout:
-
         logger.debug(result.stdout)
 
     if logger and result.stderr and result.returncode != 0:
-
         logger.error(result.stderr)
 
     return result
@@ -194,33 +185,26 @@ def run_pytest(
     """Run pytest with consistent configuration."""
 
     if logger:
-
         logger.info(f"Running tests in {path}...")
 
     cmd = [sys.executable, "-m", "pytest", str(path)]
 
     if verbose:
-
         cmd.append("-v")
 
     if markers:
-
         cmd.extend(["-m", markers])
 
     if extra_args:
-
         cmd.extend(extra_args)
 
     try:
-
         result = subprocess.run(cmd, check=False)
 
         return result.returncode == 0
 
     except Exception as e:
-
         if logger:
-
             logger.error(f"Test execution failed: {e}")
 
         return False

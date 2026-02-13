@@ -54,19 +54,15 @@ def validate_directory_structure() -> bool:
     missing_dirs = []
 
     for dir_path in expected_dirs:
-
         full_path = suite_root / dir_path
 
         if not full_path.exists():
-
             missing_dirs.append(dir_path)
 
         else:
-
             logger.info(f"  ✅ {dir_path}")
 
     if missing_dirs:
-
         logger.error(f"Missing directories: {missing_dirs}")
 
         return False
@@ -82,7 +78,6 @@ def validate_launchers() -> bool:
     logger.info("Validating launchers...")
 
     try:
-
         # Test GUI launcher
 
         from launchers.unified_launcher import UnifiedLauncher
@@ -106,7 +101,6 @@ def validate_launchers() -> bool:
         )
 
         if spec is None or spec.loader is None:
-
             raise ImportError("Could not load spec or loader for launch_golf_suite.py")
 
         launch_module = importlib.util.module_from_spec(spec)
@@ -116,13 +110,11 @@ def validate_launchers() -> bool:
         logger.info("  ✅ Main launcher script loads successfully")
 
     except ImportError as e:
-
         logger.error(f"Launcher import error: {e}")
 
         return False
 
     except Exception as e:
-
         logger.error(f"Launcher validation error: {e}")
 
         return False
@@ -138,7 +130,6 @@ def validate_shared_components() -> bool:
     logger.info("Validating shared components...")
 
     try:
-
         # Test shared Python utilities
 
         from shared.python.data_io.common_utils import (
@@ -185,9 +176,7 @@ def validate_shared_components() -> bool:
         suite_root = SUITE_ROOT
 
         for matlab_file in matlab_files:
-
             if not (suite_root / matlab_file).exists():
-
                 logger.error(f"Missing MATLAB file: {matlab_file}")
 
                 return False
@@ -195,13 +184,11 @@ def validate_shared_components() -> bool:
             logger.info(f"  ✅ {matlab_file}")
 
     except ImportError as e:
-
         logger.error(f"Shared component import error: {e}")
 
         return False
 
     except Exception as e:
-
         logger.error(f"Shared component validation error: {e}")
 
         return False
@@ -228,11 +215,9 @@ def validate_engine_structure() -> bool:
     }
 
     for engine_name, engine_path in engines.items():
-
         full_path = suite_root / engine_path
 
         if not full_path.exists():
-
             logger.error(f"Missing engine: {engine_name} at {engine_path}")
 
             return False
@@ -240,19 +225,15 @@ def validate_engine_structure() -> bool:
         # Check for key files/directories
 
         if "matlab" in engine_path.lower():
-
             # MATLAB engines should have matlab/ subdirectory
 
             if not (full_path / "matlab").exists():
-
                 logger.warning(f"MATLAB engine {engine_name} missing matlab/ directory")
 
         else:
-
             # Python engines should have python/ subdirectory
 
             if not (full_path / "python").exists():
-
                 logger.warning(f"Python engine {engine_name} missing python/ directory")
 
         logger.info(f"  ✅ {engine_name}: {engine_path}")
@@ -272,7 +253,6 @@ def validate_git_repository() -> bool:
     git_dir = suite_root / ".git"
 
     if not git_dir.exists():
-
         logger.error("Not a Git repository - missing .git directory")
 
         return False
@@ -282,9 +262,7 @@ def validate_git_repository() -> bool:
     git_files = [".git/config", ".git/HEAD", ".gitignore"]
 
     for git_file in git_files:
-
         if not (suite_root / git_file).exists():
-
             logger.error(f"Missing Git file: {git_file}")
 
             return False
@@ -310,9 +288,7 @@ def validate_configuration_files() -> bool:
     ]
 
     for config_file in config_files:
-
         if not (suite_root / config_file).exists():
-
             logger.error(f"Missing configuration file: {config_file}")
 
             return False
@@ -343,13 +319,10 @@ def run_comprehensive_validation() -> bool:
     results = {}
 
     for name, validation_func in validations:
-
         try:
-
             results[name] = validation_func()
 
         except Exception as e:
-
             logger.error(f"Validation {name} failed with exception: {e}")
 
             results[name] = False
@@ -367,7 +340,6 @@ def run_comprehensive_validation() -> bool:
     total = len(results)
 
     for name, result in results.items():
-
         status = "PASSED" if result else "FAILED"
 
         emoji = "✅" if result else "❌"
@@ -375,7 +347,6 @@ def run_comprehensive_validation() -> bool:
         logger.info(f"{emoji} {name}: {status}")
 
         if result:
-
             passed += 1
 
     logger.info("-" * 40)
@@ -383,7 +354,6 @@ def run_comprehensive_validation() -> bool:
     logger.info(f"Overall: {passed}/{total} validations passed")
 
     if passed == total:
-
         logger.info("🎉 Golf Modeling Suite validation: ALL TESTS PASSED!")
 
         logger.info("The suite is ready for development use (Beta)!")
@@ -391,7 +361,6 @@ def run_comprehensive_validation() -> bool:
         return True
 
     else:
-
         logger.error(f"❌ {total - passed} validation(s) failed")
 
         logger.error("Please address the issues above before using the suite")
@@ -400,7 +369,6 @@ def run_comprehensive_validation() -> bool:
 
 
 if __name__ == "__main__":
-
     success = run_comprehensive_validation()
 
     sys.exit(0 if success else 1)

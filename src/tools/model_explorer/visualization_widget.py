@@ -19,21 +19,17 @@ logger = get_logger(__name__)
 # Import MuJoCo viewer if available
 
 if MUJOCO_AVAILABLE:
-
     try:
-
         from .mujoco_viewer import MuJoCoViewerWidget
 
         logger.info("MuJoCo 3D viewer available")
 
     except ImportError as e:
-
         logger.info(f"MuJoCo viewer widget not available: {e}")
 
         MuJoCoViewerWidget = None  # type: ignore[misc, assignment]
 
 else:
-
     logger.info("MuJoCo not available, using fallback grid view")
 
     MuJoCoViewerWidget = None  # type: ignore[misc, assignment]
@@ -105,9 +101,7 @@ class VisualizationWidget(QWidget):
         # 3D Visualization Widget - use MuJoCo if available
 
         if self.use_mujoco:
-
             try:
-
                 self.mujoco_widget = MuJoCoViewerWidget()
 
                 layout.addWidget(self.mujoco_widget)
@@ -115,13 +109,11 @@ class VisualizationWidget(QWidget):
                 logger.info("Using MuJoCo 3D viewer")
 
             except (RuntimeError, ValueError, OSError) as e:
-
                 logger.warning(f"Failed to create MuJoCo widget: {e}")
 
                 self.use_mujoco = False
 
         if not self.use_mujoco:
-
             self.gl_widget = Simple3DVisualizationWidget()
 
             layout.addWidget(self.gl_widget)
@@ -176,7 +168,6 @@ class VisualizationWidget(QWidget):
         # Update the status text
 
         if urdf_content.strip():
-
             # Count links and joints in the URDF
 
             link_count = urdf_content.count("<link")
@@ -184,7 +175,6 @@ class VisualizationWidget(QWidget):
             joint_count = urdf_content.count("<joint")
 
             if self.use_mujoco:
-
                 self.info_label.setText(
                     f"Links: {link_count} | Joints: {joint_count} (MuJoCo 3D View)"
                 )
@@ -192,13 +182,10 @@ class VisualizationWidget(QWidget):
                 # Update MuJoCo viewer - pass path for mesh resolution
 
                 if self.mujoco_widget:
-
                     try:
-
                         self.mujoco_widget.update_visualization(urdf_content, urdf_path)
 
                     except (RuntimeError, ValueError, OSError) as e:
-
                         logger.warning(f"Failed to render in MuJoCo: {e}")
 
                         self.info_label.setText(
@@ -206,7 +193,6 @@ class VisualizationWidget(QWidget):
                         )
 
             else:
-
                 self.info_label.setText(
                     f"Links: {link_count} | Joints: {joint_count} (Grid View)"
                 )
@@ -214,7 +200,6 @@ class VisualizationWidget(QWidget):
                 self.gl_widget.update()
 
         else:
-
             self.info_label.setText("No URDF content loaded")
 
         logger.info(
@@ -229,11 +214,9 @@ class VisualizationWidget(QWidget):
         self.info_label.setText("No URDF content loaded")
 
         if self.use_mujoco and self.mujoco_widget:
-
             self.mujoco_widget.clear()
 
         elif hasattr(self, "gl_widget"):
-
             self.gl_widget.update()
 
         logger.info("Visualization cleared")
@@ -242,11 +225,9 @@ class VisualizationWidget(QWidget):
         """Reset the 3D view to default position."""
 
         if self.use_mujoco and self.mujoco_widget:
-
             self.mujoco_widget.reset_view()
 
         elif hasattr(self, "gl_widget"):
-
             self.gl_widget.reset_view()
 
         logger.info("View reset requested")
@@ -267,23 +248,18 @@ class VisualizationWidget(QWidget):
         self._joint_names = []
 
         if not urdf_content.strip():
-
             return
 
         try:
-
             root = ET.fromstring(urdf_content)
 
             for child in root:
-
                 name = child.get("name", "")
 
                 if child.tag == "link" and name:
-
                     self._link_names.append(name)
 
                 elif child.tag == "joint" and name:
-
                     self._joint_names.append(name)
 
             logger.debug(
@@ -291,7 +267,6 @@ class VisualizationWidget(QWidget):
             )
 
         except ET.ParseError as e:
-
             logger.warning(f"Failed to parse URDF for component names: {e}")
 
     def select_object(self, name: str | None) -> None:
@@ -310,17 +285,14 @@ class VisualizationWidget(QWidget):
         self.selection_changed.emit(name)
 
         if name:
-
             # Determine if it's a link or joint
 
             if name in self._link_names:
-
                 self.object_clicked.emit("link", name)
 
                 logger.info(f"Selected link: {name}")
 
             elif name in self._joint_names:
-
                 self.object_clicked.emit("joint", name)
 
                 logger.info(f"Selected joint: {name}")
@@ -328,15 +300,12 @@ class VisualizationWidget(QWidget):
         # Update visualization to show highlight
 
         if self.use_mujoco and self.mujoco_widget:
-
             # MuJoCo viewer can highlight specific geoms/bodies
 
             if hasattr(self.mujoco_widget, "highlight_body"):
-
                 self.mujoco_widget.highlight_body(name)
 
         elif hasattr(self, "gl_widget"):
-
             self.gl_widget.set_highlighted_object(name)
 
             self.gl_widget.update()
@@ -536,7 +505,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         # Draw lines parallel to X and Z
 
         for i in range(-grid_size, grid_size + 1):
-
             val = i * grid_step
 
             # Line parallel to Z (varying Z, fixed X)
@@ -617,7 +585,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         """
 
         if event is not None and event.button() == Qt.MouseButton.LeftButton:
-
             self.last_mouse_pos = event.position()
 
             self._is_dragging = False  # Will become True if mouse moves significantly
@@ -634,7 +601,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         """
 
         if event is not None and self.last_mouse_pos is not None:
-
             dx = event.position().x() - self.last_mouse_pos.x()
 
             dy = event.position().y() - self.last_mouse_pos.y()
@@ -642,7 +608,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
             # If moved more than 3 pixels, consider it a drag
 
             if abs(dx) > 3 or abs(dy) > 3:
-
                 self._is_dragging = True
 
             self.camera_rotation_y += dx * 0.5
@@ -673,11 +638,9 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         """
 
         if event is not None:
-
             # If not dragging, treat as a click for selection
 
             if not self._is_dragging and event.button() == Qt.MouseButton.LeftButton:
-
                 # In the fallback grid view, we can't do proper ray-casting
 
                 # so just emit a general click event for UI feedback
@@ -700,7 +663,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         """
 
         if event is not None:
-
             delta = event.angleDelta().y()
 
             # Inverse logic for more intuitive zoom (scroll up = zoom in)

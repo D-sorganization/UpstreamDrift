@@ -92,7 +92,6 @@ class BundledAssets:
         golf_equipment = []
 
         if self.human_models_dir.exists():
-
             human_models = [
                 d.name
                 for d in self.human_models_dir.iterdir()
@@ -100,7 +99,6 @@ class BundledAssets:
             ]
 
         if self.golf_equipment_dir.exists():
-
             golf_equipment = [
                 d.name
                 for d in self.golf_equipment_dir.iterdir()
@@ -140,7 +138,6 @@ class BundledAssets:
         urdf_path = model_dir / "model.urdf"
 
         if not urdf_path.exists():
-
             available = self.list_available_models()["human_models"]
 
             raise BundledAssetNotFoundError(
@@ -184,7 +181,6 @@ class BundledAssets:
         urdf_files = list(equip_dir.glob("*.urdf")) if equip_dir.exists() else []
 
         if not urdf_files:
-
             available = self.list_available_models()["golf_equipment"]
 
             raise BundledAssetNotFoundError(
@@ -226,22 +222,18 @@ class BundledAssets:
         """
 
         if model_category == "human_models":
-
             meshes_dir = self.human_models_dir / model_name / "meshes"
 
         elif model_category == "golf_equipment":
-
             meshes_dir = self.golf_equipment_dir / model_name / "meshes"
 
         else:
-
             raise ValueError(
                 f"Unknown model category: {model_category}. "
                 f"Use 'human_models' or 'golf_equipment'."
             )
 
         if not meshes_dir.exists():
-
             raise BundledAssetNotFoundError(
                 f"Meshes directory not found: {meshes_dir}\n"
                 f"\n"
@@ -273,19 +265,15 @@ class BundledAssets:
         """
 
         if model_category == "human_models":
-
             metadata_path = self.human_models_dir / model_name / "metadata.json"
 
         elif model_category == "golf_equipment":
-
             metadata_path = self.golf_equipment_dir / model_name / "metadata.json"
 
         else:
-
             raise ValueError(f"Unknown model category: {model_category}")
 
         if not metadata_path.exists():
-
             return {
                 "name": model_name,
                 "description": "No metadata available",
@@ -314,23 +302,18 @@ class BundledAssets:
         """
 
         try:
-
             if model_category == "human_models":
-
                 self.get_human_model_path(model_name)
 
             elif model_category == "golf_equipment":
-
                 self.get_golf_equipment_path(model_name)
 
             else:
-
                 return False
 
             return True
 
         except BundledAssetNotFoundError:
-
             return False
 
 
@@ -365,13 +348,10 @@ def get_bundled_model_path(model_name: str, category: str = "human_models") -> P
     assets = BundledAssets()
 
     if category == "human_models":
-
         return assets.get_human_model_path(model_name)
 
     elif category == "golf_equipment":
-
         return assets.get_golf_equipment_path(model_name)
 
     else:
-
         raise ValueError(f"Unknown category: {category}")
