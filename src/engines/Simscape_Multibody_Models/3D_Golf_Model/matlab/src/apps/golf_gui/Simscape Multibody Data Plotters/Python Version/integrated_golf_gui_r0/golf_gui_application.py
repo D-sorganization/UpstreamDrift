@@ -4,6 +4,8 @@ Golf Swing Visualizer - Tabular GUI Application
 Supports multiple data sources including motion capture and future Simulink models
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 import traceback
@@ -89,7 +91,7 @@ class SmoothPlaybackController(QObject):
         self.is_playing = False
         self.loop_playback = True  # Default to looping
 
-    def load_frame_processor(self, frame_processor: FrameProcessor):
+    def load_frame_processor(self, frame_processor: FrameProcessor) -> None:
         """Load frame processor with motion data"""
         self.frame_processor = frame_processor
         self.stop()
@@ -105,7 +107,7 @@ class SmoothPlaybackController(QObject):
         return self._current_position
 
     @position.setter
-    def position(self, value: float):
+    def position(self, value: float) -> None:
         """Set playback position with interpolation"""
         if self.frame_processor is None:
             return
@@ -122,7 +124,7 @@ class SmoothPlaybackController(QObject):
     # Playback Control
     # ========================================================================
 
-    def play(self):
+    def play(self) -> None:
         """Start smooth playback"""
         if self.frame_processor is None:
             return
@@ -152,7 +154,7 @@ class SmoothPlaybackController(QObject):
 
         self.is_playing = True
 
-    def pause(self):
+    def pause(self) -> None:
         """Pause playback"""
         if not self.is_playing:
             return
@@ -160,20 +162,20 @@ class SmoothPlaybackController(QObject):
         self.animation.pause()
         self.is_playing = False
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop playback and reset to beginning"""
         self.animation.stop()
         self.is_playing = False
         self.seek(0.0)
 
-    def toggle_playback(self):
+    def toggle_playback(self) -> None:
         """Toggle between play and pause"""
         if self.is_playing:
             self.pause()
         else:
             self.play()
 
-    def seek(self, position: float):
+    def seek(self, position: float) -> None:
         """Seek to specific frame position"""
         if self.frame_processor is None:
             return
@@ -188,7 +190,7 @@ class SmoothPlaybackController(QObject):
         if was_playing:
             self.play()
 
-    def set_playback_speed(self, speed: float):
+    def set_playback_speed(self, speed: float) -> None:
         """Set playback speed multiplier (0.5 = half speed, 2.0 = double speed)"""
         self._playback_speed = np.clip(speed, 0.1, 10.0)
 
@@ -918,7 +920,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
         # Set focus policy for keyboard events
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-    def initializeGL(self):
+    def initializeGL(self) -> None:
         """Initialize OpenGL context"""
         try:
             # Create moderngl context
@@ -940,12 +942,12 @@ class GolfVisualizerWidget(QOpenGLWidget):
             logger.error("❌ OpenGL initialization failed: %s", e)
             traceback.print_exc()
 
-    def resizeGL(self, w: int, h: int):
+    def resizeGL(self, w: int, h: int) -> None:
         """Handle OpenGL widget resize"""
         if self.renderer:
             self.renderer.set_viewport(w, h)
 
-    def paintGL(self):
+    def paintGL(self) -> None:
         """Render the OpenGL scene"""
         if not self.renderer or not self.current_frame_data:
             return
@@ -1056,7 +1058,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def load_data_from_dataframes(
         self, dataframes: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-    ):
+    ) -> None:
         """Load data from pandas DataFrames"""
         try:
             baseq_df, ztcfq_df, deltaq_df = dataframes
@@ -1086,7 +1088,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
             logger.error("❌ Data loading failed: %s", e)
             traceback.print_exc()
 
-    def update_frame(self, frame_data: FrameData, render_config: RenderConfig):
+    def update_frame(self, frame_data: FrameData, render_config: RenderConfig) -> None:
         """Update the current frame data and render config"""
         self.current_frame_data = frame_data
         self.current_render_config = render_config
@@ -1134,44 +1136,44 @@ class GolfVisualizerWidget(QOpenGLWidget):
             f"distance={self.camera_distance:.2f}"
         )
 
-    def set_face_on_view(self):
+    def set_face_on_view(self) -> None:
         """Set camera to face-on view (looking at golfer from front)"""
         self.camera_azimuth = 0.0
         self.camera_elevation = 15.0
         self.update()
         logger.info("📷 Camera: Face-on view")
 
-    def set_down_the_line_view(self):
+    def set_down_the_line_view(self) -> None:
         """Set camera to down-the-line view (90° from face-on)"""
         self.camera_azimuth = 90.0  # 90° from face-on, not 180°
         self.camera_elevation = 15.0
         self.update()
         logger.info("📷 Camera: Down-the-line view")
 
-    def set_behind_view(self):
+    def set_behind_view(self) -> None:
         """Set camera to behind view (180° from face-on)"""
         self.camera_azimuth = 180.0
         self.camera_elevation = 15.0
         self.update()
         logger.info("📷 Camera: Behind view")
 
-    def set_above_view(self):
+    def set_above_view(self) -> None:
         """Set camera to overhead view"""
         self.camera_azimuth = 0.0
         self.camera_elevation = 80.0
         self.update()
         logger.info("📷 Camera: Overhead view")
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """Handle mouse press events"""
         self.last_mouse_pos = event.pos()
         self.mouse_pressed = True
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event) -> None:
         """Handle mouse release events"""
         self.mouse_pressed = False
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event) -> None:
         """Handle mouse move events"""
         if not self.mouse_pressed or not self.last_mouse_pos:
             return
@@ -1202,14 +1204,14 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.last_mouse_pos = event.pos()
         self.update()
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event) -> None:
         """Handle mouse wheel events"""
         zoom_factor = 1.1 if event.angleDelta().y() > 0 else 0.9
         self.camera_distance *= zoom_factor
         self.camera_distance = np.clip(self.camera_distance, 0.1, 50.0)
         self.update()
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event) -> None:
         """Handle keyboard shortcuts"""
         key = event.key()
 
@@ -1634,7 +1636,7 @@ class GolfVisualizerMainWindow(QMainWindow):
 # ============================================================================
 
 
-def main():
+def main() -> None:
     """Main application entry point"""
     app = QApplication(sys.argv)
 

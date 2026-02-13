@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 import json
 import logging
@@ -45,7 +47,7 @@ TARGET_POSE = {
 }
 
 
-def np_encoder(object):
+def np_encoder(object) -> int | float | list:
     """JSON encoder for NumPy types."""
     if isinstance(object, np.generic):
         return object.item()
@@ -270,13 +272,13 @@ class PhysicsEnvWrapper:
 
         return Spec((self._physics.model.nu,))
 
-    def step(self, action) -> "TimeStep":
+    def step(self, action) -> TimeStep:
         """Advance the environment by one step."""
         self._physics.set_control(action)
         self._physics.step()
         return TimeStep(step_type=1)  # MID
 
-    def reset(self) -> "TimeStep":
+    def reset(self) -> TimeStep:
         """Reset the environment."""
         self._physics.reset()
         if self._initializer:
@@ -583,7 +585,7 @@ def run_simulation(
     actuators = utils.get_actuator_indices(physics)
 
     # 4. Setup Initialization Logic
-    def initialize_episode(phys):
+    def initialize_episode(phys) -> None:
         """Initialize episode state from file or default pose."""
         if load_path:
             load_state(phys, load_path)

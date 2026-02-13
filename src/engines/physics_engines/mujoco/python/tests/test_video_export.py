@@ -1,4 +1,10 @@
+"""Tests for video export functionality."""
+
+from __future__ import annotations
+
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import mujoco
@@ -23,7 +29,7 @@ FPS = 30
 
 
 @pytest.fixture
-def mock_mujoco():
+def mock_mujoco() -> tuple[MagicMock, MagicMock]:
     """Create mock MuJoCo model and data."""
     model = MagicMock(spec=mujoco.MjModel)
     model.nq = 2
@@ -39,7 +45,7 @@ def mock_mujoco():
 
 
 @pytest.fixture
-def mock_renderer():
+def mock_renderer() -> Generator[MagicMock, None, None]:
     """Mock the MuJoCo Renderer."""
     with patch("mujoco.Renderer") as mock:
         renderer = mock.return_value
@@ -49,7 +55,7 @@ def mock_renderer():
 
 
 @pytest.fixture
-def mock_cv2():
+def mock_cv2() -> Any:
     """Mock cv2 module."""
     # Since we mocked it in sys.modules, we can just grab it
     mock = sys.modules["cv2"]
@@ -73,7 +79,7 @@ def mock_cv2():
 
 
 @pytest.fixture
-def mock_imageio():
+def mock_imageio() -> Any:
     """Mock imageio module."""
     mock = sys.modules["imageio"]
     mock.reset_mock()
@@ -81,7 +87,8 @@ def mock_imageio():
 
 
 class TestVideoExporter:
-    def test_init(self, mock_mujoco, mock_renderer):
+    def test_init(self, mock_mujoco, mock_renderer) -> None:
+        """Test VideoExporter initialization."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS)
 
@@ -91,7 +98,8 @@ class TestVideoExporter:
         assert exporter.format == VideoFormat.MP4
         mock_renderer.assert_called_once_with(model, width=WIDTH, height=HEIGHT)
 
-    def test_start_recording_mp4(self, mock_mujoco, mock_renderer, mock_cv2):
+    def test_start_recording_mp4(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+        """Test starting MP4 recording."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
 
@@ -109,7 +117,10 @@ class TestVideoExporter:
         assert args[3] == (WIDTH, HEIGHT)
         assert exporter.writer is not None
 
-    def test_start_recording_gif(self, mock_mujoco, mock_renderer, mock_imageio):
+    def test_start_recording_gif(
+        self, mock_mujoco, mock_renderer, mock_imageio
+    ) -> None:
+        """Test starting GIF recording."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
 
@@ -123,7 +134,8 @@ class TestVideoExporter:
         assert exporter.frames == []
         assert exporter.writer is None
 
-    def test_add_frame_video(self, mock_mujoco, mock_renderer, mock_cv2):
+    def test_add_frame_video(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+        """Test adding a frame to video recording."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
 
@@ -140,7 +152,8 @@ class TestVideoExporter:
         exporter.writer.write.assert_called_once()
         assert exporter.frame_count == 1
 
-    def test_add_frame_gif(self, mock_mujoco, mock_renderer, mock_imageio):
+    def test_add_frame_gif(self, mock_mujoco, mock_renderer, mock_imageio) -> None:
+        """Test adding a frame to GIF recording."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
 
@@ -154,7 +167,8 @@ class TestVideoExporter:
         assert len(exporter.frames) == 1
         assert exporter.frame_count == 1
 
-    def test_finish_recording_video(self, mock_mujoco, mock_renderer, mock_cv2):
+    def test_finish_recording_video(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+        """Test finishing video recording."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
 
@@ -169,7 +183,10 @@ class TestVideoExporter:
         writer.release.assert_called_once()
         assert exporter.writer is None
 
-    def test_finish_recording_gif(self, mock_mujoco, mock_renderer, mock_imageio):
+    def test_finish_recording_gif(
+        self, mock_mujoco, mock_renderer, mock_imageio
+    ) -> None:
+        """Test finishing GIF recording."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
 
@@ -184,7 +201,8 @@ class TestVideoExporter:
         mock_imageio.mimsave.assert_called_once()
         assert exporter.frames == []
 
-    def test_export_recording(self, mock_mujoco, mock_renderer, mock_cv2):
+    def test_export_recording(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+        """Test full export recording workflow."""
         model, data = mock_mujoco
         exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
 
@@ -221,7 +239,8 @@ class TestVideoExporter:
         assert exporter.frame_count > 0
         mock_cv2.VideoWriter.return_value.release.assert_called_once()
 
-    def test_metrics_overlay(self, mock_mujoco, mock_cv2):
+    def test_metrics_overlay(self, mock_mujoco, mock_cv2) -> None:
+        """Test metrics overlay rendering on frames."""
         model, data = mock_mujoco
         frame = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
 
@@ -239,7 +258,8 @@ class TestVideoExporter:
 
     def test_export_simulation_video_function(
         self, mock_mujoco, mock_renderer, mock_cv2
-    ):
+    ) -> None:
+        """Test the export_simulation_video convenience function."""
         model, data = mock_mujoco
 
         N = 10

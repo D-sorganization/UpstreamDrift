@@ -28,13 +28,13 @@ from src.shared.python.optimization.swing_optimizer import (
 
 
 @pytest.fixture
-def default_golfer():
+def default_golfer() -> GolferModel:
     """Default golfer model with average parameters."""
     return GolferModel()
 
 
 @pytest.fixture
-def custom_golfer():
+def custom_golfer() -> GolferModel:
     """Custom golfer with specific parameters."""
     return GolferModel(
         height=1.85,
@@ -46,13 +46,13 @@ def custom_golfer():
 
 
 @pytest.fixture
-def default_club():
+def default_club() -> ClubModel:
     """Default driver club model."""
     return ClubModel()
 
 
 @pytest.fixture
-def iron_club():
+def iron_club() -> ClubModel:
     """7-iron club model."""
     return ClubModel(
         total_length=0.95,
@@ -63,7 +63,7 @@ def iron_club():
 
 
 @pytest.fixture
-def basic_config():
+def basic_config() -> OptimizationConfig:
     """Basic optimization config for fast testing."""
     return OptimizationConfig(
         objectives={OptimizationObjective.CLUBHEAD_VELOCITY: 1.0},
@@ -78,7 +78,7 @@ def basic_config():
 # =============================================================================
 
 
-def test_golfer_model_defaults():
+def test_golfer_model_defaults() -> None:
     """Test GolferModel has reasonable defaults."""
     golfer = GolferModel()
     assert golfer.height == 1.75
@@ -87,14 +87,14 @@ def test_golfer_model_defaults():
     assert golfer.flexibility_factor == 1.0
 
 
-def test_golfer_model_custom():
+def test_golfer_model_custom() -> None:
     """Test GolferModel accepts custom parameters."""
     golfer = GolferModel(height=1.90, mass=90.0)
     assert golfer.height == 1.90
     assert golfer.mass == 90.0
 
 
-def test_golfer_model_joint_limits():
+def test_golfer_model_joint_limits() -> None:
     """Test GolferModel joint limits are tuples."""
     golfer = GolferModel()
     assert isinstance(golfer.shoulder_rom, tuple)
@@ -102,7 +102,7 @@ def test_golfer_model_joint_limits():
     assert golfer.shoulder_rom[0] < golfer.shoulder_rom[1]
 
 
-def test_golfer_model_torque_limits_positive():
+def test_golfer_model_torque_limits_positive() -> None:
     """Test GolferModel torque limits are positive."""
     golfer = GolferModel()
     assert golfer.max_shoulder_torque > 0
@@ -117,7 +117,7 @@ def test_golfer_model_torque_limits_positive():
 # =============================================================================
 
 
-def test_club_model_defaults():
+def test_club_model_defaults() -> None:
     """Test ClubModel has reasonable defaults for a driver."""
     club = ClubModel()
     assert club.total_length == 1.15
@@ -125,14 +125,14 @@ def test_club_model_defaults():
     assert club.shaft_flex == "regular"
 
 
-def test_club_model_total_mass():
+def test_club_model_total_mass() -> None:
     """Test ClubModel calculates total mass correctly."""
     club = ClubModel()
     expected_mass = club.head_mass + club.shaft_mass + club.grip_mass
     assert club.total_mass == expected_mass
 
 
-def test_club_model_moment_of_inertia():
+def test_club_model_moment_of_inertia() -> None:
     """Test ClubModel MOI is positive and reasonable."""
     club = ClubModel()
     assert club.club_moi > 0
@@ -145,7 +145,7 @@ def test_club_model_moment_of_inertia():
 # =============================================================================
 
 
-def test_optimization_config_defaults():
+def test_optimization_config_defaults() -> None:
     """Test OptimizationConfig has valid defaults."""
     config = OptimizationConfig()
     assert config.n_nodes >= 10
@@ -153,7 +153,7 @@ def test_optimization_config_defaults():
     assert len(config.objectives) > 0
 
 
-def test_optimization_config_custom_objectives():
+def test_optimization_config_custom_objectives() -> None:
     """Test OptimizationConfig accepts custom objectives."""
     config = OptimizationConfig(
         objectives={
@@ -165,7 +165,7 @@ def test_optimization_config_custom_objectives():
     assert OptimizationObjective.INJURY_RISK in config.objectives
 
 
-def test_optimization_config_constraints():
+def test_optimization_config_constraints() -> None:
     """Test OptimizationConfig accepts constraints."""
     config = OptimizationConfig(
         constraints=[
@@ -182,7 +182,7 @@ def test_optimization_config_constraints():
 # =============================================================================
 
 
-def test_optimizer_init(default_golfer, default_club, basic_config):
+def test_optimizer_init(default_golfer, default_club, basic_config) -> None:
     """Test SwingOptimizer initializes correctly."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     assert optimizer.golfer == default_golfer
@@ -190,14 +190,16 @@ def test_optimizer_init(default_golfer, default_club, basic_config):
     assert optimizer.config == basic_config
 
 
-def test_optimizer_init_default_config(default_golfer, default_club):
+def test_optimizer_init_default_config(default_golfer, default_club) -> None:
     """Test SwingOptimizer uses default config when not provided."""
     optimizer = SwingOptimizer(default_golfer, default_club)
     assert optimizer.config is not None
     assert isinstance(optimizer.config, OptimizationConfig)
 
 
-def test_optimizer_joint_limits_setup(default_golfer, default_club, basic_config):
+def test_optimizer_joint_limits_setup(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test SwingOptimizer sets up joint limits correctly."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     assert "hip_rotation" in optimizer.joint_limits
@@ -205,14 +207,16 @@ def test_optimizer_joint_limits_setup(default_golfer, default_club, basic_config
     assert len(optimizer.joint_limits) == len(SwingOptimizer.JOINTS)
 
 
-def test_optimizer_torque_limits_setup(default_golfer, default_club, basic_config):
+def test_optimizer_torque_limits_setup(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test SwingOptimizer sets up torque limits correctly."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     assert "hip_rotation" in optimizer.torque_limits
     assert all(t > 0 for t in optimizer.torque_limits.values())
 
 
-def test_optimizer_lever_length(default_golfer, default_club, basic_config):
+def test_optimizer_lever_length(default_golfer, default_club, basic_config) -> None:
     """Test total lever (arm + club) is calculated correctly."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     expected = default_golfer.arm_length + default_club.total_length
@@ -224,7 +228,7 @@ def test_optimizer_lever_length(default_golfer, default_club, basic_config):
 # =============================================================================
 
 
-def test_swing_trajectory_creation():
+def test_swing_trajectory_creation() -> None:
     """Test SwingTrajectory can be created with valid data."""
     n_nodes = 20
     trajectory = SwingTrajectory(
@@ -245,7 +249,7 @@ def test_swing_trajectory_creation():
 
 
 @pytest.mark.slow
-def test_optimizer_optimize_runs(default_golfer, default_club, basic_config):
+def test_optimizer_optimize_runs(default_golfer, default_club, basic_config) -> None:
     """Test optimize() runs without error (smoke test)."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -253,7 +257,9 @@ def test_optimizer_optimize_runs(default_golfer, default_club, basic_config):
 
 
 @pytest.mark.slow
-def test_optimizer_result_has_trajectory(default_golfer, default_club, basic_config):
+def test_optimizer_result_has_trajectory(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test optimization result contains a trajectory."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -262,7 +268,9 @@ def test_optimizer_result_has_trajectory(default_golfer, default_club, basic_con
 
 
 @pytest.mark.slow
-def test_optimizer_result_has_metrics(default_golfer, default_club, basic_config):
+def test_optimizer_result_has_metrics(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test optimization result contains performance metrics."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -270,7 +278,9 @@ def test_optimizer_result_has_metrics(default_golfer, default_club, basic_config
 
 
 @pytest.mark.slow
-def test_optimizer_respects_joint_limits(default_golfer, default_club, basic_config):
+def test_optimizer_respects_joint_limits(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test optimized trajectory respects joint limits."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -285,7 +295,7 @@ def test_optimizer_respects_joint_limits(default_golfer, default_club, basic_con
 
 
 @pytest.mark.slow
-def test_optimizer_callback(default_golfer, default_club, basic_config):
+def test_optimizer_callback(default_golfer, default_club, basic_config) -> None:
     """Test optimizer calls callback function."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     callback_calls = []
@@ -302,7 +312,7 @@ def test_optimizer_callback(default_golfer, default_club, basic_config):
 # =============================================================================
 
 
-def test_optimizer_with_zero_flexibility(default_club, basic_config):
+def test_optimizer_with_zero_flexibility(default_club, basic_config) -> None:
     """Test optimizer handles golfer with minimal flexibility."""
     stiff_golfer = GolferModel(flexibility_factor=0.5)
     optimizer = SwingOptimizer(stiff_golfer, default_club, basic_config)
@@ -310,7 +320,7 @@ def test_optimizer_with_zero_flexibility(default_club, basic_config):
     assert optimizer.golfer.flexibility_factor == 0.5
 
 
-def test_optimizer_with_heavy_club(default_golfer, basic_config):
+def test_optimizer_with_heavy_club(default_golfer, basic_config) -> None:
     """Test optimizer handles heavy club."""
     heavy_club = ClubModel(head_mass=0.35, shaft_mass=0.12)
     optimizer = SwingOptimizer(default_golfer, heavy_club, basic_config)
@@ -318,13 +328,13 @@ def test_optimizer_with_heavy_club(default_golfer, basic_config):
     assert optimizer.club.head_mass == 0.35
 
 
-def test_optimizer_objectives_enum():
+def test_optimizer_objectives_enum() -> None:
     """Test all optimization objectives are defined."""
     assert len(OptimizationObjective) >= 5
     assert OptimizationObjective.CLUBHEAD_VELOCITY.value == "clubhead_velocity"
 
 
-def test_optimizer_constraints_enum():
+def test_optimizer_constraints_enum() -> None:
     """Test all optimization constraints are defined."""
     assert len(OptimizationConstraint) >= 4
     assert OptimizationConstraint.JOINT_LIMITS.value == "joint_limits"

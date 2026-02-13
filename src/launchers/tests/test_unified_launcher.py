@@ -11,7 +11,8 @@ from src.launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
 
 
 @pytest.fixture
-def mock_qapp():
+def mock_qapp() -> MagicMock:
+    """Mock qapp."""
     with patch("launchers.unified_launcher.QApplication") as mock_app_cls:
         mock_app_instance = MagicMock()
         mock_app_cls.instance.return_value = mock_app_instance
@@ -19,7 +20,8 @@ def mock_qapp():
 
 
 @pytest.fixture
-def mock_golf_launcher():
+def mock_golf_launcher() -> MagicMock:
+    """Mock golf launcher."""
     # unified_launcher imports GolfLauncher from .golf_launcher locally
     # We need to patch the class where it is used.
     # Since it's imported inside __init__, we patch it there?
@@ -31,18 +33,18 @@ def mock_golf_launcher():
     return mock_instance
 
 
-def test_init(mock_qapp, mock_golf_launcher):
+def test_init(mock_qapp, mock_golf_launcher) -> None:
     launcher = UnifiedLauncher()
     assert launcher is not None
 
 
-def test_init_no_pyqt():
+def test_init_no_pyqt() -> None:
     with patch("launchers.unified_launcher.PYQT6_AVAILABLE", False):
         with pytest.raises(ImportError, match="PyQt6 is required"):
             UnifiedLauncher()
 
 
-def test_mainloop(mock_qapp, mock_golf_launcher):
+def test_mainloop(mock_qapp, mock_golf_launcher) -> None:
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 
@@ -54,13 +56,13 @@ def test_mainloop(mock_qapp, mock_golf_launcher):
     sys.modules["launchers.golf_launcher"].main.assert_called_once()
 
 
-def test_launch_function():
+def test_launch_function() -> None:
     with patch("src.launchers.golf_launcher.main") as mock_main:
         launch()
         mock_main.assert_called_once()
 
 
-def test_show_status():
+def test_show_status() -> None:
     with (
         patch("shared.python.engine_core.engine_manager.EngineManager") as mock_mgr_cls,
         patch("builtins.print") as mock_print,
@@ -118,7 +120,7 @@ def test_show_status():
             assert found
 
 
-def test_get_version():
+def test_get_version() -> None:
     with (
         patch("launchers.unified_launcher.QApplication"),
         patch("launchers.golf_launcher.GolfLauncher"),

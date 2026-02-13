@@ -12,7 +12,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def test_data_loading_accuracy():
+def test_data_loading_accuracy() -> bool:
     """Test the accuracy of data loading"""
     logger.info("🔍 TESTING DATA LOADING ACCURACY")
     logger.info("%s", "=" * 60)
@@ -87,7 +87,7 @@ def test_data_loading_accuracy():
         return False
 
 
-def test_data_consistency():
+def test_data_consistency() -> bool:
     """Test consistency between datasets"""
     logger.info("\n🔄 TESTING DATA CONSISTENCY")
     logger.info("%s", "=" * 60)
@@ -148,7 +148,7 @@ def test_data_consistency():
         return False
 
 
-def test_error_handling():
+def test_error_handling() -> bool:
     """Test error handling capabilities"""
     logger.error("\n🛡️ TESTING ERROR HANDLING")
     logger.info("%s", "=" * 60)
@@ -191,7 +191,7 @@ def test_error_handling():
         return False
 
 
-def test_performance():
+def test_performance() -> bool:
     """Test performance characteristics"""
     logger.info("\n⚡ TESTING PERFORMANCE")
     logger.info("%s", "=" * 60)
@@ -238,7 +238,7 @@ def test_performance():
         return False
 
 
-def generate_final_report():
+def generate_final_report() -> bool:
     """Generate the final robustness report"""
     logger.info("📋 FINAL ROBUSTNESS AND ACCURACY ANALYSIS REPORT")
     logger.info("%s", "=" * 80)

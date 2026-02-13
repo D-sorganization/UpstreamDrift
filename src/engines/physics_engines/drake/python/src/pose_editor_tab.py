@@ -400,11 +400,30 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
             self._build_joint_controls()
 
     def _setup_ui(self) -> None:
-        """Create the user interface."""
+        """Create the user interface.
+
+        Delegates to helper methods for each logical section of the UI.
+        """
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(4, 4, 4, 4)
 
-        # Header with mode indicator
+        main_layout.addLayout(self._create_header())
+
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
+        main_layout.addWidget(splitter)
+
+        splitter.addWidget(self._create_gravity_and_actions_panel())
+        splitter.addWidget(self._create_joint_controls_panel())
+        splitter.addWidget(self._create_pose_library_panel())
+
+        splitter.setSizes([150, 300, 250])
+
+    def _create_header(self) -> QtWidgets.QHBoxLayout:
+        """Create the header layout with title and mode indicator.
+
+        Returns:
+            A horizontal layout containing the title label and mode indicator.
+        """
         header_layout = QtWidgets.QHBoxLayout()
         header_layout.addWidget(QtWidgets.QLabel("<b>Pose Editor</b>"))
         header_layout.addStretch()
@@ -413,13 +432,14 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.lbl_mode.setStyleSheet("color: #2196F3; font-weight: bold;")
         header_layout.addWidget(self.lbl_mode)
 
-        main_layout.addLayout(header_layout)
+        return header_layout
 
-        # Create splitter for resizable sections
-        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
-        main_layout.addWidget(splitter)
+    def _create_gravity_and_actions_panel(self) -> QtWidgets.QWidget:
+        """Create the top panel with gravity control and quick-action buttons.
 
-        # Top section: Gravity and quick actions
+        Returns:
+            A widget containing the gravity toggle and preset action buttons.
+        """
         top_widget = QtWidgets.QWidget()
         top_layout = QtWidgets.QVBoxLayout(top_widget)
         top_layout.setContentsMargins(0, 0, 0, 0)
@@ -430,6 +450,17 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         top_layout.addWidget(self.gravity_widget)
 
         # Quick actions
+        top_layout.addWidget(self._create_quick_actions_group())
+
+        return top_widget
+
+    def _create_quick_actions_group(self) -> QtWidgets.QGroupBox:
+        """Create the quick-actions group box with reset and preset buttons.
+
+        Returns:
+            A group box containing the Reset, Zero Velocities, T-Pose, and
+            Address buttons arranged in a 2x2 grid.
+        """
         actions_group = QtWidgets.QGroupBox("Quick Actions")
         actions_layout = QtWidgets.QGridLayout(actions_group)
 
@@ -453,28 +484,19 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.btn_address.clicked.connect(lambda: self._load_preset("Address"))
         actions_layout.addWidget(self.btn_address, 1, 1)
 
-        top_layout.addWidget(actions_group)
-        splitter.addWidget(top_widget)
+        return actions_group
 
-        # Middle section: Joint controls
+    def _create_joint_controls_panel(self) -> QtWidgets.QGroupBox:
+        """Create the middle panel with joint filter and slider scroll area.
+
+        Returns:
+            A group box containing the filter bar and a scrollable area for
+            joint slider widgets.
+        """
         joints_group = QtWidgets.QGroupBox("Joint Controls")
         joints_layout = QtWidgets.QVBoxLayout(joints_group)
 
-        # Filter/search
-        filter_layout = QtWidgets.QHBoxLayout()
-        filter_layout.addWidget(QtWidgets.QLabel("Filter:"))
-        self.txt_filter = QtWidgets.QLineEdit()
-        self.txt_filter.setPlaceholderText("Search joints...")
-        self.txt_filter.setClearButtonEnabled(True)
-        self.txt_filter.textChanged.connect(self._filter_joints)
-        filter_layout.addWidget(self.txt_filter)
-
-        self.combo_group = QtWidgets.QComboBox()
-        self.combo_group.addItem("All Groups")
-        self.combo_group.currentTextChanged.connect(self._filter_joints)
-        filter_layout.addWidget(self.combo_group)
-
-        joints_layout.addLayout(filter_layout)
+        joints_layout.addLayout(self._create_joint_filter_bar())
 
         # Scroll area for joint sliders
         self.scroll_area = QtWidgets.QScrollArea()
@@ -488,19 +510,45 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.scroll_area.setWidget(self.slider_container)
         joints_layout.addWidget(self.scroll_area)
 
-        splitter.addWidget(joints_group)
+        return joints_group
 
-        # Bottom section: Pose library
+    def _create_joint_filter_bar(self) -> QtWidgets.QHBoxLayout:
+        """Create the filter/search bar for joint controls.
+
+        Returns:
+            A horizontal layout with a text filter and group combo box.
+        """
+        filter_layout = QtWidgets.QHBoxLayout()
+        filter_layout.addWidget(QtWidgets.QLabel("Filter:"))
+
+        self.txt_filter = QtWidgets.QLineEdit()
+        self.txt_filter.setPlaceholderText("Search joints...")
+        self.txt_filter.setClearButtonEnabled(True)
+        self.txt_filter.textChanged.connect(self._filter_joints)
+        filter_layout.addWidget(self.txt_filter)
+
+        self.combo_group = QtWidgets.QComboBox()
+        self.combo_group.addItem("All Groups")
+        self.combo_group.currentTextChanged.connect(self._filter_joints)
+        filter_layout.addWidget(self.combo_group)
+
+        return filter_layout
+
+    def _create_pose_library_panel(self) -> PoseLibraryWidget:
+        """Create the bottom panel with the pose library widget.
+
+        Returns:
+            A configured ``PoseLibraryWidget`` connected to load, interpolation,
+            save, and preset signals.
+        """
         self.library_widget = PoseLibraryWidget(self._library)
         self.library_widget.pose_loaded.connect(self._on_pose_loaded)
         self.library_widget.interpolation_requested.connect(self._on_interpolation)
         # Override save method
         self.library_widget.save_pose_requested = self._save_current_pose
         self.library_widget.preset_load_requested = self._load_preset_from_data
-        splitter.addWidget(self.library_widget)
 
-        # Set splitter sizes
-        splitter.setSizes([150, 300, 250])
+        return self.library_widget
 
     def set_plant_and_context(
         self,

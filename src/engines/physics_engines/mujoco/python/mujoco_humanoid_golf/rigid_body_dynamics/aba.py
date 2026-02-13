@@ -307,28 +307,139 @@ def _aba_forward_accelerations(
             a[:, i] += s_subspace[i] * qdd[i]
 
 
-def _aba_allocate_arrays(nb: int, model: dict) -> dict:
-    return {
-        "xup": np.empty((nb, 6, 6)),
-        "s_subspace": [None] * nb,
-        "dof_indices": [-1] * nb,
-        "v": np.empty((6, nb), order="F"),
-        "c": np.empty((6, nb), order="F"),
-        "ia_articulated": np.array(model["I"], dtype=float),
-        "pa_bias": np.zeros((6, nb), order="F"),
-        "u_force": np.zeros((6, nb), order="F"),
-        "d": np.zeros(nb),
-        "u": np.zeros(nb),
-        "a": np.zeros((6, nb), order="F"),
-        "qdd": np.zeros(nb),
-    }
+@dataclass
+class _ABAArrays:
+    """Pre-allocated working arrays for the ABA algorithm."""
+
+    xup: np.ndarray
+    s_subspace: list[np.ndarray | None]
+    dof_indices: list[int]
+    v: np.ndarray
+    c: np.ndarray
+    ia_articulated: np.ndarray
+    pa_bias: np.ndarray
+    u_force: np.ndarray
+    d: np.ndarray
+    u: np.ndarray
+    a: np.ndarray
+    qdd: np.ndarray
+
+    @staticmethod
+    def allocate(nb: int, model: dict) -> _ABAArrays:
+        """Allocate all working arrays for an ABA computation.
+
+        Args:
+            nb: Number of bodies in the model.
+            model: Robot model dictionary containing spatial inertias.
+
+        Returns:
+            A new ``_ABAArrays`` instance with zeroed / empty buffers.
+        """
+        return _ABAArrays(
+            xup=np.empty((nb, 6, 6)),
+            s_subspace=[None] * nb,
+            dof_indices=[-1] * nb,
+            v=np.empty((6, nb), order="F"),
+            c=np.empty((6, nb), order="F"),
+            ia_articulated=np.array(model["I"], dtype=float),
+            pa_bias=np.zeros((6, nb), order="F"),
+            u_force=np.zeros((6, nb), order="F"),
+            d=np.zeros(nb),
+            u=np.zeros(nb),
+            a=np.zeros((6, nb), order="F"),
+            qdd=np.zeros(nb),
+        )
 
 
 def _aba_resolve_gravity(model: dict) -> np.ndarray:
+    """Resolve the negated gravity vector from the model.
+
+    Args:
+        model: Robot model dictionary, optionally containing a ``gravity`` key.
+
+    Returns:
+        Negated spatial gravity vector (6,).
+    """
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
     if a_grav is DEFAULT_GRAVITY:
         return NEG_DEFAULT_GRAVITY
     return -a_grav
+
+
+def _aba_run_passes(
+    nb: int,
+    q: np.ndarray,
+    qd: np.ndarray,
+    tau: np.ndarray,
+    f_ext: np.ndarray | None,
+    neg_a_grav: np.ndarray,
+    mdl: _ModelCache,
+    arr: _ABAArrays,
+    buf: _ScratchBuffers,
+) -> None:
+    """Execute the three ABA passes: kinematics, inertia, accelerations.
+
+    All results are written in-place into *arr*.
+
+    Args:
+        nb: Number of bodies.
+        q: Joint positions (NB,).
+        qd: Joint velocities (NB,).
+        tau: Joint torques (NB,).
+        f_ext: External forces (6, NB) or None.
+        neg_a_grav: Negated gravity vector (6,).
+        mdl: Cached model fields.
+        arr: Pre-allocated working arrays (modified in-place).
+        buf: Scratch buffers for intermediate computations.
+    """
+    # Pass 1 - forward kinematics: velocities and bias accelerations
+    _aba_forward_kinematics(
+        nb,
+        q,
+        qd,
+        f_ext,
+        mdl,
+        arr.xup,
+        arr.s_subspace,
+        arr.dof_indices,
+        arr.v,
+        arr.c,
+        arr.pa_bias,
+        buf,
+    )
+
+    # Pass 2 - backward recursion: articulated-body inertias
+    _aba_backward_pass(
+        nb,
+        tau,
+        mdl.parent,
+        arr.s_subspace,
+        arr.dof_indices,
+        arr.xup,
+        arr.ia_articulated,
+        arr.pa_bias,
+        arr.u_force,
+        arr.d,
+        arr.u,
+        arr.c,
+        buf,
+    )
+
+    # Pass 3 - forward recursion: joint and spatial accelerations
+    _aba_forward_accelerations(
+        nb,
+        mdl.parent,
+        arr.s_subspace,
+        arr.dof_indices,
+        arr.xup,
+        neg_a_grav,
+        arr.c,
+        arr.u_force,
+        arr.d,
+        arr.u,
+        arr.a,
+        arr.qdd,
+    )
 
 
 def aba(
@@ -382,54 +493,10 @@ def aba(
     """
     q, qd, tau, nb = _aba_validate_inputs(model, q, qd, tau)
     neg_a_grav = _aba_resolve_gravity(model)
-    arr = _aba_allocate_arrays(nb, model)
+    arr = _ABAArrays.allocate(nb, model)
     buf = _ScratchBuffers.create()
     mdl = _ModelCache.from_model(model)
 
-    _aba_forward_kinematics(
-        nb,
-        q,
-        qd,
-        f_ext,
-        mdl,
-        arr["xup"],
-        arr["s_subspace"],
-        arr["dof_indices"],
-        arr["v"],
-        arr["c"],
-        arr["pa_bias"],
-        buf,
-    )
+    _aba_run_passes(nb, q, qd, tau, f_ext, neg_a_grav, mdl, arr, buf)
 
-    _aba_backward_pass(
-        nb,
-        tau,
-        mdl.parent,
-        arr["s_subspace"],
-        arr["dof_indices"],
-        arr["xup"],
-        arr["ia_articulated"],
-        arr["pa_bias"],
-        arr["u_force"],
-        arr["d"],
-        arr["u"],
-        arr["c"],
-        buf,
-    )
-
-    _aba_forward_accelerations(
-        nb,
-        mdl.parent,
-        arr["s_subspace"],
-        arr["dof_indices"],
-        arr["xup"],
-        neg_a_grav,
-        arr["c"],
-        arr["u_force"],
-        arr["d"],
-        arr["u"],
-        arr["a"],
-        arr["qdd"],
-    )
-
-    return arr["qdd"]
+    return arr.qdd

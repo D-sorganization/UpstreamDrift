@@ -1,4 +1,9 @@
+"""Tests for Pinocchio IK task creation."""
+
+from __future__ import annotations
+
 import sys
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -6,7 +11,7 @@ import pytest
 
 
 @pytest.fixture
-def mock_pinocchio_env():
+def mock_pinocchio_env() -> Generator[None, None, None]:
     """Mock pinocchio and pink dependencies."""
     mock_mods = {
         "pink": MagicMock(),

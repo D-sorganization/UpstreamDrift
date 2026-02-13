@@ -5,6 +5,8 @@ Handles video file loading, frame extraction, and processing
 pipeline for swing analysis.
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable, Generator
 from pathlib import Path
@@ -326,7 +328,7 @@ class VideoProcessor:
             logger.error(f"Failed to export clip: {e}")
             return False
 
-    def close(self):
+    def close(self) -> None:
         """Release video resources."""
         if self._cap:
             self._cap.release()
