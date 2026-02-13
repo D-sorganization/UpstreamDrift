@@ -65,6 +65,7 @@ class AdvancedGuiMethodsMixin:
 
         # Helper to set color for geoms containing string
         def set_color_contain(name_part: str, rgba: list) -> None:
+            """Set RGBA color for all geoms whose name contains a string."""
             for i in range(self.sim_widget.model.ngeom):
                 name = mujoco.mj_id2name(
                     self.sim_widget.model, mujoco.mjtObj.mjOBJ_GEOM, i
@@ -259,6 +260,7 @@ class AdvancedGuiMethodsMixin:
         model = self.sim_widget.model
 
         def get_dof_index(joint_name: str) -> int | None:
+            """Return the DOF address for a named joint, or None."""
             j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
             if j_id == -1:
                 return None
@@ -340,6 +342,7 @@ class AdvancedGuiMethodsMixin:
             model = self.sim_widget.model
 
             def get_dof_index(joint_name: str) -> int | None:
+                """Return the DOF address for a named joint, or None."""
                 j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
                 if j_id == -1:
                     return None

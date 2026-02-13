@@ -333,7 +333,10 @@ class RealTimeController:
             )
 
         # Real hardware reading would be implemented per protocol
-        raise NotImplementedError(f"State reading not implemented for {self.comm_type}")
+        raise NotImplementedError(
+            f"State reading for communication type '{self.comm_type.value}' is not yet "
+            f"supported. Currently only CommunicationType.SIMULATION is implemented."
+        )
 
     def _send_command(self, command: ControlCommand) -> None:
         """Send control command to robot.
@@ -347,7 +350,8 @@ class RealTimeController:
 
         # Real hardware command sending would be implemented per protocol
         raise NotImplementedError(
-            f"Command sending not implemented for {self.comm_type}"
+            f"Command sending for communication type '{self.comm_type.value}' is not yet "
+            f"supported. Currently only CommunicationType.SIMULATION is implemented."
         )
 
     def get_timing_stats(self) -> TimingStatistics:

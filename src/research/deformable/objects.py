@@ -506,6 +506,7 @@ class Cloth(DeformableObject):
         springs = []
 
         def node_idx(x: int, y: int) -> int:
+            """Convert 2-D grid coordinates to a flat node index."""
             return y * self._width + x
 
         # Structural springs (horizontal and vertical)

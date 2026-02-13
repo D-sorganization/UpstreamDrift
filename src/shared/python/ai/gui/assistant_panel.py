@@ -321,6 +321,7 @@ class AIAssistantPanel(QWidget):
             category=ToolCategory.ANALYSIS,
         )
         def search_knowledge_base(query: str) -> str:
+            """Search the RAG knowledge base and return matching documents."""
             results = self._rag_store.query(query)
             if not results:
                 return "No relevant information found."

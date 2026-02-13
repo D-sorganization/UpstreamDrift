@@ -20,6 +20,8 @@ import numpy as np
 from matplotlib import animation as mpl_animation
 from matplotlib import pyplot as plt
 
+from src.shared.python.core.contracts import precondition
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -59,6 +61,7 @@ class AnimationConfig:
 
     @property
     def effective_interval(self) -> int:
+        """Return the animation interval in milliseconds, derived from fps if needed."""
         if self.interval_ms > 0:
             return self.interval_ms
         return max(1, int(1000.0 / self.fps))
@@ -195,6 +198,10 @@ class SwingAnimator:
             span = max(hi - lo, 0.1)
             setter(lo - margin * span, hi + margin * span)
 
+    @precondition(
+        lambda self, body_positions, links=None: len(body_positions) > 0,
+        "Body positions dict must be non-empty",
+    )
     def create_stick_figure_animation(
         self,
         body_positions: dict[str, np.ndarray],
@@ -246,6 +253,15 @@ class SwingAnimator:
             blit=False,
         )
 
+    @precondition(
+        lambda self, positions, vectors, times=None, label="Force": len(positions) > 0,
+        "Positions array must be non-empty",
+    )
+    @precondition(
+        lambda self, positions, vectors, times=None, label="Force": len(positions)
+        == len(vectors),
+        "Positions and vectors must have the same length",
+    )
     def create_vector_field_animation(
         self,
         positions: np.ndarray,
@@ -321,6 +337,14 @@ class SwingAnimator:
     # ----- convenience save wrapper -----
 
     @staticmethod
+    @precondition(
+        lambda anim, path, writer="ffmpeg", fps=30, dpi=100: fps > 0,
+        "Frames per second must be positive",
+    )
+    @precondition(
+        lambda anim, path, writer="ffmpeg", fps=30, dpi=100: dpi > 0,
+        "DPI must be positive",
+    )
     def save_animation(
         anim: mpl_animation.FuncAnimation,
         path: str | Path,

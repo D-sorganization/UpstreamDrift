@@ -456,6 +456,7 @@ def create_saturation_function(
     """
 
     def saturate(values: np.ndarray) -> np.ndarray:
+        """Apply saturation limits to the input values."""
         return _apply_saturation_values(values, lower, upper, mode, smoothness)
 
     return saturate

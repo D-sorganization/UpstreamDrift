@@ -78,6 +78,7 @@ class DrakeManipulabilityAnalyzer:
         priority = ["club", "club_head", "right_hand", "left_hand"]
 
         def sort_key(b: str) -> tuple[int, str]:
+            """Return priority-based sort key for body names."""
             for i, p in enumerate(priority):
                 if p in b.lower():
                     return (i, b)

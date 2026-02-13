@@ -9,10 +9,12 @@ _normals_pattern = re.compile(
 
 
 def remove_normals_node(vtp_content) -> Any:
+    """Remove PointData Normals XML nodes from VTP content string."""
     return re.sub(_normals_pattern, "", vtp_content)
 
 
 def remove_normals_from_vtp(vtp_path) -> None:
+    """Strip normals data from a VTP file in place."""
     with open(vtp_path, newline="") as fd:
         vtp_content = fd.read()
 
@@ -24,6 +26,7 @@ def remove_normals_from_vtp(vtp_path) -> None:
 
 
 def main() -> None:
+    """Parse arguments and remove normals from specified VTP files."""
     parser = argparse.ArgumentParser(
         description='removes <PointData Normals="Normals">...</PointData> in each given VTP file'
     )

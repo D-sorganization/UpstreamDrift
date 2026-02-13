@@ -23,6 +23,7 @@ from src.robotics.control.whole_body.qp_solver import (
 )
 from src.robotics.control.whole_body.task import Task
 from src.robotics.core.protocols import RoboticsCapable
+from src.shared.python.core.contracts import precondition
 
 
 @dataclass
@@ -150,6 +151,14 @@ class WholeBodyController:
         """Get number of tasks."""
         return len(self._tasks)
 
+    @precondition(
+        lambda self, task: task is not None,
+        "Task must not be None",
+    )
+    @precondition(
+        lambda self, task: isinstance(task, Task),
+        "Task must be a Task instance",
+    )
     def add_task(self, task: Task) -> None:
         """Add task to controller.
 
@@ -167,6 +176,10 @@ class WholeBodyController:
         self._tasks.append(task)
         self._sort_tasks()
 
+    @precondition(
+        lambda self, name: isinstance(name, str) and len(name) > 0,
+        "Task name must be a non-empty string",
+    )
     def remove_task(self, name: str) -> bool:
         """Remove task by name.
 
@@ -200,6 +213,10 @@ class WholeBodyController:
                 return task
         return None
 
+    @precondition(
+        lambda self, jacobians: jacobians is not None,
+        "Jacobians list must not be None",
+    )
     def set_contact_jacobians(
         self,
         jacobians: list[NDArray[np.float64]],

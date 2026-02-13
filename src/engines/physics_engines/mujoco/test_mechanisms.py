@@ -46,6 +46,7 @@ def test_joint_definitions(inclined_plane_model: mujoco.MjModel) -> None:
 
     # Helper to get joint ID
     def get_joint_id(name: str) -> int:
+        """Return the MuJoCo joint ID for a given joint name."""
         return int(
             mujoco.mj_name2id(inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, name)
         )

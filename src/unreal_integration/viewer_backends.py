@@ -666,8 +666,14 @@ def create_viewer(
     elif backend_type == BackendType.MOCK:
         return MockBackend(config)
     elif backend_type == BackendType.PYVISTA:
-        raise NotImplementedError("PyVista backend not yet implemented")
+        raise NotImplementedError(
+            "PyVista viewer backend is not yet implemented. "
+            "Use 'meshcat' or 'mock' backend instead."
+        )
     elif backend_type == BackendType.UNREAL_BRIDGE:
-        raise NotImplementedError("Unreal Bridge backend not yet implemented")
+        raise NotImplementedError(
+            "Unreal Engine bridge viewer backend is not yet implemented. "
+            "Use 'meshcat' or 'mock' backend instead."
+        )
     else:
         raise ValueError(f"Unknown backend type: {backend_type}")

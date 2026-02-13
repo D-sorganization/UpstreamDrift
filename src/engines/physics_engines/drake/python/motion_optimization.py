@@ -123,6 +123,7 @@ class DrakeMotionOptimizer:
 
         # Ball speed objective
         def ball_speed_cost(trajectory: np.ndarray) -> float:
+            """Compute negative peak speed as a cost to maximize."""
             # Placeholder: compute ball speed from trajectory
             # In real implementation, this would extract ball velocity at impact
             return float(-np.max(np.linalg.norm(np.diff(trajectory, axis=0), axis=1)))
@@ -136,6 +137,7 @@ class DrakeMotionOptimizer:
 
         # Accuracy objective (minimize lateral deviation)
         def accuracy_cost(trajectory: np.ndarray) -> float:
+            """Compute lateral deviation from the target line."""
             # Placeholder: compute lateral deviation from target line
             final_position = trajectory[-1]
             return float(abs(final_position[1]))  # y-deviation from target line
@@ -146,6 +148,7 @@ class DrakeMotionOptimizer:
 
         # Smoothness objective
         def smoothness_cost(trajectory: np.ndarray) -> float:
+            """Compute trajectory jerk as a smoothness penalty."""
             # Compute trajectory smoothness via second derivatives
             if len(trajectory) < 3:
                 return 0.0
@@ -159,6 +162,7 @@ class DrakeMotionOptimizer:
 
         # Joint angle limits
         def joint_angle_constraint(trajectory: np.ndarray) -> float:
+            """Evaluate joint angle limit violations."""
             # Placeholder: check joint angle limits
             # In real implementation, extract joint angles and check limits
             return 0.0  # No violation
@@ -172,6 +176,7 @@ class DrakeMotionOptimizer:
 
         # Impact timing constraint
         def impact_timing_constraint(trajectory: np.ndarray) -> float:
+            """Evaluate deviation from required impact timing."""
             # Placeholder: ensure impact occurs at specific time
             return 0.0  # No violation
 
@@ -371,6 +376,7 @@ class DrakeMotionOptimizer:
         self.objectives.clear()
 
         def distance_cost(trajectory: np.ndarray) -> float:
+            """Compute negative carry distance to maximize via minimization."""
             # Placeholder: compute carry distance
             return -target_distance  # Negative because we minimize
 
@@ -399,6 +405,7 @@ class DrakeMotionOptimizer:
         self.objectives.clear()
 
         def accuracy_cost(trajectory: np.ndarray) -> float:
+            """Compute Euclidean distance from final position to target."""
             # Placeholder: compute distance to target
             final_position = trajectory[-1]
             return float(np.linalg.norm(final_position - target_point))

@@ -121,6 +121,7 @@ def check_rules(src_root: Path, verbose: bool = False) -> list[str]:
 
 
 def main() -> int:
+    """Check import dependency directions and report violations."""
     parser = argparse.ArgumentParser(description="Check dependency directions")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()

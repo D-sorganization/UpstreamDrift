@@ -119,6 +119,7 @@ class TargetTrajectory:
 
         # Map phase indices to new sampling
         def map_idx(old_idx: int) -> int:
+            """Map a phase index from the original sampling to the resampled grid."""
             if old_idx < 0 or old_idx >= len(self.time_series):
                 return 0
             t = self.time_series[old_idx]
@@ -193,6 +194,7 @@ class ClubTargetManager:
             raise ValueError("No time series data")
 
         def find_idx(t: float) -> int:
+            """Find the nearest index in the time series for a given time value."""
             if t <= 0:
                 return 0
             return int(np.argmin(np.abs(ts - t)))

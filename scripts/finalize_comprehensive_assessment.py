@@ -22,6 +22,7 @@ OUTPUT_MD = DOCS_DIR / "Comprehensive_Assessment.md"
 
 
 def load_general_data():
+    """Load the general assessment summary JSON data."""
     if not SUMMARY_JSON.exists():
         logger.error(f"Summary JSON not found: {SUMMARY_JSON}")
         return None
@@ -30,6 +31,7 @@ def load_general_data():
 
 
 def load_pragmatic_data():
+    """Load the pragmatic programmer review report."""
     if not PRAGMATIC_REPORT.exists():
         logger.warning(f"Pragmatic report not found: {PRAGMATIC_REPORT}")
         return {"issues": []}
@@ -38,6 +40,7 @@ def load_pragmatic_data():
 
 
 def load_completist_data():
+    """Load the completist audit report and extract critical gap count."""
     if not COMPLETIST_REPORT.exists():
         logger.warning(f"Completist report not found: {COMPLETIST_REPORT}")
         return 0
@@ -50,6 +53,7 @@ def load_completist_data():
 
 
 def calculate_scores(general_data, critical_gaps, pragmatic_issues):
+    """Compute general, completist, pragmatic, and unified scores."""
     general_score = general_data.get("overall_score", 0.0)
 
     # Completist Score: 10 - (Critical Gaps * 0.1), min 0
@@ -69,6 +73,7 @@ def calculate_scores(general_data, critical_gaps, pragmatic_issues):
 
 
 def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
+    """Generate prioritized improvement recommendations from all assessments."""
     recommendations = []
 
     # General recommendations (from low scoring categories)
@@ -115,6 +120,7 @@ def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
 
 
 def main():
+    """Finalize and write the comprehensive assessment report."""
     logger.info("Finalizing Comprehensive Assessment Report...")
 
     general_data = load_general_data()

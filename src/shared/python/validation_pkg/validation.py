@@ -253,6 +253,7 @@ def validate_physical_bounds(func: F) -> F:
 
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
+        """Validate physical parameters before calling the wrapped function."""
         # Get function signature
         import inspect
 

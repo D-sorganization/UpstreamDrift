@@ -14,6 +14,7 @@ import mujoco
 import numpy as np
 
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
+from src.shared.python.core.contracts import precondition
 
 
 class BiomechanicalAnalyzer:
@@ -119,6 +120,10 @@ class BiomechanicalAnalyzer:
         # PERF-004: qacc is already a numpy array, no need to copy
         return cast(np.ndarray, qacc.astype(np.float64, copy=False))
 
+    @precondition(
+        lambda self, source_name: isinstance(source_name, str) and len(source_name) > 0,
+        "Source name must be a non-empty string",
+    )
     def compute_induced_acceleration(self, source_name: str) -> np.ndarray:
         """Compute induced acceleration for a specific source.
 
@@ -410,21 +415,34 @@ class SwingRecorder:
         self.reset()
 
     def reset(self) -> None:
+        """Clear recorded frames and stop recording."""
         self.frames: list[BiomechanicalData] = []
         self.is_recording = False
 
     def start_recording(self) -> None:
+        """Begin recording biomechanical data frames."""
         self.is_recording = True
         self.frames = []
 
     def stop_recording(self) -> None:
+        """Stop recording biomechanical data frames."""
         self.is_recording = False
 
+    @precondition(
+        lambda self, data: data is not None,
+        "BiomechanicalData must not be None",
+    )
     def record_frame(self, data: BiomechanicalData) -> None:
+        """Append a biomechanical data frame to the recording."""
         if self.is_recording:
             self.frames.append(data)
 
+    @precondition(
+        lambda self, field_name: isinstance(field_name, str) and len(field_name) > 0,
+        "Field name must be a non-empty string",
+    )
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
+        """Return time-aligned arrays for a named data field."""
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
@@ -448,9 +466,14 @@ class SwingRecorder:
 
         return times, cast(np.ndarray, values_array)
 
+    @precondition(
+        lambda self, source_name: source_name is not None,
+        "Source name must not be None",
+    )
     def get_induced_acceleration_series(
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Return induced acceleration time series for a source."""
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
@@ -496,18 +519,8 @@ class SwingRecorder:
             return 0.0
         return self.frames[-1].time - self.frames[0].time
 
-    def export_to_dict(self) -> dict:
-        """Export all recorded data to a dictionary for JSON/CSV export.
-
-        Returns:
-            Dictionary with time series for all fields
-        """
-        if not self.frames:
-            return {}
-
-        export_data = {}
-
-        # Scalar fields
+    def _export_scalar_fields(self, export_data: dict) -> None:
+        """Export scalar time-series fields into export_data."""
         scalar_fields = [
             "time",
             "club_head_speed",
@@ -515,7 +528,6 @@ class SwingRecorder:
             "potential_energy",
             "total_energy",
         ]
-
         for field_name in scalar_fields:
             _, values = self.get_time_series(field_name)
             if len(values) > 0:
@@ -524,7 +536,8 @@ class SwingRecorder:
                 else:
                     export_data[field_name] = list(values)
 
-        # Vector/array fields
+    def _export_array_fields(self, export_data: dict) -> None:
+        """Export vector/array time-series fields into export_data."""
         array_fields = [
             "joint_positions",
             "joint_velocities",
@@ -534,18 +547,17 @@ class SwingRecorder:
             "actuator_forces",
             "actuator_powers",
         ]
-
         for field_name in array_fields:
             _times, values = self.get_time_series(field_name)
             if len(values) > 0 and isinstance(values, np.ndarray):
                 if values.ndim == 1:
                     export_data[field_name] = values.tolist()
                 elif values.ndim == 2:
-                    # Export each component separately
                     for i in range(values.shape[1]):
                         export_data[f"{field_name}_{i}"] = values[:, i].tolist()
 
-        # Special 3D fields
+    def _export_3d_fields(self, export_data: dict) -> None:
+        """Export 3-D position/velocity fields split into x/y/z components."""
         for field_name in [
             "club_head_position",
             "club_head_velocity",
@@ -558,37 +570,35 @@ class SwingRecorder:
                 export_data[f"{field_name}_y"] = values[:, 1].tolist()
                 export_data[f"{field_name}_z"] = values[:, 2].tolist()
 
-        # Export induced
+    def _export_induced_accelerations(self, export_data: dict) -> None:
+        """Export induced and club-induced acceleration series."""
         if self.frames and self.frames[0].induced_accelerations:
             all_keys: set[str] = set()
             for f in self.frames:
                 all_keys.update(f.induced_accelerations.keys())
-
             for key in all_keys:
                 _, vals = self.get_induced_acceleration_series(key)
                 if len(vals) > 0:
                     for i in range(vals.shape[1]):
                         export_data[f"induced_acc_{key}_{i}"] = vals[:, i].tolist()
 
-        # Export club induced
         if self.frames and self.frames[0].club_induced_accelerations:
-            all_keys = set()
+            all_keys_club: set[str] = set()
             for f in self.frames:
                 if f.club_induced_accelerations:
-                    all_keys.update(f.club_induced_accelerations.keys())
-
-            for key in all_keys:
+                    all_keys_club.update(f.club_induced_accelerations.keys())
+            for key in all_keys_club:
                 _, vals = self.get_club_induced_acceleration_series(key)
                 if len(vals) > 0:
                     for i in range(vals.shape[1]):
                         export_data[f"club_acc_{key}_{i}"] = vals[:, i].tolist()
 
-        # Export counterfactuals
+    def _export_counterfactuals(self, export_data: dict) -> None:
+        """Export counterfactual simulation series."""
         if self.frames and self.frames[0].counterfactuals:
-            all_keys = set()
+            all_keys: set[str] = set()
             for f in self.frames:
                 all_keys.update(f.counterfactuals.keys())
-
             for key in all_keys:
                 _, vals = self.get_counterfactual_series(key)
                 if len(vals) > 0 and isinstance(vals, np.ndarray):
@@ -598,6 +608,21 @@ class SwingRecorder:
                         for i in range(vals.shape[1]):
                             export_data[f"cf_{key}_{i}"] = vals[:, i].tolist()
 
+    def export_to_dict(self) -> dict:
+        """Export all recorded data to a dictionary for JSON/CSV export.
+
+        Returns:
+            Dictionary with time series for all fields
+        """
+        if not self.frames:
+            return {}
+
+        export_data: dict = {}
+        self._export_scalar_fields(export_data)
+        self._export_array_fields(export_data)
+        self._export_3d_fields(export_data)
+        self._export_induced_accelerations(export_data)
+        self._export_counterfactuals(export_data)
         return export_data
 
     def get_club_induced_acceleration_series(
@@ -628,6 +653,7 @@ class SwingRecorder:
         return np.array(times, dtype=np.float64), cast(np.ndarray, np.array(values))
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Return counterfactual analysis time series by name."""
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 

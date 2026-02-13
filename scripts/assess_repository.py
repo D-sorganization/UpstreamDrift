@@ -38,6 +38,7 @@ ISSUES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def assess_A():
+    """Assess code structure and directory organization."""
     # Code Structure
     findings = []
     score = 8.0
@@ -60,6 +61,7 @@ def assess_A():
 
 
 def assess_B():
+    """Assess documentation quality and coverage."""
     # Documentation
     findings = []
     score = 7.0
@@ -90,6 +92,7 @@ def assess_B():
 
 
 def assess_C():
+    """Assess test coverage and test file count."""
     # Test Coverage
     findings = []
     score = 6.0
@@ -146,6 +149,7 @@ def assess_D():
 
 
 def assess_E():
+    """Assess performance profiling practices."""
     # Performance
     findings = []
     score = 7.5
@@ -164,6 +168,7 @@ def assess_E():
 
 
 def assess_F():
+    """Assess security practices and hardcoded secrets."""
     # Security
     findings = []
     score = 8.0
@@ -187,6 +192,7 @@ def assess_F():
 
 
 def assess_G():
+    """Assess dependency management and definition files."""
     # Dependencies
     findings = []
     score = 8.5
@@ -207,6 +213,7 @@ def assess_G():
 
 
 def assess_H():
+    """Assess CI/CD pipeline configuration."""
     # CI/CD
     findings = []
     score = 8.0
@@ -228,6 +235,7 @@ def assess_H():
 
 
 def assess_I():
+    """Assess code style and linter configuration."""
     # Code Style
     findings = []
     score = 8.0
@@ -246,6 +254,7 @@ def assess_I():
 
 
 def assess_J():
+    """Assess API design and endpoint documentation."""
     # API Design
     findings = []
     score = 7.5
@@ -283,6 +292,7 @@ def assess_J():
 
 
 def assess_K():
+    """Assess data handling and validation patterns."""
     # Data Handling
     findings = []
     score = 7.0
@@ -333,6 +343,7 @@ def assess_L():
 
 
 def assess_M():
+    """Assess configuration management practices."""
     # Configuration
     findings = []
     score = 7.5
@@ -347,6 +358,7 @@ def assess_M():
 
 
 def assess_N():
+    """Assess scalability readiness of the architecture."""
     # Scalability
     findings = []
     score = 7.0
@@ -363,6 +375,7 @@ def assess_N():
 
 
 def assess_O():
+    """Assess code maintainability and complexity metrics."""
     # Maintainability
     findings = []
     score = 7.5
@@ -389,6 +402,7 @@ def assess_O():
 
 
 def run_all_assessments():
+    """Execute all category assessments and return their reports."""
     assessors = [
         assess_A,
         assess_B,
@@ -443,6 +457,7 @@ def generate_issues_locally(json_path):
 
 
 def main():
+    """Run all assessments and generate the summary report."""
     print("Starting repository assessment...")
 
     # 1. Run individual assessments

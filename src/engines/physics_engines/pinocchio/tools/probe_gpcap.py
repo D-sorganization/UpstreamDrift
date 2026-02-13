@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def probe(filepath: str) -> None:
+    """Read a .gpcap file and log embedded string locations."""
     with open(filepath, "rb") as f:
         data = f.read()
 

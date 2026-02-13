@@ -253,6 +253,7 @@ class SwingAnalysis:
         import dataclasses
 
         def convert(obj):
+            """Recursively convert dataclasses and enums to plain dicts."""
             if dataclasses.is_dataclass(obj):
                 return {k: convert(v) for k, v in dataclasses.asdict(obj).items()}  # type: ignore[arg-type]
             if isinstance(obj, Enum):

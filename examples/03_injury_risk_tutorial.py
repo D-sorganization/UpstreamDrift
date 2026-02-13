@@ -27,6 +27,7 @@ logger = get_logger("tutorial")
 
 
 def run_tutorial() -> None:
+    """Run the end-to-end injury risk analysis tutorial."""
     logger.info("🏌️  Starting Injury Risk Analysis Tutorial\n")
 
     # 1. Spinal Load Analysis

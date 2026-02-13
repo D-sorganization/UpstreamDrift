@@ -104,3 +104,4 @@ pr_comments.json
 pr_list.json
 review_comments.json
 !.jules/sentinel.md
+.hypothesis/

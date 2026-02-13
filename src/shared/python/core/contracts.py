@@ -345,11 +345,13 @@ def precondition(
     """
 
     def decorator(func: F) -> F:
+        """Wrap the function with precondition checking logic."""
         if not enabled or DBC_LEVEL == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Execute precondition check before calling the wrapped function."""
             # Bind arguments to get named parameters
             sig = inspect.signature(func)
             try:
@@ -414,11 +416,13 @@ def postcondition(
     """
 
     def decorator(func: F) -> F:
+        """Wrap the function with postcondition checking logic."""
         if not enabled or DBC_LEVEL == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Execute the wrapped function and verify its postcondition."""
             result = func(*args, **kwargs)
 
             # Evaluate the postcondition
@@ -475,11 +479,13 @@ def require_state(
     """
 
     def decorator(func: F) -> F:
+        """Wrap the method with state validation logic."""
         if DBC_LEVEL == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+            """Verify required object state before executing the wrapped method."""
             if not state_check(self):
                 operation = operation_desc or func.__name__
                 if DBC_LEVEL == ContractLevel.ENFORCE:
@@ -721,6 +727,7 @@ def invariant_checked(func: F) -> F:
 
     @functools.wraps(func)
     def wrapper(self: ContractChecker, *args: Any, **kwargs: Any) -> Any:
+        """Execute the method and verify class invariants afterward."""
         result = func(self, *args, **kwargs)
         self._check_invariants_after(func.__name__)
         return result
@@ -823,6 +830,7 @@ def invariant(
     """
 
     def decorator(cls: type[T]) -> type[T]:
+        """Wrap the class __init__ to enforce the invariant after construction."""
         if DBC_LEVEL == ContractLevel.OFF:
             return cls
 
@@ -830,6 +838,7 @@ def invariant(
 
         @functools.wraps(original_init)
         def new_init(self: Any, *args: Any, **kwargs: Any) -> None:
+            """Run the original __init__ and check the class invariant."""
             original_init(self, *args, **kwargs)
             try:
                 result = condition(self)

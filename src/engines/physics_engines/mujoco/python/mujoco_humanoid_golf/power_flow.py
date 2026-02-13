@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -180,6 +181,28 @@ class PowerFlowAnalyzer:
                     power_diss += joint.damping[0] * qvel[v_idx] ** 2
         return power_diss
 
+    @precondition(
+        lambda self,
+        qpos,
+        qvel,
+        qacc,
+        tau,
+        dt=0.01,
+        tau_drift=None,
+        tau_control=None: dt > 0,
+        "Timestep must be positive",
+    )
+    @precondition(
+        lambda self,
+        qpos,
+        qvel,
+        qacc,
+        tau,
+        dt=0.01,
+        tau_drift=None,
+        tau_control=None: len(qvel) == len(tau),
+        "Velocity and torque arrays must have the same length",
+    )
     def compute_power_flow(
         self,
         qpos: np.ndarray,
@@ -239,6 +262,18 @@ class PowerFlowAnalyzer:
             energy_conservation_residual=0.0,
         )
 
+    @precondition(
+        lambda self, times, qpos_traj, qvel_traj, qacc_traj, tau_traj: len(times) > 0,
+        "Time array must be non-empty",
+    )
+    @precondition(
+        lambda self, times, qpos_traj, qvel_traj, qacc_traj, tau_traj: len(times)
+        == len(qpos_traj)
+        == len(qvel_traj)
+        == len(qacc_traj)
+        == len(tau_traj),
+        "All trajectory arrays must have the same length",
+    )
     def analyze_trajectory(
         self,
         times: np.ndarray,
@@ -375,6 +410,14 @@ class PowerFlowAnalyzer:
 
         return transfers
 
+    @precondition(
+        lambda self, times, results, joint_idx=0: joint_idx >= 0,
+        "Joint index must be non-negative",
+    )
+    @precondition(
+        lambda self, times, results, joint_idx=0: len(results) > 0,
+        "Results list must be non-empty",
+    )
     def plot_power_flow(
         self,
         times: np.ndarray,

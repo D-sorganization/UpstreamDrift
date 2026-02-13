@@ -19,6 +19,7 @@ import mujoco
 import numpy as np
 from scipy.linalg import lstsq
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
@@ -301,6 +302,10 @@ class InverseDynamicsSolver:
             gravity=a_g, velocity=a_c, control=a_t, total=total
         )
 
+    @precondition(
+        lambda self, qpos, qvel, ctrl: len(qpos) > 0,
+        "Joint positions must be non-empty",
+    )
     def compute_induced_accelerations(
         self,
         qpos: np.ndarray,
@@ -334,6 +339,17 @@ class InverseDynamicsSolver:
 
         return self._solve_component_accelerations(g_force, c_force, tau_force)
 
+    @precondition(
+        lambda self, times, positions, velocities, accelerations: len(times) > 0,
+        "Time array must be non-empty",
+    )
+    @precondition(
+        lambda self, times, positions, velocities, accelerations: len(times)
+        == len(positions)
+        == len(velocities)
+        == len(accelerations),
+        "All trajectory arrays must have the same length",
+    )
     def solve_inverse_dynamics_trajectory(
         self,
         times: np.ndarray,
@@ -451,6 +467,10 @@ class InverseDynamicsSolver:
             gravity=gravity,
         )
 
+    @precondition(
+        lambda self, qpos, qvel, qacc, body_id: body_id >= 0,
+        "Body ID must be non-negative",
+    )
     def compute_end_effector_forces(
         self,
         qpos: np.ndarray,
