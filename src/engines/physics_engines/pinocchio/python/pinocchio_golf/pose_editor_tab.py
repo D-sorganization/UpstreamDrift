@@ -73,7 +73,7 @@ class PinocchioPoseEditor(BasePoseEditor):
         self._data = data
         self._q = q
         self._v = v
-        self._original_gravity = GRAVITY_VECTOR.copy()
+        self._original_gravity: np.ndarray = GRAVITY_VECTOR.copy()  # type: ignore[assignment]
         self._update_callback: Any = None
         self._viz: Any = None  # Visualizer reference
 
@@ -493,8 +493,8 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.library_widget = PoseLibraryWidget(self._library)
         self.library_widget.pose_loaded.connect(self._on_pose_loaded)
         self.library_widget.interpolation_requested.connect(self._on_interpolation)
-        self.library_widget.save_pose_requested = self._save_current_pose
-        self.library_widget.preset_load_requested = self._load_preset_from_data
+        self.library_widget.save_pose_requested = self._save_current_pose  # type: ignore[method-assign]
+        self.library_widget.preset_load_requested = self._load_preset_from_data  # type: ignore[method-assign]
         splitter.addWidget(self.library_widget)
 
         splitter.setSizes([150, 300, 250])
@@ -548,7 +548,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         while self.slider_layout.count():
             item = self.slider_layout.takeAt(0)
             if item and item.widget():
-                item.widget().deleteLater()
+                item.widget().deleteLater()  # type: ignore[union-attr]
 
         joints = self._editor.get_joint_info()
         if not joints:
@@ -674,7 +674,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         positions = self._editor.get_all_positions()
         velocities = self._editor.get_all_velocities()
 
-        named_positions = {}
+        named_positions: dict[str, float | list[float]] = {}
         for joint in self._editor.get_joint_info():
             if joint.is_single_dof():
                 named_positions[joint.name] = float(positions[joint.position_index])

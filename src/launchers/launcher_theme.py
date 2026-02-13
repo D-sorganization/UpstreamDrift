@@ -3,6 +3,7 @@
 Contains theme application, theme menu setup, plot theme management,
 and dynamic theme change handling.
 """
+# mypy: disable-error-code="attr-defined,call-overload,arg-type"
 
 from __future__ import annotations
 

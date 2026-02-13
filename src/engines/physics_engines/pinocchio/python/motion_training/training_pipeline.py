@@ -133,6 +133,7 @@ class MotionTrainingPipeline:
         logger.info("\n[2/4] Initializing IK solver...")
         self._init_ik_solver()
         logger.info(f"      Model: {self.config.golfer_urdf}")
+        assert self.ik_solver is not None
         logger.info(f"      DOF: {self.ik_solver.model.nq}")
 
         # Step 3: Solve IK
@@ -201,6 +202,7 @@ class MotionTrainingPipeline:
 
     def _solve_ik(self) -> TrajectoryIKResult:
         """Solve IK for the trajectory."""
+        assert self.ik_solver is not None
         return self.ik_solver.solve_trajectory(
             self.trajectory,
             verbose=True,
@@ -208,6 +210,7 @@ class MotionTrainingPipeline:
 
     def _save_results(self) -> None:
         """Save results to files."""
+        assert self.ik_result is not None
         output_dir = Path(self.config.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 

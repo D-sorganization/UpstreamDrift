@@ -36,7 +36,7 @@ class OptionalAuth(HTTPBearer):
     def __init__(self, auto_error: bool = True) -> None:
         super().__init__(auto_error=auto_error)
 
-    async def __call__(
+    async def __call__(  # type: ignore[override]
         self, request: Request
     ) -> HTTPAuthorizationCredentials | LocalUser | None:
         if is_local_mode():

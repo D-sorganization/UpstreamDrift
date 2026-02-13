@@ -99,7 +99,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         btn.setIcon(self.style().standardIcon(icon_pixmap))
         btn.setToolTip(tooltip)
         btn.setAccessibleName(accessible_name)
-        btn.clicked.connect(slot)
+        btn.clicked.connect(slot)  # type: ignore[arg-type]
         return btn
 
     def _setup_engine_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:

@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,7 +12,7 @@ from src.launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
 
 
 @pytest.fixture
-def mock_qapp() -> MagicMock:
+def mock_qapp() -> Generator[MagicMock, None, None]:
     """Mock qapp."""
     with patch("launchers.unified_launcher.QApplication") as mock_app_cls:
         mock_app_instance = MagicMock()

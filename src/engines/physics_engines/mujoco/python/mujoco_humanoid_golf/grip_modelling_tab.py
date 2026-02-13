@@ -894,7 +894,7 @@ class GripModellingTab(QtWidgets.QWidget):
             num_contacts=len(state.contacts),
             num_slipping=state.num_slipping,
             slip_margin=margins["min_margin"],
-            equilibrium=equilibrium.get("equilibrium", False),
+            equilibrium=bool(equilibrium.get("equilibrium", False)),
         )
 
     def _update_contact_data(self) -> None:
@@ -969,7 +969,7 @@ class GripModellingTab(QtWidgets.QWidget):
             else:
                 import json
 
-                data = self.contact_exporter.export_to_dict()
+                data = self.contact_exporter.export_to_dict()  # type: ignore[assignment]
                 with open(filename, "w") as f:
                     json.dump(data, f, indent=2)
 

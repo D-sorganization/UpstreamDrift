@@ -1283,6 +1283,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
     def _compute_live_analysis(self, q: np.ndarray, v: np.ndarray) -> None:
         """Compute induced accelerations and counterfactuals for the current state."""
         assert self.plant is not None  # guaranteed by caller
+        assert self.eval_context is not None
         # Update eval context
         self.plant.SetPositions(self.eval_context, q)
         self.plant.SetVelocities(self.eval_context, v)
@@ -1335,6 +1336,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 unique_sources.add(str(src))
 
         assert self.plant is not None  # guaranteed by caller chain
+        assert self.eval_context is not None
         for source in unique_sources:
             if source in ["gravity", "velocity", "total"]:
                 continue
@@ -1404,6 +1406,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
     def _sync_eval_context(self) -> None:
         assert self.plant is not None
+        assert self.context is not None
+        assert self.eval_context is not None
         plant_context = self.plant.GetMyContextFromRoot(self.context)
         self.plant.SetPositions(
             self.eval_context, self.plant.GetPositions(plant_context)
@@ -1414,11 +1418,13 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
     def _draw_torque_vectors(self) -> None:
         assert self.plant is not None
+        assert self.eval_context is not None
         tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)
         self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
 
     def _draw_gravity_force_vectors(self) -> None:
         assert self.plant is not None
+        assert self.eval_context is not None
         for i in range(self.plant.num_bodies()):
             body = self.plant.get_body(BodyIndex(i))
             if body.name() == "world":
@@ -1596,7 +1602,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             plant_context,
             JacobianWrtVariable.kV,
             frame_B,
-            [0, 0, 0],
+            np.array([0, 0, 0]),
             frame_W,
             frame_W,  # type: ignore[arg-type]  # pydrake list-to-array overload
         )

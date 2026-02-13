@@ -279,7 +279,7 @@ class DockerLauncher:
                 process = subprocess.Popen(
                     cmd,
                     creationflags=(
-                        subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                        subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0  # type: ignore[attr-defined]
                     ),
                 )
             return process

@@ -60,7 +60,7 @@ def _magnitude_to_color(magnitude: float, max_magnitude: float) -> list[float]:
 
 def _extract_engine_state(engine_manager: EngineManager) -> tuple[Any, dict]:
     try:
-        engine = engine_manager.get_active_engine()
+        engine = engine_manager.get_active_engine()  # type: ignore[attr-defined]
     except (AttributeError, RuntimeError):
         return None, {}
 
