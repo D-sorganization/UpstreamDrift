@@ -1,0 +1,33 @@
+{
+  "rules": [
+    {
+      "source_dir": "shared/python",
+      "forbidden_prefixes": ["src.engines", "engines"],
+      "description": "shared -> engines (inverted dependency)"
+    },
+    {
+      "source_dir": "shared/python",
+      "forbidden_prefixes": ["src.robotics", "robotics"],
+      "description": "shared -> robotics (inverted dependency)"
+    },
+    {
+      "source_dir": "api",
+      "forbidden_prefixes": ["src.launchers", "launchers"],
+      "description": "api -> launchers (should use api.services.launcher_service)"
+    }
+  ],
+  "exceptions": [
+    {
+      "path": "shared/python/engine_core/engine_loaders.py",
+      "owner": "@platform-architecture",
+      "reason": "Backward-compatible shim re-export path",
+      "expires_on": "2027-01-31"
+    },
+    {
+      "path": "engines/common/capabilities.py",
+      "owner": "@platform-architecture",
+      "reason": "Backward-compatible shim for capability exports",
+      "expires_on": "2027-01-31"
+    }
+  ]
+}
