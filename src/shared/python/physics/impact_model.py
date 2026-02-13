@@ -159,6 +159,60 @@ class RigidBodyImpactModel(ImpactModel):
     to compute post-impact velocities.
     """
 
+    def _compute_effective_club_mass(self, pre_state: PreImpactState) -> float:
+        m_club = pre_state.clubhead_mass
+        club_moi = pre_state.clubhead_moi
+
+        if pre_state.impact_offset is not None and club_moi > 0:
+            r_offset = float(np.linalg.norm(pre_state.impact_offset))
+            if r_offset > 1e-6:
+                return 1.0 / (1.0 / m_club + r_offset**2 / club_moi)
+        return m_club
+
+    def _compute_impulse(
+        self,
+        v_rel: np.ndarray,
+        n: np.ndarray,
+        m_club_effective: float,
+        cor: float,
+    ) -> tuple[float, float]:
+        v_approach = np.dot(v_rel, n)
+        m_eff = (GOLF_BALL_MASS * m_club_effective) / (
+            GOLF_BALL_MASS + m_club_effective
+        )
+        j = (1 + cor) * m_eff * v_approach
+        return j, v_approach
+
+    def _compute_friction_spin(
+        self,
+        pre_state: PreImpactState,
+        v_rel: np.ndarray,
+        v_approach: float,
+        n: np.ndarray,
+        j: float,
+        friction_coefficient: float,
+    ) -> np.ndarray:
+        v_tangent = v_rel - v_approach * n
+        tangent_mag = np.linalg.norm(v_tangent)
+
+        if tangent_mag <= 1e-6:
+            return pre_state.ball_angular_velocity.copy()
+
+        tangent_dir = v_tangent / tangent_mag
+        j_friction = min(friction_coefficient * j, GOLF_BALL_MASS * tangent_mag * 0.4)
+        spin_axis = np.cross(n, tangent_dir)
+        spin_magnitude = j_friction / (GOLF_BALL_MOMENT_INERTIA / GOLF_BALL_RADIUS)
+        return pre_state.ball_angular_velocity + spin_magnitude * spin_axis
+
+    def _compute_energy_transfer(
+        self,
+        pre_ball_velocity: np.ndarray,
+        post_ball_velocity: np.ndarray,
+    ) -> float:
+        ke_pre = 0.5 * GOLF_BALL_MASS * np.dot(pre_ball_velocity, pre_ball_velocity)
+        ke_post = 0.5 * GOLF_BALL_MASS * np.dot(post_ball_velocity, post_ball_velocity)
+        return ke_post - ke_pre
+
     def solve(
         self,
         pre_state: PreImpactState,
@@ -181,72 +235,30 @@ class RigidBodyImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
-        # Masses
-        m_ball = GOLF_BALL_MASS
-        m_club = pre_state.clubhead_mass
-        I_club = pre_state.clubhead_moi
+        m_club_effective = self._compute_effective_club_mass(pre_state)
 
-        # Compute effective clubhead mass at impact point
-        # For a rigid body, the effective mass at a point offset r from CG is:
-        # m_eff_at_point = 1 / (1/m + r²/I)
-        if pre_state.impact_offset is not None and I_club > 0:
-            r_offset = float(np.linalg.norm(pre_state.impact_offset))
-            if r_offset > 1e-6:
-                m_club_effective = 1.0 / (1.0 / m_club + r_offset**2 / I_club)
-            else:
-                m_club_effective = m_club
-        else:
-            m_club_effective = m_club
-
-        # Contact normal (clubface normal, pointing away from club)
         n = pre_state.clubhead_orientation / np.linalg.norm(
             pre_state.clubhead_orientation
         )
-
-        # Relative velocity (club relative to ball)
         v_rel = pre_state.clubhead_velocity - pre_state.ball_velocity
 
-        # Approach velocity (component along normal)
-        v_approach = np.dot(v_rel, n)
+        j, v_approach = self._compute_impulse(v_rel, n, m_club_effective, params.cor)
 
-        # COR equation: v_sep = -e * v_app
-        # Combined with momentum conservation
-        e = params.cor
+        v_ball_post = pre_state.ball_velocity + (j / GOLF_BALL_MASS) * n
+        v_club_post = pre_state.clubhead_velocity - (j / pre_state.clubhead_mass) * n
 
-        # Effective mass for the collision (using effective clubhead mass at impact point)
-        m_eff = (m_ball * m_club_effective) / (m_ball + m_club_effective)
-
-        # Impulse magnitude
-        j = (1 + e) * m_eff * v_approach
-
-        # Post-impact velocities
-        v_ball_post = pre_state.ball_velocity + (j / m_ball) * n
-        v_club_post = pre_state.clubhead_velocity - (j / m_club) * n
-
-        # Spin generation from friction (simplified)
-        # Tangential velocity at contact
-        v_tangent = v_rel - v_approach * n
-        tangent_mag = np.linalg.norm(v_tangent)
-
-        if tangent_mag > 1e-6:
-            tangent_dir = v_tangent / tangent_mag
-            # Friction impulse (limited by friction cone)
-            j_friction = min(
-                params.friction_coefficient * j, m_ball * tangent_mag * 0.4
-            )
-            # Spin from friction: τ = r × F, integrated
-            spin_axis = np.cross(n, tangent_dir)
-            spin_magnitude = j_friction / (GOLF_BALL_MOMENT_INERTIA / GOLF_BALL_RADIUS)
-            ball_spin = pre_state.ball_angular_velocity + spin_magnitude * spin_axis
-        else:
-            ball_spin = pre_state.ball_angular_velocity.copy()
-
-        # Energy calculation
-        ke_ball_pre = (
-            0.5 * m_ball * np.dot(pre_state.ball_velocity, pre_state.ball_velocity)
+        ball_spin = self._compute_friction_spin(
+            pre_state,
+            v_rel,
+            v_approach,
+            n,
+            j,
+            params.friction_coefficient,
         )
-        ke_ball_post = 0.5 * m_ball * np.dot(v_ball_post, v_ball_post)
-        energy_transfer = ke_ball_post - ke_ball_pre
+        energy_transfer = self._compute_energy_transfer(
+            pre_state.ball_velocity,
+            v_ball_post,
+        )
 
         impact_loc = (
             pre_state.impact_offset.copy()
@@ -259,7 +271,7 @@ class RigidBodyImpactModel(ImpactModel):
             ball_angular_velocity=ball_spin,
             clubhead_velocity=v_club_post,
             clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
-            contact_duration=0.0,  # Instantaneous
+            contact_duration=0.0,
             energy_transfer=energy_transfer,
             impact_location=impact_loc,
         )

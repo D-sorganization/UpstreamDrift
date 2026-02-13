@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
 
@@ -156,6 +157,12 @@ async def load_engine_lazy(
 
 
 @router.post("/engines/{engine_type}/load")
+@precondition(
+    lambda engine_type, model_path=None, engine_manager=None, _user=None: engine_type
+    is not None
+    and len(engine_type.strip()) > 0,
+    "Engine type must be a non-empty string",
+)
 async def load_engine(
     engine_type: str,
     model_path: str | None = None,
@@ -202,6 +209,11 @@ async def load_engine(
 
 
 @router.post("/engines/{engine_type}/unload")
+@precondition(
+    lambda engine_type, engine_manager=None, _user=None: engine_type is not None
+    and len(engine_type.strip()) > 0,
+    "Engine type must be a non-empty string",
+)
 async def unload_engine(
     engine_type: str,
     engine_manager: EngineManager = Depends(get_engine_manager),

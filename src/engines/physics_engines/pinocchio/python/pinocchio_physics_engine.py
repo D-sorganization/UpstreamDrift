@@ -13,6 +13,7 @@ import numpy as np
 
 from src.shared.python.core.contracts import (
     check_finite,
+    invariant,
     postcondition,
     precondition,
 )
@@ -31,6 +32,14 @@ logger = get_logger(__name__)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 
+@invariant(
+    lambda self: self.model is None or self.data is not None,
+    "If model is loaded, data must also be initialized",
+)
+@invariant(
+    lambda self: self.time >= 0.0,
+    "Simulation time must be non-negative",
+)
 class PinocchioPhysicsEngine(PhysicsEngine):
     """Encapsulates Pinocchio model, data, and simulation control.
 

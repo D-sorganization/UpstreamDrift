@@ -233,12 +233,18 @@ class GripModellingTab(QtWidgets.QWidget):
         super().__init__()
         self.main_layout = QtWidgets.QHBoxLayout(self)
 
-        # --- Left Control Panel ---
+        self._setup_left_control_panel()
+        self._setup_center_sim_widget()
+        self._setup_right_contact_panel()
+        self._init_internal_state()
+
+        QtCore.QTimer.singleShot(100, self.load_current_hand_model)
+
+    def _setup_left_control_panel(self) -> None:
         self.control_panel = QtWidgets.QWidget()
         self.control_panel.setFixedWidth(300)
         self.control_layout = QtWidgets.QVBoxLayout(self.control_panel)
 
-        # Model Selection
         self.control_layout.addWidget(QtWidgets.QLabel("<b>Hand Model Selection</b>"))
         self.combo_hand = QtWidgets.QComboBox()
         self.combo_hand.addItems(
@@ -250,23 +256,25 @@ class GripModellingTab(QtWidgets.QWidget):
                 "Allegro Hand Left",
             ]
         )
-
         self.combo_hand.currentIndexChanged.connect(self.load_current_hand_model)
         self.control_layout.addWidget(self.combo_hand)
-
         self.control_layout.addSpacing(10)
 
-        # Physics Controls
+        self._setup_physics_controls()
+        self._setup_sliders_area()
+
+        self.main_layout.addWidget(self.control_panel)
+
+    def _setup_physics_controls(self) -> None:
         self.control_layout.addWidget(QtWidgets.QLabel("<b>Physics Controls</b>"))
         self.chk_kinematic = QtWidgets.QCheckBox("Kinematic Mode (Pose Only)")
         self.chk_kinematic.setToolTip(
             "Disable physics integration to pose hands without gravity/collisions"
         )
-        self.chk_kinematic.setChecked(True)  # Default to kinematic for posing
+        self.chk_kinematic.setChecked(True)
         self.chk_kinematic.toggled.connect(self._on_kinematic_toggled)
         self.control_layout.addWidget(self.chk_kinematic)
 
-        # Contact monitoring checkbox
         self.chk_contact_monitor = QtWidgets.QCheckBox("Monitor Contacts")
         self.chk_contact_monitor.setToolTip(
             "Enable contact force and slip monitoring (Issue #757)"
@@ -278,42 +286,36 @@ class GripModellingTab(QtWidgets.QWidget):
         self.control_layout.addSpacing(10)
         self.control_layout.addWidget(QtWidgets.QLabel("<b>Joint Controls</b>"))
 
-        # Sliders Area
+    def _setup_sliders_area(self) -> None:
         self.sliders_area = QtWidgets.QScrollArea()
         self.sliders_area.setWidgetResizable(True)
         self.sliders_widget = QtWidgets.QWidget()
         self.sliders_layout = QtWidgets.QVBoxLayout(self.sliders_widget)
         self.sliders_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         self.sliders_area.setWidget(self.sliders_widget)
-
         self.control_layout.addWidget(self.sliders_area)
 
-        self.main_layout.addWidget(self.control_panel)
-
-        # --- Center Simulation Widget ---
+    def _setup_center_sim_widget(self) -> None:
         self.sim_widget = MuJoCoSimWidget(width=600, height=600)
         self.main_layout.addWidget(self.sim_widget, 2)
 
-        # --- Right Panel: Contact Visualization (Issue #757) ---
+    def _setup_right_contact_panel(self) -> None:
         self.contact_panel = QtWidgets.QWidget()
         self.contact_panel.setFixedWidth(250)
         self.contact_layout = QtWidgets.QVBoxLayout(self.contact_panel)
 
         self.contact_layout.addWidget(QtWidgets.QLabel("<b>Contact Analysis</b>"))
 
-        # Contact metrics widget
         self.metrics_widget = ContactMetricsWidget()
         self.contact_layout.addWidget(self.metrics_widget)
 
         self.contact_layout.addSpacing(10)
         self.contact_layout.addWidget(QtWidgets.QLabel("<b>Pressure Distribution</b>"))
 
-        # Pressure visualization widget
         self.pressure_widget = PressureVisualizationWidget()
         self.pressure_widget.setMinimumHeight(200)
         self.contact_layout.addWidget(self.pressure_widget)
 
-        # Export button
         self.btn_export_contacts = QtWidgets.QPushButton("Export Contact Data")
         self.btn_export_contacts.clicked.connect(self._export_contact_data)
         self.contact_layout.addWidget(self.btn_export_contacts)
@@ -321,17 +323,13 @@ class GripModellingTab(QtWidgets.QWidget):
         self.contact_layout.addStretch()
         self.main_layout.addWidget(self.contact_panel)
 
-        # Internal state for sliders
+    def _init_internal_state(self) -> None:
         self.joint_sliders: list[QtWidgets.QSlider] = []
         self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
 
-        # Contact model (Issue #757)
         self.grip_contact_model = GripContactModel(GripParameters())
         self.contact_exporter = GripContactExporter(self.grip_contact_model)
         self.contact_timer: QtCore.QTimer | None = None
-
-        # Initial Load
-        QtCore.QTimer.singleShot(100, self.load_current_hand_model)
 
     def _on_kinematic_toggled(self, checked: bool) -> None:
         """Handle kinematic mode toggle."""
@@ -672,7 +670,9 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(
+        self, i: int, model: mujoco.MjModel
+    ) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return

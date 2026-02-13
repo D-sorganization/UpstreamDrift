@@ -125,23 +125,18 @@ class TestGolfSwingPlotter:
         assert ax.plot.call_count == 2  # 2 joints
         ax.set_xlabel.assert_called_with("Time (s)", fontsize=12, fontweight="bold")
 
-    def test_plot_joint_velocities(self, plotter, mock_figure):
-        """Test plotting joint velocities."""
-        plotter.plot_joint_velocities(mock_figure)
-        mock_figure.add_subplot.assert_called()
-        ax = mock_figure.add_subplot.return_value
-        assert ax.plot.call_count == 2
-
-    def test_plot_joint_torques(self, plotter, mock_figure):
-        """Test plotting joint torques."""
-        plotter.plot_joint_torques(mock_figure)
-        mock_figure.add_subplot.assert_called()
-        ax = mock_figure.add_subplot.return_value
-        assert ax.plot.call_count == 2
-
-    def test_plot_actuator_powers(self, plotter, mock_figure):
-        """Test plotting actuator powers."""
-        plotter.plot_actuator_powers(mock_figure)
+    @pytest.mark.parametrize(
+        "plot_method",
+        [
+            "plot_joint_velocities",
+            "plot_joint_torques",
+            "plot_actuator_powers",
+        ],
+        ids=["velocities", "torques", "powers"],
+    )
+    def test_plot_2dof_methods(self, plotter, mock_figure, plot_method):
+        """Test plotting methods that create 2 lines for 2 joints."""
+        getattr(plotter, plot_method)(mock_figure)
         mock_figure.add_subplot.assert_called()
         ax = mock_figure.add_subplot.return_value
         assert ax.plot.call_count == 2

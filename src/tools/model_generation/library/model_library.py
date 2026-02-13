@@ -18,6 +18,7 @@ from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.security.security_utils import validate_url_scheme
 
 logger = logging.getLogger(__name__)
@@ -298,6 +299,11 @@ class ModelLibrary:
         """Get a model entry by ID."""
         return self._entries.get(model_id)
 
+    @precondition(
+        lambda self, model_id, force_download=False: model_id is not None
+        and len(model_id.strip()) > 0,
+        "Model ID must be a non-empty string",
+    )
     def load_model(
         self,
         model_id: str,
@@ -334,6 +340,11 @@ class ModelLibrary:
             logger.error(f"Failed to load model {model_id}: {e}")
             return None
 
+    @precondition(
+        lambda self, urdf_path, **kw: urdf_path is not None
+        and len(str(urdf_path).strip()) > 0,
+        "URDF path must be a non-empty string or Path",
+    )
     def add_local_model(
         self,
         urdf_path: str | Path,
@@ -694,6 +705,11 @@ class ModelLibrary:
 
         return new_entry
 
+    @precondition(
+        lambda self, model_id, delete_files=False: model_id is not None
+        and len(model_id.strip()) > 0,
+        "Model ID must be a non-empty string",
+    )
     def remove_model(self, model_id: str, delete_files: bool = False) -> bool:
         """
         Remove a model from the library.

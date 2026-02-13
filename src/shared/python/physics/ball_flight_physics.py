@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     )
 
 from src.shared.python.core.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
+from src.shared.python.core.contracts import invariant, postcondition, precondition
 from src.shared.python.core.physics_constants import SPIN_DECAY_RATE_S
 from src.shared.python.engine_core.engine_availability import NUMBA_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -321,6 +322,8 @@ def _solve_rk4_loop(
     return out[:actual_steps]
 
 
+@invariant(lambda self: self.ball.mass > 0, "Ball mass must be positive")
+@invariant(lambda self: self.environment.gravity > 0, "Gravity must be positive")
 class BallFlightSimulator:
     """Refactored Ball Flight Simulator (Orthogonality-focused)."""
 
@@ -343,6 +346,19 @@ class BallFlightSimulator:
             self.ball.cl2,
         )
 
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
     def simulate_trajectory(
         self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> list[TrajectoryPoint]:
@@ -447,6 +463,16 @@ class BallFlightSimulator:
                 apex_t = p.time
         return apex_t
 
+    @precondition(
+        lambda self, trajectory: trajectory is not None,
+        "Trajectory must not be None",
+    )
+    @postcondition(
+        lambda result: result is not None
+        and "carry_distance" in result
+        and "max_height" in result,
+        "Analysis must include carry_distance and max_height",
+    )
     def analyze_trajectory(self, trajectory: list[TrajectoryPoint]) -> dict:
         """Generate comprehensive analysis dictionary."""
         return {
@@ -640,6 +666,21 @@ class EnhancedBallFlightSimulator:
             air_density=self.environment.air_density,
         )
 
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: launch
+        is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: max_time > 0
+        and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
     def simulate_trajectory(
         self,
         launch: LaunchConditions,
@@ -817,6 +858,18 @@ class EnhancedBallFlightSimulator:
             "without_aero": traj_without,
         }
 
+    @precondition(
+        lambda self, launch, n_samples=100, max_time=10.0, dt=0.01: launch is not None,
+        "Launch conditions must not be None",
+    )
+    @precondition(
+        lambda self, launch, n_samples=100, max_time=10.0, dt=0.01: n_samples > 0,
+        "Number of Monte Carlo samples must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Monte Carlo results must be returned as a non-None list",
+    )
     def monte_carlo_simulation(
         self,
         launch: LaunchConditions,

@@ -65,6 +65,86 @@ async def get_current_user(
     return user  # type: ignore[no-any-return]
 
 
+def _validate_api_key_format(api_key: str) -> None:
+    if not api_key.startswith("gms_"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key format",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
+    from .security import auth_cache
+
+    cached_key_id = auth_cache.get(api_key)
+    if not cached_key_id:
+        return None
+    record = db.query(APIKey).filter(APIKey.id == cached_key_id).first()
+    if not record or not record.is_active:
+        return None
+    return record
+
+
+def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
+    key_body = api_key[4:]
+    if len(key_body) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key format",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    prefix_for_index = key_body[:8]
+    prefix_hash = compute_prefix_hash(prefix_for_index)
+
+    try:
+        active_keys = (
+            db.query(APIKey)
+            .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
+            .all()
+        )
+    except (RuntimeError, ValueError, OSError):
+        # Fallback: prefix_hash column doesn't exist yet (migration pending)
+        active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+
+    if not active_keys:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    for key_candidate in active_keys:
+        if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
+            return key_candidate
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid API key",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
+    user = db.query(User).filter(User.id == api_key_record.user_id).first()
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user  # type: ignore[return-value]
+
+
+def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:
+    from datetime import datetime
+
+    api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
+    api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
+    db.commit()
+
+
 async def get_current_user_from_api_key(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
@@ -76,99 +156,20 @@ async def get_current_user_from_api_key(
     """
 
     api_key = credentials.credentials
+    _validate_api_key_format(api_key)
 
-    # Check if it's an API key (starts with gms_)
-    if not api_key.startswith("gms_"):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key format",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Performance: Check cache first
-    from .security import auth_cache
-
-    cached_key_id = auth_cache.get(api_key)
-    api_key_record = None
-
-    if cached_key_id:
-        api_key_record = db.query(APIKey).filter(APIKey.id == cached_key_id).first()
-        # Verify it's still active
-        if not api_key_record or not api_key_record.is_active:
-            api_key_record = None
+    api_key_record = _lookup_cached_api_key(api_key, db)
 
     if not api_key_record:
-        # PERFORMANCE FIX: Compute prefix hash for fast filtering
-        # Extract the key body (remove "gms_" prefix)
-        key_body = api_key[4:]
-        if len(key_body) < 8:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key format",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+        api_key_record = _lookup_api_key_by_prefix(api_key, db)
+        from .security import auth_cache
 
-        # Extract ONLY the prefix for indexing (not the full secret)
-        # This prefix is not sensitive - it's just used for database indexing
-        prefix_for_index = key_body[:8]
-
-        # Compute hash of the non-sensitive prefix for database lookup
-        prefix_hash = compute_prefix_hash(prefix_for_index)
-
-        # Query only keys matching the prefix hash (if column exists)
-        # Fallback to all active keys if prefix_hash column doesn't exist yet
-        try:
-            active_keys = (
-                db.query(APIKey)
-                .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
-                .all()
-            )
-        except (RuntimeError, ValueError, OSError):
-            # Fallback: prefix_hash column doesn't exist yet (migration pending)
-            # This maintains backward compatibility
-            active_keys = db.query(APIKey).filter(APIKey.is_active).all()
-
-        if not active_keys:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        # Verify with bcrypt (now only 1-2 candidates instead of all keys)
-        for key_candidate in active_keys:
-            if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
-                api_key_record = key_candidate
-                break
-
-        if not api_key_record:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        # Cache the success for next time
         auth_cache.set(api_key, api_key_record.id)
 
-    # Get associated user
-    user = db.query(User).filter(User.id == api_key_record.user_id).first()
-    if not user or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found or inactive",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    user = _get_active_user_for_api_key(api_key_record, db)
+    _update_api_key_usage(api_key_record, db)
 
-    # Update API key usage
-    from datetime import datetime
-
-    # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
-    api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
-    api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
-    db.commit()
-
-    return user  # type: ignore[no-any-return]
+    return user
 
 
 async def get_current_user_flexible(

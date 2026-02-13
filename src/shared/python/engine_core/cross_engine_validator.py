@@ -14,7 +14,7 @@ from typing import Literal
 
 import numpy as np
 
-from src.shared.python.core.contracts import ContractChecker
+from src.shared.python.core.contracts import ContractChecker, invariant
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -45,6 +45,10 @@ class ValidationResult:
     severity: str = "PASSED"  # PASSED, WARNING, ERROR, BLOCKER
 
 
+@invariant(
+    lambda self: all(v > 0 for v in self.TOLERANCES.values()),
+    "All tolerance values must be positive",
+)
 class CrossEngineValidator(ContractChecker):
     """Validates numerical consistency across physics engines.
 

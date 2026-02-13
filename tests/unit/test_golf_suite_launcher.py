@@ -193,11 +193,24 @@ with patch.dict(
     from src.launchers import golf_suite_launcher
 
 
+_LOG_TEXT_SPEC = [
+    "append",
+    "clear",
+    "toPlainText",
+    "setMaximumHeight",
+    "setReadOnly",
+    "setStyleSheet",
+]
+_STATUS_SPEC = ["setText", "setAlignment", "font", "setFont"]
+
+
 @pytest.fixture
 def mock_subprocess():
     """Mock subprocess.Popen."""
     with patch("subprocess.Popen") as mock_popen:
-        process = MagicMock()
+        process = MagicMock(
+            spec=["pid", "poll", "wait", "communicate", "terminate", "kill"]
+        )
         process.pid = 12345
         mock_popen.return_value = process
         yield mock_popen
@@ -221,9 +234,9 @@ class TestGolfSuiteLauncher:
         assert launcher_app is not None, "Launcher should be instantiated"
 
         # Verify PYQT6_AVAILABLE flag is set correctly for testing
-        assert golf_suite_launcher.PYQT6_AVAILABLE is True, (
-            "PYQT6_AVAILABLE should be True for launcher logic tests"
-        )
+        assert (
+            golf_suite_launcher.PYQT6_AVAILABLE is True
+        ), "PYQT6_AVAILABLE should be True for launcher logic tests"
 
         # Verify launcher has essential UI components (as mocked)
         assert hasattr(launcher_app, "log_text"), "Launcher should have log_text widget"
@@ -265,7 +278,7 @@ class TestGolfSuiteLauncher:
         """Test handling of missing script."""
         with patch.object(Path, "exists", return_value=False):
             # We need to mock log_text since it's an instance of MockQTextEdit
-            launcher_app.log_text = MagicMock()
+            launcher_app.log_text = MagicMock(spec=_LOG_TEXT_SPEC)
 
             launcher_app._launch_mujoco()
             mock_subprocess.assert_not_called()
@@ -277,7 +290,7 @@ class TestGolfSuiteLauncher:
 
     def test_log_functions(self, launcher_app):
         """Test logging functions."""
-        launcher_app.log_text = MagicMock()
+        launcher_app.log_text = MagicMock(spec=_LOG_TEXT_SPEC)
 
         launcher_app.log_message("Test message")
         launcher_app.log_text.append.assert_called()
@@ -288,9 +301,9 @@ class TestGolfSuiteLauncher:
 
     def test_copy_log(self, launcher_app):
         """Test copying log to clipboard."""
-        launcher_app.log_text = MagicMock()
+        launcher_app.log_text = MagicMock(spec=_LOG_TEXT_SPEC)
         launcher_app.log_text.toPlainText.return_value = "Log content"
-        launcher_app.status = MagicMock()
+        launcher_app.status = MagicMock(spec=_STATUS_SPEC)
 
         launcher_app.copy_log()
 
@@ -309,7 +322,7 @@ class TestGolfSuiteLauncher:
         """Test main entry point."""
         # Use manual patching to ensure we modify the *reloaded* module object
         original_launcher = golf_suite_launcher.GolfLauncher
-        mock_launcher = MagicMock()
+        mock_launcher = MagicMock(spec=["show", "resize", "setWindowTitle"])
         golf_suite_launcher.GolfLauncher = mock_launcher  # type: ignore[misc]
 
         # Use the already mocked QApplication from module setup

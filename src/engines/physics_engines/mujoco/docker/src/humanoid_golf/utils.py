@@ -70,6 +70,75 @@ def get_actuator_indices(physics) -> dict[str, int]:
     return mapping
 
 
+def _load_cmu_mjcf():
+    xml_path = get_cmu_xml_path()
+
+    with open(xml_path) as f:
+        xml_string = f.read()
+
+    suite_dir = os.path.dirname(xml_path)
+    common_dir = os.path.join(suite_dir, "common")
+
+    assets = {}
+    for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
+        path = os.path.join(common_dir, filename)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                assets[f"./common/{filename}"] = f.read()
+
+    xml_string = xml_string.replace('class="main"', 'class="main_custom"')
+    return mjcf.from_xml_string(xml_string, assets=assets)
+
+
+def _scale_model_positions(root, height_scale) -> None:
+    for body in root.find_all("body"):
+        pos = getattr(body, "pos", None)
+        if pos is not None:
+            body.pos = [x * height_scale for x in pos]
+
+    for geom in root.find_all("geom"):
+        pos = getattr(geom, "pos", None)
+        if pos is not None:
+            geom.pos = [x * height_scale for x in pos]
+
+    for joint in root.find_all("joint"):
+        pos = getattr(joint, "pos", None)
+        if pos is not None:
+            joint.pos = [x * height_scale for x in pos]
+
+    for site in root.find_all("site"):
+        pos = getattr(site, "pos", None)
+        if pos is not None:
+            site.pos = [x * height_scale for x in pos]
+
+
+def _scale_geom_sizes(root, height_scale, width_scale) -> None:
+    for geom in root.find_all("geom"):
+        size = getattr(geom, "size", None)
+        if size is not None:
+            if len(size) == 1:
+                geom.size = [size[0] * width_scale]
+            elif len(size) == 2:
+                geom.size = [size[0] * width_scale, size[1] * height_scale]
+            elif len(size) == 3:
+                geom.size = [
+                    size[0] * width_scale,
+                    size[1] * width_scale,
+                    size[2] * height_scale,
+                ]
+
+
+def _add_cameras(root, height_scale) -> None:
+    if root.worldbody:
+        root.worldbody.add(
+            "camera",
+            name="face_on",
+            pos=[2.5 * height_scale, 0, 1.4 * height_scale],
+            mode="targetbody",
+            target="root",
+        )
+
+
 def load_humanoid_with_props(
     target_height=1.8,
     weight_percent=100.0,
@@ -81,99 +150,28 @@ def load_humanoid_with_props(
     """
     Load the CMU humanoid with updated props and features.
     """
+    root = _load_cmu_mjcf()
 
-    xml_path = get_cmu_xml_path()
-
-    # Read XML
-    with open(xml_path) as f:
-        xml_string = f.read()
-
-    # FIX ASSET PATHS
-    suite_dir = os.path.dirname(xml_path)
-    common_dir = os.path.join(suite_dir, "common")
-
-    assets = {}
-    for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
-        path = os.path.join(common_dir, filename)
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                assets[f"./common/{filename}"] = f.read()
-
-    # FIX XML ERROR
-    xml_string = xml_string.replace('class="main"', 'class="main_custom"')
-
-    # Load MJCF
-    root = mjcf.from_xml_string(xml_string, assets=assets)
-
-    # --- SCALING FACTORS ---
     height_scale = target_height / 1.56
     width_scale = np.sqrt(weight_percent / 100.0) * height_scale
 
     logger.info("Scaling Height by %s (Target: %sm)", height_scale, target_height)
     logger.info("Scaling Width by %s (Weight: %s%%)", width_scale, weight_percent)
 
-    # Recursively scale positions and size
-    for body in root.find_all("body"):
-        pos = getattr(body, "pos", None)
-        if pos is not None:
-            body.pos = [x * height_scale for x in pos]
+    _scale_model_positions(root, height_scale)
+    _scale_geom_sizes(root, height_scale, width_scale)
 
-    for geom in root.find_all("geom"):
-        # Scale size
-        size = getattr(geom, "size", None)
-        if size is not None:
-            new_size = []
-            if len(size) == 1:  # Sphere
-                new_size = [size[0] * width_scale]
-            elif len(size) == 2:  # Capsule/Cylinder
-                new_size = [size[0] * width_scale, size[1] * height_scale]
-            elif len(size) == 3:  # Box
-                new_size = [
-                    size[0] * width_scale,
-                    size[1] * width_scale,
-                    size[2] * height_scale,
-                ]
-            geom.size = new_size
-
-        # Scale local pos
-        pos = getattr(geom, "pos", None)
-        if pos is not None:
-            geom.pos = [x * height_scale for x in pos]
-
-    # Scale Joint anchors (pos)
-    for joint in root.find_all("joint"):
-        pos = getattr(joint, "pos", None)
-        if pos is not None:
-            joint.pos = [x * height_scale for x in pos]
-
-    # Scale Sites
-    for site in root.find_all("site"):
-        pos = getattr(site, "pos", None)
-        if pos is not None:
-            site.pos = [x * height_scale for x in pos]
-
-    # --- ENHANCEMENTS ---
     if enhance_face:
         _add_face_features(root, height_scale, width_scale)
 
     if articulated_fingers:
         _add_articulated_fingers(root, height_scale, width_scale)
 
-    # --- ATTACH CLUB ---
     if club_params is None:
         club_params = {"length": 1.0, "mass": 0.5, "head_size": 1.0}
 
     _attach_club(root, height_scale, width_scale, club_params, two_handed)
-
-    # --- CAMERAS ---
-    if root.worldbody:
-        root.worldbody.add(
-            "camera",
-            name="face_on",
-            pos=[2.5 * height_scale, 0, 1.4 * height_scale],
-            mode="targetbody",
-            target="root",
-        )
+    _add_cameras(root, height_scale)
 
     return mjcf.Physics.from_mjcf_model(root)
 

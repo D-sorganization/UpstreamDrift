@@ -17,7 +17,7 @@ from xml.etree import ElementTree
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.shared.python.core.contracts import precondition
+from src.shared.python.core.contracts import postcondition, precondition
 
 from ..dependencies import get_logger
 from ..models.responses import (
@@ -260,6 +260,10 @@ def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str
 @precondition(
     lambda urdf_content: urdf_content is not None and len(urdf_content) > 0,
     "URDF content must be a non-empty string",
+)
+@postcondition(
+    lambda result: result is not None and result.model_name is not None,
+    "Parsed URDF model must have a valid model name",
 )
 def _parse_urdf(urdf_content: str) -> URDFModelResponse:
     """Parse a URDF XML string into a URDFModelResponse.

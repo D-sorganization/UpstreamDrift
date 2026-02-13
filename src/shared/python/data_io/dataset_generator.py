@@ -41,7 +41,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.core.contracts import precondition
+from src.shared.python.core.contracts import invariant, postcondition, precondition
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -295,6 +295,10 @@ class TrainingDataset:
         return sum(len(s.times) for s in self.samples)
 
 
+@invariant(
+    lambda self: self.engine is not None,
+    "DatasetGenerator must have a valid engine reference",
+)
 class DatasetGenerator:
     """Generates simulation datasets for neural network training.
 
@@ -335,6 +339,10 @@ class DatasetGenerator:
     @precondition(
         lambda self, config, progress_callback=None: config.timestep > 0,
         "Timestep must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and result.num_samples > 0,
+        "Generated dataset must contain at least one sample",
     )
     def generate(
         self,
@@ -486,16 +494,16 @@ class DatasetGenerator:
         assert buffers["times"] is not None, "times buffer must not be None"
         assert buffers["positions"] is not None, "positions buffer must not be None"
         assert buffers["velocities"] is not None, "velocities buffer must not be None"
-        assert buffers["accelerations"] is not None, (
-            "accelerations buffer must not be None"
-        )
+        assert (
+            buffers["accelerations"] is not None
+        ), "accelerations buffer must not be None"
         assert buffers["torques"] is not None, "torques buffer must not be None"
-        assert buffers["kinetic_energy"] is not None, (
-            "kinetic_energy buffer must not be None"
-        )
-        assert buffers["potential_energy"] is not None, (
-            "potential_energy buffer must not be None"
-        )
+        assert (
+            buffers["kinetic_energy"] is not None
+        ), "kinetic_energy buffer must not be None"
+        assert (
+            buffers["potential_energy"] is not None
+        ), "potential_energy buffer must not be None"
 
         return SimulationSample(
             sample_id=sample_id,

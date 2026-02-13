@@ -4,15 +4,24 @@ Ensures valid values, units, and citation metadata.
 
 import math
 
+import pytest
+
 from src.shared.python.core import physics_constants as pc
 
 
-def test_mathematical_constants():
+@pytest.mark.parametrize(
+    "constant,expected",
+    [
+        (pc.PI, math.pi),
+        (pc.E, math.e),
+        (pc.PI_HALF, math.pi / 2),
+        (pc.PI_QUARTER, math.pi / 4),
+    ],
+    ids=["PI", "E", "PI_HALF", "PI_QUARTER"],
+)
+def test_mathematical_constants(constant, expected):
     """Verify basic mathematical constants."""
-    assert pc.PI == math.pi
-    assert pc.E == math.e
-    assert pc.PI_HALF == math.pi / 2
-    assert pc.PI_QUARTER == math.pi / 4
+    assert constant == expected
 
 
 def test_physical_constant_metadata():
@@ -44,31 +53,42 @@ def test_golf_specific_constants():
     assert pc.GOLF_BALL_DIAMETER_M >= 0.0426
 
 
-def test_unit_conversions():
-    """Verify conversion factors are consistent."""
-    # Length
-    # Relax tolerance because M_TO_FT (3.28084) is an approximation
-    assert math.isclose(1.0 * pc.M_TO_FT * pc.FT_TO_M, 1.0, rel_tol=1e-5)
-
-    # Yard to Meter check
-    # YARD_TO_M is 0.9144 (exact)
-    # M_TO_YARD is 1.09361 (approx)
-    assert math.isclose(1.0 * pc.M_TO_YARD * pc.YARD_TO_M, 1.0, rel_tol=1e-5)
-
-    # Angles
-    assert math.isclose(180 * pc.DEG_TO_RAD, math.pi)
-    assert math.isclose(math.pi * pc.RAD_TO_DEG, 180)
-
-    # Speed
-    # 10 m/s = 36 km/h
-    assert math.isclose(10 * pc.MPS_TO_KPH, 36.0)
+@pytest.mark.parametrize(
+    "forward_factor,inverse_factor,description",
+    [
+        (pc.M_TO_FT, pc.FT_TO_M, "feet_meters"),
+        (pc.M_TO_YARD, pc.YARD_TO_M, "yards_meters"),
+    ],
+    ids=["feet_meters_roundtrip", "yards_meters_roundtrip"],
+)
+def test_unit_conversion_roundtrips(forward_factor, inverse_factor, description):
+    """Verify conversion factor round-trips are consistent."""
+    assert math.isclose(1.0 * forward_factor * inverse_factor, 1.0, rel_tol=1e-5)
 
 
-def test_material_densities():
-    """Sanity check material densities."""
-    # Steel should be denser than aluminum
-    assert pc.STEEL_DENSITY_KG_M3 > pc.ALUMINUM_DENSITY_KG_M3
+@pytest.mark.parametrize(
+    "input_val,factor,expected",
+    [
+        (180, pc.DEG_TO_RAD, math.pi),
+        (math.pi, pc.RAD_TO_DEG, 180),
+        (10, pc.MPS_TO_KPH, 36.0),
+    ],
+    ids=["deg_to_rad", "rad_to_deg", "mps_to_kph"],
+)
+def test_unit_conversions(input_val, factor, expected):
+    """Verify individual conversion factors."""
+    assert math.isclose(input_val * factor, expected)
 
-    # Titanium should be denser than aluminum but lighter than steel
-    assert pc.TITANIUM_DENSITY_KG_M3 > pc.ALUMINUM_DENSITY_KG_M3
-    assert pc.TITANIUM_DENSITY_KG_M3 < pc.STEEL_DENSITY_KG_M3
+
+@pytest.mark.parametrize(
+    "heavier,lighter",
+    [
+        (pc.STEEL_DENSITY_KG_M3, pc.ALUMINUM_DENSITY_KG_M3),
+        (pc.TITANIUM_DENSITY_KG_M3, pc.ALUMINUM_DENSITY_KG_M3),
+        (pc.STEEL_DENSITY_KG_M3, pc.TITANIUM_DENSITY_KG_M3),
+    ],
+    ids=["steel_gt_aluminum", "titanium_gt_aluminum", "steel_gt_titanium"],
+)
+def test_material_densities(heavier, lighter):
+    """Sanity check material density ordering."""
+    assert heavier > lighter

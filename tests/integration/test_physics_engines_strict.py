@@ -129,8 +129,8 @@ class TestMuJoCoStrict:
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
         # Use the class from the patched module
         engine = self.MuJoCoPhysicsEngine()
-        engine.model = MagicMock()
-        engine.data = MagicMock()
+        engine.model = MagicMock(spec=["nv", "nu", "nq", "nbody"])
+        engine.data = MagicMock(spec=["qpos", "qvel", "xpos", "xquat"])
         # Ensure we attach the mocks to the same object the engine is using
         engine.model.nv = 6
 
@@ -167,8 +167,8 @@ class TestMuJoCoStrict:
         engine = self.MuJoCoPhysicsEngine()
         assert hasattr(engine, "get_sensors"), "MuJoCo must implement get_sensors"
 
-        engine.model = MagicMock()
-        engine.data = MagicMock()
+        engine.model = MagicMock(spec=["nv", "nu", "nsensor"])
+        engine.data = MagicMock(spec=["sensordata"])
         engine.model.nsensor = 1
         mock_mujoco.mj_id2name.return_value = "sensor_0"
         engine.data.sensordata = [0.123]
@@ -180,8 +180,10 @@ class TestMuJoCoStrict:
 class TestOpenSimStrict:
     def test_inverse_dynamics_implemented(self):
         engine = OpenSimPhysicsEngine()
-        engine._model = MagicMock()  # type: ignore
-        engine._state = MagicMock()  # type: ignore
+        engine._model = MagicMock(
+            spec=["getNumSpeeds", "getNumCoordinates", "initSystem", "realizeVelocity"]
+        )  # type: ignore
+        engine._state = MagicMock(spec=["getQ", "getU", "getTime"])  # type: ignore
 
         # Provide correct speeds/coords
         engine._model.getNumSpeeds.return_value = 2  # type: ignore
@@ -191,8 +193,8 @@ class TestOpenSimStrict:
         # No error raised
 
         # Mock solver
-        mock_solver_inst = MagicMock()
-        mock_vec_out = MagicMock()
+        mock_solver_inst = MagicMock(spec=["solve"])
+        mock_vec_out = MagicMock(spec=["get"])
         mock_vec_out.get.side_effect = [10.0, 20.0]
         mock_solver_inst.solve.return_value = mock_vec_out
 
@@ -212,9 +214,11 @@ class TestMyoSuiteStrict:
         engine = MyoSuitePhysicsEngine()
 
         # Setup mock env
-        mock_env = MagicMock()
+        mock_env = MagicMock(
+            spec=["sim", "reset", "step", "close", "observation_space", "action_space"]
+        )
         # Mock underlying sim
-        mock_env.sim = MagicMock()
+        mock_env.sim = MagicMock(spec=["model", "data", "step"])
         mock_gym.make.return_value = mock_env
 
         engine.load_from_path("myoElbow-v0")
@@ -225,8 +229,8 @@ class TestMyoSuiteStrict:
     def test_step_uses_sim_if_available(self):
         """MyoSuite should prefer underlying sim.step() if accessible."""
         engine = MyoSuitePhysicsEngine()
-        mock_env = MagicMock()
-        mock_sim = MagicMock()
+        mock_env = MagicMock(spec=["sim", "reset", "step", "close"])
+        mock_sim = MagicMock(spec=["model", "data", "step"])
         mock_sim.model.opt.timestep = 0.01
 
         # Mock Env structure where env.sim exists

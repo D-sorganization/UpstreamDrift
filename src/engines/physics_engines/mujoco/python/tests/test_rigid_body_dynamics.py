@@ -103,11 +103,14 @@ class TestCRBA:
         # Matrices should be different (second joint rotation changes configuration)
         assert not np.allclose(H1, H2, atol=1e-6)
 
-    def test_crba_input_validation(self) -> None:
-        """Test CRBA input validation."""
+    @pytest.mark.parametrize(
+        "q",
+        [np.array([0.5]), np.array([0.1, 0.2, 0.3])],
+        ids=["too_short", "too_long"],
+    )
+    def test_crba_input_validation(self, q) -> None:
+        """Test CRBA input validation with wrong-length arrays."""
         model = create_2link_model()
-        q = np.array([0.5])  # Wrong length
-
         with pytest.raises(ValueError):
             crba(model, q)
 
@@ -184,13 +187,17 @@ class TestRNEA:
         # Should have non-zero torques
         assert abs(tau[0]) > 1e-6
 
-    def test_rnea_input_validation(self) -> None:
-        """Test RNEA input validation."""
+    @pytest.mark.parametrize(
+        "q,qd,qdd",
+        [
+            (np.array([0.5]), np.array([0.1, 0.2]), np.array([0.5, -0.2])),
+            (np.array([0.1, 0.2]), np.array([0.1]), np.array([0.5, -0.2])),
+        ],
+        ids=["q_wrong_length", "qd_wrong_length"],
+    )
+    def test_rnea_input_validation(self, q, qd, qdd) -> None:
+        """Test RNEA input validation with wrong-length arrays."""
         model = create_2link_model()
-        q = np.array([0.5])
-        qd = np.array([0.1, 0.2])
-        qdd = np.array([0.5, -0.2])
-
         with pytest.raises(ValueError):
             rnea(model, q, qd, qdd)
 
@@ -279,13 +286,17 @@ class TestABA:
         # External forces should affect accelerations
         assert not np.allclose(qdd_no_ext, qdd_with_ext, atol=1e-6)
 
-    def test_aba_input_validation(self) -> None:
-        """Test ABA input validation."""
+    @pytest.mark.parametrize(
+        "q,qd,tau",
+        [
+            (np.array([0.5]), np.array([0.1, 0.2]), np.array([1.5, 0.5])),
+            (np.array([0.1, 0.2]), np.array([0.1]), np.array([1.5, 0.5])),
+        ],
+        ids=["q_wrong_length", "qd_wrong_length"],
+    )
+    def test_aba_input_validation(self, q, qd, tau) -> None:
+        """Test ABA input validation with wrong-length arrays."""
         model = create_2link_model()
-        q = np.array([0.5])
-        qd = np.array([0.1, 0.2])
-        tau = np.array([1.5, 0.5])
-
         with pytest.raises(ValueError):
             aba(model, q, qd, tau)
 

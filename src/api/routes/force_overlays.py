@@ -58,6 +58,123 @@ def _magnitude_to_color(magnitude: float, max_magnitude: float) -> list[float]:
     return [r, g, b, 1.0]
 
 
+def _extract_engine_state(engine_manager: EngineManager) -> tuple[Any, dict]:
+    try:
+        engine = engine_manager.get_active_engine()
+    except (AttributeError, RuntimeError):
+        return None, {}
+
+    if engine is None:
+        return None, {}
+
+    try:
+        state = engine.get_state() if hasattr(engine, "get_state") else {}
+    except (ValueError, RuntimeError, AttributeError):
+        state = {}
+
+    return engine, state
+
+
+def _resolve_joint_names(engine: Any, n_joints: int) -> list[str]:
+    joint_names: list[str] = []
+    if hasattr(engine, "joint_names"):
+        joint_names = engine.joint_names
+    elif hasattr(engine, "get_joint_names"):
+        joint_names = engine.get_joint_names()
+    if not joint_names:
+        joint_names = [f"joint_{i}" for i in range(n_joints)]
+    return joint_names
+
+
+def _should_include_force_type(config: ForceOverlayRequest, force_type: str) -> bool:
+    return force_type in config.force_types or "all" in config.force_types
+
+
+def _resolve_body_name(joint_names: list[str], index: int) -> str:
+    if index < len(joint_names):
+        return joint_names[index]
+    return f"joint_{index}"
+
+
+def _is_filtered_out(config: ForceOverlayRequest, body_name: str) -> bool:
+    return bool(config.body_filter and body_name not in config.body_filter)
+
+
+def _build_applied_torque_vectors(
+    config: ForceOverlayRequest,
+    torques: list,
+    joint_names: list[str],
+    n_joints: int,
+) -> list[ForceVector3D]:
+    if not _should_include_force_type(config, "applied"):
+        return []
+
+    torque_count = len(torques) if torques else 0
+    vectors: list[ForceVector3D] = []
+    for i in range(min(n_joints, torque_count)):
+        torque_val = torques[i]
+        if abs(torque_val) < 1e-6:
+            continue
+
+        body_name = _resolve_body_name(joint_names, i)
+        if _is_filtered_out(config, body_name):
+            continue
+
+        y_pos = 0.5 + i * 0.3
+        direction = [0.0, 0.0, 1.0] if torque_val > 0 else [0.0, 0.0, -1.0]
+
+        vectors.append(
+            ForceVector3D(
+                body_name=body_name,
+                force_type="applied",
+                origin=[0.0, y_pos, 0.0],
+                direction=direction,
+                magnitude=abs(torque_val),
+                color=FORCE_TYPE_COLORS["applied"],
+                label=f"{torque_val:.1f} N*m" if config.show_labels else None,
+            )
+        )
+    return vectors
+
+
+def _build_gravity_vectors(
+    config: ForceOverlayRequest,
+    joint_names: list[str],
+    n_joints: int,
+) -> list[ForceVector3D]:
+    if not _should_include_force_type(config, "gravity"):
+        return []
+
+    vectors: list[ForceVector3D] = []
+    for i in range(n_joints):
+        body_name = _resolve_body_name(joint_names, i)
+        if _is_filtered_out(config, body_name):
+            continue
+
+        y_pos = 0.5 + i * 0.3
+        gravity_mag = 9.81 * (0.5 + 0.1 * i)
+        vectors.append(
+            ForceVector3D(
+                body_name=body_name,
+                force_type="gravity",
+                origin=[0.0, y_pos, 0.0],
+                direction=[0.0, -1.0, 0.0],
+                magnitude=gravity_mag,
+                color=FORCE_TYPE_COLORS["gravity"],
+                label=f"{gravity_mag:.1f} N" if config.show_labels else None,
+            )
+        )
+    return vectors
+
+
+def _apply_magnitude_coloring(vectors: list[ForceVector3D]) -> None:
+    if not vectors:
+        return
+    max_mag = max(v.magnitude for v in vectors)
+    for v in vectors:
+        v.color = _magnitude_to_color(v.magnitude, max_mag)
+
+
 def _build_force_vectors(
     engine_manager: EngineManager,
     config: ForceOverlayRequest,
@@ -74,91 +191,28 @@ def _build_force_vectors(
     Returns:
         List of force vectors for rendering.
     """
-    vectors: list[ForceVector3D] = []
-
-    try:
-        engine = engine_manager.get_active_engine()
-    except (AttributeError, RuntimeError):
-        # No active engine, return synthetic demo vectors
-        return _build_demo_vectors(config)
-
+    engine, state = _extract_engine_state(engine_manager)
     if engine is None:
         return _build_demo_vectors(config)
 
-    # Try to get force data from engine state
-    try:
-        state = engine.get_state() if hasattr(engine, "get_state") else {}
-    except (ValueError, RuntimeError, AttributeError):
-        state = {}
-
     positions = state.get("positions", [])
     torques = state.get("torques", [])
-    joint_names = []
-    if hasattr(engine, "joint_names"):
-        joint_names = engine.joint_names
-    elif hasattr(engine, "get_joint_names"):
-        joint_names = engine.get_joint_names()
+    if torques:
+        n_joints = len(torques)
+    elif positions:
+        n_joints = len(positions)
+    else:
+        n_joints = 0
+    joint_names = _resolve_joint_names(engine, n_joints)
 
-    n_joints = len(torques) if torques else len(positions) if positions else 0
+    vectors: list[ForceVector3D] = []
+    vectors.extend(
+        _build_applied_torque_vectors(config, torques, joint_names, n_joints)
+    )
+    vectors.extend(_build_gravity_vectors(config, joint_names, n_joints))
 
-    # Generate names if not available
-    if not joint_names:
-        joint_names = [f"joint_{i}" for i in range(n_joints)]
-
-    # Build applied torque vectors
-    if "applied" in config.force_types or "all" in config.force_types:
-        for i in range(min(n_joints, len(torques) if torques else 0)):
-            torque_val = torques[i] if torques else 0.0
-            if abs(torque_val) < 1e-6:
-                continue
-
-            body_name = joint_names[i] if i < len(joint_names) else f"joint_{i}"
-            if config.body_filter and body_name not in config.body_filter:
-                continue
-
-            # Position along a vertical chain (simplified)
-            y_pos = 0.5 + i * 0.3
-            direction = [0.0, 0.0, 1.0] if torque_val > 0 else [0.0, 0.0, -1.0]
-
-            vectors.append(
-                ForceVector3D(
-                    body_name=body_name,
-                    force_type="applied",
-                    origin=[0.0, y_pos, 0.0],
-                    direction=direction,
-                    magnitude=abs(torque_val),
-                    color=FORCE_TYPE_COLORS["applied"],
-                    label=f"{torque_val:.1f} N*m" if config.show_labels else None,
-                )
-            )
-
-    # Build gravity vectors
-    if "gravity" in config.force_types or "all" in config.force_types:
-        for i in range(n_joints):
-            body_name = joint_names[i] if i < len(joint_names) else f"joint_{i}"
-            if config.body_filter and body_name not in config.body_filter:
-                continue
-
-            y_pos = 0.5 + i * 0.3
-            # Gravity is always downward
-            gravity_mag = 9.81 * (0.5 + 0.1 * i)  # Approximate per-body mass * g
-            vectors.append(
-                ForceVector3D(
-                    body_name=body_name,
-                    force_type="gravity",
-                    origin=[0.0, y_pos, 0.0],
-                    direction=[0.0, -1.0, 0.0],
-                    magnitude=gravity_mag,
-                    color=FORCE_TYPE_COLORS["gravity"],
-                    label=f"{gravity_mag:.1f} N" if config.show_labels else None,
-                )
-            )
-
-    # Apply magnitude-based coloring if enabled
-    if config.color_by_magnitude and vectors:
-        max_mag = max(v.magnitude for v in vectors)
-        for v in vectors:
-            v.color = _magnitude_to_color(v.magnitude, max_mag)
+    if config.color_by_magnitude:
+        _apply_magnitude_coloring(vectors)
 
     return vectors
 

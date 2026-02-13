@@ -18,7 +18,16 @@ from src.shared.python.engine_core.engine_loaders import (
     load_mujoco_engine,
     load_pinocchio_engine,
 )
+from src.shared.python.engine_core.engine_probes import EngineProbe
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+
+_PROBE_RESULT_SPEC = [
+    "is_available",
+    "diagnostic_message",
+    "get_fix_instructions",
+    "details",
+]
 
 
 @pytest.fixture
@@ -27,13 +36,20 @@ def mock_suite_root(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def test_loader_map() -> None:
-    """Verify that LOADER_MAP contains all engine types."""
-    assert EngineType.MUJOCO in LOADER_MAP
-    assert EngineType.DRAKE in LOADER_MAP
-    assert EngineType.PINOCCHIO in LOADER_MAP
-    assert EngineType.OPENSIM in LOADER_MAP
-    assert EngineType.MYOSIM in LOADER_MAP
+@pytest.mark.parametrize(
+    "engine_type",
+    [
+        EngineType.MUJOCO,
+        EngineType.DRAKE,
+        EngineType.PINOCCHIO,
+        EngineType.OPENSIM,
+        EngineType.MYOSIM,
+    ],
+    ids=["mujoco", "drake", "pinocchio", "opensim", "myosim"],
+)
+def test_loader_map(engine_type) -> None:
+    """Verify that LOADER_MAP contains the engine type."""
+    assert engine_type in LOADER_MAP
 
 
 def test_loader_map_from_canonical_location() -> None:
@@ -47,8 +63,9 @@ def test_loader_map_from_canonical_location() -> None:
 def _make_probe_mock(*, available: bool = True) -> MagicMock:
     """Create a mock probe class whose instance.probe() returns a result mock."""
     mock_probe_cls = MagicMock()
-    mock_probe = mock_probe_cls.return_value
-    mock_result = MagicMock()
+    mock_probe = MagicMock(spec=EngineProbe)
+    mock_probe_cls.return_value = mock_probe
+    mock_result = MagicMock(spec=_PROBE_RESULT_SPEC)
     mock_result.is_available.return_value = available
     if not available:
         mock_result.diagnostic_message = "Not installed"
@@ -60,10 +77,10 @@ def _make_probe_mock(*, available: bool = True) -> MagicMock:
 @pytest.mark.serial
 def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of MuJoCo engine."""
-    mock_engine = MagicMock()
+    mock_engine = MagicMock(spec=PhysicsEngine)
     mock_engine_cls = MagicMock(return_value=mock_engine)
 
-    mock_physics_mod = MagicMock()
+    mock_physics_mod = MagicMock(spec=["MuJoCoPhysicsEngine"])
     mock_physics_mod.MuJoCoPhysicsEngine = mock_engine_cls
 
     mock_probe_cls = _make_probe_mock(available=True)
@@ -104,10 +121,10 @@ def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
 @pytest.mark.serial
 def test_load_drake_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Drake engine."""
-    mock_engine = MagicMock()
+    mock_engine = MagicMock(spec=PhysicsEngine)
     mock_engine_cls = MagicMock(return_value=mock_engine)
 
-    mock_drake_mod = MagicMock()
+    mock_drake_mod = MagicMock(spec=["DrakePhysicsEngine"])
     mock_drake_mod.DrakePhysicsEngine = mock_engine_cls
 
     mock_probe_cls = _make_probe_mock(available=True)
@@ -132,10 +149,10 @@ def test_load_drake_engine_success(mock_suite_root: Path) -> None:
 @pytest.mark.serial
 def test_load_pinocchio_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Pinocchio engine."""
-    mock_engine = MagicMock()
+    mock_engine = MagicMock(spec=PhysicsEngine)
     mock_engine_cls = MagicMock(return_value=mock_engine)
 
-    mock_pin_mod = MagicMock()
+    mock_pin_mod = MagicMock(spec=["PinocchioPhysicsEngine"])
     mock_pin_mod.PinocchioPhysicsEngine = mock_engine_cls
 
     mock_probe_cls = _make_probe_mock(available=True)

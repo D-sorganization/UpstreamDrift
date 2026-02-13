@@ -18,6 +18,23 @@ from src.shared.python.engine_core.engine_availability import (
 # Skip entire module if MuJoCo is not available
 pytestmark = skip_if_unavailable("mujoco")
 
+# Explicit attribute lists for MuJoCo C++ types that may not be importable
+# as Python classes for spec=.
+_MJ_MODEL_SPEC = ["nv", "nu", "nq", "nbody", "opt", "body"]
+_MJ_DATA_SPEC = [
+    "qpos",
+    "qvel",
+    "qacc",
+    "ctrl",
+    "qfrc_bias",
+    "qfrc_grav",
+    "qfrc_inverse",
+    "qM",
+    "time",
+    "xpos",
+    "xquat",
+]
+
 
 # Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:
@@ -102,8 +119,8 @@ def test_load_from_path(engine, mock_mj, tmp_path):
 
 
 def test_step(engine, mock_mj):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
     engine.step()
 
@@ -111,8 +128,8 @@ def test_step(engine, mock_mj):
 
 
 def test_reset(engine, mock_mj):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
     engine.reset()
 
@@ -121,9 +138,9 @@ def test_reset(engine, mock_mj):
 
 
 def test_set_control(engine):
-    engine.model = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
-    engine.data = MagicMock()
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ctrl = np.zeros(2)
 
     ctrl = np.array([1.0, 2.0])
@@ -133,9 +150,9 @@ def test_set_control(engine):
 
 
 def test_set_control_mismatch(engine):
-    engine.model = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
-    engine.data = MagicMock()
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
     ctrl = np.array([1.0, 2.0, 3.0])
     # Now expects a ValueError for mismatched control size
@@ -144,9 +161,9 @@ def test_set_control_mismatch(engine):
 
 
 def test_compute_mass_matrix(engine, mock_mj):
-    engine.model = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
-    engine.data = MagicMock()
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.qM = np.zeros(2)
 
     M = engine.compute_mass_matrix()
@@ -154,28 +171,27 @@ def test_compute_mass_matrix(engine, mock_mj):
     mock_mj.mj_fullM.assert_called_once()
 
 
-def test_compute_bias_forces(engine):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
-    engine.data.qfrc_bias = np.array([1.0, 2.0])
+@pytest.mark.parametrize(
+    "method,attr,values",
+    [
+        ("compute_bias_forces", "qfrc_bias", np.array([1.0, 2.0])),
+        ("compute_gravity_forces", "qfrc_grav", np.array([0.0, -GRAVITY_M_S2])),
+    ],
+    ids=["bias_forces", "gravity_forces"],
+)
+def test_compute_forces(engine, method, attr, values):
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
+    setattr(engine.data, attr, values)
 
-    bias = engine.compute_bias_forces()
-    np.testing.assert_array_equal(bias, np.array([1.0, 2.0]))
-
-
-def test_compute_gravity_forces(engine):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
-    engine.data.qfrc_grav = np.array([0.0, -GRAVITY_M_S2])
-
-    grav = engine.compute_gravity_forces()
-    np.testing.assert_array_equal(grav, np.array([0.0, -GRAVITY_M_S2]))
+    result = getattr(engine, method)()
+    np.testing.assert_array_equal(result, values)
 
 
 def test_compute_inverse_dynamics(engine, mock_mj):
-    engine.model = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
-    engine.data = MagicMock()
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.qfrc_inverse = np.array([10.0, 20.0])
     engine.data.qacc = np.zeros(2)  # Real array for slice assignment
 
@@ -189,8 +205,8 @@ def test_compute_inverse_dynamics(engine, mock_mj):
 
 
 def test_compute_affine_drift(engine, mock_mj):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ctrl = np.array([1.0])
     engine.data.qacc = np.array([0.5])  # Simulated drift acc
 
@@ -204,9 +220,9 @@ def test_compute_affine_drift(engine, mock_mj):
 
 
 def test_compute_jacobian(engine, mock_mj):
-    engine.model = MagicMock()
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
-    engine.data = MagicMock()
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
     mock_mj.mj_name2id.return_value = 1
 

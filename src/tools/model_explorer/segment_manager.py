@@ -1,5 +1,6 @@
 """Segment manager for handling URDF segment operations."""
 
+from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -14,6 +15,15 @@ class SegmentManager:
         self.hierarchy: dict[str, list[str]] = {}  # parent -> [children]
         self.parallel_chains: list[dict] = []  # For parallel kinematic chains
 
+    @precondition(
+        lambda self, segment_data: segment_data is not None
+        and isinstance(segment_data, dict),
+        "Segment data must be a non-None dictionary",
+    )
+    @precondition(
+        lambda self, segment_data: bool(segment_data.get("name")),
+        "Segment data must include a non-empty 'name' field",
+    )
     def add_segment(self, segment_data: dict) -> None:
         """Add a segment to the manager.
 
@@ -46,6 +56,10 @@ class SegmentManager:
 
         logger.info(f"Added segment: {name}")
 
+    @precondition(
+        lambda self, name: name is not None and len(name.strip()) > 0,
+        "Segment name must be a non-empty string",
+    )
     def remove_segment(self, name: str) -> None:
         """Remove a segment and all its children.
 
@@ -79,6 +93,15 @@ class SegmentManager:
 
         logger.info(f"Removed segment: {name}")
 
+    @precondition(
+        lambda self, segment_data: segment_data is not None
+        and isinstance(segment_data, dict),
+        "Segment data must be a non-None dictionary",
+    )
+    @precondition(
+        lambda self, segment_data: bool(segment_data.get("name")),
+        "Segment data must include a non-empty 'name' field",
+    )
     def modify_segment(self, segment_data: dict) -> None:
         """Modify an existing segment.
 
@@ -182,6 +205,10 @@ class SegmentManager:
 
         return ordered
 
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Validation result must be a list of error strings",
+    )
     def validate_hierarchy(self) -> list[str]:
         """Validate the segment hierarchy.
 
@@ -222,6 +249,19 @@ class SegmentManager:
 
         return errors
 
+    @precondition(
+        lambda self, chain_data: chain_data is not None
+        and isinstance(chain_data, dict),
+        "Chain data must be a non-None dictionary",
+    )
+    @precondition(
+        lambda self, chain_data: bool(chain_data.get("name")),
+        "Chain data must include a non-empty 'name' field",
+    )
+    @precondition(
+        lambda self, chain_data: len(chain_data.get("segments", [])) >= 2,
+        "Parallel chain must have at least 2 segments",
+    )
     def create_parallel_chain(self, chain_data: dict) -> None:
         """Create a parallel kinematic chain.
 
@@ -289,6 +329,17 @@ class SegmentManager:
         self.parallel_chains.clear()
         logger.info("Segment manager cleared")
 
+    @precondition(
+        lambda self, engine: engine is not None
+        and engine.lower() in ("mujoco", "drake", "pinocchio"),
+        "Engine must be one of: 'mujoco', 'drake', 'pinocchio'",
+    )
+    @postcondition(
+        lambda result: result is not None
+        and isinstance(result, dict)
+        and "engine" in result,
+        "Export result must be a dictionary containing an 'engine' key",
+    )
     def export_for_engine(self, engine: str) -> dict:
         """Export segment data optimized for a specific physics engine.
 

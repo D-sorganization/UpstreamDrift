@@ -430,49 +430,69 @@ class ModelLibrary:
         Returns:
             URDF XML content as string
         """
-        shaft_length = club_info["length"] - 0.254 - 0.076
-        shaft_radius = 0.006
-        head_length = 0.100
-        head_width = 0.050
-        head_height = 0.040
-        grip_length = 0.254
-        grip_radius = 0.013
+        dims = self._compute_club_dimensions(club_info)
 
         base_link = self._urdf_base_link()
-        grip_link = self._urdf_grip_link(club_info, grip_length, grip_radius)
-        shaft_link = self._urdf_shaft_link(club_info, shaft_length, shaft_radius)
-        head_link = self._urdf_head_link(
-            club_info, head_length, head_width, head_height
+        grip_link = self._urdf_grip_link(
+            club_info, dims["grip_length"], dims["grip_radius"]
         )
+        shaft_link = self._urdf_shaft_link(
+            club_info, dims["shaft_length"], dims["shaft_radius"]
+        )
+        head_link = self._urdf_head_link(
+            club_info, dims["head_length"], dims["head_width"], dims["head_height"]
+        )
+
+        joints = self._urdf_club_joints(dims["grip_length"], dims["shaft_length"])
 
         return f"""<?xml version="1.0"?>
 <robot name="{club_key}">
 {base_link}
 {grip_link}
 
-    <joint name="base_to_grip" type="fixed">
-        <parent link="base_link"/>
-        <child link="grip"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
+{joints[0]}
 
 {shaft_link}
 
-    <joint name="grip_to_shaft" type="fixed">
-        <parent link="grip"/>
-        <child link="shaft"/>
-        <origin xyz="0 0 {grip_length}" rpy="0 0 0"/>
-    </joint>
+{joints[1]}
 
 {head_link}
 
-    <joint name="shaft_to_head" type="fixed">
+{joints[2]}
+</robot>
+"""
+
+    def _compute_club_dimensions(self, club_info: dict) -> dict:
+        return {
+            "shaft_length": club_info["length"] - 0.254 - 0.076,
+            "shaft_radius": 0.006,
+            "head_length": 0.100,
+            "head_width": 0.050,
+            "head_height": 0.040,
+            "grip_length": 0.254,
+            "grip_radius": 0.013,
+        }
+
+    def _urdf_club_joints(self, grip_length: float, shaft_length: float) -> list[str]:
+        base_to_grip = """    <joint name="base_to_grip" type="fixed">
+        <parent link="base_link"/>
+        <child link="grip"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>"""
+
+        grip_to_shaft = f"""    <joint name="grip_to_shaft" type="fixed">
+        <parent link="grip"/>
+        <child link="shaft"/>
+        <origin xyz="0 0 {grip_length}" rpy="0 0 0"/>
+    </joint>"""
+
+        shaft_to_head = f"""    <joint name="shaft_to_head" type="fixed">
         <parent link="shaft"/>
         <child link="club_head"/>
         <origin xyz="0 0 {shaft_length}" rpy="0 0 0"/>
-    </joint>
-</robot>
-"""
+    </joint>"""
+
+        return [base_to_grip, grip_to_shaft, shaft_to_head]
 
     def _urdf_base_link(self) -> str:
         return """    <!-- Base link (reference frame) -->

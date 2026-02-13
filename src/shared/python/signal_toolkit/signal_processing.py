@@ -441,6 +441,63 @@ def _get_cached_wavelet(M: int, s_int: int, w0_int: int, n_fft: int) -> np.ndarr
     return np.asarray(fft.fft(wavelet, n=n_fft))
 
 
+def _validate_cwt_inputs(fs, freq_range):
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+    min_freq, max_freq = freq_range
+    if min_freq <= 0:
+        raise ValueError(f"Minimum frequency must be positive, got {min_freq}")
+    return min_freq, max_freq
+
+
+def _prepare_cwt_fft(data, freqs, w0, fs):
+    n_data = len(data)
+
+    # Determine maximum wavelet width (corresponds to smallest frequency / largest scale)
+    min_f = np.min(freqs)
+    max_s = w0 * fs / (2 * np.pi * min_f)
+    max_M = int(2 * 5 * max_s + 1)
+
+    # Determine optimal FFT size for the largest convolution
+    # Padding to N + M - 1 ensures linear convolution avoids circular aliasing
+    target_len = n_data + max_M - 1
+    n_fft = fft.next_fast_len(target_len)
+
+    # Compute FFT of data (must use full fft as we will multiply with complex wavelet)
+    data_fft = fft.fft(data, n=n_fft)
+
+    return n_data, n_fft, data_fft
+
+
+def _convolve_wavelet_at_scale(data_fft, n_fft, n_data, s, w0):
+    M = int(2 * 5 * s + 1)
+
+    # Use cached wavelet FFT to avoid recomputation
+    s_int = int(round(s * 1000))
+    w0_int = int(round(w0 * 100))
+    wavelet_fft = _get_cached_wavelet(M, s_int, w0_int, n_fft)
+
+    prod = data_fft * wavelet_fft
+    conv_res = fft.ifft(prod, n=n_fft)
+
+    # Center crop to match 'same' mode
+    # start = (M-1) // 2
+    start_idx = (M - 1) // 2
+
+    if start_idx + n_data <= len(conv_res):
+        row = conv_res[start_idx : start_idx + n_data]
+    else:
+        raise RuntimeError(
+            "Unexpected CWT convolution length: "
+            f"start_idx + n_data = {start_idx + n_data}, len(conv_res) = {len(conv_res)}. "
+            "Check wavelet padding and FFT size logic."
+        )
+
+    # Normalize by 1/sqrt(s)
+    row /= np.sqrt(s)
+    return row
+
+
 def compute_cwt(
     data: np.ndarray,
     fs: float,
@@ -463,83 +520,16 @@ def compute_cwt(
         times: Array of time points
         cwt_matrix: Complex CWT coefficients (freqs x time)
     """
-    if fs <= 0:
-        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+    _validate_cwt_inputs(fs, freq_range)
 
-    # Create frequency vector (log space usually better for wavelets, but linspace ok)
-    # Using logspace for better multiscale analysis
-    min_freq, max_freq = freq_range
-    if min_freq <= 0:
-        raise ValueError(f"Minimum frequency must be positive, got {min_freq}")
-
-    freqs = np.geomspace(min_freq, max_freq, num=num_freqs)
-
-    # Convert frequencies to scales
-    # For Morlet: scale = w0 * fs / (2 * pi * freq)
+    freqs = np.geomspace(freq_range[0], freq_range[1], num=num_freqs)
     scales = w0 * fs / (2 * np.pi * freqs)
 
-    n_data = len(data)
+    n_data, n_fft, data_fft = _prepare_cwt_fft(data, freqs, w0, fs)
     cwt_matrix = np.zeros((num_freqs, n_data), dtype=np.complex128)
 
-    # PERFORMANCE: Wavelet generation is now handled by _get_cached_wavelet()
-    # which uses LRU cache to avoid recomputation
-
-    # Optimization: Pre-compute FFT of data once to avoid recomputation in fftconvolve
-    # 1. Determine maximum wavelet width (corresponds to smallest frequency / largest scale)
-    min_f = np.min(freqs)
-    max_s = w0 * fs / (2 * np.pi * min_f)
-    max_M = int(2 * 5 * max_s + 1)
-
-    # 2. Determine optimal FFT size for the largest convolution
-    # Padding to N + M - 1 ensures linear convolution avoids circular aliasing
-    target_len = n_data + max_M - 1
-    n_fft = fft.next_fast_len(target_len)
-
-    # 3. Compute FFT of data (must use full fft as we will multiply with complex wavelet)
-    data_fft = fft.fft(data, n=n_fft)
-
     for i, s in enumerate(scales):
-        # Window length for wavelet: typically 6-10 sigmas.
-        # Morlet2 std dev is s.
-        # Support is roughly [-5s, 5s] or so.
-        M = int(2 * 5 * s + 1)  # Sufficient width
-
-        # PERFORMANCE: Use cached wavelet FFT to avoid recomputation
-        # Convert scale and w0 to integers for hashable cache key
-        s_int = int(round(s * 1000))
-        w0_int = int(round(w0 * 100))
-        wavelet_fft = _get_cached_wavelet(M, s_int, w0_int, n_fft)
-
-        # b. Multiply in frequency domain
-        prod = data_fft * wavelet_fft
-
-        # c. Inverse FFT
-        conv_res = fft.ifft(prod, n=n_fft)
-
-        # d. Center crop to match 'same' mode
-        # The linear convolution (length N+M-1) starts at index 0 because inputs were zero-padded at end.
-        # mode='same' requires extracting the center section of length N from the full convolution.
-        # The center of the full convolution is at index (N+M-1-1)/2.
-        # We want the slice [start, start + N].
-        # start = (N+M-1)//2 - (N-1)//2 (integer math)
-        # Simplified: start = (M-1) // 2
-        start_idx = (M - 1) // 2
-
-        # Ensure we stay within bounds (though with correct padding, it should be fine)
-        if start_idx + n_data <= len(conv_res):
-            cwt_matrix[i, :] = conv_res[start_idx : start_idx + n_data]
-        else:
-            # This branch is expected to be unreachable if the padding/FFT sizing logic is correct.
-            # Raise an error rather than silently changing the alignment, so any upstream issue
-            # with convolution length or padding is detected during development.
-            raise RuntimeError(
-                "Unexpected CWT convolution length: "
-                f"start_idx + n_data = {start_idx + n_data}, len(conv_res) = {len(conv_res)}. "
-                "Check wavelet padding and FFT size logic."
-            )
-
-        # Normalize by 1/sqrt(s)
-        cwt_matrix[i, :] /= np.sqrt(s)
+        cwt_matrix[i, :] = _convolve_wavelet_at_scale(data_fft, n_fft, n_data, s, w0)
 
     times = np.arange(len(data)) / fs
 

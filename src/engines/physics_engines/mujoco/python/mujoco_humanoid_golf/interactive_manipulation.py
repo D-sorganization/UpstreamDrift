@@ -366,6 +366,71 @@ class InteractiveManipulator:
 
         return success
 
+    def _compute_ik_task_error(
+        self,
+        body_id: int,
+        target_position: np.ndarray,
+        target_quat: np.ndarray | None,
+        maintain_orientation: bool,
+    ) -> np.ndarray:
+        current_pos = self.data.xpos[body_id].copy()
+        pos_error = target_position - current_pos
+
+        if maintain_orientation and target_quat is not None:
+            current_quat = self.data.xquat[body_id].copy()
+            ori_error = self._orientation_error(current_quat, target_quat)
+            return np.concatenate([pos_error, ori_error])
+        return pos_error
+
+    def _compute_ik_step(
+        self,
+        body_id: int,
+        task_error: np.ndarray,
+        task_dim: int,
+        maintain_orientation: bool,
+    ) -> np.ndarray | None:
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+        mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
+
+        J = np.vstack([jacp, jacr]) if maintain_orientation else jacp
+
+        damping_matrix = self.ik_damping**2 * np.eye(task_dim)
+        try:
+            return J.T @ np.linalg.solve(J @ J.T + damping_matrix, task_error)
+        except np.linalg.LinAlgError:
+            return None
+
+    def _apply_nullspace_posture(
+        self,
+        J_damped: np.ndarray,
+        body_id: int,
+        q: np.ndarray,
+        maintain_orientation: bool,
+    ) -> np.ndarray:
+        if not self.use_nullspace_posture or self.original_qpos is None:
+            return J_damped
+
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+        mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
+        J = np.vstack([jacp, jacr]) if maintain_orientation else jacp
+
+        J_pinv = np.linalg.pinv(J, rcond=self.ik_damping)
+        nullspace_proj = np.eye(self.model.nv) - J_pinv @ J
+
+        qpos_diff = np.zeros(self.model.nv)
+        mujoco.mj_differentiatePos(
+            self.model,
+            qpos_diff,
+            1.0,
+            q,
+            self.original_qpos,
+        )
+
+        nullspace_motion = nullspace_proj @ qpos_diff
+        return J_damped + 0.05 * nullspace_motion
+
     def _solve_ik_for_body(
         self,
         body_id: int,
@@ -382,78 +447,40 @@ class InteractiveManipulator:
         Returns:
             True if IK succeeded
         """
-        # Initialize from current state
         q = self.data.qpos.copy()
-
-        # Target task dimension
         task_dim = 6 if maintain_orientation else 3
+        target_quat = self.data.xquat[body_id].copy() if maintain_orientation else None
 
-        # Get target orientation if needed
-        target_quat = None
-        if maintain_orientation:
-            target_quat = self.data.xquat[body_id].copy()
-
-        # Iterative IK solver
         for _iteration in range(self.ik_max_iterations):
-            # Forward kinematics
             self.data.qpos[:] = q
             mujoco.mj_forward(self.model, self.data)
 
-            # Current position and orientation
-            current_pos = self.data.xpos[body_id].copy()
-            current_quat = self.data.xquat[body_id].copy()
+            task_error = self._compute_ik_task_error(
+                body_id,
+                target_position,
+                target_quat,
+                maintain_orientation,
+            )
 
-            # Position error
-            pos_error = target_position - current_pos
-
-            # Build task error
-            if maintain_orientation and target_quat is not None:
-                ori_error = self._orientation_error(current_quat, target_quat)
-                task_error = np.concatenate([pos_error, ori_error])
-            else:
-                task_error = pos_error
-
-            # Check convergence
             if np.linalg.norm(task_error) < self.ik_tolerance:
-                self.data.qpos[:] = q
-                mujoco.mj_forward(self.model, self.data)
                 return True
 
-            # Compute Jacobian (fixed for MuJoCo 3.x API)
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
-
-            J = np.vstack([jacp, jacr]) if maintain_orientation else jacp
-
-            # Damped least-squares
-            damping_matrix = self.ik_damping**2 * np.eye(task_dim)
-            try:
-                J_damped = J.T @ np.linalg.solve(J @ J.T + damping_matrix, task_error)
-            except np.linalg.LinAlgError:
+            J_damped = self._compute_ik_step(
+                body_id,
+                task_error,
+                task_dim,
+                maintain_orientation,
+            )
+            if J_damped is None:
                 return False
 
-            # Nullspace projection for posture optimization
-            if self.use_nullspace_posture and self.original_qpos is not None:
-                J_pinv = np.linalg.pinv(J, rcond=self.ik_damping)
-                nullspace_proj = np.eye(self.model.nv) - J_pinv @ J
+            J_damped = self._apply_nullspace_posture(
+                J_damped,
+                body_id,
+                q,
+                maintain_orientation,
+            )
 
-                # Convert position difference to velocity space
-                # This handles quaternion joints where nq != nv
-                qpos_diff = np.zeros(self.model.nv)
-                mujoco.mj_differentiatePos(
-                    self.model,
-                    qpos_diff,
-                    1.0,
-                    q,
-                    self.original_qpos,
-                )
-
-                nullspace_motion = nullspace_proj @ qpos_diff
-                J_damped += 0.05 * nullspace_motion
-
-            # Update with step size
-            # Use mj_integratePos to handle nq != nv (quaternion joints)
             q_new = np.zeros_like(q)
             mujoco.mj_integratePos(
                 self.model,
@@ -461,12 +488,8 @@ class InteractiveManipulator:
                 J_damped * self.ik_step_size,
                 1.0,
             )
-            q = q_new
+            q = self._clamp_joint_limits(q_new)
 
-            # Clamp to joint limits
-            q = self._clamp_joint_limits(q)
-
-        # Did not converge, but apply best result
         self.data.qpos[:] = q
         mujoco.mj_forward(self.model, self.data)
         return False

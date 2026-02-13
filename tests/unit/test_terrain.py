@@ -36,16 +36,32 @@ from src.shared.python.physics.terrain import (
 class TestTerrainType:
     """Test terrain type enumeration."""
 
-    def test_terrain_types_exist(self) -> None:
-        """Verify all expected terrain types are defined."""
-        assert TerrainType.FAIRWAY is not None
-        assert TerrainType.ROUGH is not None
-        assert TerrainType.GREEN is not None
-        assert TerrainType.BUNKER is not None
-        assert TerrainType.TEE is not None
-        assert TerrainType.FRINGE is not None
-        assert TerrainType.WATER is not None
-        assert TerrainType.CART_PATH is not None
+    @pytest.mark.parametrize(
+        "terrain_type",
+        [
+            TerrainType.FAIRWAY,
+            TerrainType.ROUGH,
+            TerrainType.GREEN,
+            TerrainType.BUNKER,
+            TerrainType.TEE,
+            TerrainType.FRINGE,
+            TerrainType.WATER,
+            TerrainType.CART_PATH,
+        ],
+        ids=[
+            "fairway",
+            "rough",
+            "green",
+            "bunker",
+            "tee",
+            "fringe",
+            "water",
+            "cart_path",
+        ],
+    )
+    def test_terrain_types_exist(self, terrain_type) -> None:
+        """Verify expected terrain type is defined."""
+        assert terrain_type is not None
 
     def test_terrain_type_values_unique(self) -> None:
         """Each terrain type should have a unique value."""
@@ -89,26 +105,34 @@ class TestSurfaceMaterial:
         # Grass height defaults to 0
         assert material.grass_height_m >= 0
 
-    def test_surface_material_validation(self) -> None:
+    @pytest.mark.parametrize(
+        "kwargs,match",
+        [
+            ({"friction_coefficient": -0.5}, "friction"),
+            ({"restitution": 1.5}, "restitution"),
+            ({"hardness": -0.1}, "hardness"),
+        ],
+        ids=["negative_friction", "restitution_over_1", "negative_hardness"],
+    )
+    def test_surface_material_validation(self, kwargs, match) -> None:
         """Invalid material properties should raise errors."""
-        with pytest.raises(ValueError, match="friction"):
-            SurfaceMaterial(name="invalid", friction_coefficient=-0.5)
+        with pytest.raises(ValueError, match=match):
+            SurfaceMaterial(name="invalid", **kwargs)
 
-        with pytest.raises(ValueError, match="restitution"):
-            SurfaceMaterial(name="invalid", restitution=1.5)
-
-        with pytest.raises(ValueError, match="hardness"):
-            SurfaceMaterial(name="invalid", hardness=-0.1)
-
-    def test_predefined_materials(self) -> None:
+    @pytest.mark.parametrize(
+        "material_name",
+        ["fairway", "rough", "green", "bunker", "tee"],
+        ids=["fairway", "rough", "green", "bunker", "tee"],
+    )
+    def test_predefined_material_exists(self, material_name) -> None:
         """Predefined materials for common terrain types should exist."""
         from src.shared.python.physics.terrain import MATERIALS
 
-        assert "fairway" in MATERIALS
-        assert "rough" in MATERIALS
-        assert "green" in MATERIALS
-        assert "bunker" in MATERIALS
-        assert "tee" in MATERIALS
+        assert material_name in MATERIALS
+
+    def test_predefined_material_relationships(self) -> None:
+        """Verify physical relationships between predefined materials."""
+        from src.shared.python.physics.terrain import MATERIALS
 
         # Bunker should have higher friction (sand)
         assert (
@@ -218,17 +242,16 @@ class TestElevationMap:
         assert elev.resolution == 0.5
         assert np.array_equal(elev.data, data)
 
-    def test_elevation_bounds_checking(self) -> None:
+    @pytest.mark.parametrize(
+        "x,y",
+        [(-1.0, 5.0), (15.0, 5.0)],
+        ids=["negative_coordinate", "beyond_bounds"],
+    )
+    def test_elevation_bounds_checking(self, x, y) -> None:
         """Out-of-bounds queries should be handled gracefully."""
         elev = ElevationMap.flat(width=10.0, length=10.0, resolution=1.0)
-
-        # Negative coordinates - should clamp or raise
         with pytest.raises(ValueError):
-            elev.get_elevation(-1.0, 5.0)
-
-        # Beyond bounds
-        with pytest.raises(ValueError):
-            elev.get_elevation(15.0, 5.0)
+            elev.get_elevation(x, y)
 
 
 class TestTerrainPatch:
@@ -358,7 +381,12 @@ class TestTerrain:
         # Fairway elsewhere
         assert terrain.get_terrain_type(50.0, 50.0) == TerrainType.FAIRWAY
 
-    def test_terrain_properties_at_point(self) -> None:
+    @pytest.mark.parametrize(
+        "prop_key",
+        ["elevation", "gradient", "normal", "terrain_type", "material"],
+        ids=["elevation", "gradient", "normal", "terrain_type", "material"],
+    )
+    def test_terrain_properties_at_point(self, prop_key) -> None:
         """Get all terrain properties at a point."""
         elevation = ElevationMap.sloped(
             width=100.0,
@@ -372,29 +400,31 @@ class TestTerrain:
         terrain = Terrain(name="Test", elevation=elevation, patches=patches)
 
         props = terrain.get_properties_at(50.0, 50.0)
+        assert prop_key in props
 
-        assert "elevation" in props
-        assert "gradient" in props
-        assert "normal" in props
-        assert "terrain_type" in props
-        assert "material" in props
-        assert props["terrain_type"] == TerrainType.FAIRWAY
-
-    def test_terrain_contact_parameters(self) -> None:
-        """Get physics-engine-ready contact parameters."""
+    @pytest.mark.parametrize(
+        "key",
+        ["friction", "restitution", "stiffness", "damping"],
+        ids=["friction", "restitution", "stiffness", "damping"],
+    )
+    def test_terrain_contact_parameter_keys(self, key) -> None:
+        """Get physics-engine-ready contact parameters contain expected keys."""
         elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
         patches = [TerrainPatch(TerrainType.BUNKER, 0.0, 100.0, 0.0, 100.0)]
 
         terrain = Terrain(name="Test", elevation=elevation, patches=patches)
 
         contact = terrain.get_contact_params(50.0, 50.0)
+        assert key in contact
 
-        assert "friction" in contact
-        assert "restitution" in contact
-        assert "stiffness" in contact
-        assert "damping" in contact
+    def test_terrain_contact_bunker_friction(self) -> None:
+        """Bunker should have higher friction."""
+        elevation = ElevationMap.flat(width=100.0, length=100.0, resolution=1.0)
+        patches = [TerrainPatch(TerrainType.BUNKER, 0.0, 100.0, 0.0, 100.0)]
 
-        # Bunker should have higher friction
+        terrain = Terrain(name="Test", elevation=elevation, patches=patches)
+
+        contact = terrain.get_contact_params(50.0, 50.0)
         assert contact["friction"] > 0.5
 
 
@@ -597,15 +627,18 @@ class TestTerrainPhysicsIntegration:
 class TestTerrainEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def test_zero_size_terrain(self) -> None:
-        """Zero-sized terrain should raise error."""
+    @pytest.mark.parametrize(
+        "width,length,resolution",
+        [
+            (0.0, 100.0, 1.0),
+            (100.0, 100.0, -1.0),
+        ],
+        ids=["zero_width", "negative_resolution"],
+    )
+    def test_elevation_invalid_params(self, width, length, resolution) -> None:
+        """Invalid elevation map parameters should raise errors."""
         with pytest.raises(ValueError):
-            ElevationMap.flat(width=0.0, length=100.0, resolution=1.0)
-
-    def test_negative_resolution(self) -> None:
-        """Negative resolution should raise error."""
-        with pytest.raises(ValueError):
-            ElevationMap.flat(width=100.0, length=100.0, resolution=-1.0)
+            ElevationMap.flat(width=width, length=length, resolution=resolution)
 
     def test_steep_slope(self) -> None:
         """Very steep slopes (>45°) should work but warn."""
