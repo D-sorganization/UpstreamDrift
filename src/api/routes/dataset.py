@@ -25,6 +25,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import get_engine_manager, get_logger
+from src.shared.python.core.contracts import precondition
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
@@ -36,6 +37,10 @@ router = APIRouter(prefix="/dataset", tags=["dataset"])
 # ---- Helpers ----
 
 
+@precondition(
+    lambda engine_manager: engine_manager is not None,
+    "Engine manager must not be None",
+)
 def _require_active_engine(engine_manager: EngineManager) -> PhysicsEngine:
     """Get the currently loaded physics engine or raise 409.
 

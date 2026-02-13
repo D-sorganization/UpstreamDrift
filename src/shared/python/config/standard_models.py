@@ -340,7 +340,7 @@ class StandardModelManager:
 
             plant = MultibodyPlant(time_step=0.001)
             parser = Parser(plant)
-            parser.AddModelFromFile(str(urdf_path))
+            parser.AddModelFromFile(str(urdf_path))  # type: ignore[attr-defined]  # pydrake deprecated alias, still works at runtime
             plant.Finalize()
             results["drake"] = True
         except ImportError as e:

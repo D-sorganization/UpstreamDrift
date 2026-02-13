@@ -10,13 +10,14 @@ Design by Contract:
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.robotics.locomotion.gait_types import GaitParameters
+from src.shared.python.core.contracts import ContractChecker
 
 
 @dataclass
@@ -150,13 +151,17 @@ class FootstepPlan:
         return None
 
 
-class FootstepPlanner:
+class FootstepPlanner(ContractChecker):
     """Plans footstep sequences for locomotion.
 
     Generates footstep positions based on velocity commands,
     goal positions, or terrain constraints.
 
     Design by Contract:
+        Invariants:
+            - Step dimension limits are positive
+            - Nominal width is non-negative
+
         Preconditions:
             - Parameters must have valid step dimensions
 
@@ -194,6 +199,27 @@ class FootstepPlanner:
         self._max_step_width = max_step_width
         self._max_step_rotation = max_step_rotation
         self._nominal_width = parameters.step_width
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for FootstepPlanner."""
+        return [
+            (
+                lambda: self._max_step_length > 0,
+                "max_step_length must be positive",
+            ),
+            (
+                lambda: self._max_step_width > 0,
+                "max_step_width must be positive",
+            ),
+            (
+                lambda: self._max_step_rotation > 0,
+                "max_step_rotation must be positive",
+            ),
+            (
+                lambda: self._nominal_width >= 0,
+                "nominal_width must be non-negative",
+            ),
+        ]
 
     @property
     def parameters(self) -> GaitParameters:

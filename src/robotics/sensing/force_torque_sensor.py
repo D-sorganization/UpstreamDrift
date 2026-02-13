@@ -10,6 +10,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
@@ -22,6 +23,7 @@ from src.robotics.sensing.noise_models import (
     CompositeNoise,
     GaussianNoise,
 )
+from src.shared.python.core.contracts import ContractChecker
 
 
 @dataclass
@@ -53,7 +55,7 @@ class ForceTorqueSensorConfig:
     seed: int | None = None
 
 
-class ForceTorqueSensor:
+class ForceTorqueSensor(ContractChecker):
     """Simulated force/torque sensor with realistic noise.
 
     Provides 6-axis force/torque measurements with configurable
@@ -64,8 +66,9 @@ class ForceTorqueSensor:
 
     Design by Contract:
         Invariants:
-            - Readings are always 6D vectors
-            - Noise parameters are non-negative
+            - Tare offset is always a 6D vector
+            - Config has non-negative noise parameters
+            - Force and torque ranges are positive
 
         Postconditions:
             - read() returns valid ForceTorqueReading
@@ -111,6 +114,25 @@ class ForceTorqueSensor:
 
         # Last reading for filtering
         self._last_reading: NDArray[np.float64] | None = None
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for ForceTorqueSensor."""
+        return [
+            (
+                lambda: self._tare_offset is not None
+                and self._tare_offset.shape == (6,),
+                "Tare offset must be a 6D vector",
+            ),
+            (
+                lambda: self._config.force_noise_std >= 0
+                and self._config.torque_noise_std >= 0,
+                "Noise standard deviations must be non-negative",
+            ),
+            (
+                lambda: self._config.force_range > 0 and self._config.torque_range > 0,
+                "Force and torque ranges must be positive",
+            ),
+        ]
 
     def _validate_config(self) -> None:
         """Validate configuration parameters."""

@@ -38,6 +38,8 @@ try:
 except ImportError:
     THEME_AVAILABLE = False
 
+from src.shared.python.theme.style_constants import Styles
+
 
 @dataclass
 class Shortcut:
@@ -96,7 +98,7 @@ class ShortcutBadge(QFrame):
                 if THEME_AVAILABLE:
                     plus.setStyleSheet(f"color: {Colors.TEXT_TERTIARY};")
                 else:
-                    plus.setStyleSheet("color: #A0A0A0;")
+                    plus.setStyleSheet(Styles.SHORTCUT_PLUS)
                 layout.addWidget(plus)
 
             key_label = QLabel(key.strip())
@@ -112,13 +114,7 @@ class ShortcutBadge(QFrame):
             else:
                 font = QFont("Segoe UI", 9)
                 font.setWeight(QFont.Weight.DemiBold)
-                key_label.setStyleSheet(
-                    "background-color: #242424; "
-                    "color: #FFFFFF; "
-                    "border: 1px solid #404040; "
-                    "border-radius: 4px; "
-                    "padding: 2px 6px;"
-                )
+                key_label.setStyleSheet(Styles.SHORTCUT_KEY_BADGE)
             key_label.setFont(font)
             layout.addWidget(key_label)
 
@@ -175,13 +171,7 @@ class ShortcutsOverlay(QWidget):
                 f"}}"
             )
         else:
-            content.setStyleSheet(
-                "QFrame#shortcutsContent {"
-                "  background-color: #1A1A1A;"
-                "  border: 1px solid #404040;"
-                "  border-radius: 12px;"
-                "}"
-            )
+            content.setStyleSheet(Styles.SHORTCUT_CONTENT)
 
         content_layout = QVBoxLayout(content)
         content_layout.setContentsMargins(24, 20, 24, 20)
@@ -197,7 +187,7 @@ class ShortcutsOverlay(QWidget):
             font = QFont("Segoe UI", 13)
             font.setWeight(QFont.Weight.Bold)
             title.setFont(font)
-            title.setStyleSheet("color: #FFFFFF;")
+            title.setStyleSheet(Styles.SHORTCUT_TITLE)
 
         close_btn = QPushButton("\u2715")  # X character
         close_btn.setFixedSize(28, 28)
@@ -218,19 +208,7 @@ class ShortcutsOverlay(QWidget):
                 f"}}"
             )
         else:
-            close_btn.setStyleSheet(
-                "QPushButton {"
-                "  background-color: transparent;"
-                "  color: #A0A0A0;"
-                "  border: none;"
-                "  border-radius: 14px;"
-                "  font-size: 14px;"
-                "}"
-                "QPushButton:hover {"
-                "  background-color: #2D2D2D;"
-                "  color: #FFFFFF;"
-                "}"
-            )
+            close_btn.setStyleSheet(Styles.SHORTCUT_CLOSE_BTN)
 
         header.addWidget(title)
         header.addStretch()
@@ -242,10 +220,7 @@ class ShortcutsOverlay(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        if THEME_AVAILABLE:
-            scroll.setStyleSheet("background-color: transparent;")
-        else:
-            scroll.setStyleSheet("background-color: transparent;")
+        scroll.setStyleSheet(Styles.TRANSPARENT_BG)
 
         shortcuts_widget = QWidget()
         shortcuts_layout = QVBoxLayout(shortcuts_widget)
@@ -275,7 +250,7 @@ class ShortcutsOverlay(QWidget):
             hint.setStyleSheet(f"color: {Colors.TEXT_QUATERNARY};")
         else:
             hint.setFont(QFont("Segoe UI", 8))
-            hint.setStyleSheet("color: #666666;")
+            hint.setStyleSheet(Styles.SHORTCUT_HINT)
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         content_layout.addWidget(hint)
 
@@ -306,7 +281,7 @@ class ShortcutsOverlay(QWidget):
             font = QFont("Segoe UI", 9)
             font.setWeight(QFont.Weight.DemiBold)
             header.setFont(font)
-            header.setStyleSheet("color: #0A84FF;")
+            header.setStyleSheet(Styles.SHORTCUT_CATEGORY_HEADER)
         layout.addWidget(header)
 
         # Shortcuts grid
@@ -326,7 +301,7 @@ class ShortcutsOverlay(QWidget):
                 desc.setStyleSheet(f"color: {Colors.TEXT_SECONDARY};")
             else:
                 desc.setFont(QFont("Segoe UI", 9))
-                desc.setStyleSheet("color: #E0E0E0;")
+                desc.setStyleSheet(Styles.SHORTCUT_DESC)
             grid.addWidget(desc, i, 1, Qt.AlignmentFlag.AlignLeft)
 
         layout.addLayout(grid)

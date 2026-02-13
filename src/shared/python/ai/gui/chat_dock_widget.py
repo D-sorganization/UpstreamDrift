@@ -30,6 +30,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.theme.style_constants import Styles
+
 _SESSION_FILE = Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
 _DEFAULT_SERVER = "ws://127.0.0.1:8000"
 
@@ -80,7 +82,7 @@ class ChatMessageBubble(QFrame):
         self._content_label = QLabel(content)
         self._content_label.setWordWrap(True)
         self._content_label.setTextFormat(Qt.TextFormat.PlainText)
-        self._content_label.setStyleSheet("color: #e0e0e0; font-size: 12px;")
+        self._content_label.setStyleSheet(Styles.CHAT_DOCK_CONTENT)
         layout.addWidget(self._content_label)
 
         bg = "#2d2d2d" if role == "user" else "#252526"
@@ -150,7 +152,7 @@ class ChatDockWidget(QDockWidget):
 
         # Status bar
         self._status_label = QLabel("Connecting...")
-        self._status_label.setStyleSheet("color: #888; font-size: 10px;")
+        self._status_label.setStyleSheet(Styles.CHAT_DOCK_STATUS)
         layout.addWidget(self._status_label)
 
         # Message scroll area
@@ -205,10 +207,8 @@ class ChatDockWidget(QDockWidget):
             "  padding: 6px; font-weight: bold;"
             "}"
         )
-        self._scroll_area.setStyleSheet(
-            "QScrollArea { background-color: #1e1e1e; border: none; }"
-        )
-        self._message_container.setStyleSheet("background-color: #1e1e1e;")
+        self._scroll_area.setStyleSheet(Styles.CHAT_DOCK_SCROLL)
+        self._message_container.setStyleSheet(Styles.CONTAINER_DARK)
 
     # ── WebSocket connection ─────────────────────────────────────────
 
@@ -230,11 +230,11 @@ class ChatDockWidget(QDockWidget):
 
     def _on_connected(self) -> None:
         self._status_label.setText("Connected")
-        self._status_label.setStyleSheet("color: #3fb950; font-size: 10px;")
+        self._status_label.setStyleSheet(Styles.CHAT_DOCK_STATUS_CONNECTED)
 
     def _on_disconnected(self) -> None:
         self._status_label.setText("Disconnected - retrying in 3s...")
-        self._status_label.setStyleSheet("color: #f85149; font-size: 10px;")
+        self._status_label.setStyleSheet(Styles.CHAT_DOCK_STATUS_ERROR)
         self._is_streaming = False
         self._send_btn.setEnabled(True)
         # Auto-reconnect

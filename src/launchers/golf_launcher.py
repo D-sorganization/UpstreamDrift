@@ -53,6 +53,7 @@ from src.launchers.ui_components import (
     StartupResults,
 )
 from src.shared.python.security.subprocess_utils import kill_process_tree
+from src.shared.python.theme.style_constants import Styles
 
 # Backward-compatible re-exports
 __all__ = [
@@ -517,10 +518,10 @@ class GolfLauncher(
         self.docker_available = available
         if available:
             self.lbl_status.setText("System Ready")
-            self.lbl_status.setStyleSheet("color: #30D158; font-weight: bold;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS_BOLD)
         else:
             self.lbl_status.setText("Docker Not Found")
-            self.lbl_status.setStyleSheet("color: #FF375F; font-weight: bold;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_ERROR_BOLD)
         self.update_launch_button()
 
     def check_docker(self) -> None:
@@ -572,7 +573,7 @@ class GolfLauncher(
 
         if not self.running_processes:
             self.lbl_status.setText("Ready")
-            self.lbl_status.setStyleSheet("color: #aaaaaa;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""

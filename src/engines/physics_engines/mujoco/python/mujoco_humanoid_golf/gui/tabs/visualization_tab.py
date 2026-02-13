@@ -6,6 +6,7 @@ import mujoco
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 if TYPE_CHECKING:
     from ...sim_widget import MuJoCoSimWidget
@@ -171,7 +172,7 @@ class VisualizationTab(QtWidgets.QWidget):
         sky_layout.addWidget(QtWidgets.QLabel("Sky Color:"))
         self.sky_color_btn = QtWidgets.QPushButton()
         self.sky_color_btn.setMinimumSize(60, 30)
-        self.sky_color_btn.setStyleSheet("background-color: rgb(51, 77, 102);")
+        self.sky_color_btn.setStyleSheet(Styles.SWATCH_SKY_DEFAULT)
         self.sky_color_btn.setToolTip("Click to change sky color")
         self.sky_color_btn.setAccessibleName("Sky Color")
         self.sky_color_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
@@ -185,7 +186,7 @@ class VisualizationTab(QtWidgets.QWidget):
         ground_layout.addWidget(QtWidgets.QLabel("Ground Color:"))
         self.ground_color_btn = QtWidgets.QPushButton()
         self.ground_color_btn.setMinimumSize(60, 30)
-        self.ground_color_btn.setStyleSheet("background-color: rgb(51, 51, 51);")
+        self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
         self.ground_color_btn.setToolTip("Click to change ground color")
         self.ground_color_btn.setAccessibleName("Ground Color")
         self.ground_color_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
@@ -548,8 +549,8 @@ class VisualizationTab(QtWidgets.QWidget):
             ground_color=default_ground,
         )
         # Update button colors
-        self.sky_color_btn.setStyleSheet("background-color: rgb(51, 77, 102);")
-        self.ground_color_btn.setStyleSheet("background-color: rgb(51, 51, 51);")
+        self.sky_color_btn.setStyleSheet(Styles.SWATCH_SKY_DEFAULT)
+        self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
 
     def on_open_meshcat(self) -> None:
         """Open the Meshcat visualizer in the default browser."""

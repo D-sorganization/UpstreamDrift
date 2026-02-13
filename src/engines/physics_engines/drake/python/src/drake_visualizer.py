@@ -49,7 +49,8 @@ class DrakeVisualizer:
                 f"{path}/x", Cylinder(radius, length), Rgba(1, 0, 0, 1)
             )
             X_x = RigidTransform(
-                RotationMatrix.MakeYRotation(pi / 2), [length / 2, 0, 0]
+                RotationMatrix.MakeYRotation(pi / 2),
+                [length / 2, 0, 0],  # type: ignore[call-overload]  # pydrake list-to-array overload
             )
             self.meshcat.SetTransform(f"{path}/x", X_x)
 
@@ -58,7 +59,8 @@ class DrakeVisualizer:
                 f"{path}/y", Cylinder(radius, length), Rgba(0, 1, 0, 1)
             )
             X_y = RigidTransform(
-                RotationMatrix.MakeXRotation(-pi / 2), [0, length / 2, 0]
+                RotationMatrix.MakeXRotation(-pi / 2),
+                [0, length / 2, 0],  # type: ignore[call-overload]  # pydrake list-to-array overload
             )
             self.meshcat.SetTransform(f"{path}/y", X_y)
 
@@ -66,7 +68,7 @@ class DrakeVisualizer:
             self.meshcat.SetObject(
                 f"{path}/z", Cylinder(radius, length), Rgba(0, 0, 1, 1)
             )
-            X_z = RigidTransform(RotationMatrix(), [0, 0, length / 2])
+            X_z = RigidTransform(RotationMatrix(), [0, 0, length / 2])  # type: ignore[call-overload]  # pydrake list-to-array overload
             self.meshcat.SetTransform(f"{path}/z", X_z)
 
             self.visible_frames.add(body_name)
@@ -113,7 +115,7 @@ class DrakeVisualizer:
 
             self.meshcat.SetTransform(
                 path=f"{self.prefix}/coms/{body_name}",
-                X_ParentChild=RigidTransform(p_WCom),
+                X_ParentChild=RigidTransform(p_WCom),  # type: ignore[call-overload]  # pydrake RigidTransform overload
             )
 
     def draw_ellipsoid(
@@ -154,7 +156,7 @@ class DrakeVisualizer:
         T[:3, 3] = position
 
         # Pass numpy array directly if supported
-        self.meshcat.SetTransform(path, T)
+        self.meshcat.SetTransform(path, T)  # type: ignore[arg-type]  # passing numpy 4x4 matrix to pydrake Meshcat
         self.visible_ellipsoids.add(name)
 
     def clear_ellipsoids(self) -> None:

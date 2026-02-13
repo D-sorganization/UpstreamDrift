@@ -33,6 +33,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -189,6 +190,11 @@ class SwingCaptureImporter:
             - Source data is never modified
     """
 
+    @precondition(
+        lambda self, marker_mapping=None, target_frame_rate=200.0: target_frame_rate
+        > 0,
+        "Target frame rate must be positive",
+    )
     def __init__(
         self,
         marker_mapping: list[MarkerToJointMapping] | None = None,
@@ -203,6 +209,10 @@ class SwingCaptureImporter:
         self.marker_mapping = marker_mapping or DEFAULT_GOLF_MAPPING
         self.target_frame_rate = target_frame_rate
 
+    @precondition(
+        lambda self, filepath: filepath is not None and len(str(filepath)) > 0,
+        "File path must be a non-empty string or Path",
+    )
     def import_file(self, filepath: str | Path) -> JointTrajectory:
         """Import a swing capture file (auto-detect format).
 
@@ -469,7 +479,7 @@ class SwingCaptureImporter:
             )
             n_markers = marker_data.n_markers
             joint_names = [f"marker_{name}_x" for name in marker_data.marker_names]
-            joint_angles = [marker_data.positions[:, i, 0] for i in range(n_markers)]
+            joint_angles = [marker_data.positions[:, i, 0] for i in range(n_markers)]  # type: ignore[misc]
 
         positions = np.column_stack(joint_angles)
         velocities = np.gradient(positions, marker_data.times, axis=0)
@@ -495,6 +505,16 @@ class SwingCaptureImporter:
             source_file=source_file,
         )
 
+    @precondition(
+        lambda self, positions, velocities, times, source_rate, target_rate: source_rate
+        > 0,
+        "Source frame rate must be positive",
+    )
+    @precondition(
+        lambda self, positions, velocities, times, source_rate, target_rate: target_rate
+        > 0,
+        "Target frame rate must be positive",
+    )
     def _resample(
         self,
         positions: np.ndarray,
@@ -585,6 +605,10 @@ class SwingCaptureImporter:
             follow_through_end=follow_end,
         )
 
+    @precondition(
+        lambda self, trajectories: trajectories is not None and len(trajectories) > 0,
+        "Trajectories list must be non-empty",
+    )
     def build_demonstration_dataset(
         self,
         trajectories: list[JointTrajectory],

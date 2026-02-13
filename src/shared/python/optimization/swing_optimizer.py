@@ -30,6 +30,7 @@ import numpy as np
 from scipy import optimize
 
 from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.core.contracts import ContractChecker
 
 
 class OptimizationObjective(Enum):
@@ -201,13 +202,20 @@ class OptimizationResult:
     risk_reduction: float = 0.0  # percentage
 
 
-class SwingOptimizer:
+class SwingOptimizer(ContractChecker):
     """
     Multi-objective swing trajectory optimizer.
 
     This optimizer uses forward dynamics to find optimal swing trajectories
     that maximize performance while respecting biomechanical constraints.
     It can optimize for multiple objectives simultaneously (Pareto optimization).
+
+    Design by Contract:
+        Invariants:
+            - golfer model has positive mass and height
+            - club model has positive total length
+            - config has at least one objective
+            - joint_limits and torque_limits cover all joints
 
     Example:
         >>> golfer = GolferModel(height=1.80, mass=80.0)
@@ -252,6 +260,31 @@ class SwingOptimizer:
 
         # Derived quantities
         self._setup_model()
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for SwingOptimizer."""
+        return [
+            (
+                lambda: self.golfer.mass > 0 and self.golfer.height > 0,
+                "Golfer model must have positive mass and height",
+            ),
+            (
+                lambda: self.club.total_length > 0,
+                "Club model must have positive total length",
+            ),
+            (
+                lambda: len(self.config.objectives) > 0,
+                "Optimization config must have at least one objective",
+            ),
+            (
+                lambda: all(j in self.joint_limits for j in self.JOINTS),
+                "joint_limits must cover all joints",
+            ),
+            (
+                lambda: all(j in self.torque_limits for j in self.JOINTS),
+                "torque_limits must cover all joints",
+            ),
+        ]
 
     def _setup_model(self) -> None:
         """Set up the biomechanical model parameters."""

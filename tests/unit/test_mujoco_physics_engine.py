@@ -5,7 +5,6 @@ the physics engine module's namespace.  Per-test patching is removed to
 avoid double-mocking conflicts that caused assertion failures in CI.
 """
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -89,21 +88,17 @@ def test_load_from_string(engine, mock_mj):
     assert engine.data is not None
 
 
-def test_load_from_path(engine, mock_mj):
-    path = "model.xml"
+def test_load_from_path(engine, mock_mj, tmp_path):
+    # Use tmp_path so the file lives under /tmp, which is in ALLOWED_MODEL_DIRS
+    model_file = tmp_path / "model.xml"
+    model_file.write_text("<mujoco/>")
 
-    # Mock the security validation to allow test paths
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
-    ) as mock_validate:
-        mock_validate.return_value = Path(path).resolve()
+    engine.load_from_path(str(model_file))
 
-        engine.load_from_path(path)
-
-        # Check if called with SOMETHING ending in "model.xml"
-        args, _ = mock_mj.MjModel.from_xml_path.call_args
-        assert args[0].endswith("model.xml")
-        assert engine.xml_path.endswith(path)
+    # Check if called with SOMETHING ending in "model.xml"
+    args, _ = mock_mj.MjModel.from_xml_path.call_args
+    assert args[0].endswith("model.xml")
+    assert engine.xml_path.endswith("model.xml")
 
 
 def test_step(engine, mock_mj):

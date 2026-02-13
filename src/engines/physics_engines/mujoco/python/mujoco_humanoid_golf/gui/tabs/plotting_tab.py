@@ -6,6 +6,7 @@ import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 from ...plotting import GolfSwingPlotter, MplCanvas
 from ...sim_widget import MuJoCoSimWidget
@@ -115,34 +116,14 @@ class PlottingTab(QtWidgets.QWidget):
 
         self.generate_plot_btn = QtWidgets.QPushButton("Generate Plot")
         self.generate_plot_btn.clicked.connect(self.on_generate_plot)
-        self.generate_plot_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2ca02c;
-                color: white;
-                font-weight: bold;
-                padding: 8px;
-            }
-            QPushButton:hover {
-                background-color: #238c23;
-            }
-        """)
+        self.generate_plot_btn.setStyleSheet(Styles.BTN_GENERATE_PLOT)
         plot_layout.addWidget(self.generate_plot_btn)
 
         self.btn_advanced_dialog = QtWidgets.QPushButton("Open Advanced Analysis...")
         self.btn_advanced_dialog.clicked.connect(
             self.main_window.show_advanced_plots_dialog
         )
-        self.btn_advanced_dialog.setStyleSheet("""
-            QPushButton {
-                background-color: #9467bd;
-                color: white;
-                font-weight: bold;
-                padding: 8px;
-            }
-            QPushButton:hover {
-                background-color: #8c564b;
-            }
-            """)
+        self.btn_advanced_dialog.setStyleSheet(Styles.BTN_ADVANCED_ANALYSIS)
         plot_layout.addWidget(self.btn_advanced_dialog)
 
         layout.addWidget(plot_group)

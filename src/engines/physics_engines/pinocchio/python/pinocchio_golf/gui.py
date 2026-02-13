@@ -1347,6 +1347,10 @@ class PinocchioGUI(SimulationGUIBase):
 
     def _advance_physics(self) -> None:
         """Integrate physics forward by one time step."""
+        assert self.model is not None
+        assert self.data is not None
+        assert self.q is not None
+        assert self.v is not None
         tau = np.zeros(self.model.nv)
         a = pin.aba(self.model, self.data, self.q, self.v, tau)
         self.v += a * self.dt
@@ -1355,6 +1359,10 @@ class PinocchioGUI(SimulationGUIBase):
 
     def _record_frame(self) -> None:
         """Record a single frame of simulation data."""
+        assert self.model is not None
+        assert self.data is not None
+        assert self.q is not None
+        assert self.v is not None
         tau = np.zeros(self.model.nv)
 
         # Compute energies for recording
@@ -1387,6 +1395,8 @@ class PinocchioGUI(SimulationGUIBase):
         self,
     ) -> tuple[np.ndarray | None, np.ndarray | None]:
         """Find the club head frame and return its position and velocity."""
+        assert self.model is not None
+        assert self.data is not None
         club_head_pos = None
         club_head_vel = None
 
@@ -1464,6 +1474,8 @@ class PinocchioGUI(SimulationGUIBase):
 
     def _compute_specific_sources(self, induced: dict[str, np.ndarray]) -> None:
         """Compute induced accelerations for specific actuator sources."""
+        assert self.analyzer is not None
+        assert self.q is not None
         sources_to_compute: list[str] = []
         txt = self.combo_induced.currentText()
         if txt:
@@ -1497,6 +1509,7 @@ class PinocchioGUI(SimulationGUIBase):
         Tries joint name, integer index, and comma-separated vector in order.
         Returns None if the source cannot be resolved.
         """
+        assert self.model is not None
         spec_tau = np.zeros(self.model.nv)
 
         # Check if it's a joint name

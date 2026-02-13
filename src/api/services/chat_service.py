@@ -17,6 +17,7 @@ from datetime import timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -147,6 +148,16 @@ class ChatService:
             logger.info("ChatService: created session %s", ctx.session_id)
             return ctx
 
+    @precondition(
+        lambda self, session_id, message, engine_context=None: session_id is not None
+        and len(session_id) > 0,
+        "Session ID must be a non-empty string",
+    )
+    @precondition(
+        lambda self, session_id, message, engine_context=None: message is not None
+        and len(message) > 0,
+        "Message must be a non-empty string",
+    )
     def add_user_message(
         self,
         session_id: str,

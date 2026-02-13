@@ -17,6 +17,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.dashboard.widgets import LivePlotWidget
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui.overlay import OverlayWidget
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 
@@ -283,57 +284,46 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         status_bar = self.statusBar()
         if status_bar is None:
             return
-        status_bar.setStyleSheet(
-            """
-            QStatusBar {
-                background-color: #2c3e50;
-                color: white;
-                font-weight: bold;
-            }
-            QStatusBar::item {
-                border: none;
-            }
-        """,
-        )
+        status_bar.setStyleSheet(Styles.STATUSBAR_DARK)
 
         # Model info label
         self.status_model_label = QtWidgets.QLabel("Model: --")
-        self.status_model_label.setStyleSheet("color: #3498db; padding: 0 10px;")
+        self.status_model_label.setStyleSheet(Styles.STATUSBAR_MODEL)
         status_bar.addWidget(self.status_model_label)
 
         # Separator
         sep1 = QtWidgets.QLabel("|")
-        sep1.setStyleSheet("color: #7f8c8d;")
+        sep1.setStyleSheet(Styles.STATUSBAR_SEPARATOR)
         status_bar.addWidget(sep1)
 
         # Time label
         self.status_time_label = QtWidgets.QLabel("Time: 0.00s")
-        self.status_time_label.setStyleSheet("color: #2ecc71; padding: 0 10px;")
+        self.status_time_label.setStyleSheet(Styles.STATUSBAR_TIME)
         status_bar.addWidget(self.status_time_label)
 
         # Separator
         sep2 = QtWidgets.QLabel("|")
-        sep2.setStyleSheet("color: #7f8c8d;")
+        sep2.setStyleSheet(Styles.STATUSBAR_SEPARATOR)
         status_bar.addWidget(sep2)
 
         # Camera info label
         self.status_camera_label = QtWidgets.QLabel("Camera: side")
-        self.status_camera_label.setStyleSheet("color: #9b59b6; padding: 0 10px;")
+        self.status_camera_label.setStyleSheet(Styles.STATUSBAR_CAMERA)
         status_bar.addWidget(self.status_camera_label)
 
         # Separator
         sep3 = QtWidgets.QLabel("|")
-        sep3.setStyleSheet("color: #7f8c8d;")
+        sep3.setStyleSheet(Styles.STATUSBAR_SEPARATOR)
         status_bar.addWidget(sep3)
 
         # Simulation state label
         self.status_state_label = QtWidgets.QLabel("Running")
-        self.status_state_label.setStyleSheet("color: #2ecc71; padding: 0 10px;")
+        self.status_state_label.setStyleSheet(Styles.STATUSBAR_STATE_RUNNING)
         status_bar.addWidget(self.status_state_label)
 
         # Permanent widget for recording status (right side)
         self.status_recording_label = QtWidgets.QLabel("")
-        self.status_recording_label.setStyleSheet("color: #e74c3c; padding: 0 10px;")
+        self.status_recording_label.setStyleSheet(Styles.STATUSBAR_RECORDING)
         status_bar.addPermanentWidget(self.status_recording_label)
 
     def _update_status_bar(self) -> None:
@@ -368,10 +358,10 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         # Update simulation state
         if self.sim_widget.running:
             self.status_state_label.setText("Running")
-            self.status_state_label.setStyleSheet("color: #2ecc71; padding: 0 10px;")
+            self.status_state_label.setStyleSheet(Styles.STATUSBAR_STATE_RUNNING)
         else:
             self.status_state_label.setText("Paused")
-            self.status_state_label.setStyleSheet("color: #f39c12; padding: 0 10px;")
+            self.status_state_label.setStyleSheet(Styles.STATUSBAR_STATE_PAUSED)
 
         # Update recording status
         recorder = self.sim_widget.get_recorder()
@@ -382,14 +372,14 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
                 f"RECORDING: {frames} frames ({duration:.1f}s)",
             )
             self.status_recording_label.setStyleSheet(
-                "color: #e74c3c; font-weight: bold; padding: 0 10px;",
+                Styles.STATUSBAR_RECORDING_ACTIVE,
             )
         else:
             frames = recorder.get_num_frames()
             if frames > 0:
                 self.status_recording_label.setText(f"Recorded: {frames} frames")
                 self.status_recording_label.setStyleSheet(
-                    "color: #f39c12; padding: 0 10px;",
+                    Styles.STATUSBAR_RECORDING_DONE,
                 )
             else:
                 self.status_recording_label.setText("")

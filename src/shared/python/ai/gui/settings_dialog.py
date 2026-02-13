@@ -39,6 +39,7 @@ from src.shared.python.ai.config import (
     get_ollama_host,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 if TYPE_CHECKING:
     # Import removed to avoid circular dependency
@@ -348,10 +349,10 @@ class ProviderConfigWidget(QWidget):
             # Show masked key
             self._key_input.setText(key)
             self._key_status.setText("✓ API key configured")
-            self._key_status.setStyleSheet("color: green;")
+            self._key_status.setStyleSheet(Styles.COLOR_GREEN)
         else:
             self._key_status.setText("⚠ No API key configured")
-            self._key_status.setStyleSheet("color: orange;")
+            self._key_status.setStyleSheet(Styles.COLOR_ORANGE)
 
     def _on_key_changed(self, text: str) -> None:
         """Handle key input changes."""
@@ -375,7 +376,7 @@ class ProviderConfigWidget(QWidget):
 
         if set_api_key(self._provider, key):
             self._key_status.setText("✓ API key saved securely")
-            self._key_status.setStyleSheet("color: green;")
+            self._key_status.setStyleSheet(Styles.COLOR_GREEN)
             QMessageBox.information(
                 self,
                 "Success",
@@ -383,7 +384,7 @@ class ProviderConfigWidget(QWidget):
             )
         else:
             self._key_status.setText("✗ Failed to save key")
-            self._key_status.setStyleSheet("color: red;")
+            self._key_status.setStyleSheet(Styles.COLOR_RED)
             QMessageBox.warning(
                 self,
                 "Error",
@@ -405,7 +406,7 @@ class ProviderConfigWidget(QWidget):
     def _test_ollama_connection(self) -> None:
         """Test connection to Ollama server."""
         self._status_label.setText("Testing connection...")
-        self._status_label.setStyleSheet("")
+        self._status_label.setStyleSheet(Styles.COLOR_RESET)
 
         try:
             from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
@@ -416,14 +417,14 @@ class ProviderConfigWidget(QWidget):
 
             if success:
                 self._status_label.setText(f"✓ {message}")
-                self._status_label.setStyleSheet("color: green;")
+                self._status_label.setStyleSheet(Styles.COLOR_GREEN)
             else:
                 self._status_label.setText(f"✗ {message}")
-                self._status_label.setStyleSheet("color: red;")
+                self._status_label.setStyleSheet(Styles.COLOR_RED)
 
         except ImportError as e:
             self._status_label.setText(f"✗ Error: {e}")
-            self._status_label.setStyleSheet("color: red;")
+            self._status_label.setStyleSheet(Styles.COLOR_RED)
 
     def get_host(self) -> str:
         """Get Ollama host if applicable."""
@@ -675,7 +676,7 @@ class AISettingsDialog(QDialog):
             "This happens locally and no code is sent to the cloud during indexing."
         )
         info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #888888; font-size: 11px;")
+        info_label.setStyleSheet(Styles.TEXT_MUTED)
         actions_layout.addWidget(info_label)
 
         layout.addWidget(actions_group)

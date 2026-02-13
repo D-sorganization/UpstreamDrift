@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.shared.python.core.contracts import precondition
+
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import (
     ActuatorUpdateRequest,
@@ -74,6 +76,10 @@ CAMERA_PRESETS: dict[str, dict[str, list[float]]] = {
 }
 
 
+@precondition(
+    lambda engine_manager: engine_manager is not None,
+    "Engine manager must not be None",
+)
 def _get_control_interface(
     engine_manager: EngineManager,
 ) -> Any:
@@ -100,6 +106,10 @@ def _get_control_interface(
         return None
 
 
+@precondition(
+    lambda engine_manager: engine_manager is not None,
+    "Engine manager must not be None",
+)
 def _get_features_registry(
     engine_manager: EngineManager,
 ) -> Any:

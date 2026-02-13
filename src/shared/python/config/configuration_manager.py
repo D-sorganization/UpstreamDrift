@@ -4,9 +4,11 @@ Handles validation, loading, and saving of simulation configurations.
 """
 
 import json
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from src.shared.python.core.contracts import ContractChecker
 from src.shared.python.data_io.common_utils import GolfModelingError
 
 
@@ -71,12 +73,27 @@ class SimulationConfig:
             raise GolfModelingError(f"Invalid control_mode: {self.control_mode}")
 
 
-class ConfigurationManager:
-    """Manages loading and saving of simulation configurations."""
+class ConfigurationManager(ContractChecker):
+    """Manages loading and saving of simulation configurations.
+
+    Design by Contract:
+        Invariants:
+            - config_path is a valid Path object and never None
+    """
 
     def __init__(self, config_path: Path) -> None:
         """Initialize with path to config file."""
         self.config_path = config_path
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for ConfigurationManager."""
+        return [
+            (
+                lambda: self.config_path is not None
+                and isinstance(self.config_path, Path),
+                "config_path must be a valid Path and never None",
+            ),
+        ]
 
     def load(self) -> SimulationConfig:
         """Load configuration from file."""
