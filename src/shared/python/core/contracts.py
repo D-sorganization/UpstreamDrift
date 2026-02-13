@@ -857,7 +857,7 @@ def invariant(
                         message,
                     )
 
-        cls.__init__ = new_init  # type: ignore[misc]
+        cls.__init__ = new_init  # type: ignore[method-assign]
         return cls
 
     return decorator
