@@ -1,5 +1,7 @@
 """Tests for the output manager."""
 
+from __future__ import annotations
+
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -14,14 +16,14 @@ from src.shared.python.data_io.output_manager import (
 
 
 @pytest.fixture
-def temp_output_dir(tmp_path):
+def temp_output_dir(tmp_path) -> OutputManager:
     """Create a temporary output manager."""
     manager = OutputManager(base_path=tmp_path)
     manager.create_output_structure()
     return manager
 
 
-def test_initialization(tmp_path):
+def test_initialization(tmp_path) -> None:
     """Test directory creation."""
     manager = OutputManager(base_path=tmp_path)
     manager.create_output_structure()
@@ -32,7 +34,7 @@ def test_initialization(tmp_path):
     assert (tmp_path / "simulations" / "mujoco").exists()
 
 
-def test_save_load_csv(temp_output_dir):
+def test_save_load_csv(temp_output_dir) -> None:
     """Test saving and loading CSV."""
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
     path = temp_output_dir.save_simulation_results(
@@ -48,7 +50,7 @@ def test_save_load_csv(temp_output_dir):
     pd.testing.assert_frame_equal(df, loaded)
 
 
-def test_save_load_json(temp_output_dir):
+def test_save_load_json(temp_output_dir) -> None:
     """Test saving and loading JSON."""
     # When saving raw list, it wraps it in {results: [...]}
     data = [1, 2, 3]
@@ -80,7 +82,7 @@ def test_save_load_json(temp_output_dir):
     assert loaded2 == data_struct
 
 
-def test_save_load_parquet(temp_output_dir):
+def test_save_load_parquet(temp_output_dir) -> None:
     """Test saving and loading Parquet."""
     try:
         import pyarrow  # noqa: F401
@@ -104,14 +106,14 @@ def test_save_load_parquet(temp_output_dir):
     pd.testing.assert_frame_equal(df, loaded)
 
 
-def test_save_pickle_disabled(temp_output_dir):
+def test_save_pickle_disabled(temp_output_dir) -> None:
     """Test that pickle is disabled for security."""
     data = [1, 2, 3]
     with pytest.raises(ValueError, match="Security: Pickle format is disabled"):
         temp_output_dir.save_simulation_results(data, "test", OutputFormat.PICKLE)
 
 
-def test_export_report_html(temp_output_dir):
+def test_export_report_html(temp_output_dir) -> None:
     """Test HTML report generation."""
     data = {"accuracy": 0.95, "speed": 100}
     path = temp_output_dir.export_analysis_report(data, "test_report", "html")
@@ -123,7 +125,7 @@ def test_export_report_html(temp_output_dir):
     assert "0.95" in content
 
 
-def test_cleanup_old_files(temp_output_dir):
+def test_cleanup_old_files(temp_output_dir) -> None:
     """Test file cleanup logic."""
     # Create an old file
     old_file = temp_output_dir.directories["simulations"] / "old.csv"
@@ -147,7 +149,7 @@ def test_cleanup_old_files(temp_output_dir):
     assert new_file.exists()
 
 
-def test_convenience_functions(tmp_path, monkeypatch):
+def test_convenience_functions(tmp_path, monkeypatch) -> None:
     """Test the top-level save_results and load_results functions."""
     # The convenience functions create a new OutputManager internally.
     # We can test them by using unittest.mock.patch as a context manager.

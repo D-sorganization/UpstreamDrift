@@ -54,14 +54,14 @@ def _default_params(**overrides: Any) -> BodyParameters:
 class TestSMPLXBetaConversion:
     """Test BodyParameters -> SMPL-X beta parameter conversion."""
 
-    def test_default_params_produce_near_zero_betas(self):
+    def test_default_params_produce_near_zero_betas(self) -> None:
         params = BodyParameters()  # 1.75 m, 75 kg, average
         betas = SMPLXMeshGenerator._convert_params_to_betas(params)
         assert betas.shape == (SMPLXMeshGenerator.NUM_BETAS,)
         # Default body close to SMPL-X mean -> betas should be small
         assert np.abs(betas).max() < 5.0
 
-    def test_tall_heavy_person(self):
+    def test_tall_heavy_person(self) -> None:
         params = _default_params(height_m=2.00, mass_kg=110.0)
         betas = SMPLXMeshGenerator._convert_params_to_betas(params)
         # beta[0] should be positive (tall)
@@ -69,14 +69,14 @@ class TestSMPLXBetaConversion:
         # beta[1] should be positive (high BMI)
         assert betas[1] > 0
 
-    def test_short_light_person(self):
+    def test_short_light_person(self) -> None:
         params = _default_params(height_m=1.50, mass_kg=45.0)
         betas = SMPLXMeshGenerator._convert_params_to_betas(params)
         assert betas[0] < 0  # shorter than mean
         # BMI = 45 / 1.50^2 = 20.0, below mean of 22 -> negative beta
         assert betas[1] < 0  # lower BMI
 
-    def test_proportion_factors_map(self):
+    def test_proportion_factors_map(self) -> None:
         params = _default_params(
             shoulder_width_factor=1.2,
             hip_width_factor=0.9,
@@ -91,7 +91,7 @@ class TestSMPLXBetaConversion:
         assert betas[5] > 0  # longer legs
         assert betas[6] > 0  # longer torso
 
-    def test_muscularity_mapping(self):
+    def test_muscularity_mapping(self) -> None:
         lean = _default_params(muscularity=0.1)
         buff = _default_params(muscularity=0.9)
         b_lean = SMPLXMeshGenerator._convert_params_to_betas(lean)
@@ -102,15 +102,15 @@ class TestSMPLXBetaConversion:
 class TestSMPLXGenderString:
     """Test gender string selection."""
 
-    def test_male(self):
+    def test_male(self) -> None:
         params = BodyParameters(gender_model=GenderModel.MALE)
         assert SMPLXMeshGenerator._gender_string(params) == "male"
 
-    def test_female(self):
+    def test_female(self) -> None:
         params = BodyParameters(gender_model=GenderModel.FEMALE)
         assert SMPLXMeshGenerator._gender_string(params) == "female"
 
-    def test_neutral(self):
+    def test_neutral(self) -> None:
         params = BodyParameters(gender_model=GenderModel.NEUTRAL)
         assert SMPLXMeshGenerator._gender_string(params) == "neutral"
 
@@ -118,7 +118,7 @@ class TestSMPLXGenderString:
 class TestSMPLXSegmentMesh:
     """Test the static _segment_mesh helper."""
 
-    def test_segment_extracts_correct_vertices(self):
+    def test_segment_extracts_correct_vertices(self) -> None:
         verts = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [2, 2, 2]])
         faces = np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]])
 
@@ -127,7 +127,7 @@ class TestSMPLXSegmentMesh:
         assert seg_v.shape[0] == 4
         assert seg_f.shape[0] == 2
 
-    def test_empty_segment(self):
+    def test_empty_segment(self) -> None:
         verts = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0]])
         faces = np.array([[0, 1, 2]])
 
@@ -139,7 +139,7 @@ class TestSMPLXSegmentMesh:
 class TestSMPLXAvailability:
     """Test is_available and error paths."""
 
-    def test_unavailable_when_smplx_missing(self):
+    def test_unavailable_when_smplx_missing(self) -> None:
         with patch(
             "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
             False,
@@ -147,7 +147,7 @@ class TestSMPLXAvailability:
             gen = SMPLXMeshGenerator()
             assert gen.is_available is False
 
-    def test_unavailable_when_model_dir_missing(self):
+    def test_unavailable_when_model_dir_missing(self) -> None:
         with patch(
             "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
             True,
@@ -155,7 +155,7 @@ class TestSMPLXAvailability:
             gen = SMPLXMeshGenerator(model_dir="/nonexistent/path")
             assert gen.is_available is False
 
-    def test_returns_error_result_when_smplx_missing(self):
+    def test_returns_error_result_when_smplx_missing(self) -> None:
         with patch(
             "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
             False,
@@ -165,7 +165,7 @@ class TestSMPLXAvailability:
             assert result.success is False
             assert "smplx" in result.error_message.lower()
 
-    def test_returns_error_when_trimesh_missing(self):
+    def test_returns_error_when_trimesh_missing(self) -> None:
         with (
             patch(
                 "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
@@ -209,7 +209,7 @@ class TestSMPLXGenerate:
     @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
     def test_generate_produces_stl_files(
         self, mock_trimesh, mock_smplx, tmp_path: Path
-    ):
+    ) -> None:
         """Verify that generate produces per-segment STL files."""
         import torch  # noqa: F401
 
@@ -224,13 +224,15 @@ class TestSMPLXGenerate:
                 self.vertices = vertices
                 self.faces = faces
 
-            def export(self, path: str):
+            def export(self, path: str) -> None:
+                """Export."""
                 Path(path).parent.mkdir(parents=True, exist_ok=True)
                 Path(path).touch()
                 exported_files.append(path)
 
             @property
-            def convex_hull(self):
+            def convex_hull(self) -> FakeTrimesh:
+                """Convex hull."""
                 return self
 
         mock_trimesh.Trimesh = FakeTrimesh
@@ -254,7 +256,7 @@ class TestSMPLXGenerate:
     @patch(
         "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
     )
-    def test_generate_handles_exception_gracefully(self, tmp_path: Path):
+    def test_generate_handles_exception_gracefully(self, tmp_path: Path) -> None:
         """Verify graceful failure when SMPL-X forward pass throws."""
         model_dir = tmp_path / "models"
         model_dir.mkdir()
@@ -274,7 +276,7 @@ class TestSMPLXGenerate:
 class TestSMPLXSupportedSegments:
     """Test get_supported_segments."""
 
-    def test_returns_expected_segments(self):
+    def test_returns_expected_segments(self) -> None:
         gen = SMPLXMeshGenerator()
         segments = gen.get_supported_segments()
         assert "head" in segments
@@ -291,7 +293,7 @@ class TestSMPLXSupportedSegments:
 class TestMakeHumanParamConversion:
     """Test BodyParameters -> MakeHuman modifier conversion."""
 
-    def test_default_params_conversion(self):
+    def test_default_params_conversion(self) -> None:
         params = BodyParameters()
         modifiers = MakeHumanMeshGenerator._convert_params_to_makehuman(params)
 
@@ -301,7 +303,7 @@ class TestMakeHumanParamConversion:
         assert "macrodetails-universal/Weight" in modifiers
         assert "__height_scale__" in modifiers
 
-    def test_gender_mapping(self):
+    def test_gender_mapping(self) -> None:
         male = BodyParameters(gender_model=GenderModel.MALE)
         female = BodyParameters(gender_model=GenderModel.FEMALE)
 
@@ -311,7 +313,7 @@ class TestMakeHumanParamConversion:
         assert m["macrodetails/Gender"] == 1.0
         assert f["macrodetails/Gender"] == 0.0
 
-    def test_age_normalisation(self):
+    def test_age_normalisation(self) -> None:
         young = BodyParameters()
         young.appearance.age_years = 20.0
         old = BodyParameters()
@@ -323,12 +325,12 @@ class TestMakeHumanParamConversion:
         assert m_young["macrodetails/Age"] < m_old["macrodetails/Age"]
         assert 0.0 <= m_young["macrodetails/Age"] <= 1.0
 
-    def test_height_scale(self):
+    def test_height_scale(self) -> None:
         tall = _default_params(height_m=1.90)
         modifiers = MakeHumanMeshGenerator._convert_params_to_makehuman(tall)
         assert modifiers["__height_scale__"] > 1.0
 
-    def test_proportion_modifiers(self):
+    def test_proportion_modifiers(self) -> None:
         params = _default_params(
             shoulder_width_factor=1.2,
             hip_width_factor=0.9,
@@ -345,17 +347,17 @@ class TestMakeHumanParamConversion:
 class TestMakeHumanAvailability:
     """Test is_available for MakeHuman."""
 
-    def test_unavailable_when_not_installed(self):
+    def test_unavailable_when_not_installed(self) -> None:
         gen = MakeHumanMeshGenerator(makehuman_path="/nonexistent/makehuman")
         assert gen.is_available is False
 
-    def test_available_when_path_exists(self, tmp_path: Path):
+    def test_available_when_path_exists(self, tmp_path: Path) -> None:
         mh_dir = tmp_path / "makehuman"
         mh_dir.mkdir()
         gen = MakeHumanMeshGenerator(makehuman_path=mh_dir)
         assert gen.is_available is True
 
-    def test_returns_error_when_unavailable(self):
+    def test_returns_error_when_unavailable(self) -> None:
         gen = MakeHumanMeshGenerator(makehuman_path="/nonexistent")
         result = gen.generate(_default_params(), Path("/tmp/out"))
         assert result.success is False
@@ -365,7 +367,7 @@ class TestMakeHumanAvailability:
 class TestMakeHumanOBJParsing:
     """Test the OBJ file parser."""
 
-    def test_parse_simple_obj(self, tmp_path: Path):
+    def test_parse_simple_obj(self, tmp_path: Path) -> None:
         obj_content = textwrap.dedent("""\
             v 0.0 0.0 0.0
             v 1.0 0.0 0.0
@@ -383,7 +385,7 @@ class TestMakeHumanOBJParsing:
         # OBJ is 1-indexed, so first face should be [0, 1, 2]
         assert faces[0].tolist() == [0, 1, 2]
 
-    def test_parse_obj_with_normals_and_texcoords(self, tmp_path: Path):
+    def test_parse_obj_with_normals_and_texcoords(self, tmp_path: Path) -> None:
         obj_content = textwrap.dedent("""\
             v 0.0 0.0 0.0
             v 1.0 0.0 0.0
@@ -399,7 +401,7 @@ class TestMakeHumanOBJParsing:
         assert vertices.shape == (3, 3)
         assert faces.shape == (1, 3)
 
-    def test_parse_obj_quad_triangulation(self, tmp_path: Path):
+    def test_parse_obj_quad_triangulation(self, tmp_path: Path) -> None:
         obj_content = textwrap.dedent("""\
             v 0.0 0.0 0.0
             v 1.0 0.0 0.0
@@ -419,7 +421,7 @@ class TestMakeHumanOBJParsing:
 class TestMakeHumanScriptGeneration:
     """Test MakeHuman scripted-mode script generation."""
 
-    def test_script_contains_modifiers(self):
+    def test_script_contains_modifiers(self) -> None:
         modifiers = {
             "macrodetails/Gender": 1.0,
             "macrodetails/Age": 0.5,
@@ -442,7 +444,9 @@ class TestMakeHumanGenerate:
         "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
     )
     @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
-    def test_generate_with_mocked_subprocess(self, mock_trimesh, tmp_path: Path):
+    def test_generate_with_mocked_subprocess(
+        self, mock_trimesh, tmp_path: Path
+    ) -> None:
         """Test end-to-end generation with mocked MakeHuman subprocess."""
         mh_dir = tmp_path / "makehuman"
         mh_dir.mkdir()
@@ -458,13 +462,15 @@ class TestMakeHumanGenerate:
                 self.vertices = vertices
                 self.faces = faces
 
-            def export(self, path: str):
+            def export(self, path: str) -> None:
+                """Export."""
                 Path(path).parent.mkdir(parents=True, exist_ok=True)
                 Path(path).touch()
                 exported_files.append(path)
 
             @property
-            def convex_hull(self):
+            def convex_hull(self) -> FakeTrimesh:
+                """Convex hull."""
                 return self
 
         mock_trimesh.Trimesh = FakeTrimesh
@@ -491,7 +497,7 @@ class TestMakeHumanGenerate:
         assert result.success is True
         assert result.metadata["backend"] == "makehuman"
 
-    def test_generate_fails_when_script_fails(self, tmp_path: Path):
+    def test_generate_fails_when_script_fails(self, tmp_path: Path) -> None:
         """Test that generation fails gracefully when MakeHuman script fails."""
         mh_dir = tmp_path / "makehuman"
         mh_dir.mkdir()
@@ -509,7 +515,7 @@ class TestMakeHumanGenerate:
 class TestMakeHumanSupportedSegments:
     """Test get_supported_segments."""
 
-    def test_returns_all_mapped_segments(self):
+    def test_returns_all_mapped_segments(self) -> None:
         gen = MakeHumanMeshGenerator()
         segments = gen.get_supported_segments()
         assert "head" in segments
@@ -521,11 +527,11 @@ class TestMakeHumanSupportedSegments:
 class TestMakeHumanVertexGroupMap:
     """Test that the vertex group map is complete."""
 
-    def test_all_values_unique(self):
+    def test_all_values_unique(self) -> None:
         values = list(MakeHumanMeshGenerator.MH_VERTEX_GROUP_MAP.values())
         assert len(values) == len(set(values)), "Duplicate segment names in map"
 
-    def test_all_keys_unique(self):
+    def test_all_keys_unique(self) -> None:
         keys = list(MakeHumanMeshGenerator.MH_VERTEX_GROUP_MAP.keys())
         assert len(keys) == len(set(keys)), "Duplicate MH group names in map"
 
@@ -538,29 +544,29 @@ class TestMakeHumanVertexGroupMap:
 class TestMeshGeneratorFactory:
     """Test the MeshGenerator factory class."""
 
-    def test_create_smplx(self):
+    def test_create_smplx(self) -> None:
         gen = MeshGenerator.create(MeshGeneratorBackend.SMPLX)
         assert isinstance(gen, SMPLXMeshGenerator)
         assert gen.backend_name == "smplx"
 
-    def test_create_makehuman(self):
+    def test_create_makehuman(self) -> None:
         gen = MeshGenerator.create(MeshGeneratorBackend.MAKEHUMAN)
         assert isinstance(gen, MakeHumanMeshGenerator)
         assert gen.backend_name == "makehuman"
 
-    def test_create_from_string(self):
+    def test_create_from_string(self) -> None:
         gen = MeshGenerator.create("smplx")
         assert isinstance(gen, SMPLXMeshGenerator)
 
-    def test_create_from_string_case_insensitive(self):
+    def test_create_from_string_case_insensitive(self) -> None:
         gen = MeshGenerator.create("SMPLX")
         assert isinstance(gen, SMPLXMeshGenerator)
 
-    def test_create_unknown_backend_raises(self):
+    def test_create_unknown_backend_raises(self) -> None:
         with pytest.raises(ValueError, match="Unknown backend"):
             MeshGenerator.create(MeshGeneratorBackend.CUSTOM)
 
-    def test_interface_compliance(self):
+    def test_interface_compliance(self) -> None:
         """Verify both generators implement the full interface."""
         for cls in [SMPLXMeshGenerator, MakeHumanMeshGenerator]:
             gen = cls()
@@ -578,7 +584,7 @@ class TestMeshGeneratorFactory:
 class TestGeneratedMeshResult:
     """Test the result dataclass."""
 
-    def test_successful_result(self):
+    def test_successful_result(self) -> None:
         result = GeneratedMeshResult(
             success=True,
             mesh_paths={"head": Path("/tmp/head.stl")},
@@ -586,7 +592,7 @@ class TestGeneratedMeshResult:
         assert result.success is True
         assert result.error_message is None
 
-    def test_failed_result(self):
+    def test_failed_result(self) -> None:
         result = GeneratedMeshResult(
             success=False,
             error_message="Something went wrong",
@@ -594,7 +600,7 @@ class TestGeneratedMeshResult:
         assert result.success is False
         assert result.error_message == "Something went wrong"
 
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         result = GeneratedMeshResult(success=True)
         assert result.mesh_paths == {}
         assert result.collision_paths == {}

@@ -13,7 +13,7 @@ sys.modules["shared.python.secure_subprocess"] = MagicMock()
 
 
 @pytest.fixture
-def app():
+def app() -> QApplication:
     """Create a Qt application instance."""
     app = QApplication.instance()
     if not app:
@@ -22,7 +22,7 @@ def app():
 
 
 @pytest.fixture
-def dialog(app):
+def dialog(app) -> EnvironmentDialog:
     """Create the EnvironmentDialog instance with mocked parent."""
     with patch("launchers.golf_launcher.DockerBuildThread"):
         dlg = EnvironmentDialog(None)
@@ -30,7 +30,7 @@ def dialog(app):
         dlg.close()
 
 
-def test_build_button_feedback(dialog):
+def test_build_button_feedback(dialog) -> None:
     """Test that the build button text changes during build process."""
 
     # Initial state
@@ -57,7 +57,7 @@ def test_build_button_feedback(dialog):
         assert dialog.btn_build.isEnabled() is True
 
 
-def test_build_button_feedback_failure(dialog):
+def test_build_button_feedback_failure(dialog) -> None:
     """Test that the build button text restores even on failure."""
 
     # Start build

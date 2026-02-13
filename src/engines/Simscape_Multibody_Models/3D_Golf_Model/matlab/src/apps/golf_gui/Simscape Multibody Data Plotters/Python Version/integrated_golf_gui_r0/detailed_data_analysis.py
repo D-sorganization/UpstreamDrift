@@ -5,6 +5,8 @@ This script will explore the actual structure of the .mat files
 to understand the data format.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 from pathlib import Path
@@ -15,7 +17,7 @@ import scipy.io
 logger = logging.getLogger(__name__)
 
 
-def deep_analyze_matlab_file(filename):
+def deep_analyze_matlab_file(filename) -> bool:
     """Deep analysis of a MATLAB file structure"""
     logger.debug(f"\n=== Deep Analysis of {filename} ===")
 
@@ -98,7 +100,7 @@ def deep_analyze_matlab_file(filename):
         return False
 
 
-def extract_actual_data(filename):
+def extract_actual_data(filename) -> np.ndarray | None:
     """Try to extract the actual data from the MATLAB file"""
     logger.debug(f"\n=== Extracting Data from {filename} ===")
 
@@ -157,7 +159,7 @@ def extract_actual_data(filename):
         return None
 
 
-def main():
+def main() -> None:
     """Main analysis function"""
     logger.info("🔍 Detailed MATLAB Data Structure Analysis")
     logger.info("=" * 60)

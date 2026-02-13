@@ -1,11 +1,13 @@
 """Tests for Induced Acceleration Analysis across all physics engines."""
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
 
 # --- PINOCCHIO ---
-def test_pinocchio_iaa():
+def test_pinocchio_iaa() -> None:
     """Test Pinocchio InducedAccelerationAnalyzer."""
     try:
         import pinocchio as pin
@@ -53,7 +55,7 @@ def test_pinocchio_iaa():
 
 
 # --- DRAKE ---
-def test_drake_iaa():
+def test_drake_iaa() -> None:
     """Test DrakeInducedAccelerationAnalyzer."""
     try:
         from unittest.mock import MagicMock
@@ -88,7 +90,7 @@ def test_drake_iaa():
 
 
 # --- MUJOCO ---
-def test_mujoco_iaa_logic():
+def test_mujoco_iaa_logic() -> None:
     """Test MuJoCo IAA helper logic."""
     try:
         import mujoco

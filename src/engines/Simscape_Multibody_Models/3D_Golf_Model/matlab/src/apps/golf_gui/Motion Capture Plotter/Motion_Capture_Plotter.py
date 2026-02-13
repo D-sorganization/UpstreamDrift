@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import sys
 
@@ -69,8 +71,8 @@ class MotionCapturePlotter(QMainWindow):
         # Try to auto-load the Excel file if it exists
         self.auto_load_excel_file()
 
-    def auto_load_excel_file(self):
-        """Automatically load the Excel file if it exists in the current directory"""
+    def auto_load_excel_file(self) -> None:
+        """Automatically load the Excel file if it exists in the current directory."""
         excel_files = [f for f in os.listdir(".") if f.endswith((".xlsx", ".xls"))]
         if excel_files:
             # Try to load the first Excel file found
@@ -78,8 +80,8 @@ class MotionCapturePlotter(QMainWindow):
             logger.info(f"Auto-loading Excel file: {filename}")
             self.load_excel_file(filename)
 
-    def setup_ui(self):
-        """Setup the main UI"""
+    def setup_ui(self) -> None:
+        """Setup the main UI."""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
@@ -270,8 +272,8 @@ class MotionCapturePlotter(QMainWindow):
 
         return info_group, help_group
 
-    def create_control_panel(self):
-        """Create the left control panel with scroll area"""
+    def create_control_panel(self) -> QScrollArea:
+        """Create the left control panel with scroll area."""
         # Create a scroll area to contain all controls
         scroll_area = QScrollArea()
         scroll_area.setMaximumWidth(400)
@@ -315,8 +317,8 @@ class MotionCapturePlotter(QMainWindow):
         scroll_area.setWidget(panel)
         return scroll_area
 
-    def create_plot_panel(self):
-        """Create the right plot panel"""
+    def create_plot_panel(self) -> QWidget:
+        """Create the right plot panel."""
         panel = QWidget()
         layout = QVBoxLayout(panel)
 
@@ -354,8 +356,8 @@ class MotionCapturePlotter(QMainWindow):
 
         return panel
 
-    def load_file(self):
-        """Load data file based on current data source"""
+    def load_file(self) -> None:
+        """Load data file based on current data source."""
         if self.current_data_source == "Motion Capture (Excel)":
             filename, _ = QFileDialog.getOpenFileName(
                 self, "Load Excel File", "", "Excel Files (*.xlsx *.xls)"
@@ -369,8 +371,8 @@ class MotionCapturePlotter(QMainWindow):
             if filename:
                 self.load_simscape_csv(filename)
 
-    def on_data_source_changed(self, source):
-        """Handle data source change"""
+    def on_data_source_changed(self, source) -> None:
+        """Handle data source change."""
         self.current_data_source = source
         logger.info(f"Data source changed to: {source}")
 
@@ -395,8 +397,8 @@ class MotionCapturePlotter(QMainWindow):
         # Update visualization
         self.update_visualization()
 
-    def auto_load_simscape_csv(self):
-        """Automatically load the Simscape CSV file if it exists"""
+    def auto_load_simscape_csv(self) -> None:
+        """Automatically load the Simscape CSV file if it exists."""
         csv_files = [f for f in os.listdir(".") if f.endswith(".csv")]
         if csv_files:
             filename = csv_files[0]
@@ -474,8 +476,8 @@ class MotionCapturePlotter(QMainWindow):
             logger.debug(f"Successfully loaded {len(data)} frames for {sheet_name}")
             self.print_data_debug(sheet_name)
 
-    def load_excel_file(self, filename):
-        """Load and process Excel file"""
+    def load_excel_file(self, filename) -> None:
+        """Load and process Excel file."""
         try:
             logger.info(f"Loading file: {filename}")
             excel_file = pd.ExcelFile(filename)
@@ -574,8 +576,8 @@ class MotionCapturePlotter(QMainWindow):
                 logger.warning(f"✗ {joint_name}: MISSING {len(missing_cols)} columns")
         return available_joints
 
-    def load_simscape_csv(self, filename):
-        """Load and process Simscape CSV file"""
+    def load_simscape_csv(self, filename) -> None:
+        """Load and process Simscape CSV file."""
         try:
             logger.info(f"Loading Simscape CSV file: {filename}")
 
@@ -629,8 +631,8 @@ class MotionCapturePlotter(QMainWindow):
                 self, "Error", f"Failed to load Simscape CSV file: {str(e)}"
             )
 
-    def print_data_debug(self, sheet_name):
-        """Print debug information about the loaded data"""
+    def print_data_debug(self, sheet_name) -> None:
+        """Print debug information about the loaded data."""
         if sheet_name in self.swing_data:
             data = self.swing_data[sheet_name]
             if not data.empty:
@@ -698,8 +700,8 @@ class MotionCapturePlotter(QMainWindow):
                 logger.info("  Motion scaling applied to make visualization clearer")
                 logger.info("=" * 40)
 
-    def setup_frame_slider(self):
-        """Setup the frame slider"""
+    def setup_frame_slider(self) -> None:
+        """Setup the frame slider."""
         if self.current_swing in self.swing_data:
             data = self.swing_data[self.current_swing]
             max_frame = len(data) - 1
@@ -707,39 +709,39 @@ class MotionCapturePlotter(QMainWindow):
             self.frame_slider.setValue(0)
             self.current_frame = 0
 
-    def on_swing_change(self, swing_name):
-        """Handle swing selection change"""
+    def on_swing_change(self, swing_name) -> None:
+        """Handle swing selection change."""
         if swing_name in self.swing_data:
             self.current_swing = swing_name
             self.setup_frame_slider()
             self.update_visualization()
 
-    def on_frame_change(self, frame):
-        """Handle frame slider change"""
+    def on_frame_change(self, frame) -> None:
+        """Handle frame slider change."""
         self.current_frame = frame
         self.frame_label.setText(str(frame))
         self.update_visualization()
 
-    def on_speed_change(self, speed):
-        """Handle speed slider change"""
+    def on_speed_change(self, speed) -> None:
+        """Handle speed slider change."""
         self.speed_label.setText(str(speed))
         if self.is_playing:
             self.animation_timer.setInterval(1000 // speed)
 
-    def on_scale_change(self, scale):
-        """Handle motion scale change"""
+    def on_scale_change(self, scale) -> None:
+        """Handle motion scale change."""
         self.motion_scale = scale
         self.scale_label.setText(f"{scale}x")
         self.update_visualization()
 
-    def on_club_length_change(self, length_cm):
-        """Handle club length change"""
+    def on_club_length_change(self, length_cm) -> None:
+        """Handle club length change."""
         self.shaft_length = length_cm / 100.0  # Convert cm to meters
         self.club_label.setText(f"{self.shaft_length:.1f}m")
         self.update_visualization()
 
-    def toggle_playback(self):
-        """Toggle play/pause"""
+    def toggle_playback(self) -> None:
+        """Toggle play/pause."""
         if self.is_playing:
             self.animation_timer.stop()
             self.play_btn.setText("Play")
@@ -750,8 +752,8 @@ class MotionCapturePlotter(QMainWindow):
             self.play_btn.setText("Pause")
             self.is_playing = True
 
-    def next_frame(self):
-        """Advance to next frame"""
+    def next_frame(self) -> None:
+        """Advance to next frame."""
         if self.current_swing in self.swing_data:
             data = self.swing_data[self.current_swing]
             if self.current_frame < len(data) - 1:
@@ -762,8 +764,8 @@ class MotionCapturePlotter(QMainWindow):
                 self.current_frame = 0
                 self.frame_slider.setValue(0)
 
-    def setup_3d_scene(self):
-        """Setup the 3D scene with ground plane and ball"""
+    def setup_3d_scene(self) -> None:
+        """Setup the 3D scene with ground plane and ball."""
         self.ax.clear()
 
         # Ground plane - positioned at calculated ground level
@@ -796,12 +798,12 @@ class MotionCapturePlotter(QMainWindow):
         # Set initial view
         self.ax.view_init(elev=15, azim=-45)
 
-    def calculate_ground_level(self):
-        """Set ground level to fixed -2.5 meters"""
+    def calculate_ground_level(self) -> float:
+        """Set ground level to fixed -2.5 meters."""
         return -2.5
 
-    def adjust_plot_limits_to_ground(self):
-        """Adjust plot limits so ground level is at the bottom"""
+    def adjust_plot_limits_to_ground(self) -> None:
+        """Adjust plot limits so ground level is at the bottom."""
         ground_level = self.calculate_ground_level()
 
         # Set Z limits with ground at bottom and reasonable height above
@@ -810,8 +812,8 @@ class MotionCapturePlotter(QMainWindow):
 
         logger.info(f"Ground level set to: {ground_level:.3f}m")
 
-    def update_visualization(self):
-        """Update the 3D visualization with proper coordinate system"""
+    def update_visualization(self) -> None:
+        """Update the 3D visualization with proper coordinate system."""
         # Store current view angles before clearing
         current_elev = self.ax.elev
         current_azim = self.ax.azim
@@ -905,8 +907,8 @@ class MotionCapturePlotter(QMainWindow):
                 label="Club Head Path",
             )
 
-    def visualize_motion_capture_data(self, frame_data, data):
-        """Visualize motion capture data (Excel format)"""
+    def visualize_motion_capture_data(self, frame_data, data) -> None:
+        """Visualize motion capture data (Excel format)."""
         # Use actual mid-hands and club head positions from the data
         # For right-handed golfers: X should be flipped to show proper swing direction
         mid_hands = np.array(
@@ -1220,8 +1222,8 @@ class MotionCapturePlotter(QMainWindow):
                         label=f"{segment_key.replace('_', ' ').title()} Path",
                     )
 
-    def visualize_simscape_data(self, frame_data, data):
-        """Visualize Simscape multibody data (CSV format)"""
+    def visualize_simscape_data(self, frame_data, data) -> None:
+        """Visualize Simscape multibody data (CSV format)."""
         # Define colors for different body segments
         colors = {
             "club": "red",
@@ -1256,8 +1258,8 @@ class MotionCapturePlotter(QMainWindow):
         self._draw_simscape_trajectory_paths(joints, data)
         self._draw_segment_traces(frame_data, data)
 
-    def update_info_text(self, frame_data):
-        """Update the information text display"""
+    def update_info_text(self, frame_data) -> None:
+        """Update the information text display."""
         info = f"Frame: {self.current_frame}\n"
         info += f"Data Source: {self.current_data_source}\n"
         info += f"Motion Scale: {self.motion_scale}x\n\n"
@@ -1316,8 +1318,8 @@ class MotionCapturePlotter(QMainWindow):
 
         self.info_text.setText(info)
 
-    def set_camera_view(self, view):
-        """Set predefined camera views"""
+    def set_camera_view(self, view) -> None:
+        """Set predefined camera views."""
         if view == "face_on":
             # Face-on view: looking at golfer from front (toward +X target line)
             self.ax.view_init(elev=15, azim=90)
@@ -1335,8 +1337,8 @@ class MotionCapturePlotter(QMainWindow):
         self.canvas.draw_idle()
         self.canvas.flush_events()
 
-    def reset_view(self):
-        """Reset the 3D view to the default isometric view and limits"""
+    def reset_view(self) -> None:
+        """Reset the 3D view to the default isometric view and limits."""
         # Reset view angles
         self.ax.view_init(elev=15, azim=-45)
 
@@ -1349,8 +1351,8 @@ class MotionCapturePlotter(QMainWindow):
         self.canvas.draw_idle()
         self.canvas.flush_events()
 
-    def on_scroll(self, event):
-        """Handle mouse scroll for zooming"""
+    def on_scroll(self, event) -> None:
+        """Handle mouse scroll for zooming."""
         if event.inaxes != self.ax:
             return
 
@@ -1385,20 +1387,20 @@ class MotionCapturePlotter(QMainWindow):
         self.canvas.draw()
         logger.info(f"Zooming: factor={zoom_factor}")
 
-    def on_mouse_press(self, event):
-        """Handle mouse button press for rotation/panning"""
+    def on_mouse_press(self, event) -> None:
+        """Handle mouse button press for rotation/panning."""
         if event.inaxes != self.ax:
             return
         # Store initial position for rotation/panning (use screen coordinates)
         self._last_pos = (event.x, event.y)
         logger.info(f"Mouse press: button={event.button}, pos=({event.x}, {event.y})")
 
-    def on_mouse_release(self, event):
-        """Handle mouse button release"""
+    def on_mouse_release(self, event) -> None:
+        """Handle mouse button release."""
         self._last_pos = None
 
-    def on_mouse_move(self, event):
-        """Handle mouse movement for rotation/panning"""
+    def on_mouse_move(self, event) -> None:
+        """Handle mouse movement for rotation/panning."""
         if event.inaxes != self.ax or self._last_pos is None:
             return
 
@@ -1454,7 +1456,7 @@ class MotionCapturePlotter(QMainWindow):
         self._last_pos = (event.x, event.y)
 
 
-def main():
+def main() -> None:
     """Launch the Motion Capture Plotter GUI application."""
     app = QApplication(sys.argv)
     window = MotionCapturePlotter()

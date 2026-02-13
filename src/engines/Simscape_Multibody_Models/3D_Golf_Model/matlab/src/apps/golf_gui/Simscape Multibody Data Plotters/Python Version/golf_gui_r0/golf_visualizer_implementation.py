@@ -8,6 +8,8 @@ Key Technologies:
 - NumPy + Numba for high-performance computations
 """
 
+from __future__ import annotations
+
 # ============================================================================
 # HIGH-PERFORMANCE DATA STRUCTURES
 # ============================================================================
@@ -290,7 +292,7 @@ class OpenGLRenderer:
         }
         """
 
-    def initialize(self, ctx):
+    def initialize(self, ctx) -> None:
         """Initialize OpenGL context and resources"""
         self.ctx = ctx
         self._compile_shaders()
@@ -610,7 +612,7 @@ class OpenGLRenderer:
         config: RenderConfig,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
-    ):
+    ) -> None:
         """Render complete frame with all elements"""
         self.ctx.clear(0.1, 0.2, 0.3)
         self.ctx.enable(mgl.DEPTH_TEST)
@@ -950,7 +952,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         self.frame_times = []
         self.fps = 0.0
 
-    def initializeGL(self):
+    def initializeGL(self) -> None:
         """Initialize OpenGL context"""
         self.ctx = mgl.create_context()
         self.renderer.initialize(self.ctx)
@@ -960,7 +962,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         logger.info(f"   Vendor: {self.ctx.info['GL_VENDOR']}")
         logger.info(f"   Renderer: {self.ctx.info['GL_RENDERER']}")
 
-    def paintGL(self):
+    def paintGL(self) -> None:
         """Render the current frame"""
         start_time = time.time()
         if self.datasets is None or self.num_frames == 0:
@@ -982,11 +984,11 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             len(self.frame_times) / sum(self.frame_times) if self.frame_times else 0
         )
 
-    def resizeGL(self, width, height):
+    def resizeGL(self, width, height) -> None:
         """Handle window resize"""
         self.ctx.viewport = (0, 0, width, height)
 
-    def load_data(self, baseq_file: str, ztcfq_file: str, delta_file: str):
+    def load_data(self, baseq_file: str, ztcfq_file: str, delta_file: str) -> None:
         """Load golf swing data"""
         try:
             datasets = self.data_processor.load_matlab_data(
@@ -1004,35 +1006,35 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         except (RuntimeError, ValueError, OSError) as e:
             logger.info(f"Failed to load data: {e}")
 
-    def play_animation(self):
+    def play_animation(self) -> None:
         """Start animation playback"""
         if not self.is_playing and self.num_frames > 0:
             self.is_playing = True
             interval = int(33 / self.playback_speed)
             self.animation_timer.start(interval)
 
-    def pause_animation(self):
+    def pause_animation(self) -> None:
         """Pause animation playback"""
         self.is_playing = False
         self.animation_timer.stop()
 
-    def next_frame(self):
+    def next_frame(self) -> None:
         """Advance to next frame"""
         if self.num_frames > 0:
             self.current_frame = (self.current_frame + 1) % self.num_frames
             self.update()
 
-    def set_frame(self, frame_idx: int):
+    def set_frame(self, frame_idx: int) -> None:
         """Jump to specific frame"""
         if 0 <= frame_idx < self.num_frames:
             self.current_frame = frame_idx
             self.update()
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """Handle mouse press for camera control"""
         self.last_mouse_pos = (event.x(), event.y())
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event) -> None:
         """Handle mouse movement for camera control"""
         if self.last_mouse_pos is not None:
             dx = event.x() - self.last_mouse_pos[0]
@@ -1044,7 +1046,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             self.last_mouse_pos = (event.x(), event.y())
             self.update()
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event) -> None:
         """Handle mouse wheel for camera zoom"""
         delta = event.angleDelta().y() / 120
         self.camera_distance = np.clip(self.camera_distance - delta * 0.2, 0.5, 10.0)
@@ -1287,7 +1289,7 @@ class ModernGolfVisualizerApp(QMainWindow):
 # ============================================================================
 # MAIN APPLICATION ENTRY POINT
 # ============================================================================
-def main():
+def main() -> None:
     """Main application entry point"""
     app = QApplication(sys.argv)
     app.setApplicationName("Modern Golf Swing Visualizer")
