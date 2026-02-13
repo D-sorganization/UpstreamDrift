@@ -193,9 +193,9 @@ class TestPhysicsAccuracy:
         # Physics engine produces nearly identical distances for small stimp differences;
         # verify the results are within ~1% of each other (engine precision limit)
         diff = abs(fast_result.total_distance - slow_result.total_distance)
-        assert diff < 0.1, (
-            f"Distances should be similar: fast={fast_result.total_distance}, slow={slow_result.total_distance}"
-        )
+        assert (
+            diff < 0.1
+        ), f"Distances should be similar: fast={fast_result.total_distance}, slow={slow_result.total_distance}"
 
     def test_uphill_vs_downhill(self) -> None:
         """Uphill putts should roll shorter than downhill."""
@@ -240,9 +240,9 @@ class TestPhysicsAccuracy:
         # Physics engine produces nearly identical distances for small slope values;
         # verify the results are within ~1% of each other (engine precision limit)
         diff = abs(downhill_result.total_distance - uphill_result.total_distance)
-        assert diff < 0.1, (
-            f"Distances should be similar: downhill={downhill_result.total_distance}, uphill={uphill_result.total_distance}"
-        )
+        assert (
+            diff < 0.1
+        ), f"Distances should be similar: downhill={downhill_result.total_distance}, uphill={uphill_result.total_distance}"
 
     def test_spin_affects_roll(self) -> None:
         """Backspin should reduce initial roll distance (check effect)."""
