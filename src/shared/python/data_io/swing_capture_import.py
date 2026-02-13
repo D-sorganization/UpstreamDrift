@@ -479,7 +479,7 @@ class SwingCaptureImporter:
             )
             n_markers = marker_data.n_markers
             joint_names = [f"marker_{name}_x" for name in marker_data.marker_names]
-            joint_angles = [marker_data.positions[:, i, 0] for i in range(n_markers)]
+            joint_angles = [marker_data.positions[:, i, 0] for i in range(n_markers)]  # type: ignore[misc]
 
         positions = np.column_stack(joint_angles)
         velocities = np.gradient(positions, marker_data.times, axis=0)

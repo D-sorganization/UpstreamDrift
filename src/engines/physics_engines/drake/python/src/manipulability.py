@@ -20,11 +20,11 @@ if DRAKE_AVAILABLE:
         MultibodyPlant,
     )
 else:
-    # Dummies for type checking
-    MultibodyPlant = object
-    Context = object
-    BodyIndex = object
-    JacobianWrtVariable = object
+    # Dummies for type checking when Drake is not installed
+    MultibodyPlant = object  # type: ignore[misc, assignment]  # dummy fallback
+    Context = object  # type: ignore[misc, assignment]  # dummy fallback
+    BodyIndex = object  # type: ignore[misc, assignment]  # dummy fallback
+    JacobianWrtVariable = object  # type: ignore[misc, assignment]  # dummy fallback
 
 
 logger = get_logger(__name__)
@@ -117,7 +117,7 @@ class DrakeManipulabilityAnalyzer:
                 context,
                 JacobianWrtVariable.kV,
                 body.body_frame(),
-                np.zeros(3),
+                np.zeros(3),  # type: ignore[arg-type]  # pydrake accepts ndarray at runtime
                 self.world_frame,
                 self.world_frame,
             )

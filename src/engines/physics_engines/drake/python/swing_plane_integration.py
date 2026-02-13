@@ -239,7 +239,7 @@ class DrakeSwingPlaneAnalyzer:
 
             from pydrake.geometry import TriangleSurfaceMesh
 
-            mesh = TriangleSurfaceMesh(faces, vertices)
+            mesh = TriangleSurfaceMesh(faces, vertices)  # type: ignore[arg-type]  # pydrake accepts ndarray at runtime
             meshcat.SetTriangleMesh(f"{prefix}/plane", mesh, Rgba(0.2, 0.5, 0.8, 0.3))
 
             # Trajectory points as line strip

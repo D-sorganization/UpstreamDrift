@@ -483,6 +483,20 @@ class DatasetGenerator:
             "control_type": profile.profile_type,
         }
 
+        assert buffers["times"] is not None, "times buffer must not be None"
+        assert buffers["positions"] is not None, "positions buffer must not be None"
+        assert buffers["velocities"] is not None, "velocities buffer must not be None"
+        assert buffers["accelerations"] is not None, (
+            "accelerations buffer must not be None"
+        )
+        assert buffers["torques"] is not None, "torques buffer must not be None"
+        assert buffers["kinetic_energy"] is not None, (
+            "kinetic_energy buffer must not be None"
+        )
+        assert buffers["potential_energy"] is not None, (
+            "potential_energy buffer must not be None"
+        )
+
         return SimulationSample(
             sample_id=sample_id,
             metadata=metadata,
@@ -681,7 +695,7 @@ class DatasetGenerator:
                     except ValueError:
                         pass
         elif config.vary_initial_positions:
-            q0 = rng.uniform(-0.5, 0.5, n_q)
+            q0 = rng.uniform(-0.5, 0.5, n_q)  # type: ignore[assignment]
         else:
             q0 = np.zeros(n_q)
 
@@ -699,7 +713,7 @@ class DatasetGenerator:
                     except ValueError:
                         pass
         elif config.vary_initial_velocities:
-            v0 = rng.uniform(-0.1, 0.1, n_v)
+            v0 = rng.uniform(-0.1, 0.1, n_v)  # type: ignore[assignment]
         else:
             v0 = np.zeros(n_v)
 

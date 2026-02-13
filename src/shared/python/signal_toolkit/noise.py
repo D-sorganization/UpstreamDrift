@@ -130,7 +130,7 @@ class NoiseGenerator:
 
         # Normalize to desired amplitude
         if np.std(values) > 0:
-            values = values / np.std(values) * amplitude
+            values = values / np.std(values) * amplitude  # type: ignore[assignment]
 
         return values
 
@@ -293,13 +293,13 @@ def generate_disturbance_profile(
     if disturbance_type == "step":
         step_time = kwargs.get("step_time", t[n // 2])
         magnitude = kwargs.get("magnitude", 1.0)
-        values = np.where(t >= step_time, magnitude, 0.0)
+        values = np.where(t >= step_time, magnitude, 0.0)  # type: ignore[assignment]
 
     elif disturbance_type == "pulse":
         start_time = kwargs.get("start_time", t[n // 4])
         duration = kwargs.get("duration", (t[-1] - t[0]) / 10)
         magnitude = kwargs.get("magnitude", 1.0)
-        values = np.where(
+        values = np.where(  # type: ignore[assignment]
             (t >= start_time) & (t < start_time + duration),
             magnitude,
             0.0,
