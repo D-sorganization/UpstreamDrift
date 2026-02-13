@@ -25,6 +25,7 @@ from typing import Any, Protocol
 
 import numpy as np
 
+from src.shared.python.core.constants import GRAVITY
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.terrain import (
     MATERIALS,
@@ -512,10 +513,8 @@ class CompressibleTurfModel:
         material = self.terrain.get_material(x, y)
         terrain_type = self.terrain.get_terrain_type(x, y)
 
-        # Ball weight creates compression (mass * g)
-        ball_weight = (
-            0.04593 * 9.81
-        )  # Golf ball weight in N (BallProperties.mass * GRAVITY_APPROX)
+        # Ball weight creates compression
+        ball_weight = 0.04593 * GRAVITY  # Golf ball weight in N
 
         # Effective sitting depth based on compression
         max_compression = material.get_max_compression_depth()
