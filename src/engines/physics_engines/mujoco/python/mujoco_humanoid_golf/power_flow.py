@@ -182,15 +182,11 @@ class PowerFlowAnalyzer:
         return power_diss
 
     @precondition(
-        lambda self, qpos, qvel, qacc, tau, dt=0.01, tau_drift=None, tau_control=None: dt
-        > 0,
+        lambda self, qpos, qvel, qacc, tau, dt=0.01, **kw: dt > 0,
         "Timestep must be positive",
     )
     @precondition(
-        lambda self, qpos, qvel, qacc, tau, dt=0.01, tau_drift=None, tau_control=None: len(
-            qvel
-        )
-        == len(tau),
+        lambda self, qpos, qvel, qacc, tau, **kw: len(qvel) == len(tau),
         "Velocity and torque arrays must have the same length",
     )
     def compute_power_flow(
