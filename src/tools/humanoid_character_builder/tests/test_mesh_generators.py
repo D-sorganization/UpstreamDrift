@@ -185,7 +185,9 @@ class TestSMPLXAvailability:
 class TestSMPLXGenerate:
     """Test the full SMPL-X generate pipeline with mocked smplx module."""
 
-    def _mock_smplx_output(self, n_verts: int = 10475, n_faces: int = 20000):
+    def _mock_smplx_output(
+        self, n_verts: int = 10475, n_faces: int = 20000
+    ) -> MagicMock:
         """Create a mock SMPL-X model output."""
         mock_output = MagicMock()
         mock_output.vertices = MagicMock()
@@ -220,7 +222,8 @@ class TestSMPLXGenerate:
         exported_files: list[str] = []
 
         class FakeTrimesh:
-            def __init__(self, vertices=None, faces=None):
+            def __init__(self, vertices: Any = None, faces: Any = None) -> None:
+                """Initialize fake trimesh with vertices and faces."""
                 self.vertices = vertices
                 self.faces = faces
 
@@ -458,7 +461,8 @@ class TestMakeHumanGenerate:
         exported_files: list[str] = []
 
         class FakeTrimesh:
-            def __init__(self, vertices=None, faces=None):
+            def __init__(self, vertices: Any = None, faces: Any = None) -> None:
+                """Initialize fake trimesh with vertices and faces."""
                 self.vertices = vertices
                 self.faces = faces
 
@@ -477,6 +481,7 @@ class TestMakeHumanGenerate:
 
         # Mock _run_makehuman_script to simulate success
         def mock_run(script_path: Path, timeout: int = 120) -> bool:
+            """Simulate a successful MakeHuman script execution."""
             # Create fake OBJ output
             script_dir = script_path.parent
             obj_path = script_dir / "body.obj"

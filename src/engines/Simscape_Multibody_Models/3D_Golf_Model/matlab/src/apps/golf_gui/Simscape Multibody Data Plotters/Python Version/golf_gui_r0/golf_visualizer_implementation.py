@@ -91,7 +91,7 @@ class RenderConfig:
 class DataProcessor:
     """Optimized data loading and processing with Numba acceleration"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.cache = {}
         self.max_force_magnitude = 1.0
         self.max_torque_magnitude = 1.0
@@ -124,7 +124,7 @@ class DataProcessor:
             return vars_found[0]
         raise ValueError(f"No valid table found in {dataset_name}")
 
-    def _calculate_scaling_factors(self, baseq_data: np.ndarray):
+    def _calculate_scaling_factors(self, baseq_data: np.ndarray) -> None:
         """Calculate scaling factors from data"""
         try:
             self.max_force_magnitude = 2000.0
@@ -224,7 +224,7 @@ class DataProcessor:
 class OpenGLRenderer:
     """High-performance OpenGL renderer with modern shaders"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.ctx = None
         self.programs = {}
         self.buffers = {}
@@ -235,7 +235,7 @@ class OpenGLRenderer:
         self.fragment_shader_source = self._get_fragment_shader_source()
 
     @staticmethod
-    def _get_vertex_shader_source():
+    def _get_vertex_shader_source() -> str:
         return """
         #version 330 core
         layout (location = 0) in vec3 position;
@@ -257,7 +257,7 @@ class OpenGLRenderer:
         """
 
     @staticmethod
-    def _get_fragment_shader_source():
+    def _get_fragment_shader_source() -> str:
         return """
         #version 330 core
         in vec3 FragPos;
@@ -299,7 +299,7 @@ class OpenGLRenderer:
         self._setup_geometry()
         self._setup_lighting()
 
-    def _compile_shaders(self):
+    def _compile_shaders(self) -> None:
         """Compile and link shader programs"""
         self.programs["standard"] = self.ctx.program(
             vertex_shader=self.vertex_shader_source,
@@ -308,7 +308,7 @@ class OpenGLRenderer:
         self._compile_vector_shaders()
         self._compile_ground_shaders()
 
-    def _compile_vector_shaders(self):
+    def _compile_vector_shaders(self) -> None:
         """Compile shaders for force/torque vectors"""
         vector_vertex = """
         #version 330 core
@@ -335,7 +335,7 @@ class OpenGLRenderer:
             vertex_shader=vector_vertex, fragment_shader=vector_fragment
         )
 
-    def _compile_ground_shaders(self):
+    def _compile_ground_shaders(self) -> None:
         """Compile shaders for ground plane with grid"""
         ground_vertex = """
         #version 330 core
@@ -371,14 +371,14 @@ class OpenGLRenderer:
         except (RuntimeError, ValueError, OSError) as e:
             logger.info(f"Failed to compile ground shader: {e}")
 
-    def _setup_geometry(self):
+    def _setup_geometry(self) -> None:
         """Create optimized geometry for body segments and club"""
         self._create_cylinder_geometry()
         self._create_sphere_geometry()
         self._create_club_geometry()
         self._create_arrow_geometry()
 
-    def _create_cylinder_geometry(self):
+    def _create_cylinder_geometry(self) -> None:
         """Create optimized cylinder with proper normals"""
         segments = 16
         vertices = []
@@ -417,7 +417,7 @@ class OpenGLRenderer:
             self.buffers["cylinder_ebo"],
         )
 
-    def _create_sphere_geometry(self):
+    def _create_sphere_geometry(self) -> None:
         """Create optimized sphere geometry"""
         vertices = self._get_sphere_vertices()
         indices = self._get_sphere_indices()
@@ -438,7 +438,7 @@ class OpenGLRenderer:
         )
 
     @staticmethod
-    def _get_sphere_vertices():
+    def _get_sphere_vertices() -> np.ndarray:
         return np.array(
             [
                 # fmt: off
@@ -512,7 +512,7 @@ class OpenGLRenderer:
         )
 
     @staticmethod
-    def _get_sphere_indices():
+    def _get_sphere_indices() -> np.ndarray:
         return np.array(
             [
                 0,
@@ -555,10 +555,10 @@ class OpenGLRenderer:
             dtype=np.uint32,
         )
 
-    def _create_club_geometry(self):
+    def _create_club_geometry(self) -> None:
         """Create detailed club geometry"""
 
-    def _create_arrow_geometry(self):
+    def _create_arrow_geometry(self) -> None:
         """Create arrow geometry for force/torque vectors"""
         segments = 16
         vertices = []
@@ -588,7 +588,7 @@ class OpenGLRenderer:
             self.buffers["cone_ebo"],
         )
 
-    def _setup_lighting(self):
+    def _setup_lighting(self) -> None:
         """Configure realistic lighting"""
         if "standard" in self.programs:
             prog = self.programs["standard"]
@@ -632,7 +632,7 @@ class OpenGLRenderer:
         config: RenderConfig,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
-    ):
+    ) -> None:
         """Render all body segments efficiently"""
         skin = [0.96, 0.76, 0.63]
         dark = [0.18, 0.32, 0.40]
@@ -698,7 +698,7 @@ class OpenGLRenderer:
         opacity: float,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
-    ):
+    ) -> None:
         """Render cylinder between two 3D points"""
         direction = end - start
         length = np.linalg.norm(direction)
@@ -731,7 +731,7 @@ class OpenGLRenderer:
         config: RenderConfig,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
-    ):
+    ) -> None:
         """Render force and torque vectors with different colors"""
         colors = {
             "BASEQ": [1.0, 0.42, 0.21],
@@ -774,7 +774,7 @@ class OpenGLRenderer:
                     proj_matrix,
                 )
 
-    def _render_ground(self, view_matrix, proj_matrix):
+    def _render_ground(self, view_matrix, proj_matrix) -> None:
         """Render infinite ground grid"""
         if "ground" not in self.vaos:
             size = 50.0
@@ -819,7 +819,7 @@ class OpenGLRenderer:
             self.programs["ground"]["opacity"].value = 1.0
             self.vaos["ground"].render()
 
-    def _render_club(self, frame_data, config, view_matrix, proj_matrix):
+    def _render_club(self, frame_data, config, view_matrix, proj_matrix) -> None:
         """Render golf club"""
         if not (
             np.isfinite(frame_data.butt).all()
@@ -849,7 +849,7 @@ class OpenGLRenderer:
             self.programs["standard"]["opacity"].value = config.body_opacity
             self.vaos["sphere"].render()
 
-    def _render_face_normal(self, frame_data, config, view_matrix, proj_matrix):
+    def _render_face_normal(self, frame_data, config, view_matrix, proj_matrix) -> None:
         """Render face normal"""
 
     def _render_arrow(
@@ -860,7 +860,7 @@ class OpenGLRenderer:
         opacity: float,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
-    ):
+    ) -> None:
         """Render 3D arrow"""
         end_pos = start_pos + vector
         self._render_cylinder_between_points(
@@ -884,7 +884,7 @@ class OpenGLRenderer:
         opacity: float,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
-    ):
+    ) -> None:
         if "cone" not in self.vaos:
             return
         direction = vector
@@ -920,7 +920,7 @@ class OpenGLRenderer:
 class ModernGolfVisualizerWidget(QOpenGLWidget):
     """Modern OpenGL widget for golf swing visualization"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.renderer = OpenGLRenderer()
         self.data_processor = DataProcessor()
@@ -1071,7 +1071,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
 class ModernGolfVisualizerApp(QMainWindow):
     """Main application window with modern UI"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Modern Golf Swing Visualizer")
         self.setGeometry(100, 100, 1600, 900)
@@ -1083,7 +1083,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         self._create_status_bar()
         self._apply_modern_style()
 
-    def _create_control_panels(self):
+    def _create_control_panels(self) -> None:
         """Create modern control panels"""
         playback_dock = QDockWidget("Playback Controls", self)
         playback_widget = self._create_playback_controls()
@@ -1178,7 +1178,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         self.perf_timer.start(100)
         return widget
 
-    def _apply_modern_style(self):
+    def _apply_modern_style(self) -> None:
         """Apply modern dark theme styling"""
         style = self._get_main_window_style()
         style += self._get_dock_widget_style()
@@ -1189,7 +1189,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         self.setStyleSheet(style)
 
     @staticmethod
-    def _get_main_window_style():
+    def _get_main_window_style() -> str:
         return """
         QMainWindow {
             background-color: #2b2b2b;
@@ -1198,7 +1198,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         """
 
     @staticmethod
-    def _get_dock_widget_style():
+    def _get_dock_widget_style() -> str:
         return """
         QDockWidget {
             color: #ffffff;
@@ -1212,7 +1212,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         """
 
     @staticmethod
-    def _get_button_style():
+    def _get_button_style() -> str:
         return """
         QPushButton {
             background-color: #4a4a4a;
@@ -1230,7 +1230,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         """
 
     @staticmethod
-    def _get_slider_style():
+    def _get_slider_style() -> str:
         return """
         QSlider::groove:horizontal {
             border: 1px solid #5a5a5a;
@@ -1248,7 +1248,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         """
 
     @staticmethod
-    def _get_checkbox_style():
+    def _get_checkbox_style() -> str:
         return """
         QCheckBox {
             color: #ffffff;
@@ -1269,7 +1269,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         """
 
     @staticmethod
-    def _get_groupbox_style():
+    def _get_groupbox_style() -> str:
         return """
         QGroupBox {
             color: #ffffff;

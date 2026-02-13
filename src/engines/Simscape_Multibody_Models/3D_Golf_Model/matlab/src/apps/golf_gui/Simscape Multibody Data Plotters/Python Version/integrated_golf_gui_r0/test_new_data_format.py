@@ -43,7 +43,7 @@ def test_new_data_files() -> bool:
 
                         return True
 
-        except Exception as e:
+        except (OSError, ValueError, KeyError) as e:
             logger.error(f"❌ Error testing {filename}: {e}")
 
     return False

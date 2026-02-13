@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 
@@ -70,7 +72,7 @@ def get_actuator_indices(physics) -> dict[str, int]:
     return mapping
 
 
-def _load_cmu_mjcf():
+def _load_cmu_mjcf() -> mjcf.RootElement:
     xml_path = get_cmu_xml_path()
 
     with open(xml_path) as f:

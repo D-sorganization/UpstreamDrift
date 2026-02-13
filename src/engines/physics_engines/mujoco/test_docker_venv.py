@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Test script to verify Docker container virtual environment setup."""
 
+from __future__ import annotations
+
 import logging
 import os
 import subprocess
@@ -10,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def _check_docker_image_exists() -> bool:
+    """Check whether the robotics_env Docker image is available."""
     logger.debug("1. Checking if robotics_env Docker image exists...")
     try:
         result = subprocess.run(
@@ -32,12 +35,13 @@ def _check_docker_image_exists() -> bool:
             "   Run: docker build -t robotics_env . (from docker/ directory)",
         )
         return False
-    except Exception as e:
+    except (subprocess.CalledProcessError, OSError) as e:
         logger.error(f"❌ Failed to check Docker images: {e}")
         return False
 
 
 def _check_python_path() -> None:
+    """Verify the container uses the virtual environment Python."""
     logger.info("\n2. Testing Python executable path in container...")
     try:
         cmd = ["docker", "run", "--rm", "robotics_env", "which", "python"]
@@ -49,11 +53,12 @@ def _check_python_path() -> None:
             logger.info("✓ Container uses virtual environment Python")
         else:
             logger.info("⚠️  Container may not be using virtual environment")
-    except Exception as e:
+    except (subprocess.CalledProcessError, OSError) as e:
         logger.error(f"❌ Failed to check Python path: {e}")
 
 
 def _check_defusedxml() -> bool:
+    """Test that the defusedxml package is importable inside the container."""
     logger.info("\n3. Testing defusedxml availability in container...")
     try:
         cmd = [
@@ -74,12 +79,13 @@ def _check_defusedxml() -> bool:
     except subprocess.CalledProcessError as e:
         logger.warning(f"❌ defusedxml not available: {e.stderr}")
         return False
-    except Exception as e:
+    except OSError as e:
         logger.error(f"❌ Failed to test defusedxml: {e}")
         return False
 
 
 def _check_defusedxml_elementtree() -> bool:
+    """Test that defusedxml.ElementTree can be imported in the container."""
     logger.info("\n4. Testing defusedxml.ElementTree import...")
     try:
         cmd = [
@@ -100,12 +106,13 @@ def _check_defusedxml_elementtree() -> bool:
     except subprocess.CalledProcessError as e:
         logger.error(f"❌ defusedxml.ElementTree import failed: {e.stderr}")
         return False
-    except Exception as e:
+    except OSError as e:
         logger.error(f"❌ Failed to test defusedxml.ElementTree: {e}")
         return False
 
 
 def _check_module_import() -> bool:
+    """Test that the mujoco_golf_pendulum module can be imported in the container."""
     logger.info("\n5. Testing mujoco_golf_pendulum module import...")
     current_dir = os.getcwd()
     if not current_dir.endswith("MuJoCo_Golf_Swing_Model"):
@@ -136,7 +143,7 @@ def _check_module_import() -> bool:
     except subprocess.CalledProcessError as e:
         logger.error(f"❌ mujoco_golf_pendulum.urdf_io import failed: {e.stderr}")
         return False
-    except Exception as e:
+    except OSError as e:
         logger.error(f"❌ Failed to test module import: {e}")
         return False
 

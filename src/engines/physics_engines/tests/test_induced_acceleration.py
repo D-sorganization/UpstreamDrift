@@ -102,7 +102,9 @@ def test_mujoco_iaa_logic() -> None:
         pytest.skip("MuJoCo or helper not found or DLL failed")
 
     class MockPhysics:
-        def __init__(self):
+        """Wrapper around a minimal MuJoCo model for IAA testing."""
+
+        def __init__(self) -> None:
             # Create simplest model
             xml = """
             <mujoco>

@@ -54,7 +54,7 @@ def test_matlab_data_structure() -> bool:
                     else:
                         logger.info(f"  {key}: {type(value).__name__}")
 
-        except Exception as e:
+        except (OSError, ValueError, KeyError) as e:
             logger.error(f"❌ Error loading {filename}: {e}")
             return False
 
@@ -94,7 +94,7 @@ def test_data_loader() -> bool:
 
         return True
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - test helper; loader may raise various errors
         logger.error(f"❌ Error in data loader: {e}")
         import traceback
 
@@ -133,7 +133,7 @@ def test_frame_processor() -> bool:
 
         return True
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - test helper; frame processor may raise various errors
         logger.error(f"❌ Error in frame processor: {e}")
         import traceback
 
@@ -181,7 +181,7 @@ def analyze_signal_bus_structure() -> bool:
 
         return True
 
-    except Exception as e:
+    except (OSError, ValueError, KeyError) as e:
         logger.error(f"❌ Error analyzing signal bus structure: {e}")
         return False
 
@@ -208,7 +208,7 @@ def main() -> bool:
         logger.info(f"\n{'=' * 20} {test_name} {'=' * 20}")
         try:
             results[test_name] = test_func()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - test runner must catch all errors
             logger.error(f"❌ {test_name} failed with exception: {e}")
             results[test_name] = False
 

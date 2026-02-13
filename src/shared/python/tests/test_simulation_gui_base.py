@@ -7,6 +7,8 @@ subclasses can properly implement the abstract interface.
 from __future__ import annotations
 
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -31,6 +33,7 @@ class ConcreteSimGUI(SimulationGUIBase):
     WINDOW_HEIGHT = 480
 
     def __init__(self) -> None:
+        """Initialize test counters and call base class init."""
         self._step_count = 0
         self._reset_count = 0
         self._vis_count = 0
@@ -41,35 +44,44 @@ class ConcreteSimGUI(SimulationGUIBase):
         super().__init__()
 
     def step_simulation(self) -> None:
+        """Advance simulation by one step."""
         self._step_count += 1
         self.sim_time += 0.01
 
     def reset_simulation(self) -> None:
+        """Reset simulation state."""
         self._reset_count += 1
         self.sim_time = 0.0
 
     def update_visualization(self) -> None:
+        """Update the visualization display."""
         self._vis_count += 1
 
     def load_model(self, index: int) -> None:
+        """Load a model by index."""
         self._loaded_index = index
 
     def sync_kinematic_controls(self) -> None:
-        pass
+        """Synchronize kinematic control UI elements."""
 
     def start_recording(self) -> None:
+        """Begin recording simulation data."""
         self._recording = True
 
     def stop_recording(self) -> None:
+        """Stop recording simulation data."""
         self._recording = False
 
     def get_recording_frame_count(self) -> int:
+        """Return the number of recorded frames."""
         return self._frame_count
 
     def export_data(self, filename: str) -> None:
+        """Export recorded data to the given filename."""
         self._exported_to = filename
 
     def get_joint_names(self) -> list[str]:
+        """Return the list of joint names."""
         return ["joint_a", "joint_b"]
 
 
@@ -79,7 +91,7 @@ class ConcreteSimGUI(SimulationGUIBase):
 
 
 @pytest.fixture(scope="module")
-def qapp():
+def qapp() -> Any:
     """Ensure a QApplication exists for the whole test module."""
     app = QtWidgets.QApplication.instance()
     if app is None:
@@ -88,7 +100,7 @@ def qapp():
 
 
 @pytest.fixture()
-def gui(qapp):
+def gui(qapp: Any) -> Generator[ConcreteSimGUI, None, None]:
     """Create a fresh ConcreteSimGUI for each test."""
     window = ConcreteSimGUI()
     yield window

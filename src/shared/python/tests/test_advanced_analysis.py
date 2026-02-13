@@ -1,5 +1,7 @@
 """Tests for advanced data analysis and plotting features."""
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
@@ -26,6 +28,7 @@ class MockRecorder:
     """Mock recorder for testing."""
 
     def __init__(self, length: int = 100) -> None:
+        """Initialize mock recorder with sinusoidal joint data."""
         self.times = np.linspace(0, 1, length)
         # Create a simple sine wave
         self.position = np.sin(2 * np.pi * self.times)
@@ -53,6 +56,7 @@ class MockRecorder:
         self.activations = np.abs(self.joint_positions)
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Return time and data arrays for the requested field."""
         if field_name == "joint_positions":
             return self.times, self.joint_positions
         elif field_name == "joint_velocities":

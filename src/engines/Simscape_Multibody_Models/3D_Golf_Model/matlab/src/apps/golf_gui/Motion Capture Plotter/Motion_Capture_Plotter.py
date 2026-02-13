@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class MotionCapturePlotter(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Motion Capture Plotter - PyQt6")
         self.setGeometry(100, 100, 1400, 900)
@@ -96,7 +96,7 @@ class MotionCapturePlotter(QMainWindow):
         plot_panel = self.create_plot_panel()
         main_layout.addWidget(plot_panel, stretch=1)
 
-    def _create_data_loading_group(self):
+    def _create_data_loading_group(self) -> QGroupBox:
         """Create the data loading group box with source and file selectors."""
         file_group = QGroupBox("Data Loading")
         file_layout = QVBoxLayout(file_group)
@@ -127,7 +127,7 @@ class MotionCapturePlotter(QMainWindow):
 
         return file_group
 
-    def _create_playback_controls_group(self):
+    def _create_playback_controls_group(self) -> QGroupBox:
         """Create the playback controls group box with play, frame, and speed."""
         playback_group = QGroupBox("Playback Controls")
         playback_layout = QVBoxLayout(playback_group)
@@ -161,7 +161,7 @@ class MotionCapturePlotter(QMainWindow):
 
         return playback_group
 
-    def _create_visualization_options_group(self):
+    def _create_visualization_options_group(self) -> QGroupBox:
         """Create the visualization options group box with traces and sliders."""
         viz_group = QGroupBox("Visualization Options")
         viz_layout = QVBoxLayout(viz_group)
@@ -226,7 +226,7 @@ class MotionCapturePlotter(QMainWindow):
 
         return viz_group
 
-    def _create_camera_controls_group(self):
+    def _create_camera_controls_group(self) -> QGroupBox:
         """Create the camera views group box with preset view buttons."""
         camera_group = QGroupBox("Camera Views")
         camera_layout = QVBoxLayout(camera_group)
@@ -246,7 +246,7 @@ class MotionCapturePlotter(QMainWindow):
 
         return camera_group
 
-    def _create_info_and_help_groups(self):
+    def _create_info_and_help_groups(self) -> tuple[QGroupBox, QGroupBox]:
         """Create the frame data info and 3D plot help group boxes.
 
         Returns (info_group, help_group) tuple.
@@ -406,7 +406,7 @@ class MotionCapturePlotter(QMainWindow):
             self.load_simscape_csv(filename)
 
     @staticmethod
-    def _safe_float(value, default=0.0):
+    def _safe_float(value, default=0.0) -> float:
         """Safely convert a value to float, returning default on failure."""
         if pd.isna(value):
             return default
@@ -416,7 +416,7 @@ class MotionCapturePlotter(QMainWindow):
             return default
 
     @staticmethod
-    def _parse_excel_row(row, row_index):
+    def _parse_excel_row(row, row_index) -> dict | None:
         """Parse a single Excel row into a frame data dict.
 
         Returns a dict with mid-hands and club head position/orientation data,
@@ -457,7 +457,7 @@ class MotionCapturePlotter(QMainWindow):
             "club_Zz": sf(row[25]),
         }
 
-    def _process_excel_sheet(self, filename, sheet_name):
+    def _process_excel_sheet(self, filename, sheet_name) -> None:
         """Process a single Excel sheet and store parsed frames in swing_data."""
         df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
 
@@ -505,7 +505,7 @@ class MotionCapturePlotter(QMainWindow):
             QMessageBox.critical(self, "Error", f"Failed to load file: {str(e)}")
 
     @staticmethod
-    def _simscape_joint_position_definitions():
+    def _simscape_joint_position_definitions() -> dict:
         """Return the mapping of joint names to their CSV column names."""
         return {
             "club_head": [
@@ -561,7 +561,7 @@ class MotionCapturePlotter(QMainWindow):
         }
 
     @staticmethod
-    def _find_available_joints(joint_positions, df_columns):
+    def _find_available_joints(joint_positions, df_columns) -> dict:
         """Check which joint positions are available in the CSV columns.
 
         Returns a dict of available joint names to their column lists.
@@ -857,7 +857,7 @@ class MotionCapturePlotter(QMainWindow):
         # Redraw canvas
         self.canvas.draw()
 
-    def _draw_motion_capture_trajectory_paths(self, data):
+    def _draw_motion_capture_trajectory_paths(self, data) -> None:
         """Draw mid-hands and club head trajectory paths for motion capture data.
 
         Parameters:
@@ -935,7 +935,7 @@ class MotionCapturePlotter(QMainWindow):
         # Draw trajectory paths
         self._draw_motion_capture_trajectory_paths(data)
 
-    def _extract_joint_positions(self, frame_data):
+    def _extract_joint_positions(self, frame_data) -> dict[str, np.ndarray]:
         """Extract scaled joint positions from a Simscape frame.
 
         Returns a dict mapping joint names to numpy position arrays.
@@ -965,7 +965,7 @@ class MotionCapturePlotter(QMainWindow):
                 )
         return joints
 
-    def _draw_club_with_face_normal(self, club_head_pos, grip_pos):
+    def _draw_club_with_face_normal(self, club_head_pos, grip_pos) -> None:
         """Draw the club shaft, head sphere, face normal vector, and golf ball.
 
         Parameters:
@@ -1011,7 +1011,7 @@ class MotionCapturePlotter(QMainWindow):
                 face_normal = face_normal / face_normal_length
                 self._draw_face_normal_and_ball(club_head_pos, face_normal)
 
-    def _draw_face_normal_and_ball(self, club_head_pos, face_normal):
+    def _draw_face_normal_and_ball(self, club_head_pos, face_normal) -> None:
         """Draw the face normal vector arrow and a golf ball in front of the club.
 
         Parameters:
@@ -1085,7 +1085,7 @@ class MotionCapturePlotter(QMainWindow):
             label="Golf Ball",
         )
 
-    def _draw_body_segments_and_markers(self, joints, segment_definitions):
+    def _draw_body_segments_and_markers(self, joints, segment_definitions) -> None:
         """Draw body segment lines and joint marker dots.
 
         Parameters:
@@ -1111,7 +1111,7 @@ class MotionCapturePlotter(QMainWindow):
                 position[0], position[1], position[2], color="black", s=50, alpha=0.8
             )
 
-    def _draw_simscape_trajectory_paths(self, joints, data):
+    def _draw_simscape_trajectory_paths(self, joints, data) -> None:
         """Draw club head and hands trajectory paths for Simscape data.
 
         Parameters:
@@ -1170,7 +1170,7 @@ class MotionCapturePlotter(QMainWindow):
                         label="Hands Path",
                     )
 
-    def _draw_segment_traces(self, frame_data, data):
+    def _draw_segment_traces(self, frame_data, data) -> None:
         """Draw optional per-segment trace paths for Simscape data.
 
         Parameters:

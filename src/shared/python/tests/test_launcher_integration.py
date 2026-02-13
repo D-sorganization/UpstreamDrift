@@ -1,6 +1,9 @@
 """Integration tests for the application launcher and engine detection."""
 
+from __future__ import annotations
+
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,7 +15,7 @@ from src.shared.python.engine_core import engine_availability
 
 
 @pytest.fixture(scope="session")
-def qapp():
+def qapp() -> Any:
     """Fixture to ensure a QApplication exists."""
     app = QtWidgets.QApplication.instance()
     if app is None:
@@ -20,7 +23,7 @@ def qapp():
     return app
 
 
-def test_environment_detection():
+def test_environment_detection() -> None:
     """Test environment detection functions."""
     # These depend on the actual env, but we can verify they run without error
     # and return booleans
@@ -29,7 +32,7 @@ def test_environment_detection():
     assert isinstance(is_production(), bool)
 
 
-def test_engine_availability_check():
+def test_engine_availability_check() -> None:
     """Test that we can check for physics engines."""
     # We expect at least one standard library to be available (numpy)
     assert engine_availability.NUMPY_AVAILABLE is True
@@ -42,7 +45,9 @@ def test_engine_availability_check():
 @patch("src.shared.python.dashboard.launcher.UnifiedDashboardWindow")
 @patch("src.shared.python.dashboard.launcher.sys.exit")
 @patch("src.shared.python.dashboard.launcher.get_qapp")
-def test_dashboard_launch(mock_get_qapp, mock_exit, mock_window, qapp):
+def test_dashboard_launch(
+    mock_get_qapp: Any, mock_exit: Any, mock_window: Any, qapp: Any
+) -> None:
     """Test launching the dashboard with a mock engine."""
 
     # Mock valid engine class
@@ -67,12 +72,12 @@ def test_dashboard_launch(mock_get_qapp, mock_exit, mock_window, qapp):
     mock_exit.assert_called_once()
 
 
-def test_mujoco_availability_logic():
+def test_mujoco_availability_logic() -> None:
     """Verify MuJoCo logic (ensure it's not strictly disabled by default logic anymore)."""
     # This test verifies that checking for mujoco doesn't raise an error
     # even if it returns False.
     try:
         available = engine_availability.is_engine_available("mujoco")
         assert isinstance(available, bool)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - verifying no exception is raised
         pytest.fail(f"Checking MuJoCo availability raised exception: {e}")
