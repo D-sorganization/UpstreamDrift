@@ -543,8 +543,12 @@ class TestPlacementGroup:
 
         group.translate_all([10, 0, 0])
 
-        np.testing.assert_allclose(group.get("a").pose.position, [10, 0, 0], atol=1e-10)
-        np.testing.assert_allclose(group.get("b").pose.position, [11, 1, 0], atol=1e-10)
+        entity_a = group.get("a")
+        entity_b = group.get("b")
+        assert entity_a is not None
+        assert entity_b is not None
+        np.testing.assert_allclose(entity_a.pose.position, [10, 0, 0], atol=1e-10)
+        np.testing.assert_allclose(entity_b.pose.position, [11, 1, 0], atol=1e-10)
 
     def test_rotate_group_around_point(self) -> None:
         """Test rotating entire group around a point."""
@@ -556,7 +560,9 @@ class TestPlacementGroup:
         # Rotate 90° around origin about z-axis
         group.rotate_around_point([0, 0, 0], axis=[0, 0, 1], angle=np.pi / 2)
 
-        np.testing.assert_allclose(group.get("a").pose.position, [0, 1, 0], atol=1e-10)
+        rotated_a = group.get("a")
+        assert rotated_a is not None
+        np.testing.assert_allclose(rotated_a.pose.position, [0, 1, 0], atol=1e-10)
 
     def test_get_centroid(self) -> None:
         """Test calculating group centroid."""

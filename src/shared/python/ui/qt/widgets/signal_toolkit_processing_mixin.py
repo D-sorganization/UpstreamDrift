@@ -287,9 +287,9 @@ class SignalToolkitProcessingMixin:
         if self.sat_preview_check.isChecked():
             mode_map = {
                 "Hard Clip": SaturationMode.HARD,
-                "Soft Clip (tanh)": SaturationMode.SOFT_TANH,
-                "Soft Clip (sigmoid)": SaturationMode.SOFT_SIGMOID,
-                "Polynomial": SaturationMode.POLYNOMIAL,
+                "Soft Clip (tanh)": SaturationMode.TANH,
+                "Soft Clip (sigmoid)": SaturationMode.SIGMOID,
+                "Polynomial": SaturationMode.SOFT,
             }
             mode = mode_map.get(self.sat_mode_combo.currentText(), SaturationMode.HARD)
 
@@ -499,7 +499,7 @@ class SignalToolkitProcessingMixin:
             else:
                 return
 
-            w, h = scipy_signal.freqz(spec.b_coeffs, spec.a_coeffs, fs=fs)
+            w, h = scipy_signal.freqz(spec.b, spec.a, fs=fs)
 
             self.canvas2.axes.clear()
             self.canvas2.setup_dark_theme()

@@ -75,7 +75,7 @@ class JointSliderWidget(QtWidgets.QWidget):  # type: ignore[misc]
         upper = self.joint_info.upper_limit
         if isinstance(lower, np.ndarray):
             lower = float(lower[0])
-            upper = float(upper[0])
+            upper = float(upper[0])  # type: ignore[index]
 
         self.slider.setMinimum(int(lower * self.SLIDER_SCALE))
         self.slider.setMaximum(int(upper * self.SLIDER_SCALE))
@@ -89,7 +89,7 @@ class JointSliderWidget(QtWidgets.QWidget):  # type: ignore[misc]
         # Spinbox
         self.spinbox = QtWidgets.QDoubleSpinBox()
         self.spinbox.setMinimum(lower)
-        self.spinbox.setMaximum(upper)
+        self.spinbox.setMaximum(upper)  # type: ignore[arg-type]
         self.spinbox.setSingleStep(0.01)
         self.spinbox.setDecimals(3)
         self.spinbox.setSuffix(f" {self.joint_info.unit}")
@@ -614,12 +614,12 @@ class PoseEditorWidget(QtWidgets.QWidget):  # type: ignore[misc]
         # Pose library
         from .library import PoseLibrary
 
-        self._library = PoseLibrary()
-        self.library_widget = PoseLibraryWidget(self._library)
+        self._library = PoseLibrary()  # type: ignore[assignment]
+        self.library_widget = PoseLibraryWidget(self._library)  # type: ignore[arg-type]
         self.library_widget.pose_loaded.connect(self._on_pose_loaded)
         self.library_widget.interpolation_requested.connect(self._on_interpolation)
-        self.library_widget.save_pose_requested = self._save_current_pose
-        self.library_widget.preset_load_requested = self._load_preset
+        self.library_widget.save_pose_requested = self._save_current_pose  # type: ignore[method-assign]
+        self.library_widget.preset_load_requested = self._load_preset  # type: ignore[method-assign]
         main_layout.addWidget(self.library_widget)
 
         # Zero velocities button

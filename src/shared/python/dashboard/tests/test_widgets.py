@@ -24,7 +24,7 @@ class MockRecorder(RecorderInterface):
             "joint_positions": (np.arange(100) * 0.1, np.random.rand(100, 3)),
             "joint_velocities": (np.arange(100) * 0.1, np.random.rand(100, 3)),
         }
-        self.config = {}
+        self.config: dict[str, object] = {}
 
     def get_time_series(self, key) -> tuple:
         """Return time series data for the given key."""
@@ -227,18 +227,18 @@ def test_live_plot_widget_metric_switching(app, recorder) -> None:
     widget = LivePlotWidget(recorder)
 
     # Switch to velocities
-    widget.combo_metric.setCurrentText("Joint Velocities")
+    widget.combo.setCurrentText("Joint Velocities")
     assert widget.current_key == "joint_velocities"
 
     # Switch back to positions
-    widget.combo_metric.setCurrentText("Joint Positions")
+    widget.combo.setCurrentText("Joint Positions")
     assert widget.current_key == "joint_positions"
 
 
 def test_live_plot_widget_plot_mode_norm(app, recorder) -> None:
     """Test 'Norm' plot mode (magnitude of vector)."""
     widget = LivePlotWidget(recorder)
-    widget.combo_plot_mode.setCurrentText("Norm")
+    widget.mode_combo.setCurrentText("Norm")
     widget.update_plot()
     # Should have exactly one line (the norm)
     lines = widget.ax.get_lines()
@@ -267,10 +267,10 @@ def test_live_plot_widget_empty_data(app) -> None:
 def test_live_plot_widget_single_dimension(app, recorder) -> None:
     """Test 'Single Dimension' plot mode with dimension selector."""
     widget = LivePlotWidget(recorder)
-    widget.combo_plot_mode.setCurrentText("Single Dimension")
+    widget.mode_combo.setCurrentText("Single Dimension")
 
     # Set specific dimension and update
-    widget.spin_dim.setValue(1)
+    widget.dim_spin.setValue(1)
     widget.update_plot()
 
     # Should have exactly one line
@@ -293,7 +293,7 @@ def test_live_plot_widget_snapshot(app, recorder, tmp_path, monkeypatch) -> None
     )
 
     # Trigger snapshot
-    widget.take_snapshot()
+    widget.copy_snapshot()
 
     # Verify file was created
     assert snapshot_path.exists()

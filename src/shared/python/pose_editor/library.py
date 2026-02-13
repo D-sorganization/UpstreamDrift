@@ -496,7 +496,7 @@ class PoseLibrary:
 
 # -------- Preset Poses --------
 
-PRESET_POSES: dict[str, dict[str, float]] = {
+PRESET_POSES: dict[str, dict[str, str | float]] = {
     # Golf Swing Presets
     "Address": {
         "description": "Standard address position for golf swing",

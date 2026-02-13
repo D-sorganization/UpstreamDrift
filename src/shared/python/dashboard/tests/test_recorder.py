@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 
@@ -91,6 +92,27 @@ class MockPhysicsEngine(PhysicsEngine):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Return zero zero-velocity counterfactual torque."""
         return np.zeros(2)
+
+    @property
+    def engine_type(self) -> str:
+        """Return the engine type identifier."""
+        return "mock"
+
+    def save_checkpoint(self) -> StateCheckpoint:
+        """Save current state as a checkpoint."""
+        return StateCheckpoint(
+            id="mock_cp",
+            timestamp=self.t,
+            wall_time=0.0,
+            engine_type=self.engine_type,
+            engine_state={"q": self.q.tolist(), "v": self.v.tolist()},
+            q=tuple(self.q.tolist()),
+            v=tuple(self.v.tolist()),
+        )
+
+    def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
+        """Restore state from a checkpoint."""
+        return None
 
 
 def test_recorder_basic() -> None:

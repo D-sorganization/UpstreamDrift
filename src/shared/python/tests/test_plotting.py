@@ -13,6 +13,7 @@ class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
     def __init__(self) -> None:
+        self.engine = None
         self.data = {
             "joint_positions": (np.linspace(0, 1, 10), np.random.rand(10, 3)),
             "joint_velocities": (np.linspace(0, 1, 10), np.random.rand(10, 3)),
@@ -43,6 +44,9 @@ class MockRecorder(RecorderInterface):
     def get_counterfactual_series(self, cf_name: str) -> tuple:
         """Return counterfactual series for the given name."""
         return self.counterfactuals.get(cf_name, (np.array([]), np.array([])))
+
+    def set_analysis_config(self, config: dict) -> None:  # noqa: ANN001
+        """Set analysis config (no-op for mock)."""
 
 
 @pytest.fixture

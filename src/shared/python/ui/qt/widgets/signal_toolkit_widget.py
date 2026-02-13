@@ -186,9 +186,9 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             self.setStyleSheet(DARK_STYLESHEET)
 
             # State
-            self.current_signal: Signal | None = None
-            self.original_signal: Signal | None = None
-            self.derivative_signal: Signal | None = None
+            self.current_signal: Signal | None = None  # type: ignore[assignment]
+            self.original_signal: Signal | None = None  # type: ignore[assignment]
+            self.derivative_signal: Signal | None = None  # type: ignore[assignment]
             self.integral_signal: Signal | None = None
             self.joint_names: list[str] = []
 

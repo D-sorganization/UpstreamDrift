@@ -37,7 +37,7 @@ class StabilityRenderer(BaseRenderer):
         if cop.shape[1] == 2:
             cop_z = np.zeros(len(cop))
         else:
-            cop_z = cop[:, 2]
+            cop_z = cop[:, 2]  # type: ignore[assignment]
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec = vec_temp
@@ -346,7 +346,7 @@ class StabilityRenderer(BaseRenderer):
             ld_times,
             0,
             ld_rates,
-            where=(ld_rates > 0),
+            where=(ld_rates > 0),  # type: ignore[arg-type]
             alpha=0.2,
             color="red",
             label="Unstable",
@@ -355,7 +355,7 @@ class StabilityRenderer(BaseRenderer):
             ld_times,
             0,
             ld_rates,
-            where=(ld_rates <= 0),
+            where=(ld_rates <= 0),  # type: ignore[arg-type]
             alpha=0.2,
             color="green",
             label="Stable",

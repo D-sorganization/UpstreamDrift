@@ -275,7 +275,7 @@ class SignalRenderer(BaseRenderer):
         data_1d = velocities[:, joint_idx]
 
         try:
-            time_div, divergence, slope = analyzer.compute_lyapunov_divergence(
+            time_div, divergence, slope = analyzer.compute_lyapunov_divergence(  # type: ignore[attr-defined]
                 data_1d,
                 tau=tau,
                 dim=dim,

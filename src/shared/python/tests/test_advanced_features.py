@@ -23,11 +23,15 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 class MockRecorder(RecorderInterface):
     """Mock recorder backed by a data dictionary."""
 
-    def __init__(self, data_dict: dict) -> None:
+    def __init__(self, data_dict: dict) -> None:  # noqa: ANN001
         """Initialize mock recorder from a data dictionary."""
         self.data = data_dict
+        self.engine = None
 
-    def get_time_series(self, field_name) -> tuple:
+    def set_analysis_config(self, config: dict) -> None:  # noqa: ANN001
+        """Set analysis config (no-op for mock)."""
+
+    def get_time_series(self, field_name) -> tuple:  # noqa: ANN001
         """Return time series data for the given field."""
         return self.data.get(field_name, ([], []))
 
@@ -233,8 +237,12 @@ class MockRecorderNew(RecorderInterface):
         self.velocities = velocities
         self.accelerations = accelerations
         self.torques = torques
+        self.engine = None
 
-    def get_time_series(self, field_name) -> tuple:
+    def set_analysis_config(self, config: dict) -> None:  # noqa: ANN001
+        """Set analysis config (no-op for mock)."""
+
+    def get_time_series(self, field_name) -> tuple:  # noqa: ANN001
         """Return time series data for the given field."""
         if field_name == "joint_positions":
             return self.times, self.positions

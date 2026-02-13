@@ -42,7 +42,7 @@ def jcalc(
     if out is None:
         xj_transform = np.zeros((6, 6), dtype=np.float64)
     else:
-        xj_transform = out
+        xj_transform = out  # type: ignore[assignment]
         xj_transform.fill(0.0)
 
     dof_idx = -1

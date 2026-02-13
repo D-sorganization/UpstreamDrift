@@ -17,7 +17,7 @@ from typing import Any, ClassVar
 try:
     import cv2
 except ImportError:
-    cv2 = None
+    cv2 = None  # type: ignore[assignment]
 import numpy as np
 
 from src.shared.python.engine_core.engine_availability import MEDIAPIPE_AVAILABLE

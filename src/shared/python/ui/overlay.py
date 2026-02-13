@@ -93,7 +93,7 @@ class OverlayWidget(QWidget):
         """Handle resize events from parent."""
         if obj == self.parent() and event.type() == event.Type.Resize:
             self.resize(event.size())
-        return super().eventFilter(obj, event)
+        return super().eventFilter(obj, event)  # type: ignore[arg-type]
 
     def paintEvent(self, event: Any) -> None:
         """Paint the overlay background."""

@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 
@@ -155,6 +156,27 @@ class MockPhysicsEngine(PhysicsEngine):
     def get_num_bodies(self) -> int:
         """Return number of bodies."""
         return 1
+
+    @property
+    def engine_type(self) -> str:
+        """Return the engine type identifier."""
+        return "mock"
+
+    def save_checkpoint(self) -> StateCheckpoint:
+        """Save current state as a checkpoint."""
+        return StateCheckpoint(
+            id="mock_cp",
+            timestamp=self._time,
+            wall_time=0.0,
+            engine_type=self.engine_type,
+            engine_state={"q": self._q.tolist(), "v": self._v.tolist()},
+            q=tuple(self._q.tolist()),
+            v=tuple(self._v.tolist()),
+        )
+
+    def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
+        """Restore state from a checkpoint."""
+        return None
 
 
 class TestGenericPhysicsRecorder:

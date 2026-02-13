@@ -193,7 +193,7 @@ class QtCanvas(CanvasAdapter):
 
     def get_figure(self) -> Figure:
         """Get the matplotlib Figure."""
-        return self._figure
+        return self._figure  # type: ignore[return-value]
 
     def refresh(self) -> None:
         """Refresh the Qt canvas display."""
