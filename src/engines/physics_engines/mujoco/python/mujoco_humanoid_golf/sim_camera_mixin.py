@@ -30,6 +30,7 @@ class SimCameraMixin:
     """
 
     def mousePressEvent(self: Any, event: QtGui.QMouseEvent | None) -> None:
+        """Handle mouse press for camera rotation, translation, or body selection."""
         if event is None:
             return
         modifiers = event.modifiers()
@@ -102,6 +103,7 @@ class SimCameraMixin:
         super().mousePressEvent(event)  # type: ignore[misc]
 
     def mouseMoveEvent(self: Any, event: QtGui.QMouseEvent | None) -> None:
+        """Handle mouse drag for camera orbit, pan, or body manipulation."""
         if event is None:
             return
         pos = event.position()
@@ -161,6 +163,7 @@ class SimCameraMixin:
         super().mouseMoveEvent(event)  # type: ignore[misc]
 
     def mouseReleaseEvent(self: Any, event: QtGui.QMouseEvent | None) -> None:
+        """Handle mouse release to end dragging or body manipulation."""
         if event is None:
             return
         if self.is_dragging:
@@ -183,6 +186,7 @@ class SimCameraMixin:
         super().mouseReleaseEvent(event)  # type: ignore[misc]
 
     def wheelEvent(self: Any, event: QtGui.QWheelEvent | None) -> None:
+        """Handle scroll wheel for camera zoom."""
         if event is None:
             return
         if self.camera is not None:
@@ -195,26 +199,31 @@ class SimCameraMixin:
         super().wheelEvent(event)  # type: ignore[misc]
 
     def set_camera_azimuth(self: Any, azimuth: float) -> None:
+        """Set the camera azimuth angle in degrees."""
         if self.camera is not None:
             self.camera.azimuth = azimuth
             self._render_once()
 
     def set_camera_elevation(self: Any, elevation: float) -> None:
+        """Set the camera elevation angle in degrees."""
         if self.camera is not None:
             self.camera.elevation = np.clip(elevation, -90.0, 90.0)
             self._render_once()
 
     def set_camera_distance(self: Any, distance: float) -> None:
+        """Set the camera orbit distance in meters."""
         if self.camera is not None:
             self.camera.distance = np.clip(distance, 0.1, 50.0)
             self._render_once()
 
     def set_camera_lookat(self: Any, x: float, y: float, z: float) -> None:
+        """Set the camera look-at target position."""
         if self.camera is not None:
             self.camera.lookat[:] = [x, y, z]
             self._render_once()
 
     def reset_camera(self: Any) -> None:
+        """Restore camera to the default viewpoint."""
         if self.camera is not None:
             mujoco.mjv_defaultCamera(self.camera)
             self.camera.azimuth = 90.0
@@ -224,6 +233,7 @@ class SimCameraMixin:
             self._render_once()
 
     def show_context_menu(self: Any, global_pos: QtCore.QPoint, body_id: int) -> None:
+        """Display a right-click context menu for a selected body."""
         if self.manipulator is None:
             return
 
@@ -253,6 +263,7 @@ class SimCameraMixin:
         menu.exec(global_pos)
 
     def toggle_frame_visibility(self: Any, body_id: int) -> None:
+        """Toggle coordinate frame overlay for a body."""
         if body_id in self.visible_frames:
             self.visible_frames.remove(body_id)
         else:
@@ -260,6 +271,7 @@ class SimCameraMixin:
         self._render_once()
 
     def toggle_com_visibility(self: Any, body_id: int) -> None:
+        """Toggle center-of-mass overlay for a body."""
         if body_id in self.visible_coms:
             self.visible_coms.remove(body_id)
         else:

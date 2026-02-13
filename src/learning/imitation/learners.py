@@ -471,6 +471,59 @@ class DAgger(ImitationLearner):
         self._aggregated_dataset = dataset
         return self._bc.train(dataset, validation_split)
 
+    @staticmethod
+    def _compute_beta(iteration: int, iterations: int, schedule: str) -> float:
+        """Compute the expert-mixing probability for a DAgger iteration."""
+        if schedule == "linear":
+            return 1.0 - iteration / iterations
+        return 0.5**iteration
+
+    def _collect_trajectory(
+        self,
+        env: Any,
+        expert: Callable[[NDArray[np.floating]], NDArray[np.floating]],
+        beta: float,
+        max_steps: int,
+    ) -> tuple[Demonstration, float]:
+        """Roll out one trajectory, mixing policy and expert actions."""
+        obs, info = env.reset()
+        demo_timestamps = [0.0]
+        demo_positions = [obs[: obs.shape[0] // 2]]
+        demo_velocities = [obs[obs.shape[0] // 2 :]]
+        demo_actions: list[NDArray[np.floating]] = []
+
+        total_reward = 0.0
+        step = 0
+        terminated = False
+
+        while step < max_steps:
+            policy_action = self.predict(obs)
+            expert_action = expert(obs)
+            demo_actions.append(expert_action)
+
+            action = expert_action if np.random.random() < beta else policy_action
+
+            obs, reward, terminated, truncated, info = env.step(action)
+            total_reward += reward
+            step += 1
+
+            demo_timestamps.append(step * 0.01)
+            demo_positions.append(obs[: obs.shape[0] // 2])
+            demo_velocities.append(obs[obs.shape[0] // 2 :])
+
+            if terminated or truncated:
+                break
+
+        demo = Demonstration(
+            timestamps=np.array(demo_timestamps[:-1]),
+            joint_positions=np.array(demo_positions[:-1]),
+            joint_velocities=np.array(demo_velocities[:-1]),
+            actions=np.array(demo_actions),
+            source="dagger",
+            success=not terminated,
+        )
+        return demo, total_reward
+
     def train_online(
         self,
         env: Any,  # RoboticsGymEnv
@@ -502,72 +555,19 @@ class DAgger(ImitationLearner):
         }
 
         for iteration in range(iterations):
-            # Compute beta (probability of using expert)
-            if beta_schedule == "linear":
-                beta = 1.0 - iteration / iterations
-            else:
-                beta = 0.5**iteration
+            beta = self._compute_beta(iteration, iterations, beta_schedule)
 
-            # Collect trajectories
             new_demos = []
             iteration_rewards = []
 
             for _ in range(trajectories_per_iter):
-                obs, info = env.reset()
-                demo_timestamps = [0.0]
-                demo_positions = [obs[: obs.shape[0] // 2]]
-                demo_velocities = [obs[obs.shape[0] // 2 :]]
-                demo_actions = []
-
-                total_reward = 0.0
-                step = 0
-
-                while step < max_steps:
-                    # Get policy action
-                    policy_action = self.predict(obs)
-
-                    # Get expert action for labeling
-                    expert_action = expert(obs)
-
-                    # Use expert action for dataset
-                    demo_actions.append(expert_action)
-
-                    # Execute action (mix policy and expert)
-                    if np.random.random() < beta:
-                        action = expert_action
-                    else:
-                        action = policy_action
-
-                    obs, reward, terminated, truncated, info = env.step(action)
-                    total_reward += reward
-                    step += 1
-
-                    demo_timestamps.append(step * 0.01)
-                    demo_positions.append(obs[: obs.shape[0] // 2])
-                    demo_velocities.append(obs[obs.shape[0] // 2 :])
-
-                    if terminated or truncated:
-                        break
-
-                # Create demonstration
-                demo = Demonstration(
-                    timestamps=np.array(demo_timestamps[:-1]),
-                    joint_positions=np.array(demo_positions[:-1]),
-                    joint_velocities=np.array(demo_velocities[:-1]),
-                    actions=np.array(demo_actions),
-                    source="dagger",
-                    success=not terminated,
-                )
+                demo, reward = self._collect_trajectory(env, expert, beta, max_steps)
                 new_demos.append(demo)
-                iteration_rewards.append(total_reward)
+                iteration_rewards.append(reward)
 
-            # Aggregate dataset
             self._aggregated_dataset.extend(new_demos)
-
-            # Retrain on aggregated dataset
             self._bc.train(self._aggregated_dataset)
 
-            # Record results
             results["iteration_rewards"].append(np.mean(iteration_rewards))
             results["dataset_size"].append(len(self._aggregated_dataset))
 

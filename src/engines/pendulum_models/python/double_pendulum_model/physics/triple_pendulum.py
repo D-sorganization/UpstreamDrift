@@ -24,10 +24,12 @@ class TripleSegmentProperties:
 
     @property
     def center_of_mass_distance(self) -> float:
+        """Return distance from proximal joint to center of mass."""
         return self.length_m * self.center_of_mass_ratio
 
     @property
     def inertia_about_proximal_joint(self) -> float:
+        """Compute inertia about the proximal joint via parallel axis."""
         return self.inertia_about_com + self.mass_kg * self.center_of_mass_distance**2
 
 
@@ -42,6 +44,7 @@ class TriplePendulumParameters:
 
     @classmethod
     def default(cls) -> TriplePendulumParameters:
+        """Create parameters with default three-segment properties."""
         seg1 = TripleSegmentProperties(
             length_m=0.75,
             mass_kg=7.5,
@@ -66,6 +69,7 @@ class TriplePendulumParameters:
 
     @property
     def gravity(self) -> float:
+        """Return effective gravitational acceleration."""
         return self.gravity_m_s2 if self.gravity_enabled else 0.0
 
 
@@ -92,10 +96,12 @@ class PolynomialProfile:
     coefficients: tuple[float, ...]
 
     def omega(self, t: float) -> float:
+        """Evaluate angular velocity polynomial at time t."""
         poly = np.poly1d(self.coefficients)
         return float(poly(t))
 
     def alpha(self, t: float) -> float:
+        """Evaluate angular acceleration polynomial at time t."""
         derivative = np.polyder(self.coefficients)
         return float(np.poly1d(derivative)(t))
 
@@ -316,6 +322,7 @@ class TriplePendulumDynamics:
         )
 
     def mass_matrix(self, state: TriplePendulumState) -> np.ndarray:
+        """Compute the 3x3 mass matrix for the current state."""
         params = self._parameter_vector()
         theta = (state.theta1, state.theta2, state.theta3)
         omega = (state.omega1, state.omega2, state.omega3)
@@ -323,6 +330,7 @@ class TriplePendulumDynamics:
         return np.array(mass, dtype=float)
 
     def bias_vector(self, state: TriplePendulumState) -> np.ndarray:
+        """Compute bias vector including Coriolis, gravity, and damping."""
         params = self._parameter_vector()
         theta = (state.theta1, state.theta2, state.theta3)
         omega = (state.omega1, state.omega2, state.omega3)
@@ -336,6 +344,7 @@ class TriplePendulumDynamics:
     def forward_dynamics(
         self, state: TriplePendulumState, control: tuple[float, float, float]
     ) -> tuple[float, float, float]:
+        """Solve for joint accelerations given applied torques."""
         mass = self.mass_matrix(state)
         bias = self.bias_vector(state)
         accelerations = np.linalg.solve(mass, np.array(control, dtype=float) - bias)
@@ -346,6 +355,7 @@ class TriplePendulumDynamics:
     def inverse_dynamics(
         self, state: TriplePendulumState, accelerations: tuple[float, float, float]
     ) -> tuple[float, float, float]:
+        """Compute torques required to produce the given accelerations."""
         mass = self.mass_matrix(state)
         bias = self.bias_vector(state)
         torques = mass @ np.array(accelerations, dtype=float) + bias
@@ -356,6 +366,7 @@ class TriplePendulumDynamics:
     def joint_torque_breakdown(
         self, state: TriplePendulumState, control: tuple[float, float, float]
     ) -> TripleJointTorques:
+        """Decompose joint torques into applied, gravity, damping, and Coriolis."""
         theta = (state.theta1, state.theta2, state.theta3)
         params = self._parameter_vector()
         gravity_components = np.array(
@@ -391,11 +402,14 @@ class TriplePendulumDynamics:
         dt: float,
         control: tuple[float, float, float],
     ) -> TriplePendulumState:
+        """Advance the state by one RK4 integration step."""
+
         def rk4_increment(
             current_state: TriplePendulumState,
             scale: float,
             derivs: tuple[float, float, float, float, float, float],
         ) -> TriplePendulumState:
+            """Apply a scaled RK4 derivative increment to the state."""
             dtheta1, dtheta2, dtheta3, domega1, domega2, domega3 = derivs
             return TriplePendulumState(
                 theta1=current_state.theta1 + scale * dtheta1,
@@ -409,6 +423,7 @@ class TriplePendulumDynamics:
         def derivatives(
             current_state: TriplePendulumState,
         ) -> tuple[float, float, float, float, float, float]:
+            """Compute velocity and acceleration derivatives for the state."""
             acc1, acc2, acc3 = self.forward_dynamics(current_state, control)
             return (
                 current_state.omega1,

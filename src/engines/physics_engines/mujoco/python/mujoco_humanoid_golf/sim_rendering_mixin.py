@@ -161,6 +161,7 @@ class SimRenderingMixin:
     def set_background_color(
         self: Any, sky_color: Any = None, ground_color: Any = None
     ) -> None:
+        """Set sky and ground background colors for the scene."""
         if sky_color is not None:
             self.sky_color = np.array(sky_color, dtype=np.float32)
         if ground_color is not None:
@@ -187,6 +188,7 @@ class SimRenderingMixin:
             end: np.ndarray,
             color: tuple[int, int, int],
         ) -> None:
+            """Draw a screen-space arrow between two world positions."""
             start_px = self._world_to_screen(start)
             end_px = self._world_to_screen(end)
             if start_px is None or end_px is None:
@@ -513,6 +515,7 @@ class SimRenderingMixin:
             color: tuple[int, int, int],
             thickness: int = 2,
         ) -> None:
+            """Draw a colored line between two screen-space points."""
             cv2.line(img, start_px, end_px, color, thickness)
 
         axis_length = 0.2

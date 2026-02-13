@@ -112,9 +112,9 @@ class TestDriftControlDecomposition:
                 "model may not support clean decomposition"
             )
 
-        assert (
-            max_res < SUPERPOSITION_TOLERANCE
-        ), f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        assert max_res < SUPERPOSITION_TOLERANCE, (
+            f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        )
 
     def test_zero_control(self, engine_name, pendulum_urdf):
         """Verify full dynamics with tau=0 equals drift acceleration."""

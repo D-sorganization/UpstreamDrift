@@ -30,11 +30,13 @@ class TrajectoryTracer:
         self._desired_traces: dict[str, list[np.ndarray]] = {}
 
     def add_point(self, body_name: str, position: np.ndarray) -> None:
+        """Append a position sample to a body's trajectory trace."""
         if body_name not in self.traces:
             self.traces[body_name] = deque(maxlen=self.max_points)
         self.traces[body_name].append(np.asarray(position, dtype=np.float64).copy())
 
     def get_trace(self, body_name: str) -> list[np.ndarray]:
+        """Return the recorded trajectory points for a body."""
         return list(self.traces.get(body_name, []))
 
     def set_desired_trajectory(
@@ -51,9 +53,11 @@ class TrajectoryTracer:
         ]
 
     def get_desired_trace(self, body_name: str) -> list[np.ndarray]:
+        """Return the desired reference trajectory for a body."""
         return list(self._desired_traces.get(body_name, []))
 
     def clear(self, body_name: str | None = None) -> None:
+        """Remove trajectory data for one body or all bodies."""
         if body_name:
             self.traces.pop(body_name, None)
             self._desired_traces.pop(body_name, None)
@@ -121,6 +125,7 @@ class ForceVisualizer:
         return torques
 
     def get_center_of_mass(self) -> dict[str, np.ndarray]:
+        """Return whole-body center of mass position and velocity."""
         return {
             "position": self.data.subtree_com[0].copy(),
             "velocity": self.data.cvel[0][:3].copy(),

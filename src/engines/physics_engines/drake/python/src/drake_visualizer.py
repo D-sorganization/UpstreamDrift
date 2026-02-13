@@ -160,6 +160,7 @@ class DrakeVisualizer:
         self.visible_ellipsoids.add(name)
 
     def clear_ellipsoids(self) -> None:
+        """Remove all ellipsoid visualizations from the scene."""
         self.meshcat.Delete(f"{self.prefix}/ellipsoids")
         self.visible_ellipsoids.clear()
 

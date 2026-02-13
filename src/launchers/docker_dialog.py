@@ -67,6 +67,7 @@ class EnvironmentDialog(QDialog):
         self.setup_ui()
 
     def setup_ui(self) -> None:
+        """Build the Docker build dialog UI layout."""
         layout = QVBoxLayout(self)
         tabs = QTabWidget()
         layout.addWidget(tabs)
@@ -106,6 +107,7 @@ class EnvironmentDialog(QDialog):
         layout.addWidget(close_btn)
 
     def start_build(self) -> None:
+        """Launch the Docker build process in a background thread."""
         self.console.clear()
         self.btn_build.setEnabled(False)
         self.btn_cancel.setEnabled(True)
@@ -151,5 +153,6 @@ class EnvironmentDialog(QDialog):
                 self._elapsed_timer_id = None
 
     def timerEvent(self, event: Any) -> None:
+        """Update the elapsed-time label on each timer tick."""
         elapsed = time.monotonic() - self._build_start_time
         self.build_status_label.setText(f"Building... ({elapsed:.0f}s elapsed)")

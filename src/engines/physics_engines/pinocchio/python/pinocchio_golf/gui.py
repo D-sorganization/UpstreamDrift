@@ -974,6 +974,7 @@ class PinocchioGUI(SimulationGUIBase):
             self.load_urdf(path)
 
     def log_write(self, text: str) -> None:
+        """Append a message to the log panel and logger."""
         self.log.append(text)
         logger.info(text)
 
@@ -1037,6 +1038,7 @@ class PinocchioGUI(SimulationGUIBase):
         self.controls_stack.addWidget(kin_page)
 
     def load_urdf(self, fname: str | None = None) -> None:
+        """Load a URDF model and initialize the viewer."""
         if not fname:
             fname, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Select URDF File", "", "URDF Files (*.urdf *.xml)"

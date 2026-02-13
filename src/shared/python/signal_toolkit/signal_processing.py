@@ -26,6 +26,7 @@ from scipy.signal import (
     welch,
 )
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_availability import (
     FASTDTW_AVAILABLE,
     NUMBA_AVAILABLE,
@@ -226,6 +227,14 @@ def _dtw_path_core(
     return distance, path_i[:idx], path_j[:idx]
 
 
+@precondition(
+    lambda data, fs, window="hann", nperseg=None: fs > 0,
+    "Sampling frequency must be positive",
+)
+@precondition(
+    lambda data, fs, window="hann", nperseg=None: len(data) > 0,
+    "Input data must be non-empty",
+)
 def compute_psd(
     data: np.ndarray,
     fs: float,
@@ -274,6 +283,14 @@ def compute_coherence(
     return freqs, coh
 
 
+@precondition(
+    lambda data, fs, window="hann", nperseg=256, noverlap=None: fs > 0,
+    "Sampling frequency must be positive",
+)
+@precondition(
+    lambda data, fs, window="hann", nperseg=256, noverlap=None: nperseg > 0,
+    "Segment length must be positive",
+)
 def compute_spectrogram(
     data: np.ndarray,
     fs: float,
@@ -498,6 +515,18 @@ def _convolve_wavelet_at_scale(data_fft, n_fft, n_data, s, w0):
     return row
 
 
+@precondition(
+    lambda data, fs, freq_range=(1.0, 50.0), num_freqs=50, w0=6.0: fs > 0,
+    "Sampling frequency must be positive",
+)
+@precondition(
+    lambda data, fs, freq_range=(1.0, 50.0), num_freqs=50, w0=6.0: num_freqs > 0,
+    "Number of frequency scales must be positive",
+)
+@precondition(
+    lambda data, fs, freq_range=(1.0, 50.0), num_freqs=50, w0=6.0: len(data) > 0,
+    "Input data must be non-empty",
+)
 def compute_cwt(
     data: np.ndarray,
     fs: float,
@@ -788,6 +817,16 @@ class KalmanFilter:
     Supports n-dimensional state and measurement vectors.
     """
 
+    @precondition(
+        lambda self, dim_x, dim_z, F=None, H=None, Q=None, R=None, P=None, x=None: dim_x
+        > 0,
+        "State dimension must be positive",
+    )
+    @precondition(
+        lambda self, dim_x, dim_z, F=None, H=None, Q=None, R=None, P=None, x=None: dim_z
+        > 0,
+        "Measurement dimension must be positive",
+    )
     def __init__(
         self,
         dim_x: int,

@@ -115,9 +115,11 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         self.xml_path = None
 
     def get_model(self) -> mujoco.MjModel | None:
+        """Return the loaded MuJoCo model, or None."""
         return self.model
 
     def get_data(self) -> mujoco.MjData | None:
+        """Return the MuJoCo simulation data, or None."""
         return self.data
 
     @precondition(

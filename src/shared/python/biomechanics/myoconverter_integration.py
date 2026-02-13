@@ -53,6 +53,37 @@ class MyoConverter:
         except ImportError:
             return False
 
+    @staticmethod
+    def _build_conversion_config(**kwargs: Any) -> dict[str, Any]:
+        """Build the MyoConverter pipeline configuration with defaults."""
+        default_config: dict[str, Any] = {
+            "convert_steps": [1, 2, 3],
+            "muscle_list": None,
+            "osim_data_overwrite": True,
+            "conversion": True,
+            "validation": True,
+            "speedy": False,
+            "generate_pdf": True,
+            "add_ground_geom": True,
+            "treat_as_normal_path_point": False,
+        }
+        return {**default_config, **kwargs}
+
+    @staticmethod
+    def _find_converted_xml(output_folder: Path) -> Path:
+        """Locate the converted MuJoCo XML in the output folder."""
+        xml_files = list(output_folder.glob("*_cvt*.xml"))
+        if xml_files:
+            return xml_files[0]
+        raise RuntimeError(
+            "Conversion completed but no output XML file found\\n"
+            f"Expected file pattern: *_cvt*.xml in {output_folder}\\n"
+            "\\nPossible causes:\\n"
+            "1. Conversion failed silently (check logs)\\n"
+            "2. Output folder permissions issue\\n"
+            "3. Disk space exhausted"
+        )
+
     def convert_osim_to_mujoco(
         self,
         osim_file: Path,
@@ -92,61 +123,26 @@ class MyoConverter:
                 "\\nVerify installation: python -c 'import myoconverter'"
             )
 
-        # Pre-flight validation
         self._validate_inputs(osim_file, geometry_folder, output_folder)
 
         try:
             from myoconverter.O2MPipeline import O2MPipeline
 
-            # Default configuration
-            default_config = {
-                "convert_steps": [1, 2, 3],  # All three steps
-                "muscle_list": None,  # Optimize all muscles
-                "osim_data_overwrite": True,
-                "conversion": True,
-                "validation": True,
-                "speedy": False,
-                "generate_pdf": True,
-                "add_ground_geom": True,
-                "treat_as_normal_path_point": False,
-            }
-
-            # Merge with user-provided kwargs
-            config = {**default_config, **kwargs}
-
-            # Ensure paths are strings
-            osim_file_str = str(osim_file)
-            geometry_folder_str = str(geometry_folder)
-            output_folder_str = str(output_folder)
+            config = self._build_conversion_config(**kwargs)
 
             logger.info(f"Converting OpenSim model: {osim_file}")
             logger.info(f"Output folder: {output_folder}")
 
-            # Run conversion pipeline (wrapped with error context)
             try:
                 O2MPipeline(
-                    osim_file_str, geometry_folder_str, output_folder_str, **config
+                    str(osim_file), str(geometry_folder), str(output_folder), **config
                 )
             except (RuntimeError, ValueError, OSError) as e:
                 self._handle_conversion_error(e, osim_file, geometry_folder)
 
-            # Find converted XML file
-            output_path = Path(output_folder)
-            xml_files = list(output_path.glob("*_cvt*.xml"))
-
-            if xml_files:
-                converted_file = xml_files[0]
-                logger.info(f"Conversion successful: {converted_file}")
-                return converted_file
-            else:
-                raise RuntimeError(
-                    "Conversion completed but no output XML file found\\n"
-                    f"Expected file pattern: *_cvt*.xml in {output_folder}\\n"
-                    "\\nPossible causes:\\n"
-                    "1. Conversion failed silently (check logs)\\n"
-                    "2. Output folder permissions issue\\n"
-                    "3. Disk space exhausted"
-                )
+            converted_file = self._find_converted_xml(Path(output_folder))
+            logger.info(f"Conversion successful: {converted_file}")
+            return converted_file
 
         except ImportError as e:
             raise RuntimeError(

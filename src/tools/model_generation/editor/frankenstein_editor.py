@@ -267,6 +267,7 @@ class FrankensteinEditor:
             return {}
 
         def build_tree(link_name: str) -> dict[str, Any]:
+            """Recursively build a nested dict representing the link hierarchy."""
             children = model.get_children(link_name)
             return {
                 "name": link_name,

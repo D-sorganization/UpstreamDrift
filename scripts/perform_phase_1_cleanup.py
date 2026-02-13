@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 def cleanup() -> None:
+    """Delete redundant requirements.txt and duplicate quality check files."""
     root = Path(".")
 
     # 1. Delete redundant requirements.txt

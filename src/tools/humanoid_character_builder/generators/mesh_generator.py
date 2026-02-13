@@ -136,10 +136,12 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
 
     @property
     def backend_name(self) -> str:
+        """Return the name of this mesh generation backend."""
         return "primitive"
 
     @property
     def is_available(self) -> bool:
+        """Check whether the trimesh dependency is installed."""
         # Check if trimesh is available for mesh creation
         try:
             import trimesh  # noqa: F401
@@ -232,6 +234,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         )
 
     def get_supported_segments(self) -> list[str]:
+        """Return the list of body segment names this backend can generate."""
         from humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
@@ -292,10 +295,12 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
     @property
     def backend_name(self) -> str:
+        """Return the name of this mesh generation backend."""
         return "makehuman"
 
     @property
     def is_available(self) -> bool:
+        """Check whether a MakeHuman installation can be found."""
         return self._find_makehuman() is not None
 
     # ------------------------------------------------------------------
@@ -675,6 +680,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
         )
 
     def get_supported_segments(self) -> list[str]:
+        """Return the list of body segment names this backend can generate."""
         return list(self.MH_VERTEX_GROUP_MAP.values())
 
 
@@ -737,10 +743,12 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
     @property
     def backend_name(self) -> str:
+        """Return the name of this mesh generation backend."""
         return "smplx"
 
     @property
     def is_available(self) -> bool:
+        """Check whether the SMPL-X package and model files are available."""
         if not SMPLX_AVAILABLE:
             return False
         return self._find_model_dir() is not None
@@ -1017,6 +1025,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         )
 
     def get_supported_segments(self) -> list[str]:
+        """Return the list of body segment names this backend can generate."""
         return list(self.SMPLX_SEGMENT_VERTEX_RANGES.keys())
 
 

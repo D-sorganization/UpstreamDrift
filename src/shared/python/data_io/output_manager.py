@@ -160,14 +160,25 @@ class OutputManager:
         logger.info("Output directory structure created successfully")
 
     @precondition(
-        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: results
-        is not None,
+        lambda self,
+        results,
+        filename,
+        format_type=OutputFormat.CSV,
+        engine="mujoco",
+        metadata=None,
+        model_path=None,
+        parameters=None: results is not None,
         "Simulation results must not be None",
     )
     @precondition(
-        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: filename
-        is not None
-        and len(filename) > 0,
+        lambda self,
+        results,
+        filename,
+        format_type=OutputFormat.CSV,
+        engine="mujoco",
+        metadata=None,
+        model_path=None,
+        parameters=None: filename is not None and len(filename) > 0,
         "Filename must be a non-empty string",
     )
     def save_simulation_results(
@@ -291,6 +302,7 @@ class OutputManager:
         """Save results in JSON format with provenance and metadata."""
 
         def json_serializer(obj: Any) -> Any:
+            """Serialize numpy arrays, numbers, and datetimes to JSON-safe types."""
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
             elif isinstance(obj, np.integer | np.floating):
@@ -574,6 +586,7 @@ class OutputManager:
             if format_type == "json":
 
                 def json_serializer(obj: Any) -> Any:
+                    """Serialize numpy arrays, numbers, and datetimes for report JSON."""
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
                     elif isinstance(obj, np.integer | np.floating):

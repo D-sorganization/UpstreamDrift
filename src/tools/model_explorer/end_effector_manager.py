@@ -261,6 +261,7 @@ class EndEffectorLibrary:
         child_joints = []
 
         def collect_children(parent_name: str) -> None:
+            """Recursively gather child links and joints under the parent."""
             for joint in root.findall("joint"):
                 parent = joint.find("parent")
                 child = joint.find("child")

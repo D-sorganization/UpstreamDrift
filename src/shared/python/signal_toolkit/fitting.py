@@ -672,6 +672,7 @@ class CustomFunctionFitter:
         }
 
         def custom_func(t: np.ndarray, *args: float) -> np.ndarray:
+            """Evaluate the user-defined expression with the given parameters."""
             # Build evaluation context with parameters
             names: dict[str, Any] = dict(safe_names)
             names["t"] = t

@@ -8,6 +8,7 @@ from urllib.parse import unquote
 
 
 def check_links(root_dir: Path) -> list[str]:
+    """Validate internal links in all Markdown files under root_dir."""
     errors = []
     link_pattern = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 

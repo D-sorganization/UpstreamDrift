@@ -228,12 +228,15 @@ class TimeStep:
         self.observation = observation or {}
 
     def first(self) -> bool:
+        """Return True if this is the first step of an episode."""
         return bool(self.step_type == 0)
 
     def mid(self) -> bool:
+        """Return True if this is a mid-episode step."""
         return bool(self.step_type == 1)
 
     def last(self) -> bool:
+        """Return True if this is the final step of an episode."""
         return bool(self.step_type == 2)
 
     def __getitem__(self, key):

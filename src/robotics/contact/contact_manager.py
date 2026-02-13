@@ -387,6 +387,7 @@ def _graham_scan(points: NDArray[np.float64]) -> NDArray[np.float64]:
 
     # Sort by polar angle from start point, then by distance for ties
     def sort_key(idx: int) -> tuple[float, float]:
+        """Return polar angle and distance from start for sorting."""
         p = points[idx]
         angle = np.arctan2(p[1] - start[1], p[0] - start[0])
         dist = np.sqrt((p[0] - start[0]) ** 2 + (p[1] - start[1]) ** 2)

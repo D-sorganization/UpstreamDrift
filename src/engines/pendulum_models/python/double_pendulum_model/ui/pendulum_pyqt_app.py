@@ -116,6 +116,7 @@ class PendulumCanvas(FigureCanvasQTAgg):
         self.ax.set_zlim([-1.5, 1.5])
 
     def draw_chain(self, points: np.ndarray[typing.Any, typing.Any]) -> None:
+        """Render the pendulum chain as connected line segments."""
         self.ax.cla()
         self._configure_axes()
         xs, ys, zs = points.T
@@ -432,6 +433,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         status_text = f"Time: {self.time:.3f} s\n"
 
         def fmt(val: float) -> str:
+            """Format a float value with fixed width and precision."""
             return f"{val:>7.3f}"
 
         status_text += f"θ1: {fmt(state.theta1)} | ω1: {fmt(state.omega1)}\n"
@@ -503,6 +505,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
 
 
 def run_app() -> None:
+    """Launch the PyQt6 pendulum explorer application."""
     app = QtWidgets.QApplication([])
     controller = PendulumController()
     controller.show()

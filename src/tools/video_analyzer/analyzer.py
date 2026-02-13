@@ -85,9 +85,10 @@ class SwingAnalyzer:
         self.smoothing_window = smoothing_window
 
     @precondition(
-        lambda self, video_path, stance=StanceDirection.UNKNOWN, progress_callback=None: video_path
-        is not None
-        and len(video_path) > 0,
+        lambda self,
+        video_path,
+        stance=StanceDirection.UNKNOWN,
+        progress_callback=None: video_path is not None and len(video_path) > 0,
         "Video path must be a non-empty string",
     )
     def analyze_video(
@@ -381,6 +382,7 @@ class SwingAnalyzer:
 
         # Build phase transitions
         def add_phase(phase: SwingPhase, start: int, end: int) -> None:
+            """Append a phase transition if the frame range is valid."""
             if start < end:
                 phases.append(
                     PhaseTransition(
@@ -484,6 +486,7 @@ class SwingAnalyzer:
         """Calculate balance and weight shift metrics."""
 
         def get_weight_distribution(landmarks: list[Landmark]) -> tuple[float, float]:
+            """Estimate left/right weight distribution from hip and ankle landmarks."""
             lh = landmarks[self.LEFT_HIP]
             rh = landmarks[self.RIGHT_HIP]
             la = landmarks[self.LEFT_ANKLE]

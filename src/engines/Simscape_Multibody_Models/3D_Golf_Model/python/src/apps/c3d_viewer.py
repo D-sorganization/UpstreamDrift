@@ -233,6 +233,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
 
 def main() -> None:
+    """Launch the C3D motion analysis viewer application."""
     app = QtWidgets.QApplication(sys.argv)
     window = C3DViewerMainWindow()
     window.show()

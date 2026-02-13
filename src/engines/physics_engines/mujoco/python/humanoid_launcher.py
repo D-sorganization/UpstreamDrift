@@ -102,6 +102,7 @@ class RemoteRecorder(RecorderInterface):
         self.reset()
 
     def reset(self) -> None:
+        """Clear all recorded simulation data."""
         self.data: dict[str, Any] = {
             "times": [],
             "joint_positions": [],
@@ -113,6 +114,7 @@ class RemoteRecorder(RecorderInterface):
         }
 
     def process_packet(self, packet: dict) -> None:
+        """Ingest a simulation data packet into the recording store."""
         try:
             t = packet["time"]
 
@@ -148,6 +150,7 @@ class RemoteRecorder(RecorderInterface):
             logging.error(f"Error processing packet: {e}")
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Return time-aligned arrays for a named data field."""
         if not self.data["times"]:
             return np.array([]), np.array([])
 
@@ -173,6 +176,7 @@ class RemoteRecorder(RecorderInterface):
     def get_induced_acceleration_series(
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Return induced acceleration time series for a source."""
         if not self.data["times"]:
             return np.array([]), np.array([])
 
@@ -203,6 +207,7 @@ class RemoteRecorder(RecorderInterface):
         self._analysis_config = config
 
     def export_to_dict(self) -> dict[str, Any]:
+        """Export all recorded data as a dictionary."""
         return self.data
 
 
@@ -284,6 +289,7 @@ class HumanoidLauncher(QMainWindow):
         self.setup_ui()
 
     def setup_ui(self) -> None:
+        """Build the main window layout with tabs and log area."""
         central_widget = QWidget()
 
         self.setCentralWidget(central_widget)
@@ -343,6 +349,7 @@ class HumanoidLauncher(QMainWindow):
         self.setup_log_area(main_layout)
 
     def setup_sim_tab(self) -> None:
+        """Build the simulation settings and control tab."""
         tab = QWidget()
 
         layout = QVBoxLayout(tab)
@@ -565,6 +572,7 @@ class HumanoidLauncher(QMainWindow):
         self.tabs.addTab(tab, "Live Analysis")
 
     def enable_results(self, enabled: bool) -> None:
+        """Enable or disable the result viewing buttons."""
         self.btn_video.setEnabled(enabled)
 
         self.btn_data.setEnabled(enabled)
@@ -572,6 +580,7 @@ class HumanoidLauncher(QMainWindow):
         self.btn_plot_iaa.setEnabled(enabled and HAS_MATPLOTLIB)
 
     def setup_appearance_tab(self) -> None:
+        """Build the humanoid appearance customization tab."""
         tab = QWidget()
 
         layout = QVBoxLayout(tab)
@@ -670,6 +679,7 @@ class HumanoidLauncher(QMainWindow):
         self.tabs.addTab(tab, "Appearance")
 
     def setup_equip_tab(self) -> None:
+        """Build the equipment configuration tab."""
         tab = QWidget()
 
         layout = QVBoxLayout(tab)
@@ -765,6 +775,7 @@ class HumanoidLauncher(QMainWindow):
         self.tabs.addTab(tab, "Equipment")
 
     def setup_log_area(self, parent_layout: QVBoxLayout) -> None:
+        """Build the simulation log output area."""
         log_group = QGroupBox("Simulation Log")
 
         log_layout = QVBoxLayout()
@@ -796,6 +807,7 @@ class HumanoidLauncher(QMainWindow):
         parent_layout.addWidget(log_group)
 
     def log(self, msg: str) -> None:
+        """Append a message to the log or process a data stream packet."""
         # Check for JSON data stream
 
         if msg.startswith("DATA_JSON:"):
@@ -824,16 +836,19 @@ class HumanoidLauncher(QMainWindow):
         self.txt_log.ensureCursorVisible()
 
     def clear_log(self) -> None:
+        """Clear the simulation log text area."""
         self.txt_log.clear()
 
         self.log("Log cleared.")
 
     def set_btn_color(self, btn: QPushButton, rgba: Sequence[float]) -> None:
+        """Apply an RGBA color swatch to a button's background."""
         r, g, b = (int(c * 255) for c in rgba[:3])
 
         btn.setStyleSheet(Styles.color_swatch(r, g, b))
 
     def pick_color(self, key: str, btn: QPushButton) -> None:
+        """Open a color picker dialog and store the chosen color."""
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])
 
         initial = QColor(
@@ -1052,6 +1067,7 @@ class HumanoidLauncher(QMainWindow):
         dialog.exec()
 
     def browse_file(self, line_edit: QLineEdit, save: bool = False) -> None:
+        """Open a file dialog and write the selected path to a line edit."""
         if save:
             path, _ = QFileDialog.getSaveFileName(
                 self, "Save State", "", "JSON State (*.json)"
@@ -1310,6 +1326,7 @@ class HumanoidLauncher(QMainWindow):
             QMessageBox.critical(self, "Plot Error", str(e))
 
     def start_simulation(self) -> None:
+        """Save config and launch the simulation in a worker process."""
         self.save_config()
 
         self.log("Starting simulation...")
@@ -1333,12 +1350,14 @@ class HumanoidLauncher(QMainWindow):
         self.btn_stop.setEnabled(True)
 
     def stop_simulation(self) -> None:
+        """Terminate the running simulation worker process."""
         if self.simulation_thread:
             self.log("Stopping simulation...")
 
             self.simulation_thread.stop()
 
     def on_simulation_finished(self, code: int, stderr: str) -> None:
+        """Handle simulation completion and update UI state."""
         if code == 0:
             self.log("Simulation finished successfully.")
 
@@ -1394,6 +1413,7 @@ class HumanoidLauncher(QMainWindow):
                 self.start_simulation()
 
     def rebuild_docker(self) -> None:
+        """Rebuild the Docker simulation environment after confirmation."""
         reply = QMessageBox.question(
             self,
             "Rebuild Environment",
@@ -1424,11 +1444,13 @@ class HumanoidLauncher(QMainWindow):
             self.build_thread.start()
 
     def open_video(self) -> None:
+        """Open the recorded simulation video in the default player."""
         vid_path = self.repo_path / "docker" / "src" / "humanoid_golf.mp4"
 
         self._open_file(vid_path)
 
     def open_data(self) -> None:
+        """Open the recorded simulation CSV data file."""
         csv_path = self.repo_path / "docker" / "src" / "golf_data.csv"
 
         self._open_file(csv_path)

@@ -108,6 +108,7 @@ class SpectrogramTab(QtWidgets.QWidget):
         self.update_plot()
 
     def update_plot(self) -> None:
+        """Redraw the spectrogram for the selected metric and dimension."""
         self.ax.clear()
 
         times, raw_data = self.recorder.get_time_series(self.current_key)
@@ -216,6 +217,7 @@ class WaveletTab(QtWidgets.QWidget):
         self.update_plot()
 
     def update_plot(self) -> None:
+        """Redraw the continuous wavelet transform plot for the selected metric."""
         self.ax.clear()
 
         times, raw_data = self.recorder.get_time_series(self.current_key)
@@ -279,6 +281,7 @@ class SwingPlaneTab(QtWidgets.QWidget):
         self.update_plot()
 
     def update_plot(self) -> None:
+        """Redraw the 3D swing plane and deviation plots."""
         self.canvas.fig.clear()
         ax3d = self.canvas.fig.add_subplot(211, projection="3d")
         ax_dev = self.canvas.fig.add_subplot(212)
@@ -380,6 +383,7 @@ class CorrelationTab(QtWidgets.QWidget):
         layout.addWidget(btn_refresh)
 
     def update_plot(self) -> None:
+        """Redraw the correlation matrix heatmap across recorded metrics."""
         self.ax.clear()
 
         # Define metrics to correlate
@@ -495,6 +499,7 @@ class PhasePlaneTab(QtWidgets.QWidget):
         self.update_plot()
 
     def update_plot(self) -> None:
+        """Redraw the phase plane plot of position versus velocity."""
         self.ax.clear()
 
         # Fetch Position and Velocity
@@ -616,6 +621,7 @@ class CoherenceTab(QtWidgets.QWidget):
         self.update_plot()
 
     def update_plot(self) -> None:
+        """Redraw the coherence plot between two selected signals."""
         self.ax.clear()
 
         key1 = self.metric_options[self.combo1.currentText()]

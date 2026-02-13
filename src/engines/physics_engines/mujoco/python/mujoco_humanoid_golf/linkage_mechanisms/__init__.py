@@ -141,31 +141,9 @@ def generate_four_bar_linkage_xml(
 """
 
 
-def generate_slider_crank_xml(
-    crank_length: float = 1.0,
-    rod_length: float = 3.0,
-    orientation: str = "horizontal",
-) -> str:
-    """
-    Generate a slider-crank mechanism (basis for piston engines).
-
-    Parameters:
-    -----------
-    crank_length : float
-        Length of the rotating crank
-    rod_length : float
-        Length of the connecting rod
-    orientation : str
-        "horizontal" or "vertical" slider direction
-    """
-    slider_axis = "1 0 0" if orientation == "horizontal" else "0 0 1"
-    slider_start = -rod_length - crank_length
-    slider_end = rod_length + crank_length
-
-    return f"""
-<mujoco model="slider_crank">
-    <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}"/>
-
+def _slider_crank_assets_xml() -> str:
+    """Generate the asset section for the slider-crank XML."""
+    return """
     <visual>
         <global offwidth="1920" offheight="1080"/>
         <quality shadowsize="4096"/>
@@ -178,8 +156,19 @@ def generate_slider_crank_xml(
         <material name="crank_mat" rgba="0.9 0.1 0.1 1"/>
         <material name="rod_mat" rgba="0.1 0.7 0.1 1"/>
         <material name="slider_mat" rgba="0.1 0.1 0.9 1"/>
-    </asset>
+    </asset>"""
 
+
+def _slider_crank_worldbody_xml(
+    orientation: str,
+    crank_length: float,
+    rod_length: float,
+    slider_axis: str,
+    slider_start: float,
+    slider_end: float,
+) -> str:
+    """Generate the worldbody section for the slider-crank XML."""
+    return f"""
     <worldbody>
         <light directional="true" diffuse=".8 .8 .8" pos="0 0 5" dir="0 0 -1"/>
         <geom type="plane" size="10 10 0.1" material="grid"/>
@@ -230,8 +219,12 @@ def generate_slider_crank_xml(
             <geom name="slider_marker" type="sphere" pos="0 0 0.2" size="0.1"
                   rgba="1 0 1 1" contype="0" conaffinity="0"/>
         </body>
-    </worldbody>
+    </worldbody>"""
 
+
+def _slider_crank_constraints_xml(orientation: str, rod_length: float) -> str:
+    """Generate the equality and actuator sections for the slider-crank XML."""
+    return f"""
     <equality>
         <connect body1="connecting_rod" body2="slider"
                  anchor="{rod_length if orientation == "horizontal" else 0} 0
@@ -241,7 +234,42 @@ def generate_slider_crank_xml(
     <actuator>
         <motor name="crank_motor" joint="crank_joint" gear="30"
               ctrllimited="true" ctrlrange="-10 10"/>
-    </actuator>
+    </actuator>"""
+
+
+def generate_slider_crank_xml(
+    crank_length: float = 1.0,
+    rod_length: float = 3.0,
+    orientation: str = "horizontal",
+) -> str:
+    """
+    Generate a slider-crank mechanism (basis for piston engines).
+
+    Parameters:
+    -----------
+    crank_length : float
+        Length of the rotating crank
+    rod_length : float
+        Length of the connecting rod
+    orientation : str
+        "horizontal" or "vertical" slider direction
+    """
+    slider_axis = "1 0 0" if orientation == "horizontal" else "0 0 1"
+    slider_start = -rod_length - crank_length
+    slider_end = rod_length + crank_length
+
+    assets = _slider_crank_assets_xml()
+    worldbody = _slider_crank_worldbody_xml(
+        orientation, crank_length, rod_length, slider_axis, slider_start, slider_end
+    )
+    constraints = _slider_crank_constraints_xml(orientation, rod_length)
+
+    return f"""
+<mujoco model="slider_crank">
+    <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}"/>
+{assets}
+{worldbody}
+{constraints}
 </mujoco>
 """
 
