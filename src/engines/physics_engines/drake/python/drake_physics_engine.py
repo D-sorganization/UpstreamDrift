@@ -47,6 +47,7 @@ if DRAKE_AVAILABLE:
         RigidTransform,  # noqa: F401
         RotationMatrix,  # noqa: F401
     )
+    from pydrake.multibody.tree import JointActuatorIndex
 
 from src.shared.python.core import constants
 from src.shared.python.engine_core.interfaces import PhysicsEngine
@@ -252,7 +253,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         # Drake has actuators.
         names = []
         for i in range(self.plant.num_actuators()):
-            actuator_idx = pydrake.multibody.tree.JointActuatorIndex(i)
+            actuator_idx = JointActuatorIndex(i)
             act = self.plant.get_joint_actuator(actuator_idx)
             names.append(act.name())
 
