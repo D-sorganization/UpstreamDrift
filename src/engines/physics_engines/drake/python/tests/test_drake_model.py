@@ -25,7 +25,7 @@ except ImportError as e:
     # but the whole file will likely need pytest skipping mechanism if we want
     # to run tests selectively.
     # However, existing pattern is to skip if import fails.
-    SpatialInertia = None
+    SpatialInertia = None  # type: ignore[misc, assignment]  # dummy fallback when pydrake unavailable
     import pytest
 
     pytest.skip(f"pydrake not available: {e}", allow_module_level=True)

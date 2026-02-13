@@ -7,6 +7,7 @@ import typing
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 from ...sim_widget import MuJoCoSimWidget
 
@@ -53,7 +54,7 @@ class AnalysisTab(QtWidgets.QWidget):
         self.recording_label = QtWidgets.QLabel(
             "Not recording"
         )  # Added for update_metrics logic
-        self.recording_label.setStyleSheet("font-weight: bold; padding: 5px;")
+        self.recording_label.setStyleSheet(Styles.RECORDING_IDLE)
 
         self.recording_time_label = QtWidgets.QLabel("--")
         self.num_frames_label = QtWidgets.QLabel("--")
@@ -94,10 +95,7 @@ class AnalysisTab(QtWidgets.QWidget):
             self.recording_label.setText(
                 f"Recording: {duration:.2f}s ({num_frames} frames)",
             )
-            self.recording_label.setStyleSheet(
-                "background-color: #d62728; color: white; font-weight: bold; "
-                "padding: 5px;",
-            )
+            self.recording_label.setStyleSheet(Styles.RECORDING_ACTIVE)
         else:
             num_frames = recorder.get_num_frames()
             if num_frames > 0:
@@ -105,13 +103,10 @@ class AnalysisTab(QtWidgets.QWidget):
                 self.recording_label.setText(
                     f"Stopped: {duration:.2f}s ({num_frames} frames)",
                 )
-                self.recording_label.setStyleSheet(
-                    "background-color: #ff7f0e; color: white; font-weight: bold; "
-                    "padding: 5px;",
-                )
+                self.recording_label.setStyleSheet(Styles.RECORDING_STOPPED)
             else:
                 self.recording_label.setText("Not recording")
-                self.recording_label.setStyleSheet("font-weight: bold; padding: 5px;")
+                self.recording_label.setStyleSheet(Styles.RECORDING_IDLE)
 
         # Update metrics
         if analyzer is not None:
@@ -214,8 +209,7 @@ class AnalysisTab(QtWidgets.QWidget):
                 output = {
                     "provenance": {
                         "software": (
-                            f"{provenance.software_name}"
-                            f" v{provenance.software_version}"
+                            f"{provenance.software_name} v{provenance.software_version}"
                         ),
                         "timestamp_utc": provenance.timestamp_utc,
                         "git_commit": provenance.git_commit_sha,

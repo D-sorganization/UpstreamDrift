@@ -32,12 +32,14 @@ import json
 import pickle
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
+from src.shared.python.core.contracts import ContractChecker
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -213,7 +215,7 @@ class Checkpointable(Protocol):
         ...
 
 
-class CheckpointManager:
+class CheckpointManager(ContractChecker):
     """Manage checkpoints for simulation reversibility.
 
     Provides:
@@ -222,6 +224,12 @@ class CheckpointManager:
         - Memory-efficient circular buffer
         - Optional disk serialization
         - Checkpoint tagging and search
+
+    Design by Contract:
+        Invariants:
+            - max_checkpoints is positive
+            - Checkpoint count never exceeds max_checkpoints
+            - Statistics counters are non-negative
 
     Example:
         >>> manager = CheckpointManager(max_checkpoints=100)
@@ -265,6 +273,27 @@ class CheckpointManager:
         # Statistics
         self._total_saves = 0
         self._total_restores = 0
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for CheckpointManager."""
+        return [
+            (
+                lambda: self.max_checkpoints > 0,
+                "max_checkpoints must be positive",
+            ),
+            (
+                lambda: len(self._checkpoints) <= self.max_checkpoints,
+                "Checkpoint count must not exceed max_checkpoints",
+            ),
+            (
+                lambda: self._total_saves >= 0 and self._total_restores >= 0,
+                "Statistics counters must be non-negative",
+            ),
+            (
+                lambda: self._tags is not None and isinstance(self._tags, dict),
+                "Tags must be a non-None dict",
+            ),
+        ]
 
     @property
     def count(self) -> int:

@@ -6,6 +6,7 @@ import mujoco
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 from ...interactive_manipulation import ConstraintType
 from ...sim_widget import MuJoCoSimWidget
@@ -204,14 +205,7 @@ class ManipulationTab(QtWidgets.QWidget):
         # Clear all constraints button
         self.clear_constraints_btn = QtWidgets.QPushButton("Clear All Constraints")
         self.clear_constraints_btn.clicked.connect(self.on_clear_constraints)
-        self.clear_constraints_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #d62728;
-            }
-            QPushButton:hover {
-                background-color: #a81f20;
-            }
-        """)
+        self.clear_constraints_btn.setStyleSheet(Styles.BTN_DANGER)
         constraint_layout.addWidget(self.clear_constraints_btn)
 
         # Constrained bodies list
@@ -284,7 +278,7 @@ class ManipulationTab(QtWidgets.QWidget):
         interp_layout.addLayout(interp_slider_layout)
 
         interp_note = QtWidgets.QLabel("Select two poses in library to interpolate")
-        interp_note.setStyleSheet("font-style: italic; font-size: 9pt;")
+        interp_note.setStyleSheet(Styles.TEXT_ITALIC_NOTE)
         interp_layout.addWidget(interp_note)
 
         pose_layout.addWidget(interp_group)
@@ -332,9 +326,7 @@ class ManipulationTab(QtWidgets.QWidget):
             "• Save poses for later use"
         )
         instructions.setWordWrap(True)
-        instructions.setStyleSheet(
-            "padding: 10px; background-color: #e8f4f8; border-radius: 5px;"
-        )
+        instructions.setStyleSheet(Styles.INSTRUCTIONS_BOX)
         return instructions
 
     def update_body_lists(self) -> None:

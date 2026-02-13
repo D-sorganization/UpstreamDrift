@@ -22,6 +22,7 @@ from src.launchers.launcher_constants import (
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_popen
+from src.shared.python.theme.style_constants import Styles
 
 logger = get_logger(__name__)
 
@@ -158,7 +159,7 @@ except ImportError as e:
         # Check if Docker mode is enabled
         if use_docker and self.docker_available:
             self.lbl_status.setText(f"> Launching {model.name} in Docker...")
-            self.lbl_status.setStyleSheet("color: #64b5f6;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_INFO)
             QApplication.processEvents(
                 QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
             )
@@ -174,7 +175,7 @@ except ImportError as e:
                 logger.error(f"Docker launch failed: {e}")
                 self.show_toast(f"Docker Launch Failed: {e}", "error")
                 self.lbl_status.setText("> Ready")
-                self.lbl_status.setStyleSheet("color: #aaaaaa;")
+                self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
                 return
 
         # Check if WSL mode is enabled
@@ -183,7 +184,7 @@ except ImportError as e:
         # Local mode - check dependencies (only if not using WSL)
         if not use_wsl:
             self.lbl_status.setText(f"> Checking {model.name} dependencies...")
-            self.lbl_status.setStyleSheet("color: #FFD60A;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
             QApplication.processEvents(
                 QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
             )
@@ -206,7 +207,7 @@ except ImportError as e:
                         return
                 self._show_dependency_error(model.name, deps_error)
                 self.lbl_status.setText("! Dependency Error")
-                self.lbl_status.setStyleSheet("color: #FF375F;")
+                self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
                 return
 
         self.lbl_status.setText(f"> Launching {model.name}...")
@@ -227,11 +228,11 @@ except ImportError as e:
                     if success:
                         self.show_toast(f"{model.name} Launched", "success")
                         self.lbl_status.setText(f"* {model.name} Running")
-                        self.lbl_status.setStyleSheet("color: #30D158;")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
                     else:
                         self.show_toast(f"Failed to launch {model.name}", "error")
                         self.lbl_status.setText("* Launch Error")
-                        self.lbl_status.setStyleSheet("color: #FF375F;")
+                        self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
                 # Fallback for MJCF and unknown types
                 elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
                     self._launch_generic_mjcf(abs_repo_path)
@@ -244,7 +245,7 @@ except ImportError as e:
             logger.error(f"Launch failed: {e}")
             self.show_toast(f"Launch Failed: {e}", "error")
             self.lbl_status.setText("> Ready")
-            self.lbl_status.setStyleSheet("color: #aaaaaa;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
 
     def _launch_generic_mjcf(self, path: Path) -> None:
         """Launch generic MJCF file in passive viewer."""
@@ -331,10 +332,10 @@ except ImportError as e:
                 self.process_manager.attach_process(model.name, process)
                 self.show_toast(f"{model.name} Launched (Docker)", "success")
                 self.lbl_status.setText(f"* {model.name} Running (Docker)")
-                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             else:
                 self.lbl_status.setText("* Docker Error")
-                self.lbl_status.setStyleSheet("color: #FF375F;")
+                self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
                 QMessageBox.critical(
                     self,
                     "Docker Launch Error",
@@ -349,7 +350,7 @@ except ImportError as e:
                 f"Failed to launch {model.name} in Docker:\n\n{e}",
             )
             self.lbl_status.setText("* Docker Error")
-            self.lbl_status.setStyleSheet("color: #FF375F;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
 
     def _launch_script_process(self, name: str, script_path: Path, cwd: Path) -> None:
         """Helper to launch python script with error visibility.
@@ -364,7 +365,7 @@ except ImportError as e:
             success = self.process_manager.launch_in_wsl(str(script_path))
             if success:
                 self.lbl_status.setText(f"* {name} Running (WSL)")
-                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
                 self.show_toast(f"{name} Launched in WSL", "success")
             else:
                 QMessageBox.critical(
@@ -380,7 +381,7 @@ except ImportError as e:
         if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"* {name} Running")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
             QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
@@ -397,7 +398,7 @@ except ImportError as e:
             success = self.process_manager.launch_module_in_wsl(module_name, cwd)
             if success:
                 self.lbl_status.setText(f"* {name} Running (WSL)")
-                self.lbl_status.setStyleSheet("color: #30D158;")
+                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
                 self.show_toast(f"{name} Launched in WSL", "success")
             else:
                 QMessageBox.critical(
@@ -413,7 +414,7 @@ except ImportError as e:
         if process:
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"* {name} Running")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
         else:
             QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
@@ -431,7 +432,7 @@ except ImportError as e:
                 return
 
         self.lbl_status.setText("> Launching URDF Generator...")
-        self.lbl_status.setStyleSheet("color: #FFD60A;")
+        self.lbl_status.setStyleSheet(Styles.STATUS_WARNING)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
         try:
@@ -444,13 +445,13 @@ except ImportError as e:
                 raise RuntimeError("ProcessManager returned None")
             self.show_toast("URDF Generator launched.", "success")
             self.lbl_status.setText("> URDF Generator Running")
-            self.lbl_status.setStyleSheet("color: #30D158;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
 
         except (ValueError, RuntimeError, OSError) as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
             self.lbl_status.setText("! Launch Error")
-            self.lbl_status.setStyleSheet("color: #FF375F;")
+            self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
 
     def _launch_c3d_viewer(self) -> None:
         """Launch the C3D motion viewer application."""

@@ -54,6 +54,9 @@ from .matplotlib_style import (
     get_chart_color,
     style_for_export,
 )
+from .style_constants import (
+    Styles,
+)
 from .theme_manager import (
     DARK_THEME,
     HIGH_CONTRAST_THEME,
@@ -121,6 +124,8 @@ __all__ = [
     "get_current_colors",
     "get_theme_manager",
     "set_theme",
+    # Style Constants
+    "Styles",
     # Fleet-wide Theme Adapter
     "FLEET_THEMES",
     "fleet_to_theme_colors",

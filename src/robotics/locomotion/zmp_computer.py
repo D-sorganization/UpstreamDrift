@@ -11,12 +11,14 @@ Design by Contract:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.robotics.core.protocols import HumanoidCapable, RoboticsCapable
+from src.shared.python.core.contracts import ContractChecker
 
 
 @dataclass
@@ -40,7 +42,7 @@ class ZMPResult:
     ground_height: float = 0.0
 
 
-class ZMPComputer:
+class ZMPComputer(ContractChecker):
     """Computes Zero Moment Point for balance analysis.
 
     The ZMP is computed from the robot's CoM position, acceleration,
@@ -48,6 +50,10 @@ class ZMPComputer:
     must lie within the support polygon.
 
     Design by Contract:
+        Invariants:
+            - GRAVITY constant is positive
+            - Engine reference is never None
+
         Preconditions:
             - Engine must provide CoM and centroidal dynamics
             - Ground contact must exist for valid ZMP
@@ -79,6 +85,19 @@ class ZMPComputer:
         self._engine = engine
         self._ground_height = ground_height
         self._is_humanoid = isinstance(engine, HumanoidCapable)
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for ZMPComputer."""
+        return [
+            (
+                lambda: self.GRAVITY > 0,
+                "GRAVITY constant must be positive",
+            ),
+            (
+                lambda: self._engine is not None,
+                "Engine reference must not be None",
+            ),
+        ]
 
     @property
     def ground_height(self) -> float:

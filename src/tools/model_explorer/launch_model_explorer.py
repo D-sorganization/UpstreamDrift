@@ -11,15 +11,12 @@ import sys
 # Qt's OpenGL context initialization conflicts with MuJoCo's plugin loading.
 
 try:
-
     import mujoco  # noqa: F401
 
 except ImportError:
-
     pass  # MuJoCo not installed, will fall back to grid view
 
 except OSError:
-
     # Handle DLL loading failures on Windows (e.g., Python 3.13 + mujoco 3.3.4)
 
     pass  # Will fall back to grid view
@@ -32,7 +29,6 @@ from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
 from src.tools.model_explorer.main_window import main  # noqa: E402
 
 if __name__ == "__main__":
-
     # Set up logging
 
     configure_gui_logging()
@@ -42,11 +38,9 @@ if __name__ == "__main__":
     logger.info("Starting Model Explorer")
 
     try:
-
         main()
 
     except (RuntimeError, ValueError, OSError) as e:
-
         logger.error(f"Failed to start Model Explorer: {e}")
 
         sys.exit(1)

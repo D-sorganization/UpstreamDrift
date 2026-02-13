@@ -13,6 +13,7 @@ from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 HAS_QT = PYQT6_AVAILABLE
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
@@ -48,8 +49,8 @@ SPINBOX_STEP_RAD = 0.01
 SLIDER_TO_RADIAN = 0.01
 SLIDER_RANGE_MIN = -314
 SLIDER_RANGE_MAX = 314
-STYLE_BUTTON_RUN = "QPushButton { background-color: #4CAF50; color: white; }"
-STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
+STYLE_BUTTON_RUN = Styles.BTN_RUN
+STYLE_BUTTON_STOP = Styles.BTN_STOP
 MS_PER_SECOND = 1000
 
 LOGGER = get_logger(__name__)

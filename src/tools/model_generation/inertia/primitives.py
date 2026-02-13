@@ -9,7 +9,19 @@ from __future__ import annotations
 
 import math
 
+from src.shared.python.core.contracts import precondition
 
+
+@precondition(lambda mass, size_x, size_y, size_z: mass > 0, "Mass must be positive")
+@precondition(
+    lambda mass, size_x, size_y, size_z: size_x > 0, "size_x must be positive"
+)
+@precondition(
+    lambda mass, size_x, size_y, size_z: size_y > 0, "size_y must be positive"
+)
+@precondition(
+    lambda mass, size_x, size_y, size_z: size_z > 0, "size_z must be positive"
+)
 def box_inertia(
     mass: float,
     size_x: float,
@@ -44,6 +56,13 @@ def box_inertia(
     }
 
 
+@precondition(lambda mass, radius, length, axis="z": mass > 0, "Mass must be positive")
+@precondition(
+    lambda mass, radius, length, axis="z": radius > 0, "Radius must be positive"
+)
+@precondition(
+    lambda mass, radius, length, axis="z": length > 0, "Length must be positive"
+)
 def cylinder_inertia(
     mass: float,
     radius: float,
@@ -99,6 +118,8 @@ def cylinder_inertia(
         }
 
 
+@precondition(lambda mass, radius: mass > 0, "Mass must be positive")
+@precondition(lambda mass, radius: radius > 0, "Radius must be positive")
 def sphere_inertia(mass: float, radius: float) -> dict[str, float]:
     """
     Compute inertia tensor for a solid sphere.
@@ -124,6 +145,13 @@ def sphere_inertia(mass: float, radius: float) -> dict[str, float]:
     }
 
 
+@precondition(lambda mass, radius, length, axis="z": mass > 0, "Mass must be positive")
+@precondition(
+    lambda mass, radius, length, axis="z": radius > 0, "Radius must be positive"
+)
+@precondition(
+    lambda mass, radius, length, axis="z": length >= 0, "Length must be non-negative"
+)
 def capsule_inertia(
     mass: float,
     radius: float,
@@ -241,6 +269,19 @@ def ellipsoid_inertia(
     }
 
 
+@precondition(
+    lambda mass, inner_radius, outer_radius, length, axis="z": mass > 0,
+    "Mass must be positive",
+)
+@precondition(
+    lambda mass, inner_radius, outer_radius, length, axis="z": inner_radius >= 0,
+    "Inner radius must be non-negative",
+)
+@precondition(
+    lambda mass, inner_radius, outer_radius, length, axis="z": outer_radius
+    > inner_radius,
+    "Outer radius must be greater than inner radius",
+)
 def hollow_cylinder_inertia(
     mass: float,
     inner_radius: float,

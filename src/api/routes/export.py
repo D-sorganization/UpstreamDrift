@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from src.api.config import VALID_EXPORT_FORMATS
+from src.shared.python.core.contracts import precondition
 
 from ..dependencies import get_task_manager
 
@@ -20,6 +21,11 @@ router = APIRouter()
 
 
 @router.get("/export/{task_id}")
+@precondition(
+    lambda task_id, format="json", task_manager=None: task_id is not None
+    and len(task_id) > 0,
+    "Task ID must be a non-empty string",
+)
 async def export_results(
     task_id: str,
     format: str = "json",

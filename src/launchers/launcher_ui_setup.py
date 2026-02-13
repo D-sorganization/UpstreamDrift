@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 if TYPE_CHECKING:
     pass
@@ -67,9 +68,7 @@ class LauncherUISetupMixin:
         # --- Content area with horizontal splitter (tiles | AI chat) ---
         self.content_splitter = QSplitter(Qt.Orientation.Horizontal)
         self.content_splitter.setHandleWidth(3)
-        self.content_splitter.setStyleSheet(
-            "QSplitter::handle { background-color: #484f58; }"
-        )
+        self.content_splitter.setStyleSheet(Styles.SPLITTER_HANDLE)
 
         # Left panel: launcher grid + bottom bar
         left_panel = QWidget()
@@ -205,14 +204,12 @@ class LauncherUISetupMixin:
         """Add status indicator, execution mode label, and search bar to top bar."""
         # Status Indicator
         self.lbl_status = QLabel("Checking Docker...")
-        self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
+        self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE_BOLD)
         top_bar.addWidget(self.lbl_status)
 
         # Execution Mode Label
         self.lbl_execution_mode = QLabel("Mode: Local (Windows)")
-        self.lbl_execution_mode.setStyleSheet(
-            "color: #FFD60A; font-weight: bold; margin-left: 10px;"
-        )
+        self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
         self.lbl_execution_mode.setToolTip(
             "Current execution environment (Local, Docker, or WSL)"
         )
@@ -263,35 +260,12 @@ class LauncherUISetupMixin:
         btn_help = QPushButton("Help")
         btn_help.setToolTip("View documentation and user guide (F1)")
         btn_help.clicked.connect(lambda: self._show_help_dialog())
-        btn_help.setStyleSheet("""
-            QPushButton {
-                background-color: #0A84FF;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #0077E6;
-            }
-        """)
+        btn_help.setStyleSheet(Styles.BTN_PRIMARY)
         top_bar.addWidget(btn_help)
 
         btn_settings = QPushButton("\u2699 Settings")
         btn_settings.setToolTip("Diagnostics, environment, and build settings")
-        btn_settings.setStyleSheet("""
-            QPushButton {
-                background-color: #484f58;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #6e7681;
-            }
-        """)
+        btn_settings.setStyleSheet(Styles.BTN_SECONDARY)
         btn_settings.clicked.connect(self._open_settings)
         top_bar.addWidget(btn_settings)
 
@@ -301,17 +275,7 @@ class LauncherUISetupMixin:
             self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
             self.btn_ai.setCheckable(True)
             self.btn_ai.clicked.connect(self.toggle_ai_assistant)
-            self.btn_ai.setStyleSheet("""
-                QPushButton {
-                    background-color: #1976d2;
-                    color: white;
-                    padding: 8px 16px;
-                    font-weight: bold;
-                    border-radius: 4px;
-                }
-                QPushButton:hover { background-color: #1565c0; }
-                QPushButton:checked { background-color: #0d47a1; }
-                """)
+            self.btn_ai.setStyleSheet(Styles.BTN_AI_CHAT)
             top_bar.addWidget(self.btn_ai)
 
     def _register_top_bar_tooltips(self) -> None:
@@ -369,10 +333,10 @@ class LauncherUISetupMixin:
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
-        self.scroll_area.setStyleSheet("QScrollArea { background: transparent; }")
+        self.scroll_area.setStyleSheet(Styles.SCROLL_AREA_TRANSPARENT)
 
         self.grid_container = QWidget()
-        self.grid_container.setStyleSheet("background: transparent;")
+        self.grid_container.setStyleSheet(Styles.TRANSPARENT_BG)
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(20)
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -389,21 +353,7 @@ class LauncherUISetupMixin:
         self.btn_launch.setEnabled(False)
         self.btn_launch.setFixedHeight(50)
         self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        self.btn_launch.setStyleSheet("""
-            QPushButton {
-                background-color: #2da44e;
-                color: white;
-                border-radius: 6px;
-                padding: 0 40px;
-            }
-            QPushButton:disabled {
-                background-color: #444444;
-                color: #888888;
-            }
-            QPushButton:hover:!disabled {
-                background-color: #2c974b;
-            }
-            """)
+        self.btn_launch.setStyleSheet(Styles.BTN_LAUNCH_READY)
         self.btn_launch.clicked.connect(self.launch_simulation)
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
         bottom_bar.addWidget(self.btn_launch)
@@ -436,15 +386,7 @@ class LauncherUISetupMixin:
         self._console_text = QPlainTextEdit()
         self._console_text.setReadOnly(True)
         self._console_text.setMaximumBlockCount(5000)
-        self._console_text.setStyleSheet(
-            "QPlainTextEdit {"
-            "  background-color: #1e1e1e;"
-            "  color: #d4d4d4;"
-            "  font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;"
-            "  font-size: 11px;"
-            "  border: none;"
-            "}"
-        )
+        self._console_text.setStyleSheet(Styles.CONSOLE_DARK)
 
         console_container = QWidget()
         console_layout = QVBoxLayout(console_container)

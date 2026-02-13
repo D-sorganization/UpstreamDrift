@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui.widgets import SignalBlocker
 
 logger = get_logger(__name__)
@@ -178,9 +179,7 @@ class GravityControlWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
 
         # Status indicator
         self.lbl_status = QtWidgets.QLabel("Gravity: ON")
-        self.lbl_status.setStyleSheet(
-            "font-weight: bold; color: #2e7d32;"
-        )  # Green for ON
+        self.lbl_status.setStyleSheet(Styles.POSE_STATUS_SUCCESS)
         layout.addWidget(self.lbl_status)
 
         # Info label
@@ -189,7 +188,7 @@ class GravityControlWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
             "without it collapsing. Re-enable before<br>"
             "running simulation.</i>"
         )
-        info.setStyleSheet("color: #666; font-size: 10px;")
+        info.setStyleSheet(Styles.POSE_INFO_MUTED)
         layout.addWidget(info)
 
     def _on_gravity_toggled(self, enabled: bool) -> None:
@@ -205,10 +204,10 @@ class GravityControlWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         """Update the status display."""
         if enabled:
             self.lbl_status.setText("Gravity: ON")
-            self.lbl_status.setStyleSheet("font-weight: bold; color: #2e7d32;")
+            self.lbl_status.setStyleSheet(Styles.POSE_STATUS_SUCCESS)
         else:
             self.lbl_status.setText("Gravity: OFF")
-            self.lbl_status.setStyleSheet("font-weight: bold; color: #c62828;")
+            self.lbl_status.setStyleSheet(Styles.POSE_STATUS_ERROR)
 
     def set_gravity_enabled(self, enabled: bool) -> None:
         """Set the gravity state.
@@ -321,7 +320,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         interp_info = QtWidgets.QLabel(
             "Select two poses in the list to blend between them"
         )
-        interp_info.setStyleSheet("font-style: italic; font-size: 10px;")
+        interp_info.setStyleSheet(Styles.TEXT_ITALIC_SMALL)
         interp_layout.addWidget(interp_info)
 
         slider_layout = QtWidgets.QHBoxLayout()
@@ -665,7 +664,7 @@ class PoseEditorWidget(QtWidgets.QWidget):  # type: ignore[misc]
         for group_name in sorted(groups.keys()):
             # Group header
             header = QtWidgets.QLabel(f"<b>{group_name}</b>")
-            header.setStyleSheet("margin-top: 8px;")
+            header.setStyleSheet(Styles.POSE_HEADER_MARGIN)
             self.slider_layout.addWidget(header)
 
             for joint in groups[group_name]:

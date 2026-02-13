@@ -20,6 +20,7 @@ from src.robotics.locomotion.gait_types import (
     GaitType,
     SupportState,
 )
+from src.shared.python.core.contracts import ContractChecker
 
 
 class GaitEvent(Enum):
@@ -62,7 +63,7 @@ class GaitState:
     next_stance_foot: str = "left"
 
 
-class GaitStateMachine:
+class GaitStateMachine(ContractChecker):
     """Finite state machine for gait management.
 
     Manages transitions between gait phases and ensures valid
@@ -70,8 +71,10 @@ class GaitStateMachine:
 
     Design by Contract:
         Invariants:
-            - State is always valid
-            - Phase time never exceeds phase duration
+            - State is always valid (phase and support state are enum members)
+            - Phase time is non-negative
+            - Step count is non-negative
+            - Callbacks dict is never None
 
         Preconditions:
             - Events must be valid for current state
@@ -103,6 +106,32 @@ class GaitStateMachine:
             "step_complete": [],
             "gait_change": [],
         }
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for GaitStateMachine."""
+        return [
+            (
+                lambda: isinstance(self._state.phase, GaitPhase),
+                "Gait phase must be a valid GaitPhase enum member",
+            ),
+            (
+                lambda: self._state.phase_time >= 0.0,
+                "Phase time must be non-negative",
+            ),
+            (
+                lambda: self._state.step_count >= 0,
+                "Step count must be non-negative",
+            ),
+            (
+                lambda: self._callbacks is not None
+                and isinstance(self._callbacks, dict),
+                "Callbacks must be a non-None dict",
+            ),
+            (
+                lambda: self._state.stance_foot in ("left", "right", "both"),
+                "Stance foot must be 'left', 'right', or 'both'",
+            ),
+        ]
 
     @property
     def state(self) -> GaitState:

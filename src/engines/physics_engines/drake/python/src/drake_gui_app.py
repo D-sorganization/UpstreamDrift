@@ -18,6 +18,7 @@ from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
+from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 
 # Use centralized availability flags
@@ -134,8 +135,8 @@ SLIDER_RANGE_MAX = 314
 INITIAL_PELVIS_HEIGHT_M = 1.0
 
 # Styles
-STYLE_BUTTON_RUN = "QPushButton { background-color: #4CAF50; color: white; }"
-STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
+STYLE_BUTTON_RUN = Styles.BTN_RUN
+STYLE_BUTTON_STOP = Styles.BTN_STOP
 
 # Logger
 LOGGER = get_logger(__name__)
@@ -610,7 +611,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         builder = DiagramBuilder()
         plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=1e-3)
         parser = Parser(plant)
-        parser.AddModels(urdf_path)
+        parser.AddModels(Path(urdf_path))  # type: ignore[arg-type]  # pydrake expects PathLike
         plant.Finalize()
 
         if self.meshcat:
@@ -635,7 +636,9 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         if plant.HasBodyNamed("pelvis"):
             pelvis = plant.GetBodyByName("pelvis")
             plant.SetFreeBodyPose(
-                plant_context, pelvis, RigidTransform([0, 0, INITIAL_PELVIS_HEIGHT_M])
+                plant_context,
+                pelvis,
+                RigidTransform([0, 0, INITIAL_PELVIS_HEIGHT_M]),  # type: ignore[call-overload]  # pydrake list-to-array overload
             )
 
         # Zero out velocities
@@ -1111,8 +1114,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
         # Update overlays
         if self.visualizer:
-            self.visualizer.update_frame_transforms(context)
-            self.visualizer.update_com_transforms(context)
+            self.visualizer.update_frame_transforms(context)  # type: ignore[attr-defined]  # custom DrakeVisualizer method
+            self.visualizer.update_com_transforms(context)  # type: ignore[attr-defined]  # custom DrakeVisualizer method
 
         self._update_visualization()
 
@@ -1208,6 +1211,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
     def _record_frame(self, context: Any) -> None:
         """Record a single frame of simulation data."""
+        assert self.plant is not None  # guaranteed by caller check
         plant_context = self.plant.GetMyContextFromRoot(context)
         q = self.plant.GetPositions(plant_context)
         v = self.plant.GetVelocities(plant_context)
@@ -1240,6 +1244,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
     def _find_club_head_position(self, plant_context: Any) -> np.ndarray:
         """Find and return the club head position in world coordinates."""
+        assert self.plant is not None  # guaranteed by caller
         body_names = ["clubhead", "club_body", "wrist", "hand", "link_7"]
         for name in body_names:
             if self.plant.HasBodyNamed(name):
@@ -1272,6 +1277,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
     def _compute_live_analysis(self, q: np.ndarray, v: np.ndarray) -> None:
         """Compute induced accelerations and counterfactuals for the current state."""
+        assert self.plant is not None  # guaranteed by caller
         # Update eval context
         self.plant.SetPositions(self.eval_context, q)
         self.plant.SetVelocities(self.eval_context, v)
@@ -1323,6 +1329,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             if src:
                 unique_sources.add(str(src))
 
+        assert self.plant is not None  # guaranteed by caller chain
         for source in unique_sources:
             if source in ["gravity", "velocity", "total"]:
                 continue
@@ -1358,8 +1365,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             return
 
         if self.visualizer:
-            self.visualizer.update_frame_transforms(self.context)
-            self.visualizer.update_com_transforms(self.context)
+            self.visualizer.update_frame_transforms(self.context)  # type: ignore[attr-defined]  # custom DrakeVisualizer method
+            self.visualizer.update_com_transforms(self.context)  # type: ignore[attr-defined]  # custom DrakeVisualizer method
 
         # Draw Ellipsoids
         self._draw_ellipsoids()
@@ -1437,7 +1444,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 points = np.vstack([pos_W, end_pos]).T
                 path = f"overlays/vectors/forces/{body.name()}"
                 if self.meshcat is not None:
-                    self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))
+                    self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))  # type: ignore[arg-type]  # pydrake Meshcat overload
 
         # 3. Advanced Vectors (Induced / CF)
         if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):
@@ -1541,7 +1548,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
 
             # Meshcat SetLineSegments expects 3xN array
             points = np.vstack([start_pos, end_pos]).T
-            self.meshcat.SetLineSegments(path, points, 2.0, color)
+            self.meshcat.SetLineSegments(path, points, 2.0, color)  # type: ignore[arg-type]  # pydrake Meshcat overload
 
     def _update_ellipsoids(self) -> None:
         """Compute and draw ellipsoids."""
@@ -1570,7 +1577,12 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         frame_B = target_body.body_frame()
 
         J_spatial = self.plant.CalcJacobianSpatialVelocity(
-            plant_context, JacobianWrtVariable.kV, frame_B, [0, 0, 0], frame_W, frame_W
+            plant_context,
+            JacobianWrtVariable.kV,
+            frame_B,
+            [0, 0, 0],
+            frame_W,
+            frame_W,  # type: ignore[arg-type]  # pydrake list-to-array overload
         )
         J = J_spatial[3:, :]  # Translational
 
@@ -1652,14 +1664,14 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             lbl = QtWidgets.QLabel(name)
 
             chk_frame = QtWidgets.QCheckBox("Frame")
-            is_vis_f = name in visualizer.visible_frames
+            is_vis_f = name in visualizer.visible_frames  # type: ignore[attr-defined]  # custom DrakeVisualizer attr
             chk_frame.setChecked(is_vis_f)
-            chk_frame.toggled.connect(lambda c, n=name: visualizer.toggle_frame(n, c))
+            chk_frame.toggled.connect(lambda c, n=name: visualizer.toggle_frame(n, c))  # type: ignore[attr-defined]  # custom DrakeVisualizer method
 
             chk_com = QtWidgets.QCheckBox("COM")
-            is_vis_c = name in visualizer.visible_coms
+            is_vis_c = name in visualizer.visible_coms  # type: ignore[attr-defined]  # custom DrakeVisualizer attr
             chk_com.setChecked(is_vis_c)
-            chk_com.toggled.connect(lambda c, n=name: visualizer.toggle_com(n, c))
+            chk_com.toggled.connect(lambda c, n=name: visualizer.toggle_com(n, c))  # type: ignore[attr-defined]  # custom DrakeVisualizer method
 
             b_row.addWidget(lbl)
             b_row.addWidget(chk_frame)
@@ -1679,8 +1691,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         if self.operating_mode == "kinematic":
             diagram.ForcedPublish(context)
             if self.visualizer:
-                self.visualizer.update_frame_transforms(context)
-                self.visualizer.update_com_transforms(context)
+                self.visualizer.update_frame_transforms(context)  # type: ignore[attr-defined]  # custom DrakeVisualizer method
+                self.visualizer.update_com_transforms(context)  # type: ignore[attr-defined]  # custom DrakeVisualizer method
 
     def _toggle_recording(self, checked: bool) -> None:  # type: ignore[override]  # noqa: FBT001
         if checked:

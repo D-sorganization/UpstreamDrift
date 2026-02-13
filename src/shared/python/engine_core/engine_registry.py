@@ -6,6 +6,8 @@ from enum import Enum
 from pathlib import Path
 from typing import TypeAlias
 
+from src.shared.python.core.contracts import ContractChecker
+
 from .interfaces import PhysicsEngine
 
 
@@ -47,15 +49,34 @@ class EngineRegistration:
     probe_class: type | None = None
 
 
-class EngineRegistry:
+class EngineRegistry(ContractChecker):
     """Registry of available physics engines.
 
     Separates engine discovery from engine loading.
+
+    Design by Contract:
+        Invariants:
+            - _registrations dict is never None
+            - All registered types are valid EngineType values
     """
 
     def __init__(self) -> None:
         self._registrations: dict[EngineType, EngineRegistration] = {}
         self._root_path: Path | None = None
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for EngineRegistry."""
+        return [
+            (
+                lambda: self._registrations is not None
+                and isinstance(self._registrations, dict),
+                "Registrations must be a non-None dict",
+            ),
+            (
+                lambda: all(isinstance(k, EngineType) for k in self._registrations),
+                "All registration keys must be EngineType instances",
+            ),
+        ]
 
     def register(self, registration: EngineRegistration) -> None:
         """Register an engine."""

@@ -24,6 +24,7 @@ from typing import Any, TypeAlias
 import numpy as np
 import pandas as pd  # type: ignore[import]
 
+from ..core.contracts import precondition
 from ..core.datetime_utils import (
     format_datetime,
     now_local,
@@ -154,6 +155,17 @@ class OutputManager:
 
         logger.info("Output directory structure created successfully")
 
+    @precondition(
+        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: results
+        is not None,
+        "Simulation results must not be None",
+    )
+    @precondition(
+        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: filename
+        is not None
+        and len(filename) > 0,
+        "Filename must be a non-empty string",
+    )
     def save_simulation_results(
         self,
         results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
@@ -484,6 +496,17 @@ class OutputManager:
 
         return sorted(simulations)
 
+    @precondition(
+        lambda self, analysis_data, report_name, format_type="json": analysis_data
+        is not None,
+        "Analysis data must not be None",
+    )
+    @precondition(
+        lambda self, analysis_data, report_name, format_type="json": report_name
+        is not None
+        and len(report_name) > 0,
+        "Report name must be a non-empty string",
+    )
     def export_analysis_report(
         self,
         analysis_data: dict[str, Any],
@@ -591,6 +614,10 @@ class OutputManager:
 
         yield from _scan_recursive(directory)
 
+    @precondition(
+        lambda self, max_age_days=30: max_age_days > 0,
+        "Maximum age in days must be positive",
+    )
     def cleanup_old_files(self, max_age_days: int = 30) -> int:
         """
         Clean up old files based on age.

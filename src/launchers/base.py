@@ -32,6 +32,8 @@ from PyQt6.QtWidgets import (
 if TYPE_CHECKING:
     pass
 
+from src.shared.python.theme.style_constants import Styles
+
 logger = logging.getLogger(__name__)
 
 # Repository root - single source of truth
@@ -207,7 +209,7 @@ class BaseLauncher(QMainWindow):
         # Title
         title_label = QLabel(item.name)
         title_label.setFont(self.CARD_TITLE_FONT)
-        title_label.setStyleSheet("border: none; background: transparent;")
+        title_label.setStyleSheet(Styles.LABEL_TITLE_TRANSPARENT)
         layout.addWidget(title_label)
 
         # Description
@@ -288,7 +290,7 @@ class BaseLauncher(QMainWindow):
 
         if subtitle:
             subtitle_label = QLabel(subtitle)
-            subtitle_label.setStyleSheet("color: #666; font-size: 13px;")
+            subtitle_label.setStyleSheet(Styles.TEXT_SUBTITLE_LAUNCHER)
             layout.addWidget(subtitle_label)
 
         return layout

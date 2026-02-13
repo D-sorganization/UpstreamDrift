@@ -35,6 +35,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.theme.style_constants import Styles
+
 logger = logging.getLogger(__name__)
 
 
@@ -150,9 +152,7 @@ class MediaPipeGUI(QMainWindow):
 
         # Header
         lbl_title = QLabel("MediaPipe Video Analysis")
-        lbl_title.setStyleSheet(
-            "font-size: 18px; font-weight: bold; margin-bottom: 10px;"
-        )
+        lbl_title.setStyleSheet(Styles.POSE_EST_TITLE)
         lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_title)
 
@@ -182,9 +182,7 @@ class MediaPipeGUI(QMainWindow):
         self.btn_run = QPushButton("Run Analysis")
         self.btn_run.clicked.connect(self.run_analysis)
         self.btn_run.setEnabled(False)
-        self.btn_run.setStyleSheet(
-            "background-color: #ff9900; color: white; padding: 10px; font-weight: bold;"
-        )
+        self.btn_run.setStyleSheet(Styles.BTN_RUN_MEDIAPIPE)
         layout.addWidget(self.btn_run)
 
         # Progress

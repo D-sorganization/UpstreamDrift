@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
+
+from src.shared.python.core.contracts import ContractChecker
 
 
 @dataclass
@@ -20,8 +23,15 @@ class ModelConfig:
     engine_type: str | None = None
 
 
-class ModelRegistry:
-    """Registry for loading and accessing model configurations."""
+class ModelRegistry(ContractChecker):
+    """Registry for loading and accessing model configurations.
+
+    Design by Contract:
+        Invariants:
+            - models dict is never None
+            - config_path is a valid Path object
+            - All model IDs in the registry are non-empty strings
+    """
 
     def __init__(self, config_path: str | Path = "config/models.yaml") -> None:
         """Initialize registry.
@@ -32,6 +42,24 @@ class ModelRegistry:
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
         self._load_registry()
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for ModelRegistry."""
+        return [
+            (
+                lambda: self.models is not None and isinstance(self.models, dict),
+                "models must be a non-None dict",
+            ),
+            (
+                lambda: self.config_path is not None
+                and isinstance(self.config_path, Path),
+                "config_path must be a valid Path",
+            ),
+            (
+                lambda: all(isinstance(k, str) and len(k) > 0 for k in self.models),
+                "All model IDs must be non-empty strings",
+            ),
+        ]
 
     def _load_registry(self) -> None:
         """Load models from YAML configuration file.

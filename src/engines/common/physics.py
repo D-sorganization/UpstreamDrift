@@ -361,6 +361,14 @@ class BallPhysics:
         self.aero = AerodynamicsCalculator(self.ball, air)
         self.gravity = gravity if gravity is not None else np.array([0.0, 0.0, -9.81])
 
+    @precondition(
+        lambda self, velocity, spin: velocity.shape == (3,),
+        "Velocity must be a 3D vector",
+    )
+    @precondition(
+        lambda self, velocity, spin: spin.shape == (3,),
+        "Spin must be a 3D vector",
+    )
     def compute_total_force(
         self,
         velocity: np.ndarray,
@@ -383,6 +391,14 @@ class BallPhysics:
 
         return F_gravity + drag + lift + magnus
 
+    @precondition(
+        lambda self, spin, dt: spin.shape == (3,),
+        "Spin must be a 3D vector",
+    )
+    @precondition(
+        lambda self, spin, dt: dt > 0,
+        "Time step dt must be positive",
+    )
     def compute_spin_decay(self, spin: np.ndarray, dt: float) -> np.ndarray:
         """Compute spin decay over time step.
 
@@ -399,6 +415,22 @@ class BallPhysics:
         decay_factor = np.exp(-self.ball.spin_decay_rate * dt)
         return spin * decay_factor
 
+    @precondition(
+        lambda self, position, velocity, spin, dt: position.shape == (3,),
+        "Position must be a 3D vector",
+    )
+    @precondition(
+        lambda self, position, velocity, spin, dt: velocity.shape == (3,),
+        "Velocity must be a 3D vector",
+    )
+    @precondition(
+        lambda self, position, velocity, spin, dt: spin.shape == (3,),
+        "Spin must be a 3D vector",
+    )
+    @precondition(
+        lambda self, position, velocity, spin, dt: dt > 0,
+        "Time step dt must be positive",
+    )
     def step(
         self,
         position: np.ndarray,

@@ -31,6 +31,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.theme.style_constants import Styles
+
 try:
     from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
 
@@ -108,7 +110,7 @@ class SignalToolkitUIMixin:
         joint_layout.addLayout(joint_row)
 
         self.apply_btn = QPushButton("Apply to Joint")
-        self.apply_btn.setStyleSheet("background-color: #107c10; font-weight: bold;")
+        self.apply_btn.setStyleSheet(Styles.BTN_ACTION_GREEN)
         joint_layout.addWidget(self.apply_btn)
 
         self.export_btn = QPushButton("Export Signal")
@@ -197,7 +199,7 @@ class SignalToolkitUIMixin:
         layout.addWidget(time_group)
 
         self.generate_btn = QPushButton("Generate Signal")
-        self.generate_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
+        self.generate_btn.setStyleSheet(Styles.BTN_ACTION_BLUE)
         layout.addWidget(self.generate_btn)
         layout.addStretch()
         return tab

@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 logger = get_logger(__name__)
 
@@ -52,11 +53,7 @@ class OverlayWidget(QWidget):
         top_bar = QHBoxLayout()
 
         self.status_label = QLabel("Run Overlay Active")
-        self.status_label.setStyleSheet(
-            "color: white; font-weight: bold; font-size: 14pt; "
-            "background-color: rgba(0, 0, 0, 150); "
-            "padding: 5px 10px; border-radius: 5px;"
-        )
+        self.status_label.setStyleSheet(Styles.OVERLAY_STATUS)
         self.status_label.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
         )
@@ -66,13 +63,7 @@ class OverlayWidget(QWidget):
         # Close button
         self.close_btn = QPushButton("×")
         self.close_btn.setFixedSize(30, 30)
-        self.close_btn.setStyleSheet(
-            "QPushButton { "
-            "  color: white; background-color: rgba(255, 0, 0, 180); "
-            "  border-radius: 15px; font-weight: bold; font-size: 16px;"
-            "}"
-            "QPushButton:hover { background-color: rgba(255, 50, 50, 255); }"
-        )
+        self.close_btn.setStyleSheet(Styles.OVERLAY_CLOSE_BTN)
         self.close_btn.clicked.connect(self.hide_overlay)
         top_bar.addWidget(self.close_btn)
 
@@ -84,23 +75,12 @@ class OverlayWidget(QWidget):
 
         # Example controls
         self.rec_btn = QPushButton("● REC")
-        self.rec_btn.setStyleSheet(
-            "QPushButton { "
-            "  color: white; background-color: rgba(200, 0, 0, 150); "
-            "  border: 1px solid white; border-radius: 4px; padding: 5px 15px;"
-            "}"
-            "QPushButton:checked { background-color: red; }"
-        )
+        self.rec_btn.setStyleSheet(Styles.OVERLAY_REC_BTN)
         self.rec_btn.setCheckable(True)
         bottom_bar.addWidget(self.rec_btn)
 
         self.pause_btn = QPushButton("⏸ PAUSE")
-        self.pause_btn.setStyleSheet(
-            "QPushButton { "
-            "  color: white; background-color: rgba(0, 0, 0, 150); "
-            "  border: 1px solid white; border-radius: 4px; padding: 5px 15px;"
-            "}"
-        )
+        self.pause_btn.setStyleSheet(Styles.OVERLAY_PAUSE_BTN)
         bottom_bar.addWidget(self.pause_btn)
 
         bottom_bar.addStretch()

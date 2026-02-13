@@ -8,11 +8,13 @@ This module provides automated cross-engine validation to ensure MuJoCo, Drake,
 and Pinocchio produce consistent results within specified tolerances.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np
 
+from src.shared.python.core.contracts import ContractChecker
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -43,7 +45,7 @@ class ValidationResult:
     severity: str = "PASSED"  # PASSED, WARNING, ERROR, BLOCKER
 
 
-class CrossEngineValidator:
+class CrossEngineValidator(ContractChecker):
     """Validates numerical consistency across physics engines.
 
     Implements tolerance-based validation per Guideline P3:
@@ -52,6 +54,11 @@ class CrossEngineValidator:
     - Accelerations: ±1e-4 m/s²
     - Torques: ±1e-3 N⋅m (or <10% RMS for large magnitudes)
     - Jacobians: ±1e-8 (element-wise)
+
+    Design by Contract:
+        Invariants:
+            - All tolerance values are positive
+            - Severity thresholds are ordered correctly
 
     Example:
         >>> validator = CrossEngineValidator()
@@ -66,6 +73,21 @@ class CrossEngineValidator:
         >>> print(f"Deviation: {result.max_deviation:.2e}")
         Deviation: 1.00e-07
     """
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for CrossEngineValidator."""
+        return [
+            (
+                lambda: all(v > 0 for v in self.TOLERANCES.values()),
+                "All tolerance values must be positive",
+            ),
+            (
+                lambda: self.WARNING_THRESHOLD
+                < self.ERROR_THRESHOLD
+                < self.BLOCKER_THRESHOLD,
+                "Severity thresholds must be ordered: WARNING < ERROR < BLOCKER",
+            ),
+        ]
 
     # Tolerance specifications from Guideline P3
     TOLERANCES = {

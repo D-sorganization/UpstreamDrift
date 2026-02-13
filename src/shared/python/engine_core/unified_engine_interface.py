@@ -7,12 +7,14 @@ This module provides a unified interface for all physics engines with:
 - Professional error handling and diagnostics
 """
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.config.standard_models import StandardModelManager
+from src.shared.python.core.contracts import ContractChecker
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.engine_core.interfaces import PhysicsEngine
@@ -21,8 +23,15 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 
-class UnifiedEngineInterface:
-    """Unified interface for all physics engines with standardized model loading."""
+class UnifiedEngineInterface(ContractChecker):
+    """Unified interface for all physics engines with standardized model loading.
+
+    Design by Contract:
+        Invariants:
+            - suite_root is a valid Path
+            - engine_manager is never None
+            - If current_engine is set, current_engine_type must also be set
+    """
 
     def __init__(self, suite_root: Path | None = None) -> None:
         """Initialize unified engine interface.
@@ -37,6 +46,25 @@ class UnifiedEngineInterface:
         self.current_engine: PhysicsEngine | None = None
         self.current_engine_type: EngineType | None = None
         self.loaded_model_path: Path | None = None
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for UnifiedEngineInterface."""
+        return [
+            (
+                lambda: self.suite_root is not None
+                and isinstance(self.suite_root, Path),
+                "suite_root must be a valid Path",
+            ),
+            (
+                lambda: self.engine_manager is not None,
+                "engine_manager must not be None",
+            ),
+            (
+                lambda: self.current_engine is None
+                or self.current_engine_type is not None,
+                "If current_engine is set, current_engine_type must also be set",
+            ),
+        ]
 
     def load_engine(
         self, engine_type: str | EngineType, load_standard_model: bool = True

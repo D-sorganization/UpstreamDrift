@@ -37,6 +37,7 @@ from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
 from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
 from src.shared.python.ai.tools.file_ops import register_file_tools
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 if TYPE_CHECKING:
     from src.shared.python.ai.adapters.base import BaseAgentAdapter
@@ -82,13 +83,13 @@ class MessageWidget(QFrame):
         header = QHBoxLayout()
 
         role_label = QLabel(self._get_role_display())
-        role_label.setStyleSheet("font-weight: bold; color: #e0e0e0;")
+        role_label.setStyleSheet(Styles.TEXT_LABEL_BOLD_WHITE)
         header.addWidget(role_label)
 
         header.addStretch()
 
         time_label = QLabel(self._timestamp.strftime("%H:%M"))
-        time_label.setStyleSheet("color: #888888; font-size: 11px;")
+        time_label.setStyleSheet(Styles.TEXT_MUTED)
         header.addWidget(time_label)
 
         layout.addLayout(header)
@@ -109,9 +110,7 @@ class MessageWidget(QFrame):
         )
         self._content_label.setMarkdown(self._content)
         # Ensure text is visible on dark backgrounds
-        self._content_label.setStyleSheet(
-            "background-color: transparent; color: #e0e0e0;"
-        )
+        self._content_label.setStyleSheet(Styles.TEXT_CONTENT_TRANSPARENT)
 
         # Auto-resize to content
         doc = self._content_label.document()
@@ -140,34 +139,11 @@ class MessageWidget(QFrame):
         - Text: #e0e0e0
         """
         if self._role == "user":
-            self.setStyleSheet("""
-                MessageWidget {
-                    background-color: #2d2d2d;
-                    border: 1px solid #3c3c3c;
-                    border-radius: 8px;
-                    margin-left: 40px;
-                }
-                QLabel { color: #FF8800; }
-                """)
+            self.setStyleSheet(Styles.CHAT_MESSAGE_USER)
         elif self._role == "assistant":
-            self.setStyleSheet("""
-                MessageWidget {
-                    background-color: #252526;
-                    border: 1px solid #333333;
-                    border-radius: 8px;
-                    margin-right: 40px;
-                }
-                QLabel { color: #e0e0e0; }
-                """)
+            self.setStyleSheet(Styles.CHAT_MESSAGE_ASSISTANT)
         elif self._role == "system":
-            self.setStyleSheet("""
-                MessageWidget {
-                    background-color: #332b00;
-                    border: 1px solid #665500;
-                    border-radius: 8px;
-                }
-                QLabel { color: #FF8800; }
-                """)
+            self.setStyleSheet(Styles.CHAT_MESSAGE_SYSTEM)
 
     def _adjust_height(self) -> None:
         """Adjust height to fit content."""
@@ -537,7 +513,7 @@ class AIAssistantPanel(QWidget):
 
         # Container for messages
         self._message_container = QWidget()
-        self._message_container.setStyleSheet("background-color: #1e1e1e;")
+        self._message_container.setStyleSheet(Styles.CONTAINER_DARK)
         self._message_layout = QVBoxLayout(self._message_container)
         self._message_layout.setContentsMargins(8, 8, 8, 8)
         self._message_layout.setSpacing(8)
@@ -596,7 +572,7 @@ class AIAssistantPanel(QWidget):
 
         # Expertise level indicator
         self._expertise_label = QLabel("Level: Beginner")
-        self._expertise_label.setStyleSheet("color: #888888; font-size: 11px;")
+        self._expertise_label.setStyleSheet(Styles.TEXT_MUTED)
         button_layout.addWidget(self._expertise_label)
 
         button_layout.addStretch()

@@ -36,11 +36,9 @@ logger = get_logger(__name__)
 # Log warning if MyoSuite not available
 
 if not MYOSUITE_AVAILABLE:
-
     logger.warning("MyoSuite not installed. MyoSuitePhysicsEngine will not function.")
 
 else:
-
     import gym
     import myosuite  # noqa: F401
 
@@ -69,7 +67,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     @property
     def model_name(self) -> str:
-
         return self.env_id if self.env_id else "MyoSuite_NoModel"
 
     @property
@@ -85,7 +82,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if self.sim is not None:
-
             return self.sim.model
 
         return None
@@ -100,7 +96,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """Load environment by ID (passed as path)."""
 
         if not MYOSUITE_AVAILABLE:
-
             raise ImportError("MyoSuite not installed")
 
         # Heuristic: if path ends with .xml, user might be confused.
@@ -112,7 +107,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         env_id = path.strip()
 
         try:
-
             self.env = gym.make(env_id)
 
             self.env_id = env_id
@@ -124,25 +118,20 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             # specific to myosuite/mujoco-py structure
 
             if hasattr(self.env, "sim"):
-
                 self.sim = self.env.sim
 
             elif hasattr(self.env, "unwrapped") and hasattr(self.env.unwrapped, "sim"):
-
                 self.sim = self.env.unwrapped.sim
 
             else:
-
                 logger.warning(
                     "Could not access underlying MuJoCo sim object in MyoSuite env"
                 )
 
             if self.sim:
-
                 self._dt = self.sim.model.opt.timestep
 
         except (RuntimeError, TypeError, ValueError) as e:
-
             logger.error("Failed to load MyoSuite environment '%s': %s", env_id, e)
 
             raise
@@ -163,7 +152,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """Reset environment."""
 
         if self.env:
-
             self.env.reset()
 
     @precondition(
@@ -173,7 +161,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """Step simulation."""
 
         if not self.env:
-
             return
 
         # Gym steps by fixed internal dt (usually frame_skip * model_dt).
@@ -201,11 +188,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         # preserving state.
 
         if self.sim:
-
             # Handle dt override if possible
 
             if dt is not None:
-
                 old_dt = self.sim.model.opt.timestep
 
                 self.sim.model.opt.timestep = dt
@@ -215,11 +200,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 self.sim.model.opt.timestep = old_dt
 
             else:
-
                 self.sim.step()
 
         else:
-
             # Fallback to env.step() with zero action if we can't control it
 
             # (Bad, but fallback)
@@ -233,22 +216,18 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """Compute forward dynamics."""
 
         if self.sim:
-
             self.sim.forward()
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get qpos, qvel."""
 
         if not self.sim:
-
             return np.array([]), np.array([])
 
         return (np.array(self.sim.data.qpos[:]), np.array(self.sim.data.qvel[:]))
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-
         if not self.sim:
-
             return
 
         # Ensure arrays are at least 1D to avoid len() errors on scalars
@@ -262,7 +241,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         # Handle both real arrays and mocked objects safely
 
         try:
-
             qpos = self.sim.data.qpos
 
             qvel = self.sim.data.qvel
@@ -270,17 +248,13 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             # Check if we can get lengths safely
 
             if hasattr(qpos, "__len__") and hasattr(qvel, "__len__"):
-
                 if len(q) == len(qpos):
-
                     self.sim.data.qpos[:] = q
 
                 if len(v) == len(qvel):
-
                     self.sim.data.qvel[:] = v
 
             else:
-
                 # Fallback for mocked objects or unusual cases
 
                 self.sim.data.qpos[:] = q
@@ -288,29 +262,24 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 self.sim.data.qvel[:] = v
 
         except (TypeError, AttributeError) as e:
-
             # Handle mocked objects or other edge cases
 
             logger.debug(f"Primary state assignment failed (may be mocked): {e}")
 
             try:
-
                 self.sim.data.qpos[:] = q
 
                 self.sim.data.qvel[:] = v
 
             except (RuntimeError, ValueError, OSError) as fallback_error:
-
                 # Log instead of silent pass - helps debugging test failures
 
                 logger.debug(f"Fallback state assignment failed: {fallback_error}")
 
         try:
-
             self.sim.forward()
 
         except (RuntimeError, ValueError, OSError) as forward_error:
-
             # Log instead of silent pass - helps debugging test failures
 
             logger.debug(f"Forward dynamics failed (may be mocked): {forward_error}")
@@ -319,45 +288,35 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """Set control (ctrl)."""
 
         if not self.sim:
-
             return
 
         try:
-
             ctrl = self.sim.data.ctrl
 
             if hasattr(ctrl, "shape") and hasattr(ctrl, "__len__"):
-
                 if len(u) == ctrl.shape[0]:
-
                     self.sim.data.ctrl[:] = u
 
             else:
-
                 # Fallback for mocked objects
 
                 self.sim.data.ctrl[:] = u
 
         except (TypeError, AttributeError) as e:
-
             # Handle mocked objects or other edge cases
 
             logger.debug(f"Primary control assignment failed (may be mocked): {e}")
 
             try:
-
                 self.sim.data.ctrl[:] = u
 
             except (RuntimeError, ValueError, OSError) as fallback_error:
-
                 # Log instead of silent pass - helps debugging test failures
 
                 logger.debug(f"Fallback control assignment failed: {fallback_error}")
 
     def get_time(self) -> float:
-
         if self.sim:
-
             return float(self.sim.data.time)
 
         return 0.0
@@ -365,15 +324,12 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
-
         if not self.sim:
-
             return np.array([])
 
         # Try generic mujoco approach assuming 'mujoco' lib is available
 
         try:
-
             import mujoco
 
             # Handle both real MuJoCo objects and mocks
@@ -381,11 +337,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             if hasattr(self.sim.model, "nv") and not isinstance(
                 self.sim.model.nv, type(lambda: None)
             ):
-
                 nv = self.sim.model.nv
 
             else:
-
                 # Fallback for mocked objects - assume small system
 
                 nv = 1
@@ -395,11 +349,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             # Try to call mj_fullM with proper error handling for mocks
 
             try:
-
                 mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)
 
             except TypeError:
-
                 # Handle mocked objects - return identity matrix
 
                 M = np.eye(nv)
@@ -407,7 +359,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return M
 
         except ImportError as e:
-
             logger.error("Failed to compute mass matrix: %s", e)
 
             return np.array([])
@@ -415,15 +366,12 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
-
         if self.sim:
-
             return np.array(self.sim.data.qfrc_bias)
 
         return np.array([])
 
     def compute_gravity_forces(self) -> np.ndarray:
-
         # Not easily exposed separately in basic bindings without extra calc
 
         return np.array([])
@@ -431,15 +379,12 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-
         # Requires calling mj_inverse
 
         if not self.sim:
-
             return np.array([])
 
         try:
-
             import mujoco
 
             self.sim.data.qacc[:] = qacc
@@ -449,19 +394,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return np.array(self.sim.data.qfrc_inverse)
 
         except ImportError as e:
-
             logger.error("Failed to compute inverse dynamics: %s", e)
 
             return np.array([])
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
-
         if not self.sim:
-
             return None
 
         try:
-
             import mujoco
 
             body_id = mujoco.mj_name2id(
@@ -469,7 +410,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             )
 
             if body_id == -1:
-
                 return None
 
             jacp = np.zeros((3, self.sim.model.nv))
@@ -481,7 +421,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return {"linear": jacp, "angular": jacr, "spatial": np.vstack([jacr, jacp])}
 
         except ImportError as e:
-
             logger.error("Failed to compute Jacobian for body '%s': %s", body_name, e)
 
             return None
@@ -508,13 +447,11 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if not self.sim:
-
             logger.warning("Simulation not initialized")
 
             return np.array([])
 
         try:
-
             # Save current activations/controls
 
             ctrl_saved = self.sim.data.ctrl.copy()
@@ -542,7 +479,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return a_drift
 
         except (ValueError, TypeError, RuntimeError) as e:
-
             logger.error(f"Failed to compute drift acceleration: {e}")
 
             return np.array([])
@@ -571,19 +507,16 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if not self.sim:
-
             logger.warning("Simulation not initialized")
 
             return np.array([])
 
         try:
-
             # Get mass matrix
 
             M = self.compute_mass_matrix()
 
             if M.size == 0:
-
                 return np.array([])
 
             # Control component: M^-1 * tau
@@ -593,7 +526,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return a_control
 
         except (ValueError, TypeError, RuntimeError) as e:
-
             logger.error(f"Failed to compute control acceleration: {e}")
 
             return np.zeros_like(tau)
@@ -616,19 +548,16 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if not self.sim:
-
             logger.warning("Cannot create muscle analyzer - simulation not initialized")
 
             return None
 
         try:
-
             from .muscle_analysis import MyoSuiteMuscleAnalyzer
 
             return MyoSuiteMuscleAnalyzer(self.sim)
 
         except ImportError as e:
-
             logger.error(f"Failed to import muscle analyzer: {e}")
 
             return None
@@ -651,19 +580,16 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         analyzer = self.get_muscle_analyzer()
 
         if analyzer is None:
-
             logger.warning("Cannot create grip model - muscle analyzer not available")
 
             return None
 
         try:
-
             from .muscle_analysis import MyoSuiteGripModel
 
             return MyoSuiteGripModel(self.sim, analyzer)
 
         except ImportError as e:
-
             logger.error(f"Failed to import grip model: {e}")
 
             return None
@@ -686,7 +612,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         analyzer = self.get_muscle_analyzer()
 
         if analyzer is None:
-
             logger.warning("Cannot set activations - muscle analyzer unavailable")
 
             return
@@ -694,9 +619,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         # Map muscle names to actuator indices
 
         for muscle_name, activation in activations.items():
-
             try:
-
                 idx = analyzer.muscle_names.index(muscle_name)
 
                 actuator_id = analyzer.muscle_actuator_ids[idx]
@@ -708,31 +631,25 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 # Set control
 
                 try:
-
                     ctrl = self.sim.data.ctrl
 
                     if hasattr(ctrl, "__len__") and actuator_id < len(ctrl):
-
                         self.sim.data.ctrl[actuator_id] = activation_clamped
 
                     elif hasattr(ctrl, "__setitem__"):
-
                         # Fallback for mocked objects
 
                         self.sim.data.ctrl[actuator_id] = activation_clamped
 
                 except (TypeError, AttributeError, IndexError):
-
                     # Handle mocked objects or other edge cases
 
                     pass
 
             except ValueError:
-
                 logger.warning(f"Muscle '{muscle_name}' not found")
 
             except (RuntimeError, OSError) as e:
-
                 logger.error(f"Failed to set activation for '{muscle_name}': {e}")
 
     def compute_muscle_induced_accelerations(self) -> dict[str, np.ndarray]:
@@ -753,7 +670,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         analyzer = self.get_muscle_analyzer()
 
         if analyzer is None:
-
             return {}
 
         return dict(analyzer.compute_muscle_induced_accelerations())
@@ -776,7 +692,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         analyzer = self.get_muscle_analyzer()
 
         if analyzer is None:
-
             logger.warning("Cannot analyze muscles - analyzer not available")
 
             return None
@@ -801,7 +716,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         analyzer = self.get_muscle_analyzer()
 
         if analyzer is None:
-
             return None
 
         from .muscle_analysis import MyoSuiteMuscleState
@@ -840,11 +754,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if not self.sim:
-
             return np.array([])
 
         try:
-
             # Save current state
 
             q_saved, v_saved = self.get_state()
@@ -876,7 +788,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return a_ztcf
 
         except (ValueError, TypeError, RuntimeError) as e:
-
             logger.error(f"Failed to compute ZTCF: {e}")
 
             return np.array([])
@@ -905,11 +816,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if not self.sim:
-
             return np.array([])
 
         try:
-
             # Save current state
 
             q_saved, v_saved = self.get_state()
@@ -917,19 +826,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             # Set state with zero velocity
 
             try:
-
                 if hasattr(v_saved, "__len__"):
-
                     n_v = len(v_saved)
 
                 else:
-
                     # Fallback for scalar or mocked objects
 
                     n_v = 1
 
             except TypeError:
-
                 n_v = 1
 
             self.set_state(q, np.zeros(n_v))
@@ -949,7 +854,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return a_zvcf
 
         except (ValueError, TypeError, RuntimeError) as e:
-
             logger.error(f"Failed to compute ZVCF: {e}")
 
             return np.array([])
@@ -966,7 +870,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """
 
         if not self.sim:
-
             return np.array([])
 
         return np.array(self.sim.data.qacc)
@@ -985,7 +888,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         analyzer = self.get_muscle_analyzer()
 
         if analyzer is None:
-
             return []
 
         return list(analyzer.muscle_names)

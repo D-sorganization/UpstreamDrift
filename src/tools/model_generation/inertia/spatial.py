@@ -12,7 +12,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.contracts import precondition
 
+
+@precondition(lambda mass, com, I_com: mass > 0, "Mass must be positive")
 def mcI(
     mass: float,
     com: NDArray[np.float64],
@@ -156,6 +159,10 @@ def spatial_inertia_to_urdf(
     }
 
 
+@precondition(
+    lambda mass, com, ixx, iyy, izz, ixy=0.0, ixz=0.0, iyz=0.0: mass > 0,
+    "Mass must be positive",
+)
 def urdf_to_spatial_inertia(
     mass: float,
     com: tuple[float, float, float] | list[float] | NDArray,

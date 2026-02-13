@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -24,6 +25,19 @@ class SimulationService:
         """
         self.engine_manager = engine_manager
 
+    @precondition(
+        lambda self, request: request is not None,
+        "Simulation request must not be None",
+    )
+    @precondition(
+        lambda self, request: request.duration > 0,
+        "Simulation duration must be positive",
+    )
+    @precondition(
+        lambda self, request: request.engine_type is not None
+        and len(request.engine_type) > 0,
+        "Engine type must be specified",
+    )
     async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
         """Run a physics simulation based on request parameters.
 
@@ -111,6 +125,15 @@ class SimulationService:
                 export_paths=[],  # Add required field
             )
 
+    @precondition(
+        lambda self, task_id, request, active_tasks: task_id is not None
+        and len(task_id) > 0,
+        "Task ID must be a non-empty string",
+    )
+    @precondition(
+        lambda self, task_id, request, active_tasks: active_tasks is not None,
+        "Active tasks dictionary must not be None",
+    )
     async def run_simulation_background(
         self, task_id: str, request: SimulationRequest, active_tasks: dict[str, Any]
     ) -> None:

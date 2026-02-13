@@ -14,6 +14,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -49,6 +50,10 @@ class LauncherService:
             self._handler_registry = ModelHandlerRegistry()
         return self._handler_registry
 
+    @precondition(
+        lambda self, model_type: model_type is not None and len(model_type) > 0,
+        "Model type must be a non-empty string",
+    )
     def get_handler(self, model_type: str) -> Any:
         """Get a handler for the given model type.
 
@@ -76,6 +81,10 @@ class LauncherService:
             }
         return processes
 
+    @precondition(
+        lambda self, name: name is not None and len(name) > 0,
+        "Process name must be a non-empty string",
+    )
     def stop_process(self, name: str) -> bool:
         """Stop a running process by name.
 

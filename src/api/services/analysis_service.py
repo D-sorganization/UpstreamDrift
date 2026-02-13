@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.core.contracts import postcondition
+from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -37,6 +37,15 @@ class AnalysisService:
         """
         self.engine_manager = engine_manager
 
+    @precondition(
+        lambda self, request: request is not None,
+        "Analysis request must not be None",
+    )
+    @precondition(
+        lambda self, request: request.analysis_type is not None
+        and len(request.analysis_type) > 0,
+        "Analysis type must be specified",
+    )
     @postcondition(
         lambda result: result.success or "error" in result.results,
         "Must return success or error details",

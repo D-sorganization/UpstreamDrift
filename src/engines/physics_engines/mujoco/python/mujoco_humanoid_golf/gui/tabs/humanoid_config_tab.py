@@ -47,6 +47,7 @@ from PyQt6.QtWidgets import (
 from src.shared.python.config.configuration_manager import ConfigurationManager
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui.qt.process_worker import ProcessWorker
 
 if TYPE_CHECKING:
@@ -185,22 +186,16 @@ class HumanoidConfigTab(QWidget):
         btn_layout = QHBoxLayout()
 
         self.btn_run = QPushButton("RUN DOCKER SIMULATION")
-        self.btn_run.setStyleSheet(
-            "background-color: #107c10; color: white;padding: 10px; font-weight: bold;"
-        )
+        self.btn_run.setStyleSheet(Styles.BTN_DOCKER_RUN)
         self.btn_run.clicked.connect(self._start_simulation)
 
         self.btn_stop = QPushButton("STOP")
-        self.btn_stop.setStyleSheet(
-            "background-color: #d13438; color: white;padding: 10px; font-weight: bold;"
-        )
+        self.btn_stop.setStyleSheet(Styles.BTN_DOCKER_STOP)
         self.btn_stop.setEnabled(False)
         self.btn_stop.clicked.connect(self._stop_simulation)
 
         self.btn_rebuild = QPushButton("UPDATE ENV")
-        self.btn_rebuild.setStyleSheet(
-            "background-color: #8b5cf6; color: white;padding: 10px; font-weight: bold;"
-        )
+        self.btn_rebuild.setStyleSheet(Styles.BTN_DOCKER_REBUILD)
         self.btn_rebuild.clicked.connect(self._rebuild_docker)
 
         btn_layout.addWidget(self.btn_run)
@@ -239,7 +234,7 @@ class HumanoidConfigTab(QWidget):
         self.txt_log = QTextEdit()
         self.txt_log.setReadOnly(True)
         self.txt_log.setMaximumHeight(200)
-        self.txt_log.setStyleSheet("font-family: Consolas, monospace; font-size: 10pt;")
+        self.txt_log.setStyleSheet(Styles.CONSOLE_MONOSPACE)
         log_layout.addWidget(self.txt_log)
         log_group.setLayout(log_layout)
         tab_layout.addWidget(log_group)
@@ -309,7 +304,7 @@ class HumanoidConfigTab(QWidget):
 
         # Save button
         btn_save = QPushButton("Save Appearance")
-        btn_save.setStyleSheet("background-color: #107c10; color: white; padding: 8px;")
+        btn_save.setStyleSheet(Styles.BTN_SAVE)
         btn_save.clicked.connect(self._save_config)
         layout.addWidget(btn_save)
 
@@ -375,7 +370,7 @@ class HumanoidConfigTab(QWidget):
 
         # Save button
         btn_save = QPushButton("Save Equipment")
-        btn_save.setStyleSheet("background-color: #107c10; color: white; padding: 8px;")
+        btn_save.setStyleSheet(Styles.BTN_SAVE)
         btn_save.clicked.connect(self._save_config)
         layout.addWidget(btn_save)
 
@@ -677,9 +672,7 @@ class HumanoidConfigTab(QWidget):
 
     def _set_btn_color(self, btn: QPushButton, rgba: Sequence[float]) -> None:
         r, g, b = (int(c * 255) for c in rgba[:3])
-        btn.setStyleSheet(
-            f"background-color: rgb({r},{g},{b}); border: 1px solid #555;"
-        )
+        btn.setStyleSheet(Styles.color_swatch(r, g, b))
 
     def _pick_color(self, key: str, btn: QPushButton) -> None:
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])

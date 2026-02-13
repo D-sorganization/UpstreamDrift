@@ -11,6 +11,8 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 
+from src.shared.python.core.contracts import precondition
+
 from .types import (
     BalanceMetrics,
     BodyAngles,
@@ -82,6 +84,12 @@ class SwingAnalyzer:
         self.min_confidence = min_confidence
         self.smoothing_window = smoothing_window
 
+    @precondition(
+        lambda self, video_path, stance=StanceDirection.UNKNOWN, progress_callback=None: video_path
+        is not None
+        and len(video_path) > 0,
+        "Video path must be a non-empty string",
+    )
     def analyze_video(
         self,
         video_path: str,
@@ -135,6 +143,17 @@ class SwingAnalyzer:
             stance=stance,
         )
 
+    @precondition(
+        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: poses
+        is not None
+        and len(poses) >= 10,
+        "Must have at least 10 valid pose frames",
+    )
+    @precondition(
+        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: fps
+        > 0,
+        "FPS must be positive",
+    )
     def analyze_poses(
         self,
         poses: list[PoseFrame],

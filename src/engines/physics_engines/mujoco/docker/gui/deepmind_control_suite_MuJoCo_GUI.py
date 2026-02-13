@@ -684,7 +684,7 @@ class GolfSimulationGUI:
         colors_inner = ttk.Frame(colors_card, style="Modern.TFrame")
         colors_inner.pack(fill="x", padx=20, pady=15)
 
-        self.color_widgets = {}
+        self.color_widgets: dict[str, tk.Canvas] = {}
 
         color_parts = [
             ("👕 Shirt", "shirt"),

@@ -36,6 +36,7 @@ from abc import abstractmethod
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 logger = get_logger(__name__)
 
@@ -61,8 +62,8 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
     TIMER_INTERVAL_MS: int = 10  # ~100 Hz default
 
     # Styles for run/stop button
-    STYLE_BUTTON_RUN: str = "QPushButton { background-color: #4CAF50; color: white; }"
-    STYLE_BUTTON_STOP: str = "QPushButton { background-color: #f44336; color: white; }"
+    STYLE_BUTTON_RUN: str = Styles.BTN_RUN
+    STYLE_BUTTON_STOP: str = Styles.BTN_STOP
 
     def __init__(self) -> None:
         """Initialize the base simulation GUI.
@@ -182,9 +183,7 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         rec_layout = QtWidgets.QHBoxLayout()
         self.btn_record = QtWidgets.QPushButton("Record")
         self.btn_record.setCheckable(True)
-        self.btn_record.setStyleSheet(
-            "QPushButton:checked { background-color: #ffcccc; }"
-        )
+        self.btn_record.setStyleSheet(Styles.BTN_RECORD_CHECKED_LIGHT)
         self.btn_record.clicked.connect(self._toggle_recording)
         rec_layout.addWidget(self.btn_record)
 

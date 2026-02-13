@@ -276,7 +276,7 @@ def load_preset_from_file(file_path: Path | str) -> BodyParameters:
     """
     import json
 
-    import yaml
+    import yaml  # type: ignore[import-untyped]
 
     file_path = Path(file_path)
 
@@ -310,7 +310,7 @@ def save_preset_to_file(
     """
     import json
 
-    import yaml
+    import yaml  # type: ignore[import-untyped]
 
     file_path = Path(file_path)
     file_path.parent.mkdir(parents=True, exist_ok=True)

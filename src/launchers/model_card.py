@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 from .startup import ASSETS_DIR, _get_theme_colors
 
@@ -133,7 +134,7 @@ class DraggableModelCard(QFrame):
         layout.setAlignment(lbl_img, Qt.AlignmentFlag.AlignCenter)
 
         # Use transparent background, remove text-align as it's handled by setAlignment
-        lbl_img.setStyleSheet("QLabel { border: none; background: transparent; }")
+        lbl_img.setStyleSheet(Styles.LABEL_TRANSPARENT)
 
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
@@ -147,10 +148,7 @@ class DraggableModelCard(QFrame):
         else:
             c = _get_theme_colors()
             lbl_img.setText("No Image")
-            lbl_img.setStyleSheet(
-                f"QLabel {{ color: {c.text_quaternary}; font-style: italic; "
-                f"border: none; background: transparent; }}"
-            )
+            lbl_img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
 
         img_container = QWidget()
         img_layout = QHBoxLayout(img_container)
@@ -179,9 +177,7 @@ class DraggableModelCard(QFrame):
         lbl_status = QLabel(status_text)
         lbl_status.setObjectName("StatusChip")
         lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
-        lbl_status.setStyleSheet(
-            f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
-        )
+        lbl_status.setStyleSheet(Styles.status_chip(status_color, text_color))
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_status.setMinimumWidth(80)
 
@@ -226,17 +222,11 @@ class DraggableModelCard(QFrame):
         status_text, status_color, text_color = self._get_status_info()
         chip = self.findChild(QLabel, "StatusChip")
         if chip:
-            chip.setStyleSheet(
-                f"background-color: {status_color}; color: {text_color}; "
-                f"padding: 2px 6px; border-radius: 4px;"
-            )
+            chip.setStyleSheet(Styles.status_chip(status_color, text_color))
         # Update no-image fallback
         img = self.findChild(QLabel, "CardImage")
         if img and not img.pixmap():
-            img.setStyleSheet(
-                f"QLabel {{ color: {c.text_quaternary}; font-style: italic; "
-                f"border: none; background: transparent; }}"
-            )
+            img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         if event and event.button() == Qt.MouseButton.LeftButton:

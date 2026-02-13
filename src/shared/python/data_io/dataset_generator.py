@@ -41,6 +41,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -323,6 +324,18 @@ class DatasetGenerator:
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
 
+    @precondition(
+        lambda self, config, progress_callback=None: config is not None,
+        "Generator config must not be None",
+    )
+    @precondition(
+        lambda self, config, progress_callback=None: config.num_samples > 0,
+        "Number of samples must be positive",
+    )
+    @precondition(
+        lambda self, config, progress_callback=None: config.timestep > 0,
+        "Timestep must be positive",
+    )
     def generate(
         self,
         config: GeneratorConfig,
@@ -469,6 +482,20 @@ class DatasetGenerator:
             "control_profile": profile.name,
             "control_type": profile.profile_type,
         }
+
+        assert buffers["times"] is not None, "times buffer must not be None"
+        assert buffers["positions"] is not None, "positions buffer must not be None"
+        assert buffers["velocities"] is not None, "velocities buffer must not be None"
+        assert (
+            buffers["accelerations"] is not None
+        ), "accelerations buffer must not be None"
+        assert buffers["torques"] is not None, "torques buffer must not be None"
+        assert (
+            buffers["kinetic_energy"] is not None
+        ), "kinetic_energy buffer must not be None"
+        assert (
+            buffers["potential_energy"] is not None
+        ), "potential_energy buffer must not be None"
 
         return SimulationSample(
             sample_id=sample_id,
@@ -668,7 +695,7 @@ class DatasetGenerator:
                     except ValueError:
                         pass
         elif config.vary_initial_positions:
-            q0 = rng.uniform(-0.5, 0.5, n_q)
+            q0 = rng.uniform(-0.5, 0.5, n_q)  # type: ignore[assignment]
         else:
             q0 = np.zeros(n_q)
 
@@ -686,7 +713,7 @@ class DatasetGenerator:
                     except ValueError:
                         pass
         elif config.vary_initial_velocities:
-            v0 = rng.uniform(-0.1, 0.1, n_v)
+            v0 = rng.uniform(-0.1, 0.1, n_v)  # type: ignore[assignment]
         else:
             v0 = np.zeros(n_v)
 
@@ -1021,6 +1048,20 @@ class DatasetGenerator:
         logger.info("Exported dataset to CSV: %s", output_dir)
         return output_dir
 
+    @precondition(
+        lambda self, dataset, output_path, format="hdf5": dataset is not None,
+        "Dataset must not be None",
+    )
+    @precondition(
+        lambda self, dataset, output_path, format="hdf5": output_path is not None
+        and len(str(output_path)) > 0,
+        "Output path must be a non-empty string or Path",
+    )
+    @precondition(
+        lambda self, dataset, output_path, format="hdf5": format
+        in ("hdf5", "sqlite", "db", "csv"),
+        "Export format must be one of: hdf5, sqlite, db, csv",
+    )
     def export(
         self,
         dataset: TrainingDataset,
