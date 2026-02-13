@@ -93,6 +93,8 @@ dev = [
     "python-multipart>=0.0.6",
     # Required for video/image processing tests
     "opencv-python-headless>=4.8.0",
+    # Required for property-based testing
+    "hypothesis>=6.0.0",
 ]
 
 # GUI testing (requires PyQt6)

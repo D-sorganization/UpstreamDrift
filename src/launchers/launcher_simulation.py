@@ -20,6 +20,7 @@ from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
 )
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_popen
 from src.shared.python.theme.style_constants import Styles
@@ -48,6 +49,10 @@ class LauncherSimulationMixin:
 
         return env
 
+    @precondition(
+        lambda self, model_type: model_type is not None and len(model_type.strip()) > 0,
+        "Model type must be a non-empty string",
+    )
     def _check_module_dependencies(self, model_type: str) -> tuple[bool, str]:
         """Check if required dependencies for a module type are available.
 
@@ -249,6 +254,10 @@ except ImportError as e:
             self.lbl_status.setText("> Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
 
+    @precondition(
+        lambda self, path: path is not None and str(path).strip() != "",
+        "MJCF path must be a non-empty Path",
+    )
     def _launch_generic_mjcf(self, path: Path) -> None:
         """Launch generic MJCF file in passive viewer."""
         import mujoco
@@ -354,6 +363,14 @@ except ImportError as e:
             self.lbl_status.setText("* Docker Error")
             self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
 
+    @precondition(
+        lambda self, name, script_path, cwd: name is not None and len(name.strip()) > 0,
+        "Process name must be a non-empty string",
+    )
+    @precondition(
+        lambda self, name, script_path, cwd: script_path is not None,
+        "Script path must not be None",
+    )
     def _launch_script_process(self, name: str, script_path: Path, cwd: Path) -> None:
         """Helper to launch python script with error visibility.
 
@@ -387,6 +404,15 @@ except ImportError as e:
         else:
             QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}")
 
+    @precondition(
+        lambda self, name, module_name, cwd: name is not None and len(name.strip()) > 0,
+        "Process name must be a non-empty string",
+    )
+    @precondition(
+        lambda self, name, module_name, cwd: module_name is not None
+        and len(module_name.strip()) > 0,
+        "Module name must be a non-empty string",
+    )
     def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:
         """Helper to launch python module with error visibility.
 

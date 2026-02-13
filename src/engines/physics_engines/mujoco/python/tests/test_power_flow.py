@@ -60,41 +60,35 @@ class TestPowerFlowBasics:
             f"Expected power {expected_power}, got {result.joint_powers[0]}"
         )
 
-    def test_power_sign_positive_when_aligned(
-        self, simple_pendulum_model: mujoco.MjModel
+    @pytest.mark.parametrize(
+        "tau_val,expect_positive",
+        [
+            (2.0, True),
+            (-2.0, False),
+        ],
+        ids=["aligned_positive", "opposed_negative"],
+    )
+    def test_power_sign_convention(
+        self, simple_pendulum_model: mujoco.MjModel, tau_val, expect_positive
     ) -> None:
-        """Test power is positive when torque and velocity are aligned."""
+        """Test power sign depends on torque-velocity alignment."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
         qpos = np.array([0.0])
         qvel = np.array([1.0])  # Positive velocity
         qacc = np.array([0.0])
-        tau = np.array([2.0])  # Positive torque (same direction)
+        tau = np.array([tau_val])
 
         result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
 
-        # Both positive → power positive (generation)
-        assert result.joint_powers[0] > 0, (
-            "Power should be positive when torque and velocity are aligned"
-        )
-
-    def test_power_sign_negative_when_opposed(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
-        """Test power is negative when torque opposes velocity."""
-        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
-
-        qpos = np.array([0.0])
-        qvel = np.array([1.0])  # Positive velocity
-        qacc = np.array([0.0])
-        tau = np.array([-2.0])  # Negative torque (opposes motion)
-
-        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
-
-        # Opposite signs → power negative (absorption/braking)
-        assert result.joint_powers[0] < 0, (
-            "Power should be negative when torque opposes velocity"
-        )
+        if expect_positive:
+            assert result.joint_powers[0] > 0, (
+                "Power should be positive when torque and velocity are aligned"
+            )
+        else:
+            assert result.joint_powers[0] < 0, (
+                "Power should be negative when torque opposes velocity"
+            )
 
     def test_zero_velocity_gives_zero_power(
         self, simple_pendulum_model: mujoco.MjModel

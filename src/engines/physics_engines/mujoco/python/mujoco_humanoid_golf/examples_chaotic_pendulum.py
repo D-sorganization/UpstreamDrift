@@ -475,15 +475,12 @@ def example_5_chaos_exploration() -> None:
     plot_results(results, title="Example 5: Chaos Exploration")
 
 
-def example_6_sensitivity_to_initial_conditions() -> None:
-    """Example 6: Demonstrate sensitivity to initial conditions (hallmark of chaos)."""
-
+def _create_sensitivity_controllers() -> tuple:
     model1 = mujoco.MjModel.from_xml_string(CHAOTIC_PENDULUM_XML)
     data1 = mujoco.MjData(model1)
     model2 = mujoco.MjModel.from_xml_string(CHAOTIC_PENDULUM_XML)
     data2 = mujoco.MjData(model2)
 
-    # Two controllers with slightly different initial angles
     controller1 = ChaosExplorationDemo(
         model1,
         data1,
@@ -498,79 +495,95 @@ def example_6_sensitivity_to_initial_conditions() -> None:
         forcing_amp=20.0,
         initial_angle=0.501,
     )
+    return controller1, controller2
+
+
+def _plot_angle_comparison(ax, results1, results2) -> None:
+    ax.plot(
+        results1["time"],
+        results1["theta"],
+        label="IC: \u03b8\u2080 = 0.500 rad",
+        linewidth=1.5,
+    )
+    ax.plot(
+        results2["time"],
+        results2["theta"],
+        label="IC: \u03b8\u2080 = 0.501 rad",
+        linewidth=1.5,
+        alpha=0.8,
+    )
+    ax.set_ylabel("Angle (rad)")
+    ax.set_xlabel("Time (s)")
+    ax.legend()
+    ax.grid(True)
+    ax.set_title("Angle vs Time (Two Different Initial Conditions)")
+
+
+def _plot_trajectory_divergence(ax, results1, results2) -> None:
+    angle_diff = np.abs(results1["theta"] - results2["theta"])
+    ax.semilogy(results1["time"], angle_diff)
+    ax.set_ylabel("Absolute Angle Difference (rad)")
+    ax.set_xlabel("Time (s)")
+    ax.grid(True)
+    ax.set_title("Divergence of Trajectories (Log Scale)")
+
+
+def _plot_phase_portraits_comparison(ax, results1, results2) -> None:
+    ax.plot(
+        results1["theta"],
+        results1["theta_dot"],
+        linewidth=0.5,
+        label="IC: \u03b8\u2080 = 0.500 rad",
+    )
+    ax.plot(
+        results2["theta"],
+        results2["theta_dot"],
+        linewidth=0.5,
+        label="IC: \u03b8\u2080 = 0.501 rad",
+        alpha=0.7,
+    )
+    ax.set_xlabel("Angle (rad)")
+    ax.set_ylabel("Angular Velocity (rad/s)")
+    ax.legend()
+    ax.grid(True)
+    ax.set_title("Phase Portraits Comparison")
+
+
+def _plot_velocity_comparison(ax, results1, results2) -> None:
+    ax.plot(
+        results1["time"],
+        results1["theta_dot"],
+        label="IC: \u03b8\u2080 = 0.500 rad",
+        linewidth=1.5,
+    )
+    ax.plot(
+        results2["time"],
+        results2["theta_dot"],
+        label="IC: \u03b8\u2080 = 0.501 rad",
+        linewidth=1.5,
+        alpha=0.8,
+    )
+    ax.set_ylabel("Angular Velocity (rad/s)")
+    ax.set_xlabel("Time (s)")
+    ax.legend()
+    ax.grid(True)
+    ax.set_title("Angular Velocity vs Time")
+
+
+def example_6_sensitivity_to_initial_conditions() -> None:
+    """Example 6: Demonstrate sensitivity to initial conditions (hallmark of chaos)."""
+
+    controller1, controller2 = _create_sensitivity_controllers()
 
     results1 = run_simulation(controller1, duration=30.0)
     results2 = run_simulation(controller2, duration=30.0)
 
-    # Plot comparison
     _fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
-    axes[0, 0].plot(
-        results1["time"],
-        results1["theta"],
-        label="IC: θ₀ = 0.500 rad",
-        linewidth=1.5,
-    )
-    axes[0, 0].plot(
-        results2["time"],
-        results2["theta"],
-        label="IC: θ₀ = 0.501 rad",
-        linewidth=1.5,
-        alpha=0.8,
-    )
-    axes[0, 0].set_ylabel("Angle (rad)")
-    axes[0, 0].set_xlabel("Time (s)")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True)
-    axes[0, 0].set_title("Angle vs Time (Two Different Initial Conditions)")
-
-    # Difference in angle over time
-    angle_diff = np.abs(results1["theta"] - results2["theta"])
-    axes[0, 1].semilogy(results1["time"], angle_diff)
-    axes[0, 1].set_ylabel("Absolute Angle Difference (rad)")
-    axes[0, 1].set_xlabel("Time (s)")
-    axes[0, 1].grid(True)
-    axes[0, 1].set_title("Divergence of Trajectories (Log Scale)")
-
-    # Phase portraits
-    axes[1, 0].plot(
-        results1["theta"],
-        results1["theta_dot"],
-        linewidth=0.5,
-        label="IC: θ₀ = 0.500 rad",
-    )
-    axes[1, 0].plot(
-        results2["theta"],
-        results2["theta_dot"],
-        linewidth=0.5,
-        label="IC: θ₀ = 0.501 rad",
-        alpha=0.7,
-    )
-    axes[1, 0].set_xlabel("Angle (rad)")
-    axes[1, 0].set_ylabel("Angular Velocity (rad/s)")
-    axes[1, 0].legend()
-    axes[1, 0].grid(True)
-    axes[1, 0].set_title("Phase Portraits Comparison")
-
-    # Velocity comparison
-    axes[1, 1].plot(
-        results1["time"],
-        results1["theta_dot"],
-        label="IC: θ₀ = 0.500 rad",
-        linewidth=1.5,
-    )
-    axes[1, 1].plot(
-        results2["time"],
-        results2["theta_dot"],
-        label="IC: θ₀ = 0.501 rad",
-        linewidth=1.5,
-        alpha=0.8,
-    )
-    axes[1, 1].set_ylabel("Angular Velocity (rad/s)")
-    axes[1, 1].set_xlabel("Time (s)")
-    axes[1, 1].legend()
-    axes[1, 1].grid(True)
-    axes[1, 1].set_title("Angular Velocity vs Time")
+    _plot_angle_comparison(axes[0, 0], results1, results2)
+    _plot_trajectory_divergence(axes[0, 1], results1, results2)
+    _plot_phase_portraits_comparison(axes[1, 0], results1, results2)
+    _plot_velocity_comparison(axes[1, 1], results1, results2)
 
     plt.suptitle(
         "Example 6: Sensitivity to Initial Conditions (Chaos)",

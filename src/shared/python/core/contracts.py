@@ -786,3 +786,78 @@ def disable_contracts() -> None:
 def contracts_enabled() -> bool:
     """Check if contracts are currently enabled."""
     return CONTRACTS_ENABLED
+
+
+# ─── Class-Level Invariant Decorator ──────────────────────────
+
+
+def invariant(
+    condition: Callable[[Any], bool],
+    message: str = "Invariant violated",
+) -> Callable[[type[T]], type[T]]:
+    """Class decorator to declare a class-level invariant.
+
+    The *condition* callable receives ``self`` and must return ``True``
+    when the invariant holds.  The check is executed after ``__init__``
+    completes; if the invariant is violated, an ``InvariantError`` is
+    raised (or a warning is logged, depending on ``DBC_LEVEL``).
+
+    Multiple ``@invariant`` decorators can be stacked on a single class.
+    They are evaluated in top-to-bottom (outermost-first) order.
+
+    Args:
+        condition: A callable ``(self) -> bool`` expressing the invariant.
+        message: Human-readable description of the invariant.
+
+    Returns:
+        A class decorator that wraps ``__init__`` with the check.
+
+    Example::
+
+        @invariant(lambda self: self.timestep > 0, "Timestep must be positive")
+        @invariant(lambda self: self.model is not None, "Model must be loaded")
+        class MyEngine:
+            def __init__(self, timestep: float, model: Any) -> None:
+                self.timestep = timestep
+                self.model = model
+    """
+
+    def decorator(cls: type[T]) -> type[T]:
+        if DBC_LEVEL == ContractLevel.OFF:
+            return cls
+
+        original_init = cls.__init__  # type: ignore[misc]
+
+        @functools.wraps(original_init)
+        def new_init(self: Any, *args: Any, **kwargs: Any) -> None:
+            original_init(self, *args, **kwargs)
+            try:
+                result = condition(self)
+            except (RuntimeError, TypeError, ValueError, AttributeError) as exc:
+                if DBC_LEVEL == ContractLevel.ENFORCE:
+                    raise InvariantError(
+                        f"Failed to evaluate invariant: {exc}",
+                        class_name=cls.__name__,
+                    ) from exc
+                else:
+                    logger.warning(
+                        "[DbC invariant] %s: failed to evaluate – %s",
+                        cls.__name__,
+                        exc,
+                    )
+                return
+
+            if not result:
+                if DBC_LEVEL == ContractLevel.ENFORCE:
+                    raise InvariantError(message, class_name=cls.__name__)
+                else:
+                    logger.warning(
+                        "[DbC invariant] %s: %s",
+                        cls.__name__,
+                        message,
+                    )
+
+        cls.__init__ = new_init  # type: ignore[misc]
+        return cls
+
+    return decorator

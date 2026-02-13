@@ -92,33 +92,26 @@ def test_plot_joint_angles(plotter):
     assert fig.axes[0].texts[0].get_text() == "No data recorded"
 
 
-def test_plot_joint_velocities(plotter):
+@pytest.mark.parametrize(
+    "plot_method",
+    [
+        "plot_joint_velocities",
+        "plot_joint_torques",
+        "plot_actuator_powers",
+        "plot_energy_analysis",
+        "plot_club_head_speed",
+    ],
+    ids=[
+        "joint_velocities",
+        "joint_torques",
+        "actuator_powers",
+        "energy_analysis",
+        "club_head_speed",
+    ],
+)
+def test_plot_method_creates_axes(plotter, plot_method):
     fig = Figure()
-    plotter.plot_joint_velocities(fig)
-    assert len(fig.axes) > 0
-
-
-def test_plot_joint_torques(plotter):
-    fig = Figure()
-    plotter.plot_joint_torques(fig)
-    assert len(fig.axes) > 0
-
-
-def test_plot_actuator_powers(plotter):
-    fig = Figure()
-    plotter.plot_actuator_powers(fig)
-    assert len(fig.axes) > 0
-
-
-def test_plot_energy_analysis(plotter):
-    fig = Figure()
-    plotter.plot_energy_analysis(fig)
-    assert len(fig.axes) > 0
-
-
-def test_plot_club_head_speed(plotter):
-    fig = Figure()
-    plotter.plot_club_head_speed(fig)
+    getattr(plotter, plot_method)(fig)
     assert len(fig.axes) > 0
 
 
@@ -146,24 +139,35 @@ def test_plot_phase_diagram(plotter):
     assert "No data available" in fig.axes[0].texts[0].get_text()
 
 
-def test_plot_torque_comparison(plotter):
+@pytest.mark.parametrize(
+    "plot_method",
+    [
+        "plot_torque_comparison",
+        "plot_spectrogram",
+    ],
+    ids=[
+        "torque_comparison",
+        "spectrogram",
+    ],
+)
+def test_plot_method_creates_axes_extra(plotter, plot_method):
     fig = Figure()
-    plotter.plot_torque_comparison(fig)
+    method = getattr(plotter, plot_method)
+    if plot_method == "plot_spectrogram":
+        method(fig, joint_idx=0)
+    else:
+        method(fig)
     assert len(fig.axes) > 0
 
 
-def test_plot_frequency_analysis(plotter):
+@pytest.mark.parametrize(
+    "signal_type",
+    ["velocity", "position", "torque"],
+    ids=["freq_velocity", "freq_position", "freq_torque"],
+)
+def test_plot_frequency_analysis(plotter, signal_type):
     fig = Figure()
-    plotter.plot_frequency_analysis(fig, joint_idx=0, signal_type="velocity")
-    assert len(fig.axes) > 0
-
-    plotter.plot_frequency_analysis(fig, joint_idx=0, signal_type="position")
-    plotter.plot_frequency_analysis(fig, joint_idx=0, signal_type="torque")
-
-
-def test_plot_spectrogram(plotter):
-    fig = Figure()
-    plotter.plot_spectrogram(fig, joint_idx=0)
+    plotter.plot_frequency_analysis(fig, joint_idx=0, signal_type=signal_type)
     assert len(fig.axes) > 0
 
 
@@ -210,21 +214,22 @@ def test_plot_swing_plane(plotter):
     assert "Insufficient data" in fig.axes[0].texts[0].get_text()
 
 
-def test_plot_angular_momentum(plotter):
+@pytest.mark.parametrize(
+    "plot_method",
+    [
+        "plot_angular_momentum",
+        "plot_cop_trajectory",
+        "plot_cop_vector_field",
+    ],
+    ids=[
+        "angular_momentum",
+        "cop_trajectory",
+        "cop_vector_field",
+    ],
+)
+def test_plot_method_spatial(plotter, plot_method):
     fig = Figure()
-    plotter.plot_angular_momentum(fig)
-    assert len(fig.axes) > 0
-
-
-def test_plot_cop_trajectory(plotter):
-    fig = Figure()
-    plotter.plot_cop_trajectory(fig)
-    assert len(fig.axes) > 0
-
-
-def test_plot_cop_vector_field(plotter):
-    fig = Figure()
-    plotter.plot_cop_vector_field(fig)
+    getattr(plotter, plot_method)(fig)
     assert len(fig.axes) > 0
 
 
@@ -240,22 +245,26 @@ def test_plot_radar_chart(plotter):
     assert "Need at least 3 metrics" in fig.axes[0].texts[0].get_text()
 
 
-def test_plot_power_flow(plotter):
+@pytest.mark.parametrize(
+    "plot_method,args",
+    [
+        ("plot_power_flow", {}),
+        ("plot_counterfactual_comparison", {"cf_name": "ztcf"}),
+    ],
+    ids=["power_flow", "counterfactual_comparison"],
+)
+def test_plot_method_advanced(plotter, plot_method, args):
     fig = Figure()
-    plotter.plot_power_flow(fig)
+    getattr(plotter, plot_method)(fig, **args)
     assert len(fig.axes) > 0
 
 
-def test_plot_induced_acceleration(plotter):
+@pytest.mark.parametrize(
+    "joint_idx",
+    [0, None],
+    ids=["specific_joint", "all_joints"],
+)
+def test_plot_induced_acceleration(plotter, joint_idx):
     fig = Figure()
-    plotter.plot_induced_acceleration(fig, "gravity", joint_idx=0)
-    assert len(fig.axes) > 0
-
-    plotter.plot_induced_acceleration(fig, "gravity", joint_idx=None)
-    assert len(fig.axes) > 1
-
-
-def test_plot_counterfactual_comparison(plotter):
-    fig = Figure()
-    plotter.plot_counterfactual_comparison(fig, "ztcf")
+    plotter.plot_induced_acceleration(fig, "gravity", joint_idx=joint_idx)
     assert len(fig.axes) > 0

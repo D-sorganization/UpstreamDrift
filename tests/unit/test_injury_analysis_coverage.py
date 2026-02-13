@@ -79,12 +79,19 @@ def test_training_load_spike(scorer):
     assert any("training load spike" in r.lower() for r in report.recommendations)
 
 
-def test_category_weighting(scorer):
+@pytest.mark.parametrize(
+    "joint_key,expected_type",
+    [
+        ("hip_lead", InjuryType.HIP),
+        ("elbow_lead", InjuryType.ELBOW),
+    ],
+    ids=["hip_region", "elbow_region"],
+)
+def test_category_weighting(scorer, joint_key, expected_type):
     """Ensure different injury types update the correct region scores."""
-    joints = {"hip_lead": MockJointResult(50), "elbow_lead": MockJointResult(50)}
+    joints = {joint_key: MockJointResult(50)}
 
     report = scorer.score(joint_results=joints)
 
-    assert InjuryType.HIP in report.region_scores
-    assert InjuryType.ELBOW in report.region_scores
-    assert report.region_scores[InjuryType.HIP] == 50.0
+    assert expected_type in report.region_scores
+    assert report.region_scores[expected_type] == 50.0

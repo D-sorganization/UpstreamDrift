@@ -323,6 +323,15 @@ class SettingsDialog(QDialog):
         runtime = data.get("runtime_state", {})
         recommendations = data.get("recommendations", [])
 
+        html = self._render_diag_summary(summary)
+        html += self._render_diag_checks(checks)
+        html += self._render_diag_engines(checks)
+        html += self._render_diag_runtime(runtime)
+        html += self._render_diag_recommendations(recommendations)
+
+        self._diag_browser.setHtml(html)
+
+    def _render_diag_summary(self, summary: dict) -> str:
         status = summary.get("status", "unknown").upper()
         passed = summary.get("passed", 0)
         failed = summary.get("failed", 0)
@@ -330,7 +339,7 @@ class SettingsDialog(QDialog):
         total = summary.get("total_checks", passed + failed + warnings)
 
         status_color = "#2da44e" if status == "HEALTHY" else "#d29922"
-        html = f"""
+        return f"""
         <div style="margin-bottom: 12px;">
             <h2 style="color:{status_color}; margin: 0;">Status: {status}</h2>
             <p><b>{total} checks:</b>
@@ -341,8 +350,8 @@ class SettingsDialog(QDialog):
         </div>
         """
 
-        # All check details (pass and fail)
-        html += "<h3>Check Results</h3><table style='width:100%;'>"
+    def _render_diag_checks(self, checks: list) -> str:
+        html = "<h3>Check Results</h3><table style='width:100%;'>"
         for check in checks:
             icon = {"pass": "&#9989;", "fail": "&#10060;", "warning": "&#9888;"}.get(
                 check["status"], "&#8226;"
@@ -358,65 +367,73 @@ class SettingsDialog(QDialog):
                 f"<td style='padding:2px 6px; color:#666;'>{duration:.0f}ms</td></tr>"
             )
         html += "</table>"
+        return html
 
-        # Engine availability table (from engine_availability check details)
+    def _render_diag_engines(self, checks: list) -> str:
         engine_check = next(
             (c for c in checks if c["name"] == "engine_availability"), None
         )
         engines = (
             engine_check.get("details", {}).get("engines", []) if engine_check else []
         )
-        if engines:
-            html += "<h3>Physics Engines</h3>"
+        if not engines:
+            return ""
+
+        html = "<h3>Physics Engines</h3>"
+        html += (
+            "<table style='width:100%; border-collapse:collapse;'>"
+            "<tr style='border-bottom:1px solid #333;'>"
+            "<th style='padding:4px 8px; text-align:left;'>Engine</th>"
+            "<th style='padding:4px 8px; text-align:left;'>Status</th>"
+            "<th style='padding:4px 8px; text-align:left;'>Version</th>"
+            "<th style='padding:4px 8px; text-align:left;'>Details</th>"
+            "</tr>"
+        )
+        for eng in engines:
+            installed = eng.get("installed", False)
+            icon = "&#9989;" if installed else "&#10060;"
+            color = "#2da44e" if installed else "#f85149"
+            name = eng.get("name", "?").replace("_", " ").title()
+            version = eng.get("version") or "-"
+            diag = eng.get("diagnostic", "")
+            missing = eng.get("missing_deps", [])
+            detail_str = diag
+            if missing and not installed:
+                detail_str = f"Missing: {', '.join(missing[:3])}"
             html += (
-                "<table style='width:100%; border-collapse:collapse;'>"
-                "<tr style='border-bottom:1px solid #333;'>"
-                "<th style='padding:4px 8px; text-align:left;'>Engine</th>"
-                "<th style='padding:4px 8px; text-align:left;'>Status</th>"
-                "<th style='padding:4px 8px; text-align:left;'>Version</th>"
-                "<th style='padding:4px 8px; text-align:left;'>Details</th>"
-                "</tr>"
+                f"<tr>"
+                f"<td style='padding:3px 8px;'><b>{name}</b></td>"
+                f"<td style='padding:3px 8px; color:{color};'>{icon} "
+                f"{'Installed' if installed else 'Not installed'}</td>"
+                f"<td style='padding:3px 8px; color:#a0a0a0;'>{version}</td>"
+                f"<td style='padding:3px 8px; color:#888;'>{detail_str}</td>"
+                f"</tr>"
             )
-            for eng in engines:
-                installed = eng.get("installed", False)
-                icon = "&#9989;" if installed else "&#10060;"
-                color = "#2da44e" if installed else "#f85149"
-                name = eng.get("name", "?").replace("_", " ").title()
-                version = eng.get("version") or "-"
-                diag = eng.get("diagnostic", "")
-                missing = eng.get("missing_deps", [])
-                detail_str = diag
-                if missing and not installed:
-                    detail_str = f"Missing: {', '.join(missing[:3])}"
-                html += (
-                    f"<tr>"
-                    f"<td style='padding:3px 8px;'><b>{name}</b></td>"
-                    f"<td style='padding:3px 8px; color:{color};'>{icon} "
-                    f"{'Installed' if installed else 'Not installed'}</td>"
-                    f"<td style='padding:3px 8px; color:#a0a0a0;'>{version}</td>"
-                    f"<td style='padding:3px 8px; color:#888;'>{detail_str}</td>"
-                    f"</tr>"
-                )
-            html += "</table>"
+        html += "</table>"
+        return html
 
-        # Runtime state
-        if runtime:
-            html += "<h3>Runtime State</h3><ul>"
-            html += f"<li>Available models: {runtime.get('available_models_count', '?')}</li>"
-            html += f"<li>Tile order: {runtime.get('model_order_count', '?')}</li>"
-            html += f"<li>Model cards: {runtime.get('model_cards_count', '?')}</li>"
-            html += f"<li>Registry loaded: {runtime.get('registry_loaded', '?')}</li>"
-            html += f"<li>Docker available: {runtime.get('docker_available', '?')}</li>"
-            html += "</ul>"
+    def _render_diag_runtime(self, runtime: dict) -> str:
+        if not runtime:
+            return ""
+        html = "<h3>Runtime State</h3><ul>"
+        html += (
+            f"<li>Available models: {runtime.get('available_models_count', '?')}</li>"
+        )
+        html += f"<li>Tile order: {runtime.get('model_order_count', '?')}</li>"
+        html += f"<li>Model cards: {runtime.get('model_cards_count', '?')}</li>"
+        html += f"<li>Registry loaded: {runtime.get('registry_loaded', '?')}</li>"
+        html += f"<li>Docker available: {runtime.get('docker_available', '?')}</li>"
+        html += "</ul>"
+        return html
 
-        # Recommendations
-        if recommendations:
-            html += "<h3>Recommendations</h3><ul>"
-            for rec in recommendations[:8]:
-                html += f"<li>{rec}</li>"
-            html += "</ul>"
-
-        self._diag_browser.setHtml(html)
+    def _render_diag_recommendations(self, recommendations: list) -> str:
+        if not recommendations:
+            return ""
+        html = "<h3>Recommendations</h3><ul>"
+        for rec in recommendations[:8]:
+            html += f"<li>{rec}</li>"
+        html += "</ul>"
+        return html
 
     def _refresh_diagnostics(self) -> None:
         """Re-run diagnostics and update the display."""

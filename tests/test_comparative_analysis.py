@@ -170,44 +170,59 @@ def test_dataclasses() -> None:
     assert aligned.correlation == 0.8
 
 
-def test_edge_cases_insufficient_data() -> None:
-    """Test handling of insufficient data."""
+@pytest.mark.parametrize(
+    "setup_fn,field,joint_idx,expect_none,expect_corr",
+    [
+        (
+            lambda a, b: (
+                setattr(a, "times", np.array([0.0])),
+                setattr(a, "club_head_speed", np.array([1.0])),
+            ),
+            "club_head_speed",
+            None,
+            True,
+            None,
+        ),
+        (
+            None,
+            "joint_positions",
+            999,
+            True,
+            None,
+        ),
+        (
+            lambda a, b: (
+                setattr(a, "club_head_speed", np.ones(100) * 5.0),
+                setattr(b, "club_head_speed", np.ones(100) * 5.0),
+            ),
+            "club_head_speed",
+            None,
+            False,
+            0.0,
+        ),
+    ],
+    ids=["insufficient_data", "invalid_joint_index", "zero_correlation"],
+)
+def test_edge_cases_alignment(
+    setup_fn, field, joint_idx, expect_none, expect_corr
+) -> None:
+    """Test edge cases in signal alignment."""
     rec_a = MockRecorder()
     rec_b = MockRecorder()
     analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)
 
-    # Single point data - should return None
-    rec_a.times = np.array([0.0])
-    rec_a.club_head_speed = np.array([1.0])
+    if setup_fn is not None:
+        setup_fn(rec_a, rec_b)
 
-    aligned = analyzer.align_signals("club_head_speed")
-    assert aligned is None
+    kwargs = {"joint_idx": joint_idx} if joint_idx is not None else {}
+    aligned = analyzer.align_signals(field, **kwargs)
 
-
-def test_edge_cases_invalid_joint_index() -> None:
-    """Test handling of out-of-bounds joint index."""
-    rec_a = MockRecorder()
-    rec_b = MockRecorder()
-    analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)
-
-    # Request joint index that doesn't exist
-    aligned = analyzer.align_signals("joint_positions", joint_idx=999)
-    assert aligned is None
-
-
-def test_edge_cases_zero_correlation() -> None:
-    """Test handling of constant signals (zero correlation)."""
-    rec_a = MockRecorder()
-    rec_b = MockRecorder()
-    analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)
-
-    # Create constant signals (zero std dev)
-    rec_a.club_head_speed = np.ones(100) * 5.0
-    rec_b.club_head_speed = np.ones(100) * 5.0
-
-    aligned = analyzer.align_signals("club_head_speed")
-    assert aligned is not None
-    assert aligned.correlation == 0.0  # Constant signals have no correlation
+    if expect_none:
+        assert aligned is None
+    else:
+        assert aligned is not None
+        if expect_corr is not None:
+            assert aligned.correlation == expect_corr
 
 
 def test_compare_scalars_zero_mean() -> None:
@@ -279,19 +294,22 @@ def test_custom_num_points() -> None:
     assert aligned.times[-1] == 1.0
 
 
-def test_multidimensional_alignment() -> None:
+@pytest.mark.parametrize(
+    "joint_idx",
+    [0, 1],
+    ids=["joint_0", "joint_1"],
+)
+def test_multidimensional_alignment(joint_idx) -> None:
     """Test alignment of multidimensional signals."""
     rec_a = MockRecorder()
     rec_b = MockRecorder()
     analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)
 
-    # Test each joint dimension
-    for joint_idx in [0, 1]:
-        aligned = analyzer.align_signals("joint_positions", joint_idx=joint_idx)
-        assert aligned is not None
-        assert len(aligned.signal_a) == 100
-        assert len(aligned.signal_b) == 100
-        assert len(aligned.error_curve) == 100
+    aligned = analyzer.align_signals("joint_positions", joint_idx=joint_idx)
+    assert aligned is not None
+    assert len(aligned.signal_a) == 100
+    assert len(aligned.signal_b) == 100
+    assert len(aligned.error_curve) == 100
 
 
 def test_angular_momentum_comparison() -> None:

@@ -22,6 +22,17 @@ import pytest
 # spawning real subprocesses during tests.
 local_server = pytest.importorskip("src.api.local_server")
 
+_PROCESS_SPEC = [
+    "pid",
+    "poll",
+    "wait",
+    "communicate",
+    "terminate",
+    "kill",
+    "returncode",
+]
+_HANDLER_SPEC = ["launch", "stop", "get_name"]
+
 
 # ── Fixtures ─────────────────────────────────────────────────────────
 
@@ -58,7 +69,7 @@ def client(_reset_startup_metrics):
     ):
         # Configure the mock registry to return handlers based on model type
         mock_registry = mock_registry_cls.return_value
-        mock_handler = MagicMock()
+        mock_handler = MagicMock(spec=_HANDLER_SPEC)
         mock_handler.launch.return_value = True
         mock_registry.get_handler.return_value = mock_handler
 
@@ -187,7 +198,7 @@ class TestProcessesEndpoint:
 
     def test_running_process_listed(self, client) -> None:
         """A running process is listed with pid and running=True."""
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 12345
         mock_proc.poll.return_value = None  # still running
         client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = (
@@ -204,7 +215,7 @@ class TestProcessesEndpoint:
 
     def test_exited_process_listed(self, client) -> None:
         """An exited process is listed with running=False and exit_code."""
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 99999
         mock_proc.poll.return_value = 1  # exited with code 1
         client._mock_process_manager.running_processes["Drake Golf Model"] = mock_proc
@@ -218,7 +229,7 @@ class TestProcessesEndpoint:
     def test_multiple_processes(self, client) -> None:
         """Multiple processes are listed correctly."""
         for name, pid in [("Engine A", 100), ("Engine B", 200), ("Tool C", 300)]:
-            proc = MagicMock()
+            proc = MagicMock(spec=_PROCESS_SPEC)
             proc.pid = pid
             proc.poll.return_value = None
             client._mock_process_manager.running_processes[name] = proc
@@ -239,7 +250,7 @@ class TestStopEndpoint:
 
     def test_stop_running_process(self, client) -> None:
         """Stopping a running process returns 200 with status=stopped."""
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 12345
         client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = (
             mock_proc
@@ -261,7 +272,7 @@ class TestStopEndpoint:
 
     def test_stop_removes_from_running(self, client) -> None:
         """After stopping, the process is removed from running_processes."""
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 12345
         client._mock_process_manager.running_processes["Test Engine"] = mock_proc
 
@@ -272,7 +283,7 @@ class TestStopEndpoint:
 
     def test_stop_calls_kill_process_tree(self, client) -> None:
         """Stop endpoint uses kill_process_tree to terminate the process."""
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 54321
         client._mock_process_manager.running_processes["Drake Golf Model"] = mock_proc
 
@@ -296,7 +307,7 @@ class TestLaunchLifecycle:
         assert resp.status_code == 200
 
         # The handler was called; simulate it adding a process
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 11111
         mock_proc.poll.return_value = None
         client._mock_process_manager.running_processes["MuJoCo"] = mock_proc
@@ -309,7 +320,7 @@ class TestLaunchLifecycle:
         """Full lifecycle: launch → list → stop → list empty."""
         # Launch
         client.post("/api/launcher/launch/drake_golf")
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 22222
         mock_proc.poll.return_value = None
         client._mock_process_manager.running_processes["Drake Golf Model"] = mock_proc
@@ -392,7 +403,7 @@ class TestEdgeCases:
 
     def test_stop_with_spaces_in_name(self, client) -> None:
         """Process names with spaces (like 'MuJoCo Humanoid Golf') work."""
-        mock_proc = MagicMock()
+        mock_proc = MagicMock(spec=_PROCESS_SPEC)
         mock_proc.pid = 33333
         client._mock_process_manager.running_processes["MuJoCo Humanoid Golf"] = (
             mock_proc

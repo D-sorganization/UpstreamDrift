@@ -16,15 +16,25 @@ from src.shared.python.data_io.common_utils import (
 )
 
 
-def test_convert_units():
+@pytest.mark.parametrize(
+    "value,from_unit,to_unit,expected",
+    [
+        (180, "deg", "rad", np.pi),
+        (np.pi, "rad", "deg", 180),
+        (1, "m", "mm", 1000),
+        (1000, "mm", "m", 1),
+        (10, "m/s", "mph", 22.3694),
+        (22.3694, "mph", "m/s", 10),
+    ],
+    ids=["deg_to_rad", "rad_to_deg", "m_to_mm", "mm_to_m", "mps_to_mph", "mph_to_mps"],
+)
+def test_convert_units(value, from_unit, to_unit, expected):
     """Test unit conversion utility."""
-    assert convert_units(180, "deg", "rad") == pytest.approx(np.pi)
-    assert convert_units(np.pi, "rad", "deg") == pytest.approx(180)
-    assert convert_units(1, "m", "mm") == 1000
-    assert convert_units(1000, "mm", "m") == 1
-    assert convert_units(10, "m/s", "mph") == pytest.approx(22.3694, rel=1e-4)
-    assert convert_units(22.3694, "mph", "m/s") == pytest.approx(10, rel=1e-4)
+    assert convert_units(value, from_unit, to_unit) == pytest.approx(expected, rel=1e-4)
 
+
+def test_convert_units_unsupported():
+    """Test unit conversion with unsupported units."""
     with pytest.raises(ValueError, match="not supported"):
         convert_units(1, "furlongs", "fortnights")
 

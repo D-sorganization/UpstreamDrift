@@ -178,6 +178,94 @@ class DifferentiableEngine:
 
         return gradient
 
+    def _set_engine_state(
+        self,
+        q: NDArray[np.floating],
+        v: NDArray[np.floating],
+        torques: NDArray[np.floating],
+    ) -> None:
+        if hasattr(self.engine, "set_joint_positions"):
+            self.engine.set_joint_positions(q)
+        if hasattr(self.engine, "set_joint_velocities"):
+            self.engine.set_joint_velocities(v)
+        if hasattr(self.engine, "set_joint_torques"):
+            self.engine.set_joint_torques(torques)
+
+    def _step_and_read_state(
+        self,
+        q: NDArray[np.floating],
+        v: NDArray[np.floating],
+        dt: float,
+    ) -> NDArray[np.floating]:
+        if hasattr(self.engine, "step"):
+            self.engine.step(dt)
+
+        if hasattr(self.engine, "get_joint_positions"):
+            q_new = self.engine.get_joint_positions()
+        else:
+            q_new = q + v * dt
+
+        if hasattr(self.engine, "get_joint_velocities"):
+            v_new = self.engine.get_joint_velocities()
+        else:
+            v_new = v
+
+        return np.concatenate([q_new, v_new])
+
+    def _compute_nominal_next_state(
+        self,
+        state: NDArray[np.floating],
+        control: NDArray[np.floating],
+        dt: float,
+    ) -> NDArray[np.floating]:
+        q = state[: self._n_q]
+        v = state[self._n_q :]
+        self._set_engine_state(q, v, control)
+        return self._step_and_read_state(q, v, dt)
+
+    def _compute_state_jacobian(
+        self,
+        state: NDArray[np.floating],
+        control: NDArray[np.floating],
+        x_next: NDArray[np.floating],
+        dt: float,
+        eps: float,
+    ) -> NDArray[np.floating]:
+        A = np.zeros((self._n_x, self._n_x))
+        for i in range(self._n_x):
+            state_plus = state.copy()
+            state_plus[i] += eps
+
+            q_plus = state_plus[: self._n_q]
+            v_plus = state_plus[self._n_q :]
+
+            self._set_engine_state(q_plus, v_plus, control)
+            x_new = self._step_and_read_state(q_plus, v_plus, dt)
+            A[:, i] = (x_new - x_next) / eps
+
+        return A
+
+    def _compute_control_jacobian(
+        self,
+        state: NDArray[np.floating],
+        control: NDArray[np.floating],
+        x_next: NDArray[np.floating],
+        dt: float,
+        eps: float,
+    ) -> NDArray[np.floating]:
+        q = state[: self._n_q]
+        v = state[self._n_q :]
+        B = np.zeros((self._n_x, self._n_u))
+        for i in range(self._n_u):
+            control_plus = control.copy()
+            control_plus[i] += eps
+
+            self._set_engine_state(q, v, control_plus)
+            x_new = self._step_and_read_state(q, v, dt)
+            B[:, i] = (x_new - x_next) / eps
+
+        return B
+
     def compute_jacobian(
         self,
         state: NDArray[np.floating],
@@ -195,91 +283,9 @@ class DifferentiableEngine:
             Tuple of (df/dx, df/du) Jacobians.
         """
         eps = 1e-5
-
-        # Compute nominal next state
-        q = state[: self._n_q]
-        v = state[self._n_q :]
-
-        if hasattr(self.engine, "set_joint_positions"):
-            self.engine.set_joint_positions(q)
-        if hasattr(self.engine, "set_joint_velocities"):
-            self.engine.set_joint_velocities(v)
-        if hasattr(self.engine, "set_joint_torques"):
-            self.engine.set_joint_torques(control)
-        if hasattr(self.engine, "step"):
-            self.engine.step(dt)
-
-        if hasattr(self.engine, "get_joint_positions"):
-            q_next = self.engine.get_joint_positions()
-        else:
-            q_next = q + v * dt
-
-        if hasattr(self.engine, "get_joint_velocities"):
-            v_next = self.engine.get_joint_velocities()
-        else:
-            v_next = v
-
-        x_next = np.concatenate([q_next, v_next])
-
-        # State Jacobian
-        A = np.zeros((self._n_x, self._n_x))
-        for i in range(self._n_x):
-            state_plus = state.copy()
-            state_plus[i] += eps
-
-            q_plus = state_plus[: self._n_q]
-            v_plus = state_plus[self._n_q :]
-
-            if hasattr(self.engine, "set_joint_positions"):
-                self.engine.set_joint_positions(q_plus)
-            if hasattr(self.engine, "set_joint_velocities"):
-                self.engine.set_joint_velocities(v_plus)
-            if hasattr(self.engine, "set_joint_torques"):
-                self.engine.set_joint_torques(control)
-            if hasattr(self.engine, "step"):
-                self.engine.step(dt)
-
-            if hasattr(self.engine, "get_joint_positions"):
-                q_new = self.engine.get_joint_positions()
-            else:
-                q_new = q_plus + v_plus * dt
-
-            if hasattr(self.engine, "get_joint_velocities"):
-                v_new = self.engine.get_joint_velocities()
-            else:
-                v_new = v_plus
-
-            x_new = np.concatenate([q_new, v_new])
-            A[:, i] = (x_new - x_next) / eps
-
-        # Control Jacobian
-        B = np.zeros((self._n_x, self._n_u))
-        for i in range(self._n_u):
-            control_plus = control.copy()
-            control_plus[i] += eps
-
-            if hasattr(self.engine, "set_joint_positions"):
-                self.engine.set_joint_positions(q)
-            if hasattr(self.engine, "set_joint_velocities"):
-                self.engine.set_joint_velocities(v)
-            if hasattr(self.engine, "set_joint_torques"):
-                self.engine.set_joint_torques(control_plus)
-            if hasattr(self.engine, "step"):
-                self.engine.step(dt)
-
-            if hasattr(self.engine, "get_joint_positions"):
-                q_new = self.engine.get_joint_positions()
-            else:
-                q_new = q + v * dt
-
-            if hasattr(self.engine, "get_joint_velocities"):
-                v_new = self.engine.get_joint_velocities()
-            else:
-                v_new = v
-
-            x_new = np.concatenate([q_new, v_new])
-            B[:, i] = (x_new - x_next) / eps
-
+        x_next = self._compute_nominal_next_state(state, control, dt)
+        A = self._compute_state_jacobian(state, control, x_next, dt, eps)
+        B = self._compute_control_jacobian(state, control, x_next, dt, eps)
         return A, B
 
     def optimize_trajectory(

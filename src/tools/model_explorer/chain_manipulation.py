@@ -38,6 +38,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -103,6 +104,11 @@ class KinematicTree:
         self.root: ChainNode | None = None
         self.nodes: dict[str, ChainNode] = {}
 
+    @precondition(
+        lambda self, urdf_content: urdf_content is not None
+        and len(urdf_content.strip()) > 0,
+        "URDF content must be a non-empty string",
+    )
     def build_from_urdf(self, urdf_content: str) -> None:
         """Build the tree from URDF XML content."""
         try:
@@ -168,6 +174,16 @@ class KinematicTree:
 
         set_depth(self.root, 0)
 
+    @precondition(
+        lambda self, from_link, to_link: from_link is not None
+        and len(from_link.strip()) > 0,
+        "Source link name must be a non-empty string",
+    )
+    @precondition(
+        lambda self, from_link, to_link: to_link is not None
+        and len(to_link.strip()) > 0,
+        "Target link name must be a non-empty string",
+    )
     def get_chain(self, from_link: str, to_link: str) -> list[ChainNode]:
         """Get the chain between two links.
 
@@ -644,6 +660,10 @@ class ChainManipulationWidget(QWidget):
         self.visualizer.node_selected.connect(self._on_node_selected)
         self.visualizer.node_double_clicked.connect(self._on_node_double_clicked)
 
+    @precondition(
+        lambda self, content: content is not None and len(content.strip()) > 0,
+        "URDF content must be a non-empty string",
+    )
     def load_urdf(self, content: str) -> None:
         """Load URDF content and build the kinematic tree."""
         self.urdf_content = content

@@ -56,6 +56,49 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
 _structured_logging_configured = False
 
 
+def _build_base_processors() -> list[Any]:
+    return [
+        structlog.stdlib.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.CallsiteParameterAdder(
+            parameters={
+                structlog.processors.CallsiteParameter.FILENAME,
+                structlog.processors.CallsiteParameter.FUNC_NAME,
+                structlog.processors.CallsiteParameter.LINENO,
+            }
+        ),
+        structlog.processors.format_exc_info,
+        structlog.processors.StackInfoRenderer(),
+    ]
+
+
+def _build_output_processors(json_output: bool, dev_mode: bool) -> list[Any]:
+    if dev_mode and not json_output:
+        return [
+            structlog.dev.ConsoleRenderer(
+                colors=True,
+                exception_formatter=structlog.dev.plain_traceback,
+            )
+        ]
+    elif json_output:
+        return [
+            structlog.processors.dict_tracebacks,
+            structlog.processors.JSONRenderer(),
+        ]
+    else:
+        return [structlog.processors.KeyValueRenderer()]
+
+
+def _apply_structlog_config(processors: list[Any], level: int) -> None:
+    structlog.configure(
+        processors=processors,
+        wrapper_class=structlog.make_filtering_bound_logger(level),
+        context_class=dict,
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+
+
 def setup_structured_logging(
     level: int = logging.INFO,
     json_output: bool = False,
@@ -87,77 +130,24 @@ def setup_structured_logging(
     global _structured_logging_configured
     import threading
 
-    # Thread-safe initialization lock
     _logging_lock = threading.Lock()
 
     if _structured_logging_configured:
-        # Fast path check
         return
 
     with _logging_lock:
         if _structured_logging_configured:
-            # Double check inside lock
             return
 
-    # Configure standard library logging
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
         level=level,
     )
 
-    # Build processor chain
-    processors: list[Any] = [
-        # Add log level to event dict
-        structlog.stdlib.add_log_level,
-        # Add timestamp
-        structlog.processors.TimeStamper(fmt="iso"),
-        # Add caller information (file, function, line)
-        structlog.processors.CallsiteParameterAdder(
-            parameters={
-                structlog.processors.CallsiteParameter.FILENAME,
-                structlog.processors.CallsiteParameter.FUNC_NAME,
-                structlog.processors.CallsiteParameter.LINENO,
-            }
-        ),
-        # Format exceptions
-        structlog.processors.format_exc_info,
-        # Stack info extraction
-        structlog.processors.StackInfoRenderer(),
-    ]
-
-    # Add dev-mode or production processors
-    if dev_mode and not json_output:
-        # Development mode: human-readable console output with colors
-        processors.extend(
-            [
-                structlog.dev.ConsoleRenderer(
-                    colors=True,
-                    exception_formatter=structlog.dev.plain_traceback,
-                )
-            ]
-        )
-    elif json_output:
-        # Production mode: JSON output for log aggregation systems
-        processors.extend(
-            [
-                # Ensure all values are JSON-serializable
-                structlog.processors.dict_tracebacks,
-                structlog.processors.JSONRenderer(),
-            ]
-        )
-    else:
-        # Fallback: key-value pairs
-        processors.append(structlog.processors.KeyValueRenderer())
-
-    # Configure structlog
-    structlog.configure(
-        processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(level),
-        context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
+    processors = _build_base_processors()
+    processors.extend(_build_output_processors(json_output, dev_mode))
+    _apply_structlog_config(processors, level)
 
     _structured_logging_configured = True
 

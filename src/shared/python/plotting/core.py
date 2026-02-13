@@ -8,6 +8,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from src.shared.python.core.contracts import invariant
 from src.shared.python.plotting.config import COLORS
 from src.shared.python.plotting.renderers.club import ClubRenderer
 from src.shared.python.plotting.renderers.comparison import ComparisonRenderer
@@ -24,6 +25,10 @@ if TYPE_CHECKING:
     from src.shared.python.validation_pkg.statistical_analysis import PCAResult
 
 
+@invariant(
+    lambda self: self.recorder is not None,
+    "GolfSwingPlotter must have a valid recorder",
+)
 class GolfSwingPlotter:
     """Creates advanced plots for golf swing analysis.
 

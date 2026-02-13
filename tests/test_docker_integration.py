@@ -96,10 +96,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
         The launcher was refactored to use mixins (launcher_simulation.py),
         so __new__-created instances need these attributes manually set.
         """
-        launcher.docker_launcher = MagicMock()
+        launcher.docker_launcher = MagicMock(
+            spec=["check_image_exists", "build_image", "run_container"]
+        )
         launcher.docker_launcher.check_image_exists.return_value = True
-        launcher.process_manager = MagicMock()
-        launcher.lbl_status = MagicMock()
+        launcher.process_manager = MagicMock(
+            spec=["start_process", "stop_process", "is_running"]
+        )
+        launcher.lbl_status = MagicMock(spec=["setText", "text"])
         launcher.toast_manager = None  # Prevent show_toast from crashing
         launcher.show_toast = MagicMock()  # Mock the toast display method
 
@@ -131,12 +135,12 @@ class TestDockerLaunchCommands(unittest.TestCase):
         )
 
         # Prepare mock Path to simulate suite_root
-        mock_path_cls = MagicMock()
-        mock_suite_root = MagicMock()
+        mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+        mock_suite_root = MagicMock(spec=["__str__", "parent"])
         mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
         # When Path(__file__) is called, return something that eventually leads to mock_suite_root
         # get_src_root() -> mock_suite_root
-        mock_file_path = MagicMock()
+        mock_file_path = MagicMock(spec=["parent"])
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
 
@@ -194,10 +198,10 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path.__str__ = Mock(return_value="/test/suite/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
-        mock_path_cls = MagicMock()
-        mock_suite_root = MagicMock()
+        mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+        mock_suite_root = MagicMock(spec=["__str__", "parent"])
         mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
-        mock_file_path = MagicMock()
+        mock_file_path = MagicMock(spec=["parent"])
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
 
@@ -265,10 +269,10 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path.__str__ = Mock(return_value="/test/suite/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
-        mock_path_cls = MagicMock()
-        mock_suite_root = MagicMock()
+        mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+        mock_suite_root = MagicMock(spec=["__str__", "parent"])
         mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
-        mock_file_path = MagicMock()
+        mock_file_path = MagicMock(spec=["parent"])
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
 
@@ -321,10 +325,10 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path.__str__ = Mock(return_value="/test/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
-        mock_path_cls = MagicMock()
-        mock_suite_root = MagicMock()
+        mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+        mock_suite_root = MagicMock(spec=["__str__", "parent"])
         mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
-        mock_file_path = MagicMock()
+        mock_file_path = MagicMock(spec=["parent"])
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
 
@@ -369,10 +373,10 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path.__str__ = Mock(return_value="/test/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
-        mock_path_cls = MagicMock()
-        mock_suite_root = MagicMock()
+        mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+        mock_suite_root = MagicMock(spec=["__str__", "parent"])
         mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
-        mock_file_path = MagicMock()
+        mock_file_path = MagicMock(spec=["parent"])
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
 

@@ -438,11 +438,13 @@ class GolfSimulationGUI:
         action_inner = ttk.Frame(action_card, style="Modern.TFrame")
         action_inner.pack(fill="x", padx=20, pady=15)
 
-        # Primary action buttons (top row)
-        primary_frame = ttk.Frame(action_inner, style="Modern.TFrame")
+        self._create_primary_action_buttons(action_inner)
+        self._create_secondary_action_buttons(action_inner)
+
+    def _create_primary_action_buttons(self, parent) -> None:
+        primary_frame = ttk.Frame(parent, style="Modern.TFrame")
         primary_frame.pack(fill="x", pady=(0, 10))
 
-        # Run simulation button (prominent)
         self.btn_run = tk.Button(
             primary_frame,
             text="🚀 RUN SIMULATION",
@@ -458,7 +460,6 @@ class GolfSimulationGUI:
         )
         self.btn_run.pack(side="left", padx=(0, 15))
 
-        # Stop button
         self.btn_stop = tk.Button(
             primary_frame,
             text="⏹️ STOP",
@@ -475,7 +476,6 @@ class GolfSimulationGUI:
         )
         self.btn_stop.pack(side="left", padx=(0, 15))
 
-        # Update Environment button
         self.btn_rebuild = tk.Button(
             primary_frame,
             text="🔧 UPDATE ENV",
@@ -491,11 +491,10 @@ class GolfSimulationGUI:
         )
         self.btn_rebuild.pack(side="right")
 
-        # Secondary action buttons (bottom row)
-        secondary_frame = ttk.Frame(action_inner, style="Modern.TFrame")
+    def _create_secondary_action_buttons(self, parent) -> None:
+        secondary_frame = ttk.Frame(parent, style="Modern.TFrame")
         secondary_frame.pack(fill="x")
 
-        # Results buttons
         results_label = ttk.Label(
             secondary_frame, text="📊 Results:", style="Modern.TLabel"
         )

@@ -2,6 +2,29 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
+from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
+
+if DRAKE_AVAILABLE:
+    from pydrake.geometry import SceneGraph
+    from pydrake.systems.analysis import Simulator
+    from pydrake.systems.framework import Context, Diagram
+
+# MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
+_PLANT_SPEC_ATTRS = [
+    "Finalize",
+    "time_step",
+    "GetMyContextFromRoot",
+    "SetDefaultPositions",
+    "SetDefaultVelocities",
+    "GetPositions",
+    "GetVelocities",
+    "CalcMassMatrixViaInverseDynamics",
+    "CalcInverseDynamics",
+    "CalcGravityGeneralizedForces",
+    "num_velocities",
+    "MakeMultibodyForces",
+]
+
 # Temporarily mock pydrake to allow DrakePhysicsEngine import.
 # We MUST clean up afterwards to avoid polluting other test modules.
 _PYDRAKE_KEYS = [
@@ -74,8 +97,10 @@ class TestDrakeWrapper(unittest.TestCase):
         self.mock_add_plant = self.patcher2.start()
 
         # Setup return values
-        self.mock_plant = MagicMock()
-        self.mock_scene_graph = MagicMock()
+        self.mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        self.mock_scene_graph = (
+            MagicMock(spec=SceneGraph) if DRAKE_AVAILABLE else MagicMock()
+        )
         self.mock_add_plant.return_value = (self.mock_plant, self.mock_scene_graph)
 
         self.addCleanup(self.patcher1.stop)
@@ -85,9 +110,15 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine = DrakePhysicsEngine(time_step=0.001)
 
         # Manually verify internal state setup
-        self.engine.diagram = MagicMock()
-        self.engine.context = MagicMock()
-        self.engine.plant_context = MagicMock()
+        self.engine.diagram = (
+            MagicMock(spec=Diagram) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.plant_context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
         self.engine._is_finalized = True
         # Simulator starts None
         self.engine.simulator = None
@@ -96,7 +127,7 @@ class TestDrakeWrapper(unittest.TestCase):
         """Test that Simulator is cached and reused in step()."""
         # Patch analysis directly on the module object to avoid sys.modules
         # lookup issues that occur in full-suite ordering.
-        mock_analysis = MagicMock()
+        mock_analysis = MagicMock(spec=["Simulator"])
         original_analysis = getattr(_drake_engine_module, "analysis", None)
         _drake_engine_module.analysis = mock_analysis
         self.addCleanup(setattr, _drake_engine_module, "analysis", original_analysis)
@@ -137,10 +168,16 @@ class TestDrakeWrapper(unittest.TestCase):
 
     def test_reset_logic(self):
         """Test that reset() properly resets state to defaults."""
-        self.engine.context = MagicMock()
-        self.engine.plant_context = MagicMock()
-        self.engine.plant = MagicMock()
-        self.engine.simulator = MagicMock()
+        self.engine.context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.plant_context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        self.engine.simulator = (
+            MagicMock(spec=Simulator) if DRAKE_AVAILABLE else MagicMock()
+        )
 
         self.engine.reset()
 
@@ -160,14 +197,20 @@ class TestDrakeWrapper(unittest.TestCase):
 
     def test_forward_computation(self):
         """Test forward() triggers computation of derived quantities."""
-        self.engine.plant_context = MagicMock()
-        self.engine.plant = MagicMock()
+        self.engine.plant_context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
 
         # Setup plant methods
         self.engine.plant.num_velocities.return_value = 3
-        self.engine.plant.CalcMassMatrixViaInverseDynamics.return_value = MagicMock()
-        self.engine.plant.CalcInverseDynamics.return_value = MagicMock()
-        self.engine.plant.MakeMultibodyForces.return_value = MagicMock()
+        self.engine.plant.CalcMassMatrixViaInverseDynamics.return_value = MagicMock(
+            spec=["shape"]
+        )
+        self.engine.plant.CalcInverseDynamics.return_value = MagicMock(spec=["shape"])
+        self.engine.plant.MakeMultibodyForces.return_value = MagicMock(
+            spec=["mutable_generalized_forces"]
+        )
 
         self.engine.forward()
 

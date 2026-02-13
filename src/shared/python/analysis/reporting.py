@@ -49,6 +49,79 @@ class ReportingMixin:
     dt: float
     duration: float
 
+    def _report_club_head_speed(self) -> dict[str, Any] | None:
+        if self.club_head_speed is None:
+            return None
+        peak_speed = self.find_club_head_speed_peak()  # type: ignore[attr-defined]
+        if not peak_speed:
+            return None
+        return {
+            "peak_value": peak_speed.value,
+            "peak_time": peak_speed.time,
+            "statistics": asdict(
+                self.compute_summary_stats(  # type: ignore[attr-defined]
+                    self.club_head_speed,
+                )
+            ),
+        }
+
+    def _report_tempo(self) -> dict[str, Any] | None:
+        tempo_result = self.compute_tempo()  # type: ignore[attr-defined]
+        if not tempo_result:
+            return None
+        return {
+            "backswing_duration": tempo_result[0],
+            "downswing_duration": tempo_result[1],
+            "ratio": tempo_result[2],
+        }
+
+    def _report_phases(self) -> list[dict[str, Any]]:
+        phases = self.detect_swing_phases()  # type: ignore[attr-defined]
+        return [
+            {
+                "name": p.name,
+                "start_time": p.start_time,
+                "end_time": p.end_time,
+                "duration": p.duration,
+            }
+            for p in phases
+        ]
+
+    def _report_joint_stats(self, joint_idx: int) -> dict[str, Any]:
+        angles_deg = np.rad2deg(self.joint_positions[:, joint_idx])
+        position_stats = self.compute_summary_stats(angles_deg)  # type: ignore[attr-defined]
+
+        velocities = (
+            self.joint_velocities[:, joint_idx]
+            if joint_idx < self.joint_velocities.shape[1]
+            else None
+        )
+
+        joint_stats: dict[str, Any] = {
+            "range_of_motion": {
+                "min_deg": position_stats.min,
+                "max_deg": position_stats.max,
+                "rom_deg": position_stats.range,
+            },
+            "position_stats": asdict(position_stats),
+        }
+
+        if velocities is not None:
+            joint_stats["velocity_stats"] = asdict(
+                self.compute_summary_stats(  # type: ignore[attr-defined]
+                    np.rad2deg(velocities),
+                )
+            )
+
+        if joint_idx < self.joint_torques.shape[1]:
+            joint_stats["torque_stats"] = asdict(
+                self.compute_summary_stats(  # type: ignore[attr-defined]
+                    self.joint_torques[:, joint_idx],
+                )
+            )
+
+        return joint_stats
+
     def generate_comprehensive_report(self) -> dict[str, Any]:
         """Generate comprehensive statistical report.
 
@@ -61,92 +134,31 @@ class ReportingMixin:
             "num_samples": len(self.times),
         }
 
-        # Club head speed analysis
-        if self.club_head_speed is not None:
-            peak_speed = self.find_club_head_speed_peak()  # type: ignore[attr-defined]
-            if peak_speed:
-                report["club_head_speed"] = {
-                    "peak_value": peak_speed.value,
-                    "peak_time": peak_speed.time,
-                    "statistics": asdict(
-                        self.compute_summary_stats(  # type: ignore[attr-defined]
-                            self.club_head_speed,
-                        )
-                    ),
-                }
+        chs = self._report_club_head_speed()
+        if chs:
+            report["club_head_speed"] = chs
 
-        # Tempo analysis
-        tempo_result = self.compute_tempo()  # type: ignore[attr-defined]
-        if tempo_result:
-            report["tempo"] = {
-                "backswing_duration": tempo_result[0],
-                "downswing_duration": tempo_result[1],
-                "ratio": tempo_result[2],
-            }
+        tempo = self._report_tempo()
+        if tempo:
+            report["tempo"] = tempo
 
-        # Swing phases
-        phases = self.detect_swing_phases()  # type: ignore[attr-defined]
-        report["phases"] = [
-            {
-                "name": p.name,
-                "start_time": p.start_time,
-                "end_time": p.end_time,
-                "duration": p.duration,
-            }
-            for p in phases
-        ]
+        report["phases"] = self._report_phases()
 
-        # GRF Metrics
         grf_metrics = self.compute_grf_metrics()  # type: ignore[attr-defined]
         if grf_metrics:
             report["grf_metrics"] = asdict(grf_metrics)
 
-        # Angular Momentum Metrics
         am_metrics = self.compute_angular_momentum_metrics()  # type: ignore[attr-defined]
         if am_metrics:
             report["angular_momentum_metrics"] = asdict(am_metrics)
 
-        # Stability Metrics
         stability_metrics = self.compute_stability_metrics()  # type: ignore[attr-defined]
         if stability_metrics:
             report["stability_metrics"] = asdict(stability_metrics)
 
-        # Joint statistics
         report["joints"] = {}
         for i in range(self.joint_positions.shape[1]):
-            angles_deg = np.rad2deg(self.joint_positions[:, i])
-            position_stats = self.compute_summary_stats(angles_deg)  # type: ignore[attr-defined]
-
-            velocities = (
-                self.joint_velocities[:, i]
-                if i < self.joint_velocities.shape[1]
-                else None
-            )
-
-            joint_stats: dict[str, Any] = {
-                "range_of_motion": {
-                    "min_deg": position_stats.min,
-                    "max_deg": position_stats.max,
-                    "rom_deg": position_stats.range,
-                },
-                "position_stats": asdict(position_stats),
-            }
-
-            if velocities is not None:
-                joint_stats["velocity_stats"] = asdict(
-                    self.compute_summary_stats(  # type: ignore[attr-defined]
-                        np.rad2deg(velocities),
-                    )
-                )
-
-            if i < self.joint_torques.shape[1]:
-                joint_stats["torque_stats"] = asdict(
-                    self.compute_summary_stats(  # type: ignore[attr-defined]
-                        self.joint_torques[:, i],
-                    )
-                )
-
-            report["joints"][f"joint_{i}"] = joint_stats
+            report["joints"][f"joint_{i}"] = self._report_joint_stats(i)
 
         return report
 
@@ -362,6 +374,104 @@ class ReportingMixin:
             dimensionless_jerk=dim_jerk,
         )
 
+    def _write_csv_overall_metrics(self, writer: csv.writer, report: dict) -> None:
+        writer.writerow(["Golf Swing Statistical Analysis"])
+        writer.writerow([])
+        writer.writerow(["Overall Metrics"])
+        writer.writerow(["Metric", "Value", "Unit"])
+        writer.writerow(["Duration", report["duration"], "s"])
+        writer.writerow(["Sample Rate", report["sample_rate"], "Hz"])
+        writer.writerow(["Samples", report["num_samples"], ""])
+        writer.writerow([])
+
+    def _write_csv_stability_metrics(self, writer: csv.writer, report: dict) -> None:
+        if "stability_metrics" not in report:
+            return
+        writer.writerow(["Stability Metrics"])
+        writer.writerow(["Metric", "Value"])
+        for key, val in report["stability_metrics"].items():
+            writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
+        writer.writerow([])
+
+    def _write_csv_club_head_speed(self, writer: csv.writer, report: dict) -> None:
+        if "club_head_speed" not in report:
+            return
+        writer.writerow(["Club Head Speed"])
+        writer.writerow(["Metric", "Value", "Unit"])
+        chs = report["club_head_speed"]
+        writer.writerow(["Peak Speed", chs["peak_value"], "mph"])
+        writer.writerow(["Peak Time", chs["peak_time"], "s"])
+        writer.writerow([])
+
+    def _write_csv_tempo(self, writer: csv.writer, report: dict) -> None:
+        if "tempo" not in report:
+            return
+        writer.writerow(["Swing Tempo"])
+        writer.writerow(["Metric", "Value", "Unit"])
+        writer.writerow(
+            ["Backswing Duration", report["tempo"]["backswing_duration"], "s"],
+        )
+        writer.writerow(
+            ["Downswing Duration", report["tempo"]["downswing_duration"], "s"],
+        )
+        writer.writerow(["Tempo Ratio", report["tempo"]["ratio"], ""])
+        writer.writerow([])
+
+    def _write_csv_phases(self, writer: csv.writer, report: dict) -> None:
+        if "phases" not in report:
+            return
+        writer.writerow(["Swing Phases"])
+        writer.writerow(["Phase", "Start (s)", "End (s)", "Duration (s)"])
+        for phase in report["phases"]:
+            writer.writerow(
+                [
+                    phase["name"],
+                    f"{phase['start_time']:.3f}",
+                    f"{phase['end_time']:.3f}",
+                    f"{phase['duration']:.3f}",
+                ],
+            )
+        writer.writerow([])
+
+    def _write_csv_grf_metrics(self, writer: csv.writer, report: dict) -> None:
+        if "grf_metrics" not in report:
+            return
+        writer.writerow(["GRF & CoP Metrics"])
+        writer.writerow(["Metric", "Value"])
+        for key, val in report["grf_metrics"].items():
+            if val is not None:
+                writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
+        writer.writerow([])
+
+    def _write_csv_joint_statistics(self, writer: csv.writer, report: dict) -> None:
+        writer.writerow(["Joint Statistics"])
+        writer.writerow(
+            [
+                "Joint",
+                "ROM (deg)",
+                "Min Angle",
+                "Max Angle",
+                "Max Velocity (deg/s)",
+                "Max Torque (Nm)",
+            ],
+        )
+
+        for joint_name, joint_data in report["joints"].items():
+            rom_data = joint_data["range_of_motion"]
+            vel_stats = joint_data.get("velocity_stats", {})
+            torque_stats = joint_data.get("torque_stats", {})
+
+            writer.writerow(
+                [
+                    joint_name,
+                    f"{rom_data['rom_deg']:.1f}",
+                    f"{rom_data['min_deg']:.1f}",
+                    f"{rom_data['max_deg']:.1f}",
+                    f"{vel_stats.get('max', 0.0):.1f}",
+                    f"{torque_stats.get('max', 0.0):.1f}",
+                ],
+            )
+
     def export_statistics_csv(
         self,
         filename: str,
@@ -378,92 +488,10 @@ class ReportingMixin:
 
         with open(filename, "w", newline="") as f:
             writer = csv.writer(f)
-
-            writer.writerow(["Golf Swing Statistical Analysis"])
-            writer.writerow([])
-
-            writer.writerow(["Overall Metrics"])
-            writer.writerow(["Metric", "Value", "Unit"])
-            writer.writerow(["Duration", report["duration"], "s"])
-            writer.writerow(["Sample Rate", report["sample_rate"], "Hz"])
-            writer.writerow(["Samples", report["num_samples"], ""])
-            writer.writerow([])
-
-            if "stability_metrics" in report:
-                writer.writerow(["Stability Metrics"])
-                writer.writerow(["Metric", "Value"])
-                sm = report["stability_metrics"]
-                for key, val in sm.items():
-                    writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
-                writer.writerow([])
-
-            if "club_head_speed" in report:
-                writer.writerow(["Club Head Speed"])
-                writer.writerow(["Metric", "Value", "Unit"])
-                chs = report["club_head_speed"]
-                writer.writerow(["Peak Speed", chs["peak_value"], "mph"])
-                writer.writerow(["Peak Time", chs["peak_time"], "s"])
-                writer.writerow([])
-
-            if "tempo" in report:
-                writer.writerow(["Swing Tempo"])
-                writer.writerow(["Metric", "Value", "Unit"])
-                writer.writerow(
-                    ["Backswing Duration", report["tempo"]["backswing_duration"], "s"],
-                )
-                writer.writerow(
-                    ["Downswing Duration", report["tempo"]["downswing_duration"], "s"],
-                )
-                writer.writerow(["Tempo Ratio", report["tempo"]["ratio"], ""])
-                writer.writerow([])
-
-            if "phases" in report:
-                writer.writerow(["Swing Phases"])
-                writer.writerow(["Phase", "Start (s)", "End (s)", "Duration (s)"])
-                for phase in report["phases"]:
-                    writer.writerow(
-                        [
-                            phase["name"],
-                            f"{phase['start_time']:.3f}",
-                            f"{phase['end_time']:.3f}",
-                            f"{phase['duration']:.3f}",
-                        ],
-                    )
-                writer.writerow([])
-
-            if "grf_metrics" in report:
-                writer.writerow(["GRF & CoP Metrics"])
-                writer.writerow(["Metric", "Value"])
-                grf = report["grf_metrics"]
-                for key, val in grf.items():
-                    if val is not None:
-                        writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
-                writer.writerow([])
-
-            writer.writerow(["Joint Statistics"])
-            writer.writerow(
-                [
-                    "Joint",
-                    "ROM (deg)",
-                    "Min Angle",
-                    "Max Angle",
-                    "Max Velocity (deg/s)",
-                    "Max Torque (Nm)",
-                ],
-            )
-
-            for joint_name, joint_data in report["joints"].items():
-                rom_data = joint_data["range_of_motion"]
-                vel_stats = joint_data.get("velocity_stats", {})
-                torque_stats = joint_data.get("torque_stats", {})
-
-                writer.writerow(
-                    [
-                        joint_name,
-                        f"{rom_data['rom_deg']:.1f}",
-                        f"{rom_data['min_deg']:.1f}",
-                        f"{rom_data['max_deg']:.1f}",
-                        f"{vel_stats.get('max', 0.0):.1f}",
-                        f"{torque_stats.get('max', 0.0):.1f}",
-                    ],
-                )
+            self._write_csv_overall_metrics(writer, report)
+            self._write_csv_stability_metrics(writer, report)
+            self._write_csv_club_head_speed(writer, report)
+            self._write_csv_tempo(writer, report)
+            self._write_csv_phases(writer, report)
+            self._write_csv_grf_metrics(writer, report)
+            self._write_csv_joint_statistics(writer, report)

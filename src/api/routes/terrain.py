@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
+from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.physics.terrain import (
     MATERIALS,
     TERRAIN_MATERIAL_MAP,
@@ -162,6 +163,14 @@ ENVIRONMENT_PRESETS: dict[str, dict[str, Any]] = {
 }
 
 
+@precondition(
+    lambda width, length, slope, direction: width > 0 and length > 0,
+    "Terrain width and length must be positive",
+)
+@postcondition(
+    lambda result: result is not None and result.name is not None,
+    "Built terrain must have a valid name",
+)
 def _build_putting_green(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
@@ -330,6 +339,12 @@ async def list_presets() -> list[EnvironmentPreset]:
 
 
 @router.post("/load", response_model=dict[str, Any])
+@precondition(
+    lambda request: request is not None
+    and request.preset is not None
+    and len(request.preset.strip()) > 0,
+    "Environment request must contain a non-empty preset name",
+)
 async def load_environment(request: CreateEnvironmentRequest) -> dict[str, Any]:
     """Load an environment preset as the active terrain."""
     global _active_terrain  # noqa: PLW0603

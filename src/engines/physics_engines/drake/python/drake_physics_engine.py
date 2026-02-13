@@ -20,7 +20,12 @@ from typing import Any, cast
 
 import numpy as np
 
-from src.shared.python.core.contracts import check_finite, postcondition, precondition
+from src.shared.python.core.contracts import (
+    check_finite,
+    invariant,
+    postcondition,
+    precondition,
+)
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -51,6 +56,10 @@ logger = get_logger(__name__)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 
+@invariant(
+    lambda self: not self._is_finalized or self.plant_context is not None,
+    "Finalized engine must have a valid plant context",
+)
 class DrakePhysicsEngine(PhysicsEngine):
     """Encapsulates Drake MultibodyPlant and simulation control.
 

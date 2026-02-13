@@ -324,6 +324,13 @@ def _aba_allocate_arrays(nb: int, model: dict) -> dict:
     }
 
 
+def _aba_resolve_gravity(model: dict) -> np.ndarray:
+    a_grav = model.get("gravity", DEFAULT_GRAVITY)
+    if a_grav is DEFAULT_GRAVITY:
+        return NEG_DEFAULT_GRAVITY
+    return -a_grav
+
+
 def aba(
     model: dict,
     q: np.ndarray,
@@ -374,13 +381,7 @@ def aba(
         >>> qdd = aba(model, q, qd, tau)
     """
     q, qd, tau, nb = _aba_validate_inputs(model, q, qd, tau)
-
-    a_grav = model.get("gravity", DEFAULT_GRAVITY)
-    if a_grav is DEFAULT_GRAVITY:
-        neg_a_grav = NEG_DEFAULT_GRAVITY
-    else:
-        neg_a_grav = -a_grav
-
+    neg_a_grav = _aba_resolve_gravity(model)
     arr = _aba_allocate_arrays(nb, model)
     buf = _ScratchBuffers.create()
     mdl = _ModelCache.from_model(model)

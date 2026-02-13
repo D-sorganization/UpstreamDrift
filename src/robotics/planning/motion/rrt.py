@@ -22,6 +22,7 @@ from src.robotics.planning.motion.planner_base import (
     PlannerResult,
     PlannerStatus,
 )
+from src.shared.python.core.contracts import invariant
 
 
 @dataclass
@@ -50,6 +51,14 @@ class TreeNode:
     cost: float = 0.0
 
 
+@invariant(
+    lambda self: self._config.step_size > 0,
+    "RRT step_size must be positive",
+)
+@invariant(
+    lambda self: 0.0 <= self._config.goal_bias <= 1.0,
+    "RRT goal_bias must be in [0, 1]",
+)
 class RRTPlanner(MotionPlanner):
     """RRT motion planner.
 

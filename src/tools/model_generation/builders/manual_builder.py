@@ -25,6 +25,8 @@ from model_generation.core.types import (
 )
 from model_generation.core.validation import Validator
 
+from src.shared.python.core.contracts import postcondition, precondition
+
 logger = logging.getLogger(__name__)
 
 
@@ -88,6 +90,12 @@ class ManualBuilder(BaseURDFBuilder):
         """Set handedness."""
         self._handedness = value
 
+    @precondition(
+        lambda self, link: link is not None
+        and hasattr(link, "name")
+        and len(link.name) > 0,
+        "Link must be a valid Link object with a non-empty name",
+    )
     def add_link(self, link: Link) -> ManualBuilder:  # type: ignore[override]
         """
         Add a link to the model.
@@ -116,6 +124,12 @@ class ManualBuilder(BaseURDFBuilder):
         self._links.append(link)
         return self
 
+    @precondition(
+        lambda self, joint: joint is not None
+        and hasattr(joint, "name")
+        and len(joint.name) > 0,
+        "Joint must be a valid Joint object with a non-empty name",
+    )
     def add_joint(self, joint: Joint) -> ManualBuilder:  # type: ignore[override]
         """
         Add a joint to the model.
@@ -168,6 +182,10 @@ class ManualBuilder(BaseURDFBuilder):
 
         return self
 
+    @precondition(
+        lambda self, name, cascade=True: name is not None and len(name.strip()) > 0,
+        "Link name must be a non-empty string",
+    )
     def remove_link(self, name: str, cascade: bool = True) -> ManualBuilder:
         """
         Remove a link from the model.
@@ -268,6 +286,10 @@ class ManualBuilder(BaseURDFBuilder):
 
         raise ValueError(f"Joint '{name}' not found")
 
+    @precondition(
+        lambda self, axis="y": axis.lower() in ("x", "y", "z"),
+        "Mirror axis must be 'x', 'y', or 'z'",
+    )
     def mirror(self, axis: str = "y") -> ManualBuilder:
         """
         Mirror the model about an axis.
@@ -367,6 +389,10 @@ class ManualBuilder(BaseURDFBuilder):
         self._joints.clear()
         self._materials.clear()
 
+    @postcondition(
+        lambda result: result is not None and isinstance(result.success, bool),
+        "Build must return a valid BuildResult with success status",
+    )
     def build(self, **kwargs: Any) -> BuildResult:
         """
         Build the URDF model.

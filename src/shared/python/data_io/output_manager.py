@@ -24,7 +24,7 @@ from typing import Any, TypeAlias
 import numpy as np
 import pandas as pd  # type: ignore[import]
 
-from ..core.contracts import precondition
+from ..core.contracts import invariant, precondition
 from ..core.datetime_utils import (
     format_datetime,
     now_local,
@@ -50,6 +50,10 @@ class OutputFormat(Enum):
     PARQUET = "parquet"
 
 
+@invariant(
+    lambda self: self.base_path.exists(),
+    "Output base_path directory must exist",
+)
 class OutputManager:
     """
     Manages all output operations for the Golf Modeling Suite.
@@ -200,45 +204,20 @@ class OutputManager:
         Returns:
             Path to saved file
         """
-        # Ensure simulation directory exists
         engine_dir = self.directories["simulations"] / engine
         engine_dir.mkdir(parents=True, exist_ok=True)
 
-        # Clean filename - remove format_type enum representation if present
-        if "OutputFormat." in filename:
-            filename = filename.split(".")[-1]  # Get just the extension part
-            filename = "test_format"  # Use a clean name
-
-        # Remove extension if already present
-        if filename.endswith(f".{format_type.value}"):
-            filename = filename[: -len(f".{format_type.value}")]
-
-        # Add timestamp if not in filename (only for files without timestamps)
-        if not any(char.isdigit() for char in filename) and "test_" not in filename:
-            timestamp = timestamp_filename(utc=False)
-            filename = f"{filename}_{timestamp}"
-
-        # Add extension based on format
+        filename = self._sanitize_filename(filename, format_type)
         file_path = engine_dir / f"{filename}.{format_type.value}"
 
-        # Capture provenance metadata for reproducibility
         provenance = ProvenanceInfo.capture(
             model_path=model_path, parameters=parameters
         )
 
         try:
-            if format_type == OutputFormat.CSV:
-                self._save_csv(results, file_path, provenance)
-            elif format_type == OutputFormat.JSON:
-                self._save_json(results, file_path, provenance, metadata, engine)
-            elif format_type == OutputFormat.HDF5:
-                self._save_hdf5(results, file_path)
-            elif format_type == OutputFormat.PICKLE:
-                raise ValueError(
-                    "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
-                )
-            elif format_type == OutputFormat.PARQUET:
-                self._save_parquet(results, file_path)
+            self._dispatch_save(
+                results, file_path, format_type, provenance, metadata, engine
+            )
 
             logger.info(
                 "simulation_results_saved",
@@ -258,6 +237,36 @@ class OutputManager:
                 exc_info=True,
             )
             raise
+
+    def _sanitize_filename(self, filename, format_type):
+        if "OutputFormat." in filename:
+            filename = filename.split(".")[-1]
+            filename = "test_format"
+
+        if filename.endswith(f".{format_type.value}"):
+            filename = filename[: -len(f".{format_type.value}")]
+
+        if not any(char.isdigit() for char in filename) and "test_" not in filename:
+            timestamp = timestamp_filename(utc=False)
+            filename = f"{filename}_{timestamp}"
+
+        return filename
+
+    def _dispatch_save(
+        self, results, file_path, format_type, provenance, metadata, engine
+    ):
+        if format_type == OutputFormat.CSV:
+            self._save_csv(results, file_path, provenance)
+        elif format_type == OutputFormat.JSON:
+            self._save_json(results, file_path, provenance, metadata, engine)
+        elif format_type == OutputFormat.HDF5:
+            self._save_hdf5(results, file_path)
+        elif format_type == OutputFormat.PICKLE:
+            raise ValueError(
+                "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
+            )
+        elif format_type == OutputFormat.PARQUET:
+            self._save_parquet(results, file_path)
 
     def _save_csv(
         self,
