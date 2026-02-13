@@ -156,14 +156,25 @@ class OutputManager:
         logger.info("Output directory structure created successfully")
 
     @precondition(
-        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: results
-        is not None,
+        lambda self,
+        results,
+        filename,
+        format_type=OutputFormat.CSV,
+        engine="mujoco",
+        metadata=None,
+        model_path=None,
+        parameters=None: results is not None,
         "Simulation results must not be None",
     )
     @precondition(
-        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: filename
-        is not None
-        and len(filename) > 0,
+        lambda self,
+        results,
+        filename,
+        format_type=OutputFormat.CSV,
+        engine="mujoco",
+        metadata=None,
+        model_path=None,
+        parameters=None: filename is not None and len(filename) > 0,
         "Filename must be a non-empty string",
     )
     def save_simulation_results(
@@ -217,77 +228,17 @@ class OutputManager:
 
         try:
             if format_type == OutputFormat.CSV:
-                is_df = False
-                try:
-                    if isinstance(results, pd.DataFrame):
-                        csv_text = results.to_csv(index=False)
-                        is_df = True
-                except TypeError:
-                    # Likely pd.DataFrame is a mock and not a type
-                    csv_text = ""
-
-                if not is_df:
-                    # Convert dict to DataFrame if possible
-                    df = pd.DataFrame(results)
-                    csv_text = df.to_csv(index=False)
-
-                # Write provenance header followed by CSV data
-                with open(file_path, "w") as f:
-                    add_provenance_header_file(f, provenance)
-                    f.write(csv_text)
-
+                self._save_csv(results, file_path, provenance)
             elif format_type == OutputFormat.JSON:
-                # Handle numpy arrays in JSON serialization
-                def json_serializer(obj: Any) -> Any:
-                    if isinstance(obj, np.ndarray):
-                        return obj.tolist()
-                    elif isinstance(obj, np.integer | np.floating):
-                        return float(obj)
-                    elif isinstance(obj, datetime):
-                        return format_datetime(obj, "iso")
-                    raise TypeError(
-                        f"Object of type {type(obj).__name__} is not JSON serializable"
-                    )
-
-                output_data = {
-                    "metadata": metadata or {},
-                    "provenance": {
-                        "software": f"{provenance.software_name} v{provenance.software_version}",
-                        "timestamp_utc": provenance.timestamp_utc,
-                        "git_commit": provenance.git_commit_sha,
-                        "git_branch": provenance.git_branch,
-                        "git_dirty": provenance.git_is_dirty,
-                        "python_version": provenance.python_version,
-                        "numpy_version": provenance.numpy_version,
-                    },
-                    "results": results,
-                    "timestamp": timestamp_iso(utc=False),
-                    "engine": engine,
-                }
-
-                with open(file_path, "w") as f:
-                    json.dump(output_data, f, indent=2, default=json_serializer)
-
+                self._save_json(results, file_path, provenance, metadata, engine)
             elif format_type == OutputFormat.HDF5:
-                if isinstance(results, pd.DataFrame):
-                    results.to_hdf(file_path, key="data", mode="w")
-                else:
-                    # Convert to DataFrame first
-                    df = pd.DataFrame(results)
-                    df.to_hdf(file_path, key="data", mode="w")
-
+                self._save_hdf5(results, file_path)
             elif format_type == OutputFormat.PICKLE:
-                # Security hardening: Disable Pickle
                 raise ValueError(
                     "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
                 )
-
             elif format_type == OutputFormat.PARQUET:
-                if isinstance(results, pd.DataFrame):
-                    results.to_parquet(file_path, index=False)
-                else:
-                    df = pd.DataFrame(results)
-                    df.to_parquet(file_path, index=False)
+                self._save_parquet(results, file_path)
 
             logger.info(
                 "simulation_results_saved",
@@ -307,6 +258,93 @@ class OutputManager:
                 exc_info=True,
             )
             raise
+
+    def _save_csv(
+        self,
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
+        file_path: Path,
+        provenance: ProvenanceInfo,
+    ) -> None:
+        """Save results in CSV format with provenance header."""
+        is_df = False
+        try:
+            if isinstance(results, pd.DataFrame):
+                csv_text = results.to_csv(index=False)
+                is_df = True
+        except TypeError:
+            csv_text = ""
+
+        if not is_df:
+            df = pd.DataFrame(results)
+            csv_text = df.to_csv(index=False)
+
+        with open(file_path, "w") as f:
+            add_provenance_header_file(f, provenance)
+            f.write(csv_text)
+
+    def _save_json(
+        self,
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
+        file_path: Path,
+        provenance: ProvenanceInfo,
+        metadata: dict[str, Any] | None,
+        engine: str,
+    ) -> None:
+        """Save results in JSON format with provenance and metadata."""
+
+        def json_serializer(obj: Any) -> Any:
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, np.integer | np.floating):
+                return float(obj)
+            elif isinstance(obj, datetime):
+                return format_datetime(obj, "iso")
+            raise TypeError(
+                f"Object of type {type(obj).__name__} is not JSON serializable"
+            )
+
+        output_data = {
+            "metadata": metadata or {},
+            "provenance": {
+                "software": f"{provenance.software_name} v{provenance.software_version}",
+                "timestamp_utc": provenance.timestamp_utc,
+                "git_commit": provenance.git_commit_sha,
+                "git_branch": provenance.git_branch,
+                "git_dirty": provenance.git_is_dirty,
+                "python_version": provenance.python_version,
+                "numpy_version": provenance.numpy_version,
+            },
+            "results": results,
+            "timestamp": timestamp_iso(utc=False),
+            "engine": engine,
+        }
+
+        with open(file_path, "w") as f:
+            json.dump(output_data, f, indent=2, default=json_serializer)
+
+    def _save_hdf5(
+        self,
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
+        file_path: Path,
+    ) -> None:
+        """Save results in HDF5 format."""
+        if isinstance(results, pd.DataFrame):
+            results.to_hdf(file_path, key="data", mode="w")
+        else:
+            df = pd.DataFrame(results)
+            df.to_hdf(file_path, key="data", mode="w")
+
+    def _save_parquet(
+        self,
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
+        file_path: Path,
+    ) -> None:
+        """Save results in Parquet format."""
+        if isinstance(results, pd.DataFrame):
+            results.to_parquet(file_path, index=False)
+        else:
+            df = pd.DataFrame(results)
+            df.to_parquet(file_path, index=False)
 
     def save_simulation_results_async(
         self,

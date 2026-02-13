@@ -181,6 +181,103 @@ class DrakeMotionOptimizer:
             constraint_function=impact_timing_constraint,
         )
 
+    def _build_total_cost_function(
+        self, traj_shape: tuple
+    ) -> Callable[[np.ndarray], float]:
+        def total_cost(x: np.ndarray) -> float:
+            """Combined weighted objective function."""
+            traj = x.reshape(traj_shape)
+            cost = 0.0
+            for obj in self.objectives:
+                if obj.cost_function is not None:
+                    cost += obj.weight * obj.cost_function(traj)
+            return cost
+
+        return total_cost
+
+    def _build_scipy_constraints(self, traj_shape: tuple) -> list[dict]:
+        scipy_constraints: list[dict] = []
+        for con in self.constraints:
+            if con.constraint_function is None:
+                continue
+            if con.constraint_type == "equality":
+                scipy_constraints.append(
+                    {
+                        "type": "eq",
+                        "fun": lambda x, c=con: c.constraint_function(
+                            x.reshape(traj_shape)
+                        ),
+                    }
+                )
+            elif con.constraint_type == "inequality":
+                if con.upper_bound is not None:
+                    scipy_constraints.append(
+                        {
+                            "type": "ineq",
+                            "fun": lambda x, c=con: c.upper_bound
+                            - c.constraint_function(x.reshape(traj_shape)),
+                        }
+                    )
+                if con.lower_bound is not None:
+                    scipy_constraints.append(
+                        {
+                            "type": "ineq",
+                            "fun": lambda x, c=con: c.constraint_function(
+                                x.reshape(traj_shape)
+                            )
+                            - c.lower_bound,
+                        }
+                    )
+        return scipy_constraints
+
+    def _evaluate_objectives(self, optimal_trajectory: np.ndarray) -> dict[str, float]:
+        objective_values = {}
+        for obj in self.objectives:
+            if obj.cost_function is not None:
+                objective_values[obj.name] = obj.cost_function(optimal_trajectory)
+        return objective_values
+
+    def _evaluate_constraint_violations(
+        self, optimal_trajectory: np.ndarray, tolerance: float
+    ) -> tuple[dict[str, float], bool]:
+        constraint_violations = {}
+        all_satisfied = True
+        for con in self.constraints:
+            if con.constraint_function is not None:
+                val = con.constraint_function(optimal_trajectory)
+                violation = 0.0
+                if con.lower_bound is not None and val < con.lower_bound:
+                    violation = con.lower_bound - val
+                elif con.upper_bound is not None and val > con.upper_bound:
+                    violation = val - con.upper_bound
+                constraint_violations[con.name] = violation
+                if violation > tolerance:
+                    all_satisfied = False
+        return constraint_violations, all_satisfied
+
+    def _build_optimization_result(
+        self,
+        opt_result,
+        optimal_trajectory: np.ndarray,
+        objective_values: dict[str, float],
+        constraint_violations: dict[str, float],
+        all_satisfied: bool,
+    ) -> OptimizationResult:
+        success = opt_result.success and all_satisfied
+        return OptimizationResult(
+            success=success,
+            optimal_trajectory=optimal_trajectory,
+            optimal_cost=float(opt_result.fun),
+            iterations=opt_result.nit if hasattr(opt_result, "nit") else 0,
+            convergence_message=(
+                opt_result.message
+                if hasattr(opt_result, "message")
+                else str(opt_result.get("message", "Unknown"))
+            ),
+            objective_values=objective_values,
+            constraint_violations=constraint_violations,
+        )
+
     def optimize_trajectory(
         self,
         initial_trajectory: np.ndarray,
@@ -222,47 +319,8 @@ class DrakeMotionOptimizer:
         traj_shape = initial_trajectory.shape
         x0 = initial_trajectory.flatten()
 
-        def total_cost(x: np.ndarray) -> float:
-            """Combined weighted objective function."""
-            traj = x.reshape(traj_shape)
-            cost = 0.0
-            for obj in self.objectives:
-                if obj.cost_function is not None:
-                    cost += obj.weight * obj.cost_function(traj)
-            return cost
-
-        scipy_constraints = []
-        for con in self.constraints:
-            if con.constraint_function is None:
-                continue
-            if con.constraint_type == "equality":
-                scipy_constraints.append(
-                    {
-                        "type": "eq",
-                        "fun": lambda x, c=con: c.constraint_function(
-                            x.reshape(traj_shape)
-                        ),
-                    }
-                )
-            elif con.constraint_type == "inequality":
-                if con.upper_bound is not None:
-                    scipy_constraints.append(
-                        {
-                            "type": "ineq",
-                            "fun": lambda x, c=con: c.upper_bound
-                            - c.constraint_function(x.reshape(traj_shape)),
-                        }
-                    )
-                if con.lower_bound is not None:
-                    scipy_constraints.append(
-                        {
-                            "type": "ineq",
-                            "fun": lambda x, c=con: c.constraint_function(
-                                x.reshape(traj_shape)
-                            )
-                            - c.lower_bound,
-                        }
-                    )
+        total_cost = self._build_total_cost_function(traj_shape)
+        scipy_constraints = self._build_scipy_constraints(traj_shape)
 
         opt_result = scipy_minimize(
             total_cost,
@@ -277,45 +335,22 @@ class DrakeMotionOptimizer:
         )
 
         optimal_trajectory = opt_result.x.reshape(traj_shape)
+        objective_values = self._evaluate_objectives(optimal_trajectory)
+        constraint_violations, all_satisfied = self._evaluate_constraint_violations(
+            optimal_trajectory, tolerance
+        )
 
-        objective_values = {}
-        for obj in self.objectives:
-            if obj.cost_function is not None:
-                objective_values[obj.name] = obj.cost_function(optimal_trajectory)
-
-        constraint_violations = {}
-        all_satisfied = True
-        for con in self.constraints:
-            if con.constraint_function is not None:
-                val = con.constraint_function(optimal_trajectory)
-                violation = 0.0
-                if con.lower_bound is not None and val < con.lower_bound:
-                    violation = con.lower_bound - val
-                elif con.upper_bound is not None and val > con.upper_bound:
-                    violation = val - con.upper_bound
-                constraint_violations[con.name] = violation
-                if violation > tolerance:
-                    all_satisfied = False
-
-        success = opt_result.success and all_satisfied
-
-        result = OptimizationResult(
-            success=success,
-            optimal_trajectory=optimal_trajectory,
-            optimal_cost=float(opt_result.fun),
-            iterations=opt_result.nit if hasattr(opt_result, "nit") else 0,
-            convergence_message=(
-                opt_result.message
-                if hasattr(opt_result, "message")
-                else str(opt_result.get("message", "Unknown"))
-            ),
-            objective_values=objective_values,
-            constraint_violations=constraint_violations,
+        result = self._build_optimization_result(
+            opt_result,
+            optimal_trajectory,
+            objective_values,
+            constraint_violations,
+            all_satisfied,
         )
 
         self.logger.info(
             f"Trajectory optimization complete. Cost: {result.optimal_cost:.4f}. "
-            f"Success: {success}. Iterations: {result.iterations}"
+            f"Success: {result.success}. Iterations: {result.iterations}"
         )
 
         return result

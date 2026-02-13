@@ -274,9 +274,8 @@ class ClubTrajectoryParser:
 
         return events
 
-    def _parse_row(self, row) -> ClubFrame | None:
-        """Parse a single data row into ClubFrame."""
-        # Access by index (works for both pandas Series and list)
+    @staticmethod
+    def _make_row_accessor(row):
         if hasattr(row, "iloc"):
 
             def get(i):
@@ -287,7 +286,82 @@ class ClubTrajectoryParser:
             def get(i):
                 return row[i] if i < len(row) else None
 
-        # Skip header rows or invalid data
+        return get
+
+    @staticmethod
+    def _orthogonalize_axes(x_axis, y_axis):
+        x_axis = x_axis / (np.linalg.norm(x_axis) + 1e-8)
+        y_axis = y_axis - np.dot(y_axis, x_axis) * x_axis
+        y_axis = y_axis / (np.linalg.norm(y_axis) + 1e-8)
+        z_axis = np.cross(x_axis, y_axis)
+        return np.column_stack([x_axis, y_axis, z_axis])
+
+    def _parse_grip_data(self, get):
+        grip_pos = np.array(
+            [
+                float(get(self.GRIP_X_COL)) * self.CM_TO_M,
+                float(get(self.GRIP_Y_COL)) * self.CM_TO_M,
+                float(get(self.GRIP_Z_COL)) * self.CM_TO_M,
+            ]
+        )
+
+        grip_x = np.array(
+            [
+                float(get(self.GRIP_XX_COL) or 1.0),
+                float(get(self.GRIP_XY_COL) or 0.0),
+                float(get(self.GRIP_XZ_COL) or 0.0),
+            ]
+        )
+        grip_y = np.array(
+            [
+                float(get(self.GRIP_YX_COL) or 0.0),
+                float(get(self.GRIP_YY_COL) or 1.0),
+                float(get(self.GRIP_YZ_COL) or 0.0),
+            ]
+        )
+        grip_rot = self._orthogonalize_axes(grip_x, grip_y)
+
+        return grip_pos, grip_rot
+
+    def _parse_club_face_data(self, get, grip_pos, grip_rot):
+        face_x = get(self.FACE_X_COL)
+        face_y = get(self.FACE_Y_COL)
+        face_z = get(self.FACE_Z_COL)
+
+        if face_x is None or face_y is None or face_z is None:
+            face_pos = grip_pos + np.array([0.0, 0.0, -1.0])
+            return face_pos, grip_rot.copy()
+
+        face_pos = np.array(
+            [
+                float(face_x) * self.CM_TO_M,
+                float(face_y) * self.CM_TO_M,
+                float(face_z) * self.CM_TO_M,
+            ]
+        )
+
+        face_x_axis = np.array(
+            [
+                float(get(self.FACE_XX_COL) or 1.0),
+                float(get(self.FACE_XY_COL) or 0.0),
+                float(get(self.FACE_XZ_COL) or 0.0),
+            ]
+        )
+        face_y_axis = np.array(
+            [
+                float(get(self.FACE_YX_COL) or 0.0),
+                float(get(self.FACE_YY_COL) or 1.0),
+                float(get(self.FACE_YZ_COL) or 0.0),
+            ]
+        )
+        face_rot = self._orthogonalize_axes(face_x_axis, face_y_axis)
+
+        return face_pos, face_rot
+
+    def _parse_row(self, row) -> ClubFrame | None:
+        """Parse a single data row into ClubFrame."""
+        get = self._make_row_accessor(row)
+
         sample = get(self.SAMPLE_COL)
         if sample is None or not isinstance(sample, (int, float)):
             return None
@@ -296,84 +370,8 @@ class ClubTrajectoryParser:
             sample_idx = int(sample)
             time = float(get(self.TIME_COL))
 
-            # Parse grip position (convert cm to m)
-            grip_pos = np.array(
-                [
-                    float(get(self.GRIP_X_COL)) * self.CM_TO_M,
-                    float(get(self.GRIP_Y_COL)) * self.CM_TO_M,
-                    float(get(self.GRIP_Z_COL)) * self.CM_TO_M,
-                ]
-            )
-
-            # Parse grip rotation matrix (X and Y axes, compute Z)
-            grip_x = np.array(
-                [
-                    float(get(self.GRIP_XX_COL) or 1.0),
-                    float(get(self.GRIP_XY_COL) or 0.0),
-                    float(get(self.GRIP_XZ_COL) or 0.0),
-                ]
-            )
-            grip_y = np.array(
-                [
-                    float(get(self.GRIP_YX_COL) or 0.0),
-                    float(get(self.GRIP_YY_COL) or 1.0),
-                    float(get(self.GRIP_YZ_COL) or 0.0),
-                ]
-            )
-            # Normalize and orthogonalize
-            grip_x = grip_x / (np.linalg.norm(grip_x) + 1e-8)
-            grip_y = grip_y - np.dot(grip_y, grip_x) * grip_x
-            grip_y = grip_y / (np.linalg.norm(grip_y) + 1e-8)
-            grip_z = np.cross(grip_x, grip_y)
-            grip_rot = np.column_stack([grip_x, grip_y, grip_z])
-
-            # Parse club face position (convert cm to m)
-            face_x = get(self.FACE_X_COL)
-            face_y = get(self.FACE_Y_COL)
-            face_z = get(self.FACE_Z_COL)
-
-            if face_x is not None and face_y is not None and face_z is not None:
-                face_pos = np.array(
-                    [
-                        float(face_x) * self.CM_TO_M,
-                        float(face_y) * self.CM_TO_M,
-                        float(face_z) * self.CM_TO_M,
-                    ]
-                )
-
-                # Parse club face rotation
-                face_xx = get(self.FACE_XX_COL)
-                face_xy = get(self.FACE_XY_COL)
-                face_xz = get(self.FACE_XZ_COL)
-                face_yx = get(self.FACE_YX_COL)
-                face_yy = get(self.FACE_YY_COL)
-                face_yz = get(self.FACE_YZ_COL)
-
-                face_x_axis = np.array(
-                    [
-                        float(face_xx or 1.0),
-                        float(face_xy or 0.0),
-                        float(face_xz or 0.0),
-                    ]
-                )
-                face_y_axis = np.array(
-                    [
-                        float(face_yx or 0.0),
-                        float(face_yy or 1.0),
-                        float(face_yz or 0.0),
-                    ]
-                )
-                face_x_axis = face_x_axis / (np.linalg.norm(face_x_axis) + 1e-8)
-                face_y_axis = (
-                    face_y_axis - np.dot(face_y_axis, face_x_axis) * face_x_axis
-                )
-                face_y_axis = face_y_axis / (np.linalg.norm(face_y_axis) + 1e-8)
-                face_z_axis = np.cross(face_x_axis, face_y_axis)
-                face_rot = np.column_stack([face_x_axis, face_y_axis, face_z_axis])
-            else:
-                # Club face data not available, estimate from grip
-                face_pos = grip_pos + np.array([0.0, 0.0, -1.0])  # ~1m below grip
-                face_rot = grip_rot.copy()
+            grip_pos, grip_rot = self._parse_grip_data(get)
+            face_pos, face_rot = self._parse_club_face_data(get, grip_pos, grip_rot)
 
             return ClubFrame(
                 time=time,

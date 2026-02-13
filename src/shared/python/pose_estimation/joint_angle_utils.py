@@ -9,6 +9,8 @@ Issue #759: Complete motion matching pipeline.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -95,79 +97,59 @@ def compute_joint_angles(
             return None
         return np.asarray(kp, dtype=float)
 
-    # ------------------------------------------------------------------
-    # Elbow flexion: shoulder-elbow-wrist
-    # ------------------------------------------------------------------
-    for side in ("right", "left"):
-        shoulder = _get(f"{side}_shoulder")
-        elbow = _get(f"{side}_elbow")
-        wrist = _get(f"{side}_wrist")
-        if shoulder is not None and elbow is not None and wrist is not None:
-            angle = _compute_flexion(shoulder, elbow, wrist)
-            if not np.isnan(angle):
-                angles[f"{side}_elbow_flexion"] = angle
+    # Bilateral flexion angles (proximal-joint-distal triplets)
+    _JOINT_DEFS: list[tuple[str, str, str, str]] = [
+        ("elbow_flexion", "shoulder", "elbow", "wrist"),
+        ("shoulder_flexion", "hip", "shoulder", "elbow"),
+        ("hip_flexion", "shoulder", "hip", "knee"),
+        ("knee_flexion", "hip", "knee", "ankle"),
+    ]
+    _compute_bilateral_flexion(angles, _get, _JOINT_DEFS)
 
-    # ------------------------------------------------------------------
-    # Shoulder flexion: hip-shoulder-elbow
-    # ------------------------------------------------------------------
-    for side in ("right", "left"):
-        hip = _get(f"{side}_hip")
-        shoulder = _get(f"{side}_shoulder")
-        elbow = _get(f"{side}_elbow")
-        if hip is not None and shoulder is not None and elbow is not None:
-            angle = _compute_flexion(hip, shoulder, elbow)
-            if not np.isnan(angle):
-                angles[f"{side}_shoulder_flexion"] = angle
-
-    # ------------------------------------------------------------------
-    # Hip flexion: shoulder-hip-knee
-    # ------------------------------------------------------------------
-    for side in ("right", "left"):
-        shoulder = _get(f"{side}_shoulder")
-        hip = _get(f"{side}_hip")
-        knee = _get(f"{side}_knee")
-        if shoulder is not None and hip is not None and knee is not None:
-            angle = _compute_flexion(shoulder, hip, knee)
-            if not np.isnan(angle):
-                angles[f"{side}_hip_flexion"] = angle
-
-    # ------------------------------------------------------------------
-    # Knee flexion: hip-knee-ankle
-    # ------------------------------------------------------------------
-    for side in ("right", "left"):
-        hip = _get(f"{side}_hip")
-        knee = _get(f"{side}_knee")
-        ankle = _get(f"{side}_ankle")
-        if hip is not None and knee is not None and ankle is not None:
-            angle = _compute_flexion(hip, knee, ankle)
-            if not np.isnan(angle):
-                angles[f"{side}_knee_flexion"] = angle
-
-    # ------------------------------------------------------------------
-    # Trunk rotation (X-factor): angle between shoulder line and hip line
-    # projected onto the transverse (horizontal XY) plane
-    # ------------------------------------------------------------------
-    l_shoulder = _get("left_shoulder")
-    r_shoulder = _get("right_shoulder")
-    l_hip = _get("left_hip")
-    r_hip = _get("right_hip")
-
-    if (
-        l_shoulder is not None
-        and r_shoulder is not None
-        and l_hip is not None
-        and r_hip is not None
-    ):
-        shoulder_vec = r_shoulder[:2] - l_shoulder[:2]  # XY projection
-        hip_vec = r_hip[:2] - l_hip[:2]
-        n1 = np.linalg.norm(shoulder_vec)
-        n2 = np.linalg.norm(hip_vec)
-        if n1 > 1e-12 and n2 > 1e-12:
-            cos_a = np.dot(shoulder_vec, hip_vec) / (n1 * n2)
-            cos_a = np.clip(cos_a, -1.0, 1.0)
-            angles["trunk_rotation"] = float(np.arccos(cos_a))
+    # Trunk rotation (X-factor)
+    _compute_trunk_rotation(angles, _get)
 
     return angles
+
+
+def _compute_bilateral_flexion(
+    angles: dict[str, float],
+    getter: Callable[[str], np.ndarray | None],
+    joint_defs: list[tuple[str, str, str, str]],
+) -> None:
+    """Compute bilateral (right/left) flexion angles for each joint definition."""
+    for angle_name, proximal_name, joint_name, distal_name in joint_defs:
+        for side in ("right", "left"):
+            proximal = getter(f"{side}_{proximal_name}")
+            joint = getter(f"{side}_{joint_name}")
+            distal = getter(f"{side}_{distal_name}")
+            if proximal is not None and joint is not None and distal is not None:
+                angle = _compute_flexion(proximal, joint, distal)
+                if not np.isnan(angle):
+                    angles[f"{side}_{angle_name}"] = angle
+
+
+def _compute_trunk_rotation(
+    angles: dict[str, float],
+    getter: Callable[[str], np.ndarray | None],
+) -> None:
+    """Compute trunk rotation (X-factor) from shoulder and hip lines."""
+    l_shoulder = getter("left_shoulder")
+    r_shoulder = getter("right_shoulder")
+    l_hip = getter("left_hip")
+    r_hip = getter("right_hip")
+
+    if l_shoulder is None or r_shoulder is None or l_hip is None or r_hip is None:
+        return
+
+    shoulder_vec = r_shoulder[:2] - l_shoulder[:2]
+    hip_vec = r_hip[:2] - l_hip[:2]
+    n1 = np.linalg.norm(shoulder_vec)
+    n2 = np.linalg.norm(hip_vec)
+    if n1 > 1e-12 and n2 > 1e-12:
+        cos_a = np.dot(shoulder_vec, hip_vec) / (n1 * n2)
+        cos_a = np.clip(cos_a, -1.0, 1.0)
+        angles["trunk_rotation"] = float(np.arccos(cos_a))
 
 
 # ------------------------------------------------------------------

@@ -147,6 +147,7 @@ ignore = ["E501", "B008"]
 [tool.ruff.lint.per-file-ignores]
 "scripts/**" = ["T201"]
 "tests/**" = ["T201"]
+"examples/**" = ["T201"]
 
 [tool.black]
 line-length = 88

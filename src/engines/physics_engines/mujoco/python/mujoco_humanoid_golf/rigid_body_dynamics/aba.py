@@ -307,6 +307,23 @@ def _aba_forward_accelerations(
             a[:, i] += s_subspace[i] * qdd[i]
 
 
+def _aba_allocate_arrays(nb: int, model: dict) -> dict:
+    return {
+        "xup": np.empty((nb, 6, 6)),
+        "s_subspace": [None] * nb,
+        "dof_indices": [-1] * nb,
+        "v": np.empty((6, nb), order="F"),
+        "c": np.empty((6, nb), order="F"),
+        "ia_articulated": np.array(model["I"], dtype=float),
+        "pa_bias": np.zeros((6, nb), order="F"),
+        "u_force": np.zeros((6, nb), order="F"),
+        "d": np.zeros(nb),
+        "u": np.zeros(nb),
+        "a": np.zeros((6, nb), order="F"),
+        "qdd": np.zeros(nb),
+    }
+
+
 def aba(
     model: dict,
     q: np.ndarray,
@@ -358,82 +375,60 @@ def aba(
     """
     q, qd, tau, nb = _aba_validate_inputs(model, q, qd, tau)
 
-    # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
-    # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
     if a_grav is DEFAULT_GRAVITY:
         neg_a_grav = NEG_DEFAULT_GRAVITY
     else:
         neg_a_grav = -a_grav
 
-    # Initialize arrays
-    xup = np.empty((nb, 6, 6))
-    s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item]
-    dof_indices: list[int] = [-1] * nb
-
-    v = np.empty((6, nb), order="F")
-    c = np.empty((6, nb), order="F")
-    ia_articulated = np.array(model["I"], dtype=float)
-    pa_bias = np.zeros((6, nb), order="F")
-    u_force = np.zeros((6, nb), order="F")
-    d = np.zeros(nb)
-    u = np.zeros(nb)
-    a = np.zeros((6, nb), order="F")
-    qdd = np.zeros(nb)
-
-    # Temporary buffers
+    arr = _aba_allocate_arrays(nb, model)
     buf = _ScratchBuffers.create()
-
-    # OPTIMIZATION: Cache dictionary lookups to local variables
     mdl = _ModelCache.from_model(model)
 
-    # --- Pass 1: Forward kinematics ---
     _aba_forward_kinematics(
         nb,
         q,
         qd,
         f_ext,
         mdl,
-        xup,
-        s_subspace,
-        dof_indices,
-        v,
-        c,
-        pa_bias,
+        arr["xup"],
+        arr["s_subspace"],
+        arr["dof_indices"],
+        arr["v"],
+        arr["c"],
+        arr["pa_bias"],
         buf,
     )
 
-    # --- Pass 2: Backward recursion (articulated-body inertias) ---
     _aba_backward_pass(
         nb,
         tau,
         mdl.parent,
-        s_subspace,
-        dof_indices,
-        xup,
-        ia_articulated,
-        pa_bias,
-        u_force,
-        d,
-        u,
-        c,
+        arr["s_subspace"],
+        arr["dof_indices"],
+        arr["xup"],
+        arr["ia_articulated"],
+        arr["pa_bias"],
+        arr["u_force"],
+        arr["d"],
+        arr["u"],
+        arr["c"],
         buf,
     )
 
-    # --- Pass 3: Forward recursion (accelerations) ---
     _aba_forward_accelerations(
         nb,
         mdl.parent,
-        s_subspace,
-        dof_indices,
-        xup,
+        arr["s_subspace"],
+        arr["dof_indices"],
+        arr["xup"],
         neg_a_grav,
-        c,
-        u_force,
-        d,
-        u,
-        a,
-        qdd,
+        arr["c"],
+        arr["u_force"],
+        arr["d"],
+        arr["u"],
+        arr["a"],
+        arr["qdd"],
     )
 
-    return qdd
+    return arr["qdd"]

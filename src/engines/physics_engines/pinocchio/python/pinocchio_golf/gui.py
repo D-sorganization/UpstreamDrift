@@ -275,11 +275,7 @@ class PinocchioGUI(SimulationGUIBase):
     WINDOW_WIDTH = 1000
     WINDOW_HEIGHT = 900
 
-    def __init__(self) -> None:
-        """Initialize the Pinocchio GUI."""
-        super().__init__()
-
-        # Internal state
+    def _init_internal_state(self) -> None:
         self.model: pin.Model | None = None
         self.data: pin.Data | None = None
         self.visual_model: pin.VisualModel | None = None
@@ -288,16 +284,13 @@ class PinocchioGUI(SimulationGUIBase):
         self.q: np.ndarray | None = None
         self.v: np.ndarray | None = None
 
-        # Analysis
         self.analyzer: InducedAccelerationAnalyzer | None = None
         self.latest_induced: dict[str, np.ndarray] | None = None
         self.latest_cf: dict[str, np.ndarray] | None = None
 
-        # Manipulability
         self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
         self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
 
-        # Recorder - pass self as engine
         self.recorder = PinocchioRecorder(engine=self)
         self.sim_time = 0.0
 
@@ -305,76 +298,52 @@ class PinocchioGUI(SimulationGUIBase):
         self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
         self.joint_names: list[str] = []
 
-        self.operating_mode = "dynamic"  # "dynamic", "kinematic"
+        self.operating_mode = "dynamic"
         self.is_running = False
         self.dt = DT_DEFAULT
 
-        # Diagnostics
-        pin_version = getattr(pin, "__version__", "unknown")
-        logger.info(f"Pinocchio Version: {pin_version}")
-        logger.info(f"Python Executable: {sys.executable}")
-
-        # Initialize log panel early so log_write() works during init
-        self.log = LogPanel()
-
-        # Meshcat viewer
+    def _init_meshcat_viewer(self) -> None:
         self.viewer: viz.Visualizer | None = None
-        if MESHCAT_AVAILABLE:
-            try:
-                # Force Meshcat to use port 7000 to match Docker exposure.
-                # Note: Meshcat binds to localhost by default; 0.0.0.0 is
-                # only used inside Docker containers (see docker_manager.py).
-                try:
-                    self.viewer = viz.Visualizer(server_args=["--port", "7000"])
-                except TypeError:
-                    # Fallback for older meshcat versions that might not
-                    # support server_args
-                    logger.warning(
-                        "Meshcat Visualizer: server_args not supported. Using default."
-                    )
-                    self.viewer = viz.Visualizer()
-
-                if callable(self.viewer.url):
-                    url = self.viewer.url()
-                else:
-                    url = self.viewer.url
-                logger.info("Internal Meshcat URL: %s", url)
-
-                # Explicitly log the external access URL for the user
-                # We assume port 7000 based on our request (or fallback logic)
-                try:
-                    port = url.split(":")[-1].split("/")[0]
-                    # Update to 7000 if we successfully requested it,
-                    # or trust the return
-                    host_url = f"http://127.0.0.1:{port}/static/"
-                    logger.info(f"Host Access URL: {host_url}")
-                    self.log_write("=" * 40)
-                    self.log_write("VISUALIZER READY")
-                    self.log_write("Open this URL in your browser:")
-                    self.log_write(f"{host_url}")
-                    self.log_write("=" * 40)
-                except (PermissionError, OSError):
-                    logger.info("Could not determine host URL from: %s", url)
-            except (ConnectionError, OSError, RuntimeError) as exc:
-                logger.error(f"Failed to initialize Meshcat viewer: {exc}")
-                self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
-                self.log_write("Please ensure meshcat-server is running or try again.")
-        else:
+        if not MESHCAT_AVAILABLE:
             self.log_write("Warning: Meshcat not available. Visualization disabled.")
             logger.warning("Meshcat module not found.")
+            return
 
-        # Model Management
-        self.available_models: list[dict] = []
-        self._scan_urdf_models()
+        try:
+            try:
+                self.viewer = viz.Visualizer(server_args=["--port", "7000"])
+            except TypeError:
+                logger.warning(
+                    "Meshcat Visualizer: server_args not supported. Using default."
+                )
+                self.viewer = viz.Visualizer()
 
-        # Setup UI
-        self._setup_ui()
+            if callable(self.viewer.url):
+                url = self.viewer.url()
+            else:
+                url = self.viewer.url
+            logger.info("Internal Meshcat URL: %s", url)
 
-        # Timer
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self._game_loop)
+            self._log_meshcat_url(url)
+        except (ConnectionError, OSError, RuntimeError) as exc:
+            logger.error(f"Failed to initialize Meshcat viewer: {exc}")
+            self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
+            self.log_write("Please ensure meshcat-server is running or try again.")
 
-        # Try load default model
+    def _log_meshcat_url(self, url: str) -> None:
+        try:
+            port = url.split(":")[-1].split("/")[0]
+            host_url = f"http://127.0.0.1:{port}/static/"
+            logger.info(f"Host Access URL: {host_url}")
+            self.log_write("=" * 40)
+            self.log_write("VISUALIZER READY")
+            self.log_write("Open this URL in your browser:")
+            self.log_write(f"{host_url}")
+            self.log_write("=" * 40)
+        except (PermissionError, OSError):
+            logger.info("Could not determine host URL from: %s", url)
+
+    def _load_default_model(self) -> None:
         default_urdf = (
             Path(__file__).parent / "../../models/generated/golfer.urdf"
         ).resolve()
@@ -386,6 +355,30 @@ class PinocchioGUI(SimulationGUIBase):
             self.load_urdf(str(default_urdf))
         else:
             self.available_models.insert(0, {"name": "Select Model...", "path": None})
+
+    def __init__(self) -> None:
+        """Initialize the Pinocchio GUI."""
+        super().__init__()
+
+        self._init_internal_state()
+
+        pin_version = getattr(pin, "__version__", "unknown")
+        logger.info(f"Pinocchio Version: {pin_version}")
+        logger.info(f"Python Executable: {sys.executable}")
+
+        self.log = LogPanel()
+
+        self._init_meshcat_viewer()
+
+        self.available_models: list[dict] = []
+        self._scan_urdf_models()
+
+        self._setup_ui()
+
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self._game_loop)
+
+        self._load_default_model()
 
     def get_joint_names(self) -> list[str]:
         """Return joint names for LivePlotWidget."""

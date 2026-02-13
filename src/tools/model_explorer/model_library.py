@@ -430,22 +430,52 @@ class ModelLibrary:
         Returns:
             URDF XML content as string
         """
-        # Shaft dimensions (tapered cylinder approximated as cylinder)
-        shaft_length = club_info["length"] - 0.254 - 0.076  # minus head and grip
-        shaft_radius = 0.006  # Average radius 6mm
-
-        # Head dimensions (simplified box for now)
+        shaft_length = club_info["length"] - 0.254 - 0.076
+        shaft_radius = 0.006
         head_length = 0.100
         head_width = 0.050
         head_height = 0.040
+        grip_length = 0.254
+        grip_radius = 0.013
 
-        # Grip dimensions
-        grip_length = 0.254  # Standard 10 inches
-        grip_radius = 0.013  # ~26mm diameter
+        base_link = self._urdf_base_link()
+        grip_link = self._urdf_grip_link(club_info, grip_length, grip_radius)
+        shaft_link = self._urdf_shaft_link(club_info, shaft_length, shaft_radius)
+        head_link = self._urdf_head_link(
+            club_info, head_length, head_width, head_height
+        )
 
-        urdf = f"""<?xml version="1.0"?>
+        return f"""<?xml version="1.0"?>
 <robot name="{club_key}">
-    <!-- Base link (reference frame) -->
+{base_link}
+{grip_link}
+
+    <joint name="base_to_grip" type="fixed">
+        <parent link="base_link"/>
+        <child link="grip"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+{shaft_link}
+
+    <joint name="grip_to_shaft" type="fixed">
+        <parent link="grip"/>
+        <child link="shaft"/>
+        <origin xyz="0 0 {grip_length}" rpy="0 0 0"/>
+    </joint>
+
+{head_link}
+
+    <joint name="shaft_to_head" type="fixed">
+        <parent link="shaft"/>
+        <child link="club_head"/>
+        <origin xyz="0 0 {shaft_length}" rpy="0 0 0"/>
+    </joint>
+</robot>
+"""
+
+    def _urdf_base_link(self) -> str:
+        return """    <!-- Base link (reference frame) -->
     <link name="base_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -456,16 +486,19 @@ class ModelLibrary:
                 <color rgba="0 0 0 0"/>
             </material>
         </visual>
-    </link>
+    </link>"""
 
-    <!-- Grip -->
+    def _urdf_grip_link(
+        self, club_info: dict, grip_length: float, grip_radius: float
+    ) -> str:
+        ixx = club_info["grip_mass"] * (3 * grip_radius**2 + grip_length**2) / 12
+        izz = club_info["grip_mass"] * grip_radius**2 / 2
+        return f"""    <!-- Grip -->
     <link name="grip">
         <inertial>
             <mass value="{club_info["grip_mass"]}"/>
             <origin xyz="0 0 {grip_length / 2}" rpy="0 0 0"/>
-            <inertia ixx="{club_info["grip_mass"] * (3 * grip_radius**2 + grip_length**2) / 12}"
-                     iyy="{club_info["grip_mass"] * (3 * grip_radius**2 + grip_length**2) / 12}"
-                     izz="{club_info["grip_mass"] * grip_radius**2 / 2}"
+            <inertia ixx="{ixx}" iyy="{ixx}" izz="{izz}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
@@ -483,22 +516,19 @@ class ModelLibrary:
                 <cylinder length="{grip_length}" radius="{grip_radius}"/>
             </geometry>
         </collision>
-    </link>
+    </link>"""
 
-    <joint name="base_to_grip" type="fixed">
-        <parent link="base_link"/>
-        <child link="grip"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
-
-    <!-- Shaft -->
+    def _urdf_shaft_link(
+        self, club_info: dict, shaft_length: float, shaft_radius: float
+    ) -> str:
+        ixx = club_info["shaft_mass"] * (3 * shaft_radius**2 + shaft_length**2) / 12
+        izz = club_info["shaft_mass"] * shaft_radius**2 / 2
+        return f"""    <!-- Shaft -->
     <link name="shaft">
         <inertial>
             <mass value="{club_info["shaft_mass"]}"/>
             <origin xyz="0 0 {shaft_length / 2}" rpy="0 0 0"/>
-            <inertia ixx="{club_info["shaft_mass"] * (3 * shaft_radius**2 + shaft_length**2) / 12}"
-                     iyy="{club_info["shaft_mass"] * (3 * shaft_radius**2 + shaft_length**2) / 12}"
-                     izz="{club_info["shaft_mass"] * shaft_radius**2 / 2}"
+            <inertia ixx="{ixx}" iyy="{ixx}" izz="{izz}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
@@ -516,26 +546,29 @@ class ModelLibrary:
                 <cylinder length="{shaft_length}" radius="{shaft_radius}"/>
             </geometry>
         </collision>
-    </link>
+    </link>"""
 
-    <joint name="grip_to_shaft" type="fixed">
-        <parent link="grip"/>
-        <child link="shaft"/>
-        <origin xyz="0 0 {grip_length}" rpy="0 0 0"/>
-    </joint>
-
-    <!-- Club Head -->
+    def _urdf_head_link(
+        self,
+        club_info: dict,
+        head_length: float,
+        head_width: float,
+        head_height: float,
+    ) -> str:
+        loft_rad = club_info["loft"] * math.pi / 180
+        ixx = club_info["head_mass"] * (head_width**2 + head_height**2) / 12
+        iyy = club_info["head_mass"] * (head_length**2 + head_height**2) / 12
+        izz = club_info["head_mass"] * (head_length**2 + head_width**2) / 12
+        return f"""    <!-- Club Head -->
     <link name="club_head">
         <inertial>
             <mass value="{club_info["head_mass"]}"/>
-            <origin xyz="{head_length / 2} 0 0" rpy="0 {club_info["loft"] * math.pi / 180} 0"/>
-            <inertia ixx="{club_info["head_mass"] * (head_width**2 + head_height**2) / 12}"
-                     iyy="{club_info["head_mass"] * (head_length**2 + head_height**2) / 12}"
-                     izz="{club_info["head_mass"] * (head_length**2 + head_width**2) / 12}"
+            <origin xyz="{head_length / 2} 0 0" rpy="0 {loft_rad} 0"/>
+            <inertia ixx="{ixx}" iyy="{iyy}" izz="{izz}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
-            <origin xyz="{head_length / 2} 0 0" rpy="0 {club_info["loft"] * math.pi / 180} 0"/>
+            <origin xyz="{head_length / 2} 0 0" rpy="0 {loft_rad} 0"/>
             <geometry>
                 <box size="{head_length} {head_width} {head_height}"/>
             </geometry>
@@ -544,21 +577,12 @@ class ModelLibrary:
             </material>
         </visual>
         <collision>
-            <origin xyz="{head_length / 2} 0 0" rpy="0 {club_info["loft"] * math.pi / 180} 0"/>
+            <origin xyz="{head_length / 2} 0 0" rpy="0 {loft_rad} 0"/>
             <geometry>
                 <box size="{head_length} {head_width} {head_height}"/>
             </geometry>
         </collision>
-    </link>
-
-    <joint name="shaft_to_head" type="fixed">
-        <parent link="shaft"/>
-        <child link="club_head"/>
-        <origin xyz="0 0 {shaft_length}" rpy="0 0 0"/>
-    </joint>
-</robot>
-"""
-        return urdf
+    </link>"""
 
     def list_available_models(self) -> dict[str, Any]:
         """List all available models in the library.

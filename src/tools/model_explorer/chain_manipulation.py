@@ -403,7 +403,23 @@ class InsertSegmentDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Insertion point
+        layout.addWidget(self._create_insertion_group(tree, insert_after))
+        layout.addWidget(self._create_link_group())
+        layout.addWidget(self._create_joint_group())
+        layout.addWidget(self._create_reparent_group(tree))
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        self.parent_combo.currentTextChanged.connect(self._update_reparent_list)
+
+    def _create_insertion_group(
+        self, tree: KinematicTree, insert_after: str | None
+    ) -> QGroupBox:
         insertion_group = QGroupBox("Insertion Point")
         insertion_layout = QFormLayout(insertion_group)
 
@@ -415,10 +431,9 @@ class InsertSegmentDialog(QDialog):
             if index >= 0:
                 self.parent_combo.setCurrentIndex(index)
         insertion_layout.addRow("Insert after link:", self.parent_combo)
+        return insertion_group
 
-        layout.addWidget(insertion_group)
-
-        # New link properties
+    def _create_link_group(self) -> QGroupBox:
         link_group = QGroupBox("New Link")
         link_layout = QFormLayout(link_group)
 
@@ -435,10 +450,9 @@ class InsertSegmentDialog(QDialog):
         self.mass_spin.setValue(1.0)
         self.mass_spin.setSuffix(" kg")
         link_layout.addRow("Mass:", self.mass_spin)
+        return link_group
 
-        layout.addWidget(link_group)
-
-        # New joint properties
+    def _create_joint_group(self) -> QGroupBox:
         joint_group = QGroupBox("New Joint")
         joint_layout = QFormLayout(joint_group)
 
@@ -450,7 +464,6 @@ class InsertSegmentDialog(QDialog):
         self.joint_type_combo.addItems(["fixed", "revolute", "prismatic", "continuous"])
         joint_layout.addRow("Joint type:", self.joint_type_combo)
 
-        # Axis
         axis_layout = QHBoxLayout()
         self.axis_x = QDoubleSpinBox()
         self.axis_x.setRange(-1, 1)
@@ -468,10 +481,9 @@ class InsertSegmentDialog(QDialog):
         axis_layout.addWidget(QLabel("Z:"))
         axis_layout.addWidget(self.axis_z)
         joint_layout.addRow("Axis:", axis_layout)
+        return joint_group
 
-        layout.addWidget(joint_group)
-
-        # Re-parenting option
+    def _create_reparent_group(self, tree: KinematicTree) -> QGroupBox:
         reparent_group = QGroupBox("Re-parent Children")
         reparent_layout = QVBoxLayout(reparent_group)
 
@@ -485,7 +497,7 @@ class InsertSegmentDialog(QDialog):
                 )
                 for child in node.children:
                     item = QListWidgetItem(child.name)
-                    item.setSelected(True)  # Select all by default
+                    item.setSelected(True)
                     self.reparent_list.addItem(item)
                 reparent_layout.addWidget(
                     QLabel("Select children to re-parent to new link:")
@@ -497,19 +509,7 @@ class InsertSegmentDialog(QDialog):
         else:
             reparent_layout.addWidget(QLabel("Select a parent link first"))
             self.reparent_list = None
-
-        layout.addWidget(reparent_group)
-
-        # Buttons
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-
-        # Update reparent list when parent changes
-        self.parent_combo.currentTextChanged.connect(self._update_reparent_list)
+        return reparent_group
 
     def _update_reparent_list(self, parent_name: str) -> None:
         """Update the reparent list when parent selection changes."""

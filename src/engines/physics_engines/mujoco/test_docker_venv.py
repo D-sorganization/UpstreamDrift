@@ -9,12 +9,7 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def test_docker_venv() -> bool:
-    """Test if Docker container properly uses the virtual environment."""
-    logger.info("🐳 Testing Docker Container Virtual Environment")
-    logger.info("=" * 60)
-
-    # Test 1: Check if Docker image exists
+def _check_docker_image_exists() -> bool:
     logger.debug("1. Checking if robotics_env Docker image exists...")
     try:
         result = subprocess.run(
@@ -31,17 +26,18 @@ def test_docker_venv() -> bool:
         )
         if "robotics_env" in result.stdout:
             logger.info("✓ robotics_env Docker image found")
-        else:
-            logger.warning("❌ robotics_env Docker image not found")
-            logger.info(
-                "   Run: docker build -t robotics_env . (from docker/ directory)"
-            )
-            return False
+            return True
+        logger.warning("❌ robotics_env Docker image not found")
+        logger.info(
+            "   Run: docker build -t robotics_env . (from docker/ directory)",
+        )
+        return False
     except Exception as e:
         logger.error(f"❌ Failed to check Docker images: {e}")
         return False
 
-    # Test 2: Check Python path in container
+
+def _check_python_path() -> None:
     logger.info("\n2. Testing Python executable path in container...")
     try:
         cmd = ["docker", "run", "--rm", "robotics_env", "which", "python"]
@@ -56,7 +52,8 @@ def test_docker_venv() -> bool:
     except Exception as e:
         logger.error(f"❌ Failed to check Python path: {e}")
 
-    # Test 3: Check if defusedxml is available in container
+
+def _check_defusedxml() -> bool:
     logger.info("\n3. Testing defusedxml availability in container...")
     try:
         cmd = [
@@ -73,6 +70,7 @@ def test_docker_venv() -> bool:
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         logger.info(f"✓ {result.stdout.strip()}")
+        return True
     except subprocess.CalledProcessError as e:
         logger.warning(f"❌ defusedxml not available: {e.stderr}")
         return False
@@ -80,7 +78,8 @@ def test_docker_venv() -> bool:
         logger.error(f"❌ Failed to test defusedxml: {e}")
         return False
 
-    # Test 4: Test the specific import that was failing
+
+def _check_defusedxml_elementtree() -> bool:
     logger.info("\n4. Testing defusedxml.ElementTree import...")
     try:
         cmd = [
@@ -97,6 +96,7 @@ def test_docker_venv() -> bool:
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         logger.info(f"✓ {result.stdout.strip()}")
+        return True
     except subprocess.CalledProcessError as e:
         logger.error(f"❌ defusedxml.ElementTree import failed: {e.stderr}")
         return False
@@ -104,40 +104,61 @@ def test_docker_venv() -> bool:
         logger.error(f"❌ Failed to test defusedxml.ElementTree: {e}")
         return False
 
-    # Test 5: Test the mujoco_golf_pendulum module import (if workspace is mounted)
-    logger.info("\n5. Testing mujoco_golf_pendulum module import...")
 
-    # Get current directory (should be MuJoCo repo root)
+def _check_module_import() -> bool:
+    logger.info("\n5. Testing mujoco_golf_pendulum module import...")
     current_dir = os.getcwd()
     if not current_dir.endswith("MuJoCo_Golf_Swing_Model"):
         logger.info("⚠️  Not running from MuJoCo_Golf_Swing_Model directory")
         logger.warning("   Skipping module import test")
-    else:
-        try:
-            cmd = [
-                "docker",
-                "run",
-                "--rm",
-                "-v",
-                f"{current_dir}:/workspace",
-                "-w",
-                "/workspace/python",
-                "robotics_env",
-                "python",
-                "-c",
-                (
-                    "from mujoco_golf_pendulum import urdf_io; "
-                    "print('urdf_io imported successfully')"
-                ),
-            ]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            logger.info(f"✓ {result.stdout.strip()}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"❌ mujoco_golf_pendulum.urdf_io import failed: {e.stderr}")
-            return False
-        except Exception as e:
-            logger.error(f"❌ Failed to test module import: {e}")
-            return False
+        return True
+
+    try:
+        cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            f"{current_dir}:/workspace",
+            "-w",
+            "/workspace/python",
+            "robotics_env",
+            "python",
+            "-c",
+            (
+                "from mujoco_golf_pendulum import urdf_io; "
+                "print('urdf_io imported successfully')"
+            ),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        logger.info(f"✓ {result.stdout.strip()}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"❌ mujoco_golf_pendulum.urdf_io import failed: {e.stderr}")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Failed to test module import: {e}")
+        return False
+
+
+def test_docker_venv() -> bool:
+    """Test if Docker container properly uses the virtual environment."""
+    logger.info("🐳 Testing Docker Container Virtual Environment")
+    logger.info("=" * 60)
+
+    if not _check_docker_image_exists():
+        return False
+
+    _check_python_path()
+
+    if not _check_defusedxml():
+        return False
+
+    if not _check_defusedxml_elementtree():
+        return False
+
+    if not _check_module_import():
+        return False
 
     logger.info("\n" + "=" * 60)
     logger.info("✅ All Docker container tests passed!")
@@ -153,7 +174,7 @@ def main() -> int:
         logger.info("\n💡 Troubleshooting steps:")
         logger.info(
             "   1. Rebuild Docker image: docker build -t robotics_env . "
-            "(from docker/ directory)"
+            "(from docker/ directory)",
         )
         logger.info("   2. Check if defusedxml was properly installed during build")
         logger.info("   3. Verify virtual environment is activated in container")

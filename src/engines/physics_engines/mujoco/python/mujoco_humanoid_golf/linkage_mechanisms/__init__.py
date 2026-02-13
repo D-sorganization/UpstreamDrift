@@ -20,6 +20,69 @@ import numpy as np
 from src.shared.python.core.constants import GRAVITY_M_S2
 
 
+def _four_bar_asset_xml() -> str:
+    return """    <asset>
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
+                 rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0.2"/>
+        <material name="crank_mat" rgba="0.9 0.1 0.1 1"/>
+        <material name="coupler_mat" rgba="0.1 0.7 0.1 1"/>
+        <material name="follower_mat" rgba="0.1 0.1 0.9 1"/>
+        <material name="ground_mat" rgba="0.3 0.3 0.3 1"/>
+    </asset>"""
+
+
+def _four_bar_worldbody_xml(
+    ground: float, crank: float, coupler: float, follower: float
+) -> str:
+    cx = crank * np.cos(np.pi / 4)
+    cy = crank * np.sin(np.pi / 4)
+    return f"""    <worldbody>
+        <light directional="true" diffuse=".8 .8 .8" specular="0.3 0.3 0.3"
+              pos="0 0 5" dir="0 0 -1"/>
+        <geom type="plane" size="10 10 0.1" material="grid"/>
+
+        <!-- Ground link visualization -->
+        <geom type="cylinder" fromto="0 0 0.5  {ground} 0 0.5" size="0.03"
+              material="ground_mat" contype="0" conaffinity="0"/>
+
+        <!-- Fixed pivot points -->
+        <geom name="pivot_crank" type="sphere" pos="0 0 0.5" size="0.08"
+              rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+        <geom name="pivot_follower" type="sphere" pos="{ground} 0 0.5" size="0.08"
+              rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+
+        <!-- Crank link -->
+        <body name="crank" pos="0 0 0.5">
+            <joint name="crank_joint" type="hinge" axis="0 0 1" damping="0.1"/>
+            <geom type="capsule"
+                  fromto="0 0 0  {cx} {cy} 0"
+                  size="0.05" material="crank_mat" mass="0.5"/>
+            <geom name="crank_end" type="sphere"
+                  pos="{cx} {cy} 0"
+                  size="0.07" rgba="1 0.5 0 1" contype="0" conaffinity="0"/>
+
+            <!-- Coupler link attached to crank end -->
+            <body name="coupler" pos="{cx} {cy} 0">
+                <joint name="coupler_crank_joint" type="hinge" axis="0 0 1" damping="0.05"/>
+                <geom type="capsule" fromto="0 0 0  {coupler * 0.7} {coupler * 0.3} 0"
+                      size="0.05" material="coupler_mat" mass="0.5"/>
+                <geom name="coupler_point" type="sphere" pos="{coupler * 0.35} {coupler * 0.15} 0"
+                      size="0.06" rgba="1 1 0 1" contype="0" conaffinity="0"/>
+            </body>
+        </body>
+
+        <!-- Follower link -->
+        <body name="follower" pos="{ground} 0 0.5">
+            <joint name="follower_joint" type="hinge" axis="0 0 1" damping="0.1"/>
+            <geom type="capsule" fromto="0 0 0  {-follower * 0.7} {follower * 0.3} 0"
+                  size="0.05" material="follower_mat" mass="0.5"/>
+            <geom name="follower_end" type="sphere" pos="{-follower * 0.7} {follower * 0.3} 0"
+                  size="0.07" rgba="0.5 0 1 1" contype="0" conaffinity="0"/>
+        </body>
+    </worldbody>"""
+
+
 def generate_four_bar_linkage_xml(
     link_lengths: list[float] | None = None,
     link_type: str = "grashof_crank_rocker",
@@ -39,14 +102,13 @@ def generate_four_bar_linkage_xml(
     --------
     str : MuJoCo XML string
     """
-    # Default configurations for different types
     configs = {
-        "grashof_crank_rocker": [4.0, 1.0, 3.5, 3.0],  # s + l < p + q
-        "grashof_double_crank": [4.0, 2.0, 4.5, 3.5],  # Parallelogram-like
-        "grashof_double_rocker": [4.0, 3.8, 2.5, 3.0],  # Both rock
-        "non_grashof": [4.0, 4.5, 2.0, 3.0],  # s + l > p + q
-        "parallel": [4.0, 2.0, 4.0, 2.0],  # Parallelogram
-        "antiparallel": [4.0, 2.0, 4.0, 2.0],  # Crossed linkage
+        "grashof_crank_rocker": [4.0, 1.0, 3.5, 3.0],
+        "grashof_double_crank": [4.0, 2.0, 4.5, 3.5],
+        "grashof_double_rocker": [4.0, 3.8, 2.5, 3.0],
+        "non_grashof": [4.0, 4.5, 2.0, 3.0],
+        "parallel": [4.0, 2.0, 4.0, 2.0],
+        "antiparallel": [4.0, 2.0, 4.0, 2.0],
     }
 
     if link_lengths is None:
@@ -54,11 +116,8 @@ def generate_four_bar_linkage_xml(
 
     ground, crank, coupler, follower = link_lengths
 
-    # Crank position at origin, follower at (ground, 0)
-
-    # Initial coupler end position (approximate)
-    crank * np.cos(np.pi / 4)
-    crank * np.sin(np.pi / 4)
+    asset_xml = _four_bar_asset_xml()
+    worldbody_xml = _four_bar_worldbody_xml(ground, crank, coupler, follower)
 
     return f"""
 <mujoco model="four_bar_linkage_{link_type}">
@@ -70,60 +129,9 @@ def generate_four_bar_linkage_xml(
         <map stiffness="700" shadowscale="0.5" fogstart="10" fogend="15"/>
     </visual>
 
-    <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
-                 rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
-        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0.2"/>
-        <material name="crank_mat" rgba="0.9 0.1 0.1 1"/>
-        <material name="coupler_mat" rgba="0.1 0.7 0.1 1"/>
-        <material name="follower_mat" rgba="0.1 0.1 0.9 1"/>
-        <material name="ground_mat" rgba="0.3 0.3 0.3 1"/>
-    </asset>
+{asset_xml}
 
-    <worldbody>
-        <light directional="true" diffuse=".8 .8 .8" specular="0.3 0.3 0.3"
-              pos="0 0 5" dir="0 0 -1"/>
-        <geom type="plane" size="10 10 0.1" material="grid"/>
-
-        <!-- Ground link visualization -->
-        <geom type="cylinder" fromto="0 0 0.5  {ground} 0 0.5" size="0.03"
-              material="ground_mat" contype="0" conaffinity="0"/>
-
-        <!-- Fixed pivot points -->
-        <geom name="pivot_crank" type="sphere" pos="0 0 0.5" size="0.08"
-              rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-        <geom name="pivot_follower" type="sphere" pos="{ground} 0 0.5" size="0.08"
-              rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-
-        <!-- Crank link -->
-        <body name="crank" pos="0 0 0.5">
-            <joint name="crank_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule"
-                  fromto="0 0 0  {crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0"
-                  size="0.05" material="crank_mat" mass="0.5"/>
-            <geom name="crank_end" type="sphere"
-                  pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0"
-                  size="0.07" rgba="1 0.5 0 1" contype="0" conaffinity="0"/>
-
-            <!-- Coupler link attached to crank end -->
-            <body name="coupler" pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0">
-                <joint name="coupler_crank_joint" type="hinge" axis="0 0 1" damping="0.05"/>
-                <geom type="capsule" fromto="0 0 0  {coupler * 0.7} {coupler * 0.3} 0"
-                      size="0.05" material="coupler_mat" mass="0.5"/>
-                <geom name="coupler_point" type="sphere" pos="{coupler * 0.35} {coupler * 0.15} 0"
-                      size="0.06" rgba="1 1 0 1" contype="0" conaffinity="0"/>
-            </body>
-        </body>
-
-        <!-- Follower link -->
-        <body name="follower" pos="{ground} 0 0.5">
-            <joint name="follower_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" fromto="0 0 0  {-follower * 0.7} {follower * 0.3} 0"
-                  size="0.05" material="follower_mat" mass="0.5"/>
-            <geom name="follower_end" type="sphere" pos="{-follower * 0.7} {follower * 0.3} 0"
-                  size="0.07" rgba="0.5 0 1 1" contype="0" conaffinity="0"/>
-        </body>
-    </worldbody>
+{worldbody_xml}
 
     <actuator>
         <motor name="crank_motor" joint="crank_joint" gear="20"
@@ -639,6 +647,62 @@ def generate_pantograph_xml(scale_factor: float = 2.0) -> str:
 """
 
 
+def _delta_robot_arm_xml(
+    arm_num: int,
+    base_radius: float,
+    angle_deg: float,
+    arm_length: float,
+    forearm_length: float,
+) -> str:
+    angle_rad = np.radians(angle_deg)
+    bx = base_radius * np.cos(angle_rad)
+    by = base_radius * np.sin(angle_rad)
+    euler_attr = f' euler="0 0 {angle_deg}"' if angle_deg != 0 else ""
+    return f"""
+        <!-- Arm {arm_num} ({angle_deg} degrees) -->
+        <body name="base{arm_num}" pos="{bx} {by} 2">
+            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+            <body name="arm{arm_num}" pos="0 0 0"{euler_attr}>
+                <joint name="joint{arm_num}" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
+                <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
+                      material="arm_mat" mass="1.0"/>
+
+                <body name="forearm{arm_num}a" pos="0 {-0.15} {-arm_length}">
+                    <joint name="elbow{arm_num}a" type="hinge" axis="0 1 0" damping="0.5"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
+                          material="forearm_mat" mass="0.5"/>
+                </body>
+                <body name="forearm{arm_num}b" pos="0 {0.15} {-arm_length}">
+                    <joint name="elbow{arm_num}b" type="hinge" axis="0 1 0" damping="0.5"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
+                          material="forearm_mat" mass="0.5"/>
+                </body>
+            </body>
+        </body>"""
+
+
+def _delta_robot_equality_xml(forearm_length: float) -> str:
+    lines = [
+        "    <equality>",
+        "        <!-- Connect forearms to platform -->",
+    ]
+    for arm_num in range(1, 4):
+        lines.append(
+            f'        <connect body1="forearm{arm_num}a" body2="platform" anchor="0 0 {-forearm_length}"/>'
+        )
+        lines.append(
+            f'        <connect body1="forearm{arm_num}b" body2="platform" anchor="0 0 {-forearm_length}"/>'
+        )
+    lines.append("")
+    lines.append("        <!-- Keep forearm pairs parallel -->")
+    for arm_num in range(1, 4):
+        lines.append(
+            f'        <joint joint1="elbow{arm_num}a" joint2="elbow{arm_num}b" polycoef="0 1 0 0 0"/>'
+        )
+    lines.append("    </equality>")
+    return "\n".join(lines)
+
+
 def generate_delta_robot_xml(
     base_radius: float = 2.0, platform_radius: float = 0.5
 ) -> str:
@@ -654,6 +718,14 @@ def generate_delta_robot_xml(
     """
     arm_length = 2.0
     forearm_length = 3.0
+
+    arms_xml = ""
+    for arm_num, angle_deg in enumerate([0, 120, 240], start=1):
+        arms_xml += _delta_robot_arm_xml(
+            arm_num, base_radius, angle_deg, arm_length, forearm_length
+        )
+
+    equality_xml = _delta_robot_equality_xml(forearm_length)
 
     return f"""
 <mujoco model="delta_robot">
@@ -680,70 +752,7 @@ def generate_delta_robot_xml(
         <!-- Base frame -->
         <geom type="cylinder" pos="0 0 2" size="{base_radius} 0.2"
               material="base_mat" contype="0" conaffinity="0"/>
-
-        <!-- Arm 1 (0 degrees) -->
-        <body name="base1" pos="{base_radius} 0 2">
-            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <body name="arm1" pos="0 0 0">
-                <joint name="joint1" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
-                <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
-                      material="arm_mat" mass="1.0"/>
-
-                <!-- Forearm 1 (parallel linkage) -->
-                <body name="forearm1a" pos="0 {-0.15} {-arm_length}">
-                    <joint name="elbow1a" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
-                </body>
-                <body name="forearm1b" pos="0 {0.15} {-arm_length}">
-                    <joint name="elbow1b" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
-                </body>
-            </body>
-        </body>
-
-        <!-- Arm 2 (120 degrees) -->
-        <body name="base2" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 2">
-            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <body name="arm2" pos="0 0 0" euler="0 0 120">
-                <joint name="joint2" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
-                <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
-                      material="arm_mat" mass="1.0"/>
-
-                <body name="forearm2a" pos="0 {-0.15} {-arm_length}">
-                    <joint name="elbow2a" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
-                </body>
-                <body name="forearm2b" pos="0 {0.15} {-arm_length}">
-                    <joint name="elbow2b" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
-                </body>
-            </body>
-        </body>
-
-        <!-- Arm 3 (240 degrees) -->
-        <body name="base3" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 2">
-            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <body name="arm3" pos="0 0 0" euler="0 0 240">
-                <joint name="joint3" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
-                <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
-                      material="arm_mat" mass="1.0"/>
-
-                <body name="forearm3a" pos="0 {-0.15} {-arm_length}">
-                    <joint name="elbow3a" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
-                </body>
-                <body name="forearm3b" pos="0 {0.15} {-arm_length}">
-                    <joint name="elbow3b" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
-                </body>
-            </body>
-        </body>
+{arms_xml}
 
         <!-- End effector platform -->
         <body name="platform" pos="0 0 {2 - arm_length - forearm_length}">
@@ -753,20 +762,7 @@ def generate_delta_robot_xml(
         </body>
     </worldbody>
 
-    <equality>
-        <!-- Connect forearms to platform -->
-        <connect body1="forearm1a" body2="platform" anchor="0 0 {-forearm_length}"/>
-        <connect body1="forearm1b" body2="platform" anchor="0 0 {-forearm_length}"/>
-        <connect body1="forearm2a" body2="platform" anchor="0 0 {-forearm_length}"/>
-        <connect body1="forearm2b" body2="platform" anchor="0 0 {-forearm_length}"/>
-        <connect body1="forearm3a" body2="platform" anchor="0 0 {-forearm_length}"/>
-        <connect body1="forearm3b" body2="platform" anchor="0 0 {-forearm_length}"/>
-
-        <!-- Keep forearm pairs parallel -->
-        <joint joint1="elbow1a" joint2="elbow1b" polycoef="0 1 0 0 0"/>
-        <joint joint1="elbow2a" joint2="elbow2b" polycoef="0 1 0 0 0"/>
-        <joint joint1="elbow3a" joint2="elbow3b" polycoef="0 1 0 0 0"/>
-    </equality>
+{equality_xml}
 
     <actuator>
         <motor name="motor1" joint="joint1" gear="50" ctrllimited="true" ctrlrange="-10 10"/>

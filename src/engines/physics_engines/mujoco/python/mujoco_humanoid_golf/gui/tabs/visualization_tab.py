@@ -48,7 +48,20 @@ class VisualizationTab(QtWidgets.QWidget):
         camera_group = QtWidgets.QGroupBox("Camera View")
         camera_layout = QtWidgets.QVBoxLayout(camera_group)
 
-        # Preset camera views
+        self._create_camera_presets(camera_layout)
+        self._create_reset_camera_button(camera_layout)
+
+        advanced_cam_group = QtWidgets.QGroupBox("Advanced Camera Controls")
+        advanced_cam_layout = QtWidgets.QFormLayout(advanced_cam_group)
+
+        self._create_camera_sliders(advanced_cam_layout)
+        self._create_lookat_controls(advanced_cam_layout)
+        self._create_mouse_info(advanced_cam_layout)
+
+        camera_layout.addWidget(advanced_cam_group)
+        return camera_group
+
+    def _create_camera_presets(self, camera_layout: QtWidgets.QVBoxLayout) -> None:
         preset_layout = QtWidgets.QHBoxLayout()
         preset_layout.addWidget(QtWidgets.QLabel("Preset:"))
         self.camera_combo = QtWidgets.QComboBox()
@@ -57,7 +70,7 @@ class VisualizationTab(QtWidgets.QWidget):
         preset_layout.addWidget(self.camera_combo)
         camera_layout.addLayout(preset_layout)
 
-        # Reset camera button
+    def _create_reset_camera_button(self, camera_layout: QtWidgets.QVBoxLayout) -> None:
         reset_cam_btn = QtWidgets.QPushButton("Reset Camera")
         style = self.style()
         if style:
@@ -68,11 +81,9 @@ class VisualizationTab(QtWidgets.QWidget):
         reset_cam_btn.clicked.connect(self.on_reset_camera)
         camera_layout.addWidget(reset_cam_btn)
 
-        # Advanced camera controls
-        advanced_cam_group = QtWidgets.QGroupBox("Advanced Camera Controls")
-        advanced_cam_layout = QtWidgets.QFormLayout(advanced_cam_group)
-
-        # Azimuth (rotation around vertical axis)
+    def _create_camera_sliders(
+        self, advanced_cam_layout: QtWidgets.QFormLayout
+    ) -> None:
         self.azimuth_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         self.azimuth_slider.setMinimum(0)
         self.azimuth_slider.setMaximum(360)
@@ -86,7 +97,6 @@ class VisualizationTab(QtWidgets.QWidget):
         advanced_cam_layout.addRow("Azimuth:", self.azimuth_slider)
         advanced_cam_layout.addRow("", self.azimuth_label)
 
-        # Elevation (up/down angle)
         self.elevation_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         self.elevation_slider.setMinimum(-90)
         self.elevation_slider.setMaximum(90)
@@ -100,7 +110,6 @@ class VisualizationTab(QtWidgets.QWidget):
         advanced_cam_layout.addRow("Elevation:", self.elevation_slider)
         advanced_cam_layout.addRow("", self.elevation_label)
 
-        # Distance slider for zoom control
         self.distance_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         self.distance_slider.setMinimum(1)
         self.distance_slider.setMaximum(500)
@@ -112,7 +121,9 @@ class VisualizationTab(QtWidgets.QWidget):
         advanced_cam_layout.addRow("Distance:", self.distance_slider)
         advanced_cam_layout.addRow("", self.distance_label)
 
-        # Lookat position (X, Y, Z)
+    def _create_lookat_controls(
+        self, advanced_cam_layout: QtWidgets.QFormLayout
+    ) -> None:
         lookat_layout = QtWidgets.QHBoxLayout()
         self.lookat_x_spin = QtWidgets.QDoubleSpinBox()
         self.lookat_x_spin.setRange(-10.0, 10.0)
@@ -146,7 +157,8 @@ class VisualizationTab(QtWidgets.QWidget):
 
         advanced_cam_layout.addRow("Lookat:", lookat_layout)
 
-        # Mouse controls info
+    @staticmethod
+    def _create_mouse_info(advanced_cam_layout: QtWidgets.QFormLayout) -> None:
         mouse_info = QtWidgets.QLabel(
             "Mouse Controls:\n"
             "\u2022 Left Drag: Rotate camera\n"
@@ -155,12 +167,8 @@ class VisualizationTab(QtWidgets.QWidget):
             "\u2022 Wheel: Zoom",
         )
         mouse_info.setWordWrap(True)
-        # Style set in dark_theme.qss
         mouse_info.setObjectName("helpLabel")
         advanced_cam_layout.addRow("", mouse_info)
-
-        camera_layout.addWidget(advanced_cam_group)
-        return camera_group
 
     def _setup_background_controls(self) -> QtWidgets.QGroupBox:
         """Create background color controls for sky and ground."""
@@ -282,7 +290,20 @@ class VisualizationTab(QtWidgets.QWidget):
         force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
         force_layout = QtWidgets.QVBoxLayout(force_group)
 
-        # Isolate Selection
+        self._create_force_checkboxes(force_layout)
+        self._create_torque_scale_controls(force_layout)
+        self._create_force_scale_controls(force_layout)
+        self._create_advanced_vector_overlays(force_layout)
+
+        self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
+        self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
+        force_layout.addWidget(self.show_contacts_cb)
+
+        ellipsoid_group = self._create_ellipsoid_group()
+
+        return force_group, ellipsoid_group
+
+    def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         self.isolate_forces_cb = QtWidgets.QCheckBox("Isolate to Selected Body")
         self.isolate_forces_cb.setToolTip(
             "Only show forces/torques for the currently selected body (via Right-Click)"
@@ -290,11 +311,13 @@ class VisualizationTab(QtWidgets.QWidget):
         self.isolate_forces_cb.stateChanged.connect(self.on_isolate_forces_changed)
         force_layout.addWidget(self.isolate_forces_cb)
 
-        # Torque vectors
         self.show_torques_cb = QtWidgets.QCheckBox("Show Joint Torque Vectors")
         self.show_torques_cb.stateChanged.connect(self.on_show_torques_changed)
         force_layout.addWidget(self.show_torques_cb)
 
+    def _create_torque_scale_controls(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
         torque_scale_layout = QtWidgets.QFormLayout()
         self.torque_scale_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         self.torque_scale_slider.setMinimum(1)
@@ -310,7 +333,7 @@ class VisualizationTab(QtWidgets.QWidget):
         torque_scale_layout.addRow("", self.torque_scale_label)
         force_layout.addLayout(torque_scale_layout)
 
-        # Force vectors
+    def _create_force_scale_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         self.show_forces_cb = QtWidgets.QCheckBox("Show Constraint Forces")
         self.show_forces_cb.stateChanged.connect(self.on_show_forces_changed)
         force_layout.addWidget(self.show_forces_cb)
@@ -328,11 +351,12 @@ class VisualizationTab(QtWidgets.QWidget):
         force_scale_layout.addRow("", self.force_scale_label)
         force_layout.addLayout(force_scale_layout)
 
-        # Advanced Vector Visualization
+    def _create_advanced_vector_overlays(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
         advanced_vector_group = QtWidgets.QGroupBox("Advanced Vector Overlays")
         av_layout = QtWidgets.QFormLayout(advanced_vector_group)
 
-        # Induced Accel
         self.show_induced_cb = QtWidgets.QCheckBox("Show Induced Acceleration")
         self.show_induced_cb.setToolTip(
             "Show acceleration vectors induced by a specific source (Magenta)"
@@ -340,7 +364,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.show_induced_cb.stateChanged.connect(self.on_advanced_vector_changed)
 
         self.induced_source_combo = QtWidgets.QComboBox()
-        self.induced_source_combo.setEditable(True)  # Allow custom actuator names
+        self.induced_source_combo.setEditable(True)
         self.induced_source_combo.addItems(["gravity", "velocity", "total"])
         self.induced_source_combo.setToolTip(
             "Select source or type specific actuator name"
@@ -349,7 +373,6 @@ class VisualizationTab(QtWidgets.QWidget):
             self.on_advanced_vector_changed
         )
 
-        # Counterfactuals
         self.show_cf_cb = QtWidgets.QCheckBox("Show Counterfactuals")
         self.show_cf_cb.setToolTip(
             "Show Counterfactual vectors like ZTCF accel or ZVCF torque (Yellow)"
@@ -357,9 +380,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.show_cf_cb.stateChanged.connect(self.on_advanced_vector_changed)
 
         self.cf_type_combo = QtWidgets.QComboBox()
-        self.cf_type_combo.addItems(
-            ["ztcf_accel", "zvcf_torque"]
-        )  # Keys in BiomechanicalData
+        self.cf_type_combo.addItems(["ztcf_accel", "zvcf_torque"])
         self.cf_type_combo.currentTextChanged.connect(self.on_advanced_vector_changed)
 
         av_layout.addRow(self.show_induced_cb, self.induced_source_combo)
@@ -367,12 +388,7 @@ class VisualizationTab(QtWidgets.QWidget):
 
         force_layout.addWidget(advanced_vector_group)
 
-        # Contact forces
-        self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
-        self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
-        force_layout.addWidget(self.show_contacts_cb)
-
-        # Ellipsoids
+    def _create_ellipsoid_group(self) -> QtWidgets.QGroupBox:
         ellipsoid_group = QtWidgets.QGroupBox("Ellipsoids")
         ellipsoid_layout = QtWidgets.QVBoxLayout(ellipsoid_group)
         self.show_mobility_ellipsoid_cb = QtWidgets.QCheckBox(
@@ -389,7 +405,7 @@ class VisualizationTab(QtWidgets.QWidget):
         )
         ellipsoid_layout.addWidget(self.show_force_ellipsoid_cb)
 
-        return force_group, ellipsoid_group
+        return ellipsoid_group
 
     def _setup_matrix_analysis(self) -> QtWidgets.QGroupBox:
         """Create matrix analysis display labels."""

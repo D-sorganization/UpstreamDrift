@@ -171,6 +171,108 @@ async def get_logo(filename: str) -> FileResponse:
 _ENGINE_CAPABILITIES: dict[str, dict[str, str]] | None = None
 
 
+def _build_engine_profiles() -> dict:
+    from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
+
+    F = CapabilityLevel.FULL
+    P = CapabilityLevel.PARTIAL
+    N = CapabilityLevel.NONE
+
+    return {
+        "mujoco": EngineCapabilities(
+            engine_name="MuJoCo",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=F,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=F,
+            dataset_export=F,
+            force_visualization=F,
+            model_positioning=F,
+            measurements=F,
+        ),
+        "drake": EngineCapabilities(
+            engine_name="Drake",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=P,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=P,
+            dataset_export=F,
+            force_visualization=P,
+            model_positioning=F,
+            measurements=F,
+        ),
+        "pinocchio": EngineCapabilities(
+            engine_name="Pinocchio",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=F,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=P,
+            dataset_export=F,
+            force_visualization=P,
+            model_positioning=F,
+            measurements=F,
+        ),
+        "opensim": EngineCapabilities(
+            engine_name="OpenSim",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=P,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=P,
+            dataset_export=F,
+            force_visualization=P,
+            model_positioning=P,
+            measurements=F,
+        ),
+        "myosuite": EngineCapabilities(
+            engine_name="MyoSuite",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=P,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=P,
+            dataset_export=F,
+            force_visualization=P,
+            model_positioning=P,
+            measurements=F,
+        ),
+        "pendulum": EngineCapabilities(
+            engine_name="Pendulum",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=N,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=P,
+            dataset_export=F,
+            force_visualization=F,
+            model_positioning=F,
+            measurements=F,
+        ),
+        "putting_green": EngineCapabilities(
+            engine_name="Putting Green",
+            mass_matrix=F,
+            jacobian=F,
+            contact_forces=P,
+            inverse_dynamics=F,
+            drift_acceleration=F,
+            video_export=P,
+            dataset_export=F,
+            force_visualization=P,
+            model_positioning=F,
+            measurements=F,
+        ),
+    }
+
+
 def _get_engine_capabilities() -> dict[str, dict[str, str]]:
     """Get capability profiles for all known engines.
 
@@ -181,102 +283,7 @@ def _get_engine_capabilities() -> dict[str, dict[str, str]]:
     if _ENGINE_CAPABILITIES is not None:
         return _ENGINE_CAPABILITIES
 
-    from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
-
-    profiles = {
-        "mujoco": EngineCapabilities(
-            engine_name="MuJoCo",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.FULL,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.FULL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.FULL,
-            model_positioning=CapabilityLevel.FULL,
-            measurements=CapabilityLevel.FULL,
-        ),
-        "drake": EngineCapabilities(
-            engine_name="Drake",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.PARTIAL,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.PARTIAL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.PARTIAL,
-            model_positioning=CapabilityLevel.FULL,
-            measurements=CapabilityLevel.FULL,
-        ),
-        "pinocchio": EngineCapabilities(
-            engine_name="Pinocchio",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.FULL,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.PARTIAL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.PARTIAL,
-            model_positioning=CapabilityLevel.FULL,
-            measurements=CapabilityLevel.FULL,
-        ),
-        "opensim": EngineCapabilities(
-            engine_name="OpenSim",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.PARTIAL,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.PARTIAL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.PARTIAL,
-            model_positioning=CapabilityLevel.PARTIAL,
-            measurements=CapabilityLevel.FULL,
-        ),
-        "myosuite": EngineCapabilities(
-            engine_name="MyoSuite",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.PARTIAL,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.PARTIAL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.PARTIAL,
-            model_positioning=CapabilityLevel.PARTIAL,
-            measurements=CapabilityLevel.FULL,
-        ),
-        "pendulum": EngineCapabilities(
-            engine_name="Pendulum",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.NONE,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.PARTIAL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.FULL,
-            model_positioning=CapabilityLevel.FULL,
-            measurements=CapabilityLevel.FULL,
-        ),
-        "putting_green": EngineCapabilities(
-            engine_name="Putting Green",
-            mass_matrix=CapabilityLevel.FULL,
-            jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.PARTIAL,
-            inverse_dynamics=CapabilityLevel.FULL,
-            drift_acceleration=CapabilityLevel.FULL,
-            video_export=CapabilityLevel.PARTIAL,
-            dataset_export=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.PARTIAL,
-            model_positioning=CapabilityLevel.FULL,
-            measurements=CapabilityLevel.FULL,
-        ),
-    }
-
+    profiles = _build_engine_profiles()
     _ENGINE_CAPABILITIES = {k: v.to_dict() for k, v in profiles.items()}
     return _ENGINE_CAPABILITIES
 

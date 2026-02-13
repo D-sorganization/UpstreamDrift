@@ -252,62 +252,60 @@ class GenericPhysicsRecorder:
         if not self.is_recording:
             return
 
-        # PERFORMANCE FIX: Ensure buffer has capacity (dynamic growth)
         self._ensure_capacity()
 
         if not self.is_recording:
-            # _ensure_capacity may have stopped recording if max reached
             return
 
-        # PERFORMANCE FIX: Batch state retrieval (was 3 separate calls)
-        # get_full_state() returns q, v, t, and M in a single call
         full_state = self.engine.get_full_state()
         q = full_state["q"]
         v = full_state["v"]
         t = full_state["t"]
-        M = full_state.get("M")  # May be None for some engines
+        M = full_state.get("M")
 
-        # Initialize array buffers on first record
         if not self._buffers_initialized:
             self._initialize_array_buffers(q, v)
 
-        # Handle control input
-        if control_input is not None:
-            tau = control_input
-        else:
-            # Try to get from engine if possible, or assume zero/unknown
-            # PhysicsEngine doesn't enforce get_control, but we can check if it has a stored one
-            # For now, default to zero if not provided
-            tau = np.zeros(len(v))
+        tau = control_input if control_input is not None else np.zeros(len(v))
+        ke = self._compute_kinetic_energy(v, M)
 
-        # Energies - use pre-computed M from get_full_state()
+        idx = self.current_idx
+        self._record_realtime_analysis(idx, q, v, tau, M)
+        self._store_basic_data(idx, t, q, v, ke, tau)
+        self._record_ground_forces(idx)
+
+        self.current_idx += 1
+
+    def _compute_kinetic_energy(self, v: np.ndarray, M: np.ndarray | None) -> float:
+        """Compute kinetic energy from velocity and mass matrix."""
         if M is not None and M.size > 0:
             try:
-                ke = 0.5 * v.T @ M @ v
+                return 0.5 * v.T @ M @ v
             except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("Failed to compute kinetic energy: %s", e)
-                ke = 0.0
-        else:
-            ke = 0.0
+        return 0.0
 
-        # Real-time Analysis Computations
-        idx = self.current_idx
-
-        # ZTCF
+    def _record_realtime_analysis(
+        self,
+        idx: int,
+        q: np.ndarray,
+        v: np.ndarray,
+        tau: np.ndarray,
+        M: np.ndarray | None,
+    ) -> None:
+        """Record real-time counterfactual and induced acceleration analysis."""
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
             try:
                 self.data["ztcf_accel"][idx] = self.engine.compute_ztcf(q, v)
             except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Failed to compute ZTCF at frame %d: %s", idx, e)
 
-        # ZVCF
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
             try:
                 self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
             except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Failed to compute ZVCF at frame %d: %s", idx, e)
 
-        # Drift Accel
         if self.analysis_config["track_drift"] and self.data["drift_accel"] is not None:
             try:
                 self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
@@ -316,7 +314,6 @@ class GenericPhysicsRecorder:
                     "Failed to compute drift acceleration at frame %d: %s", idx, e
                 )
 
-        # Total Control Accel
         if (
             self.analysis_config["track_total_control"]
             and self.data["control_accel"] is not None
@@ -330,17 +327,18 @@ class GenericPhysicsRecorder:
                     "Failed to compute control acceleration at frame %d: %s", idx, e
                 )
 
-        # PERFORMANCE FIX: Vectorized induced accelerations
-        # Instead of calling compute_control_acceleration N times (each solving M\tau),
-        # we compute M_inv once and use: accel[src] = M_inv[:, src] * tau[src]
+        self._record_induced_accelerations(idx, tau, M)
+
+    def _record_induced_accelerations(
+        self, idx: int, tau: np.ndarray, M: np.ndarray | None
+    ) -> None:
+        """Record per-source induced accelerations (vectorized when possible)."""
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
         if sources and M is not None and M.size > 0:
             try:
-                # Compute M_inv once for all sources
                 M_inv = np.linalg.inv(M)
                 for src_idx in sources:
                     if src_idx in self.data["induced_accelerations"]:
-                        # Vectorized: M^{-1} * e_src * tau[src] = M_inv[:, src] * tau[src]
                         self.data["induced_accelerations"][src_idx][idx] = (
                             M_inv[:, src_idx] * tau[src_idx]
                         )
@@ -349,7 +347,6 @@ class GenericPhysicsRecorder:
                     "Failed to compute induced accelerations at frame %d: %s", idx, e
                 )
         elif sources:
-            # Fallback to original method if M not available
             for src_idx in sources:
                 if src_idx in self.data["induced_accelerations"]:
                     try:
@@ -365,25 +362,32 @@ class GenericPhysicsRecorder:
                             e,
                         )
 
-        # Store basic data using array indexing (no copy needed, direct assignment)
+    def _store_basic_data(
+        self,
+        idx: int,
+        t: float,
+        q: np.ndarray,
+        v: np.ndarray,
+        ke: float,
+        tau: np.ndarray,
+    ) -> None:
+        """Store core state data into recording buffers."""
         self.data["times"][idx] = t
         self.data["joint_positions"][idx] = q
         self.data["joint_velocities"][idx] = v
         self.data["kinetic_energy"][idx] = ke
         self.data["joint_torques"][idx] = tau
 
-        # Ground Forces (from engine, if supported)
+    def _record_ground_forces(self, idx: int) -> None:
+        """Record ground reaction forces and moments from the engine."""
         try:
             grf = self.engine.compute_contact_forces()
             if grf is not None and len(grf) >= 3:
                 self.data["ground_forces"][idx] = grf[:3]
-                # Some engines return a 6-vector [force(3), moment(3)]
                 if len(grf) >= 6:
                     self.data["ground_moments"][idx] = grf[3:6]
         except (ValueError, RuntimeError, AttributeError) as e:
             logger.warning("Failed to compute ground forces at frame %d: %s", idx, e)
-
-        self.current_idx += 1
 
     def update_control(self, u: np.ndarray) -> None:
         """Update the last applied control for recording."""

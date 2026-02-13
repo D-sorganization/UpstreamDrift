@@ -105,11 +105,34 @@ class URDFEditorWindow(QMainWindow):
         if menubar is None:
             return
 
-        # File menu
         file_menu = menubar.addMenu("&File")
         if file_menu is None:
             return
+        self._setup_file_menu(file_menu)
 
+        edit_menu = menubar.addMenu("&Edit")
+        if edit_menu is None:
+            return
+        self._setup_edit_menu(edit_menu)
+
+        view_menu = menubar.addMenu("&View")
+        if view_menu is None:
+            return
+        self._setup_view_menu(view_menu)
+
+        tools_menu = menubar.addMenu("&Tools")
+        if tools_menu is None:
+            return
+        self._setup_tools_menu(tools_menu)
+
+        help_menu = menubar.addMenu("&Help")
+        if help_menu is None:
+            return
+        about_action = QAction("&About", self)
+        about_action.triggered.connect(self._show_about)
+        help_menu.addAction(about_action)
+
+    def _setup_file_menu(self, file_menu: Any) -> None:
         new_action = QAction("&New", self)
         new_action.setShortcut(QKeySequence.StandardKey.New)
         new_action.triggered.connect(self.new_urdf)
@@ -139,11 +162,7 @@ class URDFEditorWindow(QMainWindow):
         close_action.triggered.connect(self.close)
         file_menu.addAction(close_action)
 
-        # Edit menu
-        edit_menu = menubar.addMenu("&Edit")
-        if edit_menu is None:
-            return
-
+    def _setup_edit_menu(self, edit_menu: Any) -> None:
         validate_action = QAction("&Validate URDF", self)
         validate_action.setShortcut("Ctrl+Shift+V")
         validate_action.triggered.connect(self._validate_current)
@@ -154,11 +173,7 @@ class URDFEditorWindow(QMainWindow):
         format_action.triggered.connect(self._format_current)
         edit_menu.addAction(format_action)
 
-        # View menu
-        view_menu = menubar.addMenu("&View")
-        if view_menu is None:
-            return
-
+    def _setup_view_menu(self, view_menu: Any) -> None:
         self.show_preview_action = QAction("Show &3D Preview", self)
         self.show_preview_action.setCheckable(True)
         self.show_preview_action.setChecked(True)
@@ -171,11 +186,7 @@ class URDFEditorWindow(QMainWindow):
         self.show_library_action.triggered.connect(self._toggle_library)
         view_menu.addAction(self.show_library_action)
 
-        # Tools menu
-        tools_menu = menubar.addMenu("&Tools")
-        if tools_menu is None:
-            return
-
+    def _setup_tools_menu(self, tools_menu: Any) -> None:
         frankenstein_action = QAction("&Frankenstein Mode", self)
         frankenstein_action.triggered.connect(
             lambda: self.central_tabs.setCurrentWidget(self.frankenstein)
@@ -205,15 +216,6 @@ class URDFEditorWindow(QMainWindow):
             lambda: self.central_tabs.setCurrentWidget(self.mesh_browser)
         )
         tools_menu.addAction(mesh_action)
-
-        # Help menu
-        help_menu = menubar.addMenu("&Help")
-        if help_menu is None:
-            return
-
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self._show_about)
-        help_menu.addAction(about_action)
 
     def _setup_dock_widgets(self) -> None:
         """Set up dock widgets for preview and library."""

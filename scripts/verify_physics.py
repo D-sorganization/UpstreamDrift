@@ -23,18 +23,38 @@ ROOT_DIR = get_src_root()
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
 
 
-def run_verification() -> None:
-    """Run the physics verification suite."""
-    report_lines = []
-    report_lines.append("# Physics Verification Report")
-    report_lines.append(
-        f"**Date:** {datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}"  # noqa: UP017
-    )
-    report_lines.append("")
+class _PytestPlugin:
+    def __init__(self) -> None:
+        self.results: list[dict[str, Any]] = []
 
-    print("Starting Physics Verification...")
+    def pytest_runtest_logreport(self, report: Any) -> None:
+        if report.when == "call":
+            self.results.append(
+                {
+                    "nodeid": report.nodeid,
+                    "outcome": report.outcome,
+                    "duration": report.duration,
+                },
+            )
+        elif report.when == "setup" and report.outcome == "skipped":
+            self.results.append(
+                {
+                    "nodeid": report.nodeid,
+                    "outcome": "skipped",
+                    "duration": 0.0,
+                },
+            )
 
-    # 1. Engine Diagnostics
+
+def _build_report_header() -> list[str]:
+    return [
+        "# Physics Verification Report",
+        f"**Date:** {datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}",
+        "",
+    ]
+
+
+def _run_engine_diagnostics(report_lines: list[str]) -> None:
     manager = EngineManager(ROOT_DIR)
     probes = manager.probe_all_engines()
 
@@ -57,37 +77,13 @@ def run_verification() -> None:
     print("-" * 60)
     report_lines.append("")
 
-    # 2. Run Tests
-    report_lines.append("## 2. Validation Test Results")
 
+def _run_tests_and_report(report_lines: list[str]) -> _PytestPlugin:
+    report_lines.append("## 2. Validation Test Results")
     print("\nRunning Pytest Suite...")
 
-    class Plugin:
-        def __init__(self) -> None:
-            self.results: list[dict[str, Any]] = []
-
-        def pytest_runtest_logreport(self, report: Any) -> None:
-            if report.when == "call":
-                self.results.append(
-                    {
-                        "nodeid": report.nodeid,
-                        "outcome": report.outcome,
-                        "duration": report.duration,
-                    }
-                )
-            elif report.when == "setup" and report.outcome == "skipped":
-                self.results.append(
-                    {
-                        "nodeid": report.nodeid,
-                        "outcome": "skipped",
-                        "duration": 0.0,
-                    }
-                )
-
-    plugin = Plugin()
+    plugin = _PytestPlugin()
     test_dir = ROOT_DIR / "tests" / "physics_validation"
-
-    # Run pytest
     _ret_code = pytest.main(["-v", str(test_dir)], plugins=[plugin])
 
     report_lines.append("| Test Case | Outcome | Duration (s) |")
@@ -102,8 +98,13 @@ def run_verification() -> None:
         report_lines.append(f"| {test_name} | {outcome} | {res['duration']:.4f} |")
 
     report_lines.append("")
+    return plugin
 
-    # 3. Recommendations
+
+def _build_recommendations(
+    report_lines: list[str],
+    plugin: _PytestPlugin,
+) -> None:
     report_lines.append("## 3. Analysis & Recommendations")
 
     failed = [r for r in plugin.results if r["outcome"] == "failed"]
@@ -118,16 +119,25 @@ def run_verification() -> None:
         report_lines.append("### ⚠️ Skipped Tests")
         for s in skipped:
             report_lines.append(
-                f"- **{s['nodeid']}** was skipped. Check engine availability."
+                f"- **{s['nodeid']}** was skipped. Check engine availability.",
             )
 
     if not failed and not skipped:
         report_lines.append("### ✅ All Systems Valid")
         report_lines.append(
-            "All physics engines are producing valid, energy-conserving results."
+            "All physics engines are producing valid, energy-conserving results.",
         )
 
-    # Write Report
+
+def run_verification() -> None:
+    """Run the physics verification suite."""
+    print("Starting Physics Verification...")
+
+    report_lines = _build_report_header()
+    _run_engine_diagnostics(report_lines)
+    plugin = _run_tests_and_report(report_lines)
+    _build_recommendations(report_lines, plugin)
+
     report_path = ROOT_DIR / "output" / "PHYSICS_VERIFICATION_REPORT.md"
     report_path.parent.mkdir(exist_ok=True, parents=True)
     report_path.write_text("\n".join(report_lines), encoding="utf-8")

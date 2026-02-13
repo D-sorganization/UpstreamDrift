@@ -840,6 +840,81 @@ class KinematicForceAnalyzer:
 
         return results
 
+    def _validate_effective_mass_direction(self, direction: np.ndarray) -> np.ndarray:
+        direction_norm = np.linalg.norm(direction)
+        if direction_norm < EPSILON_SINGULARITY_DETECTION:
+            raise ValueError(
+                f"Direction vector has near-zero magnitude: {direction_norm:.2e}. "
+                "Cannot compute effective mass for zero-length direction."
+            )
+        return direction / direction_norm
+
+    def _check_mass_matrix_conditioning(self, M: np.ndarray) -> None:
+        M_cond = np.linalg.cond(M)
+        if M_cond > 1e6:
+            warnings.warn(
+                f"Mass matrix is ill-conditioned: κ(M) = {M_cond:.2e} > 1e6. "
+                "Effective mass computation may be numerically unstable. "
+                "This often indicates the robot is near a kinematic singularity.",
+                category=UserWarning,
+                stacklevel=2,
+            )
+
+        eigenvalues = np.linalg.eigvalsh(M)
+        if np.any(eigenvalues <= 0):
+            raise ValueError(
+                f"Mass matrix is not positive definite. "
+                f"Minimum eigenvalue: {eigenvalues.min():.2e}. "
+                "This indicates a modeling error or numerical instability."
+            )
+
+    def _check_jacobian_rank(self, jacp: np.ndarray) -> None:
+        J_rank = np.linalg.matrix_rank(jacp)
+        if J_rank < 3:
+            warnings.warn(
+                f"Jacobian is rank deficient: rank={J_rank} < 3. "
+                "Robot has lost mobility in some directions. "
+                "Effective mass may not be well-defined.",
+                category=RuntimeWarning,
+                stacklevel=2,
+            )
+
+    def _compute_effective_mass_value(
+        self, direction: np.ndarray, jacp: np.ndarray, M: np.ndarray
+    ) -> float:
+        J_dir = direction @ jacp
+        M_inv = np.linalg.inv(M)
+        denominator = J_dir @ M_inv @ J_dir.T + EPSILON_SINGULARITY_DETECTION
+
+        if abs(denominator) < 1e-8:
+            warnings.warn(
+                f"Effective mass denominator near zero: {denominator:.2e}. "
+                "Robot is at or very close to a kinematic singularity in the "
+                f"specified direction {direction}. Effective mass is extremely large.",
+                category=UserWarning,
+                stacklevel=2,
+            )
+
+        m_eff = 1.0 / denominator
+
+        if m_eff < 0:
+            raise ValueError(
+                f"Computed negative effective mass: {m_eff:.2e} kg. "
+                "This indicates a numerical error or modeling issue."
+            )
+
+        if not np.isfinite(m_eff):
+            warnings.warn(
+                f"Effective mass is non-finite: {m_eff}. "
+                "Robot is at a kinematic singularity. "
+                "Returning large finite value instead.",
+                category=UserWarning,
+                stacklevel=2,
+            )
+            m_eff = 1e10
+
+        return float(m_eff)
+
     def compute_effective_mass(
         self,
         qpos: np.ndarray,
@@ -902,93 +977,18 @@ class KinematicForceAnalyzer:
         if body_id is None:
             return 0.0
 
-        # Normalize direction (singularity protection)
-        direction_norm = np.linalg.norm(direction)
-        if direction_norm < EPSILON_SINGULARITY_DETECTION:
-            raise ValueError(
-                f"Direction vector has near-zero magnitude: {direction_norm:.2e}. "
-                "Cannot compute effective mass for zero-length direction."
-            )
-        direction = direction / direction_norm
+        direction = self._validate_effective_mass_direction(direction)
 
-        # Get mass matrix (already uses _perturb_data internally)
         M = self.compute_mass_matrix(qpos)
+        self._check_mass_matrix_conditioning(M)
 
-        # ASSESSMENT B-008: Check mass matrix condition number
-        M_cond = np.linalg.cond(M)
-        if M_cond > 1e6:
-            warnings.warn(
-                f"Mass matrix is ill-conditioned: κ(M) = {M_cond:.2e} > 1e6. "
-                "Effective mass computation may be numerically unstable. "
-                "This often indicates the robot is near a kinematic singularity.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-
-        # Check if mass matrix is positive definite (physical requirement)
-        eigenvalues = np.linalg.eigvalsh(M)
-        if np.any(eigenvalues <= 0):
-            raise ValueError(
-                f"Mass matrix is not positive definite. "
-                f"Minimum eigenvalue: {eigenvalues.min():.2e}. "
-                "This indicates a modeling error or numerical instability."
-            )
-
-        # FIXED: Use private data structure
         self._perturb_data.qpos[:] = qpos
         mujoco.mj_forward(self.model, self._perturb_data)
 
         jacp, _ = self._compute_jacobian(body_id, data=self._perturb_data)
+        self._check_jacobian_rank(jacp)
 
-        # ASSESSMENT B-008: Check Jacobian rank
-        J_rank = np.linalg.matrix_rank(jacp)
-        if J_rank < 3:
-            warnings.warn(
-                f"Jacobian is rank deficient: rank={J_rank} < 3. "
-                "Robot has lost mobility in some directions. "
-                "Effective mass may not be well-defined.",
-                category=RuntimeWarning,
-                stacklevel=2,
-            )
-
-        # Project Jacobian onto direction
-        J_dir = direction @ jacp
-
-        # Effective mass: m_eff = (J M^{-1} J^T)^{-1}
-        # Regularization prevents division by zero at singularities
-        M_inv = np.linalg.inv(M)
-        denominator = J_dir @ M_inv @ J_dir.T + EPSILON_SINGULARITY_DETECTION
-
-        # ASSESSMENT B-008: Detect near-singular configurations
-        if abs(denominator) < 1e-8:
-            warnings.warn(
-                f"Effective mass denominator near zero: {denominator:.2e}. "
-                "Robot is at or very close to a kinematic singularity in the "
-                f"specified direction {direction}. Effective mass is extremely large.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-
-        m_eff = 1.0 / denominator
-
-        # Sanity check: effective mass should be positive and finite
-        if m_eff < 0:
-            raise ValueError(
-                f"Computed negative effective mass: {m_eff:.2e} kg. "
-                "This indicates a numerical error or modeling issue."
-            )
-
-        if not np.isfinite(m_eff):
-            warnings.warn(
-                f"Effective mass is non-finite: {m_eff}. "
-                "Robot is at a kinematic singularity. "
-                "Returning large finite value instead.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-            m_eff = 1e10  # Large but finite fallback value
-
-        return float(m_eff)
+        return self._compute_effective_mass_value(direction, jacp, M)
 
 
 def export_kinematic_forces_to_csv(

@@ -112,6 +112,97 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(export.router, prefix="/api", tags=["Export"])
 
 
+def _load_launcher_manifest() -> dict[str, Any]:
+    import json
+
+    manifest_path = Path(__file__).parent.parent / "config" / "launcher_manifest.json"
+    if manifest_path.exists():
+        with open(manifest_path, encoding="utf-8") as f:
+            return json.load(f)
+    return {"version": "1.0.0", "tiles": []}
+
+
+def _find_logo_file(logo_name: str) -> Path | None:
+    logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
+    logo_path = logos_dir / logo_name
+    if logo_path.exists() and logo_path.is_file():
+        return logo_path
+    launcher_logos = Path(__file__).parent.parent / "launchers" / "assets"
+    alt_path = launcher_logos / logo_name
+    if alt_path.exists() and alt_path.is_file():
+        return alt_path
+    return None
+
+
+def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
+    import json as _json
+
+    manifest_path = Path(__file__).parent.parent / "config" / "launcher_manifest.json"
+    if not manifest_path.exists():
+        logger.error("[launch] Manifest not found at %s", manifest_path)
+        return None, None
+
+    with open(manifest_path, encoding="utf-8") as f:
+        manifest = _json.load(f)
+
+    for t in manifest.get("tiles", []):
+        if t.get("id") == tile_id:
+            return manifest, t
+    return manifest, None
+
+
+def _execute_tile_launch(
+    tile_id: str, tile: dict, launcher_service: Any
+) -> dict[str, Any]:
+    model_type = tile.get("type", "")
+    repo_path = Path(__file__).parent.parent.parent
+    logger.info(
+        "[launch] Resolved tile: name=%s type=%s path=%s",
+        tile.get("name"),
+        model_type,
+        tile.get("path"),
+    )
+
+    class _TileModel:
+        """Minimal model object compatible with handler.launch()."""
+
+        def __init__(self, data: dict) -> None:
+            for k, v in data.items():
+                setattr(self, k, v)
+
+    model = _TileModel(tile)
+
+    handler = launcher_service.get_handler(model_type)
+    if handler is None:
+        logger.error("[launch] No handler for type=%s (tile=%s)", model_type, tile_id)
+        return JSONResponse(
+            status_code=400,
+            content={"detail": f"No handler for type: {model_type}"},
+        )
+
+    logger.info(
+        "[launch] Using handler %s for tile %s",
+        type(handler).__name__,
+        tile_id,
+    )
+    success = handler.launch(model, repo_path, launcher_service.process_manager)
+    if success:
+        logger.info(
+            "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
+        )
+        return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
+    else:
+        logger.error(
+            "[launch] Handler returned failure for tile %s (type=%s)",
+            tile_id,
+            model_type,
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
+        )
+
+
 def _register_launcher_endpoints(app: FastAPI) -> None:
     """Register launcher manifest, logo, launch, process, and stop endpoints."""
     from src.api.services.launcher_service import LauncherService
@@ -123,30 +214,16 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
     @app.get("/api/launcher/manifest")
     async def get_launcher_manifest() -> dict[str, Any]:
         """Return the launcher manifest (tile configuration) for the web UI."""
-        import json
-
-        manifest_path = (
-            Path(__file__).parent.parent / "config" / "launcher_manifest.json"
-        )
-        if manifest_path.exists():
-            with open(manifest_path, encoding="utf-8") as f:
-                return json.load(f)
-        return {"version": "1.0.0", "tiles": []}
+        return _load_launcher_manifest()
 
     @app.get("/api/launcher/logos/{logo_name:path}")
     async def get_launcher_logo(logo_name: str) -> Any:
         """Serve logo images from assets/logos directory."""
         from fastapi.responses import FileResponse
 
-        logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
-        logo_path = logos_dir / logo_name
-        if logo_path.exists() and logo_path.is_file():
-            return FileResponse(str(logo_path))
-        # Also check launcher assets directory
-        launcher_logos = Path(__file__).parent.parent / "launchers" / "assets"
-        alt_path = launcher_logos / logo_name
-        if alt_path.exists() and alt_path.is_file():
-            return FileResponse(str(alt_path))
+        found = _find_logo_file(logo_name)
+        if found is not None:
+            return FileResponse(str(found))
         return JSONResponse(
             status_code=404, content={"detail": f"Logo not found: {logo_name}"}
         )
@@ -158,30 +235,14 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         Looks up the tile in the launcher manifest and uses the model
         handler registry to spawn it as a subprocess.
         """
-        import json as _json
-
         logger.info("[launch] Received launch request for tile_id=%s", tile_id)
 
-        # Load manifest to find tile config
-        manifest_path = (
-            Path(__file__).parent.parent / "config" / "launcher_manifest.json"
-        )
-        if not manifest_path.exists():
-            logger.error("[launch] Manifest not found at %s", manifest_path)
+        manifest, tile = _find_tile_in_manifest(tile_id)
+        if manifest is None:
             return JSONResponse(
                 status_code=404,
                 content={"detail": "Launcher manifest not found"},
             )
-
-        with open(manifest_path, encoding="utf-8") as f:
-            manifest = _json.load(f)
-
-        tile = None
-        for t in manifest.get("tiles", []):
-            if t.get("id") == tile_id:
-                tile = t
-                break
-
         if tile is None:
             logger.warning("[launch] Tile not found: %s", tile_id)
             return JSONResponse(
@@ -189,56 +250,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
                 content={"detail": f"Tile not found: {tile_id}"},
             )
 
-        model_type = tile.get("type", "")
-        repo_path = Path(__file__).parent.parent.parent
-        logger.info(
-            "[launch] Resolved tile: name=%s type=%s path=%s",
-            tile.get("name"),
-            model_type,
-            tile.get("path"),
-        )
-
-        # Use a simple namespace so handlers can read .id, .type, .path, etc.
-        class _TileModel:
-            """Minimal model object compatible with handler.launch()."""
-
-            def __init__(self, data: dict) -> None:
-                for k, v in data.items():
-                    setattr(self, k, v)
-
-        model = _TileModel(tile)
-
-        handler = _launcher_service.get_handler(model_type)
-        if handler is None:
-            logger.error(
-                "[launch] No handler for type=%s (tile=%s)", model_type, tile_id
-            )
-            return JSONResponse(
-                status_code=400,
-                content={"detail": f"No handler for type: {model_type}"},
-            )
-
-        logger.info(
-            "[launch] Using handler %s for tile %s",
-            type(handler).__name__,
-            tile_id,
-        )
-        success = handler.launch(model, repo_path, _launcher_service.process_manager)
-        if success:
-            logger.info(
-                "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
-            )
-            return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
-        else:
-            logger.error(
-                "[launch] Handler returned failure for tile %s (type=%s)",
-                tile_id,
-                model_type,
-            )
-            return JSONResponse(
-                status_code=500,
-                content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
-            )
+        return _execute_tile_launch(tile_id, tile, _launcher_service)
 
     @app.get("/api/launcher/processes")
     async def list_running_processes() -> dict[str, Any]:
@@ -326,6 +338,143 @@ def _register_health_and_diagnostic_endpoints(
         return details
 
 
+def _mount_logos_directory(app: FastAPI) -> None:
+    logos_path = Path(__file__).parent.parent.parent / "assets" / "logos"
+    if logos_path.exists():
+        app.mount(
+            "/logos",
+            StaticFiles(directory=str(logos_path)),
+            name="logos",
+        )
+        logger.info(f"Mounted /logos from {logos_path}")
+
+
+def _mount_assets_directory(app: FastAPI, ui_path: Path) -> None:
+    assets_path = ui_path / "assets"
+    if assets_path.exists():
+        app.mount(
+            "/assets",
+            StaticFiles(directory=str(assets_path)),
+            name="static_assets",
+        )
+        logger.info(f"Mounted /assets from {assets_path}")
+    else:
+        logger.warning(f"Assets directory not found at {assets_path}")
+        _startup_metrics["errors"].append(f"Assets directory missing: {assets_path}")
+
+
+def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
+    index_html = ui_path / "index.html"
+    if index_html.exists():
+        from fastapi.responses import FileResponse
+
+        @app.get("/{full_path:path}")
+        async def serve_spa(request: Request, full_path: str) -> Any:
+            """Serve the SPA index.html for all non-API routes."""
+            if full_path.startswith("api/"):
+                return JSONResponse(
+                    status_code=404,
+                    content={"detail": "API route not found", "path": full_path},
+                )
+            static_file = ui_path / full_path
+            if full_path and static_file.exists() and static_file.is_file():
+                return FileResponse(str(static_file))
+            return FileResponse(str(index_html))
+
+
+def _get_ui_not_built_html() -> str:
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Golf Modeling Suite - Setup Required</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: #f0f0f0;
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .container {
+                text-align: center;
+                padding: 40px;
+                background: rgba(0,0,0,0.3);
+                border-radius: 16px;
+                max-width: 600px;
+            }
+            h1 { color: #0a84ff; margin-bottom: 10px; }
+            .emoji { font-size: 4em; margin-bottom: 20px; }
+            .code {
+                background: #0d0d0d;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-family: monospace;
+                margin: 20px 0;
+                text-align: left;
+            }
+            a {
+                color: #0a84ff;
+                text-decoration: none;
+            }
+            a:hover { text-decoration: underline; }
+            .btn {
+                display: inline-block;
+                background: #0a84ff;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                margin-top: 20px;
+                text-decoration: none;
+            }
+            .btn:hover {
+                background: #0066cc;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="emoji">\U0001f3cc\ufe0f\u200d\u2642\ufe0f</div>
+            <h1>Golf Modeling Suite</h1>
+            <h2>Web UI Setup Required</h2>
+            <p>The web interface has not been built yet. Run these commands:</p>
+            <div class="code">
+                cd ui<br>
+                npm install<br>
+                npm run build
+            </div>
+            <p>Then restart the server.</p>
+            <p style="color: #888; margin-top: 30px;">
+                <strong>API is working!</strong> Check:
+            </p>
+            <p>
+                <a href="/api/health">/api/health</a> |
+                <a href="/api/docs">/api/docs</a> |
+                <a href="/api/diagnostics/html">/api/diagnostics/html</a>
+            </p>
+            <a href="/api/diagnostics/html" class="btn">Run Diagnostics</a>
+        </div>
+    </body>
+    </html>
+    """
+
+
+def _register_error_page_catch_all(app: FastAPI) -> None:
+    @app.get("/{full_path:path}")
+    async def serve_error_page(request: Request, full_path: str) -> HTMLResponse:
+        """Serve a helpful error page when UI is not built."""
+        if full_path.startswith("api/"):
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "API route not found", "path": full_path},
+            )
+        return HTMLResponse(content=_get_ui_not_built_html(), status_code=503)
+
+
 def _mount_static_files_and_spa(app: FastAPI) -> None:
     """Mount static UI files and SPA catch-all, or an error page if UI is not built."""
     ui_path = _resolve_ui_dist_path()
@@ -334,145 +483,14 @@ def _mount_static_files_and_spa(app: FastAPI) -> None:
     if ui_path.exists():
         logger.info(f"UI build found at {ui_path}, mounting static files")
         _startup_metrics["static_files_mounted"] = True
-
-        # Mount logos directory so web UI can load tile logos
-        logos_path = Path(__file__).parent.parent.parent / "assets" / "logos"
-        if logos_path.exists():
-            app.mount(
-                "/logos",
-                StaticFiles(directory=str(logos_path)),
-                name="logos",
-            )
-            logger.info(f"Mounted /logos from {logos_path}")
-
-        # Check if assets directory exists before mounting
-        assets_path = ui_path / "assets"
-        if assets_path.exists():
-            app.mount(
-                "/assets",
-                StaticFiles(directory=str(assets_path)),
-                name="static_assets",
-            )
-            logger.info(f"Mounted /assets from {assets_path}")
-        else:
-            logger.warning(f"Assets directory not found at {assets_path}")
-            _startup_metrics["errors"].append(
-                f"Assets directory missing: {assets_path}"
-            )
-
-        # SPA catch-all: serve index.html for all non-API routes
-        index_html = ui_path / "index.html"
-        if index_html.exists():
-            from fastapi.responses import FileResponse
-
-            @app.get("/{full_path:path}")
-            async def serve_spa(request: Request, full_path: str) -> Any:
-                """Serve the SPA index.html for all non-API routes."""
-                if full_path.startswith("api/"):
-                    return JSONResponse(
-                        status_code=404,
-                        content={"detail": "API route not found", "path": full_path},
-                    )
-                # Check if it's a static file first
-                static_file = ui_path / full_path
-                if full_path and static_file.exists() and static_file.is_file():
-                    return FileResponse(str(static_file))
-                return FileResponse(str(index_html))
-
+        _mount_logos_directory(app)
+        _mount_assets_directory(app, ui_path)
+        _register_spa_catch_all(app, ui_path)
     else:
         warning = f"UI build not found at {ui_path}. Run npm install && npm run build."
         logger.warning(warning)
         _startup_metrics["errors"].append(warning)
-
-        # Provide a helpful error page when UI is not built
-        @app.get("/{full_path:path}")
-        async def serve_error_page(request: Request, full_path: str) -> HTMLResponse:
-            """Serve a helpful error page when UI is not built."""
-            if full_path.startswith("api/"):
-                return JSONResponse(
-                    status_code=404,
-                    content={"detail": "API route not found", "path": full_path},
-                )
-
-            error_html = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Golf Modeling Suite - Setup Required</title>
-                <style>
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                        color: #f0f0f0;
-                        margin: 0;
-                        min-height: 100vh;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    .container {
-                        text-align: center;
-                        padding: 40px;
-                        background: rgba(0,0,0,0.3);
-                        border-radius: 16px;
-                        max-width: 600px;
-                    }
-                    h1 { color: #0a84ff; margin-bottom: 10px; }
-                    .emoji { font-size: 4em; margin-bottom: 20px; }
-                    .code {
-                        background: #0d0d0d;
-                        padding: 15px 20px;
-                        border-radius: 8px;
-                        font-family: monospace;
-                        margin: 20px 0;
-                        text-align: left;
-                    }
-                    a {
-                        color: #0a84ff;
-                        text-decoration: none;
-                    }
-                    a:hover { text-decoration: underline; }
-                    .btn {
-                        display: inline-block;
-                        background: #0a84ff;
-                        color: white;
-                        padding: 12px 24px;
-                        border-radius: 8px;
-                        margin-top: 20px;
-                        text-decoration: none;
-                    }
-                    .btn:hover {
-                        background: #0066cc;
-                        text-decoration: none;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="emoji">🏌️‍♂️</div>
-                    <h1>Golf Modeling Suite</h1>
-                    <h2>Web UI Setup Required</h2>
-                    <p>The web interface has not been built yet. Run these commands:</p>
-                    <div class="code">
-                        cd ui<br>
-                        npm install<br>
-                        npm run build
-                    </div>
-                    <p>Then restart the server.</p>
-                    <p style="color: #888; margin-top: 30px;">
-                        <strong>API is working!</strong> Check:
-                    </p>
-                    <p>
-                        <a href="/api/health">/api/health</a> |
-                        <a href="/api/docs">/api/docs</a> |
-                        <a href="/api/diagnostics/html">/api/diagnostics/html</a>
-                    </p>
-                    <a href="/api/diagnostics/html" class="btn">Run Diagnostics</a>
-                </div>
-            </body>
-            </html>
-            """
-            return HTMLResponse(content=error_html, status_code=503)
+        _register_error_page_catch_all(app)
 
 
 def create_local_app() -> FastAPI:

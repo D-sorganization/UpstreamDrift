@@ -19,70 +19,104 @@ class PhaseDetectionMixin:
         Returns:
             List of SwingPhase objects
         """
-        phases = []
         club_head_speed = getattr(self, "club_head_speed", None)
         times = getattr(self, "times", None)
         duration = getattr(self, "duration", 0.0)
 
         if club_head_speed is None or len(club_head_speed) < 20:
-            # If no club head data, return single phase
-            t_start = float(times[0]) if times is not None and len(times) > 0 else 0.0
-            t_end = float(times[-1]) if times is not None and len(times) > 0 else 0.0
-            idx_end = len(times) - 1 if times is not None and len(times) > 0 else 0
+            return self._fallback_single_phase(times, duration)
 
-            return [
-                SwingPhase(
-                    name="Complete Swing",
-                    start_time=t_start,
-                    end_time=t_end,
-                    start_index=0,
-                    end_index=idx_end,
-                    duration=float(duration),
-                ),
-            ]
+        smoothed_speed = self._smooth_speed(club_head_speed)
+        impact_idx, transition_idx, takeaway_idx, finish_idx = self._find_key_events(
+            smoothed_speed
+        )
+        phase_defs = self._build_phase_definitions(
+            smoothed_speed,
+            impact_idx,
+            transition_idx,
+            takeaway_idx,
+            finish_idx,
+        )
 
-        # Smooth speed for phase detection
+        if times is None:
+            times = np.zeros(0)
+
+        return self._create_phases_from_definitions(phase_defs, times)
+
+    @staticmethod
+    def _fallback_single_phase(
+        times: np.ndarray | None,
+        duration: float,
+    ) -> list[SwingPhase]:
+        """Return a single 'Complete Swing' phase when data is insufficient."""
+        t_start = float(times[0]) if times is not None and len(times) > 0 else 0.0
+        t_end = float(times[-1]) if times is not None and len(times) > 0 else 0.0
+        idx_end = len(times) - 1 if times is not None and len(times) > 0 else 0
+
+        return [
+            SwingPhase(
+                name="Complete Swing",
+                start_time=t_start,
+                end_time=t_end,
+                start_index=0,
+                end_index=idx_end,
+                duration=float(duration),
+            ),
+        ]
+
+    @staticmethod
+    def _smooth_speed(club_head_speed: np.ndarray) -> np.ndarray:
+        """Apply Savitzky-Golay smoothing to club head speed."""
         window_len = min(11, len(club_head_speed))
         if window_len % 2 == 0:
             window_len -= 1
 
         if window_len <= 3:
-            smoothed_speed = club_head_speed
-        else:
-            smoothed_speed = savgol_filter(club_head_speed, window_len, 3)
+            return club_head_speed
+        return savgol_filter(club_head_speed, window_len, 3)
 
-        # Key events
-        impact_idx = np.argmax(smoothed_speed)  # Peak speed = impact
+    @staticmethod
+    def _find_key_events(
+        smoothed_speed: np.ndarray,
+    ) -> tuple[int, int, int, int]:
+        """Locate impact, transition, takeaway, and finish indices."""
+        impact_idx = int(np.argmax(smoothed_speed))
 
-        # Find transition (top of backswing) - minimum speed before impact
+        # Transition (top of backswing) - minimum speed before impact
         search_end = int(impact_idx * 0.7)
         if search_end > 5:
-            # Avoid searching in very beginning noise
-            transition_idx = 5 + np.argmin(smoothed_speed[5:search_end])
+            transition_idx = 5 + int(np.argmin(smoothed_speed[5:search_end]))
         else:
             transition_idx = impact_idx // 2
 
-        # Find takeaway start (first significant movement)
+        # Takeaway start (first significant movement)
         speed_threshold = 0.1 * smoothed_speed[transition_idx]
         takeaway_idx = 0
-        # OPTIMIZATION: Use vectorized search instead of loop
         search_region = smoothed_speed[1:transition_idx]
         mask = search_region > speed_threshold
         if np.any(mask):
             takeaway_idx = 1 + int(np.argmax(mask))
 
-        # Find finish (speed drops after impact)
+        # Finish (speed drops after impact)
         finish_threshold = 0.3 * smoothed_speed[impact_idx]
         finish_idx = len(smoothed_speed) - 1
-
-        # OPTIMIZATION: Use vectorized search instead of loop
         search_region_post = smoothed_speed[impact_idx + 1 :]
         mask_post = search_region_post < finish_threshold
         if np.any(mask_post):
             finish_idx = int(impact_idx + 1 + np.argmax(mask_post))
 
-        # Define phases
-        phase_definitions = [
+        return impact_idx, transition_idx, takeaway_idx, finish_idx
+
+    @staticmethod
+    def _build_phase_definitions(
+        smoothed_speed: np.ndarray,
+        impact_idx: int,
+        transition_idx: int,
+        takeaway_idx: int,
+        finish_idx: int,
+    ) -> list[tuple[str, int, int]]:
+        """Build the list of (name, start_idx, end_idx) phase boundaries."""
+        return [
             ("Address", 0, takeaway_idx),
             (
                 "Takeaway",
@@ -113,16 +147,17 @@ class PhaseDetectionMixin:
             ("Finish", finish_idx, len(smoothed_speed) - 1),
         ]
 
-        if times is None:
-            # Should not happen if other logic holds, but safe fallback
-            times = np.zeros(0)
-
+    @staticmethod
+    def _create_phases_from_definitions(
+        phase_definitions: list[tuple[str, int, int]],
+        times: np.ndarray,
+    ) -> list[SwingPhase]:
+        """Convert raw phase definitions into bounded SwingPhase objects."""
+        phases: list[SwingPhase] = []
         for name, start_idx_raw, end_idx_raw in phase_definitions:
-            # Type cast to handle tuple unpacking
             start_idx_val = int(cast(int, start_idx_raw))
             end_idx_val = int(cast(int, end_idx_raw))
 
-            # Ensure indices are within bounds
             max_idx = len(times) - 1
             start_idx = int(max(0, min(start_idx_val, max_idx)))
             end_idx = int(max(start_idx, min(end_idx_val, max_idx)))
@@ -141,7 +176,6 @@ class PhaseDetectionMixin:
                     ),
                 ),
             )
-
         return phases
 
     def compute_phase_statistics(

@@ -462,119 +462,100 @@ class BallFlightSimulator:
         self, vel: np.ndarray, launch: LaunchConditions
     ) -> dict[str, np.ndarray]:
         """Calculate forces on the ball (supports vectorized input)."""
-        # Handle both single vector (3,) and batch (3, N)
         is_batch = vel.ndim > 1
-
-        if is_batch:
-            # Broadcase wind to shape
-            wind = (
-                self.environment.wind_velocity.reshape(3, 1)
-                if self.environment.wind_velocity.ndim == 1
-                else self.environment.wind_velocity
-            )
-            rel_vel = vel - wind
-            speed = np.sqrt(np.sum(rel_vel**2, axis=0))
-        else:
-            rel_vel = vel - self.environment.wind_velocity
-            speed = float(np.linalg.norm(rel_vel))
-
         omega = launch.spin_rate * 2 * np.pi / 60
 
-        # Prepare outputs
         shape = vel.shape
         gravity = np.zeros(shape)
-        gravity[2, ...] = -self.ball.mass * self.environment.gravity  # Set Z component
+        gravity[2, ...] = -self.ball.mass * self.environment.gravity
 
-        drag = np.zeros(shape)
-        magnus = np.zeros(shape)
-
-        # Avoid division by zero
-        # Mask for speeds > threshold
         if is_batch:
-            mask = speed > MIN_SPEED_THRESHOLD
-            if np.any(mask):
-                valid_speed = speed[mask]
-                valid_rel_vel = rel_vel[:, mask]
-
-                s_ratio = (omega * self.ball.radius) / valid_speed
-
-                # Drag
-                # We need vectorized calculation of coefficients if possible,
-                # but ball properties are scalar. We can map them.
-                # Assuming s_ratio is array.
-                cd = self.ball.cd0 + s_ratio * (self.ball.cd1 + s_ratio * self.ball.cd2)
-
-                drag_force_mag = (
-                    0.5
-                    * self.environment.air_density
-                    * self.ball.cross_sectional_area
-                    * cd
-                    * (valid_speed**2)
-                )
-                drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
-
-                # Magnus
-                cl = self.ball.cl0 + s_ratio * (self.ball.cl1 + s_ratio * self.ball.cl2)
-                # Clip CL? The original code had clip.
-                # Implementing simple cl calcs for now.
-
-                magnus_force_mag = (
-                    0.5
-                    * self.environment.air_density
-                    * self.ball.cross_sectional_area
-                    * cl
-                    * (valid_speed**2)
-                )
-
-                # Cross product
-                # spin_axis is (3,)
-                axis = launch.spin_axis.reshape(3, 1)
-                cross = np.cross(
-                    axis, valid_rel_vel / valid_speed, axis=0
-                )  # Cross product along axis 0
-                cross_norm = np.sqrt(np.sum(cross**2, axis=0))
-
-                cross_mask = cross_norm > NUMERICAL_EPSILON
-
-                # Apply across
-                # This is getting complicated to vectorize perfectly with numpy basic indexing inplace
-                # Let's simplify: if batch, iterate? No, performance.
-                # But for unit test 'TestCalculateForcesVectorized', we must support it.
-
-                if np.any(cross_mask):
-                    factor = magnus_force_mag[cross_mask] / cross_norm[cross_mask]
-                    magnus[:, np.where(mask)[0][cross_mask]] = (
-                        cross[:, cross_mask] * factor
-                    )
-
+            drag, magnus = self._calculate_forces_batch(vel, omega, launch.spin_axis)
         else:
-            if speed > MIN_SPEED_THRESHOLD:
-                s_ratio = (omega * self.ball.radius) / speed
-                cd = self.ball.calculate_cd(s_ratio)
-                cl = self.ball.calculate_cl(s_ratio)
-
-                drag_mag = (
-                    0.5
-                    * self.environment.air_density
-                    * self.ball.cross_sectional_area
-                    * cd
-                    * (speed**2)
-                )
-                drag = -drag_mag * (rel_vel / speed)
-
-                cross = np.cross(launch.spin_axis, rel_vel / speed)
-                cross_norm = np.linalg.norm(cross)
-                if cross_norm > NUMERICAL_EPSILON:
-                    magnus_mag = (
-                        0.5
-                        * self.environment.air_density
-                        * self.ball.cross_sectional_area
-                        * cl
-                        * (speed**2)
-                    )
-                    magnus = magnus_mag * (cross / cross_norm)
+            drag, magnus = self._calculate_forces_single(vel, omega, launch)
 
         return {"gravity": gravity, "drag": drag, "magnus": magnus}
+
+    def _calculate_forces_batch(
+        self,
+        vel: np.ndarray,
+        omega: float,
+        spin_axis: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Vectorized force calculation for batch velocity arrays (3, N)."""
+        wind = (
+            self.environment.wind_velocity.reshape(3, 1)
+            if self.environment.wind_velocity.ndim == 1
+            else self.environment.wind_velocity
+        )
+        rel_vel = vel - wind
+        speed = np.sqrt(np.sum(rel_vel**2, axis=0))
+
+        drag = np.zeros(vel.shape)
+        magnus = np.zeros(vel.shape)
+
+        mask = speed > MIN_SPEED_THRESHOLD
+        if not np.any(mask):
+            return drag, magnus
+
+        valid_speed = speed[mask]
+        valid_rel_vel = rel_vel[:, mask]
+        s_ratio = (omega * self.ball.radius) / valid_speed
+        aero_prefix = (
+            0.5 * self.environment.air_density * self.ball.cross_sectional_area
+        )
+
+        # Drag
+        cd = self.ball.cd0 + s_ratio * (self.ball.cd1 + s_ratio * self.ball.cd2)
+        drag_force_mag = aero_prefix * cd * (valid_speed**2)
+        drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
+
+        # Magnus
+        cl = self.ball.cl0 + s_ratio * (self.ball.cl1 + s_ratio * self.ball.cl2)
+        magnus_force_mag = aero_prefix * cl * (valid_speed**2)
+
+        axis = spin_axis.reshape(3, 1)
+        cross = np.cross(axis, valid_rel_vel / valid_speed, axis=0)
+        cross_norm = np.sqrt(np.sum(cross**2, axis=0))
+        cross_mask = cross_norm > NUMERICAL_EPSILON
+
+        if np.any(cross_mask):
+            factor = magnus_force_mag[cross_mask] / cross_norm[cross_mask]
+            magnus[:, np.where(mask)[0][cross_mask]] = cross[:, cross_mask] * factor
+
+        return drag, magnus
+
+    def _calculate_forces_single(
+        self,
+        vel: np.ndarray,
+        omega: float,
+        launch: LaunchConditions,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Scalar force calculation for a single velocity vector (3,)."""
+        rel_vel = vel - self.environment.wind_velocity
+        speed = float(np.linalg.norm(rel_vel))
+
+        drag = np.zeros(vel.shape)
+        magnus = np.zeros(vel.shape)
+
+        if speed <= MIN_SPEED_THRESHOLD:
+            return drag, magnus
+
+        s_ratio = (omega * self.ball.radius) / speed
+        cd = self.ball.calculate_cd(s_ratio)
+        cl = self.ball.calculate_cl(s_ratio)
+        aero_prefix = (
+            0.5 * self.environment.air_density * self.ball.cross_sectional_area
+        )
+
+        drag = -(aero_prefix * cd * speed**2) * (rel_vel / speed)
+
+        cross = np.cross(launch.spin_axis, rel_vel / speed)
+        cross_norm = np.linalg.norm(cross)
+        if cross_norm > NUMERICAL_EPSILON:
+            magnus = (aero_prefix * cl * speed**2) * (cross / cross_norm)
+
+        return drag, magnus
 
 
 # =============================================================================

@@ -1384,7 +1384,16 @@ class GolfVisualizerMainWindow(QMainWindow):
 
     def _apply_modern_style(self):
         """Apply modern white theme"""
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            self._get_window_tab_style()
+            + self._get_groupbox_button_style()
+            + self._get_slider_checkbox_style()
+            + self._get_combobox_label_statusbar_style()
+        )
+
+    @staticmethod
+    def _get_window_tab_style() -> str:
+        return """
             QMainWindow {
                 background-color: #ffffff;
                 color: #333333;
@@ -1414,7 +1423,11 @@ class GolfVisualizerMainWindow(QMainWindow):
             QTabBar::tab:hover {
                 background-color: #e8e8e8;
             }
+        """
 
+    @staticmethod
+    def _get_groupbox_button_style() -> str:
+        return """
             QGroupBox {
                 font-weight: bold;
                 border: 1px solid #cccccc;
@@ -1452,7 +1465,11 @@ class GolfVisualizerMainWindow(QMainWindow):
                 background-color: #cccccc;
                 color: #666666;
             }
+        """
 
+    @staticmethod
+    def _get_slider_checkbox_style() -> str:
+        return """
             QSlider::groove:horizontal {
                 border: 1px solid #cccccc;
                 height: 6px;
@@ -1488,7 +1505,11 @@ class GolfVisualizerMainWindow(QMainWindow):
                 background-color: #0078d4;
                 border-color: #0078d4;
             }
+        """
 
+    @staticmethod
+    def _get_combobox_label_statusbar_style() -> str:
+        return """
             QComboBox {
                 border: 1px solid #cccccc;
                 border-radius: 4px;
@@ -1518,7 +1539,7 @@ class GolfVisualizerMainWindow(QMainWindow):
                 color: #333333;
                 border-top: 1px solid #cccccc;
             }
-        """)
+        """
 
     def _load_motion_capture_data(self):
         """Load motion capture data"""

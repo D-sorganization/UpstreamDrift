@@ -170,12 +170,18 @@ class GolfSimulationGUI:
     def setup_styles(self) -> None:
         """Configure modern styling for the application."""
         style = ttk.Style()
-
-        # Configure the theme
         style.theme_use("clam")
 
-        # Color scheme
-        colors = {
+        colors = self._get_color_scheme()
+        self._configure_notebook_styles(style, colors)
+        self._configure_frame_styles(style, colors)
+        self._configure_label_styles(style, colors)
+        self._configure_button_styles(style)
+        self._configure_widget_styles(style, colors)
+
+    @staticmethod
+    def _get_color_scheme() -> dict[str, str]:
+        return {
             "bg": "#2b2b2b",
             "fg": "#ffffff",
             "select_bg": "#404040",
@@ -187,15 +193,16 @@ class GolfSimulationGUI:
             "purple": "#8b5cf6",
         }
 
-        # Configure notebook (tabs) - Fixed height, color-only selection indication
+    @staticmethod
+    def _configure_notebook_styles(style: ttk.Style, colors: dict[str, str]) -> None:
         style.configure("Modern.TNotebook", background=colors["bg"], borderwidth=0)
         style.configure(
             "Modern.TNotebook.Tab",
             background=colors["select_bg"],
             foreground=colors["fg"],
-            padding=[20, 12],  # Fixed padding for consistent height
+            padding=[20, 12],
             font=("Segoe UI", 10, "bold"),
-            focuscolor="none",  # Remove focus outline
+            focuscolor="none",
         )
         style.map(
             "Modern.TNotebook.Tab",
@@ -209,7 +216,6 @@ class GolfSimulationGUI:
                 ("active", colors["fg"]),
                 ("!active", colors["fg"]),
             ],
-            # Ensure consistent padding in all states
             padding=[
                 ("selected", [20, 12]),
                 ("active", [20, 12]),
@@ -217,13 +223,15 @@ class GolfSimulationGUI:
             ],
         )
 
-        # Configure frames
+    @staticmethod
+    def _configure_frame_styles(style: ttk.Style, colors: dict[str, str]) -> None:
         style.configure("Modern.TFrame", background=colors["bg"])
         style.configure(
             "Card.TFrame", background=colors["select_bg"], relief="flat", borderwidth=1
         )
 
-        # Configure labels
+    @staticmethod
+    def _configure_label_styles(style: ttk.Style, colors: dict[str, str]) -> None:
         style.configure(
             "Modern.TLabel",
             background=colors["bg"],
@@ -243,7 +251,8 @@ class GolfSimulationGUI:
             font=("Segoe UI", 12, "bold"),
         )
 
-        # Configure buttons
+    @staticmethod
+    def _configure_button_styles(style: ttk.Style) -> None:
         style.configure("Modern.TButton", font=("Segoe UI", 10), padding=[15, 8])
         style.configure(
             "Primary.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10]
@@ -256,7 +265,8 @@ class GolfSimulationGUI:
             "Danger.TButton", font=("Segoe UI", 11, "bold"), padding=[15, 8]
         )
 
-        # Configure other widgets
+    @staticmethod
+    def _configure_widget_styles(style: ttk.Style, colors: dict[str, str]) -> None:
         style.configure(
             "Modern.TCombobox",
             fieldbackground=colors["select_bg"],
@@ -764,11 +774,9 @@ class GolfSimulationGUI:
 
     def setup_equip_tab(self) -> None:
         """Setup the equipment tab."""
-        # Main container
         main_container = ttk.Frame(self.tab_equip, style="Modern.TFrame")
         main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Title
         title = ttk.Label(
             main_container,
             text="⚙️ Equipment & Model Configuration",
@@ -776,69 +784,67 @@ class GolfSimulationGUI:
         )
         title.pack(pady=(0, 20))
 
-        # Golf club parameters card
+        self._create_club_parameters_card(main_container)
+        self._create_advanced_features_card(main_container)
+        self._create_equip_save_button(main_container)
+
+    def _create_club_parameters_card(self, parent: ttk.Frame) -> None:
         club_card = ttk.LabelFrame(
-            main_container, text="🏌️ Golf Club Parameters", style="Modern.TLabelframe"
+            parent, text="🏌️ Golf Club Parameters", style="Modern.TLabelframe"
         )
         club_card.pack(fill="x", pady=(0, 20))
 
         club_inner = ttk.Frame(club_card, style="Modern.TFrame")
         club_inner.pack(fill="x", padx=20, pady=15)
 
-        # Club length
-        length_frame = ttk.Frame(club_inner, style="Modern.TFrame")
-        length_frame.pack(fill="x", pady=(0, 15))
-
-        length_label_frame = ttk.Frame(length_frame, style="Modern.TFrame")
-        length_label_frame.pack(fill="x", pady=(0, 5))
-
-        ttk.Label(
-            length_label_frame, text="Club Length (meters):", style="Modern.TLabel"
-        ).pack(side="left")
-        length_value = ttk.Label(
-            length_label_frame, textvariable=self.club_length_var, style="Modern.TLabel"
-        )
-        length_value.pack(side="right")
-
-        length_scale = tk.Scale(
-            length_frame,
+        self._create_scale_control(
+            club_inner,
+            label="Club Length (meters):",
+            variable=self.club_length_var,
             from_=0.5,
             to=1.5,
             resolution=0.05,
-            orient=tk.HORIZONTAL,
-            variable=self.club_length_var,
-            length=300,
-            bg="#2b2b2b",
-            fg="white",
-            troughcolor="#404040",
-            activebackground="#0078d4",
-            highlightthickness=0,
-            relief="flat",
+            bottom_pad=15,
         )
-        length_scale.pack(fill="x")
-
-        # Club mass
-        mass_frame = ttk.Frame(club_inner, style="Modern.TFrame")
-        mass_frame.pack(fill="x")
-
-        mass_label_frame = ttk.Frame(mass_frame, style="Modern.TFrame")
-        mass_label_frame.pack(fill="x", pady=(0, 5))
-
-        ttk.Label(mass_label_frame, text="Club Mass (kg):", style="Modern.TLabel").pack(
-            side="left"
-        )
-        mass_value = ttk.Label(
-            mass_label_frame, textvariable=self.club_mass_var, style="Modern.TLabel"
-        )
-        mass_value.pack(side="right")
-
-        mass_scale = tk.Scale(
-            mass_frame,
+        self._create_scale_control(
+            club_inner,
+            label="Club Mass (kg):",
+            variable=self.club_mass_var,
             from_=0.1,
             to=2.0,
             resolution=0.1,
+            bottom_pad=0,
+        )
+
+    def _create_scale_control(
+        self,
+        parent: ttk.Frame,
+        *,
+        label: str,
+        variable: tk.DoubleVar,
+        from_: float,
+        to: float,
+        resolution: float,
+        bottom_pad: int,
+    ) -> None:
+        frame = ttk.Frame(parent, style="Modern.TFrame")
+        frame.pack(fill="x", pady=(0, bottom_pad))
+
+        label_frame = ttk.Frame(frame, style="Modern.TFrame")
+        label_frame.pack(fill="x", pady=(0, 5))
+
+        ttk.Label(label_frame, text=label, style="Modern.TLabel").pack(side="left")
+        ttk.Label(label_frame, textvariable=variable, style="Modern.TLabel").pack(
+            side="right"
+        )
+
+        tk.Scale(
+            frame,
+            from_=from_,
+            to=to,
+            resolution=resolution,
             orient=tk.HORIZONTAL,
-            variable=self.club_mass_var,
+            variable=variable,
             length=300,
             bg="#2b2b2b",
             fg="white",
@@ -846,12 +852,11 @@ class GolfSimulationGUI:
             activebackground="#0078d4",
             highlightthickness=0,
             relief="flat",
-        )
-        mass_scale.pack(fill="x")
+        ).pack(fill="x")
 
-        # Advanced features card
+    def _create_advanced_features_card(self, parent: ttk.Frame) -> None:
         features_card = ttk.LabelFrame(
-            main_container,
+            parent,
             text="🔬 Advanced Model Features",
             style="Modern.TLabelframe",
         )
@@ -860,7 +865,6 @@ class GolfSimulationGUI:
         features_inner = ttk.Frame(features_card, style="Modern.TFrame")
         features_inner.pack(fill="x", padx=20, pady=15)
 
-        # Feature checkboxes with modern styling
         features = [
             ("🤝 Two-Handed Grip (Constrained)", self.two_handed_var),
             ("😊 Enhanced Face (Nose, Mouth)", self.enhance_face_var),
@@ -887,8 +891,8 @@ class GolfSimulationGUI:
             )
             checkbox.pack(side="left")
 
-        # Save button
-        save_frame = ttk.Frame(main_container, style="Modern.TFrame")
+    def _create_equip_save_button(self, parent: ttk.Frame) -> None:
+        save_frame = ttk.Frame(parent, style="Modern.TFrame")
         save_frame.pack(fill="x", pady=20)
 
         save_btn = tk.Button(

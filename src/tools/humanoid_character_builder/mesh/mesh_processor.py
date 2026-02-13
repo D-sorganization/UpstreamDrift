@@ -61,6 +61,49 @@ class MeshExportConfig:
     collision_simplification: float = 0.3
 
 
+def _empty_segment_result(segment_name: str, error_message: str) -> MeshSegmentResult:
+    return MeshSegmentResult(
+        segment_name=segment_name,
+        mesh_path=None,
+        vertex_count=0,
+        face_count=0,
+        volume=0.0,
+        center_of_mass=(0.0, 0.0, 0.0),
+        bounding_box_min=(0.0, 0.0, 0.0),
+        bounding_box_max=(0.0, 0.0, 0.0),
+        is_watertight=False,
+        success=False,
+        error_message=error_message,
+    )
+
+
+def _build_segment_result(
+    submesh: Any, segment_name: str, output_path: Path
+) -> MeshSegmentResult:
+    bbox = submesh.bounding_box.bounds
+    com = submesh.center_mass if submesh.is_watertight else submesh.centroid
+    return MeshSegmentResult(
+        segment_name=segment_name,
+        mesh_path=output_path,
+        vertex_count=len(submesh.vertices),
+        face_count=len(submesh.faces),
+        volume=float(submesh.volume) if submesh.is_watertight else 0.0,
+        center_of_mass=(float(com[0]), float(com[1]), float(com[2])),
+        bounding_box_min=(
+            float(bbox[0, 0]),
+            float(bbox[0, 1]),
+            float(bbox[0, 2]),
+        ),
+        bounding_box_max=(
+            float(bbox[1, 0]),
+            float(bbox[1, 1]),
+            float(bbox[1, 2]),
+        ),
+        is_watertight=submesh.is_watertight,
+        success=True,
+    )
+
+
 class MeshProcessor:
     """
     Process and manipulate mesh geometry.
@@ -145,101 +188,78 @@ class MeshProcessor:
         if not self._trimesh_available:
             raise ImportError("trimesh is required")
 
-        import trimesh
-
         config = config or MeshExportConfig()
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
         results = {}
-
         for segment_name, vertex_indices in vertex_groups.items():
-            try:
-                # Extract faces that use these vertices
-                vertex_set = set(vertex_indices)
-                face_mask = np.array(
-                    [all(v in vertex_set for v in face) for face in mesh.faces]
-                )
-
-                if not np.any(face_mask):
-                    results[segment_name] = MeshSegmentResult(
-                        segment_name=segment_name,
-                        mesh_path=None,
-                        vertex_count=0,
-                        face_count=0,
-                        volume=0.0,
-                        center_of_mass=(0.0, 0.0, 0.0),
-                        bounding_box_min=(0.0, 0.0, 0.0),
-                        bounding_box_max=(0.0, 0.0, 0.0),
-                        is_watertight=False,
-                        success=False,
-                        error_message="No faces found for vertex group",
-                    )
-                    continue
-
-                # Create submesh
-                submesh = mesh.submesh([face_mask], append=True)
-
-                # Process mesh
-                if config.repair:
-                    trimesh.repair.fill_holes(submesh)
-                    submesh.fix_normals()
-
-                if config.simplify and config.target_faces:
-                    submesh = self._simplify_mesh(submesh, config.target_faces)
-
-                if config.center_at_origin:
-                    submesh.vertices -= submesh.center_mass
-
-                if config.scale != 1.0:
-                    submesh.vertices *= config.scale
-
-                # Export
-                output_path = output_dir / f"{segment_name}.{config.format}"
-                submesh.export(str(output_path))
-
-                # Get properties
-                bbox = submesh.bounding_box.bounds
-                com = submesh.center_mass if submesh.is_watertight else submesh.centroid
-
-                results[segment_name] = MeshSegmentResult(
-                    segment_name=segment_name,
-                    mesh_path=output_path,
-                    vertex_count=len(submesh.vertices),
-                    face_count=len(submesh.faces),
-                    volume=float(submesh.volume) if submesh.is_watertight else 0.0,
-                    center_of_mass=(float(com[0]), float(com[1]), float(com[2])),
-                    bounding_box_min=(
-                        float(bbox[0, 0]),
-                        float(bbox[0, 1]),
-                        float(bbox[0, 2]),
-                    ),
-                    bounding_box_max=(
-                        float(bbox[1, 0]),
-                        float(bbox[1, 1]),
-                        float(bbox[1, 2]),
-                    ),
-                    is_watertight=submesh.is_watertight,
-                    success=True,
-                )
-
-            except (ValueError, TypeError, RuntimeError) as e:
-                logger.error(f"Failed to segment {segment_name}: {e}")
-                results[segment_name] = MeshSegmentResult(
-                    segment_name=segment_name,
-                    mesh_path=None,
-                    vertex_count=0,
-                    face_count=0,
-                    volume=0.0,
-                    center_of_mass=(0.0, 0.0, 0.0),
-                    bounding_box_min=(0.0, 0.0, 0.0),
-                    bounding_box_max=(0.0, 0.0, 0.0),
-                    is_watertight=False,
-                    success=False,
-                    error_message=str(e),
-                )
-
+            results[segment_name] = self._segment_single_group(
+                mesh, segment_name, vertex_indices, output_dir, config
+            )
         return results
+
+    def _segment_single_group(
+        self,
+        mesh: Any,
+        segment_name: str,
+        vertex_indices: NDArray[np.int64],
+        output_dir: Path,
+        config: MeshExportConfig,
+    ) -> MeshSegmentResult:
+        try:
+            return self._extract_and_export_segment(
+                mesh, segment_name, vertex_indices, output_dir, config
+            )
+        except (ValueError, TypeError, RuntimeError) as e:
+            logger.error(f"Failed to segment {segment_name}: {e}")
+            return _empty_segment_result(segment_name, str(e))
+
+    def _extract_and_export_segment(
+        self,
+        mesh: Any,
+        segment_name: str,
+        vertex_indices: NDArray[np.int64],
+        output_dir: Path,
+        config: MeshExportConfig,
+    ) -> MeshSegmentResult:
+        import trimesh
+
+        vertex_set = set(vertex_indices)
+        face_mask = np.array(
+            [all(v in vertex_set for v in face) for face in mesh.faces]
+        )
+
+        if not np.any(face_mask):
+            return _empty_segment_result(
+                segment_name, "No faces found for vertex group"
+            )
+
+        submesh = mesh.submesh([face_mask], append=True)
+        submesh = self._apply_mesh_processing(submesh, config, trimesh)
+
+        output_path = output_dir / f"{segment_name}.{config.format}"
+        submesh.export(str(output_path))
+
+        return _build_segment_result(submesh, segment_name, output_path)
+
+    def _apply_mesh_processing(
+        self, submesh: Any, config: MeshExportConfig, trimesh: Any
+    ) -> Any:
+        if config.repair:
+            trimesh.repair.fill_holes(submesh)
+            submesh.fix_normals()
+
+        if config.simplify and config.target_faces:
+            submesh = self._simplify_mesh(submesh, config.target_faces)
+
+        if config.center_at_origin:
+            submesh.vertices -= submesh.center_mass
+
+        if config.scale != 1.0:
+            submesh.vertices *= config.scale
+
+        return submesh
 
     def segment_by_bounding_boxes(
         self,

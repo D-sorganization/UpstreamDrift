@@ -870,20 +870,8 @@ class HumanoidLauncher(QMainWindow):
 
         self.btn_signal_toolkit.setEnabled(mode == "poly")
 
-    def open_polynomial_generator(self) -> None:
-        """Open polynomial generator dialog."""
-
-        # Lazy import to avoid MuJoCo DLL initialization on Windows
-
+    def _load_polynomial_generator_class(self) -> type | None:
         try:
-            # We import directly from the file to avoid importing the package
-
-            # 'mujoco_humanoid_golf', which triggers 'import mujoco' in its __init__.
-
-            # This allows the polynomial generator (which uses only matplotlib/numpy)
-
-            # to work even if MuJoCo DLLs are missing or incompatible locally.
-
             import importlib.util
 
             target_file = (
@@ -893,26 +881,19 @@ class HumanoidLauncher(QMainWindow):
             if not target_file.exists():
                 raise FileNotFoundError(f"File not found: {target_file}")
 
-            # Use a stable module name to allow caching and avoid memory leaks
-
             module_name = "polynomial_generator_widget"
 
             if module_name in sys.modules:
                 module = sys.modules[module_name]
-
             else:
                 spec = importlib.util.spec_from_file_location(module_name, target_file)
-
                 if spec is None or spec.loader is None:
                     raise ImportError(f"Could not load spec from {target_file}")
-
                 module = importlib.util.module_from_spec(spec)
-
                 sys.modules[module_name] = module
-
                 spec.loader.exec_module(module)
 
-            PolynomialGeneratorWidget = module.PolynomialGeneratorWidget  # type: ignore[attr-defined]
+            return module.PolynomialGeneratorWidget  # type: ignore[attr-defined]
 
         except ImportError as e:
             QMessageBox.warning(
@@ -921,8 +902,7 @@ class HumanoidLauncher(QMainWindow):
                 f"The polynomial generator widget is not available.\n\nError: {e}\n\n"
                 "Please ensure mujoco_humanoid_golf/polynomial_generator.py exists.",
             )
-
-            return
+            return None
 
         except (RuntimeError, TypeError, AttributeError) as e:
             QMessageBox.warning(
@@ -930,26 +910,10 @@ class HumanoidLauncher(QMainWindow):
                 "Loading Error",
                 f"Failed to load generator widget.\n\nError: {e}",
             )
+            return None
 
-            return
-
-        # Create dialog
-
-        dialog = QDialog(self)
-
-        dialog.setWindowTitle("Polynomial Function Generator")
-
-        dialog.setMinimumSize(900, 700)
-
-        layout = QVBoxLayout(dialog)
-
-        # Add polynomial generator widget
-
-        poly_widget = PolynomialGeneratorWidget(dialog)
-
-        # Set available joints (humanoid joint names)
-
-        joints = [
+    def _get_humanoid_joint_names(self) -> list[str]:
+        return [
             "lowerbackrx",
             "upperbackrx",
             "rtibiarx",
@@ -968,29 +932,32 @@ class HumanoidLauncher(QMainWindow):
             "lradiusrx",
         ]
 
-        poly_widget.set_joints(joints)
+    def open_polynomial_generator(self) -> None:
+        """Open polynomial generator dialog."""
 
-        # Connect signal to save coefficients
+        PolynomialGeneratorWidget = self._load_polynomial_generator_class()
+        if PolynomialGeneratorWidget is None:
+            return
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Polynomial Function Generator")
+        dialog.setMinimumSize(900, 700)
+        layout = QVBoxLayout(dialog)
+
+        poly_widget = PolynomialGeneratorWidget(dialog)
+        poly_widget.set_joints(self._get_humanoid_joint_names())
 
         def on_polynomial_generated(joint_name: str, coefficients: list[float]) -> None:
             """Save generated polynomial coefficients to config."""
-
             self.config.polynomial_coefficients[joint_name] = coefficients
-
             self.save_config()
-
             self.log(f"Polynomial generated for {joint_name}: {coefficients}")
 
         poly_widget.polynomial_generated.connect(on_polynomial_generated)
-
         layout.addWidget(poly_widget)
 
-        # Add close button
-
         btn_close = QPushButton("Close")
-
         btn_close.clicked.connect(dialog.accept)
-
         layout.addWidget(btn_close)
 
         dialog.exec()
@@ -1163,6 +1130,52 @@ class HumanoidLauncher(QMainWindow):
         except ImportError as e:
             self.log(f"Error saving config: {e}")
 
+    def _get_docker_internal_command(self) -> tuple[list[str], dict[str, str] | None]:
+        cmd = ["python", "-m", "humanoid_golf.sim"]
+        env = {"PYTHONPATH": "../docker/src"}
+        return cmd, env
+
+    def _get_docker_base_cmd(self, abs_repo_path: str) -> tuple[list[str], str]:
+        is_windows = platform.system() == "Windows"
+        mount_path = abs_repo_path
+
+        if is_windows:
+            drive, tail = os.path.splitdrive(abs_repo_path)
+            if drive:
+                drive_letter = drive[0].lower()
+                rel_path = tail.replace("\\", "/")
+                wsl_path = f"/mnt/{drive_letter}{rel_path}"
+                return ["wsl", "docker", "run"], wsl_path
+            else:
+                logging.warning(
+                    "Repository path '%s' does not start with a drive letter; "
+                    "using absolute path directly for Docker mount.",
+                    abs_repo_path,
+                )
+                return ["docker", "run"], abs_repo_path.replace("\\", "/")
+
+        return ["docker", "run"], mount_path
+
+    def _append_display_env(self, cmd: list[str]) -> None:
+        is_windows = platform.system() == "Windows"
+
+        if not self.config.live_view:
+            cmd.extend(["-e", "MUJOCO_GL=osmesa"])
+            return
+
+        if is_windows:
+            cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
+            cmd.extend(["-e", "MUJOCO_GL=glfw"])
+            cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+            cmd.extend(["-e", "QT_AUTO_SCREEN_SCALE_FACTOR=0"])
+            cmd.extend(["-e", "QT_SCALE_FACTOR=1"])
+            cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
+        else:
+            cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
+            cmd.extend(["-e", "MUJOCO_GL=glfw"])
+            cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+            cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])  # nosec B108
+
     def get_simulation_command(self) -> tuple[list[str], dict[str, str] | None]:
         """Construct the command to run the simulation.
 
@@ -1174,134 +1187,82 @@ class HumanoidLauncher(QMainWindow):
 
         """
 
-        # Check if running inside Docker container
-
-        in_docker = Path("/.dockerenv").exists()
-
-        env = None
-
-        if in_docker:
-            # Running inside the Mujoco Docker container:
-
-            # - CWD set to /workspace/engines/physics_engines/mujoco/python
-
-            # - Module exists at ../docker/src/humanoid_golf/sim.py relative to here
-
-            cmd = ["python", "-m", "humanoid_golf.sim"]
-
-            # Ensure PYTHONPATH includes the directory containing 'humanoid_golf'
-
-            # We add '../docker/src' to PYTHONPATH.
-
-            # Note: We must also include existing PYTHONPATH if any.
-
-            # Using os.environ logic in ProcessWorker handles the merge,
-
-            # we just provide the override/addition here.
-
-            env = {"PYTHONPATH": "../docker/src"}
-
-            return cmd, env
-
-        # HOST-SIDE EXECUTION (Legacy/Dev)
-
-        is_windows = platform.system() == "Windows"
+        if Path("/.dockerenv").exists():
+            return self._get_docker_internal_command()
 
         abs_repo_path = str(self.repo_path.resolve())
-
-        cmd = []
-
-        mount_path = abs_repo_path
-
-        if is_windows:
-            drive, tail = os.path.splitdrive(abs_repo_path)
-
-            if drive:
-                drive_letter = drive[0].lower()
-
-                rel_path = tail.replace("\\", "/")
-
-                wsl_path = f"/mnt/{drive_letter}{rel_path}"
-
-                cmd = ["wsl", "docker", "run"]
-
-                mount_path = wsl_path
-
-            else:
-                logging.warning(
-                    "Repository path '%s' does not start with a drive letter; "
-                    "using absolute path directly for Docker mount.",
-                    abs_repo_path,
-                )
-
-                cmd = ["docker", "run"]
-
-                mount_path = abs_repo_path.replace("\\", "/")
-
-        else:
-            cmd = ["docker", "run"]
+        cmd, mount_path = self._get_docker_base_cmd(abs_repo_path)
 
         cmd.extend(
             ["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/docker/src"]
         )
 
-        # Display settings
-
-        if self.config.live_view:
-            if is_windows:
-                cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
-
-                cmd.extend(["-e", "MUJOCO_GL=glfw"])
-
-                cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
-
-                # Fix pixelated/jumbled display by disabling Qt DPI scaling over X11
-
-                cmd.extend(["-e", "QT_AUTO_SCREEN_SCALE_FACTOR=0"])
-
-                cmd.extend(["-e", "QT_SCALE_FACTOR=1"])
-
-                cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
-
-            else:
-                cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
-
-                cmd.extend(["-e", "MUJOCO_GL=glfw"])
-
-                cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
-
-                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])  # nosec B108
-
-        else:
-            cmd.extend(["-e", "MUJOCO_GL=osmesa"])
-
-        # Image and Command
+        self._append_display_env(cmd)
 
         cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u"])
-
-        # Always use the working humanoid golf simulation that supports customization
-
-        # Module path: docker/src/humanoid_golf/sim.py
-
-        # (separate from mujoco_humanoid_golf package)
-
-        # This reads simulation_config.json and applies all GUI settings:
-
-        # - Body segment colors (shirt, pants, shoes, skin, eyes, club)
-
-        # - Height and weight scaling
-
-        # - Club parameters (length, mass)
-
-        # - Control mode (PD, LQR, Polynomial)
-
-        # - State save/load
-
-        # - Live view vs headless mode
-
         cmd.extend(["-m", "humanoid_golf.sim"])
 
         return cmd, None
+
+    def _extract_iaa_joints_from_headers(self, headers: list[str]) -> list[str]:
+        joints = set()
+        for h in headers:
+            if h.startswith("iaa_") and h.endswith("_total"):
+                parts = h.split("_")
+                if len(parts) >= 3:
+                    joint = "_".join(parts[1:-1])
+                    joints.add(joint)
+        return sorted(joints)
+
+    def _read_iaa_data(
+        self, csv_path: Path, joint: str
+    ) -> tuple[list[float], list[float], list[float], list[float], list[float]]:
+        times: list[float] = []
+        g_vals: list[float] = []
+        c_vals: list[float] = []
+        t_vals: list[float] = []
+        tot_vals: list[float] = []
+
+        col_g = f"iaa_{joint}_g"
+        col_c = f"iaa_{joint}_c"
+        col_t = f"iaa_{joint}_t"
+        col_tot = f"iaa_{joint}_total"
+
+        with open(csv_path) as f:
+            reader = csv.DictReader(f)  # type: ignore[assignment]
+            for row_dict in reader:
+                if isinstance(row_dict, dict):
+                    try:
+                        times.append(float(row_dict.get("time", "0")))
+                        g_vals.append(float(row_dict.get(col_g, "0")))
+                        c_vals.append(float(row_dict.get(col_c, "0")))
+                        t_vals.append(float(row_dict.get(col_t, "0")))
+                        tot_vals.append(float(row_dict.get(col_tot, "0")))
+                    except (ValueError, KeyError):
+                        continue
+
+        return times, g_vals, c_vals, t_vals, tot_vals
+
+    def _render_iaa_plot(
+        self,
+        joint: str,
+        times: list[float],
+        g_vals: list[float],
+        c_vals: list[float],
+        t_vals: list[float],
+        tot_vals: list[float],
+    ) -> None:
+        plt.figure(figsize=(10, 6))
+        plt.plot(times, g_vals, label="Gravity", linestyle="--")
+        plt.plot(times, c_vals, label="Velocity (Coriolis)", linestyle="-.")
+        plt.plot(times, t_vals, label="Control", linestyle=":")
+        plt.plot(times, tot_vals, label="Total", color="k", linewidth=1)
+        plt.title(f"Induced Accelerations: {joint}")
+        plt.xlabel("Time [s]")
+        plt.ylabel("Acceleration [rad/s^2]")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
     def plot_induced_acceleration(self) -> None:
         """Plot Induced Acceleration Analysis from CSV."""
@@ -1313,121 +1274,37 @@ class HumanoidLauncher(QMainWindow):
 
         if not csv_path.exists():
             QMessageBox.warning(self, "No Data", "golf_data.csv not found.")
-
             return
 
         try:
-            # Read CSV headers to find joints
-
-            joints = set()
-
             with open(csv_path) as f:
                 reader = csv.reader(f)
-
                 headers = next(reader)
 
-            # Headers like iaa_{joint}_{type}
+            sorted_joints = self._extract_iaa_joints_from_headers(headers)
 
-            # type is g, c, t, total
-
-            for h in headers:
-                if h.startswith("iaa_") and h.endswith("_total"):
-                    # Extract joint name: iaa_HEAD_total
-
-                    parts = h.split("_")
-
-                    if len(parts) >= 3:
-                        joint = "_".join(parts[1:-1])
-
-                        joints.add(joint)
-
-            if not joints:
+            if not sorted_joints:
                 QMessageBox.warning(
                     self,
                     "No IAA Data",
                     "No Induced Acceleration data found in CSV.",
                 )
-
                 return
-
-            sorted_joints = sorted(list(joints))
-
-            # Ask user for joint
 
             joint, ok = QInputDialog.getItem(
                 self, "Select Joint", "Joint:", sorted_joints, 0, False
             )
-
             if not ok or not joint:
                 return
 
-            # Read Data
-
-            times: list[float] = []
-
-            g_vals: list[float] = []
-
-            c_vals: list[float] = []
-
-            t_vals: list[float] = []
-
-            tot_vals: list[float] = []
-
-            # Column names
-
-            col_g = f"iaa_{joint}_g"
-
-            col_c = f"iaa_{joint}_c"
-
-            col_t = f"iaa_{joint}_t"
-
-            col_tot = f"iaa_{joint}_total"
-
-            with open(csv_path) as f:
-                reader = csv.DictReader(f)  # type: ignore[assignment]
-
-                for row_dict in reader:
-                    if isinstance(row_dict, dict):
-                        try:
-                            times.append(float(row_dict.get("time", "0")))
-
-                            g_vals.append(float(row_dict.get(col_g, "0")))
-
-                            c_vals.append(float(row_dict.get(col_c, "0")))
-
-                            t_vals.append(float(row_dict.get(col_t, "0")))
-
-                            tot_vals.append(float(row_dict.get(col_tot, "0")))
-
-                        except (ValueError, KeyError):
-                            continue
+            times, g_vals, c_vals, t_vals, tot_vals = self._read_iaa_data(
+                csv_path, joint
+            )
 
             if not times:
                 return
 
-            # Plot
-
-            plt.figure(figsize=(10, 6))
-
-            plt.plot(times, g_vals, label="Gravity", linestyle="--")
-
-            plt.plot(times, c_vals, label="Velocity (Coriolis)", linestyle="-.")
-
-            plt.plot(times, t_vals, label="Control", linestyle=":")
-
-            plt.plot(times, tot_vals, label="Total", color="k", linewidth=1)
-
-            plt.title(f"Induced Accelerations: {joint}")
-
-            plt.xlabel("Time [s]")
-
-            plt.ylabel("Acceleration [rad/s^2]")
-
-            plt.legend()
-
-            plt.grid(True)
-
-            plt.show()
+            self._render_iaa_plot(joint, times, g_vals, c_vals, t_vals, tot_vals)
 
         except (FileNotFoundError, PermissionError, OSError) as e:
             QMessageBox.critical(self, "Plot Error", str(e))

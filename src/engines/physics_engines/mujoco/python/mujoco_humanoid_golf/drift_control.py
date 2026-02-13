@@ -89,6 +89,69 @@ class DriftControlDecomposer:
         self._data_control = mujoco.MjData(model)
         self._data_full = mujoco.MjData(model)
 
+    def _compute_full_acceleration(
+        self,
+        qpos: np.ndarray,
+        qvel: np.ndarray,
+        ctrl: np.ndarray,
+    ) -> np.ndarray:
+        self._data_full.qpos[:] = qpos
+        self._data_full.qvel[:] = qvel
+        self._data_full.ctrl[: len(ctrl)] = ctrl
+
+        mujoco.mj_forward(self.model, self._data_full)
+        mujoco.mj_inverse(self.model, self._data_full)
+
+        M = np.zeros((self.model.nv, self.model.nv))
+        mujoco.mj_fullM(self.model, M, self._data_full.qM)
+
+        bias = self._data_full.qfrc_bias.copy()
+        tau = self._data_full.qfrc_actuator.copy()
+
+        net_force = tau - bias
+        return np.linalg.solve(M, net_force)
+
+    def _compute_drift_acceleration(
+        self, qpos: np.ndarray, qvel: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        self._data_drift.qpos[:] = qpos
+        self._data_drift.qvel[:] = qvel
+        self._data_drift.ctrl[:] = 0
+
+        mujoco.mj_forward(self.model, self._data_drift)
+
+        M_drift = np.zeros((self.model.nv, self.model.nv))
+        mujoco.mj_fullM(self.model, M_drift, self._data_drift.qM)
+
+        bias_drift = self._data_drift.qfrc_bias.copy()
+        qacc_drift = np.linalg.solve(M_drift, -bias_drift)
+
+        self._data_drift.qvel[:] = 0
+        mujoco.mj_forward(self.model, self._data_drift)
+        gravity_bias = self._data_drift.qfrc_bias.copy()
+
+        coriolis_bias = bias_drift - gravity_bias
+
+        qacc_drift_gravity = np.linalg.solve(M_drift, -gravity_bias)
+        qacc_drift_velocity = np.linalg.solve(M_drift, -coriolis_bias)
+
+        return qacc_drift, M_drift, qacc_drift_gravity, qacc_drift_velocity
+
+    def _validate_superposition(
+        self, qacc_full: np.ndarray, qacc_drift: np.ndarray, qacc_control: np.ndarray
+    ) -> float:
+        qacc_reconstructed = qacc_drift + qacc_control
+        residual = float(np.linalg.norm(qacc_full - qacc_reconstructed))
+
+        if residual > 1e-5:
+            logger.warning(
+                f"Drift-control superposition failed: residual={residual:.2e} > 1e-5. "
+                f"This indicates numerical issues or missing constraint handling. "
+                f"Guideline F requires drift + control = full."
+            )
+
+        return residual
+
     def decompose(
         self,
         qpos: np.ndarray,
@@ -114,95 +177,24 @@ class DriftControlDecomposer:
         Raises:
             ValueError: If superposition fails (residual > 1e-5)
         """
-        # 1. Compute FULL acceleration (drift + control)
-        self._data_full.qpos[:] = qpos
-        self._data_full.qvel[:] = qvel
-        self._data_full.ctrl[: len(ctrl)] = ctrl
+        qacc_full = self._compute_full_acceleration(qpos, qvel, ctrl)
 
-        mujoco.mj_forward(self.model, self._data_full)
+        qacc_drift, _, qacc_drift_gravity, qacc_drift_velocity = (
+            self._compute_drift_acceleration(qpos, qvel)
+        )
 
-        # Get full acceleration
-        # Use inverse dynamics to get qacc from current state
-        mujoco.mj_inverse(self.model, self._data_full)
-
-        # Actually, we need forward acceleration. Let me use the mass matrix approach:
-        # M * qacc = tau - bias
-        # qacc = M^-1 * (tau - bias)
-
-        # Get mass matrix
-        M = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M, self._data_full.qM)
-
-        # Get bias forces (Coriolis + gravity)
-        bias = self._data_full.qfrc_bias.copy()
-
-        # Get actuation forces
-        tau = self._data_full.qfrc_actuator.copy()
-
-        # Solve for acceleration: M * qacc = tau - bias
-        net_force = tau - bias
-        qacc_full = np.linalg.solve(M, net_force)
-
-        # 2. Compute DRIFT-ONLY acceleration (ctrl = 0, passive dynamics)
-        self._data_drift.qpos[:] = qpos
-        self._data_drift.qvel[:] = qvel
-        self._data_drift.ctrl[:] = 0  # NO CONTROL
-
-        mujoco.mj_forward(self.model, self._data_drift)
-
-        # Get drift components
-        M_drift = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_drift, self._data_drift.qM)
-
-        bias_drift = self._data_drift.qfrc_bias.copy()
-
-        # Drift acceleration: M * qacc_drift = -bias (no actuation)
-        qacc_drift = np.linalg.solve(M_drift, -bias_drift)
-
-        # Decompose drift bias into gravity and velocity (Coriolis)
-        # Gravity component: evaluate bias with qvel=0
-        self._data_drift.qvel[:] = 0
-        mujoco.mj_forward(self.model, self._data_drift)
-        gravity_bias = self._data_drift.qfrc_bias.copy()
-
-        # Velocity (Coriolis/centrifugal) component
-        coriolis_bias = bias_drift - gravity_bias
-
-        qacc_drift_gravity = np.linalg.solve(M_drift, -gravity_bias)
-        qacc_drift_velocity = np.linalg.solve(M_drift, -coriolis_bias)
-
-        # 3. Compute CONTROL-ONLY acceleration
-        # This is: acceleration with control but removing drift effects
-        # qacc_control = qacc_full - qacc_drift
         qacc_control = qacc_full - qacc_drift
-
-        # Decompose control into actuation and constraint-mediated
-        # For now, treat all control as actuation (constraints handled separately)
         qacc_control_actuation = qacc_control.copy()
-        # Note: Constraint-mediated control not yet decomposed (deferred)
         qacc_control_constraint = None
 
-        # Constraint components (if model has constraints)
         qacc_drift_constraint = None
         if self.model.neq > 0:
-            # Note: Constraint decomposition not yet implemented
-            # Constraint forces are included in bias terms but not separately tracked
             logger.debug(
                 f"Model has {self.model.neq} equality constraints. "
                 "Constraint decomposition not yet implemented."
             )
 
-        # 4. Validate superposition: full = drift + control
-        qacc_reconstructed = qacc_drift + qacc_control
-        residual = float(np.linalg.norm(qacc_full - qacc_reconstructed))
-
-        # Guideline F requires this test to pass
-        if residual > 1e-5:
-            logger.warning(
-                f"Drift-control superposition failed: residual={residual:.2e} > 1e-5. "
-                f"This indicates numerical issues or missing constraint handling. "
-                f"Guideline F requires drift + control = full."
-            )
+        residual = self._validate_superposition(qacc_full, qacc_drift, qacc_control)
 
         return DriftControlResult(
             drift_acceleration=qacc_drift,

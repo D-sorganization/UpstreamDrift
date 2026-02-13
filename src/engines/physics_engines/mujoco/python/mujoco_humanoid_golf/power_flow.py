@@ -117,6 +117,69 @@ class PowerFlowAnalyzer:
 
         self._data = mujoco.MjData(model)
 
+    def _compute_work_decomposition(
+        self,
+        tau: np.ndarray,
+        qvel: np.ndarray,
+        dt: float,
+        tau_drift: np.ndarray | None,
+        tau_control: np.ndarray | None,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        if tau_drift is not None:
+            joint_work_drift = tau_drift * qvel * dt
+        else:
+            joint_work_drift = np.zeros_like(tau)
+
+        if tau_control is not None:
+            joint_work_control = tau_control * qvel * dt
+        else:
+            joint_work_control = np.zeros_like(tau)
+
+        joint_work_total = tau * qvel * dt
+        return joint_work_drift, joint_work_control, joint_work_total
+
+    def _compute_segment_energies(
+        self, qvel: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        import mujoco
+
+        segment_ke = np.zeros(self.model.nbody)
+        segment_pe = np.zeros(self.model.nbody)
+
+        for i in range(self.model.nbody):
+            body = self.model.body(i)
+
+            jacp = np.zeros((3, self.model.nv))
+            jacr = np.zeros((3, self.model.nv))
+            mujoco.mj_jacBodyCom(self.model, self._data, jacp, jacr, i)
+
+            com_vel = jacp @ qvel
+            ang_vel = jacr @ qvel
+
+            mass = body.mass[0]
+            inertia = body.inertia
+
+            ke_linear = 0.5 * mass * np.dot(com_vel, com_vel)
+            ke_rotational = 0.5 * np.sum(inertia * ang_vel**2)
+            segment_ke[i] = ke_linear + ke_rotational
+
+            com_pos_world = self._data.xpos[i]
+            height = com_pos_world[2]
+            g = abs(self.model.opt.gravity[2])
+            segment_pe[i] = mass * g * height
+
+        return segment_ke, segment_pe
+
+    def _compute_power_dissipation(self, qvel: np.ndarray) -> float:
+        power_diss = 0.0
+        for i in range(self.model.njnt):
+            joint = self.model.jnt(i)
+            if joint.damping[0] > 0:
+                v_idx = joint.dofadr[0]
+                if v_idx < self.model.nv:
+                    power_diss += joint.damping[0] * qvel[v_idx] ** 2
+        return power_diss
+
     def compute_power_flow(
         self,
         qpos: np.ndarray,
@@ -146,100 +209,22 @@ class PowerFlowAnalyzer:
         """
         import mujoco
 
-        # Set state
         self._data.qpos[:] = qpos
         self._data.qvel[:] = qvel
         self._data.qacc[:] = qacc
-
-        # Forward kinematics to update body transforms
         mujoco.mj_forward(self.model, self._data)
 
-        # 1. Joint-level power: P = τ · ω
-        # Power is positive when torque and velocity are aligned
         joint_powers = tau * qvel
 
-        # 2. Work decomposition (if components provided)
-        if tau_drift is not None:
-            joint_work_drift = tau_drift * qvel * dt
-        else:
-            joint_work_drift = np.zeros_like(tau)
+        joint_work_drift, joint_work_control, joint_work_total = (
+            self._compute_work_decomposition(tau, qvel, dt, tau_drift, tau_control)
+        )
 
-        if tau_control is not None:
-            joint_work_control = tau_control * qvel * dt
-        else:
-            joint_work_control = np.zeros_like(tau)
-
-        joint_work_total = tau * qvel * dt
-
-        # 3. Segment energies
-        # Kinetic energy per segment: 0.5 * m * v^2 + 0.5 * I * ω^2
-        segment_ke = np.zeros(self.model.nbody)
-        segment_pe = np.zeros(self.model.nbody)
-
-        for i in range(self.model.nbody):
-            body = self.model.body(i)
-
-            # Get body velocity (COM)
-            com_vel = np.zeros(3)
-            ang_vel = np.zeros(3)
-
-            # Use mj_objectVelocity to get 6D velocity at COM
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-
-            # Get Jacobian at body COM
-            mujoco.mj_jacBodyCom(self.model, self._data, jacp, jacr, i)
-
-            # Velocity at COM: v = J * qvel
-            com_vel = jacp @ qvel
-            ang_vel = jacr @ qvel
-
-            # Mass and inertia
-            mass = body.mass[0]
-            inertia = body.inertia  # 3×1 array (diagonal inertia in body frame)
-
-            # Kinetic energy: 0.5 * m * v^2 + 0.5 * I * ω^2
-            # Linear KE
-            ke_linear = 0.5 * mass * np.dot(com_vel, com_vel)
-
-            # Rotational KE (simplified - assumes diagonal inertia)
-            # For full accuracy, need to rotate inertia to world frame
-            # For now, approximate with diagonal components
-            ke_rotational = 0.5 * np.sum(inertia * ang_vel**2)
-
-            segment_ke[i] = ke_linear + ke_rotational
-
-            # Potential energy: m * g * h
-            # Height is Z-coordinate of COM in world frame
-            com_pos_world = self._data.xpos[i]  # Body COM position in world
-            height = com_pos_world[2]  # Z-coordinate
-
-            # Gravity magnitude (assume along -Z)
-            g = abs(self.model.opt.gravity[2])
-
-            segment_pe[i] = mass * g * height
-
+        segment_ke, segment_pe = self._compute_segment_energies(qvel)
         total_me = float(np.sum(segment_ke) + np.sum(segment_pe))
 
-        # 4. System-level power metrics
-        # Power input: sum of positive joint powers (actuators doing positive work)
         power_in = float(np.sum(np.maximum(joint_powers, 0)))
-
-        # Power dissipation: estimate from damping
-        # P_diss = b * ω^2 (for each joint with damping)
-        power_diss = 0.0
-        for i in range(self.model.njnt):
-            joint = self.model.jnt(i)
-            if joint.damping[0] > 0:
-                v_idx = joint.dofadr[0]
-                if v_idx < self.model.nv:
-                    power_diss += joint.damping[0] * qvel[v_idx] ** 2
-
-        # 5. Energy conservation check
-        # dE/dt ≈ P_in - P_diss
-        # For validation, we'd need E(t-dt) to compute dE/dt
-        # For now, report residual as zero (would need time history)
-        energy_residual = 0.0
+        power_diss = self._compute_power_dissipation(qvel)
 
         return PowerFlowResult(
             joint_powers=joint_powers,
@@ -251,7 +236,7 @@ class PowerFlowAnalyzer:
             total_mechanical_energy=total_me,
             power_in=power_in,
             power_dissipation=float(power_diss),
-            energy_conservation_residual=energy_residual,
+            energy_conservation_residual=0.0,
         )
 
     def analyze_trajectory(

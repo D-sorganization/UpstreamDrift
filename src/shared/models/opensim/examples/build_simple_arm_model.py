@@ -42,22 +42,7 @@ except ImportError:
     sys.exit(1)
 
 
-def build_simple_arm_model() -> osim.Model:
-    """Build a simple 2-DOF arm model with a biceps muscle.
-
-    Returns:
-        Configured OpenSim Model ready for simulation.
-    """
-    # Define global model where the arm lives.
-    arm = osim.Model()
-    arm.setName("SimpleArm")
-
-    # Gravity - use centralized constant for DRY
-    arm.setGravity(osim.Vec3(0, -GRAVITY_M_S2, 0))
-
-    # ---------------------------------------------------------------------------
-    # Create bodies
-    # ---------------------------------------------------------------------------
+def _create_arm_bodies():
     humerus = osim.Body(
         "humerus",
         1.0,  # mass [kg]
@@ -70,10 +55,10 @@ def build_simple_arm_model() -> osim.Model:
         osim.Vec3(0, 0, 0),
         osim.Inertia(0.1, 0.1, 0.1),
     )
+    return humerus, radius
 
-    # ---------------------------------------------------------------------------
-    # Create joints
-    # ---------------------------------------------------------------------------
+
+def _create_arm_joints(arm, humerus, radius):
     shoulder = osim.PinJoint(
         "shoulder",
         arm.getGround(),  # parent frame
@@ -93,10 +78,10 @@ def build_simple_arm_model() -> osim.Model:
         osim.Vec3(0, 1, 0),  # location in child
         osim.Vec3(0, 0, 0),
     )
+    return shoulder, elbow
 
-    # ---------------------------------------------------------------------------
-    # Create muscle (Millard2012 Hill-type model)
-    # ---------------------------------------------------------------------------
+
+def _create_biceps_muscle(humerus, radius):
     biceps = osim.Millard2012EquilibriumMuscle(
         "biceps",  # name
         200.0,  # max isometric force [N]
@@ -106,27 +91,17 @@ def build_simple_arm_model() -> osim.Model:
     )
     biceps.addNewPathPoint("origin", humerus, osim.Vec3(0, 0.8, 0))
     biceps.addNewPathPoint("insertion", radius, osim.Vec3(0, 0.7, 0))
+    return biceps
 
-    # ---------------------------------------------------------------------------
-    # Create controller (step activation: 0.3 at t=0.5s, 1.0 at t=3.0s)
-    # ---------------------------------------------------------------------------
+
+def _create_controller(biceps):
     brain = osim.PrescribedController()
     brain.addActuator(biceps)
     brain.prescribeControlForActuator("biceps", osim.StepFunction(0.5, 3.0, 0.3, 1.0))
+    return brain
 
-    # ---------------------------------------------------------------------------
-    # Assemble model
-    # ---------------------------------------------------------------------------
-    arm.addBody(humerus)
-    arm.addBody(radius)
-    arm.addJoint(shoulder)
-    arm.addJoint(elbow)
-    arm.addForce(biceps)
-    arm.addController(brain)
 
-    # ---------------------------------------------------------------------------
-    # Add reporter for console output
-    # ---------------------------------------------------------------------------
+def _add_reporter(arm, biceps, elbow):
     reporter = osim.ConsoleReporter()
     reporter.set_report_time_interval(1.0)
     reporter.addToReport(biceps.getOutput("fiber_force"))
@@ -134,27 +109,45 @@ def build_simple_arm_model() -> osim.Model:
     reporter.addToReport(elbow_coord, "elbow_angle")
     arm.addComponent(reporter)
 
-    # ---------------------------------------------------------------------------
-    # Add visualization geometry
-    # ---------------------------------------------------------------------------
+
+def _attach_body_visualization(body, name):
     body_geometry = osim.Ellipsoid(0.1, 0.5, 0.1)
     body_geometry.setColor(osim.Gray)
 
-    # Humerus visualization
-    humerus_center = osim.PhysicalOffsetFrame()
-    humerus_center.setName("humerusCenter")
-    humerus_center.setParentFrame(humerus)
-    humerus_center.setOffsetTransform(osim.Transform(osim.Vec3(0, 0.5, 0)))
-    humerus.addComponent(humerus_center)
-    humerus_center.attachGeometry(body_geometry.clone())
+    center = osim.PhysicalOffsetFrame()
+    center.setName(name)
+    center.setParentFrame(body)
+    center.setOffsetTransform(osim.Transform(osim.Vec3(0, 0.5, 0)))
+    body.addComponent(center)
+    center.attachGeometry(body_geometry.clone())
 
-    # Radius visualization
-    radius_center = osim.PhysicalOffsetFrame()
-    radius_center.setName("radiusCenter")
-    radius_center.setParentFrame(radius)
-    radius_center.setOffsetTransform(osim.Transform(osim.Vec3(0, 0.5, 0)))
-    radius.addComponent(radius_center)
-    radius_center.attachGeometry(body_geometry.clone())
+
+def build_simple_arm_model() -> osim.Model:
+    """Build a simple 2-DOF arm model with a biceps muscle.
+
+    Returns:
+        Configured OpenSim Model ready for simulation.
+    """
+    arm = osim.Model()
+    arm.setName("SimpleArm")
+    arm.setGravity(osim.Vec3(0, -GRAVITY_M_S2, 0))
+
+    humerus, radius = _create_arm_bodies()
+    shoulder, elbow = _create_arm_joints(arm, humerus, radius)
+    biceps = _create_biceps_muscle(humerus, radius)
+    brain = _create_controller(biceps)
+
+    arm.addBody(humerus)
+    arm.addBody(radius)
+    arm.addJoint(shoulder)
+    arm.addJoint(elbow)
+    arm.addForce(biceps)
+    arm.addController(brain)
+
+    _add_reporter(arm, biceps, elbow)
+
+    _attach_body_visualization(humerus, "humerusCenter")
+    _attach_body_visualization(radius, "radiusCenter")
 
     return arm
 

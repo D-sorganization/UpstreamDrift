@@ -672,9 +672,7 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(
-        self, i: int, model: mujoco.MjModel
-    ) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return
@@ -832,48 +830,26 @@ class GripModellingTab(QtWidgets.QWidget):
             self.contact_timer.stop()
         logger.info("Contact monitoring stopped")
 
-    def _update_contact_data(self) -> None:
-        """Update contact data from MuJoCo simulation.
-
-        Extracts contact information from MuJoCo and updates visualizations.
-        """
-        if self.sim_widget.model is None or self.sim_widget.data is None:
-            return
-
-        model = self.sim_widget.model
-        data = self.sim_widget.data
-
-        # Extract contacts from MuJoCo
-        n_contacts = data.ncon
-
-        if n_contacts == 0:
-            self.pressure_widget.clear()
-            self.metrics_widget.update_metrics(0, 0, 0, 0, 0.0, False)
-            return
-
-        # Collect contact data
+    def _extract_hand_contacts(
+        self, model: mujoco.MjModel, data: mujoco.MjData
+    ) -> tuple[list, list, list, list, list]:
         positions = []
         normals = []
         forces = []
         velocities = []
         body_names = []
 
-        for i in range(n_contacts):
+        for i in range(data.ncon):
             contact = data.contact[i]
-
-            # Get contact position and normal
             pos = contact.pos.copy()
-            normal = contact.frame[:3].copy()  # First 3 elements are normal
+            normal = contact.frame[:3].copy()
 
-            # Get contact force (need to use mj_contactForce)
             force = np.zeros(6)
             mujoco.mj_contactForce(model, data, i, force)
-            contact_force = force[:3]  # Linear force components
+            contact_force = force[:3]
 
-            # Estimate velocity at contact (simplified)
-            vel = np.zeros(3)  # Would need body velocities for accurate computation
+            vel = np.zeros(3)
 
-            # Get body names
             geom1 = contact.geom1
             geom2 = contact.geom2
             body1_id = model.geom_bodyid[geom1]
@@ -881,7 +857,6 @@ class GripModellingTab(QtWidgets.QWidget):
             body1_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body1_id)
             body2_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body2_id)
 
-            # Filter for hand-grip contacts (simplified heuristic)
             is_hand_contact = any(
                 name and ("hand" in name.lower() or "finger" in name.lower())
                 for name in [body1_name, body2_name]
@@ -894,31 +869,11 @@ class GripModellingTab(QtWidgets.QWidget):
                 velocities.append(vel)
                 body_names.append(body1_name or "unknown")
 
-        if not positions:
-            self.pressure_widget.clear()
-            self.metrics_widget.update_metrics(0, 0, 0, 0, 0.0, False)
-            return
+        return positions, normals, forces, velocities, body_names
 
-        # Update grip contact model
-        positions_arr = np.array(positions)
-        normals_arr = np.array(normals)
-        forces_arr = np.array(forces)
-        velocities_arr = np.array(velocities)
-        timestamp = data.time
-
-        state = self.grip_contact_model.update_from_mujoco(
-            positions_arr,
-            normals_arr,
-            forces_arr,
-            velocities_arr,
-            body_names,
-            timestamp,
-        )
-
-        # Capture for export
-        self.contact_exporter.capture_timestep()
-
-        # Update pressure visualization
+    def _update_contact_visualizations(
+        self, positions_arr: np.ndarray, state: Any
+    ) -> None:
         if len(positions_arr) > 0:
             grip_center = np.mean(positions_arr, axis=0)
         else:
@@ -930,9 +885,7 @@ class GripModellingTab(QtWidgets.QWidget):
         )
         self.pressure_widget.update_pressure(pressure_data)
 
-        # Update metrics display
         margins = self.grip_contact_model.check_slip_margin()
-        # ~3N typical club weight
         equilibrium = self.grip_contact_model.check_static_equilibrium(3.0)
 
         self.metrics_widget.update_metrics(
@@ -943,6 +896,48 @@ class GripModellingTab(QtWidgets.QWidget):
             slip_margin=margins["min_margin"],
             equilibrium=equilibrium.get("equilibrium", False),
         )
+
+    def _update_contact_data(self) -> None:
+        """Update contact data from MuJoCo simulation.
+
+        Extracts contact information from MuJoCo and updates visualizations.
+        """
+        if self.sim_widget.model is None or self.sim_widget.data is None:
+            return
+
+        model = self.sim_widget.model
+        data = self.sim_widget.data
+
+        if data.ncon == 0:
+            self.pressure_widget.clear()
+            self.metrics_widget.update_metrics(0, 0, 0, 0, 0.0, False)
+            return
+
+        positions, normals, forces, velocities, body_names = (
+            self._extract_hand_contacts(model, data)
+        )
+
+        if not positions:
+            self.pressure_widget.clear()
+            self.metrics_widget.update_metrics(0, 0, 0, 0, 0.0, False)
+            return
+
+        positions_arr = np.array(positions)
+        normals_arr = np.array(normals)
+        forces_arr = np.array(forces)
+        velocities_arr = np.array(velocities)
+
+        state = self.grip_contact_model.update_from_mujoco(
+            positions_arr,
+            normals_arr,
+            forces_arr,
+            velocities_arr,
+            body_names,
+            data.time,
+        )
+
+        self.contact_exporter.capture_timestep()
+        self._update_contact_visualizations(positions_arr, state)
 
     def _export_contact_data(self) -> None:
         """Export captured contact data to file."""

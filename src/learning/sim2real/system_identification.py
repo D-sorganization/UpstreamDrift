@@ -245,61 +245,92 @@ class SystemIdentifier:
         if params_to_identify is None:
             params_to_identify = list(self.param_bounds.keys())
 
-        # Initialize parameter vector
         n_params = len(params_to_identify)
-        param_vector = np.ones(n_params)  # Start at nominal (scale = 1)
+        param_vector = np.ones(n_params)
 
-        # Get bounds
         lower_bounds = np.array([self.param_bounds[p][0] for p in params_to_identify])
         upper_bounds = np.array([self.param_bounds[p][1] for p in params_to_identify])
 
         def objective(params: NDArray[np.floating]) -> float:
             """Compute total error over all trajectories."""
-            self._apply_params(params)
-            total_error = 0.0
+            return self._evaluate_params(params, trajectories)
 
-            for demo in trajectories:
-                if demo.actions is None:
-                    continue
-
-                # Build initial state
-                initial_state = np.concatenate(
-                    [
-                        demo.joint_positions[0],
-                        demo.joint_velocities[0],
-                    ]
-                )
-
-                # Build real trajectory
-                real_traj = np.concatenate(
-                    [
-                        demo.joint_positions,
-                        demo.joint_velocities,
-                    ],
-                    axis=1,
-                )
-
-                # Compute dt from timestamps
-                dt = float(np.mean(np.diff(demo.timestamps)))
-
-                # Simulate
-                sim_traj = self._simulate_trajectory(initial_state, demo.actions, dt)
-
-                # Compute error
-                total_error += self._compute_trajectory_error(sim_traj, real_traj)
-
-            return total_error / len(trajectories)
-
-        # Simple gradient-free optimization (coordinate descent)
         best_params = param_vector.copy()
         best_error = objective(best_params)
+
+        best_params, best_error, converged, _iteration = self._coordinate_descent(
+            objective,
+            best_params,
+            best_error,
+            lower_bounds,
+            upper_bounds,
+            n_params,
+            max_iterations,
+            tolerance,
+        )
+
+        identified = {}
+        for i, name in enumerate(params_to_identify):
+            identified[name] = float(best_params[i])
+
+        return IdentificationResult(
+            identified_params=identified,  # type: ignore[arg-type]
+            residual_error=best_error,
+            iterations=_iteration + 1,
+            converged=converged,
+        )
+
+    def _evaluate_params(
+        self,
+        params: NDArray[np.floating],
+        trajectories: list[Demonstration],
+    ) -> float:
+        self._apply_params(params)
+        total_error = 0.0
+
+        for demo in trajectories:
+            if demo.actions is None:
+                continue
+
+            initial_state = np.concatenate(
+                [
+                    demo.joint_positions[0],
+                    demo.joint_velocities[0],
+                ],
+            )
+
+            real_traj = np.concatenate(
+                [
+                    demo.joint_positions,
+                    demo.joint_velocities,
+                ],
+                axis=1,
+            )
+
+            dt = float(np.mean(np.diff(demo.timestamps)))
+            sim_traj = self._simulate_trajectory(initial_state, demo.actions, dt)
+            total_error += self._compute_trajectory_error(sim_traj, real_traj)
+
+        return total_error / len(trajectories)
+
+    def _coordinate_descent(
+        self,
+        objective,
+        best_params: NDArray[np.floating],
+        best_error: float,
+        lower_bounds: NDArray[np.floating],
+        upper_bounds: NDArray[np.floating],
+        n_params: int,
+        max_iterations: int,
+        tolerance: float,
+    ) -> tuple[NDArray[np.floating], float, bool, int]:
         converged = False
+        _iteration = 0
 
         for _iteration in range(max_iterations):
             improved = False
 
             for i in range(n_params):
-                # Try small perturbations
                 for delta in [0.1, -0.1, 0.05, -0.05, 0.01, -0.01]:
                     test_params = best_params.copy()
                     test_params[i] = np.clip(
@@ -318,17 +349,7 @@ class SystemIdentifier:
                 converged = True
                 break
 
-        # Build result dictionary
-        identified = {}
-        for i, name in enumerate(params_to_identify):
-            identified[name] = float(best_params[i])
-
-        return IdentificationResult(
-            identified_params=identified,  # type: ignore[arg-type]
-            residual_error=best_error,
-            iterations=_iteration + 1,
-            converged=converged,
-        )
+        return best_params, best_error, converged, _iteration
 
     def compute_reality_gap(
         self,
@@ -385,7 +406,7 @@ class SystemIdentifier:
         """
         # Apply identified parameters
         param_vector = np.array(
-            [identified_params.get(name, 1.0) for name in self.param_bounds.keys()]
+            [identified_params.get(name, 1.0) for name in self.param_bounds.keys()],
         )
         self._apply_params(param_vector)
 
@@ -399,7 +420,7 @@ class SystemIdentifier:
                 [
                     demo.joint_positions[0],
                     demo.joint_velocities[0],
-                ]
+                ],
             )
 
             real_traj = np.concatenate(

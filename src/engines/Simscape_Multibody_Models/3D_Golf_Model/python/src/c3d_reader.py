@@ -35,6 +35,34 @@ BIOMECHANICAL_MARKER_MIN_M = 0.001  # 1mm minimum - detects mm/m confusion
 BIOMECHANICAL_MARKER_MAX_M = 10.0  # 10m maximum - detects unrealistic scales
 
 
+def _force_plate_columns(include_time: bool, compute_cop: bool) -> list[str]:
+    columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
+    if include_time:
+        columns.insert(1, "time")
+    if compute_cop:
+        columns.extend(["cop_x", "cop_y", "cop_z"])
+    return columns
+
+
+def _write_sidecar_metadata(path: Path, metadata: dict[str, Any]) -> None:
+    meta_path = path.with_name(f"{path.stem}_meta.json")
+    with open(meta_path, "w") as f:
+        json.dump(metadata, f, indent=2)
+
+
+def _add_cop_columns(plate_df: pd.DataFrame, ground_height: float) -> None:
+    fz = plate_df["fz"].to_numpy()
+    mx = plate_df["mx"].to_numpy()
+    my = plate_df["my"].to_numpy()
+
+    min_force_threshold = 10.0  # [N] minimum force for valid COP
+    valid_contact = np.abs(fz) > min_force_threshold
+
+    plate_df["cop_x"] = np.where(valid_contact, -my / fz, np.nan)
+    plate_df["cop_y"] = np.where(valid_contact, mx / fz, np.nan)
+    plate_df["cop_z"] = np.where(valid_contact, ground_height, np.nan)
+
+
 @dataclass(frozen=True)
 class C3DEvent:
     """A labeled event occurring at a specific time within a capture."""
@@ -160,7 +188,6 @@ class C3DDataReader:
             ``residual`` (EzC3D stores residuals in the fourth point channel), and
             an optional ``time`` column in seconds.
         """
-
         c3d_data = self._load()
         metadata = self.get_metadata()
         points = c3d_data["data"]["points"]
@@ -168,73 +195,106 @@ class C3DDataReader:
         marker_labels = np.array(metadata.marker_labels)
 
         if markers:
-            # Filter markers early to avoid processing unneeded data
             mask = np.isin(marker_labels, list(markers))
             marker_labels = marker_labels[mask]
             points = points[:, mask, :]
 
-        # Sort markers alphabetically to avoid expensive DataFrame sorting later
-        sort_indices = np.argsort(marker_labels)
-        sorted_labels = marker_labels[sort_indices]
+        sorted_labels, points = self._sort_markers(marker_labels, points)
+        coordinates = self._compute_coordinates(points, metadata, target_units)
 
-        # Reorder points data: (4, Markers, Frames) -> (4, SortedMarkers, Frames)
-        # This aligns the data with the sorted labels so we can construct the DataFrame
-        # already sorted by frame and marker.
-        points = points[:, sort_indices, :]
-
-        raw_coordinates = np.transpose(points[:3, :, :], axes=(2, 1, 0)).reshape(-1, 3)
-        coordinates = raw_coordinates * self._unit_scale(metadata.units, target_units)
-
-        # Guideline P1: Unit Validation - Prevent 1000x errors from mm/m confusion
-        # Biomechanical markers should be in range [1mm, 10m]
-        if coordinates.size > 0:  # Only validate if we have data
-            min_pos = np.nanmin(coordinates)
-            max_pos = np.nanmax(coordinates)
-
-            # Check for all-NaN data (nanmin/nanmax return NaN)
-            if np.isnan(min_pos) or np.isnan(max_pos):
-                logger.warning(
-                    "All marker coordinates are NaN or non-finite; skipping unit "
-                    "range validation (Guideline P1). Verify upstream data quality "
-                    "and missing-data handling."
-                )
-            else:
-                if min_pos < BIOMECHANICAL_MARKER_MIN_M:
-                    logger.warning(
-                        "⚠️ Suspiciously small marker positions detected (< 1mm). "
-                        f"Min position: {min_pos:.6f}m. "
-                        f"Source units: {metadata.units}, target: "
-                        f"{target_units or 'unchanged'}. "
-                        "Guideline P1: Verify unit conversion is correct to "
-                        "avoid 1000x errors."
-                    )
-
-                if max_pos > BIOMECHANICAL_MARKER_MAX_M:
-                    logger.error(
-                        "❌ Unrealistic marker positions detected (> 10m). "
-                        f"Max position: {max_pos:.2f}m. "
-                        f"Source units: {metadata.units}, target: "
-                        f"{target_units or 'unchanged'}. "
-                        "Guideline P1 VIOLATION: Likely unit conversion error."
-                    )
-                    raise ValueError(
-                        f"Marker positions exceed {BIOMECHANICAL_MARKER_MAX_M}m "
-                        f"(max: {max_pos:.2f}m) - likely unit error. "
-                        f"Check that source units '{metadata.units}' are correct. "
-                        "Common issue: mm labeled as m or vice versa."
-                    )
+        self._validate_marker_positions(coordinates, metadata, target_units)
 
         residuals = points[3, :, :].T.reshape(-1)
-
         if residual_nan_threshold is not None:
             too_noisy = residuals > residual_nan_threshold
             coordinates[too_noisy, :] = np.nan
 
+        dataframe = self._build_points_dataframe(
+            sorted_labels, coordinates, residuals, metadata, include_time
+        )
+
+        logger.info(
+            "Loaded %s frames for %s markers from %s",
+            metadata.frame_count,
+            len(sorted_labels),
+            self.file_path.name,
+        )
+        return dataframe
+
+    @staticmethod
+    def _sort_markers(
+        marker_labels: np.ndarray, points: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        sort_indices = np.argsort(marker_labels)
+        return marker_labels[sort_indices], points[:, sort_indices, :]
+
+    def _compute_coordinates(
+        self,
+        points: np.ndarray,
+        metadata: C3DMetadata,
+        target_units: str | None,
+    ) -> np.ndarray:
+        raw_coordinates = np.transpose(points[:3, :, :], axes=(2, 1, 0)).reshape(-1, 3)
+        return raw_coordinates * self._unit_scale(metadata.units, target_units)
+
+    @staticmethod
+    def _validate_marker_positions(
+        coordinates: np.ndarray,
+        metadata: C3DMetadata,
+        target_units: str | None,
+    ) -> None:
+        if coordinates.size == 0:
+            return
+
+        min_pos = np.nanmin(coordinates)
+        max_pos = np.nanmax(coordinates)
+
+        if np.isnan(min_pos) or np.isnan(max_pos):
+            logger.warning(
+                "All marker coordinates are NaN or non-finite; skipping unit "
+                "range validation (Guideline P1). Verify upstream data quality "
+                "and missing-data handling."
+            )
+            return
+
+        if min_pos < BIOMECHANICAL_MARKER_MIN_M:
+            logger.warning(
+                "Suspiciously small marker positions detected (< 1mm). "
+                f"Min position: {min_pos:.6f}m. "
+                f"Source units: {metadata.units}, target: "
+                f"{target_units or 'unchanged'}. "
+                "Guideline P1: Verify unit conversion is correct to "
+                "avoid 1000x errors."
+            )
+
+        if max_pos > BIOMECHANICAL_MARKER_MAX_M:
+            logger.error(
+                "Unrealistic marker positions detected (> 10m). "
+                f"Max position: {max_pos:.2f}m. "
+                f"Source units: {metadata.units}, target: "
+                f"{target_units or 'unchanged'}. "
+                "Guideline P1 VIOLATION: Likely unit conversion error."
+            )
+            raise ValueError(
+                f"Marker positions exceed {BIOMECHANICAL_MARKER_MAX_M}m "
+                f"(max: {max_pos:.2f}m) - likely unit error. "
+                f"Check that source units '{metadata.units}' are correct. "
+                "Common issue: mm labeled as m or vice versa."
+            )
+
+    @staticmethod
+    def _build_points_dataframe(
+        sorted_labels: np.ndarray,
+        coordinates: np.ndarray,
+        residuals: np.ndarray,
+        metadata: C3DMetadata,
+        include_time: bool,
+    ) -> pd.DataFrame:
         current_marker_count = len(sorted_labels)
         frame_indices = np.repeat(np.arange(metadata.frame_count), current_marker_count)
         marker_names = np.tile(sorted_labels, metadata.frame_count)
 
-        data = {
+        data: dict[str, Any] = {
             "frame": frame_indices,
             "marker": marker_names,
             "x": coordinates[:, 0],
@@ -252,17 +312,7 @@ class C3DDataReader:
                     "despite include_time=True."
                 )
 
-        dataframe = pd.DataFrame(data)
-
-        dataframe = dataframe.reset_index(drop=True)
-
-        logger.info(
-            "Loaded %s frames for %s markers from %s",
-            metadata.frame_count,
-            current_marker_count,
-            self.file_path.name,
-        )
-        return dataframe
+        return pd.DataFrame(data).reset_index(drop=True)
 
     def analog_dataframe(self, include_time: bool = True) -> pd.DataFrame:
         """Return analog channels as a tidy DataFrame.
@@ -465,14 +515,8 @@ class C3DDataReader:
                 "No force plate channels detected in C3D file. "
                 "Expected channels like Fx1, Fy1, Fz1, Mx1, My1, Mz1."
             )
-            columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
-            if include_time:
-                columns.insert(1, "time")
-            if compute_cop:
-                columns.extend(["cop_x", "cop_y", "cop_z"])
-            return pd.DataFrame(columns=columns)
+            return pd.DataFrame(columns=_force_plate_columns(include_time, compute_cop))
 
-        # Filter to specific plate if requested
         if plate_number is not None:
             if plate_number not in plate_channels:
                 raise ValueError(
@@ -481,20 +525,44 @@ class C3DDataReader:
                 )
             plate_channels = {plate_number: plate_channels[plate_number]}
 
-        # Get analog data
-        analog_df = self.analog_dataframe(include_time=False)
+        analog_wide = self._pivot_analog_data()
         metadata = self.get_metadata()
-        analog_rate = metadata.analog_rate
 
-        # Pivot to wide format
-        analog_wide = analog_df.pivot(
+        result_dfs = self._build_plate_dataframes(
+            plate_channels, analog_wide, compute_cop, ground_height
+        )
+
+        if not result_dfs:
+            return pd.DataFrame(columns=_force_plate_columns(include_time, compute_cop))
+
+        result = pd.concat(result_dfs, ignore_index=True)
+
+        if include_time and metadata.analog_rate:
+            result.insert(1, "time", result["sample"] / metadata.analog_rate)
+
+        logger.info(
+            "Extracted force plate data for %d plates, %d samples from %s",
+            len(plate_channels),
+            len(result),
+            self.file_path.name,
+        )
+        return result
+
+    def _pivot_analog_data(self) -> pd.DataFrame:
+        analog_df = self.analog_dataframe(include_time=False)
+        return analog_df.pivot(
             index="sample", columns="channel", values="value"
         ).reset_index()
 
-        # Build output dataframes for each plate
-        result_dfs = []
-
+    @staticmethod
+    def _build_plate_dataframes(
+        plate_channels: dict[int, dict[str, str]],
+        analog_wide: pd.DataFrame,
+        compute_cop: bool,
+        ground_height: float,
+    ) -> list[pd.DataFrame]:
         required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
+        result_dfs: list[pd.DataFrame] = []
 
         for plate_num, channels in sorted(plate_channels.items()):
             missing_keys = required_keys - set(channels.keys())
@@ -519,46 +587,11 @@ class C3DDataReader:
             )
 
             if compute_cop:
-                # COP_x = -My / Fz, COP_y = Mx / Fz (when Fz != 0)
-                fz = plate_df["fz"].to_numpy()
-                mx = plate_df["mx"].to_numpy()
-                my = plate_df["my"].to_numpy()
-
-                # Avoid division by zero - set COP to NaN when Fz is too small
-                min_force_threshold = 10.0  # [N] minimum force for valid COP
-                valid_contact = np.abs(fz) > min_force_threshold
-
-                cop_x = np.where(valid_contact, -my / fz, np.nan)
-                cop_y = np.where(valid_contact, mx / fz, np.nan)
-                cop_z = np.where(valid_contact, ground_height, np.nan)
-
-                plate_df["cop_x"] = cop_x
-                plate_df["cop_y"] = cop_y
-                plate_df["cop_z"] = cop_z
+                _add_cop_columns(plate_df, ground_height)
 
             result_dfs.append(plate_df)
 
-        if not result_dfs:
-            columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
-            if include_time:
-                columns.insert(1, "time")
-            if compute_cop:
-                columns.extend(["cop_x", "cop_y", "cop_z"])
-            return pd.DataFrame(columns=columns)
-
-        result = pd.concat(result_dfs, ignore_index=True)
-
-        if include_time and analog_rate:
-            result.insert(1, "time", result["sample"] / analog_rate)
-
-        logger.info(
-            "Extracted force plate data for %d plates, %d samples from %s",
-            len(plate_channels),
-            len(result),
-            self.file_path.name,
-        )
-
-        return result
+        return result_dfs
 
     def get_force_plate_count(self) -> int:
         """Return the number of detected force plates."""
@@ -712,13 +745,37 @@ class C3DDataReader:
         Includes validation, versioning, and telemetry.
         """
         path = Path(output_path).resolve()
+        self._validate_export_path(path)
 
-        # Security: Normalize and validate path
-        # Allow test directories when running tests, but still enforce security for
-        # security tests
+        if not file_format:
+            if not path.suffix:
+                raise ValueError(
+                    "File format could not be inferred from the path suffix."
+                )
+            file_format = path.suffix.lstrip(".")
+
+        normalized_format = file_format.lower()
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        metadata = self._build_export_metadata(dataframe)
+
+        with log_execution_time(f"export_{normalized_format}"):
+            if normalized_format == "csv":
+                self._export_csv(dataframe, path, metadata, sanitize)
+            elif normalized_format == "json":
+                self._export_json(dataframe, path, metadata)
+            elif normalized_format == "npz":
+                self._export_npz(dataframe, path, metadata)
+            else:  # pragma: no cover - defensive guard for unrecognized formats
+                raise ValueError(f"Unsupported export format: {file_format}")
+
+        logger.info("Exported %s rows to %s", len(dataframe), path)
+        return path
+
+    @staticmethod
+    def _validate_export_path(path: Path) -> None:
         base_dir = Path.cwd().resolve()
 
-        # Check if this is a security test that should enforce validation
         import inspect
 
         frame = inspect.currentframe()
@@ -732,7 +789,6 @@ class C3DDataReader:
         finally:
             del frame
 
-        # Allow test directories when running tests (but not for security tests)
         is_test_env = not is_security_test and any(
             [
                 "pytest" in str(base_dir),
@@ -748,67 +804,47 @@ class C3DDataReader:
                 f"(outside project root {base_dir})"
             )
 
-        if not file_format:
-            if not path.suffix:
-                raise ValueError(
-                    "File format could not be inferred from the path suffix."
-                )
-            file_format = path.suffix.lstrip(".")
+    def _build_export_metadata(self, dataframe: pd.DataFrame) -> dict[str, Any]:
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "created_at_utc": datetime.now(timezone.utc).isoformat(),  # noqa: UP017
+            "source_file": self.file_path.name,
+            "row_count": len(dataframe),
+            "units": self.get_metadata().units,
+        }
 
-        normalized_format = file_format.lower()
-        path.parent.mkdir(parents=True, exist_ok=True)
+    def _export_csv(
+        self,
+        dataframe: pd.DataFrame,
+        path: Path,
+        metadata: dict[str, Any],
+        sanitize: bool,
+    ) -> None:
+        df_to_export = dataframe.copy() if sanitize else dataframe
+        if sanitize:
+            for col in df_to_export.select_dtypes(include=[object, "string"]).columns:
+                df_to_export[col] = df_to_export[col].apply(self._sanitize_for_csv)
+        df_to_export.to_csv(path, index=False)
+        _write_sidecar_metadata(path, metadata)
 
-        with log_execution_time(f"export_{normalized_format}"):
-            # Metadata for versioning
-            metadata = {
-                "schema_version": SCHEMA_VERSION,
-                "created_at_utc": datetime.now(timezone.utc).isoformat(),  # noqa: UP017
-                "source_file": self.file_path.name,
-                "row_count": len(dataframe),
-                "units": self.get_metadata().units,
-            }
+    @staticmethod
+    def _export_json(
+        dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
+    ) -> None:
+        output = {
+            "metadata": metadata,
+            "data": dataframe.to_dict(orient="records"),
+        }
+        with open(path, "w") as f:
+            json.dump(output, f, indent=2)
 
-            if normalized_format == "csv":
-                df_to_export = dataframe.copy() if sanitize else dataframe
-                if sanitize:
-                    # Sanitize for CSV Injection (Excel Formula Injection)
-                    for col in df_to_export.select_dtypes(
-                        include=[object, "string"]
-                    ).columns:
-                        df_to_export[col] = df_to_export[col].apply(
-                            self._sanitize_for_csv
-                        )
-                df_to_export.to_csv(path, index=False)
-
-                # Create sidecar metadata file
-                meta_path = path.with_name(f"{path.stem}_meta.json")
-                with open(meta_path, "w") as f:
-                    json.dump(metadata, f, indent=2)
-
-            elif normalized_format == "json":
-                # Envelope pattern
-                output = {
-                    "metadata": metadata,
-                    "data": dataframe.to_dict(orient="records"),
-                }
-                with open(path, "w") as f:
-                    json.dump(output, f, indent=2)
-
-            elif normalized_format == "npz":
-                # Save metadata inside NPZ and as sidecar
-                arrays = {column: dataframe[column].to_numpy() for column in dataframe}
-                np.savez(path, _metadata=json.dumps(metadata), **arrays)
-
-                # Sidecar
-                meta_path = path.with_name(f"{path.stem}_meta.json")
-                with open(meta_path, "w") as f:
-                    json.dump(metadata, f, indent=2)
-
-            else:  # pragma: no cover - defensive guard for unrecognized formats
-                raise ValueError(f"Unsupported export format: {file_format}")
-
-        logger.info("Exported %s rows to %s", len(dataframe), path)
-        return path
+    @staticmethod
+    def _export_npz(
+        dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
+    ) -> None:
+        arrays = {column: dataframe[column].to_numpy() for column in dataframe}
+        np.savez(path, _metadata=json.dumps(metadata), **arrays)
+        _write_sidecar_metadata(path, metadata)
 
 
 def load_tour_average_reader(base_directory: Path | None = None) -> C3DDataReader:

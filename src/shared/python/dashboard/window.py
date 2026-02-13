@@ -9,6 +9,8 @@ Provides a unified interface for:
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
@@ -269,123 +271,134 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         self.static_canvas.fig.clear()
 
         try:
-            if plot_type == "Joint Angles":
-                self.plotter.plot_joint_angles(self.static_canvas.fig)
-            elif plot_type == "Joint Velocities":
-                self.plotter.plot_joint_velocities(self.static_canvas.fig)
-            elif plot_type == "Joint Torques":
-                self.plotter.plot_joint_torques(self.static_canvas.fig)
-            elif plot_type == "Energies":
-                self.plotter.plot_energy_analysis(self.static_canvas.fig)
-            elif plot_type == "Club Head Speed":
-                self.plotter.plot_club_head_speed(self.static_canvas.fig)
-            elif plot_type == "Angular Momentum":
-                self.plotter.plot_angular_momentum(self.static_canvas.fig)
-            elif plot_type == "Power Flow":
-                self.plotter.plot_power_flow(self.static_canvas.fig)
-            elif plot_type == "Joint Power Curves":
-                self.plotter.plot_joint_power_curves(self.static_canvas.fig)
-            elif plot_type == "Impulse Accumulation":
-                self.plotter.plot_impulse_accumulation(self.static_canvas.fig)
-            elif plot_type == "Phase Diagram (Joint 0)":
-                self.plotter.plot_phase_diagram(self.static_canvas.fig, joint_idx=0)
-            elif plot_type == "Poincaré Map (3D)":
-                # Default: Pos 0, Vel 0, Acc 0. Section: Vel 0 = 0.
-                self.plotter.plot_poincare_map_3d(
-                    self.static_canvas.fig,
-                    dimensions=[("position", 0), ("velocity", 0), ("acceleration", 0)],
-                    section_condition=("velocity", 0, 0.0),
-                    title="Poincaré Map (Joint 0)",
-                )
-            elif plot_type == "Chaos Analysis (Lyapunov)":
-                self.plotter.plot_lyapunov_exponent(self.static_canvas.fig, joint_idx=0)
-            elif plot_type == "Recurrence Plot":
-                # Need to compute matrix
-                times, positions = self.recorder.get_time_series("joint_positions")
-                _, velocities = self.recorder.get_time_series("joint_velocities")
-                if len(times) > 0:
-                    analyzer = StatisticalAnalyzer(
-                        times=np.asarray(times),
-                        joint_positions=np.asarray(positions),
-                        joint_velocities=np.asarray(velocities),
-                        joint_torques=np.zeros_like(positions),
-                    )
-                    rm = analyzer.compute_recurrence_matrix()
-                    self.plotter.plot_recurrence_plot(self.static_canvas.fig, rm)
-                else:
-                    raise ValueError("No data available")
-            elif plot_type == "Stability Diagram (CoM vs CoP)":
-                self.plotter.plot_stability_diagram(self.static_canvas.fig)
-            elif plot_type == "CoP Trajectory":
-                self.plotter.plot_cop_trajectory(self.static_canvas.fig)
-            elif plot_type == "GRF Butterfly Diagram":
-                self.plotter.plot_grf_butterfly_diagram(self.static_canvas.fig)
-            elif plot_type == "Club Head Trajectory (3D)":
-                self.plotter.plot_club_head_trajectory(self.static_canvas.fig)
-            elif plot_type == "Kinematic Sequence (Bars)":
-                # Heuristic: First few joints in order
-                _, vels = self.recorder.get_time_series("joint_velocities")
-                vels = np.asarray(vels)
-                n_joints = vels.shape[1] if len(vels) > 0 else 0
-                if n_joints >= 3:
-                    # Map first joints to generic proximal-to-distal labels
-                    indices = {
-                        "proximal": 0,
-                        "mid_proximal": 1,
-                        "mid_distal": min(2, n_joints - 1),
-                    }
-                    if n_joints > 3:
-                        indices["distal"] = n_joints - 1
-                    self.plotter.plot_kinematic_sequence_bars(
-                        self.static_canvas.fig, indices
-                    )
-                else:
-                    # Fallback
-                    indices = {f"Joint {i}": i for i in range(n_joints)}
-                    self.plotter.plot_kinematic_sequence_bars(
-                        self.static_canvas.fig, indices
-                    )
-            elif plot_type == "Swing Profile (Radar)":
-                times, positions = self.recorder.get_time_series("joint_positions")
-                _, velocities = self.recorder.get_time_series("joint_velocities")
-                _, torques = self.recorder.get_time_series("joint_torques")
-                try:
-                    _, club_speed = self.recorder.get_time_series("club_head_speed")
-                except (KeyError, AttributeError):
-                    club_speed = None
-
-                if len(times) > 0:
-                    analyzer = StatisticalAnalyzer(
-                        times=np.asarray(times),
-                        joint_positions=np.asarray(positions),
-                        joint_velocities=np.asarray(velocities),
-                        joint_torques=np.asarray(torques),
-                        club_head_speed=(
-                            np.asarray(club_speed) if club_speed is not None else None
-                        ),
-                    )
-                    dna = analyzer.compute_swing_profile()
-                    if dna:
-                        metrics = {
-                            "Speed": dna.speed_score,
-                            "Sequence": dna.sequence_score,
-                            "Stability": dna.stability_score,
-                            "Efficiency": dna.efficiency_score,
-                            "Power": dna.power_score,
-                        }
-                        self.plotter.plot_radar_chart(self.static_canvas.fig, metrics)
-                    else:
-                        raise ValueError("Could not compute Swing Profile")
-                else:
-                    raise ValueError("No data available")
-            elif plot_type == "Summary Dashboard":
-                self.plotter.plot_summary_dashboard(self.static_canvas.fig)
+            self._dispatch_plot(plot_type)
         except (ValueError, TypeError, RuntimeError) as e:
             ax = self.static_canvas.fig.add_subplot(111)
             ax.text(0.5, 0.5, f"Plot Error: {e}", ha="center", va="center")
             logger.error(f"Error generating static plot '{plot_type}': {e}")
 
         self.static_canvas.draw()
+
+    def _dispatch_plot(self, plot_type: str) -> None:
+        """Dispatch to the appropriate plotter method."""
+        fig = self.static_canvas.fig
+
+        simple_plots = {
+            "Joint Angles": lambda: self.plotter.plot_joint_angles(fig),
+            "Joint Velocities": lambda: self.plotter.plot_joint_velocities(fig),
+            "Joint Torques": lambda: self.plotter.plot_joint_torques(fig),
+            "Energies": lambda: self.plotter.plot_energy_analysis(fig),
+            "Club Head Speed": lambda: self.plotter.plot_club_head_speed(fig),
+            "Angular Momentum": lambda: self.plotter.plot_angular_momentum(fig),
+            "Power Flow": lambda: self.plotter.plot_power_flow(fig),
+            "Joint Power Curves": lambda: self.plotter.plot_joint_power_curves(fig),
+            "Impulse Accumulation": lambda: self.plotter.plot_impulse_accumulation(fig),
+            "Phase Diagram (Joint 0)": lambda: self.plotter.plot_phase_diagram(
+                fig, joint_idx=0
+            ),
+            "Chaos Analysis (Lyapunov)": lambda: self.plotter.plot_lyapunov_exponent(
+                fig, joint_idx=0
+            ),
+            "Stability Diagram (CoM vs CoP)": lambda: self.plotter.plot_stability_diagram(
+                fig
+            ),
+            "CoP Trajectory": lambda: self.plotter.plot_cop_trajectory(fig),
+            "GRF Butterfly Diagram": lambda: self.plotter.plot_grf_butterfly_diagram(
+                fig
+            ),
+            "Club Head Trajectory (3D)": lambda: self.plotter.plot_club_head_trajectory(
+                fig
+            ),
+            "Summary Dashboard": lambda: self.plotter.plot_summary_dashboard(fig),
+        }
+
+        if plot_type in simple_plots:
+            simple_plots[plot_type]()
+        elif plot_type == "Poincaré Map (3D)":
+            self._plot_poincare(fig)
+        elif plot_type == "Recurrence Plot":
+            self._plot_recurrence(fig)
+        elif plot_type == "Kinematic Sequence (Bars)":
+            self._plot_kinematic_sequence(fig)
+        elif plot_type == "Swing Profile (Radar)":
+            self._plot_swing_radar(fig)
+
+    def _plot_poincare(self, fig: Any) -> None:
+        """Render Poincare map plot."""
+        self.plotter.plot_poincare_map_3d(
+            fig,
+            dimensions=[("position", 0), ("velocity", 0), ("acceleration", 0)],
+            section_condition=("velocity", 0, 0.0),
+            title="Poincaré Map (Joint 0)",
+        )
+
+    def _plot_recurrence(self, fig: Any) -> None:
+        """Render recurrence plot from recorded data."""
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+        if len(times) > 0:
+            analyzer = StatisticalAnalyzer(
+                times=np.asarray(times),
+                joint_positions=np.asarray(positions),
+                joint_velocities=np.asarray(velocities),
+                joint_torques=np.zeros_like(positions),
+            )
+            rm = analyzer.compute_recurrence_matrix()
+            self.plotter.plot_recurrence_plot(fig, rm)
+        else:
+            raise ValueError("No data available")
+
+    def _plot_kinematic_sequence(self, fig: Any) -> None:
+        """Render kinematic sequence bar chart."""
+        _, vels = self.recorder.get_time_series("joint_velocities")
+        vels = np.asarray(vels)
+        n_joints = vels.shape[1] if len(vels) > 0 else 0
+        if n_joints >= 3:
+            indices: dict[str, int] = {
+                "proximal": 0,
+                "mid_proximal": 1,
+                "mid_distal": min(2, n_joints - 1),
+            }
+            if n_joints > 3:
+                indices["distal"] = n_joints - 1
+        else:
+            indices = {f"Joint {i}": i for i in range(n_joints)}
+        self.plotter.plot_kinematic_sequence_bars(fig, indices)
+
+    def _plot_swing_radar(self, fig: Any) -> None:
+        """Render swing profile radar chart."""
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+        _, torques = self.recorder.get_time_series("joint_torques")
+        try:
+            _, club_speed = self.recorder.get_time_series("club_head_speed")
+        except (KeyError, AttributeError):
+            club_speed = None
+
+        if len(times) == 0:
+            raise ValueError("No data available")
+
+        analyzer = StatisticalAnalyzer(
+            times=np.asarray(times),
+            joint_positions=np.asarray(positions),
+            joint_velocities=np.asarray(velocities),
+            joint_torques=np.asarray(torques),
+            club_head_speed=(
+                np.asarray(club_speed) if club_speed is not None else None
+            ),
+        )
+        dna = analyzer.compute_swing_profile()
+        if dna:
+            metrics = {
+                "Speed": dna.speed_score,
+                "Sequence": dna.sequence_score,
+                "Stability": dna.stability_score,
+                "Efficiency": dna.efficiency_score,
+                "Power": dna.power_score,
+            }
+            self.plotter.plot_radar_chart(fig, metrics)
+        else:
+            raise ValueError("Could not compute Swing Profile")
 
     def compute_analysis(self) -> None:
         """Trigger post-hoc analysis computation."""

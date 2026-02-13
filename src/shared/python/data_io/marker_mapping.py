@@ -154,17 +154,7 @@ class MarkerToModelMapper:
             RegistrationResult with transformation and diagnostics
         """
         if body_name not in self._mappings:
-            return RegistrationResult(
-                success=False,
-                transformation=np.eye(4),
-                residuals=np.array([]),
-                rms_error=float("inf"),
-                max_error=float("inf"),
-                outlier_indices=[],
-                fit_quality=0.0,
-                num_markers_used=0,
-                condition_number=float("inf"),
-            )
+            return self._failed_registration()
 
         mappings = self._mappings[body_name]
 
@@ -173,24 +163,49 @@ class MarkerToModelMapper:
                 f"Marker count mismatch: {len(mappings)} mappings, "
                 f"{len(marker_positions)} positions"
             )
-            return RegistrationResult(
-                success=False,
-                transformation=np.eye(4),
-                residuals=np.array([]),
-                rms_error=float("inf"),
-                max_error=float("inf"),
-                outlier_indices=[],
-                fit_quality=0.0,
-                num_markers_used=0,
-                condition_number=float("inf"),
-            )
+            return self._failed_registration()
 
-        # Iterative outlier rejection
+        inlier_mask, transformation, residuals = self._iterative_fit(
+            mappings, marker_positions, outlier_threshold, max_iterations
+        )
+
+        inlier_observed = marker_positions[inlier_mask]
+        return self._build_registration_result(
+            inlier_mask, transformation, residuals, inlier_observed
+        )
+
+    @staticmethod
+    def _failed_registration() -> RegistrationResult:
+        """Return a default failed RegistrationResult."""
+        return RegistrationResult(
+            success=False,
+            transformation=np.eye(4),
+            residuals=np.array([]),
+            rms_error=float("inf"),
+            max_error=float("inf"),
+            outlier_indices=[],
+            fit_quality=0.0,
+            num_markers_used=0,
+            condition_number=float("inf"),
+        )
+
+    def _iterative_fit(
+        self,
+        mappings: list[MarkerMapping],
+        marker_positions: np.ndarray,
+        outlier_threshold: float,
+        max_iterations: int,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Run iterative outlier-rejection fitting loop.
+
+        Returns:
+            Tuple of (inlier_mask, transformation, residuals).
+        """
         inlier_mask = np.ones(len(marker_positions), dtype=bool)
         transformation = np.eye(4)
+        residuals = np.zeros(len(marker_positions))
 
         for _iteration in range(max_iterations):
-            # Get inlier markers
             inlier_observed = marker_positions[inlier_mask]
             inlier_offsets = np.array(
                 [
@@ -204,26 +219,30 @@ class MarkerToModelMapper:
                 logger.warning("Too few markers for robust fit")
                 break
 
-            # Fit rigid transformation (Kabsch algorithm)
             transformation = self._fit_rigid_transform(inlier_offsets, inlier_observed)
 
-            # Compute residuals
             all_offsets = np.array([m.body_offset for m in mappings])
             predicted = self._apply_transform(transformation, all_offsets)
             residuals = np.linalg.norm(marker_positions - predicted, axis=1)
 
-            # Detect outliers
             inlier_residuals = residuals[inlier_mask]
             if len(inlier_residuals) > 0:
                 std = np.std(inlier_residuals)
                 new_outliers = residuals > outlier_threshold * std
-
                 if np.array_equal(new_outliers, ~inlier_mask):
-                    break  # Converged
-
+                    break
                 inlier_mask = ~new_outliers
 
-        # Final metrics
+        return inlier_mask, transformation, residuals
+
+    @staticmethod
+    def _build_registration_result(
+        inlier_mask: np.ndarray,
+        transformation: np.ndarray,
+        residuals: np.ndarray,
+        inlier_observed: np.ndarray,
+    ) -> RegistrationResult:
+        """Compute final metrics and build a successful RegistrationResult."""
         final_residuals = residuals[inlier_mask]
         rms = (
             float(np.sqrt(np.mean(final_residuals**2)))
@@ -234,13 +253,9 @@ class MarkerToModelMapper:
             float(np.max(final_residuals)) if len(final_residuals) > 0 else float("inf")
         )
 
-        # Vectorized outlier indexing
         outlier_idx = np.where(~inlier_mask)[0].tolist()
+        fit_quality = float(np.exp(-rms / 0.01))
 
-        # Fit quality: exp(-rms/threshold)
-        fit_quality = float(np.exp(-rms / 0.01))  # 1cm reference
-
-        # Condition number (from SVD of point cloud)
         if len(inlier_observed) >= 3:
             centered = inlier_observed - np.mean(inlier_observed, axis=0)
             _, s, _ = np.linalg.svd(centered, full_matrices=False)

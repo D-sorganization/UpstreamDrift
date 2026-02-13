@@ -486,16 +486,16 @@ class DatasetGenerator:
         assert buffers["times"] is not None, "times buffer must not be None"
         assert buffers["positions"] is not None, "positions buffer must not be None"
         assert buffers["velocities"] is not None, "velocities buffer must not be None"
-        assert (
-            buffers["accelerations"] is not None
-        ), "accelerations buffer must not be None"
+        assert buffers["accelerations"] is not None, (
+            "accelerations buffer must not be None"
+        )
         assert buffers["torques"] is not None, "torques buffer must not be None"
-        assert (
-            buffers["kinetic_energy"] is not None
-        ), "kinetic_energy buffer must not be None"
-        assert (
-            buffers["potential_energy"] is not None
-        ), "potential_energy buffer must not be None"
+        assert buffers["kinetic_energy"] is not None, (
+            "kinetic_energy buffer must not be None"
+        )
+        assert buffers["potential_energy"] is not None, (
+            "potential_energy buffer must not be None"
+        )
 
         return SimulationSample(
             sample_id=sample_id,
@@ -773,86 +773,63 @@ class DatasetGenerator:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with h5py.File(str(output_path), "w") as f:
-            # Metadata
-            meta = f.create_group("metadata")
-            meta.attrs["model_name"] = dataset.model_name
-            meta.attrs["engine_name"] = dataset.engine_name
-            meta.attrs["num_samples"] = dataset.num_samples
-            meta.attrs["total_frames"] = dataset.total_frames
-            meta.attrs["creation_time"] = dataset.creation_time
-            meta.attrs["duration"] = dataset.config.duration
-            meta.attrs["timestep"] = dataset.config.timestep
-            meta.attrs["seed"] = dataset.config.seed
-
-            # Joint names
-            if dataset.joint_names:
-                meta.create_dataset(
-                    "joint_names",
-                    data=[n.encode("utf-8") for n in dataset.joint_names],
-                )
-
-            # Samples
+            self._write_hdf5_metadata(f, dataset)
             samples_grp = f.create_group("samples")
             for sample in dataset.samples:
-                s_grp = samples_grp.create_group(f"sample_{sample.sample_id:06d}")
-                s_grp.create_dataset("times", data=sample.times, compression="gzip")
-                s_grp.create_dataset(
-                    "positions", data=sample.positions, compression="gzip"
-                )
-                s_grp.create_dataset(
-                    "velocities", data=sample.velocities, compression="gzip"
-                )
-                s_grp.create_dataset(
-                    "accelerations", data=sample.accelerations, compression="gzip"
-                )
-                s_grp.create_dataset("torques", data=sample.torques, compression="gzip")
-
-                if sample.mass_matrices is not None:
-                    s_grp.create_dataset(
-                        "mass_matrices",
-                        data=sample.mass_matrices,
-                        compression="gzip",
-                    )
-                if sample.bias_forces is not None:
-                    s_grp.create_dataset(
-                        "bias_forces", data=sample.bias_forces, compression="gzip"
-                    )
-                if sample.gravity_forces is not None:
-                    s_grp.create_dataset(
-                        "gravity_forces",
-                        data=sample.gravity_forces,
-                        compression="gzip",
-                    )
-                if sample.contact_forces is not None:
-                    s_grp.create_dataset(
-                        "contact_forces",
-                        data=sample.contact_forces,
-                        compression="gzip",
-                    )
-                if sample.drift_accelerations is not None:
-                    s_grp.create_dataset(
-                        "drift_accelerations",
-                        data=sample.drift_accelerations,
-                        compression="gzip",
-                    )
-                if sample.control_accelerations is not None:
-                    s_grp.create_dataset(
-                        "control_accelerations",
-                        data=sample.control_accelerations,
-                        compression="gzip",
-                    )
-
-                # Energies
-                if sample.energies:
-                    e_grp = s_grp.create_group("energies")
-                    for key, arr in sample.energies.items():
-                        e_grp.create_dataset(key, data=arr, compression="gzip")
-
-                # Metadata as JSON attribute
-                s_grp.attrs["metadata"] = json.dumps(sample.metadata)
+                self._write_hdf5_sample(samples_grp, sample)
 
         logger.info("Exported dataset to HDF5: %s", output_path)
         return output_path
+
+    @staticmethod
+    def _write_hdf5_metadata(f: Any, dataset: TrainingDataset) -> None:
+        """Write dataset-level metadata to an HDF5 file."""
+        meta = f.create_group("metadata")
+        meta.attrs["model_name"] = dataset.model_name
+        meta.attrs["engine_name"] = dataset.engine_name
+        meta.attrs["num_samples"] = dataset.num_samples
+        meta.attrs["total_frames"] = dataset.total_frames
+        meta.attrs["creation_time"] = dataset.creation_time
+        meta.attrs["duration"] = dataset.config.duration
+        meta.attrs["timestep"] = dataset.config.timestep
+        meta.attrs["seed"] = dataset.config.seed
+
+        if dataset.joint_names:
+            meta.create_dataset(
+                "joint_names",
+                data=[n.encode("utf-8") for n in dataset.joint_names],
+            )
+
+    @staticmethod
+    def _write_hdf5_sample(samples_grp: Any, sample: SimulationSample) -> None:
+        """Write a single sample's data to an HDF5 samples group."""
+        s_grp = samples_grp.create_group(f"sample_{sample.sample_id:06d}")
+        s_grp.create_dataset("times", data=sample.times, compression="gzip")
+        s_grp.create_dataset("positions", data=sample.positions, compression="gzip")
+        s_grp.create_dataset("velocities", data=sample.velocities, compression="gzip")
+        s_grp.create_dataset(
+            "accelerations", data=sample.accelerations, compression="gzip"
+        )
+        s_grp.create_dataset("torques", data=sample.torques, compression="gzip")
+
+        optional_fields = [
+            ("mass_matrices", sample.mass_matrices),
+            ("bias_forces", sample.bias_forces),
+            ("gravity_forces", sample.gravity_forces),
+            ("contact_forces", sample.contact_forces),
+            ("drift_accelerations", sample.drift_accelerations),
+            ("control_accelerations", sample.control_accelerations),
+        ]
+        for field_name, field_data in optional_fields:
+            if field_data is not None:
+                s_grp.create_dataset(field_name, data=field_data, compression="gzip")
+
+        if sample.energies:
+            e_grp = s_grp.create_group("energies")
+            for key, arr in sample.energies.items():
+                e_grp.create_dataset(key, data=arr, compression="gzip")
+
+        s_grp.attrs["metadata"] = json.dumps(sample.metadata)
 
     def export_to_sqlite(
         self, dataset: TrainingDataset, output_path: str | Path
@@ -875,110 +852,111 @@ class DatasetGenerator:
         conn = sqlite3.connect(str(output_path))
         try:
             cursor = conn.cursor()
-
-            # Create tables
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS dataset_metadata (
-                    key TEXT PRIMARY KEY,
-                    value TEXT
-                )
-            """)
-
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS samples (
-                    sample_id INTEGER PRIMARY KEY,
-                    metadata_json TEXT,
-                    n_steps INTEGER,
-                    n_q INTEGER,
-                    n_v INTEGER
-                )
-            """)
-
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS frames (
-                    sample_id INTEGER,
-                    step INTEGER,
-                    time REAL,
-                    positions_json TEXT,
-                    velocities_json TEXT,
-                    accelerations_json TEXT,
-                    torques_json TEXT,
-                    kinetic_energy REAL,
-                    PRIMARY KEY (sample_id, step),
-                    FOREIGN KEY (sample_id) REFERENCES samples(sample_id)
-                )
-            """)
-
-            # Insert metadata
-            meta_items = [
-                ("model_name", dataset.model_name),
-                ("engine_name", dataset.engine_name),
-                ("num_samples", str(dataset.num_samples)),
-                ("total_frames", str(dataset.total_frames)),
-                ("creation_time", str(dataset.creation_time)),
-                ("seed", str(dataset.config.seed)),
-                ("duration", str(dataset.config.duration)),
-                ("timestep", str(dataset.config.timestep)),
-                ("joint_names", json.dumps(dataset.joint_names)),
-            ]
-            cursor.executemany(
-                "INSERT OR REPLACE INTO dataset_metadata (key, value) VALUES (?, ?)",
-                meta_items,
-            )
-
-            # Insert samples and frames
+            self._create_sqlite_tables(cursor)
+            self._insert_sqlite_metadata(cursor, dataset)
             for sample in dataset.samples:
-                n_steps = len(sample.times)
-                n_q = sample.positions.shape[1] if sample.positions.ndim > 1 else 0
-                n_v = sample.velocities.shape[1] if sample.velocities.ndim > 1 else 0
-
-                cursor.execute(
-                    "INSERT INTO samples (sample_id, metadata_json, n_steps, n_q, n_v) "
-                    "VALUES (?, ?, ?, ?, ?)",
-                    (
-                        sample.sample_id,
-                        json.dumps(sample.metadata),
-                        n_steps,
-                        n_q,
-                        n_v,
-                    ),
-                )
-
-                # Batch insert frames
-                frame_rows = []
-                for step in range(n_steps):
-                    ke = (
-                        float(sample.energies["kinetic"][step])
-                        if "kinetic" in sample.energies
-                        else 0.0
-                    )
-                    frame_rows.append(
-                        (
-                            sample.sample_id,
-                            step,
-                            float(sample.times[step]),
-                            json.dumps(sample.positions[step].tolist()),
-                            json.dumps(sample.velocities[step].tolist()),
-                            json.dumps(sample.accelerations[step].tolist()),
-                            json.dumps(sample.torques[step].tolist()),
-                            ke,
-                        )
-                    )
-
-                cursor.executemany(
-                    "INSERT INTO frames "
-                    "(sample_id, step, time, positions_json, velocities_json, "
-                    "accelerations_json, torques_json, kinetic_energy) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    frame_rows,
-                )
-
+                self._insert_sqlite_sample(cursor, sample)
             conn.commit()
         finally:
             conn.close()
 
         logger.info("Exported dataset to SQLite: %s", output_path)
         return output_path
+
+    @staticmethod
+    def _create_sqlite_tables(cursor: sqlite3.Cursor) -> None:
+        """Create the SQLite schema tables."""
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS dataset_metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS samples (
+                sample_id INTEGER PRIMARY KEY,
+                metadata_json TEXT,
+                n_steps INTEGER,
+                n_q INTEGER,
+                n_v INTEGER
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS frames (
+                sample_id INTEGER,
+                step INTEGER,
+                time REAL,
+                positions_json TEXT,
+                velocities_json TEXT,
+                accelerations_json TEXT,
+                torques_json TEXT,
+                kinetic_energy REAL,
+                PRIMARY KEY (sample_id, step),
+                FOREIGN KEY (sample_id) REFERENCES samples(sample_id)
+            )
+        """)
+
+    @staticmethod
+    def _insert_sqlite_metadata(
+        cursor: sqlite3.Cursor, dataset: TrainingDataset
+    ) -> None:
+        """Insert dataset-level metadata into the SQLite database."""
+        meta_items = [
+            ("model_name", dataset.model_name),
+            ("engine_name", dataset.engine_name),
+            ("num_samples", str(dataset.num_samples)),
+            ("total_frames", str(dataset.total_frames)),
+            ("creation_time", str(dataset.creation_time)),
+            ("seed", str(dataset.config.seed)),
+            ("duration", str(dataset.config.duration)),
+            ("timestep", str(dataset.config.timestep)),
+            ("joint_names", json.dumps(dataset.joint_names)),
+        ]
+        cursor.executemany(
+            "INSERT OR REPLACE INTO dataset_metadata (key, value) VALUES (?, ?)",
+            meta_items,
+        )
+
+    @staticmethod
+    def _insert_sqlite_sample(cursor: sqlite3.Cursor, sample: SimulationSample) -> None:
+        """Insert a single sample and its frames into the SQLite database."""
+        n_steps = len(sample.times)
+        n_q = sample.positions.shape[1] if sample.positions.ndim > 1 else 0
+        n_v = sample.velocities.shape[1] if sample.velocities.ndim > 1 else 0
+
+        cursor.execute(
+            "INSERT INTO samples (sample_id, metadata_json, n_steps, n_q, n_v) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (sample.sample_id, json.dumps(sample.metadata), n_steps, n_q, n_v),
+        )
+
+        frame_rows = []
+        for step in range(n_steps):
+            ke = (
+                float(sample.energies["kinetic"][step])
+                if "kinetic" in sample.energies
+                else 0.0
+            )
+            frame_rows.append(
+                (
+                    sample.sample_id,
+                    step,
+                    float(sample.times[step]),
+                    json.dumps(sample.positions[step].tolist()),
+                    json.dumps(sample.velocities[step].tolist()),
+                    json.dumps(sample.accelerations[step].tolist()),
+                    json.dumps(sample.torques[step].tolist()),
+                    ke,
+                )
+            )
+
+        cursor.executemany(
+            "INSERT INTO frames "
+            "(sample_id, step, time, positions_json, velocities_json, "
+            "accelerations_json, torques_json, kinetic_energy) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            frame_rows,
+        )
 
     def export_to_csv(self, dataset: TrainingDataset, output_dir: str | Path) -> Path:
         """Export dataset to CSV files (one per sample).

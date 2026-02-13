@@ -58,11 +58,23 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def _load_stylesheet(self) -> None:
         """Load and apply the external QSS stylesheet."""
+        self._apply_qss_stylesheet()
+        self._create_main_tabs()
+        self._create_golf_analysis_layout()
+        self._create_secondary_tabs()
+        self._create_analysis_tabs()
+        self._connect_signals()
+
+        self.grip_modelling_tab.connect_sim_widget(self.sim_widget)
+        self.sim_widget.reset_state()
+
+        self._apply_styling()
+        self._load_launch_config()
+        self._create_status_bar()
+        self._start_status_timer()
+
+    def _apply_qss_stylesheet(self) -> None:
         try:
-            # Navigate up from gui/core/main_window.py to gui/styles/dark_theme.qss
-            # __file__ is .../gui/core/main_window.py
-            # parent is .../gui/core
-            # parent.parent is .../gui
             style_path = Path(__file__).parent.parent / "styles" / "dark_theme.qss"
             if style_path.exists():
                 with open(style_path) as f:
@@ -74,69 +86,45 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         except ImportError:
             logger.exception("Failed to load stylesheet, using default Qt styling")
 
-        # Model configurations
-
-        # Create central tab widget
+    def _create_main_tabs(self) -> None:
         self.main_tab_widget = QtWidgets.QTabWidget()
         self.setCentralWidget(self.main_tab_widget)
 
-        # --- Tab 1: Golf Swing Analysis ---
         self.golf_analysis_widget = QtWidgets.QWidget()
         self.main_tab_widget.addTab(self.golf_analysis_widget, "Golf Swing Analysis")
 
+        self.grip_modelling_tab = GripModellingTab()
+        self.main_tab_widget.addTab(self.grip_modelling_tab, "Grip Modelling")
+
+        self.humanoid_config_tab = HumanoidConfigTab()
+        self.main_tab_widget.addTab(self.humanoid_config_tab, "Humanoid Config")
+
+    def _create_golf_analysis_layout(self) -> None:
         main_layout = QtWidgets.QHBoxLayout(self.golf_analysis_widget)
 
-        # Main horizontal splitter: simulation | controls/analysis
         main_splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
 
-        # Left: Simulation view
         self.sim_widget = MuJoCoSimWidget(width=900, height=700, fps=60)
         main_splitter.addWidget(self.sim_widget)
 
-        # Overlay widget for simulation controls (REC, PAUSE, etc.)
         self.overlay = OverlayWidget(self.sim_widget)
         self.overlay.rec_btn.clicked.connect(self._on_overlay_rec_toggled)
         self.overlay.pause_btn.clicked.connect(self._on_overlay_pause_clicked)
 
-        # Right: Tabbed interface for controls and analysis
         self.tab_widget = QtWidgets.QTabWidget()
         self.tab_widget.setMinimumWidth(400)
         main_splitter.addWidget(self.tab_widget)
 
-        # Set splitter proportions (70% simulation, 30% controls)
         main_splitter.setSizes([1100, 500])
-
         main_layout.addWidget(main_splitter)
 
-        # --- Tab 2: Grip Modelling ---
-        self.grip_modelling_tab = GripModellingTab()
-        self.main_tab_widget.addTab(self.grip_modelling_tab, "Grip Modelling")
-
-        # --- Tab 3: Humanoid Config (appearance, equipment, Docker sim) ---
-        self.humanoid_config_tab = HumanoidConfigTab()
-        self.main_tab_widget.addTab(self.humanoid_config_tab, "Humanoid Config")
-
-        # Create tabs
-        # Physics Configuration Tab
+    def _create_secondary_tabs(self) -> None:
         self.physics_tab = PhysicsTab(self.sim_widget, self)
         self.tab_widget.addTab(self.physics_tab, "Physics")
 
-        # Simulation Controls Tab
         self.controls_tab = ControlsTab(self.sim_widget, self)
         self.tab_widget.addTab(self.controls_tab, "Controls")
 
-        # Connect signals
-        self.physics_tab.model_changed.connect(self.controls_tab.on_model_loaded)
-        self.physics_tab.model_changed.connect(self.on_model_changed_signal)
-        self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
-
-        # Connect live analysis toggle
-        if hasattr(self.controls_tab, "chk_live_analysis"):
-            self.controls_tab.chk_live_analysis.toggled.connect(
-                self.on_live_analysis_toggled
-            )
-
-        # Visualization Tab
         self.visualization_tab = VisualizationTab(self.sim_widget, self)
         self.tab_widget.addTab(self.visualization_tab, "Visualization")
         self.analysis_tab = AnalysisTab(self.sim_widget, self)
@@ -144,9 +132,8 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self.plotting_tab = PlottingTab(self.sim_widget, self)
         self.tab_widget.addTab(self.plotting_tab, "Plotting")
 
-        # Live Analysis Tab
+    def _create_analysis_tabs(self) -> None:
         recorder = self.sim_widget.get_recorder()
-        # Ensure recorder has engine reference for joint names
         recorder.engine = self.sim_widget.engine
         self.live_plot = LivePlotWidget(recorder)
         self.tab_widget.addTab(self.live_plot, "Live Analysis")
@@ -154,36 +141,28 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self.manipulation_tab = ManipulationTab(self.sim_widget, self)
         self.tab_widget.addTab(self.manipulation_tab, "Interactive Pose")
 
-        # Manipulability & Force Tab
         self.manipulability_tab = ManipulabilityTab(self.sim_widget, self)
         self.tab_widget.addTab(self.manipulability_tab, "Manipulability")
 
-        # Connect model loaded signal to manipulability tab
+    def _connect_signals(self) -> None:
+        self.physics_tab.model_changed.connect(self.controls_tab.on_model_loaded)
+        self.physics_tab.model_changed.connect(self.on_model_changed_signal)
+        self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
+
+        if hasattr(self.controls_tab, "chk_live_analysis"):
+            self.controls_tab.chk_live_analysis.toggled.connect(
+                self.on_live_analysis_toggled
+            )
+
         self.physics_tab.model_changed.connect(
             lambda n, c: self.manipulability_tab.on_model_loaded()
         )
 
-        # Connect grip modelling tab to simulation widget
-        self.grip_modelling_tab.connect_sim_widget(self.sim_widget)
-
-        self.sim_widget.reset_state()
-
-        # Apply professional styling
-        self._apply_styling()
-
-        # Auto-load configuration if present (overrides defaults if config found)
-        self._load_launch_config()
-
-        # Create status bar
-        self._create_status_bar()
-
-        # Start status bar update timer
+    def _start_status_timer(self) -> None:
         self.status_timer = QtCore.QTimer(self)
         self.status_timer.timeout.connect(self._update_status_bar)
-        self.status_timer.start(200)  # Update every 200ms
+        self.status_timer.start(200)
 
-        # Connect live plot update to simulation timer
-        # This ensures the plot updates whenever the simulation steps/renders
         if hasattr(self.sim_widget, "timer"):
             self.sim_widget.timer.timeout.connect(self.live_plot.update_plot)
 

@@ -54,24 +54,25 @@ class ControlsTab(QtWidgets.QWidget):
 
     def _setup_ui(self) -> None:
         """Create the simulation controls interface."""
-        # Use simple vertical layout for the whole tab
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(8, 8, 8, 8)
 
-        # 1. Quick Start Help Panel (collapsible)
         self._create_help_panel(main_layout)
-
-        # 2. Quick Camera Access Buttons
         self._create_quick_camera_buttons(main_layout)
+        self._create_simulation_buttons(main_layout)
+        self._create_recording_info(main_layout)
+        self._create_dynamic_controls(main_layout)
+        self._create_kinematic_controls(main_layout)
 
-        # 3. Simulation control buttons
+        self.joint_widgets: dict[str, dict[str, QtWidgets.QWidget]] = {}
+
+    def _create_simulation_buttons(self, main_layout: QtWidgets.QVBoxLayout) -> None:
         buttons_group = QtWidgets.QGroupBox("Simulation Control")
         buttons_layout = QtWidgets.QGridLayout(buttons_group)
 
         style = self.style()
 
         self.play_pause_btn = QtWidgets.QPushButton("Pause")
-
         self.play_pause_btn.setCheckable(True)
         if style:
             self.play_pause_btn.setIcon(
@@ -115,13 +116,12 @@ class ControlsTab(QtWidgets.QWidget):
         buttons_layout.addWidget(self.record_btn, 1, 1)
         main_layout.addWidget(buttons_group)
 
-        # Recording info
+    def _create_recording_info(self, main_layout: QtWidgets.QVBoxLayout) -> None:
         self.recording_label = QtWidgets.QLabel("Not recording")
         self.recording_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.recording_label.setStyleSheet(Styles.RECORDING_IDLE)
         main_layout.addWidget(self.recording_label)
 
-        # Real-time analysis toggle
         self.chk_live_analysis = QtWidgets.QCheckBox(
             "Enable Live Analysis (CPU Intensive)"
         )
@@ -130,12 +130,11 @@ class ControlsTab(QtWidgets.QWidget):
         )
         main_layout.addWidget(self.chk_live_analysis)
 
-        # 4. Container for Dynamic Mode Controls (Actuators)
+    def _create_dynamic_controls(self, main_layout: QtWidgets.QVBoxLayout) -> None:
         self.dynamic_controls_widget = QtWidgets.QWidget()
         dynamic_layout = QtWidgets.QVBoxLayout(self.dynamic_controls_widget)
         dynamic_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Actuator filter
         filter_layout = QtWidgets.QHBoxLayout()
         filter_label = QtWidgets.QLabel("Filter actuators:")
         self.actuator_filter_input = QtWidgets.QLineEdit()
@@ -146,7 +145,6 @@ class ControlsTab(QtWidgets.QWidget):
         filter_layout.addWidget(self.actuator_filter_input)
         dynamic_layout.addLayout(filter_layout)
 
-        # Scroll area for actuators
         scroll = QtWidgets.QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(
@@ -160,7 +158,7 @@ class ControlsTab(QtWidgets.QWidget):
 
         main_layout.addWidget(self.dynamic_controls_widget)
 
-        # 5. Container for Kinematic Mode Controls (Joints)
+    def _create_kinematic_controls(self, main_layout: QtWidgets.QVBoxLayout) -> None:
         self.kinematic_controls_widget = QtWidgets.QWidget()
         self.kinematic_controls_widget.setVisible(False)
         kinematic_layout = QtWidgets.QVBoxLayout(self.kinematic_controls_widget)
@@ -174,9 +172,6 @@ class ControlsTab(QtWidgets.QWidget):
         kinematic_layout.addWidget(k_scroll)
 
         main_layout.addWidget(self.kinematic_controls_widget)
-
-        # Storage for joint widgets
-        self.joint_widgets: dict[str, dict[str, QtWidgets.QWidget]] = {}
 
     def _create_help_panel(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Create a collapsible help panel."""
@@ -781,6 +776,21 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
 
         self.control = self.control_system.get_actuator_control(actuator_index)
 
+        self._create_control_type_section(layout)
+        self._create_constant_damping_section(layout)
+        self._create_polynomial_section(layout)
+        self._create_sine_wave_section(layout)
+        self._create_step_function_section(layout)
+
+        button_box = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Close,
+        )
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+        self._update_visibility()
+
+    def _create_control_type_section(self, layout: QtWidgets.QVBoxLayout) -> None:
         self.control_type_combo = QtWidgets.QComboBox()
         self.control_type_combo.addItems(self.CONTROL_TYPE_LABELS)
         self.control_type_combo.setCurrentIndex(
@@ -790,6 +800,7 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
         layout.addWidget(QtWidgets.QLabel("<b>Control Type</b>"))
         layout.addWidget(self.control_type_combo)
 
+    def _create_constant_damping_section(self, layout: QtWidgets.QVBoxLayout) -> None:
         self.constant_input = QtWidgets.QDoubleSpinBox()
         self.constant_input.setRange(-1000.0, 1000.0)
         self.constant_input.setDecimals(3)
@@ -809,6 +820,7 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
         const_form.addRow("Damping:", self.damping_input)
         layout.addLayout(const_form)
 
+    def _create_polynomial_section(self, layout: QtWidgets.QVBoxLayout) -> None:
         self.poly_widget = QtWidgets.QGroupBox("Polynomial Coefficients")
         poly_layout = QtWidgets.QGridLayout(self.poly_widget)
         coeffs = self.control.get_polynomial_coeffs()
@@ -827,14 +839,14 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
             poly_layout.addWidget(QtWidgets.QLabel(f"c{idx}:"), row, col)
             poly_layout.addWidget(spin, row, col + 1)
 
-        # Visual Editor Button
         visual_btn = QtWidgets.QPushButton("📊 Visual Editor")
         visual_btn.setToolTip("Draw and fit polynomial curve visually")
         visual_btn.clicked.connect(self._open_visual_editor)
-        poly_layout.addWidget(visual_btn, 4, 0, 1, 4)  # Span all columns at bottom
+        poly_layout.addWidget(visual_btn, 4, 0, 1, 4)
 
         layout.addWidget(self.poly_widget)
 
+    def _create_sine_wave_section(self, layout: QtWidgets.QVBoxLayout) -> None:
         self.sine_widget = QtWidgets.QGroupBox("Sine Wave Parameters")
         sine_form = QtWidgets.QFormLayout(self.sine_widget)
 
@@ -868,6 +880,7 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
         sine_form.addRow("Phase:", self.sine_phase_spin)
         layout.addWidget(self.sine_widget)
 
+    def _create_step_function_section(self, layout: QtWidgets.QVBoxLayout) -> None:
         self.step_widget = QtWidgets.QGroupBox("Step Function Parameters")
         step_form = QtWidgets.QFormLayout(self.step_widget)
 
@@ -891,14 +904,6 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
         )
         step_form.addRow("Step Value:", self.step_value_spin)
         layout.addWidget(self.step_widget)
-
-        button_box = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.StandardButton.Close,
-        )
-        button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box)
-
-        self._update_visibility()
 
     def _type_to_index(self, ctype: ControlType) -> int:
         mapping = {

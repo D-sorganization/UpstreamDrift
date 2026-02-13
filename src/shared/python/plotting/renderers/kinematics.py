@@ -277,24 +277,8 @@ class KinematicsRenderer(BaseRenderer):
             )
             return
 
-        def get_data(dtype: str, idx: int) -> np.ndarray | None:
-            if dtype == "position":
-                _, d = self.data.get_series("joint_positions")
-            elif dtype == "velocity":
-                _, d = self.data.get_series("joint_velocities")
-            elif dtype == "acceleration":
-                _, d = self.data.get_series("joint_accelerations")
-            elif dtype == "torque":
-                _, d = self.data.get_series("joint_torques")
-            else:
-                return None
-            d = np.asarray(d)
-            if d.ndim > 1 and idx < d.shape[1]:
-                return d[:, idx]
-            return None
-
         cond_type, cond_idx, cond_val = section_condition
-        cond_data = get_data(cond_type, cond_idx)
+        cond_data = self._get_poincare_data(cond_type, cond_idx)
         times, _ = self.data.get_series("joint_positions")
 
         if cond_data is None or len(cond_data) < 2:
@@ -308,37 +292,83 @@ class KinematicsRenderer(BaseRenderer):
             )
             return
 
-        diff = cond_data - cond_val
-        crossings = []
-
-        for i in range(len(diff) - 1):
-            if diff[i] * diff[i + 1] <= 0:
-                if diff[i] < diff[i + 1] and direction in ["positive", "both"]:
-                    crossings.append(i)
-                elif diff[i] > diff[i + 1] and direction in ["negative", "both"]:
-                    crossings.append(i)
+        crossings = self._find_section_crossings(cond_data, cond_val, direction)
 
         if not crossings:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "No section crossings found", ha="center", va="center")
             return
 
+        points_arr, point_times = self._interpolate_crossings(
+            crossings, cond_data, cond_val, times, dimensions
+        )
+
+        self._render_poincare_3d(
+            fig,
+            points_arr,
+            point_times,
+            dimensions,
+            cond_type,
+            cond_idx,
+            cond_val,
+            title,
+        )
+
+    def _get_poincare_data(self, dtype: str, idx: int) -> np.ndarray | None:
+        """Retrieve a single data column for Poincare section computation."""
+        series_map = {
+            "position": "joint_positions",
+            "velocity": "joint_velocities",
+            "acceleration": "joint_accelerations",
+            "torque": "joint_torques",
+        }
+        key = series_map.get(dtype)
+        if key is None:
+            return None
+        _, d = self.data.get_series(key)
+        d = np.asarray(d)
+        if d.ndim > 1 and idx < d.shape[1]:
+            return d[:, idx]
+        return None
+
+    @staticmethod
+    def _find_section_crossings(
+        cond_data: np.ndarray, cond_val: float, direction: str
+    ) -> list[int]:
+        """Find zero-crossing indices in (cond_data - cond_val)."""
+        diff = cond_data - cond_val
+        crossings = []
+        for i in range(len(diff) - 1):
+            if diff[i] * diff[i + 1] <= 0:
+                if diff[i] < diff[i + 1] and direction in ["positive", "both"]:
+                    crossings.append(i)
+                elif diff[i] > diff[i + 1] and direction in ["negative", "both"]:
+                    crossings.append(i)
+        return crossings
+
+    def _interpolate_crossings(
+        self,
+        crossings: list[int],
+        cond_data: np.ndarray,
+        cond_val: float,
+        times: np.ndarray,
+        dimensions: list[tuple[str, int]],
+    ) -> tuple[np.ndarray, list[float]]:
+        """Interpolate crossing points in the requested dimensions."""
+        diff = cond_data - cond_val
         points = []
-        point_times = []
+        point_times: list[float] = []
 
         for i in crossings:
             denom = diff[i + 1] - diff[i]
-            if abs(denom) < 1e-9:
-                alpha = 0.5
-            else:
-                alpha = -diff[i] / denom
+            alpha = 0.5 if abs(denom) < 1e-9 else -diff[i] / denom
 
             t_cross = times[i] + alpha * (times[i + 1] - times[i])
             point_times.append(t_cross)
 
             pt_coords = []
             for dim_type, dim_idx in dimensions:
-                data = get_data(dim_type, dim_idx)
+                data = self._get_poincare_data(dim_type, dim_idx)
                 if data is None:
                     pt_coords.append(0.0)
                 else:
@@ -348,8 +378,20 @@ class KinematicsRenderer(BaseRenderer):
                     pt_coords.append(val)
             points.append(pt_coords)
 
-        points_arr = np.array(points)
+        return np.array(points), point_times
 
+    def _render_poincare_3d(
+        self,
+        fig: Figure,
+        points_arr: np.ndarray,
+        point_times: list[float],
+        dimensions: list[tuple[str, int]],
+        cond_type: str,
+        cond_idx: int,
+        cond_val: float,
+        title: str | None,
+    ) -> None:
+        """Render the 3D scatter plot for the Poincare section."""
         ax = fig.add_subplot(111, projection="3d")
 
         sc = ax.scatter(
@@ -368,7 +410,11 @@ class KinematicsRenderer(BaseRenderer):
             unit = (
                 "deg"
                 if dt == "position"
-                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
+                else "deg/s"
+                if dt == "velocity"
+                else "Nm"
+                if dt == "torque"
+                else ""
             )
             labels.append(f"{name} {dt[:3]} ({unit})")
 
