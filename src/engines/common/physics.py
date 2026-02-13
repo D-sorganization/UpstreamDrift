@@ -22,6 +22,11 @@ import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
 
+# ─── Physical Constants ────────────────────────────────────────────────
+STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
+GRAVITY_APPROX: float = 9.81  # m/s² (common approximation)
+GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY_APPROX])
+
 
 @dataclass(frozen=True)
 class AirProperties:
@@ -53,7 +58,7 @@ class AirProperties:
         T0 = 288.15  # K
         P0 = 101325.0  # Pa
         L = 0.0065  # Temperature lapse rate [K/m]
-        g = 9.80665  # m/s²
+        g = STANDARD_GRAVITY
         M = 0.0289644  # Molar mass of air [kg/mol]
         R = 8.31447  # Universal gas constant [J/(mol·K)]
 
@@ -359,7 +364,7 @@ class BallPhysics:
         """
         self.ball = ball or BallProperties()
         self.aero = AerodynamicsCalculator(self.ball, air)
-        self.gravity = gravity if gravity is not None else np.array([0.0, 0.0, -9.81])
+        self.gravity = gravity if gravity is not None else GRAVITY_VECTOR.copy()
 
     @precondition(
         lambda self, velocity, spin: velocity.shape == (3,),

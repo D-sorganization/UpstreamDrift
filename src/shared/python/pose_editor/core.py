@@ -239,7 +239,7 @@ class BasePoseEditor(ABC):
         """Initialize the pose editor."""
         self._state = PoseEditorState()
         self._joint_info: list[JointInfo] = []
-        self._original_gravity: float = 9.81
+        self._original_gravity: float = 9.81  # m/s² (GRAVITY_APPROX)
         self._callbacks: dict[str, list[Any]] = {
             "pose_changed": [],
             "gravity_changed": [],

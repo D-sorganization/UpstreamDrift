@@ -512,8 +512,10 @@ class CompressibleTurfModel:
         material = self.terrain.get_material(x, y)
         terrain_type = self.terrain.get_terrain_type(x, y)
 
-        # Ball weight creates compression
-        ball_weight = 0.04593 * 9.81  # Golf ball weight in N
+        # Ball weight creates compression (mass * g)
+        ball_weight = (
+            0.04593 * 9.81
+        )  # Golf ball weight in N (BallProperties.mass * GRAVITY_APPROX)
 
         # Effective sitting depth based on compression
         max_compression = material.get_max_compression_depth()

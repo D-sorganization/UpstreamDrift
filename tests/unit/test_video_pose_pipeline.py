@@ -13,34 +13,34 @@ from src.shared.python.engine_core.engine_availability import (
 # Skip entire module if MediaPipe is not available
 pytestmark = skip_if_unavailable("mediapipe")
 
-# Mock cv2 before importing video_pose_pipeline
-sys.modules["cv2"] = MagicMock()
-
-# Mock shared.python.pose_estimation.mediapipe_estimator before import
-# Both prefixed and unprefixed paths must be mocked because the source uses
-# bare imports (without 'src.' prefix) in some modules.
+# Create mocks for modules that need to be present before import.
+# Use patch.dict to avoid polluting sys.modules for other test files.
+_mock_cv2 = MagicMock()
 mock_mp_module = MagicMock()
-sys.modules["src.shared.python.pose_estimation.mediapipe_estimator"] = mock_mp_module
-sys.modules["shared.python.pose_estimation.mediapipe_estimator"] = mock_mp_module
-
 mock_op_module = MagicMock()
-sys.modules["src.shared.python.pose_estimation.openpose_estimator"] = mock_op_module
-sys.modules["shared.python.pose_estimation.openpose_estimator"] = mock_op_module
 
+_MOCKED_MODULES = {
+    "cv2": _mock_cv2,
+    "src.shared.python.pose_estimation.mediapipe_estimator": mock_mp_module,
+    "shared.python.pose_estimation.mediapipe_estimator": mock_mp_module,
+    "src.shared.python.pose_estimation.openpose_estimator": mock_op_module,
+    "shared.python.pose_estimation.openpose_estimator": mock_op_module,
+}
 
-from src.shared.python.gui_pkg.video_pose_pipeline import (  # noqa: E402
-    VideoPosePipeline,
-    VideoProcessingConfig,
-    VideoProcessingResult,
-)
-from src.shared.python.pose_estimation.interface import (  # noqa: E402
-    PoseEstimationResult,
-)
+with patch.dict(sys.modules, _MOCKED_MODULES):
+    from src.shared.python.gui_pkg.video_pose_pipeline import (  # noqa: E402
+        VideoPosePipeline,
+        VideoProcessingConfig,
+        VideoProcessingResult,
+    )
+    from src.shared.python.pose_estimation.interface import (  # noqa: E402
+        PoseEstimationResult,
+    )
 
 
 @pytest.fixture
 def mock_cv2():
-    return sys.modules["cv2"]
+    return _mock_cv2
 
 
 @pytest.fixture

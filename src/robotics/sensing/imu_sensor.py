@@ -50,7 +50,7 @@ class IMUSensorConfig:
     accel_bias_drift: float = 0.0001
     gyro_bias_drift: float = 0.00001
     gravity: NDArray[np.float64] = field(
-        default_factory=lambda: np.array([0.0, 0.0, -9.81])
+        default_factory=lambda: np.array([0.0, 0.0, -9.81])  # GRAVITY_APPROX
     )
     cutoff_frequency: float = 200.0
     sample_rate: float = 1000.0

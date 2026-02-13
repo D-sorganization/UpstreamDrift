@@ -434,8 +434,8 @@ class Cable(DeformableObject):
         internal_forces = self.compute_internal_forces()
         total_forces = internal_forces + self._external_forces
 
-        # Gravity
-        gravity = np.array([0, 0, -9.81])
+        # Gravity (standard approximation)
+        gravity = np.array([0.0, 0.0, -9.81])
         node_mass = self._material.density * self._total_rest_length / self.n_nodes
         total_forces += node_mass * gravity
 
@@ -606,8 +606,8 @@ class Cloth(DeformableObject):
         internal_forces = self.compute_internal_forces()
         total_forces = internal_forces + self._external_forces
 
-        # Gravity
-        gravity = np.array([0, 0, -9.81])
+        # Gravity (standard approximation)
+        gravity = np.array([0.0, 0.0, -9.81])
         node_mass = self._material.density * 0.01  # Assume thin cloth
         total_forces += node_mass * gravity
 

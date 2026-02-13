@@ -40,23 +40,18 @@ class MockRecorder(RecorderInterface):
 
     def start(self) -> None:
         """Start recording."""
-        pass
 
     def stop(self) -> None:
         """Stop recording."""
-        pass
 
     def reset(self) -> None:
         """Reset recorder state."""
-        pass
 
     def record_step(self) -> None:
         """Record a single step."""
-        pass
 
     def compute_analysis_post_hoc(self) -> None:
         """Compute post-hoc analysis."""
-        pass
 
     def get_counterfactual_series(self, key) -> tuple:
         """Return empty counterfactual series."""
