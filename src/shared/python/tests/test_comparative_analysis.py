@@ -13,12 +13,20 @@ from src.shared.python.validation_pkg.comparative_analysis import (
 class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
-    def __init__(self, data_dict) -> None:
+    def __init__(self, data_dict) -> None:  # noqa: ANN001
         self.data = data_dict
+        self.engine = None
 
     def get_time_series(self, field_name: str) -> tuple:
         """Return time series data for the given field."""
         return self.data.get(field_name, (np.array([]), np.array([])))
+
+    def get_induced_acceleration_series(self, source_name: str | int) -> tuple:
+        """Return empty induced acceleration series."""
+        return np.array([]), np.array([])
+
+    def set_analysis_config(self, config: dict) -> None:  # noqa: ANN001
+        """Set analysis config (no-op for mock)."""
 
 
 @pytest.fixture

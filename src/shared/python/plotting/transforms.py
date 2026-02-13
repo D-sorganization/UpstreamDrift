@@ -134,4 +134,4 @@ class DataManager:
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual series (uncached)."""
-        return self.recorder.get_counterfactual_series(cf_name)
+        return self.recorder.get_counterfactual_series(cf_name)  # type: ignore[attr-defined]
