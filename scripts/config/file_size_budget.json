@@ -1,0 +1,65 @@
+{
+  "max_lines": 1200,
+  "exceptions": [
+    {
+      "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
+      "owner": "@engine-platform",
+      "reason": "Phase-1 GUI decomposition pending",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
+      "owner": "@engine-platform",
+      "reason": "Phase-1 GUI decomposition pending",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/head_models.py",
+      "owner": "@mujoco-core",
+      "reason": "Domain split queued for phase-1",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py",
+      "owner": "@simscape-gui",
+      "reason": "Coordinator/service extraction pending",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
+      "owner": "@mujoco-core",
+      "reason": "Launcher orchestration split pending",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
+      "owner": "@simscape-gui",
+      "reason": "Legacy plotting module staged for decomposition",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/model_generation/editor/frankenstein_editor.py",
+      "owner": "@model-gen",
+      "reason": "Editor command extraction pending",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/linkage_mechanisms/__init__.py",
+      "owner": "@mujoco-core",
+      "reason": "Module breakup planned",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py",
+      "owner": "@simscape-gui",
+      "reason": "Visualization adapter extraction pending",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py",
+      "owner": "@mujoco-core",
+      "reason": "Docker GUI split tracked in phase-1",
+      "expires_on": "2026-12-31"
+    }
+  ]
+}
