@@ -17,6 +17,7 @@ from src.shared.python.analysis.dataclasses import (
     JerkMetrics,
     SwingProfileMetrics,
 )
+from src.shared.python.core.contracts import precondition
 
 
 class ReportingMixin:
@@ -162,6 +163,10 @@ class ReportingMixin:
 
         return report
 
+    @precondition(
+        lambda self, data, window="hann": len(data) > 0,
+        "Input data must be non-empty",
+    )
     def compute_frequency_analysis(
         self,
         data: np.ndarray,
@@ -309,6 +314,10 @@ class ReportingMixin:
             power_score=float(power_score),
         )
 
+    @precondition(
+        lambda self, joint_idx: joint_idx >= 0,
+        "Joint index must be non-negative",
+    )
     def compute_jerk_metrics(self, joint_idx: int) -> JerkMetrics | None:
         """Compute jerk metrics for a joint.
 
@@ -472,6 +481,11 @@ class ReportingMixin:
                 ],
             )
 
+    @precondition(
+        lambda self, filename, report=None: isinstance(filename, str)
+        and len(filename) > 0,
+        "Filename must be a non-empty string",
+    )
     def export_statistics_csv(
         self,
         filename: str,

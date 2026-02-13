@@ -139,6 +139,7 @@ class EquilibriumSolver:
 
         # Define residual function for newton()
         def residual_func(l_CE: float) -> float:
+            """Compute the muscle-tendon equilibrium residual for a given fiber length."""
             return self._equilibrium_residual(l_CE, l_MT, activation, v_CE)
 
         try:

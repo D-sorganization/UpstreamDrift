@@ -207,9 +207,11 @@ class ScipyQPSolver(QPSolver):
         n = problem.n_vars
 
         def objective(x: NDArray[np.float64]) -> float:
+            """Evaluate the quadratic objective value."""
             return float(0.5 * x @ problem.H @ x + problem.g @ x)
 
         def gradient(x: NDArray[np.float64]) -> NDArray[np.float64]:
+            """Compute the gradient of the quadratic objective."""
             return problem.H @ x + problem.g
 
         x0 = np.zeros(n)

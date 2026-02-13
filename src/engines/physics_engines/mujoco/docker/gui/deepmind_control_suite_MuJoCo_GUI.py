@@ -979,6 +979,51 @@ class GolfSimulationGUI:
             # self.process.kill()
         self.stop_event.set()
 
+    @staticmethod
+    def _generate_update_dockerfile() -> str:
+        """Generate a minimal Dockerfile to add missing dependencies."""
+        return (
+            "# Add missing dependencies to existing robotics_env\n"
+            "FROM robotics_env:latest\n\n"
+            "# Install missing dependencies in the existing virtual "
+            "environment\n"
+            'RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" '
+            '"PyQt6>=6.6.0"\n\n'
+            "# Update PATH to use robotics_env by default\n"
+            'ENV PATH="/opt/mujoco-env/bin:$PATH"\n'
+            'ENV VIRTUAL_ENV="/opt/mujoco-env"\n'
+        )
+
+    def _run_docker_build(self, temp_dir: str, cmd: list[str]) -> int:
+        """Execute the docker build command and return the exit code."""
+        if self.is_windows:
+            create_new_console = 0x00000010
+            result = subprocess.run(
+                ["cmd", "/k", *cmd],
+                cwd=temp_dir,
+                creationflags=create_new_console,  # type: ignore[call-arg]
+            )
+        else:
+            result = subprocess.run(cmd, cwd=temp_dir, check=True)
+        return result.returncode
+
+    def _verify_docker_update(self) -> None:
+        """Run a quick container test to verify defusedxml is available."""
+        test_cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "robotics_env",
+            "python",
+            "-c",
+            "import defusedxml; print('✅ defusedxml confirmed working')",
+        ]
+        test_result = subprocess.run(test_cmd, capture_output=True, text=True)
+        if test_result.returncode == 0:
+            self.root.after(0, self.log, test_result.stdout.strip())
+        else:
+            self.root.after(0, self.log, "⚠️ Update completed but test failed")
+
     def rebuild_docker(self) -> None:
         """Add missing dependencies to the existing robotics_env Docker image."""
         from tkinter import messagebox
@@ -1000,19 +1045,9 @@ class GolfSimulationGUI:
         self.btn_rebuild.config(state=tk.DISABLED)
 
         def run_update() -> None:
+            """Rebuild the Docker image with missing dependencies."""
             try:
-                # Create a minimal Dockerfile to add defusedxml
-                dockerfile_content = (
-                    "# Add missing dependencies to existing robotics_env\n"
-                    "FROM robotics_env:latest\n\n"
-                    "# Install missing dependencies in the existing virtual "
-                    "environment\n"
-                    'RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" '
-                    '"PyQt6>=6.6.0"\n\n'
-                    "# Update PATH to use robotics_env by default\n"
-                    'ENV PATH="/opt/mujoco-env/bin:$PATH"\n'
-                    'ENV VIRTUAL_ENV="/opt/mujoco-env"\n'
-                )
+                dockerfile_content = self._generate_update_dockerfile()
 
                 with tempfile.TemporaryDirectory() as temp_dir:
                     dockerfile_path = os.path.join(temp_dir, "Dockerfile")
@@ -1020,23 +1055,12 @@ class GolfSimulationGUI:
                         f.write(dockerfile_content)
 
                     cmd = ["docker", "build", "-t", "robotics_env", "."]
-
                     self.root.after(0, self.log, f"Running: {' '.join(cmd)}")
                     self.root.after(0, self.log, "Adding defusedxml to robotics_env...")
 
-                    # Run build process
-                    if self.is_windows:
-                        # Use CREATE_NEW_CONSOLE to show build progress
-                        create_new_console = 0x00000010
-                        result = subprocess.run(
-                            ["cmd", "/k", *cmd],
-                            cwd=temp_dir,
-                            creationflags=create_new_console,  # type: ignore[call-arg]
-                        )
-                    else:
-                        result = subprocess.run(cmd, cwd=temp_dir, check=True)
+                    returncode = self._run_docker_build(temp_dir, cmd)
 
-                    if result.returncode == 0:
+                    if returncode == 0:
                         self.root.after(
                             0, self.log, "✅ robotics_env updated successfully!"
                         )
@@ -1045,32 +1069,12 @@ class GolfSimulationGUI:
                             self.log,
                             "defusedxml and other dependencies are now available.",
                         )
-
-                        # Test the update
-                        test_cmd = [
-                            "docker",
-                            "run",
-                            "--rm",
-                            "robotics_env",
-                            "python",
-                            "-c",
-                            "import defusedxml; "
-                            "print('✅ defusedxml confirmed working')",
-                        ]
-                        test_result = subprocess.run(
-                            test_cmd, capture_output=True, text=True
-                        )
-                        if test_result.returncode == 0:
-                            self.root.after(0, self.log, test_result.stdout.strip())
-                        else:
-                            self.root.after(
-                                0, self.log, "⚠️ Update completed but test failed"
-                            )
+                        self._verify_docker_update()
                     else:
                         self.root.after(
                             0,
                             self.log,
-                            f"❌ Update failed with code {result.returncode}",
+                            f"❌ Update failed with code {returncode}",
                         )
 
             except ImportError as e:

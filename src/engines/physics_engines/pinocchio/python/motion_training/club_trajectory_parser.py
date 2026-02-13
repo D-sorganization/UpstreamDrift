@@ -279,11 +279,13 @@ class ClubTrajectoryParser:
         if hasattr(row, "iloc"):
 
             def get(i):
+                """Return the value at index i from a pandas row."""
                 return row.iloc[i] if i < len(row) else None
 
         else:
 
             def get(i):
+                """Return the value at index i from a list row."""
                 return row[i] if i < len(row) else None
 
         return get

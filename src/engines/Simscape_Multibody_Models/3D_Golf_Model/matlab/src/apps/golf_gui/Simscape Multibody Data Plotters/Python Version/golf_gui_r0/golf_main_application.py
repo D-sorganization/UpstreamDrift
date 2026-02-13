@@ -714,6 +714,7 @@ def main():
 
     # Setup exception handling
     def handle_exception(exc_type, exc_value, exc_traceback):
+        """Log uncaught exceptions and show an error dialog."""
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return

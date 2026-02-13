@@ -239,6 +239,7 @@ class QtWorker(BackgroundWorker):
                     self._cancelled = False
 
                 def run(self) -> None:
+                    """Execute the target function in the worker thread."""
                     try:
                         # Check for cancellation before starting
                         if self._cancelled or self.isInterruptionRequested():
@@ -252,6 +253,7 @@ class QtWorker(BackgroundWorker):
                             self.error_signal.emit(e)
 
                 def cancel(self) -> None:
+                    """Request cancellation of the worker thread."""
                     self._cancelled = True
                     self.requestInterruption()
 

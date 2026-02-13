@@ -308,6 +308,7 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
         }
 
         def classify(value: float, range_info: dict[str, Any]) -> str:
+            """Classify a torque value relative to its typical range."""
             if value < range_info["low"]:
                 return "Below typical"
             elif value <= range_info["high"]:

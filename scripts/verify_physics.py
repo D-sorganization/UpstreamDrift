@@ -28,6 +28,7 @@ class _PytestPlugin:
         self.results: list[dict[str, Any]] = []
 
     def pytest_runtest_logreport(self, report: Any) -> None:
+        """Collect test results from each pytest report hook invocation."""
         if report.when == "call":
             self.results.append(
                 {

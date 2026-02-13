@@ -626,8 +626,11 @@ def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F],
     skip_reason = reason or f"{engine_name} not installed"
 
     def decorator(func: F) -> F:
+        """Wrap the function to skip or raise when the engine is unavailable."""
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Check engine availability and skip or raise before execution."""
             if not is_engine_available(engine_name):
                 # Try to use pytest.skip if available (for test functions)
                 try:

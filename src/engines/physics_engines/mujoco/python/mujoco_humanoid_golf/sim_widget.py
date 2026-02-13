@@ -44,6 +44,7 @@ class ModelLoaderThread(QtCore.QThread):
         self.is_file = is_file
 
     def run(self) -> None:
+        """Load the MuJoCo model in a background thread."""
         try:
             if self.is_file:
                 model = mujoco.MjModel.from_xml_path(self.xml_content)
@@ -184,18 +185,22 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     @property
     def model(self) -> mujoco.MjModel | None:
+        """Return the current MuJoCo model."""
         return self.engine.model
 
     @model.setter
     def model(self, value: mujoco.MjModel | None) -> None:
+        """Set the MuJoCo model on the physics engine."""
         self.engine.model = value
 
     @property
     def data(self) -> mujoco.MjData | None:
+        """Return the current MuJoCo simulation data."""
         return self.engine.data
 
     @data.setter
     def data(self, value: mujoco.MjData | None) -> None:
+        """Set the MuJoCo simulation data on the physics engine."""
         self.engine.data = value
 
     # -------- MuJoCo setup --------
@@ -467,6 +472,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     # -------- Control interface --------
 
     def set_joint_torque(self, index: int, torque: float) -> None:
+        """Set a constant torque value for a single actuator."""
         if self.control_system is not None:
             self.control_system.set_constant_value(index, torque)
             self.control_system.set_control_type(index, ControlType.CONSTANT)
@@ -475,13 +481,16 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 self.control_vector[index] = torque
 
     def get_control_system(self) -> ControlSystem | None:
+        """Return the active control system, or None."""
         return self.control_system
 
     def reset_control_system(self) -> None:
+        """Reset all actuator control values to zero."""
         if self.control_system is not None:
             self.control_system.reset()
 
     def verify_control_system(self) -> bool:
+        """Check that the control system matches the model actuator count."""
         if self.model is None:
             return False
         if self.control_system is None:
@@ -489,6 +498,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         return bool(self.control_system.num_actuators == self.model.nu)
 
     def set_running(self, running: bool) -> None:
+        """Enable or disable the simulation stepping loop."""
         self.running = running
 
     def set_camera(self, camera_name: str) -> None:
@@ -513,6 +523,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def set_torque_visualization(
         self, enabled: bool, scale: float | None = None
     ) -> None:
+        """Toggle torque vector overlay and optionally set scale."""
         self.show_torque_vectors = enabled
         if scale is not None:
             self.torque_scale = scale
@@ -520,6 +531,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def set_force_visualization(
         self, enabled: bool, scale: float | None = None
     ) -> None:
+        """Toggle force vector overlay and optionally set scale."""
         self.show_force_vectors = enabled
         if scale is not None:
             self.force_scale = scale
@@ -527,6 +539,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def set_ellipsoid_visualization(
         self, mobility_enabled: bool, force_enabled: bool
     ) -> None:
+        """Toggle mobility and force ellipsoid overlays."""
         self.show_mobility_ellipsoid = mobility_enabled
         self.show_force_ellipsoid = force_enabled
 
@@ -543,9 +556,11 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             self.show_reference_trajectory = show_reference
 
     def set_reference_trajectory(self, trajectory: np.ndarray | None) -> None:
+        """Set or clear the desired reference trajectory overlay."""
         self.reference_trajectory = trajectory
 
     def reset_swing_plane(self) -> None:
+        """Clear accumulated swing plane trajectory data."""
         self.swing_plane_visualizer.reset()
 
     def _record_club_trajectory_point(self) -> None:
@@ -658,23 +673,28 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         cf_enabled: bool,
         cf_type: str,
     ) -> None:
+        """Configure induced acceleration and counterfactual overlays."""
         self.show_induced_vectors = induced_enabled
         self.induced_vector_source = induced_source
         self.show_cf_vectors = cf_enabled
         self.cf_vector_type = cf_type
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
+        """Toggle native MuJoCo contact force rendering."""
         self.show_contact_forces = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled
 
     def set_isolate_forces_visualization(self, enabled: bool) -> None:
+        """Restrict force overlays to the currently selected body."""
         self.isolate_forces_visualization = enabled
 
     def get_recorder(self) -> SwingRecorder:
+        """Return the active swing data recorder."""
         return self.recorder
 
     def get_analyzer(self) -> BiomechanicalAnalyzer | None:
+        """Return the biomechanical analyzer, or None."""
         return self.analyzer
 
     def get_jacobian_and_rank(self) -> dict[str, Any]:
@@ -726,6 +746,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         }
 
     def set_body_color(self, body_name: str, rgba: list[float]) -> None:
+        """Set the RGBA color of all geoms belonging to a body."""
         if self.model is None:
             return
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
@@ -740,9 +761,11 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self._render_once()
 
     def reset_body_color(self, body_name: str) -> None:
+        """Reset a body's geom colors to default gray."""
         self.set_body_color(body_name, [0.5, 0.5, 0.5, 1.0])
 
     def compute_ellipsoids(self) -> None:
+        """Compute and render manipulability ellipsoids in Meshcat."""
         if (
             not self.show_mobility_ellipsoid and not self.show_force_ellipsoid
         ) or self.meshcat_adapter is None:
@@ -908,9 +931,11 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.manipulator.enforce_constraints()
 
     def generate_report(self) -> Any | None:
+        """Generate a telemetry report from recorded simulation data."""
         if self.telemetry is None:
             return None
         return self.telemetry.generate_report()
 
     def get_manipulator(self) -> InteractiveManipulator | None:
+        """Return the interactive body manipulator, or None."""
         return self.manipulator

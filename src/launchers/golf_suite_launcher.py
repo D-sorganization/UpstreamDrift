@@ -348,9 +348,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         try:
             # Launch detached process
             # Use same python interpreter
-            process = subprocess.Popen(
-                [sys.executable, str(path)], cwd=str(cwd)
-            )  # noqa: S603
+            process = subprocess.Popen([sys.executable, str(path)], cwd=str(cwd))  # noqa: S603
             self.log_message(f"{name} launched successfully (PID: {process.pid})")
             self.status.setText(f"{name} Launched")
         except (OSError, subprocess.SubprocessError) as e:
@@ -398,6 +396,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
 
 def main() -> None:
+    """Launch the Golf Suite GUI application."""
     if not PYQT6_AVAILABLE:
         # If logger is configured (basic config above), this goes to stderr/stdout
         logger.error(

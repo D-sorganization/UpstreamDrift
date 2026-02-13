@@ -283,7 +283,10 @@ def compare_all_models_to_dataset(
         def make_model_func(
             m: "BallFlightModel",
         ) -> Callable[[float, float, float], float]:
+            """Create a closure that simulates carry distance for a given model."""
+
             def model_func(speed: float, angle: float, spin: float) -> float:
+                """Simulate a shot and return carry distance in yards."""
                 launch = UnifiedLaunchConditions.from_imperial(
                     ball_speed_mph=speed,
                     launch_angle_deg=angle,

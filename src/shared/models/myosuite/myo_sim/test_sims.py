@@ -77,6 +77,7 @@ class TestSims(unittest.TestCase):
         return model
 
     def test_sims(self):
+        """Load and verify each registered MuJoCo model."""
         for model_path in model_paths:
             logger.info(f"Testing: {model_path}")
             self.get_sim(model_path)

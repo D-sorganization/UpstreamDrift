@@ -6,6 +6,7 @@ across all physics engines (Drake, Pinocchio, MuJoCo).
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -371,7 +372,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         self.lbl_opacity.setText(f"{self.slider_opacity.value()}%")
 
 
-class ClubTargetOverlay:
+class ClubTargetOverlay(ABC):
     """Manages target trajectory overlay for visualization.
 
     This is a base class that can be extended for different visualization backends
@@ -461,6 +462,7 @@ class ClubTargetOverlay:
 
         return markers
 
+    @abstractmethod
     def render(self, renderer: Any) -> None:
         """Render the overlay.
 
@@ -469,8 +471,4 @@ class ClubTargetOverlay:
         Args:
             renderer: The visualization renderer (MuJoCo, Meshcat, etc.)
         """
-        if not self._enabled or self._player is None:
-            return
-
-        # Subclasses should implement specific rendering logic
-        raise NotImplementedError("Subclasses must implement render()")
+        ...

@@ -153,6 +153,7 @@ class DrakeRecorder:
         self.analysis_config: dict[str, Any] = {}
 
     def reset(self) -> None:
+        """Clear all recorded data and reset state."""
         self.times: list[float] = []
         self.q_history: list[np.ndarray] = []
         self.v_history: list[np.ndarray] = []
@@ -167,10 +168,12 @@ class DrakeRecorder:
         self.is_recording = False
 
     def start(self) -> None:
+        """Reset data and begin recording."""
         self.reset()
         self.is_recording = True
 
     def stop(self) -> None:
+        """Stop recording simulation data."""
         self.is_recording = False
 
     def record(
@@ -182,6 +185,7 @@ class DrakeRecorder:
         com_pos: np.ndarray | None = None,
         angular_momentum: np.ndarray | None = None,
     ) -> None:
+        """Record a single simulation frame with state and optional data."""
         if not self.is_recording:
             return
         self.times.append(t)
@@ -289,6 +293,7 @@ class DrakeRecorder:
         data: dict[str, Any] = {"times": np.array(self.times)}
 
         def add_series(target: dict, name: str, arr_list: list) -> None:
+            """Append a time-aligned array to the target dictionary."""
             if not arr_list:
                 return
             arr = np.array(arr_list)

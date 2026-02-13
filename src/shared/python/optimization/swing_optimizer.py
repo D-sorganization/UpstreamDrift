@@ -113,6 +113,7 @@ class ClubModel:
 
     @property
     def total_mass(self) -> float:
+        """Return the combined mass of head, shaft, and grip."""
         return self.head_mass + self.shaft_mass + self.grip_mass
 
     @property
@@ -384,11 +385,13 @@ class SwingOptimizer(ContractChecker):
         constraints = self._build_constraints()
 
         def objective(x: np.ndarray) -> float:
+            """Evaluate the optimization objective for a given parameter vector."""
             return self._compute_objective(x)
 
         iteration_count = [0]
 
         def scipy_callback(xk: np.ndarray) -> None:
+            """Increment iteration count and invoke the user callback."""
             iteration_count[0] += 1
             if callback:
                 obj_val = objective(xk)

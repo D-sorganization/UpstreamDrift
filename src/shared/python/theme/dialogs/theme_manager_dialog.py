@@ -61,6 +61,7 @@ class ThemeListItem(QListWidgetItem):
         self.setToolTip(tooltip)
 
     def set_current(self, is_current: bool) -> None:
+        """Update the active status of this theme item and refresh its display."""
         if self.is_current != is_current:
             self.is_current = is_current
             self._update_display()

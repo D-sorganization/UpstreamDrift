@@ -460,6 +460,7 @@ def create_moving_average_filter(
     kernel = np.ones(window_size) / window_size
 
     def apply(values: np.ndarray) -> np.ndarray:
+        """Apply moving average convolution to the input values."""
         return np.convolve(values, kernel, mode="same")
 
     return apply
@@ -482,6 +483,7 @@ def create_savgol_filter(
         window_length += 1
 
     def apply(values: np.ndarray) -> np.ndarray:
+        """Apply Savitzky-Golay smoothing to the input values."""
         if len(values) < window_length:
             return values
         return savgol_filter(values, window_length, polyorder)

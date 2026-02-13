@@ -1455,6 +1455,7 @@ class MotionCapturePlotter(QMainWindow):
 
 
 def main():
+    """Launch the Motion Capture Plotter GUI application."""
     app = QApplication(sys.argv)
     window = MotionCapturePlotter()
     window.show()

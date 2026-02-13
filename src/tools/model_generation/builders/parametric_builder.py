@@ -287,6 +287,7 @@ class ParametricBuilder(BaseURDFBuilder):
         gender_factor = self._gender_factor
 
         def get_mass(name: str, default: float) -> float:
+            """Return the anthropometric mass ratio or the default value."""
             if use_anthropometry:
                 try:
                     return get_segment_mass_ratio(name, gender_factor)
@@ -295,6 +296,7 @@ class ParametricBuilder(BaseURDFBuilder):
             return default
 
         def get_length(name: str, default: float) -> float:
+            """Return the anthropometric length ratio or the default value."""
             if use_anthropometry:
                 try:
                     return get_segment_length_ratio(name, gender_factor)

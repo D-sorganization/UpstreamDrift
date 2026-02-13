@@ -6,7 +6,7 @@ from enum import Enum
 from pathlib import Path
 from typing import TypeAlias
 
-from src.shared.python.core.contracts import ContractChecker
+from src.shared.python.core.contracts import ContractChecker, precondition
 
 from .interfaces import PhysicsEngine
 
@@ -78,10 +78,22 @@ class EngineRegistry(ContractChecker):
             ),
         ]
 
+    @precondition(
+        lambda self, registration: registration is not None,
+        "Registration must not be None",
+    )
+    @precondition(
+        lambda self, registration: isinstance(registration, EngineRegistration),
+        "Registration must be an EngineRegistration instance",
+    )
     def register(self, registration: EngineRegistration) -> None:
         """Register an engine."""
         self._registrations[registration.engine_type] = registration
 
+    @precondition(
+        lambda self, engine_type: isinstance(engine_type, EngineType),
+        "Engine type must be a valid EngineType enum member",
+    )
     def get(self, engine_type: EngineType) -> EngineRegistration | None:
         """Get registration for an engine type."""
         return self._registrations.get(engine_type)

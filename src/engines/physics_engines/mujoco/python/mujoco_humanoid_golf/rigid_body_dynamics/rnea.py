@@ -30,6 +30,7 @@ class _RneaModelCache:
 
     @staticmethod
     def from_model(model: dict) -> _RneaModelCache:
+        """Build a cache of model fields used during RNEA passes."""
         return _RneaModelCache(
             parent=model["parent"],
             jtype=model["jtype"],
@@ -47,6 +48,7 @@ class _RneaScratchBuffers:
 
     @staticmethod
     def create() -> _RneaScratchBuffers:
+        """Allocate pre-sized scratch buffers for RNEA computation."""
         return _RneaScratchBuffers(
             xj_buf=np.empty((6, 6)),
             scratch_vec=np.empty(6),

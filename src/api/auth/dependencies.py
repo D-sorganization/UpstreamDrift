@@ -194,6 +194,7 @@ def require_role(required_role: UserRole) -> Callable[[User], User]:
     def role_dependency(
         current_user: User = Depends(get_current_user_flexible),
     ) -> User:
+        """Verify the current user has the required role."""
         role_checker = RoleChecker(required_role)
 
         if not role_checker(current_user):
@@ -214,6 +215,7 @@ def check_usage_quota(resource_type: str) -> Callable[[User, Session], User]:
         current_user: User = Depends(get_current_user_flexible),
         db: Session = Depends(get_db),
     ) -> User:
+        """Enforce usage quota for the given resource type."""
         if not usage_tracker.check_quota(current_user, resource_type):
             user_role = UserRole(current_user.role)
             from .models import SUBSCRIPTION_QUOTAS

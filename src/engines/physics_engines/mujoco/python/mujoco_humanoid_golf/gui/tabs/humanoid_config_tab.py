@@ -476,6 +476,7 @@ class HumanoidConfigTab(QWidget):
         poly_widget.set_joints(self._HUMANOID_JOINTS)
 
         def on_generated(joint_name: str, coefficients: list[float]) -> None:
+            """Store generated polynomial coefficients for a joint."""
             self.config.polynomial_coefficients[joint_name] = coefficients
             self._save_config()
             self._log(f"Polynomial generated for {joint_name}: {coefficients}")
@@ -506,6 +507,7 @@ class HumanoidConfigTab(QWidget):
         toolkit_widget.set_joints(self._HUMANOID_JOINTS)
 
         def on_generated(joint_name: str, coefficients: list[float]) -> None:
+            """Store generated signal coefficients for a joint."""
             self.config.polynomial_coefficients[joint_name] = coefficients
             self._save_config()
             self._log(f"Signal generated for {joint_name}: {coefficients}")

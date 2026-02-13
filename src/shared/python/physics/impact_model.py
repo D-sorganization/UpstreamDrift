@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..core.physics_constants import (
@@ -149,7 +150,7 @@ class ImpactModel(ABC):
         Returns:
             Post-impact state
         """
-        raise NotImplementedError()
+        ...
 
 
 class RigidBodyImpactModel(ImpactModel):
@@ -213,6 +214,18 @@ class RigidBodyImpactModel(ImpactModel):
         ke_post = 0.5 * GOLF_BALL_MASS * np.dot(post_ball_velocity, post_ball_velocity)
         return ke_post - ke_pre
 
+    @precondition(
+        lambda self, pre_state, params: pre_state.clubhead_mass > 0,
+        "Clubhead mass must be positive",
+    )
+    @precondition(
+        lambda self, pre_state, params: 0 <= params.cor <= 1,
+        "Coefficient of restitution must be between 0 and 1",
+    )
+    @precondition(
+        lambda self, pre_state, params: params.friction_coefficient >= 0,
+        "Friction coefficient must be non-negative",
+    )
     def solve(
         self,
         pre_state: PreImpactState,
@@ -298,6 +311,10 @@ class SpringDamperImpactModel(ImpactModel):
         not yet implemented.
     """
 
+    @precondition(
+        lambda self, dt=1e-7: dt > 0,
+        "Integration time step must be positive",
+    )
     def __init__(self, dt: float = 1e-7) -> None:
         """Initialize spring-damper model.
 
@@ -308,6 +325,14 @@ class SpringDamperImpactModel(ImpactModel):
         """
         self.dt = dt
 
+    @precondition(
+        lambda self, pre_state, params: pre_state.clubhead_mass > 0,
+        "Clubhead mass must be positive",
+    )
+    @precondition(
+        lambda self, pre_state, params: params.contact_stiffness > 0,
+        "Contact stiffness must be positive",
+    )
     def solve(
         self,
         pre_state: PreImpactState,
@@ -448,6 +473,15 @@ class FiniteTimeImpactModel(ImpactModel):
         )
 
 
+@precondition(
+    lambda impact_offset,
+    clubhead_velocity,
+    clubface_normal,
+    gear_factor=0.5,
+    h_scale=100.0,
+    v_scale=50.0: 0 <= gear_factor <= 1,
+    "Gear effect factor must be between 0 and 1",
+)
 def compute_gear_effect_spin(
     impact_offset: np.ndarray,
     clubhead_velocity: np.ndarray,
@@ -757,6 +791,28 @@ class ImpactSolverAPI:
         self.params = params or ImpactParameters()
         self.recorder = ImpactRecorder()
 
+    @precondition(
+        lambda self,
+        timestamp,
+        clubhead_velocity,
+        clubhead_orientation,
+        ball_velocity=None,
+        ball_angular_velocity=None,
+        clubhead_mass=0.200,
+        record=True: clubhead_mass > 0,
+        "Clubhead mass must be positive",
+    )
+    @precondition(
+        lambda self,
+        timestamp,
+        clubhead_velocity,
+        clubhead_orientation,
+        ball_velocity=None,
+        ball_angular_velocity=None,
+        clubhead_mass=0.200,
+        record=True: timestamp >= 0,
+        "Timestamp must be non-negative",
+    )
     def solve_impact(
         self,
         timestamp: float,
