@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.workflow_adapter import EngineWorkflowAdapter
 
 from ..auth.middleware import OptionalAuth, is_local_mode
 from ..dependencies import get_engine_manager
@@ -90,28 +91,9 @@ async def probe_engine(
 ) -> dict[str, Any]:
     """Probe if an engine is available (for lazy loading UI)."""
     try:
-        # Map frontend names to EngineType
-        engine_map = {
-            "mujoco": EngineType.MUJOCO,
-            "drake": EngineType.DRAKE,
-            "pinocchio": EngineType.PINOCCHIO,
-            "opensim": EngineType.OPENSIM,
-            "myosuite": EngineType.MYOSIM,
-            "putting_green": EngineType.PUTTING_GREEN,
-        }
-
-        engine_type = engine_map.get(engine_name.lower())
-        if not engine_type:
-            return {"available": False, "error": f"Unknown engine: {engine_name}"}
-
-        available_engines = engine_manager.get_available_engines()
-        is_available = engine_type in available_engines
-
-        return {
-            "available": is_available,
-            "version": "1.0.0" if is_available else None,
-            "capabilities": ["physics"] if is_available else [],
-        }
+        workflow = EngineWorkflowAdapter(engine_manager)
+        result = workflow.probe(engine_name)
+        return result.payload
     except (RuntimeError, ValueError, OSError) as e:
         return {"available": False, "error": str(e)}
 
@@ -123,33 +105,13 @@ async def load_engine_lazy(
 ) -> dict[str, Any]:
     """Load an engine (for lazy loading UI)."""
     try:
-        # Map frontend names to EngineType
-        engine_map = {
-            "mujoco": EngineType.MUJOCO,
-            "drake": EngineType.DRAKE,
-            "pinocchio": EngineType.PINOCCHIO,
-            "opensim": EngineType.OPENSIM,
-            "myosuite": EngineType.MYOSIM,
-            "putting_green": EngineType.PUTTING_GREEN,
-        }
-
-        engine_type = engine_map.get(engine_name.lower())
-        if not engine_type:
+        workflow = EngineWorkflowAdapter(engine_manager)
+        result = workflow.load(engine_name)
+        if not result.ok:
             raise HTTPException(
-                status_code=400, detail=f"Unknown engine: {engine_name}"
+                status_code=result.status_code, detail=result.payload["detail"]
             )
-
-        success = engine_manager.switch_engine(engine_type)
-        if not success:
-            raise HTTPException(status_code=400, detail=f"Failed to load {engine_name}")
-
-        return {
-            "status": "loaded",
-            "engine": engine_name,
-            "version": "1.0.0",
-            "capabilities": ["physics"],
-            "message": f"{engine_name} loaded successfully",
-        }
+        return result.payload
     except HTTPException:
         raise
     except (RuntimeError, TypeError, AttributeError) as e:
@@ -170,9 +132,14 @@ async def load_engine(
     _user=Depends(OptionalAuth()),
 ) -> dict[str, Any]:
     """Load a specific physics engine with optional model."""
-    try:
-        engine_enum = EngineType(engine_type.upper())
+    workflow = EngineWorkflowAdapter(engine_manager)
+    engine_enum = workflow.parse_engine_identifier(engine_type)
+    if engine_enum is None:
+        raise HTTPException(
+            status_code=400, detail=f"Unknown engine type: {engine_type}"
+        )
 
+    try:
         # Use switch_engine which is the public API for loading engines
         success = engine_manager.switch_engine(engine_enum)
         if not success:
@@ -198,10 +165,6 @@ async def load_engine(
             "state": state,
         }
 
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown engine type: {engine_type}"
-        ) from exc
     except ImportError as exc:
         raise HTTPException(
             status_code=500, detail=f"Error loading engine: {str(exc)}"
@@ -220,20 +183,13 @@ async def unload_engine(
     _user=Depends(OptionalAuth()),
 ) -> dict[str, str]:
     """Unload a physics engine to free resources."""
-    try:
-        engine_enum = EngineType(engine_type.upper())
-
-        # Check if this engine is currently loaded
-        current = engine_manager.get_current_engine()
-        if current == engine_enum:
-            # Use cleanup to unload current engine
-            engine_manager.cleanup()
-
-        return {"status": "unloaded", "engine": engine_type}
-    except ValueError as exc:
+    workflow = EngineWorkflowAdapter(engine_manager)
+    result = workflow.unload(engine_type)
+    if not result.ok:
         raise HTTPException(
-            status_code=400, detail=f"Invalid engine type: {engine_type}"
-        ) from exc
+            status_code=result.status_code, detail=result.payload["detail"]
+        )
+    return result.payload
 
 
 # ──────────────────────────────────────────────────────────────
