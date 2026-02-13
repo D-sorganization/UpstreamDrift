@@ -14,6 +14,7 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.common.physics import GRAVITY_VECTOR
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
     PYQT6_AVAILABLE,
@@ -72,7 +73,7 @@ class PinocchioPoseEditor(BasePoseEditor):
         self._data = data
         self._q = q
         self._v = v
-        self._original_gravity = np.array([0, 0, -9.81])
+        self._original_gravity = GRAVITY_VECTOR.copy()
         self._update_callback: Any = None
         self._viz: Any = None  # Visualizer reference
 
@@ -317,7 +318,7 @@ class PinocchioPoseEditor(BasePoseEditor):
     def _get_gravity_magnitude(self) -> float:
         """Get current gravity magnitude."""
         if self._model is None:
-            return 9.81
+            return float(np.linalg.norm(GRAVITY_VECTOR))
         return float(np.linalg.norm(self._model.gravity.linear))
 
     def update_visualization(self) -> None:

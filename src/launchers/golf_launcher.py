@@ -399,15 +399,18 @@ class GolfLauncher(
 
         for mid, card in self.model_cards.items():
             if mid == model_id:
-                card.setStyleSheet(f"""
+                card.setStyleSheet(
+                    f"""
                     QFrame#ModelCard {{
                         background-color: {c.bg_highlight};
                         border: 2px solid {c.primary};
                         border-radius: 12px;
                     }}
-                    """)
+                    """
+                )
             else:
-                card.setStyleSheet(f"""
+                card.setStyleSheet(
+                    f"""
                     QFrame#ModelCard {{
                         background-color: {c.bg_elevated};
                         border: 1px solid {c.border_default};
@@ -417,7 +420,8 @@ class GolfLauncher(
                         background-color: {c.bg_highlight};
                         border: 1px solid {c.border_strong};
                     }}
-                    """)
+                    """
+                )
 
         # Update launch button
         model = self._get_model(model_id)
@@ -442,13 +446,15 @@ class GolfLauncher(
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")
             self.btn_launch.setEnabled(False)
-            self.btn_launch.setStyleSheet(f"""
+            self.btn_launch.setStyleSheet(
+                f"""
                 QPushButton {{
                     background-color: {c.bg_elevated};
                     color: {c.text_quaternary};
                     border-radius: 6px;
                 }}
-                """)
+                """
+            )
             return
 
         name = model_name or self.selected_model
@@ -458,20 +464,23 @@ class GolfLauncher(
         if model and getattr(model, "requires_docker", False):
             if not self.docker_available:
                 self.btn_launch.setText("! Docker Required")
-                self.btn_launch.setStyleSheet(f"""
+                self.btn_launch.setStyleSheet(
+                    f"""
                     QPushButton {{
                         background-color: {c.bg_elevated};
                         color: {c.error};
                         border: 2px solid {c.error};
                         border-radius: 6px;
                     }}
-                    """)
+                    """
+                )
                 self.btn_launch.setEnabled(False)
                 return
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
-        self.btn_launch.setStyleSheet(f"""
+        self.btn_launch.setStyleSheet(
+            f"""
             QPushButton {{
                 background-color: {c.success};
                 color: white;
@@ -481,7 +490,8 @@ class GolfLauncher(
             QPushButton:hover {{
                 background-color: {c.success_hover};
             }}
-            """)
+            """
+        )
 
     def _get_engine_type(self, model_type: str) -> Any:
         """Map model type to EngineType."""

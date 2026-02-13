@@ -322,7 +322,8 @@ class HumanoidLauncher(QMainWindow):
 
         self.tabs = QTabWidget()
 
-        self.tabs.setStyleSheet("""
+        self.tabs.setStyleSheet(
+            """
 
             QTabWidget::pane { border: 1px solid #444; background: #2b2b2b; }
 
@@ -332,7 +333,8 @@ class HumanoidLauncher(QMainWindow):
 
             QTabBar::tab:hover { background: #444; }
 
-        """)
+        """
+        )
 
         self.setup_sim_tab()
 
@@ -1482,7 +1484,8 @@ if __name__ == "__main__":
 
     # Global Stylesheet for Rounded Buttons and Modern Look
 
-    app.setStyleSheet("""
+    app.setStyleSheet(
+        """
 
         QPushButton {
 
@@ -1574,7 +1577,8 @@ if __name__ == "__main__":
 
         }
 
-    """)
+    """
+    )
 
     window = HumanoidLauncher()
 

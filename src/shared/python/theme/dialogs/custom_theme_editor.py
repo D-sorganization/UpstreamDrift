@@ -64,7 +64,8 @@ class ColorPickerButton(QPushButton):
         """Update button appearance to show the current color."""
         qcolor = QColor(self._color)
         text_color = "#ffffff" if qcolor.lightness() < 128 else "#000000"
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QPushButton {{
                 background-color: {self._color};
                 color: {text_color};
@@ -76,7 +77,8 @@ class ColorPickerButton(QPushButton):
             QPushButton:hover {{
                 border: 2px solid #333333;
             }}
-        """)
+        """
+        )
         self.setText(self._color.upper())
 
     def _open_color_picker(self) -> None:
@@ -110,7 +112,8 @@ class ThemePreviewWidget(QWidget):
 
     def apply_theme_colors(self, colors: dict[str, str]) -> None:
         """Apply theme colors to preview elements."""
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QWidget {{
                 background-color: {colors.get("bg", "#1A1A1A")};
                 color: {colors.get("text", "#FFFFFF")};
@@ -147,7 +150,8 @@ class ThemePreviewWidget(QWidget):
                 color: {colors.get("text_secondary", "#E0E0E0")};
                 background: transparent;
             }}
-        """)
+        """
+        )
 
 
 class CustomThemeEditor(QDialog):
