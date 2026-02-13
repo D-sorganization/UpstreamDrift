@@ -12,6 +12,7 @@ from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
+from src.shared.python.core.constants import GRAVITY
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -239,7 +240,7 @@ class BasePoseEditor(ABC):
         """Initialize the pose editor."""
         self._state = PoseEditorState()
         self._joint_info: list[JointInfo] = []
-        self._original_gravity: float = 9.81  # m/s² (GRAVITY_APPROX)
+        self._original_gravity: float = GRAVITY
         self._callbacks: dict[str, list[Any]] = {
             "pose_changed": [],
             "gravity_changed": [],

@@ -23,6 +23,7 @@ from model_generation.core.types import (
     Origin,
 )
 
+from src.shared.python.core.constants import GRAVITY
 from src.shared.python.core.contracts import precondition
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,7 @@ class MJCFConfig:
     inertiafromgeom: bool = False
 
     # Option settings
-    gravity: tuple[float, float, float] = (0.0, 0.0, -9.81)  # GRAVITY_APPROX
+    gravity: tuple[float, float, float] = (0.0, 0.0, -GRAVITY)
     timestep: float = 0.002
 
     # Visual settings
