@@ -5,15 +5,18 @@ from unittest.mock import patch
 import pytest
 
 import shared.python
-from shared.python import ComparativePlotter, ComparativeSwingAnalyzer
+from shared.python import (  # type: ignore[attr-defined]
+    ComparativePlotter,
+    ComparativeSwingAnalyzer,
+)
 
 
 def test_lazy_imports() -> None:
     """Test that lazy imports work correctly."""
     assert ComparativeSwingAnalyzer is not None
     assert ComparativePlotter is not None
-    assert shared.python.ComparativeSwingAnalyzer is not None
-    assert shared.python.ComparativePlotter is not None
+    assert shared.python.ComparativeSwingAnalyzer is not None  # type: ignore[attr-defined]
+    assert shared.python.ComparativePlotter is not None  # type: ignore[attr-defined]
 
 
 def test_lazy_import_failure() -> None:
@@ -22,12 +25,12 @@ def test_lazy_import_failure() -> None:
     # NOTE: Do NOT use patch.dict(sys.modules, clear=True) as it corrupts
     # numpy's C API state, causing pandas datetime errors in later tests
     with pytest.raises(AttributeError, match="has no attribute 'NonExistent'"):
-        _ = shared.python.NonExistent
+        _ = shared.python.NonExistent  # type: ignore[attr-defined]
 
 
 def test_pose_estimation_import() -> None:
     """Test importing pose_estimation via __getattr__."""
-    pe = shared.python.pose_estimation
+    pe = shared.python.pose_estimation  # type: ignore[attr-defined]
     assert pe is not None
 
 

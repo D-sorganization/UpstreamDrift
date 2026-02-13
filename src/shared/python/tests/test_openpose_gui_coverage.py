@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Generator
 from unittest.mock import patch
 
 import pytest
@@ -26,12 +27,12 @@ if PYQT6_AVAILABLE:
 
 # Helper fixture to ensure QApplication exists
 @pytest.fixture(scope="session")
-def qapp() -> QApplication:
+def qapp() -> Generator[QApplication, None, None]:
     """Provide the QApplication instance for the session."""
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
-    yield app
+    yield app  # type: ignore[misc]
 
 
 @pytest.fixture

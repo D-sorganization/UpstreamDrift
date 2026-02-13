@@ -49,7 +49,7 @@ def plot_joint_positions(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     times, positions = recorder.get_time_series("joint_positions")
 
@@ -103,7 +103,7 @@ def plot_joint_velocities(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     times, velocities = recorder.get_time_series("joint_velocities")
 
@@ -159,7 +159,7 @@ def plot_joint_accelerations(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     # Try to get accelerations directly, compute from velocities if not available
     try:
@@ -223,7 +223,7 @@ def plot_club_head_speed(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     times, speeds = recorder.get_time_series("club_head_speed")
 
@@ -290,7 +290,7 @@ def plot_com_trajectory(
         if ax is None:
             fig, ax = config.create_figure()
         else:
-            fig = ax.figure
+            fig = ax.figure  # type: ignore[assignment]
         ax.text(0.5, 0.5, "No data available", ha="center", va="center")
         return fig, ax
 
@@ -307,7 +307,7 @@ def plot_com_trajectory(
             fig = Figure(figsize=(config.width, config.height), dpi=config.dpi)
             ax = fig.add_subplot(111, projection="3d")
         else:
-            fig = ax.figure
+            fig = ax.figure  # type: ignore[assignment]
 
         ax.plot(
             positions[:, 0],
@@ -317,12 +317,12 @@ def plot_com_trajectory(
         )
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
-        ax.set_zlabel("Z [m]")
+        ax.set_zlabel("Z [m]")  # type: ignore[union-attr]
     else:
         if ax is None:
             fig, ax = config.create_figure()
         else:
-            fig = ax.figure
+            fig = ax.figure  # type: ignore[assignment]
 
         d1, d2 = dimensions[0], dimensions[1]
         i1, i2 = dim_map[d1], dim_map[d2]
@@ -376,7 +376,7 @@ def plot_phase_diagram(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     times, positions = recorder.get_time_series("joint_positions")
     _, velocities = recorder.get_time_series("joint_velocities")

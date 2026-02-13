@@ -73,7 +73,7 @@ class PinocchioPoseEditor(BasePoseEditor):
         self._data = data
         self._q = q
         self._v = v
-        self._original_gravity = np.array([0, 0, -GRAVITY])
+        self._original_gravity = np.array([0, 0, -GRAVITY])  # type: ignore[assignment]
         self._update_callback: Any = None
         self._viz: Any = None  # Visualizer reference
 

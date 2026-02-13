@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -46,7 +47,9 @@ def mock_suite_root(tmp_path) -> Path:
 
 
 @pytest.fixture
-def engine_manager(mock_suite_root) -> EngineManager:
+def engine_manager(
+    mock_suite_root,
+) -> Generator[EngineManager, None, None]:  # noqa: ANN001
     """Initialize EngineManager with mock root."""
     # Patch probes globally for the lifetime of the fixture
     # This ensures new instances created inside methods are also mocked

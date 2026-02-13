@@ -111,19 +111,19 @@ class SwingAnimator:
         ax: Axes = fig.add_subplot(111, projection="3d")
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_zlabel("Z (m)")
+        ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
         ax.set_title("Swing Trajectory Animation")
 
         body_data, times = self._gather_trajectory_data(body_names)
         if len(times) == 0:
-            ax.text2D(
+            ax.text2D(  # type: ignore[attr-defined]
                 0.5, 0.5, "No trajectory data", transform=ax.transAxes, ha="center"
             )
             return mpl_animation.FuncAnimation(fig, lambda _: [], frames=1)
 
         self._plot_desired_trajectories(ax, desired_positions, cfg)
         lines, points = self._create_body_artists(ax, body_data, cfg)
-        time_text = ax.text2D(0.02, 0.95, "", transform=ax.transAxes)
+        time_text = ax.text2D(0.02, 0.95, "", transform=ax.transAxes)  # type: ignore[attr-defined]
         ax.legend(loc="upper right", fontsize=8)
         self._set_axis_limits_from_data(ax, body_data)
 
@@ -299,7 +299,7 @@ class SwingAnimator:
             color=cfg.actual_color,
             arrow_length_ratio=0.15,
         )
-        time_text = ax.text2D(0.02, 0.95, "", transform=ax.transAxes)
+        time_text = ax.text2D(0.02, 0.95, "", transform=ax.transAxes)  # type: ignore[attr-defined]
 
         # Limits
         all_pts = np.asarray(positions)

@@ -46,7 +46,7 @@ def plot_energy_overview(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     # Get energy data
     try:
@@ -129,7 +129,7 @@ def plot_energy_breakdown(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     try:
         times, kinetic = recorder.get_time_series("kinetic_energy")
@@ -198,7 +198,7 @@ def plot_power_analysis(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     try:
         times, powers = recorder.get_time_series("actuator_powers")
@@ -267,7 +267,7 @@ def plot_cumulative_work(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     try:
         times, powers = recorder.get_time_series("actuator_powers")
@@ -339,7 +339,7 @@ def plot_energy_flow(
     if ax is None:
         fig, ax = config.create_figure()
     else:
-        fig = ax.figure
+        fig = ax.figure  # type: ignore[assignment]
 
     try:
         times, kinetic = recorder.get_time_series("kinetic_energy")
@@ -364,7 +364,7 @@ def plot_energy_flow(
         times,
         0,
         energy_rate,
-        where=energy_rate >= 0,
+        where=energy_rate >= 0,  # type: ignore[arg-type]
         alpha=0.7,
         label="Energy Input",
         color=config.colors.tertiary,
@@ -373,7 +373,7 @@ def plot_energy_flow(
         times,
         0,
         energy_rate,
-        where=energy_rate < 0,
+        where=energy_rate < 0,  # type: ignore[arg-type]
         alpha=0.7,
         label="Energy Output",
         color=config.colors.quaternary,

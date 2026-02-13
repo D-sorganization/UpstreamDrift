@@ -20,6 +20,7 @@ class MockRecorder(RecorderInterface):
     def __init__(self, prefix: str = "") -> None:
         """Initialize mock recorder with random joint and club data."""
         self.prefix = prefix
+        self.engine = None
         self.data = {
             "joint_positions": (np.linspace(0, 1, 10), np.random.rand(10, 3)),
             "joint_velocities": (np.linspace(0, 1, 10), np.random.rand(10, 3)),
@@ -39,6 +40,9 @@ class MockRecorder(RecorderInterface):
     def get_induced_acceleration_series(self, field_name: str | int) -> tuple:
         """Return induced acceleration data series."""
         return np.array([]), np.array([])
+
+    def set_analysis_config(self, config: dict) -> None:  # noqa: ANN001
+        """Set analysis config (no-op for mock)."""
 
 
 @pytest.fixture
