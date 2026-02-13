@@ -494,16 +494,16 @@ class DatasetGenerator:
         assert buffers["times"] is not None, "times buffer must not be None"
         assert buffers["positions"] is not None, "positions buffer must not be None"
         assert buffers["velocities"] is not None, "velocities buffer must not be None"
-        assert buffers["accelerations"] is not None, (
-            "accelerations buffer must not be None"
-        )
+        assert (
+            buffers["accelerations"] is not None
+        ), "accelerations buffer must not be None"
         assert buffers["torques"] is not None, "torques buffer must not be None"
-        assert buffers["kinetic_energy"] is not None, (
-            "kinetic_energy buffer must not be None"
-        )
-        assert buffers["potential_energy"] is not None, (
-            "potential_energy buffer must not be None"
-        )
+        assert (
+            buffers["kinetic_energy"] is not None
+        ), "kinetic_energy buffer must not be None"
+        assert (
+            buffers["potential_energy"] is not None
+        ), "potential_energy buffer must not be None"
 
         return SimulationSample(
             sample_id=sample_id,
