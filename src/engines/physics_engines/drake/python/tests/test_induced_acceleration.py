@@ -1,5 +1,7 @@
 """Unit tests for Drake Induced Acceleration Analyzer."""
 
+from __future__ import annotations
+
 import sys
 from unittest.mock import MagicMock
 
@@ -22,7 +24,7 @@ class TestDrakeInducedAcceleration:
     """Test suite for DrakeInducedAccelerationAnalyzer."""
 
     @pytest.fixture
-    def mock_plant(self):
+    def mock_plant(self) -> MagicMock:
         """Mock MultibodyPlant."""
         plant = MagicMock()
         # Setup basic mock behavior
@@ -30,15 +32,15 @@ class TestDrakeInducedAcceleration:
         return plant
 
     @pytest.fixture
-    def analyzer(self, mock_plant):
+    def analyzer(self, mock_plant) -> DrakeInducedAccelerationAnalyzer:
         """Create analyzer instance."""
         return DrakeInducedAccelerationAnalyzer(mock_plant)
 
-    def test_initialization(self, analyzer, mock_plant):
+    def test_initialization(self, analyzer, mock_plant) -> None:
         """Test initialization."""
         assert analyzer.plant == mock_plant
 
-    def test_compute_components_basic(self, analyzer, mock_plant):
+    def test_compute_components_basic(self, analyzer, mock_plant) -> None:
         """Test compute_components with simple inputs."""
         context = MagicMock()
 
@@ -78,7 +80,9 @@ class TestDrakeInducedAcceleration:
         mock_plant.CalcGravityGeneralizedForces.assert_called_with(context)
         mock_plant.CalcBiasTerm.assert_called_with(context)
 
-    def test_compute_components_with_non_identity_mass(self, analyzer, mock_plant):
+    def test_compute_components_with_non_identity_mass(
+        self, analyzer, mock_plant
+    ) -> None:
         """Test compute_components with non-identity mass matrix."""
         context = MagicMock()
 
@@ -106,7 +110,7 @@ class TestDrakeInducedAcceleration:
         # total = 0
         np.testing.assert_allclose(results["total"], [0.0, 0.0], atol=1e-10)
 
-    def test_compute_components_structure(self, analyzer, mock_plant):
+    def test_compute_components_structure(self, analyzer, mock_plant) -> None:
         """Verify the result dictionary structure."""
         mock_plant.CalcMassMatrix.return_value = np.eye(2)
         mock_plant.CalcGravityGeneralizedForces.return_value = np.zeros(2)

@@ -11,7 +11,7 @@ from src.shared.python.biomechanics.hill_muscle import (
 
 
 @pytest.fixture
-def muscle_params():
+def muscle_params() -> MuscleParameters:
     """Default muscle parameters for testing."""
     return MuscleParameters(
         F_max=1000.0, l_opt=0.10, l_slack=0.20, v_max=1.0, pennation_angle=0.0
@@ -19,18 +19,18 @@ def muscle_params():
 
 
 @pytest.fixture
-def muscle_model(muscle_params):
+def muscle_model(muscle_params) -> HillMuscleModel:
     """Hill muscle model instance."""
     return HillMuscleModel(muscle_params)
 
 
-def test_force_length_active_at_optimal(muscle_model):
+def test_force_length_active_at_optimal(muscle_model) -> None:
     """Test active force at optimal length."""
     # At optimal length (norm = 1.0), force multiplier should be 1.0
     assert np.isclose(muscle_model.force_length_active(1.0), 1.0)
 
 
-def test_force_length_active_bell_curve(muscle_model):
+def test_force_length_active_bell_curve(muscle_model) -> None:
     """Test bell curve shape of active force-length relationship."""
     # Force should be lower at shorter and longer lengths
     l_short = 0.5
@@ -45,7 +45,7 @@ def test_force_length_active_bell_curve(muscle_model):
     assert f_long > 0
 
 
-def test_force_length_passive(muscle_model):
+def test_force_length_passive(muscle_model) -> None:
     """Test passive force-length relationship."""
     # No passive force below optimal length
     assert muscle_model.force_length_passive(0.9) == 0.0
@@ -59,7 +59,7 @@ def test_force_length_passive(muscle_model):
     assert f_1_5 > f_1_2
 
 
-def test_force_velocity_isometric(muscle_model):
+def test_force_velocity_isometric(muscle_model) -> None:
     """Test force-velocity at isometric conditions."""
     # At v=0, force multiplier is not 1.0 in this implementation?
     # Wait, the formula says:
@@ -68,7 +68,7 @@ def test_force_velocity_isometric(muscle_model):
     assert np.isclose(muscle_model.force_velocity(0.0), 1.0)
 
 
-def test_force_velocity_shortening(muscle_model):
+def test_force_velocity_shortening(muscle_model) -> None:
     """Test force-velocity during shortening (concentric).
 
     Standard Hill model: Force decreases as shortening velocity increases.
@@ -84,7 +84,7 @@ def test_force_velocity_shortening(muscle_model):
     assert f_v > 0.0  # Force should still be positive
 
 
-def test_tendon_force(muscle_model):
+def test_tendon_force(muscle_model) -> None:
     """Test tendon force-strain relationship."""
     # Slack length strain <= 0 -> Force 0
     assert muscle_model.tendon_force(1.0) == 0.0  # At slack length
@@ -95,7 +95,7 @@ def test_tendon_force(muscle_model):
     assert f_stretch > 0
 
 
-def test_compute_muscle_force_isometric_max(muscle_model, muscle_params):
+def test_compute_muscle_force_isometric_max(muscle_model, muscle_params) -> None:
     """Test max isometric force computation."""
     # At optimal length with full activation and zero velocity
     state = MuscleState(
@@ -110,7 +110,7 @@ def test_compute_muscle_force_isometric_max(muscle_model, muscle_params):
     assert np.isclose(force, muscle_params.F_max, rtol=0.1)
 
 
-def test_compute_muscle_force_pennation(muscle_params):
+def test_compute_muscle_force_pennation(muscle_params) -> None:
     """Test effect of pennation angle."""
     angle = np.pi / 3  # 60 degrees, cos = 0.5
     muscle_params.pennation_angle = angle

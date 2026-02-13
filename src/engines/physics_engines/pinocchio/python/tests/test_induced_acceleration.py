@@ -1,6 +1,9 @@
 """Unit tests for Pinocchio Induced Acceleration Analyzer."""
 
+from __future__ import annotations
+
 import sys
+from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -19,7 +22,7 @@ class TestPinocchioInducedAcceleration:
     """Test suite for InducedAccelerationAnalyzer."""
 
     @pytest.fixture(autouse=True)
-    def reset_mocks(self):
+    def reset_mocks(self) -> Generator[None, None, None]:
         """Reset mocks before each test."""
         mock_pin.reset_mock()
         mock_pin.aba.side_effect = None
@@ -27,7 +30,7 @@ class TestPinocchioInducedAcceleration:
         yield
 
     @pytest.fixture
-    def mock_model(self):
+    def mock_model(self) -> MagicMock:
         """Mock Pinocchio Model."""
         model = MagicMock()
         model.nq = 2
@@ -36,23 +39,23 @@ class TestPinocchioInducedAcceleration:
         return model
 
     @pytest.fixture
-    def mock_data(self):
+    def mock_data(self) -> MagicMock:
         """Mock Pinocchio Data."""
         return MagicMock()
 
     @pytest.fixture
-    def analyzer(self, mock_model, mock_data):
+    def analyzer(self, mock_model, mock_data) -> InducedAccelerationAnalyzer:
         """Create analyzer instance."""
         return InducedAccelerationAnalyzer(mock_model, mock_data)
 
-    def test_initialization(self, analyzer, mock_model, mock_data):
+    def test_initialization(self, analyzer, mock_model, mock_data) -> None:
         """Test initialization."""
         assert analyzer.model == mock_model
         assert analyzer.data == mock_data
         assert analyzer._temp_data is not None
         assert analyzer._temp_data != mock_data  # Should be a new instance
 
-    def test_compute_components_logic(self, analyzer, mock_model):
+    def test_compute_components_logic(self, analyzer, mock_model) -> None:
         """Test compute_components logical flow."""
         q = np.array([0.0, 0.0])
         v = np.array([0.1, 0.2])
@@ -91,7 +94,7 @@ class TestPinocchioInducedAcceleration:
         # Verify calls were made
         assert mock_pin.aba.call_count == 3
 
-    def test_compute_specific_control(self, analyzer, mock_model):
+    def test_compute_specific_control(self, analyzer, mock_model) -> None:
         """Test compute_specific_control."""
         q = np.zeros(2)
         specific_tau = np.array([5.0, 5.0])
@@ -112,7 +115,7 @@ class TestPinocchioInducedAcceleration:
         np.testing.assert_allclose(result, [5.0, 5.0])
         assert mock_pin.aba.call_count == 2
 
-    def test_compute_counterfactuals(self, analyzer, mock_model):
+    def test_compute_counterfactuals(self, analyzer, mock_model) -> None:
         """Test compute_counterfactuals."""
         q = np.zeros(2)
         v = np.zeros(2)

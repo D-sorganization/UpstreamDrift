@@ -1,7 +1,10 @@
 """Tests for Advanced Analysis Features (Wavelet, Swing Plane, Correlation)."""
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
+from PyQt6.QtWidgets import QApplication
 
 from src.shared.python.dashboard.advanced_analysis import (
     AdvancedAnalysisDialog,
@@ -12,7 +15,10 @@ from src.shared.python.dashboard.advanced_analysis import (
 
 
 class MockRecorder:
-    def get_time_series(self, key: str):
+    """Mock recorder providing synthetic time series data."""
+
+    def get_time_series(self, key: str) -> tuple:
+        """Return synthetic time series for the given key."""
         t = np.linspace(0, 1, 100)
 
         # Base signal
@@ -51,16 +57,19 @@ class MockRecorder:
 
 
 @pytest.fixture
-def app(qapp):
+def app(qapp) -> QApplication:
+    """Provide the QApplication instance."""
     return qapp
 
 
 @pytest.fixture
-def recorder():
+def recorder() -> MockRecorder:
+    """Create a MockRecorder instance."""
     return MockRecorder()
 
 
-def test_wavelet_tab(recorder, qtbot):
+def test_wavelet_tab(recorder, qtbot) -> None:
+    """Test WaveletTab initialization and w0 parameter change."""
     tab = WaveletTab(recorder)
     qtbot.addWidget(tab)
 
@@ -73,7 +82,8 @@ def test_wavelet_tab(recorder, qtbot):
     assert len(tab.ax.collections) > 0
 
 
-def test_swing_plane_tab(recorder, qtbot):
+def test_swing_plane_tab(recorder, qtbot) -> None:
+    """Test SwingPlaneTab initialization and subplot creation."""
     tab = SwingPlaneTab(recorder)
     qtbot.addWidget(tab)
 
@@ -87,7 +97,8 @@ def test_swing_plane_tab(recorder, qtbot):
     assert len(ax3d.collections) > 0 or len(ax3d.patches) > 0
 
 
-def test_correlation_tab(recorder, qtbot):
+def test_correlation_tab(recorder, qtbot) -> None:
+    """Test CorrelationTab update and image plotting."""
     tab = CorrelationTab(recorder)
     qtbot.addWidget(tab)
 
@@ -105,7 +116,8 @@ def test_correlation_tab(recorder, qtbot):
     assert len(tab.ax.images) > 0
 
 
-def test_advanced_analysis_dialog_features(recorder, qtbot):
+def test_advanced_analysis_dialog_features(recorder, qtbot) -> None:
+    """Test AdvancedAnalysisDialog contains all expected tabs."""
     dlg = AdvancedAnalysisDialog(None, recorder)
     qtbot.addWidget(dlg)
 

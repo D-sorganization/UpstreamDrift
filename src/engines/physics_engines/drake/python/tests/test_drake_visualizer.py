@@ -1,5 +1,7 @@
 """Unit tests for Drake Visualizer."""
 
+from __future__ import annotations
+
 import sys
 from unittest.mock import MagicMock
 
@@ -57,21 +59,21 @@ class TestDrakeVisualizer:
     """Test suite for DrakeVisualizer."""
 
     @pytest.fixture
-    def mock_meshcat(self):
+    def mock_meshcat(self) -> MagicMock:
         """Mock Meshcat."""
         return MagicMock()
 
     @pytest.fixture
-    def mock_plant(self):
+    def mock_plant(self) -> MagicMock:
         """Mock MultibodyPlant."""
         return MagicMock()
 
     @pytest.fixture
-    def visualizer(self, mock_meshcat, mock_plant):
+    def visualizer(self, mock_meshcat, mock_plant) -> DrakeVisualizer:
         """Create visualizer instance."""
         return DrakeVisualizer(mock_meshcat, mock_plant)
 
-    def test_initialization(self, visualizer, mock_meshcat, mock_plant):
+    def test_initialization(self, visualizer, mock_meshcat, mock_plant) -> None:
         """Test initialization."""
         assert visualizer.meshcat == mock_meshcat
         assert visualizer.plant == mock_plant
@@ -80,7 +82,7 @@ class TestDrakeVisualizer:
         assert len(visualizer.visible_coms) == 0
         assert len(visualizer.visible_ellipsoids) == 0
 
-    def test_toggle_frame_visible(self, visualizer, mock_meshcat):
+    def test_toggle_frame_visible(self, visualizer, mock_meshcat) -> None:
         """Test enabling frame visualization."""
         body_name = "test_body"
 
@@ -96,7 +98,7 @@ class TestDrakeVisualizer:
         # Verify Transforms were set
         assert mock_meshcat.SetTransform.call_count == 3
 
-    def test_toggle_frame_hidden(self, visualizer, mock_meshcat):
+    def test_toggle_frame_hidden(self, visualizer, mock_meshcat) -> None:
         """Test disabling frame visualization."""
         body_name = "test_body"
         visualizer.visible_frames.add(body_name)
@@ -106,7 +108,9 @@ class TestDrakeVisualizer:
         assert body_name not in visualizer.visible_frames
         mock_meshcat.Delete.assert_called_with(f"visual_overlays/frames/{body_name}")
 
-    def test_update_frame_transforms(self, visualizer, mock_meshcat, mock_plant):
+    def test_update_frame_transforms(
+        self, visualizer, mock_meshcat, mock_plant
+    ) -> None:
         """Test updating frame transforms."""
         body_name = "test_body"
         visualizer.visible_frames.add(body_name)
@@ -128,7 +132,7 @@ class TestDrakeVisualizer:
             f"visual_overlays/frames/{body_name}", X_WB
         )
 
-    def test_toggle_com_visible(self, visualizer, mock_meshcat):
+    def test_toggle_com_visible(self, visualizer, mock_meshcat) -> None:
         """Test enabling COM visualization."""
         body_name = "test_body"
 
@@ -139,7 +143,7 @@ class TestDrakeVisualizer:
         args, _ = mock_meshcat.SetObject.call_args
         assert args[0] == f"visual_overlays/coms/{body_name}"
 
-    def test_toggle_com_hidden(self, visualizer, mock_meshcat):
+    def test_toggle_com_hidden(self, visualizer, mock_meshcat) -> None:
         """Test disabling COM visualization."""
         body_name = "test_body"
         visualizer.visible_coms.add(body_name)
@@ -149,7 +153,7 @@ class TestDrakeVisualizer:
         assert body_name not in visualizer.visible_coms
         mock_meshcat.Delete.assert_called_with(f"visual_overlays/coms/{body_name}")
 
-    def test_update_com_transforms(self, visualizer, mock_meshcat, mock_plant):
+    def test_update_com_transforms(self, visualizer, mock_meshcat, mock_plant) -> None:
         """Test updating COM transforms."""
         body_name = "test_body"
         visualizer.visible_coms.add(body_name)
@@ -183,7 +187,7 @@ class TestDrakeVisualizer:
         # MockRigidTransform eats them, but no crash is good)
         mock_meshcat.SetTransform.assert_called()
 
-    def test_draw_ellipsoid(self, visualizer, mock_meshcat):
+    def test_draw_ellipsoid(self, visualizer, mock_meshcat) -> None:
         """Test drawing ellipsoid."""
         name = "test_ellipsoid"
         rotation_matrix = np.eye(3)
@@ -204,7 +208,7 @@ class TestDrakeVisualizer:
         assert T_arg.shape == (4, 4)
         np.testing.assert_allclose(T_arg[:3, 3], position)
 
-    def test_clear_ellipsoids(self, visualizer, mock_meshcat):
+    def test_clear_ellipsoids(self, visualizer, mock_meshcat) -> None:
         """Test clearing ellipsoids."""
         visualizer.visible_ellipsoids.add("e1")
         visualizer.clear_ellipsoids()
@@ -212,7 +216,7 @@ class TestDrakeVisualizer:
         assert len(visualizer.visible_ellipsoids) == 0
         mock_meshcat.Delete.assert_called_with("visual_overlays/ellipsoids")
 
-    def test_clear_all(self, visualizer, mock_meshcat):
+    def test_clear_all(self, visualizer, mock_meshcat) -> None:
         """Test clearing all overlays."""
         visualizer.visible_frames.add("f1")
         visualizer.visible_coms.add("c1")

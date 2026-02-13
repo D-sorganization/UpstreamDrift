@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from unittest.mock import patch
 
@@ -24,7 +26,8 @@ if PYQT6_AVAILABLE:
 
 # Helper fixture to ensure QApplication exists
 @pytest.fixture(scope="session")
-def qapp():
+def qapp() -> QApplication:
+    """Provide the QApplication instance for the session."""
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
@@ -32,26 +35,30 @@ def qapp():
 
 
 @pytest.fixture
-def gui(qapp, qtbot):
+def gui(qapp, qtbot) -> OpenPoseGUI:
+    """Create an OpenPoseGUI instance."""
     window = OpenPoseGUI()
     qtbot.addWidget(window)
     return window
 
 
-def test_initial_state(gui):
+def test_initial_state(gui) -> None:
+    """Test OpenPoseGUI initial widget state."""
     assert gui.lbl_file.text() == "No file selected."
     assert not gui.btn_run.isEnabled()
     assert gui.progress.value() == 0
 
 
-def test_load_video_cancel(gui):
+def test_load_video_cancel(gui) -> None:
+    """Test loading video when user cancels file dialog."""
     with patch.object(QFileDialog, "getOpenFileName", return_value=("", "")):
         gui.load_video()
         assert gui.lbl_file.text() == "No file selected."
         assert not gui.btn_run.isEnabled()
 
 
-def test_load_video_success(gui):
+def test_load_video_success(gui) -> None:
+    """Test successful video file loading."""
     test_file = "/path/to/video.mp4"
     with patch.object(
         QFileDialog,
@@ -64,7 +71,8 @@ def test_load_video_success(gui):
         assert "Loaded video" in gui.log_area.toPlainText()
 
 
-def test_run_analysis(gui, qtbot):
+def test_run_analysis(gui, qtbot) -> None:
+    """Test running analysis workflow."""
     # Setup state
     gui.lbl_file.setText("/path/to/video.mp4")
     gui.btn_run.setEnabled(True)
@@ -91,6 +99,7 @@ def test_run_analysis(gui, qtbot):
         mock_msg.assert_called_once()
 
 
-def test_log(gui):
+def test_log(gui) -> None:
+    """Test log message appending."""
     gui.log("Test message")
     assert "Test message" in gui.log_area.toPlainText()
