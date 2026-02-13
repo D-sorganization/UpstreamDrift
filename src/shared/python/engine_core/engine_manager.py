@@ -166,10 +166,6 @@ class EngineManager(ContractChecker):
         lambda self, engine_type: engine_type is not None,
         "Engine type must not be None",
     )
-    @precondition(
-        lambda self, engine_type: isinstance(engine_type, EngineType),
-        "Engine type must be a valid EngineType enum member",
-    )
     def switch_engine(self, engine_type: EngineType) -> bool:
         """Switch to a different physics engine."""
         if engine_type not in self.engine_status:
@@ -323,10 +319,6 @@ class EngineManager(ContractChecker):
             "engine_status": {e.value: s.value for e, s in self.engine_status.items()},
         }
 
-    @precondition(
-        lambda self, engine_type: isinstance(engine_type, EngineType),
-        "Engine type must be a valid EngineType enum member",
-    )
     def validate_engine_configuration(self, engine_type: EngineType) -> bool:
         """Validate engine configuration."""
         if engine_type not in self.engine_status:
