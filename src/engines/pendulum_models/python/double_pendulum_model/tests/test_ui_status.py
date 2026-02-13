@@ -1,3 +1,5 @@
+"""Tests for pendulum UI status label updates."""
+
 import typing
 
 import pytest
@@ -11,6 +13,7 @@ from src.shared.python.ui.qt.utils import get_qapp
 
 @pytest.fixture(scope="module")
 def app() -> QtWidgets.QApplication:
+    """Provide a shared QApplication instance for the test module."""
     app = get_qapp()
     return typing.cast(QtWidgets.QApplication, app)
 

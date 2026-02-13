@@ -278,13 +278,13 @@ class ClubTrajectoryParser:
     def _make_row_accessor(row):
         if hasattr(row, "iloc"):
 
-            def get(i):
+            def get(i) -> object | None:
                 """Return the value at index i from a pandas row."""
                 return row.iloc[i] if i < len(row) else None
 
         else:
 
-            def get(i):
+            def get(i) -> object | None:
                 """Return the value at index i from a list row."""
                 return row[i] if i < len(row) else None
 

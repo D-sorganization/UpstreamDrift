@@ -10,6 +10,8 @@ Features:
 - Background rendering (non-blocking UI)
 """
 
+from __future__ import annotations
+
 import logging
 import subprocess
 from dataclasses import dataclass
@@ -66,7 +68,7 @@ class VideoExporter(QObject):
         self.renderer = renderer
         self.frame_processor = frame_processor
 
-    def export_video(self, config: VideoExportConfig):
+    def export_video(self, config: VideoExportConfig) -> None:
         """
         Export animation to video file
 
@@ -356,7 +358,7 @@ class VideoExportThread(QThread):
         self.frame_processor = frame_processor
         self.config = config
 
-    def run(self):
+    def run(self) -> None:
         """Run export in background thread"""
         exporter = VideoExporter(self.renderer, self.frame_processor)
 

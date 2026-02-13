@@ -1,3 +1,7 @@
+"""Tests for URDF import and export functionality."""
+
+from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import defusedxml.ElementTree as ET
@@ -14,7 +18,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io impo
 
 
 @pytest.fixture
-def mock_mujoco_model():
+def mock_mujoco_model() -> MagicMock:
     """Create a mock MuJoCo model."""
     model = MagicMock(spec=mujoco.MjModel)
 
@@ -60,7 +64,8 @@ def mock_mujoco_model():
 
 
 @pytest.fixture
-def sample_urdf_xml():
+def sample_urdf_xml() -> str:
+    """Return a sample URDF XML string for testing."""
     return """
     <robot name="test_robot">
         <link name="base_link">
@@ -96,14 +101,16 @@ def sample_urdf_xml():
     """
 
 
-def test_urdf_exporter_init(mock_mujoco_model):
+def test_urdf_exporter_init(mock_mujoco_model) -> None:
+    """Test URDFExporter initialization."""
     with patch("mujoco.MjData", autospec=True) as mock_data_cls:
         exporter = URDFExporter(mock_mujoco_model)
         assert exporter.model == mock_mujoco_model
         assert exporter.data == mock_data_cls.return_value
 
 
-def test_export_to_urdf(mock_mujoco_model):
+def test_export_to_urdf(mock_mujoco_model) -> None:
+    """Test exporting a MuJoCo model to URDF format."""
     with patch("mujoco.MjData", autospec=True):
         exporter = URDFExporter(mock_mujoco_model)
 
@@ -161,8 +168,8 @@ def test_export_to_urdf(mock_mujoco_model):
             assert 'type="prismatic"' in urdf_str
 
 
-def test_export_model_to_urdf_function(mock_mujoco_model):
-    # Test convenience function
+def test_export_model_to_urdf_function(mock_mujoco_model) -> None:
+    """Test the export_model_to_urdf convenience function."""
     with (
         patch("mujoco.mj_id2name", return_value="test_name"),
         patch("pathlib.Path.write_text"),
@@ -172,7 +179,8 @@ def test_export_model_to_urdf_function(mock_mujoco_model):
         assert len(urdf_str) > 0
 
 
-def test_urdf_importer_import(sample_urdf_xml):
+def test_urdf_importer_import(sample_urdf_xml) -> None:
+    """Test importing a URDF file to MJCF format."""
     importer = URDFImporter()
 
     with (
@@ -192,7 +200,8 @@ def test_urdf_importer_import(sample_urdf_xml):
         assert 'pos="1 0 0"' in mjcf_str  # From joint origin
 
 
-def test_import_urdf_to_mujoco_function(sample_urdf_xml):
+def test_import_urdf_to_mujoco_function(sample_urdf_xml) -> None:
+    """Test the import_urdf_to_mujoco convenience function."""
     with (
         patch("defusedxml.ElementTree.parse") as mock_parse,
         patch("pathlib.Path.exists", return_value=True),
@@ -205,14 +214,15 @@ def test_import_urdf_to_mujoco_function(sample_urdf_xml):
         assert len(mjcf_str) > 0
 
 
-def test_importer_file_not_found():
+def test_importer_file_not_found() -> None:
+    """Test that importing a non-existent URDF raises FileNotFoundError."""
     importer = URDFImporter()
     with pytest.raises(FileNotFoundError):
         importer.import_from_urdf("nonexistent.urdf")
 
 
-def test_exporter_no_root_body(mock_mujoco_model):
-    # Setup model so find_root_body returns None
+def test_exporter_no_root_body(mock_mujoco_model) -> None:
+    """Test exporting a model with only the world body and no root."""
     mock_mujoco_model.nbody = 1  # Only world
 
     with patch("mujoco.MjData", autospec=True):

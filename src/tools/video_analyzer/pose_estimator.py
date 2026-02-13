@@ -5,6 +5,8 @@ Provides real-time pose estimation for golf swing analysis,
 extracting 33 body landmarks from video frames.
 """
 
+from __future__ import annotations
+
 import logging
 
 import cv2
@@ -292,7 +294,7 @@ class PoseEstimator:
 
         return output
 
-    def close(self):
+    def close(self) -> None:
         """Release resources."""
         if self._pose:
             self._pose.close()

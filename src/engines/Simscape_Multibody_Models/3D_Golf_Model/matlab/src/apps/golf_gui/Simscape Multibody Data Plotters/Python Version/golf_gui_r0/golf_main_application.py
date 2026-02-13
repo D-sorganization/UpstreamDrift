@@ -4,6 +4,8 @@ Golf Swing Visualizer - Main Application Entry Point
 Complete integration of all components with enhanced features and error handling
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 import time
@@ -178,19 +180,19 @@ class PerformanceMonitor(QThread):
             "frame_rate": 0.0,
         }
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """Start performance monitoring"""
         self.monitoring = True
         self.start()
         logger.info("Performance monitoring started")
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop performance monitoring"""
         self.monitoring = False
         self.wait()
         logger.info("Performance monitoring stopped")
 
-    def run(self):
+    def run(self) -> None:
         """Performance monitoring loop"""
         while self.monitoring:
             try:
@@ -631,7 +633,7 @@ class SessionManager:
         logger.info(f"Created session: {session_id}")
         return session_id
 
-    def save_session(self, session_id: str, filepath: str):
+    def save_session(self, session_id: str, filepath: str) -> None:
         """Save session to file"""
         if session_id in self.sessions:
             import json
@@ -664,12 +666,12 @@ class ExportManager:
         self.export_queue: list[dict] = []
         self.is_exporting = False
 
-    def export_video(self, frames: list, output_path: str, fps: int = 30):
+    def export_video(self, frames: list, output_path: str, fps: int = 30) -> None:
         """Export frames as video"""
         # This would use OpenCV or similar to create video
         logger.info(f"Exporting video: {output_path}")
 
-    def export_data(self, data: dict, output_path: str, format: str = "csv"):
+    def export_data(self, data: dict, output_path: str, format: str = "csv") -> None:
         """Export analysis data"""
         if format.lower() == "csv":
             import pandas as pd
@@ -678,7 +680,7 @@ class ExportManager:
             df.to_csv(output_path, index=False)
         logger.info(f"Exported data: {output_path}")
 
-    def export_images(self, frames: list, output_dir: str, format: str = "png"):
+    def export_images(self, frames: list, output_dir: str, format: str = "png") -> None:
         """Export frame sequence as images"""
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         # Export logic here
@@ -692,13 +694,13 @@ class PluginManager:
         self.plugins: dict[str, object] = {}
         self.plugin_dir = Path("plugins")
 
-    def load_plugins(self):
+    def load_plugins(self) -> None:
         """Load available plugins"""
         if self.plugin_dir.exists():
             logger.info("Loading plugins...")
             # Plugin loading logic here
 
-    def register_plugin(self, name: str, plugin: object):
+    def register_plugin(self, name: str, plugin: object) -> None:
         """Register a plugin"""
         self.plugins[name] = plugin
         logger.info(f"Plugin registered: {name}")
@@ -709,11 +711,11 @@ class PluginManager:
 # ============================================================================
 
 
-def main():
+def main() -> int:
     """Enhanced main entry point with comprehensive error handling"""
 
     # Setup exception handling
-    def handle_exception(exc_type, exc_value, exc_traceback):
+    def handle_exception(exc_type, exc_value, exc_traceback) -> None:
         """Log uncaught exceptions and show an error dialog."""
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)

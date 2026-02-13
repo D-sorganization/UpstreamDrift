@@ -1,5 +1,7 @@
 """Tests for advanced plotting analysis."""
 
+from __future__ import annotations
+
 import importlib.util
 import os
 import sys
@@ -26,7 +28,8 @@ GolfSwingPlotter = plotting.GolfSwingPlotter
 
 
 @pytest.fixture
-def mock_recorder():
+def mock_recorder() -> MagicMock:
+    """Create a mock data recorder with sample time series data."""
     recorder = MagicMock()
 
     # Mock data
@@ -47,7 +50,7 @@ def mock_recorder():
     ],
     ids=["frequency_analysis", "spectrogram"],
 )
-def test_plot_methods(mock_recorder, method_name, ax_check_attr):
+def test_plot_methods(mock_recorder, method_name, ax_check_attr) -> None:
     """Test plotting methods create axes and call expected rendering."""
     plotter = GolfSwingPlotter(mock_recorder)
     fig = MagicMock()

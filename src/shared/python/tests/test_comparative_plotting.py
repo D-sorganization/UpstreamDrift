@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -15,7 +17,7 @@ from src.shared.python.validation_pkg.comparative_plotting import ComparativePlo
 class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""
 
-    def __init__(self, prefix=""):
+    def __init__(self, prefix="") -> None:
         self.prefix = prefix
         self.data = {
             "joint_positions": (np.linspace(0, 1, 10), np.random.rand(10, 3)),
@@ -25,20 +27,22 @@ class MockRecorder(RecorderInterface):
             "kinetic_energy": (np.linspace(0, 1, 10), np.random.rand(10)),
         }
 
-    def get_time_series(self, field_name: str):
+    def get_time_series(self, field_name: str) -> tuple:
+        """Return time series data for the given field."""
         return self.data.get(field_name, (np.array([]), np.array([])))
 
-    def get_counterfactual_series(self, field_name: str):
+    def get_counterfactual_series(self, field_name: str) -> tuple:
         """Return counterfactual data series."""
         return np.array([]), np.array([])
 
-    def get_induced_acceleration_series(self, field_name: str | int):
+    def get_induced_acceleration_series(self, field_name: str | int) -> tuple:
         """Return induced acceleration data series."""
         return np.array([]), np.array([])
 
 
 @pytest.fixture
-def mock_analyzer():
+def mock_analyzer() -> MagicMock:
+    """Create a mock ComparativeSwingAnalyzer."""
     rec_a = MockRecorder("A")
     rec_b = MockRecorder("B")
     analyzer = MagicMock(spec=ComparativeSwingAnalyzer)
@@ -88,20 +92,24 @@ def mock_analyzer():
 
 
 @pytest.fixture
-def plotter(mock_analyzer):
+def plotter(mock_analyzer) -> ComparativePlotter:
+    """Create a ComparativePlotter from mock analyzer."""
     return ComparativePlotter(mock_analyzer)
 
 
 @pytest.fixture
-def fig():
+def fig() -> Figure:
+    """Create a matplotlib Figure."""
     return Figure()
 
 
-def test_init(plotter, mock_analyzer):
+def test_init(plotter, mock_analyzer) -> None:
+    """Test ComparativePlotter initialization."""
     assert plotter.analyzer == mock_analyzer
 
 
-def test_plot_comparison(plotter, fig):
+def test_plot_comparison(plotter, fig) -> None:
+    """Test comparison plotting for scalar signals."""
     plotter.plot_comparison(fig, "club_head_speed")
     assert len(fig.axes) > 0  # GridSpec creates axes on fig
 
@@ -112,7 +120,8 @@ def test_plot_comparison(plotter, fig):
     assert len(fig.axes) > 0  # Should show "Data not available"
 
 
-def test_plot_phase_comparison(plotter, fig):
+def test_plot_phase_comparison(plotter, fig) -> None:
+    """Test phase comparison plotting."""
     plotter.plot_phase_comparison(fig, joint_idx=0)
     assert len(fig.axes) > 0
 
@@ -123,7 +132,8 @@ def test_plot_phase_comparison(plotter, fig):
     assert len(fig.axes) == 1
 
 
-def test_plot_3d_trajectory_comparison(plotter, fig):
+def test_plot_3d_trajectory_comparison(plotter, fig) -> None:
+    """Test 3D trajectory comparison plotting."""
     plotter.plot_3d_trajectory_comparison(fig)
     assert len(fig.axes) > 0
     assert fig.axes[0].name == "3d"
@@ -135,7 +145,8 @@ def test_plot_3d_trajectory_comparison(plotter, fig):
     assert len(fig.axes) > 0  # Text axis
 
 
-def test_plot_dashboard(plotter, fig):
+def test_plot_dashboard(plotter, fig) -> None:
+    """Test full comparison dashboard plotting."""
     # This calls plot_comparison with subfigures
     # Note: Figure.add_subfigure is new in Matplotlib 3.4+
 
@@ -148,12 +159,14 @@ def test_plot_dashboard(plotter, fig):
     assert len(fig.subfigs) >= 2 or len(fig.axes) > 0
 
 
-def test_plot_comparison_with_joint_idx(plotter, fig):
+def test_plot_comparison_with_joint_idx(plotter, fig) -> None:
+    """Test comparison plotting with joint index selection."""
     plotter.plot_comparison(fig, "joint_positions", joint_idx=0)
     assert len(fig.axes) > 0
 
 
-def test_plot_comparison_no_metrics(plotter, fig):
+def test_plot_comparison_no_metrics(plotter, fig) -> None:
+    """Test dashboard plotting with empty metrics list."""
     plotter.analyzer.generate_comparison_report.return_value = {"metrics": []}
     plotter.plot_dashboard(fig)
     # Check that it didn't crash

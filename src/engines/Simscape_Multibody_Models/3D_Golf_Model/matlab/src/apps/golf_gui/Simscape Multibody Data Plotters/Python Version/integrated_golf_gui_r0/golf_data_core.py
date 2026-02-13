@@ -4,6 +4,8 @@ Golf Swing Visualizer - Core Data Structures and Processing
 High-performance data handling with optimized MATLAB loading and frame processing
 """
 
+from __future__ import annotations
+
 import logging
 import threading
 import time
@@ -188,7 +190,7 @@ class PerformanceStats:
     memory_usage_mb: float = 0.0
     frame_times: list[float] = field(default_factory=list)
 
-    def update_frame_time(self, frame_time: float):
+    def update_frame_time(self, frame_time: float) -> None:
         """Update frame timing statistics"""
         self.frame_times.append(frame_time)
         if len(self.frame_times) > 120:  # Keep last 2 seconds at 60fps
@@ -482,13 +484,13 @@ class FrameProcessor:
         # Track current frame for UI coordination
         self.current_frame = 0
 
-    def set_filter(self, filter_type: str):
+    def set_filter(self, filter_type: str) -> None:
         """Set the data filter and invalidate dynamics cache."""
         if filter_type != self.current_filter:
             self.current_filter = filter_type
             self.invalidate_cache()
 
-    def invalidate_cache(self):
+    def invalidate_cache(self) -> None:
         """Invalidate cached dynamics data."""
         with self._dynamics_cache_lock:
             self.dynamics_cache = {}
@@ -670,18 +672,18 @@ class FrameProcessor:
         """Get time vector."""
         return self.time_vector
 
-    def set_filter_type(self, filter_type: str):
+    def set_filter_type(self, filter_type: str) -> None:
         """Set the current filter type and invalidate cached filtered data"""
         self.set_filter(filter_type)  # Use existing method
 
-    def set_filter_param(self, param_name: str, value):
+    def set_filter_param(self, param_name: str, value) -> None:
         """Set a filter parameter and invalidate cached filtered data"""
         if not hasattr(self, "filter_params"):
             self.filter_params = {}
         self.filter_params[param_name] = value
         self.invalidate_cache()
 
-    def set_vector_visibility(self, vector_type: str, visible: bool):
+    def set_vector_visibility(self, vector_type: str, visible: bool) -> None:
         """Set visibility for calculated vector types"""
         if vector_type == "force":
             self.config.show_calculated_force = visible
@@ -689,7 +691,7 @@ class FrameProcessor:
             self.config.show_calculated_torque = visible
         # Update any other vector types as needed
 
-    def set_vector_scale(self, vector_type: str, scale: float):
+    def set_vector_scale(self, vector_type: str, scale: float) -> None:
         """Set scale for vector rendering"""
         if vector_type == "all":
             self.config.calculated_vector_scale = scale

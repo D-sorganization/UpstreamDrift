@@ -14,7 +14,7 @@ import scipy.io
 logger = logging.getLogger(__name__)
 
 
-def analyze_matlab_files():
+def analyze_matlab_files() -> bool:
     """Analyze the MATLAB data files to understand the current structure"""
     logger.debug("=== Analyzing MATLAB Data Files ===")
 
@@ -60,7 +60,7 @@ def analyze_matlab_files():
     return True
 
 
-def check_signal_bus_structure():
+def check_signal_bus_structure() -> bool:
     """Check if the data structure suggests signal bus logging"""
     logger.debug("\n=== Checking Signal Bus Structure ===")
 
@@ -104,7 +104,7 @@ def check_signal_bus_structure():
         return False
 
 
-def check_required_signals():
+def check_required_signals() -> bool:
     """Check if required signals for GUI are present"""
     logger.debug("\n=== Checking Required Signals ===")
 
@@ -149,7 +149,7 @@ def check_required_signals():
         return False
 
 
-def main():
+def main() -> bool:
     """Main analysis function"""
     logger.info("🚀 Starting Signal Bus Analysis")
     logger.info("=" * 50)

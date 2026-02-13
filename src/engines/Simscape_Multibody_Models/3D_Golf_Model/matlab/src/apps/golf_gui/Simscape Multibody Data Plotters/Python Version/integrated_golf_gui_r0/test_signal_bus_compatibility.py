@@ -16,7 +16,7 @@ from golf_data_core import MatlabDataLoader
 logger = logging.getLogger(__name__)
 
 
-def test_matlab_data_structure():
+def test_matlab_data_structure() -> bool:
     """Test the current MATLAB data structure to understand what's available"""
     logger.debug("=== Testing MATLAB Data Structure ===")
 
@@ -61,7 +61,7 @@ def test_matlab_data_structure():
     return True
 
 
-def test_data_loader():
+def test_data_loader() -> bool:
     """Test the MatlabDataLoader with the current data structure"""
     logger.debug("\n=== Testing MatlabDataLoader ===")
 
@@ -102,7 +102,7 @@ def test_data_loader():
         return False
 
 
-def test_frame_processor():
+def test_frame_processor() -> bool:
     """Test the FrameProcessor with the current data"""
     logger.debug("\n=== Testing FrameProcessor ===")
 
@@ -141,7 +141,7 @@ def test_frame_processor():
         return False
 
 
-def analyze_signal_bus_structure():
+def analyze_signal_bus_structure() -> bool:
     """Analyze the signal bus structure to understand the new logging setup"""
     logger.debug("\n=== Analyzing Signal Bus Structure ===")
 
@@ -186,7 +186,7 @@ def analyze_signal_bus_structure():
         return False
 
 
-def main():
+def main() -> bool:
     """Main test function"""
     logger.info("🚀 Starting Signal Bus Compatibility Test")
     logger.info("=" * 50)

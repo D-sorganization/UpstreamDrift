@@ -11,7 +11,7 @@ import scipy.io
 logger = logging.getLogger(__name__)
 
 
-def test_new_data_files():
+def test_new_data_files() -> bool:
     """Test the newly generated test data files"""
     logger.debug("=== Testing New Data Files ===")
 
@@ -49,7 +49,7 @@ def test_new_data_files():
     return False
 
 
-def main():
+def main() -> bool:
     """Main test function"""
     logger.info("🧪 Testing New Data Format Compatibility")
     logger.info("=" * 50)

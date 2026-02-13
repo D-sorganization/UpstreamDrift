@@ -1,5 +1,7 @@
 """Tests for drift-control decomposition (Guideline F - MANDATORY)."""
 
+from __future__ import annotations
+
 import mujoco
 import numpy as np
 import pytest
@@ -10,7 +12,7 @@ from mujoco_humanoid_golf.drift_control import (
 
 
 @pytest.fixture
-def simple_pendulum_model():
+def simple_pendulum_model() -> mujoco.MjModel:
     """Create simple pendulum for testing."""
     xml = """
     <mujoco>
@@ -32,7 +34,7 @@ def simple_pendulum_model():
 class TestDriftControlDecomposer:
     """Test drift-control decomposition implementation."""
 
-    def test_decomposer_initialization(self, simple_pendulum_model):
+    def test_decomposer_initialization(self, simple_pendulum_model) -> None:
         """Test decomposer creates private data structures."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -44,7 +46,7 @@ class TestDriftControlDecomposer:
         assert id(decomposer._data_drift) != id(decomposer._data_control)
         assert id(decomposer._data_drift) != id(decomposer._data_full)
 
-    def test_superposition_principle(self, simple_pendulum_model):
+    def test_superposition_principle(self, simple_pendulum_model) -> None:
         """Test that drift + control = full (Guideline F requirement)."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -68,7 +70,7 @@ class TestDriftControlDecomposer:
             f"Residual {result.residual:.2e} exceeds Guideline F tolerance 1e-5"
         )
 
-    def test_zero_control_gives_drift_only(self, simple_pendulum_model):
+    def test_zero_control_gives_drift_only(self, simple_pendulum_model) -> None:
         """Test that zero control gives drift-only acceleration."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -88,7 +90,7 @@ class TestDriftControlDecomposer:
             result.full_acceleration, result.drift_acceleration, atol=1e-6
         )
 
-    def test_zvcf_isolates_coriolis_from_gravity(self, simple_pendulum_model):
+    def test_zvcf_isolates_coriolis_from_gravity(self, simple_pendulum_model) -> None:
         """Test ZVCF: counterfactual has only gravity, observed has
         gravity + Coriolis.
         """
@@ -111,7 +113,9 @@ class TestDriftControlDecomposer:
             result.drift_acceleration, result.drift_gravity_component, atol=1e-6
         )
 
-    def test_gravity_acceleration_matches_mgL_sin_theta(self, simple_pendulum_model):
+    def test_gravity_acceleration_matches_mgL_sin_theta(
+        self, simple_pendulum_model
+    ) -> None:
         """Test gravity acceleration matches analytical solution."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -134,7 +138,7 @@ class TestDriftControlDecomposer:
             "Expected significant gravity acceleration at 30 degrees"
         )
 
-    def test_control_scales_with_torque(self, simple_pendulum_model):
+    def test_control_scales_with_torque(self, simple_pendulum_model) -> None:
         """Test that control acceleration scales linearly with applied torque."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -155,7 +159,7 @@ class TestDriftControlDecomposer:
         )
         assert 1.8 < ratio < 2.2, f"Expected ~2x scaling, got {ratio:.2f}x"
 
-    def test_trajectory_analysis(self, simple_pendulum_model):
+    def test_trajectory_analysis(self, simple_pendulum_model) -> None:
         """Test analyzing full trajectory."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -176,7 +180,7 @@ class TestDriftControlDecomposer:
                 f"Trajectory point failed superposition: residual={r.residual:.2e}"
             )
 
-    def test_decomposition_is_reproducible(self, simple_pendulum_model):
+    def test_decomposition_is_reproducible(self, simple_pendulum_model) -> None:
         """Test that decomposition gives same results with same inputs."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -199,13 +203,13 @@ class TestDriftControlPhysics:
 
     def test_passive_pendulum_drift_matches_energy_conservation(
         self, simple_pendulum_model
-    ):
+    ) -> None:
         """Test drift component matches energy-conserving motion."""
         pytest.skip("Requires energy calculation utilities - implement in follow-up")
 
         # (modulo damping losses if present)
 
-    def test_control_enables_upward_swing(self, simple_pendulum_model):
+    def test_control_enables_upward_swing(self, simple_pendulum_model) -> None:
         """Test that control can drive pendulum upward against gravity."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 

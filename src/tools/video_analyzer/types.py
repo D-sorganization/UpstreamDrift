@@ -5,6 +5,8 @@ These types mirror the TypeScript definitions used in the web frontend
 for consistent data exchange between Python backend and JavaScript frontend.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -265,7 +267,7 @@ class SwingAnalysis:
         return convert(self)
 
     @classmethod
-    def from_dict(cls, data: dict) -> "SwingAnalysis":
+    def from_dict(cls, data: dict) -> SwingAnalysis:
         """Create from dictionary (e.g., from JSON)."""
         # This would need full implementation for production
         return cls(**data)

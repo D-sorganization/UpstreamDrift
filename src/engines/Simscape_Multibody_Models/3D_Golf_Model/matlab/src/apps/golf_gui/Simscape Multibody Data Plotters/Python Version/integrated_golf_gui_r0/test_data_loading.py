@@ -3,6 +3,8 @@
 Test script to verify data loading and GUI functionality
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 
@@ -13,7 +15,7 @@ from wiffle_data_loader import WiffleDataLoader
 logger = logging.getLogger(__name__)
 
 
-def test_data_loading():
+def test_data_loading() -> dict | None:
     """Test the data loading functionality"""
     logger.info("🧪 Testing data loading...")
 
@@ -37,7 +39,7 @@ def test_data_loading():
         return None
 
 
-def test_gui_launch():
+def test_gui_launch() -> bool:
     """Test launching the GUI"""
     logger.info("🧪 Testing GUI launch...")
 
