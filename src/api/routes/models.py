@@ -17,6 +17,8 @@ from xml.etree import ElementTree
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.shared.python.core.contracts import precondition
+
 from ..dependencies import get_logger
 from ..models.responses import (
     ModelListResponse,
@@ -162,6 +164,10 @@ def _parse_urdf_geometry(visual_elem: Any, materials: dict[str, list[float]]) ->
     return result
 
 
+@precondition(
+    lambda urdf_content: urdf_content is not None and len(urdf_content) > 0,
+    "URDF content must be a non-empty string",
+)
 def _parse_urdf(urdf_content: str) -> URDFModelResponse:
     """Parse a URDF XML string into a URDFModelResponse.
 

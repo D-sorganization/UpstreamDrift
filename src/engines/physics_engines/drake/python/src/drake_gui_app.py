@@ -18,6 +18,7 @@ from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
+from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 
 # Use centralized availability flags
@@ -134,8 +135,8 @@ SLIDER_RANGE_MAX = 314
 INITIAL_PELVIS_HEIGHT_M = 1.0
 
 # Styles
-STYLE_BUTTON_RUN = "QPushButton { background-color: #4CAF50; color: white; }"
-STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
+STYLE_BUTTON_RUN = Styles.BTN_RUN
+STYLE_BUTTON_STOP = Styles.BTN_STOP
 
 # Logger
 LOGGER = get_logger(__name__)

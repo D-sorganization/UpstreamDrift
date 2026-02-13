@@ -23,6 +23,8 @@ from model_generation.core.types import (
     Origin,
 )
 
+from src.shared.python.core.contracts import precondition
+
 logger = logging.getLogger(__name__)
 
 
@@ -88,6 +90,10 @@ class MJCFConverter:
         self.config = config or MJCFConfig()
         self._urdf_parser = URDFParser()
 
+    @precondition(
+        lambda self, source, output_path=None: source is not None,
+        "Source must not be None",
+    )
     def urdf_to_mjcf(
         self,
         source: str | Path | ParsedModel,
@@ -117,6 +123,10 @@ class MJCFConverter:
 
         return mjcf_xml
 
+    @precondition(
+        lambda self, source, output_path=None: source is not None,
+        "Source must not be None",
+    )
     def mjcf_to_urdf(
         self,
         source: str | Path,

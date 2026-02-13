@@ -430,9 +430,11 @@ class TestDatasetExport:
     def test_export_invalid_format_raises(
         self, generator: DatasetGenerator, basic_config: GeneratorConfig
     ) -> None:
-        """Test that invalid export format raises ValueError."""
+        """Test that invalid export format raises error."""
+        from src.shared.python.core.contracts import PreconditionError
+
         dataset = generator.generate(basic_config)
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with pytest.raises(ValueError, match="Unsupported export format"):
+            with pytest.raises((ValueError, PreconditionError)):
                 generator.export(dataset, Path(tmpdir) / "test", format="invalid")

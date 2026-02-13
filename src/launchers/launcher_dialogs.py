@@ -30,6 +30,7 @@ from src.launchers.ui_components import (
     SettingsDialog,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 if TYPE_CHECKING:
     pass
@@ -293,23 +294,12 @@ class LauncherDialogsMixin:
         self.layout_manager.set_edit_mode(checked)
         if checked:
             self.btn_modify_layout.setText("Edit Mode On")
-            self.btn_modify_layout.setStyleSheet("""
-                QPushButton {
-                    background-color: #007acc;
-                    color: white;
-                    border: 1px solid #0099ff;
-                }
-                """)
+            self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_EDIT_ON)
             self.btn_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
         else:
             self.btn_modify_layout.setText("Layout Locked")
-            self.btn_modify_layout.setStyleSheet("""
-                QPushButton {
-                    background-color: #444444;
-                    color: #cccccc;
-                }
-                """)
+            self.btn_modify_layout.setStyleSheet(Styles.BTN_LAYOUT_LOCKED)
             self.btn_customize_tiles.setEnabled(False)
 
     def _on_docker_mode_changed(self, state: int) -> None:
@@ -418,16 +408,10 @@ class LauncherDialogsMixin:
 
         if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
             self.lbl_execution_mode.setText("Mode: WSL (Ubuntu)")
-            self.lbl_execution_mode.setStyleSheet(
-                "color: #30D158; font-weight: bold; margin-left: 10px;"
-            )
+            self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
             self.lbl_execution_mode.setText("Mode: Docker Container")
-            self.lbl_execution_mode.setStyleSheet(
-                "color: #30D158; font-weight: bold; margin-left: 10px;"
-            )
+            self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         else:
             self.lbl_execution_mode.setText("Mode: Local (Windows)")
-            self.lbl_execution_mode.setStyleSheet(
-                "color: #FFD60A; font-weight: bold; margin-left: 10px;"
-            )
+            self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)

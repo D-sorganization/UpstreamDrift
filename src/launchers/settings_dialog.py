@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
 
 from src.launchers.docker_manager import DockerBuildThread
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 from .startup import REPOS_ROOT
 
@@ -95,10 +96,7 @@ class SettingsDialog(QDialog):
         self._btn_layout_lock = QPushButton("Layout: Locked")
         self._btn_layout_lock.setCheckable(True)
         self._btn_layout_lock.setChecked(False)
-        self._btn_layout_lock.setStyleSheet(
-            "QPushButton { background: #444; color: #ccc; padding: 8px 16px; }"
-            "QPushButton:checked { background: #007acc; color: white; }"
-        )
+        self._btn_layout_lock.setStyleSheet(Styles.BTN_LAYOUT_TOGGLE)
         inner.addWidget(self._btn_layout_lock)
 
         self._btn_edit_tiles = QPushButton("Edit Tiles (show/hide)")
@@ -196,10 +194,7 @@ class SettingsDialog(QDialog):
         self.build_console = QTextEdit()
         self.build_console.setReadOnly(True)
         self.build_console.setMaximumHeight(150)
-        self.build_console.setStyleSheet(
-            "background-color: #1e1e1e; color: #00ff00;"
-            "font-family: 'Cascadia Code', Consolas, monospace; font-size: 11px;"
-        )
+        self.build_console.setStyleSheet(Styles.CONSOLE_BUILD)
         build_inner.addWidget(self.build_console)
 
         tab_layout.addWidget(build_group)
@@ -229,13 +224,7 @@ class SettingsDialog(QDialog):
         # System checks browser
         self._diag_browser = QTextBrowser()
         self._diag_browser.setOpenExternalLinks(False)
-        self._diag_browser.setStyleSheet(
-            "QTextBrowser {"
-            "  background-color: #1e1e1e; color: #d4d4d4;"
-            "  font-family: 'Segoe UI', sans-serif; font-size: 13px;"
-            "  padding: 12px;"
-            "}"
-        )
+        self._diag_browser.setStyleSheet(Styles.CONSOLE_DIAGNOSTICS)
         tab_layout.addWidget(self._diag_browser, stretch=3)
 
         if self._diagnostics_data:
@@ -247,13 +236,7 @@ class SettingsDialog(QDialog):
         self._proc_log_viewer = QTextEdit()
         self._proc_log_viewer.setReadOnly(True)
         self._proc_log_viewer.setMaximumHeight(180)
-        self._proc_log_viewer.setStyleSheet(
-            "QTextEdit {"
-            "  background-color: #0d0d0d; color: #00ff00;"
-            "  font-family: 'Cascadia Code', Consolas, monospace;"
-            "  font-size: 11px;"
-            "}"
-        )
+        self._proc_log_viewer.setStyleSheet(Styles.CONSOLE_LOG_GREEN)
         proc_inner.addWidget(self._proc_log_viewer)
         tab_layout.addWidget(proc_group, stretch=1)
 
@@ -263,13 +246,7 @@ class SettingsDialog(QDialog):
         self._log_viewer = QTextEdit()
         self._log_viewer.setReadOnly(True)
         self._log_viewer.setMaximumHeight(160)
-        self._log_viewer.setStyleSheet(
-            "QTextEdit {"
-            "  background-color: #0d0d0d; color: #d4d4d4;"
-            "  font-family: 'Cascadia Code', Consolas, monospace;"
-            "  font-size: 11px;"
-            "}"
-        )
+        self._log_viewer.setStyleSheet(Styles.CONSOLE_LOG_LIGHT)
         log_inner.addWidget(self._log_viewer)
         tab_layout.addWidget(log_group, stretch=1)
 

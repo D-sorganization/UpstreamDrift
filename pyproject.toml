@@ -241,3 +241,49 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
+
+# ---------------------------------------------------------------------------
+# Coverage configuration (pytest-cov / coverage.py)
+# Run with:  pytest --cov   (flags are NOT baked into addopts so that plain
+#            pytest still works without the coverage plugin installed)
+# ---------------------------------------------------------------------------
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/vendor/*",
+    "*/archive/*",
+    "*/legacy/*",
+    "*/node_modules/*",
+    "*/migrations/*",
+    "*/conftest.py",
+    # Third-party / vendored model files
+    "src/shared/models/opensim/opensim-models/*",
+    "src/shared/models/myosuite/*",
+]
+
+[tool.coverage.report]
+# Coverage threshold: start at 0 so CI is not blocked; enforce locally or
+# in a dedicated coverage-gate job with:
+#   pytest --cov=src --cov-fail-under=50
+# Raise the value here once coverage consistently exceeds the target.
+fail_under = 0
+show_missing = true
+skip_empty = true
+precision = 1
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.",
+    "raise NotImplementedError",
+    "pass",
+    "except ImportError",
+    "if TYPE_CHECKING:",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"

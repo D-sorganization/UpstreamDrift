@@ -9,6 +9,7 @@ from typing import Any
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
 
 from ...control_system import ControlSystem, ControlType
 from ...polynomial_generator import PolynomialGeneratorWidget
@@ -106,10 +107,7 @@ class ControlsTab(QtWidgets.QWidget):
         self.record_btn.setCheckable(True)
         self.record_btn.toggled.connect(self.on_record_toggled)
         self.record_btn.setToolTip("Record simulation data for analysis and export")
-        self.record_btn.setStyleSheet(
-            "QPushButton:checked { background-color: #d62728; color: white; "
-            "font-weight: bold; }"
-        )
+        self.record_btn.setStyleSheet(Styles.BTN_RECORD_CHECKED)
 
         buttons_layout.addWidget(self.play_pause_btn, 0, 0)
         buttons_layout.addWidget(self.reset_btn, 0, 1)
@@ -120,7 +118,7 @@ class ControlsTab(QtWidgets.QWidget):
         # Recording info
         self.recording_label = QtWidgets.QLabel("Not recording")
         self.recording_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.recording_label.setStyleSheet("font-weight: bold; padding: 5px;")
+        self.recording_label.setStyleSheet(Styles.RECORDING_IDLE)
         main_layout.addWidget(self.recording_label)
 
         # Real-time analysis toggle
@@ -293,9 +291,7 @@ class ControlsTab(QtWidgets.QWidget):
                 "Large musculoskeletal model detected. Showing simplified "
                 "actuator controls."
             )
-            self._simplified_notice.setStyleSheet(
-                "background-color: #fff3cd; padding: 6px;"
-            )
+            self._simplified_notice.setStyleSheet(Styles.NOTICE_WARNING)
             self.actuator_layout.addWidget(self._simplified_notice)
 
         for group_name, actuators in groups.items():

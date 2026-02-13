@@ -14,6 +14,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_availability import (
     C3D_AVAILABLE,
     EZC3D_AVAILABLE,
@@ -34,6 +35,15 @@ if H5PY_AVAILABLE:
     import h5py
 
 
+@precondition(
+    lambda output_path, data_dict, compress=True: output_path is not None
+    and len(output_path) > 0,
+    "Output path must be a non-empty string",
+)
+@precondition(
+    lambda output_path, data_dict, compress=True: data_dict is not None,
+    "Data dictionary must not be None",
+)
 def export_to_matlab(
     output_path: str,
     data_dict: dict[str, Any],
@@ -83,6 +93,15 @@ def export_to_matlab(
         return False
 
 
+@precondition(
+    lambda output_path, data_dict, compression="gzip": output_path is not None
+    and len(output_path) > 0,
+    "Output path must be a non-empty string",
+)
+@precondition(
+    lambda output_path, data_dict, compression="gzip": data_dict is not None,
+    "Data dictionary must not be None",
+)
 def export_to_hdf5(
     output_path: str,
     data_dict: dict[str, Any],
@@ -145,6 +164,28 @@ def export_to_hdf5(
         return False
 
 
+@precondition(
+    lambda output_path,
+    times,
+    joint_positions,
+    joint_names,
+    forces=None,
+    moments=None,
+    frame_rate=60.0,
+    units=None: output_path is not None and len(output_path) > 0,
+    "Output path must be a non-empty string",
+)
+@precondition(
+    lambda output_path,
+    times,
+    joint_positions,
+    joint_names,
+    forces=None,
+    moments=None,
+    frame_rate=60.0,
+    units=None: frame_rate > 0,
+    "Frame rate must be positive",
+)
 def export_to_c3d(
     output_path: str,
     times: np.ndarray,

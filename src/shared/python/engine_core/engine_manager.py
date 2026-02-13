@@ -7,10 +7,12 @@ including MuJoCo, Drake, Pinocchio, OpenSim, MATLAB models, and pendulum models.
 OBS-001: Migrated to structured logging with structlog for better observability.
 """
 
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 from typing import Any
 
+from ..core.contracts import ContractChecker
 from ..data_io.common_utils import (
     GolfModelingError,
     get_logger,
@@ -30,11 +32,37 @@ setup_structured_logging()
 logger = get_logger(__name__)
 
 
-class EngineManager:
+class EngineManager(ContractChecker):
     """Manages different physics engines for golf swing modeling.
 
     Refactored to use EngineRegistry (Decoupling Phase).
+
+    Design by Contract:
+        Invariants:
+            - engine_status dict is never None
+            - engine_paths dict is never None
+            - suite_root is a valid Path object
     """
+
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
+        """Define class invariants for EngineManager."""
+        return [
+            (
+                lambda: self.engine_status is not None
+                and isinstance(self.engine_status, dict),
+                "engine_status must be a non-None dict",
+            ),
+            (
+                lambda: self.engine_paths is not None
+                and isinstance(self.engine_paths, dict),
+                "engine_paths must be a non-None dict",
+            ),
+            (
+                lambda: self.suite_root is not None
+                and isinstance(self.suite_root, Path),
+                "suite_root must be a valid Path",
+            ),
+        ]
 
     def __init__(self, suite_root: Path | None = None) -> None:
         """Initialize the engine manager.

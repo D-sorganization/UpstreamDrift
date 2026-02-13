@@ -60,6 +60,7 @@ from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
     configure_gui_logging,
     get_logger,
 )
+from src.shared.python.theme.style_constants import Styles
 from src.shared.python.ui.qt.process_worker import ProcessWorker  # noqa: E402
 
 # Use centralized availability flag
@@ -297,9 +298,7 @@ class HumanoidLauncher(QMainWindow):
 
         header_label = QLabel("Humanoid Golf Simulation")
 
-        header_label.setStyleSheet(
-            "font-size: 24px; font-weight: bold; color: #ffffff;"
-        )
+        header_label.setStyleSheet(Styles.HEADER_TITLE_LARGE)
 
         header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -307,7 +306,7 @@ class HumanoidLauncher(QMainWindow):
 
         subtitle_label = QLabel("Advanced biomechanical golf swing analysis")
 
-        subtitle_label.setStyleSheet("font-size: 14px; color: #cccccc;")
+        subtitle_label.setStyleSheet(Styles.HEADER_SUBTITLE)
 
         subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -369,12 +368,7 @@ class HumanoidLauncher(QMainWindow):
 
         settings_group = QGroupBox("Simulation Settings")
 
-        settings_group.setStyleSheet(
-            "QGroupBox { font-weight: bold; border: 1px solid #555; "
-            "margin-top: 10px; }\n"
-            "QGroupBox::title { subcontrol-origin: margin; left: 10px; "
-            "padding: 0 5px; }"
-        )
+        settings_group.setStyleSheet(Styles.GROUPBOX_DARK)
 
         settings_layout = QGridLayout()
 
@@ -384,17 +378,13 @@ class HumanoidLauncher(QMainWindow):
 
         self.btn_poly_generator = QPushButton("📊 Polynomial Generator")
 
-        self.btn_poly_generator.setStyleSheet(
-            "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
-        )
+        self.btn_poly_generator.setStyleSheet(Styles.BTN_POLY_GENERATOR)
 
         self.btn_poly_generator.clicked.connect(self.open_polynomial_generator)
 
         self.btn_signal_toolkit = QPushButton("🔧 Signal Toolkit")
 
-        self.btn_signal_toolkit.setStyleSheet(
-            "background-color: #6b5b95; color: white; padding: 8px; font-weight: bold;"
-        )
+        self.btn_signal_toolkit.setStyleSheet(Styles.BTN_SIGNAL_TOOLKIT)
 
         self.btn_signal_toolkit.clicked.connect(self.open_signal_toolkit)
 
@@ -410,9 +400,7 @@ class HumanoidLauncher(QMainWindow):
 
         self.mode_help_label = QLabel()
 
-        self.mode_help_label.setStyleSheet(
-            "color: #aaa; font-style: italic; font-size: 11px;"
-        )
+        self.mode_help_label.setStyleSheet(Styles.TEXT_HELP_HINT)
 
         self.mode_help_label.setWordWrap(True)
 
@@ -453,12 +441,7 @@ class HumanoidLauncher(QMainWindow):
 
         state_group = QGroupBox("State Management")
 
-        state_group.setStyleSheet(
-            "QGroupBox { font-weight: bold; border: 1px solid #555; "
-            "margin-top: 10px; }\n"
-            "QGroupBox::title { subcontrol-origin: margin; left: 10px; "
-            "padding: 0 5px; }"
-        )
+        state_group.setStyleSheet(Styles.GROUPBOX_DARK)
 
         state_layout = QGridLayout()
 
@@ -503,19 +486,13 @@ class HumanoidLauncher(QMainWindow):
 
         self.btn_run = QPushButton("RUN SIMULATION")
 
-        self.btn_run.setStyleSheet(
-            "background-color: #107c10; color: white;"
-            "padding: 12px; font-weight: bold; font-size: 14px;"
-        )
+        self.btn_run.setStyleSheet(Styles.BTN_DOCKER_RUN)
 
         self.btn_run.clicked.connect(self.start_simulation)
 
         self.btn_stop = QPushButton("STOP")
 
-        self.btn_stop.setStyleSheet(
-            "background-color: #d13438; color: white;"
-            "padding: 12px; font-weight: bold; font-size: 14px;"
-        )
+        self.btn_stop.setStyleSheet(Styles.BTN_DOCKER_STOP)
 
         self.btn_stop.setEnabled(False)
 
@@ -523,9 +500,7 @@ class HumanoidLauncher(QMainWindow):
 
         self.btn_rebuild = QPushButton("UPDATE ENV")
 
-        self.btn_rebuild.setStyleSheet(
-            "background-color: #8b5cf6; color: white;padding: 12px; font-weight: bold;"
-        )
+        self.btn_rebuild.setStyleSheet(Styles.BTN_DOCKER_REBUILD)
 
         self.btn_rebuild.clicked.connect(self.rebuild_docker)
 
@@ -684,9 +659,7 @@ class HumanoidLauncher(QMainWindow):
 
         btn_save = QPushButton("💾 Save Appearance Settings")
 
-        btn_save.setStyleSheet(
-            "background-color: #107c10; color: white; padding: 10px;"
-        )
+        btn_save.setStyleSheet(Styles.BTN_SAVE)
 
         btn_save.clicked.connect(self.save_config)
 
@@ -781,9 +754,7 @@ class HumanoidLauncher(QMainWindow):
 
         btn_save = QPushButton("Save Equipment Settings")
 
-        btn_save.setStyleSheet(
-            "background-color: #107c10; color: white; padding: 10px;"
-        )
+        btn_save.setStyleSheet(Styles.BTN_SAVE)
 
         btn_save.clicked.connect(self.save_config)
 
@@ -816,10 +787,7 @@ class HumanoidLauncher(QMainWindow):
 
         self.txt_log.setReadOnly(True)
 
-        self.txt_log.setStyleSheet(
-            "background-color: #1e1e1e; color: #ddd;"
-            "font-family: Consolas; font-size: 10pt;"
-        )
+        self.txt_log.setStyleSheet(Styles.CONSOLE_LOG_DARK)
 
         log_layout.addWidget(self.txt_log)
 
@@ -863,9 +831,7 @@ class HumanoidLauncher(QMainWindow):
     def set_btn_color(self, btn: QPushButton, rgba: Sequence[float]) -> None:
         r, g, b = (int(c * 255) for c in rgba[:3])
 
-        btn.setStyleSheet(
-            f"background-color: rgb({r},{g},{b}); border: 1px solid #555;"
-        )
+        btn.setStyleSheet(Styles.color_swatch(r, g, b))
 
     def pick_color(self, key: str, btn: QPushButton) -> None:
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])

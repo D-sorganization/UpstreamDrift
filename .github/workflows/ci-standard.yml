@@ -133,13 +133,22 @@ jobs:
           # - Parallel execution (-n auto)
           # - 60 second timeout per test
           # - Skip slow tests in CI for faster feedback
+          # - Coverage measurement on src/ (pytest-cov)
           xvfb-run --auto-servernum pytest \
             -n auto \
             --timeout=60 \
             --timeout-method=thread \
             -m "not slow and not benchmark and not requires_gl" \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-config=pyproject.toml \
             --tb=short \
             -v
+          # NOTE: --cov-fail-under is NOT passed here so coverage
+          # does not block CI yet.  The threshold lives in
+          # [tool.coverage.report] and can be enforced locally or
+          # in a dedicated coverage-gate job later.
 
       # Cross-Engine Validator Unit Tests (C-001 Remediation)
       # These run on every PR to catch framework issues immediately
@@ -165,6 +174,7 @@ jobs:
         with:
           fail_ci_if_error: false # Do not block if token is missing
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
 
   frontend-tests:
     needs: quality-gate

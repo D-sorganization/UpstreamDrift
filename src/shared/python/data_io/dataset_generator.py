@@ -41,6 +41,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -323,6 +324,18 @@ class DatasetGenerator:
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
 
+    @precondition(
+        lambda self, config, progress_callback=None: config is not None,
+        "Generator config must not be None",
+    )
+    @precondition(
+        lambda self, config, progress_callback=None: config.num_samples > 0,
+        "Number of samples must be positive",
+    )
+    @precondition(
+        lambda self, config, progress_callback=None: config.timestep > 0,
+        "Timestep must be positive",
+    )
     def generate(
         self,
         config: GeneratorConfig,
@@ -1021,6 +1034,20 @@ class DatasetGenerator:
         logger.info("Exported dataset to CSV: %s", output_dir)
         return output_dir
 
+    @precondition(
+        lambda self, dataset, output_path, format="hdf5": dataset is not None,
+        "Dataset must not be None",
+    )
+    @precondition(
+        lambda self, dataset, output_path, format="hdf5": output_path is not None
+        and len(str(output_path)) > 0,
+        "Output path must be a non-empty string or Path",
+    )
+    @precondition(
+        lambda self, dataset, output_path, format="hdf5": format
+        in ("hdf5", "sqlite", "db", "csv"),
+        "Export format must be one of: hdf5, sqlite, db, csv",
+    )
     def export(
         self,
         dataset: TrainingDataset,
