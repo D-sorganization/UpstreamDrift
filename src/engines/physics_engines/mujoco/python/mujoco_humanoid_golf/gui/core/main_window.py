@@ -174,7 +174,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         return []
 
     @property
-    def model_combo(self) -> QtWidgets.QComboBox | None:
+    def model_combo(self) -> QtWidgets.QComboBox | None:  # type: ignore[override]
         """Expose model combo from PhysicsTab for mixin compatibility."""
         if hasattr(self, "physics_tab"):
             return self.physics_tab.model_combo
@@ -472,7 +472,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def step_simulation(self) -> None:
         """Advance the MuJoCo simulation by one step."""
-        self.sim_widget.step()
+        self.sim_widget.step()  # type: ignore[attr-defined]
 
     def reset_simulation(self) -> None:
         """Reset the MuJoCo simulation state."""
@@ -490,7 +490,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def sync_kinematic_controls(self) -> None:
         """Synchronize kinematic slider values with model state."""
         if hasattr(self, "manipulation_tab"):
-            self.manipulation_tab.sync_sliders()
+            self.manipulation_tab.sync_sliders()  # type: ignore[attr-defined]
 
     def start_recording(self) -> None:
         """Start recording simulation data."""

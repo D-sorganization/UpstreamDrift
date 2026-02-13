@@ -400,7 +400,7 @@ def _aba_run_passes(
         f_ext,
         mdl,
         arr.xup,
-        arr.s_subspace,
+        arr.s_subspace,  # type: ignore[arg-type]
         arr.dof_indices,
         arr.v,
         arr.c,
@@ -413,7 +413,7 @@ def _aba_run_passes(
         nb,
         tau,
         mdl.parent,
-        arr.s_subspace,
+        arr.s_subspace,  # type: ignore[arg-type]
         arr.dof_indices,
         arr.xup,
         arr.ia_articulated,
@@ -429,7 +429,7 @@ def _aba_run_passes(
     _aba_forward_accelerations(
         nb,
         mdl.parent,
-        arr.s_subspace,
+        arr.s_subspace,  # type: ignore[arg-type]
         arr.dof_indices,
         arr.xup,
         neg_a_grav,

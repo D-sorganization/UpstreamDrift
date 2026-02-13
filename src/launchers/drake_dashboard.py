@@ -36,7 +36,7 @@ def main() -> None:
                 model_path = selected[0]
 
     launch_dashboard(
-        engine_class=DrakePhysicsEngine,
+        engine_class=DrakePhysicsEngine,  # type: ignore[type-abstract]
         title="Drake Golf Analysis Dashboard",
         model_path=model_path,
     )

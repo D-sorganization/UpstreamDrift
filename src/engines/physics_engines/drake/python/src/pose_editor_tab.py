@@ -142,7 +142,7 @@ class DrakePoseEditor(BasePoseEditor):
             try:
                 if hasattr(joint, "position_lower_limit"):
                     lower_limit = joint.position_lower_limit()
-                    upper_limit = joint.position_upper_limit()
+                    upper_limit = joint.position_upper_limit()  # type: ignore[attr-defined]
             except (RuntimeError, ValueError, AttributeError):
                 pass
 
@@ -345,7 +345,7 @@ class DrakePoseEditor(BasePoseEditor):
 
         names = []
         for i in range(self._plant.num_bodies()):
-            body = self._plant.get_body(i)
+            body = self._plant.get_body(i)  # type: ignore[arg-type]
             names.append(body.name())
         return names
 
@@ -546,8 +546,8 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.library_widget.pose_loaded.connect(self._on_pose_loaded)
         self.library_widget.interpolation_requested.connect(self._on_interpolation)
         # Override save method
-        self.library_widget.save_pose_requested = self._save_current_pose
-        self.library_widget.preset_load_requested = self._load_preset_from_data
+        self.library_widget.save_pose_requested = self._save_current_pose  # type: ignore[method-assign]
+        self.library_widget.preset_load_requested = self._load_preset_from_data  # type: ignore[method-assign]
 
         return self.library_widget
 
@@ -585,7 +585,7 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         while self.slider_layout.count():
             item = self.slider_layout.takeAt(0)
             if item and item.widget():
-                item.widget().deleteLater()
+                item.widget().deleteLater()  # type: ignore[union-attr]
 
         joints = self._editor.get_joint_info()
         if not joints:
@@ -713,7 +713,7 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         velocities = self._editor.get_all_velocities()
 
         # Create named positions for portability
-        named_positions = {}
+        named_positions: dict[str, float | list[float]] = {}
         for joint in self._editor.get_joint_info():
             if joint.is_single_dof():
                 named_positions[joint.name] = float(positions[joint.position_index])

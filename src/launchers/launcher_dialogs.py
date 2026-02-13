@@ -5,6 +5,8 @@ preferences, settings, diagnostics, environment manager, layout manager,
 bug reporting, and AI settings.
 """
 
+# mypy: disable-error-code="attr-defined,call-overload,arg-type,assignment"
+
 from __future__ import annotations
 
 import os

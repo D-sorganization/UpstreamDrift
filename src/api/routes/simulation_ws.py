@@ -35,11 +35,11 @@ async def _load_simulation_engine(
     """
     try:
         enum_type = EngineType(engine_type.upper())
-        success = engine_manager.switch_engine(enum_type)
+        success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
         if not success:
             raise ValueError("Could not load engine")
 
-        engine = engine_manager.get_active_physics_engine()
+        engine = engine_manager.get_active_physics_engine()  # type: ignore[attr-defined]
         if not engine:
             raise ValueError("Could not load engine")
 

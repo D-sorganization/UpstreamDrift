@@ -139,9 +139,9 @@ class TestBallFlightProperties:
 
         # Drag should oppose relative velocity (zero wind => relative = velocity)
         dot = float(np.dot(drag, velocity))
-        assert dot <= 1e-10, (
-            f"Drag should oppose velocity: dot={dot}, drag={drag}, vel={velocity}"
-        )
+        assert (
+            dot <= 1e-10
+        ), f"Drag should oppose velocity: dot={dot}, drag={drag}, vel={velocity}"
 
     @given(
         velocity=nonzero_velocity,
@@ -273,9 +273,9 @@ class TestBallFlightProperties:
             return
 
         ratio = drag_scaled_mag / drag_base_mag
-        assert abs(ratio - density_factor) < 0.01, (
-            f"Drag should scale by {density_factor}, got ratio {ratio}"
-        )
+        assert (
+            abs(ratio - density_factor) < 0.01
+        ), f"Drag should scale by {density_factor}, got ratio {ratio}"
 
 
 # ============================================================================
@@ -318,15 +318,15 @@ class TestPhaseDetectionProperties:
 
         # Check that first phase starts at or before time[0]
         first_start = phases[0].start_time
-        assert first_start <= times[0] + 1e-10, (
-            f"First phase start {first_start} should be <= {times[0]}"
-        )
+        assert (
+            first_start <= times[0] + 1e-10
+        ), f"First phase start {first_start} should be <= {times[0]}"
 
         # Check that last phase ends at or after the last time
         last_end = phases[-1].end_time
-        assert last_end >= times[-1] - 1e-10, (
-            f"Last phase end {last_end} should be >= {times[-1]}"
-        )
+        assert (
+            last_end >= times[-1] - 1e-10
+        ), f"Last phase end {last_end} should be >= {times[-1]}"
 
     @given(
         n_points=st.integers(min_value=50, max_value=500),
@@ -387,12 +387,12 @@ class TestPhaseDetectionProperties:
         phases = detector.detect_swing_phases()
 
         for phase in phases:
-            assert phase.duration >= 0.0, (
-                f"Phase '{phase.name}' has negative duration: {phase.duration}"
-            )
-            assert phase.end_time >= phase.start_time, (
-                f"Phase '{phase.name}' end_time={phase.end_time} < start_time={phase.start_time}"
-            )
+            assert (
+                phase.duration >= 0.0
+            ), f"Phase '{phase.name}' has negative duration: {phase.duration}"
+            assert (
+                phase.end_time >= phase.start_time
+            ), f"Phase '{phase.name}' end_time={phase.end_time} < start_time={phase.start_time}"
 
 
 # ============================================================================
@@ -429,9 +429,9 @@ class TestSwingOptimizerConfigProperties:
         bounds = optimizer._get_bounds()
 
         for i, (lo, hi) in enumerate(bounds):
-            assert lo <= hi, (
-                f"Bound index {i}: lower={lo} > upper={hi} (flexibility={flexibility})"
-            )
+            assert (
+                lo <= hi
+            ), f"Bound index {i}: lower={lo} > upper={hi} (flexibility={flexibility})"
 
     @given(
         # flexibility_factor >= 1.0 ensures scaled bounds encompass the raw
@@ -478,17 +478,17 @@ class TestSwingOptimizerConfigProperties:
         x0 = optimizer._generate_initial_guess()
         bounds = optimizer._get_bounds()
 
-        assert len(x0) == len(bounds), (
-            f"Initial guess length {len(x0)} != bounds length {len(bounds)}"
-        )
+        assert len(x0) == len(
+            bounds
+        ), f"Initial guess length {len(x0)} != bounds length {len(bounds)}"
 
         n_angle_vars = len(optimizer.JOINTS) * n_nodes
         # Angle portion: must be strictly within joint-limit bounds
         for i in range(n_angle_vars):
             lo, hi = bounds[i]
-            assert lo - 1e-6 <= x0[i] <= hi + 1e-6, (
-                f"Angle x0[{i}]={x0[i]} not in [{lo}, {hi}]"
-            )
+            assert (
+                lo - 1e-6 <= x0[i] <= hi + 1e-6
+            ), f"Angle x0[{i}]={x0[i]} not in [{lo}, {hi}]"
 
 
 # ============================================================================
@@ -503,9 +503,9 @@ class TestPhysicalConstantsProperties:
         """Property: gravity is within the expected range (9.7 to 9.9 m/s^2)."""
         g = float(physics_constants.GRAVITY_M_S2)
         assert 9.7 < g < 9.9, f"Gravity={g} outside expected range [9.7, 9.9]"
-        assert g == pytest.approx(9.80665, abs=1e-5), (
-            f"Gravity={g} should be standard gravity 9.80665"
-        )
+        assert g == pytest.approx(
+            9.80665, abs=1e-5
+        ), f"Gravity={g} should be standard gravity 9.80665"
 
     def test_all_physical_constants_positive_and_finite(self) -> None:
         """Property: all physical constants defined via PhysicalConstant are positive and finite."""
@@ -520,9 +520,9 @@ class TestPhysicalConstantsProperties:
                 constants_checked += 1
 
         # Ensure we actually checked a meaningful number of constants
-        assert constants_checked >= 10, (
-            f"Only checked {constants_checked} constants; expected at least 10"
-        )
+        assert (
+            constants_checked >= 10
+        ), f"Only checked {constants_checked} constants; expected at least 10"
 
     def test_precomputed_floats_match_source_constants(self) -> None:
         """Property: pre-computed float values match their source constants."""
@@ -574,17 +574,17 @@ class TestPhysicalConstantsProperties:
 
         # deg -> rad -> deg should roundtrip
         roundtripped = value * deg_to_rad * rad_to_deg
-        assert roundtripped == pytest.approx(value, rel=1e-10), (
-            f"DEG->RAD->DEG roundtrip: {value} -> {roundtripped}"
-        )
+        assert roundtripped == pytest.approx(
+            value, rel=1e-10
+        ), f"DEG->RAD->DEG roundtrip: {value} -> {roundtripped}"
 
         ft_to_m = float(physics_constants.FT_TO_M)
         m_to_ft = float(physics_constants.M_TO_FT)
 
         roundtripped_ft = value * ft_to_m * m_to_ft
-        assert roundtripped_ft == pytest.approx(value, rel=1e-6), (
-            f"FT->M->FT roundtrip: {value} -> {roundtripped_ft}"
-        )
+        assert roundtripped_ft == pytest.approx(
+            value, rel=1e-6
+        ), f"FT->M->FT roundtrip: {value} -> {roundtripped_ft}"
 
 
 # ============================================================================
@@ -691,9 +691,9 @@ class TestRRTPlannerProperties:
 
         if result.success:
             end_dist = float(np.linalg.norm(result.path[-1] - q_goal))
-            assert end_dist <= goal_tol + 1e-10, (
-                f"Path end distance to goal {end_dist} exceeds tolerance {goal_tol}"
-            )
+            assert (
+                end_dist <= goal_tol + 1e-10
+            ), f"Path end distance to goal {end_dist} exceeds tolerance {goal_tol}"
 
     @given(
         ndof=st.integers(min_value=2, max_value=6),

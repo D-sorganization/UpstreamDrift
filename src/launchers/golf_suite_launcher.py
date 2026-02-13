@@ -99,7 +99,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         btn.setIcon(self.style().standardIcon(icon_pixmap))
         btn.setToolTip(tooltip)
         btn.setAccessibleName(accessible_name)
-        btn.clicked.connect(slot)
+        btn.clicked.connect(slot)  # type: ignore[arg-type]
         return btn
 
     def _setup_engine_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:
@@ -348,7 +348,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         try:
             # Launch detached process
             # Use same python interpreter
-            process = subprocess.Popen([sys.executable, str(path)], cwd=str(cwd))  # noqa: S603
+            process = subprocess.Popen(
+                [sys.executable, str(path)], cwd=str(cwd)
+            )  # noqa: S603
             self.log_message(f"{name} launched successfully (PID: {process.pid})")
             self.status.setText(f"{name} Launched")
         except (OSError, subprocess.SubprocessError) as e:

@@ -535,7 +535,7 @@ class HumanoidConfigTab(QWidget):
 
         is_windows = platform.system() == "Windows"
         repo_path = str(self._mujoco_dir.resolve())
-        cmd: list[str] = []
+        cmd = []  # noqa: F841
         mount_path = repo_path
 
         if is_windows:

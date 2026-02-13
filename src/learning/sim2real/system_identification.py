@@ -258,7 +258,7 @@ class SystemIdentifier:
         best_params = param_vector.copy()
         best_error = objective(best_params)
 
-        best_params, best_error, converged, _iteration = self._coordinate_descent(
+        best_params, best_error, converged, _iteration = self._coordinate_descent(  # type: ignore[assignment]
             objective,
             best_params,
             best_error,

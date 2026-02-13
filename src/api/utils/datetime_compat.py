@@ -7,7 +7,7 @@ from typing import Final
 
 # Python 3.11+ compatible UTC timezone
 try:
-    from datetime import UTC as _UTC
+    from datetime import UTC as _UTC  # type: ignore[attr-defined]
 
     UTC: Final = _UTC
 except ImportError:

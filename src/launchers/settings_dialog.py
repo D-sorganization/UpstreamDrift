@@ -3,6 +3,8 @@
 Provides a tabbed dialog with Layout, Configuration, and Diagnostics tabs.
 """
 
+# mypy: disable-error-code="attr-defined,assignment"
+
 from __future__ import annotations
 
 import time

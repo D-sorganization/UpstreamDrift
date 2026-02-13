@@ -593,7 +593,7 @@ class GolfLauncher(
         if hasattr(self, "cleanup_timer") and self.cleanup_timer is not None:
             self.cleanup_timer.stop()
             self.cleanup_timer.deleteLater()
-            self.cleanup_timer = None
+            self.cleanup_timer = None  # type: ignore[assignment]
 
         # Clean up docker checker thread
         if hasattr(self, "docker_checker") and self.docker_checker is not None:

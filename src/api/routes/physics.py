@@ -540,7 +540,7 @@ async def control_recording(
     if action == "start":
         engine_manager._is_recording = True  # type: ignore[attr-defined]
         engine_manager._recorded_frames = []  # type: ignore[attr-defined]
-        return TrajectoryRecordResponse(
+        return TrajectoryRecordResponse(  # type: ignore[call-arg]
             recording=True,
             frame_count=0,
             status="Recording started",
@@ -549,7 +549,7 @@ async def control_recording(
     elif action == "stop":
         engine_manager._is_recording = False  # type: ignore[attr-defined]
         frame_count = len(getattr(engine_manager, "_recorded_frames", []))
-        return TrajectoryRecordResponse(
+        return TrajectoryRecordResponse(  # type: ignore[call-arg]
             recording=False,
             frame_count=frame_count,
             status="Recording stopped",

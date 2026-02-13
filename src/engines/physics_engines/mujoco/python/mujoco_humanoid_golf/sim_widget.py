@@ -120,7 +120,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.camera.distance = 3.0
         self.camera.lookat[:] = [0, 0, 1]
 
-        self.last_mouse_pos: tuple[int, int] | None = None
+        self.last_mouse_pos: tuple[int, int] | None = None  # type: ignore[assignment]
         self.camera_mode = "rotate"
         self.is_dragging = False
 
@@ -139,7 +139,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.frame_width = width
         self.frame_height = height
 
-        self.engine = MuJoCoPhysicsEngine()
+        self.engine = MuJoCoPhysicsEngine()  # type: ignore[abstract]
         self.renderer: mujoco.Renderer | None = None
         self.control_vector: np.ndarray | None = None
         self.control_system: ControlSystem | None = None

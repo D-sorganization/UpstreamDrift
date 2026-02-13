@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 from abc import abstractmethod
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -51,7 +52,7 @@ class LaunchItem:
         path: str | None = None,
         item_type: str = "tool",
         icon: str | None = None,
-        action: callable | None = None,
+        action: Callable[..., Any] | None = None,
     ) -> None:
         """Initialize a launch item.
 

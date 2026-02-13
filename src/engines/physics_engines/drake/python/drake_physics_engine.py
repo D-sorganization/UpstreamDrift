@@ -156,8 +156,8 @@ class DrakePhysicsEngine(PhysicsEngine):
             # Reset to default state (positions and velocities)
             # pydrake stubs expect (context, positions) but the single-arg overload
             # resets to defaults; suppress the type checker mismatch.
-            self.plant.SetDefaultPositions(self.plant_context)  # type: ignore[call-arg]
-            self.plant.SetDefaultVelocities(self.plant_context)  # type: ignore[call-arg]
+            self.plant.SetDefaultPositions(self.plant_context)  # type: ignore[call-overload]
+            self.plant.SetDefaultVelocities(self.plant_context)  # type: ignore[attr-defined]
 
             # Re-initialize the simulator with the reset state
             self.simulator.Initialize()

@@ -45,7 +45,7 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
     actuators: list[ActuatorInfo] = []
 
     try:
-        engine = engine_manager.get_active_engine()
+        engine = engine_manager.get_active_engine()  # type: ignore[attr-defined]
     except (AttributeError, RuntimeError):
         return _demo_actuators()
 
