@@ -377,6 +377,7 @@ class Validator:
 
         # Check for circular dependencies using DFS
         def has_cycle(start: str, visited: set[str], path: set[str]) -> bool:
+            """Detect cycles via depth-first search from start."""
             if start in path:
                 return True
             if start in visited:

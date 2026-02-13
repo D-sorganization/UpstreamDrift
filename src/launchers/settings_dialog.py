@@ -516,6 +516,7 @@ class SettingsDialog(QDialog):
                 self._build_timer_id = None
 
     def timerEvent(self, event: Any) -> None:
+        """Update the build elapsed-time label on each timer tick."""
         if hasattr(self, "_build_start_time"):
             elapsed = time.monotonic() - self._build_start_time
             self._build_status.setText(f"Building... ({elapsed:.0f}s elapsed)")

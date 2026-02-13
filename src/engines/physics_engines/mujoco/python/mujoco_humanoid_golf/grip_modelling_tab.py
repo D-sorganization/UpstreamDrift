@@ -477,6 +477,7 @@ class GripModellingTab(QtWidgets.QWidget):
         extracted_bodies: list[str] = []
 
         def extract_worldbody_content(filename: str, body_pattern: str) -> str:
+            """Extract worldbody XML content from a hand model file."""
             content = self._get_hand_content(
                 folder_path, filename, body_pattern, is_both
             )
@@ -541,6 +542,7 @@ class GripModellingTab(QtWidgets.QWidget):
             if "<global" in xml_content:
 
                 def update_global_tag(m: re.Match) -> str:
+                    """Replace offscreen render dimensions in a global tag."""
                     attrs = m.group(1).replace("/", "").strip()
                     attrs = re.sub(r'offwidth="[^"]*"', "", attrs)
                     attrs = re.sub(r'offheight="[^"]*"', "", attrs)
@@ -670,9 +672,7 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(
-        self, i: int, model: mujoco.MjModel
-    ) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return

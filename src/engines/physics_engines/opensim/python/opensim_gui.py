@@ -175,6 +175,7 @@ class OpenSimGolfGUI(QMainWindow):
         self.lbl_status.setStyleSheet(f"color: {color}; font-weight: bold;")
 
     def init_ui(self) -> None:
+        """Build the main window layout and control widgets."""
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
@@ -243,6 +244,7 @@ class OpenSimGolfGUI(QMainWindow):
             self._try_load_model()
 
     def run_simulation(self) -> None:
+        """Execute the loaded OpenSim simulation and display results."""
         if self.model is None:
             QMessageBox.warning(
                 self,
@@ -279,6 +281,7 @@ class OpenSimGolfGUI(QMainWindow):
             self.btn_run.setEnabled(True)
 
     def plot_results(self) -> None:
+        """Plot joint angles, torques, and swing trajectory."""
         if not self.result:
             return
 

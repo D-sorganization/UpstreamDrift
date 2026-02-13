@@ -496,6 +496,76 @@ class ParameterEstimator:
             radius_gyration=rog_frac,
         )
 
+    def _fit_from_anthropometry(
+        self,
+        segment_names: list[str],
+        total_body_mass: float,
+        known_lengths: dict[str, float] | None,
+    ) -> FitResult:
+        """Estimate segment parameters using anthropometric tables only."""
+        logger.warning("No marker data - using anthropometric estimates only")
+        params: dict[str, Any] = {}
+        for segment_name in segment_names:
+            length = known_lengths.get(segment_name, 0.3) if known_lengths else 0.3
+            segment_params = self.estimate_segment_params(
+                segment_name, length, total_body_mass
+            )
+            params[f"{segment_name}_length"] = segment_params.length
+            params[f"{segment_name}_mass"] = segment_params.mass
+        return FitResult(
+            success=True,
+            parameters=params,
+            residuals=np.array([]),
+            rms_error=0.0,
+            message="Anthropometric estimation (no marker data)",
+        )
+
+    def _fit_from_markers(
+        self,
+        marker_array: np.ndarray,
+        segment_names: list[str],
+        total_body_mass: float,
+        known_lengths: dict[str, float] | None,
+    ) -> FitResult:
+        """Fit segment parameters from marker position data."""
+        fitted_params: dict[str, Any] = {}
+        all_residuals: list[float] = []
+
+        for i, segment_name in enumerate(segment_names):
+            if i + 1 >= marker_array.shape[1]:
+                break
+
+            proximal = marker_array[:, i, :]
+            distal = marker_array[:, i + 1, :]
+            mean_length, std_length = self.estimate_segment_length(proximal, distal)
+
+            if known_lengths and segment_name in known_lengths:
+                length = known_lengths[segment_name]
+                residual = mean_length - length
+            else:
+                length = mean_length
+                residual = std_length
+
+            all_residuals.append(residual)
+
+            segment_params = self.estimate_segment_params(
+                segment_name, length, total_body_mass
+            )
+            fitted_params[f"{segment_name}_length"] = segment_params.length
+            fitted_params[f"{segment_name}_mass"] = segment_params.mass
+            fitted_params[f"{segment_name}_com"] = segment_params.com_position
+
+        residuals = np.array(all_residuals)
+        rms = float(np.sqrt(np.mean(residuals**2))) if len(residuals) > 0 else 0.0
+
+        return FitResult(
+            success=True,
+            parameters=fitted_params,
+            residuals=residuals,
+            rms_error=rms,
+            message="Segment parameters fitted from marker data",
+        )
+
     def fit_parameters_to_kinematics(
         self,
         kinematic_data: list[KinematicState],
@@ -523,7 +593,6 @@ class ParameterEstimator:
                 message="No kinematic data provided",
             )
 
-        # Extract marker data if available
         marker_frames = [
             state.marker_positions
             for state in kinematic_data
@@ -531,70 +600,13 @@ class ParameterEstimator:
         ]
 
         if not marker_frames:
-            # Fall back to anthropometric estimation without marker data
-            logger.warning("No marker data - using anthropometric estimates only")
-
-            params = {}
-            for segment_name in segment_names:
-                # Use known length or estimate from body height
-                length = known_lengths.get(segment_name, 0.3) if known_lengths else 0.3
-                segment_params = self.estimate_segment_params(
-                    segment_name, length, total_body_mass
-                )
-                params[f"{segment_name}_length"] = segment_params.length
-                params[f"{segment_name}_mass"] = segment_params.mass
-
-            return FitResult(
-                success=True,
-                parameters=params,
-                residuals=np.array([]),
-                rms_error=0.0,
-                message="Anthropometric estimation (no marker data)",
+            return self._fit_from_anthropometry(
+                segment_names, total_body_mass, known_lengths
             )
 
-        # Compute segment lengths from marker data
-        # This requires knowing which markers correspond to which segments
-        # Simplified: assume consecutive markers define segments
-        marker_array = np.array(marker_frames)  # [frames, markers, 3]
-
-        fitted_params = {}
-        all_residuals = []
-
-        for i, segment_name in enumerate(segment_names):
-            if i + 1 >= marker_array.shape[1]:
-                break
-
-            proximal = marker_array[:, i, :]
-            distal = marker_array[:, i + 1, :]
-
-            mean_length, std_length = self.estimate_segment_length(proximal, distal)
-
-            # Use known length if provided, otherwise use measured
-            if known_lengths and segment_name in known_lengths:
-                length = known_lengths[segment_name]
-                residual = mean_length - length
-            else:
-                length = mean_length
-                residual = std_length  # Use variation as residual
-
-            all_residuals.append(residual)
-
-            segment_params = self.estimate_segment_params(
-                segment_name, length, total_body_mass
-            )
-            fitted_params[f"{segment_name}_length"] = segment_params.length
-            fitted_params[f"{segment_name}_mass"] = segment_params.mass
-            fitted_params[f"{segment_name}_com"] = segment_params.com_position
-
-        residuals = np.array(all_residuals)
-        rms = float(np.sqrt(np.mean(residuals**2))) if len(residuals) > 0 else 0.0
-
-        return FitResult(
-            success=True,
-            parameters=fitted_params,
-            residuals=residuals,
-            rms_error=rms,
-            message="Segment parameters fitted from marker data",
+        marker_array = np.array(marker_frames)
+        return self._fit_from_markers(
+            marker_array, segment_names, total_body_mass, known_lengths
         )
 
 

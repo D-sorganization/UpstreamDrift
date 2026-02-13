@@ -60,7 +60,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             - Returns empty string if no model loaded
             - Returns model identifier if model is loaded
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def load_from_path(self, path: str) -> None:
@@ -85,7 +85,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             ValueError: If file format is not supported
             StateError: If engine cannot be initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def load_from_string(self, content: str, extension: str | None = None) -> None:
@@ -106,7 +106,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             ValueError: If content is empty or invalid
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def reset(self) -> None:
@@ -122,7 +122,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def step(self, dt: float | None = None) -> None:
@@ -144,7 +144,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             StateError: If engine is not initialized
             ValueError: If dt <= 0
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def forward(self) -> None:
@@ -164,7 +164,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
@@ -186,7 +186,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
@@ -209,7 +209,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             StateError: If engine is not initialized
             ValueError: If array dimensions don't match model
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def set_control(self, u: np.ndarray) -> None:
@@ -230,7 +230,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             StateError: If engine is not initialized
             ValueError: If array dimension doesn't match model
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def get_time(self) -> float:
@@ -248,7 +248,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     def get_full_state(self) -> dict[str, Any]:
         """Get complete state in a single batched call (performance optimization).
@@ -333,7 +333,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def compute_bias_forces(self) -> np.ndarray:
@@ -352,7 +352,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def compute_gravity_forces(self) -> np.ndarray:
@@ -371,7 +371,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
@@ -397,7 +397,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             StateError: If engine is not initialized
             ValueError: If qacc has wrong dimensions
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
@@ -420,7 +420,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Raises:
             StateError: If engine is not initialized
         """
-        raise NotImplementedError()
+        ...
 
     def compute_contact_forces(self) -> np.ndarray:
         """Compute total contact forces (GRF).
@@ -471,7 +471,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             - compute_control_acceleration: Control-attributed component
             - Section F: Superposition requirement (drift + control = full)
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
@@ -505,7 +505,7 @@ class PhysicsEngine(Checkpointable, Protocol):
         Note:
             For muscle-driven models, tau represents muscle-generated joint torques.
         """
-        raise NotImplementedError()
+        ...
 
     # -------- Section G: Counterfactual Experiments (Mandatory) --------
 
@@ -559,7 +559,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             - compute_zvcf: Zero-velocity counterfactual
             - Section G1: ZTCF definition in design guidelines
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
@@ -611,7 +611,7 @@ class PhysicsEngine(Checkpointable, Protocol):
             - compute_ztcf: Zero-torque counterfactual
             - Section G2: ZVCF definition in design guidelines
         """
-        raise NotImplementedError()
+        ...
 
     # ---------------------------------------------------------------------------
     # Section B5: Flexible Beam Shaft (Optional Interface)
@@ -694,7 +694,7 @@ class RecorderInterface(Protocol):
             times: (N,) array of time timestamps.
             values: (N, D) array of data values.
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def get_induced_acceleration_series(
@@ -708,7 +708,7 @@ class RecorderInterface(Protocol):
         Returns:
             Tuple of (times, values).
         """
-        raise NotImplementedError()
+        ...
 
     @abstractmethod
     def set_analysis_config(self, config: dict[str, Any]) -> None:
@@ -717,4 +717,4 @@ class RecorderInterface(Protocol):
         Args:
             config: Dictionary of configuration flags (e.g. {'ztcf': True}).
         """
-        raise NotImplementedError()
+        ...

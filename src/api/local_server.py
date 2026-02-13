@@ -275,6 +275,7 @@ def _register_health_and_diagnostic_endpoints(
 
     @app.get("/api/health")
     async def health_check() -> dict[str, Any]:
+        """Return server health status and available engines."""
         return {
             "status": "healthy",
             "mode": "local",
@@ -635,6 +636,7 @@ def main() -> None:
 
     # Open browser after server starts
     def open_browser() -> None:
+        """Open the default web browser to the local server URL."""
         if os.environ.get("GOLF_NO_BROWSER") != "true":
             webbrowser.open(f"http://{host}:{port}")
 

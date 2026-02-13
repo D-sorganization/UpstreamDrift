@@ -2,6 +2,7 @@ import ast
 
 
 def validate_polynomial_text(text: str) -> str | None:
+    """Validate polynomial coefficient text and return error or None."""
     cleaned = text.replace(" ", "")
     if not cleaned:
         return None  # Empty is valid (treated as 0.0)
@@ -13,6 +14,7 @@ def validate_polynomial_text(text: str) -> str | None:
 
 
 def validate_torque_text(text: str) -> str | None:
+    """Validate torque expression syntax and return error or None."""
     if not text.strip():
         return None  # Empty is valid (treated as 0.0)
     try:

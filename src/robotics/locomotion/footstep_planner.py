@@ -17,7 +17,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.robotics.locomotion.gait_types import GaitParameters
-from src.shared.python.core.contracts import ContractChecker
+from src.shared.python.core.contracts import ContractChecker, precondition
 
 
 @dataclass
@@ -231,6 +231,15 @@ class FootstepPlanner(ContractChecker):
         self._parameters = parameters
         self._nominal_width = parameters.step_width
 
+    @precondition(
+        lambda self,
+        start,
+        goal,
+        start_yaw=0.0,
+        goal_yaw=None,
+        start_foot="left": start_foot in ("left", "right"),
+        "start_foot must be 'left' or 'right'",
+    )
     def plan_to_goal(
         self,
         start: NDArray[np.float64],
@@ -291,6 +300,24 @@ class FootstepPlanner(ContractChecker):
             total_duration=total_duration,
         )
 
+    @precondition(
+        lambda self,
+        current_position,
+        current_yaw,
+        velocity_command,
+        n_steps=4,
+        start_foot="left": n_steps > 0,
+        "Number of steps must be positive",
+    )
+    @precondition(
+        lambda self,
+        current_position,
+        current_yaw,
+        velocity_command,
+        n_steps=4,
+        start_foot="left": start_foot in ("left", "right"),
+        "start_foot must be 'left' or 'right'",
+    )
     def plan_from_velocity(
         self,
         current_position: NDArray[np.float64],
@@ -383,6 +410,14 @@ class FootstepPlanner(ContractChecker):
 
         return np.array([pos[0] + offset_x, pos[1] + offset_y, pos[2]])
 
+    @precondition(
+        lambda self,
+        current_position,
+        current_yaw,
+        target_yaw,
+        start_foot="left": start_foot in ("left", "right"),
+        "start_foot must be 'left' or 'right'",
+    )
     def plan_in_place_turn(
         self,
         current_position: NDArray[np.float64],

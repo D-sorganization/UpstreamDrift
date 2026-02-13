@@ -67,6 +67,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     @property
     def model_name(self) -> str:
+        """Return the Gym environment ID as the model name."""
         return self.env_id if self.env_id else "MyoSuite_NoModel"
 
     @property
@@ -227,6 +228,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         return (np.array(self.sim.data.qpos[:]), np.array(self.sim.data.qvel[:]))
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Set joint positions and velocities on the simulation."""
         if not self.sim:
             return
 
@@ -316,6 +318,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 logger.debug(f"Fallback control assignment failed: {fallback_error}")
 
     def get_time(self) -> float:
+        """Return the current simulation time in seconds."""
         if self.sim:
             return float(self.sim.data.time)
 
@@ -324,6 +327,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
+        """Compute the joint-space mass matrix via MuJoCo."""
         if not self.sim:
             return np.array([])
 
@@ -366,12 +370,14 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
+        """Return the Coriolis and gravity bias force vector."""
         if self.sim:
             return np.array(self.sim.data.qfrc_bias)
 
         return np.array([])
 
     def compute_gravity_forces(self) -> np.ndarray:
+        """Return gravity forces (not exposed in basic bindings)."""
         # Not easily exposed separately in basic bindings without extra calc
 
         return np.array([])
@@ -379,6 +385,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute inverse dynamics torques for the given acceleration."""
         # Requires calling mj_inverse
 
         if not self.sim:
@@ -399,6 +406,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return np.array([])
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
+        """Compute linear and angular Jacobian for a named body."""
         if not self.sim:
             return None
 

@@ -97,6 +97,7 @@ def run_audit(target_path: Path) -> list[dict[str, object]]:
 
 
 def main() -> None:
+    """Run the scientific auditor CLI on the specified path."""
     if len(sys.argv) < 2:
         sys.stderr.write("Usage: python scientific_auditor.py <path>\n")
         sys.exit(1)

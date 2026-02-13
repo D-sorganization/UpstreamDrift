@@ -441,6 +441,7 @@ class BallRollPhysics:
         def derivatives(
             pos: np.ndarray, vel: np.ndarray
         ) -> tuple[np.ndarray, np.ndarray]:
+            """Compute velocity and acceleration for the given state."""
             temp_state = BallState(pos, vel, state.spin)
             accel = self.compute_total_acceleration(temp_state)
             return vel, accel

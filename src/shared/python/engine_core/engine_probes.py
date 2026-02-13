@@ -190,21 +190,17 @@ class DrakeProbe(EngineProbe):
         """Initialize Drake probe."""
         super().__init__("Drake", suite_root)
 
-    def probe(self) -> EngineProbeResult:
-        """Check Drake readiness."""
-        missing = []
-
-        # Check for pydrake package
+    def _check_pydrake_import(self) -> tuple[str | None, EngineProbeResult | None]:
+        """Verify that pydrake and its core modules can be imported."""
         try:
             import pydrake
 
             version = getattr(pydrake, "__version__", "unknown")
 
-            # Verify core modules
             try:
-                import pydrake.multibody
+                import pydrake.multibody  # noqa: F401
             except ImportError:
-                return EngineProbeResult(
+                return None, EngineProbeResult(
                     engine_name=self.engine_name,
                     status=ProbeStatus.MISSING_BINARY,
                     version=version,
@@ -213,8 +209,10 @@ class DrakeProbe(EngineProbe):
                     "Installation might be corrupted.",
                 )
 
+            return version, None
+
         except ImportError:
-            return EngineProbeResult(
+            return None, EngineProbeResult(
                 engine_name=self.engine_name,
                 status=ProbeStatus.NOT_INSTALLED,
                 version=None,
@@ -223,38 +221,29 @@ class DrakeProbe(EngineProbe):
                 "Install with: pip install drake",
             )
 
-        # Check meshcat port availability
+    @staticmethod
+    def _check_meshcat_port() -> int | None:
+        """Find an available meshcat port in the 7000-7010 range."""
         import socket
 
-        meshcat_available = False
-        available_port = None
         for port in range(7000, 7011):
             try:
                 sock = socket.socket()
                 sock.bind(("localhost", port))
                 sock.close()
-                meshcat_available = True
-                available_port = port
-                break
+                return port
             except OSError:
                 continue
+        return None
 
-        if not meshcat_available:
-            return EngineProbeResult(
-                engine_name=self.engine_name,
-                status=ProbeStatus.CONFIGURATION_ERROR,
-                version=version,
-                missing_dependencies=["meshcat ports 7000-7010"],
-                diagnostic_message=f"Drake {version} installed but meshcat ports "
-                "7000-7010 are all blocked. Close other instances or use Docker.",
-            )
-
-        # Check for engine directory
+    def _check_engine_assets(self) -> list[str]:
+        """Check for required Drake engine directories and source files."""
+        missing: list[str] = []
         engine_dir = self.suite_root / "engines" / "physics_engines" / "drake"
         if not engine_dir.exists():
             missing.append("engine directory")
+            return missing
 
-        # Check for Python modules
         python_dir = engine_dir / "python"
         if python_dir.exists():
             src_dir = python_dir / "src"
@@ -267,7 +256,27 @@ class DrakeProbe(EngineProbe):
                 missing.append("src directory")
         else:
             missing.append("python directory")
+        return missing
 
+    def probe(self) -> EngineProbeResult:
+        """Check Drake readiness."""
+        version, error = self._check_pydrake_import()
+        if error is not None:
+            return error
+        assert version is not None
+
+        available_port = self._check_meshcat_port()
+        if available_port is None:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.CONFIGURATION_ERROR,
+                version=version,
+                missing_dependencies=["meshcat ports 7000-7010"],
+                diagnostic_message=f"Drake {version} installed but meshcat ports "
+                "7000-7010 are all blocked. Close other instances or use Docker.",
+            )
+
+        missing = self._check_engine_assets()
         if missing:
             return EngineProbeResult(
                 engine_name=self.engine_name,
@@ -278,6 +287,7 @@ class DrakeProbe(EngineProbe):
                 f"{', '.join(missing)}",
             )
 
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "drake"
         return EngineProbeResult(
             engine_name=self.engine_name,
             status=ProbeStatus.AVAILABLE,

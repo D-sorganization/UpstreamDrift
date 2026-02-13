@@ -696,10 +696,12 @@ def create_help_menu_actions(
     """
 
     def default_open_manual() -> None:
+        """Open the help dialog as a user manual."""
         dialog = HelpDialog(parent)
         dialog.exec()
 
     def default_open_about() -> None:
+        """Show the About dialog with version and project information."""
         from PyQt6.QtWidgets import QMessageBox
 
         QMessageBox.about(

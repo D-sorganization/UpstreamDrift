@@ -317,6 +317,7 @@ class DifferentiableEngine:
 
         # Define loss function
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
+            """Compute squared error between the final state and the goal."""
             final_state = trajectory[-1]
             state_error = final_state - goal_state
             return float(np.sum(state_error**2))
@@ -526,6 +527,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         contact_penalty_weight: float,
     ) -> Callable[[NDArray[np.floating]], float]:
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
+            """Compute goal error plus contact-transition velocity penalty."""
             final_error = float(np.sum((trajectory[-1] - goal_state) ** 2))
 
             contact_penalty = 0.0

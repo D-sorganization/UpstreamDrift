@@ -47,6 +47,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     @property
     def model_name(self) -> str:
+        """Return the OpenSim model name."""
         if self._model:
             return self._model.getName()
         return "OpenSim_NoModel"
@@ -57,6 +58,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         return self._model is not None and self._state is not None
 
     def load_from_path(self, path: str) -> None:
+        """Load an OpenSim model from a file path."""
         if opensim is None:
             raise ImportError("OpenSim library not installed")
 
@@ -108,6 +110,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:
+        """Reinitialize the model state and equilibrate muscles."""
         if self._model and self._state:
             # Re-initialize the system to defaults
             self._state = self._model.initializeState()
@@ -119,6 +122,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         lambda self, dt=None: self.is_initialized, "Engine must be initialized"
     )
     def step(self, dt: float | None = None) -> None:
+        """Integrate the simulation forward by one time step."""
         if not self._model or not self._state:
             return
 
@@ -134,10 +138,12 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
+        """Realize the model to the dynamics stage."""
         if self._model and self._state:
             self._model.realizeDynamics(self._state)
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return coordinate positions and speeds as numpy arrays."""
         if not self._model or not self._state:
             return np.array([]), np.array([])
 
@@ -154,6 +160,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         return q, v
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Set coordinate positions and speeds on the model state."""
         if not self._model or not self._state:
             return
 
@@ -190,6 +197,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to set OpenSim controls: {e}")
 
     def get_time(self) -> float:
+        """Return the current simulation time in seconds."""
         if self._state:
             return self._state.getTime()
         return 0.0
@@ -197,6 +205,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
+        """Compute the joint-space mass matrix via MatterSubsystem."""
         if not self._model or not self._state:
             return np.array([])
 
@@ -268,6 +277,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute required torques for the given joint accelerations."""
         if not self._model or not self._state:
             return np.array([])
 

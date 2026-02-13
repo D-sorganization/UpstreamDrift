@@ -490,6 +490,7 @@ class DoublePendulumApp:
         """Create a simple tooltip."""
 
         def on_enter(event: tk.Event) -> None:
+            """Display tooltip near the cursor on mouse enter."""
             tooltip = tk.Toplevel()
             tooltip.wm_overrideredirect(True)  # noqa: FBT003
             tooltip.wm_geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
@@ -506,6 +507,7 @@ class DoublePendulumApp:
             widget.tooltip = tooltip  # type: ignore[attr-defined]
 
         def on_leave(_event: tk.Event) -> None:
+            """Destroy tooltip on mouse leave."""
             if hasattr(widget, "tooltip"):
                 widget.tooltip.destroy()  # type: ignore[attr-defined]
                 del widget.tooltip  # type: ignore[attr-defined]
@@ -515,6 +517,7 @@ class DoublePendulumApp:
 
     def _read_inputs(self) -> UserInputs:
         def get_float(label: str) -> float:
+            """Parse a float value from the named entry widget."""
             result = 0.0
             if label not in self.entries:
                 logger.warning("Entry '%s' not found", label)
@@ -531,6 +534,7 @@ class DoublePendulumApp:
             return result
 
         def get_str(label: str) -> str:
+            """Read a string value from the named entry widget."""
             if label not in self.entries:
                 return "0.0"
             return self.entries[label].get() or "0.0"
@@ -1141,6 +1145,7 @@ class DoublePendulumApp:
 
 
 def run_app() -> None:
+    """Launch the Tkinter double pendulum application."""
     root = tk.Tk()
     DoublePendulumApp(root)
     root.mainloop()

@@ -53,8 +53,11 @@ def log_errors(
     """
 
     def decorator(func: F) -> F:
+        """Wrap the function with error logging."""
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Log errors from the wrapped function and optionally reraise."""
             try:
                 return func(*args, **kwargs)
             except (RuntimeError, TypeError, ValueError) as e:
@@ -91,8 +94,11 @@ def handle_import_error(
     """
 
     def decorator(func: F) -> F:
+        """Wrap the function with import error handling."""
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Catch ImportError and return default value on failure."""
             try:
                 return func(*args, **kwargs)
             except ImportError as e:
@@ -129,8 +135,11 @@ def retry_on_error(
     import time
 
     def decorator(func: F) -> F:
+        """Wrap the function with retry-on-error logic."""
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Retry the wrapped function up to max_attempts on specified exceptions."""
             last_exception = None
             for attempt in range(max_attempts):
                 try:
@@ -209,8 +218,11 @@ def validate_args(**validators: Callable[[Any], bool]) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
+        """Wrap the function with argument validation checks."""
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Validate arguments against their validators before calling the function."""
             # Get function signature
             import inspect
 

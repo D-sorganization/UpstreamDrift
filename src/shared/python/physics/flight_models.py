@@ -93,6 +93,7 @@ class UnifiedLaunchConditions:
         )
 
     def get_initial_velocity(self) -> np.ndarray:
+        """Compute the 3D initial velocity vector from launch angles and speed."""
         ca, sa = math.cos(self.azimuth_angle), math.sin(self.azimuth_angle)
         cv, sv = math.cos(self.launch_angle), math.sin(self.launch_angle)
         return np.array(
@@ -100,6 +101,7 @@ class UnifiedLaunchConditions:
         )
 
     def get_spin_vector(self) -> np.ndarray:
+        """Compute the 3D spin vector from spin rate and axis angle."""
         omega = self.spin_rate * 2 * math.pi / 60
         backspin = omega * math.cos(self.spin_axis_angle)
         sidespin = omega * math.sin(self.spin_axis_angle)
@@ -112,6 +114,7 @@ class UnifiedLaunchConditions:
         )
 
     def get_wind_vector(self) -> np.ndarray:
+        """Compute the 3D wind velocity vector from speed and direction."""
         return np.array(
             [
                 -self.wind_speed * math.cos(self.wind_direction),
@@ -155,23 +158,27 @@ class BallFlightModel(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        raise NotImplementedError()
+        """Return the display name of the flight model."""
+        ...
 
     @property
     @abstractmethod
     def description(self) -> str:
-        raise NotImplementedError()
+        """Return a short description of the model approach."""
+        ...
 
     @property
     @abstractmethod
     def reference(self) -> str:
-        raise NotImplementedError()
+        """Return the citation or reference for the model."""
+        ...
 
     @abstractmethod
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> FlightResult:
-        raise NotImplementedError()
+        """Simulate ball flight and return the trajectory result."""
+        ...
 
     def _compute_metrics(self, trajectory: list[TrajectoryPoint]) -> FlightResult:
         """Standardized metrics computation (Consolidated for DRY)."""
@@ -208,6 +215,7 @@ class BallFlightModel(ABC):
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
 
         def ground_ev(t: float, y: np.ndarray) -> float:
+            """Return the ball height for ground-contact event detection."""
             return float(y[2])
 
         # Type safe attribute assignment for solve_ivp
@@ -253,19 +261,23 @@ class WaterlooPennerModel(BallFlightModel):
 
     @property
     def name(self) -> str:
+        """Return the Waterloo/Penner model name."""
         return "Waterloo/Penner"
 
     @property
     def description(self) -> str:
+        """Return the Waterloo/Penner model description."""
         return "Quadratic Cd/Cl from Waterloo tunnel data"
 
     @property
     def reference(self) -> str:
+        """Return the Waterloo/Penner model citation."""
         return "McPhee et al. (Waterloo)"
 
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> FlightResult:
+        """Simulate ball flight using the Waterloo/Penner quadratic coefficient model."""
         cd0, cd1, cd2, cl0, cl1, cl2, cl_max = self.params
         omega_v = launch.get_spin_vector()
         omega_m = np.linalg.norm(omega_v)
@@ -273,6 +285,7 @@ class WaterlooPennerModel(BallFlightModel):
         area = math.pi * launch.ball_radius**2
 
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
+            """Compute state derivatives using quadratic Cd/Cl aerodynamics."""
             v_val = cast(np.ndarray, y[3:])
             v_rel = v_val - wind_v
             speed = np.linalg.norm(v_rel)
@@ -319,19 +332,23 @@ class MacDonaldHanzelyModel(BallFlightModel):
 
     @property
     def name(self) -> str:
+        """Return the MacDonald-Hanzely model name."""
         return "MacDonald-Hanzely"
 
     @property
     def description(self) -> str:
+        """Return the MacDonald-Hanzely model description."""
         return "ODE model with exponential spin decay"
 
     @property
     def reference(self) -> str:
+        """Return the MacDonald-Hanzely model citation."""
         return "MacDonald & Hanzely (1991)"
 
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> FlightResult:
+        """Simulate ball flight using the MacDonald-Hanzely spin-decay model."""
         omega_0 = launch.spin_rate * 2 * math.pi / 60
         spin_axis = launch.get_spin_vector()
         if np.linalg.norm(spin_axis) > 0:
@@ -341,6 +358,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
         k_drag = 0.5 * launch.air_density * area * self.cd / launch.ball_mass
 
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
+            """Compute state derivatives with exponential spin decay."""
             v_val = cast(np.ndarray, y[3:])
             v_rel = v_val - wind_v
             speed = np.linalg.norm(v_rel)
@@ -401,19 +419,23 @@ class ConstantCoefficientModel(BallFlightModel):
 
     @property
     def name(self) -> str:
+        """Return the model name from the specification."""
         return self._spec.name
 
     @property
     def description(self) -> str:
+        """Return the model description from the specification."""
         return self._spec.description
 
     @property
     def reference(self) -> str:
+        """Return the model citation from the specification."""
         return self._spec.reference
 
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
     ) -> FlightResult:
+        """Simulate ball flight using constant drag and lift coefficients."""
         omega_0 = launch.spin_rate * 2 * math.pi / 60
         spin_axis = launch.get_spin_vector()
         if np.linalg.norm(spin_axis) > 0:
@@ -423,6 +445,7 @@ class ConstantCoefficientModel(BallFlightModel):
         k_drag = 0.5 * launch.air_density * area * self._spec.cd / launch.ball_mass
 
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
+            """Compute state derivatives with constant coefficients and spin decay."""
             v_val = cast(np.ndarray, y[3:])
             v_rel = v_val - wind_v
             speed = np.linalg.norm(v_rel)
@@ -461,12 +484,14 @@ class FlightModelRegistry:
 
     @classmethod
     def get_model(cls, model_type: FlightModelType) -> BallFlightModel:
+        """Return the flight model instance for the given model type."""
         if not cls._models:
             cls._initialize()
         return cls._models[model_type]
 
     @classmethod
     def get_all_models(cls) -> list[BallFlightModel]:
+        """Return all registered flight model instances."""
         if not cls._models:
             cls._initialize()
         return list(cls._models.values())

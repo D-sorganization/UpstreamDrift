@@ -26,6 +26,7 @@ class LocalUser:
         self.quota_remaining: float = float("inf")
 
     def has_permission(self, permission: str) -> bool:
+        """Check whether the local user has the given permission."""
         return True  # Everything allowed locally
 
 

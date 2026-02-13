@@ -26,6 +26,7 @@ class CloudClient:
 
     @property
     def is_logged_in(self) -> bool:
+        """Return whether the client has an active authentication token."""
         return self.token is not None
 
     async def login(self, email: str, password: str) -> bool:

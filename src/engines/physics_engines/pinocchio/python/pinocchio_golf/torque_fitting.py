@@ -31,12 +31,14 @@ def fit_torque_poly(
 def evaluate_torque_poly(
     coeffs: npt.NDArray[np.float64], t: npt.ArrayLike
 ) -> npt.NDArray[np.float64]:
+    """Evaluate a fitted torque polynomial at the given times."""
     t_arr = np.asarray(t, dtype=np.float64)
     result = np.polyval(coeffs, t_arr)
     return np.asarray(result, dtype=np.float64)
 
 
 def main() -> None:
+    """Fit a polynomial to torque-time CSV data and plot results."""
     parser = argparse.ArgumentParser(
         description="Fit polynomial to torque vs time data."
     )

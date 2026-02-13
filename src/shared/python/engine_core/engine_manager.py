@@ -12,7 +12,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from ..core.contracts import ContractChecker
+from ..core.contracts import ContractChecker, precondition
 from ..data_io.common_utils import (
     GolfModelingError,
     get_logger,
@@ -162,6 +162,10 @@ class EngineManager(ContractChecker):
             if status == EngineStatus.AVAILABLE
         ]
 
+    @precondition(
+        lambda self, engine_type: engine_type is not None,
+        "Engine type must not be None",
+    )
     def switch_engine(self, engine_type: EngineType) -> bool:
         """Switch to a different physics engine."""
         if engine_type not in self.engine_status:
@@ -298,12 +302,15 @@ class EngineManager(ContractChecker):
         logger.info("engine_cleanup_complete")
 
     def get_current_engine(self) -> EngineType | None:
+        """Return the currently active engine type."""
         return self.current_engine
 
     def get_engine_status(self, engine_type: EngineType) -> EngineStatus:
+        """Return the availability status of the specified engine."""
         return self.engine_status.get(engine_type, EngineStatus.UNAVAILABLE)
 
     def get_engine_info(self) -> dict[str, Any]:
+        """Return a summary dict of current engine, available engines, and statuses."""
         return {
             "current_engine": (
                 self.current_engine.value if self.current_engine else None
@@ -337,16 +344,19 @@ class EngineManager(ContractChecker):
         return validation_path.exists()
 
     def probe_all_engines(self) -> dict[EngineType, Any]:
+        """Probe every registered engine and cache the results."""
         for engine_type, probe in self.probes.items():
             self.probe_results[engine_type] = probe.probe()
         return self.probe_results
 
     def get_probe_result(self, engine_type: EngineType) -> Any:
+        """Return the probe result for a specific engine, probing first if needed."""
         if not self.probe_results:
             self.probe_all_engines()
         return self.probe_results.get(engine_type)
 
     def get_diagnostic_report(self) -> str:
+        """Generate a human-readable diagnostic report for all engines."""
         if not self.probe_results:
             self.probe_all_engines()
 

@@ -50,8 +50,11 @@ def skip_if_engine_unavailable(engine_type: EngineType) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
+        """Wrap the test function to skip when the engine is unavailable."""
+
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """Check engine availability and skip the test if not installed."""
             manager = EngineManager()
             probe_result = manager.get_probe_result(engine_type)
 

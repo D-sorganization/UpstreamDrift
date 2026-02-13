@@ -86,54 +86,58 @@ class DraggableModelCard(QFrame):
 
         self.setup_ui()
 
-    def setup_ui(self) -> None:
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
+    def _resolve_image_name(self) -> str | None:
+        """Determine the image filename for this model card."""
         img_name = MODEL_IMAGES.get(self.model.name)
-        if not img_name:
-            # Fallback based on model ID
-            model_id = self.model.id.lower()
-            if "mujoco" in model_id:
-                img_name = "mujoco_humanoid.png"
-            elif "drake" in model_id:
-                img_name = "drake.png"
-            elif "pinocchio" in model_id:
-                img_name = "pinocchio.png"
-            elif "opensim" in model_id:
-                img_name = "opensim.png"
-            elif "myosim" in model_id or "myosuite" in model_id:
-                img_name = "myosim.png"
-            elif "matlab" in model_id:
-                img_name = "matlab_logo.png"
-            elif "motion" in model_id or "capture" in model_id or "c3d" in model_id:
-                img_name = "c3d_icon.png"
-            elif "model_explorer" in model_id or "urdf" in model_id:
-                img_name = "urdf_icon.png"
-            # Fallback for engine types if ID didn't match
-            elif "engine_managed" in getattr(self.model, "type", ""):
-                if getattr(self.model, "engine_type", "") == "mujoco":
-                    img_name = "mujoco_humanoid.png"
-
-        # Check assets dir first, then fall back to SVG logos dir
-        img_path = None
         if img_name:
-            img_path = ASSETS_DIR / img_name
-            if not img_path.exists():
-                # Fall back to SVG logos directory
-                svg_logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
-                img_path = svg_logos_dir / img_name
-                if not img_path.exists():
-                    img_path = None
+            return img_name
+
+        model_id = self.model.id.lower()
+        if "mujoco" in model_id:
+            return "mujoco_humanoid.png"
+        elif "drake" in model_id:
+            return "drake.png"
+        elif "pinocchio" in model_id:
+            return "pinocchio.png"
+        elif "opensim" in model_id:
+            return "opensim.png"
+        elif "myosim" in model_id or "myosuite" in model_id:
+            return "myosim.png"
+        elif "matlab" in model_id:
+            return "matlab_logo.png"
+        elif "motion" in model_id or "capture" in model_id or "c3d" in model_id:
+            return "c3d_icon.png"
+        elif "model_explorer" in model_id or "urdf" in model_id:
+            return "urdf_icon.png"
+        elif "engine_managed" in getattr(self.model, "type", ""):
+            if getattr(self.model, "engine_type", "") == "mujoco":
+                return "mujoco_humanoid.png"
+        return None
+
+    @staticmethod
+    def _find_image_path(img_name: str | None) -> Path | None:
+        """Locate the image file in assets or SVG logos directories."""
+        if not img_name:
+            return None
+        img_path = ASSETS_DIR / img_name
+        if img_path.exists():
+            return img_path
+        svg_logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
+        img_path = svg_logos_dir / img_name
+        if img_path.exists():
+            return img_path
+        return None
+
+    def _create_image_widget(self, layout: QVBoxLayout) -> None:
+        """Create and add the model image label to the layout."""
+        img_name = self._resolve_image_name()
+        img_path = self._find_image_path(img_name)
+
         lbl_img = QLabel()
         lbl_img.setObjectName("CardImage")
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Enforce centering in the layout
         layout.setAlignment(lbl_img, Qt.AlignmentFlag.AlignCenter)
-
-        # Use transparent background, remove text-align as it's handled by setAlignment
         lbl_img.setStyleSheet(Styles.LABEL_TRANSPARENT)
 
         if img_path and img_path.exists():
@@ -156,8 +160,30 @@ class DraggableModelCard(QFrame):
         img_layout.addStretch()
         img_layout.addWidget(lbl_img)
         img_layout.addStretch()
-
         layout.addWidget(img_container)
+
+    def _create_status_chip(self, layout: QVBoxLayout) -> None:
+        """Create and add the status chip to the layout."""
+        status_text, status_color, text_color = self._get_status_info()
+        lbl_status = QLabel(status_text)
+        lbl_status.setObjectName("StatusChip")
+        lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
+        lbl_status.setStyleSheet(Styles.status_chip(status_color, text_color))
+        lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl_status.setMinimumWidth(80)
+
+        chip_layout = QHBoxLayout()
+        chip_layout.addStretch()
+        chip_layout.addWidget(lbl_status)
+        chip_layout.addStretch()
+        layout.addLayout(chip_layout)
+
+    def setup_ui(self) -> None:
+        """Build the model card widget layout with image, labels, and status chip."""
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._create_image_widget(layout)
 
         lbl_name = QLabel(self.model.name)
         lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
@@ -172,20 +198,7 @@ class DraggableModelCard(QFrame):
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_desc)
 
-        # Status Chip
-        status_text, status_color, text_color = self._get_status_info()
-        lbl_status = QLabel(status_text)
-        lbl_status.setObjectName("StatusChip")
-        lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
-        lbl_status.setStyleSheet(Styles.status_chip(status_color, text_color))
-        lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_status.setMinimumWidth(80)
-
-        chip_layout = QHBoxLayout()
-        chip_layout.addStretch()
-        chip_layout.addWidget(lbl_status)
-        chip_layout.addStretch()
-        layout.addLayout(chip_layout)
+        self._create_status_chip(layout)
 
     def _get_status_info(self) -> tuple[str, str, str]:
         c = _get_theme_colors()
@@ -229,12 +242,14 @@ class DraggableModelCard(QFrame):
             img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
+        """Handle left-click to select this model card."""
         if event and event.button() == Qt.MouseButton.LeftButton:
             self.drag_start_position = event.position().toPoint()
             if self.parent_launcher:
                 self.parent_launcher.select_model(self.model.id)
 
     def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
+        """Initiate drag-and-drop when in layout-edit mode."""
         if not event or not (event.buttons() & Qt.MouseButton.LeftButton):
             return
         if not getattr(self.parent_launcher, "layout_edit_mode", False):
@@ -254,10 +269,12 @@ class DraggableModelCard(QFrame):
         drag.exec(Qt.DropAction.MoveAction)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent | None) -> None:
+        """Launch the model directly on double-click."""
         if self.parent_launcher:
             self.parent_launcher.launch_model_direct(self.model.id)
 
     def dragEnterEvent(self, event: QDragEnterEvent | None) -> None:
+        """Accept drag events carrying a model card identifier."""
         if not event:
             return
 
@@ -270,6 +287,7 @@ class DraggableModelCard(QFrame):
             event.acceptProposedAction()
 
     def dropEvent(self, event: QDropEvent | None) -> None:
+        """Swap model card positions on drop."""
         if not event:
             return
 

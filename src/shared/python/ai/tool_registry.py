@@ -282,6 +282,7 @@ class ToolRegistry:
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+            """Register the decorated function as a tool in the registry."""
             # Extract parameters from function signature
             parameters = self._extract_parameters(func)
 

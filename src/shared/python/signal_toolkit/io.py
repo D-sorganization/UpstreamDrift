@@ -68,6 +68,7 @@ class SignalImporter:
 
         # Resolve column indices
         def resolve_column(col: str | int) -> int:
+            """Convert a column name or index to a numeric column index."""
             if isinstance(col, int):
                 return col
             try:

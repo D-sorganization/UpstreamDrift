@@ -339,10 +339,12 @@ def required_contact_forces(
 
     # Objective: minimize force magnitude
     def objective(f: NDArray[np.float64]) -> float:
+        """Compute total squared force magnitude."""
         return float(np.sum(f**2))
 
     # Constraint: G @ f = w
     def wrench_constraint(f: NDArray[np.float64]) -> NDArray[np.float64]:
+        """Return the wrench balance residual."""
         return G @ f - desired_wrench
 
     # Initial guess: pseudoinverse solution

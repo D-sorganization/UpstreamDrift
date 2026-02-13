@@ -11,12 +11,14 @@ from pathlib import Path
 
 
 def print_result(component: str, status: str, message: str = "") -> None:
+    """Print a color-coded health check result line."""
     color = "\033[92m" if status == "OK" else "\033[91m"
     reset = "\033[0m"
     print(f"{component:<30} [{color}{status}{reset}] {message}")
 
 
 def check_python_module(module_name: str) -> tuple[bool, str]:
+    """Check whether a Python module can be imported."""
     try:
         __import__(module_name)
         return True, ""
@@ -27,6 +29,7 @@ def check_python_module(module_name: str) -> tuple[bool, str]:
 
 
 def check_docker_image(image_name: str) -> tuple[bool, str]:
+    """Check whether a Docker image exists locally."""
     try:
         result = subprocess.run(
             ["docker", "image", "inspect", image_name], capture_output=True, text=True
@@ -40,6 +43,7 @@ def check_docker_image(image_name: str) -> tuple[bool, str]:
 
 
 def check_nvidia_docker() -> tuple[bool, str]:
+    """Check whether the NVIDIA Docker runtime is available."""
     try:
         # Check Docker without running a full container
         result = subprocess.run(
@@ -59,6 +63,7 @@ def check_nvidia_docker() -> tuple[bool, str]:
 
 
 def main() -> None:
+    """Run all system health checks and print results."""
     print("=" * 60)
     print(f"System Health Check - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)

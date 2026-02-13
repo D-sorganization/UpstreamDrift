@@ -110,26 +110,23 @@ class GolfSplashScreen(QSplashScreen):
         self.loading_message = "Initializing UpstreamDrift..."
         self.progress = 0
 
-    def drawContents(self, painter: QPainter | None) -> None:
-        if painter is None:
-            return
-
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-
+    @staticmethod
+    def _resolve_theme_colors() -> tuple[str, str, str, str, str]:
+        """Return primary, secondary, accent, bar-bg, and quaternary colors."""
         if THEME_AVAILABLE:
-            text_primary = Colors.TEXT_PRIMARY
-            text_secondary = Colors.TEXT_TERTIARY
-            accent = Colors.PRIMARY
-            bg_bar = Colors.BG_ELEVATED
-            text_quaternary = Colors.TEXT_QUATERNARY
-        else:
-            text_primary = "#FFFFFF"
-            text_secondary = "#A0A0A0"
-            accent = "#0A84FF"
-            bg_bar = "#2D2D2D"
-            text_quaternary = "#666666"
+            return (
+                Colors.TEXT_PRIMARY,
+                Colors.TEXT_TERTIARY,
+                Colors.PRIMARY,
+                Colors.BG_ELEVATED,
+                Colors.TEXT_QUATERNARY,
+            )
+        return ("#FFFFFF", "#A0A0A0", "#0A84FF", "#2D2D2D", "#666666")
 
+    def _draw_logo_and_title(
+        self, painter: QPainter, text_primary: str, text_secondary: str
+    ) -> None:
+        """Draw the logo image, title text, and subtitle."""
         center_x = self.width() // 2
         logo_y = 50
         if self.logo_pixmap and not self.logo_pixmap.isNull():
@@ -165,6 +162,8 @@ class GolfSplashScreen(QSplashScreen):
             "Professional Biomechanics & Robotics Platform",
         )
 
+    def _draw_progress_bar(self, painter: QPainter, accent: str, bg_bar: str) -> None:
+        """Draw the loading status text and progress bar."""
         status_font = (
             get_qfont(size=Sizes.SM, weight=Weights.MEDIUM)
             if THEME_AVAILABLE
@@ -194,6 +193,8 @@ class GolfSplashScreen(QSplashScreen):
             progress_width = int(bar_width * (self.progress / 100))
             painter.drawRoundedRect(bar_x, bar_y, progress_width, bar_height, 2, 2)
 
+    def _draw_version_labels(self, painter: QPainter, text_quaternary: str) -> None:
+        """Draw the version and branding labels at the bottom."""
         version_font = (
             get_qfont(size=Sizes.XS, weight=Weights.NORMAL)
             if THEME_AVAILABLE
@@ -212,7 +213,24 @@ class GolfSplashScreen(QSplashScreen):
             "UpstreamDrift",
         )
 
+    def drawContents(self, painter: QPainter | None) -> None:
+        """Paint the splash screen logo, title, progress bar, and version."""
+        if painter is None:
+            return
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+
+        text_primary, text_secondary, accent, bg_bar, text_quaternary = (
+            self._resolve_theme_colors()
+        )
+
+        self._draw_logo_and_title(painter, text_primary, text_secondary)
+        self._draw_progress_bar(painter, accent, bg_bar)
+        self._draw_version_labels(painter, text_quaternary)
+
     def show_message(self, message: str, progress: int) -> None:
+        """Update the displayed loading message and progress percentage."""
         self.loading_message = message
         self.progress = progress
         self.showMessage(
@@ -235,6 +253,7 @@ class AsyncStartupWorker(QThread):
         self.results = StartupResults()
 
     def run(self) -> None:
+        """Execute asynchronous startup tasks in a background thread."""
         try:
             self.progress_signal.emit("Loading model registry...", 10)
             from src.shared.python.config.model_registry import ModelRegistry

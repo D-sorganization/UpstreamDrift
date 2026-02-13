@@ -105,10 +105,12 @@ class LocalRepository(Repository):
 
     @property
     def name(self) -> str:
+        """Return the repository display name."""
         return self._name
 
     @property
     def description(self) -> str:
+        """Return the repository description."""
         return self._description
 
     def list_models(self) -> list[RepositoryModel]:
@@ -192,10 +194,12 @@ class GitHubRepository(Repository):
 
     @property
     def name(self) -> str:
+        """Return the repository display name."""
         return self._name
 
     @property
     def description(self) -> str:
+        """Return the repository description."""
         return self._description
 
     def list_models(self) -> list[RepositoryModel]:
@@ -352,10 +356,12 @@ class CompositeRepository(Repository):
 
     @property
     def name(self) -> str:
+        """Return the composite repository display name."""
         return self._name
 
     @property
     def description(self) -> str:
+        """Return the composite repository description."""
         return self._description
 
     def add_repository(self, repo: Repository) -> None:

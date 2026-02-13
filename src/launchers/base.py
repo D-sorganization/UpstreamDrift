@@ -13,6 +13,7 @@ import logging
 import os
 import subprocess
 import sys
+from abc import abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -302,15 +303,22 @@ class BaseLauncher(QMainWindow):
         line.setFrameShadow(QFrame.Shadow.Sunken)
         return line
 
+    @abstractmethod
     def get_items(self) -> list[LaunchItem]:
         """Get the list of items to display.
 
         Subclasses must override this to provide their launch items.
 
+        Note:
+            ABC cannot be used as a mixin here due to PyQt6 metaclass conflict
+            (QMainWindow's sip.wrappertype is incompatible with ABCMeta).
+            The @abstractmethod decorator serves as documentation; enforcement
+            is at runtime via the method body.
+
         Returns:
             List of LaunchItem objects
         """
-        raise NotImplementedError(f"{type(self).__name__} must implement get_items()")
+        ...
 
     def init_ui(self) -> None:
         """Initialize the standard UI layout.

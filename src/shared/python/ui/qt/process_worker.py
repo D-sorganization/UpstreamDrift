@@ -22,12 +22,15 @@ else:
             pass
 
         def start(self) -> None:
+            """Start the thread by calling run synchronously."""
             self.run()
 
         def run(self) -> None:
+            """Execute the thread work (no-op in fallback stub)."""
             pass
 
         def wait(self) -> None:
+            """Wait for the thread to finish (no-op in fallback stub)."""
             pass
 
     class pyqtSignal:  # type: ignore[no-redef]
@@ -37,15 +40,18 @@ else:
             self._slots: list[Any] = []
 
         def connect(self, slot: Any) -> None:
+            """Register a slot callback for this signal."""
             self._slots.append(slot)
 
         def disconnect(self, slot: Any = None) -> None:
+            """Remove a slot callback, or all slots if none specified."""
             if slot is None:
                 self._slots.clear()
             else:
                 self._slots.remove(slot)
 
         def emit(self, *args: Any) -> None:
+            """Emit the signal, calling all connected slots with the given arguments."""
             for slot in self._slots:
                 slot(*args)
 

@@ -219,6 +219,7 @@ class MATLABQualityChecker:
 
 
 def main() -> None:
+    """Run the MATLAB quality checker from the command line."""
     parser = argparse.ArgumentParser(description="MATLAB Quality Checker")
     parser.add_argument("--project-root", type=str, default=".")
     args = parser.parse_args()

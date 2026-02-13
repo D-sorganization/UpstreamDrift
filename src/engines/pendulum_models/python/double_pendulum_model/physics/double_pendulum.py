@@ -112,10 +112,12 @@ class SegmentProperties:
 
     @property
     def center_of_mass_distance(self) -> float:
+        """Return distance from proximal joint to center of mass."""
         return self.length_m * self.center_of_mass_ratio
 
     @property
     def inertia_about_proximal_joint(self) -> float:
+        """Compute inertia about the proximal joint via parallel axis."""
         return self.inertia_about_com + self.mass_kg * self.center_of_mass_distance**2
 
 
@@ -130,10 +132,12 @@ class LowerSegmentProperties:
 
     @property
     def total_mass(self) -> float:
+        """Return combined mass of shaft and clubhead."""
         return self.shaft_mass_kg + self.clubhead_mass_kg
 
     @property
     def center_of_mass_distance(self) -> float:
+        """Compute mass-weighted center of mass distance from grip."""
         shaft_com = self.length_m * self.shaft_com_ratio
         weighted_sum = (
             shaft_com * self.shaft_mass_kg + self.length_m * self.clubhead_mass_kg
@@ -142,6 +146,7 @@ class LowerSegmentProperties:
 
     @property
     def inertia_about_com(self) -> float:
+        """Compute composite rotational inertia about center of mass."""
         shaft_inertia_com = (1.0 / 12.0) * self.shaft_mass_kg * self.length_m**2
         # Shaft COM is at shaft_com_ratio * length, not at midpoint
         shaft_com_position = self.length_m * self.shaft_com_ratio
@@ -154,6 +159,7 @@ class LowerSegmentProperties:
 
     @property
     def inertia_about_proximal_joint(self) -> float:
+        """Compute inertia about the proximal joint via parallel axis."""
         return (
             self.inertia_about_com + self.total_mass * self.center_of_mass_distance**2
         )
@@ -174,6 +180,7 @@ class DoublePendulumParameters:
 
     @classmethod
     def default(cls) -> DoublePendulumParameters:
+        """Create parameters with default golf-swing segment properties."""
         upper_inertia = (
             DEFAULT_ARM_INERTIA_SCALING * DEFAULT_ARM_MASS_KG * DEFAULT_ARM_LENGTH_M**2
         )
@@ -193,10 +200,12 @@ class DoublePendulumParameters:
 
     @property
     def plane_inclination_rad(self) -> float:
+        """Return swing plane inclination in radians."""
         return math.radians(self.plane_inclination_deg)
 
     @property
     def projected_gravity(self) -> float:
+        """Compute gravity component projected onto the swing plane."""
         if not self.gravity_enabled:
             return 0.0
         if not self.constrained_to_plane:
@@ -240,6 +249,7 @@ class DoublePendulumDynamics:
         self._cache_parameters()
 
         def zero_input(_: float, __: DoublePendulumState) -> float:
+            """Return zero forcing for undriven joints."""
             return 0.0
 
         self.forcing_functions = forcing_functions or (zero_input, zero_input)
@@ -258,6 +268,7 @@ class DoublePendulumDynamics:
         self._d2 = p.damping_wrist
 
     def mass_matrix(self, theta2: float) -> Matrix2x2:
+        """Compute the 2x2 mass matrix for the given relative angle."""
         # Use cached values
         m2 = self._m2
         l1 = self._l1
@@ -274,6 +285,7 @@ class DoublePendulumDynamics:
     def coriolis_vector(
         self, theta2: float, omega1: float, omega2: float
     ) -> tuple[float, float]:
+        """Compute Coriolis and centripetal force vector."""
         m2 = self._m2
         l1 = self._l1
         lc2 = self._lc2
@@ -284,6 +296,7 @@ class DoublePendulumDynamics:
         return c1, c2
 
     def gravity_vector(self, theta1: float, theta2: float) -> tuple[float, float]:
+        """Compute gravitational torque vector for both joints."""
         m1 = self._m1
         m2 = self._m2
         l1 = self._l1
@@ -298,6 +311,7 @@ class DoublePendulumDynamics:
         return g1, g2
 
     def damping_vector(self, omega1: float, omega2: float) -> tuple[float, float]:
+        """Compute viscous damping torques for both joints."""
         d1 = self._d1 * omega1
         d2 = self._d2 * omega2
         return d1, d2
@@ -317,6 +331,7 @@ class DoublePendulumDynamics:
     def control_affine(
         self, state: DoublePendulumState
     ) -> tuple[tuple[float, ...], tuple[tuple[float, ...], ...]]:
+        """Decompose dynamics into drift and control-input matrices."""
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
         d1, d2 = self.damping_vector(state.omega1, state.omega2)
@@ -341,6 +356,7 @@ class DoublePendulumDynamics:
     def applied_torques(
         self, t: float, state: DoublePendulumState
     ) -> tuple[float, float]:
+        """Evaluate user-defined forcing functions at the given state."""
         tau1 = self.forcing_functions[0](t, state)
         tau2 = self.forcing_functions[1](t, state)
         return tau1, tau2
@@ -363,6 +379,7 @@ class DoublePendulumDynamics:
     def joint_torque_breakdown(
         self, state: DoublePendulumState, control: tuple[float, float]
     ) -> JointTorques:
+        """Decompose joint torques into applied, gravity, damping, and Coriolis."""
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
         d1, d2 = self.damping_vector(state.omega1, state.omega2)
@@ -376,6 +393,7 @@ class DoublePendulumDynamics:
     def derivatives(
         self, t: float, state: DoublePendulumState
     ) -> tuple[float, float, float, float]:
+        """Compute state derivatives (velocities and accelerations)."""
         tau1, tau2 = self.applied_torques(t, state)
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
@@ -388,9 +406,12 @@ class DoublePendulumDynamics:
     def step(
         self, t: float, state: DoublePendulumState, dt: float
     ) -> DoublePendulumState:
+        """Advance the state by one RK4 integration step."""
+
         def rk4_increment(
             current_state: DoublePendulumState, scale: float, derivs: Iterable[float]
         ) -> DoublePendulumState:
+            """Apply a scaled RK4 derivative increment to the state."""
             dtheta1, dtheta2, domega1, domega2 = derivs
             # Preserve phi and omega_phi (out-of-plane motion not yet in dynamics)
             phi = getattr(current_state, "phi", 0.0)
@@ -428,8 +449,11 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
+def compile_forcing_functions(
+    shoulder_expression: str, wrist_expression: str
+) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:
+    """Compile shoulder and wrist torque expressions into callables."""
     return ExpressionFunction(shoulder_expression), ExpressionFunction(wrist_expression)

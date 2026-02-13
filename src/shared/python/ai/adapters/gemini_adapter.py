@@ -94,6 +94,7 @@ class GeminiAdapter(BaseAgentAdapter):
 
     @property
     def capabilities(self) -> ProviderCapabilities:
+        """Return the set of capabilities supported by the Gemini provider."""
         from src.shared.python.ai.types import ProviderCapability
 
         return ProviderCapabilities(

@@ -477,6 +477,7 @@ class NonlinearDynamicsMixin:
         tolerance = r * np.std(data)
 
         def count_matches(template_len: int) -> int:
+            """Count template-matching vector pairs within the tolerance radius."""
             n_vectors = N - template_len
 
             X = np.zeros((n_vectors, template_len))

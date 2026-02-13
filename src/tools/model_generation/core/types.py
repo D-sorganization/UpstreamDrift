@@ -335,22 +335,27 @@ class Material:
     # Common materials
     @classmethod
     def skin(cls) -> Material:
+        """Create a skin-colored material preset."""
         return cls("skin", (0.87, 0.72, 0.53, 1.0))
 
     @classmethod
     def bone(cls) -> Material:
+        """Create a bone-colored material preset."""
         return cls("bone", (0.95, 0.95, 0.90, 1.0))
 
     @classmethod
     def muscle(cls) -> Material:
+        """Create a muscle-colored material preset."""
         return cls("muscle", (0.8, 0.3, 0.3, 1.0))
 
     @classmethod
     def metal(cls) -> Material:
+        """Create a metal-colored material preset."""
         return cls("metal", (0.7, 0.7, 0.75, 1.0))
 
     @classmethod
     def plastic(cls) -> Material:
+        """Create a plastic-colored material preset."""
         return cls("plastic", (0.3, 0.3, 0.8, 1.0))
 
 

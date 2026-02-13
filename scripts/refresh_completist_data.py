@@ -20,6 +20,7 @@ EXCLUDE_DIRS = [
 
 
 def run_grep(pattern, output_file, extended_regex=False):
+    """Run grep with the given pattern and write results to output_file."""
     cmd = ["grep", "-rn"]
     if extended_regex:
         cmd.append("-E")
@@ -40,6 +41,7 @@ def run_grep(pattern, output_file, extended_regex=False):
 
 
 def main():
+    """Refresh completist audit data by running grep scans and stub finders."""
     print("Refreshing completist data...")
 
     # 1. Run find_stubs.py

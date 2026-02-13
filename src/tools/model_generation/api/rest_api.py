@@ -51,18 +51,22 @@ class APIResponse:
 
     @classmethod
     def ok(cls, data: dict[str, Any]) -> APIResponse:
+        """Create a 200 OK response with the given data."""
         return cls(status_code=200, body=data)
 
     @classmethod
     def created(cls, data: dict[str, Any]) -> APIResponse:
+        """Create a 201 Created response with the given data."""
         return cls(status_code=201, body=data)
 
     @classmethod
     def error(cls, message: str, status_code: int = 400) -> APIResponse:
+        """Create an error response with the given message and status code."""
         return cls(status_code=status_code, body={"error": message})
 
     @classmethod
     def not_found(cls, message: str = "Not found") -> APIResponse:
+        """Create a 404 Not Found response."""
         return cls(status_code=404, body={"error": message})
 
     @classmethod
@@ -72,6 +76,7 @@ class APIResponse:
         filename: str,
         content_type: str = "application/xml",
     ) -> APIResponse:
+        """Create a file-download response with appropriate headers."""
         return cls(
             status_code=200,
             body=content if isinstance(content, bytes) else content.encode(),
@@ -1040,7 +1045,10 @@ class FlaskAdapter:
             endpoint = route.path.replace("/", "_").replace("{", "").replace("}", "")
 
             def make_handler(r: Route) -> Any:
+                """Create a Flask view function for the given route."""
+
                 def handler(**kwargs) -> Any:
+                    """Translate a Flask request into an APIRequest and return the response."""
                     # Build APIRequest
                     api_request = APIRequest(
                         method=HTTPMethod(flask_request.method),
@@ -1094,7 +1102,10 @@ class FastAPIAdapter:
         for route in self.api.get_routes():
 
             async def make_handler(r: Route) -> Any:
+                """Create a FastAPI endpoint handler for the given route."""
+
                 async def handler(request: Request, **kwargs) -> Any:
+                    """Translate a FastAPI request into an APIRequest and return the response."""
                     body = None
                     try:
                         body = await request.json()

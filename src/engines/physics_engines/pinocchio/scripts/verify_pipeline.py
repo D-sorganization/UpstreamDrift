@@ -17,6 +17,7 @@ from dtack.utils.matlab_importer import MATLABImporter
 
 
 def main() -> None:
+    """Verify the unified platform pipeline end to end."""
     setup_logging()
     logger = get_logger("VerifyWorkflow")
 

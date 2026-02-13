@@ -648,6 +648,7 @@ def main() -> None:
     main_window = None
 
     def on_startup_finished(results: StartupResults) -> None:
+        """Create and display the main window after startup completes."""
         nonlocal main_window
         main_window = GolfLauncher(results)
         main_window.show()
@@ -655,6 +656,7 @@ def main() -> None:
         worker.wait(1000)
 
     def on_startup_progress(msg: str, percent: int) -> None:
+        """Forward startup progress to the splash screen."""
         splash.show_message(msg, percent)
 
     worker.progress_signal.connect(on_startup_progress)

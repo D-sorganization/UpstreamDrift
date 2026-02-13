@@ -39,6 +39,7 @@ else:
         """No-op decorator when numba is not installed."""
 
         def decorator(func: object) -> object:
+            """Return the function unchanged as a no-op JIT substitute."""
             return func
 
         if len(args) == 1 and callable(args[0]):
@@ -69,16 +70,20 @@ class BallProperties:
 
     @property
     def radius(self) -> float:
+        """Return the ball radius in meters."""
         return self.diameter / 2
 
     @property
     def cross_sectional_area(self) -> float:
+        """Return the cross-sectional area of the ball."""
         return float(np.pi * (self.diameter / 2) ** 2)
 
     def calculate_cd(self, s: float) -> float:
+        """Compute the drag coefficient from the spin parameter."""
         return self.cd0 + s * (self.cd1 + s * self.cd2)
 
     def calculate_cl(self, s: float) -> float:
+        """Compute the lift coefficient from the spin parameter, clamped to max."""
         return min(MAX_LIFT_COEFFICIENT, self.cl0 + s * (self.cl1 + s * self.cl2))
 
 
@@ -116,10 +121,12 @@ class TrajectoryPoint:
 
     @property
     def speed(self) -> float:
+        """Return the scalar speed from the velocity vector."""
         return float(np.linalg.norm(self.velocity))
 
     @property
     def height(self) -> float:
+        """Return the vertical position component."""
         return float(self.position[2])
 
 
@@ -798,6 +805,7 @@ class EnhancedBallFlightSimulator:
         def derivatives(
             p: np.ndarray, v: np.ndarray, time: float
         ) -> tuple[np.ndarray, np.ndarray]:
+            """Compute velocity and acceleration derivatives for RK4 integration."""
             aero_forces = self._aero_engine.compute_forces(v, spin, t=time, position=p)
             gravity_force = self.ball.mass * gravity_acc
             total_force = aero_forces["total"] + gravity_force

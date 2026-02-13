@@ -464,6 +464,7 @@ class ControlsTab(QtWidgets.QWidget):
         if slider is not None:
 
             def slider_sync_func(value: float) -> None:
+                """Synchronize slider position with the detail dialog value."""
                 slider.blockSignals(True)
                 slider.setValue(int(value))
                 slider.blockSignals(False)
@@ -483,6 +484,7 @@ class ControlsTab(QtWidgets.QWidget):
 
     # Callbacks
     def on_actuator_filter_changed(self, text: str) -> None:
+        """Filter visible actuator groups by search text."""
         text = text.lower()
         for group in self.actuator_groups:
             group_name = group.title().lower()
@@ -491,6 +493,7 @@ class ControlsTab(QtWidgets.QWidget):
             group.setVisible(match)
 
     def on_actuator_slider_changed(self, index: int, value: int) -> None:
+        """Apply slider value change to actuator constant torque."""
         # Update label
         if index < len(self.actuator_labels):
             self.actuator_labels[index].setText(f"{value} Nm")
@@ -509,6 +512,7 @@ class ControlsTab(QtWidgets.QWidget):
             cs.set_control_type(index, ControlType.CONSTANT)
 
     def on_constant_value_changed(self, index: int, value: float) -> None:
+        """Apply spinbox value change to actuator constant torque."""
         if index < len(self.actuator_sliders):
             s = self.actuator_sliders[index]
             s.blockSignals(True)
@@ -521,11 +525,13 @@ class ControlsTab(QtWidgets.QWidget):
             cs.set_control_type(index, ControlType.CONSTANT)
 
     def on_damping_changed(self, index: int, value: float) -> None:
+        """Update damping coefficient for an actuator."""
         cs = self.sim_widget.get_control_system()
         if cs:
             cs.set_damping(index, value)
 
     def on_control_type_changed(self, index: int, type_idx: int) -> None:
+        """Switch the control type for an actuator."""
         cs = self.sim_widget.get_control_system()
         if cs:
             types = [
@@ -538,6 +544,7 @@ class ControlsTab(QtWidgets.QWidget):
                 cs.set_control_type(index, types[type_idx])
 
     def on_play_pause_toggled(self, checked: bool) -> None:
+        """Toggle simulation between paused and running states."""
         # Toggle simulation running state
         self.sim_widget.running = not checked
         self.play_pause_btn.setText("Resume" if checked else "Pause")
@@ -552,11 +559,13 @@ class ControlsTab(QtWidgets.QWidget):
             self.play_pause_btn.setIcon(style.standardIcon(icon))
 
     def on_reset_clicked(self) -> None:
+        """Reset the simulation to the initial state."""
         self.sim_widget.reset_state()
         self.play_pause_btn.setChecked(False)  # Resume if paused
         self.sim_widget.running = True
 
     def on_record_toggled(self, checked: bool) -> None:
+        """Start or stop recording simulation data."""
         recorder = self.sim_widget.get_recorder()
         if checked:
             self.record_btn.setText("Stop Recording")
@@ -576,6 +585,7 @@ class ControlsTab(QtWidgets.QWidget):
             recorder.stop_recording()
 
     def on_take_screenshot(self) -> None:
+        """Save the current simulation view as a PNG screenshot."""
         pixmap = self.sim_widget.label.pixmap()
         if not pixmap or pixmap.isNull():
             return
@@ -594,6 +604,7 @@ class ControlsTab(QtWidgets.QWidget):
             )
 
     def on_export_data(self) -> None:
+        """Delegate data export to the main window handler."""
         if hasattr(self.main_window, "on_export_data"):
             self.main_window.on_export_data()
 
@@ -974,6 +985,7 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
 
         # Handle result
         def on_generated(name: str, coeffs: list[float]) -> None:
+            """Apply generated polynomial coefficients to spinboxes."""
             # Update spinboxes
             for i, val in enumerate(coeffs):
                 if i < len(self.poly_spinboxes):

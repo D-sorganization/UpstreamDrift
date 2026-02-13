@@ -31,6 +31,7 @@ class GuiRecorder(RecorderInterface):
         self.analysis_config = config
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
+        """Extract a named time series from recorded biomechanical data."""
         if not self.data_store:
             return np.array([]), np.array([])
 
@@ -66,6 +67,7 @@ class GuiRecorder(RecorderInterface):
     def get_induced_acceleration_series(
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Extract induced acceleration time series for a named source."""
         if not self.data_store:
             return np.array([]), np.array([])
 
@@ -86,6 +88,7 @@ class GuiRecorder(RecorderInterface):
         return np.array(times), np.array(values)
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Extract counterfactual time series by name."""
         if not self.data_store:
             return np.array([]), np.array([])
 

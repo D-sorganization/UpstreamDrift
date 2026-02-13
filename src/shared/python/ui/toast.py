@@ -290,6 +290,7 @@ class ToastManager:
 
         # Clean up when dismissed
         def on_destroyed() -> None:
+            """Remove the toast from the active list when it is destroyed."""
             if toast in self.active_toasts:
                 self.active_toasts.remove(toast)
 

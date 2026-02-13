@@ -329,9 +329,11 @@ class MuJoCoOffscreenRenderer:
 
         # Fix zero inertia values
         def fix_inertia_attr(attr: str, content: str) -> str:
+            """Replace near-zero diagonal inertia values with the minimum."""
             pattern = rf'{attr}="([^"]+)"'
 
             def replace(m: re.Match) -> str:
+                """Substitute the matched inertia value if below threshold."""
                 val = float(m.group(1))
                 # Only fix diagonal elements (ixx, iyy, izz)
                 if attr in ("ixx", "iyy", "izz") and val < min_inertia:

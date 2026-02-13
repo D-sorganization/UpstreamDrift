@@ -56,6 +56,7 @@ class MuJoCoMeshcatAdapter:
         self.load_model_geometry()
 
     def open_browser(self) -> None:
+        """Open the Meshcat visualization URL in the default browser."""
         if self.vis is not None:
             webbrowser.open(self.vis.url())
 

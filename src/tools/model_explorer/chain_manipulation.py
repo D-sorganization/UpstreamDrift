@@ -168,6 +168,7 @@ class KinematicTree:
             return
 
         def set_depth(node: ChainNode, depth: int) -> None:
+            """Recursively assign depth values to each node."""
             node.depth = depth
             for child in node.children:
                 set_depth(child, depth + 1)
@@ -239,6 +240,7 @@ class KinematicTree:
         chains = []
 
         def collect_chains(node: ChainNode, current_chain: list[ChainNode]) -> None:
+            """Recursively collect root-to-leaf chains."""
             current_chain = current_chain + [node]
             if node.is_leaf():
                 chains.append(current_chain)
@@ -333,6 +335,7 @@ class ChainVisualizer(QGraphicsView):
 
         # Assign positions
         def assign_position(node: ChainNode) -> None:
+            """Assign x/y coordinates to a node based on its depth and index."""
             depth = node.depth
             count = depth_counts[depth]
             index = depth_indices[depth]

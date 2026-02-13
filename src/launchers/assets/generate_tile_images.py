@@ -45,9 +45,11 @@ def create_png(
     """
 
     def crc32(data: bytes) -> int:
+        """Compute CRC-32 checksum for the given bytes."""
         return zlib.crc32(data) & 0xFFFFFFFF
 
     def make_chunk(chunk_type: bytes, data: bytes) -> bytes:
+        """Build a PNG chunk with type, data, length, and CRC."""
         chunk = chunk_type + data
         return struct.pack(">I", len(data)) + chunk + struct.pack(">I", crc32(chunk))
 
