@@ -21,10 +21,10 @@ def test_registry_initialization(registry):
     assert registry.get("GRAVITY") is not None
 
 
-def test_parameter_validation():
-    """Test parameter validation logic."""
-    # Test numeric validation
-    param = PhysicsParameter(
+@pytest.fixture
+def bounded_param():
+    """Create a bounded parameter for validation tests."""
+    return PhysicsParameter(
         name="TEST",
         value=10.0,
         unit="m",
@@ -35,24 +35,23 @@ def test_parameter_validation():
         max_value=20.0,
     )
 
-    # Valid
-    valid, msg = param.validate(15.0)
-    assert valid
 
-    # Invalid type
-    valid, msg = param.validate("string")
-    assert not valid
-    assert "numeric" in msg
-
-    # Below min
-    valid, msg = param.validate(-1.0)
-    assert not valid
-    assert "must be >=" in msg
-
-    # Above max
-    valid, msg = param.validate(25.0)
-    assert not valid
-    assert "must be <=" in msg
+@pytest.mark.parametrize(
+    "test_value,expect_valid,msg_contains",
+    [
+        (15.0, True, None),
+        ("string", False, "numeric"),
+        (-1.0, False, "must be >="),
+        (25.0, False, "must be <="),
+    ],
+    ids=["valid_in_range", "invalid_type", "below_min", "above_max"],
+)
+def test_parameter_validation(bounded_param, test_value, expect_valid, msg_contains):
+    """Test parameter validation logic."""
+    valid, msg = bounded_param.validate(test_value)
+    assert valid == expect_valid
+    if msg_contains is not None:
+        assert msg_contains in msg
 
 
 def test_constant_parameter():

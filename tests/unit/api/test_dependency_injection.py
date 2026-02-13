@@ -17,6 +17,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from src.shared.python.engine_core.engine_manager import EngineManager
+
 # Skip if FastAPI not available
 fastapi = pytest.importorskip("fastapi")
 httpx = pytest.importorskip("httpx")
@@ -126,16 +128,17 @@ class TestDependencyOverride:
     @pytest.fixture
     def mock_engine_manager(self) -> MagicMock:
         """Create a mock engine manager."""
-        mgr = MagicMock()
+        mgr = MagicMock(spec=EngineManager)
         mgr.get_available_engines.return_value = ["mock_engine"]
         mgr.get_current_engine.return_value = None
-        mgr.get_engine_status.return_value = MagicMock(value="available")
+        mgr.get_engine_status.return_value = MagicMock(spec=["value"])
+        mgr.get_engine_status.return_value.value = "available"
         return mgr
 
     @pytest.fixture
     def mock_task_manager(self) -> MagicMock:
         """Create a mock task manager."""
-        mgr = MagicMock()
+        mgr = MagicMock(spec=["__contains__", "__getitem__", "get", "keys"])
         mgr.__contains__ = MagicMock(return_value=False)
         return mgr
 
@@ -159,7 +162,9 @@ class TestDependencyOverride:
         # Override dependencies with mocks
         app.dependency_overrides[get_engine_manager] = lambda: mock_engine_manager
         app.dependency_overrides[get_task_manager] = lambda: mock_task_manager
-        app.dependency_overrides[get_logger] = lambda: MagicMock()
+        app.dependency_overrides[get_logger] = lambda: MagicMock(
+            spec=["info", "warning", "error", "debug"]
+        )
 
         return app
 
@@ -262,7 +267,7 @@ class TestDependencyProviders:
         from src.api.dependencies import get_engine_manager
 
         mock_request = MagicMock()
-        mock_mgr = MagicMock()
+        mock_mgr = MagicMock(spec=EngineManager)
         mock_request.app.state.engine_manager = mock_mgr
 
         result = get_engine_manager(mock_request)

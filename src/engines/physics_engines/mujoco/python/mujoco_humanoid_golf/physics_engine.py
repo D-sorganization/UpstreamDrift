@@ -11,6 +11,7 @@ import numpy as np
 from src.shared.python.core.contracts import (
     PreconditionError,
     check_finite,
+    invariant,
     postcondition,
     precondition,
 )
@@ -30,6 +31,10 @@ ALLOWED_MODEL_DIRS = [
 ]
 
 
+@invariant(
+    lambda self: self.model is None or self.data is not None,
+    "If model is loaded, data must also be initialized",
+)
 class MuJoCoPhysicsEngine(PhysicsEngine):
     """Encapsulates MuJoCo model, data, and simulation control.
 

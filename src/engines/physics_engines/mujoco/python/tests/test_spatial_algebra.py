@@ -65,16 +65,15 @@ class TestSpatialCrossProducts:
         with pytest.raises(ValueError):
             spatial_cross(v, u, "invalid")
 
-    def test_crm_zero_velocity_returns_zero_matrix(self) -> None:
-        """Test CRM returns zero matrix for zero velocity."""
+    @pytest.mark.parametrize(
+        "operator_fn",
+        [crm, crf],
+        ids=["crm", "crf"],
+    )
+    def test_zero_velocity_returns_zero_matrix(self, operator_fn) -> None:
+        """Test CRM/CRF returns zero matrix for zero velocity."""
         v = np.zeros(6)
-        X = crm(v)
-        np.testing.assert_allclose(X, np.zeros((6, 6)), atol=1e-10)
-
-    def test_crf_zero_velocity_returns_zero_matrix(self) -> None:
-        """Test CRF returns zero matrix for zero velocity."""
-        v = np.zeros(6)
-        X = crf(v)
+        X = operator_fn(v)
         np.testing.assert_allclose(X, np.zeros((6, 6)), atol=1e-10)
 
 
@@ -243,15 +242,24 @@ class TestJointCalculations:
         # Index should be 3 for Px
         assert idx == 3
 
-    def test_jcalc_all_joint_types(self) -> None:
+    @pytest.mark.parametrize(
+        "jtype,expected_idx",
+        [
+            ("Rx", 0),
+            ("Ry", 1),
+            ("Rz", 2),
+            ("Px", 3),
+            ("Py", 4),
+            ("Pz", 5),
+        ],
+        ids=["Rx", "Ry", "Rz", "Px", "Py", "Pz"],
+    )
+    def test_jcalc_all_joint_types(self, jtype, expected_idx) -> None:
         """Test all supported joint types."""
-        joint_types = ["Rx", "Ry", "Rz", "Px", "Py", "Pz"]
-
-        for i, jtype in enumerate(joint_types):
-            Xj, S, idx = jcalc(jtype, 0.1)
-            assert Xj.shape == (6, 6)
-            assert S.shape == (6,)
-            assert idx == i
+        Xj, S, idx = jcalc(jtype, 0.1)
+        assert Xj.shape == (6, 6)
+        assert S.shape == (6,)
+        assert idx == expected_idx
 
     def test_jcalc_unsupported_joint(self) -> None:
         """Test error for unsupported joint type."""

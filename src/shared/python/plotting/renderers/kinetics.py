@@ -705,41 +705,48 @@ class KineticsRenderer(BaseRenderer):
             return
 
         if joint_idx is not None:
-            if joint_idx < acc.shape[1]:
-                ax.plot(
-                    times,
-                    acc[:, joint_idx],
-                    label=self.data.get_joint_name(joint_idx),
-                    linewidth=2,
-                    color=self.colors["primary"],
-                )
-                ax.set_ylabel(
-                    f"Joint {joint_idx} Acceleration (rad/s²)",
-                    fontsize=12,
-                    fontweight="bold",
-                )
-            else:
-                ax.text(
-                    0.5,
-                    0.5,
-                    f"Joint index {joint_idx} out of bounds",
-                    ha="center",
-                    va="center",
-                )
+            if not self._plot_induced_joint(ax, times, acc, joint_idx):
                 return
         else:
-            norm = np.sqrt(np.sum(acc**2, axis=1))
-            ax.plot(
-                times,
-                norm,
-                label="L2 Norm",
-                linewidth=2,
-                color=self.colors["primary"],
-            )
-            ax.set_ylabel(
-                "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
-            )
+            self._plot_induced_norm(ax, times, acc)
 
         ax.set_title(
             f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
+        )
+
+    def _plot_induced_joint(self, ax, times, acc, joint_idx):
+        if joint_idx >= acc.shape[1]:
+            ax.text(
+                0.5,
+                0.5,
+                f"Joint index {joint_idx} out of bounds",
+                ha="center",
+                va="center",
+            )
+            return False
+        ax.plot(
+            times,
+            acc[:, joint_idx],
+            label=self.data.get_joint_name(joint_idx),
+            linewidth=2,
+            color=self.colors["primary"],
+        )
+        ax.set_ylabel(
+            f"Joint {joint_idx} Acceleration (rad/s\u00b2)",
+            fontsize=12,
+            fontweight="bold",
+        )
+        return True
+
+    def _plot_induced_norm(self, ax, times, acc):
+        norm = np.sqrt(np.sum(acc**2, axis=1))
+        ax.plot(
+            times,
+            norm,
+            label="L2 Norm",
+            linewidth=2,
+            color=self.colors["primary"],
+        )
+        ax.set_ylabel(
+            "Acceleration Magnitude (rad/s\u00b2)", fontsize=12, fontweight="bold"
         )

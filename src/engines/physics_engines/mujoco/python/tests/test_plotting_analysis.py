@@ -39,24 +39,21 @@ def mock_recorder():
     return recorder
 
 
-def test_plot_frequency_analysis(mock_recorder):
+@pytest.mark.parametrize(
+    "method_name,ax_check_attr",
+    [
+        ("plot_frequency_analysis", "semilogy"),
+        ("plot_spectrogram", "pcolormesh"),
+    ],
+    ids=["frequency_analysis", "spectrogram"],
+)
+def test_plot_methods(mock_recorder, method_name, ax_check_attr):
+    """Test plotting methods create axes and call expected rendering."""
     plotter = GolfSwingPlotter(mock_recorder)
     fig = MagicMock()
 
-    plotter.plot_frequency_analysis(fig, joint_idx=0, signal_type="velocity")
-
-    # Check if ax.semilogy was called
-    assert fig.add_subplot.called
-    ax = fig.add_subplot.return_value
-    assert ax.semilogy.called
-
-
-def test_plot_spectrogram(mock_recorder):
-    plotter = GolfSwingPlotter(mock_recorder)
-    fig = MagicMock()
-
-    plotter.plot_spectrogram(fig, joint_idx=0, signal_type="velocity")
+    getattr(plotter, method_name)(fig, joint_idx=0, signal_type="velocity")
 
     assert fig.add_subplot.called
     ax = fig.add_subplot.return_value
-    assert ax.pcolormesh.called
+    assert getattr(ax, ax_check_attr).called

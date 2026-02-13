@@ -10,12 +10,18 @@ from typing import Any, cast
 
 import numpy as np
 
+from src.shared.python.core.contracts import invariant
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 
+@invariant(lambda self: self.max_samples > 0, "max_samples must be positive")
+@invariant(
+    lambda self: self.current_idx <= self.current_capacity,
+    "current_idx must not exceed current_capacity",
+)
 class GenericPhysicsRecorder:
     """Records simulation data from a PhysicsEngine.
 

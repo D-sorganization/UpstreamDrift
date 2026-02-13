@@ -259,6 +259,48 @@ class InverseDynamicsSolver:
             manipulability_index=primary_result.manipulability_index,
         )
 
+    def _compute_gravity_force(self) -> np.ndarray:
+        qvel_backup = self._perturb_data.qvel.copy()
+        self._perturb_data.qvel[:] = 0
+        self._perturb_data.cvel[:] = 0
+        g_force = np.zeros(self.model.nv)
+        mujoco.mj_rne(self.model, self._perturb_data, 0, g_force)
+        self._perturb_data.qvel[:] = qvel_backup
+        return g_force
+
+    def _compute_coriolis_force(self, g_force: np.ndarray) -> np.ndarray:
+        mujoco.mj_forward(self.model, self._perturb_data)
+        bias_force = self._perturb_data.qfrc_bias.copy()
+        return bias_force - g_force
+
+    def _compute_control_force(self, ctrl: np.ndarray) -> np.ndarray:
+        self._perturb_data.ctrl[:] = 0
+        if len(ctrl) == self.model.nu:
+            self._perturb_data.ctrl[:] = ctrl
+        mujoco.mj_fwdActuation(self.model, self._perturb_data)
+        return self._perturb_data.qfrc_actuation.copy()
+
+    def _solve_component_accelerations(
+        self,
+        g_force: np.ndarray,
+        c_force: np.ndarray,
+        tau_force: np.ndarray,
+    ) -> InducedAccelerationResult:
+        # Acc_G = M^-1 * (-G), Acc_C = M^-1 * (-C), Acc_Tau = M^-1 * (tau)
+        a_g = (-g_force).copy()
+        mujoco.mj_solveM(self.model, self._perturb_data, a_g)
+
+        a_c = (-c_force).copy()
+        mujoco.mj_solveM(self.model, self._perturb_data, a_c)
+
+        a_t = tau_force.copy()
+        mujoco.mj_solveM(self.model, self._perturb_data, a_t)
+
+        total = a_g + a_c + a_t
+        return InducedAccelerationResult(
+            gravity=a_g, velocity=a_c, control=a_t, total=total
+        )
+
     def compute_induced_accelerations(
         self,
         qpos: np.ndarray,
@@ -283,87 +325,14 @@ class InverseDynamicsSolver:
         Returns:
             InducedAccelerationResult with component accelerations.
         """
-        # FIXED: Use private data structure for thread safety (Assessment A-001)
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
 
-        # 1. Compute Mass Matrix M
-        mujoco.mj_fullM(
-            self.model, np.zeros((self.model.nv, self.model.nv)), self._perturb_data.qM
-        )
-        # However, we can use mj_solveM to solve M*x = y without explicit inverse,
-        # which is faster/steadier.
-        # But for separation, we want M^-1 * vector.
+        g_force = self._compute_gravity_force()
+        c_force = self._compute_coriolis_force(g_force)
+        tau_force = self._compute_control_force(ctrl)
 
-        # Let's compute Force Vectors first.
-        # We need Coriolis and Gravity as TORQUES.
-
-        # A. Gravity
-        # mj_rne with v=0, a=0 returns G.
-        qvel_backup = self._perturb_data.qvel.copy()
-        self._perturb_data.qvel[:] = 0
-        self._perturb_data.cvel[:] = 0
-        g_force = np.zeros(self.model.nv)
-        mujoco.mj_rne(self.model, self._perturb_data, 0, g_force)
-
-        # B. Coriolis (C * qdot)
-        # mj_forward computes qfrc_bias = C + G.
-        self._perturb_data.qvel[:] = qvel_backup  # Restore
-        mujoco.mj_forward(self.model, self._perturb_data)
-        bias_force = self._perturb_data.qfrc_bias.copy()
-        c_force = bias_force - g_force
-
-        # C. Control Torques
-        # Map ctrl to joint space if needed.
-        # If ctrl is smaller than nv, we assume it matches nu.
-        # mujoco stores applied forces (passive + active) in qfrc_applied + actuation?
-        # Ideally we take 'ctrl' input and map to generalized force.
-        # For simplicity, if len(ctrl) == nu, use data.ctrl.
-        # We want the effect of 'ctrl' vector.
-        # We can use mj_mulJacT? Or just assign data.ctrl and run mj_fwdActuation?
-        # Actually easier: The user passes 'ctrl' vector.
-        # If we just want impact of 'ctrl', we set data.ctrl = ctrl, run actuation.
-        self._perturb_data.ctrl[:] = 0
-        if len(ctrl) == self.model.nu:
-            self._perturb_data.ctrl[:] = ctrl
-        # Need to compute qfrc_actuation
-        mujoco.mj_fwdActuation(self.model, self._perturb_data)
-        tau_force = self._perturb_data.qfrc_actuation.copy()
-
-        # Scale external forces if any? ignoring for now as they are not passed.
-
-        # Now solve M * a = F for each component.
-        # Induced Acc = M^-1 * F_generalized.
-        # Note equation direction: M*a + C + G = tau
-        # M*a = tau - C - G
-        # Acc_G = M^-1 * (-G)
-        # Acc_C = M^-1 * (-C)
-        # Acc_Tau = M^-1 * (tau)
-
-        # Vectors to solve for:
-        f_g = -g_force
-        f_c = -c_force
-        f_t = tau_force
-
-        # Solve using MuJoCo's Cholesky solver (qLD) which is already computed
-        # in mj_forward
-        # But we need to use mj_solveM which uses qLD.
-        # mj_solveM overwrites the input vector with the solution.
-
-        a_g = f_g.copy()
-        mujoco.mj_solveM(self.model, self._perturb_data, a_g)
-
-        a_c = f_c.copy()
-        mujoco.mj_solveM(self.model, self._perturb_data, a_c)
-
-        a_t = f_t.copy()
-        mujoco.mj_solveM(self.model, self._perturb_data, a_t)
-
-        total = a_g + a_c + a_t
-
-        return InducedAccelerationResult(
-            gravity=a_g, velocity=a_c, control=a_t, total=total
-        )
+        return self._solve_component_accelerations(g_force, c_force, tau_force)
 
     def solve_inverse_dynamics_trajectory(
         self,

@@ -33,6 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -445,6 +446,10 @@ class JointEditorPanel(QWidget):
         # This would load the joint's current values into the editor
         self.apply_btn.setEnabled(bool(name))
 
+    @precondition(
+        lambda self, joint: joint is not None and hasattr(joint, "name"),
+        "Joint must be a valid JointInfo object",
+    )
     def set_joint(self, joint: JointInfo) -> None:
         """Set the joint to edit."""
         self.current_joint = joint
@@ -609,6 +614,10 @@ class JointManipulatorWidget(QWidget):
         self.filter_combo.currentTextChanged.connect(self._on_filter_changed)
         self.editor_panel.joint_updated.connect(self._on_joint_updated)
 
+    @precondition(
+        lambda self, content: content is not None and len(content.strip()) > 0,
+        "URDF content must be a non-empty string",
+    )
     def load_urdf(self, content: str) -> None:
         """Load URDF content and auto-detect joints."""
         self.urdf_content = content
@@ -729,10 +738,18 @@ class JointManipulatorWidget(QWidget):
         self.urdf_modified.emit(new_content)
         self.status_label.setText(f"Updated joint '{name}'")
 
+    @postcondition(
+        lambda result: result is not None and isinstance(result, dict),
+        "Joint positions must be returned as a non-None dictionary",
+    )
     def get_joint_positions(self) -> dict[str, float]:
         """Get current positions of all joints."""
         return {name: j.current_position for name, j in self.joints.items()}
 
+    @precondition(
+        lambda self, positions: positions is not None and isinstance(positions, dict),
+        "Joint positions must be a non-None dictionary",
+    )
     def set_joint_positions(self, positions: dict[str, float]) -> None:
         """Set joint positions."""
         for i in range(self.sliders_layout.count() - 1):

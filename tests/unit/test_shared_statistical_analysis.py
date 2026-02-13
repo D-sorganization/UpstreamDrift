@@ -333,12 +333,19 @@ def test_compute_impulse_metrics(sample_data):
     # But wait, it's torque = velocity. Velocity integral over 1s (cycle) is 0.
     assert metrics.net_impulse == pytest.approx(0.0, abs=1.0)  # approx
 
-    # Test invalid inputs
-    assert sample_data.compute_impulse_metrics("torque", 99) is None
-    assert (
-        sample_data.compute_impulse_metrics("force", 0) is None
-    )  # No forces in sample_data
-    assert sample_data.compute_impulse_metrics("invalid", 0) is None
+
+@pytest.mark.parametrize(
+    "source_type,joint_idx",
+    [
+        ("torque", 99),
+        ("force", 0),
+        ("invalid", 0),
+    ],
+    ids=["invalid_joint_idx", "no_forces_data", "invalid_source_type"],
+)
+def test_compute_impulse_metrics_invalid(sample_data, source_type, joint_idx):
+    """Test impulse metrics returns None for invalid inputs."""
+    assert sample_data.compute_impulse_metrics(source_type, joint_idx) is None
 
 
 def test_compute_x_factor_stretch():

@@ -18,6 +18,8 @@ from xml.etree import ElementTree
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.shared.python.core.contracts import postcondition, precondition
+
 from ..dependencies import get_logger
 from ..models.requests import ModelCompareRequest, ModelExplorerRequest
 from ..models.responses import (
@@ -182,6 +184,18 @@ def _parse_urdf_joint_nodes(
     return joint_count, child_links
 
 
+@precondition(
+    lambda urdf_content, file_path: urdf_content is not None and len(urdf_content) > 0,
+    "URDF content must be a non-empty string",
+)
+@precondition(
+    lambda urdf_content, file_path: file_path is not None and len(file_path) > 0,
+    "File path must be a non-empty string",
+)
+@postcondition(
+    lambda result: result is not None and len(result.tree) > 0,
+    "Parsed URDF tree must contain at least one node",
+)
 def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse:
     """Parse URDF XML into a tree structure for the model explorer.
 
@@ -230,6 +244,10 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
     )
 
 
+@precondition(
+    lambda model_path: model_path is not None and len(model_path) > 0,
+    "Model path must be a non-empty string",
+)
 def _resolve_model_path(model_path: str) -> Path:
     """Resolve a model path relative to the project root.
 

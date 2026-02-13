@@ -4,12 +4,35 @@ import numpy as np
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
+    DRAKE_AVAILABLE,
     skip_if_unavailable,
 )
 
 # Skip entire module if Drake is not installed - mocking pydrake at module level
 # is unreliable and leads to AttributeError on patched module globals
 pytestmark = skip_if_unavailable("drake")
+
+if DRAKE_AVAILABLE:
+    from pydrake.all import DiagramBuilder, Parser
+    from pydrake.geometry import SceneGraph
+    from pydrake.systems.analysis import Simulator
+    from pydrake.systems.framework import Context
+
+# MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
+_PLANT_SPEC_ATTRS = [
+    "Finalize",
+    "time_step",
+    "GetMyContextFromRoot",
+    "SetDefaultPositions",
+    "SetDefaultVelocities",
+    "GetPositions",
+    "GetVelocities",
+    "CalcMassMatrixViaInverseDynamics",
+    "CalcInverseDynamics",
+    "CalcGravityGeneralizedForces",
+    "num_velocities",
+    "MakeMultibodyForces",
+]
 
 
 # Mock classes that need to be defined before importing the engine
@@ -75,14 +98,14 @@ def engine(DrakePhysicsEngineClass):
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     ) as mock_add:
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add.return_value = (mock_plant, mock_scene_graph)
 
         eng = DrakePhysicsEngineClass()
         eng.plant = mock_plant
         eng.scene_graph = mock_scene_graph
-        eng.builder = MagicMock()
+        eng.builder = MagicMock(spec=DiagramBuilder)
         return eng
 
 
@@ -94,9 +117,9 @@ def initialized_engine(engine):
     passes for step/reset/forward/compute_* methods.
     """
     engine._is_finalized = True
-    engine.plant_context = MagicMock()
-    engine.context = MagicMock()
-    engine.simulator = MagicMock()
+    engine.plant_context = MagicMock(spec=Context)
+    engine.context = MagicMock(spec=Context)
+    engine.simulator = MagicMock(spec=Simulator)
     return engine
 
 
@@ -107,16 +130,19 @@ def test_initialization(engine):
 
 
 def test_load_from_path(engine):
+    from pathlib import Path as StdPath
+
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.Parser"
     ) as mock_parser_cls:
-        mock_parser = MagicMock()
+        mock_parser = MagicMock(spec=Parser)
         mock_parser_cls.return_value = mock_parser
 
         path = "test_model.urdf"
         engine.load_from_path(path)
 
-        mock_parser.AddModels.assert_called_once_with(path)
+        # Source wraps the path in Path() before passing to AddModels
+        mock_parser.AddModels.assert_called_once_with(StdPath(path))
         assert engine.model_name == "test_model"
         # Should ensure finalized
         engine.plant.Finalize.assert_called_once()
@@ -127,7 +153,7 @@ def test_load_from_string(engine):
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.Parser"
     ) as mock_parser_cls:
-        mock_parser = MagicMock()
+        mock_parser = MagicMock(spec=Parser)
         mock_parser_cls.return_value = mock_parser
 
         content = "<robot></robot>"

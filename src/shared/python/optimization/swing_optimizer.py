@@ -30,7 +30,12 @@ import numpy as np
 from scipy import optimize
 
 from src.shared.python.core.constants import GRAVITY_M_S2
-from src.shared.python.core.contracts import ContractChecker
+from src.shared.python.core.contracts import (
+    ContractChecker,
+    invariant,
+    postcondition,
+    precondition,
+)
 
 
 class OptimizationObjective(Enum):
@@ -202,6 +207,14 @@ class OptimizationResult:
     risk_reduction: float = 0.0  # percentage
 
 
+@invariant(
+    lambda self: self.config.n_nodes >= 2,
+    "Optimization must have at least 2 collocation nodes",
+)
+@invariant(
+    lambda self: self.config.swing_duration > 0,
+    "Swing duration must be positive",
+)
 class SwingOptimizer(ContractChecker):
     """
     Multi-objective swing trajectory optimizer.
@@ -321,6 +334,10 @@ class SwingOptimizer(ContractChecker):
             "wrist_rotation": self.golfer.max_wrist_torque,
         }
 
+    @postcondition(
+        lambda result: result is not None and isinstance(result.success, bool),
+        "Optimization must return a valid result with success status",
+    )
     def optimize(
         self,
         initial_swing: SwingTrajectory | None = None,
@@ -432,6 +449,16 @@ class SwingOptimizer(ContractChecker):
             computation_time=computation_time,
         )
 
+    @precondition(
+        lambda self, n_points=10: n_points > 0,
+        "Number of Pareto points must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None
+        and isinstance(result, list)
+        and len(result) > 0,
+        "Pareto optimization must return at least one result",
+    )
     def optimize_pareto(
         self,
         n_points: int = 10,

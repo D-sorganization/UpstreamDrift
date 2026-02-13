@@ -23,6 +23,8 @@ from model_generation.inertia.primitives import (
     sphere_inertia,
 )
 
+from src.shared.python.core.contracts import postcondition, precondition
+
 logger = logging.getLogger(__name__)
 
 
@@ -151,6 +153,10 @@ class InertiaCalculator:
     # Cache for mesh computations
     _cache: dict[str, InertiaResult] = field(default_factory=dict)
 
+    @postcondition(
+        lambda result: result is not None and result.mass > 0,
+        "Computed inertia must have positive mass",
+    )
     def compute(
         self,
         source: str | Path | Geometry | dict[str, Any],
@@ -212,6 +218,14 @@ class InertiaCalculator:
         else:
             raise ValueError(f"Unsupported inertia mode: {mode}")
 
+    @precondition(
+        lambda self, geometry, mass: geometry is not None,
+        "Geometry object must not be None",
+    )
+    @precondition(
+        lambda self, geometry, mass: mass > 0,
+        "Mass must be positive for inertia computation",
+    )
     def compute_from_geometry(
         self,
         geometry: Geometry,
@@ -253,6 +267,14 @@ class InertiaCalculator:
         )
         return self.compute(mesh_path, mass=mass, density=density, mode=mode)
 
+    @precondition(
+        lambda self, ixx, iyy, izz, mass, **kw: mass > 0,
+        "Mass must be positive for manual inertia specification",
+    )
+    @precondition(
+        lambda self, ixx, iyy, izz, mass, **kw: ixx >= 0 and iyy >= 0 and izz >= 0,
+        "Diagonal inertia components must be non-negative",
+    )
     def compute_from_manual(
         self,
         ixx: float,

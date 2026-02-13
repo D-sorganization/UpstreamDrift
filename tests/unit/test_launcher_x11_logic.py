@@ -58,11 +58,15 @@ def mocked_launcher():
                 self.chk_live: MockQCheckBox = MockQCheckBox(checked=True)  # type: ignore[assignment]
                 self.chk_gpu: MockQCheckBox = MockQCheckBox(checked=False)  # type: ignore[assignment]
                 self.model_cards = {}
-                self.docker_launcher = MagicMock()
-                self.process_manager = MagicMock()
-                self.lbl_status = MagicMock()
+                self.docker_launcher = MagicMock(
+                    spec=["check_image_exists", "build_image", "run_container"]
+                )
+                self.process_manager = MagicMock(
+                    spec=["start_process", "stop_process", "is_running"]
+                )
+                self.lbl_status = MagicMock(spec=["setText", "setStyleSheet"])
                 self.toast_manager = None
-                self.show_toast = MagicMock()
+                self.show_toast = MagicMock(spec=["__call__"])
 
             # Override _launch_docker_container to just return the command checks
             # or we can test the actual method if we mock start_meshcat etc.
@@ -85,10 +89,10 @@ def test_live_view_environment_flags(mocked_launcher):
     # Mock OS to look like Windows
     # Mock OS to look like Windows
     # Also mock Path to prevent WindowsPath instantiation on Linux
-    mock_path_cls = MagicMock()
-    mock_suite_root = MagicMock()
+    mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+    mock_suite_root = MagicMock(spec=["__str__", "parent"])
     mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
-    mock_file_path = MagicMock()
+    mock_file_path = MagicMock(spec=["parent"])
     mock_file_path.parent.parent = mock_suite_root
     mock_path_cls.return_value = mock_file_path
 
@@ -99,7 +103,7 @@ def test_live_view_environment_flags(mocked_launcher):
     ):
         # Create a dummy model
         model = MockModel("custom_humanoid")
-        abs_path = MagicMock()  # Use Mock for the argument too
+        abs_path = MagicMock(spec=["__str__"])  # Use Mock for the argument too
         abs_path.__str__ = Mock(return_value="/mock/path")  # type: ignore[method-assign]
 
         # Call the method
@@ -134,10 +138,10 @@ def test_headless_environment_flags(mocked_launcher):
     launcher.chk_live.setChecked(False)
 
     # Mock Path to prevent WindowsPath instantiation on Linux
-    mock_path_cls = MagicMock()
-    mock_suite_root = MagicMock()
+    mock_path_cls = MagicMock(spec=["__call__", "return_value"])
+    mock_suite_root = MagicMock(spec=["__str__", "parent"])
     mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
-    mock_file_path = MagicMock()
+    mock_file_path = MagicMock(spec=["parent"])
     mock_file_path.parent.parent = mock_suite_root
     mock_path_cls.return_value = mock_file_path
 
@@ -147,7 +151,7 @@ def test_headless_environment_flags(mocked_launcher):
         patch("src.launchers.golf_launcher.Path", mock_path_cls),
     ):
         model = MockModel("custom_humanoid")
-        launcher._launch_docker_container(model, MagicMock())
+        launcher._launch_docker_container(model, MagicMock(spec=["__str__"]))
 
         args = mock_popen.call_args[0][0]
         full_command = " ".join(args)

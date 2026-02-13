@@ -24,6 +24,7 @@ from src.robotics.planning.motion.planner_base import (
     PlannerStatus,
 )
 from src.robotics.planning.motion.rrt import TreeNode
+from src.shared.python.core.contracts import invariant
 
 
 @dataclass
@@ -49,6 +50,10 @@ class RRTStarConfig(PlannerConfig):
             raise ValueError("rewire_factor must be positive")
 
 
+@invariant(
+    lambda self: self._config.rewire_factor > 0,
+    "RRT* rewire_factor must be positive",
+)
 class RRTStarPlanner(MotionPlanner):
     """RRT* (optimal RRT) motion planner.
 

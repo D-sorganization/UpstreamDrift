@@ -62,22 +62,27 @@ class TestTwistsAndWrenches:
 class TestScrewAxes:
     """Tests for screw axis representations."""
 
-    def test_screw_axis_pure_rotation(self) -> None:
-        """Test screw axis for pure rotation."""
-        axis = np.array([0, 0, 1])  # z-axis
-        point = np.array([0, 0, 0])  # origin
-        S = screw_axis(axis, point, 0)
-
-        expected = np.array([0, 0, 1, 0, 0, 0])
-        np.testing.assert_allclose(S, expected, atol=1e-10)
-
-    def test_screw_axis_pure_translation(self) -> None:
-        """Test screw axis for pure translation."""
-        axis = np.array([1, 0, 0])
-        point = np.array([0, 0, 0])
-        S = screw_axis(axis, point, np.inf)
-
-        expected = np.array([0, 0, 0, 1, 0, 0])
+    @pytest.mark.parametrize(
+        "axis,point,pitch,expected",
+        [
+            (
+                np.array([0, 0, 1]),
+                np.array([0, 0, 0]),
+                0,
+                np.array([0, 0, 1, 0, 0, 0]),
+            ),
+            (
+                np.array([1, 0, 0]),
+                np.array([0, 0, 0]),
+                np.inf,
+                np.array([0, 0, 0, 1, 0, 0]),
+            ),
+        ],
+        ids=["pure_rotation", "pure_translation"],
+    )
+    def test_screw_axis_basic(self, axis, point, pitch, expected) -> None:
+        """Test screw axis for pure rotation and pure translation."""
+        S = screw_axis(axis, point, pitch)
         np.testing.assert_allclose(S, expected, atol=1e-10)
 
     def test_screw_axis_normalization(self) -> None:
@@ -104,30 +109,30 @@ class TestScrewAxes:
 class TestExponentialMap:
     """Tests for exponential map."""
 
-    def test_exponential_pure_rotation(self) -> None:
-        """Test exponential map for pure rotation."""
-        S = np.array([0, 0, 1, 0, 0, 0])  # Rotation about z
-        theta = np.pi / 2  # 90 degrees
-
+    @pytest.mark.parametrize(
+        "S,theta,expected_R,expected_p",
+        [
+            (
+                np.array([0, 0, 1, 0, 0, 0]),
+                np.pi / 2,
+                np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]]),
+                np.array([0, 0, 0]),
+            ),
+            (
+                np.array([0, 0, 0, 1, 0, 0]),
+                1.5,
+                np.eye(3),
+                np.array([1.5, 0, 0]),
+            ),
+        ],
+        ids=["pure_rotation", "pure_translation"],
+    )
+    def test_exponential_basic(self, S, theta, expected_R, expected_p) -> None:
+        """Test exponential map for pure rotation and pure translation."""
         T = exponential_map(S, theta)
 
-        # Expected rotation matrix
-        R_expected = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
-
-        np.testing.assert_allclose(T[:3, :3], R_expected, atol=1e-10)
-        np.testing.assert_allclose(T[:3, 3], 0, atol=1e-10)
-
-    def test_exponential_pure_translation(self) -> None:
-        """Test exponential map for pure translation."""
-        S = np.array([0, 0, 0, 1, 0, 0])  # Translation along x
-        theta = 1.5
-
-        T = exponential_map(S, theta)
-
-        np.testing.assert_allclose(T[:3, :3], np.eye(3), atol=1e-10)
-
-        p_expected = np.array([1.5, 0, 0])
-        np.testing.assert_allclose(T[:3, 3], p_expected, atol=1e-10)
+        np.testing.assert_allclose(T[:3, :3], expected_R, atol=1e-10)
+        np.testing.assert_allclose(T[:3, 3], expected_p, atol=1e-10)
 
     def test_exponential_homogeneous_row(self) -> None:
         """Test bottom row is [0 0 0 1]."""
@@ -181,9 +186,9 @@ class TestLogarithmicMap:
             0,
             atol=1e-10,
         ), f"Identity transformation should have zero screw axis, got S={S}"
-        assert abs(theta) < 1e-10, (
-            f"Identity transformation should have zero displacement, got theta={theta}"
-        )
+        assert (
+            abs(theta) < 1e-10
+        ), f"Identity transformation should have zero displacement, got theta={theta}"
 
 
 class TestAdjointTransform:

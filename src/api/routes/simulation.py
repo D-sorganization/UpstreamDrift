@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from src.api.utils.datetime_compat import UTC
+from src.shared.python.core.contracts import precondition
 
 from ..dependencies import get_logger, get_simulation_service, get_task_manager
 from ..models.requests import SimulationRequest
@@ -26,6 +27,10 @@ router = APIRouter()
 
 
 @router.post("/simulate", response_model=SimulationResponse)
+@precondition(
+    lambda request, service=None, logger=None: request is not None,
+    "Simulation request must not be None",
+)
 async def run_simulation(
     request: SimulationRequest,
     service: SimulationService = Depends(get_simulation_service),
@@ -107,6 +112,10 @@ async def run_simulation_async(
 
 
 @router.get("/simulate/status/{task_id}")
+@precondition(
+    lambda task_id, task_manager=None: task_id is not None and len(task_id.strip()) > 0,
+    "Task ID must be a non-empty string",
+)
 async def get_simulation_status(
     task_id: str,
     task_manager: Any = Depends(get_task_manager),

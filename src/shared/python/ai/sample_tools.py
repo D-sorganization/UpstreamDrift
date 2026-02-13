@@ -48,9 +48,7 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     logger.info("Registered Golf Suite tools")
 
 
-def _register_data_tools(registry: ToolRegistry) -> None:
-    """Register data loading and management tools."""
-
+def _register_list_sample_files_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="list_sample_files",
         description=(
@@ -86,6 +84,8 @@ def _register_data_tools(registry: ToolRegistry) -> None:
             "message": f"Found {len(files)} sample C3D files.",
         }
 
+
+def _register_load_c3d_tool(registry: ToolRegistry):
     @registry.register(
         name="load_c3d",
         description=(
@@ -146,6 +146,10 @@ def _register_data_tools(registry: ToolRegistry) -> None:
         except ImportError as e:
             return {"success": False, "error": f"Failed to load C3D: {e}"}
 
+    return load_c3d
+
+
+def _register_marker_info_tool(registry: ToolRegistry, load_c3d_fn) -> None:
     @registry.register(
         name="get_marker_info",
         description=(
@@ -188,7 +192,7 @@ def _register_data_tools(registry: ToolRegistry) -> None:
             "STRN": "Sternum",
         }
 
-        result = load_c3d(file_path)
+        result = load_c3d_fn(file_path)
         if not result.get("success"):
             # Return the error from load_c3d
             error_result: dict[str, Any] = result
@@ -214,9 +218,14 @@ def _register_data_tools(registry: ToolRegistry) -> None:
         }
 
 
-def _register_analysis_tools(registry: ToolRegistry) -> None:
-    """Register analysis and simulation tools."""
+def _register_data_tools(registry: ToolRegistry) -> None:
+    """Register data loading and management tools."""
+    _register_list_sample_files_tool(registry)
+    load_c3d_fn = _register_load_c3d_tool(registry)
+    _register_marker_info_tool(registry, load_c3d_fn)
 
+
+def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="run_inverse_dynamics",
         description=(
@@ -265,6 +274,8 @@ def _register_analysis_tools(registry: ToolRegistry) -> None:
             "note": ("Implementation requires physics engine integration."),
         }
 
+
+def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="interpret_torques",
         description=(
@@ -327,9 +338,13 @@ def _register_analysis_tools(registry: ToolRegistry) -> None:
         }
 
 
-def _register_education_tools(registry: ToolRegistry) -> None:
-    """Register educational and explanation tools."""
+def _register_analysis_tools(registry: ToolRegistry) -> None:
+    """Register analysis and simulation tools."""
+    _register_inverse_dynamics_tool(registry)
+    _register_interpret_torques_tool(registry)
 
+
+def _register_explain_concept_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="explain_concept",
         description=(
@@ -381,6 +396,8 @@ def _register_education_tools(registry: ToolRegistry) -> None:
 
         return result
 
+
+def _register_list_glossary_terms_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="list_glossary_terms",
         description=(
@@ -415,6 +432,8 @@ def _register_education_tools(registry: ToolRegistry) -> None:
             "filter": category,
         }
 
+
+def _register_search_glossary_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="search_glossary",
         description=(
@@ -449,9 +468,14 @@ def _register_education_tools(registry: ToolRegistry) -> None:
         }
 
 
-def _register_validation_tools(registry: ToolRegistry) -> None:
-    """Register validation and verification tools."""
+def _register_education_tools(registry: ToolRegistry) -> None:
+    """Register educational and explanation tools."""
+    _register_explain_concept_tool(registry)
+    _register_list_glossary_terms_tool(registry)
+    _register_search_glossary_tool(registry)
 
+
+def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="validate_cross_engine",
         description=(
@@ -488,6 +512,8 @@ def _register_validation_tools(registry: ToolRegistry) -> None:
             "note": "Placeholder - requires full physics engine integration.",
         }
 
+
+def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="check_energy_conservation",
         description=(
@@ -516,6 +542,8 @@ def _register_validation_tools(registry: ToolRegistry) -> None:
             "note": "Placeholder - requires simulation data.",
         }
 
+
+def _register_list_physics_engines_tool(registry: ToolRegistry) -> None:
     @registry.register(
         name="list_physics_engines",
         description="List available physics engines and their status.",
@@ -566,3 +594,10 @@ def _register_validation_tools(registry: ToolRegistry) -> None:
             "available_count": available,
             "message": f"{available} of 3 physics engines available.",
         }
+
+
+def _register_validation_tools(registry: ToolRegistry) -> None:
+    """Register validation and verification tools."""
+    _register_cross_engine_validation_tool(registry)
+    _register_energy_conservation_tool(registry)
+    _register_list_physics_engines_tool(registry)

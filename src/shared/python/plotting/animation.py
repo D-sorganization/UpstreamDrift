@@ -111,59 +111,18 @@ class SwingAnimator:
         ax.set_zlabel("Z (m)")
         ax.set_title("Swing Trajectory Animation")
 
-        # Gather data
-        body_data: dict[str, np.ndarray] = {}
-        times = np.empty(0)
-        for name in body_names:
-            t, pos = self.recorder.get_time_series(f"{name}_position")
-            if len(t) > 0:
-                body_data[name] = np.asarray(pos)
-                if len(t) > len(times):
-                    times = np.asarray(t)
+        body_data, times = self._gather_trajectory_data(body_names)
         if len(times) == 0:
             ax.text2D(
                 0.5, 0.5, "No trajectory data", transform=ax.transAxes, ha="center"
             )
             return mpl_animation.FuncAnimation(fig, lambda _: [], frames=1)
 
-        n_frames = len(times)
-
-        # Static elements: desired trajectories
-        if desired_positions:
-            for name, pts in desired_positions.items():
-                pts = np.asarray(pts)
-                if pts.ndim == 2 and pts.shape[1] >= 3:
-                    ax.plot(
-                        pts[:, 0],
-                        pts[:, 1],
-                        pts[:, 2],
-                        color=cfg.desired_color,
-                        alpha=0.4,
-                        linewidth=1.5,
-                        label=f"{name} desired",
-                    )
-
-        # Per-body artists
-        lines: dict[str, Any] = {}
-        points: dict[str, Any] = {}
-        for name in body_data:
-            (line,) = ax.plot(
-                [], [], [], linewidth=1.5, color=cfg.actual_color, label=name
-            )
-            (pt,) = ax.plot([], [], [], "o", markersize=5, color=cfg.actual_color)
-            lines[name] = line
-            points[name] = pt
-
+        self._plot_desired_trajectories(ax, desired_positions, cfg)
+        lines, points = self._create_body_artists(ax, body_data, cfg)
         time_text = ax.text2D(0.02, 0.95, "", transform=ax.transAxes)
         ax.legend(loc="upper right", fontsize=8)
-
-        # Set axis limits from data
-        all_pts = np.vstack(list(body_data.values()))
-        margin = 0.1
-        for setter, col in [(ax.set_xlim, 0), (ax.set_ylim, 1), (ax.set_zlim, 2)]:
-            lo, hi = float(all_pts[:, col].min()), float(all_pts[:, col].max())
-            span = max(hi - lo, 0.1)
-            setter(lo - margin * span, hi + margin * span)
+        self._set_axis_limits_from_data(ax, body_data)
 
         def _update(frame: int) -> list:
             artists: list = []
@@ -183,11 +142,58 @@ class SwingAnimator:
         anim = mpl_animation.FuncAnimation(
             fig,
             _update,
-            frames=n_frames,
+            frames=len(times),
             interval=cfg.effective_interval,
             blit=False,
         )
         return anim
+
+    def _gather_trajectory_data(self, body_names):
+        body_data: dict[str, np.ndarray] = {}
+        times = np.empty(0)
+        for name in body_names:
+            t, pos = self.recorder.get_time_series(f"{name}_position")
+            if len(t) > 0:
+                body_data[name] = np.asarray(pos)
+                if len(t) > len(times):
+                    times = np.asarray(t)
+        return body_data, times
+
+    def _plot_desired_trajectories(self, ax, desired_positions, cfg):
+        if not desired_positions:
+            return
+        for name, pts in desired_positions.items():
+            pts = np.asarray(pts)
+            if pts.ndim == 2 and pts.shape[1] >= 3:
+                ax.plot(
+                    pts[:, 0],
+                    pts[:, 1],
+                    pts[:, 2],
+                    color=cfg.desired_color,
+                    alpha=0.4,
+                    linewidth=1.5,
+                    label=f"{name} desired",
+                )
+
+    def _create_body_artists(self, ax, body_data, cfg):
+        lines: dict[str, Any] = {}
+        points: dict[str, Any] = {}
+        for name in body_data:
+            (line,) = ax.plot(
+                [], [], [], linewidth=1.5, color=cfg.actual_color, label=name
+            )
+            (pt,) = ax.plot([], [], [], "o", markersize=5, color=cfg.actual_color)
+            lines[name] = line
+            points[name] = pt
+        return lines, points
+
+    def _set_axis_limits_from_data(self, ax, body_data):
+        all_pts = np.vstack(list(body_data.values()))
+        margin = 0.1
+        for setter, col in [(ax.set_xlim, 0), (ax.set_ylim, 1), (ax.set_zlim, 2)]:
+            lo, hi = float(all_pts[:, col].min()), float(all_pts[:, col].max())
+            span = max(hi - lo, 0.1)
+            setter(lo - margin * span, hi + margin * span)
 
     def create_stick_figure_animation(
         self,

@@ -10,6 +10,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 from src.config.launcher_manifest_loader import ASSETS_DIR, LauncherManifest
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -64,6 +65,10 @@ async def get_tiles() -> list[dict]:  # type: ignore[type-arg]
 
 
 @router.get("/tiles/{tile_id}")
+@precondition(
+    lambda tile_id: tile_id is not None and len(tile_id.strip()) > 0,
+    "Tile ID must be a non-empty string",
+)
 async def get_tile(tile_id: str) -> dict:  # type: ignore[type-arg]
     """Get a specific tile by ID.
 
@@ -127,6 +132,10 @@ async def validate_logos() -> dict:  # type: ignore[type-arg]
 
 
 @router.get("/logos/{filename}")
+@precondition(
+    lambda filename: filename is not None and len(filename.strip()) > 0,
+    "Logo filename must be a non-empty string",
+)
 async def get_logo(filename: str) -> FileResponse:
     """Serve a tile logo file.
 
@@ -299,6 +308,10 @@ async def get_all_engine_capabilities() -> dict[str, dict[str, str]]:
 
 
 @router.get("/engines/{engine_id}/capabilities")
+@precondition(
+    lambda engine_id: engine_id is not None and len(engine_id.strip()) > 0,
+    "Engine ID must be a non-empty string",
+)
 async def get_engine_capabilities(engine_id: str) -> dict[str, str]:
     """Get capability profile for a specific engine.
 

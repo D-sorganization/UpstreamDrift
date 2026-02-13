@@ -325,53 +325,13 @@ class FootstepPlanner(ContractChecker):
         timing = 0.0
 
         for i in range(n_steps):
-            # Compute step displacement
-            dt = self._parameters.step_duration
-            step_x = vx * dt
-            step_y = vy * dt
-            step_yaw = omega * dt
+            step_x, step_y, step_yaw = self._compute_clamped_step(vx, vy, omega)
 
-            # Clamp to limits
-            step_x = np.clip(step_x, -self._max_step_length, self._max_step_length)
-            step_y = np.clip(step_y, -self._max_step_width, self._max_step_width)
-            step_yaw = np.clip(
-                step_yaw, -self._max_step_rotation, self._max_step_rotation
-            )
-
-            # Update orientation
-            yaw += step_yaw / 2  # Half rotation during step
-
-            # Transform to world frame
-            cos_yaw = np.cos(yaw)
-            sin_yaw = np.sin(yaw)
-            world_dx = cos_yaw * step_x - sin_yaw * step_y
-            world_dy = sin_yaw * step_x + cos_yaw * step_y
-
-            # Update position
-            pos[0] += world_dx
-            pos[1] += world_dy
-
-            # Add lateral offset for foot
-            lateral_offset = self._nominal_width / 2
-            if foot == "left":
-                offset_x = -sin_yaw * lateral_offset
-                offset_y = cos_yaw * lateral_offset
-            else:
-                offset_x = sin_yaw * lateral_offset
-                offset_y = -cos_yaw * lateral_offset
-
-            foot_pos = np.array(
-                [
-                    pos[0] + offset_x,
-                    pos[1] + offset_y,
-                    pos[2],
-                ]
-            )
-
-            # Complete rotation
+            yaw += step_yaw / 2
+            pos = self._advance_position(pos, yaw, step_x, step_y)
+            foot_pos = self._compute_foot_position(pos, yaw, foot)
             yaw += step_yaw / 2
 
-            # Create footstep
             orientation = self._yaw_to_quat(yaw)
             footstep = Footstep(
                 position=foot_pos,
@@ -383,7 +343,6 @@ class FootstepPlanner(ContractChecker):
             )
             footsteps.append(footstep)
 
-            # Switch foot
             foot = "right" if foot == "left" else "left"
             timing += self._parameters.step_duration
 
@@ -394,6 +353,35 @@ class FootstepPlanner(ContractChecker):
             goal_position=pos,
             total_duration=timing,
         )
+
+    def _compute_clamped_step(self, vx, vy, omega):
+        dt = self._parameters.step_duration
+        step_x = np.clip(vx * dt, -self._max_step_length, self._max_step_length)
+        step_y = np.clip(vy * dt, -self._max_step_width, self._max_step_width)
+        step_yaw = np.clip(
+            omega * dt, -self._max_step_rotation, self._max_step_rotation
+        )
+        return step_x, step_y, step_yaw
+
+    def _advance_position(self, pos, yaw, step_x, step_y):
+        cos_yaw = np.cos(yaw)
+        sin_yaw = np.sin(yaw)
+        pos[0] += cos_yaw * step_x - sin_yaw * step_y
+        pos[1] += sin_yaw * step_x + cos_yaw * step_y
+        return pos
+
+    def _compute_foot_position(self, pos, yaw, foot):
+        cos_yaw = np.cos(yaw)
+        sin_yaw = np.sin(yaw)
+        lateral_offset = self._nominal_width / 2
+        if foot == "left":
+            offset_x = -sin_yaw * lateral_offset
+            offset_y = cos_yaw * lateral_offset
+        else:
+            offset_x = sin_yaw * lateral_offset
+            offset_y = -cos_yaw * lateral_offset
+
+        return np.array([pos[0] + offset_x, pos[1] + offset_y, pos[2]])
 
     def plan_in_place_turn(
         self,

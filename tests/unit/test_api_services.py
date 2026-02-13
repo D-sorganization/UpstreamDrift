@@ -16,6 +16,19 @@ try:
 except ImportError as e:
     pytest.skip(f"Cannot import API services: {e}", allow_module_level=True)
 
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+
+_RECORDER_SPEC_ATTRS = [
+    "is_recording",
+    "record_step",
+    "get_time_series",
+    "get_data_dict",
+    "start",
+    "stop",
+    "reset",
+]
+
 
 class TestSimulationService:
     """Tests for SimulationService."""
@@ -23,13 +36,8 @@ class TestSimulationService:
     @pytest.fixture
     def mock_engine_manager(self) -> MagicMock:
         """Create a mock engine manager."""
-        manager = MagicMock()
-        mock_engine = MagicMock()
-        mock_engine.step = MagicMock()
-        mock_engine.set_state = MagicMock()
-        mock_engine.set_control = MagicMock()
-        mock_engine.reset = MagicMock()
-        mock_engine.load_from_path = MagicMock()
+        manager = MagicMock(spec=EngineManager)
+        mock_engine = MagicMock(spec=PhysicsEngine)
         manager.get_active_physics_engine.return_value = mock_engine
         return manager
 
@@ -53,7 +61,7 @@ class TestSimulationService:
         with patch(
             "api.services.simulation_service.GenericPhysicsRecorder"
         ) as MockRecorder:
-            mock_recorder = MagicMock()
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
             mock_recorder.is_recording = False
             mock_recorder.get_time_series.return_value = ([], [])
             MockRecorder.return_value = mock_recorder
@@ -83,7 +91,7 @@ class TestSimulationService:
         with patch(
             "api.services.simulation_service.GenericPhysicsRecorder"
         ) as MockRecorder:
-            mock_recorder = MagicMock()
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
             mock_recorder.is_recording = False
             mock_recorder.get_time_series.return_value = ([], [])
             MockRecorder.return_value = mock_recorder
@@ -128,7 +136,7 @@ class TestSimulationService:
 
     def test_extract_simulation_data(self, service: SimulationService) -> None:
         """Test data extraction from recorder."""
-        mock_recorder = MagicMock()
+        mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
         mock_recorder.get_time_series.side_effect = [
             ([0.0, 0.1], [[0.0], [0.1]]),  # positions
             ([0.0, 0.1], [[0.0], [0.1]]),  # velocities
@@ -146,7 +154,7 @@ class TestSimulationService:
         self, service: SimulationService
     ) -> None:
         """Test that data extraction handles missing data gracefully."""
-        mock_recorder = MagicMock()
+        mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
         mock_recorder.get_time_series.side_effect = KeyError("no data")
 
         # Should not raise, just return empty/partial data
@@ -160,7 +168,7 @@ class TestAnalysisService:
     @pytest.fixture
     def mock_engine_manager(self) -> MagicMock:
         """Create a mock engine manager."""
-        return MagicMock()
+        return MagicMock(spec=EngineManager)
 
     @pytest.fixture
     def service(self, mock_engine_manager: MagicMock) -> AnalysisService:
@@ -214,8 +222,8 @@ class TestServiceIntegration:
     @pytest.fixture
     def mock_engine_manager(self) -> MagicMock:
         """Create a mock engine manager."""
-        manager = MagicMock()
-        mock_engine = MagicMock()
+        manager = MagicMock(spec=EngineManager)
+        mock_engine = MagicMock(spec=PhysicsEngine)
         manager.get_active_physics_engine.return_value = mock_engine
         return manager
 
@@ -228,7 +236,7 @@ class TestServiceIntegration:
         with patch(
             "api.services.simulation_service.GenericPhysicsRecorder"
         ) as MockRecorder:
-            mock_recorder = MagicMock()
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
             mock_recorder.is_recording = False
             mock_recorder.get_time_series.return_value = ([0.0, 0.1], [[0.0], [0.1]])
             MockRecorder.return_value = mock_recorder

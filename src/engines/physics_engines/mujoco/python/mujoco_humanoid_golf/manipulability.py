@@ -16,6 +16,7 @@ from typing import Literal
 import mujoco
 import numpy as np
 
+from src.shared.python.core.contracts import invariant
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -45,6 +46,14 @@ class ManipulabilityResult:
     manipulability_index: float  # sqrt(det(J J^T))
 
 
+@invariant(
+    lambda self: self.model is not None,
+    "ManipulabilityAnalyzer must have a valid MuJoCo model",
+)
+@invariant(
+    lambda self: self.data is not None,
+    "ManipulabilityAnalyzer must have valid MuJoCo data",
+)
 class ManipulabilityAnalyzer:
     """Analyzes mechanism manipulability and force production capabilities."""
 

@@ -16,6 +16,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.core.contracts import invariant
+
 
 @dataclass
 class QPProblem:
@@ -145,6 +147,11 @@ class QPSolver(ABC):
         ...
 
 
+@invariant(lambda self: self._max_iter > 0, "max_iter must be positive")
+@invariant(
+    lambda self: self._method in ("SLSQP", "trust-constr"),
+    "Solver method must be SLSQP or trust-constr",
+)
 class ScipyQPSolver(QPSolver):
     """QP solver using scipy.optimize.
 

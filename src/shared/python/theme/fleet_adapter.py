@@ -151,6 +151,93 @@ def _hex_with_alpha(hex_color: str, alpha: int) -> str:
     return f"#{hex_val}{alpha:02x}"
 
 
+def _extract_base_colors(ft: dict[str, str], is_dark: bool) -> dict[str, str]:
+    accent = ft.get("accent", "#0A84FF")
+    return {
+        "accent": accent,
+        "text": ft.get("text", "#FFFFFF" if is_dark else "#1A1A1A"),
+        "text_secondary": ft.get("text_secondary", "#E0E0E0" if is_dark else "#404040"),
+        "bg": ft.get("bg", "#1A1A1A" if is_dark else "#FFFFFF"),
+        "group_bg": ft.get("group_bg", "#242424" if is_dark else "#F8F9FA"),
+        "input_bg": ft.get("input_bg", "#0D1117" if is_dark else "#FFFFFF"),
+        "border": ft.get("border", "#404040" if is_dark else "#D0D0D0"),
+        "focus": ft.get("focus", accent),
+        "label": ft.get("label", "#A0A0A0" if is_dark else "#666666"),
+    }
+
+
+def _extract_semantic_colors(ft: dict[str, str], is_dark: bool) -> dict[str, str]:
+    return {
+        "success": ft.get("success", "#30D158" if is_dark else "#28A745"),
+        "warning": ft.get("warning", "#FF9F0A" if is_dark else "#E67E00"),
+        "error": ft.get("error", "#FF375F" if is_dark else "#DC3545"),
+        "info": ft.get("info", "#64D2FF" if is_dark else "#17A2B8"),
+    }
+
+
+def _build_theme_colors_kwargs(
+    theme_name: str,
+    ft: dict[str, str],
+    is_dark: bool,
+    base: dict[str, str],
+    semantic: dict[str, str],
+) -> dict:
+    accent = base["accent"]
+    group_bg = base["group_bg"]
+    border = base["border"]
+    label = base["label"]
+    success = semantic["success"]
+    warning = semantic["warning"]
+    error = semantic["error"]
+    info = semantic["info"]
+
+    return {
+        "name": theme_name,
+        "is_dark": is_dark,
+        "primary": accent,
+        "primary_hover": _adjust_color_brightness(accent, 1.2),
+        "primary_pressed": _adjust_color_brightness(accent, 0.8),
+        "primary_muted": _hex_with_alpha(accent, 0x40),
+        "success": success,
+        "success_hover": _adjust_color_brightness(success, 1.2),
+        "success_muted": _hex_with_alpha(success, 0x40),
+        "warning": warning,
+        "warning_hover": _adjust_color_brightness(warning, 1.2),
+        "warning_muted": _hex_with_alpha(warning, 0x40),
+        "error": error,
+        "error_hover": _adjust_color_brightness(error, 1.2),
+        "error_muted": _hex_with_alpha(error, 0x40),
+        "bg_deep": base["input_bg"],
+        "bg_base": base["bg"],
+        "bg_surface": group_bg,
+        "bg_elevated": ft.get("table_header", _adjust_color_brightness(group_bg, 1.1)),
+        "bg_highlight": ft.get("title_bg", _adjust_color_brightness(group_bg, 1.2)),
+        "border_subtle": _adjust_color_brightness(border, 0.8 if is_dark else 1.1),
+        "border_default": border,
+        "border_strong": _adjust_color_brightness(border, 1.2 if is_dark else 0.9),
+        "border_focus": base["focus"],
+        "text_primary": base["text"],
+        "text_secondary": base["text_secondary"],
+        "text_tertiary": label,
+        "text_quaternary": _adjust_color_brightness(label, 0.7),
+        "text_link": ft.get("link", accent),
+        "chart_blue": accent,
+        "chart_green": success,
+        "chart_orange": warning,
+        "chart_red": error,
+        "chart_purple": "#BF5AF2" if is_dark else "#9B59B6",
+        "chart_cyan": info,
+        "chart_yellow": "#FFD60A" if is_dark else "#F0AD4E",
+        "chart_brown": "#AC8E68" if is_dark else "#8B6914",
+        "grid_line": _adjust_color_brightness(border, 0.7 if is_dark else 1.2),
+        "axis_line": border,
+        "tick_color": label,
+        "shadow_light": "rgba(0, 0, 0, 0.15)" if is_dark else "rgba(0, 0, 0, 0.08)",
+        "shadow_medium": "rgba(0, 0, 0, 0.25)" if is_dark else "rgba(0, 0, 0, 0.12)",
+        "shadow_heavy": "rgba(0, 0, 0, 0.40)" if is_dark else "rgba(0, 0, 0, 0.20)",
+    }
+
+
 def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     """Convert a fleet-wide theme to UpstreamDrift's ThemeColors format.
 
@@ -167,7 +254,6 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     Raises:
         KeyError: If theme_name is not found in fleet themes
     """
-    # Import here to avoid circular imports
     from .theme_manager import ThemeColors
 
     if theme_name not in FLEET_THEMES:
@@ -175,85 +261,11 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
 
     ft = FLEET_THEMES[theme_name]
     is_dark = _is_dark_theme(ft)
+    base = _extract_base_colors(ft, is_dark)
+    semantic = _extract_semantic_colors(ft, is_dark)
+    kwargs = _build_theme_colors_kwargs(theme_name, ft, is_dark, base, semantic)
 
-    # Map fleet theme to ThemeColors
-    # Fleet base keys: bg, group_bg, border, text, text_secondary, label, focus,
-    #                  input_bg, accent, title_bg, title_border, table_header,
-    #                  table_alt, button_hover
-    # Fleet semantic keys (from themes.json): success, warning, error, info,
-    #                  link, link_hover, selection_bg, selection_text
-
-    # Derive colors from fleet theme
-    accent = ft.get("accent", "#0A84FF")
-    text = ft.get("text", "#FFFFFF" if is_dark else "#1A1A1A")
-    text_secondary = ft.get("text_secondary", "#E0E0E0" if is_dark else "#404040")
-    bg = ft.get("bg", "#1A1A1A" if is_dark else "#FFFFFF")
-    group_bg = ft.get("group_bg", "#242424" if is_dark else "#F8F9FA")
-    input_bg = ft.get("input_bg", "#0D1117" if is_dark else "#FFFFFF")
-    border = ft.get("border", "#404040" if is_dark else "#D0D0D0")
-    focus = ft.get("focus", accent)
-    label = ft.get("label", "#A0A0A0" if is_dark else "#666666")
-
-    # Semantic colors - read from theme dict (populated from themes.json),
-    # falling back to reasonable defaults based on dark/light
-    success = ft.get("success", "#30D158" if is_dark else "#28A745")
-    warning = ft.get("warning", "#FF9F0A" if is_dark else "#E67E00")
-    error = ft.get("error", "#FF375F" if is_dark else "#DC3545")
-    info = ft.get("info", "#64D2FF" if is_dark else "#17A2B8")
-
-    return ThemeColors(
-        name=theme_name,
-        is_dark=is_dark,
-        # Primary accent
-        primary=accent,
-        primary_hover=_adjust_color_brightness(accent, 1.2),
-        primary_pressed=_adjust_color_brightness(accent, 0.8),
-        primary_muted=_hex_with_alpha(accent, 0x40),
-        # Semantic colors
-        success=success,
-        success_hover=_adjust_color_brightness(success, 1.2),
-        success_muted=_hex_with_alpha(success, 0x40),
-        warning=warning,
-        warning_hover=_adjust_color_brightness(warning, 1.2),
-        warning_muted=_hex_with_alpha(warning, 0x40),
-        error=error,
-        error_hover=_adjust_color_brightness(error, 1.2),
-        error_muted=_hex_with_alpha(error, 0x40),
-        # Background hierarchy
-        bg_deep=input_bg,
-        bg_base=bg,
-        bg_surface=group_bg,
-        bg_elevated=ft.get("table_header", _adjust_color_brightness(group_bg, 1.1)),
-        bg_highlight=ft.get("title_bg", _adjust_color_brightness(group_bg, 1.2)),
-        # Border colors
-        border_subtle=_adjust_color_brightness(border, 0.8 if is_dark else 1.1),
-        border_default=border,
-        border_strong=_adjust_color_brightness(border, 1.2 if is_dark else 0.9),
-        border_focus=focus,
-        # Text hierarchy
-        text_primary=text,
-        text_secondary=text_secondary,
-        text_tertiary=label,
-        text_quaternary=_adjust_color_brightness(label, 0.7),
-        text_link=ft.get("link", accent),
-        # Chart colors - use accent-based palette
-        chart_blue=accent,
-        chart_green=success,
-        chart_orange=warning,
-        chart_red=error,
-        chart_purple="#BF5AF2" if is_dark else "#9B59B6",
-        chart_cyan=info,
-        chart_yellow="#FFD60A" if is_dark else "#F0AD4E",
-        chart_brown="#AC8E68" if is_dark else "#8B6914",
-        # Grid and axis
-        grid_line=_adjust_color_brightness(border, 0.7 if is_dark else 1.2),
-        axis_line=border,
-        tick_color=label,
-        # Shadows
-        shadow_light="rgba(0, 0, 0, 0.15)" if is_dark else "rgba(0, 0, 0, 0.08)",
-        shadow_medium="rgba(0, 0, 0, 0.25)" if is_dark else "rgba(0, 0, 0, 0.12)",
-        shadow_heavy="rgba(0, 0, 0, 0.40)" if is_dark else "rgba(0, 0, 0, 0.20)",
-    )
+    return ThemeColors(**kwargs)
 
 
 __all__ = [

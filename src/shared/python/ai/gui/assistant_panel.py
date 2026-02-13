@@ -383,7 +383,6 @@ class AIAssistantPanel(QWidget):
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
-        # Gitpod Orange Header
         header.setStyleSheet("""
             QFrame {
                 background-color: #FF8800;
@@ -407,8 +406,15 @@ class AIAssistantPanel(QWidget):
 
         layout = QHBoxLayout(header)
 
-        # Provider Icon & Title
-        self._provider_icon = QLabel("🤖")
+        self._add_header_title_widgets(layout)
+        self._add_header_mode_and_status(layout)
+        layout.addStretch()
+        self._add_header_action_buttons(layout)
+
+        return header
+
+    def _add_header_title_widgets(self, layout) -> None:
+        self._provider_icon = QLabel("\U0001f916")
         self._provider_icon.setStyleSheet(
             "font-size: 18px; color: black; background: transparent;"
         )
@@ -420,10 +426,9 @@ class AIAssistantPanel(QWidget):
         )
         layout.addWidget(self._model_label)
 
-        # Spacer
         layout.addSpacing(10)
 
-        # Mode Selection (Ask, Plan, Agent)
+    def _add_header_mode_and_status(self, layout) -> None:
         self._mode_combo = QComboBox()
         self._mode_combo.addItems(["Ask", "Plan", "Agent"])
         self._mode_combo.setToolTip(
@@ -441,28 +446,23 @@ class AIAssistantPanel(QWidget):
         """)
         layout.addWidget(self._mode_combo)
 
-        # Status indicator
         self._status_label = QLabel("Ready")
         self._status_label.setStyleSheet(
             "font-size: 11px; color: #333; background: transparent;"
         )
         layout.addWidget(self._status_label)
 
-        layout.addStretch()
-
-        # New chat button
+    def _add_header_action_buttons(self, layout) -> None:
         new_chat_btn = QPushButton("New Chat")
         new_chat_btn.clicked.connect(self._on_new_chat)
         layout.addWidget(new_chat_btn)
 
-        # Settings button
-        settings_btn = QPushButton("⚙️")
+        settings_btn = QPushButton("\u2699\ufe0f")
         settings_btn.setToolTip("Settings")
         settings_btn.clicked.connect(self._show_settings)
         layout.addWidget(settings_btn)
 
-        # Close button
-        close_btn = QPushButton("✕")
+        close_btn = QPushButton("\u2715")
         close_btn.setToolTip("Close AI Chat")
         close_btn.setStyleSheet("""
             QPushButton {
@@ -481,8 +481,6 @@ class AIAssistantPanel(QWidget):
         """)
         close_btn.clicked.connect(self.close_requested.emit)
         layout.addWidget(close_btn)
-
-        return header
 
     def _create_message_area(self) -> QScrollArea:
         """Create the message display area."""

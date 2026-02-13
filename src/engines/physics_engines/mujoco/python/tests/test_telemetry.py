@@ -110,25 +110,31 @@ def test_telemetry_reset(mock_mujoco_model_data) -> None:
         assert len(recorder.samples) == 0
 
 
-def test_export_telemetry_json() -> None:
-    data = {"scalar": 1.0, "array": np.array([1, 2, 3])}
-
+@pytest.mark.parametrize(
+    "export_fn,filename,data,expected_call",
+    [
+        (
+            export_telemetry_json,
+            "test.json",
+            {"scalar": 1.0, "array": np.array([1, 2, 3])},
+            ("test.json", "w"),
+        ),
+        (
+            export_telemetry_csv,
+            "test.csv",
+            {"time": np.array([0.0, 0.1]), "vec3": np.array([[1, 2, 3], [4, 5, 6]])},
+            ("test.csv", "w"),
+        ),
+    ],
+    ids=["json_export", "csv_export"],
+)
+def test_export_telemetry(export_fn, filename, data, expected_call) -> None:
+    open_kwargs = {"newline": ""} if "csv" in filename else {}
     with patch("builtins.open", mock_open()) as mock_file:
-        success = export_telemetry_json("test.json", data)
+        success = export_fn(filename, data)
 
     assert success
-    mock_file.assert_called_with("test.json", "w")
-    # Verify json dump called? (Implicit by success returning True)
-
-
-def test_export_telemetry_csv() -> None:
-    data = {"time": np.array([0.0, 0.1]), "vec3": np.array([[1, 2, 3], [4, 5, 6]])}
-
-    with patch("builtins.open", mock_open()) as mock_file:
-        success = export_telemetry_csv("test.csv", data)
-
-    assert success
-    mock_file.assert_called_with("test.csv", "w", newline="")
+    mock_file.assert_called_with(*expected_call, **open_kwargs)
 
     # Test with incompatible data length (should handle or fail gracefully depending on
     # impl, code pads with "")
@@ -138,8 +144,15 @@ def test_export_telemetry_csv() -> None:
         assert success
 
 
-def test_export_fail_handling() -> None:
-    # Test exceptions
+@pytest.mark.parametrize(
+    "export_fn,filename,data",
+    [
+        (export_telemetry_json, "fail.json", {}),
+        (export_telemetry_csv, "fail.csv", {"a": [1]}),
+    ],
+    ids=["json_fail", "csv_fail"],
+)
+def test_export_fail_handling(export_fn, filename, data) -> None:
+    """Test export functions return False on PermissionError."""
     with patch("builtins.open", side_effect=PermissionError):
-        assert not export_telemetry_json("fail.json", {})
-        assert not export_telemetry_csv("fail.csv", {"a": [1]})
+        assert not export_fn(filename, data)

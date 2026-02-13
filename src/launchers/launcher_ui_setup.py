@@ -103,7 +103,12 @@ class LauncherUISetupMixin:
         """Set up the application menu bar."""
         menubar = self.menuBar()
 
-        # File Menu
+        self._setup_file_menu(menubar)
+        self._setup_view_menu(menubar)
+        self._setup_tools_menu(menubar)
+        self._setup_help_menu(menubar)
+
+    def _setup_file_menu(self, menubar) -> None:
         file_menu = menubar.addMenu("&File")
 
         action_preferences = QAction("&Preferences...", self)
@@ -118,7 +123,7 @@ class LauncherUISetupMixin:
         action_exit.triggered.connect(self.close)
         file_menu.addAction(action_exit)
 
-        # View Menu
+    def _setup_view_menu(self, menubar) -> None:
         view_menu = menubar.addMenu("&View")
 
         action_layout_mode = QAction("&Edit Layout Mode", self)
@@ -145,12 +150,11 @@ class LauncherUISetupMixin:
         view_menu.addAction(action_console)
         self._action_console = action_console
 
-        # Theme submenu under View
         view_menu.addSeparator()
         theme_menu = view_menu.addMenu("&Theme")
         self._setup_theme_menu(theme_menu)
 
-        # Tools Menu
+    def _setup_tools_menu(self, menubar) -> None:
         tools_menu = menubar.addMenu("&Tools")
 
         action_env = QAction("&Environment Manager...", self)
@@ -161,7 +165,7 @@ class LauncherUISetupMixin:
         action_diag.triggered.connect(lambda: self._open_settings(tab=2))
         tools_menu.addAction(action_diag)
 
-        # Help Menu
+    def _setup_help_menu(self, menubar) -> None:
         help_menu = menubar.addMenu("&Help")
 
         action_manual = QAction("&User Manual", self)
@@ -173,7 +177,6 @@ class LauncherUISetupMixin:
         action_project_map.triggered.connect(self._open_project_map)
         help_menu.addAction(action_project_map)
 
-        # Topic-specific help items
         help_menu.addSeparator()
 
         for label, topic in [

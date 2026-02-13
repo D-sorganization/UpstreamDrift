@@ -361,88 +361,84 @@ class WholeBodyController:
         Returns:
             WBCSolution from hierarchical solve.
         """
-        # Group tasks by priority
         priority_groups = self._group_tasks_by_priority()
 
         if not priority_groups:
             return WBCSolution(success=False, status="No valid tasks")
 
         n_vars = n_v + n_contact_vars
-
-        # Initialize nullspace projector
         accumulated_A: list[NDArray[np.float64]] = []
-
-        # Solution accumulator
         x_solution = np.zeros(n_vars)
 
-        # Solve each priority level
         for _priority, tasks in sorted(priority_groups.items(), reverse=True):
-            # Build task matrices for this level
-            H = np.zeros((n_vars, n_vars))
-            g = np.zeros(n_vars)
-
-            for task in tasks:
-                if task.jacobian is None:
-                    continue
-
-                J = task.jacobian
-                target = task.target
-                W = task.get_weight_matrix()
-
-                if J.shape[1] != n_v:
-                    continue
-
-                # Extend Jacobian to full decision space
-                J_full = np.zeros((J.shape[0], n_vars))
-                J_full[:, :n_v] = J
-
-                # Apply nullspace projection from higher priorities
-                if accumulated_A:
-                    A_stack = np.vstack(accumulated_A)
-                    N = self._compute_nullspace_projector(A_stack, n_vars)
-                    J_proj = J_full @ N
-                else:
-                    J_proj = J_full
-
-                H += J_proj.T @ W @ J_proj
-                g += -J_proj.T @ W @ target
-
-                # Add to accumulated constraints for next level
-                accumulated_A.append(J_full)
-
-            # Add regularization
-            H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
-            if n_contact_vars > 0:
-                H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
-                    n_contact_vars
-                )
-
-            # Build constraints (same for all levels)
-            A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
-            A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
-                n_v, n_contact_vars, qd
+            H, g, accumulated_A = self._build_priority_level_cost(
+                tasks, n_v, n_vars, accumulated_A
             )
-            x_lb, x_ub = self._build_variable_bounds(n_v, n_contact_vars, qd)
+            self._apply_regularization(H, n_v, n_contact_vars)
 
-            problem = QPProblem(
-                H=H,
-                g=g,
-                A_eq=A_eq,
-                b_eq=b_eq,
-                A_ineq=A_ineq,
-                lb_ineq=lb_ineq,
-                ub_ineq=ub_ineq,
-                x_lb=x_lb,
-                x_ub=x_ub,
-            )
-
+            problem = self._build_level_qp(H, g, n_v, n_contact_vars, M, nle, qd)
             qp_solution = self._solver.solve(problem)
 
             if qp_solution.success and qp_solution.x is not None:
                 x_solution = qp_solution.x  # type: ignore[assignment]
 
-        # Extract final solution
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)
+
+    def _build_priority_level_cost(self, tasks, n_v, n_vars, accumulated_A):
+        H = np.zeros((n_vars, n_vars))
+        g = np.zeros(n_vars)
+
+        for task in tasks:
+            if task.jacobian is None:
+                continue
+
+            J = task.jacobian
+            if J.shape[1] != n_v:
+                continue
+
+            J_full = np.zeros((J.shape[0], n_vars))
+            J_full[:, :n_v] = J
+
+            if accumulated_A:
+                A_stack = np.vstack(accumulated_A)
+                N = self._compute_nullspace_projector(A_stack, n_vars)
+                J_proj = J_full @ N
+            else:
+                J_proj = J_full
+
+            W = task.get_weight_matrix()
+            H += J_proj.T @ W @ J_proj
+            g += -J_proj.T @ W @ task.target
+
+            accumulated_A.append(J_full)
+
+        return H, g, accumulated_A
+
+    def _apply_regularization(self, H, n_v, n_contact_vars):
+        H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
+        if n_contact_vars > 0:
+            H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
+                n_contact_vars
+            )
+
+    def _build_level_qp(self, H, g, n_v, n_contact_vars, M, nle, qd):
+        A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
+        A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
+            n_v, n_contact_vars, qd
+        )
+        x_lb, x_ub = self._build_variable_bounds(n_v, n_contact_vars, qd)
+
+        return QPProblem(
+            H=H,
+            g=g,
+            A_eq=A_eq,
+            b_eq=b_eq,
+            A_ineq=A_ineq,
+            lb_ineq=lb_ineq,
+            ub_ineq=ub_ineq,
+            x_lb=x_lb,
+            x_ub=x_ub,
+        )
 
     def _build_dynamics_constraint(
         self,

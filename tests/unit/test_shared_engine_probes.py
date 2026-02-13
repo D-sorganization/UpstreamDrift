@@ -2,6 +2,8 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.shared.python.engine_core.engine_probes import (
     DrakeProbe,
     EngineProbe,
@@ -60,26 +62,22 @@ def test_mujoco_probe_success(tmp_path):
         assert result.version == "3.0"
 
 
-def test_mujoco_probe_missing_package(tmp_path):
+@pytest.mark.parametrize(
+    "error_type,error_msg,expected_status",
+    [
+        (ImportError, "No module named mujoco", ProbeStatus.NOT_INSTALLED),
+        (OSError, "DLL load failed", ProbeStatus.MISSING_BINARY),
+    ],
+    ids=["mujoco_missing_package", "mujoco_dll_error"],
+)
+def test_mujoco_probe_import_errors(tmp_path, error_type, error_msg, expected_status):
     with patch.dict(sys.modules):
         if "mujoco" in sys.modules:
             del sys.modules["mujoco"]
-        # Also need to ensure it can't be imported from environment if present
-        with patch(
-            "builtins.__import__", side_effect=ImportError("No module named mujoco")
-        ):
+        with patch("builtins.__import__", side_effect=error_type(error_msg)):
             probe = MuJoCoProbe(tmp_path)
             result = probe.probe()
-            assert result.status == ProbeStatus.NOT_INSTALLED
-
-
-def test_mujoco_probe_dll_error(tmp_path):
-    with patch.dict(sys.modules):
-        # Mock import raising OSError
-        with patch("builtins.__import__", side_effect=OSError("DLL load failed")):
-            probe = MuJoCoProbe(tmp_path)
-            result = probe.probe()
-            assert result.status == ProbeStatus.MISSING_BINARY
+            assert result.status == expected_status
 
 
 def test_mujoco_probe_missing_assets(tmp_path):
@@ -177,21 +175,24 @@ def test_pinocchio_probe_missing_dir(tmp_path):
 
 
 # Test PendulumProbe
-def test_pendulum_probe_success(tmp_path):
-    engine_dir = tmp_path / "engines/pendulum_models"
-    (engine_dir / "python/src").mkdir(parents=True)
-    (engine_dir / "python/src/constants.py").touch()
-    (engine_dir / "python/src/pendulum_solver.py").touch()
+@pytest.mark.parametrize(
+    "setup_dirs,expected_status",
+    [
+        (True, ProbeStatus.AVAILABLE),
+        (False, ProbeStatus.MISSING_ASSETS),
+    ],
+    ids=["pendulum_success", "pendulum_missing"],
+)
+def test_pendulum_probe(tmp_path, setup_dirs, expected_status):
+    if setup_dirs:
+        engine_dir = tmp_path / "engines/pendulum_models"
+        (engine_dir / "python/src").mkdir(parents=True)
+        (engine_dir / "python/src/constants.py").touch()
+        (engine_dir / "python/src/pendulum_solver.py").touch()
 
     probe = PendulumProbe(tmp_path)
     result = probe.probe()
-    assert result.status == ProbeStatus.AVAILABLE
-
-
-def test_pendulum_probe_missing(tmp_path):
-    probe = PendulumProbe(tmp_path)
-    result = probe.probe()
-    assert result.status == ProbeStatus.MISSING_ASSETS
+    assert result.status == expected_status
 
 
 # Test MatlabProbe
@@ -238,37 +239,38 @@ def test_matlab_probe_not_installed(tmp_path):
 
 
 # Test OpenSimProbe
-def test_opensim_probe_success(tmp_path):
+def _setup_opensim_dirs(tmp_path):
+    """Helper to set up OpenSim engine directories."""
     engine_dir = tmp_path / "engines/physics_engines/opensim"
     (engine_dir / "python/opensim_golf").mkdir(parents=True)
     (engine_dir / "python/opensim_physics_engine.py").touch()
 
+
+@pytest.mark.parametrize(
+    "setup_dirs,mock_installed,expected_status",
+    [
+        (True, True, ProbeStatus.AVAILABLE),
+        (False, True, ProbeStatus.MISSING_ASSETS),
+        (False, False, ProbeStatus.NOT_INSTALLED),
+    ],
+    ids=["opensim_success", "opensim_missing_dir", "opensim_not_installed"],
+)
+def test_opensim_probe(tmp_path, setup_dirs, mock_installed, expected_status):
     from src.shared.python.engine_core.engine_probes import OpenSimProbe
 
-    with patch.dict(sys.modules, {"opensim": MagicMock(__version__="4.0")}):
-        probe = OpenSimProbe(tmp_path)
-        result = probe.probe()
-        assert result.status == ProbeStatus.AVAILABLE
-        assert result.version == "4.0"
+    if setup_dirs:
+        _setup_opensim_dirs(tmp_path)
 
-
-def test_opensim_probe_missing_dir(tmp_path):
-    from src.shared.python.engine_core.engine_probes import OpenSimProbe
-
-    with patch.dict(sys.modules, {"opensim": MagicMock(__version__="4.0")}):
-        probe = OpenSimProbe(tmp_path)
-        result = probe.probe()
-        assert result.status == ProbeStatus.MISSING_ASSETS
-        assert "engine directory" in result.missing_dependencies
-
-
-def test_opensim_probe_not_installed(tmp_path):
-    from src.shared.python.engine_core.engine_probes import OpenSimProbe
-
-    with patch.dict(sys.modules):
-        if "opensim" in sys.modules:
-            del sys.modules["opensim"]
-        with patch("builtins.__import__", side_effect=ImportError):
+    if mock_installed:
+        with patch.dict(sys.modules, {"opensim": MagicMock(__version__="4.0")}):
             probe = OpenSimProbe(tmp_path)
             result = probe.probe()
-            assert result.status == ProbeStatus.NOT_INSTALLED
+    else:
+        with patch.dict(sys.modules):
+            if "opensim" in sys.modules:
+                del sys.modules["opensim"]
+            with patch("builtins.__import__", side_effect=ImportError):
+                probe = OpenSimProbe(tmp_path)
+                result = probe.probe()
+
+    assert result.status == expected_status

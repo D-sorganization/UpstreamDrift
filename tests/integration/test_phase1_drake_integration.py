@@ -20,6 +20,30 @@ from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 
+if DRAKE_AVAILABLE:
+    from pydrake.all import DiagramBuilder, Parser
+    from pydrake.geometry import SceneGraph
+    from pydrake.systems.analysis import Simulator
+    from pydrake.systems.framework import Context, Diagram
+
+# MultibodyPlant uses some undocumented Drake APIs (SetDefaultVelocities,
+# MakeMultibodyForces) via type-ignore in the production code.  We enumerate
+# the attributes the tests rely on so that the mock is constrained yet still
+# permits those extra calls.
+_PLANT_SPEC_ATTRS = [
+    "Finalize",
+    "time_step",
+    "GetMyContextFromRoot",
+    "SetDefaultPositions",
+    "SetDefaultVelocities",
+    "GetPositions",
+    "GetVelocities",
+    "CalcMassMatrixViaInverseDynamics",
+    "CalcInverseDynamics",
+    "num_velocities",
+    "MakeMultibodyForces",
+]
+
 
 @unittest.skipUnless(DRAKE_AVAILABLE, "Drake not available")
 class TestPhase1DrakeIntegration(unittest.TestCase):
@@ -70,8 +94,8 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test successful Drake model loading."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock plant methods
@@ -79,27 +103,27 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_plant.time_step.return_value = 0.001
 
         # Mock builder and diagram
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
-        mock_diagram = MagicMock()
+        mock_diagram = MagicMock(spec=Diagram)
         mock_builder_instance.Build.return_value = mock_diagram
-        mock_context = MagicMock()
+        mock_context = MagicMock(spec=Context)
         mock_diagram.CreateDefaultContext.return_value = mock_context
-        mock_plant_context = MagicMock()
+        mock_plant_context = MagicMock(spec=Context)
         mock_plant.GetMyContextFromRoot.return_value = mock_plant_context
 
         # Mock Parser class
         with patch(
             "src.engines.physics_engines.drake.python.drake_physics_engine.Parser"
         ) as mock_parser_class:
-            mock_parser_instance = MagicMock()
+            mock_parser_instance = MagicMock(spec=Parser)
             mock_parser_class.return_value = mock_parser_instance
 
             # Mock simulator via the analysis module
             with patch(
                 "src.engines.physics_engines.drake.python.drake_physics_engine.analysis"
             ) as mock_analysis:
-                mock_simulator = MagicMock()
+                mock_simulator = MagicMock(spec=Simulator)
                 mock_analysis.Simulator.return_value = mock_simulator
 
                 # Import and test loading
@@ -114,9 +138,9 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
                 engine.load_from_path(str(self.urdf_path))
 
-                # Verify loading was attempted
+                # Verify loading was attempted (source wraps in Path())
                 mock_parser_instance.AddModels.assert_called_once_with(
-                    str(self.urdf_path)
+                    Path(str(self.urdf_path))
                 )
                 mock_plant.Finalize.assert_called_once()
 
@@ -132,19 +156,19 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine handles missing files gracefully."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
         # Mock Parser to raise RuntimeError (Drake raises RuntimeError for bad files)
         with patch(
             "src.engines.physics_engines.drake.python.drake_physics_engine.Parser"
         ) as mock_parser_class:
-            mock_parser_instance = MagicMock()
+            mock_parser_instance = MagicMock(spec=Parser)
             mock_parser_class.return_value = mock_parser_instance
             mock_parser_instance.AddModels.side_effect = RuntimeError("File not found")
 
@@ -170,18 +194,18 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine reset functionality."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
-        mock_diagram = MagicMock()
-        mock_context = MagicMock()
-        mock_plant_context = MagicMock()
-        mock_simulator = MagicMock()
+        mock_diagram = MagicMock(spec=Diagram)
+        mock_context = MagicMock(spec=Context)
+        mock_plant_context = MagicMock(spec=Context)
+        mock_simulator = MagicMock(spec=Simulator)
 
         from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
@@ -218,17 +242,17 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine forward computation."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
-        mock_plant_context = MagicMock()
+        mock_plant_context = MagicMock(spec=Context)
         mock_plant.num_velocities.return_value = 3
-        mock_plant.MakeMultibodyForces.return_value = MagicMock()
+        mock_plant.MakeMultibodyForces.return_value = MagicMock(spec=["__call__"])
 
         from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
@@ -262,18 +286,18 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine step with simulator caching."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
-        mock_diagram = MagicMock()
-        mock_context = MagicMock()
-        mock_plant_context = MagicMock()
-        mock_simulator = MagicMock()
+        mock_diagram = MagicMock(spec=Diagram)
+        mock_context = MagicMock(spec=Context)
+        mock_plant_context = MagicMock(spec=Context)
+        mock_simulator = MagicMock(spec=Simulator)
         mock_plant.time_step.return_value = 0.001
 
         mock_context.get_time.return_value = 0.0
@@ -314,12 +338,12 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         when the engine is not initialized (no model loaded).
         """
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
         from src.engines.physics_engines.drake.python.drake_physics_engine import (
@@ -359,19 +383,19 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine logging functionality."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
         # Mock Parser to raise exception
         with patch(
             "src.engines.physics_engines.drake.python.drake_physics_engine.Parser"
         ) as mock_parser_class:
-            mock_parser_instance = MagicMock()
+            mock_parser_instance = MagicMock(spec=Parser)
             mock_parser_class.return_value = mock_parser_instance
             mock_parser_instance.AddModels.side_effect = RuntimeError("File not found")
 
@@ -401,15 +425,15 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine state management."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
-        mock_plant_context = MagicMock()
+        mock_plant_context = MagicMock(spec=Context)
         mock_plant.GetPositions.return_value = np.array([1.0, 2.0])
         mock_plant.GetVelocities.return_value = np.array([3.0, 4.0])
 
@@ -444,12 +468,12 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
     ) -> None:
         """Test Drake engine model name property."""
         # Mock Drake components
-        mock_plant = MagicMock()
-        mock_scene_graph = MagicMock()
+        mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
+        mock_scene_graph = MagicMock(spec=SceneGraph)
         mock_add_plant.return_value = (mock_plant, mock_scene_graph)
 
         # Mock builder instance
-        mock_builder_instance = MagicMock()
+        mock_builder_instance = MagicMock(spec=DiagramBuilder)
         mock_builder.return_value = mock_builder_instance
 
         from src.engines.physics_engines.drake.python.drake_physics_engine import (

@@ -47,6 +47,7 @@ from src.shared.python.analysis.power_work_metrics import PowerWorkMetricsMixin
 from src.shared.python.analysis.reporting import ReportingMixin
 from src.shared.python.analysis.stability_metrics import StabilityMetricsMixin
 from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
+from src.shared.python.core.contracts import invariant
 
 # Re-export for backward compatibility
 __all__ = [
@@ -69,6 +70,14 @@ __all__ = [
 ]
 
 
+@invariant(
+    lambda self: len(self.times) == len(self.joint_positions),
+    "Time and joint_positions arrays must have matching lengths",
+)
+@invariant(
+    lambda self: len(self.times) == len(self.joint_velocities),
+    "Time and joint_velocities arrays must have matching lengths",
+)
 class StatisticalAnalyzer(
     ReportingMixin,
     PCAAnalysisMixin,

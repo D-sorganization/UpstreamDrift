@@ -11,6 +11,17 @@ from src.shared.python.engine_core.engine_availability import (
 # is unreliable and leads to AttributeError on patched module globals
 pytestmark = skip_if_unavailable("pinocchio")
 
+# Explicit attribute lists for Pinocchio C++ types (pinocchio bindings).
+_PIN_MODEL_SPEC = [
+    "nv",
+    "nq",
+    "existBodyName",
+    "existFrame",
+    "getFrameId",
+    "createData",
+]
+_PIN_DATA_SPEC = ["M", "J"]
+
 
 # Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:
@@ -78,7 +89,7 @@ def test_load_from_path(mock_pin, engine):
 @patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin")
 def test_load_from_string(mock_pin, engine):
     content = "<robot/>"
-    mock_model = MagicMock()
+    mock_model = MagicMock(spec=_PIN_MODEL_SPEC)
     mock_model.nv = 2
     mock_pin.buildModelFromXML.return_value = mock_model
 
@@ -89,8 +100,8 @@ def test_load_from_string(mock_pin, engine):
 
 
 def test_step(engine):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
+    engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
+    engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     engine.q = np.array([0.0])
     engine.v = np.array([0.0])
     engine.tau = np.array([0.0])
@@ -112,8 +123,8 @@ def test_step(engine):
 
 
 def test_compute_mass_matrix(engine):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
+    engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
+    engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     # Mock data.M
     engine.data.M = np.array([[1.0, 0.2], [0.0, 2.0]])  # Upper triangular example
 
@@ -129,8 +140,8 @@ def test_compute_mass_matrix(engine):
 
 
 def test_compute_jacobian(engine):
-    engine.model = MagicMock()
-    engine.data = MagicMock()
+    engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
+    engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     engine.model.existBodyName.return_value = True
     engine.model.getFrameId.return_value = 1
 

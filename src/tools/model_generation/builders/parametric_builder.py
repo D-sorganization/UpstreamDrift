@@ -32,6 +32,8 @@ from model_generation.core.types import (
 )
 from model_generation.inertia.calculator import InertiaCalculator, InertiaMode
 
+from src.shared.python.core.contracts import postcondition, precondition
+
 logger = logging.getLogger(__name__)
 
 
@@ -110,6 +112,18 @@ class ParametricBuilder(BaseURDFBuilder):
         """Get mass in kg."""
         return self._mass_kg
 
+    @precondition(
+        lambda self, height_m=None, mass_kg=None, gender_factor=None, **proportions: (
+            height_m is None or height_m > 0
+        ),
+        "Height must be positive when specified",
+    )
+    @precondition(
+        lambda self, height_m=None, mass_kg=None, gender_factor=None, **proportions: (
+            mass_kg is None or mass_kg > 0
+        ),
+        "Mass must be positive when specified",
+    )
     def set_parameters(
         self,
         height_m: float | None = None,
@@ -139,6 +153,23 @@ class ParametricBuilder(BaseURDFBuilder):
 
         return self
 
+    @precondition(
+        lambda self, name, parent, mass_ratio, length_ratio, **kw: name is not None
+        and len(name.strip()) > 0,
+        "Segment name must be a non-empty string",
+    )
+    @precondition(
+        lambda self, name, parent, mass_ratio, length_ratio, **kw: 0
+        < mass_ratio
+        <= 1.0,
+        "Mass ratio must be between 0 (exclusive) and 1.0 (inclusive)",
+    )
+    @precondition(
+        lambda self, name, parent, mass_ratio, length_ratio, **kw: 0
+        < length_ratio
+        <= 1.0,
+        "Length ratio must be between 0 (exclusive) and 1.0 (inclusive)",
+    )
     def add_segment(
         self,
         name: str,
@@ -494,6 +525,10 @@ class ParametricBuilder(BaseURDFBuilder):
         self._joints.clear()
         self._segment_templates.clear()
 
+    @postcondition(
+        lambda result: result is not None and isinstance(result.success, bool),
+        "Build must return a valid BuildResult with success status",
+    )
     def build(self, **kwargs: Any) -> BuildResult:
         """
         Build the URDF model.

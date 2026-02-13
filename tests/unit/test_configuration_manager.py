@@ -21,13 +21,18 @@ def test_default_config():
     assert config.control_mode == "pd"
 
 
-def test_config_validation():
-    """Test validation logic."""
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"height_m": -1.0},
+        {"control_mode": "invalid"},
+    ],
+    ids=["negative_height", "invalid_control_mode"],
+)
+def test_config_validation(kwargs):
+    """Test validation logic rejects invalid configurations."""
     with pytest.raises(GolfModelingError):
-        SimulationConfig(height_m=-1.0).validate()
-
-    with pytest.raises(GolfModelingError):
-        SimulationConfig(control_mode="invalid").validate()
+        SimulationConfig(**kwargs).validate()
 
 
 def test_save_load(tmp_path):

@@ -431,97 +431,98 @@ class MJCFConverter:
         for body_elem in elem.findall("body"):
             body_name = body_elem.get("name", f"body_{len(links)}")
 
-            # Parse position
-            pos_str = body_elem.get("pos", "0 0 0")
-            pos_parts = [float(v) for v in pos_str.split()]
-            pos: tuple[float, float, float] = (
-                pos_parts[0],
-                pos_parts[1],
-                pos_parts[2] if len(pos_parts) > 2 else 0.0,
-            )
+            pos = self._parse_mjcf_position(body_elem)
+            inertia = self._parse_mjcf_inertial(body_elem)
 
-            # Parse inertial
-            inertia = Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=1.0)
-            inertial_elem = body_elem.find("inertial")
-            if inertial_elem is not None:
-                mass = float(inertial_elem.get("mass", 1.0))
-
-                com_str = inertial_elem.get("pos", "0 0 0")
-                com_parts = [float(v) for v in com_str.split()]
-                com: tuple[float, float, float] = (
-                    com_parts[0],
-                    com_parts[1],
-                    com_parts[2] if len(com_parts) > 2 else 0.0,
-                )
-
-                diag_str = inertial_elem.get("diaginertia")
-                full_str = inertial_elem.get("fullinertia")
-
-                if diag_str:
-                    diag = [float(v) for v in diag_str.split()]
-                    inertia = Inertia(
-                        ixx=diag[0],
-                        iyy=diag[1],
-                        izz=diag[2],
-                        mass=mass,
-                        center_of_mass=com,
-                    )
-                elif full_str:
-                    full = [float(v) for v in full_str.split()]
-                    inertia = Inertia(
-                        ixx=full[0],
-                        iyy=full[1],
-                        izz=full[2],
-                        ixy=full[3] if len(full) > 3 else 0,
-                        ixz=full[4] if len(full) > 4 else 0,
-                        iyz=full[5] if len(full) > 5 else 0,
-                        mass=mass,
-                        center_of_mass=com,
-                    )
-                else:
-                    inertia = Inertia(
-                        ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com
-                    )
-
-            # Create link
             link = Link(name=body_name, inertia=inertia)
             links.append(link)
 
-            # Parse joint and create URDF joint to parent
             if parent_name:
-                joint_elem = body_elem.find("joint")
-                if joint_elem is not None:
-                    joint_name = joint_elem.get("name", f"{parent_name}_to_{body_name}")
-                    mjcf_type = joint_elem.get("type", "hinge")
-                    joint_type = MJCF_TO_URDF_JOINT.get(mjcf_type, JointType.REVOLUTE)
+                self._parse_mjcf_joint(body_elem, parent_name, body_name, pos, joints)
 
-                    axis_str = joint_elem.get("axis", "0 0 1")
-                    axis_parts = [float(v) for v in axis_str.split()]
-                    axis: tuple[float, float, float] = (
-                        axis_parts[0],
-                        axis_parts[1],
-                        axis_parts[2] if len(axis_parts) > 2 else 0.0,
-                    )
-
-                    joint = Joint(
-                        name=joint_name,
-                        joint_type=joint_type,
-                        parent=parent_name,
-                        child=body_name,
-                        origin=Origin(xyz=pos),
-                        axis=axis,
-                    )
-                    joints.append(joint)
-                else:
-                    # Fixed joint
-                    joint = Joint(
-                        name=f"{parent_name}_to_{body_name}",
-                        joint_type=JointType.FIXED,
-                        parent=parent_name,
-                        child=body_name,
-                        origin=Origin(xyz=pos),
-                    )
-                    joints.append(joint)
-
-            # Recurse into children
             self._parse_mjcf_body(body_elem, body_name, links, joints)
+
+    def _parse_mjcf_position(self, body_elem: ET.Element) -> tuple[float, float, float]:
+        pos_str = body_elem.get("pos", "0 0 0")
+        pos_parts = [float(v) for v in pos_str.split()]
+        return (
+            pos_parts[0],
+            pos_parts[1],
+            pos_parts[2] if len(pos_parts) > 2 else 0.0,
+        )
+
+    def _parse_mjcf_inertial(self, body_elem: ET.Element) -> Inertia:
+        inertial_elem = body_elem.find("inertial")
+        if inertial_elem is None:
+            return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=1.0)
+
+        mass = float(inertial_elem.get("mass", 1.0))
+
+        com_str = inertial_elem.get("pos", "0 0 0")
+        com_parts = [float(v) for v in com_str.split()]
+        com: tuple[float, float, float] = (
+            com_parts[0],
+            com_parts[1],
+            com_parts[2] if len(com_parts) > 2 else 0.0,
+        )
+
+        diag_str = inertial_elem.get("diaginertia")
+        full_str = inertial_elem.get("fullinertia")
+
+        if diag_str:
+            diag = [float(v) for v in diag_str.split()]
+            return Inertia(
+                ixx=diag[0],
+                iyy=diag[1],
+                izz=diag[2],
+                mass=mass,
+                center_of_mass=com,
+            )
+        elif full_str:
+            full = [float(v) for v in full_str.split()]
+            return Inertia(
+                ixx=full[0],
+                iyy=full[1],
+                izz=full[2],
+                ixy=full[3] if len(full) > 3 else 0,
+                ixz=full[4] if len(full) > 4 else 0,
+                iyz=full[5] if len(full) > 5 else 0,
+                mass=mass,
+                center_of_mass=com,
+            )
+        else:
+            return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com)
+
+    def _parse_mjcf_joint(self, body_elem, parent_name, body_name, pos, joints):
+        joint_elem = body_elem.find("joint")
+        if joint_elem is not None:
+            joint_name = joint_elem.get("name", f"{parent_name}_to_{body_name}")
+            mjcf_type = joint_elem.get("type", "hinge")
+            joint_type = MJCF_TO_URDF_JOINT.get(mjcf_type, JointType.REVOLUTE)
+
+            axis_str = joint_elem.get("axis", "0 0 1")
+            axis_parts = [float(v) for v in axis_str.split()]
+            axis: tuple[float, float, float] = (
+                axis_parts[0],
+                axis_parts[1],
+                axis_parts[2] if len(axis_parts) > 2 else 0.0,
+            )
+
+            joint = Joint(
+                name=joint_name,
+                joint_type=joint_type,
+                parent=parent_name,
+                child=body_name,
+                origin=Origin(xyz=pos),
+                axis=axis,
+            )
+            joints.append(joint)
+        else:
+            joint = Joint(
+                name=f"{parent_name}_to_{body_name}",
+                joint_type=JointType.FIXED,
+                parent=parent_name,
+                child=body_name,
+                origin=Origin(xyz=pos),
+            )
+            joints.append(joint)
