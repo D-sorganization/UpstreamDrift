@@ -2,26 +2,49 @@
 
 import sys
 from typing import Any, cast
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-# Mock modules if not available
-sys.modules["gym"] = MagicMock()
-sys.modules["myosuite"] = MagicMock()
-sys.modules["opensim"] = MagicMock()
+# Mock modules using patch.dict (auto-cleans) before importing engines.
+# The mocks must also be present at test execution time because the engine
+# modules reference gym/myosuite/opensim at runtime, not just import time.
+_MOCKED_MODULES = {
+    "gym": MagicMock(),
+    "myosuite": MagicMock(),
+    "opensim": MagicMock(),
+}
+
+with patch.dict(sys.modules, _MOCKED_MODULES):
+    from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
+        MyoSuitePhysicsEngine,
+    )
+    from src.engines.physics_engines.opensim.python import (  # noqa: E402
+        opensim_physics_engine as _osim_module,
+    )
+    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+        OpenSimPhysicsEngine,
+    )
+
+# Re-install mocks for test execution (auto-cleaned by patch.dict on stop).
+# Also patch the module-level opensim attribute on the engine module so
+# runtime references to opensim.Vector etc. work.
+_runtime_patcher = patch.dict(sys.modules, _MOCKED_MODULES)
+_mock_opensim = _MOCKED_MODULES["opensim"]
 
 
-# Import after mocking
-from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
-    MyoSuitePhysicsEngine,
-)
-from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-    OpenSimPhysicsEngine,
-)
+def setup_module(module):
+    _runtime_patcher.start()
+    _osim_module.opensim = _mock_opensim
+
+
+def teardown_module(module):
+    _runtime_patcher.stop()
+    _osim_module.opensim = None
+
 
 logger = get_logger(__name__)
 

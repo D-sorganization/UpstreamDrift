@@ -34,27 +34,23 @@ _OSIM_MANAGER_SPEC = [
     "setFinalTime",
 ]
 
-# Mock opensim before importing the engine
+# Mock opensim using patch.dict (auto-cleans) before importing the engine
 mock_opensim = MagicMock()
-sys.modules["opensim"] = mock_opensim
 
-# Also patch OPENSIM_AVAILABLE so the engine module picks up the mock
-with patch("src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE", True):
-    from src.engines.physics_engines.opensim.python import (  # noqa: E402
-        opensim_physics_engine as osim_module,
-    )
-    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-        OpenSimPhysicsEngine,
-    )
+with patch.dict(sys.modules, {"opensim": mock_opensim}):
+    # Also patch OPENSIM_AVAILABLE so the engine module picks up the mock
+    with patch(
+        "src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE", True
+    ):
+        from src.engines.physics_engines.opensim.python import (  # noqa: E402
+            opensim_physics_engine as osim_module,
+        )
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+            OpenSimPhysicsEngine,
+        )
 
-    # Force the module-level opensim reference to use our mock
-    osim_module.opensim = mock_opensim
-
-
-def teardown_module(module):
-    """Clean up sys.modules pollution."""
-    if "opensim" in sys.modules:
-        del sys.modules["opensim"]
+        # Force the module-level opensim reference to use our mock
+        osim_module.opensim = mock_opensim
 
 
 @pytest.fixture

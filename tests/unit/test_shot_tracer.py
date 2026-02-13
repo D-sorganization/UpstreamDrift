@@ -15,14 +15,13 @@ pytestmark = pytest.mark.skipif(
     reason="PyQt6 or pytest-qt not available",
 )
 
-# Mock flight_models before importing shot_tracer
-sys.modules["flight_models"] = MagicMock()
-
-if PYQT6_AVAILABLE:
-    from src.launchers.shot_tracer import (
-        MultiModelShotTracerWidget,
-        MultiModelShotTracerWindow,
-    )
+# Mock flight_models using patch.dict (auto-cleans) before importing shot_tracer
+with patch.dict(sys.modules, {"flight_models": MagicMock()}):
+    if PYQT6_AVAILABLE:
+        from src.launchers.shot_tracer import (
+            MultiModelShotTracerWidget,
+            MultiModelShotTracerWindow,
+        )
 
 
 @pytest.fixture

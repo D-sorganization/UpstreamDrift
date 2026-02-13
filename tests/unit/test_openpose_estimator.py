@@ -8,26 +8,21 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Mock pyopenpose at sys.modules level BEFORE importing the estimator,
+# Mock pyopenpose using patch.dict (auto-cleans) BEFORE importing the estimator,
 # so the try/except import in the module succeeds.
 mock_op = MagicMock()
-sys.modules["pyopenpose"] = mock_op
 
-# Now import with pyopenpose mocked
-from src.shared.python.pose_estimation import (
-    openpose_estimator as op_module,  # noqa: E402
-)
-from src.shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
-    OpenPoseEstimator,
-)
+with patch.dict(sys.modules, {"pyopenpose": mock_op}):
+    # Now import with pyopenpose mocked
+    from src.shared.python.pose_estimation import (
+        openpose_estimator as op_module,  # noqa: E402
+    )
+    from src.shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
+        OpenPoseEstimator,
+    )
 
 # Ensure the module-level 'op' reference uses our mock
 op_module.op = mock_op
-
-
-def teardown_module(module):
-    """Clean up sys.modules pollution."""
-    sys.modules.pop("pyopenpose", None)
 
 
 @pytest.fixture

@@ -25,8 +25,7 @@ _PLANT_SPEC_ATTRS = [
     "MakeMultibodyForces",
 ]
 
-# Temporarily mock pydrake to allow DrakePhysicsEngine import.
-# We MUST clean up afterwards to avoid polluting other test modules.
+# Mock pydrake using patch.dict (auto-cleans) to allow DrakePhysicsEngine import.
 _PYDRAKE_KEYS = [
     "pydrake",
     "pydrake.systems",
@@ -39,37 +38,28 @@ _PYDRAKE_KEYS = [
     "pydrake.math",
     "pydrake.all",
 ]
-_saved_pydrake = {k: sys.modules[k] for k in _PYDRAKE_KEYS if k in sys.modules}
 
-for _k in _PYDRAKE_KEYS:
-    sys.modules[_k] = MagicMock()
-
-_drake_avail_patcher = patch(
-    "src.shared.python.engine_core.engine_availability.DRAKE_AVAILABLE", True
-)
-_drake_avail_patcher.start()
-
-# Force re-import of drake_physics_engine with DRAKE_AVAILABLE=True
 _ENGINE_MOD_NAME = "src.engines.physics_engines.drake.python.drake_physics_engine"
-sys.modules.pop(_ENGINE_MOD_NAME, None)
 
+_pydrake_mocks = {k: MagicMock() for k in _PYDRAKE_KEYS}
 _drake_engine_module = None  # will hold module reference for @patch usage
-try:
-    from src.engines.physics_engines.drake.python import (
-        drake_physics_engine as _drake_engine_module,
-    )
 
-    DrakePhysicsEngine = _drake_engine_module.DrakePhysicsEngine
-except ImportError:
-    DrakePhysicsEngine = None  # type: ignore[assignment,misc]
-finally:
-    _drake_avail_patcher.stop()
-    # Restore pydrake sys.modules to prevent mock pydrake from leaking
-    for _k in _PYDRAKE_KEYS:
-        if _k in _saved_pydrake:
-            sys.modules[_k] = _saved_pydrake[_k]
-        else:
-            sys.modules.pop(_k, None)
+with patch.dict(sys.modules, _pydrake_mocks):
+    with patch(
+        "src.shared.python.engine_core.engine_availability.DRAKE_AVAILABLE", True
+    ):
+        # Force re-import of drake_physics_engine with DRAKE_AVAILABLE=True
+        sys.modules.pop(_ENGINE_MOD_NAME, None)
+
+        try:
+            from src.engines.physics_engines.drake.python import (
+                drake_physics_engine as _drake_engine_module,
+            )
+
+            DrakePhysicsEngine = _drake_engine_module.DrakePhysicsEngine
+        except ImportError:
+            DrakePhysicsEngine = None  # type: ignore[assignment,misc]
+
     # Remove the mock-backed engine module to prevent pollution during
     # integration tests that run before this file's tests.
     sys.modules.pop(_ENGINE_MOD_NAME, None)

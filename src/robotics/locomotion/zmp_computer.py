@@ -69,7 +69,7 @@ class ZMPComputer(ContractChecker):
         ...     print(f"ZMP at {result.zmp_position[:2]}")
     """
 
-    GRAVITY = 9.81
+    GRAVITY = 9.81  # m/s² — see also src.engines.common.physics.GRAVITY_APPROX
 
     def __init__(
         self,

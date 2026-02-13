@@ -31,11 +31,9 @@ class MockPhysicsEngine(PhysicsEngine):
 
     def forward(self) -> None:
         """Advance the engine forward."""
-        pass
 
     def set_control(self, u) -> None:
         """Set control input."""
-        pass
 
     def compute_mass_matrix(self) -> np.ndarray:
         """Return the identity mass matrix."""
@@ -84,11 +82,9 @@ class MockPhysicsEngine(PhysicsEngine):
 
     def load_from_path(self, path) -> None:
         """Load model from path (no-op)."""
-        pass
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from string (no-op)."""
-        pass
 
     @property
     def model_name(self) -> str:
