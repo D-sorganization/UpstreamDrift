@@ -140,7 +140,9 @@ def check_required_signals():
                     if dataset.shape[1] >= 6:  # At least 6 signals for positions
                         logger.info(f"    ✅ {name} has sufficient signals for GUI")
                     else:
-                        logger.warning(f"    ⚠️  {name} may be missing required signals")
+                        logger.warning(
+                            f"    ⚠️  {name} may be missing required signals"
+                        )
 
         return True
 
