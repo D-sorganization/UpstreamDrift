@@ -91,29 +91,52 @@ class GolfLauncher(
         self.resize(1400, 900)
         self.center_window()
 
-        # Store startup metrics for status display
         self._startup_time_ms = (
             startup_results.startup_time_ms if startup_results else 0
         )
 
-        # Set Icon - UpstreamDrift logo (golfer swoosh)
+        self._load_window_icon()
+        self._init_state(startup_results)
+        self._init_managers()
+        self._init_registry(startup_results)
+        self._init_engine_manager(startup_results)
+        self._build_available_models()
+        self._init_layout_manager()
+        self._initialize_model_order()
+
+        self.init_ui()
+        self._apply_theme_system()
+
+        if startup_results:
+            self._apply_docker_status(startup_results.docker_available)
+        else:
+            self.check_docker()
+
+        self._load_layout()
+
+        self.cleanup_timer = QTimer(self)
+        self.cleanup_timer.timeout.connect(self._cleanup_processes)
+        self.cleanup_timer.start(10000)
+
+        self.toast_manager = None
+        self._init_ui_components()
+
+        if self._startup_time_ms > 0:
+            logger.info(f"Application startup completed in {self._startup_time_ms}ms")
+
+    def _load_window_icon(self) -> None:
         icon_candidates = [
             ASSETS_DIR / "golf_logo.ico",
             ASSETS_DIR / "golf_logo.png",
         ]
-
-        icon_loaded = False
         for icon_path in icon_candidates:
             if icon_path.exists():
                 self.setWindowIcon(QIcon(str(icon_path)))
                 logger.info("Loaded icon: %s", icon_path.name)
-                icon_loaded = True
-                break
+                return
+        logger.warning("No icon files found")
 
-        if not icon_loaded:
-            logger.warning("No icon files found")
-
-        # State
+    def _init_state(self, startup_results: StartupResults | None) -> None:
         self.docker_available = (
             startup_results.docker_available if startup_results else False
         )
@@ -122,24 +145,21 @@ class GolfLauncher(
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []
         self.layout_edit_mode = False
+        self.available_models: dict[str, Any] = {}
+        self.special_app_lookup: dict[str, Any] = {}
+        self.current_filter_text = ""
 
-        # Initialize process output console (unified terminal)
+    def _init_managers(self) -> None:
         self._setup_process_console()
-
-        # Initialize process and model managers (extracted from god class)
         self.process_manager = ProcessManager(
             REPOS_ROOT,
             output_callback=self._on_process_output,
         )
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
-        # Keep backwards-compatible reference
         self.running_processes = self.process_manager.running_processes
-        self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, Any] = {}
-        self.current_filter_text = ""
 
-        # Use pre-loaded registry from startup results, or load fresh
+    def _init_registry(self, startup_results: StartupResults | None) -> None:
         if startup_results and startup_results.registry is not None:
             self.registry = startup_results.registry
             logger.info("Using pre-loaded model registry from async startup")
@@ -151,7 +171,7 @@ class GolfLauncher(
                 logger.error(f"Failed to load ModelRegistry: {e}")
                 self.registry = None
 
-        # Use pre-loaded engine manager from startup results, or load fresh
+    def _init_engine_manager(self, startup_results: StartupResults | None) -> None:
         if startup_results and startup_results.engine_manager is not None:
             self.engine_manager = startup_results.engine_manager
             logger.info("Using pre-loaded engine manager from async startup")
@@ -163,47 +183,15 @@ class GolfLauncher(
                 logger.warning(f"Failed to initialize EngineManager: {e}")
                 self.engine_manager = None
 
-        self._build_available_models()
-
-        # Initialize layout manager (extracted from god class)
+    def _init_layout_manager(self) -> None:
         self.layout_manager = LayoutManager(
             config_file=LAYOUT_CONFIG_FILE,
             available_models=self.available_models,
             get_model_func=self._get_model,
             create_card_func=lambda model: DraggableModelCard(model, self),
         )
-        # Keep backward-compatible references
         self.model_cards = self.layout_manager.model_cards
         self.model_order = self.layout_manager.model_order
-
-        self._initialize_model_order()
-
-        self.init_ui()
-
-        # Apply shared theme system
-        self._apply_theme_system()
-
-        # Use pre-loaded Docker status or check asynchronously
-        if startup_results:
-            self._apply_docker_status(startup_results.docker_available)
-        else:
-            self.check_docker()
-
-        # Load saved layout
-        self._load_layout()
-
-        # Set up periodic process cleanup
-        self.cleanup_timer = QTimer(self)
-        self.cleanup_timer.timeout.connect(self._cleanup_processes)
-        self.cleanup_timer.start(10000)
-
-        # Initialize UI components if available
-        self.toast_manager = None
-        self._init_ui_components()
-
-        # Log startup performance
-        if self._startup_time_ms > 0:
-            logger.info(f"Application startup completed in {self._startup_time_ms}ms")
 
     # -- Model management methods --
 

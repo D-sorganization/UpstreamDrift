@@ -1386,12 +1386,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         self._update_ellipsoids()
         self._update_vectors()
 
-    def _update_vectors(self) -> None:
-        """Draw advanced vectors (Forces, Torques, Induced, CF)."""
-        if not self.plant or not self.eval_context:
-            return
-
-        # Explicit cleanup of disabled categories
+    def _cleanup_disabled_vector_categories(self) -> None:
         if self.meshcat is not None:
             if not self.chk_show_torques.isChecked():
                 self.meshcat.Delete("overlays/vectors/torques")
@@ -1402,7 +1397,8 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             if not self.chk_cf_vec.isChecked():
                 self.meshcat.Delete("overlays/vectors/cf")
 
-        # Use eval context synced with current state
+    def _sync_eval_context(self) -> None:
+        assert self.plant is not None
         plant_context = self.plant.GetMyContextFromRoot(self.context)
         self.plant.SetPositions(
             self.eval_context, self.plant.GetPositions(plant_context)
@@ -1411,94 +1407,109 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
             self.eval_context, self.plant.GetVelocities(plant_context)
         )
 
-        # 1. Standard Torques (Blue)
+    def _draw_torque_vectors(self) -> None:
+        assert self.plant is not None
+        tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)
+        self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
+
+    def _draw_gravity_force_vectors(self) -> None:
+        assert self.plant is not None
+        for i in range(self.plant.num_bodies()):
+            body = self.plant.get_body(BodyIndex(i))
+            if body.name() == "world":
+                continue
+
+            mass = body.get_mass(self.eval_context)
+            if mass <= 1e-6:
+                continue
+
+            gravity = self.plant.gravity_field().gravity_vector()
+            force_vec = gravity * mass
+
+            X_WB = self.plant.EvalBodyPoseInWorld(self.eval_context, body)
+            com_B = body.CalcCenterOfMassInBodyFrame(self.eval_context)
+            pos_W = X_WB.multiply(com_B)
+
+            scale = 0.01
+            end_pos = pos_W + force_vec * scale
+
+            points = np.vstack([pos_W, end_pos]).T
+            path = f"overlays/vectors/forces/{body.name()}"
+            if self.meshcat is not None:
+                self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))  # type: ignore[arg-type]  # pydrake Meshcat overload
+
+    def _resolve_induced_accels(self, analyzer, source):
+        assert self.plant is not None
+        accels = np.zeros(self.plant.num_velocities())
+
+        if source in ["gravity", "velocity", "total"]:
+            res = analyzer.compute_components(self.eval_context)
+            accels = res.get(source, accels)
+        else:
+            tau = np.zeros(self.plant.num_velocities())
+            found = False
+            if self.plant.HasJointNamed(source):
+                joint = self.plant.GetJointByName(source)
+                if joint.num_velocities() == 1:
+                    v_idx = joint.velocity_start()
+                    tau[v_idx] = 1.0
+                    found = True
+
+            if not found:
+                try:
+                    act_idx = int(source)
+                    if 0 <= act_idx < len(tau):
+                        tau[act_idx] = 1.0
+                        found = True
+                except ValueError:
+                    pass
+
+            if found:
+                accels = analyzer.compute_specific_control(self.eval_context, tau)
+
+        return accels
+
+    def _draw_induced_vectors(self, analyzer) -> None:
+        source = self.combo_induced_source.currentText()
+        accels = self._resolve_induced_accels(analyzer, source)
+        self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
+
+    def _draw_counterfactual_vectors(self, analyzer) -> None:
+        assert self.plant is not None
+        cf_type = self.combo_cf_type.currentText()
+        res = analyzer.compute_counterfactuals(self.eval_context)
+
+        if cf_type == "ztcf_accel":
+            vals = res.get("ztcf_accel", np.zeros(self.plant.num_velocities()))
+            self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
+        elif cf_type == "zvcf_torque":
+            vals = res.get("zvcf_torque", np.zeros(self.plant.num_velocities()))
+            self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
+
+    def _update_vectors(self) -> None:
+        """Draw advanced vectors (Forces, Torques, Induced, CF)."""
+        if not self.plant or not self.eval_context:
+            return
+
+        self._cleanup_disabled_vector_categories()
+        self._sync_eval_context()
+
         if self.chk_show_torques.isChecked():
-            # Visualize gravity compensation torques (holding torque)
-            tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)
-            self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
+            self._draw_torque_vectors()
 
-        # 2. Standard Forces (Green) - Visualize Gravity Force at COM
         if self.chk_show_forces.isChecked():
-            for i in range(self.plant.num_bodies()):
-                body = self.plant.get_body(BodyIndex(i))
-                if body.name() == "world":
-                    continue
+            self._draw_gravity_force_vectors()
 
-                mass = body.get_mass(self.eval_context)
-                if mass <= 1e-6:
-                    continue
-
-                # Gravity force = mass * g (down Z)
-                # Drake gravity is usually [0, 0, -9.81]
-                gravity = self.plant.gravity_field().gravity_vector()
-                force_vec = gravity * mass
-
-                # Draw at COM
-                X_WB = self.plant.EvalBodyPoseInWorld(self.eval_context, body)
-                com_B = body.CalcCenterOfMassInBodyFrame(self.eval_context)
-                pos_W = X_WB.multiply(com_B)
-
-                scale = 0.01  # Force scale
-                end_pos = pos_W + force_vec * scale
-
-                points = np.vstack([pos_W, end_pos]).T
-                path = f"overlays/vectors/forces/{body.name()}"
-                if self.meshcat is not None:
-                    self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))  # type: ignore[arg-type]  # pydrake Meshcat overload
-
-        # 3. Advanced Vectors (Induced / CF)
         if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):
             return
 
         analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
 
-        # Induced
         if self.chk_induced_vec.isChecked():
-            source = self.combo_induced_source.currentText()
-            accels = np.zeros(self.plant.num_velocities())
+            self._draw_induced_vectors(analyzer)
 
-            if source in ["gravity", "velocity", "total"]:
-                res = analyzer.compute_components(self.eval_context)
-                accels = res.get(source, accels)
-            else:
-                # Specific actuator by name or index
-                tau = np.zeros(self.plant.num_velocities())
-                found = False
-                # Try name match
-                if self.plant.HasJointNamed(source):
-                    joint = self.plant.GetJointByName(source)
-                    if joint.num_velocities() == 1:
-                        v_idx = joint.velocity_start()
-                        tau[v_idx] = 1.0
-                        found = True
-
-                if not found:
-                    try:
-                        act_idx = int(source)
-                        if 0 <= act_idx < len(tau):
-                            tau[act_idx] = 1.0
-                            found = True
-                    except ValueError:
-                        pass
-
-                if found:
-                    accels = analyzer.compute_specific_control(self.eval_context, tau)
-
-            self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
-
-        # Counterfactuals
         if self.chk_cf_vec.isChecked():
-            cf_type = self.combo_cf_type.currentText()
-            res = analyzer.compute_counterfactuals(self.eval_context)
-
-            # Default to ZTCF accel if not found
-            if cf_type == "ztcf_accel":
-                vals = res.get("ztcf_accel", np.zeros(self.plant.num_velocities()))
-                self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
-            elif cf_type == "zvcf_torque":
-                vals = res.get("zvcf_torque", np.zeros(self.plant.num_velocities()))
-                # Visualize torque as vectors? reusing accel visualizer for now (scaled)
-                self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
+            self._draw_counterfactual_vectors(analyzer)
 
     def _draw_accel_vectors(
         self,

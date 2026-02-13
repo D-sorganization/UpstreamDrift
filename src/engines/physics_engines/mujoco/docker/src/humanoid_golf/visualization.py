@@ -12,6 +12,7 @@ This module provides:
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -247,21 +248,13 @@ def add_visualization_overlays(
 
     visualizer = ForceVisualizer(physics)
 
-    # Resolve scene to append custom geoms
     scene = getattr(viewer, "user_scn", None) or getattr(viewer, "scn", None)
     if scene is None:
         return
 
-    # ---- Record current positions for traced bodies ----
     if show_tracers:
-        for body_name in tracer_bodies:
-            try:
-                body_id = physics.model.body(body_name).id
-                tracer.add_point(body_name, physics.data.xpos[body_id].copy())
-            except (RuntimeError, ValueError, AttributeError):
-                pass
+        _record_tracer_positions(physics, tracer, tracer_bodies)
 
-    # Helper: safely add a geom
     def _add_geom() -> Any | None:
         if scene.ngeom >= scene.maxgeom:
             return None
@@ -269,99 +262,141 @@ def add_visualization_overlays(
         scene.ngeom += 1
         return g
 
-    # ---- Contact force arrows ----
     if show_forces:
-        contacts = visualizer.get_contact_forces()
-        for contact in contacts:
-            if contact["total_force"] < 0.1:
-                continue
-            arrow_len = min(contact["total_force"] * force_scale, 0.5)
-            direction = contact["normal"]
-            start = contact["position"]
-            end = start + direction * arrow_len
+        _overlay_contact_forces(visualizer, _add_geom, force_scale)
 
-            # Normal force (red)
-            g = _add_geom()
-            if g is not None:
-                _init_arrow_geom(g, start, end, 0.005, FORCE_COLORS["contact_normal"])
-
-            # Friction force (orange, perpendicular indicator)
-            if contact["friction_force"] > 0.05:
-                fric_len = min(contact["friction_force"] * force_scale, 0.3)
-                # Build a tangent direction perpendicular to normal
-                n = np.asarray(direction, dtype=np.float64)
-                if abs(n[0]) < 0.9:
-                    tangent = np.cross(n, [1.0, 0.0, 0.0])
-                else:
-                    tangent = np.cross(n, [0.0, 1.0, 0.0])
-                tangent /= np.linalg.norm(tangent) + 1e-12
-                fric_end = start + tangent * fric_len
-                g = _add_geom()
-                if g is not None:
-                    _init_arrow_geom(
-                        g, start, fric_end, 0.003, FORCE_COLORS["contact_friction"]
-                    )
-
-    # ---- Joint torque indicators ----
     if show_torques:
-        torques = visualizer.get_joint_torques()
-        for i, (name, tau) in enumerate(torques.items()):
-            if abs(tau) < 0.01:
-                continue
-            # Place a small sphere at the joint body position coloured by sign
-            jnt_idx = None
-            for j in range(physics.model.njnt):
-                try:
-                    if physics.model.joint(j).name == name:
-                        jnt_idx = j
-                        break
-                except (RuntimeError, ValueError, AttributeError):
-                    pass
-            # Fallback: use actuator index as body proxy
-            body_id = min(i + 1, physics.model.nbody - 1)
-            if jnt_idx is not None:
-                body_id = physics.model.jnt_bodyid[jnt_idx]
+        _overlay_joint_torques(visualizer, physics, _add_geom, torque_scale)
 
-            pos = physics.data.xpos[body_id]
-            colour = (
-                FORCE_COLORS["joint_torque_positive"]
-                if tau > 0
-                else FORCE_COLORS["joint_torque_negative"]
-            )
-            radius = min(abs(tau) * torque_scale, 0.04)
-            g = _add_geom()
-            if g is not None:
-                _init_sphere_geom(g, pos, max(radius, 0.005), colour)
-
-    # ---- Trajectory traces (actual) ----
     if show_tracers:
-        for body_name in tracer_bodies:
-            trace = tracer.get_trace(body_name)
-            if len(trace) < 2:
-                continue
-            color = get_trace_color(body_name)
-            step = max(1, len(trace) // 200)  # cap segments for perf
-            for k in range(0, len(trace) - step, step):
-                g = _add_geom()
-                if g is None:
-                    break
-                _init_line_geom(g, trace[k], trace[k + step], 0.002, color)
+        _overlay_trajectory_traces(tracer, tracer_bodies, _add_geom)
 
-    # ---- Desired trajectory overlay (dashed-style alternating segments) ----
     if show_desired:
-        for body_name in tracer_bodies:
-            desired = tracer.get_desired_trace(body_name)
-            if len(desired) < 2:
-                continue
-            # Render in cyan with slight transparency
-            desired_color = [0.0, 1.0, 1.0, 0.5]
-            step = max(1, len(desired) // 200)
-            for k in range(0, len(desired) - step, step * 2):
-                g = _add_geom()
-                if g is None:
+        _overlay_desired_trajectory(tracer, tracer_bodies, _add_geom)
+
+
+def _record_tracer_positions(
+    physics: Any, tracer: TrajectoryTracer, tracer_bodies: list[str]
+) -> None:
+    for body_name in tracer_bodies:
+        try:
+            body_id = physics.model.body(body_name).id
+            tracer.add_point(body_name, physics.data.xpos[body_id].copy())
+        except (RuntimeError, ValueError, AttributeError):
+            pass
+
+
+def _overlay_contact_forces(
+    visualizer: ForceVisualizer,
+    add_geom: Callable[[], Any | None],
+    force_scale: float,
+) -> None:
+    contacts = visualizer.get_contact_forces()
+    for contact in contacts:
+        if contact["total_force"] < 0.1:
+            continue
+        arrow_len = min(contact["total_force"] * force_scale, 0.5)
+        direction = contact["normal"]
+        start = contact["position"]
+        end = start + direction * arrow_len
+
+        g = add_geom()
+        if g is not None:
+            _init_arrow_geom(g, start, end, 0.005, FORCE_COLORS["contact_normal"])
+
+        if contact["friction_force"] > 0.05:
+            _add_friction_arrow(add_geom, contact, direction, start, force_scale)
+
+
+def _add_friction_arrow(
+    add_geom: Callable[[], Any | None],
+    contact: dict,
+    direction: Any,
+    start: Any,
+    force_scale: float,
+) -> None:
+    fric_len = min(contact["friction_force"] * force_scale, 0.3)
+    n = np.asarray(direction, dtype=np.float64)
+    if abs(n[0]) < 0.9:
+        tangent = np.cross(n, [1.0, 0.0, 0.0])
+    else:
+        tangent = np.cross(n, [0.0, 1.0, 0.0])
+    tangent /= np.linalg.norm(tangent) + 1e-12
+    fric_end = start + tangent * fric_len
+    g = add_geom()
+    if g is not None:
+        _init_arrow_geom(g, start, fric_end, 0.003, FORCE_COLORS["contact_friction"])
+
+
+def _overlay_joint_torques(
+    visualizer: ForceVisualizer,
+    physics: Any,
+    add_geom: Callable[[], Any | None],
+    torque_scale: float,
+) -> None:
+    torques = visualizer.get_joint_torques()
+    for i, (name, tau) in enumerate(torques.items()):
+        if abs(tau) < 0.01:
+            continue
+        jnt_idx = None
+        for j in range(physics.model.njnt):
+            try:
+                if physics.model.joint(j).name == name:
+                    jnt_idx = j
                     break
-                end_k = min(k + step, len(desired) - 1)
-                _init_line_geom(g, desired[k], desired[end_k], 0.003, desired_color)
+            except (RuntimeError, ValueError, AttributeError):
+                pass
+        body_id = min(i + 1, physics.model.nbody - 1)
+        if jnt_idx is not None:
+            body_id = physics.model.jnt_bodyid[jnt_idx]
+
+        pos = physics.data.xpos[body_id]
+        colour = (
+            FORCE_COLORS["joint_torque_positive"]
+            if tau > 0
+            else FORCE_COLORS["joint_torque_negative"]
+        )
+        radius = min(abs(tau) * torque_scale, 0.04)
+        g = add_geom()
+        if g is not None:
+            _init_sphere_geom(g, pos, max(radius, 0.005), colour)
+
+
+def _overlay_trajectory_traces(
+    tracer: TrajectoryTracer,
+    tracer_bodies: list[str],
+    add_geom: Callable[[], Any | None],
+) -> None:
+    for body_name in tracer_bodies:
+        trace = tracer.get_trace(body_name)
+        if len(trace) < 2:
+            continue
+        color = get_trace_color(body_name)
+        step = max(1, len(trace) // 200)
+        for k in range(0, len(trace) - step, step):
+            g = add_geom()
+            if g is None:
+                break
+            _init_line_geom(g, trace[k], trace[k + step], 0.002, color)
+
+
+def _overlay_desired_trajectory(
+    tracer: TrajectoryTracer,
+    tracer_bodies: list[str],
+    add_geom: Callable[[], Any | None],
+) -> None:
+    for body_name in tracer_bodies:
+        desired = tracer.get_desired_trace(body_name)
+        if len(desired) < 2:
+            continue
+        desired_color = [0.0, 1.0, 1.0, 0.5]
+        step = max(1, len(desired) // 200)
+        for k in range(0, len(desired) - step, step * 2):
+            g = add_geom()
+            if g is None:
+                break
+            end_k = min(k + step, len(desired) - 1)
+            _init_line_geom(g, desired[k], desired[end_k], 0.003, desired_color)
 
 
 # ---------------------------------------------------------------------------

@@ -339,6 +339,42 @@ def create_metrics_overlay(
     return frame
 
 
+def _detect_video_format(output_path: str) -> VideoFormat:
+    ext = Path(output_path).suffix.lower()
+    if ext == ".mp4":
+        return VideoFormat.MP4
+    if ext == ".avi":
+        return VideoFormat.AVI
+    if ext == ".gif":
+        return VideoFormat.GIF
+    msg = f"Unsupported format: {ext}"
+    raise ValueError(msg)
+
+
+def _build_frame_metrics(
+    model: mj.MjModel,
+    data: mj.MjData,
+    frame_idx: int,
+) -> dict[str, Any]:
+    metrics: dict[str, Any] = {
+        "Frame": lambda d, frame_num=frame_idx: frame_num,
+    }
+
+    try:
+        club_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, "club_head")
+        if club_id >= 0:
+            jacp = np.zeros((3, model.nv))
+            jacr = np.zeros((3, model.nv))
+            mj.mj_jacBody(model, data, jacp, jacr, club_id)
+            vel = jacp @ data.qvel
+            speed = np.linalg.norm(vel) * 2.237  # m/s to mph
+            metrics["Club Speed"] = lambda d, s=speed: int(s)  # type: ignore[assignment]
+    except (ValueError, TypeError, RuntimeError):
+        pass
+
+    return metrics
+
+
 def export_simulation_video(
     model: mj.MjModel,
     data: mj.MjData,
@@ -372,22 +408,9 @@ def export_simulation_video(
     Returns:
         True if successful
     """
-    # Determine format from extension
-    ext = Path(output_path).suffix.lower()
-    if ext == ".mp4":
-        format = VideoFormat.MP4
-    elif ext == ".avi":
-        format = VideoFormat.AVI
-    elif ext == ".gif":
-        format = VideoFormat.GIF
-    else:
-        msg = f"Unsupported format: {ext}"
-        raise ValueError(msg)
-
-    # Create exporter
+    format = _detect_video_format(output_path)
     exporter = VideoExporter(model, data, width, height, fps, format)
 
-    # Start recording
     if not exporter.start_recording(output_path):
         return False
 
@@ -396,37 +419,15 @@ def export_simulation_video(
         total_frames = len(recorded_states)
 
         for i in range(total_frames):
-            # Set state
             data.qpos[:] = recorded_states[i, :nq]
             data.qvel[:] = recorded_states[i, nq:]
             data.ctrl[:] = recorded_controls[i]
-
-            # Forward kinematics
             mj.mj_forward(model, data)
 
-            # Create overlay
             overlay_fn = None
             if show_metrics:
                 t = times[i]
-
-                # Define metrics to display
-                metrics = {
-                    "Frame": lambda d, frame_num=i: frame_num,
-                }
-
-                # Add club head speed if available
-                try:
-                    club_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, "club_head")
-                    if club_id >= 0:
-                        jacp = np.zeros((3, model.nv))
-                        jacr = np.zeros((3, model.nv))
-                        mj.mj_jacBody(model, data, jacp, jacr, club_id)
-                        vel = jacp @ data.qvel
-                        speed = np.linalg.norm(vel) * 2.237  # m/s to mph
-                        metrics["Club Speed"] = lambda d, s=speed: int(s)  # type: ignore[assignment]
-                except (ValueError, TypeError, RuntimeError):
-                    # Ignore club speed if club head not found
-                    pass
+                metrics = _build_frame_metrics(model, data, i)
 
                 def overlay_fn(
                     frame: np.ndarray,
@@ -443,14 +444,11 @@ def export_simulation_video(
                         font_scale=0.8,
                     )
 
-            # Add frame
             exporter.add_frame(camera_id, overlay_fn)
 
-            # Progress
             if progress_callback:
                 progress_callback(i + 1, total_frames)
 
-        # Finish
         exporter.finish_recording(output_path)
         return True
 

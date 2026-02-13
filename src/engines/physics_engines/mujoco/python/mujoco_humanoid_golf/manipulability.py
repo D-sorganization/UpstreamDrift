@@ -59,6 +59,49 @@ class ManipulabilityAnalyzer:
         self.data = data
         self._cache_J_trans: dict[str, np.ndarray] = {}
 
+    def _compute_ellipsoid_decomposition(
+        self, M_v: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
+        try:
+            eig_val_v, eig_vec_v = np.linalg.eigh(M_v)
+        except np.linalg.LinAlgError:
+            return None
+
+        idx_v = eig_val_v.argsort()[::-1]
+        eig_val_v = eig_val_v[idx_v]
+        eig_vec_v = eig_vec_v[:, idx_v]
+
+        radii_v = np.sqrt(np.maximum(eig_val_v, 1e-9))
+        radii_f = 1.0 / np.maximum(radii_v, 1e-9)
+
+        return eig_val_v, eig_vec_v, radii_v, radii_f
+
+    @staticmethod
+    def _check_condition_number(radii_v: np.ndarray, body_name: str) -> float:
+        cond_num = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float("inf")
+
+        if cond_num > 1e6:
+            logger.warning(
+                f"High Jacobian condition number for {body_name}: k={cond_num:.2e}. "
+                f"Near singularity - manipulability metrics may be unreliable. "
+                f"Guideline O3 warning threshold exceeded. "
+                f"Consider alternative joint configuration or regularization."
+            )
+
+        if cond_num > 1e10:
+            logger.error(
+                f"Jacobian is singular for {body_name}: k={cond_num:.2e}. "
+                f"Cannot compute reliable manipulability. "
+                f"Guideline O3 VIOLATION - system at or near kinematic singularity."
+            )
+            raise ValueError(
+                f"Jacobian singularity detected for {body_name} (k={cond_num:.2e}). "
+                f"System is at or near kinematic singularity. "
+                f"Manipulability analysis invalid."
+            )
+
+        return cond_num
+
     def compute_metrics(
         self, body_name: str, mode: Literal["kinematic", "dynamic"] = "kinematic"
     ) -> ManipulabilityResult | None:
@@ -75,92 +118,33 @@ class ManipulabilityAnalyzer:
         if body_id == -1:
             return None
 
-        # 1. Compute Jacobian
-        # We focus on Translational Manipulability (3xN) for golf context
         jacp = np.zeros((3, self.model.nv))
-        jacr = np.zeros((3, self.model.nv))  # rotational, ignored for now
+        jacr = np.zeros((3, self.model.nv))
         mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
-
-        # Use Translational Jacobian
         J = jacp
 
-        # 2. Compute Core Matrices
-        # Velocity Manipulability Matrix M_v = J * J^T
-        # Shape: (3, 3)
         M_v = J @ J.T
-
-        # Force Manipulability Matrix M_f = (J * J^T)^-1
-        # Note: If singular, we pseudoinverse
         try:
             M_f = np.linalg.inv(M_v)
         except np.linalg.LinAlgError:
             M_f = np.linalg.pinv(M_v)
 
-        # 3. Eigen Decomposition for Ellipsoids
-        # Velocity Ellipsoid:
-        # Defined by v^T (J J^T)^-1 v <= 1
-        # Shape determined by J J^T. Radii are sqrt(eigenvalues of J J^T).
-        try:
-            eig_val_v, eig_vec_v = np.linalg.eigh(M_v)
-        except np.linalg.LinAlgError:
+        decomp = self._compute_ellipsoid_decomposition(M_v)
+        if decomp is None:
             return None
+        _eig_val_v, eig_vec_v, radii_v, radii_f = decomp
 
-        # Sort descending
-        idx_v = eig_val_v.argsort()[::-1]
-        eig_val_v = eig_val_v[idx_v]
-        eig_vec_v = eig_vec_v[:, idx_v]
-
-        # Velocity Radii = sqrt(eigenvalues) = sigma
-        radii_v = np.sqrt(np.maximum(eig_val_v, 1e-9))
-
-        # Force Ellipsoid:
-        # Defined by f^T (J J^T) f <= 1
-        # Shape determined by (J J^T)^-1. Radii are sqrt(eigenvalues of (J J^T)^-1).
-        # Eigenvalues of inverse are 1/eigenvalues.
-        # Force Radii = 1/sigma
-        radii_f = 1.0 / np.maximum(radii_v, 1e-9)
-
-        # Condition Number (Isotropy)
-        # Ratio of largest to smallest singular value (sigma_max / sigma_min)
-        # = radii_v_max / radii_v_min
-        cond_num = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float("inf")
-
-        # Guideline O3: Singularity Detection & Warnings
-        # Warn on poor conditioning (κ > 1e6), error on singularity (κ > 1e10)
-        if cond_num > 1e6:
-            logger.warning(
-                f"⚠️ High Jacobian condition number for {body_name}: κ={cond_num:.2e}. "
-                f"Near singularity - manipulability metrics may be unreliable. "
-                f"Guideline O3 warning threshold exceeded. "
-                f"Consider alternative joint configuration or regularization."
-            )
-
-        if cond_num > 1e10:
-            logger.error(
-                f"❌ Jacobian is singular for {body_name}: κ={cond_num:.2e}. "
-                f"Cannot compute reliable manipulability. "
-                f"Guideline O3 VIOLATION - system at or near kinematic singularity."
-            )
-            raise ValueError(
-                f"Jacobian singularity detected for {body_name} (κ={cond_num:.2e}). "
-                f"System is at or near kinematic singularity. "
-                f"Manipulability analysis invalid."
-            )
-
-        # Manipulability Index (Volumetric)
+        cond_num = self._check_condition_number(radii_v, body_name)
         manip_index = np.prod(radii_v)
-
-        # Position of the ellipsoid
         pos = self.data.xpos[body_id].copy()
 
-        # Construct Result
         return ManipulabilityResult(
             body_name=body_name,
             J_trans=J,
             mobility_matrix=M_v,
             force_matrix=M_f,
             velocity_ellipsoid=EllipsoidParams(radii_v, eig_vec_v, pos),
-            force_ellipsoid=EllipsoidParams(radii_f, eig_vec_v, pos),  # Axes same as V
+            force_ellipsoid=EllipsoidParams(radii_f, eig_vec_v, pos),
             condition_number=cond_num,
             volume=manip_index,
             manipulability_index=manip_index,

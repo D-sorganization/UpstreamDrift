@@ -85,6 +85,60 @@ class DrakeManipulabilityAnalyzer:
 
         return sorted(bodies, key=sort_key)
 
+    def _compute_translational_jacobian(self, context: Context, body):
+        return self.plant.CalcJacobianTranslationalVelocity(
+            context,
+            JacobianWrtVariable.kV,
+            body.body_frame(),
+            np.zeros(3),  # type: ignore[arg-type]  # pydrake accepts ndarray at runtime
+            self.world_frame,
+            self.world_frame,
+        )
+
+    def _decompose_mobility_matrix(self, mobility_matrix):
+        eigvals_v, eigvecs_v = np.linalg.eigh(mobility_matrix)
+        idx = np.argsort(eigvals_v)[::-1]
+        eigvals_v = eigvals_v[idx]
+        eigvecs_v = eigvecs_v[:, idx]
+        radii_v = np.sqrt(np.maximum(eigvals_v, 1e-9))
+        return radii_v, eigvecs_v
+
+    def _check_condition_number(self, name, cond):
+        if cond > 1e6:
+            logger.warning(
+                f"High Jacobian condition number for {name}: k={cond:.2e}. "
+                f"Near singularity - manipulability metrics may be unreliable. "
+                f"Guideline O3 warning threshold exceeded."
+            )
+
+        if cond > 1e10:
+            logger.error(
+                f"Jacobian is singular for {name}: k={cond:.2e}. "
+                f"Guideline O3 VIOLATION - system at kinematic singularity."
+            )
+            return False
+        return True
+
+    def _build_result_for_body(
+        self, context: Context, name, body, radii_v, eigvecs_v, cond
+    ):
+        isotropy = 1.0 / cond if cond > 0 else 0.0
+        manip_index = np.prod(radii_v)
+        radii_f = 1.0 / np.maximum(radii_v, 1e-9)
+
+        pose = self.plant.EvalBodyPoseInWorld(context, body)
+        cartesian_pos = pose.translation()
+
+        return ManipulabilityResult(
+            body_name=name,
+            cartesian_pos=cartesian_pos,
+            mobility_ellipsoid=EllipsoidParams(radii_v, eigvecs_v, cartesian_pos),
+            force_ellipsoid=EllipsoidParams(radii_f, eigvecs_v, cartesian_pos),
+            condition_number=cond,
+            isotropy=isotropy,
+            manipulability_index=manip_index,
+        )
+
     def compute_metrics(
         self, context: Context, body_names: list[str]
     ) -> list[ManipulabilityResult]:
@@ -107,88 +161,21 @@ class DrakeManipulabilityAnalyzer:
                 continue
 
             body = self.plant.GetBodyByName(name)
-
-            # Compute Translational Jacobian J (3 x nv)
-            # Frame B: body frame
-            # p_BoBp_B: Point of interest in B. We use origin (0,0,0).
-            # Frame A: World
-            # Frame E: World (Expressed in)
-            J_full = self.plant.CalcJacobianTranslationalVelocity(
-                context,
-                JacobianWrtVariable.kV,
-                body.body_frame(),
-                np.zeros(3),  # type: ignore[arg-type]  # pydrake accepts ndarray at runtime
-                self.world_frame,
-                self.world_frame,
-            )
-
-            # J is 3 x nv.
-            # For redundant manipulators, J J^T (3x3) gives mobility.
-
-            # Mobility: Mv = J J^T
+            J_full = self._compute_translational_jacobian(context, body)
             mobility_matrix = J_full @ J_full.T
 
-            # Eigen Decomposition
             try:
-                eigvals_v, eigvecs_v = np.linalg.eigh(mobility_matrix)
-                # Sort descending
-                idx = np.argsort(eigvals_v)[::-1]
-                eigvals_v = eigvals_v[idx]
-                eigvecs_v = eigvecs_v[:, idx]
-
-                # Radii (Velocity) = sqrt(lambda)
-                radii_v = np.sqrt(np.maximum(eigvals_v, 1e-9))
-
-                # Axes are eigenvectors
-
-                # Condition Number
+                radii_v, eigvecs_v = self._decompose_mobility_matrix(mobility_matrix)
                 cond = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float("inf")
 
-                # Guideline O3: Singularity Detection & Warnings
-                # Warn on poor conditioning (κ > 1e6), error on singularity (κ > 1e10)
-                if cond > 1e6:
-                    logger.warning(
-                        f"⚠️ High Jacobian condition number for {name}: κ={cond:.2e}. "
-                        f"Near singularity - manipulability metrics may be unreliable. "
-                        f"Guideline O3 warning threshold exceeded."
-                    )
-
-                if cond > 1e10:
-                    logger.error(
-                        f"❌ Jacobian is singular for {name}: κ={cond:.2e}. "
-                        f"Guideline O3 VIOLATION - system at kinematic singularity."
-                    )
-                    # Drake: Continue instead of raising to allow
-                    # processing other bodies
+                if not self._check_condition_number(name, cond):
                     continue
-
-                # Isotropy (1/cond)
-                isotropy = 1.0 / cond if cond > 0 else 0.0
-
-                # Manipulability Index (Measure of volume ~ prod(radii))
-                manip_index = np.prod(radii_v)
 
             except np.linalg.LinAlgError:
                 continue
 
-            # Force Ellipsoid
-            # Mf = (J J^T)^-1
-            # Radii = 1 / sqrt(lambda_v)
-            radii_f = 1.0 / np.maximum(radii_v, 1e-9)
-            # Axes are same as velocity
-
-            # Position
-            pose = self.plant.EvalBodyPoseInWorld(context, body)
-            cartesian_pos = pose.translation()
-
-            res = ManipulabilityResult(
-                body_name=name,
-                cartesian_pos=cartesian_pos,
-                mobility_ellipsoid=EllipsoidParams(radii_v, eigvecs_v, cartesian_pos),
-                force_ellipsoid=EllipsoidParams(radii_f, eigvecs_v, cartesian_pos),
-                condition_number=cond,
-                isotropy=isotropy,
-                manipulability_index=manip_index,
+            res = self._build_result_for_body(
+                context, name, body, radii_v, eigvecs_v, cond
             )
             results.append(res)
 

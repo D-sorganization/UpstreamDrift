@@ -464,6 +464,93 @@ class APIDiagnostics:
         return recommendations
 
 
+def _render_check_card_html(check: dict[str, Any]) -> str:
+    status = check.get("status", "unknown")
+    if status == "pass":
+        icon = "\u2705"
+        color = "#28a745"
+    elif status == "fail":
+        icon = "\u274c"
+        color = "#dc3545"
+    else:
+        icon = "\u26a0\ufe0f"
+        color = "#ffc107"
+
+    return f"""
+    <div style="border: 1px solid {color}; border-radius: 8px; padding: 12px; margin: 8px 0; background: #1e1e1e;">
+        <h4 style="margin: 0 0 8px 0; color: {color};">{icon} {check.get("name", "Unknown")}</h4>
+        <p style="margin: 0 0 8px 0; color: #ccc;">{check.get("message", "")}</p>
+        <details style="color: #888;">
+            <summary style="cursor: pointer;">Details ({check.get("duration_ms", 0):.2f}ms)</summary>
+            <pre style="background: #0d0d0d; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 12px;">{_format_details(check.get("details", {}))}</pre>
+        </details>
+    </div>
+    """
+
+
+def _render_summary_html(summary: dict[str, Any], status_color: str) -> str:
+    return f"""
+    <div class="summary">
+        <div class="stat">
+            <div class="stat-value" style="color: {status_color};">{summary.get("status", "unknown").upper()}</div>
+            <div class="stat-label">System Status</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #28a745;">{summary.get("passed", 0)}</div>
+            <div class="stat-label">Passed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #dc3545;">{summary.get("failed", 0)}</div>
+            <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #ffc107;">{summary.get("warnings", 0)}</div>
+            <div class="stat-label">Warnings</div>
+        </div>
+    </div>
+    """
+
+
+def _get_diagnostics_page_css(status_color: str) -> str:
+    return f"""
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d0d0d;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }}
+        .container {{ max-width: 900px; margin: 0 auto; }}
+        h1 {{ color: #0a84ff; border-bottom: 2px solid #0a84ff; padding-bottom: 10px; }}
+        .summary {{
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }}
+        .stat {{
+            text-align: center;
+            padding: 10px;
+        }}
+        .stat-value {{
+            font-size: 2em;
+            font-weight: bold;
+        }}
+        .stat-label {{ color: #888; font-size: 0.9em; }}
+        .status-badge {{
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            background: {status_color};
+            color: white;
+        }}
+    """
+
+
 def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
     """Generate HTML diagnostic report for browser viewing.
 
@@ -479,33 +566,12 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
 
     status_color = "#28a745" if summary.get("status") == "healthy" else "#dc3545"
 
-    checks_html = ""
-    for check in checks:
-        status = check.get("status", "unknown")
-        if status == "pass":
-            icon = "✅"
-            color = "#28a745"
-        elif status == "fail":
-            icon = "❌"
-            color = "#dc3545"
-        else:
-            icon = "⚠️"
-            color = "#ffc107"
-
-        checks_html += f"""
-        <div style="border: 1px solid {color}; border-radius: 8px; padding: 12px; margin: 8px 0; background: #1e1e1e;">
-            <h4 style="margin: 0 0 8px 0; color: {color};">{icon} {check.get("name", "Unknown")}</h4>
-            <p style="margin: 0 0 8px 0; color: #ccc;">{check.get("message", "")}</p>
-            <details style="color: #888;">
-                <summary style="cursor: pointer;">Details ({check.get("duration_ms", 0):.2f}ms)</summary>
-                <pre style="background: #0d0d0d; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 12px;">{_format_details(check.get("details", {}))}</pre>
-            </details>
-        </div>
-        """
-
+    checks_html = "".join(_render_check_card_html(check) for check in checks)
     recs_html = "".join(
         f"<li style='color: #ffd700; margin: 4px 0;'>{r}</li>" for r in recommendations
     )
+    summary_html = _render_summary_html(summary, status_color)
+    css = _get_diagnostics_page_css(status_color)
 
     return f"""
     <!DOCTYPE html>
@@ -514,75 +580,18 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
         <title>Golf Modeling Suite - API Diagnostics</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: #0d0d0d;
-                color: #f0f0f0;
-                margin: 0;
-                padding: 20px;
-            }}
-            .container {{ max-width: 900px; margin: 0 auto; }}
-            h1 {{ color: #0a84ff; border-bottom: 2px solid #0a84ff; padding-bottom: 10px; }}
-            .summary {{
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                border-radius: 12px;
-                padding: 20px;
-                margin: 20px 0;
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-            }}
-            .stat {{
-                text-align: center;
-                padding: 10px;
-            }}
-            .stat-value {{
-                font-size: 2em;
-                font-weight: bold;
-            }}
-            .stat-label {{ color: #888; font-size: 0.9em; }}
-            .status-badge {{
-                display: inline-block;
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-weight: bold;
-                background: {status_color};
-                color: white;
-            }}
-        </style>
+        <style>{css}</style>
     </head>
     <body>
         <div class="container">
-            <h1>🏌️ Golf Modeling Suite - API Diagnostics</h1>
-
-            <div class="summary">
-                <div class="stat">
-                    <div class="stat-value" style="color: {status_color};">{summary.get("status", "unknown").upper()}</div>
-                    <div class="stat-label">System Status</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" style="color: #28a745;">{summary.get("passed", 0)}</div>
-                    <div class="stat-label">Passed</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" style="color: #dc3545;">{summary.get("failed", 0)}</div>
-                    <div class="stat-label">Failed</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" style="color: #ffc107;">{summary.get("warnings", 0)}</div>
-                    <div class="stat-label">Warnings</div>
-                </div>
-            </div>
-
-            <h2>📋 Diagnostic Checks</h2>
+            <h1>\U0001f3cc\ufe0f Golf Modeling Suite - API Diagnostics</h1>
+            {summary_html}
+            <h2>\U0001f4cb Diagnostic Checks</h2>
             {checks_html}
-
-            <h2>💡 Recommendations</h2>
+            <h2>\U0001f4a1 Recommendations</h2>
             <ul style="background: #1a1a2e; padding: 20px 40px; border-radius: 8px;">
                 {recs_html}
             </ul>
-
             <p style="color: #666; text-align: center; margin-top: 30px;">
                 Generated at {summary.get("timestamp", "unknown")} |
                 <a href="/api/diagnostics" style="color: #0a84ff;">JSON View</a> |
