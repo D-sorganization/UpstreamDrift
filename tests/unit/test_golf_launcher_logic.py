@@ -217,29 +217,17 @@ def mock_pyqt(monkeypatch):
     mock_qt_gui.QIcon = MagicMock()
     mock_qt_gui.QPixmap = MagicMock()
 
-    # Store original modules to restore later
-    original_modules = {}
-    pyqt_modules = ["PyQt6", "PyQt6.QtCore", "PyQt6.QtGui", "PyQt6.QtWidgets"]
-
-    for module_name in pyqt_modules:
-        if module_name in sys.modules:
-            original_modules[module_name] = sys.modules[module_name]
-
-    # Apply our mocks
-    sys.modules["PyQt6"] = MagicMock()
-    sys.modules["PyQt6.QtCore"] = mock_qt_core
-    sys.modules["PyQt6.QtGui"] = mock_qt_gui
-    sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
-
-    try:
+    # Use patch.dict for automatic save/restore of sys.modules
+    with patch.dict(
+        sys.modules,
+        {
+            "PyQt6": MagicMock(),
+            "PyQt6.QtCore": mock_qt_core,
+            "PyQt6.QtGui": mock_qt_gui,
+            "PyQt6.QtWidgets": mock_qt_widgets,
+        },
+    ):
         yield
-    finally:
-        # Restore original modules or remove if they weren't there before
-        for module_name in pyqt_modules:
-            if module_name in original_modules:
-                sys.modules[module_name] = original_modules[module_name]
-            else:
-                sys.modules.pop(module_name, None)
 
 
 @pytest.mark.skip(
