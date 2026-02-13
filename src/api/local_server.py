@@ -153,7 +153,7 @@ def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
 
 def _execute_tile_launch(
     tile_id: str, tile: dict, launcher_service: Any
-) -> dict[str, Any] | JSONResponse:
+) -> dict[str, Any]:
     model_type = tile.get("type", "")
     repo_path = Path(__file__).parent.parent.parent
     logger.info(
@@ -229,7 +229,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         )
 
     @app.post("/api/launcher/launch/{tile_id}")
-    async def launch_tile(tile_id: str) -> dict[str, Any] | JSONResponse:
+    async def launch_tile(tile_id: str) -> dict[str, Any]:
         """Launch an engine or tool by tile ID.
 
         Looks up the tile in the launcher manifest and uses the model
@@ -258,7 +258,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         return {"processes": _launcher_service.get_running_processes()}
 
     @app.post("/api/launcher/stop/{name}")
-    async def stop_process(name: str) -> dict[str, Any] | JSONResponse:
+    async def stop_process(name: str) -> dict[str, Any]:
         """Stop a running engine/tool process by name."""
         if not _launcher_service.stop_process(name):
             logger.warning("[stop] Process not found: %s", name)
@@ -466,9 +466,7 @@ def _get_ui_not_built_html() -> str:
 
 def _register_error_page_catch_all(app: FastAPI) -> None:
     @app.get("/{full_path:path}")
-    async def serve_error_page(
-        request: Request, full_path: str
-    ) -> HTMLResponse | JSONResponse:
+    async def serve_error_page(request: Request, full_path: str) -> HTMLResponse:
         """Serve a helpful error page when UI is not built."""
         if full_path.startswith("api/"):
             return JSONResponse(
