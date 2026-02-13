@@ -9,6 +9,8 @@ Provides a unified interface for:
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
@@ -321,7 +323,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         elif plot_type == "Swing Profile (Radar)":
             self._plot_swing_radar(fig)
 
-    def _plot_poincare(self, fig: object) -> None:
+    def _plot_poincare(self, fig: Any) -> None:
         """Render Poincare map plot."""
         self.plotter.plot_poincare_map_3d(
             fig,
@@ -330,7 +332,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             title="Poincaré Map (Joint 0)",
         )
 
-    def _plot_recurrence(self, fig: object) -> None:
+    def _plot_recurrence(self, fig: Any) -> None:
         """Render recurrence plot from recorded data."""
         times, positions = self.recorder.get_time_series("joint_positions")
         _, velocities = self.recorder.get_time_series("joint_velocities")
@@ -346,7 +348,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         else:
             raise ValueError("No data available")
 
-    def _plot_kinematic_sequence(self, fig: object) -> None:
+    def _plot_kinematic_sequence(self, fig: Any) -> None:
         """Render kinematic sequence bar chart."""
         _, vels = self.recorder.get_time_series("joint_velocities")
         vels = np.asarray(vels)
@@ -363,7 +365,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             indices = {f"Joint {i}": i for i in range(n_joints)}
         self.plotter.plot_kinematic_sequence_bars(fig, indices)
 
-    def _plot_swing_radar(self, fig: object) -> None:
+    def _plot_swing_radar(self, fig: Any) -> None:
         """Render swing profile radar chart."""
         times, positions = self.recorder.get_time_series("joint_positions")
         _, velocities = self.recorder.get_time_series("joint_velocities")

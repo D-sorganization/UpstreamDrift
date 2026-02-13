@@ -1398,6 +1398,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 self.meshcat.Delete("overlays/vectors/cf")
 
     def _sync_eval_context(self) -> None:
+        assert self.plant is not None
         plant_context = self.plant.GetMyContextFromRoot(self.context)
         self.plant.SetPositions(
             self.eval_context, self.plant.GetPositions(plant_context)
@@ -1407,10 +1408,12 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         )
 
     def _draw_torque_vectors(self) -> None:
+        assert self.plant is not None
         tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)
         self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
 
     def _draw_gravity_force_vectors(self) -> None:
+        assert self.plant is not None
         for i in range(self.plant.num_bodies()):
             body = self.plant.get_body(BodyIndex(i))
             if body.name() == "world":
@@ -1436,6 +1439,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
                 self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))  # type: ignore[arg-type]  # pydrake Meshcat overload
 
     def _resolve_induced_accels(self, analyzer, source):
+        assert self.plant is not None
         accels = np.zeros(self.plant.num_velocities())
 
         if source in ["gravity", "velocity", "total"]:
@@ -1471,6 +1475,7 @@ class DrakeSimApp(SimulationGUIBase):  # type: ignore[misc, no-any-unimported]
         self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
     def _draw_counterfactual_vectors(self, analyzer) -> None:
+        assert self.plant is not None
         cf_type = self.combo_cf_type.currentText()
         res = analyzer.compute_counterfactuals(self.eval_context)
 

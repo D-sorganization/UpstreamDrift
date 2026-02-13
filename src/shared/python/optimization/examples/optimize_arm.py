@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from typing import Any
 
 import numpy as np
 
@@ -32,7 +33,7 @@ def _load_model(urdf_path: str) -> object:
     return model
 
 
-def _setup_optimization(model: object, cmodel: object, cdata: object) -> tuple:
+def _setup_optimization(model: Any, cmodel: Any, cdata: Any) -> tuple:
     """Create optimizer, decision variables, and apply dynamics constraints.
 
     Returns:
@@ -74,7 +75,7 @@ def _setup_optimization(model: object, cmodel: object, cdata: object) -> tuple:
     return opti, Q, V, U, dt
 
 
-def _solve_and_export(opti: object, Q: object, V: object, U: object) -> None:
+def _solve_and_export(opti: Any, Q: Any, V: Any, U: Any) -> None:
     """Solve the optimization and save trajectory results."""
     p_opts = {"expand": True}
     s_opts = {"max_iter": 1000, "print_level": 5}

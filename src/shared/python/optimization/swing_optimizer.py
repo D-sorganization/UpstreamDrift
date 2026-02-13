@@ -24,7 +24,7 @@ References:
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 from scipy import optimize
@@ -361,7 +361,7 @@ class SwingOptimizer(ContractChecker):
         self,
         x0: np.ndarray,
         callback: Callable[[int, float], None] | None,
-    ) -> tuple[optimize.OptimizeResult, int]:
+    ) -> tuple[Any, int]:
         """Execute the scipy minimization and return raw result + iterations."""
         bounds = self._get_bounds()
         constraints = self._build_constraints()
@@ -393,7 +393,7 @@ class SwingOptimizer(ContractChecker):
 
     def _build_success_result(
         self,
-        result: optimize.OptimizeResult,
+        result: Any,
         iterations: int,
         computation_time: float,
     ) -> OptimizationResult:
@@ -420,7 +420,7 @@ class SwingOptimizer(ContractChecker):
 
     @staticmethod
     def _build_failure_result(
-        result: optimize.OptimizeResult,
+        result: Any,
         iterations: int,
         computation_time: float,
     ) -> OptimizationResult:
