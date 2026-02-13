@@ -18,6 +18,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.robotics.core.protocols import HumanoidCapable, RoboticsCapable
+from src.shared.python.core.constants import GRAVITY as _GRAVITY_CONST
 from src.shared.python.core.contracts import ContractChecker
 
 
@@ -69,7 +70,7 @@ class ZMPComputer(ContractChecker):
         ...     print(f"ZMP at {result.zmp_position[:2]}")
     """
 
-    GRAVITY = 9.81  # m/s² — see also src.engines.common.physics.GRAVITY_APPROX
+    GRAVITY = _GRAVITY_CONST
 
     def __init__(
         self,
