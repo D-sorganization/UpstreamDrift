@@ -2,6 +2,8 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 
 if DRAKE_AVAILABLE:
@@ -63,6 +65,25 @@ with patch.dict(sys.modules, _pydrake_mocks):
     # Remove the mock-backed engine module to prevent pollution during
     # integration tests that run before this file's tests.
     sys.modules.pop(_ENGINE_MOD_NAME, None)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_drake_module_state():
+    """Prevent module-level Drake mocks from leaking across tests."""
+    engine_before = sys.modules.get(_ENGINE_MOD_NAME)
+    pydrake_before = {key: sys.modules.get(key) for key in _PYDRAKE_KEYS}
+    yield
+
+    if engine_before is None:
+        sys.modules.pop(_ENGINE_MOD_NAME, None)
+    else:
+        sys.modules[_ENGINE_MOD_NAME] = engine_before
+
+    for key, value in pydrake_before.items():
+        if value is None:
+            sys.modules.pop(key, None)
+        else:
+            sys.modules[key] = value
 
 
 class TestDrakeWrapper(unittest.TestCase):
