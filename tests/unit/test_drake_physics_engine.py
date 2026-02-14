@@ -1,3 +1,4 @@
+import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -11,6 +12,18 @@ from src.shared.python.engine_core.engine_availability import (
 # Skip entire module if Drake is not installed - mocking pydrake at module level
 # is unreliable and leads to AttributeError on patched module globals
 pytestmark = skip_if_unavailable("drake")
+
+# Drake engine module paths (both with and without src. prefix) that need cleanup
+_DRAKE_ENGINE_MODULES = [
+    "engines",
+    "engines.physics_engines",
+    "engines.physics_engines.drake",
+    "engines.physics_engines.drake.python",
+    "engines.physics_engines.drake.python.drake_physics_engine",
+    "src.engines.physics_engines.drake",
+    "src.engines.physics_engines.drake.python",
+    "src.engines.physics_engines.drake.python.drake_physics_engine",
+]
 
 if DRAKE_AVAILABLE:
     from pydrake.all import DiagramBuilder, Parser
@@ -40,9 +53,22 @@ class MockPhysicsEngine:
     pass
 
 
+def _cleanup_drake_modules():
+    """Clean up drake engine modules to prevent pollution of other tests."""
+    for module_name in _DRAKE_ENGINE_MODULES:
+        sys.modules.pop(module_name, None)
+
+
 @pytest.fixture(autouse=True, scope="module")
 def mock_drake_dependencies():
-    """Fixture to mock pydrake and interfaces safely for the duration of this module."""
+    """Fixture to mock pydrake and interfaces safely for the duration of this module.
+
+    Also cleanup drake engine modules after all tests to prevent pollution of
+    test_drake_wrapper.py. When drake_physics_engine is imported, it pollutes
+    sys.modules with parent packages. Then test_drake_wrapper.py fails when trying
+    to patch src.engines.physics_engines.drake.python.drake_physics_engine because
+    the parent package exists but drake_physics_engine was imported earlier.
+    """
     mock_pydrake = MagicMock()
     mock_interfaces = MagicMock()
     mock_interfaces.PhysicsEngine = MockPhysicsEngine
@@ -63,6 +89,15 @@ def mock_drake_dependencies():
         },
     ):
         yield mock_pydrake, mock_interfaces
+
+    # Clean up drake engine modules to prevent pollution
+    _cleanup_drake_modules()
+
+
+# Also cleanup at module teardown in case the fixture doesn't run for all test scenarios
+def teardown_module():
+    """Module-level teardown to ensure cleanup happens."""
+    _cleanup_drake_modules()
 
 
 @pytest.fixture(scope="module")

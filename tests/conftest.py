@@ -15,8 +15,13 @@ import pytest
 # Engine module prefixes whose sys.modules entries must be isolated between
 # tests.  Pinocchio's C extension (pinocchio_pywrap_default) is corrupted by
 # PinocchioProbe.probe(); Drake gets replaced with MagicMock objects by tests
-# that mock pydrake, causing downstream TypeError comparisons.
-_PROTECTED_PREFIXES = ("pinocchio", "pydrake")
+# that mock pydrake, causing downstream TypeError comparisons. Drake engine
+# modules also get polluted when imported with different paths (src.engines.*
+# vs engines.*), breaking test_drake_wrapper.py.
+_PROTECTED_PREFIXES = (
+    "pinocchio",
+    "pydrake",
+)
 
 
 def _matches_protected(name: str) -> bool:
