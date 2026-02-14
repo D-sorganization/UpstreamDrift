@@ -56,7 +56,14 @@ from src.shared.python.ai.types import (
     ToolCall,
     ToolResult,
 )
-from src.shared.python.ai.workflow_engine import (
+from src.shared.python.ai.workflow_definitions import (
+    create_c3d_import_workflow,
+    create_cross_engine_validation_workflow,
+    create_drift_control_decomposition_workflow,
+    create_first_analysis_workflow,
+    create_inverse_dynamics_workflow,
+)
+from src.shared.python.ai.workflow_engine import (  # noqa: I001
     RecoveryStrategy,
     StepResult,
     StepStatus,
@@ -65,11 +72,6 @@ from src.shared.python.ai.workflow_engine import (
     WorkflowEngine,
     WorkflowExecution,
     WorkflowStep,
-    create_c3d_import_workflow,
-    create_cross_engine_validation_workflow,
-    create_drift_control_decomposition_workflow,
-    create_first_analysis_workflow,
-    create_inverse_dynamics_workflow,
 )
 
 __all__ = [
