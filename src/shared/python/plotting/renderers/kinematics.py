@@ -44,11 +44,12 @@ class KinematicsRenderer(BaseRenderer):
                 label = self.data.get_aligned_label(idx, positions.shape[1])
                 ax.plot(times, np.rad2deg(positions[:, idx]), label=label, linewidth=2)
 
-        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
-        ax.set_ylabel("Joint Angle (degrees)", fontsize=12, fontweight="bold")
-        ax.set_title("Joint Angles vs Time", fontsize=14, fontweight="bold")
-        ax.legend(loc="best", framealpha=0.9)
-        ax.grid(True, alpha=0.3, linestyle="--")
+        self.format_axis(
+            ax,
+            xlabel="Time (s)",
+            ylabel="Joint Angle (degrees)",
+            title="Joint Angles vs Time",
+        )
         fig.tight_layout()
 
     def plot_joint_velocities(
@@ -83,11 +84,12 @@ class KinematicsRenderer(BaseRenderer):
                 label = self.data.get_aligned_label(idx, velocities.shape[1])
                 ax.plot(times, np.rad2deg(velocities[:, idx]), label=label, linewidth=2)
 
-        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
-        ax.set_ylabel("Angular Velocity (deg/s)", fontsize=12, fontweight="bold")
-        ax.set_title("Joint Velocities vs Time", fontsize=14, fontweight="bold")
-        ax.legend(loc="best", framealpha=0.9)
-        ax.grid(True, alpha=0.3, linestyle="--")
+        self.format_axis(
+            ax,
+            xlabel="Time (s)",
+            ylabel="Angular Velocity (deg/s)",
+            title="Joint Velocities vs Time",
+        )
         fig.tight_layout()
 
     def plot_angle_angle_diagram(
@@ -145,13 +147,12 @@ class KinematicsRenderer(BaseRenderer):
         name1 = self.data.get_joint_name(joint_idx_1)
         name2 = self.data.get_joint_name(joint_idx_2)
 
-        ax.set_xlabel(f"{name1} Angle (deg)", fontsize=12, fontweight="bold")
-        ax.set_ylabel(f"{name2} Angle (deg)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            title or f"Coordination: {name1} vs {name2}", fontsize=14, fontweight="bold"
+        self.format_axis(
+            ax,
+            xlabel=f"{name1} Angle (deg)",
+            ylabel=f"{name2} Angle (deg)",
+            title=title or f"Coordination: {name1} vs {name2}",
         )
-        ax.legend(loc="best")
-        ax.grid(True, alpha=0.3, linestyle="--")
         fig.colorbar(sc, ax=ax, label="Time (s)")
         fig.tight_layout()
 
@@ -204,11 +205,12 @@ class KinematicsRenderer(BaseRenderer):
         )
 
         joint_name = self.data.get_joint_name(joint_idx)
-        ax.set_xlabel(f"{joint_name} Angle (degrees)", fontsize=12, fontweight="bold")
-        ax.set_ylabel(f"{joint_name} Velocity (deg/s)", fontsize=12, fontweight="bold")
-        ax.set_title(f"Phase Diagram: {joint_name}", fontsize=14, fontweight="bold")
-        ax.legend(loc="best")
-        ax.grid(True, alpha=0.3, linestyle="--")
+        self.format_axis(
+            ax,
+            xlabel=f"{joint_name} Angle (degrees)",
+            ylabel=f"{joint_name} Velocity (deg/s)",
+            title=f"Phase Diagram: {joint_name}",
+        )
         fig.colorbar(sc, ax=ax, label="Time (s)")
         fig.tight_layout()
 
@@ -566,10 +568,12 @@ class KinematicsRenderer(BaseRenderer):
         )
 
         joint_name = self.data.get_joint_name(joint_idx)
-        ax.set_xlabel(f"{joint_name} Angle (deg)", fontsize=12, fontweight="bold")
-        ax.set_ylabel(f"{joint_name} Velocity (deg/s)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            f"Phase Space Density: {joint_name}", fontsize=14, fontweight="bold"
+        self.format_axis(
+            ax,
+            xlabel=f"{joint_name} Angle (deg)",
+            ylabel=f"{joint_name} Velocity (deg/s)",
+            title=f"Phase Space Density: {joint_name}",
+            legend=False,
         )
 
         fig.colorbar(h[3], ax=ax, label="Count")
