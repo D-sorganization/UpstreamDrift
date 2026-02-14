@@ -232,12 +232,8 @@ class FootstepPlanner(ContractChecker):
         self._nominal_width = parameters.step_width
 
     @precondition(
-        lambda self,
-        start,
-        goal,
-        start_yaw=0.0,
-        goal_yaw=None,
-        start_foot="left": start_foot in ("left", "right"),
+        lambda self, start, goal, start_yaw=0.0, goal_yaw=None, start_foot="left": start_foot
+        in ("left", "right"),
         "start_foot must be 'left' or 'right'",
     )
     def plan_to_goal(
@@ -301,21 +297,13 @@ class FootstepPlanner(ContractChecker):
         )
 
     @precondition(
-        lambda self,
-        current_position,
-        current_yaw,
-        velocity_command,
-        n_steps=4,
-        start_foot="left": n_steps > 0,
+        lambda self, current_position, current_yaw, velocity_command, n_steps=4, start_foot="left": n_steps
+        > 0,
         "Number of steps must be positive",
     )
     @precondition(
-        lambda self,
-        current_position,
-        current_yaw,
-        velocity_command,
-        n_steps=4,
-        start_foot="left": start_foot in ("left", "right"),
+        lambda self, current_position, current_yaw, velocity_command, n_steps=4, start_foot="left": start_foot
+        in ("left", "right"),
         "start_foot must be 'left' or 'right'",
     )
     def plan_from_velocity(
@@ -411,11 +399,8 @@ class FootstepPlanner(ContractChecker):
         return np.array([pos[0] + offset_x, pos[1] + offset_y, pos[2]])
 
     @precondition(
-        lambda self,
-        current_position,
-        current_yaw,
-        target_yaw,
-        start_foot="left": start_foot in ("left", "right"),
+        lambda self, current_position, current_yaw, target_yaw, start_foot="left": start_foot
+        in ("left", "right"),
         "start_foot must be 'left' or 'right'",
     )
     def plan_in_place_turn(

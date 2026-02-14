@@ -2,8 +2,8 @@
 
 import math
 from enum import Enum
-import defusedxml.ElementTree as ET
 
+import defusedxml.ElementTree as ET
 import defusedxml.minidom as minidom
 import numpy as np
 

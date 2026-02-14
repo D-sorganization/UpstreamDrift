@@ -222,9 +222,9 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=4)
 
         # VAF should be high
-        assert result.vaf > 0.80, (
-            "High number of synergies should give good reconstruction"
-        )
+        assert (
+            result.vaf > 0.80
+        ), "High number of synergies should give good reconstruction"
 
         # Reconstruction shape should match data
         assert result.reconstructed.shape == data.shape
@@ -298,9 +298,9 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=1)
 
         # VAF should be very high (near perfect reconstruction)
-        assert result.vaf > 0.98, (
-            f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
-        )
+        assert (
+            result.vaf > 0.98
+        ), f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
 
 
 @skip_if_unavailable("sklearn")
@@ -573,6 +573,6 @@ class TestNumericalAccuracy:
         result = analyzer.extract_synergies(n_synergies=n_muscles)
 
         # VAF should be very high (near 1.0)
-        assert result.vaf > 0.95, (
-            f"VAF with {n_muscles} synergies should be > 0.95, got {result.vaf}"
-        )
+        assert (
+            result.vaf > 0.95
+        ), f"VAF with {n_muscles} synergies should be > 0.95, got {result.vaf}"
