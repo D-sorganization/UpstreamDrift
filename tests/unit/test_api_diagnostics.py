@@ -329,7 +329,6 @@ def client() -> Generator[TestClient, None, None]:
         pytest.skip("local_server not available")
 
 
-
 class TestLocalServerDiagnostics:
     """Integration tests for local_server diagnostic endpoints."""
 
