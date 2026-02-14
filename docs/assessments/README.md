@@ -1,5 +1,15 @@
 # Assessment Framework v2.0
 
+## Canonical Assessment Taxonomy
+
+- Active framework index: `docs/assessments/README.md` (this file)
+- Archived/historical assessments: `docs/archive/` and `docs/assessments/archive/`
+- Generated debt inventory: `docs/technical_debt/TODO_FIXME_REGISTER.md`
+
+When adding or moving assessment artifacts, update this README in the same PR.
+
+---
+
 ## Overview
 
 This document defines the comprehensive 16-point assessment framework (A-O + Highlight) for evaluating repository health, user experience, and production readiness.
