@@ -315,21 +315,23 @@ class TestAPIDiagnosticsPerformance:
             assert elapsed < 2.0, f"{result.name} took too long: {elapsed:.2f}s"
 
 
+# Module-level fixture for TestLocalServerDiagnostics
+@pytest.fixture
+def client() -> Generator[TestClient, None, None]:
+    """Create test client for local server."""
+    try:
+        from src.api.local_server import create_local_app
+
+        app = create_local_app()
+        with TestClient(app, base_url="http://localhost") as test_client:
+            yield test_client
+    except ImportError:
+        pytest.skip("local_server not available")
+
+
 # Integration test with local_server
 class TestLocalServerDiagnostics:
     """Integration tests for local_server diagnostic endpoints."""
-
-    @pytest.fixture
-    def client(self) -> Generator[TestClient, None, None]:
-        """Create test client for local server."""
-        try:
-            from src.api.local_server import create_local_app
-
-            app = create_local_app()
-            with TestClient(app, base_url="http://localhost") as test_client:
-                yield test_client
-        except ImportError:
-            pytest.skip("local_server not available")
 
     def test_diagnostics_endpoint_json(self, client: TestClient) -> None:
         """Test /api/diagnostics returns JSON."""
