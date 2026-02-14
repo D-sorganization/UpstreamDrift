@@ -80,24 +80,25 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 
 ## Assessment Prompt Index
 
-| Assessment | Prompt File                      | Results Template                     |
-| ---------- | -------------------------------- | ------------------------------------ |
-| A          | `Assessment_Prompt_A.md`         | `Assessment_A_Results_YYYY-MM-DD.md` |
-| B          | `Assessment_Prompt_B.md`         | `Assessment_B_Results_YYYY-MM-DD.md` |
-| C          | `Assessment_Prompt_C.md`         | `Assessment_C_Results_YYYY-MM-DD.md` |
-| D          | `Assessment_Prompt_D.md`         | `Assessment_D_Results_YYYY-MM-DD.md` |
-| E          | `Assessment_Prompt_E.md`         | `Assessment_E_Results_YYYY-MM-DD.md` |
-| F          | `Assessment_Prompt_F.md`         | `Assessment_F_Results_YYYY-MM-DD.md` |
-| G          | `Assessment_Prompt_G.md`         | `Assessment_G_Results_YYYY-MM-DD.md` |
-| H          | `Assessment_Prompt_H.md`         | `Assessment_H_Results_YYYY-MM-DD.md` |
-| I          | `Assessment_Prompt_I.md`         | `Assessment_I_Results_YYYY-MM-DD.md` |
-| J          | `Assessment_Prompt_J.md`         | `Assessment_J_Results_YYYY-MM-DD.md` |
-| K          | `Assessment_Prompt_K.md`         | `Assessment_K_Results_YYYY-MM-DD.md` |
-| L          | `Assessment_Prompt_L.md`         | `Assessment_L_Results_YYYY-MM-DD.md` |
-| M          | `Assessment_Prompt_M.md`         | `Assessment_M_Results_YYYY-MM-DD.md` |
-| N          | `Assessment_Prompt_N.md`         | `Assessment_N_Results_YYYY-MM-DD.md` |
-| O          | `Assessment_Prompt_O.md`         | `Assessment_O_Results_YYYY-MM-DD.md` |
-| Highlight  | `Assessment_Prompt_Highlight.md` | `Assessment_Highlight_YYYY-MM-DD.md` |
+| Assessment    | Prompt File                      | Results Template                         |
+| ------------- | -------------------------------- | ---------------------------------------- |
+| A             | `Assessment_Prompt_A.md`         | `Assessment_A_Results_YYYY-MM-DD.md`     |
+| B             | `Assessment_Prompt_B.md`         | `Assessment_B_Results_YYYY-MM-DD.md`     |
+| C             | `Assessment_Prompt_C.md`         | `Assessment_C_Results_YYYY-MM-DD.md`     |
+| D             | `Assessment_Prompt_D.md`         | `Assessment_D_Results_YYYY-MM-DD.md`     |
+| E             | `Assessment_Prompt_E.md`         | `Assessment_E_Results_YYYY-MM-DD.md`     |
+| F             | `Assessment_Prompt_F.md`         | `Assessment_F_Results_YYYY-MM-DD.md`     |
+| G             | `Assessment_Prompt_G.md`         | `Assessment_G_Results_YYYY-MM-DD.md`     |
+| H             | `Assessment_Prompt_H.md`         | `Assessment_H_Results_YYYY-MM-DD.md`     |
+| I             | `Assessment_Prompt_I.md`         | `Assessment_I_Results_YYYY-MM-DD.md`     |
+| J             | `Assessment_Prompt_J.md`         | `Assessment_J_Results_YYYY-MM-DD.md`     |
+| K             | `Assessment_Prompt_K.md`         | `Assessment_K_Results_YYYY-MM-DD.md`     |
+| L             | `Assessment_Prompt_L.md`         | `Assessment_L_Results_YYYY-MM-DD.md`     |
+| M             | `Assessment_Prompt_M.md`         | `Assessment_M_Results_YYYY-MM-DD.md`     |
+| N             | `Assessment_Prompt_N.md`         | `Assessment_N_Results_YYYY-MM-DD.md`     |
+| O             | `Assessment_Prompt_O.md`         | `Assessment_O_Results_YYYY-MM-DD.md`     |
+| Highlight     | `Assessment_Prompt_Highlight.md` | `Assessment_Highlight_YYYY-MM-DD.md`     |
+| Comprehensive | N/A (multi-framework)            | `comprehensive_assessment_YYYY-MM-DD.md` |
 
 ---
 
@@ -165,6 +166,7 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 | ------- | ------- | ---------------------------------------------- |
 | 1.0     | 2025-12 | Initial 15-point framework                     |
 | 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis |
+| 2.1     | 2026-02 | Added comprehensive multi-framework assessment |
 
 ---
 
