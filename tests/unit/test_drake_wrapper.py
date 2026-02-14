@@ -73,12 +73,13 @@ def _fix_drake_pollution():
         parent_pkg_name = "src.engines.physics_engines.drake.python"
         if parent_pkg_name in sys.modules:
             parent_pkg = sys.modules[parent_pkg_name]
-            setattr(parent_pkg, "drake_physics_engine", _drake_engine_module)
+            parent_pkg.drake_physics_engine = _drake_engine_module
 
     yield
 
     # Cleanup
     sys.modules.pop(_ENGINE_MOD_NAME, None)
+
 
 _pydrake_mocks = {k: MagicMock() for k in _PYDRAKE_KEYS}
 _drake_engine_module = None  # will hold module reference for @patch usage
