@@ -241,7 +241,7 @@ repos:
       - id: pytest-unit
         name: "pytest (Python tests)"
         stages: [pre-push]
-        entry: pytest
+        entry: python3 -m pytest
         args:
           [
             "tests/unit/api",
