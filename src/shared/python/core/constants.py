@@ -6,13 +6,13 @@ Pre-computed float values are provided to avoid repeated conversions.
 
 from pathlib import Path
 
-from .physics_constants import *  # noqa: F403
 from .physics_constants import (
     GOLF_BALL_DIAMETER_M,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_MOMENT_OF_INERTIA_KG_M2,
     GOLF_BALL_RADIUS_M,
     GRAVITY_M_S2,
+    PhysicalConstant,
 )
 
 # Pre-computed float values for commonly used constants
