@@ -14,8 +14,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from xml.etree import ElementTree
 
+import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.shared.python.core.contracts import postcondition, precondition
@@ -210,7 +210,7 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
         ValueError: If the URDF cannot be parsed.
     """
     try:
-        root = ElementTree.fromstring(urdf_content)  # noqa: S314
+        root = ElementTree.fromstring(urdf_content)
     except ElementTree.ParseError as e:
         raise ValueError(f"Invalid URDF XML: {e}") from e
 

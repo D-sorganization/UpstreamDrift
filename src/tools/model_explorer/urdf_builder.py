@@ -2,8 +2,8 @@
 
 import math
 from enum import Enum
-from xml.etree.ElementTree import Element, SubElement, tostring
 
+import defusedxml.ElementTree as ET
 import defusedxml.minidom as minidom
 import numpy as np
 
@@ -209,7 +209,7 @@ class URDFBuilder:
             return self._create_empty_urdf()
 
         # Create root element
-        robot = Element("robot", name=self.robot_name)
+        robot = ET.Element("robot", name=self.robot_name)
 
         # Add materials
         self._add_materials(robot)
@@ -218,7 +218,7 @@ class URDFBuilder:
         self._add_links_and_joints(robot)
 
         # Pretty print the XML
-        rough_string = tostring(robot, encoding="unicode")
+        rough_string = ET.tostring(robot, encoding="unicode")
         reparsed = minidom.parseString(rough_string)
         return str(reparsed.toprettyxml(indent="  "))
 
@@ -228,33 +228,33 @@ class URDFBuilder:
         Returns:
             Empty URDF XML content.
         """
-        robot = Element("robot", name=self.robot_name)
+        robot = ET.Element("robot", name=self.robot_name)
 
         # Add a base link for empty URDF
-        base_link = SubElement(robot, "link", name="base_link")
-        visual = SubElement(base_link, "visual")
-        geometry = SubElement(visual, "geometry")
-        SubElement(geometry, "box", size="0.1 0.1 0.1")
+        base_link = ET.SubElement(robot, "link", name="base_link")
+        visual = ET.SubElement(base_link, "visual")
+        geometry = ET.SubElement(visual, "geometry")
+        ET.SubElement(geometry, "box", size="0.1 0.1 0.1")
 
-        rough_string = tostring(robot, encoding="unicode")
+        rough_string = ET.tostring(robot, encoding="unicode")
         reparsed = minidom.parseString(rough_string)
         return str(reparsed.toprettyxml(indent="  "))
 
-    def _add_materials(self, robot: Element) -> None:
+    def _add_materials(self, robot: ET.Element) -> None:
         """Add material definitions to the URDF.
 
         Args:
             robot: Root robot element.
         """
         for material_name, material_data in self.materials.items():
-            material_elem = SubElement(robot, "material", name=material_name)
+            material_elem = ET.SubElement(robot, "material", name=material_name)
 
             color = material_data.get("color", {})
             if color:
                 color_str = f"{color.get('r', 0.8)} {color.get('g', 0.8)} {color.get('b', 0.8)} {color.get('a', 1.0)}"
-                SubElement(material_elem, "color", rgba=color_str)
+                ET.SubElement(material_elem, "color", rgba=color_str)
 
-    def _add_links_and_joints(self, robot: Element) -> None:
+    def _add_links_and_joints(self, robot: ET.Element) -> None:
         """Add links and joints to the URDF.
 
         Args:
@@ -298,14 +298,14 @@ class URDFBuilder:
 
         return sorted_segments
 
-    def _add_link(self, robot: Element, segment: dict) -> None:
+    def _add_link(self, robot: ET.Element, segment: dict) -> None:
         """Add a link element to the URDF.
 
         Args:
             robot: Root robot element.
             segment: Segment data.
         """
-        link = SubElement(robot, "link", name=segment["name"])
+        link = ET.SubElement(robot, "link", name=segment["name"])
 
         # Add visual
         self._add_visual(link, segment)
@@ -316,65 +316,65 @@ class URDFBuilder:
         # Add inertial
         self._add_inertial(link, segment)
 
-    def _add_visual(self, link: Element, segment: dict) -> None:
+    def _add_visual(self, link: ET.Element, segment: dict) -> None:
         """Add visual element to a link.
 
         Args:
             link: Link element.
             segment: Segment data.
         """
-        visual = SubElement(link, "visual")
+        visual = ET.SubElement(link, "visual")
 
         # Add origin
         self._add_origin(visual, segment["geometry"])
 
         # Add geometry
-        geometry = SubElement(visual, "geometry")
+        geometry = ET.SubElement(visual, "geometry")
         self._add_geometry(geometry, segment["geometry"])
 
         # Add material
         material = segment.get("physics", {}).get("material", {})
         if material.get("name"):
-            SubElement(visual, "material", name=material["name"])
+            ET.SubElement(visual, "material", name=material["name"])
 
-    def _add_collision(self, link: Element, segment: dict) -> None:
+    def _add_collision(self, link: ET.Element, segment: dict) -> None:
         """Add collision element to a link.
 
         Args:
             link: Link element.
             segment: Segment data.
         """
-        collision = SubElement(link, "collision")
+        collision = ET.SubElement(link, "collision")
 
         # Add origin
         self._add_origin(collision, segment["geometry"])
 
         # Add geometry
-        geometry = SubElement(collision, "geometry")
+        geometry = ET.SubElement(collision, "geometry")
         self._add_geometry(geometry, segment["geometry"])
 
-    def _add_inertial(self, link: Element, segment: dict) -> None:
+    def _add_inertial(self, link: ET.Element, segment: dict) -> None:
         """Add inertial element to a link.
 
         Args:
             link: Link element.
             segment: Segment data.
         """
-        inertial = SubElement(link, "inertial")
+        inertial = ET.SubElement(link, "inertial")
 
         # Add origin (center of mass)
-        origin = SubElement(inertial, "origin")
+        origin = ET.SubElement(inertial, "origin")
         origin.set("xyz", "0 0 0")
         origin.set("rpy", "0 0 0")
 
         # Add mass
         physics = segment.get("physics", {})
         mass_value = physics.get("mass", 1.0)
-        SubElement(inertial, "mass", value=str(mass_value))
+        ET.SubElement(inertial, "mass", value=str(mass_value))
 
         # Add inertia
         inertia_data = physics.get("inertia", {})
-        inertia = SubElement(inertial, "inertia")
+        inertia = ET.SubElement(inertial, "inertia")
         inertia.set("ixx", str(inertia_data.get("ixx", 0.1)))
         inertia.set("ixy", "0")
         inertia.set("ixz", "0")
@@ -382,7 +382,7 @@ class URDFBuilder:
         inertia.set("iyz", "0")
         inertia.set("izz", str(inertia_data.get("izz", 0.1)))
 
-    def _add_origin(self, parent: Element, geometry: dict) -> None:
+    def _add_origin(self, parent: ET.Element, geometry: dict) -> None:
         """Add origin element.
 
         Args:
@@ -400,11 +400,11 @@ class URDFBuilder:
         yaw = math.radians(orientation.get("yaw", 0))
         rpy = f"{roll} {pitch} {yaw}"
 
-        origin = SubElement(parent, "origin")
+        origin = ET.SubElement(parent, "origin")
         origin.set("xyz", xyz)
         origin.set("rpy", rpy)
 
-    def _add_geometry(self, geometry: Element, geom_data: dict) -> None:
+    def _add_geometry(self, geometry: ET.Element, geom_data: dict) -> None:
         """Add geometry element.
 
         Args:
@@ -416,28 +416,28 @@ class URDFBuilder:
 
         if shape == "box":
             size = f"{dimensions.get('length', 1.0)} {dimensions.get('width', 0.1)} {dimensions.get('height', 0.1)}"
-            SubElement(geometry, "box", size=size)
+            ET.SubElement(geometry, "box", size=size)
         elif shape == "cylinder":
             radius = dimensions.get("width", 0.1) / 2  # Use width as diameter
             length = dimensions.get("length", 1.0)
-            cylinder = SubElement(geometry, "cylinder")
+            cylinder = ET.SubElement(geometry, "cylinder")
             cylinder.set("radius", str(radius))
             cylinder.set("length", str(length))
         elif shape == "sphere":
             radius = dimensions.get("length", 0.1) / 2  # Use length as diameter
-            SubElement(geometry, "sphere", radius=str(radius))
+            ET.SubElement(geometry, "sphere", radius=str(radius))
         elif shape == "capsule":
             radius = dimensions.get("width", 0.1) / 2
             length = dimensions.get("length", 1.0)
-            capsule = SubElement(geometry, "capsule")
+            capsule = ET.SubElement(geometry, "capsule")
             capsule.set("radius", str(radius))
             capsule.set("length", str(length))
         else:
             # Default to box
             size = f"{dimensions.get('length', 1.0)} {dimensions.get('width', 0.1)} {dimensions.get('height', 0.1)}"
-            SubElement(geometry, "box", size=size)
+            ET.SubElement(geometry, "box", size=size)
 
-    def _add_joint(self, robot: Element, segment: dict) -> None:
+    def _add_joint(self, robot: ET.Element, segment: dict) -> None:
         """Add a joint element to the URDF.
 
         Args:
@@ -448,11 +448,11 @@ class URDFBuilder:
         joint_data = segment.get("joint", {})
         joint_type = joint_data.get("type", "fixed")
 
-        joint = SubElement(robot, "joint", name=joint_name, type=joint_type)
+        joint = ET.SubElement(robot, "joint", name=joint_name, type=joint_type)
 
         # Add parent and child
-        SubElement(joint, "parent", link=segment["parent"])
-        SubElement(joint, "child", link=segment["name"])
+        ET.SubElement(joint, "parent", link=segment["parent"])
+        ET.SubElement(joint, "child", link=segment["name"])
 
         # Add origin
         self._add_origin(joint, segment["geometry"])
@@ -461,12 +461,12 @@ class URDFBuilder:
         if joint_type in ["revolute", "prismatic", "continuous"]:
             axis_data = joint_data.get("axis", {})
             axis_str = f"{axis_data.get('x', 0)} {axis_data.get('y', 0)} {axis_data.get('z', 1)}"
-            SubElement(joint, "axis", xyz=axis_str)
+            ET.SubElement(joint, "axis", xyz=axis_str)
 
         # Add limits for revolute/prismatic joints
         if joint_type in ["revolute", "prismatic"]:
             limits = joint_data.get("limits", {})
-            limit_elem = SubElement(joint, "limit")
+            limit_elem = ET.SubElement(joint, "limit")
 
             if joint_type == "revolute":
                 # Convert degrees to radians
