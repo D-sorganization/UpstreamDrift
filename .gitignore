@@ -105,3 +105,8 @@ pr_list.json
 review_comments.json
 !.jules/sentinel.md
 .hypothesis/
+
+# Stale pip/CI artifacts
+launch_status.txt
+test_output.txt
+=*

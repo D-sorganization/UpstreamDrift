@@ -28,7 +28,7 @@ class UIBuildHook(BuildHookInterface):
             return
 
         if not dist_dir.exists() or self.config.get("force_ui_build"):
-            print("Building UI...")
+            logger.info("Building UI...")
 
             # Check if npm is available
             npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
@@ -52,17 +52,17 @@ class UIBuildHook(BuildHookInterface):
                     capture_output=True,
                     text=True,
                 )
-                print(f"UI built successfully to {dist_dir}")
+                logger.info("UI built successfully to %s", dist_dir)
 
             except FileNotFoundError:
                 msg = "npm not found. Please install Node.js to build the UI."
-                print(f"Error: {msg}")
+                logger.error("Error: %s", msg)
                 raise RuntimeError(msg) from None
 
             except subprocess.CalledProcessError as e:
                 msg = f"UI build failed: {e.stderr or e.stdout or str(e)}"
-                print(f"Error: {msg}")
+                logger.error("Error: %s", msg)
                 raise RuntimeError(msg) from e
 
         else:
-            print(f"Using existing UI build at {dist_dir}")
+            logger.info("Using existing UI build at %s", dist_dir)
