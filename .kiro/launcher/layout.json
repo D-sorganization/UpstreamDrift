@@ -1,14 +1,9 @@
 {
-  "model_order": [
-    "drake_golf",
-    "pinocchio_golf",
-    "opensim_golf",
-    "myosim_suite"
-  ],
-  "selected_model": "pinocchio_golf",
+  "model_order": ["model_2", "model_1", "model_0", "model_3"],
+  "selected_model": null,
   "window_geometry": {
     "x": 0,
-    "y": 19,
+    "y": 50,
     "width": 1920,
     "height": 1009
   },
