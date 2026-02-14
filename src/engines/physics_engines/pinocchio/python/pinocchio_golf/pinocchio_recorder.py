@@ -1,20 +1,19 @@
-"""Pinocchio simulation recorder and utility classes.
+"""Pinocchio simulation recording and data export.
 
-Extracted from gui.py to reduce monolith size.
+Contains PinocchioRecorder for capturing simulation data
+and exporting it for analysis.
 """
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
-from PyQt6 import QtWidgets  # noqa: F401
 
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
-from src.shared.python.ui.widgets import LogPanel, SignalBlocker
 
-# Re-export for backward compatibility
-__all__ = ["LogPanel", "PinocchioRecorder", "SignalBlocker"]
+logger = logging.getLogger(__name__)
 
 
 class PinocchioRecorder:
@@ -100,6 +99,7 @@ class PinocchioRecorder:
         if field_name == "ztcf_accel":
             return self.get_counterfactual_series("ztcf_accel")
         if field_name == "zvcf_accel":
+            # Assuming torque is stored here for now or adapt
             return self.get_counterfactual_series("zvcf_torque")
 
         values = [getattr(f, field_name, None) for f in self.frames]
@@ -134,10 +134,13 @@ class PinocchioRecorder:
         times = []
         values = []
 
+        # Map int index to key if possible (unlikely for Pinocchio basic)
         key = str(source_name)
 
         for f in self.frames:
             val = f.induced_accelerations.get(key)
+            # Try int key if str fails - convert int to string key since
+            # dict keys are stored as strings by convention
             if val is None and isinstance(source_name, int):
                 val = f.induced_accelerations.get(str(source_name))
 
