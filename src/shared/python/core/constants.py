@@ -6,6 +6,7 @@ Pre-computed float values are provided to avoid repeated conversions.
 
 from pathlib import Path
 
+from . import physics_constants as _physics_constants
 from .physics_constants import (
     GOLF_BALL_DIAMETER_M,
     GOLF_BALL_MASS_KG,
@@ -14,6 +15,14 @@ from .physics_constants import (
     GRAVITY_M_S2,
     PhysicalConstant,
 )
+
+# Backward compatibility: re-export physics constants from canonical module.
+__all__ = getattr(
+    _physics_constants,
+    "__all__",
+    [name for name in dir(_physics_constants) if not name.startswith("_")],
+)
+globals().update({name: getattr(_physics_constants, name) for name in __all__})
 
 # Pre-computed float values for commonly used constants
 # (Avoids repeated float() conversions from PhysicalConstant in multiple modules)
