@@ -360,9 +360,9 @@ class TestMakeHumanAvailability:
         gen = MakeHumanMeshGenerator(makehuman_path=mh_dir)
         assert gen.is_available is True
 
-    def test_returns_error_when_unavailable(self) -> None:
+    def test_returns_error_when_unavailable(self, tmp_path: Path) -> None:
         gen = MakeHumanMeshGenerator(makehuman_path="/nonexistent")
-        result = gen.generate(_default_params(), Path("/tmp/out"))
+        result = gen.generate(_default_params(), tmp_path / "out")
         assert result.success is False
         assert "not found" in result.error_message.lower()
 
@@ -431,8 +431,8 @@ class TestMakeHumanScriptGeneration:
         }
         script = MakeHumanMeshGenerator._build_mh_script(
             modifiers,
-            Path("/tmp/body.obj"),
-            Path("/tmp/groups.json"),
+            Path("body.obj"),
+            Path("groups.json"),
         )
         assert "macrodetails/Gender" in script
         assert "macrodetails/Age" in script
@@ -592,7 +592,7 @@ class TestGeneratedMeshResult:
     def test_successful_result(self) -> None:
         result = GeneratedMeshResult(
             success=True,
-            mesh_paths={"head": Path("/tmp/head.stl")},
+            mesh_paths={"head": Path("head.stl")},
         )
         assert result.success is True
         assert result.error_message is None
