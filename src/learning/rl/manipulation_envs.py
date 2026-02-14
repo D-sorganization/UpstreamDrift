@@ -452,9 +452,9 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         reward = 0.0
 
         obj_pos = self._get_object_position()
-        assert (
-            self.task_config.target_position is not None
-        ), "target_position must be set"
+        assert self.task_config.target_position is not None, (
+            "target_position must be set"
+        )
         target_pos = self.task_config.target_position
 
         # Coordination reward: both arms approaching object
@@ -532,9 +532,9 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         info["right_grasped"] = self._right_grasped
         info["object_lifted"] = self._object_lifted
         info["object_position"] = obj_pos.tolist()
-        assert (
-            self.task_config.target_position is not None
-        ), "target_position must be set"
+        assert self.task_config.target_position is not None, (
+            "target_position must be set"
+        )
         info["distance_to_target"] = float(
             np.linalg.norm(obj_pos - self.task_config.target_position)
         )
