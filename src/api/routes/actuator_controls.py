@@ -12,7 +12,7 @@ No module-level mutable state.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -43,9 +43,10 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
         List of actuator descriptors.
     """
     actuators: list[ActuatorInfo] = []
+    manager_any = cast(Any, engine_manager)
 
     try:
-        engine = engine_manager.get_active_engine()  # type: ignore[attr-defined]
+        engine = manager_any.get_active_engine()
     except (AttributeError, RuntimeError):
         return _demo_actuators()
 
@@ -155,7 +156,7 @@ async def get_actuator_panel(
 
         engine_name = "none"
         try:
-            active = engine_manager.get_active_engine()
+            active = cast(Any, engine_manager).get_active_engine()
             if active and hasattr(active, "engine_type"):
                 engine_name = str(active.engine_type)
             elif active:
