@@ -567,12 +567,18 @@ async def control_recording(
         if frame_count > 0:
             import json
             import tempfile
+            from pathlib import Path
 
-            export_path = tempfile.mktemp(suffix=f".{request.export_format}")
-            with open(export_path, "w", encoding="utf-8") as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=f".{request.export_format}",
+                delete=False,
+                encoding="utf-8",
+            ) as tmp_file:
+                export_path = str(Path(tmp_file.name))
                 json.dump(
                     {"frames": recorded, "format": request.export_format},
-                    f,
+                    tmp_file,
                     indent=2,
                 )
             if logger:
