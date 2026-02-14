@@ -41,6 +41,8 @@ if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
 
 router = APIRouter()
+_CONTROL_INTERFACE_CACHE: dict[int, Any] = {}
+_FEATURES_REGISTRY_CACHE: dict[int, Any] = {}
 
 # Module-level state is stored in app.state via dependency injection.
 # These defaults are used when no simulation state exists yet.
@@ -93,14 +95,15 @@ def _get_control_interface(
         return None
 
     # Check if we already have a cached control interface
-    if hasattr(engine_manager, "_control_interface"):
-        return engine_manager._control_interface
+    cache_key = id(engine_manager)
+    if cache_key in _CONTROL_INTERFACE_CACHE:
+        return _CONTROL_INTERFACE_CACHE[cache_key]
 
     try:
         from src.shared.python.control_interface import ControlInterface
 
         ctrl = ControlInterface(engine)
-        engine_manager._control_interface = ctrl  # type: ignore[attr-defined]
+        _CONTROL_INTERFACE_CACHE[cache_key] = ctrl
         return ctrl
     except ImportError:
         return None
@@ -122,8 +125,9 @@ def _get_features_registry(
     if engine is None:
         return None
 
-    if hasattr(engine_manager, "_features_registry"):
-        return engine_manager._features_registry
+    cache_key = id(engine_manager)
+    if cache_key in _FEATURES_REGISTRY_CACHE:
+        return _FEATURES_REGISTRY_CACHE[cache_key]
 
     try:
         from src.shared.python.control_features_registry import (
@@ -131,7 +135,7 @@ def _get_features_registry(
         )
 
         registry = ControlFeaturesRegistry(engine)
-        engine_manager._features_registry = registry  # type: ignore[attr-defined]
+        _FEATURES_REGISTRY_CACHE[cache_key] = registry
         return registry
     except ImportError:
         return None

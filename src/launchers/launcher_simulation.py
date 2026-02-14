@@ -91,7 +91,7 @@ except ImportError as e:
     print(f"ImportError: {{e}}")
 except OSError as e:
     print(f"OSError: {{e}}")
-except ImportError as e:
+except Exception as e:
     print(f"Error: {{type(e).__name__}}: {{e}}")
 """
         try:
