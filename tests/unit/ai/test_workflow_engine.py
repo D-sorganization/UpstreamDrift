@@ -7,13 +7,15 @@ import pytest
 from src.shared.python.ai.exceptions import WorkflowError
 from src.shared.python.ai.tool_registry import ToolRegistry
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
+from src.shared.python.ai.workflow_definitions import (
+    create_first_analysis_workflow,
+)
 from src.shared.python.ai.workflow_engine import (
     RecoveryStrategy,
     StepStatus,
     Workflow,
     WorkflowEngine,
     WorkflowStep,
-    create_first_analysis_workflow,
 )
 
 
@@ -281,7 +283,7 @@ class TestC3DImportWorkflow:
 
     def test_workflow_creation(self) -> None:
         """Test creating the c3d_import workflow."""
-        from src.shared.python.ai.workflow_engine import create_c3d_import_workflow
+        from src.shared.python.ai.workflow_definitions import create_c3d_import_workflow
 
         workflow = create_c3d_import_workflow()
         assert workflow.id == "c3d_import"
@@ -291,7 +293,7 @@ class TestC3DImportWorkflow:
 
     def test_workflow_steps(self) -> None:
         """Test that workflow has expected steps."""
-        from src.shared.python.ai.workflow_engine import create_c3d_import_workflow
+        from src.shared.python.ai.workflow_definitions import create_c3d_import_workflow
 
         workflow = create_c3d_import_workflow()
         step_ids = [s.id for s in workflow.steps]
@@ -306,7 +308,7 @@ class TestInverseDynamicsWorkflow:
 
     def test_workflow_creation(self) -> None:
         """Test creating the inverse_dynamics workflow."""
-        from src.shared.python.ai.workflow_engine import (
+        from src.shared.python.ai.workflow_definitions import (
             create_inverse_dynamics_workflow,
         )
 
@@ -318,7 +320,7 @@ class TestInverseDynamicsWorkflow:
 
     def test_workflow_has_educational_content(self) -> None:
         """Test that steps have educational content."""
-        from src.shared.python.ai.workflow_engine import (
+        from src.shared.python.ai.workflow_definitions import (
             create_inverse_dynamics_workflow,
         )
 
@@ -334,7 +336,7 @@ class TestCrossEngineValidationWorkflow:
 
     def test_workflow_creation(self) -> None:
         """Test creating the cross_engine_validation workflow."""
-        from src.shared.python.ai.workflow_engine import (
+        from src.shared.python.ai.workflow_definitions import (
             create_cross_engine_validation_workflow,
         )
 
@@ -346,7 +348,7 @@ class TestCrossEngineValidationWorkflow:
 
     def test_workflow_timeout(self) -> None:
         """Test that validation step has extended timeout."""
-        from src.shared.python.ai.workflow_engine import (
+        from src.shared.python.ai.workflow_definitions import (
             create_cross_engine_validation_workflow,
         )
 
@@ -360,7 +362,7 @@ class TestDriftControlDecompositionWorkflow:
 
     def test_workflow_creation(self) -> None:
         """Test creating the drift_control_decomposition workflow."""
-        from src.shared.python.ai.workflow_engine import (
+        from src.shared.python.ai.workflow_definitions import (
             create_drift_control_decomposition_workflow,
         )
 
@@ -372,7 +374,7 @@ class TestDriftControlDecompositionWorkflow:
 
     def test_workflow_has_expert_content(self) -> None:
         """Test that expert workflow has expert-level content."""
-        from src.shared.python.ai.workflow_engine import (
+        from src.shared.python.ai.workflow_definitions import (
             create_drift_control_decomposition_workflow,
         )
 

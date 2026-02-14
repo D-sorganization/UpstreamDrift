@@ -34,7 +34,9 @@ def test_data_loading() -> dict | None:
 
         return {"baseq": baseq_data, "ztcfq": ztcfq_data, "deltaq": deltaq_data}
 
-    except Exception as e:  # noqa: BLE001 - test helper; data loader may raise various errors
+    except (
+        Exception
+    ) as e:  # noqa: BLE001 - test helper; data loader may raise various errors
         logger.error(f"❌ Data loading failed: {e}")
         return None
 
@@ -69,7 +71,9 @@ def test_gui_launch() -> bool:
             logger.info("❌ No data available for GUI test")
             return False
 
-    except Exception as e:  # noqa: BLE001 - test helper; GUI init may raise various errors
+    except (
+        Exception
+    ) as e:  # noqa: BLE001 - test helper; GUI init may raise various errors
         logger.error(f"❌ GUI launch failed: {e}")
         return False
 
