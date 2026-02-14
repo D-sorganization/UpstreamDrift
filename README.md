@@ -151,21 +151,21 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 - Jacobians and derivatives
 - Constrained systems
 - PINK inverse kinematics
-- **See**: [engines/physics_engines/pinocchio/README.md](engines/physics_engines/pinocchio/README.md)
+- **See**: [src/engines/physics_engines/pinocchio/README.md](src/engines/physics_engines/pinocchio/README.md)
 
 ### OpenSim (Biomechanical Validation)
 
 - Model validation against OpenSim
 - Biomechanical analysis
 - Integration with established workflows
-- **See**: [engines/physics_engines/opensim/README.md](engines/physics_engines/opensim/README.md)
+- **See**: [src/engines/physics_engines/opensim/README.md](src/engines/physics_engines/opensim/README.md)
 
 ### MyoSuite (Muscle Modeling)
 
 - Realistic muscle dynamics
 - 290-muscle full body models
 - MuJoCo-based simulation
-- **See**: [engines/physics_engines/myosuite/README.md](engines/physics_engines/myosuite/README.md)
+- **See**: [src/engines/physics_engines/myosuite/README.md](src/engines/physics_engines/myosuite/README.md)
 
 **See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and use cases**.
 
@@ -196,20 +196,21 @@ UpstreamDrift/
 │   ├── assessments/             # Project reviews and summaries
 │   ├── technical/               # Technical reports
 │   └── api/                     # API documentation
-├── launchers/                    # Unified launch applications
-├── engines/
-│   ├── physics_engines/         # Python physics engines
-│   │   ├── mujoco/             # MuJoCo implementation
-│   │   ├── drake/              # Drake implementation
-│   │   ├── pinocchio/          # Pinocchio implementation
-│   │   ├── opensim/            # OpenSim integration
-│   │   └── myosuite/           # MyoSuite integration
-│   ├── Simscape_Multibody_Models/ # MATLAB/Simulink models
-│   └── pendulum_models/         # Simplified pendulum models
-├── shared/                       # Common utilities and resources
-│   ├── python/                  # Shared Python code
-│   └── data/                    # Shared data and models
-└── tools/                        # Analysis and development tools
+├── src/
+│   ├── launchers/               # Unified launch applications
+│   ├── engines/
+│   │   ├── physics_engines/     # Python physics engines
+│   │   │   ├── mujoco/          # MuJoCo implementation
+│   │   │   ├── drake/           # Drake implementation
+│   │   │   ├── pinocchio/       # Pinocchio implementation
+│   │   │   ├── opensim/         # OpenSim integration
+│   │   │   └── myosuite/        # MyoSuite integration
+│   │   ├── Simscape_Multibody_Models/ # MATLAB/Simulink models
+│   │   └── pendulum_models/     # Simplified pendulum models
+│   ├── shared/                  # Source-level shared code
+│   └── tools/                   # Source-level tools
+├── shared/                      # Shared assets and vendored dependencies
+└── tools/                       # Root-level helper scripts and workflows
 ```
 
 ## Contributing
