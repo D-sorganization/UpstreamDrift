@@ -1,5 +1,14 @@
 # Assessment Framework v2.0
 
+## Canonical Current Quality Status
+
+- Canonical status file: `docs/assessments/CANONICAL_QUALITY_STATUS.md`
+- Archive index: `docs/assessments/archive/INDEX.md`
+
+When assessments are superseded, move old artifacts into `docs/assessments/archive/` and update the archive index.
+
+---
+
 ## Canonical Assessment Taxonomy
 
 - Active framework index: `docs/assessments/README.md` (this file)
