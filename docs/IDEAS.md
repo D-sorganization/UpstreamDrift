@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-02-14
+**Last Updated**: 2026-02-15
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -53,6 +53,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Outcome_: Assessment of joint stability and injury risk.
   - _Ref_: Latash, M. L., & Zatsiorsky, V. M. (1993). "Joint stiffness: Myth or reality?"
 
+- **Grip Pressure Profiling**: Measure the dynamic grip pressure distribution ($P(t)$) at the hands. Grip tension affects wrist mobility (ROM) and clubface control during the release.
+  - _Data Needed_: Pressure sensor grid data mapped to hand segments.
+  - _Outcome_: Identification of tension-induced speed leaks or face control issues.
+  - _Ref_: Komi, E. R., et al. (2008). "Grip force during the golf swing."
+
 ### Injury & Learning
 
 - **Muscle-Tendon Strain Modeling**: Quantify strain in specific high-risk muscle groups (e.g., lead adductor magnus, trailing internal oblique) using Hill-type muscle models to predict acute injury risk beyond generic joint stress.
@@ -63,6 +68,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Stochastic target generation algorithms.
   - _Outcome_: Training protocols that accelerate skill acquisition.
   - _Ref_: Schöllhorn, W. I. (1999). "Individualality of human movements."
+
+- **Quiet Eye Quantification**: Measure the "Quiet Eye" duration (fixation on ball before initiation). Longer fixation durations are strongly correlated with putting success and elite performance.
+  - _Data Needed_: Eye-tracking coordinates $(x,y)$ and event timing.
+  - _Outcome_: Cognitive state assessment and focus training metrics.
+  - _Ref_: Vickers, J. N. (2007). "Perception, Cognition, and Decision Training."
 
 ## 2. Ball Flight Physics
 
@@ -161,6 +171,14 @@ This document serves as the central registry for scientific research topics, tec
   - _Outcome_: Accurate prediction of impact position and dynamic face angle.
   - _Ref_: Mather, J. S. B. (2000). "The role of the shaft in the golf swing."
 
+- **Bulge & Roll Optimization**: Optimize the horizontal (Bulge) and vertical (Roll) radii of the clubface to minimize dispersion for a specific player's impact pattern (Gear Effect compensation).
+  - _Data Needed_: Impact distribution heatmaps and launch conditions.
+  - _Outcome_: Custom face geometry recommendations for "shot correction".
+
+- **Movable Weight Dynamics**: Model the shift in Center of Gravity (CG) and MOI tensor when moving discrete weights (e.g., sliding tracks).
+  - _Data Needed_: Weight mass, track geometry, and base head properties.
+  - _Outcome_: Prediction of shot shape bias (Draw/Fade) and stability changes.
+
 ### Ball & Face Mechanics
 
 - **Multi-Layer Compression Dynamics**: Model the interaction between core, mantle, and cover layers to predict ball speed and spin separation. Finite Element or lumped-parameter modeling of deformation.
@@ -213,6 +231,15 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: High-fidelity 3D golfer meshes and textures.
   - _Outcome_: Robust "Sim2Real" transfer for markerless motion capture.
 
+- **Swing Signature Clustering**: Use Unsupervised Learning (e.g., K-Means, Hierarchical) to group swings into distinct styles (e.g., "Glider", "Spinner", "Launcher") based on kinematic feature vectors.
+  - _Data Needed_: Large database of kinematic sequences.
+  - _Outcome_: Tailored coaching and equipment recommendations based on swing type.
+
+- **Green Reading Algorithms**: Simulate ball rolling physics on non-planar surfaces using localized gravity vectors to calculate the "Aim Point" and effective break.
+  - _Data Needed_: Lidar or photogrammetry point clouds of greens.
+  - _Outcome_: AR overlay of optimal putting lines.
+  - _Ref_: Penner, A. R. (2002). "The physics of putting."
+
 ## 5. Simulation Technology
 
 ### Physics Engine
@@ -234,6 +261,14 @@ This document serves as the central registry for scientific research topics, tec
 - **Neural ODE Surrogate Models**: Train Neural Ordinary Differential Equations (Neural ODEs) to approximate the physics engine's output. This allows for differentiable simulation and drastically faster execution for real-time applications.
   - _Data Needed_: Large dataset of physics engine simulations (Input-Output pairs).
   - _Outcome_: Real-time trajectory prediction on mobile devices.
+
+- **Granular Media (Bunker Physics)**: Implement Discrete Element Method (DEM) or continuum granular models for club-sand interaction.
+  - _Data Needed_: Sand particle size distribution and friction angles.
+  - _Outcome_: Accurate simulation of splash shots and energy dissipation in bunkers.
+
+- **Sensor Fusion (Radar + Optical)**: Combine Doppler Radar (TrackMan) and Optical (Camera) data using Kalman Filtering to resolve discrepancies (e.g., Spin Axis) and improve robustness.
+  - _Data Needed_: Synchronized streams from multiple sensor types with known covariance.
+  - _Outcome_: "Ground Truth" generation from imperfect sensors.
 
 ### Haptics & Immersion
 
@@ -274,3 +309,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-13 | Added Power Flow, Muscle Synergy, Trajectory Opt, Flyer Lie, Rigid Impact, Bayesian, Causal, Neural ODE | All      | Active |
 | 2026-02-13 | Added Muscle Strain, Wet Play, Dimple Opt, Multi-Layer Ball, Fatigue, Synthetic Data, PPO               | All      | Active |
 | 2026-02-14 | Added Force Vector, Stiffness, Turbulence, Mud Ball, Spine, Head Aero, Tempo, Soft Body, ILC            | All      | Active |
+| 2026-02-15 | Added Grip Pressure, Quiet Eye, Bulge/Roll Opt, Movable Weights, Clustering, Green Reading, Bunker, Fusion | All | Active |
