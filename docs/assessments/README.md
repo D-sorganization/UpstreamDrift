@@ -171,3 +171,25 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 ---
 
 _See individual Assessment_Prompt_X.md files for detailed prompts._
+
+---
+
+## Latest Reports (2026-02-15)
+
+- [Comprehensive Assessment](Comprehensive_Assessment.md)
+- [Completist Report](completist/Completist_Report_2026-02-15.md)
+- [Assessment A: Architecture](Assessment_A_Category.md)
+- [Assessment B: Code Quality](Assessment_B_Category.md)
+- [Assessment C: Documentation](Assessment_C_Category.md)
+- [Assessment D: User Experience](Assessment_D_Category.md)
+- [Assessment E: Performance](Assessment_E_Category.md)
+- [Assessment F: Installation](Assessment_F_Category.md)
+- [Assessment G: Testing](Assessment_G_Category.md)
+- [Assessment H: Error Handling](Assessment_H_Category.md)
+- [Assessment I: Security](Assessment_I_Category.md)
+- [Assessment J: Extensibility](Assessment_J_Category.md)
+- [Assessment K: Reproducibility](Assessment_K_Category.md)
+- [Assessment L: Maintainability](Assessment_L_Category.md)
+- [Assessment M: Education](Assessment_M_Category.md)
+- [Assessment N: Visualization](Assessment_N_Category.md)
+- [Assessment O: CI/CD](Assessment_O_Category.md)
