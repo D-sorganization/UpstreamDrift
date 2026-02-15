@@ -35,7 +35,8 @@ class AnalysisMixin:
         """Check whether live analysis should run based on UI and config."""
         config_requests_analysis = False
         if hasattr(self.recorder, "analysis_config") and isinstance(  # type: ignore[attr-defined]
-            self.recorder.analysis_config, dict  # type: ignore[attr-defined]
+            self.recorder.analysis_config,
+            dict,  # type: ignore[attr-defined]
         ):
             cfg = self.recorder.analysis_config  # type: ignore[attr-defined]
             if (
@@ -92,7 +93,8 @@ class AnalysisMixin:
 
         # 2. From LivePlotWidget config
         if hasattr(self.recorder, "analysis_config") and isinstance(  # type: ignore[attr-defined]
-            self.recorder.analysis_config, dict  # type: ignore[attr-defined]
+            self.recorder.analysis_config,
+            dict,  # type: ignore[attr-defined]
         ):
             sources = self.recorder.analysis_config.get("induced_accel_sources", [])  # type: ignore[attr-defined]
             if isinstance(sources, list):
@@ -125,7 +127,8 @@ class AnalysisMixin:
                     if 0 <= act_idx < len(tau_vec):
                         tau_vec[act_idx] = 1.0
                         accels = analyzer.compute_specific_control(
-                            self.eval_context, tau_vec  # type: ignore[attr-defined]
+                            self.eval_context,
+                            tau_vec,  # type: ignore[attr-defined]
                         )
                         res[source] = accels
             except (ValueError, TypeError, RuntimeError):
@@ -243,7 +246,9 @@ class AnalysisMixin:
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
 
             for q, v in zip(
-                self.recorder.q_history, self.recorder.v_history, strict=False  # type: ignore[attr-defined]
+                self.recorder.q_history,
+                self.recorder.v_history,
+                strict=False,  # type: ignore[attr-defined]
             ):
                 self.plant.SetPositions(self.eval_context, q)  # type: ignore[attr-defined]
                 self.plant.SetVelocities(self.eval_context, v)  # type: ignore[attr-defined]

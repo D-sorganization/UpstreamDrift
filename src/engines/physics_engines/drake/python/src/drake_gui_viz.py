@@ -93,10 +93,12 @@ class VisualizationMixin:
         assert self.eval_context is not None  # type: ignore[attr-defined]
         plant_context = self.plant.GetMyContextFromRoot(self.context)  # type: ignore[attr-defined]
         self.plant.SetPositions(  # type: ignore[attr-defined]
-            self.eval_context, self.plant.GetPositions(plant_context)  # type: ignore[attr-defined]
+            self.eval_context,
+            self.plant.GetPositions(plant_context),  # type: ignore[attr-defined]
         )
         self.plant.SetVelocities(  # type: ignore[attr-defined]
-            self.eval_context, self.plant.GetVelocities(plant_context)  # type: ignore[attr-defined]
+            self.eval_context,
+            self.plant.GetVelocities(plant_context),  # type: ignore[attr-defined]
         )
 
     def _draw_torque_vectors(self) -> None:

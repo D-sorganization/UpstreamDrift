@@ -246,7 +246,10 @@ class SimulationMixin:
             return
 
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Data", "drake_sim_data", "All Files (*)"  # type: ignore[arg-type]
+            self,
+            "Save Data",
+            "drake_sim_data",
+            "All Files (*)",  # type: ignore[arg-type]
         )
         if not filename:
             return
