@@ -469,9 +469,9 @@ class ClubDataLoader:
         if x_col and y_col and z_col:
             positions = np.column_stack(
                 [
-                    df[x_col].values,
-                    df[y_col].values,
-                    df[z_col].values,
+                    df[x_col].to_numpy(),
+                    df[y_col].to_numpy(),
+                    df[z_col].to_numpy(),
                 ]
             )
 
@@ -484,9 +484,9 @@ class ClubDataLoader:
         if vx_col and vy_col and vz_col:
             velocities = np.column_stack(
                 [
-                    df[vx_col].values,
-                    df[vy_col].values,
-                    df[vz_col].values,
+                    df[vx_col].to_numpy(),
+                    df[vy_col].to_numpy(),
+                    df[vz_col].to_numpy(),
                 ]
             )
 

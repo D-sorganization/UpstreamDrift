@@ -109,9 +109,9 @@ class CentroidalMPC(ModelPredictiveController):
         R = np.eye(self._n_u) * 0.001
 
         # Terminal cost
-        P = Q * 10
+        P = (Q * 10).astype(float)
 
-        self._cost = CostFunction(Q=Q, R=R, P=P)
+        self._cost = CostFunction(Q=Q.astype(float), R=R, P=P)
 
     def set_mass(self, mass: float) -> None:
         """Set robot mass.
@@ -279,9 +279,9 @@ class WholeBodyMPC(ModelPredictiveController):
         R = np.eye(self._n_u) * 0.001
 
         # Terminal cost
-        P = Q * 10
+        P = (Q * 10).astype(float)
 
-        self._cost = CostFunction(Q=Q, R=R, P=P)
+        self._cost = CostFunction(Q=Q.astype(float), R=R, P=P)
 
     def set_end_effector_target(
         self,
