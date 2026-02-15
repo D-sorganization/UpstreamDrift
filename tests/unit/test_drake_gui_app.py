@@ -330,9 +330,7 @@ class TestDrakeRecorder:
 
         np.testing.assert_array_almost_equal(rec.club_head_pos_history[0], [0, 0, 0])
         np.testing.assert_array_almost_equal(rec.com_position_history[0], [0, 0, 0])
-        np.testing.assert_array_almost_equal(
-            rec.angular_momentum_history[0], [0, 0, 0]
-        )
+        np.testing.assert_array_almost_equal(rec.angular_momentum_history[0], [0, 0, 0])
 
     def test_reset_clears_data(self) -> None:
         """Test reset() clears all recorded data."""
