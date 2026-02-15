@@ -970,7 +970,9 @@ class UnrealBridgeBackend(ViewerBackend):
         # Start background thread
         self._stop_event.clear()
         self._server_thread = threading.Thread(
-            target=self._run_server_loop, daemon=True, name="UnrealBridgeThread"
+            target=self._run_server_loop,
+            daemon=True,
+            name="UnrealBridgeThread"
         )
         self._server_thread.start()
 
@@ -978,9 +980,7 @@ class UnrealBridgeBackend(ViewerBackend):
         time.sleep(0.1)
 
         self._is_initialized = True
-        logger.info(
-            f"Unreal Bridge backend initialized on port {self.config.server_port}"
-        )
+        logger.info(f"Unreal Bridge backend initialized on port {self.config.server_port}")
 
     def _run_server_loop(self) -> None:
         """Run the asyncio event loop for the server."""

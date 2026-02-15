@@ -19,7 +19,6 @@ from src.unreal_integration.viewer_backends import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 def create_test_mesh() -> LoadedMesh:
     """Create a simple test mesh (triangle)."""
     vertices = [
@@ -29,7 +28,6 @@ def create_test_mesh() -> LoadedMesh:
     ]
     faces = [MeshFace(indices=np.array([0, 1, 2]))]
     return LoadedMesh(name="test_mesh", vertices=vertices, faces=faces)
-
 
 def verify_backend(backend_type: str):
     """Verify a specific backend."""
@@ -53,7 +51,9 @@ def verify_backend(backend_type: str):
         logger.info(f"Added mesh: {name}")
 
         backend.update_transform(
-            name, position=Vector3(1.0, 2.0, 3.0), rotation=Quaternion.identity()
+            name,
+            position=Vector3(1.0, 2.0, 3.0),
+            rotation=Quaternion.identity()
         )
         logger.info("Updated transform.")
 
@@ -69,9 +69,7 @@ def verify_backend(backend_type: str):
     except Exception as e:
         logger.error(f"Error during {backend_type} verification: {e}")
         import traceback
-
         traceback.print_exc()
-
 
 def main():
     """Main verification function."""
@@ -80,7 +78,6 @@ def main():
     verify_backend("pyvista")
     print("-" * 40)
     verify_backend("unreal_bridge")
-
 
 if __name__ == "__main__":
     main()
