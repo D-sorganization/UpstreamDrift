@@ -1,100 +1,36 @@
-./.github/workflows/Jules-Comprehensive-Assessment.yml:72:          # Find NotImplementedError
-./.github/workflows/Jules-Comprehensive-Assessment.yml:73:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
-./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements
-./.github/workflows/Jules-Completist.yml:122:          - Raise NotImplementedError in core paths
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:94:          # Find NotImplementedError patterns
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:95:          echo "### NotImplementedError Placeholders" >> /tmp/incomplete_report.md
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:98:          grep -rn "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | grep -v ".git" | head -30 >> /tmp/incomplete_report.md || echo "None found"
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:118:          NOT_IMPL_COUNT=$(grep -rc "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:307:          | NotImplementedError | ${NOT_IMPL:-0} | x5 | $(echo "$NOT_IMPL * 5" | bc) |
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:374:          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
-./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./AGENTS.md:415:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
-./.claude/skills/lint/SKILL.md:34:   - Search for `NotImplementedError` that should be implemented
-./.claude/skills/lint/SKILL.md:38:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
-./scripts/analyze_completist_data.py:214:        "NotImplementedError": 4,
-./.agent/skills/lint/SKILL.md:34:   - Search for `NotImplementedError` that should be implemented
-./.agent/skills/lint/SKILL.md:38:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
-./.agent/workflows/lint.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
-./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
-./reports/bandit.json:13654:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
-./tests/integration/test_physics_interfaces.py:56:        except NotImplementedError:
-./tests/integration/test_physics_interfaces.py:57:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
-./tests/integration/test_physics_interfaces.py:99:        except NotImplementedError:
-./tests/integration/test_physics_interfaces.py:100:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
-./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:73:          # Find NotImplementedError
-./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:74:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./vendor/ud-tools/.github/copilot-instructions.md:22:- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
-./vendor/ud-tools/AGENTS.md:293:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
-./vendor/ud-tools/.claude/skills/lint/SKILL.md:30:   - Search for `NotImplementedError` that should be implemented
-./vendor/ud-tools/.claude/skills/lint/SKILL.md:34:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
-./vendor/ud-tools/scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
-./vendor/ud-tools/scripts/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/review_data/diffs.txt:113:+- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
-./vendor/ud-tools/.Jules/review_data/diffs.txt:3357:+- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
-./vendor/ud-tools/.Jules/review_data/diffs.txt:18576:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/review_data/diffs.txt:42312:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/review_data/diffs.txt:116534:+- No `pass` or `NotImplementedError`
-./vendor/ud-tools/.Jules/review_data/diffs.txt:130642:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/review_data/diffs.txt:134795:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/review_data/diffs.txt:152039:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/review_data/diffs.txt:153128:+- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
-./vendor/ud-tools/.Jules/review_data/diffs.txt:153304:+    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/.Jules/completist_data/todo_markers.txt:4:./.cursor/rules/.cursorrules.md:14:- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
-./vendor/ud-tools/.Jules/completist_data/todo_markers.txt:7:./tools/README.md:26:- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
-./vendor/ud-tools/.Jules/completist_data/todo_markers.txt:16:./.github/copilot-instructions.md:22:- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
-./vendor/ud-tools/.agent/skills/lint/SKILL.md:33:   - Search for `NotImplementedError` that should be implemented
-./vendor/ud-tools/.agent/skills/lint/SKILL.md:37:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
-./vendor/ud-tools/.agent/workflows/lint.md:36:   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
-./vendor/ud-tools/.cursor/rules/.cursorrules.md:14:- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
-./vendor/ud-tools/src/tools/README.md:26:- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
-./vendor/ud-tools/src/tools/quality_utils.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/src/shared/python/model_generation/converters/format_utils.py:161:    raise NotImplementedError(
-./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
-./vendor/ud-tools/src/shared/python/signal_toolkit/io.py:543:        raise NotImplementedError(msg)
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./tests/unit/test_launchers.py:88:                    pass  # Help typically causes SystemExit
+./tests/unit/test_method_citations.py:28:            pass  # Expected — frozen dataclass
+./tests/unit/test_contracts.py:420:                pass  # Expected
+./tests/integration/test_physics_interfaces.py:79:        except NotImplementedError:
+./tests/integration/test_physics_interfaces.py:80:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
+./tests/integration/test_physics_interfaces.py:122:        except NotImplementedError:
+./tests/integration/test_physics_interfaces.py:123:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
+./src/robotics/locomotion/gait_state_machine.py:385:                pass  # Don't let callback errors break state machine
+./src/unreal_integration/viewer_backends.py:669:        raise NotImplementedError(
+./src/unreal_integration/viewer_backends.py:674:        raise NotImplementedError(
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:132:        """Test detection of NotImplementedError."""
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:133:        lines = ["def function():\n", "    raise NotImplementedError\n"]
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:138:        assert any("NotImplementedError" in issue[1] for issue in issues)
-./src/engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
-./src/deployment/realtime/controller.py:336:        raise NotImplementedError(f"State reading not implemented for {self.comm_type}")
-./src/deployment/realtime/controller.py:349:        raise NotImplementedError(
-./src/unreal_integration/viewer_backends.py:669:        raise NotImplementedError("PyVista backend not yet implemented")
-./src/unreal_integration/viewer_backends.py:671:        raise NotImplementedError("Unreal Bridge backend not yet implemented")
-./src/launchers/base.py:90:    NotImplementedError at runtime.
-./src/launchers/base.py:311:        raise NotImplementedError(f"{type(self).__name__} must implement get_items()")
-./src/tools/model_generation/converters/format_utils.py:161:    raise NotImplementedError(
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py:375:        pass  # Server not running — engine works fine without chat
+./src/engines/physics_engines/opensim/python/opensim_gui.py:269:        except NotImplementedError as e:
+./src/launchers/base.py:94:    NotImplementedError at runtime.
+./src/launchers/launcher_process_manager.py:154:            pass  # Never let logging crash the app
+./src/api/routes/simulation_ws.py:67:        pass  # No message, continue simulation
+./src/api/routes/simulation_ws.py:215:        pass  # Client disconnected
+./src/deployment/realtime/controller.py:336:        raise NotImplementedError(
+./src/deployment/realtime/controller.py:352:        raise NotImplementedError(
+./src/tools/model_explorer/model_library.py:742:                        pass  # reading error, skip
+./src/tools/model_explorer/launch_model_explorer.py:17:    pass  # MuJoCo not installed, will fall back to grid view
+./src/tools/model_explorer/launch_model_explorer.py:22:    pass  # Will fall back to grid view
 ./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./src/shared/python/club_data/display.py:474:        raise NotImplementedError("Subclasses must implement render()")
-./src/shared/python/physics/flight_models.py:158:        raise NotImplementedError()
-./src/shared/python/physics/flight_models.py:163:        raise NotImplementedError()
-./src/shared/python/physics/flight_models.py:168:        raise NotImplementedError()
-./src/shared/python/physics/flight_models.py:174:        raise NotImplementedError()
-./src/shared/python/physics/impact_model.py:152:        raise NotImplementedError()
+./src/tools/humanoid_character_builder/mesh/inertia_calculator.py:24:    pass  # For type hints without runtime import
+./src/tools/model_generation/library/repository.py:313:            pass  # Meshes not found or not accessible
+./src/tools/model_generation/converters/format_utils.py:161:    raise NotImplementedError(
+./src/shared/python/validation_pkg/comparative_analysis.py:19:    pass  # pragma: no cover
+./src/shared/python/signal_toolkit/io.py:544:        raise NotImplementedError(msg)
 ./src/shared/python/engine_core/base_physics_engine.py:360:            except (NotImplementedError, AttributeError):
-./src/shared/python/engine_core/interfaces.py:63:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:88:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:109:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:125:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:147:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:167:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:189:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:212:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:233:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:251:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:336:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:355:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:374:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:400:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:423:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:474:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:508:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:562:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:614:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:697:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:711:        raise NotImplementedError()
-./src/shared/python/engine_core/interfaces.py:720:        raise NotImplementedError()
-./src/shared/python/signal_toolkit/io.py:543:        raise NotImplementedError(msg)
+./scripts/analyze_completist_data.py:214:        "NotImplementedError": 4,
+./scripts/check_duplicates.py:95:                    pass  # Skip if cannot read
+./scripts/refresh_completist_data.py:61:    # 3. Grep for NotImplementedError
+./scripts/refresh_completist_data.py:62:    run_grep("NotImplementedError", os.path.join(DATA_DIR, "not_implemented.txt"))
