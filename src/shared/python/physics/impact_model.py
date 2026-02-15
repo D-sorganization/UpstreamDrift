@@ -200,7 +200,10 @@ class RigidBodyImpactModel(ImpactModel):
             return pre_state.ball_angular_velocity.copy()
 
         tangent_dir = v_tangent / tangent_mag
-        j_friction = min(friction_coefficient * j, GOLF_BALL_MASS * tangent_mag * 0.4)
+        j_friction = min(
+            float(friction_coefficient * j),
+            float(GOLF_BALL_MASS * tangent_mag * 0.4),
+        )
         spin_axis = np.cross(n, tangent_dir)
         spin_magnitude = j_friction / (GOLF_BALL_MOMENT_INERTIA / GOLF_BALL_RADIUS)
         return pre_state.ball_angular_velocity + spin_magnitude * spin_axis
