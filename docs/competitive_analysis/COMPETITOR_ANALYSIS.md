@@ -1,6 +1,6 @@
 # Competitor Analysis
 
-**Last Updated:** 2026-02-12
+**Last Updated:** 2025-02-12
 
 This document maintains a comprehensive analysis of the golf technology market, focusing on launch monitors, software, biomechanics, and open-source alternatives.
 
@@ -108,70 +108,81 @@ This document maintains a comprehensive analysis of the golf technology market, 
 7.  **Recent Updates:** EYE MINI (portable unit).
 8.  **Our Differentiation:** We offer open integration possibilities where they have a closed but accessible ecosystem.
 
-### Garmin / Rapsodo (Entry Level)
+### Garmin Approach R10
 
-1.  **Core Value Proposition:** Making launch monitor data accessible to every golfer.
-2.  **Key Features:** Portability, direct phone integration, gamification.
-3.  **Limitations:** Accuracy varies (spin rates often estimated); limited data parameters.
-4.  **Pricing Model:** Low hardware cost ($300-$700) + Premium App Subscription.
-5.  **Target Market:** Recreational Golfers.
-6.  **Technology Stack:** Small Doppler Radar (Garmin); Camera + Radar (Rapsodo).
-7.  **Recent Updates:** Rapsodo MLM2PRO offering simulation connectors.
-8.  **Our Differentiation:** We can upscale their limited data using physics models to approximate pro-level insights.
+1.  **Core Value Proposition:** Making launch monitor data accessible to every golfer with an ultra-portable device.
+2.  **Key Features:** Direct phone integration, gamification (Home Tee Hero), very long battery life.
+3.  **Limitations:** Doppler radar struggles with indoor spin axis and backspin accuracy (often estimated).
+4.  **Pricing Model:** Low hardware cost (~$600) + Subscription for simulation.
+5.  **Target Market:** Recreational Golfers, Beginners.
+6.  **Technology Stack:** Small Doppler Radar.
+7.  **Recent Updates:** Integration with third-party simulation software (E6, Awesome Golf, GSPro via connector).
+8.  **Our Differentiation:** We can upscale its limited data using physics models to approximate pro-level insights without new hardware.
+
+### Rapsodo MLM2PRO
+
+1.  **Core Value Proposition:** Bringing vision-based spin accuracy to the entry-level market.
+2.  **Key Features:** Dual cameras (Impact Vision + Shot Vision), measured spin with Callaway RPT balls.
+3.  **Limitations:** Requires subscription for core features; uses special marked balls for best data.
+4.  **Pricing Model:** Low hardware cost (~$700) + Premium App Subscription (~$200/yr).
+5.  **Target Market:** Serious Amateurs on a budget.
+6.  **Technology Stack:** Camera + Radar fusion.
+7.  **Recent Updates:** Enhanced simulation connectors and Android stability.
+8.  **Our Differentiation:** We offer similar vision-based analysis tools without locking users into a subscription ecosystem.
 
 ### GSPro (Software)
 
-1.  **Core Value Proposition:** Community-driven, realistic 4K golf simulation that connects to almost any hardware.
-2.  **Key Features:** Open API (OPCD), SGT online tour, realistic ball physics (no boost).
-3.  **Limitations:** Requires high-end gaming PC; no native mobile app.
+1.  **Core Value Proposition:** The "People's Simulator" - a community-driven, open platform with realistic physics and 4K graphics.
+2.  **Key Features:** Open API (OPCD) allowing connection to almost any hardware, SGT online tour, active course design community.
+3.  **Limitations:** Requires high-end gaming PC; official API access is becoming more controlled.
 4.  **Pricing Model:** Annual Subscription ($250).
-5.  **Target Market:** DIY Simulator Builders.
+5.  **Target Market:** DIY Simulator Builders, Enthusiasts.
 6.  **Technology Stack:** Unity Engine.
-7.  **Recent Updates:** V2 release with new UI and physics tweaks.
-8.  **Our Differentiation:** We are open source; GSPro is open-api but closed source. We focus on biomechanics/science, they focus on gameplay.
+7.  **Recent Updates:** V2 release with new UI, physics tweaks, and improved graphics pipeline.
+8.  **Our Differentiation:** We are open source (code), whereas GSPro is open platform (API) but closed source. We focus on biomechanics over gameplay.
 
 ### TruGolf / E6 Connect
 
-1.  **Core Value Proposition:** Established leader in commercial simulator software with vast compatibility.
-2.  **Key Features:** Massive course library, widely compatible with almost all hardware, proven reliability.
-3.  **Limitations:** Graphics engine aging compared to Unity-based competitors; UI can feel dated.
-4.  **Pricing Model:** Subscription or one-time license (often bundled).
+1.  **Core Value Proposition:** The industry standard for commercial reliability and massive hardware compatibility.
+2.  **Key Features:** Largest library of licensed courses, stable for commercial use, cross-platform (iOS/PC).
+3.  **Limitations:** Graphics engine is aging compared to Unity-based competitors like GSPro; UI can feel dated.
+4.  **Pricing Model:** Subscription or one-time license (often bundled with hardware).
 5.  **Target Market:** Commercial Centers, Home Sims.
 6.  **Technology Stack:** Proprietary engine.
-7.  **Recent Updates:** Apex engine (next-gen).
+7.  **Recent Updates:** Apex engine (next-gen) development.
 8.  **Our Differentiation:** We offer open source physics models versus their proprietary "black box" simulation.
 
 ### Sportsbox AI
 
-1.  **Core Value Proposition:** 3D Motion Capture without markers or suits, using just a phone.
-2.  **Key Features:** 2D-to-3D lifting, Kinematic Sequence, Avatar visualization.
-3.  **Limitations:** Single camera lacks depth precision of multi-cam/marker systems; occlusion issues.
+1.  **Core Value Proposition:** Democratizing 3D Motion Capture using just a smartphone.
+2.  **Key Features:** 2D-to-3D lifting, Kinematic Sequence, Avatar visualization, mobile-first workflow.
+3.  **Limitations:** Single camera lacks depth precision of multi-cam systems; occlusion issues; subscription fatigue.
 4.  **Pricing Model:** Monthly/Annual SaaS.
-5.  **Target Market:** Instructors, Remote Coaches.
+5.  **Target Market:** Instructors, Remote Coaches, Students.
 6.  **Technology Stack:** Computer Vision, Deep Learning (Pose Estimation).
 7.  **Recent Updates:** Sportsbox 3D Practice (consumer version).
-8.  **Our Differentiation:** Our biomechanics modules will be open and verifiable, allowing researchers to tweak the "lifting" algorithms.
+8.  **Our Differentiation:** Our biomechanics modules will be open and verifiable, allowing researchers to inspect and tweak the algorithms.
 
 ### GEARS Golf
 
-1.  **Core Value Proposition:** The gold standard for motion capture accuracy in golf.
-2.  **Key Features:** Sub-millimeter accuracy, full body + club tracking (28-32 sensors).
+1.  **Core Value Proposition:** The absolute "MRI of Golf" - gold standard for motion capture accuracy.
+2.  **Key Features:** Sub-millimeter accuracy, full body + club tracking (28-32 optical sensors).
 3.  **Limitations:** Extremely expensive ($30k+); requires dedicated studio space and setup time.
 4.  **Pricing Model:** Expensive Hardware + Maintenance/License.
-5.  **Target Market:** Elite Fitting Centers, R&D Labs.
+5.  **Target Market:** Elite Fitting Centers, R&D Labs, Tour Pros.
 6.  **Technology Stack:** Optical Motion Capture (Passive Markers).
-7.  **Recent Updates:** Integration with force plates.
-8.  **Our Differentiation:** We aim to approximate GEARS-level insights using accessible hardware (multi-cam) and advanced physics.
+7.  **Recent Updates:** Integration with force plates for synchronized analysis.
+8.  **Our Differentiation:** We aim to approximate GEARS-level insights using accessible hardware (multi-cam) and advanced physics, acknowledging a trade-off in precision.
 
 ### K-Motion (K-Vest)
 
-1.  **Core Value Proposition:** Biofeedback training for kinematic sequence mastery.
+1.  **Core Value Proposition:** The pioneer of biofeedback training for kinematic sequence.
 2.  **Key Features:** Wireless 3D sensors (vest, wrist, hip), real-time auditory/visual biofeedback.
-3.  **Limitations:** Wearable sensors can be cumbersome; requires setup; drift issues over time.
+3.  **Limitations:** Wearable sensors can be cumbersome; requires calibration; drift issues over time.
 4.  **Pricing Model:** Hardware purchase + SaaS subscription.
 5.  **Target Market:** Instructors, TPI professionals.
 6.  **Technology Stack:** IMU sensors (Bluetooth).
-7.  **Recent Updates:** Wireless improvements and evaluation of markerless tech.
+7.  **Recent Updates:** Wireless improvements and evaluation of markerless tech integration.
 8.  **Our Differentiation:** We aim to replicate kinematic sequence analysis using markerless video, removing the need for wearable sensors.
 
 ### Swing Catalyst
@@ -187,9 +198,9 @@ This document maintains a comprehensive analysis of the golf technology market, 
 
 ### V1 Sports
 
-1.  **Core Value Proposition:** The standard for video analysis in coaching.
-2.  **Key Features:** Side-by-side comparison, drawing tools, cloud storage for students, mobile app.
-3.  **Limitations:** Primarily 2D focused; analysis requires manual input (drawing lines).
+1.  **Core Value Proposition:** The ubiquity of video analysis in coaching.
+2.  **Key Features:** Side-by-side comparison, drawing tools, cloud storage, mobile app ecosystem.
+3.  **Limitations:** Primarily 2D focused; analysis requires manual input (drawing lines) rather than auto-extraction.
 4.  **Pricing Model:** SaaS for coaches.
 5.  **Target Market:** Golf Coaches.
 6.  **Technology Stack:** Video processing, Mobile App.
@@ -218,41 +229,52 @@ This document maintains a comprehensive analysis of the golf technology market, 
 7.  **Recent Updates:** Wireless connectivity.
 8.  **Our Differentiation:** We estimate pressure/COP from video, eliminating the need for a mat.
 
-### Open Source (OpenSim / OpenCap / OpenGolf)
+### OpenSim
 
-1.  **Core Value Proposition:** Validated, peer-reviewed biomechanics tools for research and community development.
-2.  **Key Features:** Muscle-actuated simulations (OpenSim); Multi-phone mocap (OpenCap); Community simulator (OpenGolf).
-3.  **Limitations:** High technical barrier; not always golf-specific; complex workflow.
-4.  **Pricing Model:** Free (Apache/MIT licenses).
-5.  **Target Market:** University Researchers, Biomechanists, Developers.
-6.  **Technology Stack:** C++, Python, Cloud Computing, Unity.
-7.  **Recent Updates:** OpenCap web interface improvements.
-8.  **Our Differentiation:** We wrap these powerful tools in a golf-specific domain layer, making them usable for the sport.
+1.  **Core Value Proposition:** The academic standard for musculoskeletal modeling and dynamic simulation.
+2.  **Key Features:** Muscle-actuated simulations, inverse kinematics, inverse dynamics, static optimization.
+3.  **Limitations:** High technical barrier; steep learning curve; not golf-specific out of the box.
+4.  **Pricing Model:** Free (Apache 2.0).
+5.  **Target Market:** Academic Researchers, Biomechanists.
+6.  **Technology Stack:** C++, Python bindings.
+7.  **Recent Updates:** Moco (direct collocation) for trajectory optimization.
+8.  **Our Differentiation:** We wrap these powerful tools in a golf-specific domain layer, making them usable for the sport without a PhD.
+
+### OpenCap
+
+1.  **Core Value Proposition:** Validated markerless 3D motion capture using synchronized smartphones.
+2.  **Key Features:** Uses 2+ iOS devices, cloud-based processing, automatic musculoskeletal model scaling.
+3.  **Limitations:** Dependent on cloud processing (latency); requires specific phone hardware.
+4.  **Pricing Model:** Free for research (Cloud costs may apply eventually).
+5.  **Target Market:** Researchers, Clinicians.
+6.  **Technology Stack:** Cloud AI, OpenSim backend.
+7.  **Recent Updates:** Web interface improvements and calibration ease.
+8.  **Our Differentiation:** We aim for local processing options to ensure data privacy and real-time feedback, avoiding cloud dependency.
 
 ### OpenBiomechanics Project
 
-1.  **Core Value Proposition:** High-fidelity, open-access biomechanics datasets for validation and research.
+1.  **Core Value Proposition:** High-fidelity, open-access biomechanics datasets for validation.
 2.  **Key Features:** Raw marker data, force plate data, and processed OpenSim kinematics for elite athletes (baseball/golf).
-3.  **Limitations:** Requires technical skills (Python/Matlab) to process; it is a dataset, not a consumer tool.
+3.  **Limitations:** It is a static dataset, not an executable tool or software.
 4.  **Pricing Model:** Free (Open Access).
-5.  **Target Market:** Researchers, Data Scientists, Biomechanists.
+5.  **Target Market:** Researchers, Data Scientists.
 6.  **Technology Stack:** Vicon Motion Capture, AMTI Force Plates.
 7.  **Recent Updates:** Expanded pitching and golf swing datasets.
-8.  **Our Differentiation:** We integrate their rigorous datasets into our validation pipeline to ground our models in reality.
+8.  **Our Differentiation:** We use this dataset as the "ground truth" to validate and tune our own physics and vision models.
 
 ---
 
 ## Feature Comparison Matrix
 
-| Feature              | Us                       | TrackMan         | Foresight            | FlightScope       | K-Motion        | Sportsbox   | Uneekor          |
-| -------------------- | ------------------------ | ---------------- | -------------------- | ----------------- | --------------- | ----------- | ---------------- |
-| **Ball Flight Data** | **Simulated/Integrated** | Measured (Radar) | Measured (Photo)     | Measured (Fusion) | N/A             | N/A         | Measured (Photo) |
-| **Club Data**        | **Simulated/Integrated** | Measured (OERT)  | Measured (Fiducials) | Measured          | N/A             | N/A         | Measured (Photo) |
-| **Body Mocap**       | **In Dev (Video)**       | N/A              | N/A                  | N/A               | Sensors (IMU)   | Video (AI)  | N/A              |
-| **3D Visualization** | **Web/Native**           | TPS Software     | FSX Software         | E6/FS Skills      | Proprietary App | App/Web     | View/Refine      |
-| **Export/API**       | **Full Python API**      | SDK (Paid)       | Restricted           | Restricted        | Restricted      | Restricted  | SDK (Partner)    |
-| **Pricing**          | **Free / Open**          | $$$$$            | $$$$$                | $$ - $$$          | $$              | $ (Sub)     | $$$              |
-| **Platform Support** | **Linux/Mac/Win**        | Win/iOS          | Win                  | iOS/Android/Win   | iOS/Win         | iOS/Android | Win              |
+| Feature                    | Us                       | TrackMan         | Foresight            | FlightScope       | K-Motion        | Sportsbox   | Uneekor          |
+| -------------------------- | ------------------------ | ---------------- | -------------------- | ----------------- | --------------- | ----------- | ---------------- |
+| **Ball Flight Data**       | **Simulated/Integrated** | Measured (Radar) | Measured (Photo)     | Measured (Fusion) | N/A             | N/A         | Measured (Photo) |
+| **Club Data**              | **Simulated/Integrated** | Measured (OERT)  | Measured (Fiducials) | Measured          | N/A             | N/A         | Measured (Photo) |
+| **Body Movement Analysis** | **In Dev (Video)**       | N/A              | N/A                  | N/A               | Sensors (IMU)   | Video (AI)  | N/A              |
+| **3D Visualization**       | **Web/Native**           | TPS Software     | FSX Software         | E6/FS Skills      | Proprietary App | App/Web     | View/Refine      |
+| **Export/API**             | **Full Python API**      | SDK (Paid)       | Restricted           | Restricted        | Restricted      | Restricted  | SDK (Partner)    |
+| **Pricing**                | **Free / Open**          | $$$$$            | $$$$$                | $$ - $$$          | $$              | $ (Sub)     | $$$              |
+| **Platform Support**       | **Linux/Mac/Win**        | Win/iOS          | Win                  | iOS/Android/Win   | iOS/Win         | iOS/Android | Win              |
 
 ---
 
@@ -278,5 +300,5 @@ This document maintains a comprehensive analysis of the golf technology market, 
 1.  **The "Linux of Golf Analytics":** Become the underlying infrastructure that power-users and developers build on top of.
 2.  **Hardware-Agnostic AI:** Develop superior computer vision models that can turn any webcam into a basic launch monitor, undercutting entry-level hardware.
 3.  **Unified Biomechanics Standard:** Bridge the gap between K-Vest, Sportsbox, and Force Plates by creating a universal data format and analysis pipeline.
-4.  **Education & Research:** dominate the academic and coaching certification markets where "showing the work" (physics/math) is valuable.
+4.  **Education & Research:** Dominate the academic and coaching certification markets where "showing the work" (physics/math) is valuable.
 5.  **Data Privacy & Ownership:** Capitalize on the growing concern for data sovereignty by offering local-first storage, unlike cloud-dependent competitors that lock user data.
