@@ -188,11 +188,11 @@ jobs:
               git add -A
             fi
 
-            # ----- FIX 2: Black formatting -----
-            echo ">>> Running black..."
-            black . 2>&1 || true
+            # ----- FIX 2: Ruff formatting (matches CI quality-gate) -----
+            echo ">>> Running ruff format..."
+            ruff format . 2>&1 || true
             if ! git diff --quiet; then
-              CHANGES_MADE="$CHANGES_MADE black"
+              CHANGES_MADE="$CHANGES_MADE ruff-format"
               git add -A
             fi
 
@@ -204,10 +204,10 @@ jobs:
               git add -A
             fi
 
-            # ----- FIX 4: Re-run ruff + black for consistency after autoflake -----
-            echo ">>> Re-running ruff + black (post-cleanup)..."
+            # ----- FIX 4: Re-run ruff + ruff format for consistency after autoflake -----
+            echo ">>> Re-running ruff check + ruff format (post-cleanup)..."
             ruff check --fix . 2>&1 || true
-            black . 2>&1 || true
+            ruff format . 2>&1 || true
             if ! git diff --quiet; then
               CHANGES_MADE="$CHANGES_MADE post-cleanup"
               git add -A
@@ -223,9 +223,9 @@ jobs:
 
               if ! git diff --quiet; then
                 CHANGES_MADE="$CHANGES_MADE mypy-agent"
-                # Re-run ruff + black on mypy agent's changes for formatting consistency
+                # Re-run ruff + ruff format on mypy agent's changes for formatting consistency
                 ruff check --fix . 2>&1 || true
-                black . 2>&1 || true
+                ruff format . 2>&1 || true
                 git add -A
               fi
             else
