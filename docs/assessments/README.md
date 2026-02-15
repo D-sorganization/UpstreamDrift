@@ -100,6 +100,12 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 | Highlight     | `Assessment_Prompt_Highlight.md` | `Assessment_Highlight_YYYY-MM-DD.md`     |
 | Comprehensive | N/A (multi-framework)            | `comprehensive_assessment_YYYY-MM-DD.md` |
 
+### Specialized Assessments
+
+| Date       | Topic         | Report File                                            |
+| ---------- | ------------- | ------------------------------------------------------ |
+| 2025-02-24 | Physics Audit | `docs/assessments/physics/Physics_Audit_2025-02-24.md` |
+
 ---
 
 ## Severity Definitions (All Assessments)
@@ -167,6 +173,7 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 | 1.0     | 2025-12 | Initial 15-point framework                     |
 | 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis |
 | 2.1     | 2026-02 | Added comprehensive multi-framework assessment |
+| 2.2     | 2025-02 | Added Physics Audit (Specialized Assessment)   |
 
 ---
 
