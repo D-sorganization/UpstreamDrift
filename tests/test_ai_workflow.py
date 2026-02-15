@@ -4,13 +4,13 @@ import pytest
 
 from src.shared.python.ai.exceptions import WorkflowError
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult
+from src.shared.python.ai.workflow_definitions import create_first_analysis_workflow
 from src.shared.python.ai.workflow_engine import (
     StepStatus,
     Workflow,
     WorkflowEngine,
     WorkflowExecution,
     WorkflowStep,
-    create_first_analysis_workflow,
 )
 
 

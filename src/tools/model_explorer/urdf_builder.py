@@ -1,10 +1,10 @@
 """URDF builder for creating and managing URDF content."""
 
 import math
+import xml.etree.ElementTree as ET
 from enum import Enum
+from xml.dom import minidom
 
-import defusedxml.ElementTree as ET
-import defusedxml.minidom as minidom
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger

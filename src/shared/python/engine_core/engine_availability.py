@@ -236,11 +236,13 @@ except ImportError:
     pass
 
 # Check Drake
+# Test pydrake.all to verify full installation (bare import pydrake
+# succeeds on incomplete installs).
 try:
-    import pydrake  # noqa: F401
+    import pydrake.all  # noqa: F401
 
     DRAKE_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError):
     pass
 
 # Check OpenSim
@@ -280,7 +282,7 @@ try:
     import torch  # noqa: F401
 
     PYTORCH_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError):
     pass
 
 # Check TensorFlow
@@ -288,7 +290,7 @@ try:
     import tensorflow  # noqa: F401
 
     TENSORFLOW_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError):
     pass
 
 # Check MyoConverter
@@ -296,7 +298,7 @@ try:
     import myoconverter  # noqa: F401
 
     MYOCONVERTER_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError):
     pass
 
 # Check OpenPose
@@ -304,7 +306,7 @@ try:
     import openpose  # noqa: F401
 
     OPENPOSE_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError):
     pass
 
 # Check SciPy
@@ -432,7 +434,7 @@ try:
     import numba  # noqa: F401
 
     NUMBA_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError):
     pass
 
 # Check fastdtw (Dynamic Time Warping)
