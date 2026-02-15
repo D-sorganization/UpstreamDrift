@@ -152,9 +152,9 @@ class TestPendulumEngineDirectly:
         if expected.get("theta1_decreases"):
             # From pi/2, gravity should pull link back toward 0
             theta1_values = [p[0] for p in positions_history]
-            assert theta1_values[-1] < math.pi / 2, (
-                f"theta1 should decrease from pi/2, got {theta1_values[-1]}"
-            )
+            assert (
+                theta1_values[-1] < math.pi / 2
+            ), f"theta1 should decrease from pi/2, got {theta1_values[-1]}"
 
 
 # ---------------------------------------------------------------------------

@@ -163,9 +163,9 @@ class TestLaunchEndpoint:
         """Every tile in the manifest can be launched (handler returns True)."""
         for tile in manifest["tiles"]:
             resp = client.post(f"/api/launcher/launch/{tile['id']}")
-            assert resp.status_code == 200, (
-                f"Failed to launch tile '{tile['id']}': {resp.json()}"
-            )
+            assert (
+                resp.status_code == 200
+            ), f"Failed to launch tile '{tile['id']}': {resp.json()}"
             data = resp.json()
             assert data["tile_id"] == tile["id"]
 
