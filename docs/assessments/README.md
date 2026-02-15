@@ -83,10 +83,11 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 In addition to the standard framework, specialized audits monitor specific quality aspects.
 
 ### Completist Audits
+
 **Focus**: Implementation completeness, identifying critical gaps, feature requests (TODOs), and technical debt (FIXMEs).
 
-| Report | Date | Focus |
-|---|---|---|
+| Report                                                        | Date       | Focus                                                             |
+| ------------------------------------------------------------- | ---------- | ----------------------------------------------------------------- |
 | `docs/assessments/completist/Completist_Report_2026-02-15.md` | 2026-02-15 | Critical backend gaps (PyVista/Unreal) & False Positive Filtering |
 
 ---
@@ -186,7 +187,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 1.0     | 2025-12 | Initial 15-point framework                     |
 | 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis |
 | 2.1     | 2026-02 | Added comprehensive multi-framework assessment |
-| 2.2     | 2025-02 | Added Physics Audit (Specialized Assessment)   |
+| 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)   |
+| 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)    |
 
 ---
 
