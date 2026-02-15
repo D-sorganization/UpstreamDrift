@@ -132,21 +132,21 @@ class TestEquipmentModule:
         for club_type, config in CLUB_CONFIGS.items():
             # Total length should be reasonable (0.5m to 1.5m)
             assert isinstance(config["total_length"], float)
-            assert (
-                0.5 <= config["total_length"] <= 1.5
-            ), f"{club_type} length {config['total_length']} outside realistic range"
+            assert 0.5 <= config["total_length"] <= 1.5, (
+                f"{club_type} length {config['total_length']} outside realistic range"
+            )
 
             # Head mass should be reasonable (100g to 500g)
             assert isinstance(config["head_mass"], float)
-            assert (
-                0.1 <= config["head_mass"] <= 0.5
-            ), f"{club_type} head mass {config['head_mass']} outside realistic range"
+            assert 0.1 <= config["head_mass"] <= 0.5, (
+                f"{club_type} head mass {config['head_mass']} outside realistic range"
+            )
 
             # Club loft should be in degrees converted to radians (0 to 90 degrees = 0 to 1.57 rad)
             assert isinstance(config["club_loft"], float)
-            assert (
-                0 <= config["club_loft"] <= 1.6
-            ), f"{club_type} loft {config['club_loft']} outside realistic range"
+            assert 0 <= config["club_loft"] <= 1.6, (
+                f"{club_type} loft {config['club_loft']} outside realistic range"
+            )
 
     def test_club_ordering_by_length(self) -> None:
         """Test that clubs follow expected length ordering: driver > 7-iron > wedge."""
