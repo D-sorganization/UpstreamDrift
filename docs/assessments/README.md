@@ -78,6 +78,19 @@ This document defines the comprehensive 16-point assessment framework (A-O + Hig
 
 ---
 
+## Specialized Audits
+
+In addition to the standard framework, specialized audits monitor specific quality aspects.
+
+### Completist Audits
+**Focus**: Implementation completeness, identifying critical gaps, feature requests (TODOs), and technical debt (FIXMEs).
+
+| Report | Date | Focus |
+|---|---|---|
+| `docs/assessments/completist/Completist_Report_2026-02-15.md` | 2026-02-15 | Critical backend gaps (PyVista/Unreal) & False Positive Filtering |
+
+---
+
 ## Assessment Prompt Index
 
 | Assessment    | Prompt File                      | Results Template                         |
