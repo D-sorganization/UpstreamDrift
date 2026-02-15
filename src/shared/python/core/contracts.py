@@ -184,7 +184,7 @@ class PostconditionError(ContractViolationError):
         function_name: str | None = None,
         result: Any = None,
     ) -> None:
-        details = {}
+        details: dict[str, Any] = {}
         if result is not None:
             # Avoid storing large arrays
             if isinstance(result, np.ndarray):

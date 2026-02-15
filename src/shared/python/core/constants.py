@@ -8,12 +8,39 @@ from pathlib import Path
 
 from . import physics_constants as _physics_constants
 from .physics_constants import (
+    AIR_DENSITY_SEA_LEVEL_KG_M3 as AIR_DENSITY_SEA_LEVEL_KG_M3,  # noqa: F401
+)
+from .physics_constants import (
+    DEG_TO_RAD as DEG_TO_RAD,  # noqa: F401
+)
+from .physics_constants import (
     GOLF_BALL_DIAMETER_M,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_MOMENT_OF_INERTIA_KG_M2,
     GOLF_BALL_RADIUS_M,
     GRAVITY_M_S2,
     PhysicalConstant,
+)
+from .physics_constants import (
+    GOLF_BALL_DRAG_COEFFICIENT as GOLF_BALL_DRAG_COEFFICIENT,  # noqa: F401
+)
+from .physics_constants import (
+    KG_TO_LB as KG_TO_LB,  # noqa: F401
+)
+from .physics_constants import (
+    M_TO_FT as M_TO_FT,  # noqa: F401
+)
+from .physics_constants import (
+    M_TO_YARD as M_TO_YARD,  # noqa: F401
+)
+from .physics_constants import (
+    MPS_TO_KPH as MPS_TO_KPH,  # noqa: F401
+)
+from .physics_constants import (
+    MPS_TO_MPH as MPS_TO_MPH,  # noqa: F401
+)
+from .physics_constants import (
+    RAD_TO_DEG as RAD_TO_DEG,  # noqa: F401
 )
 
 # Backward compatibility: re-export physics constants from canonical module.

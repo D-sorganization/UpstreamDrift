@@ -951,6 +951,7 @@ class UnrealBridgeBackend(ViewerBackend):
         self._frame_queue: Queue[UnrealDataFrame] = Queue()
         self._stop_event = threading.Event()
         self._frame_counter = 0
+        self._object_counter = 0
         self._start_time = 0.0
 
     def initialize(self) -> None:
@@ -1113,16 +1114,13 @@ class UnrealBridgeBackend(ViewerBackend):
             if name == "club":
                 club = ClubState(
                     head_position=pos,
-                    head_rotation=rot,
                     # We don't track velocity/acceleration in ViewerBackend currently
                     head_velocity=Vector3.zero(),
-                    head_angular_velocity=Vector3.zero(),
                 )
             elif name == "ball":
                 ball = BallState(
                     position=pos,
                     velocity=Vector3.zero(),
-                    spin=Vector3.zero(),
                 )
             else:
                 # Map everything else to joints
