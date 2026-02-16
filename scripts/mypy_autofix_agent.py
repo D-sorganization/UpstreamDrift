@@ -135,14 +135,27 @@ COMMON_TYPE_IMPORTS = {
 }
 
 
-def run_mypy(config_file: str | None = None) -> str:
+def run_mypy(config_file: str | None = None, targets: list[str] | None = None) -> str:
     """Run mypy and return raw output."""
-    cmd = ["mypy", "src", "--no-error-summary"]
+    if not targets:
+        # Default to src and tests if no targets provided, but check if they exist
+        targets = []
+        if Path("src").exists():
+            targets.append("src")
+        if Path("tests").exists():
+            targets.append("tests")
+        if not targets:
+            targets = ["."]
+
+    cmd = ["mypy"] + targets + ["--no-error-summary"]
     if config_file:
         cmd.extend(["--config-file", config_file])
     # Show error codes for targeted fixes
     cmd.append("--show-error-codes")
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    # Add non-interactive and ignore-missing-imports for agent use
+    cmd.extend(["--ignore-missing-imports", "--non-interactive"])
+
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     return result.stdout + result.stderr
 
 
@@ -497,14 +510,15 @@ def run_agent(
     dry_run: bool = False,
     verbose: bool = False,
     config_file: str | None = None,
+    targets: list[str] | None = None,
 ) -> AgentReport:
     """Main agent loop: observe, classify, fix, report."""
     report = AgentReport()
 
     # Step 1: Run mypy
     if verbose:
-        print(">>> Running mypy...")
-    output = run_mypy(config_file)
+        print(f">>> Running mypy on targets: {targets or 'default'}...")
+    output = run_mypy(config_file, targets)
     errors = parse_mypy_output(output)
     report.total_errors = len(errors)
 
@@ -657,6 +671,11 @@ def main() -> int:
         default=None,
         help="Path to mypy config file (default: uses pyproject.toml)",
     )
+    parser.add_argument(
+        "targets",
+        nargs="*",
+        help="Files or directories to check (default: src)",
+    )
     args = parser.parse_args()
 
     report = run_agent(
@@ -665,6 +684,7 @@ def main() -> int:
         dry_run=args.dry_run,
         verbose=args.verbose,
         config_file=args.config_file,
+        targets=args.targets,
     )
 
     print_report(report)
