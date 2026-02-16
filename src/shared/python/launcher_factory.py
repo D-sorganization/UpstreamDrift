@@ -2,15 +2,15 @@
 
 This module consolidates launcher logic from multiple entry points to ensure DRY.
 """
+
 import importlib
 import logging
 import sys
-from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 # Mapping of engine names to their python module paths for direct execution
-ENGINE_MODULES: Dict[str, str] = {
+ENGINE_MODULES: dict[str, str] = {
     "mujoco": "src.engines.physics_engines.mujoco.python.humanoid_launcher",
     "drake": "src.engines.physics_engines.drake.python.src.drake_gui_app",
     "pinocchio": "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui",
@@ -20,7 +20,7 @@ ENGINE_MODULES: Dict[str, str] = {
 }
 
 
-def get_engine_module(engine_name: str) -> Optional[str]:
+def get_engine_module(engine_name: str) -> str | None:
     """Get the python module path for a given engine."""
     return ENGINE_MODULES.get(engine_name)
 

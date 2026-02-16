@@ -3,7 +3,6 @@
 Consolidates mock engine setup patterns used across unit, integration, and parity tests.
 """
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
