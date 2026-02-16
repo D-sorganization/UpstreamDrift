@@ -178,11 +178,24 @@ jobs:
             CHANGES_MADE=""
             git_status_before=$(git status --porcelain | wc -l)
 
-            # ===== PHASE 1: Formatting & Linting (deterministic, safe) =====
+            # ----- STEP 0: Collect changed files for this PR -----
+            echo ">>> Collecting changed files..."
+            # Get base branch from PR info or default to main
+            BASE_BRANCH=$(gh pr view "$PR_NUMBER" --json baseRefName --jq '.baseRefName' 2>/dev/null || echo "main")
+            git fetch origin "$BASE_BRANCH" --depth=1
+            CHANGED_FILES=$(git diff --diff-filter=ACMRT --name-only "origin/$BASE_BRANCH" HEAD -- '*.py' | tr '\n' ' ')
+            
+            if [ -z "$CHANGED_FILES" ]; then
+              echo "No changed Python files found in this PR. Skipping fixes."
+              break
+            fi
+            echo "Changed files to fix: $CHANGED_FILES"
+
+            # ===== PHASE 1: Formatting & Linting (Scoped to changed files) =====
 
             # ----- FIX 1: Ruff linting + import sorting -----
             echo ">>> Running ruff check --fix (linting + import sorting)..."
-            ruff check --fix . 2>&1 || true
+            ruff check --fix $CHANGED_FILES 2>&1 || true
             if ! git diff --quiet; then
               CHANGES_MADE="$CHANGES_MADE ruff"
               git add -A
@@ -198,7 +211,7 @@ jobs:
 
             # ----- FIX 3: Remove unused imports -----
             echo ">>> Running autoflake..."
-            autoflake --in-place --remove-all-unused-imports --recursive . 2>&1 || true
+            for f in $CHANGED_FILES; do autoflake --in-place --remove-all-unused-imports "$f" 2>&1 || true; done 2>&1 || true
             if ! git diff --quiet; then
               CHANGES_MADE="$CHANGES_MADE autoflake"
               git add -A
@@ -206,7 +219,7 @@ jobs:
 
             # ----- FIX 4: Re-run ruff + ruff format for consistency after autoflake -----
             echo ">>> Re-running ruff check + ruff format (post-cleanup)..."
-            ruff check --fix . 2>&1 || true
+            ruff check --fix $CHANGED_FILES 2>&1 || true
             ruff format . 2>&1 || true
             if ! git diff --quiet; then
               CHANGES_MADE="$CHANGES_MADE post-cleanup"
@@ -218,13 +231,13 @@ jobs:
             echo ">>> Running mypy autofix agent..."
             if [ -f "scripts/mypy_autofix_agent.py" ]; then
               python scripts/mypy_autofix_agent.py \
-                --max-fixes 20 --max-files 15 --verbose \
-                --config-file pyproject.toml 2>&1 || true
+                --max-fixes 30 --max-files 20 --verbose \
+                --config-file pyproject.toml $CHANGED_FILES 2>&1 || true
 
               if ! git diff --quiet; then
                 CHANGES_MADE="$CHANGES_MADE mypy-agent"
                 # Re-run ruff + ruff format on mypy agent's changes for formatting consistency
-                ruff check --fix . 2>&1 || true
+                ruff check --fix $CHANGED_FILES 2>&1 || true
                 ruff format . 2>&1 || true
                 git add -A
               fi
