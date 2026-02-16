@@ -19,9 +19,11 @@ class TestLauncherModule:
         # Test main launch script
         try:
             import launch_golf_suite
+            from src.shared.python import launcher_factory
 
             assert hasattr(launch_golf_suite, "main")
-            assert hasattr(launch_golf_suite, "launch_engine_directly")
+            # launch_engine_directly is now in launcher_factory
+            assert hasattr(launcher_factory, "launch_engine_directly")
         except ImportError:
             pytest.skip("Main launcher not available")
 
@@ -51,20 +53,12 @@ class TestLauncherModule:
         """Test main launcher script structure."""
         try:
             import launch_golf_suite
+            from src.shared.python import launcher_factory
 
-            # Check for expected functions (post-refactor API)
-            expected_functions = [
-                "main",
-                "launch_engine_directly",
-            ]
-
-            available_functions = []
-            for func_name in expected_functions:
-                if hasattr(launch_golf_suite, func_name):
-                    available_functions.append(func_name)
-
-            # Should have the core launcher functions
-            assert len(available_functions) >= 2
+            # main is in launch_golf_suite
+            assert hasattr(launch_golf_suite, "main")
+            # launch_engine_directly is in launcher_factory
+            assert hasattr(launcher_factory, "launch_engine_directly")
 
         except ImportError:
             pytest.skip("Main launcher not available")
@@ -97,11 +91,11 @@ class TestLauncherModule:
         gracefully when an engine module is not importable.
         """
         try:
-            import launch_golf_suite
+            from src.shared.python import launcher_factory
 
             # Test that launch_engine_directly handles ImportError gracefully
             with pytest.raises(SystemExit):
-                launch_golf_suite.launch_engine_directly("nonexistent_engine")
+                launcher_factory.launch_engine_directly("nonexistent_engine")
 
         except ImportError:
             pytest.skip("Main launcher not available")

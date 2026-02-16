@@ -48,56 +48,10 @@ _PLANT_SPEC_ATTRS = [
 ]
 
 
-# Mock classes that need to be defined before importing the engine
-class MockPhysicsEngine:
-    pass
-
-
 def _cleanup_drake_modules():
     """Clean up drake engine modules to prevent pollution of other tests."""
     for module_name in _DRAKE_ENGINE_MODULES:
         sys.modules.pop(module_name, None)
-
-
-@pytest.fixture(autouse=True, scope="module")
-def mock_drake_dependencies():
-    """Fixture to mock pydrake and interfaces safely for the duration of this module.
-
-    Also cleanup drake engine modules after all tests to prevent pollution of
-    test_drake_wrapper.py. When drake_physics_engine is imported, it pollutes
-    sys.modules with parent packages. Then test_drake_wrapper.py fails when trying
-    to patch src.engines.physics_engines.drake.python.drake_physics_engine because
-    the parent package exists but drake_physics_engine was imported earlier.
-    """
-    mock_pydrake = MagicMock()
-    mock_interfaces = MagicMock()
-    mock_interfaces.PhysicsEngine = MockPhysicsEngine
-
-    with patch.dict(
-        "sys.modules",
-        {
-            "pydrake": mock_pydrake,
-            "pydrake.math": MagicMock(),
-            "pydrake.multibody": MagicMock(),
-            "pydrake.multibody.plant": MagicMock(),
-            "pydrake.multibody.parsing": MagicMock(),
-            "pydrake.systems": MagicMock(),
-            "pydrake.systems.framework": MagicMock(),
-            "pydrake.systems.analysis": MagicMock(),
-            "pydrake.all": MagicMock(),
-            "shared.python.interfaces": mock_interfaces,
-        },
-    ):
-        yield mock_pydrake, mock_interfaces
-
-    # Clean up drake engine modules to prevent pollution
-    _cleanup_drake_modules()
-
-
-# Also cleanup at module teardown in case the fixture doesn't run for all test scenarios
-def teardown_module():
-    """Module-level teardown to ensure cleanup happens."""
-    _cleanup_drake_modules()
 
 
 @pytest.fixture(scope="module")
@@ -125,6 +79,9 @@ def DrakePhysicsEngineClass(mock_drake_dependencies):
         mod.pydrake = original_pydrake  # type: ignore[attr-defined]
     if original_interfaces:
         mod.interfaces = original_interfaces  # type: ignore[attr-defined]
+
+    # Clean up drake engine modules to prevent pollution
+    _cleanup_drake_modules()
 
 
 @pytest.fixture
