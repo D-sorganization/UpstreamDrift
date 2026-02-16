@@ -220,10 +220,7 @@ def is_headless() -> bool:
         return True
 
     # Check for display on Linux
-    if os.name == "posix" and not os.environ.get("DISPLAY"):
-        return True
-
-    return False
+    return bool(os.name == "posix" and not os.environ.get("DISPLAY"))
 
 
 def is_qt_available() -> bool:

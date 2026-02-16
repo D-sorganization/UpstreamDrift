@@ -343,16 +343,20 @@ class URDFCodeEditor(QPlainTextEdit):
     def keyPressEvent(self, event: Any) -> None:
         """Handle key press events for auto-completion."""
         popup = self.completer.popup()
-        if popup and popup.isVisible():
-            if event.key() in (
+        if (
+            popup
+            and popup.isVisible()
+            and event.key()
+            in (
                 Qt.Key.Key_Enter,
                 Qt.Key.Key_Return,
                 Qt.Key.Key_Escape,
                 Qt.Key.Key_Tab,
                 Qt.Key.Key_Backtab,
-            ):
-                event.ignore()
-                return
+            )
+        ):
+            event.ignore()
+            return
 
         super().keyPressEvent(event)
 

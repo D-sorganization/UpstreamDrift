@@ -160,10 +160,7 @@ class CoordinationMetricsMixin:
             norm_pos = 2 * (pos - min_p) / range_p - 1.0
 
         max_v = np.max(np.abs(vel))
-        if max_v < 1e-6:
-            norm_vel = np.zeros_like(vel)
-        else:
-            norm_vel = vel / max_v
+        norm_vel = np.zeros_like(vel) if max_v < 1e-06 else vel / max_v
 
         phase = np.arctan2(norm_vel, norm_pos)
         phase_unwrapped = np.unwrap(phase)

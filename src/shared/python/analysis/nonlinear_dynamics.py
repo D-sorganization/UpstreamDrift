@@ -60,7 +60,7 @@ class NonlinearDynamicsMixin:
 
         N = len(data)
         M = N - (dim - 1) * tau
-        if M < window + 1:
+        if window + 1 > M:
             return np.array([]), np.array([])
 
         # Reconstruct Phase Space
@@ -347,7 +347,7 @@ class NonlinearDynamicsMixin:
             Estimated LLE (nats/s)
         """
         N = len(data)
-        if N < window:
+        if window > N:
             return 0.0
 
         M = N - (dim - 1) * tau
@@ -471,7 +471,7 @@ class NonlinearDynamicsMixin:
             Sample Entropy value
         """
         N = len(data)
-        if N < m + 1:
+        if m + 1 > N:
             return 0.0
 
         tolerance = r * np.std(data)
@@ -559,7 +559,7 @@ class NonlinearDynamicsMixin:
             Fractal dimension (HFD) approx between 1.0 and 2.0
         """
         N = len(data)
-        if N < k_max + 1:
+        if k_max + 1 > N:
             return 1.0
 
         L_k = []

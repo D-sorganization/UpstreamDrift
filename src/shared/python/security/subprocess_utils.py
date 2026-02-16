@@ -21,6 +21,7 @@ Usage:
 
 from __future__ import annotations
 
+import contextlib
 import subprocess
 import threading
 import time
@@ -385,10 +386,8 @@ def kill_process_tree(pid: int, timeout: float = 5.0) -> bool:
 
         # Terminate children first
         for child in children:
-            try:
+            with contextlib.suppress(psutil.NoSuchProcess):
                 child.terminate()
-            except psutil.NoSuchProcess:
-                pass
 
         # Terminate parent
         parent.terminate()
@@ -398,10 +397,8 @@ def kill_process_tree(pid: int, timeout: float = 5.0) -> bool:
 
         # Kill any remaining processes
         for p in alive:
-            try:
+            with contextlib.suppress(psutil.NoSuchProcess):
                 p.kill()
-            except psutil.NoSuchProcess:
-                pass
 
         return True
 

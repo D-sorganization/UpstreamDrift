@@ -374,10 +374,7 @@ def compute_spectral_arc_length(
     # rfft returns positive frequencies at indices 0 to n_padded//2 + 1.
     # df = fs / n_padded
     df = fs / n_padded
-    if df > 0:
-        limit_idx = int(np.floor(fc / df)) + 1
-    else:
-        limit_idx = 1
+    limit_idx = int(np.floor(fc / df)) + 1 if df > 0 else 1
 
     # limit_idx must be at most n_padded // 2 + 1 (Nyquist limit for positive freqs)
     # This matches the size of rfft output exactly.
