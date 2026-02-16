@@ -154,7 +154,7 @@ def run_mypy(config_file: str | None = None, targets: list[str] | None = None) -
     cmd.append("--show-error-codes")
     # Add non-interactive and ignore-missing-imports for agent use
     cmd.extend(["--ignore-missing-imports", "--non-interactive"])
-    
+
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     return result.stdout + result.stderr
 
