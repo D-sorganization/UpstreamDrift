@@ -6,6 +6,8 @@ and all post-hoc plotting methods.
 
 from __future__ import annotations
 
+import contextlib
+
 import numpy as np
 
 from src.shared.python.engine_core.engine_availability import (
@@ -23,7 +25,6 @@ if HAS_QT:
 if HAS_MATPLOTLIB:
     import matplotlib.pyplot as plt
 
-import contextlib
 
 from .drake_analysis import DrakeInducedAccelerationAnalyzer  # noqa: E402
 
