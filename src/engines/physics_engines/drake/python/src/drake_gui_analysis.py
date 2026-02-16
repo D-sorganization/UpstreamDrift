@@ -24,6 +24,7 @@ if HAS_MATPLOTLIB:
     import matplotlib.pyplot as plt
 
 from .drake_analysis import DrakeInducedAccelerationAnalyzer  # noqa: E402
+import contextlib
 
 LOGGER = get_logger(__name__)
 
@@ -156,10 +157,8 @@ class AnalysisMixin:
         spec_act_idx = -1
         txt = self.combo_induced_source.currentText()  # type: ignore[attr-defined]
         if txt and txt not in ["gravity", "velocity", "total"]:
-            try:
+            with contextlib.suppress(ValueError):
                 spec_act_idx = int(txt)
-            except ValueError:
-                pass
 
         g_induced = []
         c_induced = []

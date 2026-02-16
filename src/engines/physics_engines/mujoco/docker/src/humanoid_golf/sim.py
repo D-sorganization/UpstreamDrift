@@ -10,6 +10,7 @@ import imageio
 import numpy as np
 
 from . import iaa_helper, utils
+import contextlib
 
 logger = logging.getLogger(__name__)
 
@@ -596,10 +597,8 @@ def run_simulation(
             with phys.reset_context():
                 phys.data.qpos[2] = 1.1 * (target_height / 1.56)
                 for joint, angle in TARGET_POSE.items():
-                    try:
+                    with contextlib.suppress(KeyError):
                         phys.named.data.qpos[joint] = angle
-                    except KeyError:
-                        pass
 
     # Initialize for checking or headless run
     initialize_episode(physics)

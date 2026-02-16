@@ -15,6 +15,7 @@ from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
+import contextlib
 
 logger = logging.getLogger(__name__)
 
@@ -726,15 +727,13 @@ def main() -> int:
         )
 
         # Show error dialog if GUI is available
-        try:
+        with contextlib.suppress(RuntimeError, ValueError, AttributeError):
             QMessageBox.critical(
                 None,
                 "Critical Error",
                 f"An unexpected error occurred:\n{exc_value}\n\n"
                 f"Check golf_visualizer.log for details.",
             )
-        except (RuntimeError, ValueError, AttributeError):
-            pass
 
     sys.excepthook = handle_exception
 

@@ -124,33 +124,33 @@ def classify_assessment_category(source_name: str, description: str = "") -> str
     """
     text = (source_name + " " + description).lower()
 
-    if "architecture" in text or "implementation" in text or "A" == source_name:
+    if "architecture" in text or "implementation" in text or source_name == "A":
         return "Architecture"
-    if "quality" in text or "hygiene" in text or "B" == source_name:
+    if "quality" in text or "hygiene" in text or source_name == "B":
         return "Code Quality"
-    if "documentation" in text or "C" == source_name:
+    if "documentation" in text or source_name == "C":
         return "Documentation"
-    if "user" in text or "ux" in text or "D" == source_name:
+    if "user" in text or "ux" in text or source_name == "D":
         return "User Experience"
-    if "performance" in text or "E" == source_name:
+    if "performance" in text or source_name == "E":
         return "Performance"
-    if "installation" in text or "deployment" in text or "F" == source_name:
+    if "installation" in text or "deployment" in text or source_name == "F":
         return "Installation"
-    if "test" in text or "G" == source_name:
+    if "test" in text or source_name == "G":
         return "Testing"
-    if "error" in text or "H" == source_name:
+    if "error" in text or source_name == "H":
         return "Error Handling"
-    if "security" in text or "I" == source_name:
+    if "security" in text or source_name == "I":
         return "Security"
-    if "extensibility" in text or "J" == source_name:
+    if "extensibility" in text or source_name == "J":
         return "Extensibility"
-    if "reproducibility" in text or "K" == source_name:
+    if "reproducibility" in text or source_name == "K":
         return "Reproducibility"
-    if "maintainability" in text or "L" == source_name:
+    if "maintainability" in text or source_name == "L":
         return "Maintainability"
-    if "visualization" in text or "N" == source_name:
+    if "visualization" in text or source_name == "N":
         return "Visualization"
-    if "ci" in text or "cd" in text or "O" == source_name:
+    if "ci" in text or "cd" in text or source_name == "O":
         return "CI/CD"
 
     return "General"

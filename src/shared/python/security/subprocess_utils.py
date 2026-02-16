@@ -29,6 +29,7 @@ from pathlib import Path
 from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_run
+import contextlib
 
 logger = get_logger(__name__)
 
@@ -385,10 +386,8 @@ def kill_process_tree(pid: int, timeout: float = 5.0) -> bool:
 
         # Terminate children first
         for child in children:
-            try:
+            with contextlib.suppress(psutil.NoSuchProcess):
                 child.terminate()
-            except psutil.NoSuchProcess:
-                pass
 
         # Terminate parent
         parent.terminate()
@@ -398,10 +397,8 @@ def kill_process_tree(pid: int, timeout: float = 5.0) -> bool:
 
         # Kill any remaining processes
         for p in alive:
-            try:
+            with contextlib.suppress(psutil.NoSuchProcess):
                 p.kill()
-            except psutil.NoSuchProcess:
-                pass
 
         return True
 

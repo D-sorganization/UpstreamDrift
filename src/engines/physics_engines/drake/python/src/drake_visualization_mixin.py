@@ -15,6 +15,7 @@ from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+import contextlib
 
 HAS_QT = PYQT6_AVAILABLE
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
@@ -480,10 +481,8 @@ class DrakeVisualizationMixin:
         spec_act_idx = -1
         txt = self.combo_induced_source.currentText()
         if txt and txt not in ["gravity", "velocity", "total"]:
-            try:
+            with contextlib.suppress(ValueError):
                 spec_act_idx = int(txt)
-            except ValueError:
-                pass
 
         g_induced = []
         c_induced = []

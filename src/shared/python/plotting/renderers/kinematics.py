@@ -341,11 +341,13 @@ class KinematicsRenderer(BaseRenderer):
         diff = cond_data - cond_val
         crossings = []
         for i in range(len(diff) - 1):
-            if diff[i] * diff[i + 1] <= 0:
-                if diff[i] < diff[i + 1] and direction in ["positive", "both"]:
-                    crossings.append(i)
-                elif diff[i] > diff[i + 1] and direction in ["negative", "both"]:
-                    crossings.append(i)
+            if diff[i] * diff[i + 1] <= 0 and (
+                diff[i] < diff[i + 1]
+                and direction in ["positive", "both"]
+                or diff[i] > diff[i + 1]
+                and direction in ["negative", "both"]
+            ):
+                crossings.append(i)
         return crossings
 
     def _interpolate_crossings(
@@ -459,7 +461,7 @@ class KinematicsRenderer(BaseRenderer):
         x = data_full[:, joint_idx]
         N = len(x)
 
-        if N < delay * (embedding_dim - 1) + 1:
+        if delay * (embedding_dim - 1) + 1 > N:
             ax = fig.add_subplot(111)
             ax.text(
                 0.5,

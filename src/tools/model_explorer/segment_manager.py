@@ -235,11 +235,8 @@ class SegmentManager:
 
         visited: set[str] = set()
         for name in self.segments:
-            if name not in visited:
-                if has_cycle(name, visited, set()):
-                    errors.append(
-                        f"Circular dependency detected involving segment: {name}"
-                    )
+            if name not in visited and has_cycle(name, visited, set()):
+                errors.append(f"Circular dependency detected involving segment: {name}")
 
         # Check for orphaned segments (parent doesn't exist)
         for name, data in self.segments.items():

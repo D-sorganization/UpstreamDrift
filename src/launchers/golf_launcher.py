@@ -54,6 +54,7 @@ from src.launchers.ui_components import (
 )
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
+import contextlib
 
 # Backward-compatible re-exports
 __all__ = [
@@ -518,10 +519,8 @@ class GolfLauncher(
         if hasattr(self, "docker_checker") and self.docker_checker is not None:
             if self.docker_checker.isRunning():
                 self.docker_checker.wait(1000)
-            try:
+            with contextlib.suppress(TypeError, RuntimeError):
                 self.docker_checker.result.disconnect(self.on_docker_check_complete)
-            except (TypeError, RuntimeError):
-                pass
 
         self.docker_checker = DockerCheckThread()
         self.docker_checker.result.connect(self.on_docker_check_complete)
@@ -597,10 +596,8 @@ class GolfLauncher(
 
         # Clean up docker checker thread
         if hasattr(self, "docker_checker") and self.docker_checker is not None:
-            try:
+            with contextlib.suppress(TypeError, RuntimeError):
                 self.docker_checker.result.disconnect(self.on_docker_check_complete)
-            except (TypeError, RuntimeError):
-                pass
             if self.docker_checker.isRunning():
                 self.docker_checker.wait(1000)
             self.docker_checker = None

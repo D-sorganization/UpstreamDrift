@@ -14,6 +14,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas, RecorderInterface
 
 from ..sim.dynamics import DynamicsEngine
+import contextlib
 
 logger = get_logger(__name__)
 
@@ -57,10 +58,8 @@ class GuiRecorder(RecorderInterface):
             values = [d.club_head_speed for d in self.data_store]
         else:
             # Generic fallback for scalar or simple arrays
-            try:
+            with contextlib.suppress(RuntimeError, ValueError, AttributeError):
                 values = [val if val is not None else 0.0 for val in values]
-            except (RuntimeError, ValueError, AttributeError):
-                pass
 
         return times, values
 

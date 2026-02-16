@@ -8,6 +8,7 @@ import sys
 import tempfile
 import threading
 from functools import partial
+import contextlib
 
 logger = logging.getLogger(__name__)
 
@@ -1156,10 +1157,8 @@ class GolfSimulationGUI:
                     output_queue.put(line)
                 out.close()
             except (RuntimeError, ValueError, OSError) as e:
-                try:
+                with contextlib.suppress(RuntimeError, ValueError, AttributeError):
                     self.root.after(0, self.log, f"Exception in enqueue_output: {e}")
-                except (RuntimeError, ValueError, AttributeError):
-                    pass
             output_queue.put(None)  # Sentinel
 
         t = threading.Thread(
@@ -1169,9 +1168,8 @@ class GolfSimulationGUI:
 
         while True:
             # Check user stop
-            if self.stop_event.is_set():
-                if self.process.poll() is None:
-                    self.process.terminate()
+            if self.stop_event.is_set() and self.process.poll() is None:
+                self.process.terminate()
 
             try:
                 output = q.get(timeout=0.1)

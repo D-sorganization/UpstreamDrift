@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
+import contextlib
 
 logger = logging.getLogger(__name__)
 
@@ -1107,10 +1108,8 @@ class FastAPIAdapter:
                 async def handler(request: Request, **kwargs) -> Any:
                     """Translate a FastAPI request into an APIRequest and return the response."""
                     body = None
-                    try:
+                    with contextlib.suppress(RuntimeError, ValueError, AttributeError):
                         body = await request.json()
-                    except (RuntimeError, ValueError, AttributeError):
-                        pass
 
                     files = {}
                     form = await request.form()

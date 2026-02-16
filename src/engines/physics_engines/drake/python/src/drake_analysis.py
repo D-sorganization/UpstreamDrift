@@ -11,12 +11,11 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import contextlib
 
 if TYPE_CHECKING:
-    try:
+    with contextlib.suppress(ImportError):
         from pydrake.all import Context, MultibodyPlant
-    except ImportError:
-        pass
 
 from src.shared.python.logging_pkg.logging_config import configure_gui_logging
 

@@ -44,6 +44,7 @@ import numpy as np
 from src.shared.python.core.contracts import invariant, postcondition, precondition
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
+import contextlib
 
 logger = get_logger(__name__)
 
@@ -420,10 +421,8 @@ class DatasetGenerator:
 
         # Restore original state
         if self._original_state is not None:
-            try:
+            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
                 self.engine.set_state(*self._original_state)
-            except (ValueError, RuntimeError, AttributeError):
-                pass
 
         dataset = TrainingDataset(
             samples=samples,
@@ -628,22 +627,16 @@ class DatasetGenerator:
             buffers: Pre-allocated recording buffers (modified in-place).
         """
         if config.record_mass_matrix and buffers["mass_matrices"] is not None:
-            try:
+            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
                 buffers["mass_matrices"][step] = self.engine.compute_mass_matrix()
-            except (ValueError, RuntimeError, AttributeError):
-                pass
 
         if config.record_bias_forces and buffers["bias_forces"] is not None:
-            try:
+            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
                 buffers["bias_forces"][step] = self.engine.compute_bias_forces()
-            except (ValueError, RuntimeError, AttributeError):
-                pass
 
         if config.record_gravity and buffers["gravity"] is not None:
-            try:
+            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
                 buffers["gravity"][step] = self.engine.compute_gravity_forces()
-            except (ValueError, RuntimeError, AttributeError):
-                pass
 
         if config.record_contact_forces and buffers["contact"] is not None:
             try:

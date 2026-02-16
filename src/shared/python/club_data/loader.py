@@ -14,6 +14,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+import contextlib
 
 logger = get_logger(__name__)
 
@@ -591,10 +592,8 @@ class ClubDataLoader:
                         if field_name == "player_name":
                             player_name = str(value)
                         else:
-                            try:
+                            with contextlib.suppress(ValueError, TypeError):
                                 metrics_data[field_name] = float(value)
-                            except (ValueError, TypeError):
-                                pass
                     break
 
         if not player_name:

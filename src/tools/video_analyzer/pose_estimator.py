@@ -144,9 +144,8 @@ class PoseEstimator:
         Returns:
             PoseFrame with landmarks, or None if no pose detected.
         """
-        if not self._initialized:
-            if not self.initialize():
-                return None
+        if not self._initialized and not self.initialize():
+            return None
 
         # Convert BGR to RGB for MediaPipe
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -201,9 +200,8 @@ class PoseEstimator:
         Returns:
             PoseFrame with world-space landmarks, or None if no pose detected.
         """
-        if not self._initialized:
-            if not self.initialize():
-                return None
+        if not self._initialized and not self.initialize():
+            return None
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self._pose.process(rgb_frame)  # type: ignore[attr-defined]

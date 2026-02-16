@@ -16,6 +16,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
+import contextlib
 
 router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
 
@@ -262,10 +263,8 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
         for row in rows:
             val = row.get(col)
             if val is not None:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     values.append(float(val))
-                except (ValueError, TypeError):
-                    pass
 
         if values:
             stats[col] = {

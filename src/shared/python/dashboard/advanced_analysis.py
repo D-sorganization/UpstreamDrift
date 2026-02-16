@@ -138,10 +138,7 @@ class SpectrogramTab(QtWidgets.QWidget):
         signal_data = data[:, dim_idx]
 
         # Estimate fs
-        if len(times) > 1:
-            fs = float(1.0 / np.mean(np.diff(times)))
-        else:
-            fs = 100.0
+        fs = float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
 
         f, t, Sxx = compute_spectrogram(signal_data, fs)
 
@@ -240,10 +237,7 @@ class WaveletTab(QtWidgets.QWidget):
         signal_data = data[:, dim_idx]
 
         # Estimate fs
-        if len(times) > 1:
-            fs = float(1.0 / np.mean(np.diff(times)))
-        else:
-            fs = 100.0
+        fs = float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
 
         w0 = self.spin_w0.value()
         freqs, t, cwt_mat = compute_cwt(signal_data, fs, w0=w0, num_freqs=64)
@@ -661,10 +655,7 @@ class CoherenceTab(QtWidgets.QWidget):
         x = d1[:, dim_idx]
         y = d2[:, dim_idx]
 
-        if len(t1) > 1:
-            fs = float(1.0 / np.mean(np.diff(t1)))
-        else:
-            fs = 100.0
+        fs = float(1.0 / np.mean(np.diff(t1))) if len(t1) > 1 else 100.0
 
         f, Cxy = compute_coherence(x, y, fs)
 

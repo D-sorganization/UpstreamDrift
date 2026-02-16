@@ -13,6 +13,7 @@ import pinocchio as pin  # type: ignore
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+import contextlib
 
 # Check meshcat availability
 try:
@@ -118,10 +119,8 @@ class PinocchioVisualizationMixin:
             return
 
         # Clear previous ellipsoids to prevent ghosting
-        try:
+        with contextlib.suppress(RuntimeError, ValueError, AttributeError):
             self.viewer["overlays/ellipsoids"].delete()
-        except (RuntimeError, ValueError, AttributeError):
-            pass
 
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             # Get selected bodies
