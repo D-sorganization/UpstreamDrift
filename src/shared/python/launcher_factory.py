@@ -2,6 +2,7 @@
 
 This module consolidates launcher logic from multiple entry points to ensure DRY.
 """
+from __future__ import annotations
 
 import importlib
 import logging
