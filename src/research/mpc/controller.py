@@ -99,10 +99,7 @@ class CostFunction:
 
         x_err = x
         if self.x_ref is not None:
-            if self.x_ref.ndim == 1:
-                x_err = x - self.x_ref
-            else:
-                x_err = x - self.x_ref[-1]
+            x_err = x - self.x_ref if self.x_ref.ndim == 1 else x - self.x_ref[-1]
 
         cost = float(x_err @ self.P @ x_err)
 

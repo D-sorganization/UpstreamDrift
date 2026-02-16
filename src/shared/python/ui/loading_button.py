@@ -83,10 +83,7 @@ class LoadingSpinner(QWidget):
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
         # Gradient effect using multiple arcs
-        if THEME_AVAILABLE:
-            color = QColor(Colors.TEXT_PRIMARY)
-        else:
-            color = QColor("#FFFFFF")
+        color = QColor(Colors.TEXT_PRIMARY) if THEME_AVAILABLE else QColor("#FFFFFF")
 
         # Draw fading tail
         for i in range(8):

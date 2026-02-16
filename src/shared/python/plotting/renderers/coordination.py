@@ -159,10 +159,7 @@ class CoordinationRenderer(BaseRenderer):
             ax.text(0.5, 0.5, "No data available", ha="center", va="center")
             return
 
-        if len(crp_data) != len(times):
-            plot_times = times[: len(crp_data)]
-        else:
-            plot_times = times
+        plot_times = times[: len(crp_data)] if len(crp_data) != len(times) else times
 
         ax = fig.add_subplot(111)
 
@@ -418,10 +415,7 @@ class CoordinationRenderer(BaseRenderer):
             if idx < velocities.shape[1]:
                 vel = np.abs(velocities[:, idx])
                 max_vel = float(np.max(vel))
-                if max_vel > 0:
-                    vel_norm = vel / max_vel
-                else:
-                    vel_norm = vel
+                vel_norm = vel / max_vel if max_vel > 0 else vel
 
                 color = colors[i % len(colors)]
                 ax.plot(times, vel_norm, label=name, color=color, linewidth=2)

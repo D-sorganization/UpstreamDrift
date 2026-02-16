@@ -159,7 +159,7 @@ def test_dtw_analysis() -> None:
 
     assert dist >= 0
     assert len(path) >= 100
-    assert (0, 0) in path or (0, 0) == path[0]  # Usually starts at 0,0
+    assert (0, 0) in path or path[0] == (0, 0)  # Usually starts at 0,0
 
     # Plotting
     plotter = ComparativePlotter(analyzer)

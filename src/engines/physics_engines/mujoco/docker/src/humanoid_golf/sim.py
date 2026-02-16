@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import csv
 import json
 import logging
@@ -596,10 +597,8 @@ def run_simulation(
             with phys.reset_context():
                 phys.data.qpos[2] = 1.1 * (target_height / 1.56)
                 for joint, angle in TARGET_POSE.items():
-                    try:
+                    with contextlib.suppress(KeyError):
                         phys.named.data.qpos[joint] = angle
-                    except KeyError:
-                        pass
 
     # Initialize for checking or headless run
     initialize_episode(physics)

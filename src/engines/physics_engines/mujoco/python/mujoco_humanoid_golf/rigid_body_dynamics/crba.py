@@ -150,10 +150,7 @@ def _crba_mass_matrix(
 
             # Off-diagonal element (hottest part of CRBA, O(n^2))
             idx_p = dof_indices[p]
-            if idx_p != -1:
-                val = f_force[idx_p]
-            else:
-                val = np.dot(s_subspace[p], f_force)
+            val = f_force[idx_p] if idx_p != -1 else np.dot(s_subspace[p], f_force)
 
             h_matrix[i, p] = val
             h_matrix[p, i] = val  # Symmetric

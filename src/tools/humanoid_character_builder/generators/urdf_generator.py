@@ -274,10 +274,7 @@ class HumanoidURDFGenerator:
         seg_params = params.get_segment_params(segment_name)
 
         # Determine mass
-        if seg_params.has_mass_override():
-            final_mass = seg_params.mass_kg
-        else:
-            final_mass = mass
+        final_mass = seg_params.mass_kg if seg_params.has_mass_override() else mass
 
         # Compute inertia
         inertia = self._compute_segment_inertia(

@@ -481,10 +481,7 @@ class LauncherUISetupMixin:
             with urllib.request.urlopen(req, timeout=2) as resp:
                 sessions = json.loads(resp.read().decode("utf-8"))
 
-            if sessions:
-                session_id = sessions[0]["session_id"]
-            else:
-                session_id = None
+            session_id = sessions[0]["session_id"] if sessions else None
 
             session_file = (
                 Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
