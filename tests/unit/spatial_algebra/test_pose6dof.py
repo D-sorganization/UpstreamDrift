@@ -148,9 +148,7 @@ class TestPose6DOF:
     def test_to_quaternion(self) -> None:
         p = Pose6DOF(euler_angles=[0, 0, math.pi / 2])
         q = p.to_quaternion()
-        assert abs(q[0]) == pytest.approx(
-            math.cos(math.pi / 4), abs=1e-6
-        )
+        assert abs(q[0]) == pytest.approx(math.cos(math.pi / 4), abs=1e-6)
 
     def test_rotation_matrix_property(self) -> None:
         p = Pose6DOF()
@@ -206,6 +204,4 @@ class TestTransform6DOF:
         t = Transform6DOF(translation=[1, 2, 3])
         t_inv = t.inverse()
         composed = t.compose(t_inv)
-        np.testing.assert_allclose(
-            composed.homogeneous_matrix, np.eye(4), atol=1e-10
-        )
+        np.testing.assert_allclose(composed.homogeneous_matrix, np.eye(4), atol=1e-10)

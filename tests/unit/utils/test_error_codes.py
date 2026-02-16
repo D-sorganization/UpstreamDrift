@@ -5,9 +5,9 @@ from __future__ import annotations
 import pytest
 
 from src.api.utils.error_codes import (
+    ERROR_METADATA,
     APIError,
     APIException,
-    ERROR_METADATA,
     ErrorCategory,
     ErrorCode,
     raise_api_error,
@@ -79,9 +79,7 @@ class TestAPIError:
         assert error.message == "Custom error"
 
     def test_from_code_with_details(self) -> None:
-        error = APIError.from_code(
-            ErrorCode.INVALID_REQUEST, details={"field": "name"}
-        )
+        error = APIError.from_code(ErrorCode.INVALID_REQUEST, details={"field": "name"})
         assert error.details == {"field": "name"}
 
     def test_to_dict_structure(self) -> None:

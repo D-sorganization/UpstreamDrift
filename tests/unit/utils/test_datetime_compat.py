@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
-from src.api.utils.datetime_compat import UTC, add_days, add_minutes, iso_format, utc_now
+from src.api.utils.datetime_compat import (
+    UTC,
+    add_days,
+    add_minutes,
+    iso_format,
+    utc_now,
+)
 
 
 class TestUTC:
