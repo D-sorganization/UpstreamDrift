@@ -1,5 +1,6 @@
 """Pinocchio GUI Wrapper (PyQt6 + meshcat)."""
 
+import contextlib
 import sys
 from pathlib import Path
 
@@ -22,7 +23,6 @@ from src.shared.python.validation_pkg.statistical_analysis import (
 
 from .manipulability import PinocchioManipulabilityAnalyzer
 from .pinocchio_recorder import PinocchioRecorder
-import contextlib
 
 # Check meshcat availability
 try:

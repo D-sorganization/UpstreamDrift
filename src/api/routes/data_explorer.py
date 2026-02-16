@@ -8,6 +8,7 @@ See issue #1206
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
 import json
@@ -16,7 +17,6 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
-import contextlib
 
 router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
 

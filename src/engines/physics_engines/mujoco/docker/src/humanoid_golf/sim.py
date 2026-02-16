@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import csv
 import json
 import logging
@@ -10,7 +11,6 @@ import imageio
 import numpy as np
 
 from . import iaa_helper, utils
-import contextlib
 
 logger = logging.getLogger(__name__)
 

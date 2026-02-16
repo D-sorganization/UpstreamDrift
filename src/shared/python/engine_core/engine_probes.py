@@ -6,13 +6,13 @@ are properly installed and ready to use, with actionable diagnostics.
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
 
 from ..config.environment import get_env
-import contextlib
 
 
 class ProbeStatus(Enum):

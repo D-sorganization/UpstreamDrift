@@ -15,6 +15,7 @@ This module composes focused mixin classes into the GolfLauncher:
 
 from __future__ import annotations
 
+import contextlib
 import sys
 from typing import Any
 
@@ -54,7 +55,6 @@ from src.launchers.ui_components import (
 )
 from src.shared.python.security.subprocess_utils import kill_process_tree
 from src.shared.python.theme.style_constants import Styles
-import contextlib
 
 # Backward-compatible re-exports
 __all__ = [

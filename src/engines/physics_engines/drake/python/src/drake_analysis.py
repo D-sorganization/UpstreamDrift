@@ -7,11 +7,11 @@ capturing simulation data for analysis.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import contextlib
 
 if TYPE_CHECKING:
     with contextlib.suppress(ImportError):

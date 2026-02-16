@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import sys
 from typing import Any
 
@@ -14,7 +15,6 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas, RecorderInterface
 
 from ..sim.dynamics import DynamicsEngine
-import contextlib
 
 logger = get_logger(__name__)
 

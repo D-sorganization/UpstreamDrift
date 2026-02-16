@@ -6,6 +6,7 @@ and data export from DrakeSimApp (drake_gui_app.py).
 
 from __future__ import annotations
 
+import contextlib
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -15,7 +16,6 @@ from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
-import contextlib
 
 HAS_QT = PYQT6_AVAILABLE
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE

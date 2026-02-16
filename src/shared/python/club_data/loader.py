@@ -6,6 +6,7 @@ Excel files for use as target trajectories in physics simulations.
 
 from __future__ import annotations
 
+import contextlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,7 +15,6 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-import contextlib
 
 logger = get_logger(__name__)
 

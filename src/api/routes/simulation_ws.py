@@ -1,12 +1,12 @@
 """WebSocket routes for real-time simulation streaming."""
 
 import asyncio
+import contextlib
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from src.shared.python.engine_core.engine_registry import EngineType
-import contextlib
 
 router = APIRouter()
 

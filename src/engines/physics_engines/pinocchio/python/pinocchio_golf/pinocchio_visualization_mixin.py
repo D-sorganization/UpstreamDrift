@@ -6,6 +6,7 @@ overlays, and toggle handlers from PinocchioGUI (gui.py).
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 import numpy as np
@@ -13,7 +14,6 @@ import pinocchio as pin  # type: ignore
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-import contextlib
 
 # Check meshcat availability
 try:

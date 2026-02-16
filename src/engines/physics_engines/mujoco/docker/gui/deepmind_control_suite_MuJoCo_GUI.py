@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import json
 import logging
@@ -8,7 +9,6 @@ import sys
 import tempfile
 import threading
 from functools import partial
-import contextlib
 
 logger = logging.getLogger(__name__)
 

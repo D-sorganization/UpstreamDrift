@@ -7,6 +7,7 @@ Can be used with Flask, FastAPI, or other frameworks via adapters.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import tempfile
 from collections.abc import Callable
@@ -14,7 +15,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
-import contextlib
 
 logger = logging.getLogger(__name__)
 

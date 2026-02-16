@@ -6,6 +6,7 @@ Complete integration of all components with enhanced features and error handling
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import sys
 import time
@@ -15,7 +16,6 @@ from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
 )
-import contextlib
 
 logger = logging.getLogger(__name__)
 

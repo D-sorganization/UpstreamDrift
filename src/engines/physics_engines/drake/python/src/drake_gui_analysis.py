@@ -23,8 +23,9 @@ if HAS_QT:
 if HAS_MATPLOTLIB:
     import matplotlib.pyplot as plt
 
-from .drake_analysis import DrakeInducedAccelerationAnalyzer  # noqa: E402
 import contextlib
+
+from .drake_analysis import DrakeInducedAccelerationAnalyzer  # noqa: E402
 
 LOGGER = get_logger(__name__)
 

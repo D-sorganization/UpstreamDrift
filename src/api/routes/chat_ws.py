@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
+
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
 from src.shared.python.logging_pkg.logging_config import get_logger
-import contextlib
 
 logger = get_logger(__name__)
 
