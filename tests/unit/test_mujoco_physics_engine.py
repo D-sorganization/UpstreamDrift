@@ -1,11 +1,9 @@
 """Tests for MuJoCo physics engine.
 
-Uses a single module-level mock for the mujoco dependency, injected into
-the physics engine module's namespace.  Per-test patching is removed to
-avoid double-mocking conflicts that caused assertion failures in CI.
+Uses shared module-level mocks for the mujoco dependency from conftest.py.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -34,28 +32,6 @@ _MJ_DATA_SPEC = [
     "xpos",
     "xquat",
 ]
-
-
-# Mock classes that need to be defined before importing the engine
-class MockPhysicsEngine:
-    pass
-
-
-@pytest.fixture(autouse=True, scope="module")
-def mock_mujoco_dependencies():
-    """Fixture to mock mujoco and interfaces safely for the duration of this module."""
-    mock_mujoco = MagicMock()
-    mock_interfaces = MagicMock()
-    mock_interfaces.PhysicsEngine = MockPhysicsEngine
-
-    with patch.dict(
-        "sys.modules",
-        {
-            "mujoco": mock_mujoco,
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces": mock_interfaces,
-        },
-    ):
-        yield mock_mujoco, mock_interfaces
 
 
 @pytest.fixture(scope="module")

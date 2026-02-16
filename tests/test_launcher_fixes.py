@@ -443,8 +443,9 @@ class TestLauncherIntegration(unittest.TestCase):
         # Test that it has the expected structure
         content = script_path.read_text()
         self.assertIn("def main(", content)
-        self.assertIn("def launch_engine_directly", content)
         self.assertIn("Golf Modeling Suite", content)
+        # launch_engine_directly should now be imported from launcher_factory
+        self.assertIn("from src.shared.python.launcher_factory", content)
 
     @patch("src.launchers.golf_launcher.GolfLauncher")
     def test_unified_launcher_import(self, mock_golf_launcher: Mock) -> None:

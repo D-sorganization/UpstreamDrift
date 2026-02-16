@@ -83,8 +83,7 @@ Examples:
         web_only_engines = {"matlab_2d", "matlab_3d"}
         if args.engine in web_only_engines:
             logger.info(
-                "Engine '%s' requires the web UI. Launching web UI instead...",
-                args.engine,
+                "Engine '%s' requires the web UI. Launching web UI instead...", args.engine
             )
             os.environ["GOLF_DEFAULT_ENGINE"] = args.engine
             from src.api.local_server import main as server_main
