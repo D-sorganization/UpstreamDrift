@@ -10,7 +10,6 @@ Usage:
 """
 
 import argparse
-import importlib
 import logging
 import os
 import sys
@@ -73,7 +72,27 @@ Examples:
 
     if args.engine:
         # Direct engine launch (legacy support)
+        try:
+            from src.shared.python.launcher_factory import launch_engine_directly
+        except ImportError:
+            # Fallback if PYTHONPATH is not set correctly
+            sys.path.append(os.getcwd())
+            from src.shared.python.launcher_factory import launch_engine_directly
+
+        # Check if engine is web-only
+        web_only_engines = {"matlab_2d", "matlab_3d"}
+        if args.engine in web_only_engines:
+            logger.info(
+                "Engine '%s' requires the web UI. Launching web UI instead...", args.engine
+            )
+            os.environ["GOLF_DEFAULT_ENGINE"] = args.engine
+            from src.api.local_server import main as server_main
+
+            server_main()
+            return
+
         launch_engine_directly(args.engine)
+
     elif args.classic:
         # Classic PyQt6 launcher
         try:
@@ -99,47 +118,6 @@ Examples:
         from src.api.local_server import main as server_main
 
         server_main()
-
-
-def launch_engine_directly(engine: str):
-    """Launch a specific engine GUI directly (legacy mode)."""
-    engine_launchers = {
-        "mujoco": "src.engines.physics_engines.mujoco.python.humanoid_launcher",
-        "drake": "src.engines.physics_engines.drake.python.drake_gui_app",
-        "pinocchio": "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui",
-        "opensim": "src.engines.physics_engines.opensim.python.opensim_launcher",
-        "myosim": "src.engines.physics_engines.myosim.python.myosim_launcher",
-        "pendulum": "src.engines.pendulum_models.python.pendulum_launcher",
-    }
-
-    # Engines that don't support direct launch
-    web_only_engines = {"matlab_2d", "matlab_3d"}
-
-    if engine in web_only_engines:
-        logger.info(
-            "Engine '%s' requires the web UI. Launching web UI instead...", engine
-        )
-        os.environ["GOLF_DEFAULT_ENGINE"] = engine
-        from src.api.local_server import main as server_main
-
-        server_main()
-        return
-
-    if engine not in engine_launchers:
-        logger.error("Direct launch not available for %s. Use web UI instead.", engine)
-        sys.exit(1)
-
-    try:
-        module = importlib.import_module(engine_launchers[engine])
-        if hasattr(module, "main"):
-            module.main()
-        else:
-            logger.error("Module %s has no main() function.", engine_launchers[engine])
-            sys.exit(1)
-    except ImportError as e:
-        logger.error("Failed to launch %s: %s", engine, e)
-        logger.info("Try using 'golf-suite' without --engine to use the web UI.")
-        sys.exit(1)
 
 
 if __name__ == "__main__":
