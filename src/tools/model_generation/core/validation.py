@@ -356,7 +356,7 @@ class Validator:
 
         # Build parent map
         link_name_set = set(link_names)
-        parent_map: dict[str, str | None] = {name: None for name in link_names}
+        parent_map: dict[str, str | None] = dict.fromkeys(link_names)
         for joint in joints:
             if joint.child in parent_map:
                 parent_map[joint.child] = joint.parent

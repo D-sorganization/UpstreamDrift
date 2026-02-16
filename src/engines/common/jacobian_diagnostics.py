@@ -152,10 +152,7 @@ def compute_jacobian_diagnostics(
     nullspace_dim = n - rank
 
     # Condition number
-    if sigma[-1] > rank_tol:
-        kappa = float(sigma[0] / sigma[-1])
-    else:
-        kappa = float("inf")
+    kappa = float(sigma[0] / sigma[-1]) if sigma[-1] > rank_tol else float("inf")
 
     # Manipulability (Yoshikawa)
     mu = float(np.prod(sigma[sigma > rank_tol])) if rank > 0 else 0.0

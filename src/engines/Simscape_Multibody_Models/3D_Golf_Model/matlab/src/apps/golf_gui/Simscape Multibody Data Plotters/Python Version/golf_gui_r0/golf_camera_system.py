@@ -137,10 +137,7 @@ class SmoothAnimator:
         easing_func: Callable | None = None,
     ) -> np.ndarray:
         """Interpolate between two vectors with optional easing"""
-        if easing_func:
-            t = easing_func(np.clip(t, 0.0, 1.0))
-        else:
-            t = np.clip(t, 0.0, 1.0)
+        t = easing_func(np.clip(t, 0.0, 1.0)) if easing_func else np.clip(t, 0.0, 1.0)
 
         return start + (end - start) * t
 
@@ -152,10 +149,7 @@ class SmoothAnimator:
         easing_func: Callable | None = None,
     ) -> tuple[float, float, float]:
         """Spherical interpolation for smooth orbit camera movement"""
-        if easing_func:
-            t = easing_func(np.clip(t, 0.0, 1.0))
-        else:
-            t = np.clip(t, 0.0, 1.0)
+        t = easing_func(np.clip(t, 0.0, 1.0)) if easing_func else np.clip(t, 0.0, 1.0)
 
         start_dist, start_azim, start_elev = start_spherical
         end_dist, end_azim, end_elev = end_spherical
@@ -319,17 +313,11 @@ class CameraController(QObject):
         """Create look-at view matrix"""
         f = target - eye
         f_norm = np.linalg.norm(f)
-        if f_norm > 1e-6:
-            f = f / f_norm
-        else:
-            f = np.array([0, 0, -1], dtype=np.float32)
+        f = f / f_norm if f_norm > 1e-06 else np.array([0, 0, -1], dtype=np.float32)
 
         s = np.cross(f, up)
         s_norm = np.linalg.norm(s)
-        if s_norm > 1e-6:
-            s = s / s_norm
-        else:
-            s = np.array([1, 0, 0], dtype=np.float32)
+        s = s / s_norm if s_norm > 1e-06 else np.array([1, 0, 0], dtype=np.float32)
 
         u = np.cross(s, f)
 

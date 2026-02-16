@@ -7,6 +7,7 @@ Can be used with Flask, FastAPI, or other frameworks via adapters.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import tempfile
 from collections.abc import Callable
@@ -1107,10 +1108,8 @@ class FastAPIAdapter:
                 async def handler(request: Request, **kwargs) -> Any:
                     """Translate a FastAPI request into an APIRequest and return the response."""
                     body = None
-                    try:
+                    with contextlib.suppress(RuntimeError, ValueError, AttributeError):
                         body = await request.json()
-                    except (RuntimeError, ValueError, AttributeError):
-                        pass
 
                     files = {}
                     form = await request.form()

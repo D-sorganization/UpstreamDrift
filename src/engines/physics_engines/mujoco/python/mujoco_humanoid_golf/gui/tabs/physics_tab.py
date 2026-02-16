@@ -429,19 +429,15 @@ class PhysicsTab(QtWidgets.QWidget):
 
         # Handle actuator count mismatch
         model = self.sim_widget.model
-        if model:
-            if model.nu != len(config["actuators"]):
-                # Fix up
-                diff = model.nu - len(config["actuators"])
-                if diff > 0:
-                    config["actuators"].extend(
-                        [
-                            f"Actuator {i}"
-                            for i in range(len(config["actuators"]), model.nu)
-                        ]
-                    )
-                else:
-                    config["actuators"] = config["actuators"][: model.nu]
+        if model and model.nu != len(config["actuators"]):
+            # Fix up
+            diff = model.nu - len(config["actuators"])
+            if diff > 0:
+                config["actuators"].extend(
+                    [f"Actuator {i}" for i in range(len(config["actuators"]), model.nu)]
+                )
+            else:
+                config["actuators"] = config["actuators"][: model.nu]
 
         self.sim_widget.verify_control_system()
 

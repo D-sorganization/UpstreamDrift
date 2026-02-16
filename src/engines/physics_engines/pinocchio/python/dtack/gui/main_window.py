@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import sys
 from typing import Any
 
@@ -57,10 +58,8 @@ class GuiRecorder(RecorderInterface):
             values = [d.club_head_speed for d in self.data_store]
         else:
             # Generic fallback for scalar or simple arrays
-            try:
+            with contextlib.suppress(RuntimeError, ValueError, AttributeError):
                 values = [val if val is not None else 0.0 for val in values]
-            except (RuntimeError, ValueError, AttributeError):
-                pass
 
         return times, values
 

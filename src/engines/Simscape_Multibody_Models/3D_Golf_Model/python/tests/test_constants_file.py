@@ -57,14 +57,14 @@ class TestMathematicalConstants:
 
     def test_pi_value(self) -> None:
         """Test that PI constant equals math.pi."""
-        assert PI == math.pi
+        assert math.pi == PI
         # Verify it's the expected mathematical constant
         assert PI > 3.14 and PI < 3.15
 
     def test_e_value(self) -> None:
         """Test that E constant equals Euler's number."""
-        assert E == math.e
-        assert E == pytest.approx(2.71828182845904523536)
+        assert math.e == E
+        assert pytest.approx(2.71828182845904523536) == E
 
 
 class TestPhysicalConstants:

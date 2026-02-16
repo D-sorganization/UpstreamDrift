@@ -374,10 +374,7 @@ class Quaternion:
 
         # Pitch (y-axis rotation)
         sinp = 2 * (self.w * self.y - self.z * self.x)
-        if abs(sinp) >= 1:
-            pitch = math.copysign(math.pi / 2, sinp)
-        else:
-            pitch = math.asin(sinp)
+        pitch = math.copysign(math.pi / 2, sinp) if abs(sinp) >= 1 else math.asin(sinp)
 
         # Yaw (z-axis rotation)
         siny_cosp = 2 * (self.w * self.z + self.x * self.y)

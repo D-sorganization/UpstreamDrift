@@ -1,5 +1,6 @@
 """Pinocchio GUI Wrapper (PyQt6 + meshcat)."""
 
+import contextlib
 import sys
 from pathlib import Path
 
@@ -112,10 +113,7 @@ class PinocchioGUI(SimulationGUIBase):
                 )
                 self.viewer = viz.Visualizer()
 
-            if callable(self.viewer.url):
-                url = self.viewer.url()
-            else:
-                url = self.viewer.url
+            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
             logger.info("Internal Meshcat URL: %s", url)
 
             self._log_meshcat_url(url)
@@ -1402,10 +1400,8 @@ class PinocchioGUI(SimulationGUIBase):
             return
 
         # Clear previous ellipsoids to prevent ghosting
-        try:
+        with contextlib.suppress(RuntimeError, ValueError, AttributeError):
             self.viewer["overlays/ellipsoids"].delete()
-        except (RuntimeError, ValueError, AttributeError):
-            pass
 
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             # Get selected bodies

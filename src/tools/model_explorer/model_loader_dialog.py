@@ -830,10 +830,7 @@ class ModelLoaderDialog(QDialog):
         }
 
         formatter = formatters.get(category)
-        if formatter:
-            info_text = formatter(model_info)
-        else:
-            info_text = "No information available."
+        info_text = formatter(model_info) if formatter else "No information available."
 
         self.info_display.setPlainText(info_text)
 

@@ -152,10 +152,7 @@ def quaternion_to_euler(quat: Quat | list[float]) -> Vec3:
 
     # Pitch (y-axis rotation)
     sinp = 2 * (w * y - z * x)
-    if np.abs(sinp) >= 1:
-        pitch = np.copysign(np.pi / 2, sinp)
-    else:
-        pitch = np.arcsin(sinp)
+    pitch = np.copysign(np.pi / 2, sinp) if np.abs(sinp) >= 1 else np.arcsin(sinp)
 
     # Yaw (z-axis rotation)
     siny_cosp = 2 * (w * z + x * y)

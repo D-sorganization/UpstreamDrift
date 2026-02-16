@@ -6,6 +6,7 @@ are properly installed and ready to use, with actionable diagnostics.
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -511,10 +512,8 @@ class OpenSimProbe(EngineProbe):
             version = getattr(opensim, "__version__", "unknown")
             if version == "unknown":
                 # Try getting version from build info if available
-                try:
+                with contextlib.suppress(AttributeError):
                     version = opensim.GetVersion()
-                except AttributeError:
-                    pass
 
         except ImportError:
             return EngineProbeResult(
@@ -653,9 +652,7 @@ class OpenPoseProbe(EngineProbe):
         default_path = Path("C:/openpose/models")
 
         models_found = False
-        if model_path_env and Path(model_path_env).exists():
-            models_found = True
-        elif default_path.exists():
+        if model_path_env and Path(model_path_env).exists() or default_path.exists():
             models_found = True
 
         if not models_found:

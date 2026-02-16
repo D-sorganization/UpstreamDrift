@@ -419,10 +419,7 @@ def _register_list_glossary_terms_tool(registry: ToolRegistry) -> None:
         """
         edu = _get_education_system()
 
-        if category:
-            terms = edu.list_terms(category=category)
-        else:
-            terms = edu.list_terms()
+        terms = edu.list_terms(category=category) if category else edu.list_terms()
 
         categories = edu.list_categories()
 

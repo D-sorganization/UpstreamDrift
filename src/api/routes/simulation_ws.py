@@ -1,6 +1,7 @@
 """WebSocket routes for real-time simulation streaming."""
 
 import asyncio
+import contextlib
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
@@ -215,12 +216,8 @@ async def simulation_stream(
         pass  # Client disconnected
     except (ValueError, RuntimeError, AttributeError) as e:
         # Best effort error reporting
-        try:
+        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.send_json({"error": str(e)})
-        except (ConnectionError, TimeoutError, OSError):
-            pass
     finally:
-        try:
+        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.close()
-        except (ConnectionError, TimeoutError, OSError):
-            pass

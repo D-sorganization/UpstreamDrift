@@ -74,11 +74,10 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
     )
 
     analog_time = None
-    if metadata_obj.analog_rate and metadata_obj.analog_rate > 0:
-        if analog:
-            first_analog = next(iter(analog.values()))
-            n_samples = len(first_analog.values)
-            analog_time = np.arange(n_samples) / metadata_obj.analog_rate
+    if metadata_obj.analog_rate and metadata_obj.analog_rate > 0 and analog:
+        first_analog = next(iter(analog.values()))
+        n_samples = len(first_analog.values)
+        analog_time = np.arange(n_samples) / metadata_obj.analog_rate
 
     # Metadata dict for UI
     metadata_ui = {

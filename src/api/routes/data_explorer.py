@@ -8,6 +8,7 @@ See issue #1206
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
 import json
@@ -262,10 +263,8 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
         for row in rows:
             val = row.get(col)
             if val is not None:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     values.append(float(val))
-                except (ValueError, TypeError):
-                    pass
 
         if values:
             stats[col] = {

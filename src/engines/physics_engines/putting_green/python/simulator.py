@@ -323,9 +323,7 @@ class PuttingGreenSimulator:
         if suffix == ".npy":
             heightmap = np.load(filepath)
             self.green.set_heightmap(heightmap)
-        elif suffix == ".csv":
-            self.green.load_from_file(filepath)
-        elif suffix in (".tif", ".tiff"):
+        elif suffix == ".csv" or suffix in (".tif", ".tiff"):
             self.green.load_from_file(filepath)
         else:
             self.green.load_from_file(filepath)

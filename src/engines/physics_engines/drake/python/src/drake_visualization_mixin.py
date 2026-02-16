@@ -6,6 +6,7 @@ and data export from DrakeSimApp (drake_gui_app.py).
 
 from __future__ import annotations
 
+import contextlib
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -480,10 +481,8 @@ class DrakeVisualizationMixin:
         spec_act_idx = -1
         txt = self.combo_induced_source.currentText()
         if txt and txt not in ["gravity", "velocity", "total"]:
-            try:
+            with contextlib.suppress(ValueError):
                 spec_act_idx = int(txt)
-            except ValueError:
-                pass
 
         g_induced = []
         c_induced = []

@@ -124,10 +124,7 @@ class InertiaResult:
             return False
         if not (abs(self.iyy - self.izz) <= self.ixx <= self.iyy + self.izz):
             return False
-        if not (abs(self.ixx - self.izz) <= self.iyy <= self.ixx + self.izz):
-            return False
-
-        return True
+        return abs(self.ixx - self.izz) <= self.iyy <= self.ixx + self.izz
 
     def validate_positive_definite(self) -> bool:
         """Check if inertia matrix is positive definite."""

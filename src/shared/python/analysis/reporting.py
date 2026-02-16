@@ -241,10 +241,7 @@ class ReportingMixin:
             for i in range(3):
                 idx = np.argmax(np.abs(self.joint_velocities[:, i]))
                 peaks.append(idx)
-            if peaks == sorted(peaks, key=int):
-                sequence_score = 100.0
-            else:
-                sequence_score = 50.0
+            sequence_score = 100.0 if peaks == sorted(peaks, key=int) else 50.0
         else:
             sequence_score = 0.0
 

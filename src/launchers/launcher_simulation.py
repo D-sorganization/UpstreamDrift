@@ -304,19 +304,18 @@ except Exception as e:
 
         try:
             # Auto-start VcXsrv on Windows for GUI support
-            if os.name == "nt":
-                if not start_vcxsrv():
-                    response = QMessageBox.question(
-                        self,
-                        "X Server Not Available",
-                        "VcXsrv X server is not running and could not be started.\n\n"
-                        "Docker GUI apps require an X server.\n\n"
-                        "Install VcXsrv from: https://vcxsrv.com\n\n"
-                        "Continue anyway?",
-                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                    )
-                    if response != QMessageBox.StandardButton.Yes:
-                        return
+            if os.name == "nt" and not start_vcxsrv():
+                response = QMessageBox.question(
+                    self,
+                    "X Server Not Available",
+                    "VcXsrv X server is not running and could not be started.\n\n"
+                    "Docker GUI apps require an X server.\n\n"
+                    "Install VcXsrv from: https://vcxsrv.com\n\n"
+                    "Continue anyway?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                )
+                if response != QMessageBox.StandardButton.Yes:
+                    return
 
             # Check if Docker image exists
             if not self.docker_launcher.check_image_exists():

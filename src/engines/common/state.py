@@ -102,9 +102,7 @@ class SimulationState:
             return False
         if len(self.tau) > 0 and not np.all(np.isfinite(self.tau)):
             return False
-        if self.time < 0:
-            return False
-        return True
+        return not self.time < 0
 
 
 class StateManager:

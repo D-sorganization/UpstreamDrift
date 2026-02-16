@@ -37,12 +37,11 @@ def validate_path(
         except (RuntimeError, TypeError, ValueError):
             continue
 
-    if not is_allowed:
-        if strict:
-            raise ValueError(
-                f"Path traversal blocked: {path} is not within allowed roots: "
-                f"{[str(r) for r in allowed_roots]}"
-            )
+    if not is_allowed and strict:
+        raise ValueError(
+            f"Path traversal blocked: {path} is not within allowed roots: "
+            f"{[str(r) for r in allowed_roots]}"
+        )
 
     return resolved_path
 

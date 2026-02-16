@@ -6,6 +6,8 @@ and all post-hoc plotting methods.
 
 from __future__ import annotations
 
+import contextlib
+
 import numpy as np
 
 from src.shared.python.engine_core.engine_availability import (
@@ -22,6 +24,7 @@ if HAS_QT:
 
 if HAS_MATPLOTLIB:
     import matplotlib.pyplot as plt
+
 
 from .drake_analysis import DrakeInducedAccelerationAnalyzer  # noqa: E402
 
@@ -156,10 +159,8 @@ class AnalysisMixin:
         spec_act_idx = -1
         txt = self.combo_induced_source.currentText()  # type: ignore[attr-defined]
         if txt and txt not in ["gravity", "velocity", "total"]:
-            try:
+            with contextlib.suppress(ValueError):
                 spec_act_idx = int(txt)
-            except ValueError:
-                pass
 
         g_induced = []
         c_induced = []

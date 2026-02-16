@@ -6,6 +6,7 @@ overlays, and toggle handlers from PinocchioGUI (gui.py).
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 import numpy as np
@@ -118,10 +119,8 @@ class PinocchioVisualizationMixin:
             return
 
         # Clear previous ellipsoids to prevent ghosting
-        try:
+        with contextlib.suppress(RuntimeError, ValueError, AttributeError):
             self.viewer["overlays/ellipsoids"].delete()
-        except (RuntimeError, ValueError, AttributeError):
-            pass
 
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             # Get selected bodies

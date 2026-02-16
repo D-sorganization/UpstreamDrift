@@ -221,10 +221,7 @@ def rnea(
     q, qd, qdd, nb = _rnea_validate_inputs(model, q, qd, qdd)
 
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
-    if a_grav is DEFAULT_GRAVITY:
-        neg_a_grav = NEG_DEFAULT_GRAVITY
-    else:
-        neg_a_grav = -a_grav
+    neg_a_grav = NEG_DEFAULT_GRAVITY if a_grav is DEFAULT_GRAVITY else -a_grav
 
     v = np.empty((6, nb), order="F")
     a = np.empty((6, nb), order="F")

@@ -130,10 +130,7 @@ def cross_motion(
             msg = f"m must be 6x1 spatial vector, got shape {orig_m_shape}"
             raise ValueError(msg)
 
-    if out is None:
-        res = np.empty(6, dtype=np.result_type(v, m))
-    else:
-        res = out
+    res = np.empty(6, dtype=np.result_type(v, m)) if out is None else out
 
     res[0] = v[1] * m[2] - v[2] * m[1]
     res[1] = v[2] * m[0] - v[0] * m[2]
@@ -168,10 +165,7 @@ def cross_force(
             msg = f"f must be 6x1 spatial vector, got shape {orig_f_shape}"
             raise ValueError(msg)
 
-    if out is None:
-        res = np.empty(6, dtype=np.result_type(v, f))
-    else:
-        res = out
+    res = np.empty(6, dtype=np.result_type(v, f)) if out is None else out
 
     res[0] = v[1] * f[2] - v[2] * f[1] + v[4] * f[5] - v[5] * f[4]
     res[1] = v[2] * f[0] - v[0] * f[2] + v[5] * f[3] - v[3] * f[5]

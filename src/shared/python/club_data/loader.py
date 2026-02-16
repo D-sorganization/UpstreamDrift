@@ -6,6 +6,7 @@ Excel files for use as target trajectories in physics simulations.
 
 from __future__ import annotations
 
+import contextlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -591,10 +592,8 @@ class ClubDataLoader:
                         if field_name == "player_name":
                             player_name = str(value)
                         else:
-                            try:
+                            with contextlib.suppress(ValueError, TypeError):
                                 metrics_data[field_name] = float(value)
-                            except (ValueError, TypeError):
-                                pass
                     break
 
         if not player_name:

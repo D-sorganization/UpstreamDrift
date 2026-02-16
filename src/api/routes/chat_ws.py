@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -93,10 +95,8 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
         logger.debug("Chat WebSocket disconnected: session=%s", session_id)
     except (ConnectionError, TimeoutError, OSError) as e:
         logger.error("Chat WebSocket error: %s", e)
-        try:
+        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
             await websocket.send_json({"type": "error", "detail": str(e)})
-        except (ConnectionError, TimeoutError, OSError):
-            pass
 
 
 # ── REST fallback endpoints ──────────────────────────────────────────
