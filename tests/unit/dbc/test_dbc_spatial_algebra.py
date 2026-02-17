@@ -426,9 +426,9 @@ class TestTransformSpatialInertiaPostconditions(unittest.TestCase):
             transform_spatial_inertia,
         )
 
-        I = mcI(2.0, np.zeros(3), np.diag([1.0, 2.0, 3.0]))
+        inertia = mcI(2.0, np.zeros(3), np.diag([1.0, 2.0, 3.0]))
         X = np.eye(6)
-        result = transform_spatial_inertia(I, X)
+        result = transform_spatial_inertia(inertia, X)
         np.testing.assert_array_almost_equal(result, result.T)
 
     def test_identity_transform_preserves(self) -> None:
@@ -437,9 +437,9 @@ class TestTransformSpatialInertiaPostconditions(unittest.TestCase):
             transform_spatial_inertia,
         )
 
-        I = mcI(2.0, np.zeros(3), np.diag([1.0, 2.0, 3.0]))
-        result = transform_spatial_inertia(I, np.eye(6))
-        np.testing.assert_array_almost_equal(result, I)
+        inertia = mcI(2.0, np.zeros(3), np.diag([1.0, 2.0, 3.0]))
+        result = transform_spatial_inertia(inertia, np.eye(6))
+        np.testing.assert_array_almost_equal(result, inertia)
 
 
 class TestCrossMotionAxisPreconditions(unittest.TestCase):

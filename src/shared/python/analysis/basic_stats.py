@@ -6,6 +6,7 @@ import numpy as np
 from scipy.signal import find_peaks
 
 from src.shared.python.analysis.dataclasses import PeakInfo, SummaryStatistics
+from src.shared.python.core.contracts import ensure, require
 
 
 class BasicStatsMixin:
@@ -23,18 +24,28 @@ class BasicStatsMixin:
     def compute_summary_stats(self, data: np.ndarray) -> SummaryStatistics:
         """Compute summary statistics for a 1D array.
 
+        Design by Contract:
+            Preconditions:
+                - data is non-empty
+            Postconditions:
+                - std >= 0
+                - range >= 0
+                - rms >= 0
+
         Args:
             data: 1D numpy array
 
         Returns:
             SummaryStatistics object
         """
+        require(len(data) > 0, "data must be non-empty")
+
         min_idx = np.argmin(data)
         max_idx = np.argmax(data)
         min_val = float(data[min_idx])
         max_val = float(data[max_idx])
 
-        return SummaryStatistics(
+        result = SummaryStatistics(
             mean=float(np.mean(data)),
             median=float(np.median(data)),
             std=float(np.std(data)),
@@ -45,6 +56,12 @@ class BasicStatsMixin:
             max_time=float(self.times[max_idx]),
             rms=float(np.sqrt(np.mean(data**2))),
         )
+
+        ensure(result.std >= 0, "std must be non-negative", result.std)
+        ensure(result.range >= 0, "range must be non-negative", result.range)
+        ensure(result.rms >= 0, "rms must be non-negative", result.rms)
+
+        return result
 
     def find_peaks_in_data(
         self,
