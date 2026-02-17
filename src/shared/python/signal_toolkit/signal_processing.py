@@ -26,7 +26,7 @@ from scipy.signal import (
     welch,
 )
 
-from src.shared.python.core.contracts import precondition
+from src.shared.python.core.contracts import ensure, precondition, require
 from src.shared.python.engine_core.engine_availability import (
     FASTDTW_AVAILABLE,
     NUMBA_AVAILABLE,
@@ -267,6 +267,12 @@ def compute_coherence(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute Magnitude Squared Coherence.
 
+    Design by Contract:
+        Preconditions:
+            - fs > 0 (sampling frequency must be positive)
+            - x and y must be non-empty
+            - x and y must have the same length
+
     Args:
         x: First time series
         y: Second time series
@@ -277,8 +283,14 @@ def compute_coherence(
     Returns:
         tuple: (frequencies, coherence_values)
     """
-    if fs <= 0:
-        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+    require(fs > 0, "Sampling frequency must be positive", fs)
+    require(len(x) > 0, "Input x must be non-empty")
+    require(len(y) > 0, "Input y must be non-empty")
+    require(
+        len(x) == len(y),
+        "x and y must have the same length",
+        {"x_len": len(x), "y_len": len(y)},
+    )
     freqs, coh = coherence(x, y, fs=fs, window=window, nperseg=nperseg)
     return freqs, coh
 
@@ -402,7 +414,9 @@ def compute_spectral_arc_length(
     # Arc length
     sal = -np.sum(np.sqrt(d_freq**2 + d_mag**2))
 
-    return float(sal)
+    result = float(sal)
+    ensure(result <= 0, "SAL must be non-positive (arc length is negated)", result)
+    return result
 
 
 @functools.lru_cache(maxsize=128)

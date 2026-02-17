@@ -27,6 +27,7 @@ import logging
 
 import numpy as np
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = logging.getLogger(__name__)
@@ -56,14 +57,26 @@ class ActivationDynamics:
     ) -> None:
         """Initialize activation dynamics.
 
+        Design by Contract:
+            Preconditions:
+                - tau_act > 0 (activation time constant must be positive)
+                - tau_deact > 0 (deactivation time constant must be positive)
+                - 0 < min_activation < 1 (floor must be within unit interval)
+            Invariants:
+                - tau_deact > tau_act (deactivation is physiologically slower)
+
         Args:
             tau_act: Time constant for activation (rise) [s]
             tau_deact: Time constant for deactivation (fall) [s]
             min_activation: Minimum activation floor (to prevent division by zero)
         """
-        if tau_act <= 0 or tau_deact <= 0:
-            msg = "Time constants must be positive"
-            raise ValueError(msg)
+        require(tau_act > 0, "tau_act must be positive", tau_act)
+        require(tau_deact > 0, "tau_deact must be positive", tau_deact)
+        require(
+            0 < min_activation < 1,
+            "min_activation must be in (0, 1)",
+            min_activation,
+        )
 
         self.tau_act = tau_act
         self.tau_deact = tau_deact
@@ -71,6 +84,9 @@ class ActivationDynamics:
 
     def compute_derivative(self, u: float, a: float) -> float:
         """Compute activation derivative da/dt.
+
+        Design by Contract:
+            Postcondition: result is finite
 
         Args:
             u: Neural excitation [0, 1]
@@ -91,12 +107,18 @@ class ActivationDynamics:
             tau = self.tau_deact / (0.5 + 1.5 * a)
 
         dadt = (u - a) / tau
-        return float(dadt)
+        result = float(dadt)
+        ensure(np.isfinite(result), "derivative da/dt must be finite", result)
+        return result
 
     def update(self, u: float, a: float, dt: float) -> float:
         """Update activation state by one time step.
 
         Uses Euler integration: a(t+dt) = a(t) + da/dt * dt
+
+        Design by Contract:
+            Precondition: dt > 0
+            Postcondition: min_activation <= result <= 1.0
 
         Args:
             u: Neural excitation [0, 1]
@@ -106,11 +128,18 @@ class ActivationDynamics:
         Returns:
             New activation level a(t+dt) [0, 1]
         """
+        require(dt > 0, "time step dt must be positive", dt)
         dadt = self.compute_derivative(u, a)
         a_new = a + dadt * dt
 
         # Clamp result
-        return float(np.clip(a_new, self.min_activation, 1.0))
+        result = float(np.clip(a_new, self.min_activation, 1.0))
+        ensure(
+            self.min_activation <= result <= 1.0,
+            "activation must be in [min_activation, 1.0]",
+            result,
+        )
+        return result
 
 
 # Example usage / validation

@@ -3,6 +3,7 @@
 import numpy as np
 
 from src.shared.python.analysis.dataclasses import StabilityMetrics
+from src.shared.python.core.contracts import ensure
 
 
 class StabilityMetricsMixin:
@@ -12,6 +13,12 @@ class StabilityMetricsMixin:
         """Compute postural stability metrics.
 
         Requires both CoP and CoM positions.
+
+        Design by Contract:
+            Postconditions:
+                - all distance values are non-negative
+                - inclination angles are in [0, 180] degrees
+                - all returned values are finite
 
         Returns:
             StabilityMetrics object or None if data unavailable
@@ -65,10 +72,34 @@ class StabilityMetricsMixin:
         angles_rad = np.arccos(cos_theta)
         angles_deg = np.rad2deg(angles_rad)
 
-        return StabilityMetrics(
+        result = StabilityMetrics(
             min_com_cop_distance=float(np.min(dist)),
             max_com_cop_distance=float(np.max(dist)),
             mean_com_cop_distance=float(np.mean(dist)),
             peak_inclination_angle=float(np.max(angles_deg)),
             mean_inclination_angle=float(np.mean(angles_deg)),
         )
+
+        # Postconditions: distances non-negative, angles in [0, 180]
+        ensure(
+            result.min_com_cop_distance >= 0,
+            "min CoM-CoP distance must be non-negative",
+            result.min_com_cop_distance,
+        )
+        ensure(
+            result.max_com_cop_distance >= 0,
+            "max CoM-CoP distance must be non-negative",
+            result.max_com_cop_distance,
+        )
+        ensure(
+            0 <= result.peak_inclination_angle <= 180.0,
+            "peak inclination angle must be in [0, 180] degrees",
+            result.peak_inclination_angle,
+        )
+        ensure(
+            0 <= result.mean_inclination_angle <= 180.0,
+            "mean inclination angle must be in [0, 180] degrees",
+            result.mean_inclination_angle,
+        )
+
+        return result

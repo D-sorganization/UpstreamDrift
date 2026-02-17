@@ -3,6 +3,7 @@
 import numpy as np
 
 from src.shared.python.analysis.dataclasses import AngularMomentumMetrics
+from src.shared.python.core.contracts import ensure
 
 
 class AngularMomentumMetricsMixin:
@@ -10,6 +11,14 @@ class AngularMomentumMetricsMixin:
 
     def compute_angular_momentum_metrics(self) -> AngularMomentumMetrics | None:
         """Compute metrics related to system angular momentum.
+
+        Design by Contract:
+            Postconditions:
+                - peak_magnitude >= 0
+                - mean_magnitude >= 0
+                - variability >= 0
+                - all component peaks >= 0
+                - all values finite
 
         Returns:
             AngularMomentumMetrics object or None if data unavailable
@@ -39,7 +48,7 @@ class AngularMomentumMetricsMixin:
         std_mag = float(np.std(mag))
         variability = std_mag / mean_mag if mean_mag > 0 else 0.0
 
-        return AngularMomentumMetrics(
+        result = AngularMomentumMetrics(
             peak_magnitude=peak_mag,
             peak_time=peak_time,
             mean_magnitude=mean_mag,
@@ -48,3 +57,25 @@ class AngularMomentumMetricsMixin:
             peak_lz=peak_lz,
             variability=variability,
         )
+
+        # Postconditions
+        ensure(
+            result.peak_magnitude >= 0,
+            "peak_magnitude must be non-negative",
+            result.peak_magnitude,
+        )
+        ensure(
+            result.mean_magnitude >= 0,
+            "mean_magnitude must be non-negative",
+            result.mean_magnitude,
+        )
+        ensure(
+            result.variability >= 0,
+            "variability must be non-negative",
+            result.variability,
+        )
+        ensure(result.peak_lx >= 0, "peak_lx must be non-negative", result.peak_lx)
+        ensure(result.peak_ly >= 0, "peak_ly must be non-negative", result.peak_ly)
+        ensure(result.peak_lz >= 0, "peak_lz must be non-negative", result.peak_lz)
+
+        return result
