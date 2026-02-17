@@ -10,6 +10,7 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
 from src.shared.python.analysis.dataclasses import CoordinationMetrics
+from src.shared.python.core.contracts import ensure, require
 
 
 class CoordinationMetricsMixin:
@@ -40,6 +41,10 @@ class CoordinationMetricsMixin:
         successive data points in an Angle-Angle diagram. It quantifies
         the coordination pattern between the two segments.
 
+        Design by Contract:
+            Postconditions:
+                - all angles in [0, 360)
+
         Args:
             joint_idx_1: Index of the first joint (x-axis)
             joint_idx_2: Index of the second joint (y-axis)
@@ -62,7 +67,13 @@ class CoordinationMetricsMixin:
         # Normalize to [0, 360)
         gamma_deg = np.mod(gamma_deg, 360.0)
 
-        return np.asarray(gamma_deg)
+        result = np.asarray(gamma_deg)
+        if len(result) > 0:
+            ensure(
+                np.all(result >= 0) and np.all(result < 360.0),
+                "coupling angles must be in [0, 360)",
+            )
+        return result
 
     def compute_coordination_metrics(
         self, joint_idx_1: int, joint_idx_2: int
@@ -80,6 +91,13 @@ class CoordinationMetricsMixin:
         - Proximal: 0 +/- 22.5, 180 +/- 22.5
         - Distal: 90 +/- 22.5, 270 +/- 22.5
         - Anti-Phase: 135 +/- 22.5, 315 +/- 22.5
+
+        Design by Contract:
+            Postconditions:
+                - all percentage fields are non-negative
+                - percentages sum to approximately 100
+                - mean_coupling_angle in [0, 360)
+                - coordination_variability >= 0
 
         Args:
             joint_idx_1: Proximal joint index (X-axis)
@@ -119,7 +137,7 @@ class CoordinationMetricsMixin:
         else:
             circ_std_deg = 0.0
 
-        return CoordinationMetrics(
+        result = CoordinationMetrics(
             in_phase_pct=float(in_phase_cnt / total * 100),
             anti_phase_pct=float(anti_phase_cnt / total * 100),
             proximal_leading_pct=float(proximal_cnt / total * 100),
@@ -127,6 +145,31 @@ class CoordinationMetricsMixin:
             mean_coupling_angle=float(mean_angle_deg),
             coordination_variability=float(circ_std_deg),
         )
+
+        # Postconditions
+        pct_sum = (
+            result.in_phase_pct
+            + result.anti_phase_pct
+            + result.proximal_leading_pct
+            + result.distal_leading_pct
+        )
+        ensure(
+            abs(pct_sum - 100.0) < 1e-6,
+            "coordination percentages must sum to 100",
+            pct_sum,
+        )
+        ensure(
+            result.coordination_variability >= 0,
+            "coordination variability must be non-negative",
+            result.coordination_variability,
+        )
+        ensure(
+            0.0 <= result.mean_coupling_angle < 360.0,
+            "mean coupling angle must be in [0, 360)",
+            result.mean_coupling_angle,
+        )
+
+        return result
 
     def compute_phase_angle(self, joint_idx: int) -> np.ndarray:
         """Compute continuous phase angle for a joint.
@@ -230,6 +273,12 @@ class CoordinationMetricsMixin:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Compute rolling correlation between two joints.
 
+        Design by Contract:
+            Preconditions:
+                - window_size >= 2
+            Postconditions:
+                - all correlations in [-1, 1]
+
         Args:
             joint_idx_1: First joint index
             joint_idx_2: Second joint index
@@ -239,6 +288,8 @@ class CoordinationMetricsMixin:
         Returns:
             Tuple of (times, correlations). Times correspond to window centers.
         """
+        require(window_size >= 2, "window_size must be >= 2", window_size)
+
         if data_type == "position":
             data = self.joint_positions
         elif data_type == "torque":
@@ -272,6 +323,14 @@ class CoordinationMetricsMixin:
         with np.errstate(divide="ignore", invalid="ignore"):
             correlations = numerator / denominator
         correlations[np.isnan(correlations)] = 0.0
+
+        # Postcondition
+        if len(correlations) > 0:
+            ensure(
+                np.all(correlations >= -1.0 - 1e-6)
+                and np.all(correlations <= 1.0 + 1e-6),
+                "rolling correlations must be in [-1, 1]",
+            )
 
         valid_indices = np.arange(len(correlations)) + window_size // 2
         window_times = self.times[valid_indices]

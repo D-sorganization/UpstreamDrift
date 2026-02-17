@@ -12,6 +12,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from src.shared.python.core.contracts import ensure, require
+
 
 @dataclass
 class SwingPlaneMetrics:
@@ -31,6 +33,12 @@ class SwingPlaneAnalyzer:
     def fit_plane(self, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Fit a plane to a set of 3D points using SVD.
 
+        Design by Contract:
+            Preconditions:
+                - len(points) >= 3
+            Postconditions:
+                - normal vector is unit length (within tolerance)
+
         Args:
             points: Array of points (N, 3)
 
@@ -40,9 +48,7 @@ class SwingPlaneAnalyzer:
         Raises:
             ValueError: If fewer than 3 points are provided.
         """
-        if len(points) < 3:
-            msg = "At least 3 points are required to fit a plane."
-            raise ValueError(msg)
+        require(len(points) >= 3, "at least 3 points required to fit a plane")
 
         centroid = np.mean(points, axis=0)
         centered_points = points - centroid
@@ -57,6 +63,11 @@ class SwingPlaneAnalyzer:
         norm = np.linalg.norm(normal)
         if norm > 0:
             normal = normal / norm
+
+        ensure(
+            abs(np.linalg.norm(normal) - 1.0) < 1e-6,
+            "normal vector must be unit length",
+        )
 
         return centroid, normal
 
@@ -81,6 +92,12 @@ class SwingPlaneAnalyzer:
 
     def analyze(self, points: np.ndarray) -> SwingPlaneMetrics:
         """Perform full swing plane analysis on trajectory.
+
+        Design by Contract:
+            Postconditions:
+                - rmse >= 0
+                - max_deviation >= 0
+                - steepness_deg in [0, 180]
 
         Args:
             points: (N, 3) club head trajectory (or similar)
@@ -107,7 +124,7 @@ class SwingPlaneAnalyzer:
         nx, ny = normal[0], normal[1]
         direction = np.degrees(np.arctan2(ny, nx))
 
-        return SwingPlaneMetrics(
+        result = SwingPlaneMetrics(
             normal_vector=normal,
             point_on_plane=centroid,
             steepness_deg=float(steepness),
@@ -115,3 +132,18 @@ class SwingPlaneAnalyzer:
             rmse=float(rmse),
             max_deviation=float(max_dev),
         )
+
+        # Postconditions
+        ensure(result.rmse >= 0, "RMSE must be non-negative", result.rmse)
+        ensure(
+            result.max_deviation >= 0,
+            "max deviation must be non-negative",
+            result.max_deviation,
+        )
+        ensure(
+            0.0 <= result.steepness_deg <= 180.0,
+            "steepness must be in [0, 180] degrees",
+            result.steepness_deg,
+        )
+
+        return result
