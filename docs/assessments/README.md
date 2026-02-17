@@ -119,6 +119,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | Date       | Topic         | Report File                                            |
 | ---------- | ------------- | ------------------------------------------------------ |
 | 2025-02-24 | Physics Audit | `docs/assessments/physics/Physics_Audit_2025-02-24.md` |
+| 2025-02-24 | Implementation Gaps | `docs/assessments/implementation_gaps_report.md` |
 
 ---
 
@@ -189,6 +190,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2.1     | 2026-02 | Added comprehensive multi-framework assessment |
 | 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)   |
 | 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)    |
+| 2.4     | 2026-02 | Added Implementation Gaps Report               |
 
 ---
 
