@@ -1,11 +1,13 @@
 """Unit tests for kinematic sequence analysis."""
 
 import numpy as np
+import pytest
 
 from src.shared.python.biomechanics.kinematic_sequence import (
     KinematicSequenceAnalyzer,
     SegmentTimingAnalyzer,
 )
+from src.shared.python.core.contracts import PreconditionError
 
 
 class MockRecorder:
@@ -102,12 +104,10 @@ def test_extract_velocities():
 
 
 def test_empty_data():
-    """Test handling empty data."""
+    """Test handling empty data raises PreconditionError."""
     analyzer = SegmentTimingAnalyzer()
-    result = analyzer.analyze({}, np.array([]))
-
-    assert len(result.peaks) == 0
-    assert result.sequence_consistency == 0.0
+    with pytest.raises(PreconditionError):
+        analyzer.analyze({}, np.array([]))
 
 
 def test_backward_compat_alias():

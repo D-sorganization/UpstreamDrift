@@ -14,6 +14,7 @@ import numpy as np
 from scipy import optimize
 from simpleeval import EvalWithCompoundTypes
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.signal_toolkit.core import Signal
 
 
@@ -117,6 +118,8 @@ class SinusoidFitter:
         Returns:
             FitResult with fitted parameters and statistics.
         """
+        require(len(signal.values) > 0, "signal must be non-empty")
+
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -166,7 +169,7 @@ class SinusoidFitter:
             units=signal.units,
         )
 
-        return FitResult(
+        result = FitResult(
             parameters={
                 "amplitude": popt[0],
                 "frequency": popt[1],
@@ -181,6 +184,8 @@ class SinusoidFitter:
             success=success,
             message=message,
         )
+        ensure(result.rmse >= 0, "RMSE must be non-negative", result.rmse)
+        return result
 
     def get_function_string(self, params: dict[str, float]) -> str:
         """Get string representation of the fitted function."""
@@ -268,6 +273,8 @@ class ExponentialFitter:
         Returns:
             FitResult with fitted parameters.
         """
+        require(len(signal.values) > 0, "signal must be non-empty")
+
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -414,6 +421,8 @@ class LinearFitter:
         Returns:
             FitResult with slope and intercept parameters.
         """
+        require(len(signal.values) > 0, "signal must be non-empty")
+
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -481,10 +490,12 @@ class PolynomialFitter:
         Returns:
             FitResult with polynomial coefficients.
         """
+        order = order if order is not None else self.order
+        require(len(signal.values) > 0, "signal must be non-empty")
+        require(order >= 0, "polynomial order must be non-negative", order)
+
         t = signal.time - signal.time[0]
         y = signal.values
-
-        order = order if order is not None else self.order
 
         # Need at least order+1 points
         if len(t) < order + 1:
@@ -529,7 +540,7 @@ class PolynomialFitter:
         Returns:
             Array of coefficients [c0, c1, c2, ...].
         """
-        max_order = max(int(k[1:]) for k in params.keys())
+        max_order = max(int(k[1:]) for k in params)
         coeffs = np.zeros(max_order + 1)
         for k, v in params.items():
             idx = int(k[1:])

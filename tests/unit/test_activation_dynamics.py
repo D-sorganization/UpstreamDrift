@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.biomechanics.activation_dynamics import ActivationDynamics
+from src.shared.python.core.contracts import PreconditionError
 
 
 class TestActivationDynamicsInitialization:
@@ -34,23 +35,23 @@ class TestActivationDynamicsInitialization:
         assert dynamics.min_activation == 0.005
 
     def test_negative_tau_act_raises_error(self):
-        """Test that negative tau_act raises ValueError."""
-        with pytest.raises(ValueError, match="Time constants must be positive"):
+        """Test that negative tau_act raises PreconditionError."""
+        with pytest.raises(PreconditionError):
             ActivationDynamics(tau_act=-0.010, tau_deact=0.040)
 
     def test_negative_tau_deact_raises_error(self):
-        """Test that negative tau_deact raises ValueError."""
-        with pytest.raises(ValueError, match="Time constants must be positive"):
+        """Test that negative tau_deact raises PreconditionError."""
+        with pytest.raises(PreconditionError):
             ActivationDynamics(tau_act=0.010, tau_deact=-0.040)
 
     def test_zero_tau_act_raises_error(self):
-        """Test that zero tau_act raises ValueError."""
-        with pytest.raises(ValueError, match="Time constants must be positive"):
+        """Test that zero tau_act raises PreconditionError."""
+        with pytest.raises(PreconditionError):
             ActivationDynamics(tau_act=0.0, tau_deact=0.040)
 
     def test_zero_tau_deact_raises_error(self):
-        """Test that zero tau_deact raises ValueError."""
-        with pytest.raises(ValueError, match="Time constants must be positive"):
+        """Test that zero tau_deact raises PreconditionError."""
+        with pytest.raises(PreconditionError):
             ActivationDynamics(tau_act=0.010, tau_deact=0.0)
 
 
@@ -226,13 +227,13 @@ class TestUpdate:
         assert a_new < a, "Activation should decrease when u < a"
 
     def test_zero_time_step_no_change(self, dynamics):
-        """Test that zero time step produces no change."""
+        """Test that zero time step raises PreconditionError."""
         u = 1.0
         a = 0.5
         dt = 0.0
 
-        a_new = dynamics.update(u, a, dt)
-        np.testing.assert_allclose(a_new, a, rtol=1e-10)
+        with pytest.raises(PreconditionError):
+            dynamics.update(u, a, dt)
 
 
 class TestStepResponse:

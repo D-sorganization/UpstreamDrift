@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.engine_core.engine_availability import SKLEARN_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -53,6 +54,16 @@ class MuscleSynergyAnalyzer:
             muscle_names: Optional list of muscle names.
         """
         self.data = np.asarray(activation_data)
+        require(
+            self.data.ndim == 2,
+            "activation_data must be 2D (n_samples, n_muscles)",
+            self.data.ndim,
+        )
+        require(
+            self.data.shape[0] > 0 and self.data.shape[1] > 0,
+            "activation_data must have at least one sample and one muscle",
+            self.data.shape,
+        )
         if np.any(self.data < 0):
             logger.warning(
                 "Activation data contains negative values. NMF requires non-negative data. Clipping to 0."
@@ -100,10 +111,12 @@ class MuscleSynergyAnalyzer:
         Returns:
             SynergyResult object.
         """
-        if n_synergies < 1 or n_synergies > self.n_muscles:
-            raise ValueError(
-                f"Invalid number of synergies: {n_synergies}. Must be between 1 and {self.n_muscles}"
-            )
+        require(
+            1 <= n_synergies <= self.n_muscles,
+            f"n_synergies must be between 1 and {self.n_muscles}",
+            n_synergies,
+        )
+        require(max_iter >= 1, "max_iter must be >= 1", max_iter)
 
         if not SKLEARN_AVAILABLE:
             raise ImportError(
@@ -140,9 +153,9 @@ class MuscleSynergyAnalyzer:
 
         sst = np.sum(self.data**2)
         sse = np.sum((self.data - X_recon) ** 2)
-        vaf = 1.0 - (sse / sst)
+        vaf = 1.0 - (sse / sst) if sst > 0 else 0.0
 
-        return SynergyResult(
+        result = SynergyResult(
             weights=W_standard,
             activations=H_standard,
             reconstructed=X_recon,
@@ -150,11 +163,22 @@ class MuscleSynergyAnalyzer:
             n_synergies=n_synergies,
             muscle_names=self.muscle_names,
         )
+        ensure(
+            0.0 <= result.vaf <= 1.0 + 1e-6,
+            "VAF must be in [0, 1]",
+            result.vaf,
+        )
+        return result
 
     def find_optimal_synergies(
         self, max_synergies: int = 10, vaf_threshold: float = 0.90
     ) -> SynergyResult:
         """Find the minimum number of synergies to satisfy VAF threshold.
+
+        Design by Contract:
+            Preconditions:
+                - max_synergies >= 1
+                - vaf_threshold in [0, 1]
 
         Args:
             max_synergies: Maximum number to try.
