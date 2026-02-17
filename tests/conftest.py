@@ -160,7 +160,7 @@ def mock_drake_dependencies():
         yield mock_pydrake, mock_interfaces
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_mujoco_dependencies():
     """Fixture to mock mujoco and interfaces safely.
 
