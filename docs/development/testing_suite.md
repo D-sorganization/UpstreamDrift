@@ -122,8 +122,8 @@ and `PostconditionError`.
 | P1       | `spatial_algebra/` | >80%   | Wave 2 ✓ |
 | P2       | `physics/`         | >50%   | Wave 3 ✓ |
 | P2       | `data_io/`         | >50%   | Wave 3 ✓ |
-| P3       | `optimization/`    | >40%   | Planned  |
-| P3       | `validation_pkg/`  | >40%   | Planned  |
+| P3       | `optimization/`    | >40%   | Wave 4 ✓ |
+| P3       | `validation_pkg/`  | >40%   | Wave 4 ✓ |
 
 ### Exclusions
 
@@ -179,3 +179,29 @@ Tests run automatically via GitHub Actions on every push and PR:
   - `path_utils.py`: repo root resolution, ensure_directory, find_file_in_parents
   - `reproducibility.py`: set_seeds determinism, RNG isolation, log_execution_time
 - **Total new tests**: 129
+
+### Wave 4 (Feb 2026) — Optimization & Validation
+
+- `optimization/` (1 module): 0% → ~65% (69 new tests)
+  - `swing_optimizer.py`: enums, GolferModel/ClubModel dataclasses, derived
+    properties (total_mass, club_moi), OptimizationConfig defaults, SwingTrajectory
+    and OptimizationResult fields, SwingOptimizer init/model setup, initial guess
+    generation, vector↔trajectory roundtrip, bounds, constraints, objective
+    computation, injury risk, energy cost, metrics, and full-optimization smoke
+    tests
+- `validation_pkg/` (4 modules): ~30% → ~70% (106 new tests)
+  - `validation.py`: PhysicalValidationError (old/new style), validate_mass,
+    validate_timestep, validate_inertia_matrix (SPD, shape, symmetry),
+    validate_joint_limits, validate_friction_coefficient,
+    validate_physical_bounds decorator
+  - `validation_utils.py`: array shape/dimensions/length, positive, range,
+    file/directory/extension existence, not_none, type, dict_keys, numeric
+    (NaN/Inf handling), validate_all error collection
+  - `validation_helpers.py`: ValidationLevel enum, validate_finite (strict/
+    standard/permissive), validate_magnitude bounds, validate_joint_state
+    (dimension mismatch, NaN), validate_cartesian_state, validate_model_parameters
+    (mass positivity, total-mass plausibility warning), physics constants
+  - `validation_data.py`: DataSource enum, ValidationDataPoint frozen dataclass,
+    mph/yards conversions, is_valid_carry tolerance, PGA_TOUR_2024 and
+    AMATEUR_AVERAGES collections, get_validation_data_for_club lookup
+- **Total new tests**: 175
