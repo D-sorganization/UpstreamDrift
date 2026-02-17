@@ -6,6 +6,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 
 from src.shared.python.analysis.dataclasses import SummaryStatistics, SwingPhase
+from src.shared.python.core.contracts import ensure
 
 
 class PhaseDetectionMixin:
@@ -15,6 +16,12 @@ class PhaseDetectionMixin:
         """Automatically detect swing phases.
 
         Uses heuristics based on club head speed and position.
+
+        Design by Contract:
+            Postconditions:
+                - all phases have duration >= 0
+                - all phases have start_time <= end_time
+                - all phases have start_index <= end_index
 
         Returns:
             List of SwingPhase objects
@@ -41,7 +48,25 @@ class PhaseDetectionMixin:
         if times is None:
             times = np.zeros(0)
 
-        return self._create_phases_from_definitions(phase_defs, times)
+        phases = self._create_phases_from_definitions(phase_defs, times)
+
+        # Postconditions
+        for phase in phases:
+            ensure(
+                phase.duration >= 0,
+                f"phase '{phase.name}' duration must be non-negative",
+                phase.duration,
+            )
+            ensure(
+                phase.start_time <= phase.end_time,
+                f"phase '{phase.name}' start_time must be <= end_time",
+            )
+            ensure(
+                phase.start_index <= phase.end_index,
+                f"phase '{phase.name}' start_index must be <= end_index",
+            )
+
+        return phases
 
     @staticmethod
     def _fallback_single_phase(
