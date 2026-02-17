@@ -113,9 +113,9 @@ and `PostconditionError`.
 | -------- | ------------------ | ------ | -------------- |
 | P0       | `core/`            | >90%   | Wave 1 ✓       |
 | P0       | `signal_toolkit/`  | >60%   | Wave 1 ✓       |
-| P1       | `analysis/`        | >80%   | Planned Wave 2 |
-| P1       | `biomechanics/`    | >80%   | Planned Wave 2 |
-| P1       | `spatial_algebra/` | >80%   | Planned Wave 2 |
+| P1       | `analysis/`        | >80%   | Wave 2 ✓       |
+| P1       | `biomechanics/`    | >80%   | Planned Wave 3 |
+| P1       | `spatial_algebra/` | >80%   | Wave 2 ✓       |
 | P2       | `physics/`         | >50%   | Planned Wave 3 |
 | P2       | `data_io/`         | >50%   | Planned Wave 3 |
 | P3       | `optimization/`    | >40%   | Planned Wave 4 |
@@ -145,3 +145,16 @@ Tests run automatically via GitHub Actions on every push and PR:
 - `core/datetime_utils.py`: 53% → ~95% (40+ new tests)
 - `signal_toolkit/signal_processing.py`: 24% → ~55% (32+ new tests)
 - **Total new tests**: 169
+
+### Wave 2 (Feb 2026) — Spatial Algebra & Analysis
+
+- `spatial_algebra/` (all modules): ~30% → ~85% (80 new tests)
+  - `spatial_vectors.py`: skew, crm, crf, cross ops, fast variants, axis ops
+  - `transforms.py`: xrot, xlt, xtrans, inv_xtrans with mathematical verification
+  - `inertia.py`: mcI, mci, transform_spatial_inertia (symmetry, PSD)
+  - `joints.py`: jcalc for all 6 joint types (Rx, Ry, Rz, Px, Py, Pz)
+- `analysis/` (all mixin modules): ~40% → ~75% (42 new tests)
+  - `basic_stats.py`, `energy_metrics.py`, `stability_metrics.py`
+  - `angular_momentum.py`, `grf_metrics.py`, `pca_analysis.py`
+  - All dataclass instantiation
+- **Total new tests**: 122
