@@ -6,6 +6,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 
 from src.shared.python.analysis.dataclasses import PeakInfo
+from src.shared.python.core.contracts import ensure
 
 
 class SwingMetricsMixin:
@@ -27,6 +28,11 @@ class SwingMetricsMixin:
     def compute_range_of_motion(self, joint_idx: int) -> tuple[float, float, float]:
         """Compute range of motion for a joint.
 
+        Design by Contract:
+            Postconditions:
+                - rom >= 0 (range of motion is non-negative)
+                - max_angle >= min_angle
+
         Args:
             joint_idx: Joint index
 
@@ -41,12 +47,21 @@ class SwingMetricsMixin:
         max_angle = float(np.max(angles_deg))
         rom = max_angle - min_angle
 
+        ensure(rom >= 0, "ROM must be non-negative", rom)
+        ensure(max_angle >= min_angle, "max_angle must be >= min_angle")
+
         return (min_angle, max_angle, rom)
 
     def compute_tempo(self) -> tuple[float, float, float] | None:
         """Compute swing tempo (backswing:downswing ratio).
 
         Uses club head speed to identify transition point.
+
+        Design by Contract:
+            Postconditions:
+                - backswing_duration >= 0
+                - downswing_duration >= 0
+                - ratio >= 0
 
         Returns:
             (backswing_duration, downswing_duration, ratio) or None
@@ -86,6 +101,18 @@ class SwingMetricsMixin:
             backswing_duration / downswing_duration if downswing_duration > 0 else 0.0
         )
 
+        ensure(
+            backswing_duration >= 0,
+            "backswing duration must be non-negative",
+            backswing_duration,
+        )
+        ensure(
+            downswing_duration >= 0,
+            "downswing duration must be non-negative",
+            downswing_duration,
+        )
+        ensure(ratio >= 0, "tempo ratio must be non-negative", ratio)
+
         return (backswing_duration, downswing_duration, ratio)
 
     def compute_x_factor(
@@ -120,6 +147,10 @@ class SwingMetricsMixin:
     ) -> tuple[np.ndarray, float] | None:
         """Compute X-Factor velocity (stretch rate) and peak stretch.
 
+        Design by Contract:
+            Postcondition:
+                - peak_stretch_rate >= 0
+
         Args:
             shoulder_joint_idx: Index of shoulder/torso rotation joint
             hip_joint_idx: Index of hip rotation joint
@@ -134,6 +165,12 @@ class SwingMetricsMixin:
         # Calculate derivative (finite difference)
         x_factor_velocity = np.gradient(x_factor, self.dt)
         peak_stretch_rate = float(np.max(np.abs(x_factor_velocity)))
+
+        ensure(
+            peak_stretch_rate >= 0,
+            "peak stretch rate must be non-negative",
+            peak_stretch_rate,
+        )
 
         return x_factor_velocity, peak_stretch_rate
 

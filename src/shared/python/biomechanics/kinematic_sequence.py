@@ -22,6 +22,7 @@ from src.shared.python.analysis.dataclasses import (
     CITATION_SEGMENT_TIMING,
     MethodCitation,
 )
+from src.shared.python.core.contracts import ensure, require
 
 if TYPE_CHECKING:
     from typing import Any
@@ -84,6 +85,14 @@ class SegmentTimingAnalyzer:
     ) -> SegmentTimingResult:
         """Analyze the kinematic sequence from velocity data.
 
+        Design by Contract:
+            Preconditions:
+                - len(times) > 0
+            Postconditions:
+                - sequence_consistency in [0, 1]
+                - all peak velocities >= 0
+                - all timing_gaps values are finite
+
         Args:
             segment_velocities: Dict mapping segment name to velocity array (1D)
             times: Time array corresponding to velocities
@@ -91,6 +100,8 @@ class SegmentTimingAnalyzer:
         Returns:
             KinematicSequenceResult object
         """
+        require(len(times) > 0, "times array must be non-empty")
+
         # 1. Detect peaks for each segment
         peaks = self._detect_peaks(segment_velocities, times)
 
@@ -109,7 +120,7 @@ class SegmentTimingAnalyzer:
             peaks, segment_velocities
         )
 
-        return SegmentTimingResult(
+        result = SegmentTimingResult(
             peaks=peaks,
             sequence_order=actual_order,
             expected_order=self.expected_order,
@@ -118,6 +129,27 @@ class SegmentTimingAnalyzer:
             is_valid_sequence=is_valid,
             methodology=CITATION_SEGMENT_TIMING,
         )
+
+        # Postconditions
+        ensure(
+            0.0 <= result.sequence_consistency <= 1.0,
+            "sequence_consistency must be in [0, 1]",
+            result.sequence_consistency,
+        )
+        for peak in result.peaks:
+            ensure(
+                peak.peak_velocity >= 0,
+                "peak velocity must be non-negative",
+                peak.peak_velocity,
+            )
+        for gap_name, gap_val in result.timing_gaps.items():
+            ensure(
+                np.isfinite(gap_val),
+                f"timing gap '{gap_name}' must be finite",
+                gap_val,
+            )
+
+        return result
 
     @staticmethod
     def _detect_peaks(
