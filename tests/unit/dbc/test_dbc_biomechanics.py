@@ -74,9 +74,7 @@ class TestForceLengthActivePostconditions(unittest.TestCase):
             MuscleParameters,
         )
 
-        return HillMuscleModel(
-            MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20)
-        )
+        return HillMuscleModel(MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20))
 
     def test_optimal_length_gives_max(self) -> None:
         model = self._make_model()
@@ -97,8 +95,7 @@ class TestForceLengthActivePostconditions(unittest.TestCase):
         model = self._make_model()
         for l_norm in np.linspace(0.1, 3.0, 50):
             fl = model.force_length_active(float(l_norm))
-            self.assertGreaterEqual(fl, 0.0,
-                                    f"f_l({l_norm}) = {fl} < 0")
+            self.assertGreaterEqual(fl, 0.0, f"f_l({l_norm}) = {fl} < 0")
 
 
 class TestForceLengthPassivePostconditions(unittest.TestCase):
@@ -110,9 +107,7 @@ class TestForceLengthPassivePostconditions(unittest.TestCase):
             MuscleParameters,
         )
 
-        return HillMuscleModel(
-            MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20)
-        )
+        return HillMuscleModel(MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20))
 
     def test_below_optimal_gives_zero(self) -> None:
         model = self._make_model()
@@ -132,8 +127,9 @@ class TestForceLengthPassivePostconditions(unittest.TestCase):
         prev = 0.0
         for l_norm in np.linspace(1.01, 2.0, 20):
             fp = model.force_length_passive(float(l_norm))
-            self.assertGreaterEqual(fp, prev,
-                                    f"Passive force not monotonic at l_norm={l_norm}")
+            self.assertGreaterEqual(
+                fp, prev, f"Passive force not monotonic at l_norm={l_norm}"
+            )
             prev = fp
 
 
@@ -146,9 +142,7 @@ class TestForceVelocityPostconditions(unittest.TestCase):
             MuscleParameters,
         )
 
-        return HillMuscleModel(
-            MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20)
-        )
+        return HillMuscleModel(MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20))
 
     def test_isometric_gives_one(self) -> None:
         model = self._make_model()
@@ -171,8 +165,7 @@ class TestForceVelocityPostconditions(unittest.TestCase):
         model = self._make_model()
         for v in np.linspace(-0.99, 0.0, 20):
             fv = model.force_velocity(float(v))
-            self.assertGreaterEqual(fv, 0.0,
-                                    f"f_v({v}) = {fv} < 0")
+            self.assertGreaterEqual(fv, 0.0, f"f_v({v}) = {fv} < 0")
 
 
 class TestTendonForcePostconditions(unittest.TestCase):
@@ -184,9 +177,7 @@ class TestTendonForcePostconditions(unittest.TestCase):
             MuscleParameters,
         )
 
-        return HillMuscleModel(
-            MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20)
-        )
+        return HillMuscleModel(MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20))
 
     def test_slack_gives_zero(self) -> None:
         model = self._make_model()
@@ -206,8 +197,7 @@ class TestTendonForcePostconditions(unittest.TestCase):
         prev = 0.0
         for lt in np.linspace(1.0, 1.1, 20):
             ft = model.tendon_force(float(lt))
-            self.assertGreaterEqual(ft, prev,
-                                    f"Tendon force not monotonic at lt={lt}")
+            self.assertGreaterEqual(ft, prev, f"Tendon force not monotonic at lt={lt}")
             prev = ft
 
 
@@ -220,9 +210,7 @@ class TestComputeForcePostconditions(unittest.TestCase):
             MuscleParameters,
         )
 
-        return HillMuscleModel(
-            MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20)
-        )
+        return HillMuscleModel(MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20))
 
     def test_isometric_max_activation(self) -> None:
         from src.shared.python.biomechanics.hill_muscle import MuscleState
@@ -255,7 +243,8 @@ class TestComputeForcePostconditions(unittest.TestCase):
                     )
                     force = model.compute_force(state)
                     self.assertGreaterEqual(
-                        force, 0.0,
+                        force,
+                        0.0,
                         f"Force={force} < 0 for a={activation}, "
                         f"l_CE={l_CE}, v_CE={v_CE}",
                     )
@@ -274,8 +263,9 @@ class TestComputeForcePostconditions(unittest.TestCase):
         # Force should be non-decreasing with activation
         for i in range(1, len(forces)):
             self.assertGreaterEqual(
-                forces[i] + 1e-10, forces[i - 1],
-                f"Force not monotonic at activation={i/10}",
+                forces[i] + 1e-10,
+                forces[i - 1],
+                f"Force not monotonic at activation={i / 10}",
             )
 
 

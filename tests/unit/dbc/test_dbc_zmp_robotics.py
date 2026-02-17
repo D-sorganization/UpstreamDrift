@@ -80,9 +80,7 @@ class TestComputeZMPPostconditions(unittest.TestCase):
             com_position=np.array([0.0, 0.0, 1.0]),
             com_acceleration=np.zeros(3),
         )
-        np.testing.assert_array_almost_equal(
-            result.zmp_position, result.cop_position
-        )
+        np.testing.assert_array_almost_equal(result.zmp_position, result.cop_position)
 
     def test_quasi_static_zmp_under_com(self) -> None:
         """For zero acceleration, ZMP should be directly under CoM."""
@@ -191,30 +189,30 @@ class TestStabilityMargin(unittest.TestCase):
 
         computer = ZMPComputer(_make_mock_engine())
         # Point at origin, polygon around it
-        polygon = np.array([
-            [-0.5, -0.5],
-            [0.5, -0.5],
-            [0.5, 0.5],
-            [-0.5, 0.5],
-        ])
-        margin = computer.compute_stability_margin(
-            np.array([0.0, 0.0]), polygon
+        polygon = np.array(
+            [
+                [-0.5, -0.5],
+                [0.5, -0.5],
+                [0.5, 0.5],
+                [-0.5, 0.5],
+            ]
         )
+        margin = computer.compute_stability_margin(np.array([0.0, 0.0]), polygon)
         self.assertGreater(margin, 0.0)
 
     def test_outside_polygon_negative_margin(self) -> None:
         from src.robotics.locomotion.zmp_computer import ZMPComputer
 
         computer = ZMPComputer(_make_mock_engine())
-        polygon = np.array([
-            [-0.1, -0.1],
-            [0.1, -0.1],
-            [0.1, 0.1],
-            [-0.1, 0.1],
-        ])
-        margin = computer.compute_stability_margin(
-            np.array([1.0, 0.0]), polygon
+        polygon = np.array(
+            [
+                [-0.1, -0.1],
+                [0.1, -0.1],
+                [0.1, 0.1],
+                [-0.1, 0.1],
+            ]
         )
+        margin = computer.compute_stability_margin(np.array([1.0, 0.0]), polygon)
         self.assertLess(margin, 0.0)
 
     def test_center_has_maximum_margin(self) -> None:
@@ -222,18 +220,16 @@ class TestStabilityMargin(unittest.TestCase):
         from src.robotics.locomotion.zmp_computer import ZMPComputer
 
         computer = ZMPComputer(_make_mock_engine())
-        polygon = np.array([
-            [-1.0, -1.0],
-            [1.0, -1.0],
-            [1.0, 1.0],
-            [-1.0, 1.0],
-        ])
-        m_center = computer.compute_stability_margin(
-            np.array([0.0, 0.0]), polygon
+        polygon = np.array(
+            [
+                [-1.0, -1.0],
+                [1.0, -1.0],
+                [1.0, 1.0],
+                [-1.0, 1.0],
+            ]
         )
-        m_edge = computer.compute_stability_margin(
-            np.array([0.5, 0.0]), polygon
-        )
+        m_center = computer.compute_stability_margin(np.array([0.0, 0.0]), polygon)
+        m_edge = computer.compute_stability_margin(np.array([0.5, 0.0]), polygon)
         self.assertGreater(m_center, m_edge)
 
 

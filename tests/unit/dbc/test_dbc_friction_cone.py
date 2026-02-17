@@ -148,9 +148,7 @@ class TestLinearizeFrictionConePreconditions(unittest.TestCase):
         from src.shared.python.core.contracts import ContractViolationError
 
         with self.assertRaises((ContractViolationError, ValueError)):
-            linearize_friction_cone(
-                mu=-0.5, normal=np.array([0.0, 0.0, 1.0])
-            )
+            linearize_friction_cone(mu=-0.5, normal=np.array([0.0, 0.0, 1.0]))
 
 
 class TestLinearizeFrictionConePostconditions(unittest.TestCase):
@@ -159,9 +157,7 @@ class TestLinearizeFrictionConePostconditions(unittest.TestCase):
     def test_output_shapes(self) -> None:
         from src.robotics.contact.friction_cone import linearize_friction_cone
 
-        A, b = linearize_friction_cone(
-            0.5, np.array([0.0, 0.0, 1.0]), 8
-        )
+        A, b = linearize_friction_cone(0.5, np.array([0.0, 0.0, 1.0]), 8)
         self.assertEqual(A.shape, (8, 3))
         self.assertEqual(b.shape, (8,))
 
@@ -169,23 +165,21 @@ class TestLinearizeFrictionConePostconditions(unittest.TestCase):
         """The b vector should be all zeros for homogeneous friction cone."""
         from src.robotics.contact.friction_cone import linearize_friction_cone
 
-        _, b = linearize_friction_cone(
-            0.5, np.array([0.0, 0.0, 1.0]), 8
-        )
+        _, b = linearize_friction_cone(0.5, np.array([0.0, 0.0, 1.0]), 8)
         np.testing.assert_array_almost_equal(b, 0.0)
 
     def test_valid_force_satisfies_constraints(self) -> None:
         """A force inside the cone should satisfy A @ f <= b."""
         from src.robotics.contact.friction_cone import linearize_friction_cone
 
-        A, b = linearize_friction_cone(
-            0.5, np.array([0.0, 0.0, 1.0]), 16
-        )
+        A, b = linearize_friction_cone(0.5, np.array([0.0, 0.0, 1.0]), 16)
         # Pure normal force should satisfy
         f = np.array([0.0, 0.0, 10.0])
         result = A @ f
-        self.assertTrue(np.all(result <= b + 1e-6),
-                        f"Pure normal force violates constraints: {result}")
+        self.assertTrue(
+            np.all(result <= b + 1e-6),
+            f"Pure normal force violates constraints: {result}",
+        )
 
 
 class TestProjectToFrictionCone(unittest.TestCase):
@@ -220,8 +214,8 @@ class TestProjectToFrictionCone(unittest.TestCase):
         projected = project_to_friction_cone(f, cone)
         # Either zero or on cone surface
         self.assertTrue(
-            cone.contains(projected, tolerance=1e-5) or
-            np.linalg.norm(projected) < 1e-10
+            cone.contains(projected, tolerance=1e-5)
+            or np.linalg.norm(projected) < 1e-10
         )
 
     def test_projected_force_finite(self) -> None:
