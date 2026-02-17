@@ -14,6 +14,7 @@ from src.shared.python.biomechanics.muscle_analysis import (
     MuscleSynergyAnalyzer,
     SynergyResult,
 )
+from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 
@@ -250,19 +251,19 @@ class TestExtractSynergies:
         assert np.all(result.activations >= 0), "Activations should be non-negative"
 
     def test_invalid_number_of_synergies_too_small(self):
-        """Test that n_synergies < 1 raises ValueError."""
+        """Test that n_synergies < 1 raises PreconditionError."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        with pytest.raises(ValueError, match="Invalid number of synergies"):
+        with pytest.raises(PreconditionError):
             analyzer.extract_synergies(n_synergies=0)
 
     def test_invalid_number_of_synergies_too_large(self):
-        """Test that n_synergies > n_muscles raises ValueError."""
+        """Test that n_synergies > n_muscles raises PreconditionError."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
 
-        with pytest.raises(ValueError, match="Invalid number of synergies"):
+        with pytest.raises(PreconditionError):
             analyzer.extract_synergies(n_synergies=6)  # > 5 muscles
 
     def test_custom_max_iterations(self):

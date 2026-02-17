@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import require
 from src.shared.python.signal_toolkit.core import Signal
 
 logger = logging.getLogger(__name__)
@@ -142,6 +143,12 @@ class SignalImporter:
         Returns:
             Signal object.
         """
+        require(len(time) > 0, "time array must be non-empty")
+        require(
+            len(time) == len(values),
+            "time and values must have same length",
+            {"time_len": len(time), "values_len": len(values)},
+        )
         return Signal(time=time, values=values, name=name, units=units)
 
     @staticmethod
