@@ -13,6 +13,7 @@ from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
 
 from src.shared.python.analysis.dataclasses import RQAMetrics
+from src.shared.python.core.contracts import ensure, require
 
 
 class NonlinearDynamicsMixin:
@@ -337,6 +338,14 @@ class NonlinearDynamicsMixin:
     ) -> float:
         """Estimate the Largest Lyapunov Exponent (LLE) using Rosenstein's algorithm.
 
+        Design by Contract:
+            Preconditions:
+                - tau >= 1
+                - dim >= 1
+                - window >= 1
+            Postcondition:
+                - result is finite
+
         Args:
             data: 1D time series array
             tau: Time delay (lag)
@@ -346,6 +355,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Estimated LLE (nats/s)
         """
+        require(tau >= 1, "tau must be >= 1", tau)
+        require(dim >= 1, "dim must be >= 1", dim)
+        require(window >= 1, "window must be >= 1", window)
+
         N = len(data)
         if window > N:
             return 0.0
@@ -406,7 +419,9 @@ class NonlinearDynamicsMixin:
 
         if len(t_axis) > 1:
             slope, _ = np.polyfit(t_axis, avg_log_dist, 1)
-            return float(slope)
+            result = float(slope)
+            ensure(np.isfinite(result), "LLE must be finite", result)
+            return result
 
         return 0.0
 
@@ -418,6 +433,13 @@ class NonlinearDynamicsMixin:
     ) -> float:
         """Compute Permutation Entropy.
 
+        Design by Contract:
+            Preconditions:
+                - order >= 2
+                - delay >= 1
+            Postcondition:
+                - result >= 0 (entropy is non-negative)
+
         Args:
             data: 1D time series
             order: Order of permutation (embedding dimension)
@@ -426,6 +448,9 @@ class NonlinearDynamicsMixin:
         Returns:
             Entropy value (bits)
         """
+        require(order >= 2, "permutation order must be >= 2", order)
+        require(delay >= 1, "delay must be >= 1", delay)
+
         N = len(data)
         M = N - (order - 1) * delay
         if M < 1:
@@ -452,7 +477,9 @@ class NonlinearDynamicsMixin:
         probs = probs[probs > 0]
 
         pe = -np.sum(probs * np.log2(probs))
-        return float(pe)
+        result = float(pe)
+        ensure(result >= 0, "permutation entropy must be non-negative", result)
+        return result
 
     def compute_sample_entropy(
         self,
@@ -462,6 +489,13 @@ class NonlinearDynamicsMixin:
     ) -> float:
         """Compute Sample Entropy (SampEn).
 
+        Design by Contract:
+            Preconditions:
+                - m >= 1
+                - r > 0
+            Postcondition:
+                - result >= 0 (sample entropy is non-negative)
+
         Args:
             data: 1D time series
             m: Template length (embedding dimension)
@@ -470,6 +504,9 @@ class NonlinearDynamicsMixin:
         Returns:
             Sample Entropy value
         """
+        require(m >= 1, "template length m must be >= 1", m)
+        require(r > 0, "tolerance r must be positive", r)
+
         N = len(data)
         if m + 1 > N:
             return 0.0
@@ -496,7 +533,9 @@ class NonlinearDynamicsMixin:
         if A == 0 or B == 0:
             return 0.0
 
-        return float(-np.log(B / A))
+        result = float(-np.log(B / A))
+        ensure(result >= 0, "sample entropy must be non-negative", result)
+        return result
 
     def compute_multiscale_entropy(
         self,
@@ -551,6 +590,12 @@ class NonlinearDynamicsMixin:
     ) -> float:
         """Compute Fractal Dimension using Higuchi's method.
 
+        Design by Contract:
+            Precondition:
+                - k_max >= 1
+            Postcondition:
+                - result is finite
+
         Args:
             data: 1D time series
             k_max: Maximum interval time (k)
@@ -558,6 +603,8 @@ class NonlinearDynamicsMixin:
         Returns:
             Fractal dimension (HFD) approx between 1.0 and 2.0
         """
+        require(k_max >= 1, "k_max must be >= 1", k_max)
+
         N = len(data)
         if k_max + 1 > N:
             return 1.0
@@ -582,4 +629,6 @@ class NonlinearDynamicsMixin:
         y_val = np.log(L_k)
         slope, _ = np.polyfit(x_k, y_val, 1)
 
-        return float(slope)
+        result = float(slope)
+        ensure(np.isfinite(result), "fractal dimension must be finite", result)
+        return result

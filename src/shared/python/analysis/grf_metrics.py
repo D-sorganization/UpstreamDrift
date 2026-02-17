@@ -3,6 +3,7 @@
 import numpy as np
 
 from src.shared.python.analysis.dataclasses import GRFMetrics
+from src.shared.python.core.contracts import ensure
 
 
 class GRFMetricsMixin:
@@ -10,6 +11,13 @@ class GRFMetricsMixin:
 
     def compute_grf_metrics(self) -> GRFMetrics | None:
         """Compute Ground Reaction Force and Center of Pressure metrics.
+
+        Design by Contract:
+            Postconditions:
+                - cop_path_length >= 0 (path length is non-negative)
+                - cop_max_velocity >= 0 (velocity magnitude is non-negative)
+                - cop_x_range >= 0 and cop_y_range >= 0
+                - all returned values are finite
 
         Returns:
             GRFMetrics object or None if data unavailable
@@ -52,7 +60,7 @@ class GRFMetricsMixin:
                 shear = np.hypot(ground_forces[:, 0], ground_forces[:, 1])
                 peak_shear = float(np.max(shear))
 
-        return GRFMetrics(
+        result = GRFMetrics(
             cop_path_length=float(path_length),
             cop_max_velocity=float(max_vel),
             cop_x_range=x_range,
@@ -60,3 +68,32 @@ class GRFMetricsMixin:
             peak_vertical_force=peak_vertical,
             peak_shear_force=peak_shear,
         )
+
+        # Postconditions
+        ensure(
+            result.cop_path_length >= 0,
+            "CoP path length must be non-negative",
+            result.cop_path_length,
+        )
+        ensure(
+            result.cop_max_velocity >= 0,
+            "CoP max velocity must be non-negative",
+            result.cop_max_velocity,
+        )
+        ensure(
+            result.cop_x_range >= 0,
+            "CoP X range must be non-negative",
+            result.cop_x_range,
+        )
+        ensure(
+            result.cop_y_range >= 0,
+            "CoP Y range must be non-negative",
+            result.cop_y_range,
+        )
+        ensure(
+            np.isfinite(result.cop_path_length),
+            "CoP path length must be finite",
+            result.cop_path_length,
+        )
+
+        return result
