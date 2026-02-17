@@ -10,6 +10,7 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.signal_toolkit.core import Signal
 
 
@@ -47,6 +48,12 @@ class NoiseGenerator:
     ) -> Signal:
         """Generate a noise signal.
 
+        Design by Contract:
+            Preconditions:
+                - amplitude >= 0
+            Postconditions:
+                - output signal has same length as input time array
+
         Args:
             t: Time array.
             noise_type: Type of noise to generate.
@@ -56,6 +63,8 @@ class NoiseGenerator:
         Returns:
             Signal containing the noise.
         """
+        require(amplitude >= 0, "noise amplitude must be non-negative", amplitude)
+
         n = len(t)
 
         if noise_type == NoiseType.WHITE:
@@ -92,12 +101,19 @@ class NoiseGenerator:
         else:
             values = self._generate_white_noise(n, amplitude)
 
-        return Signal(
+        result = Signal(
             time=t,
             values=values,
             name=f"{noise_type.value}_noise",
             metadata={"noise_type": noise_type.value, "amplitude": amplitude},
         )
+
+        ensure(
+            len(result.values) == len(t),
+            "noise signal length must match input time array",
+        )
+
+        return result
 
     def _generate_white_noise(self, n: int, amplitude: float) -> np.ndarray:
         """Generate Gaussian white noise."""

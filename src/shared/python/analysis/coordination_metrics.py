@@ -70,7 +70,7 @@ class CoordinationMetricsMixin:
         result = np.asarray(gamma_deg)
         if len(result) > 0:
             ensure(
-                np.all(result >= 0) and np.all(result < 360.0),
+                bool(np.all(result >= 0) and np.all(result < 360.0)),
                 "coupling angles must be in [0, 360)",
             )
         return result
@@ -327,8 +327,10 @@ class CoordinationMetricsMixin:
         # Postcondition
         if len(correlations) > 0:
             ensure(
-                np.all(correlations >= -1.0 - 1e-6)
-                and np.all(correlations <= 1.0 + 1e-6),
+                bool(
+                    np.all(correlations >= -1.0 - 1e-6)
+                    and np.all(correlations <= 1.0 + 1e-6)
+                ),
                 "rolling correlations must be in [-1, 1]",
             )
 
