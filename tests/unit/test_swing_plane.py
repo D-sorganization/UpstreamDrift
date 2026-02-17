@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
+from src.shared.python.core.contracts import PreconditionError
 
 
 class TestSwingPlaneAnalyzer:
@@ -103,5 +104,5 @@ class TestSwingPlaneAnalyzer:
     def test_insufficient_points(self, analyzer: SwingPlaneAnalyzer) -> None:
         """Test error handling for insufficient points."""
         points = np.array([[0, 0, 0], [1, 1, 1]])
-        with pytest.raises(ValueError, match="At least 3 points"):
+        with pytest.raises(PreconditionError):
             analyzer.fit_plane(points)
