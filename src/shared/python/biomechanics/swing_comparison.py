@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.data_io import common_utils
 from src.shared.python.signal_toolkit import signal_processing
 from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
@@ -143,12 +144,21 @@ class SwingComparator:
         # norm_dist is Z-score error. 1.0 means ~1 std dev avg error.
         score = SIMILARITY_SCORE_CONSTANT * np.exp(-norm_dist)
 
-        return DTWResult(
+        result = DTWResult(
             distance=dist,
             path=path,
             normalized_distance=norm_dist,
             similarity_score=score,
         )
+        ensure(
+            result.distance >= 0, "DTW distance must be non-negative", result.distance
+        )
+        ensure(
+            0.0 <= result.similarity_score <= 100.0,
+            "similarity_score must be in [0, 100]",
+            result.similarity_score,
+        )
+        return result
 
     def compare_peak_speeds(
         self,
@@ -156,12 +166,22 @@ class SwingComparator:
     ) -> dict[str, ComparisonMetric]:
         """Compare peak speeds of key segments.
 
+        Design by Contract:
+            Preconditions:
+                - segment_indices must be non-empty
+            Postconditions:
+                - each metric score is in [0, 100]
+
         Args:
             segment_indices: Map of segment name to joint index
 
         Returns:
             Dictionary of comparison metrics
         """
+        require(
+            len(segment_indices) > 0,
+            "segment_indices must be non-empty",
+        )
         metrics = {}
 
         for name, idx in segment_indices.items():
@@ -216,6 +236,10 @@ class SwingComparator:
     ) -> dict[str, Any]:
         """Generate a full comparison report.
 
+        Design by Contract:
+            Postconditions:
+                - overall_similarity (if present) is in [0, 100]
+
         Args:
             segment_indices: Map of segment names to joint indices
 
@@ -247,5 +271,12 @@ class SwingComparator:
 
             if count > 0:
                 report["overall_similarity"] = total_sim / count
+
+        if "overall_similarity" in report:
+            ensure(
+                0.0 <= report["overall_similarity"] <= 100.0,
+                "overall_similarity must be in [0, 100]",
+                report["overall_similarity"],
+            )
 
         return report

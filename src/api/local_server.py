@@ -228,7 +228,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
             status_code=404, content={"detail": f"Logo not found: {logo_name}"}
         )
 
-    @app.post("/api/launcher/launch/{tile_id}")
+    @app.post("/api/launcher/launch/{tile_id}", response_model=None)
     async def launch_tile(tile_id: str) -> dict[str, Any] | JSONResponse:
         """Launch an engine or tool by tile ID.
 
@@ -257,7 +257,7 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         """List currently running engine/tool processes."""
         return {"processes": _launcher_service.get_running_processes()}
 
-    @app.post("/api/launcher/stop/{name}")
+    @app.post("/api/launcher/stop/{name}", response_model=None)
     async def stop_process(name: str) -> dict[str, Any] | JSONResponse:
         """Stop a running engine/tool process by name."""
         if not _launcher_service.stop_process(name):
@@ -465,7 +465,7 @@ def _get_ui_not_built_html() -> str:
 
 
 def _register_error_page_catch_all(app: FastAPI) -> None:
-    @app.get("/{full_path:path}")
+    @app.get("/{full_path:path}", response_model=None)
     async def serve_error_page(
         request: Request, full_path: str
     ) -> HTMLResponse | JSONResponse:

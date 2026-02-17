@@ -23,6 +23,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = logging.getLogger(__name__)
@@ -155,12 +156,24 @@ class HillMuscleModel:
     def compute_force(self, state: MuscleState) -> float:
         """Compute total muscle force generated at the tendon.
 
+        Design by Contract:
+            Preconditions:
+                - activation in [0, 1]
+            Postconditions:
+                - returned force >= 0
+
         Args:
             state: Current MuscleState
 
         Returns:
             Force at the tendon [N]
         """
+        require(
+            0.0 <= state.activation <= 1.0,
+            "activation must be in [0, 1]",
+            state.activation,
+        )
+
         # Normalize inputs
         l_norm = state.l_CE / self.params.l_opt
         v_norm = state.v_CE / (self.params.v_max * self.params.l_opt)
@@ -182,7 +195,9 @@ class HillMuscleModel:
 
         F_total = (F_active + F_passive + F_damping) * cos_alpha
 
-        return float(max(0.0, F_total))
+        result = float(max(0.0, F_total))
+        ensure(result >= 0, "muscle force must be non-negative", result)
+        return result
 
 
 # Example usage
