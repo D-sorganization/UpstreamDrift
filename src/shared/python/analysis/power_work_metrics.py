@@ -13,6 +13,7 @@ from src.shared.python.analysis.dataclasses import (
     JointPowerMetrics,
     JointStiffnessMetrics,
 )
+from src.shared.python.core.contracts import ensure
 
 
 class PowerWorkMetricsMixin:
@@ -41,6 +42,12 @@ class PowerWorkMetricsMixin:
 
         Work is calculated as the time integral of power (torque * angular velocity).
         Results are cached for performance.
+
+        Design by Contract:
+            Postconditions:
+                - positive_work >= 0
+                - negative_work <= 0
+                - all values are finite
 
         Args:
             joint_idx: Index of the joint
@@ -90,11 +97,35 @@ class PowerWorkMetricsMixin:
             "net_work": float(net_work),
         }
 
+        # Postconditions
+        ensure(
+            result["positive_work"] >= 0,
+            "positive work must be non-negative",
+            result["positive_work"],
+        )
+        ensure(
+            result["negative_work"] <= 0,
+            "negative work must be non-positive",
+            result["negative_work"],
+        )
+        ensure(
+            np.isfinite(result["net_work"]),
+            "net work must be finite",
+            result["net_work"],
+        )
+
         self._work_metrics_cache[joint_idx] = result
         return result
 
     def compute_joint_power_metrics(self, joint_idx: int) -> JointPowerMetrics | None:
         """Compute detailed power metrics for a joint.
+
+        Design by Contract:
+            Postconditions:
+                - peak_generation >= 0
+                - peak_absorption <= 0
+                - generation_duration >= 0 and absorption_duration >= 0
+                - all values are finite
 
         Args:
             joint_idx: Index of the joint
@@ -137,7 +168,7 @@ class PowerWorkMetricsMixin:
             trapz_func = getattr(np, "trapz")  # noqa: B009
             net_work = float(trapz_func(power, dx=dt))
 
-        return JointPowerMetrics(
+        result = JointPowerMetrics(
             peak_generation=peak_gen,
             peak_absorption=peak_abs,
             avg_generation=avg_gen,
@@ -146,6 +177,35 @@ class PowerWorkMetricsMixin:
             generation_duration=gen_dur,
             absorption_duration=abs_dur,
         )
+
+        # Postconditions
+        ensure(
+            result.peak_generation >= 0,
+            "peak generation must be non-negative",
+            result.peak_generation,
+        )
+        ensure(
+            result.peak_absorption <= 0,
+            "peak absorption must be non-positive",
+            result.peak_absorption,
+        )
+        ensure(
+            result.generation_duration >= 0,
+            "generation duration must be non-negative",
+            result.generation_duration,
+        )
+        ensure(
+            result.absorption_duration >= 0,
+            "absorption duration must be non-negative",
+            result.absorption_duration,
+        )
+        ensure(
+            np.isfinite(result.net_work),
+            "net work must be finite",
+            result.net_work,
+        )
+
+        return result
 
     def compute_impulse_metrics(
         self,
@@ -201,6 +261,10 @@ class PowerWorkMetricsMixin:
     def compute_phase_space_path_length(self, joint_idx: int) -> float:
         """Compute path length in phase space (Angle vs Angular Velocity).
 
+        Design by Contract:
+            Postcondition:
+                - result >= 0 (path length is non-negative)
+
         Args:
             joint_idx: Index of the joint
 
@@ -220,7 +284,9 @@ class PowerWorkMetricsMixin:
         d_vel = vel[1:] - vel[:-1]
 
         dist = np.sqrt(d_pos**2 + d_vel**2)
-        return float(np.sum(dist))
+        result = float(np.sum(dist))
+        ensure(result >= 0, "phase space path length must be non-negative", result)
+        return result
 
     def compute_joint_stiffness(
         self,

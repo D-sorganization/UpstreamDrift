@@ -11,6 +11,7 @@ from src.shared.python.analysis.dataclasses import (
     KinematicSequenceInfo,
     PCAResult,
 )
+from src.shared.python.core.contracts import ensure, require
 
 
 class PCAAnalysisMixin:
@@ -36,6 +37,14 @@ class PCAAnalysisMixin:
         Also known as "Principal Movements" when applied to kinematic data.
         Identifies the main modes of variation in the movement.
 
+        Design by Contract:
+            Preconditions:
+                - n_components is None or n_components >= 1
+            Postconditions:
+                - all explained_variance values are non-negative
+                - sum of explained_variance_ratio <= 1.0 + epsilon
+                - all values are finite
+
         Args:
             n_components: Number of components to retain (default: all)
             data_type: 'position', 'velocity'
@@ -43,6 +52,13 @@ class PCAAnalysisMixin:
         Returns:
             PCAResult object or None
         """
+        if n_components is not None:
+            require(
+                n_components >= 1,
+                "n_components must be >= 1",
+                n_components,
+            )
+
         if data_type == "position":
             data = self.joint_positions
         else:
@@ -76,13 +92,30 @@ class PCAAnalysisMixin:
             explained_variance_ratio = explained_variance_ratio[:n_components]
             projected_data = projected_data[:, :n_components]
 
-        return PCAResult(
+        result = PCAResult(
             components=components,
             explained_variance=explained_variance,
             explained_variance_ratio=explained_variance_ratio,
             projected_data=projected_data,
             mean=mean,
         )
+
+        # Postconditions
+        ensure(
+            np.all(result.explained_variance >= 0),
+            "all explained variances must be non-negative",
+        )
+        ensure(
+            np.sum(result.explained_variance_ratio) <= 1.0 + 1e-6,
+            "variance ratios must sum to <= 1.0",
+            float(np.sum(result.explained_variance_ratio)),
+        )
+        ensure(
+            np.all(np.isfinite(result.explained_variance)),
+            "explained variances must be finite",
+        )
+
+        return result
 
     def compute_principal_movements(
         self, n_modes: int = 3
@@ -113,6 +146,11 @@ class PCAAnalysisMixin:
 
         The kinematic sequence refers to the proximal-to-distal sequencing of
         peak rotational velocities.
+
+        Design by Contract:
+            Postconditions:
+                - efficiency_score in [0.0, 1.0]
+                - all peak velocities >= 0
 
         Args:
             segment_indices: Dictionary mapping segment names to joint indices.
@@ -156,5 +194,18 @@ class PCAAnalysisMixin:
             1 for e, a in zip(expected_order, actual_order, strict=False) if e == a
         )
         efficiency_score = matches / len(expected_order) if expected_order else 0.0
+
+        # Postconditions
+        ensure(
+            0.0 <= efficiency_score <= 1.0,
+            "efficiency score must be in [0, 1]",
+            efficiency_score,
+        )
+        for info in sequence_info:
+            ensure(
+                info.peak_velocity >= 0,
+                f"peak velocity for '{info.segment_name}' must be non-negative",
+                info.peak_velocity,
+            )
 
         return sequence_info, efficiency_score

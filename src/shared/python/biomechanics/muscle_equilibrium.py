@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.optimize import newton
 
+from src.shared.python.core.contracts import ensure, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -119,6 +120,14 @@ class EquilibriumSolver:
 
         Uses Newton-Raphson to find l_CE such that F_fiber = F_tendon.
 
+        Design by Contract:
+            Preconditions:
+                - l_MT > 0 (muscle-tendon length must be positive)
+                - 0 <= activation <= 1
+            Postcondition:
+                - result > 0 (fiber length must be positive)
+                - result is finite
+
         Args:
             l_MT: Muscle-tendon unit length [m]
             activation: Activation level [0,1]
@@ -134,6 +143,13 @@ class EquilibriumSolver:
         Example:
             >>> l_CE = solver.solve_fiber_length(l_MT=0.37, activation=0.5)
         """
+        require(l_MT > 0, "l_MT must be positive", l_MT)
+        require(
+            0.0 <= activation <= 1.0,
+            "activation must be in [0, 1]",
+            activation,
+        )
+
         if initial_guess is None:
             initial_guess = INITIAL_GUESS_RATIO * self.muscle.params.l_opt
 
@@ -161,7 +177,10 @@ class EquilibriumSolver:
                     f"  This may indicate numerical issues or invalid configuration"
                 )
 
-            return float(l_CE_solution)
+            result = float(l_CE_solution)
+            ensure(result > 0, "fiber length must be positive", result)
+            ensure(np.isfinite(result), "fiber length must be finite", result)
+            return result
 
         except RuntimeError as e:
             logger.error(
@@ -192,6 +211,13 @@ class EquilibriumSolver:
 
         where l_CE(t+dt) is solved from l_MT(t+dt) = l_MT(t) + v_MT·dt.
 
+        Design by Contract:
+            Preconditions:
+                - dt > 0 (time step must be positive)
+                - l_CE > 0 (fiber length must be positive)
+            Postcondition:
+                - result is finite
+
         Args:
             l_MT: Current muscle-tendon length [m]
             v_MT: Muscle-tendon velocity [m/s]
@@ -206,6 +232,9 @@ class EquilibriumSolver:
             This is an approximation. For exact v_CE, solve the implicit
             differentiated equilibrium equation (more complex).
         """
+        require(dt > 0, "dt must be positive", dt)
+        require(l_CE > 0, "l_CE must be positive", l_CE)
+
         # Future muscle-tendon length
         l_MT_next = l_MT + v_MT * dt
 
@@ -218,7 +247,9 @@ class EquilibriumSolver:
             # Finite difference velocity
             v_CE = (l_CE_next - l_CE) / dt
 
-            return float(v_CE)
+            result = float(v_CE)
+            ensure(np.isfinite(result), "fiber velocity must be finite", result)
+            return result
 
         except RuntimeError:
             logger.warning(
@@ -238,6 +269,14 @@ def compute_equilibrium_state(
 ) -> tuple[float, float]:
     """Convenience function to compute both l_CE and v_CE at equilibrium.
 
+    Design by Contract:
+        Preconditions:
+            - l_MT > 0
+            - 0 <= activation <= 1
+        Postconditions:
+            - l_CE > 0
+            - both results are finite
+
     Args:
         muscle: HillMuscleModel instance
         l_MT: Muscle-tendon unit length [m]
@@ -256,6 +295,13 @@ def compute_equilibrium_state(
         >>> l_CE, v_CE = compute_equilibrium_state(muscle, l_MT=0.37, v_MT=0.0, activation=0.5)
         >>> print(f"Fiber length: {l_CE:.4f} m, velocity: {v_CE:.4f} m/s")
     """
+    require(l_MT > 0, "l_MT must be positive", l_MT)
+    require(
+        0.0 <= activation <= 1.0,
+        "activation must be in [0, 1]",
+        activation,
+    )
+
     solver = EquilibriumSolver(muscle)
 
     # Solve for fiber length
@@ -268,6 +314,10 @@ def compute_equilibrium_state(
         v_CE = solver.solve_fiber_velocity(l_MT, v_MT, activation, l_CE)
     else:
         v_CE = 0.0  # Static case
+
+    ensure(l_CE > 0, "equilibrium l_CE must be positive", l_CE)
+    ensure(np.isfinite(l_CE), "equilibrium l_CE must be finite", l_CE)
+    ensure(np.isfinite(v_CE), "equilibrium v_CE must be finite", v_CE)
 
     return l_CE, v_CE
 
