@@ -43,15 +43,15 @@ class EnergyMetricsMixin:
             {"ke_len": len(kinetic_energy), "pe_len": len(potential_energy)},
         )
         require(
-            np.all(kinetic_energy >= 0),
+            bool(np.all(kinetic_energy >= 0)),
             "kinetic energy must be non-negative",
         )
         require(
-            np.all(np.isfinite(kinetic_energy)),
+            bool(np.all(np.isfinite(kinetic_energy))),
             "kinetic energy must be finite",
         )
         require(
-            np.all(np.isfinite(potential_energy)),
+            bool(np.all(np.isfinite(potential_energy))),
             "potential energy must be finite",
         )
 

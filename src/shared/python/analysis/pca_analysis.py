@@ -102,7 +102,7 @@ class PCAAnalysisMixin:
 
         # Postconditions
         ensure(
-            np.all(result.explained_variance >= 0),
+            bool(np.all(result.explained_variance >= 0)),
             "all explained variances must be non-negative",
         )
         ensure(
@@ -111,7 +111,7 @@ class PCAAnalysisMixin:
             float(np.sum(result.explained_variance_ratio)),
         )
         ensure(
-            np.all(np.isfinite(result.explained_variance)),
+            bool(np.all(np.isfinite(result.explained_variance))),
             "explained variances must be finite",
         )
 
