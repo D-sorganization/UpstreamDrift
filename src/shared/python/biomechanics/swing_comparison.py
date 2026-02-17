@@ -150,7 +150,9 @@ class SwingComparator:
             normalized_distance=norm_dist,
             similarity_score=score,
         )
-        ensure(result.distance >= 0, "DTW distance must be non-negative", result.distance)
+        ensure(
+            result.distance >= 0, "DTW distance must be non-negative", result.distance
+        )
         ensure(
             0.0 <= result.similarity_score <= 100.0,
             "similarity_score must be in [0, 100]",

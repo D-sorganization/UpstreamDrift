@@ -38,9 +38,7 @@ def _make_signal(
 class TestHillMusclePreconditions(unittest.TestCase):
     """Test require() contracts on HillMuscleModel.compute_force."""
 
-    def _make_model_and_state(
-        self, activation: float = 0.5
-    ) -> tuple[Any, Any]:
+    def _make_model_and_state(self, activation: float = 0.5) -> tuple[Any, Any]:
         from src.shared.python.biomechanics.hill_muscle import (
             HillMuscleModel,
             MuscleParameters,
