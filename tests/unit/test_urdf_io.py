@@ -144,41 +144,20 @@ class TestURDFExporter:
 
     def test_export_to_urdf(self, tmp_path):
         """Test exporting MJCF to URDF."""
-        # Ensure every subpackage along the dotted path is linked as an
-        # attribute of its parent module.  Other tests in the full suite
-        # may manipulate sys.modules and break this chain, causing
-        # ``mock.patch()`` to raise ``AttributeError`` on lookup.
-        import importlib
-        import sys
+        # Import the target module directly so we can use patch.object
+        # instead of dotted-string patching (avoids InvalidSpecError when
+        # _dot_lookup encounters Mock objects in the module chain).
+        import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io as urdf_io_mod
 
-        _chain = [
-            "src.engines.physics_engines",
-            "src.engines.physics_engines.mujoco",
-            "src.engines.physics_engines.mujoco.python",
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf",
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io",
-        ]
-        for _mod_name in _chain:
-            importlib.import_module(_mod_name)
-        # Re-link child attributes on each parent so _dot_lookup works
-        for i in range(1, len(_chain)):
-            parent = sys.modules[_chain[i - 1]]
-            child_attr = _chain[i].rsplit(".", 1)[1]
-            if not hasattr(parent, child_attr):
-                setattr(parent, child_attr, sys.modules[_chain[i]])
-
-        # Setup comprehensive mujoco mock in sys.modules to bypass C-extension issues
         mock_mujoco = MagicMock()
         mock_mujoco.MjModel = MagicMock
         mock_mujoco.MjData = MagicMock
         mock_mujoco.mjtObj.mjOBJ_BODY = 1
         mock_mujoco.mjtObj.mjOBJ_JOINT = 2
         mock_mujoco.mjtObj.mjOBJ_MODEL = 3
-        mock_mujoco.mjtJoint.mjJNT_HINGE = 0  # Define this for the mock model
+        mock_mujoco.mjtJoint.mjJNT_HINGE = 0
 
-        # Mock id2name logic - need to handle the actual MjModel mock being passed
         def id2name_side_effect(model, obj_type, obj_id):
-            # Convert obj_type to int if it's a mock object
             if hasattr(obj_type, "value"):
                 obj_type = obj_type.value
             elif not isinstance(obj_type, int):
@@ -197,26 +176,11 @@ class TestURDFExporter:
 
         mock_mujoco.mj_id2name.side_effect = id2name_side_effect
 
-        # Use direct patching instead of sys.modules manipulation and reload
-        # to prevent MuJoCo DLL/C-API corruption (Access Violation)
-        with patch(
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco",
-            mock_mujoco,
-        ):
-            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
-                URDFExporter,
-                mujoco,
-            )
-
-            # Ensure constants that might have been lost are restored if needed
-            # but usually the mock will handle them via getattr
-
+        with patch.object(urdf_io_mod, "mujoco", mock_mujoco):
             mock_mujoco_model = MagicMock()
             mock_mujoco_model.nbody = 3
-            mock_mujoco_model.body_jntadr = [-1, -1, 0]  # Child has joint at index 0
-            mock_mujoco_model.jnt_type = [
-                mujoco.mjtJoint.mjJNT_HINGE
-            ]  # Joint 0 is hinge
+            mock_mujoco_model.body_jntadr = [-1, -1, 0]
+            mock_mujoco_model.jnt_type = [mock_mujoco.mjtJoint.mjJNT_HINGE]
             mock_mujoco_model.body_parentid = [0, 0, 1]
             mock_mujoco_model.body_mass = [0, 1.0, 1.0]
             mock_mujoco_model.body_inertia = np.zeros((3, 3))
@@ -227,10 +191,7 @@ class TestURDFExporter:
             mock_mujoco_model.jnt_limited = [False]
             mock_mujoco_model.jnt_range = np.zeros((1, 2))
 
-            # Constants that might have been lost in reload/mock
-            # Ensure URDFExporter uses the mocked enums/constants
-
-            exporter = URDFExporter(mock_mujoco_model)
+            exporter = urdf_io_mod.URDFExporter(mock_mujoco_model)
 
             output_path = tmp_path / "exported.urdf"
             urdf_str = exporter.export_to_urdf(output_path, model_name="test_export")
@@ -238,51 +199,20 @@ class TestURDFExporter:
             assert output_path.exists()
             assert 'robot name="test_export"' in urdf_str
             assert 'link name="base_link"' in urdf_str
-        assert 'link name="child_link"' in urdf_str
-
-        # Since body 2 (child_link) is child of 1 (base_link), checking for joint logic
-        # In _build_children: parent is base_link (id 1).
-        # Iterates children. Finds 2 (parentid[2]==1).
-        # Calls _create_joint(1, 2).
-        # child_jntadr[2] is 0. Joint 0 exists.
-        # Joint 0 name is joint_0.
-
-        assert 'joint name="joint_0"' in urdf_str
+            assert 'link name="child_link"' in urdf_str
+            assert 'joint name="joint_0"' in urdf_str
 
 
 def test_convenience_functions(sample_urdf, mock_mujoco_model, tmp_path):
     """Test convenience functions."""
-    # Ensure every subpackage along the dotted path is linked as an
-    # attribute of its parent module (see test_export_to_urdf for details).
-    import importlib
-    import sys as _sys
-
-    _chain = [
-        "src.engines.physics_engines",
-        "src.engines.physics_engines.mujoco",
-        "src.engines.physics_engines.mujoco.python",
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf",
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io",
-    ]
-    for _mod_name in _chain:
-        importlib.import_module(_mod_name)
-    for i in range(1, len(_chain)):
-        parent = _sys.modules[_chain[i - 1]]
-        child_attr = _chain[i].rsplit(".", 1)[1]
-        if not hasattr(parent, child_attr):
-            setattr(parent, child_attr, _sys.modules[_chain[i]])
+    import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io as urdf_io_mod
 
     # Import
     mjcf = import_urdf_to_mujoco(sample_urdf)
     assert "<mujoco" in mjcf
 
-    # Export
-    # We need to mock URDFExporter inside the function or pass a mock model that works
-    # Using patch to avoid complexity of real exporter running on mock model
-    # Note: Use src. prefix to match how it's imported in the module/env
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.URDFExporter"
-    ) as MockExporter:
+    # Export — use patch.object to avoid dotted-string lookup issues
+    with patch.object(urdf_io_mod, "URDFExporter") as MockExporter:
         instance = MockExporter.return_value
         instance.export_to_urdf.return_value = "<robot></robot>"
 
