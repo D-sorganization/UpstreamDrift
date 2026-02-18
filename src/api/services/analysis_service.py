@@ -180,10 +180,10 @@ class AnalysisService:
             if "joint_angles" in request_data:
                 result["joint_angles"] = request_data["joint_angles"]
                 result["metadata"]["data_source"] = "request"
-            if "angular_velocities" in request.data:
-                result["angular_velocities"] = request.data["angular_velocities"]
-            if "angular_accelerations" in request.data:
-                result["angular_accelerations"] = request.data["angular_accelerations"]
+            if "angular_velocities" in request_data:
+                result["angular_velocities"] = request_data["angular_velocities"]
+            if "angular_accelerations" in request_data:
+                result["angular_accelerations"] = request_data["angular_accelerations"]
 
         return result
 
