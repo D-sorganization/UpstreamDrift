@@ -182,7 +182,6 @@ exclude = [
     "src/shared/python/dashboard/tests/",
     "src/engines/physics_engines/pinocchio/python/motion_training/",
     "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/",
-    "src/api/",
     "src/launchers/",
     # Additional directories with complex typing issues (pre-existing)
     "src/shared/python/pose_editor/",
@@ -212,6 +211,11 @@ module = [
     "src.engines.physics_engines.pinocchio.python.pinocchio_golf.*",
 ]
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "src.api.*"
+disallow_untyped_defs = true
+warn_return_any = true
 
 [tool.pytest.ini_options]
 # Consolidated pytest configuration (replaces duplicate pytest.ini files)
