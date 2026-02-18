@@ -175,7 +175,7 @@ class AnalysisService:
             metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
-        request_data = request.data if hasattr(request, "data") else None
+        request_data = getattr(request, "data", None)
         if request_data:
             if "joint_angles" in request_data:
                 result["joint_angles"] = request_data["joint_angles"]
@@ -238,12 +238,9 @@ class AnalysisService:
             metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
-        if (
-            hasattr(request, "data")
-            and request.data
-            and "joint_torques" in request.data
-        ):
-            result["joint_torques"] = request.data["joint_torques"]
+        request_data = getattr(request, "data", None)
+        if request_data and "joint_torques" in request_data:
+            result["joint_torques"] = request_data["joint_torques"]
             result["metadata"]["data_source"] = "request"
 
         return result
@@ -374,12 +371,13 @@ class AnalysisService:
             metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided timing data if available
-        if hasattr(request, "data") and request.data:
-            if "phase_transitions" in request.data:
-                result["phase_transitions"] = request.data["phase_transitions"]
+        request_data = getattr(request, "data", None)
+        if request_data:
+            if "phase_transitions" in request_data:
+                result["phase_transitions"] = request_data["phase_transitions"]
                 result["metadata"]["data_source"] = "request"
-            if "sequence_timing" in request.data:
-                result["sequence_timing"] = request.data["sequence_timing"]
+            if "sequence_timing" in request_data:
+                result["sequence_timing"] = request_data["sequence_timing"]
 
         return result
 
