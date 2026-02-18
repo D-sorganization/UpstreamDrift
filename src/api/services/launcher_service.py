@@ -77,8 +77,9 @@ class LauncherService:
         Returns:
             Dictionary mapping process name to status info.
         """
+        running = self.process_manager.running_processes
         processes = {}
-        for name, proc in self.process_manager.running_processes.items():
+        for name, proc in running.items():
             poll = proc.poll()
             processes[name] = {
                 "pid": proc.pid,
@@ -102,12 +103,13 @@ class LauncherService:
         """
         from src.shared.python.security.subprocess_utils import kill_process_tree
 
-        proc = self.process_manager.running_processes.get(name)
+        running = self.process_manager.running_processes
+        proc = running.get(name)
         if proc is None:
             return False
 
         logger.info("[stop] Killing process tree for %s (pid=%s)", name, proc.pid)
         kill_process_tree(proc.pid)
-        del self.process_manager.running_processes[name]
+        del running[name]
         logger.info("[stop] Process %s stopped and removed", name)
         return True

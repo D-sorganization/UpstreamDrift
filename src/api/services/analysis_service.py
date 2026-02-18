@@ -160,21 +160,25 @@ class AnalysisService:
                     if isinstance(state, dict):
                         result["metadata"]["state_keys"] = list(state.keys())
 
-                result["metadata"]["engine_type"] = type(engine).__name__
-                result["metadata"]["data_source"] = "engine"
+                metadata = result["metadata"]
+                metadata["engine_type"] = type(engine).__name__
+                metadata["data_source"] = "engine"
 
             except (GolfSuiteError, ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Could not extract kinematics from engine: %s", e)
-                result["metadata"]["engine_error"] = str(e)
-                result["metadata"]["data_source"] = "none"
+                metadata = result["metadata"]
+                metadata["engine_error"] = str(e)
+                metadata["data_source"] = "none"
         else:
-            result["metadata"]["data_source"] = "none"
-            result["metadata"]["note"] = "No engine loaded - load an engine first"
+            metadata = result["metadata"]
+            metadata["data_source"] = "none"
+            metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
-        if hasattr(request, "data") and request.data:
-            if "joint_angles" in request.data:
-                result["joint_angles"] = request.data["joint_angles"]
+        request_data = request.data if hasattr(request, "data") else None
+        if request_data:
+            if "joint_angles" in request_data:
+                result["joint_angles"] = request_data["joint_angles"]
                 result["metadata"]["data_source"] = "request"
             if "angular_velocities" in request.data:
                 result["angular_velocities"] = request.data["angular_velocities"]
@@ -219,16 +223,19 @@ class AnalysisService:
                     if contact is not None:
                         result["ground_reaction_forces"] = contact
 
-                result["metadata"]["engine_type"] = type(engine).__name__
-                result["metadata"]["data_source"] = "engine"
+                metadata = result["metadata"]
+                metadata["engine_type"] = type(engine).__name__
+                metadata["data_source"] = "engine"
 
             except (GolfSuiteError, ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Could not extract kinetics from engine: %s", e)
-                result["metadata"]["engine_error"] = str(e)
-                result["metadata"]["data_source"] = "none"
+                metadata = result["metadata"]
+                metadata["engine_error"] = str(e)
+                metadata["data_source"] = "none"
         else:
-            result["metadata"]["data_source"] = "none"
-            result["metadata"]["note"] = "No engine loaded - load an engine first"
+            metadata = result["metadata"]
+            metadata["data_source"] = "none"
+            metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
         if (
@@ -287,16 +294,19 @@ class AnalysisService:
                     if powers is not None:
                         result["power"] = self._to_list(powers)
 
-                result["metadata"]["engine_type"] = type(engine).__name__
-                result["metadata"]["data_source"] = "engine"
+                metadata = result["metadata"]
+                metadata["engine_type"] = type(engine).__name__
+                metadata["data_source"] = "engine"
 
             except (GolfSuiteError, ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Could not extract energetics from engine: %s", e)
-                result["metadata"]["engine_error"] = str(e)
-                result["metadata"]["data_source"] = "none"
+                metadata = result["metadata"]
+                metadata["engine_error"] = str(e)
+                metadata["data_source"] = "none"
         else:
-            result["metadata"]["data_source"] = "none"
-            result["metadata"]["note"] = "No engine loaded - load an engine first"
+            metadata = result["metadata"]
+            metadata["data_source"] = "none"
+            metadata["note"] = "No engine loaded - load an engine first"
 
         return result
 
@@ -349,16 +359,19 @@ class AnalysisService:
                             "club_peak": None,
                         }
 
-                result["metadata"]["engine_type"] = type(engine).__name__
-                result["metadata"]["data_source"] = "engine"
+                metadata = result["metadata"]
+                metadata["engine_type"] = type(engine).__name__
+                metadata["data_source"] = "engine"
 
             except (GolfSuiteError, ImportError) as e:
                 logger.warning("Could not analyze swing sequence from engine: %s", e)
-                result["metadata"]["engine_error"] = str(e)
-                result["metadata"]["data_source"] = "none"
+                metadata = result["metadata"]
+                metadata["engine_error"] = str(e)
+                metadata["data_source"] = "none"
         else:
-            result["metadata"]["data_source"] = "none"
-            result["metadata"]["note"] = "No engine loaded - load an engine first"
+            metadata = result["metadata"]
+            metadata["data_source"] = "none"
+            metadata["note"] = "No engine loaded - load an engine first"
 
         # Use provided timing data if available
         if hasattr(request, "data") and request.data:

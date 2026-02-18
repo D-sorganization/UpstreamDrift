@@ -75,10 +75,11 @@ class SimulationService:
 
             # Set initial state if provided
             if request.initial_state:
-                q = request.initial_state.get("positions", [])
-                v = request.initial_state.get("velocities", [])
-                if q and v:
-                    engine.set_state(q, v)
+                initial_state = request.initial_state
+                positions = initial_state.get("positions", [])
+                velocities = initial_state.get("velocities", [])
+                if positions and velocities:
+                    engine.set_state(positions, velocities)
 
             # Setup recorder
             recorder = GenericPhysicsRecorder(engine)
