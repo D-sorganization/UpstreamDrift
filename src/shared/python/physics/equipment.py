@@ -7,6 +7,8 @@ different physics engines.
 
 from __future__ import annotations
 
+import functools
+
 # Golf club parameters (realistic values)
 # All units in SI (meters, kg, radians) unless otherwise specified
 CLUB_CONFIGS: dict[str, dict[str, float | list[float]]] = {
@@ -56,14 +58,15 @@ CLUB_CONFIGS: dict[str, dict[str, float | list[float]]] = {
 }
 
 
+@functools.lru_cache(maxsize=32)
 def get_club_config(club_type: str) -> dict[str, float | list[float]]:
-    """Retrieve configuration for a specific club type.
+    """Retrieve configuration for a specific club type. Cached for performance.
 
     Args:
         club_type: "driver", "iron_7", or "wedge"
 
     Returns:
-        Dictionary of club parameters
+        Dictionary of club parameters (do not mutate the returned dict)
 
     Raises:
         ValueError: If club_type is not found
