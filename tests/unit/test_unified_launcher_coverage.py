@@ -63,11 +63,11 @@ def test_get_version(launcher):
         assert launcher.get_version() == "2.0.0"
 
     # Test with mock shared version when package metadata fails
-    with patch("importlib.metadata.version", side_effect=ImportError):
-        with patch.dict(
-            sys.modules, {"src.shared.python": MagicMock(__version__="1.5.0")}
-        ):
-            assert launcher.get_version() == "1.5.0"
+    with (
+        patch("importlib.metadata.version", side_effect=ImportError),
+        patch.dict(sys.modules, {"src.shared.python": MagicMock(__version__="1.5.0")}),
+    ):
+        assert launcher.get_version() == "1.5.0"
 
 
 def test_cli_launch():

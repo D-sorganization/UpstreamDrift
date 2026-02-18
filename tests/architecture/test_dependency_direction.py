@@ -108,9 +108,8 @@ def _extract_imports(filepath: Path) -> list[str]:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 imports.append(alias.name)
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                imports.append(node.module)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imports.append(node.module)
     return imports
 
 
@@ -134,10 +133,7 @@ def _import_targets_layer(module_name: str, target_layer: str) -> bool:
         return True
 
     # Short: <layer>.xxx (some files use this form)
-    if parts[0] == target_layer:
-        return True
-
-    return False
+    return parts[0] == target_layer
 
 
 def _collect_violations() -> list[str]:

@@ -392,7 +392,7 @@ class OpenSimGripModel:
         # Filter for grip muscles (typically hand/finger muscles)
         grip_muscle_names = [
             name
-            for name in muscle_forces.keys()
+            for name in muscle_forces
             if any(
                 keyword in name.lower()
                 for keyword in ["flexor", "extensor", "grip", "hand"]

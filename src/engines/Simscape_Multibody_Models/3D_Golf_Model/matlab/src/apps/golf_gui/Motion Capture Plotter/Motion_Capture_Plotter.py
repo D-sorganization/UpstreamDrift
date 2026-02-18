@@ -1118,57 +1118,59 @@ class MotionCapturePlotter(QMainWindow):
             joints: dict mapping joint names to numpy position arrays
             data: full DataFrame of all frames
         """
-        if self.trajectory_check.isChecked() and len(data) > 1:
-            # Club head trajectory
-            if "club_head" in joints:
-                club_trajectory = np.array(
+        # Club head trajectory
+        if (
+            self.trajectory_check.isChecked()
+            and len(data) > 1
+            and "club_head" in joints
+        ):
+            club_trajectory = np.array(
+                [
                     [
-                        [
-                            -row["club_head_X"]
-                            * self.motion_scale,  # Flip X for right-handed swing
-                            row["club_head_Y"] * self.motion_scale,
-                            row["club_head_Z"] * self.motion_scale,
-                        ]
-                        for _, row in data.iterrows()
-                        if "club_head_X" in row
+                        -row["club_head_X"]
+                        * self.motion_scale,  # Flip X for right-handed swing
+                        row["club_head_Y"] * self.motion_scale,
+                        row["club_head_Z"] * self.motion_scale,
                     ]
+                    for _, row in data.iterrows()
+                    if "club_head_X" in row
+                ]
+            )
+            if len(club_trajectory) > 1:
+                self.ax.plot(
+                    club_trajectory[:, 0],
+                    club_trajectory[:, 1],
+                    club_trajectory[:, 2],
+                    "r--",
+                    alpha=0.6,
+                    linewidth=2,
+                    label="Club Head Path",
                 )
-                if len(club_trajectory) > 1:
-                    self.ax.plot(
-                        club_trajectory[:, 0],
-                        club_trajectory[:, 1],
-                        club_trajectory[:, 2],
-                        "r--",
-                        alpha=0.6,
-                        linewidth=2,
-                        label="Club Head Path",
-                    )
 
-        if self.club_path_check.isChecked() and len(data) > 1:
             # Hands trajectory
-            if "left_hand" in joints:
-                hands_trajectory = np.array(
+        if self.club_path_check.isChecked() and len(data) > 1 and "left_hand" in joints:
+            hands_trajectory = np.array(
+                [
                     [
-                        [
-                            -row["left_hand_X"]
-                            * self.motion_scale,  # Flip X for right-handed swing
-                            row["left_hand_Y"] * self.motion_scale,
-                            row["left_hand_Z"] * self.motion_scale,
-                        ]
-                        for _, row in data.iterrows()
-                        if "left_hand_X" in row
+                        -row["left_hand_X"]
+                        * self.motion_scale,  # Flip X for right-handed swing
+                        row["left_hand_Y"] * self.motion_scale,
+                        row["left_hand_Z"] * self.motion_scale,
                     ]
+                    for _, row in data.iterrows()
+                    if "left_hand_X" in row
+                ]
+            )
+            if len(hands_trajectory) > 1:
+                self.ax.plot(
+                    hands_trajectory[:, 0],
+                    hands_trajectory[:, 1],
+                    hands_trajectory[:, 2],
+                    "b--",
+                    alpha=0.6,
+                    linewidth=2,
+                    label="Hands Path",
                 )
-                if len(hands_trajectory) > 1:
-                    self.ax.plot(
-                        hands_trajectory[:, 0],
-                        hands_trajectory[:, 1],
-                        hands_trajectory[:, 2],
-                        "b--",
-                        alpha=0.6,
-                        linewidth=2,
-                        label="Hands Path",
-                    )
 
     def _draw_segment_traces(self, frame_data, data) -> None:
         """Draw optional per-segment trace paths for Simscape data.
@@ -1364,10 +1366,7 @@ class MotionCapturePlotter(QMainWindow):
         z_lim = self.ax.get_zlim()
 
         # Determine zoom factor based on scroll direction
-        if event.button == "up" or event.step > 0:
-            zoom_factor = 0.9  # Zoom in
-        else:
-            zoom_factor = 1.1  # Zoom out
+        zoom_factor = 0.9 if event.button == "up" or event.step > 0 else 1.1  # Zoom out
 
         # Calculate centers
         x_center = (x_lim[0] + x_lim[1]) / 2

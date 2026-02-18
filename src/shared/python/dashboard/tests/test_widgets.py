@@ -126,15 +126,17 @@ def test_live_plot_widget_freq_analysis(app, recorder) -> None:
 
     # Mock QDialog.exec to prevent blocking
     # Also mock compute_psd to avoid needing full signal processing
-    with patch.object(FrequencyAnalysisDialog, "exec", return_value=None) as mock_exec:
-        with patch(
+    with (
+        patch.object(FrequencyAnalysisDialog, "exec", return_value=None) as mock_exec,
+        patch(
             "shared.python.dashboard.widgets.compute_psd",
             return_value=(np.linspace(0, 10, 10), np.random.rand(3, 10)),
-        ):
-            widget.show_freq_analysis()
-            mock_exec.assert_called_once()
-            # Verify psd called?
-            # widget.show_freq_analysis instantiates FrequencyAnalysisDialog which calls compute_psd
+        ),
+    ):
+        widget.show_freq_analysis()
+        mock_exec.assert_called_once()
+        # Verify psd called?
+        # widget.show_freq_analysis instantiates FrequencyAnalysisDialog which calls compute_psd
 
 
 def test_frequency_analysis_dialog(app) -> None:

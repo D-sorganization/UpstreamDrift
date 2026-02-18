@@ -756,9 +756,11 @@ class JointManipulatorWidget(QWidget):
             item = self.sliders_layout.itemAt(i)
             if item and item.widget():
                 widget = item.widget()
-                if isinstance(widget, JointSliderWidget):
-                    if widget.joint.name in positions:
-                        widget.set_value(positions[widget.joint.name])
+                if (
+                    isinstance(widget, JointSliderWidget)
+                    and widget.joint.name in positions
+                ):
+                    widget.set_value(positions[widget.joint.name])
 
     def get_urdf_content(self) -> str:
         """Get the current URDF content."""

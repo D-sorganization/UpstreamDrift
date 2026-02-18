@@ -182,11 +182,10 @@ class MousePickingRay:
                     body_radius = max(body_radius, geom_size[0])
 
             # Check if ray intersects bounding sphere
-            if distance_to_body < body_radius * 1.5:  # 1.5x radius for easier picking
-                if proj_length < closest_distance:
-                    closest_distance = proj_length
-                    closest_body = body_id
-                    closest_point = closest_on_ray
+            if distance_to_body < body_radius * 1.5 and proj_length < closest_distance:
+                closest_distance = proj_length
+                closest_body = body_id
+                closest_point = closest_on_ray
 
         if closest_body is not None and closest_point is not None:
             return closest_body, closest_point, closest_distance
@@ -624,7 +623,7 @@ class InteractiveManipulator:
                         maintain_orientation=True,
                     )
 
-            elif constraint.constraint_type == ConstraintType.RELATIVE_TO_BODY:
+            elif constraint.constraint_type == ConstraintType.RELATIVE_TO_BODY:  # noqa: SIM102
                 # Maintain relative pose to reference body
                 if (
                     constraint.reference_body_id is not None

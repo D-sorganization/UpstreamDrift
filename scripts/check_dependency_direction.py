@@ -78,9 +78,8 @@ def get_top_level_imports(filepath: Path) -> list[tuple[int, str]]:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 results.append((node.lineno, alias.name))
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                results.append((node.lineno, node.module))
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            results.append((node.lineno, node.module))
 
     return results
 

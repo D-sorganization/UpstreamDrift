@@ -456,19 +456,22 @@ class GolfLauncher(
         model = self._get_model(self.selected_model)
 
         # Check Docker dependency
-        if model and getattr(model, "requires_docker", False):
-            if not self.docker_available:
-                self.btn_launch.setText("! Docker Required")
-                self.btn_launch.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: {c.bg_elevated};
-                        color: {c.error};
-                        border: 2px solid {c.error};
-                        border-radius: 6px;
-                    }}
-                    """)
-                self.btn_launch.setEnabled(False)
-                return
+        if (
+            model
+            and getattr(model, "requires_docker", False)
+            and not self.docker_available
+        ):
+            self.btn_launch.setText("! Docker Required")
+            self.btn_launch.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {c.bg_elevated};
+                    color: {c.error};
+                    border: 2px solid {c.error};
+                    border-radius: 6px;
+                }}
+                """)
+            self.btn_launch.setEnabled(False)
+            return
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)

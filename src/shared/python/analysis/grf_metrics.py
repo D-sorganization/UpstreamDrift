@@ -52,13 +52,12 @@ class GRFMetricsMixin:
         # Force metrics
         peak_vertical = None
         peak_shear = None
-        if ground_forces is not None:
-            # Assuming Z is vertical (index 2)
-            if ground_forces.shape[1] >= 3:
-                peak_vertical = float(np.max(ground_forces[:, 2]))
-                # Shear is magnitude of X and Y forces
-                shear = np.hypot(ground_forces[:, 0], ground_forces[:, 1])
-                peak_shear = float(np.max(shear))
+        # Assuming Z is vertical (index 2)
+        if ground_forces is not None and ground_forces.shape[1] >= 3:
+            peak_vertical = float(np.max(ground_forces[:, 2]))
+            # Shear is magnitude of X and Y forces
+            shear = np.hypot(ground_forces[:, 0], ground_forces[:, 1])
+            peak_shear = float(np.max(shear))
 
         result = GRFMetrics(
             cop_path_length=float(path_length),

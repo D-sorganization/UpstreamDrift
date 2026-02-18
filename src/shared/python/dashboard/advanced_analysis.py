@@ -404,12 +404,9 @@ class CorrelationTab(QtWidgets.QWidget):
                 continue
 
             # Reduce to scalar
-            if vals.ndim > 1:
-                # Take L2 norm for vectors (forces, etc.)
-                # Assuming shape (N, D)
-                scalar_vals = np.linalg.norm(vals, axis=1)
-            else:
-                scalar_vals = vals
+            # Take L2 norm for vectors (forces, etc.)
+            # Assuming shape (N, D)
+            scalar_vals = np.linalg.norm(vals, axis=1) if vals.ndim > 1 else vals
 
             data_dict[label] = scalar_vals
             if len(scalar_vals) < min_len:

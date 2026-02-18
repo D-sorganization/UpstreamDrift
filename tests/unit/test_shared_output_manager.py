@@ -1,5 +1,6 @@
 """Unit tests for shared output manager."""
 
+import contextlib
 import shutil
 import unittest
 from datetime import datetime, timezone
@@ -29,10 +30,8 @@ class TestOutputManager(unittest.TestCase):
     def tearDown(self):
         """Clean up test fixtures."""
         if self.test_dir.exists():
-            try:
+            with contextlib.suppress(PermissionError, OSError):
                 shutil.rmtree(self.test_dir)
-            except (PermissionError, OSError):
-                pass
 
     def test_initialization_directory_creation(self):
         """Test that directory structure is created."""
@@ -144,12 +143,15 @@ class TestOutputManager(unittest.TestCase):
         # The cleanup function uses now_local() for cutoff calculation
         # Use timezone-aware datetime since now_local returns timezone-aware
         fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=UTC)
-        with patch(
-            "src.shared.python.data_io.output_manager.now_local", return_value=fixed_now
-        ):
+        with (
+            patch(
+                "src.shared.python.data_io.output_manager.now_local",
+                return_value=fixed_now,
+            ),
             # Also mock unlink to verify it was called and avoid actual deletion
-            with patch.object(Path, "unlink") as mock_unlink:
-                cleaned = self.manager.cleanup_old_files()
+            patch.object(Path, "unlink") as mock_unlink,
+        ):
+            cleaned = self.manager.cleanup_old_files()
 
-                self.assertGreaterEqual(cleaned, 1)
-                self.assertTrue(mock_unlink.called)
+            self.assertGreaterEqual(cleaned, 1)
+            self.assertTrue(mock_unlink.called)

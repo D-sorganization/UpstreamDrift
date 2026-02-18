@@ -304,23 +304,25 @@ class TestPasswordSecurity:
 
         try:
             # Mock environment to not have admin password set
-            with patch.dict("os.environ", {}, clear=True):
+            with (
+                patch.dict("os.environ", {}, clear=True),
                 # Mock SessionLocal to avoid actual database operations
-                with patch("api.database.SessionLocal") as mock_session:
-                    mock_db = MagicMock()
-                    mock_session.return_value = mock_db
+                patch("api.database.SessionLocal") as mock_session,
+            ):
+                mock_db = MagicMock()
+                mock_session.return_value = mock_db
 
-                    # Mock query to return no admin user
-                    mock_db.query.return_value.filter.return_value.first.return_value = None
+                # Mock query to return no admin user
+                mock_db.query.return_value.filter.return_value.first.return_value = None
 
-                    # This should generate a random password but NOT log it
-                    try:
-                        database.init_db()
-                    except Exception as e:
-                        # Catch and log expected errors for this specific logging test
-                        logging.getLogger(__name__).debug(
-                            f"Caught expected init_db error: {e}"
-                        )
+                # This should generate a random password but NOT log it
+                try:
+                    database.init_db()
+                except Exception as e:
+                    # Catch and log expected errors for this specific logging test
+                    logging.getLogger(__name__).debug(
+                        f"Caught expected init_db error: {e}"
+                    )
 
             # Get logged output
             log_output = log_buffer.getvalue()

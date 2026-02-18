@@ -435,6 +435,8 @@ class TestDatasetExport:
 
         dataset = generator.generate(basic_config)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with pytest.raises((ValueError, PreconditionError)):
-                generator.export(dataset, Path(tmpdir) / "test", format="invalid")
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            pytest.raises((ValueError, PreconditionError)),
+        ):
+            generator.export(dataset, Path(tmpdir) / "test", format="invalid")

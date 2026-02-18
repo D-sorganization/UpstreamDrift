@@ -274,9 +274,10 @@ class CollisionChecker:
             return False
 
         # Broad phase: AABB check
-        if self._config.use_broad_phase:
-            if not self._aabb_overlap(geom_a, geom_b, margin):
-                return False
+        if self._config.use_broad_phase and not self._aabb_overlap(
+            geom_a, geom_b, margin
+        ):
+            return False
 
         # Narrow phase: Actual distance check
         distance, _, _ = compute_primitive_distance(geom_a, geom_b)
@@ -294,9 +295,10 @@ class CollisionChecker:
             return False
 
         # Broad phase
-        if self._config.use_broad_phase:
-            if not self._aabb_overlap(body_geom, env_primitive, margin):
-                return False
+        if self._config.use_broad_phase and not self._aabb_overlap(
+            body_geom, env_primitive, margin
+        ):
+            return False
 
         # Narrow phase
         distance, _, _ = compute_primitive_distance(body_geom, env_primitive)

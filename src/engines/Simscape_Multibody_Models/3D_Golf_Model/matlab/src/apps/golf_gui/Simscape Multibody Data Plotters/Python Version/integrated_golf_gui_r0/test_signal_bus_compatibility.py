@@ -39,7 +39,7 @@ def test_matlab_data_structure() -> bool:
             mat_data = scipy.io.loadmat(filename)
 
             logger.info(f"Keys in {filename}:")
-            for key in mat_data.keys():
+            for key in mat_data:
                 if not key.startswith("__"):  # Skip metadata keys
                     value = mat_data[key]
                     if isinstance(value, np.ndarray):
@@ -151,13 +151,16 @@ def analyze_signal_bus_structure() -> bool:
 
         # Look for signal bus related fields
         signal_bus_indicators = []
-        for key in mat_data.keys():
+        for key in mat_data:
             if not key.startswith("__"):
                 value = mat_data[key]
-                if isinstance(value, np.ndarray) and value.ndim == 2:
-                    # Check if this looks like signal bus data
-                    if value.shape[1] > 20:  # Many columns suggest signal bus
-                        signal_bus_indicators.append((key, value.shape))
+                # Check if this looks like signal bus data
+                if (
+                    isinstance(value, np.ndarray)
+                    and value.ndim == 2
+                    and value.shape[1] > 20
+                ):
+                    signal_bus_indicators.append((key, value.shape))
 
         logger.info("Potential signal bus data:")
         for key, shape in signal_bus_indicators:

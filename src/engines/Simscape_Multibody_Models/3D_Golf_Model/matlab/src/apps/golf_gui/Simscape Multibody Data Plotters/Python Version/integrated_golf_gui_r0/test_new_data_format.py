@@ -25,7 +25,7 @@ def test_new_data_files() -> bool:
             logger.info(f"Keys: {list(mat_data.keys())}")
 
             # Look for the main data array
-            for key in mat_data.keys():
+            for key in mat_data:
                 if not key.startswith("__"):
                     data = mat_data[key]
                     logger.info(f"  {key}: shape {data.shape}, dtype {data.dtype}")

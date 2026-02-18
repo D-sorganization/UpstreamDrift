@@ -147,18 +147,21 @@ class SimCameraMixin:
             self.last_mouse_pos = (x, y)
             return
 
-        if self.manipulator is not None and self.model is not None:
-            if self.manipulator.selected_body_id is not None:
-                success = self.manipulator.drag_to(
-                    x,
-                    y,
-                    self.frame_width,
-                    self.frame_height,
-                    self.camera,
-                )
+        if (
+            self.manipulator is not None
+            and self.model is not None
+            and self.manipulator.selected_body_id is not None
+        ):
+            success = self.manipulator.drag_to(
+                x,
+                y,
+                self.frame_width,
+                self.frame_height,
+                self.camera,
+            )
 
-                if success:
-                    self._render_once()
+            if success:
+                self._render_once()
 
         super().mouseMoveEvent(event)  # type: ignore[misc]
 

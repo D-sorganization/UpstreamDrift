@@ -176,21 +176,22 @@ class DraggableTabWidget(QTabWidget):
             ):
                 self.drag_start_pos = event.globalPosition().toPoint()
 
-        elif event.type() == QEvent.Type.MouseMove:
-            if isinstance(event, QMouseEvent) and (
-                event.buttons() & Qt.MouseButton.LeftButton
+        elif (
+            event.type() == QEvent.Type.MouseMove
+            and isinstance(event, QMouseEvent)
+            and (event.buttons() & Qt.MouseButton.LeftButton)
+        ):
+            pos = event.globalPosition().toPoint()
+            if (pos - self.drag_start_pos).manhattanLength() >= (
+                QApplication.startDragDistance()
             ):
-                pos = event.globalPosition().toPoint()
-                if (pos - self.drag_start_pos).manhattanLength() >= (
-                    QApplication.startDragDistance()
-                ):
-                    local = self.mapFromGlobal(pos)
-                    bar = self.tabBar()
-                    if bar and not bar.geometry().contains(local):
-                        idx = self.currentIndex()
-                        if idx >= 0:
-                            self.detach_tab(idx, pos)
-                            return True
+                local = self.mapFromGlobal(pos)
+                bar = self.tabBar()
+                if bar and not bar.geometry().contains(local):
+                    idx = self.currentIndex()
+                    if idx >= 0:
+                        self.detach_tab(idx, pos)
+                        return True
 
         return super().eventFilter(watched, event)
 

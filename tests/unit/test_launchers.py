@@ -2,6 +2,7 @@
 Unit tests for launcher functionality.
 """
 
+import contextlib
 import os
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -76,10 +77,8 @@ class TestLauncherModule:
                 mock_parse.return_value = mock_args
 
                 # Should handle help gracefully
-                try:
+                with contextlib.suppress(SystemExit):
                     launch_golf_suite.main()
-                except SystemExit:
-                    pass  # Help typically causes SystemExit
 
         except ImportError:
             pytest.skip("Main launcher not available")

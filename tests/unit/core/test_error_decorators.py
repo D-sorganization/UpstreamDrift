@@ -239,9 +239,11 @@ class TestErrorContext:
 
     def test_reraise_true_propagates(self) -> None:
         """With reraise=True, exception is re-raised."""
-        with pytest.raises(ValueError, match="inner"):
-            with ErrorContext("test op", reraise=True):
-                raise ValueError("inner")
+        with (
+            pytest.raises(ValueError, match="inner"),
+            ErrorContext("test op", reraise=True),
+        ):
+            raise ValueError("inner")
 
     def test_reraise_false_suppresses(self) -> None:
         """With reraise=False, exception is suppressed."""
@@ -251,17 +253,21 @@ class TestErrorContext:
 
     def test_logs_on_error(self, caplog: pytest.LogCaptureFixture) -> None:
         """Context manager logs the operation name on error."""
-        with caplog.at_level(logging.ERROR):
-            with ErrorContext("loading config", reraise=False):
-                raise OSError("disk error")
+        with (
+            caplog.at_level(logging.ERROR),
+            ErrorContext("loading config", reraise=False),
+        ):
+            raise OSError("disk error")
 
         assert any("loading config" in r.message for r in caplog.records)
 
     def test_log_success_flag(self, caplog: pytest.LogCaptureFixture) -> None:
         """With log_success=True, logs on successful completion."""
-        with caplog.at_level(logging.DEBUG):
-            with ErrorContext("batch processing", log_success=True):
-                pass
+        with (
+            caplog.at_level(logging.DEBUG),
+            ErrorContext("batch processing", log_success=True),
+        ):
+            pass
 
         # Should have logged success
         log_messages = [r.message for r in caplog.records]

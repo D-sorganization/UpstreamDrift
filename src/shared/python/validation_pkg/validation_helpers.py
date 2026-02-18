@@ -316,15 +316,14 @@ def validate_model_parameters(
     total_mass = np.sum(body_masses)
 
     # Skip total mass check if only a few bodies (might be partial model)
-    if len(body_masses) > 10:
-        # Human body mass typically 40-200 kg
-        if total_mass < 20 or total_mass > 500:
-            warnings.warn(
-                f"Total model mass ({total_mass:.1f} kg) is outside typical "
-                f"human range (40-200 kg). Verify model parameters and units.",
-                category=UserWarning,
-                stacklevel=2,
-            )
+    # Human body mass typically 40-200 kg
+    if len(body_masses) > 10 and (total_mass < 20 or total_mass > 500):
+        warnings.warn(
+            f"Total model mass ({total_mass:.1f} kg) is outside typical "
+            f"human range (40-200 kg). Verify model parameters and units.",
+            category=UserWarning,
+            stacklevel=2,
+        )
 
 
 # Export public API

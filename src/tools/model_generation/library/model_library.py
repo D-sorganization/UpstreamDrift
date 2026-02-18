@@ -325,9 +325,10 @@ class ModelLibrary:
             return None
 
         # Check if we need to download
-        if not entry.is_cached or force_download:
-            if entry.source != RepositorySource.LOCAL:
-                self._download_model(entry)
+        if (
+            not entry.is_cached or force_download
+        ) and entry.source != RepositorySource.LOCAL:
+            self._download_model(entry)
 
         if not entry.urdf_path or not entry.urdf_path.exists():
             logger.error(f"URDF file not found for model: {model_id}")

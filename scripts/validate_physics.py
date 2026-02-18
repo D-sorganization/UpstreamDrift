@@ -45,10 +45,7 @@ def get_test_files(test_type: str) -> list[Path]:
     repo_root = get_repo_root()
     files: list[Path] = []
 
-    if test_type == "all":
-        types_to_include = list(TEST_FILES.keys())
-    else:
-        types_to_include = [test_type]
+    types_to_include = list(TEST_FILES.keys()) if test_type == "all" else [test_type]
 
     for t in types_to_include:
         if t in TEST_FILES:

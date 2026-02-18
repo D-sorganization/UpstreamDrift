@@ -264,10 +264,7 @@ class BehaviorCloning(ImitationLearner):
         x = observations
         for i, layer in enumerate(self._policy):
             z = x @ layer["W"] + layer["b"]
-            if i < len(self._policy) - 1:
-                x = np.maximum(0, z)  # ReLU
-            else:
-                x = z  # Linear output
+            x = np.maximum(0, z) if i < len(self._policy) - 1 else z  # Linear output
             activations.append(x)
 
         # Backward pass

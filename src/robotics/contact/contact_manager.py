@@ -131,11 +131,8 @@ class ContactManager(ContractChecker):
 
         contacts: list[ContactState] = []
 
-        if self._is_contact_capable:
-            contacts = self._detect_from_engine()
-        else:
-            # Fallback: no contact detection available
-            contacts = []
+        # Fallback: no contact detection available
+        contacts = self._detect_from_engine() if self._is_contact_capable else []
 
         self._contact_cache = contacts
         return contacts

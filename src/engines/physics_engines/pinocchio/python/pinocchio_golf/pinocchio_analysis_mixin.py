@@ -325,11 +325,12 @@ class PinocchioAnalysisMixin:
                         frame.joint_velocities,
                         frame.joint_torques,
                     )
-                if not frame.counterfactuals:
-                    if hasattr(self.analyzer, "compute_counterfactuals"):
-                        frame.counterfactuals = self.analyzer.compute_counterfactuals(
-                            frame.joint_positions, frame.joint_velocities
-                        )
+                if not frame.counterfactuals and hasattr(
+                    self.analyzer, "compute_counterfactuals"
+                ):
+                    frame.counterfactuals = self.analyzer.compute_counterfactuals(
+                        frame.joint_positions, frame.joint_velocities
+                    )
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 

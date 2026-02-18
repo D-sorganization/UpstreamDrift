@@ -109,9 +109,11 @@ class DraggableModelCard(QFrame):
             return "c3d_icon.png"
         elif "model_explorer" in model_id or "urdf" in model_id:
             return "urdf_icon.png"
-        elif "engine_managed" in getattr(self.model, "type", ""):
-            if getattr(self.model, "engine_type", "") == "mujoco":
-                return "mujoco_humanoid.png"
+        elif (
+            "engine_managed" in getattr(self.model, "type", "")
+            and getattr(self.model, "engine_type", "") == "mujoco"
+        ):
+            return "mujoco_humanoid.png"
         return None
 
     @staticmethod

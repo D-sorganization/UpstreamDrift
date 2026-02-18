@@ -251,9 +251,12 @@ class MotionPlanner(ABC):
             True if configuration is valid.
         """
         # Check bounds
-        if self._lower_bounds is not None and self._upper_bounds is not None:
-            if np.any(q < self._lower_bounds) or np.any(q > self._upper_bounds):
-                return False
+        if (
+            self._lower_bounds is not None
+            and self._upper_bounds is not None
+            and (np.any(q < self._lower_bounds) or np.any(q > self._upper_bounds))
+        ):
+            return False
 
         # Check collision
         result = self._collision_checker.check_collision(q)

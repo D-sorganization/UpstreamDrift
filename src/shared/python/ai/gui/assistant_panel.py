@@ -955,12 +955,9 @@ class AIAssistantPanel(QWidget):
         while repo_root.name != "src" and repo_root.parent != repo_root:
             repo_root = repo_root.parent
 
-        if repo_root.name == "src":
-            # We found src, let's index from here
-            src_path = repo_root
-        else:
-            # Fallback
-            src_path = Path("src").resolve()
+        # We found src, let's index from here
+        # Fallback
+        src_path = repo_root if repo_root.name == "src" else Path("src").resolve()
 
         if not src_path.exists():
             logger.error(f"Could not find src directory to index at {src_path}")

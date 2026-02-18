@@ -268,4 +268,4 @@ class TestUploadLimitsConfig:
 
         # Should be approximately consistent (MB * 1024 * 1024 = bytes)
         expected_bytes = MAX_UPLOAD_SIZE_MB * 1024 * 1024
-        assert MAX_UPLOAD_SIZE_BYTES == expected_bytes
+        assert expected_bytes == MAX_UPLOAD_SIZE_BYTES

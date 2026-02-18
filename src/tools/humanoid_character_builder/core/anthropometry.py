@@ -482,7 +482,7 @@ def estimate_segment_masses(
         Dict mapping segment name to mass in kg
     """
     masses = {}
-    for segment_name in _SEGMENT_NAME_MAP.keys():
+    for segment_name in _SEGMENT_NAME_MAP:
         ratio = get_segment_mass_ratio(segment_name, gender_factor)
         masses[segment_name] = total_mass_kg * ratio
     return masses
@@ -503,7 +503,7 @@ def estimate_segment_dimensions(
         'length', 'width', 'depth' keys
     """
     dimensions = {}
-    for segment_name in _SEGMENT_NAME_MAP.keys():
+    for segment_name in _SEGMENT_NAME_MAP:
         key = get_anthropometry_key(segment_name)
         data = DE_LEVA_DATA.get_segment_data(key, gender_factor)
 

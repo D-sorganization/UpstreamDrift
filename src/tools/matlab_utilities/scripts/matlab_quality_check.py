@@ -131,12 +131,13 @@ class MATLABQualityChecker:
         }
         matches = re.findall(r"(?<![.\w])(?:\d+\.\d+|\d+)(?![.\w])", line)
         for num in matches:
-            if num not in acceptable:
-                # Check for trailing comment explaining it
-                if "%" not in line or line.find(num) > line.find("%"):
-                    issues.append(
-                        f"{file_name} (line {i}): Magic number {num} - define as named constant with unit/source"
-                    )
+            # Check for trailing comment explaining it
+            if num not in acceptable and (
+                "%" not in line or line.find(num) > line.find("%")
+            ):
+                issues.append(
+                    f"{file_name} (line {i}): Magic number {num} - define as named constant with unit/source"
+                )
 
     def _check_function_unsafe(
         self, line: str, i: int, file_name: str, issues: list[str]

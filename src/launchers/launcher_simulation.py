@@ -493,10 +493,12 @@ except Exception as e:
             self.show_toast("C3D Viewer script not found.", "error")
             return
 
-        if "c3d_viewer" in self.running_processes:
-            if self.running_processes["c3d_viewer"].poll() is None:
-                self.show_toast("C3D Viewer is already running.", "warning")
-                return
+        if (
+            "c3d_viewer" in self.running_processes
+            and self.running_processes["c3d_viewer"].poll() is None
+        ):
+            self.show_toast("C3D Viewer is already running.", "warning")
+            return
 
         try:
             logger.info("Launching C3D Viewer: %s", c3d_script)
@@ -519,10 +521,12 @@ except Exception as e:
             self.show_toast("Shot Tracer script not found.", "error")
             return
 
-        if "shot_tracer" in self.running_processes:
-            if self.running_processes["shot_tracer"].poll() is None:
-                self.show_toast("Shot Tracer is already running.", "warning")
-                return
+        if (
+            "shot_tracer" in self.running_processes
+            and self.running_processes["shot_tracer"].poll() is None
+        ):
+            self.show_toast("Shot Tracer is already running.", "warning")
+            return
 
         try:
             logger.info("Launching Shot Tracer: %s", shot_tracer_script)

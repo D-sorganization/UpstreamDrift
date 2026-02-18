@@ -240,13 +240,13 @@ class MuscleDrivenEnv:
 
         agonist_act = {
             name: self.muscle_activations[name]
-            for name in self.muscle_system.agonist.muscles.keys()
+            for name in self.muscle_system.agonist.muscles
             if name in self.muscle_activations
         }
 
         antagonist_act = {
             name: self.muscle_activations[name]
-            for name in self.muscle_system.antagonist.muscles.keys()
+            for name in self.muscle_system.antagonist.muscles
             if name in self.muscle_activations
         }
 

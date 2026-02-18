@@ -46,17 +46,19 @@ class TestMediaPipeEstimator:
         self, mock_mediapipe: MagicMock
     ) -> Generator[mediapipe_estimator.MediaPipeEstimator, None, None]:
         """Return a MediaPipeEstimator instance with mocked dependencies."""
-        with patch.object(mediapipe_estimator, "MEDIAPIPE_AVAILABLE", True):
-            with patch.object(mediapipe_estimator, "mp", mock_mediapipe):
-                # We also need to patch cv2 since it's used in methods
-                with patch(
-                    "src.shared.python.pose_estimation.mediapipe_estimator.cv2",
-                    MagicMock(),
-                ):
-                    estimator = mediapipe_estimator.MediaPipeEstimator(
-                        min_detection_confidence=0.7
-                    )
-                    yield estimator
+        with (
+            patch.object(mediapipe_estimator, "MEDIAPIPE_AVAILABLE", True),
+            patch.object(mediapipe_estimator, "mp", mock_mediapipe),
+            # We also need to patch cv2 since it's used in methods
+            patch(
+                "src.shared.python.pose_estimation.mediapipe_estimator.cv2",
+                MagicMock(),
+            ),
+        ):
+            estimator = mediapipe_estimator.MediaPipeEstimator(
+                min_detection_confidence=0.7
+            )
+            yield estimator
 
     def test_initialization(
         self, estimator_instance: mediapipe_estimator.MediaPipeEstimator
@@ -206,14 +208,14 @@ class TestMediaPipeEstimator:
     def test_missing_mediapipe(self) -> None:
         """Test behavior when mediapipe is missing."""
         # We patch module attributes to simulate missing mediapipe
-        with patch.object(mediapipe_estimator, "MEDIAPIPE_AVAILABLE", False):
-            with patch.object(mediapipe_estimator, "mp", None):
-                # Initialize should check MEDIAPIPE_AVAILABLE but only warn
-                # The __init__ in the code warns but doesn't raise
-                estimator = mediapipe_estimator.MediaPipeEstimator()
+        with (
+            patch.object(mediapipe_estimator, "MEDIAPIPE_AVAILABLE", False),
+            patch.object(mediapipe_estimator, "mp", None),
+        ):
+            # Initialize should check MEDIAPIPE_AVAILABLE but only warn
+            # The __init__ in the code warns but doesn't raise
+            estimator = mediapipe_estimator.MediaPipeEstimator()
 
-                # load_model should raise ImportError
-                with pytest.raises(
-                    ImportError, match="MediaPipe module is not installed"
-                ):
-                    estimator.load_model()
+            # load_model should raise ImportError
+            with pytest.raises(ImportError, match="MediaPipe module is not installed"):
+                estimator.load_model()

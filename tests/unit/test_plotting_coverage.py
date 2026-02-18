@@ -25,25 +25,21 @@ def mock_recorder():
     times = np.linspace(0, 1, 100)
 
     def get_time_series(field):
-        if field == "joint_positions":
+        if (
+            field == "joint_positions"
+            or field == "joint_velocities"
+            or field == "joint_torques"
+            or field == "actuator_powers"
+        ):
             return times, np.random.rand(100, 3)
-        elif field == "joint_velocities":
-            return times, np.random.rand(100, 3)
-        elif field == "joint_torques":
-            return times, np.random.rand(100, 3)
-        elif field == "actuator_powers":
-            return times, np.random.rand(100, 3)
-        elif field == "kinetic_energy":
+        elif (
+            field == "kinetic_energy"
+            or field == "potential_energy"
+            or field == "total_energy"
+            or field == "club_head_speed"
+        ):
             return times, np.random.rand(100)
-        elif field == "potential_energy":
-            return times, np.random.rand(100)
-        elif field == "total_energy":
-            return times, np.random.rand(100)
-        elif field == "club_head_speed":
-            return times, np.random.rand(100)
-        elif field == "club_head_position":
-            return times, np.random.rand(100, 3)
-        elif field == "angular_momentum":
+        elif field == "club_head_position" or field == "angular_momentum":
             return times, np.random.rand(100, 3)
         elif field == "cop_position":
             return times, np.random.rand(100, 2)

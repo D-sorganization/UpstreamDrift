@@ -73,9 +73,10 @@ def test_load_drake_missing(tmp_path: object) -> None:
                 raise ImportError(f"No module named {name}")
             return original_import(name, *args, **kwargs)
 
-        with patch("builtins.__import__", side_effect=side_effect):
-            # Need to mock other engines to allow import of engine_loaders
-            with patch.dict(
+        # Need to mock other engines to allow import of engine_loaders
+        with (
+            patch("builtins.__import__", side_effect=side_effect),
+            patch.dict(
                 sys.modules,
                 {
                     "mujoco": MagicMock(),
@@ -83,14 +84,15 @@ def test_load_drake_missing(tmp_path: object) -> None:
                     "matlab": MagicMock(),
                     "matlab.engine": MagicMock(),
                 },
-            ):
-                from shared.python.engine_core.engine_loaders import load_drake_engine
+            ),
+        ):
+            from shared.python.engine_core.engine_loaders import load_drake_engine
 
-                # load_drake_engine catches ImportError and raises GolfModelingError
-                with pytest.raises(Exception) as excinfo:
-                    load_drake_engine(path)
+            # load_drake_engine catches ImportError and raises GolfModelingError
+            with pytest.raises(Exception) as excinfo:
+                load_drake_engine(path)
 
-                assert "Drake requirements not met" in str(excinfo.value)
+            assert "Drake requirements not met" in str(excinfo.value)
     finally:
         # Restore backed up modules
         if pydrake_backup is not None:

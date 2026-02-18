@@ -212,10 +212,13 @@ class AnalysisService:
             result["metadata"]["note"] = "No engine loaded - load an engine first"
 
         # Use provided data if available
-        if hasattr(request, "data") and request.data:
-            if "joint_torques" in request.data:
-                result["joint_torques"] = request.data["joint_torques"]
-                result["metadata"]["data_source"] = "request"
+        if (
+            hasattr(request, "data")
+            and request.data
+            and "joint_torques" in request.data
+        ):
+            result["joint_torques"] = request.data["joint_torques"]
+            result["metadata"]["data_source"] = "request"
 
         return result
 

@@ -572,7 +572,7 @@ class EndEffectorManagerWidget(QWidget):
         self.current_list.clear()
         self.current_end_effectors = []
 
-        for name in links.keys():
+        for name in links:
             if name is None:
                 continue
             is_leaf = name in end_effector_names

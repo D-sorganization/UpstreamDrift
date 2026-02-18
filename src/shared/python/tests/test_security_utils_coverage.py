@@ -78,9 +78,11 @@ def test_validate_path_invalid_format() -> None:
     # unless it is really malformed or permissions issue.
     # We can mock Path.resolve to raise an exception.
 
-    with pytest.raises(ValueError, match="Invalid path format"):
-        with patch.object(Path, "resolve", side_effect=Exception("Disk error")):
-            validate_path("some/path", [Path(".")])
+    with (
+        pytest.raises(ValueError, match="Invalid path format"),
+        patch.object(Path, "resolve", side_effect=Exception("Disk error")),
+    ):
+        validate_path("some/path", [Path(".")])
 
     # Non-strict should return the input as Path
     with patch.object(Path, "resolve", side_effect=Exception("Disk error")):

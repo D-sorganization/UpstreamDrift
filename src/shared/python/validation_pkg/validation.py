@@ -278,9 +278,12 @@ def validate_physical_bounds(func: F) -> F:
                 validate_timestep(float(param_value))
 
             # Inertia validation
-            if "inertia" in param_name.lower() and isinstance(param_value, np.ndarray):
-                if param_value.shape == (3, 3):
-                    validate_inertia_matrix(param_value, param_name)
+            if (
+                "inertia" in param_name.lower()
+                and isinstance(param_value, np.ndarray)
+                and param_value.shape == (3, 3)
+            ):
+                validate_inertia_matrix(param_value, param_name)
 
             # Joint limits validation
             if param_name == "q_min" and "q_max" in bound_args.arguments:

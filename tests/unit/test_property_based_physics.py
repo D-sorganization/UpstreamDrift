@@ -526,18 +526,22 @@ class TestPhysicalConstantsProperties:
 
     def test_precomputed_floats_match_source_constants(self) -> None:
         """Property: pre-computed float values match their source constants."""
-        assert GRAVITY_FLOAT == pytest.approx(float(physics_constants.GRAVITY_M_S2))
-        assert GOLF_BALL_MASS_FLOAT == pytest.approx(
-            float(physics_constants.GOLF_BALL_MASS_KG)
+        assert pytest.approx(float(physics_constants.GRAVITY_M_S2)) == GRAVITY_FLOAT
+        assert (
+            pytest.approx(float(physics_constants.GOLF_BALL_MASS_KG))
+            == GOLF_BALL_MASS_FLOAT
         )
-        assert GOLF_BALL_RADIUS_FLOAT == pytest.approx(
-            float(physics_constants.GOLF_BALL_RADIUS_M)
+        assert (
+            pytest.approx(float(physics_constants.GOLF_BALL_RADIUS_M))
+            == GOLF_BALL_RADIUS_FLOAT
         )
-        assert GOLF_BALL_DIAMETER_FLOAT == pytest.approx(
-            float(physics_constants.GOLF_BALL_DIAMETER_M)
+        assert (
+            pytest.approx(float(physics_constants.GOLF_BALL_DIAMETER_M))
+            == GOLF_BALL_DIAMETER_FLOAT
         )
-        assert GOLF_BALL_MOMENT_INERTIA_FLOAT == pytest.approx(
-            float(physics_constants.GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
+        assert (
+            pytest.approx(float(physics_constants.GOLF_BALL_MOMENT_OF_INERTIA_KG_M2))
+            == GOLF_BALL_MOMENT_INERTIA_FLOAT
         )
 
     def test_derived_constants_consistent(self) -> None:

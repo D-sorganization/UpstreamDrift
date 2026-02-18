@@ -163,25 +163,23 @@ def test_main_missing_dependencies():
             "Test Error",
             create=True,
         ),
-    ):
-        with patch(
+        patch(
             "src.shared.python.optimization.examples.optimize_arm.logger"
-        ) as mock_logger:
-            main()
-            mock_logger.error.assert_any_call(
-                "Skipping optimize_arm.py due to missing dependencies: Test Error"
-            )
+        ) as mock_logger,
+    ):
+        main()
+        mock_logger.error.assert_any_call(
+            "Skipping optimize_arm.py due to missing dependencies: Test Error"
+        )
 
 
 def test_urdf_not_found():
-    with patch("os.path.exists", return_value=False):
-        with pytest.raises(SystemExit):
-            main()
+    with patch("os.path.exists", return_value=False), pytest.raises(SystemExit):
+        main()
 
 
 def test_optimization_failure(mock_casadi, mock_pinocchio):
     mock_casadi.solve.side_effect = Exception("Infeasible")
 
-    with patch("os.path.exists", return_value=True):
-        with pytest.raises(SystemExit):
-            main()
+    with patch("os.path.exists", return_value=True), pytest.raises(SystemExit):
+        main()

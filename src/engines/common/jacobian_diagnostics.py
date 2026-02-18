@@ -214,10 +214,7 @@ def compute_constraint_diagnostics(
     nullspace_dim = n_dof - rank
 
     # Nullspace basis: last (n_dof - rank) rows of Vt
-    if nullspace_dim > 0:
-        nullspace_basis = Vt[rank:].T  # (n_dof x nullspace_dim)
-    else:
-        nullspace_basis = np.zeros((n_dof, 0))
+    nullspace_basis = Vt[rank:].T if nullspace_dim > 0 else np.zeros((n_dof, 0))
 
     # Overconstrained if rank > expected unconstrained DOF
     is_overconstrained = False

@@ -263,7 +263,7 @@ class TestReproducibility:
         assert DEFAULT_SEED == 42
 
     def test_max_seed(self) -> None:
-        assert MAX_SEED == np.iinfo(np.uint32).max
+        assert np.iinfo(np.uint32).max == MAX_SEED
 
     def test_set_seeds_deterministic(self) -> None:
         """After set_seeds, random output should be reproducible."""

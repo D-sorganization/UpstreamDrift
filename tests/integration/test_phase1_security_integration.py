@@ -7,6 +7,7 @@ This module tests the complete security hardening implementation including:
 - Error handling and logging
 """
 
+import contextlib
 import os
 import subprocess
 import sys
@@ -98,9 +99,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         with (
             patch("pathlib.Path.exists", return_value=True),
             patch("pathlib.Path.is_file", return_value=True),
+            self.assertRaises(SecureSubprocessError),
         ):
-            with self.assertRaises(SecureSubprocessError):
-                validate_script_path(invalid_script, suite_root)
+            validate_script_path(invalid_script, suite_root)
 
     def test_secure_run_success(self) -> None:
         """Test secure_run with valid command."""
@@ -200,9 +201,8 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
         suite_root = Path(__file__).resolve().parent.parent.parent
         for path in malicious_paths:
-            with self.subTest(path=path):
-                with self.assertRaises(SecureSubprocessError):
-                    validate_script_path(Path(path), suite_root)
+            with self.subTest(path=path), self.assertRaises(SecureSubprocessError):
+                validate_script_path(Path(path), suite_root)
 
     def test_working_directory_validation(self) -> None:
         """Test working directory validation."""
@@ -257,10 +257,8 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
     def test_security_logging(self, mock_logger) -> None:
         """Test security-related logging."""
         # Test blocked executable logging
-        try:
+        with contextlib.suppress(SecureSubprocessError):
             secure_run(["malicious_exe"])
-        except SecureSubprocessError:
-            pass
 
         # Verify that some logging occurred (info level for the attempt)
         # The secure_run function logs at info level before validation
@@ -320,10 +318,10 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             thread.join(timeout=10)
 
         # Check results (skip if Python not available)
-        if not errors or all(isinstance(e, SecureSubprocessError) for e in errors):
-            # Either all succeeded or all failed due to whitelist
-            if results:
-                self.assertTrue(all(rc == 0 for rc in results))
+        if (
+            not errors or all(isinstance(e, SecureSubprocessError) for e in errors)
+        ) and results:
+            self.assertTrue(all(rc == 0 for rc in results))
 
     def tearDown(self) -> None:
         """Clean up test fixtures."""

@@ -229,11 +229,10 @@ def validate_database_config() -> DatabaseKeyValidationResults:
 
     # Check for credentials in URL (they should be there for remote databases)
     db_type = results["database_type"]
-    if db_type in ["postgresql", "mysql"]:
-        if database_url and "@" not in database_url:
-            results["warnings"].append(
-                f"{str(db_type).upper()} URL appears to be missing credentials"
-            )
+    if db_type in ["postgresql", "mysql"] and database_url and "@" not in database_url:
+        results["warnings"].append(
+            f"{str(db_type).upper()} URL appears to be missing credentials"
+        )
 
     return results
 
