@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.core.contracts import StateError
+from src.shared.python.core.error_utils import SimulationError
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -142,7 +144,7 @@ class ConservationMonitor:
             ...     drift_pct = monitor.check_and_warn()  # Warns if drift > 1%
         """
         if self.E_initial is None:
-            raise RuntimeError(
+            raise StateError(
                 "ConservationMonitor not initialized. Call initialize() first."
             )
 
@@ -236,7 +238,7 @@ class ConservationMonitor:
             significant (slow motion), this approximation is poor.
         """
         if self.E_initial is None:
-            raise RuntimeError(
+            raise StateError(
                 "ConservationMonitor not initialized. Call initialize() first."
             )
 
@@ -260,5 +262,5 @@ class ConservationMonitor:
         )
 
 
-class IntegrationFailureError(Exception):
+class IntegrationFailureError(SimulationError):
     """Raised when energy drift indicates integration failure (>5% drift)."""

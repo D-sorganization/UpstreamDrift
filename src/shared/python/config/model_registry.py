@@ -105,8 +105,10 @@ class ModelRegistry(ContractChecker):
 
         except yaml.YAMLError as e:
             logger.error(f"YAML parsing error in {self.config_path}: {e}")
+            raise
         except OSError as e:
             logger.error(f"Failed to read registry file {self.config_path}: {e}")
+            raise
 
     def get_model(self, model_id: str) -> ModelConfig | None:
         """

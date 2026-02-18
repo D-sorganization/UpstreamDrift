@@ -1007,7 +1007,7 @@ class UnrealBridgeBackend(ViewerBackend):
                     except Empty:
                         await asyncio.sleep(0.001)
 
-                except Exception as e:
+                except (OSError, RuntimeError) as e:
                     logger.error(f"Error in streaming loop: {e}")
                     await asyncio.sleep(1.0)  # Backoff on error
 

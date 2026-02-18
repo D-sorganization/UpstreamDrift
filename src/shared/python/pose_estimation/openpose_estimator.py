@@ -10,6 +10,7 @@ from typing import Any, ClassVar
 
 import numpy as np
 
+from src.shared.python.core.contracts import StateError
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Try to import pyopenpose. If not found, we will fall back to mock/error behavior
@@ -117,7 +118,7 @@ class OpenPoseEstimator(PoseEstimator):
     def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult:
         """Process a single image frame."""
         if not self._is_loaded or self.wrapper is None:
-            raise RuntimeError("OpenPose model not loaded. Call load_model() first.")
+            raise StateError("OpenPose model not loaded. Call load_model() first.")
 
         try:
             datum = op.Datum()

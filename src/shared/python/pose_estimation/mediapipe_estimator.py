@@ -20,6 +20,7 @@ except ImportError:
     cv2 = None  # type: ignore[assignment]
 import numpy as np
 
+from src.shared.python.core.contracts import StateError
 from src.shared.python.engine_core.engine_availability import MEDIAPIPE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -165,7 +166,7 @@ class MediaPipeEstimator(PoseEstimator):
             PoseEstimationResult containing joint angles and keypoints
         """
         if not self._is_loaded:
-            raise RuntimeError("Model not loaded. Call load_model() first.")
+            raise StateError("Model not loaded. Call load_model() first.")
 
         # Convert BGR to RGB for MediaPipe
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -174,7 +175,7 @@ class MediaPipeEstimator(PoseEstimator):
         if self.pose_detector is not None:
             results = self.pose_detector.process(rgb_image)
         else:
-            raise RuntimeError("MediaPipe pose detector not initialized")
+            raise StateError("MediaPipe pose detector not initialized")
 
         if results.pose_landmarks is None:
             # No pose detected
@@ -226,13 +227,13 @@ class MediaPipeEstimator(PoseEstimator):
             List of results for each frame with temporal smoothing
         """
         if not self._is_loaded:
-            raise RuntimeError("Model not loaded. Call load_model() first.")
+            raise StateError("Model not loaded. Call load_model() first.")
 
         results = []
         cap = cv2.VideoCapture(str(video_path))
 
         if not cap.isOpened():
-            raise RuntimeError(f"Could not open video file: {video_path}")
+            raise FileNotFoundError(f"Could not open video file: {video_path}")
 
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))

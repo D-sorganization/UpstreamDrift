@@ -15,6 +15,7 @@ from typing import Any
 import cv2
 import numpy as np
 
+from src.shared.python.core.contracts import StateError
 from src.shared.python.data_io.io_utils import ensure_directory
 from src.shared.python.data_io.marker_mapping import (
     MarkerToModelMapper,
@@ -134,14 +135,14 @@ class VideoPosePipeline:
             raise FileNotFoundError(f"Video file not found: {video_path}")
 
         if self.estimator is None:
-            raise RuntimeError("Estimator not loaded")
+            raise StateError("Estimator not loaded")
 
         logger.info(f"Processing video: {video_path}")
 
         # Get video info
         cap = cv2.VideoCapture(str(video_path))
         if not cap.isOpened():
-            raise RuntimeError(f"Could not open video: {video_path}")
+            raise FileNotFoundError(f"Could not open video: {video_path}")
 
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         cap.release()

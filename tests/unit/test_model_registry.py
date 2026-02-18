@@ -59,16 +59,15 @@ class TestModelRegistry:
         assert len(registry.models) == 0
 
     def test_load_malformed_yaml(self):
-        """Test loading a malformed YAML file."""
+        """Test loading a malformed YAML file raises yaml.YAMLError."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
             # Write invalid YAML (tab character instead of spaces)
             with open(config_path, "w", encoding="utf-8") as f:
                 f.write("models:\n\t- id: test")
 
-            registry = ModelRegistry(config_path)
-            # Should handle exception gracefully (log error) and have 0 models
-            assert len(registry.models) == 0
+            with pytest.raises(yaml.YAMLError):
+                ModelRegistry(config_path)
 
     def test_load_invalid_model_format(self):
         """Test loading registry with invalid model structure."""
