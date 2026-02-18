@@ -28,6 +28,12 @@ class LauncherService:
     """
 
     def __init__(self, repo_root: Path) -> None:
+        if repo_root is None:
+            raise ValueError("repo_root must not be None")
+        if not repo_root.is_dir():
+            raise FileNotFoundError(
+                f"repo_root does not exist or is not a directory: {repo_root}"
+            )
         self._repo_root = repo_root
         self._process_manager: Any = None
         self._handler_registry: Any = None

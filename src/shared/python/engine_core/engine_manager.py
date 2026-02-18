@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..core.contracts import ContractChecker, precondition
+from ..core.error_utils import EngineLaunchError
 from ..data_io.common_utils import (
     GolfModelingError,
     get_logger,
@@ -235,6 +236,9 @@ class EngineManager(ContractChecker):
                 status="loaded",
             )
 
+        except GolfModelingError:
+            self.engine_status[engine_type] = EngineStatus.ERROR
+            raise
         except Exception as e:  # noqa: BLE001 - engine factories may raise anything
             self.engine_status[engine_type] = EngineStatus.ERROR
             logger.error(
@@ -243,9 +247,7 @@ class EngineManager(ContractChecker):
                 error=str(e),
                 exc_info=True,
             )
-            raise GolfModelingError(
-                f"Failed to load engine {engine_type.value}: {e}"
-            ) from e
+            raise EngineLaunchError(engine_type.value, reason=str(e)) from e
 
     def _load_matlab_engine(self, engine_type: EngineType) -> None:
         """Load MATLAB engine type."""

@@ -482,6 +482,73 @@ class DataFormatError(GolfSuiteError):
         super().__init__(message)
 
 
+# ============================================================================
+# Domain-specific exceptions for physics simulation
+# ============================================================================
+
+
+class PhysicsSimulationError(GolfSuiteError):
+    """Base exception for physics simulation failures."""
+
+
+class EngineLaunchError(PhysicsSimulationError):
+    """Raised when a physics engine fails to initialize."""
+
+    def __init__(self, engine_type: str, reason: str = "") -> None:
+        self.engine_type = engine_type
+        msg = f"Failed to launch engine '{engine_type}'"
+        if reason:
+            msg += f": {reason}"
+        super().__init__(msg)
+
+
+class SimulationStepError(PhysicsSimulationError):
+    """Raised when a simulation step fails to complete."""
+
+    def __init__(self, step: int, reason: str = "") -> None:
+        self.step = step
+        msg = f"Simulation failed at step {step}"
+        if reason:
+            msg += f": {reason}"
+        super().__init__(msg)
+
+
+class ModelLoadError(PhysicsSimulationError):
+    """Raised when a model file cannot be loaded."""
+
+    def __init__(self, model_path: str, reason: str = "") -> None:
+        self.model_path = model_path
+        msg = f"Failed to load model '{model_path}'"
+        if reason:
+            msg += f": {reason}"
+        super().__init__(msg)
+
+
+class SimulationTimeoutError(PhysicsSimulationError):
+    """Raised when a simulation exceeds its time budget."""
+
+    def __init__(self, timeout_seconds: float) -> None:
+        self.timeout_seconds = timeout_seconds
+        super().__init__(f"Simulation timed out after {timeout_seconds}s")
+
+
+# ============================================================================
+# Network/API exceptions
+# ============================================================================
+
+
+class APIError(GolfSuiteError):
+    """Base exception for API layer failures."""
+
+
+class RateLimitExceededError(APIError):
+    """Raised when API rate limit is exceeded."""
+
+
+class InvalidRequestError(APIError):
+    """Raised when an API request fails validation."""
+
+
 class TimeoutError(GolfSuiteError):
     """Raised when an operation times out.
 
@@ -554,6 +621,16 @@ __all__ = [
     # Model/Simulation
     "ModelError",
     "SimulationError",
+    # Physics simulation (domain-specific)
+    "PhysicsSimulationError",
+    "EngineLaunchError",
+    "SimulationStepError",
+    "ModelLoadError",
+    "SimulationTimeoutError",
+    # API errors
+    "APIError",
+    "RateLimitExceededError",
+    "InvalidRequestError",
     # I/O
     "IOError",
     "IOUtilsError",

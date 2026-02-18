@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.core.error_utils import InvalidRequestError
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -168,7 +169,7 @@ class ChatService:
         with self._lock:
             ctx = self._sessions.get(session_id)
             if not ctx:
-                raise ValueError(f"Session {session_id} not found")
+                raise InvalidRequestError(f"Session {session_id} not found")
 
             # Prepend engine context hint if provided
             content = message
@@ -179,6 +180,10 @@ class ChatService:
             self._persist_session(session_id)
             return str(uuid.uuid4().hex[:12])
 
+    @precondition(
+        lambda self, session_id: session_id is not None and len(session_id) > 0,
+        "Session ID must be a non-empty string",
+    )
     async def stream_response(self, session_id: str) -> AsyncIterator[str]:
         """Stream AI response chunks for the latest user message.
 
