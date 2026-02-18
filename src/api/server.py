@@ -13,7 +13,7 @@ import os
 from typing import Any
 
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -262,14 +262,12 @@ async def startup_event() -> None:
         raise
 
 
-# --- API v1 route registration (Issues #1485, #1488) ---
-# All routes are mounted under /api/v1 via a centralised registry,
+# --- Route registration (Issues #1485, #1488) ---
+# All routes are registered via a centralised registry,
 # decoupling server.py from individual route modules.
 
-_v1_router = APIRouter(prefix="/api/v1")
 for _router in get_all_routers():
-    _v1_router.include_router(_router)
-app.include_router(_v1_router)
+    app.include_router(_router)
 
 
 if __name__ == "__main__":
