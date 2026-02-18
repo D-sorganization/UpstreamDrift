@@ -1,9 +1,13 @@
 """Double Pendulum Physics Engine Adapter.
 
-Wraps the standalone DoublePendulumDynamics to implement the PhysicsEngine protocol.
+Wraps the standalone DoublePendulumDynamics to implement the PhysicsEngine
+protocol. Inherits from BasePhysicsEngine to eliminate DRY violations for
+checkpoint save/restore, model name tracking, and engine initialization.
 """
 
 from __future__ import annotations
+
+from typing import Any
 
 import numpy as np
 
@@ -16,21 +20,30 @@ from src.shared.python.core.contracts import (
     postcondition,
     precondition,
 )
+from src.shared.python.engine_core.base_physics_engine import (
+    BasePhysicsEngine,
+)
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
-from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 
-class PendulumPhysicsEngine(PhysicsEngine):
-    """Adapter for DoublePendulumDynamics to match PhysicsEngine protocol."""
+class PendulumPhysicsEngine(BasePhysicsEngine):
+    """Adapter for DoublePendulumDynamics matching PhysicsEngine protocol.
+
+    Inherits common functionality from BasePhysicsEngine:
+    - Checkpoint save/restore (with phi/omega_phi via hooks)
+    - Model name and initialization tracking
+    - String representation
+    """
 
     def __init__(self) -> None:
         """Initialize the pendulum engine."""
+        super().__init__()
         self.dynamics = DoublePendulumDynamics()
         # Initial state
-        self.state = DoublePendulumState(
+        self._pendulum_state = DoublePendulumState(
             theta1=0.0,
             theta2=0.0,
             omega1=0.0,
@@ -42,11 +55,15 @@ class PendulumPhysicsEngine(PhysicsEngine):
         self.control = np.zeros(2)
 
         # Wire up forcing functions to use our control
-        # The dynamics engine calls these during step() to get torque
         self.dynamics.forcing_functions = (
             self._get_shoulder_torque,
             self._get_wrist_torque,
         )
+
+        # Pendulum is a fixed model: always initialized
+        self.model = self.dynamics
+        self.model_name_str = "DoublePendulum"
+        self._is_initialized = True
 
     def _get_shoulder_torque(self, t: float, state: DoublePendulumState) -> float:
         return float(self.control[0])
@@ -55,23 +72,22 @@ class PendulumPhysicsEngine(PhysicsEngine):
         return float(self.control[1])
 
     @property
-    def model_name(self) -> str:
-        """Return the name of the currently loaded model."""
-        return "DoublePendulum"
-
-    @property
     def engine_type(self) -> str:
         """Get engine type identifier."""
         return "pendulum"
 
-    @property
-    def is_initialized(self) -> bool:
-        """Check if the engine is initialized (always True for pendulum)."""
-        return self.dynamics is not None
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific load from path (no-op for pendulum)."""
+
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """Engine-specific load from string (no-op for pendulum)."""
 
     def load_from_path(self, path: str) -> None:
-        """Load model from file path."""
-        # Pendulum is a fixed model, but we could theoretically load params from JSON.
+        """Load model from file path.
+
+        Pendulum is a standalone fixed model. Path is ignored.
+        Overrides base to skip path validation (no actual file).
+        """
         logger.debug(
             "PendulumPhysicsEngine is standalone. "
             "Model parameters are default. Path %s ignored.",
@@ -79,12 +95,16 @@ class PendulumPhysicsEngine(PhysicsEngine):
         )
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
-        """Load model from string."""
+        """Load model from string.
+
+        Pendulum is a standalone fixed model. Content is ignored.
+        Overrides base to skip content validation.
+        """
         logger.debug("PendulumPhysicsEngine ignores load_from_string.")
 
     def reset(self) -> None:
         """Reset simulation state to initial configuration."""
-        self.state = DoublePendulumState(
+        self._pendulum_state = DoublePendulumState(
             theta1=0.0,
             theta2=0.0,
             omega1=0.0,
@@ -100,31 +120,28 @@ class PendulumPhysicsEngine(PhysicsEngine):
         step_size = dt if dt is not None else 0.01
 
         # The dynamics step returns a NEW state object (functional style)
-        self.state = self.dynamics.step(self.time, self.state, step_size)
+        self._pendulum_state = self.dynamics.step(
+            self.time, self._pendulum_state, step_size
+        )
         self.time += step_size
 
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without stepping time."""
-        # Pendulum dynamics are computed on-the-fly in step or accessor methods.
-        # No explicit forward() pass needed to update internal buffers,
-        # but we adhere to protocol.
+        # Pendulum dynamics are computed on-the-fly in step or accessors.
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
-        # q = [theta1, theta2]
-        # v = [omega1, omega2]
-        # We ignore phi (planar inclination) for the standard 2D pendulum protocol for now.
-        q = np.array([self.state.theta1, self.state.theta2])
-        v = np.array([self.state.omega1, self.state.omega2])
+        q = np.array([self._pendulum_state.theta1, self._pendulum_state.theta2])
+        v = np.array([self._pendulum_state.omega1, self._pendulum_state.omega2])
         return q, v
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state."""
         if len(q) >= 2 and len(v) >= 2:
-            self.state.theta1 = float(q[0])
-            self.state.theta2 = float(q[1])
-            self.state.omega1 = float(v[0])
-            self.state.omega2 = float(v[1])
+            self._pendulum_state.theta1 = float(q[0])
+            self._pendulum_state.theta2 = float(q[1])
+            self._pendulum_state.omega1 = float(v[0])
+            self._pendulum_state.omega2 = float(v[1])
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control vector."""
@@ -135,36 +152,47 @@ class PendulumPhysicsEngine(PhysicsEngine):
         """Get the current simulation time."""
         return self.time
 
+    # -- Checkpoint Hooks (DRY: delegates to BasePhysicsEngine) --
+
+    def _get_extra_checkpoint_state(self) -> dict[str, Any]:
+        """Return pendulum-specific checkpoint data (phi, omega_phi)."""
+        return {
+            "phi": self._pendulum_state.phi,
+            "omega_phi": self._pendulum_state.omega_phi,
+        }
+
+    def _restore_extra_checkpoint_state(self, checkpoint: StateCheckpoint) -> None:
+        """Restore pendulum-specific state from checkpoint."""
+        self.time = checkpoint.timestamp
+        if "phi" in checkpoint.engine_state:
+            self._pendulum_state.phi = checkpoint.engine_state["phi"]
+        if "omega_phi" in checkpoint.engine_state:
+            self._pendulum_state.omega_phi = checkpoint.engine_state["omega_phi"]
+
+    # -------- Dynamics Interface --------
+
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q)."""
-        # returns ((m11, m12), (m12, m22))
-        m_tuple = self.dynamics.mass_matrix(self.state.theta2)
+        m_tuple = self.dynamics.mass_matrix(self._pendulum_state.theta2)
         return np.array(m_tuple)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q) + d(q,v)."""
-        # We can use joint_torque_breakdown with zero control to get the rest?
-        # Breakdown returns applied, grav, damp, coriolis.
-        # Bias = C + G (+ D?)
-        # Protocol typically defines bias as terms that oppose motion if tau=0?
-        # Eq: M a + C + G = tau
-        # So Bias = C + G.
-        # Damping is usually separate or part of bias depending on convention.
-        # Let's include Damping in Bias for full 'passive forces'.
-
         c1, c2 = self.dynamics.coriolis_vector(
-            self.state.theta2, self.state.omega1, self.state.omega2
+            self._pendulum_state.theta2,
+            self._pendulum_state.omega1,
+            self._pendulum_state.omega2,
         )
-        g1, g2 = self.dynamics.gravity_vector(self.state.theta1, self.state.theta2)
-        d1, d2 = self.dynamics.damping_vector(self.state.omega1, self.state.omega2)
-
-        # Terms on the LHS of M a + C + G + D = tau
-        # Actually usually M a + C + G + D = tau
-        # So Bias = C + G + D
+        g1, g2 = self.dynamics.gravity_vector(
+            self._pendulum_state.theta1, self._pendulum_state.theta2
+        )
+        d1, d2 = self.dynamics.damping_vector(
+            self._pendulum_state.omega1, self._pendulum_state.omega2
+        )
 
         return np.array([c1 + g1 + d1, c2 + g2 + d2])
 
@@ -172,10 +200,15 @@ class PendulumPhysicsEngine(PhysicsEngine):
     @postcondition(check_finite, "Gravity forces must contain finite values")
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
-        g1, g2 = self.dynamics.gravity_vector(self.state.theta1, self.state.theta2)
+        g1, g2 = self.dynamics.gravity_vector(
+            self._pendulum_state.theta1, self._pendulum_state.theta2
+        )
         return np.array([g1, g2])
 
-    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @precondition(
+        lambda self, qacc: self.is_initialized,
+        "Engine must be initialized",
+    )
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
@@ -183,7 +216,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
             return np.array([])
 
         tau1, tau2 = self.dynamics.inverse_dynamics(
-            self.state, (float(qacc[0]), float(qacc[1]))
+            self._pendulum_state, (float(qacc[0]), float(qacc[1]))
         )
         return np.array([tau1, tau2])
 
@@ -194,8 +227,6 @@ class PendulumPhysicsEngine(PhysicsEngine):
 
         Section F Implementation: Returns acceleration with tau=0.
         """
-        # Drift = M^-1 * (-(C + G + D))
-        # Or equivalently: solve M*a = -(C + G + D)
         M = self.compute_mass_matrix()
         bias = self.compute_bias_forces()
 
@@ -203,18 +234,21 @@ class PendulumPhysicsEngine(PhysicsEngine):
         a_drift = np.linalg.solve(M, -bias)
         return a_drift
 
-    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @precondition(
+        lambda self, tau: self.is_initialized,
+        "Engine must be initialized",
+    )
     @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
-        """Compute control-attributed acceleration from applied torques only.
+        """Compute control-attributed acceleration from applied torques.
 
         Section F Implementation: Returns M^-1 * tau.
 
         Args:
-            tau: Applied generalized forces (2,) [N·m]
+            tau: Applied generalized forces (2,) [N*m]
 
         Returns:
-            Control acceleration vector (2,) [rad/s²]
+            Control acceleration vector (2,) [rad/s**2]
         """
         if len(tau) < 2:
             return np.array([])
@@ -225,145 +259,92 @@ class PendulumPhysicsEngine(PhysicsEngine):
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
-        # Double pendulum Jacobian.
-        # Needs implementation of kinematics Jacobian (end effector etc)
-        # This is not exposed in DoublePendulumDynamics directly usually.
-        # We can implement analytical Jacobian for the 2 links.
-
-        # Link 1 tip:
-        # x1 = l1 sin(theta1)
-        # y1 = -l1 cos(theta1)
-        # Link 2 tip:
-        # x2 = x1 + l2 sin(theta1 + theta2)
-        # y2 = y1 - l2 cos(theta1 + theta2)
-
-        # This requires partial derivatives w.r.t theta1, theta2.
-        # Placeholder for now as it wasn't strictly required by assessment logic
-        # (Pendulum was marked 0/13, so getting core dynamics is huge win).
+        # Placeholder -- not yet implemented for double pendulum
         return None
 
-    # -------- Section G: Counterfactual Experiments (Implementation) --------
+    # ---- Section G: Counterfactual Experiments (Implementation) ----
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual - Guideline G1 Implementation.
+        """Zero-Torque Counterfactual - Guideline G1.
 
         For double pendulum:
-            q̈_ZTCF = M(q)⁻¹ · (-(C(q,v)·v + g(q) + d(q,v)))
-
-        This is the acceleration with all applied torques set to zero.
-        Identical to compute_drift_acceleration() but can use arbitrary (q,v).
+            q_ddot_ZTCF = M(q)^-1 * (-(C(q,v)*v + g(q) + d(q,v)))
 
         Args:
             q: Joint positions [rad] (2,)
             v: Joint velocities [rad/s] (2,)
 
         Returns:
-            Acceleration with tau=0 [rad/s²] (2,)
+            Acceleration with tau=0 [rad/s**2] (2,)
         """
         if len(q) < 2 or len(v) < 2:
             return np.array([])
 
         # Save current state
-        theta1_orig = self.state.theta1
-        theta2_orig = self.state.theta2
-        omega1_orig = self.state.omega1
-        omega2_orig = self.state.omega2
+        theta1_orig = self._pendulum_state.theta1
+        theta2_orig = self._pendulum_state.theta2
+        omega1_orig = self._pendulum_state.omega1
+        omega2_orig = self._pendulum_state.omega2
 
         try:
             # Set to counterfactual state
-            self.state.theta1 = float(q[0])
-            self.state.theta2 = float(q[1])
-            self.state.omega1 = float(v[0])
-            self.state.omega2 = float(v[1])
+            self._pendulum_state.theta1 = float(q[0])
+            self._pendulum_state.theta2 = float(q[1])
+            self._pendulum_state.omega1 = float(v[0])
+            self._pendulum_state.omega2 = float(v[1])
 
-            # Compute drift acceleration (which is ZTCF by definition)
             a_ztcf = self.compute_drift_acceleration()
-
             return a_ztcf
 
         finally:
             # Restore original state
-            self.state.theta1 = theta1_orig
-            self.state.theta2 = theta2_orig
-            self.state.omega1 = omega1_orig
-            self.state.omega2 = omega2_orig
+            self._pendulum_state.theta1 = theta1_orig
+            self._pendulum_state.theta2 = theta2_orig
+            self._pendulum_state.omega1 = omega1_orig
+            self._pendulum_state.omega2 = omega2_orig
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual - Guideline G2 Implementation.
+        """Zero-Velocity Counterfactual - Guideline G2.
 
         For double pendulum with v=0:
-            q̈_ZVCF = M(q)⁻¹ · (-g(q) + τ)
-
-        Note: Coriolis and damping terms vanish when v=0.
-        Control (τ) is preserved from current state.
+            q_ddot_ZVCF = M(q)^-1 * (-g(q) + tau)
 
         Args:
             q: Joint positions [rad] (2,)
 
         Returns:
-            Acceleration with v=0 but τ preserved [rad/s²] (2,)
+            Acceleration with v=0 but tau preserved [rad/s**2] (2,)
         """
         if len(q) < 2:
             return np.array([])
 
         # Save current state
-        theta1_orig = self.state.theta1
-        theta2_orig = self.state.theta2
-        omega1_orig = self.state.omega1
-        omega2_orig = self.state.omega2
+        theta1_orig = self._pendulum_state.theta1
+        theta2_orig = self._pendulum_state.theta2
+        omega1_orig = self._pendulum_state.omega1
+        omega2_orig = self._pendulum_state.omega2
 
         try:
-            # Set to counterfactual configuration with v=0
-            self.state.theta1 = float(q[0])
-            self.state.theta2 = float(q[1])
-            self.state.omega1 = 0.0  # ZVCF: zero velocity
-            self.state.omega2 = 0.0
+            self._pendulum_state.theta1 = float(q[0])
+            self._pendulum_state.theta2 = float(q[1])
+            self._pendulum_state.omega1 = 0.0  # ZVCF: zero velocity
+            self._pendulum_state.omega2 = 0.0
 
-            # Compute forces with v=0
-            # Coriolis vanishes: c1 = c2 = 0 (depends on v)
-            # Damping vanishes: d1 = d2 = 0 (depends on v)
-            g1, g2 = self.dynamics.gravity_vector(self.state.theta1, self.state.theta2)
+            g1, g2 = self.dynamics.gravity_vector(
+                self._pendulum_state.theta1,
+                self._pendulum_state.theta2,
+            )
             g = np.array([g1, g2])
 
-            # Control from current state
             tau = self.control.copy()
 
-            # M * a_zvcf = -g + tau
             M = self.compute_mass_matrix()
             a_zvcf = np.linalg.solve(M, -g + tau)
 
             return a_zvcf
 
         finally:
-            # Restore original state
-            self.state.theta1 = theta1_orig
-            self.state.theta2 = theta2_orig
-            self.state.omega1 = omega1_orig
-            self.state.omega2 = omega2_orig
-
-    # -------- Checkpointable Protocol --------
-
-    def save_checkpoint(self) -> StateCheckpoint:
-        """Save current state as a checkpoint."""
-        q, v = self.get_state()
-        return StateCheckpoint.create(
-            engine_type=self.engine_type,
-            engine_state={
-                "phi": self.state.phi,
-                "omega_phi": self.state.omega_phi,
-            },
-            q=q,
-            v=v,
-            timestamp=self.time,
-        )
-
-    def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
-        """Restore state from a checkpoint."""
-        q = checkpoint.get_q()
-        v = checkpoint.get_v()
-        self.set_state(q, v)
-        self.time = checkpoint.timestamp
-        if "phi" in checkpoint.engine_state:
-            self.state.phi = checkpoint.engine_state["phi"]
-        if "omega_phi" in checkpoint.engine_state:
-            self.state.omega_phi = checkpoint.engine_state["omega_phi"]
+            self._pendulum_state.theta1 = theta1_orig
+            self._pendulum_state.theta2 = theta2_orig
+            self._pendulum_state.omega1 = omega1_orig
+            self._pendulum_state.omega2 = omega2_orig
