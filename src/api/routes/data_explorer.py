@@ -18,6 +18,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
 
 router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
@@ -179,6 +180,7 @@ async def list_datasets() -> DatasetListResponse:
     lambda name, limit=50: name is not None and len(name.strip()) > 0 and limit > 0,
     "Dataset name must be non-empty and limit must be positive",
 )
+@handle_api_errors
 async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
     """Get a preview of dataset contents.
 
@@ -203,30 +205,24 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
         raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
 
     filepath = matches[0]
-    try:
-        content = filepath.read_text(encoding="utf-8")
-        if filepath.suffix.lower() == ".csv":
-            columns, rows = _parse_csv_content(content)
-        elif filepath.suffix.lower() == ".json":
-            columns, rows = _parse_json_content(content)
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Preview not supported for {filepath.suffix} format",
-            )
-
-        return DatasetPreviewResponse(
-            name=name,
-            columns=columns,
-            rows=rows[:limit],
-            total_rows=len(rows),
-            format=filepath.suffix.lstrip("."),
+    content = filepath.read_text(encoding="utf-8")
+    if filepath.suffix.lower() == ".csv":
+        columns, rows = _parse_csv_content(content)
+    elif filepath.suffix.lower() == ".json":
+        columns, rows = _parse_json_content(content)
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Preview not supported for {filepath.suffix} format",
         )
 
-    except HTTPException:
-        raise
-    except (RuntimeError, TypeError, AttributeError) as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return DatasetPreviewResponse(
+        name=name,
+        columns=columns,
+        rows=rows[:limit],
+        total_rows=len(rows),
+        format=filepath.suffix.lstrip("."),
+    )
 
 
 @router.get("/datasets/{name}/stats", response_model=DatasetStatsResponse)
@@ -234,6 +230,7 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
     lambda name: name is not None and len(name.strip()) > 0,
     "Dataset name must be a non-empty string",
 )
+@handle_api_errors
 async def dataset_stats(name: str) -> DatasetStatsResponse:
     """Get summary statistics for a dataset.
 
@@ -250,21 +247,16 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
         if not matches:
             raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
         filepath = matches[0]
-        try:
-            content = filepath.read_text(encoding="utf-8")
-            if filepath.suffix.lower() == ".csv":
-                columns, rows = _parse_csv_content(content)
-            elif filepath.suffix.lower() == ".json":
-                columns, rows = _parse_json_content(content)
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Stats not supported for {filepath.suffix}",
-                )
-        except HTTPException:
-            raise
-        except (RuntimeError, TypeError, AttributeError) as exc:
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
+        content = filepath.read_text(encoding="utf-8")
+        if filepath.suffix.lower() == ".csv":
+            columns, rows = _parse_csv_content(content)
+        elif filepath.suffix.lower() == ".json":
+            columns, rows = _parse_json_content(content)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Stats not supported for {filepath.suffix}",
+            )
 
     # Compute statistics per column
     stats: dict[str, dict[str, float | None]] = {}
@@ -295,6 +287,7 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
 
 
 @router.post("/import", response_model=ImportResponse)
+@handle_api_errors
 async def import_dataset(file: UploadFile) -> ImportResponse:
     """Import a CSV or JSON dataset.
 
@@ -310,29 +303,25 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
             detail=f"Unsupported format: {suffix}. Use .csv or .json",
         )
 
-    try:
-        content = (await file.read()).decode("utf-8")
+    content = (await file.read()).decode("utf-8")
 
-        if suffix == ".csv":
-            columns, rows = _parse_csv_content(content)
-        else:
-            columns, rows = _parse_json_content(content)
+    if suffix == ".csv":
+        columns, rows = _parse_csv_content(content)
+    else:
+        columns, rows = _parse_json_content(content)
 
-        _loaded_datasets[file.filename] = {
-            "columns": columns,
-            "rows": rows,
-            "format": suffix.lstrip("."),
-        }
+    _loaded_datasets[file.filename] = {
+        "columns": columns,
+        "rows": rows,
+        "format": suffix.lstrip("."),
+    }
 
-        return ImportResponse(
-            name=file.filename,
-            format=suffix.lstrip("."),
-            columns=columns,
-            row_count=len(rows),
-        )
-
-    except (FileNotFoundError, OSError) as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return ImportResponse(
+        name=file.filename,
+        format=suffix.lstrip("."),
+        columns=columns,
+        row_count=len(rows),
+    )
 
 
 @router.post("/datasets/{name}/filter")
