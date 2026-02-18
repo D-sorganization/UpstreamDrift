@@ -161,8 +161,8 @@ class LayoutManager:
 
             return layout_data
 
-        except ImportError as e:
-            logger.error(f"Failed to load layout: {e}")
+        except (json.JSONDecodeError, OSError, KeyError) as e:
+            logger.error(f"Failed to load layout from {self.config_file}: {e}")
             return None
 
     def sync_model_cards(self) -> None:

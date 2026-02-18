@@ -51,8 +51,15 @@ class ModelRegistry:
             self._loaded = True
             logger.info(f"Loaded {len(self.models)} models from registry")
 
-        except ImportError as e:
-            logger.error(f"Failed to load model registry: {e}")
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error in {full_config_path}: {e}")
+            raise
+        except TypeError as e:
+            logger.error(f"Invalid model specification in {full_config_path}: {e}")
+            raise
+        except OSError as e:
+            logger.error(f"Failed to read model registry {full_config_path}: {e}")
+            raise
 
     def get_all_models(self) -> list[ModelSpec]:
         """Get all registered models."""

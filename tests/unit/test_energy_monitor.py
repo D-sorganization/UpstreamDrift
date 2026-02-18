@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.core.contracts import StateError
 from src.shared.python.physics.energy_monitor import (
     ENERGY_DRIFT_CRITICAL_PCT,
     ENERGY_DRIFT_TOLERANCE_PCT,
@@ -232,7 +233,7 @@ class TestCheckAndWarn:
         engine = MockPhysicsEngine()
         monitor = ConservationMonitor(as_physics_engine(engine))
 
-        with pytest.raises(RuntimeError, match="not initialized"):
+        with pytest.raises(StateError, match="not initialized"):
             monitor.check_and_warn()
 
     def test_zero_drift_returns_zero(self):
@@ -486,7 +487,7 @@ class TestProjectToEnergyManifold:
         engine = MockPhysicsEngine()
         monitor = ConservationMonitor(as_physics_engine(engine))
 
-        with pytest.raises(RuntimeError, match="not initialized"):
+        with pytest.raises(StateError, match="not initialized"):
             monitor.project_to_energy_manifold()
 
     def test_projection_scales_velocity(self):
@@ -607,7 +608,7 @@ class TestIntegrationFailureError:
         try:
             raise IntegrationFailureError(msg)
         except IntegrationFailureError as e:
-            assert str(e) == msg
+            assert msg in str(e)
 
 
 class TestPhysicalRealism:

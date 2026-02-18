@@ -150,7 +150,7 @@ class LQRController(BaseController):
                     if joint in physics.named.data.qpos:
                         physics.named.data.qpos[joint] = angle
                 except KeyError:
-                    pass
+                    logger.debug("Joint %r not found in qpos, skipping", joint)
 
             self.qpos_targ = physics.data.qpos.copy()
             self.qvel_targ = np.zeros(physics.model.nv)

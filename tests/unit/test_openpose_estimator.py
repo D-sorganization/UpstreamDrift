@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+from src.shared.python.core.contracts import StateError
+
 # Mock pyopenpose using patch.dict (auto-cleans) BEFORE importing the estimator,
 # so the try/except import in the module succeeds.
 mock_op = MagicMock()
@@ -81,7 +83,7 @@ def test_load_model_failure(estimator, op_mock):
 
 def test_estimate_from_image_not_loaded():
     est = OpenPoseEstimator()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(StateError):
         est.estimate_from_image(np.zeros((100, 100, 3)))
 
 
