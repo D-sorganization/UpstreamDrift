@@ -18,6 +18,7 @@ from typing import Any
 import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import postcondition, precondition
 
 from ..dependencies import get_logger
@@ -348,6 +349,7 @@ async def get_model_explorer(
     "/tools/model-explorer/inspect",
     response_model=ModelExplorerResponse,
 )
+@handle_api_errors
 async def inspect_model(
     request: ModelExplorerRequest,
     logger: Any = Depends(get_logger),
@@ -361,28 +363,16 @@ async def inspect_model(
     Returns:
         Model explorer data.
     """
-    try:
-        filepath = _resolve_model_path(request.model_path)
-        content = filepath.read_text(encoding="utf-8")
-        return _parse_urdf_tree(content, request.model_path)
-    except HTTPException:
-        raise
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=422, detail=f"Failed to parse model: {str(exc)}"
-        ) from exc
-    except ImportError as exc:
-        if logger:
-            logger.error("Error inspecting model: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Model inspection error: {str(exc)}"
-        ) from exc
+    filepath = _resolve_model_path(request.model_path)
+    content = filepath.read_text(encoding="utf-8")
+    return _parse_urdf_tree(content, request.model_path)
 
 
 @router.post(
     "/tools/model-explorer/compare",
     response_model=ModelCompareResponse,
 )
+@handle_api_errors
 async def compare_models(
     request: ModelCompareRequest,
     logger: Any = Depends(get_logger),
@@ -398,40 +388,27 @@ async def compare_models(
     Returns:
         Comparison data with both models and diff analysis.
     """
-    try:
-        path_a = _resolve_model_path(request.model_a_path)
-        path_b = _resolve_model_path(request.model_b_path)
+    path_a = _resolve_model_path(request.model_a_path)
+    path_b = _resolve_model_path(request.model_b_path)
 
-        content_a = path_a.read_text(encoding="utf-8")
-        content_b = path_b.read_text(encoding="utf-8")
+    content_a = path_a.read_text(encoding="utf-8")
+    content_b = path_b.read_text(encoding="utf-8")
 
-        model_a = _parse_urdf_tree(content_a, request.model_a_path)
-        model_b = _parse_urdf_tree(content_b, request.model_b_path)
+    model_a = _parse_urdf_tree(content_a, request.model_a_path)
+    model_b = _parse_urdf_tree(content_b, request.model_b_path)
 
-        # Find shared and unique joints
-        joints_a = {node.name for node in model_a.tree if node.node_type == "joint"}
-        joints_b = {node.name for node in model_b.tree if node.node_type == "joint"}
+    # Find shared and unique joints
+    joints_a = {node.name for node in model_a.tree if node.node_type == "joint"}
+    joints_b = {node.name for node in model_b.tree if node.node_type == "joint"}
 
-        shared = sorted(joints_a & joints_b)
-        only_a = sorted(joints_a - joints_b)
-        only_b = sorted(joints_b - joints_a)
+    shared = sorted(joints_a & joints_b)
+    only_a = sorted(joints_a - joints_b)
+    only_b = sorted(joints_b - joints_a)
 
-        return ModelCompareResponse(
-            model_a=model_a,
-            model_b=model_b,
-            shared_joints=shared,
-            unique_to_a=only_a,
-            unique_to_b=only_b,
-        )
-    except HTTPException:
-        raise
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=422, detail=f"Failed to parse models: {str(exc)}"
-        ) from exc
-    except ImportError as exc:
-        if logger:
-            logger.error("Error comparing models: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Model comparison error: {str(exc)}"
-        ) from exc
+    return ModelCompareResponse(
+        model_a=model_a,
+        model_b=model_b,
+        shared_joints=shared,
+        unique_to_a=only_a,
+        unique_to_b=only_b,
+    )
