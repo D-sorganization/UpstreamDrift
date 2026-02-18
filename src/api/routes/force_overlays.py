@@ -357,7 +357,7 @@ def _get_sim_time(engine_manager: EngineManager) -> float:
         if active is None or not hasattr(active, "get_state"):
             return 0.0
         state = active.get_state()
-        return state.get("time", 0.0)
+        return float(state.get("time", 0.0))
     except (ValueError, RuntimeError, AttributeError):
         return 0.0
 

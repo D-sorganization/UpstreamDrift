@@ -50,7 +50,7 @@ async def _load_simulation_engine(
         if not engine:
             raise ValueError("Could not load engine")
 
-        return engine
+        return engine  # type: ignore[no-any-return]
     except ValueError:
         await websocket.send_json({"error": f"Invalid engine: {engine_type}"})
         return None

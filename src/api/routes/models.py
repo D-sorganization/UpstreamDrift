@@ -165,6 +165,14 @@ def _parse_urdf_geometry(visual_elem: Any, materials: dict[str, list[float]]) ->
 
 
 def _parse_urdf_materials(root: Any) -> dict[str, list[float]]:
+    """Parse top-level URDF material definitions into an RGBA color map.
+
+    Args:
+        root: The parsed URDF XML root element.
+
+    Returns:
+        Dictionary mapping material names to RGBA color lists.
+    """
     materials: dict[str, list[float]] = {}
     for mat_elem in root.findall("material"):
         mat_name = mat_elem.get("name", "")
@@ -178,6 +186,15 @@ def _parse_urdf_materials(root: Any) -> dict[str, list[float]]:
 def _parse_urdf_links(
     root: Any, materials: dict[str, list[float]]
 ) -> list[URDFLinkGeometry]:
+    """Parse URDF <link> elements into geometry descriptors.
+
+    Args:
+        root: The parsed URDF XML root element.
+        materials: Material name-to-RGBA mapping from top-level definitions.
+
+    Returns:
+        List of URDFLinkGeometry descriptors for each link with visual data.
+    """
     links: list[URDFLinkGeometry] = []
     for link_elem in root.findall("link"):
         link_name = link_elem.get("name", "unnamed")
@@ -194,6 +211,15 @@ def _parse_urdf_links(
 
 
 def _parse_urdf_joint_element(joint_elem: Any) -> URDFJointDescriptor:
+    """Parse a single URDF <joint> element into a joint descriptor.
+
+    Args:
+        joint_elem: XML element for a <joint> tag.
+
+    Returns:
+        URDFJointDescriptor with joint name, type, parent/child links,
+        origin, rotation, axis, and optional limits.
+    """
     joint_name = joint_elem.get("name", "unnamed")
     joint_type = joint_elem.get("type", "fixed")
 
@@ -238,6 +264,14 @@ def _parse_urdf_joint_element(joint_elem: Any) -> URDFJointDescriptor:
 
 
 def _parse_urdf_joints(root: Any) -> tuple[list[URDFJointDescriptor], set[str]]:
+    """Parse all URDF <joint> elements and collect child link names.
+
+    Args:
+        root: The parsed URDF XML root element.
+
+    Returns:
+        Tuple of (joint descriptors list, set of child link names).
+    """
     joints: list[URDFJointDescriptor] = []
     child_links: set[str] = set()
     for joint_elem in root.findall("joint"):
@@ -248,6 +282,15 @@ def _parse_urdf_joints(root: Any) -> tuple[list[URDFJointDescriptor], set[str]]:
 
 
 def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str:
+    """Identify the root link (not a child of any joint).
+
+    Args:
+        links: Parsed link geometry descriptors.
+        child_links: Set of link names that appear as children in joints.
+
+    Returns:
+        Name of the root link, or "base" if none can be determined.
+    """
     all_link_names = {link.link_name for link in links}
     root_candidates = all_link_names - child_links
     return (

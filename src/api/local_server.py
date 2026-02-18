@@ -113,16 +113,30 @@ def _register_api_routers(app: FastAPI) -> None:
 
 
 def _load_launcher_manifest() -> dict[str, Any]:
+    """Load the launcher manifest JSON from the config directory.
+
+    Returns:
+        Parsed manifest dict, or a default empty manifest if not found.
+    """
     import json
 
     manifest_path = Path(__file__).parent.parent / "config" / "launcher_manifest.json"
     if manifest_path.exists():
         with open(manifest_path, encoding="utf-8") as f:
-            return json.load(f)
+            result: dict[str, Any] = json.load(f)
+            return result
     return {"version": "1.0.0", "tiles": []}
 
 
 def _find_logo_file(logo_name: str) -> Path | None:
+    """Search for a logo file in known asset directories.
+
+    Args:
+        logo_name: Filename of the logo to find.
+
+    Returns:
+        Path to the logo file, or None if not found.
+    """
     logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
     logo_path = logos_dir / logo_name
     if logo_path.exists() and logo_path.is_file():
@@ -135,6 +149,14 @@ def _find_logo_file(logo_name: str) -> Path | None:
 
 
 def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
+    """Find a tile by ID in the launcher manifest.
+
+    Args:
+        tile_id: The tile identifier to search for.
+
+    Returns:
+        Tuple of (manifest dict, tile dict) or (None, None) if not found.
+    """
     import json as _json
 
     manifest_path = Path(__file__).parent.parent / "config" / "launcher_manifest.json"
@@ -154,6 +176,16 @@ def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
 def _execute_tile_launch(
     tile_id: str, tile: dict, launcher_service: Any
 ) -> dict[str, Any] | JSONResponse:
+    """Execute the launch of a tile using the appropriate handler.
+
+    Args:
+        tile_id: The tile identifier.
+        tile: Tile configuration dict from the manifest.
+        launcher_service: The launcher service managing handlers.
+
+    Returns:
+        Success dict or JSONResponse with error details.
+    """
     model_type = tile.get("type", "")
     repo_path = Path(__file__).parent.parent.parent
     logger.info(
@@ -340,6 +372,11 @@ def _register_health_and_diagnostic_endpoints(
 
 
 def _mount_logos_directory(app: FastAPI) -> None:
+    """Mount the logos directory as a static file route.
+
+    Args:
+        app: The FastAPI application instance.
+    """
     logos_path = Path(__file__).parent.parent.parent / "assets" / "logos"
     if logos_path.exists():
         app.mount(
@@ -351,6 +388,12 @@ def _mount_logos_directory(app: FastAPI) -> None:
 
 
 def _mount_assets_directory(app: FastAPI, ui_path: Path) -> None:
+    """Mount the UI assets directory as a static file route.
+
+    Args:
+        app: The FastAPI application instance.
+        ui_path: Path to the UI build directory.
+    """
     assets_path = ui_path / "assets"
     if assets_path.exists():
         app.mount(
@@ -365,6 +408,12 @@ def _mount_assets_directory(app: FastAPI, ui_path: Path) -> None:
 
 
 def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
+    """Register the SPA catch-all route to serve index.html for non-API paths.
+
+    Args:
+        app: The FastAPI application instance.
+        ui_path: Path to the UI build directory.
+    """
     index_html = ui_path / "index.html"
     if index_html.exists():
         from fastapi.responses import FileResponse
@@ -384,6 +433,11 @@ def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
 
 
 def _get_ui_not_built_html() -> str:
+    """Return an HTML page informing the user that the UI has not been built.
+
+    Returns:
+        HTML string with setup instructions.
+    """
     return """
     <!DOCTYPE html>
     <html>
@@ -465,6 +519,12 @@ def _get_ui_not_built_html() -> str:
 
 
 def _register_error_page_catch_all(app: FastAPI) -> None:
+    """Register a catch-all route that shows a helpful error page when UI is not built.
+
+    Args:
+        app: The FastAPI application instance.
+    """
+
     @app.get("/{full_path:path}", response_model=None)
     async def serve_error_page(
         request: Request, full_path: str

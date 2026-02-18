@@ -106,7 +106,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
 @router.get("/chat/sessions")
 async def list_sessions(request: Request) -> list[dict]:
     """List all active chat sessions."""
-    return request.app.state.chat_service.list_sessions()
+    return request.app.state.chat_service.list_sessions()  # type: ignore[no-any-return]
 
 
 @router.get("/chat/sessions/{session_id}/history")
