@@ -109,13 +109,15 @@ def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
     """Test MuJoCo engine loading when probe fails."""
     mock_probe_cls = _make_probe_mock(available=False)
 
-    with patch.object(engine_probes_mod, "MuJoCoProbe", mock_probe_cls):
+    with (
+        patch.object(engine_probes_mod, "MuJoCoProbe", mock_probe_cls),
         # Error may be "MuJoCo not ready" (if engine module imports succeed and probe fails)
         # or "MuJoCo requirements not met" (if engine module import fails)
-        with pytest.raises(
+        pytest.raises(
             GolfModelingError, match="MuJoCo (not ready|requirements not met)"
-        ):
-            load_mujoco_engine(mock_suite_root)
+        ),
+    ):
+        load_mujoco_engine(mock_suite_root)
 
 
 @pytest.mark.serial

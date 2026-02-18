@@ -443,7 +443,7 @@ class InsertSegmentDialog(QDialog):
         insertion_layout = QFormLayout(insertion_group)
 
         self.parent_combo = QComboBox()
-        for name in tree.nodes.keys():
+        for name in tree.nodes:
             self.parent_combo.addItem(name)
         if insert_after:
             index = self.parent_combo.findText(insert_after)

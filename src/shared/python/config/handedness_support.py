@@ -244,11 +244,12 @@ def mirror_joint_configuration(
             # (i.e., has significant X or Z component)
             if abs(axis_np[1]) < Y_AXIS_ALIGNMENT_THRESHOLD:  # Not a Y-axis rotation
                 q_mirrored[i] = -q[i]
-        elif jtype.lower() == "prismatic":
-            # Prismatic joints: flip if axis crosses mirror plane
-            # (i.e., has significant Y component)
-            if abs(axis_np[1]) > Y_AXIS_SIGNIFICANCE_THRESHOLD:  # Has Y component
-                q_mirrored[i] = -q[i]
+        elif (
+            jtype.lower() == "prismatic"
+            and abs(axis_np[1]) > Y_AXIS_SIGNIFICANCE_THRESHOLD
+        ):
+            # Prismatic joints: flip if axis crosses mirror plane (has Y component)
+            q_mirrored[i] = -q[i]
 
     return q_mirrored
 

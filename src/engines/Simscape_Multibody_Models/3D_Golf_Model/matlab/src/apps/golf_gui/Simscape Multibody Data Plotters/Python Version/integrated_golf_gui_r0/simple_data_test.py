@@ -35,7 +35,7 @@ def analyze_matlab_files() -> bool:
             mat_data = scipy.io.loadmat(filename)
 
             logger.info(f"Keys in {filename}:")
-            for key in mat_data.keys():
+            for key in mat_data:
                 if not key.startswith("__"):  # Skip metadata
                     value = mat_data[key]
                     if isinstance(value, np.ndarray):

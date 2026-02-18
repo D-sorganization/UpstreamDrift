@@ -102,10 +102,7 @@ def build_executable() -> bool:
             [sys.executable, "setup.py", "build"], capture_output=True, text=True
         )
 
-        if result.returncode != 0:
-            return False
-
-        return True
+        return result.returncode == 0
 
     finally:
         os.chdir(original_cwd)
@@ -183,9 +180,8 @@ def main() -> None:
         clean_build_dirs()
 
     # Install dependencies
-    if not args.skip_deps:
-        if not install_dependencies():
-            sys.exit(1)
+    if not args.skip_deps and not install_dependencies():
+        sys.exit(1)
 
     # Detect available engines
     available_engines = detect_physics_engines()

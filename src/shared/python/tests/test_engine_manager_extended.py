@@ -153,9 +153,11 @@ def test_load_engine_no_loader(engine_manager) -> None:
 
     registry = get_registry()
 
-    with patch.object(registry, "get", return_value=None):
-        with pytest.raises(GolfModelingError):
-            engine_manager._load_engine(EngineType.MUJOCO)
+    with (
+        patch.object(registry, "get", return_value=None),
+        pytest.raises(GolfModelingError),
+    ):
+        engine_manager._load_engine(EngineType.MUJOCO)
 
 
 def test_load_mujoco_engine_success(engine_manager) -> None:
@@ -165,20 +167,20 @@ def test_load_mujoco_engine_success(engine_manager) -> None:
 
     mock_mujoco_module = MagicMock()
 
-    with patch.dict(sys.modules, {"mujoco": mock_mujoco_module}):
-        with patch(
+    with (
+        patch.dict(sys.modules, {"mujoco": mock_mujoco_module}),
+        patch(
             "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
-        ) as mock_engine_class:
-            mock_engine_instance = MagicMock()
-            mock_engine_class.return_value = mock_engine_instance
+        ) as mock_engine_class,
+    ):
+        mock_engine_instance = MagicMock()
+        mock_engine_class.return_value = mock_engine_instance
 
-            result = engine_manager.switch_engine(EngineType.MUJOCO)
+        result = engine_manager.switch_engine(EngineType.MUJOCO)
 
-            assert result is True
-            assert engine_manager.active_physics_engine is not None
-            assert (
-                engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
-            )
+        assert result is True
+        assert engine_manager.active_physics_engine is not None
+        assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
 
 
 def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
@@ -212,18 +214,20 @@ def test_load_drake_engine_success(engine_manager) -> None:
 
     mock_pydrake_module = MagicMock()
 
-    with patch.dict(sys.modules, {"pydrake": mock_pydrake_module}):
-        with patch(
+    with (
+        patch.dict(sys.modules, {"pydrake": mock_pydrake_module}),
+        patch(
             "engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
-        ) as mock_engine_class:
-            mock_engine_instance = MagicMock()
-            mock_engine_class.return_value = mock_engine_instance
+        ) as mock_engine_class,
+    ):
+        mock_engine_instance = MagicMock()
+        mock_engine_class.return_value = mock_engine_instance
 
-            result = engine_manager.switch_engine(EngineType.DRAKE)
+        result = engine_manager.switch_engine(EngineType.DRAKE)
 
-            assert result is True
-            assert engine_manager.active_physics_engine is not None
-            assert engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
+        assert result is True
+        assert engine_manager.active_physics_engine is not None
+        assert engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
 
 
 def test_load_pinocchio_engine_success(engine_manager) -> None:
@@ -233,21 +237,20 @@ def test_load_pinocchio_engine_success(engine_manager) -> None:
 
     mock_pinocchio_module = MagicMock()
 
-    with patch.dict(sys.modules, {"pinocchio": mock_pinocchio_module}):
-        with patch(
+    with (
+        patch.dict(sys.modules, {"pinocchio": mock_pinocchio_module}),
+        patch(
             "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
-        ) as mock_engine_class:
-            mock_engine_instance = MagicMock()
-            mock_engine_class.return_value = mock_engine_instance
+        ) as mock_engine_class,
+    ):
+        mock_engine_instance = MagicMock()
+        mock_engine_class.return_value = mock_engine_instance
 
-            result = engine_manager.switch_engine(EngineType.PINOCCHIO)
+        result = engine_manager.switch_engine(EngineType.PINOCCHIO)
 
-            assert result is True
-            assert engine_manager.active_physics_engine is not None
-            assert (
-                engine_manager.engine_status[EngineType.PINOCCHIO]
-                == EngineStatus.LOADED
-            )
+        assert result is True
+        assert engine_manager.active_physics_engine is not None
+        assert engine_manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.LOADED
 
 
 def test_load_matlab_engine_success(engine_manager) -> None:
@@ -256,12 +259,14 @@ def test_load_matlab_engine_success(engine_manager) -> None:
     mock_matlab_engine = MagicMock()
     mock_matlab.engine = mock_matlab_engine
 
-    with patch.dict(
-        sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}
+    with (
+        patch.dict(
+            sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}
+        ),
+        patch("pathlib.Path.exists", return_value=True),
     ):
-        with patch("pathlib.Path.exists", return_value=True):
-            engine_manager._load_matlab_engine(EngineType.MATLAB_2D)
-            assert engine_manager._matlab_engine is not None
+        engine_manager._load_matlab_engine(EngineType.MATLAB_2D)
+        assert engine_manager._matlab_engine is not None
 
 
 def test_load_pendulum_engine(engine_manager) -> None:

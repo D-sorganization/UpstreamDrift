@@ -53,22 +53,20 @@ class ScienceAuditor(ast.NodeVisitor):
         elif isinstance(node.func, ast.Attribute):
             func_name = node.func.attr
 
-        if func_name in trig_functions:
-            # Flag if the argument is a numeric constant (likely ambiguous units)
-            if any(
-                isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float))
-                for arg in node.args
-            ):
-                self.risks.append(
-                    {
-                        "line": node.lineno,
-                        "type": "Unit Ambiguity",
-                        "msg": (
-                            f"{func_name}() called with a numeric constant. "
-                            "Verify if argument is in radians (Python default)."
-                        ),
-                    }
-                )
+        if func_name in trig_functions and any(
+            isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float))
+            for arg in node.args
+        ):
+            self.risks.append(
+                {
+                    "line": node.lineno,
+                    "type": "Unit Ambiguity",
+                    "msg": (
+                        f"{func_name}() called with a numeric constant. "
+                        "Verify if argument is in radians (Python default)."
+                    ),
+                }
+            )
         self.generic_visit(node)
 
 

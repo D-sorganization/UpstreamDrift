@@ -628,13 +628,12 @@ def _gjk_distance(
         support = support_a - support_b
 
         # Check if we've passed the origin
-        if np.dot(support, direction) < 0:
-            # Origin not contained, compute distance
-            if len(simplex) == 0:
-                # Return distance between supports
-                diff = support_b - support_a
-                dist = float(np.linalg.norm(diff))
-                return dist, support_a, support_b
+        # Origin not contained, compute distance
+        if np.dot(support, direction) < 0 and len(simplex) == 0:
+            # Return distance between supports
+            diff = support_b - support_a
+            dist = float(np.linalg.norm(diff))
+            return dist, support_a, support_b
 
         simplex.append(support)
 

@@ -57,23 +57,25 @@ class TestSharedExport:
         output_path = str(tmp_path / "test.mat")
 
         # Mock scipy.io.savemat
-        with patch("src.shared.python.data_io.export.savemat") as mock_savemat:
-            with patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", True):
-                success = export_to_matlab(output_path, sample_data)
-                assert success is True
-                mock_savemat.assert_called_once()
+        with (
+            patch("src.shared.python.data_io.export.savemat") as mock_savemat,
+            patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", True),
+        ):
+            success = export_to_matlab(output_path, sample_data)
+            assert success is True
+            mock_savemat.assert_called_once()
 
-                # Verify arguments
-                args, kwargs = mock_savemat.call_args
-                assert args[0] == output_path
-                data_dict = args[1]
+            # Verify arguments
+            args, kwargs = mock_savemat.call_args
+            assert args[0] == output_path
+            data_dict = args[1]
 
-                # Check data transformation
-                assert "times" in data_dict
-                assert "scalar_int" in data_dict
-                # Check nested flattening
-                assert "nested_dict_sub_array" in data_dict
-                assert "nested_dict_sub_scalar" in data_dict
+            # Check data transformation
+            assert "times" in data_dict
+            assert "scalar_int" in data_dict
+            # Check nested flattening
+            assert "nested_dict_sub_array" in data_dict
+            assert "nested_dict_sub_scalar" in data_dict
 
     def test_export_to_matlab_missing_dependency(
         self, tmp_path: Path, sample_data: dict[str, Any]
@@ -87,13 +89,15 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test exception handling during export."""
-        with patch(
-            "src.shared.python.data_io.export.savemat",
-            side_effect=Exception("Disk full"),
+        with (
+            patch(
+                "src.shared.python.data_io.export.savemat",
+                side_effect=Exception("Disk full"),
+            ),
+            patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", True),
         ):
-            with patch("src.shared.python.data_io.export.SCIPY_AVAILABLE", True):
-                success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
-                assert success is False
+            success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
+            assert success is False
 
     def test_export_to_hdf5_success(
         self, tmp_path: Path, sample_data: dict[str, Any]

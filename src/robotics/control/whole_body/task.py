@@ -87,9 +87,12 @@ class Task:
                 )
 
         # Validate bounds for inequality tasks
-        if self.task_type == TaskType.INEQUALITY:
-            if self.lower_bound is None and self.upper_bound is None:
-                raise ValueError("Inequality task must have at least one bound")
+        if (
+            self.task_type == TaskType.INEQUALITY
+            and self.lower_bound is None
+            and self.upper_bound is None
+        ):
+            raise ValueError("Inequality task must have at least one bound")
 
         # Validate finite values
         if not np.all(np.isfinite(self.jacobian)):

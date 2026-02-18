@@ -40,9 +40,11 @@ def test_init(mock_qapp, mock_golf_launcher) -> None:
 
 
 def test_init_no_pyqt() -> None:
-    with patch("launchers.unified_launcher.PYQT6_AVAILABLE", False):
-        with pytest.raises(ImportError, match="PyQt6 is required"):
-            UnifiedLauncher()
+    with (
+        patch("launchers.unified_launcher.PYQT6_AVAILABLE", False),
+        pytest.raises(ImportError, match="PyQt6 is required"),
+    ):
+        UnifiedLauncher()
 
 
 def test_mainloop(mock_qapp, mock_golf_launcher) -> None:

@@ -55,17 +55,19 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
             # Check docs
-            if not ast.get_docstring(node):
-                # Skip private members (starting with _)
-                if not node.name.startswith("_"):
-                    # Skip tests
-                    if "tests" not in filepath and "test_" not in filepath:
-                        docs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
+            if (
+                not ast.get_docstring(node)
+                and not node.name.startswith("_")
+                and "tests" not in filepath
+                and "test_" not in filepath
+            ):
+                docs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
             # Check stubs (functions only)
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-                if is_stub(node):
-                    stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and is_stub(
+                node
+            ):
+                stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
 
 def main() -> None:

@@ -366,26 +366,28 @@ class TestGolfLauncherLogic:
         launcher.select_model("test_model")
 
         # Mock subprocess
-        with patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen:
-            with patch.object(Path, "exists", return_value=True):
-                with patch("os.name", "posix"):
-                    # We need to verify _launch_docker_container is called essentially
-                    # because type is "docker" (not custom)
+        with (
+            patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen,
+            patch.object(Path, "exists", return_value=True),
+            patch("os.name", "posix"),
+        ):
+            # We need to verify _launch_docker_container is called essentially
+            # because type is "docker" (not custom)
 
-                    launcher.launch_simulation()
+            launcher.launch_simulation()
 
-                    mock_popen.assert_called()
-                    args = mock_popen.call_args[0][0]
-                    assert args[0] == "docker"
-                    assert args[1] == "run"
-                    assert args[1] == "run"
-                    # Verify volume mount path logic: args[5] should be the
-                    # '-v REPOS_ROOT:/workspace' argument.
-                    assert "UpstreamDrift" in args[5] or "workspace" in args[5]
-                    # Also check working directory is set to /workspace
-                    assert "-w" in args
-                    idx = args.index("-w")
-                    assert args[idx + 1] == "/workspace"
+            mock_popen.assert_called()
+            args = mock_popen.call_args[0][0]
+            assert args[0] == "docker"
+            assert args[1] == "run"
+            assert args[1] == "run"
+            # Verify volume mount path logic: args[5] should be the
+            # '-v REPOS_ROOT:/workspace' argument.
+            assert "UpstreamDrift" in args[5] or "workspace" in args[5]
+            # Also check working directory is set to /workspace
+            assert "-w" in args
+            idx = args.index("-w")
+            assert args[idx + 1] == "/workspace"
 
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
@@ -409,12 +411,14 @@ class TestGolfLauncherLogic:
         launcher.docker_available = True
         launcher.select_model("generic_mjcf")
 
-        with patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen:
-            with patch.object(Path, "exists", return_value=True):
-                launcher.launch_simulation()
+        with (
+            patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen,
+            patch.object(Path, "exists", return_value=True),
+        ):
+            launcher.launch_simulation()
 
-                mock_popen.assert_called()
-                args = mock_popen.call_args[0][0]
-                # Should use sys.executable
-                assert args[0] == sys.executable
-                assert "mujoco.viewer" in args[2]
+            mock_popen.assert_called()
+            args = mock_popen.call_args[0][0]
+            # Should use sys.executable
+            assert args[0] == sys.executable
+            assert "mujoco.viewer" in args[2]

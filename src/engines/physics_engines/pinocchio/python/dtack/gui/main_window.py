@@ -370,15 +370,16 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         """Run counterfactual analysis."""
         logger.info(f"Running {cf_type} counterfactual...")
 
-        if not self.dynamics_engine or not self.recorded_data:
-            # Need real data to run real counterfactuals
-            if not self.recorded_data:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "No Data",
-                    "No recorded data to analyze. Run simulation first.",
-                )
-                return
+        # Need real data to run real counterfactuals
+        if (
+            not self.dynamics_engine or not self.recorded_data
+        ) and not self.recorded_data:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recorded data to analyze. Run simulation first.",
+            )
+            return
 
         # Perform Analysis frame-by-frame
         # Note: This is simplified. ZVCF/ZTCF usually imply re-integration over time.

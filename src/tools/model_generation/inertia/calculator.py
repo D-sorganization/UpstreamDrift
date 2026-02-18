@@ -339,7 +339,7 @@ class InertiaCalculator:
             raise ValueError(f"Manual mode requires dict, got {type(source)}")
 
         # Handle nested inertia dict
-        inertia_data = data["inertia"] if "inertia" in data else data
+        inertia_data = data.get("inertia", data)
 
         result = InertiaResult(
             ixx=inertia_data.get("ixx", DEFAULT_INERTIA_KG_M2),

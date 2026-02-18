@@ -622,9 +622,8 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
             if selected_group != "All Groups" and group != selected_group:
                 show = False
 
-            if search_text and joint_name:
-                if search_text not in joint_name.lower():
-                    show = False
+            if search_text and joint_name and search_text not in joint_name.lower():
+                show = False
 
             widget.setVisible(show)
 

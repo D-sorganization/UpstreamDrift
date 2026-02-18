@@ -422,12 +422,15 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
             if event.button == 1:
                 self.drawn_points = [(event.xdata, event.ydata)]
 
-        elif self.mode == "drag":
-            if event.button == 1 and self.polynomial_coeffs is not None:
-                self.dragging_curve = True
-                self.drag_start_pos = (event.xdata, event.ydata)
-                self.drag_start_coeffs = self.polynomial_coeffs.copy()
-                self.drag_start_points = list(self.current_points)
+        elif (
+            self.mode == "drag"
+            and event.button == 1
+            and self.polynomial_coeffs is not None
+        ):
+            self.dragging_curve = True
+            self.drag_start_pos = (event.xdata, event.ydata)
+            self.drag_start_coeffs = self.polynomial_coeffs.copy()
+            self.drag_start_points = list(self.current_points)
 
     def _on_canvas_release(self, event: matplotlib.backend_bases.MouseEvent) -> None:
         """Handle mouse release events."""

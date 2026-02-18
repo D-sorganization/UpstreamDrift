@@ -406,7 +406,7 @@ class SystemIdentifier:
         """
         # Apply identified parameters
         param_vector = np.array(
-            [identified_params.get(name, 1.0) for name in self.param_bounds.keys()],
+            [identified_params.get(name, 1.0) for name in self.param_bounds],
         )
         self._apply_params(param_vector)
 

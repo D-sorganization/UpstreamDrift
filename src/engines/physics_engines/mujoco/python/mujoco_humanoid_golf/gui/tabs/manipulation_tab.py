@@ -598,14 +598,16 @@ class ManipulationTab(QtWidgets.QWidget):
             | QtWidgets.QMessageBox.StandardButton.No,
         )
 
-        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
-            if manipulator.delete_pose(pose_name):
-                self.update_pose_list()
-                logger.info("Pose '%s' deleted successfully", pose_name)
-                if self.main_window.statusBar():
-                    self.main_window.statusBar().showMessage(
-                        f"Pose '{pose_name}' deleted successfully.", 3000
-                    )
+        if (
+            reply == QtWidgets.QMessageBox.StandardButton.Yes
+            and manipulator.delete_pose(pose_name)
+        ):
+            self.update_pose_list()
+            logger.info("Pose '%s' deleted successfully", pose_name)
+            if self.main_window.statusBar():
+                self.main_window.statusBar().showMessage(
+                    f"Pose '{pose_name}' deleted successfully.", 3000
+                )
 
     def on_export_poses(self) -> None:
         """Export pose library to file."""
