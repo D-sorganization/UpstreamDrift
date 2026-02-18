@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.shared.python.core.constants import GRAVITY
+from src.shared.python.core.contracts import precondition
 
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import ForceOverlayRequest
@@ -272,6 +273,16 @@ def _build_demo_vectors(config: ForceOverlayRequest) -> list[ForceVector3D]:
     "/simulation/forces",
     response_model=ForceOverlayResponse,
 )
+@precondition(
+    lambda force_types="applied",
+    color_by_magnitude=True,
+    body_filter=None,
+    show_labels=False,
+    scale_factor=0.01,
+    engine_manager=None,
+    logger=None: scale_factor > 0 and len(force_types.strip()) > 0,
+    "Scale factor must be positive and force_types must be non-empty",
+)
 async def get_force_overlays(
     force_types: str = "applied",
     color_by_magnitude: bool = True,
@@ -349,6 +360,10 @@ async def get_force_overlays(
 @router.post(
     "/simulation/forces/config",
     response_model=ForceOverlayResponse,
+)
+@precondition(
+    lambda config, engine_manager=None, logger=None: config.scale_factor > 0,
+    "Scale factor must be positive",
 )
 async def update_force_overlay_config(
     config: ForceOverlayRequest,

@@ -15,6 +15,8 @@ import numpy as np
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from src.shared.python.core.contracts import precondition
+
 router = APIRouter(prefix="/api/tools/putting-green", tags=["putting-green"])
 
 
@@ -117,6 +119,10 @@ class GreenContourResponse(BaseModel):
 
 
 @router.post("/simulate", response_model=PuttSimulationResponse)
+@precondition(
+    lambda request: request.direction_x != 0.0 or request.direction_y != 0.0,
+    "Putt direction vector must not be zero",
+)
 async def simulate_putt(request: PuttSimulationRequest) -> PuttSimulationResponse:
     """Simulate a single putt with given parameters.
 
@@ -223,6 +229,10 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
 
 
 @router.post("/scatter", response_model=ScatterAnalysisResponse)
+@precondition(
+    lambda request: request.direction_x != 0.0 or request.direction_y != 0.0,
+    "Scatter direction vector must not be zero",
+)
 async def scatter_analysis(
     request: ScatterAnalysisRequest,
 ) -> ScatterAnalysisResponse:
@@ -287,6 +297,13 @@ async def scatter_analysis(
 
 
 @router.get("/contours", response_model=GreenContourResponse)
+@precondition(
+    lambda width=20.0, height=20.0, resolution=20, stimp_rating=10.0: width > 0
+    and height > 0
+    and resolution >= 2
+    and 6.0 <= stimp_rating <= 15.0,
+    "Green dimensions must be positive, resolution >= 2, and stimp_rating in [6, 15]",
+)
 async def get_green_contours(
     width: float = 20.0,
     height: float = 20.0,
