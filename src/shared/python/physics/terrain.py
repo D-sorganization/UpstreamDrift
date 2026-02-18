@@ -24,6 +24,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import functools
 import json
 import math
 from dataclasses import dataclass, field
@@ -1084,11 +1085,12 @@ def create_terrain_from_config(config_path: Path | str) -> Terrain:
 # Physics integration functions
 
 
+@functools.lru_cache(maxsize=256)
 def compute_gravity_on_slope(
     slope_angle_deg: float,
     gravity: float = float(GRAVITY_M_S2),
 ) -> tuple[float, float]:
-    """Compute gravity components on a slope.
+    """Compute gravity components on a slope. Cached for performance.
 
     Args:
         slope_angle_deg: Slope angle in degrees

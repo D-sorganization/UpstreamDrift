@@ -18,6 +18,7 @@ for shaft modeling. Physics engine integration is separate.
 
 from __future__ import annotations
 
+import functools
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -139,11 +140,12 @@ class ShaftState:
     timestamp: float = 0.0
 
 
+@functools.lru_cache(maxsize=256)
 def compute_section_inertia(
     outer_diameter: float,
     wall_thickness: float,
 ) -> float:
-    """Compute second moment of area for hollow circular section.
+    """Compute second moment of area for hollow circular section. Cached for performance.
 
     I = π/64 * (D⁴ - d⁴)
 
@@ -162,11 +164,12 @@ def compute_section_inertia(
     return float(inertia)
 
 
+@functools.lru_cache(maxsize=256)
 def compute_section_area(
     outer_diameter: float,
     wall_thickness: float,
 ) -> float:
-    """Compute cross-sectional area for hollow circular section.
+    """Compute cross-sectional area for hollow circular section. Cached for performance.
 
     A = π/4 * (D² - d²)
 
