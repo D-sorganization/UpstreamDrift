@@ -1,9 +1,10 @@
 # Development
 
-Documentation for developers contributing to the Golf Modeling Suite.
+Documentation for developers contributing to UpstreamDrift.
 
 ## Contents
 
+- **[First Contribution](FIRST_CONTRIBUTION.md)**: New here? Start with this onboarding guide.
 - **[Architecture](architecture.md)**: Understanding the system design.
 - **[Contributing](contributing.md)**: How to submit changes.
 - **[Testing](testing.md)**: Running the test suite.
