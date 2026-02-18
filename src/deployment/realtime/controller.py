@@ -175,6 +175,8 @@ class RealTimeController:
             ):
                 # Simulated connection always succeeds
                 self._is_connected = True
+                # Reset simulation state on connect to ensure correct sizing
+                self._sim_state = None
             elif self.comm_type == CommunicationType.ROS2:
                 self._connect_ros2()
             elif self.comm_type == CommunicationType.UDP:
@@ -344,10 +346,12 @@ class RealTimeController:
             if self._sim_state is None:
                 self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
 
+            # Atomic read of state tuple
+            current_sim_state = self._sim_state
             return RobotState(
                 timestamp=timestamp,
-                joint_positions=self._sim_state[0],
-                joint_velocities=self._sim_state[1],
+                joint_positions=current_sim_state[0],
+                joint_velocities=current_sim_state[1],
                 joint_torques=np.zeros(n_joints),
             )
 
@@ -378,7 +382,9 @@ class RealTimeController:
             if command.mode == ControlMode.TORQUE:
                 if command.torque_commands is not None:
                     # Simple double integrator: acc = torque (assuming unit mass)
-                    qdd = command.torque_commands
+                    # Add damping to prevent instability
+                    damping = 0.1
+                    qdd = command.torque_commands - damping * qd
                     qd = qd + qdd * self.dt
                     q = q + qd * self.dt
 
