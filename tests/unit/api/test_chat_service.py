@@ -11,6 +11,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.shared.python.core.error_utils import InvalidRequestError
+
 
 @pytest.fixture
 def chat_service(tmp_path):
@@ -93,8 +95,8 @@ class TestMessageHandling:
         assert ctx.metadata.get("last_engine") == "mujoco"
 
     def test_add_message_to_nonexistent_session(self, chat_service):
-        """Adding a message to a non-existent session raises ValueError."""
-        with pytest.raises(ValueError, match="not found"):
+        """Adding a message to a non-existent session raises InvalidRequestError."""
+        with pytest.raises(InvalidRequestError, match="not found"):
             chat_service.add_user_message("fake-session", "Hello")
 
     def test_get_session_history(self, chat_service):
