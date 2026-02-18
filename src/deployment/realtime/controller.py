@@ -27,6 +27,7 @@ class CommunicationType(Enum):
     ROS2 = "ros2"
     UDP = "udp"
     SIMULATION = "simulation"
+    LOOPBACK = "loopback"
 
 
 @dataclass
@@ -139,6 +140,9 @@ class RealTimeController:
         self._last_state: RobotState | None = None
         self._last_command: ControlCommand | None = None
 
+        # Loopback physics state
+        self._sim_state: tuple[NDArray[np.floating], NDArray[np.floating]] | None = None
+
         # Locks
         self._state_lock = threading.Lock()
         self._command_lock = threading.Lock()
@@ -165,7 +169,10 @@ class RealTimeController:
         self._config = robot_config
 
         try:
-            if self.comm_type == CommunicationType.SIMULATION:
+            if self.comm_type in (
+                CommunicationType.SIMULATION,
+                CommunicationType.LOOPBACK,
+            ):
                 # Simulated connection always succeeds
                 self._is_connected = True
             elif self.comm_type == CommunicationType.ROS2:
@@ -332,6 +339,18 @@ class RealTimeController:
                 joint_torques=np.zeros(n_joints),
             )
 
+        if self.comm_type == CommunicationType.LOOPBACK:
+            n_joints = self._config.n_joints if self._config else 7
+            if self._sim_state is None:
+                self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
+
+            return RobotState(
+                timestamp=timestamp,
+                joint_positions=self._sim_state[0],
+                joint_velocities=self._sim_state[1],
+                joint_torques=np.zeros(n_joints),
+            )
+
         # Real hardware reading would be implemented per protocol
         raise NotImplementedError(
             f"State reading for communication type '{self.comm_type.value}' is not yet "
@@ -346,6 +365,53 @@ class RealTimeController:
         """
         if self.comm_type == CommunicationType.SIMULATION:
             # Simulated: command is "sent"
+            return
+
+        if self.comm_type == CommunicationType.LOOPBACK:
+            if self._sim_state is None:
+                # Initialize state if not present (should be handled in _read_state, but safety check)
+                n_joints = self._config.n_joints if self._config else 7
+                self._sim_state = (np.zeros(n_joints), np.zeros(n_joints))
+
+            q, qd = self._sim_state
+
+            if command.mode == ControlMode.TORQUE:
+                if command.torque_commands is not None:
+                    # Simple double integrator: acc = torque (assuming unit mass)
+                    qdd = command.torque_commands
+                    qd = qd + qdd * self.dt
+                    q = q + qd * self.dt
+
+            elif command.mode == ControlMode.POSITION:
+                if command.position_targets is not None:
+                    # Instantaneous position control (infinite gain)
+                    q = command.position_targets
+                    # Reset velocity or leave it? Let's zero it to be safe as position jump implies infinite velocity
+                    qd = np.zeros_like(q)
+
+            elif command.mode == ControlMode.VELOCITY:
+                if command.velocity_targets is not None:
+                    qd = command.velocity_targets
+                    q = q + qd * self.dt
+
+            elif command.mode == ControlMode.IMPEDANCE:
+                if (
+                    command.position_targets is not None
+                    and command.stiffness is not None
+                    and command.damping is not None
+                ):
+                    # Impedance control: tau = K(q_d - q) + D(0 - qd)
+                    # acc = tau (unit mass)
+                    q_err = command.position_targets - q
+                    tau = command.stiffness * q_err - command.damping * qd
+                    if command.feedforward_torque is not None:
+                        tau += command.feedforward_torque
+
+                    qdd = tau
+                    qd = qd + qdd * self.dt
+                    q = q + qd * self.dt
+
+            self._sim_state = (q, qd)
             return
 
         # Real hardware command sending would be implemented per protocol
