@@ -18,6 +18,9 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 
+# Ensure the project root is on sys.path so ``src`` is importable.
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 from src.shared.python.data_io.path_utils import get_src_root  # noqa: E402
 

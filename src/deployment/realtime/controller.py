@@ -400,22 +400,22 @@ class RealTimeController:
                     qd = command.velocity_targets
                     q = q + qd * self.dt
 
-            elif command.mode == ControlMode.IMPEDANCE:
-                if (
-                    command.position_targets is not None
-                    and command.stiffness is not None
-                    and command.damping is not None
-                ):
-                    # Impedance control: tau = K(q_d - q) + D(0 - qd)
-                    # acc = tau (unit mass)
-                    q_err = command.position_targets - q
-                    tau = command.stiffness * q_err - command.damping * qd
-                    if command.feedforward_torque is not None:
-                        tau += command.feedforward_torque
+            elif (
+                command.mode == ControlMode.IMPEDANCE
+                and command.position_targets is not None
+                and command.stiffness is not None
+                and command.damping is not None
+            ):
+                # Impedance control: tau = K(q_d - q) + D(0 - qd)
+                # acc = tau (unit mass)
+                q_err = command.position_targets - q
+                tau = command.stiffness * q_err - command.damping * qd
+                if command.feedforward_torque is not None:
+                    tau += command.feedforward_torque
 
-                    qdd = tau
-                    qd = qd + qdd * self.dt
-                    q = q + qd * self.dt
+                qdd = tau
+                qd = qd + qdd * self.dt
+                q = q + qd * self.dt
 
             self._sim_state = (q, qd)
             return

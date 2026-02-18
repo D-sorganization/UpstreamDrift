@@ -163,7 +163,8 @@ class TestMotionRetargeter:
 
         retargeter = MotionRetargeter(skeleton, skeleton)
 
-        source_motion = np.random.randn(10, skeleton.n_joints)
+        # Use values within [-pi, pi] to avoid clipping by joint-limit enforcement
+        source_motion = np.random.uniform(-np.pi, np.pi, (10, skeleton.n_joints))
         target_motion = retargeter.retarget(source_motion, method="direct")
 
         np.testing.assert_array_almost_equal(source_motion, target_motion)

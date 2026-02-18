@@ -291,6 +291,33 @@ models:
         )
         console_patcher.start()
 
+        # Patch the entire init_ui to prevent SIGABRT from real Qt widget
+        # creation (QWidget, QSplitter, etc.) in headless WSL environments.
+        # In the full test suite, launcher_ui_setup is already imported with
+        # real C++ Qt classes cached at module scope, so the sys.modules mock
+        # for PyQt6 has no effect on those cached references.
+        def _mock_init_ui(self_arg):
+            self_arg.grid_layout = MockQLayout()
+            self_arg.btn_launch = MagicMock()
+            self_arg.lbl_status = MagicMock()
+            self_arg.content_splitter = MagicMock()
+            self_arg.search_bar = MagicMock()
+
+        init_ui_patcher = patch(
+            "src.launchers.launcher_ui_setup.LauncherUISetupMixin.init_ui",
+            _mock_init_ui,
+        )
+        init_ui_patcher.start()
+
+        # Patch _init_ui_components to prevent QShortcut creation which
+        # rejects GolfLauncher (inheriting MockQMainWindow) as parent
+        # when the real PyQt6.QtGui.QShortcut is cached at module scope.
+        ui_components_patcher = patch(
+            "src.launchers.launcher_dialogs.LauncherDialogsMixin._init_ui_components",
+            lambda self_arg: setattr(self_arg, "toast_manager", None),
+        )
+        ui_components_patcher.start()
+
         try:
             with (
                 patch(
@@ -309,6 +336,8 @@ models:
                 launcher = FreshGolfLauncher()
                 yield launcher, model_xml
         finally:
+            ui_components_patcher.stop()
+            init_ui_patcher.stop()
             console_patcher.stop()
             ai_panel_patcher.stop()
             context_help_patcher.stop()

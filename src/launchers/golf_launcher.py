@@ -561,7 +561,7 @@ class GolfLauncher(
         for key in finished:
             del self.running_processes[key]
 
-        if not self.running_processes:
+        if not self.running_processes and hasattr(self, "lbl_status"):
             self.lbl_status.setText("Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
 
