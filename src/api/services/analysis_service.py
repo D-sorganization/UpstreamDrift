@@ -13,6 +13,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
+from src.shared.python.core.error_utils import GolfSuiteError, ValidationError
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -20,6 +21,10 @@ from ..models.requests import AnalysisRequest
 from ..models.responses import AnalysisResponse
 
 logger = get_logger(__name__)
+
+VALID_ANALYSIS_TYPES = frozenset(
+    {"kinematics", "kinetics", "energetics", "swing_sequence"}
+)
 
 
 class AnalysisService:
@@ -60,8 +65,17 @@ class AnalysisService:
             AnalysisResponse with computed results or error information
 
         Raises:
-            ValueError: If analysis_type is not recognized
+            ValidationError: If analysis_type is not recognized
         """
+        # Fail-fast: validate analysis type before doing any work
+        if request.analysis_type not in VALID_ANALYSIS_TYPES:
+            raise ValidationError(
+                field="analysis_type",
+                value=request.analysis_type,
+                reason="Unknown analysis type",
+                valid_values=sorted(VALID_ANALYSIS_TYPES),
+            )
+
         try:
             # Get the active engine for analysis
             engine = self.engine_manager.get_active_physics_engine()
@@ -75,7 +89,12 @@ class AnalysisService:
             elif request.analysis_type == "swing_sequence":
                 results = await self._analyze_swing_sequence(request, engine)
             else:
-                raise ValueError(f"Unknown analysis type: {request.analysis_type}")
+                raise ValidationError(
+                    field="analysis_type",
+                    value=request.analysis_type,
+                    reason="Unknown analysis type",
+                    valid_values=sorted(VALID_ANALYSIS_TYPES),
+                )
 
             return AnalysisResponse(
                 analysis_type=request.analysis_type,
@@ -85,8 +104,8 @@ class AnalysisService:
                 export_path="",
             )
 
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.error(f"Analysis failed: {e}", exc_info=True)
+        except (GolfSuiteError, RuntimeError, OSError) as e:
+            logger.error("Analysis failed: %s", e, exc_info=True)
             return AnalysisResponse(
                 analysis_type=request.analysis_type,
                 success=False,
@@ -145,8 +164,8 @@ class AnalysisService:
                 metadata["engine_type"] = type(engine).__name__
                 metadata["data_source"] = "engine"
 
-            except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(f"Could not extract kinematics from engine: {e}")
+            except (GolfSuiteError, ValueError, RuntimeError, AttributeError) as e:
+                logger.warning("Could not extract kinematics from engine: %s", e)
                 metadata = result["metadata"]
                 metadata["engine_error"] = str(e)
                 metadata["data_source"] = "none"
@@ -208,8 +227,8 @@ class AnalysisService:
                 metadata["engine_type"] = type(engine).__name__
                 metadata["data_source"] = "engine"
 
-            except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(f"Could not extract kinetics from engine: {e}")
+            except (GolfSuiteError, ValueError, RuntimeError, AttributeError) as e:
+                logger.warning("Could not extract kinetics from engine: %s", e)
                 metadata = result["metadata"]
                 metadata["engine_error"] = str(e)
                 metadata["data_source"] = "none"
@@ -279,8 +298,8 @@ class AnalysisService:
                 metadata["engine_type"] = type(engine).__name__
                 metadata["data_source"] = "engine"
 
-            except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(f"Could not extract energetics from engine: {e}")
+            except (GolfSuiteError, ValueError, RuntimeError, AttributeError) as e:
+                logger.warning("Could not extract energetics from engine: %s", e)
                 metadata = result["metadata"]
                 metadata["engine_error"] = str(e)
                 metadata["data_source"] = "none"
@@ -344,8 +363,8 @@ class AnalysisService:
                 metadata["engine_type"] = type(engine).__name__
                 metadata["data_source"] = "engine"
 
-            except ImportError as e:
-                logger.warning(f"Could not analyze swing sequence from engine: {e}")
+            except (GolfSuiteError, ImportError) as e:
+                logger.warning("Could not analyze swing sequence from engine: %s", e)
                 metadata = result["metadata"]
                 metadata["engine_error"] = str(e)
                 metadata["data_source"] = "none"

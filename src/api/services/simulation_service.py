@@ -3,6 +3,11 @@
 from typing import Any
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.core.error_utils import (
+    EngineLaunchError,
+    GolfSuiteError,
+    ModelLoadError,
+)
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -56,11 +61,17 @@ class SimulationService:
 
             engine = self.engine_manager.get_active_physics_engine()
             if not engine:
-                raise RuntimeError(f"Failed to load engine: {request.engine_type}")
+                raise EngineLaunchError(
+                    request.engine_type,
+                    reason="engine loaded but no active engine returned",
+                )
 
             # Load model if specified
             if request.model_path:
-                engine.load_from_path(request.model_path)
+                try:
+                    engine.load_from_path(request.model_path)
+                except (FileNotFoundError, OSError, ValueError) as e:
+                    raise ModelLoadError(str(request.model_path), reason=str(e)) from e
 
             # Set initial state if provided
             if request.initial_state:
@@ -79,6 +90,12 @@ class SimulationService:
 
             # Run simulation
             timestep = request.timestep or 0.001
+            if timestep <= 0:
+                raise ValueError(f"Timestep must be positive, got {timestep}")
+            if timestep > request.duration:
+                raise ValueError(
+                    f"Timestep ({timestep}) must not exceed duration ({request.duration})"
+                )
             steps = int(request.duration / timestep)
 
             # Start recording (using is_recording to check state)
@@ -115,8 +132,8 @@ class SimulationService:
                 export_paths=[],  # Add required field
             )
 
-        except (ValueError, RuntimeError, AttributeError) as e:
-            logger.error(f"Simulation failed: {e}")
+        except (GolfSuiteError, ValueError, RuntimeError) as e:
+            logger.error("Simulation failed: %s", e, exc_info=True)
             return SimulationResponse(
                 success=False,
                 duration=0.0,
@@ -198,7 +215,7 @@ class SimulationService:
                 logger.debug("Control inputs not available: %s", e)
 
         except Exception as e:  # noqa: BLE001 - recorder may raise various errors
-            logger.warning(f"Error extracting simulation data: {e}")
+            logger.warning("Error extracting simulation data: %s", e)
 
         return data
 
@@ -239,6 +256,6 @@ class SimulationService:
                 )
 
         except Exception as e:  # noqa: BLE001 - recorder may raise various errors
-            logger.warning(f"Error performing analysis: {e}")
+            logger.warning("Error performing analysis: %s", e)
 
         return results
