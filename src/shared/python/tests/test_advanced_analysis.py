@@ -57,7 +57,7 @@ class MockRecorder:
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Return time and data arrays for the requested field."""
-        if field_name == "joint_positions":
+        if field_name == "joint_positions":  # noqa: SIM116
             return self.times, self.joint_positions
         elif field_name == "joint_velocities":
             return self.times, self.joint_velocities

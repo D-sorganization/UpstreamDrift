@@ -752,10 +752,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # Handle library subcommands
-    if args.command in ("library", "lib"):
-        if not hasattr(args, "lib_command") or not args.lib_command:
-            parser.parse_args([args.command, "-h"])
-            return 0
+    if args.command in ("library", "lib") and (
+        not hasattr(args, "lib_command") or not args.lib_command
+    ):
+        parser.parse_args([args.command, "-h"])
+        return 0
 
     if hasattr(args, "func"):
         return args.func(args)

@@ -306,16 +306,15 @@ class HumanoidStandEnv(RoboticsGymEnv):
     def _step_simulation(self) -> None:
         """Step simulation, possibly applying perturbation."""
         # Random perturbation
-        if self._perturbation_force > 0:
-            if self.np_random.random() < 0.01:  # 1% chance per step
-                force = self.np_random.uniform(
-                    -self._perturbation_force,
-                    self._perturbation_force,
-                    size=3,
-                )
-                force[2] = 0  # No vertical force
-                if hasattr(self.engine, "apply_external_force"):
-                    self.engine.apply_external_force("torso", force)
+        if self._perturbation_force > 0 and self.np_random.random() < 0.01:
+            force = self.np_random.uniform(
+                -self._perturbation_force,
+                self._perturbation_force,
+                size=3,
+            )
+            force[2] = 0  # No vertical force
+            if hasattr(self.engine, "apply_external_force"):
+                self.engine.apply_external_force("torso", force)
 
         if hasattr(self.engine, "step"):
             self.engine.step()

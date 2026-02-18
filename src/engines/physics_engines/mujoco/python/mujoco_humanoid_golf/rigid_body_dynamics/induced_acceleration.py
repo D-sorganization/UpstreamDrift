@@ -91,11 +91,8 @@ class MuJoCoInducedAccelerationAnalyzer:
         # decomposition.
         # Stack RHS vectors: [-G, -C, tau, J^T f_c]
 
-        if tau_app is not None:
-            tau_vec = tau_app
-        else:
-            # self.data.qfrc_actuator contains generalized actuator forces
-            tau_vec = self.data.qfrc_actuator
+        # self.data.qfrc_actuator contains generalized actuator forces
+        tau_vec = tau_app if tau_app is not None else self.data.qfrc_actuator
 
         # Stack RHS vectors into a matrix (nv, 4)
         rhs_stack = np.column_stack(
