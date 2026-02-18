@@ -15,8 +15,9 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.constants import GRAVITY
 from src.shared.python.core.contracts import precondition
 
@@ -339,6 +340,28 @@ def _build_demo_vectors(config: ForceOverlayRequest) -> list[ForceVector3D]:
     return vectors
 
 
+def _get_sim_time(engine_manager: EngineManager) -> float:
+    """Get current simulation time from the engine manager.
+
+    Breaks apart the chained engine_manager.get_active_engine().get_state()
+    train wreck into a safe helper.
+
+    Args:
+        engine_manager: The engine manager to query.
+
+    Returns:
+        Current simulation time, or 0.0 if unavailable.
+    """
+    try:
+        active = engine_manager.get_active_engine()  # type: ignore[attr-defined]
+        if active is None or not hasattr(active, "get_state"):
+            return 0.0
+        state = active.get_state()
+        return state.get("time", 0.0)
+    except (ValueError, RuntimeError, AttributeError):
+        return 0.0
+
+
 @router.get(
     "/simulation/forces",
     response_model=ForceOverlayResponse,
@@ -353,6 +376,7 @@ def _build_demo_vectors(config: ForceOverlayRequest) -> list[ForceVector3D]:
     logger=None: scale_factor > 0 and len(force_types.strip()) > 0,
     "Scale factor must be positive and force_types must be non-empty",
 )
+@handle_api_errors
 async def get_force_overlays(
     force_types: str = "applied",
     color_by_magnitude: bool = True,
@@ -379,52 +403,34 @@ async def get_force_overlays(
     Returns:
         Force overlay data with vectors and metadata.
     """
-    try:
-        config = ForceOverlayRequest(
-            enabled=True,
-            force_types=force_types.split(","),
-            color_by_magnitude=color_by_magnitude,
-            body_filter=body_filter.split(",") if body_filter else None,
-            show_labels=show_labels,
-            scale_factor=scale_factor,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    config = ForceOverlayRequest(
+        enabled=True,
+        force_types=force_types.split(","),
+        color_by_magnitude=color_by_magnitude,
+        body_filter=body_filter.split(",") if body_filter else None,
+        show_labels=show_labels,
+        scale_factor=scale_factor,
+    )
 
-    try:
-        vectors = _build_force_vectors(engine_manager, config)
+    vectors = _build_force_vectors(engine_manager, config)
 
-        total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")
-        total_torque = sum(v.magnitude for v in vectors if v.force_type == "applied")
+    total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")
+    total_torque = sum(v.magnitude for v in vectors if v.force_type == "applied")
 
-        # Get simulation time
-        sim_time = 0.0
-        try:
-            active = engine_manager.get_active_engine()
-            if active and hasattr(active, "get_state"):
-                state = active.get_state()
-                sim_time = float(state.get("time", 0.0))
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+    sim_time = _get_sim_time(engine_manager)
 
-        return ForceOverlayResponse(
-            sim_time=sim_time,
-            vectors=vectors,
-            total_force_magnitude=total_force,
-            total_torque_magnitude=total_torque,
-            overlay_config={
-                "force_types": config.force_types,
-                "color_by_magnitude": config.color_by_magnitude,
-                "scale_factor": config.scale_factor,
-                "body_filter": config.body_filter,
-            },
-        )
-    except (ValueError, RuntimeError, AttributeError) as exc:
-        if logger:
-            logger.error("Error building force overlays: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Force overlay error: {str(exc)}"
-        ) from exc
+    return ForceOverlayResponse(
+        sim_time=sim_time,
+        vectors=vectors,
+        total_force_magnitude=total_force,
+        total_torque_magnitude=total_torque,
+        overlay_config={
+            "force_types": config.force_types,
+            "color_by_magnitude": config.color_by_magnitude,
+            "scale_factor": config.scale_factor,
+            "body_filter": config.body_filter,
+        },
+    )
 
 
 @router.post(
@@ -435,6 +441,7 @@ async def get_force_overlays(
     lambda config, engine_manager=None, logger=None: config.scale_factor > 0,
     "Scale factor must be positive",
 )
+@handle_api_errors
 async def update_force_overlay_config(
     config: ForceOverlayRequest,
     engine_manager: Any = Depends(get_engine_manager),
@@ -453,37 +460,23 @@ async def update_force_overlay_config(
     Returns:
         Updated force overlay data.
     """
-    try:
-        vectors = _build_force_vectors(engine_manager, config)
+    vectors = _build_force_vectors(engine_manager, config)
 
-        total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")
-        total_torque = sum(v.magnitude for v in vectors if v.force_type == "applied")
+    total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")
+    total_torque = sum(v.magnitude for v in vectors if v.force_type == "applied")
 
-        sim_time = 0.0
-        try:
-            active = engine_manager.get_active_engine()
-            if active and hasattr(active, "get_state"):
-                state = active.get_state()
-                sim_time = float(state.get("time", 0.0))
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+    sim_time = _get_sim_time(engine_manager)
 
-        return ForceOverlayResponse(
-            sim_time=sim_time,
-            vectors=vectors,
-            total_force_magnitude=total_force,
-            total_torque_magnitude=total_torque,
-            overlay_config={
-                "force_types": config.force_types,
-                "color_by_magnitude": config.color_by_magnitude,
-                "scale_factor": config.scale_factor,
-                "body_filter": config.body_filter,
-                "show_labels": config.show_labels,
-            },
-        )
-    except (ValueError, RuntimeError, AttributeError) as exc:
-        if logger:
-            logger.error("Error updating force overlay config: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Force overlay error: {str(exc)}"
-        ) from exc
+    return ForceOverlayResponse(
+        sim_time=sim_time,
+        vectors=vectors,
+        total_force_magnitude=total_force,
+        total_torque_magnitude=total_torque,
+        overlay_config={
+            "force_types": config.force_types,
+            "color_by_magnitude": config.color_by_magnitude,
+            "scale_factor": config.scale_factor,
+            "body_filter": config.body_filter,
+            "show_labels": config.show_labels,
+        },
+    )

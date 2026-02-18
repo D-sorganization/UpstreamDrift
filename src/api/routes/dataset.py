@@ -25,6 +25,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import get_engine_manager, get_logger
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
 
 if TYPE_CHECKING:
@@ -225,6 +226,7 @@ async def generate_dataset(
 
 
 @router.post("/import-swing", response_model=SwingImportResponse)
+@handle_api_errors
 async def import_swing_capture(
     request: SwingImportRequest,
     logger: Any = Depends(get_logger),
@@ -234,50 +236,42 @@ async def import_swing_capture(
     This endpoint does not require a loaded engine — it only parses
     capture data and converts it to joint-space trajectories.
     """
+    from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
+
+    importer = SwingCaptureImporter(target_frame_rate=request.target_frame_rate)
+    trajectory = importer.import_file(request.file_path)
+
+    phases = None
     try:
-        from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
+        phase_labels = importer.detect_swing_phases(trajectory)
+        phases = {
+            "address": phase_labels.address,
+            "backswing_start": phase_labels.backswing_start,
+            "top_of_backswing": phase_labels.top_of_backswing,
+            "downswing_start": phase_labels.downswing_start,
+            "impact": phase_labels.impact,
+            "follow_through_end": phase_labels.follow_through_end,
+        }
+    except (RuntimeError, ValueError, AttributeError):
+        pass
 
-        importer = SwingCaptureImporter(target_frame_rate=request.target_frame_rate)
-        trajectory = importer.import_file(request.file_path)
-
-        phases = None
-        try:
-            phase_labels = importer.detect_swing_phases(trajectory)
-            phases = {
-                "address": phase_labels.address,
-                "backswing_start": phase_labels.backswing_start,
-                "top_of_backswing": phase_labels.top_of_backswing,
-                "downswing_start": phase_labels.downswing_start,
-                "impact": phase_labels.impact,
-                "follow_through_end": phase_labels.follow_through_end,
-            }
-        except (RuntimeError, ValueError, AttributeError):
-            pass
-
-        rl_export_path = None
-        if request.export_for_rl:
-            output = (
-                request.output_path
-                or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
-            )
-            rl_export_path = str(importer.export_for_rl(trajectory, output))
-
-        return SwingImportResponse(
-            status="success",
-            n_frames=trajectory.n_frames,
-            n_joints=trajectory.n_joints,
-            duration=float(trajectory.times[-1] - trajectory.times[0]),
-            joint_names=trajectory.joint_names,
-            phases=phases,
-            rl_export_path=rl_export_path,
+    rl_export_path = None
+    if request.export_for_rl:
+        output = (
+            request.output_path
+            or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
         )
+        rl_export_path = str(importer.export_for_rl(trajectory, output))
 
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return SwingImportResponse(
+        status="success",
+        n_frames=trajectory.n_frames,
+        n_joints=trajectory.n_joints,
+        duration=float(trajectory.times[-1] - trajectory.times[0]),
+        joint_names=trajectory.joint_names,
+        phases=phases,
+        rl_export_path=rl_export_path,
+    )
 
 
 @router.get("/control/state")
@@ -303,6 +297,7 @@ async def get_control_state(
 
 
 @router.post("/control/configure")
+@handle_api_errors
 async def configure_control(
     request: ControlStateRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -311,35 +306,29 @@ async def configure_control(
     """Configure control strategy and parameters on the active engine."""
     engine = _require_active_engine(engine_manager)
 
-    try:
-        from src.shared.python.control_interface import ControlInterface
+    from src.shared.python.control_interface import ControlInterface
 
-        ctrl = ControlInterface(engine)
+    ctrl = ControlInterface(engine)
 
-        if request.strategy:
-            ctrl.set_strategy(request.strategy)
+    if request.strategy:
+        ctrl.set_strategy(request.strategy)
 
-        if request.kp is not None or request.kd is not None:
-            ctrl.set_gains(kp=request.kp, kd=request.kd, ki=request.ki)
+    if request.kp is not None or request.kd is not None:
+        ctrl.set_gains(kp=request.kp, kd=request.kd, ki=request.ki)
 
-        if request.torques is not None:
-            ctrl.set_torques(request.torques)
+    if request.torques is not None:
+        ctrl.set_torques(request.torques)
 
-        if request.joint_index is not None and request.joint_torque is not None:
-            ctrl.set_joint_torque(request.joint_index, request.joint_torque)
+    if request.joint_index is not None and request.joint_torque is not None:
+        ctrl.set_joint_torque(request.joint_index, request.joint_torque)
 
-        if request.target_positions is not None:
-            ctrl.set_target_positions(request.target_positions)
+    if request.target_positions is not None:
+        ctrl.set_target_positions(request.target_positions)
 
-        if request.target_velocities is not None:
-            ctrl.set_target_velocities(request.target_velocities)
+    if request.target_velocities is not None:
+        ctrl.set_target_velocities(request.target_velocities)
 
-        return ctrl.get_state()
-
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return ctrl.get_state()
 
 
 @router.get("/control/strategies")
@@ -400,6 +389,7 @@ async def features_summary(
 
 
 @router.post("/features/execute")
+@handle_api_errors
 async def execute_feature(
     request: FeatureExecuteRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -408,20 +398,12 @@ async def execute_feature(
     """Execute a specific engine feature by name on the active engine."""
     engine = _require_active_engine(engine_manager)
 
-    try:
-        from src.shared.python.control_features_registry import ControlFeaturesRegistry
+    from src.shared.python.control_features_registry import ControlFeaturesRegistry
 
-        registry = ControlFeaturesRegistry(engine)
-        # nosemgrep: sql-injection-db-cursor-execute
-        result = registry.execute(request.feature_name, **request.args)
-        return {"feature": request.feature_name, "result": result}
-
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except RuntimeError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    registry = ControlFeaturesRegistry(engine)
+    # nosemgrep: sql-injection-db-cursor-execute
+    result = registry.execute(request.feature_name, **request.args)
+    return {"feature": request.feature_name, "result": result}
 
 
 @router.get("/plots/types")
