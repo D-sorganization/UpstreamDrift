@@ -78,7 +78,7 @@ class TestPinocchioGUI:
         mock_gui.data = MagicMock()
 
         with patch(
-            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
+            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.pinocchio_analysis_mixin.InducedAccelerationAnalyzer"
         ) as MockAnalyzer:
             mock_gui._ensure_analyzer_initialized()
 
@@ -90,7 +90,7 @@ class TestPinocchioGUI:
         mock_gui.analyzer = existing_analyzer
 
         with patch(
-            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
+            "src.engines.physics_engines.pinocchio.python.pinocchio_golf.pinocchio_analysis_mixin.InducedAccelerationAnalyzer"
         ) as MockAnalyzer:
             mock_gui._ensure_analyzer_initialized()
 
