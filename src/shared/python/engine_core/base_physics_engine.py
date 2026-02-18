@@ -78,6 +78,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
     - Error handling for model loading
     - Path validation
     - State management
+    - Checkpoint save/restore with protocol-compatible get_state/set_state
     - Model name tracking
     - Logging
     - Design by Contract enforcement
@@ -101,13 +102,17 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
     - _load_from_string_impl()
     - step()
     - reset()
+
+    Subclasses may optionally override:
+    - _get_extra_checkpoint_state(): return engine-specific data
+    - _restore_extra_checkpoint_state(): restore engine-specific data
     """
 
     def __init__(self, allowed_dirs: list[Path] | None = None) -> None:
         """Initialize base physics engine.
 
         Args:
-            allowed_dirs: List of allowed directories for model loading (security)
+            allowed_dirs: List of allowed directories for model loading
         """
         self.model: Any = None
         self.data: Any = None
@@ -148,6 +153,15 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         if self.model is not None and hasattr(self.model, "name"):
             return str(self.model.name)
         return self.model_name_str
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if engine is initialized with a model.
+
+        Returns:
+            True if a model has been successfully loaded.
+        """
+        return self._is_initialized
 
     @log_errors("Failed to load model from path", reraise=True)
     @invariant_checked
@@ -271,19 +285,8 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         """
         return self.data
 
-    def is_initialized(self) -> bool:
-        """Check if engine is initialized with a model.
-
-        Returns:
-            True if a model has been successfully loaded.
-        """
-        return self._is_initialized
-
     def require_initialized(self, operation: str = "this operation") -> None:
         """Verify engine is initialized, raising StateError if not.
-
-        This is an explicit precondition check that can be called by subclasses
-        at the start of methods that require initialization.
 
         Args:
             operation: Description of the operation being attempted.
@@ -301,45 +304,78 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             )
 
     @require_state(lambda self: self._is_initialized, "initialized")
-    def get_state(self) -> EngineState | None:  # type: ignore[override]
+    def get_state(  # type: ignore[override]
+        self,
+    ) -> EngineState | tuple[np.ndarray, np.ndarray] | None:
         """Get current engine state.
 
         Preconditions:
             - Engine must be initialized
 
         Returns:
-            Current EngineState object.
+            Current EngineState object if using EngineState-based state,
+            or tuple of (q, v) if overridden by subclass.
         """
         return self.state
 
     @require_state(lambda self: self._is_initialized, "initialized")
     @invariant_checked
-    def set_state(self, state: EngineState) -> None:  # type: ignore[override]
+    def set_state(  # type: ignore[override]
+        self, *args: Any, **kwargs: Any
+    ) -> None:
         """Set engine state.
 
         Preconditions:
             - Engine must be initialized
 
+        Accepts either:
+            - set_state(engine_state) for EngineState-based management
+            - set_state(q, v) when overridden by subclass
+
         Args:
-            state: New EngineState to set.
+            *args: EngineState or (q, v) arrays depending on subclass.
+            **kwargs: Optional keyword arguments.
         """
-        self.state = state
+        if len(args) == 1 and isinstance(args[0], EngineState):
+            self.state = args[0]
+        elif len(args) == 2:
+            # Protocol-compatible (q, v) form
+            if self.state is not None:
+                self.state.q = np.asarray(args[0]).copy()
+                self.state.v = np.asarray(args[1]).copy()
+        else:
+            raise TypeError(
+                f"set_state expects EngineState or (q, v), got {len(args)} args"
+            )
+
+    def get_time(self) -> float:
+        """Get current simulation time.
+
+        Returns:
+            Current simulation time in seconds.
+        """
+        if self.state is not None:
+            return self.state.time
+        return 0.0
 
     @require_state(lambda self: self._is_initialized, "initialized")
     def save_checkpoint(self) -> StateCheckpoint:
         """Save current engine state to a checkpoint.
 
-        Returns:
-            StateCheckpoint object containing engine state and timestamp.
-        """
-        import numpy as np
+        Uses get_state() and get_time() for protocol-compatible engines.
+        Subclasses can add engine-specific data via
+        _get_extra_checkpoint_state().
 
+        Returns:
+            StateCheckpoint object containing engine state.
+        """
         engine_state_dict: dict[str, Any] = {}
         timestamp = 0.0
         q = np.array([])
         v = np.array([])
 
         if self.state:
+            # Legacy EngineState-based path
             timestamp = self.state.time
             q = self.state.q.copy()
             v = self.state.v.copy()
@@ -351,14 +387,25 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                 "t": self.state.time,
             }
         else:
-            # Fallback if state is managed differently
+            # Protocol-compatible path: use get_state() and get_time()
             try:
                 timestamp = self.get_time()
-                engine_state_dict = self.get_full_state()
-                q = engine_state_dict.get("q", np.array([]))
-                v = engine_state_dict.get("v", np.array([]))
+                state_result = self.get_state()
+                if isinstance(state_result, tuple) and len(state_result) == 2:
+                    q = np.asarray(state_result[0]).copy()
+                    v = np.asarray(state_result[1]).copy()
+                engine_state_dict = {
+                    "q": q,
+                    "v": v,
+                    "t": timestamp,
+                }
             except (NotImplementedError, AttributeError):
                 pass
+
+        # Allow subclasses to add engine-specific checkpoint data
+        extra = self._get_extra_checkpoint_state()
+        if extra:
+            engine_state_dict.update(extra)
 
         return StateCheckpoint.create(
             engine_type=self.__class__.__name__,
@@ -368,9 +415,23 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             timestamp=timestamp,
         )
 
+    def _get_extra_checkpoint_state(self) -> dict[str, Any]:
+        """Return engine-specific data to include in checkpoints.
+
+        Override in subclasses to store additional state beyond q, v, t.
+
+        Returns:
+            Dictionary of additional state data.
+        """
+        return {}
+
     @require_state(lambda self: self._is_initialized, "initialized")
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Restore engine state from a checkpoint.
+
+        Uses set_state(q, v) for protocol-compatible engines.
+        Subclasses can restore engine-specific state via
+        _restore_extra_checkpoint_state().
 
         Args:
             checkpoint: Checkpoint to restore from.
@@ -383,19 +444,39 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         v = data.get("v")
 
         if q is not None and v is not None:
-            nq = len(q)
-            nv = len(v)
-            new_state = EngineState(nq, nv)
-            new_state.q = np.array(q)
-            new_state.v = np.array(v)
-            new_state.time = data.get("t", checkpoint.timestamp)
+            q_arr = np.asarray(q)
+            v_arr = np.asarray(v)
 
-            if "a" in data:
-                new_state.a = np.array(data["a"])
-            if "tau" in data:
-                new_state.tau = np.array(data["tau"])
+            if self.state is not None:
+                # Legacy EngineState-based path
+                nq = len(q_arr)
+                nv = len(v_arr)
+                new_state = EngineState(nq, nv)
+                new_state.q = q_arr.copy()
+                new_state.v = v_arr.copy()
+                new_state.time = data.get("t", checkpoint.timestamp)
 
-            self.set_state(new_state)
+                if "a" in data:
+                    new_state.a = np.array(data["a"])
+                if "tau" in data:
+                    new_state.tau = np.array(data["tau"])
+
+                self.set_state(new_state)
+            else:
+                # Protocol-compatible path: use set_state(q, v)
+                self.set_state(q_arr, v_arr)
+
+        # Allow subclasses to restore engine-specific state
+        self._restore_extra_checkpoint_state(checkpoint)
+
+    def _restore_extra_checkpoint_state(self, checkpoint: StateCheckpoint) -> None:
+        """Restore engine-specific state from a checkpoint.
+
+        Override in subclasses to restore additional state.
+
+        Args:
+            checkpoint: Checkpoint with engine-specific state data.
+        """
 
     def __repr__(self) -> str:
         """String representation of engine."""
@@ -412,7 +493,7 @@ class ModelLoadingMixin:
 
         Args:
             path: Path to file
-            allowed_extensions: List of allowed extensions (e.g., [".urdf", ".xml"])
+            allowed_extensions: List of allowed extensions
 
         Raises:
             ValueError: If extension is not allowed
