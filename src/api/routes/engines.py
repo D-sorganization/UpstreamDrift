@@ -38,7 +38,7 @@ class EngineListResponse(BaseModel):
 @router.get("/engines", response_model=EngineListResponse)
 async def get_engines(
     engine_manager: EngineManager = Depends(get_engine_manager),
-    _user=Depends(OptionalAuth(auto_error=False)),
+    _user: Any = Depends(OptionalAuth(auto_error=False)),
 ) -> EngineListResponse:
     """Get status of all available physics engines."""
     engines = []
@@ -129,7 +129,7 @@ async def load_engine(
     engine_type: str,
     model_path: str | None = None,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    _user=Depends(OptionalAuth()),
+    _user: Any = Depends(OptionalAuth()),
 ) -> dict[str, Any]:
     """Load a specific physics engine with optional model."""
     workflow = EngineWorkflowAdapter(engine_manager)
@@ -180,7 +180,7 @@ async def load_engine(
 async def unload_engine(
     engine_type: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    _user=Depends(OptionalAuth()),
+    _user: Any = Depends(OptionalAuth()),
 ) -> dict[str, str]:
     """Unload a physics engine to free resources."""
     workflow = EngineWorkflowAdapter(engine_manager)
