@@ -41,7 +41,7 @@ class TestEngineProbing:
         Engine availability depends on the environment (Docker vs local dev),
         so we validate the response shape rather than hardcoding expected values.
         """
-        response = client.get(f"/api/engines/{engine_name}/probe")
+        response = client.get(f"/api/v1/engines/{engine_name}/probe")
         assert response.status_code == 200, f"Failed to probe {engine_name}"
 
         data = response.json()
@@ -54,7 +54,7 @@ class TestEngineProbing:
 
     def test_unknown_engine_probe(self, client) -> None:
         """Test probing unknown engine returns proper error."""
-        response = client.get("/api/engines/nonexistent/probe")
+        response = client.get("/api/v1/engines/nonexistent/probe")
         assert response.status_code == 200  # Returns 200 with error in body
 
         data = response.json()
@@ -77,7 +77,7 @@ class TestEngineLoading:
     )
     def test_load_available_engine(self, client, engine_name: str) -> None:
         """Test loading an available engine succeeds."""
-        response = client.post(f"/api/engines/{engine_name}/load")
+        response = client.post(f"/api/v1/engines/{engine_name}/load")
         assert response.status_code == 200, f"Failed to load {engine_name}"
 
         data = response.json()
@@ -94,13 +94,13 @@ class TestEngineLoading:
     )
     def test_load_unavailable_engine(self, client, engine_name: str) -> None:
         """Test loading unavailable engine fails gracefully."""
-        response = client.post(f"/api/engines/{engine_name}/load")
+        response = client.post(f"/api/v1/engines/{engine_name}/load")
         # Should return error status
         assert response.status_code in [400, 500]
 
     def test_load_unknown_engine(self, client) -> None:
         """Test loading unknown engine returns 400."""
-        response = client.post("/api/engines/nonexistent/load")
+        response = client.post("/api/v1/engines/nonexistent/load")
         assert response.status_code == 400
 
         data = response.json()
@@ -113,7 +113,7 @@ class TestEngineList:
 
     def test_get_engines_list(self, client) -> None:
         """Test GET /api/engines returns all configured engines."""
-        response = client.get("/engines")
+        response = client.get("/api/v1/engines")
         assert response.status_code == 200
 
         data = response.json()
@@ -135,7 +135,7 @@ class TestSimulationStart:
     @pytest.fixture
     def loaded_mujoco(self, client) -> None:
         """Fixture to ensure MuJoCo is loaded."""
-        client.post("/api/engines/mujoco/load")
+        client.post("/api/v1/engines/mujoco/load")
 
     @pytest.mark.skip(reason="MuJoCo Python module not installed in test environment")
     def test_start_simulation_with_mujoco(self, client, loaded_mujoco: None) -> None:
@@ -163,7 +163,7 @@ class TestPuttingGreenEngine:
 
     def test_putting_green_probe(self, client) -> None:
         """Test Putting Green engine is available."""
-        response = client.get("/api/engines/putting_green/probe")
+        response = client.get("/api/v1/engines/putting_green/probe")
         assert response.status_code == 200
 
         data = response.json()
@@ -171,7 +171,7 @@ class TestPuttingGreenEngine:
 
     def test_putting_green_load(self, client) -> None:
         """Test Putting Green engine can be loaded."""
-        response = client.post("/api/engines/putting_green/load")
+        response = client.post("/api/v1/engines/putting_green/load")
         assert response.status_code == 200
 
         data = response.json()
@@ -184,7 +184,7 @@ class TestPuttingGreenEngine:
     def test_putting_green_simulation(self, client) -> None:
         """Test Putting Green simulation (will be implemented in #1136)."""
         # Load engine
-        client.post("/api/engines/putting_green/load")
+        client.post("/api/v1/engines/putting_green/load")
 
         # Start simulation
         response = client.post(

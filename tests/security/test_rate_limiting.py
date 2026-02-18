@@ -16,7 +16,7 @@ def test_rate_limiting():
 
     # Just a basic check that the endpoint exists first
     response = client.post(
-        "/api/auth/login", json={"username": "test", "password": "wrong"}
+        "/api/v1/auth/login", json={"username": "test", "password": "wrong"}
     )
     assert response.status_code in [401, 429]
 

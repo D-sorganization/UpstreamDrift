@@ -52,7 +52,7 @@ class TestEngineProbeHTTP:
         self, client: TestClient, engine_name: str
     ) -> None:
         """Each engine probe returns parseable JSON with standard fields."""
-        resp = client.get(f"/api/engines/{engine_name}/probe")
+        resp = client.get(f"/api/v1/engines/{engine_name}/probe")
         assert resp.status_code == 200
 
         data = resp.json()
@@ -64,7 +64,7 @@ class TestEngineProbeHTTP:
         self, client: TestClient, engine_name: str
     ) -> None:
         """Each engine probe includes diagnostic information."""
-        resp = client.get(f"/api/engines/{engine_name}/probe")
+        resp = client.get(f"/api/v1/engines/{engine_name}/probe")
         data = resp.json()
         assert len(data) > 1  # More than just "available"
 
@@ -77,14 +77,14 @@ class TestEngineLoadHTTP:
 
     def test_load_putting_green(self, client: TestClient) -> None:
         """Putting Green is pure Python and should always load."""
-        resp = client.post("/api/engines/putting_green/load")
+        resp = client.post("/api/v1/engines/putting_green/load")
         assert resp.status_code == 200
         data = resp.json()
         assert data.get("loaded") is True or data.get("status") == "loaded"
 
     def test_load_nonexistent_engine(self, client: TestClient) -> None:
         """Loading a non-existent engine returns appropriate error."""
-        resp = client.post("/api/engines/completely_fake/load")
+        resp = client.post("/api/v1/engines/completely_fake/load")
         assert resp.status_code in [400, 404, 500]
 
 
@@ -132,7 +132,7 @@ class TestCrossEngineConsistency:
         engines = ["mujoco", "drake", "pinocchio", "putting_green"]
 
         for engine in engines:
-            resp = client.get(f"/api/engines/{engine}/probe")
+            resp = client.get(f"/api/v1/engines/{engine}/probe")
             assert resp.status_code == 200
             data = resp.json()
             assert "available" in data, f"{engine} probe missing 'available'"
@@ -150,7 +150,7 @@ class TestEnginePerformanceBenchmarks:
 
         for engine in engines:
             start = time.time()
-            resp = client.get(f"/api/engines/{engine}/probe")
+            resp = client.get(f"/api/v1/engines/{engine}/probe")
             elapsed = time.time() - start
             assert resp.status_code == 200
             assert elapsed < 2.0, f"{engine} probe took {elapsed:.2f}s (>2s)"
@@ -158,7 +158,7 @@ class TestEnginePerformanceBenchmarks:
     def test_engine_list_latency(self, client: TestClient) -> None:
         """Engine list responds within 3 seconds."""
         start = time.time()
-        resp = client.get("/engines")
+        resp = client.get("/api/v1/engines")
         elapsed = time.time() - start
         assert resp.status_code == 200
         assert elapsed < 3.0

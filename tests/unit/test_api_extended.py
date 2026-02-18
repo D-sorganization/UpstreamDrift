@@ -107,7 +107,7 @@ class TestEngineManagement:
 
     def test_get_engines_structure(self, client: TestClient) -> None:
         """Test that engine list has correct structure."""
-        response = client.get("/engines")
+        response = client.get("/api/v1/engines")
         assert response.status_code == 200
         engines = response.json()
 
@@ -119,17 +119,17 @@ class TestEngineManagement:
 
     def test_load_engine_empty_type(self, client: TestClient) -> None:
         """Test loading engine with empty type string."""
-        response = client.post("/engines//load")
+        response = client.post("/api/v1/engines//load")
         assert response.status_code in [404, 405, 400]
 
     def test_load_engine_special_characters(self, client: TestClient) -> None:
         """Test loading engine with special characters in type."""
-        response = client.post("/engines/<script>alert(1)</script>/load")
+        response = client.post("/api/v1/engines/<script>alert(1)</script>/load")
         assert response.status_code == 400
 
     def test_load_engine_sql_injection(self, client: TestClient) -> None:
         """Test that SQL injection in engine type is safe."""
-        response = client.post("/engines/'; DROP TABLE engines; --/load")
+        response = client.post("/api/v1/engines/'; DROP TABLE engines; --/load")
         assert response.status_code == 400
 
 
@@ -144,7 +144,7 @@ class TestSimulationEndpoints:
     def test_simulate_with_invalid_json(self, client: TestClient) -> None:
         """Test POST /simulate with malformed JSON."""
         response = client.post(
-            "/simulate",
+            "/api/v1/simulate",
             content="not valid json",
             headers={"Content-Type": "application/json"},
         )
@@ -152,13 +152,13 @@ class TestSimulationEndpoints:
 
     def test_simulate_with_empty_object(self, client: TestClient) -> None:
         """Test POST /simulate with empty JSON object."""
-        response = client.post("/simulate", json={})
+        response = client.post("/api/v1/simulate", json={})
         assert response.status_code == 422
 
     def test_simulate_with_null_values(self, client: TestClient) -> None:
         """Test POST /simulate with null values in required fields."""
         response = client.post(
-            "/simulate",
+            "/api/v1/simulate",
             json={
                 "engine_type": None,
                 "initial_state": None,
@@ -171,7 +171,7 @@ class TestSimulationEndpoints:
         """Test that async simulation returns a task ID."""
         # This may fail if engine not initialized, which is expected
         response = client.post(
-            "/simulate/async",
+            "/api/v1/simulate/async",
             json={
                 "engine_type": "mujoco",
                 "duration": 1.0,
@@ -187,7 +187,9 @@ class TestSimulationEndpoints:
 
     def test_get_status_uuid_format(self, client: TestClient) -> None:
         """Test status endpoint with valid UUID format but non-existent task."""
-        response = client.get("/simulate/status/550e8400-e29b-41d4-a716-446655440000")
+        response = client.get(
+            "/api/v1/simulate/status/550e8400-e29b-41d4-a716-446655440000"
+        )
         assert response.status_code == 404
 
 
@@ -208,7 +210,7 @@ class TestVideoAnalysisEndpoints:
         # Create a minimal video-like file
         video_content = b"\x00\x00\x00\x20ftypisom"  # Minimal MP4 header
         response = client.post(
-            "/analyze/video",
+            "/api/v1/analyze/video",
             files={"file": ("test.mp4", io.BytesIO(video_content), "video/mp4")},
             data={"min_confidence": "not_a_number"},
         )
@@ -218,7 +220,7 @@ class TestVideoAnalysisEndpoints:
         """Test video analysis with confidence out of [0,1] range."""
         video_content = b"\x00\x00\x00\x20ftypisom"
         response = client.post(
-            "/analyze/video",
+            "/api/v1/analyze/video",
             files={"file": ("test.mp4", io.BytesIO(video_content), "video/mp4")},
             data={"min_confidence": "5.0"},  # Out of range - send as string
         )
@@ -229,7 +231,7 @@ class TestVideoAnalysisEndpoints:
         """Test that MP4 content type is accepted."""
         video_content = b"\x00\x00\x00\x20ftypisom"
         response = client.post(
-            "/analyze/video",
+            "/api/v1/analyze/video",
             files={"file": ("test.mp4", io.BytesIO(video_content), "video/mp4")},
         )
         # May fail due to invalid video, or 503 if video pipeline not initialized
@@ -243,7 +245,7 @@ class TestVideoAnalysisEndpoints:
         """
         png_content = b"\x89PNG\r\n\x1a\n"
         response = client.post(
-            "/analyze/video",
+            "/api/v1/analyze/video",
             files={"file": ("test.png", io.BytesIO(png_content), "image/png")},
         )
         assert response.status_code in [400, 503]
@@ -259,12 +261,12 @@ class TestExportEndpoints:
 
     def test_export_with_format_parameter(self, client: TestClient) -> None:
         """Test export with format query parameter."""
-        response = client.get("/export/non-existent?format=csv")
+        response = client.get("/api/v1/export/non-existent?format=csv")
         assert response.status_code == 404
 
     def test_export_with_invalid_format(self, client: TestClient) -> None:
         """Test export with unsupported format parameter."""
-        response = client.get("/export/non-existent?format=invalid_format")
+        response = client.get("/api/v1/export/non-existent?format=invalid_format")
         assert response.status_code == 404  # Task not found first
 
 
@@ -278,12 +280,12 @@ class TestBiomechanicsEndpoints:
 
     def test_analyze_biomechanics_missing_body(self, client: TestClient) -> None:
         """Test POST /analyze/biomechanics without body."""
-        response = client.post("/analyze/biomechanics")
+        response = client.post("/api/v1/analyze/biomechanics")
         assert response.status_code == 422
 
     def test_analyze_biomechanics_empty_body(self, client: TestClient) -> None:
         """Test POST /analyze/biomechanics with empty body."""
-        response = client.post("/analyze/biomechanics", json={})
+        response = client.post("/api/v1/analyze/biomechanics", json={})
         assert response.status_code == 422
 
 
@@ -298,7 +300,7 @@ class TestRateLimiting:
     def test_multiple_requests_dont_immediately_fail(self, client: TestClient) -> None:
         """Test that a few requests don't trigger rate limiting."""
         for _ in range(5):
-            response = client.get("/health")
+            response = client.get("/api/v1/health")
             # Should succeed within reasonable request count
             assert response.status_code == 200
 
@@ -351,7 +353,7 @@ class TestResponseSchemas:
 
     def test_root_response_schema(self, client: TestClient) -> None:
         """Test root endpoint response matches expected schema."""
-        response = client.get("/")
+        response = client.get("/api/v1/")
         assert response.status_code == 200
         data = response.json()
 
@@ -362,7 +364,7 @@ class TestResponseSchemas:
 
     def test_health_response_schema(self, client: TestClient) -> None:
         """Test health endpoint response matches expected schema."""
-        response = client.get("/health")
+        response = client.get("/api/v1/health")
         assert response.status_code == 200
         data = response.json()
 
@@ -378,11 +380,11 @@ class TestResponseSchemas:
 
         expected_paths = [
             "/",
-            "/health",
-            "/engines",
-            "/simulate",
-            "/analyze/video",
-            "/analyze/biomechanics",
+            "/api/v1/health",
+            "/api/v1/engines",
+            "/api/v1/simulate",
+            "/api/v1/analyze/video",
+            "/api/v1/analyze/biomechanics",
         ]
 
         for path in expected_paths:
@@ -406,7 +408,7 @@ class TestErrorResponses:
 
     def test_422_includes_validation_details(self, client: TestClient) -> None:
         """Test that 422 responses include validation error details."""
-        response = client.post("/simulate", json={"invalid": "data"})
+        response = client.post("/api/v1/simulate", json={"invalid": "data"})
         assert response.status_code == 422
         data = response.json()
         assert "detail" in data

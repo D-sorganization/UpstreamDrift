@@ -35,10 +35,43 @@ class EngineListResponse(BaseModel):
     mode: str  # "local" or "cloud"
 
 
-@router.get("/engines", response_model=EngineListResponse)
+@router.get(
+    "/engines",
+    response_model=EngineListResponse,
+    responses={
+        200: {
+            "description": "List of available physics engines",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "engines": [
+                            {
+                                "name": "mujoco",
+                                "available": True,
+                                "loaded": False,
+                                "version": None,
+                                "capabilities": [
+                                    "physics",
+                                    "contacts",
+                                    "muscles",
+                                    "tendons",
+                                ],
+                                "engine_type": "mujoco",
+                                "status": "available",
+                                "is_available": True,
+                                "description": "mujoco physics engine",
+                            }
+                        ],
+                        "mode": "local",
+                    }
+                }
+            },
+        }
+    },
+)
 async def get_engines(
     engine_manager: EngineManager = Depends(get_engine_manager),
-    _user=Depends(OptionalAuth(auto_error=False)),
+    _user: Any = Depends(OptionalAuth(auto_error=False)),
 ) -> EngineListResponse:
     """Get status of all available physics engines."""
     engines = []
@@ -84,7 +117,7 @@ async def get_engines(
     )
 
 
-@router.get("/api/engines/{engine_name}/probe")
+@router.get("/engines/{engine_name}/probe")
 async def probe_engine(
     engine_name: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -98,7 +131,7 @@ async def probe_engine(
         return {"available": False, "error": str(e)}
 
 
-@router.post("/api/engines/{engine_name}/load")
+@router.post("/engines/{engine_name}/load")
 async def load_engine_lazy(
     engine_name: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -129,7 +162,7 @@ async def load_engine(
     engine_type: str,
     model_path: str | None = None,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    _user=Depends(OptionalAuth()),
+    _user: Any = Depends(OptionalAuth()),
 ) -> dict[str, Any]:
     """Load a specific physics engine with optional model."""
     workflow = EngineWorkflowAdapter(engine_manager)
@@ -180,7 +213,7 @@ async def load_engine(
 async def unload_engine(
     engine_type: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
-    _user=Depends(OptionalAuth()),
+    _user: Any = Depends(OptionalAuth()),
 ) -> dict[str, str]:
     """Unload a physics engine to free resources."""
     workflow = EngineWorkflowAdapter(engine_manager)

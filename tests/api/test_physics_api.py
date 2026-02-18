@@ -296,7 +296,7 @@ class TestCameraPresetAPI:
 
     def test_valid_preset_returns_200(self, client) -> None:
         """POST /simulation/camera with valid preset returns 200."""
-        resp = client.post("/simulation/camera", json={"preset": "side"})
+        resp = client.post("/api/v1/simulation/camera", json={"preset": "side"})
         assert resp.status_code == 200
         data = resp.json()
         assert data["preset"] == "side"
@@ -307,12 +307,12 @@ class TestCameraPresetAPI:
     def test_all_presets_return_200(self, client) -> None:
         """All camera presets return valid responses."""
         for preset in VALID_CAMERA_PRESETS:
-            resp = client.post("/simulation/camera", json={"preset": preset})
+            resp = client.post("/api/v1/simulation/camera", json={"preset": preset})
             assert resp.status_code == 200, f"Preset {preset} failed"
 
     def test_invalid_preset_returns_422(self, client) -> None:
         """Invalid preset returns 422 validation error."""
-        resp = client.post("/simulation/camera", json={"preset": "orbital"})
+        resp = client.post("/api/v1/simulation/camera", json={"preset": "orbital"})
         assert resp.status_code == 422
 
 
@@ -321,7 +321,7 @@ class TestSpeedControlAPI:
 
     def test_set_speed_returns_200(self, client) -> None:
         """POST /simulation/speed with valid factor returns 200."""
-        resp = client.post("/simulation/speed", json={"speed_factor": 2.0})
+        resp = client.post("/api/v1/simulation/speed", json={"speed_factor": 2.0})
         assert resp.status_code == 200
         data = resp.json()
         assert data["speed_factor"] == 2.0
@@ -329,12 +329,12 @@ class TestSpeedControlAPI:
 
     def test_default_speed(self, client) -> None:
         """Default speed factor 1.0 is accepted."""
-        resp = client.post("/simulation/speed", json={"speed_factor": 1.0})
+        resp = client.post("/api/v1/simulation/speed", json={"speed_factor": 1.0})
         assert resp.status_code == 200
 
     def test_invalid_speed_rejected(self, client) -> None:
         """Speed out of range returns 422."""
-        resp = client.post("/simulation/speed", json={"speed_factor": 100.0})
+        resp = client.post("/api/v1/simulation/speed", json={"speed_factor": 100.0})
         assert resp.status_code == 422
 
 
@@ -344,7 +344,7 @@ class TestRecordingAPI:
     def test_start_recording(self, client) -> None:
         """POST /simulation/recording with start action works."""
         resp = client.post(
-            "/simulation/recording",
+            "/api/v1/simulation/recording",
             json={"action": "start", "export_format": "json"},
         )
         assert resp.status_code == 200
@@ -355,11 +355,11 @@ class TestRecordingAPI:
         """POST /simulation/recording with stop action works."""
         # Start then stop
         client.post(
-            "/simulation/recording",
+            "/api/v1/simulation/recording",
             json={"action": "start", "export_format": "json"},
         )
         resp = client.post(
-            "/simulation/recording",
+            "/api/v1/simulation/recording",
             json={"action": "stop", "export_format": "json"},
         )
         assert resp.status_code == 200
@@ -369,7 +369,7 @@ class TestRecordingAPI:
     def test_export_empty(self, client) -> None:
         """Export with no recorded frames returns message."""
         resp = client.post(
-            "/simulation/recording",
+            "/api/v1/simulation/recording",
             json={"action": "export", "export_format": "json"},
         )
         assert resp.status_code == 200
@@ -382,7 +382,7 @@ class TestSimulationStatsAPI:
 
     def test_stats_returns_200(self, client) -> None:
         """GET /simulation/stats returns 200."""
-        resp = client.get("/simulation/stats")
+        resp = client.get("/api/v1/simulation/stats")
         assert resp.status_code == 200
         data = resp.json()
         assert "sim_time" in data
@@ -398,7 +398,7 @@ class TestEngineCapabilitiesAPI:
 
     def test_pendulum_capabilities(self, client) -> None:
         """GET /engines/pendulum/capabilities returns 200."""
-        resp = client.get("/engines/pendulum/capabilities")
+        resp = client.get("/api/v1/engines/pendulum/capabilities")
         assert resp.status_code == 200
         data = resp.json()
         assert "engine_type" in data
@@ -408,12 +408,12 @@ class TestEngineCapabilitiesAPI:
 
     def test_unknown_engine_returns_400(self, client) -> None:
         """Unknown engine type returns 400."""
-        resp = client.get("/engines/nonexistent/capabilities")
+        resp = client.get("/api/v1/engines/nonexistent/capabilities")
         assert resp.status_code == 400
 
     def test_capabilities_have_required_fields(self, client) -> None:
         """Each capability entry has name, level, supported fields."""
-        resp = client.get("/engines/pendulum/capabilities")
+        resp = client.get("/api/v1/engines/pendulum/capabilities")
         if resp.status_code == 200:
             data = resp.json()
             for cap in data["capabilities"]:
@@ -428,13 +428,13 @@ class TestActuatorEndpoints:
 
     def test_get_actuators_no_engine_returns_400(self, client) -> None:
         """GET /simulation/actuators returns 400 when no engine loaded."""
-        resp = client.get("/simulation/actuators")
+        resp = client.get("/api/v1/simulation/actuators")
         # Should be 400 since no engine is loaded
         assert resp.status_code == 400
 
     def test_post_actuators_no_engine_returns_400(self, client) -> None:
         """POST /simulation/actuators returns 400 when no engine loaded."""
-        resp = client.post("/simulation/actuators", json={"strategy": "pd"})
+        resp = client.post("/api/v1/simulation/actuators", json={"strategy": "pd"})
         assert resp.status_code == 400
 
 
@@ -443,7 +443,7 @@ class TestForceEndpoints:
 
     def test_get_forces_no_engine_returns_400(self, client) -> None:
         """GET /simulation/forces returns 400 when no engine loaded."""
-        resp = client.get("/simulation/forces")
+        resp = client.get("/api/v1/simulation/forces")
         assert resp.status_code == 400
 
 
@@ -452,7 +452,7 @@ class TestMetricsEndpoints:
 
     def test_get_metrics_no_engine_returns_400(self, client) -> None:
         """GET /simulation/metrics returns 400 when no engine loaded."""
-        resp = client.get("/simulation/metrics")
+        resp = client.get("/api/v1/simulation/metrics")
         assert resp.status_code == 400
 
 
@@ -461,5 +461,5 @@ class TestControlFeaturesEndpoints:
 
     def test_get_features_no_engine_returns_400(self, client) -> None:
         """GET /simulation/control-features returns 400 when no engine loaded."""
-        resp = client.get("/simulation/control-features")
+        resp = client.get("/api/v1/simulation/control-features")
         assert resp.status_code == 400

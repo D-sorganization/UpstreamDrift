@@ -41,7 +41,7 @@ class TestRootEndpoints:
 
     def test_root_endpoint(self, client: TestClient) -> None:
         """Test GET / returns API info."""
-        response = client.get("/")
+        response = client.get("/api/v1/")
         assert response.status_code == 200
         data = response.json()
         assert "message" in data
@@ -50,7 +50,7 @@ class TestRootEndpoints:
 
     def test_health_check(self, client: TestClient) -> None:
         """Test GET /health returns health status."""
-        response = client.get("/health")
+        response = client.get("/api/v1/health")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "healthy"
@@ -61,7 +61,7 @@ class TestEngineEndpoints:
 
     def test_get_engines(self, client: TestClient) -> None:
         """Test GET /engines returns engine list."""
-        response = client.get("/engines")
+        response = client.get("/api/v1/engines")
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, dict)
@@ -70,13 +70,13 @@ class TestEngineEndpoints:
 
     def test_load_engine_invalid_type(self, client: TestClient) -> None:
         """Test loading non-existent engine type."""
-        response = client.post("/engines/invalid_engine/load")
+        response = client.post("/api/v1/engines/invalid_engine/load")
         assert response.status_code == 400
 
     def test_load_engine_path_traversal_blocked(self, client: TestClient) -> None:
         """Test that path traversal attempts are blocked."""
         response = client.post(
-            "/engines/mujoco/load",
+            "/api/v1/engines/mujoco/load",
             params={"model_path": "../../../etc/passwd"},
         )
         assert response.status_code in [400, 500]
@@ -87,12 +87,12 @@ class TestSimulationEndpoints:
 
     def test_simulate_missing_body(self, client: TestClient) -> None:
         """Test POST /simulate without body returns 422."""
-        response = client.post("/simulate")
+        response = client.post("/api/v1/simulate")
         assert response.status_code == 422
 
     def test_get_simulation_status_not_found(self, client: TestClient) -> None:
         """Test getting status of non-existent task."""
-        response = client.get("/simulate/status/non-existent-task-id")
+        response = client.get("/api/v1/simulate/status/non-existent-task-id")
         assert response.status_code == 404
 
 
@@ -106,7 +106,7 @@ class TestVideoAnalysisEndpoints:
         or 503 (service unavailable) if video pipeline is not initialized
         (e.g., MediaPipe not installed). Both are correct rejections.
         """
-        response = client.post("/analyze/video")
+        response = client.post("/api/v1/analyze/video")
         assert response.status_code in (422, 503)
 
     def test_analyze_video_wrong_content_type(self, client: TestClient) -> None:
@@ -117,7 +117,7 @@ class TestVideoAnalysisEndpoints:
         try:
             with open(temp_path, "rb") as f:
                 response = client.post(
-                    "/analyze/video",
+                    "/api/v1/analyze/video",
                     files={"file": ("test.txt", f, "text/plain")},
                 )
             # 400 = explicit rejection, 415 = unsupported media type,
@@ -133,7 +133,7 @@ class TestExportEndpoints:
 
     def test_export_not_found(self, client: TestClient) -> None:
         """Test exporting non-existent task."""
-        response = client.get("/export/non-existent-task-id")
+        response = client.get("/api/v1/export/non-existent-task-id")
         assert response.status_code == 404
 
 
@@ -143,7 +143,7 @@ class TestSecurityFeatures:
     def test_path_validation_dotdot(self, client: TestClient) -> None:
         """Test .. in paths is rejected."""
         response = client.post(
-            "/engines/mujoco/load",
+            "/api/v1/engines/mujoco/load",
             params={"model_path": "models/../../../secret"},
         )
         assert response.status_code in [400, 500]

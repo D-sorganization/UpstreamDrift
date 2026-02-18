@@ -18,9 +18,10 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
 
-router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
+router = APIRouter(prefix="/tools/data-explorer", tags=["data-explorer"])
 
 
 # ── Request / Response Models ──
@@ -179,6 +180,7 @@ async def list_datasets() -> DatasetListResponse:
     lambda name, limit=50: name is not None and len(name.strip()) > 0 and limit > 0,
     "Dataset name must be non-empty and limit must be positive",
 )
+@handle_api_errors
 async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
     """Get a preview of dataset contents.
 
@@ -234,6 +236,7 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
     lambda name: name is not None and len(name.strip()) > 0,
     "Dataset name must be a non-empty string",
 )
+@handle_api_errors
 async def dataset_stats(name: str) -> DatasetStatsResponse:
     """Get summary statistics for a dataset.
 
@@ -295,6 +298,7 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
 
 
 @router.post("/import", response_model=ImportResponse)
+@handle_api_errors
 async def import_dataset(file: UploadFile) -> ImportResponse:
     """Import a CSV or JSON dataset.
 

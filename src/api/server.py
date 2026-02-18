@@ -13,7 +13,7 @@ import os
 from typing import Any
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -34,26 +34,7 @@ from .config import (
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
-from .routes import actuator_controls as actuator_controls_routes
-from .routes import aip as aip_routes
-from .routes import analysis as analysis_routes
-from .routes import analysis_tools as analysis_tools_routes
-from .routes import auth as auth_routes
-from .routes import core as core_routes
-from .routes import data_explorer as data_explorer_routes
-from .routes import dataset as dataset_routes
-from .routes import engines as engine_routes
-from .routes import export as export_routes
-from .routes import force_overlays as force_overlay_routes
-from .routes import launcher as launcher_routes
-from .routes import model_explorer as model_explorer_routes
-from .routes import models as model_routes
-from .routes import motion_capture as motion_capture_routes
-from .routes import physics as physics_routes
-from .routes import putting_green as putting_green_routes
-from .routes import simulation as simulation_routes
-from .routes import terrain as terrain_routes
-from .routes import video as video_routes
+from .routes import get_all_routers
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
 from .utils.tracing import RequestTracer
@@ -281,29 +262,14 @@ async def startup_event() -> None:
         raise
 
 
-# Include routers
-app.include_router(auth_routes.router)
-app.include_router(core_routes.router)
-app.include_router(engine_routes.router)
-app.include_router(simulation_routes.router)
-app.include_router(video_routes.router)
-app.include_router(analysis_routes.router)
-app.include_router(export_routes.router)
-app.include_router(launcher_routes.router)
-app.include_router(terrain_routes.router)
-app.include_router(dataset_routes.router)
-app.include_router(physics_routes.router)
-app.include_router(model_routes.router)
-app.include_router(analysis_tools_routes.router)
-# Phase 4: Force overlays, actuator controls, model explorer, AIP (#1199, #1198, #1200, #763)
-app.include_router(force_overlay_routes.router)
-app.include_router(actuator_controls_routes.router)
-app.include_router(model_explorer_routes.router)
-app.include_router(aip_routes.router)
-# Phase 5: Tool pages - Putting Green, Data Explorer, Motion Capture (#1206)
-app.include_router(putting_green_routes.router)
-app.include_router(data_explorer_routes.router)
-app.include_router(motion_capture_routes.router)
+# --- API v1 route registration (Issues #1485, #1488) ---
+# All routes are mounted under /api/v1 via a centralised registry,
+# decoupling server.py from individual route modules.
+
+_v1_router = APIRouter(prefix="/api/v1")
+for _router in get_all_routers():
+    _v1_router.include_router(_router)
+app.include_router(_v1_router)
 
 
 if __name__ == "__main__":

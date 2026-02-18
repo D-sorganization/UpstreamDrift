@@ -312,25 +312,25 @@ class TestAPIRouteConnectivity:
 
     def test_opensim_probe_via_api(self, client) -> None:
         """OpenSim probe returns valid JSON via API."""
-        resp = client.get("/api/engines/opensim/probe")
+        resp = client.get("/api/v1/engines/opensim/probe")
         assert resp.status_code == 200
         data = resp.json()
         assert "available" in data
 
     def test_myosuite_probe_via_api(self, client) -> None:
         """MyoSuite probe returns valid JSON via API."""
-        resp = client.get("/api/engines/myosuite/probe")
+        resp = client.get("/api/v1/engines/myosuite/probe")
         assert resp.status_code == 200
         data = resp.json()
         assert "available" in data
 
     def test_opensim_load_via_api(self, client) -> None:
         """OpenSim load endpoint responds."""
-        resp = client.post("/api/engines/opensim/load")
+        resp = client.post("/api/v1/engines/opensim/load")
         # May fail if opensim not installed, but should not crash
         assert resp.status_code in [200, 400, 500]
 
     def test_myosuite_load_via_api(self, client) -> None:
         """MyoSuite load endpoint responds."""
-        resp = client.post("/api/engines/myosuite/load")
+        resp = client.post("/api/v1/engines/myosuite/load")
         assert resp.status_code in [200, 400, 500]

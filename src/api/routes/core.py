@@ -34,7 +34,23 @@ async def root() -> dict[str, str]:
     }
 
 
-@router.get("/health")
+@router.get(
+    "/health",
+    responses={
+        200: {
+            "description": "Server is healthy",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "status": "healthy",
+                        "engines_available": 4,
+                        "timestamp": "2026-02-18T00:00:00+00:00",
+                    }
+                }
+            },
+        }
+    },
+)
 @precondition(
     lambda engine_manager=None: engine_manager is not None,
     "Engine manager must be injected",
@@ -57,7 +73,7 @@ async def health_check(
     }
 
 
-@router.get("/api/diagnostics", response_model=None)
+@router.get("/diagnostics", response_model=None)
 async def get_diagnostics() -> dict:  # type: ignore[type-arg]
     """Get comprehensive diagnostic information for browser mode."""
     repo_root = Path(__file__).parent.parent.parent.parent

@@ -26,7 +26,29 @@ if TYPE_CHECKING:
 router = APIRouter()
 
 
-@router.post("/simulate", response_model=SimulationResponse)
+@router.post(
+    "/simulate",
+    response_model=SimulationResponse,
+    responses={
+        200: {
+            "description": "Simulation completed successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "engine_type": "mujoco",
+                        "duration": 1.5,
+                        "timestep": 0.001,
+                        "results": {},
+                    }
+                }
+            },
+        },
+        422: {
+            "description": "Validation error in request body",
+        },
+    },
+)
 @precondition(
     lambda request, service=None, logger=None: request is not None,
     "Simulation request must not be None",

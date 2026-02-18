@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 
 from src.shared.python.core.contracts import precondition
 
-router = APIRouter(prefix="/api/tools/motion-capture", tags=["motion-capture"])
+router = APIRouter(prefix="/tools/motion-capture", tags=["motion-capture"])
 
 
 # ── Request / Response Models ──

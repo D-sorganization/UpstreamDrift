@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from src.shared.python.core.contracts import precondition
 
-router = APIRouter(prefix="/api/tools/putting-green", tags=["putting-green"])
+router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
 
 # ── Request / Response Models ──
