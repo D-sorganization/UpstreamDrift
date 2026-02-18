@@ -36,7 +36,7 @@ def get_engine_manager(request: Request) -> EngineManager:
     manager = getattr(request.app.state, "engine_manager", None)
     if manager is None:
         raise HTTPException(status_code=503, detail="Engine manager not initialized")
-    return manager  # type: ignore[return-value]
+    return manager  # type: ignore[no-any-return]
 
 
 def get_simulation_service(request: Request) -> SimulationService:
@@ -56,7 +56,7 @@ def get_simulation_service(request: Request) -> SimulationService:
         raise HTTPException(
             status_code=503, detail="Simulation service not initialized"
         )
-    return service  # type: ignore[return-value]
+    return service  # type: ignore[no-any-return]
 
 
 def get_analysis_service(request: Request) -> AnalysisService:
@@ -74,7 +74,7 @@ def get_analysis_service(request: Request) -> AnalysisService:
     service = getattr(request.app.state, "analysis_service", None)
     if service is None:
         raise HTTPException(status_code=503, detail="Analysis service not initialized")
-    return service  # type: ignore[return-value]
+    return service  # type: ignore[no-any-return]
 
 
 def get_video_pipeline(request: Request) -> VideoPosePipeline:
@@ -95,7 +95,7 @@ def get_video_pipeline(request: Request) -> VideoPosePipeline:
             status_code=503,
             detail="Video pipeline not initialized (MediaPipe may not be installed)",
         )
-    return pipeline  # type: ignore[return-value]
+    return pipeline  # type: ignore[no-any-return]
 
 
 def get_task_manager(request: Request) -> Any:
