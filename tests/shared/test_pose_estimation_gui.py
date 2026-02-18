@@ -100,15 +100,17 @@ class TestMediaPipeWorker:
         worker.error.connect(error_messages.append)
 
         # Mock the import to raise ImportError
-        with patch.dict("sys.modules", {"mediapipe": None}):
-            with patch(
+        with (
+            patch.dict("sys.modules", {"mediapipe": None}),
+            patch(
                 "src.shared.python.pose_estimation.mediapipe_gui._AnalysisWorker.run"
-            ) as mock_run:
-                # Simulate what happens when import fails
-                mock_run.side_effect = lambda: worker.error.emit(
-                    "MediaPipe dependency not installed"
-                )
-                mock_run()
+            ) as mock_run,
+        ):
+            # Simulate what happens when import fails
+            mock_run.side_effect = lambda: worker.error.emit(
+                "MediaPipe dependency not installed"
+            )
+            mock_run()
 
         assert len(error_messages) == 1
         assert "not installed" in error_messages[0]

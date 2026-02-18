@@ -42,37 +42,37 @@ class TestTimeAgo:
         """Singular form for 1 second."""
         dt = now_utc() - timedelta(seconds=1)
         result = time_ago(dt)
-        assert "1 second ago" == result
+        assert result == "1 second ago"
 
     def test_minutes_ago(self) -> None:
         dt = now_utc() - timedelta(minutes=5)
         result = time_ago(dt)
-        assert "5 minutes ago" == result
+        assert result == "5 minutes ago"
 
     def test_one_minute_ago(self) -> None:
         dt = now_utc() - timedelta(minutes=1)
         result = time_ago(dt)
-        assert "1 minute ago" == result
+        assert result == "1 minute ago"
 
     def test_hours_ago(self) -> None:
         dt = now_utc() - timedelta(hours=3)
         result = time_ago(dt)
-        assert "3 hours ago" == result
+        assert result == "3 hours ago"
 
     def test_one_hour_ago(self) -> None:
         dt = now_utc() - timedelta(hours=1)
         result = time_ago(dt)
-        assert "1 hour ago" == result
+        assert result == "1 hour ago"
 
     def test_days_ago(self) -> None:
         dt = now_utc() - timedelta(days=7)
         result = time_ago(dt)
-        assert "7 days ago" == result
+        assert result == "7 days ago"
 
     def test_one_day_ago(self) -> None:
         dt = now_utc() - timedelta(days=1)
         result = time_ago(dt)
-        assert "1 day ago" == result
+        assert result == "1 day ago"
 
     def test_months_ago(self) -> None:
         dt = now_utc() - timedelta(days=90)
@@ -326,22 +326,22 @@ class TestFormatDatetimeExtended:
     def test_display_format(self) -> None:
         dt = datetime(2024, 6, 15, 14, 30, 0)
         result = format_datetime(dt, "display")
-        assert "2024-06-15 14:30:00" == result
+        assert result == "2024-06-15 14:30:00"
 
     def test_date_format(self) -> None:
         dt = datetime(2024, 6, 15, 14, 30, 0)
         result = format_datetime(dt, "date")
-        assert "2024-06-15" == result
+        assert result == "2024-06-15"
 
     def test_time_format(self) -> None:
         dt = datetime(2024, 6, 15, 14, 30, 0)
         result = format_datetime(dt, "time")
-        assert "14:30:00" == result
+        assert result == "14:30:00"
 
     def test_compact_format(self) -> None:
         dt = datetime(2024, 6, 15, 14, 30, 0)
         result = format_datetime(dt, "compact")
-        assert "20240615143000" == result
+        assert result == "20240615143000"
 
     def test_invalid_format_raises(self) -> None:
         dt = datetime(2024, 1, 15)

@@ -119,7 +119,7 @@ class DataProcessor:
         for var_name in candidates:
             if var_name in mat_data:
                 return var_name
-        vars_found = [k for k in mat_data.keys() if not k.startswith("__")]
+        vars_found = [k for k in mat_data if not k.startswith("__")]
         if vars_found:
             return vars_found[0]
         raise ValueError(f"No valid table found in {dataset_name}")

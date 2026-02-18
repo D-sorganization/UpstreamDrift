@@ -476,11 +476,8 @@ class TopographyData:
             import matplotlib.pyplot as plt
 
             img = plt.imread(str(filepath))
-            if len(img.shape) == 3:
-                # Convert to grayscale
-                heightmap = np.mean(img, axis=2)
-            else:
-                heightmap = img
+            # Convert to grayscale
+            heightmap = np.mean(img, axis=2) if len(img.shape) == 3 else img
         else:
             pil_img = Image.open(filepath).convert("L")
             heightmap = np.array(pil_img) / 255.0  # Normalize to 0-1

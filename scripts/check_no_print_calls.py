@@ -67,9 +67,12 @@ def find_print_calls(file_path: Path) -> list[int]:
 
     lines: list[int] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-            if node.func.id == "print":
-                lines.append(node.lineno)
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "print"
+        ):
+            lines.append(node.lineno)
     return sorted(lines)
 
 

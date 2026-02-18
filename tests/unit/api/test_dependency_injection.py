@@ -303,12 +303,12 @@ class TestMigrationCompleteness:
             source = route_file.read_text(encoding="utf-8")
             tree = ast.parse(source)
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and node.name == "configure":
-                    # Allow configure_control in dataset.py (it's an endpoint, not DI)
-                    if "configure_control" in route_file.read_text(encoding="utf-8"):
-                        # Check the exact function name
-                        if node.name == "configure":
-                            pytest.fail(
-                                f"{route_file.name} still has a configure() function "
-                                f"at line {node.lineno}"
-                            )
+                if (
+                    isinstance(node, ast.FunctionDef)
+                    and node.name == "configure"
+                    and "configure_control" in route_file.read_text(encoding="utf-8")
+                ):
+                    pytest.fail(
+                        f"{route_file.name} still has a configure() function "
+                        f"at line {node.lineno}"
+                    )

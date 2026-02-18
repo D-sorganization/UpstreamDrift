@@ -10,6 +10,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -379,7 +380,5 @@ class GaitStateMachine(ContractChecker):
     def _invoke_callbacks(self, event_type: str, event: GaitEvent) -> None:
         """Invoke registered callbacks."""
         for callback in self._callbacks.get(event_type, []):
-            try:
+            with contextlib.suppress(RuntimeError, ValueError, OSError):
                 callback(self.state, event)
-            except (RuntimeError, ValueError, OSError):
-                pass  # Don't let callback errors break state machine

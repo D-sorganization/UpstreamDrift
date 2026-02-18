@@ -205,7 +205,7 @@ class CrossEngineValidator(ContractChecker):
 
     def _build_message(self, severity: str, max_dev: float, tol: float) -> str:
         """Build appropriate message based on severity."""
-        if severity == "PASSED":
+        if severity == "PASSED":  # noqa: SIM116
             return ""
         elif severity == "WARNING":
             return f"Deviation {max_dev:.2e} acceptable but exceeds base tolerance {tol:.2e}"

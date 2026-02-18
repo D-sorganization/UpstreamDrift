@@ -34,10 +34,7 @@ class StabilityRenderer(BaseRenderer):
         diff = cop_xy - com_xy
         dist = np.hypot(diff[:, 0], diff[:, 1])
 
-        if cop.shape[1] == 2:
-            cop_z = np.zeros(len(cop))
-        else:
-            cop_z = cop[:, 2]  # type: ignore[assignment]
+        cop_z = np.zeros(len(cop)) if cop.shape[1] == 2 else cop[:, 2]
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec = vec_temp

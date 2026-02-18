@@ -532,16 +532,20 @@ class CheckpointManager(ContractChecker):
         should_checkpoint = False
 
         # Check step interval
-        if self._auto_interval_steps > 0:
-            if step - self._last_auto_step >= self._auto_interval_steps:
-                should_checkpoint = True
-                self._last_auto_step = step
+        if (
+            self._auto_interval_steps > 0
+            and step - self._last_auto_step >= self._auto_interval_steps
+        ):
+            should_checkpoint = True
+            self._last_auto_step = step
 
         # Check time interval
-        if self._auto_interval_time > 0:
-            if sim_time - self._last_auto_time >= self._auto_interval_time:
-                should_checkpoint = True
-                self._last_auto_time = sim_time
+        if (
+            self._auto_interval_time > 0
+            and sim_time - self._last_auto_time >= self._auto_interval_time
+        ):
+            should_checkpoint = True
+            self._last_auto_time = sim_time
 
         if should_checkpoint:
             self.save(engine)

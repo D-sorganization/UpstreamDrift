@@ -534,7 +534,7 @@ class TestPhysicsConstants:
         assert MAX_JOINT_ACCELERATION_RAD_S2 > 0
 
     def test_max_joint_position_is_2pi(self) -> None:
-        assert MAX_JOINT_POSITION_RAD == pytest.approx(2 * math.pi)
+        assert pytest.approx(2 * math.pi) == MAX_JOINT_POSITION_RAD
 
     def test_max_cartesian_velocity_positive(self) -> None:
         assert MAX_CARTESIAN_VELOCITY_M_S > 0

@@ -169,10 +169,9 @@ class LauncherDialogsMixin:
         from src.shared.python.ai.gui import AISettingsDialog
 
         dialog = AISettingsDialog(self)
-        if dialog.exec():
-            # Reload settings in panel
-            if hasattr(self, "ai_panel"):
-                pass
+        # Reload settings in panel
+        if dialog.exec() and hasattr(self, "ai_panel"):
+            pass
 
     def toggle_ai_assistant(self, checked: bool) -> None:
         """Toggle the AI Assistant panel visibility via the content splitter.

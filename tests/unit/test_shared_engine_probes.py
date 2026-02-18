@@ -136,13 +136,15 @@ def test_drake_probe_port_blocked(tmp_path):
 
 
 def test_drake_probe_missing_module(tmp_path):
-    with patch.dict(sys.modules, {"pydrake": MagicMock()}):
+    with (
+        patch.dict(sys.modules, {"pydrake": MagicMock()}),
         # Mock import pydrake.multibody failing
-        with patch(
+        patch(
             "builtins.__import__",
             side_effect=ImportError("No module named pydrake.multibody"),
-        ):
-            pass
+        ),
+    ):
+        pass
 
     # Let's try patching the module lookup
     with patch.dict(sys.modules):

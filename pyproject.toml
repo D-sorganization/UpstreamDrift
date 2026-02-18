@@ -139,11 +139,11 @@ exclude = [
     "shared/models/opensim/opensim-models/**",
     "shared/models/myosuite/**",
     "src/shared/models/myosuite/**",
-    "vendor/ud-tools/**",
+    "vendor/**",
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "T201"]
+select = ["E", "F", "I", "UP", "B", "T201", "SIM"]
 ignore = ["E501", "B008"]
 
 [tool.ruff.lint.per-file-ignores]

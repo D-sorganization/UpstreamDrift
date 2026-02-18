@@ -273,9 +273,11 @@ class ThemeManagerDialog(QDialog):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
-        if reply == QMessageBox.StandardButton.Yes:
-            if self.theme_manager.delete_custom_theme(items[0].theme_name):
-                self._populate_themes()
+        if (
+            reply == QMessageBox.StandardButton.Yes
+            and self.theme_manager.delete_custom_theme(items[0].theme_name)
+        ):
+            self._populate_themes()
 
     def _export_selected(self) -> None:
         items = self.theme_list.selectedItems()

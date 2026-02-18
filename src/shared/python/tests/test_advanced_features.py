@@ -244,7 +244,7 @@ class MockRecorderNew(RecorderInterface):
 
     def get_time_series(self, field_name) -> tuple:  # noqa: ANN001
         """Return time series data for the given field."""
-        if field_name == "joint_positions":
+        if field_name == "joint_positions":  # noqa: SIM116
             return self.times, self.positions
         elif field_name == "joint_velocities":
             return self.times, self.velocities

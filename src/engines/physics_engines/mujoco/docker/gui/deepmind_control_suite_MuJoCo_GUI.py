@@ -45,11 +45,9 @@ class GolfSimulationGUI:
         self.root.minsize(800, 600)
 
         # Configure window icon and styling
-        try:
+        with contextlib.suppress(RuntimeError, ValueError, AttributeError):
             # Try to set a modern window style
             self.root.tk.call("tk", "scaling", 1.2)
-        except (RuntimeError, ValueError, AttributeError):
-            pass
 
         # Detect Environment
         self.is_windows = platform.system() == "Windows"

@@ -324,9 +324,11 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         elif self.model.nq >= 10:
             if self.model.njnt > 0:
                 first_joint_type = self.model.jnt_type[0]
-                if first_joint_type == mujoco.mjtJoint.mjJNT_FREE:
-                    if len(self.data.qpos) >= 3:
-                        self.data.qpos[2] = 0.9
+                if (
+                    first_joint_type == mujoco.mjtJoint.mjJNT_FREE
+                    and len(self.data.qpos) >= 3
+                ):
+                    self.data.qpos[2] = 0.9
         elif self.model.nq >= 1:
             self.data.qpos[0] = 0.2
 
@@ -598,66 +600,70 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 )
 
         hist = self.swing_plane_visualizer.trajectory_history
-        if self.show_swing_plane and len(hist) >= 3:
-            if self.model is not None and self.data is not None:
-                body_id = mujoco.mj_name2id(
-                    self.model,
-                    mujoco.mjtObj.mjOBJ_BODY,
-                    self.swing_plane_body_name,
-                )
-                if body_id == -1:
-                    body_id = self.model.nbody - 1
+        if (
+            self.show_swing_plane
+            and len(hist) >= 3
+            and self.model is not None
+            and self.data is not None
+        ):
+            body_id = mujoco.mj_name2id(
+                self.model,
+                mujoco.mjtObj.mjOBJ_BODY,
+                self.swing_plane_body_name,
+            )
+            if body_id == -1:
+                body_id = self.model.nbody - 1
 
-                if body_id < self.model.nbody:
-                    vel_adr = self.model.body_dofadr[body_id]
-                else:
-                    vel_adr = -1
-                if vel_adr >= 0 and vel_adr + 2 < len(self.data.qvel):
-                    clubhead_velocity = self.data.qvel[vel_adr : vel_adr + 3]
-                else:
-                    hist = self.swing_plane_visualizer.trajectory_history
-                    if len(hist) >= 2:
-                        dt = (
-                            self.swing_plane_visualizer.timestamp_history[-1]
-                            - self.swing_plane_visualizer.timestamp_history[-2]
-                        )
-                        if dt > 0:
-                            clubhead_velocity = (hist[-1] - hist[-2]) / dt
-                        else:
-                            clubhead_velocity = np.zeros(3)
+            if body_id < self.model.nbody:
+                vel_adr = self.model.body_dofadr[body_id]
+            else:
+                vel_adr = -1
+            if vel_adr >= 0 and vel_adr + 2 < len(self.data.qvel):
+                clubhead_velocity = self.data.qvel[vel_adr : vel_adr + 3]
+            else:
+                hist = self.swing_plane_visualizer.trajectory_history
+                if len(hist) >= 2:
+                    dt = (
+                        self.swing_plane_visualizer.timestamp_history[-1]
+                        - self.swing_plane_visualizer.timestamp_history[-2]
+                    )
+                    if dt > 0:
+                        clubhead_velocity = (hist[-1] - hist[-2]) / dt
                     else:
                         clubhead_velocity = np.zeros(3)
+                else:
+                    clubhead_velocity = np.zeros(3)
 
-                clubhead_pos = self.data.xpos[body_id].copy()
-                parent_id = self.model.body_parentid[body_id]
-                grip_pos = self.data.xpos[max(parent_id, 1)].copy()
+            clubhead_pos = self.data.xpos[body_id].copy()
+            parent_id = self.model.body_parentid[body_id]
+            grip_pos = self.data.xpos[max(parent_id, 1)].copy()
 
-                if np.linalg.norm(clubhead_velocity) > 1e-3:
-                    try:
-                        spv = self.swing_plane_visualizer
-                        plane_vis = spv.update_instantaneous_plane(
-                            clubhead_velocity,
-                            grip_pos,
-                            clubhead_pos,
-                        )
-                        self.meshcat_adapter.draw_swing_plane(
-                            "instantaneous_plane",
-                            plane_vis.vertices,
-                            color=0x4488FF,
-                            opacity=0.25,
-                        )
-                        self.meshcat_adapter.draw_arrow_line(
-                            "plane_normal",
-                            plane_vis.normal_arrow_start,
-                            plane_vis.normal_arrow_end,
-                            color=0x4488FF,
-                        )
-                    except (
-                        RuntimeError,
-                        ValueError,
-                        AttributeError,
-                    ):
-                        pass
+            if np.linalg.norm(clubhead_velocity) > 1e-3:
+                try:
+                    spv = self.swing_plane_visualizer
+                    plane_vis = spv.update_instantaneous_plane(
+                        clubhead_velocity,
+                        grip_pos,
+                        clubhead_pos,
+                    )
+                    self.meshcat_adapter.draw_swing_plane(
+                        "instantaneous_plane",
+                        plane_vis.vertices,
+                        color=0x4488FF,
+                        opacity=0.25,
+                    )
+                    self.meshcat_adapter.draw_arrow_line(
+                        "plane_normal",
+                        plane_vis.normal_arrow_start,
+                        plane_vis.normal_arrow_end,
+                        color=0x4488FF,
+                    )
+                except (
+                    RuntimeError,
+                    ValueError,
+                    AttributeError,
+                ):
+                    pass
 
         if self.show_reference_trajectory and self.reference_trajectory is not None:
             self.meshcat_adapter.draw_trajectory(
@@ -896,12 +902,16 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             should_compute = self.enable_live_analysis or config_requests_analysis
 
             selected_actuator = config_selected_actuator
-            if selected_actuator is None:
-                if self.show_induced_vectors and self.induced_vector_source not in [
+            if (
+                selected_actuator is None
+                and self.show_induced_vectors
+                and self.induced_vector_source
+                not in [
                     "gravity",
                     "actuator",
-                ]:
-                    selected_actuator = self.induced_vector_source
+                ]
+            ):
+                selected_actuator = self.induced_vector_source
 
             if self.analyzer is not None and self.recorder.is_recording:
                 bio_data = self.analyzer.extract_full_state(

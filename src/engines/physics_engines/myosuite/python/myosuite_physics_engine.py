@@ -834,13 +834,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             # Set state with zero velocity
 
             try:
-                if hasattr(v_saved, "__len__"):
-                    n_v = len(v_saved)
-
-                else:
-                    # Fallback for scalar or mocked objects
-
-                    n_v = 1
+                # Fallback for scalar or mocked objects
+                n_v = len(v_saved) if hasattr(v_saved, "__len__") else 1
 
             except TypeError:
                 n_v = 1

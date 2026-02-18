@@ -663,9 +663,8 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
                 show = False
 
             # Text search
-            if search_text and joint_name:
-                if search_text not in joint_name.lower():
-                    show = False
+            if search_text and joint_name and search_text not in joint_name.lower():
+                show = False
 
             widget.setVisible(show)
 
