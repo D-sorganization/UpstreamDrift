@@ -209,6 +209,7 @@ module = [
     "src.shared.python.ui.*",
     "src.shared.python.spatial_algebra.*",
     "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.*",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.*",
 ]
 ignore_errors = true
 
