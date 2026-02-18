@@ -180,6 +180,6 @@ def check_minimum_version(
                 f"{module_name} {current_version} does not meet minimum {minimum_version}"
             )
         return meets_requirement
-    except (RuntimeError, ValueError, OSError) as e:
-        logger.error(f"Failed to compare versions: {e}")
+    except ValueError as e:
+        logger.error(f"Failed to compare versions for {module_name}: {e}")
         return False
