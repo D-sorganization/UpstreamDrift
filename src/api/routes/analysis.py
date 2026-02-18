@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.shared.python.core.contracts import precondition
+
 from ..dependencies import get_analysis_service, get_logger
 from ..models.requests import AnalysisRequest
 from ..models.responses import AnalysisResponse
@@ -22,6 +24,10 @@ router = APIRouter()
 
 
 @router.post("/analyze/biomechanics", response_model=AnalysisResponse)
+@precondition(
+    lambda request, service=None, logger=None: request is not None,
+    "Analysis request must not be None",
+)
 async def analyze_biomechanics(
     request: AnalysisRequest,
     service: AnalysisService = Depends(get_analysis_service),

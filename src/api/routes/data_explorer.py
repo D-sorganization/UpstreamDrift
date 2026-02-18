@@ -18,6 +18,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
+from src.shared.python.core.contracts import precondition
+
 router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
 
 
@@ -173,6 +175,10 @@ async def list_datasets() -> DatasetListResponse:
 
 
 @router.get("/datasets/{name}/preview", response_model=DatasetPreviewResponse)
+@precondition(
+    lambda name, limit=50: name is not None and len(name.strip()) > 0 and limit > 0,
+    "Dataset name must be non-empty and limit must be positive",
+)
 async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
     """Get a preview of dataset contents.
 
@@ -224,6 +230,10 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
 
 
 @router.get("/datasets/{name}/stats", response_model=DatasetStatsResponse)
+@precondition(
+    lambda name: name is not None and len(name.strip()) > 0,
+    "Dataset name must be a non-empty string",
+)
 async def dataset_stats(name: str) -> DatasetStatsResponse:
     """Get summary statistics for a dataset.
 
@@ -326,6 +336,10 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
 
 
 @router.post("/datasets/{name}/filter")
+@precondition(
+    lambda name, request: name is not None and len(name.strip()) > 0,
+    "Dataset name must be a non-empty string",
+)
 async def filter_dataset(
     name: str, request: DatasetFilterRequest
 ) -> DatasetPreviewResponse:

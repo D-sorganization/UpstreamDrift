@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.shared.python.core.contracts import precondition
+
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import (
     ActuatorBatchCommandRequest,
@@ -187,6 +189,10 @@ async def get_actuator_panel(
     "/simulation/actuators",
     response_model=ActuatorCommandResponse,
 )
+@precondition(
+    lambda command, engine_manager=None, logger=None: command.actuator_index >= 0,
+    "Actuator index must be non-negative",
+)
 async def send_actuator_command(
     command: ActuatorCommandRequest,
     engine_manager: Any = Depends(get_engine_manager),
@@ -261,6 +267,10 @@ async def send_actuator_command(
 @router.post(
     "/simulation/actuators/batch",
     response_model=list[ActuatorCommandResponse],
+)
+@precondition(
+    lambda batch, engine_manager=None, logger=None: len(batch.commands) > 0,
+    "Batch must contain at least one command",
 )
 async def send_actuator_batch(
     batch: ActuatorBatchCommandRequest,

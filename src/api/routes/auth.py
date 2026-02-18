@@ -24,6 +24,7 @@ from src.api.auth.models import (
 from src.api.auth.security import security_manager, usage_tracker
 from src.api.database import get_db
 from src.api.utils.datetime_compat import UTC
+from src.shared.python.core.contracts import precondition
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -128,6 +129,11 @@ async def login(
 
 
 @router.post("/refresh", response_model=dict)
+@precondition(
+    lambda refresh_token, db=None: refresh_token is not None
+    and len(refresh_token.strip()) > 0,
+    "Refresh token must be a non-empty string",
+)
 async def refresh_token(
     refresh_token: str, db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -218,6 +224,10 @@ async def list_api_keys(
 
 
 @router.delete("/api-keys/{api_key_id}")
+@precondition(
+    lambda api_key_id, current_user=None, db=None: api_key_id > 0,
+    "API key ID must be a positive integer",
+)
 async def delete_api_key(
     api_key_id: int, current_user: User = RequireAuth, db: Session = Depends(get_db)
 ) -> dict[str, str]:
@@ -242,6 +252,10 @@ async def delete_api_key(
 
 # Admin routes
 @router.get("/users", response_model=list[UserResponse])
+@precondition(
+    lambda skip=0, limit=100, current_user=None, db=None: skip >= 0 and limit > 0,
+    "skip must be non-negative and limit must be positive",
+)
 async def list_users(
     skip: int = 0,
     limit: int = 100,
@@ -255,6 +269,10 @@ async def list_users(
 
 
 @router.put("/users/{user_id}/role")
+@precondition(
+    lambda user_id, new_role, current_user=None, db=None: user_id > 0,
+    "User ID must be a positive integer",
+)
 async def update_user_role(
     user_id: int,
     new_role: UserRole,
@@ -276,6 +294,10 @@ async def update_user_role(
 
 
 @router.put("/users/{user_id}/status")
+@precondition(
+    lambda user_id, is_active, current_user=None, db=None: user_id > 0,
+    "User ID must be a positive integer",
+)
 async def update_user_status(
     user_id: int,
     is_active: bool,

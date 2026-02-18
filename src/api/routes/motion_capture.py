@@ -16,6 +16,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from src.shared.python.core.contracts import precondition
+
 router = APIRouter(prefix="/api/tools/motion-capture", tags=["motion-capture"])
 
 
@@ -178,6 +180,10 @@ async def list_capture_sources() -> list[CaptureSource]:
 
 
 @router.get("/skeleton/{source_type}", response_model=list[JointData])
+@precondition(
+    lambda source_type: source_type is not None and len(source_type.strip()) > 0,
+    "Source type must be a non-empty string",
+)
 async def get_skeleton_template(source_type: str) -> list[JointData]:
     """Get the skeleton joint template for a given source type.
 
@@ -242,6 +248,10 @@ async def start_capture_session(
 
 
 @router.post("/session/{session_id}/stop", response_model=CaptureSessionResponse)
+@precondition(
+    lambda session_id: session_id is not None and len(session_id.strip()) > 0,
+    "Session ID must be a non-empty string",
+)
 async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
     """Stop an active capture session and save the recording.
 
@@ -345,6 +355,12 @@ async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
 
 
 @router.get("/frame/{recording_name}/{frame_index}", response_model=SkeletonFrame)
+@precondition(
+    lambda recording_name, frame_index: recording_name is not None
+    and len(recording_name.strip()) > 0
+    and frame_index >= 0,
+    "Recording name must be non-empty and frame index must be non-negative",
+)
 async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:
     """Get skeleton data for a specific frame.
 

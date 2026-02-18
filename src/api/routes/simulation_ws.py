@@ -6,6 +6,7 @@ import contextlib
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
+from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 
 router = APIRouter()
@@ -34,6 +35,11 @@ async def _load_simulation_engine(
     Returns:
         The active physics engine, or None if loading failed.
     """
+    require(
+        engine_type is not None and len(engine_type.strip()) > 0,
+        "Engine type must be a non-empty string",
+        engine_type,
+    )
     try:
         enum_type = EngineType(engine_type.upper())
         success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
@@ -104,6 +110,9 @@ async def _run_simulation_loop(
     """
     duration = config.get("duration", 3.0)
     timestep = config.get("timestep", 0.002)
+
+    require(duration > 0, "Simulation duration must be positive", duration)
+    require(timestep > 0, "Simulation timestep must be positive", timestep)
 
     await websocket.send_json({"status": "running", "duration": duration})
 

@@ -15,6 +15,8 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Request
 
+from src.shared.python.core.contracts import precondition
+
 from ..aip.dispatcher import (
     INVALID_REQUEST,
     PARSE_ERROR,
@@ -68,6 +70,10 @@ async def get_capabilities() -> AIPHandshakeResponse:
 
 
 @router.post("/aip/rpc")
+@precondition(
+    lambda request, engine_manager=None, logger=None: request is not None,
+    "RPC request must not be None",
+)
 async def handle_rpc(
     request: Request,
     engine_manager: Any = Depends(get_engine_manager),
