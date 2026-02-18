@@ -4,6 +4,7 @@ Provides optional features (wind, spin decay) that can be enabled
 without changing the tuned coefficients of the original models.
 """
 
+import functools
 import math
 from dataclasses import dataclass
 
@@ -29,8 +30,9 @@ class FlightModelOptions:
     altitude_m: float = 0.0  # Altitude above sea level [m]
 
 
+@functools.lru_cache(maxsize=256)
 def compute_spin_decay(omega_initial: float, time: float, decay_rate: float) -> float:
-    """Compute spin rate with exponential decay.
+    """Compute spin rate with exponential decay. Cached for performance.
 
     Spin decays as: ω(t) = ω₀ * exp(-λ*t)
 
@@ -45,10 +47,11 @@ def compute_spin_decay(omega_initial: float, time: float, decay_rate: float) -> 
     return omega_initial * math.exp(-decay_rate * time)
 
 
+@functools.lru_cache(maxsize=256)
 def compute_air_density_at_altitude(
     sea_level_density: float, altitude_m: float
 ) -> float:
-    """Compute air density at altitude using barometric formula.
+    """Compute air density at altitude using barometric formula. Cached for performance.
 
     Uses simplified isothermal atmosphere model.
 
