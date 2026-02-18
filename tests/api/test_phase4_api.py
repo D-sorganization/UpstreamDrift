@@ -585,87 +585,100 @@ class TestAIPDispatcher:
         assert "model" in namespaces
         assert len(namespaces["model"]) == 1
 
-    @pytest.mark.asyncio
-    async def test_dispatch_success(self) -> None:
+    def test_dispatch_success(self) -> None:
         """Dispatch resolves method and returns result."""
+        import asyncio
+
         from src.api.aip.dispatcher import MethodRegistry, dispatch
 
         registry = MethodRegistry()
         registry.register("test.add", lambda a, b, **kw: a + b)
 
-        result = await dispatch(
-            registry,
-            {
-                "jsonrpc": "2.0",
-                "method": "test.add",
-                "params": [3, 4],
-                "id": 1,
-            },
+        result = asyncio.get_event_loop().run_until_complete(
+            dispatch(
+                registry,
+                {
+                    "jsonrpc": "2.0",
+                    "method": "test.add",
+                    "params": [3, 4],
+                    "id": 1,
+                },
+            )
         )
 
         assert result is not None
         assert result["result"] == 7
         assert result["id"] == 1
 
-    @pytest.mark.asyncio
-    async def test_dispatch_method_not_found(self) -> None:
+    def test_dispatch_method_not_found(self) -> None:
         """Unknown method returns -32601."""
+        import asyncio
+
         from src.api.aip.dispatcher import METHOD_NOT_FOUND, MethodRegistry, dispatch
 
         registry = MethodRegistry()
 
-        result = await dispatch(
-            registry,
-            {
-                "jsonrpc": "2.0",
-                "method": "nonexistent",
-                "id": 1,
-            },
+        result = asyncio.get_event_loop().run_until_complete(
+            dispatch(
+                registry,
+                {
+                    "jsonrpc": "2.0",
+                    "method": "nonexistent",
+                    "id": 1,
+                },
+            )
         )
 
         assert result is not None
         assert result["error"]["code"] == METHOD_NOT_FOUND
 
-    @pytest.mark.asyncio
-    async def test_dispatch_invalid_version(self) -> None:
+    def test_dispatch_invalid_version(self) -> None:
         """Wrong JSON-RPC version returns error."""
+        import asyncio
+
         from src.api.aip.dispatcher import INVALID_REQUEST, MethodRegistry, dispatch
 
         registry = MethodRegistry()
 
-        result = await dispatch(
-            registry,
-            {
-                "jsonrpc": "1.0",
-                "method": "test",
-                "id": 1,
-            },
+        result = asyncio.get_event_loop().run_until_complete(
+            dispatch(
+                registry,
+                {
+                    "jsonrpc": "1.0",
+                    "method": "test",
+                    "id": 1,
+                },
+            )
         )
 
         assert result is not None
         assert result["error"]["code"] == INVALID_REQUEST
 
-    @pytest.mark.asyncio
-    async def test_dispatch_notification(self) -> None:
+    def test_dispatch_notification(self) -> None:
         """Notification (no id) returns None."""
+        import asyncio
+
         from src.api.aip.dispatcher import MethodRegistry, dispatch
 
         registry = MethodRegistry()
         registry.register("test.noop", lambda **kw: None)
 
-        result = await dispatch(
-            registry,
-            {
-                "jsonrpc": "2.0",
-                "method": "test.noop",
-            },
+        result = asyncio.get_event_loop().run_until_complete(
+            dispatch(
+                registry,
+                {
+                    "jsonrpc": "2.0",
+                    "method": "test.noop",
+                },
+            )
         )
 
         assert result is None
 
-    @pytest.mark.asyncio
-    async def test_dispatch_with_kwargs(self) -> None:
+    def test_dispatch_with_kwargs(self) -> None:
         """Dispatch with named parameters."""
+        import asyncio
+
         from src.api.aip.dispatcher import MethodRegistry, dispatch
 
         registry = MethodRegistry()
@@ -674,14 +687,16 @@ class TestAIPDispatcher:
             lambda name="world", **kw: f"hello {name}",
         )
 
-        result = await dispatch(
-            registry,
-            {
-                "jsonrpc": "2.0",
-                "method": "test.greet",
-                "params": {"name": "alice"},
-                "id": 42,
-            },
+        result = asyncio.get_event_loop().run_until_complete(
+            dispatch(
+                registry,
+                {
+                    "jsonrpc": "2.0",
+                    "method": "test.greet",
+                    "params": {"name": "alice"},
+                    "id": 42,
+                },
+            )
         )
 
         assert result is not None
