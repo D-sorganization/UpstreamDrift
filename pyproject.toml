@@ -283,11 +283,9 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Coverage threshold: start at 0 so CI is not blocked; enforce locally or
-# in a dedicated coverage-gate job with:
-#   pytest --cov=src --cov-fail-under=50
-# Raise the value here once coverage consistently exceeds the target.
-fail_under = 0
+# Coverage threshold — enforced in CI and locally when running with --cov.
+# Raise this value as coverage improves.
+fail_under = 40
 show_missing = true
 skip_empty = true
 precision = 1
