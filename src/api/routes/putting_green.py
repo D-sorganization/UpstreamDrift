@@ -12,15 +12,16 @@ See issue #1206
 from __future__ import annotations
 
 import numpy as np
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
 
-# ── Request / Response Models ──
+# -- Request / Response Models --
 
 
 class PuttSimulationRequest(BaseModel):
@@ -115,7 +116,7 @@ class GreenContourResponse(BaseModel):
     hole_position: list[float]
 
 
-# ── Endpoints ──
+# -- Endpoints --
 
 
 @router.post("/simulate", response_model=PuttSimulationResponse)
@@ -123,109 +124,103 @@ class GreenContourResponse(BaseModel):
     lambda request: request.direction_x != 0.0 or request.direction_y != 0.0,
     "Putt direction vector must not be zero",
 )
+@handle_api_errors
 async def simulate_putt(request: PuttSimulationRequest) -> PuttSimulationResponse:
     """Simulate a single putt with given parameters.
 
     See issue #1206
     """
-    try:
-        from src.engines.physics_engines.putting_green.python.green_surface import (
-            GreenSurface,
-        )
-        from src.engines.physics_engines.putting_green.python.putter_stroke import (
-            StrokeParameters,
-        )
-        from src.engines.physics_engines.putting_green.python.simulator import (
-            PuttingGreenSimulator,
-            SimulationConfig,
-        )
-        from src.engines.physics_engines.putting_green.python.turf_properties import (
-            TurfProperties,
-        )
+    from src.engines.physics_engines.putting_green.python.green_surface import (
+        GreenSurface,
+    )
+    from src.engines.physics_engines.putting_green.python.putter_stroke import (
+        StrokeParameters,
+    )
+    from src.engines.physics_engines.putting_green.python.simulator import (
+        PuttingGreenSimulator,
+        SimulationConfig,
+    )
+    from src.engines.physics_engines.putting_green.python.turf_properties import (
+        TurfProperties,
+    )
 
-        turf = TurfProperties(stimp_rating=request.stimp_rating)
-        green = GreenSurface(
-            width=request.green_width,
-            height=request.green_height,
-            turf=turf,
-        )
-        green.set_hole_position(np.array([request.hole_x, request.hole_y]))
+    turf = TurfProperties(stimp_rating=request.stimp_rating)
+    green = GreenSurface(
+        width=request.green_width,
+        height=request.green_height,
+        turf=turf,
+    )
+    green.set_hole_position(np.array([request.hole_x, request.hole_y]))
 
-        config = SimulationConfig(record_trajectory=True)
-        sim = PuttingGreenSimulator(green=green, config=config)
+    config = SimulationConfig(record_trajectory=True)
+    sim = PuttingGreenSimulator(green=green, config=config)
 
-        if request.wind_speed > 0:
-            sim.set_wind(
-                request.wind_speed,
-                np.array([request.wind_direction_x, request.wind_direction_y]),
-            )
-
-        direction = np.array([request.direction_x, request.direction_y])
-        norm = np.linalg.norm(direction)
-        if norm > 0:
-            direction = direction / norm
-
-        stroke = StrokeParameters(speed=request.speed, direction=direction)
-        result = sim.simulate_putt(
-            stroke, ball_position=np.array([request.ball_x, request.ball_y])
+    if request.wind_speed > 0:
+        sim.set_wind(
+            request.wind_speed,
+            np.array([request.wind_direction_x, request.wind_direction_y]),
         )
 
-        return PuttSimulationResponse(
-            positions=result.positions.tolist(),
-            velocities=result.velocities.tolist(),
-            times=result.times.tolist(),
-            holed=result.holed,
-            final_position=result.final_position.tolist(),
-            total_distance=result.total_distance,
-            duration=result.duration,
-        )
+    direction = np.array([request.direction_x, request.direction_y])
+    norm = np.linalg.norm(direction)
+    if norm > 0:
+        direction = direction / norm
 
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    stroke = StrokeParameters(speed=request.speed, direction=direction)
+    result = sim.simulate_putt(
+        stroke, ball_position=np.array([request.ball_x, request.ball_y])
+    )
+
+    return PuttSimulationResponse(
+        positions=result.positions.tolist(),
+        velocities=result.velocities.tolist(),
+        times=result.times.tolist(),
+        holed=result.holed,
+        final_position=result.final_position.tolist(),
+        total_distance=result.total_distance,
+        duration=result.duration,
+    )
 
 
 @router.post("/read-green", response_model=GreenReadingResponse)
+@handle_api_errors
 async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     """Read green between ball and target positions.
 
     See issue #1206
     """
-    try:
-        from src.engines.physics_engines.putting_green.python.green_surface import (
-            GreenSurface,
-        )
-        from src.engines.physics_engines.putting_green.python.simulator import (
-            PuttingGreenSimulator,
-        )
-        from src.engines.physics_engines.putting_green.python.turf_properties import (
-            TurfProperties,
-        )
+    from src.engines.physics_engines.putting_green.python.green_surface import (
+        GreenSurface,
+    )
+    from src.engines.physics_engines.putting_green.python.simulator import (
+        PuttingGreenSimulator,
+    )
+    from src.engines.physics_engines.putting_green.python.turf_properties import (
+        TurfProperties,
+    )
 
-        turf = TurfProperties(stimp_rating=request.stimp_rating)
-        green = GreenSurface(
-            width=request.green_width,
-            height=request.green_height,
-            turf=turf,
-        )
-        green.set_hole_position(np.array([request.target_x, request.target_y]))
+    turf = TurfProperties(stimp_rating=request.stimp_rating)
+    green = GreenSurface(
+        width=request.green_width,
+        height=request.green_height,
+        turf=turf,
+    )
+    green.set_hole_position(np.array([request.target_x, request.target_y]))
 
-        sim = PuttingGreenSimulator(green=green)
-        reading = sim.read_green(
-            np.array([request.ball_x, request.ball_y]),
-            np.array([request.target_x, request.target_y]),
-        )
+    sim = PuttingGreenSimulator(green=green)
+    reading = sim.read_green(
+        np.array([request.ball_x, request.ball_y]),
+        np.array([request.target_x, request.target_y]),
+    )
 
-        return GreenReadingResponse(
-            distance=float(reading["distance"]),
-            total_break=float(reading["total_break"]),
-            recommended_speed=float(reading["recommended_speed"]),
-            aim_point=reading["aim_point"].tolist(),
-            elevations=[float(e) for e in reading["elevations"]],
-            slopes=[s.tolist() for s in reading["slopes"]],
-        )
-
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return GreenReadingResponse(
+        distance=float(reading["distance"]),
+        total_break=float(reading["total_break"]),
+        recommended_speed=float(reading["recommended_speed"]),
+        aim_point=reading["aim_point"].tolist(),
+        elevations=[float(e) for e in reading["elevations"]],
+        slopes=[s.tolist() for s in reading["slopes"]],
+    )
 
 
 @router.post("/scatter", response_model=ScatterAnalysisResponse)
@@ -233,6 +228,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     lambda request: request.direction_x != 0.0 or request.direction_y != 0.0,
     "Scatter direction vector must not be zero",
 )
+@handle_api_errors
 async def scatter_analysis(
     request: ScatterAnalysisRequest,
 ) -> ScatterAnalysisResponse:
@@ -240,60 +236,56 @@ async def scatter_analysis(
 
     See issue #1206
     """
-    try:
-        from src.engines.physics_engines.putting_green.python.green_surface import (
-            GreenSurface,
-        )
-        from src.engines.physics_engines.putting_green.python.putter_stroke import (
-            StrokeParameters,
-        )
-        from src.engines.physics_engines.putting_green.python.simulator import (
-            PuttingGreenSimulator,
-        )
-        from src.engines.physics_engines.putting_green.python.turf_properties import (
-            TurfProperties,
-        )
+    from src.engines.physics_engines.putting_green.python.green_surface import (
+        GreenSurface,
+    )
+    from src.engines.physics_engines.putting_green.python.putter_stroke import (
+        StrokeParameters,
+    )
+    from src.engines.physics_engines.putting_green.python.simulator import (
+        PuttingGreenSimulator,
+    )
+    from src.engines.physics_engines.putting_green.python.turf_properties import (
+        TurfProperties,
+    )
 
-        turf = TurfProperties(stimp_rating=request.stimp_rating)
-        green = GreenSurface(
-            width=request.green_width,
-            height=request.green_height,
-            turf=turf,
-        )
+    turf = TurfProperties(stimp_rating=request.stimp_rating)
+    green = GreenSurface(
+        width=request.green_width,
+        height=request.green_height,
+        turf=turf,
+    )
 
-        sim = PuttingGreenSimulator(green=green)
+    sim = PuttingGreenSimulator(green=green)
 
-        direction = np.array([request.direction_x, request.direction_y])
-        norm = np.linalg.norm(direction)
-        if norm > 0:
-            direction = direction / norm
+    direction = np.array([request.direction_x, request.direction_y])
+    norm = np.linalg.norm(direction)
+    if norm > 0:
+        direction = direction / norm
 
-        stroke = StrokeParameters(speed=request.speed, direction=direction)
-        results = sim.simulate_scatter(
-            start_position=np.array([request.ball_x, request.ball_y]),
-            stroke_params=stroke,
-            n_simulations=request.n_simulations,
-            speed_variance=request.speed_variance,
-            direction_variance_deg=request.direction_variance_deg,
-        )
+    stroke = StrokeParameters(speed=request.speed, direction=direction)
+    results = sim.simulate_scatter(
+        start_position=np.array([request.ball_x, request.ball_y]),
+        stroke_params=stroke,
+        n_simulations=request.n_simulations,
+        speed_variance=request.speed_variance,
+        direction_variance_deg=request.direction_variance_deg,
+    )
 
-        final_positions = [r.final_position.tolist() for r in results]
-        holed_count = sum(1 for r in results if r.holed)
-        hole_pos = green.hole_position
-        avg_dist = float(
-            np.mean([np.linalg.norm(r.final_position - hole_pos) for r in results])
-        )
+    final_positions = [r.final_position.tolist() for r in results]
+    holed_count = sum(1 for r in results if r.holed)
+    hole_pos = green.hole_position
+    avg_dist = float(
+        np.mean([np.linalg.norm(r.final_position - hole_pos) for r in results])
+    )
 
-        return ScatterAnalysisResponse(
-            final_positions=final_positions,
-            holed_count=holed_count,
-            total_simulations=len(results),
-            average_distance_from_hole=avg_dist,
-            make_percentage=(holed_count / len(results) * 100 if results else 0),
-        )
-
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return ScatterAnalysisResponse(
+        final_positions=final_positions,
+        holed_count=holed_count,
+        total_simulations=len(results),
+        average_distance_from_hole=avg_dist,
+        make_percentage=(holed_count / len(results) * 100 if results else 0),
+    )
 
 
 @router.get("/contours", response_model=GreenContourResponse)
@@ -304,6 +296,7 @@ async def scatter_analysis(
     and 6.0 <= stimp_rating <= 15.0,
     "Green dimensions must be positive, resolution >= 2, and stimp_rating in [6, 15]",
 )
+@handle_api_errors
 async def get_green_contours(
     width: float = 20.0,
     height: float = 20.0,
@@ -314,34 +307,30 @@ async def get_green_contours(
 
     See issue #1206
     """
-    try:
-        from src.engines.physics_engines.putting_green.python.green_surface import (
-            GreenSurface,
-        )
-        from src.engines.physics_engines.putting_green.python.turf_properties import (
-            TurfProperties,
-        )
+    from src.engines.physics_engines.putting_green.python.green_surface import (
+        GreenSurface,
+    )
+    from src.engines.physics_engines.putting_green.python.turf_properties import (
+        TurfProperties,
+    )
 
-        turf = TurfProperties(stimp_rating=stimp_rating)
-        green = GreenSurface(width=width, height=height, turf=turf)
+    turf = TurfProperties(stimp_rating=stimp_rating)
+    green = GreenSurface(width=width, height=height, turf=turf)
 
-        xs = np.linspace(0, width, resolution)
-        ys = np.linspace(0, height, resolution)
-        grid_x, grid_y = np.meshgrid(xs, ys)
-        elevations = np.zeros_like(grid_x)
+    xs = np.linspace(0, width, resolution)
+    ys = np.linspace(0, height, resolution)
+    grid_x, grid_y = np.meshgrid(xs, ys)
+    elevations = np.zeros_like(grid_x)
 
-        for i in range(resolution):
-            for j in range(resolution):
-                elevations[i, j] = green.get_elevation(grid_x[i, j], grid_y[i, j])  # type: ignore[attr-defined]
+    for i in range(resolution):
+        for j in range(resolution):
+            elevations[i, j] = green.get_elevation(grid_x[i, j], grid_y[i, j])  # type: ignore[attr-defined]
 
-        return GreenContourResponse(
-            width=width,
-            height=height,
-            grid_x=grid_x.tolist(),
-            grid_y=grid_y.tolist(),
-            elevations=elevations.tolist(),
-            hole_position=green.hole_position.tolist(),
-        )
-
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return GreenContourResponse(
+        width=width,
+        height=height,
+        grid_x=grid_x.tolist(),
+        grid_y=grid_y.tolist(),
+        elevations=elevations.tolist(),
+        hole_position=green.hole_position.tolist(),
+    )
