@@ -376,12 +376,14 @@ class TestThreeWayTriangulation:
                 # Check if the other two agree
                 sorted_other = sorted(other_engines)
                 other_pair: tuple[str, str] = (sorted_other[0], sorted_other[1])
-                if other_pair in deviations:
-                    if deviations[other_pair] < agreement_threshold:
-                        logger.warning(
-                            f"Triangulation identified {engine_name} as outlier: "
-                            f"disagrees with both {other_engines[0]} and {other_engines[1]}"
-                        )
+                if (
+                    other_pair in deviations
+                    and deviations[other_pair] < agreement_threshold
+                ):
+                    logger.warning(
+                        f"Triangulation identified {engine_name} as outlier: "
+                        f"disagrees with both {other_engines[0]} and {other_engines[1]}"
+                    )
 
         # For now, just verify that at least two engines agree closely
         min_deviation = min(deviations.values()) if deviations else float("inf")

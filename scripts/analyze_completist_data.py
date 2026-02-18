@@ -67,10 +67,7 @@ def is_excluded(filepath: str) -> bool:
     if fp.startswith("./"):
         fp = fp[2:]
 
-    for excl in EXCLUDED_PATHS:
-        if fp.startswith(excl) or excl in fp:
-            return True
-    return False
+    return any(fp.startswith(excl) or excl in fp for excl in EXCLUDED_PATHS)
 
 
 def _parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:

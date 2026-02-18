@@ -389,9 +389,11 @@ class TestRequestTracer:
         async def mock_call_next_error(request):
             raise ValueError("Test error")
 
-        with patch("src.api.utils.tracing.logger"):
-            with pytest.raises(ValueError, match="Test error"):
-                await tracer.trace_request(mock_request, mock_call_next_error)
+        with (
+            patch("src.api.utils.tracing.logger"),
+            pytest.raises(ValueError, match="Test error"),
+        ):
+            await tracer.trace_request(mock_request, mock_call_next_error)
 
 
 class TestTracedLogContract:

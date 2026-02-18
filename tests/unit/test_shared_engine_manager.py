@@ -148,27 +148,27 @@ class TestEngineManager(unittest.TestCase):
 
         # Add the full module hierarchy to sys.modules
         # Note: loaders now use src.engines.* import paths (Phase 1 decoupling)
-        with patch.dict(
-            sys.modules,
-            {
-                "mujoco": mock_mujoco_pkg,
-                "src.engines.physics_engines.mujoco": MagicMock(),
-                "src.engines.physics_engines.mujoco.python": MagicMock(),
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
-                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_mod,
-            },
+        with (
+            patch.dict(
+                sys.modules,
+                {
+                    "mujoco": mock_mujoco_pkg,
+                    "src.engines.physics_engines.mujoco": MagicMock(),
+                    "src.engines.physics_engines.mujoco.python": MagicMock(),
+                    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
+                    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_mod,
+                },
+            ),
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
         ):
-            with (
-                patch("pathlib.Path.exists", return_value=True),
-                patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
-            ):
-                # Use the actual method that exists in EngineManager
-                manager._load_engine(EngineType.MUJOCO)
-                # Check that the engine was loaded successfully
-                self.assertEqual(
-                    manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
-                )
-                self.assertIsNotNone(manager.active_physics_engine)
+            # Use the actual method that exists in EngineManager
+            manager._load_engine(EngineType.MUJOCO)
+            # Check that the engine was loaded successfully
+            self.assertEqual(
+                manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
+            )
+            self.assertIsNotNone(manager.active_physics_engine)
 
     def test_get_engine_info(self):
         """Test information retrieval."""

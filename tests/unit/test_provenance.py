@@ -86,9 +86,8 @@ class TestProvenance(unittest.TestCase):
         )
 
         m = mock_open()
-        with patch("builtins.open", m):
-            with open("test.csv", "w") as f:
-                add_provenance_header_file(f, provenance)
+        with patch("builtins.open", m), open("test.csv", "w") as f:
+            add_provenance_header_file(f, provenance)
 
         m().write.assert_called()
         # Verify call args contain provenance info

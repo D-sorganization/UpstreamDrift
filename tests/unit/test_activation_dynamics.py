@@ -472,10 +472,7 @@ class TestNumericalStability:
         # Simulate square wave at 10 Hz for 0.5 seconds
         for i in range(500):
             # 10 Hz = 100ms period, 50ms on, 50ms off
-            if (i % 100) < 50:
-                u = 1.0
-            else:
-                u = 0.0
+            u = 1.0 if i % 100 < 50 else 0.0
 
             a = dynamics.update(u, a, dt)
 

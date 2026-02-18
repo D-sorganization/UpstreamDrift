@@ -139,7 +139,7 @@ exclude = [
     "shared/models/opensim/opensim-models/**",
     "shared/models/myosuite/**",
     "src/shared/models/myosuite/**",
-    "vendor/ud-tools/**",
+    "vendor/**",
 ]
 
 [tool.ruff.lint]

@@ -24,10 +24,7 @@ def get_public_names(module_path: Path) -> list[str]:
     names: list[str] = []
 
     for node in ast.iter_child_nodes(tree):
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-            if not node.name.startswith("_"):
-                names.append(node.name)
-        elif isinstance(node, ast.ClassDef):
+        if isinstance(node, (ast.FunctionDef | ast.AsyncFunctionDef, ast.ClassDef)):
             if not node.name.startswith("_"):
                 names.append(node.name)
         elif isinstance(node, ast.Assign):
@@ -45,14 +42,18 @@ def get_public_names(module_path: Path) -> list[str]:
     for node in ast.iter_child_nodes(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == "__all__":
-                    if isinstance(node.value, ast.List):
-                        for elt in node.value.elts:
-                            if isinstance(elt, ast.Constant) and isinstance(
-                                elt.value, str
-                            ):
-                                if elt.value not in names:
-                                    names.append(elt.value)
+                if (
+                    isinstance(target, ast.Name)
+                    and target.id == "__all__"
+                    and isinstance(node.value, ast.List)
+                ):
+                    for elt in node.value.elts:
+                        if (
+                            isinstance(elt, ast.Constant)
+                            and isinstance(elt.value, str)
+                            and elt.value not in names
+                        ):
+                            names.append(elt.value)
 
     return sorted(set(names))
 

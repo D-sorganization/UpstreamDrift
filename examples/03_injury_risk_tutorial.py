@@ -62,7 +62,7 @@ def run_tutorial() -> None:
         mock_res.risk_score = (
             45.0 if "lead" in joint else 20.0
         )  # Higher risk on lead side
-        mock_res.impingement_risk = True if joint == "hip_lead" else False
+        mock_res.impingement_risk = joint == "hip_lead"
         joint_results[joint] = mock_res
 
     logger.info("   Joint analysis complete.")
