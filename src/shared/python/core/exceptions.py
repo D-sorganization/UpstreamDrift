@@ -17,9 +17,17 @@ Migration:
 import warnings
 
 from .error_utils import (
+    APIError,
     DataFormatError,
+    EngineLaunchError,
     EngineNotAvailableError,
     GolfSuiteError,
+    InvalidRequestError,
+    ModelLoadError,
+    PhysicsSimulationError,
+    RateLimitExceededError,
+    SimulationStepError,
+    SimulationTimeoutError,
     ValidationError,
 )
 
@@ -69,6 +77,16 @@ __all__ = [
     "DataFormatError",
     "ValidationError",
     "ArrayDimensionError",
+    # Physics simulation (domain-specific)
+    "PhysicsSimulationError",
+    "EngineLaunchError",
+    "SimulationStepError",
+    "ModelLoadError",
+    "SimulationTimeoutError",
+    # API errors
+    "APIError",
+    "RateLimitExceededError",
+    "InvalidRequestError",
     # Deprecated aliases (kept for backwards compatibility)
     "GolfModelingError",
     "EngineNotFoundError",
