@@ -142,14 +142,35 @@ class TestURDFImporter:
 class TestURDFExporter:
     """Test suite for URDFExporter."""
 
-    @patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco.MjData"
-    )
-    def test_export_to_urdf(self, mock_mjdata_class, tmp_path):
+    def test_export_to_urdf(self, tmp_path):
         """Test exporting MJCF to URDF."""
+        # Ensure every subpackage along the dotted path is linked as an
+        # attribute of its parent module.  Other tests in the full suite
+        # may manipulate sys.modules and break this chain, causing
+        # ``mock.patch()`` to raise ``AttributeError`` on lookup.
+        import importlib
+        import sys
+
+        _chain = [
+            "src.engines.physics_engines",
+            "src.engines.physics_engines.mujoco",
+            "src.engines.physics_engines.mujoco.python",
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf",
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io",
+        ]
+        for _mod_name in _chain:
+            importlib.import_module(_mod_name)
+        # Re-link child attributes on each parent so _dot_lookup works
+        for i in range(1, len(_chain)):
+            parent = sys.modules[_chain[i - 1]]
+            child_attr = _chain[i].rsplit(".", 1)[1]
+            if not hasattr(parent, child_attr):
+                setattr(parent, child_attr, sys.modules[_chain[i]])
+
         # Setup comprehensive mujoco mock in sys.modules to bypass C-extension issues
         mock_mujoco = MagicMock()
         mock_mujoco.MjModel = MagicMock
+        mock_mujoco.MjData = MagicMock
         mock_mujoco.mjtObj.mjOBJ_BODY = 1
         mock_mujoco.mjtObj.mjOBJ_JOINT = 2
         mock_mujoco.mjtObj.mjOBJ_MODEL = 3
@@ -231,6 +252,26 @@ class TestURDFExporter:
 
 def test_convenience_functions(sample_urdf, mock_mujoco_model, tmp_path):
     """Test convenience functions."""
+    # Ensure every subpackage along the dotted path is linked as an
+    # attribute of its parent module (see test_export_to_urdf for details).
+    import importlib
+    import sys as _sys
+
+    _chain = [
+        "src.engines.physics_engines",
+        "src.engines.physics_engines.mujoco",
+        "src.engines.physics_engines.mujoco.python",
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf",
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io",
+    ]
+    for _mod_name in _chain:
+        importlib.import_module(_mod_name)
+    for i in range(1, len(_chain)):
+        parent = _sys.modules[_chain[i - 1]]
+        child_attr = _chain[i].rsplit(".", 1)[1]
+        if not hasattr(parent, child_attr):
+            setattr(parent, child_attr, _sys.modules[_chain[i]])
+
     # Import
     mjcf = import_urdf_to_mujoco(sample_urdf)
     assert "<mujoco" in mjcf
