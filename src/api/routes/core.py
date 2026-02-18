@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 from fastapi import APIRouter, Depends
 
 from src.api.utils.datetime_compat import iso_format, utc_now
+from src.shared.python.core.contracts import precondition
 
 from ..dependencies import get_engine_manager
 
@@ -34,6 +35,10 @@ async def root() -> dict[str, str]:
 
 
 @router.get("/health")
+@precondition(
+    lambda engine_manager=None: engine_manager is not None,
+    "Engine manager must be injected",
+)
 async def health_check(
     engine_manager: EngineManager = Depends(get_engine_manager),
 ) -> dict[str, str | int]:

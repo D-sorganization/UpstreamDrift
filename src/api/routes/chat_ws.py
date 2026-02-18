@@ -6,6 +6,7 @@ import contextlib
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -109,6 +110,10 @@ async def list_sessions(request: Request) -> list[dict]:
 
 
 @router.get("/chat/sessions/{session_id}/history")
+@precondition(
+    lambda request, session_id: session_id is not None and len(session_id.strip()) > 0,
+    "Session ID must be a non-empty string",
+)
 async def get_history(request: Request, session_id: str) -> dict:
     """Get message history for a session."""
     messages = request.app.state.chat_service.get_session_history(session_id)

@@ -85,12 +85,13 @@ class TestModelRegistry(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
     def test_load_registry_yaml_error(self, mock_file, mock_exists):
-        """Test loading registry with YAML syntax error."""
+        """Test loading registry with YAML syntax error raises."""
         mock_exists.return_value = True
-        with patch("yaml.safe_load", side_effect=yaml.YAMLError("Error")):
-            registry = ModelRegistry("dummy_path.yaml")
-
-        self.assertEqual(len(registry.models), 0)
+        with (
+            patch("yaml.safe_load", side_effect=yaml.YAMLError("Error")),
+            self.assertRaises(yaml.YAMLError),
+        ):
+            ModelRegistry("dummy_path.yaml")
 
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)

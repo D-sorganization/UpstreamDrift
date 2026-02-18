@@ -43,6 +43,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.contracts import invariant, postcondition, precondition
+from src.shared.python.core.error_utils import SimulationError
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -408,7 +409,7 @@ class DatasetGenerator:
                 continue
 
         if not samples:
-            raise RuntimeError(
+            raise SimulationError(
                 f"All {config.num_samples} samples failed during generation"
             )
 
@@ -694,7 +695,10 @@ class DatasetGenerator:
                         if 0 <= idx < n_q:
                             q0[idx] = pr.sample(rng)
                     except ValueError:
-                        pass
+                        logger.debug(
+                            "Skipping position range %r: not a valid joint index",
+                            pr.name,
+                        )
         elif config.vary_initial_positions:
             q0 = rng.uniform(-0.5, 0.5, n_q)  # type: ignore[assignment]
         else:
@@ -712,7 +716,10 @@ class DatasetGenerator:
                         if 0 <= idx < n_v:
                             v0[idx] = vr.sample(rng)
                     except ValueError:
-                        pass
+                        logger.debug(
+                            "Skipping velocity range %r: not a valid joint index",
+                            vr.name,
+                        )
         elif config.vary_initial_velocities:
             v0 = rng.uniform(-0.1, 0.1, n_v)  # type: ignore[assignment]
         else:

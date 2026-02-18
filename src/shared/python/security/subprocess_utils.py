@@ -410,7 +410,7 @@ def kill_process_tree(pid: int, timeout: float = 5.0) -> bool:
 
             os.kill(pid, signal.SIGTERM)
             return True
-        except ImportError as e:
+        except OSError as e:
             logger.error(f"Failed to kill process {pid}: {e}")
             return False
 
