@@ -62,6 +62,14 @@ def _magnitude_to_color(magnitude: float, max_magnitude: float) -> list[float]:
 
 
 def _extract_engine_state(engine_manager: EngineManager) -> tuple[Any, dict]:
+    """Extract the active engine and its current state.
+
+    Args:
+        engine_manager: The engine manager instance.
+
+    Returns:
+        Tuple of (engine instance or None, state dict).
+    """
     try:
         engine = engine_manager.get_active_engine()  # type: ignore[attr-defined]
     except (AttributeError, RuntimeError):
@@ -79,6 +87,15 @@ def _extract_engine_state(engine_manager: EngineManager) -> tuple[Any, dict]:
 
 
 def _resolve_joint_names(engine: Any, n_joints: int) -> list[str]:
+    """Resolve joint names from the engine, falling back to generic names.
+
+    Args:
+        engine: The active physics engine instance.
+        n_joints: Number of joints to generate names for.
+
+    Returns:
+        List of joint name strings.
+    """
     joint_names: list[str] = []
     if hasattr(engine, "joint_names"):
         joint_names = engine.joint_names
@@ -90,16 +107,43 @@ def _resolve_joint_names(engine: Any, n_joints: int) -> list[str]:
 
 
 def _should_include_force_type(config: ForceOverlayRequest, force_type: str) -> bool:
+    """Check whether a force type should be included based on the config.
+
+    Args:
+        config: The overlay request configuration.
+        force_type: Force type string to check (e.g. "applied", "gravity").
+
+    Returns:
+        True if the force type is included in the config.
+    """
     return force_type in config.force_types or "all" in config.force_types
 
 
 def _resolve_body_name(joint_names: list[str], index: int) -> str:
+    """Resolve a body name from joint names by index, with fallback.
+
+    Args:
+        joint_names: List of known joint names.
+        index: Joint index to look up.
+
+    Returns:
+        The joint name at the given index, or a generic "joint_N" name.
+    """
     if index < len(joint_names):
         return joint_names[index]
     return f"joint_{index}"
 
 
 def _is_filtered_out(config: ForceOverlayRequest, body_name: str) -> bool:
+    """Check whether a body should be excluded by the body filter.
+
+    Args:
+        config: The overlay request configuration.
+        body_name: Name of the body to check.
+
+    Returns:
+        True if the body is filtered out (not in the filter list).
+    """
     return bool(config.body_filter and body_name not in config.body_filter)
 
 
@@ -109,6 +153,17 @@ def _build_applied_torque_vectors(
     joint_names: list[str],
     n_joints: int,
 ) -> list[ForceVector3D]:
+    """Build 3D vectors for applied joint torques.
+
+    Args:
+        config: Overlay request configuration.
+        torques: List of torque values per joint.
+        joint_names: List of joint name strings.
+        n_joints: Number of joints.
+
+    Returns:
+        List of ForceVector3D for non-zero applied torques.
+    """
     if not _should_include_force_type(config, "applied"):
         return []
 
@@ -145,6 +200,16 @@ def _build_gravity_vectors(
     joint_names: list[str],
     n_joints: int,
 ) -> list[ForceVector3D]:
+    """Build 3D vectors for gravity forces on each joint.
+
+    Args:
+        config: Overlay request configuration.
+        joint_names: List of joint name strings.
+        n_joints: Number of joints.
+
+    Returns:
+        List of ForceVector3D for downward gravity forces.
+    """
     if not _should_include_force_type(config, "gravity"):
         return []
 
@@ -171,6 +236,11 @@ def _build_gravity_vectors(
 
 
 def _apply_magnitude_coloring(vectors: list[ForceVector3D]) -> None:
+    """Re-color vectors using a heat-map based on magnitude.
+
+    Args:
+        vectors: List of force vectors to re-color in place.
+    """
     if not vectors:
         return
     max_mag = max(v.magnitude for v in vectors)
@@ -333,7 +403,7 @@ async def get_force_overlays(
             active = engine_manager.get_active_engine()
             if active and hasattr(active, "get_state"):
                 state = active.get_state()
-                sim_time = state.get("time", 0.0)
+                sim_time = float(state.get("time", 0.0))
         except (ValueError, RuntimeError, AttributeError):
             pass
 
@@ -394,7 +464,7 @@ async def update_force_overlay_config(
             active = engine_manager.get_active_engine()
             if active and hasattr(active, "get_state"):
                 state = active.get_state()
-                sim_time = state.get("time", 0.0)
+                sim_time = float(state.get("time", 0.0))
         except (ValueError, RuntimeError, AttributeError):
             pass
 

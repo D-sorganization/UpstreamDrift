@@ -367,12 +367,12 @@ class AnalysisService:
 
         return None  # Unable to determine without more context
 
-    def _to_list(self, data: Any) -> list:
+    def _to_list(self, data: Any) -> list[Any]:
         """Convert numpy array or other data to JSON-serializable list."""
         if data is None:
             return []
         if isinstance(data, np.ndarray):
-            return data.tolist()
+            return list(data.tolist())  # type: ignore[no-any-return]
         if isinstance(data, (list, tuple)):
             return list(data)
         if isinstance(data, (int, float)):
