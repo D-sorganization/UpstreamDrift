@@ -179,6 +179,62 @@ class TestRealTimeController:
 
         controller.disconnect()
 
+    def test_loopback_physics(self) -> None:
+        """Test LOOPBACK physics simulation."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="loopback",
+        )
+        config = RobotConfig(name="test_robot", n_joints=1)
+        controller.connect(config)
+
+        # Trigger initialization
+        controller._read_state()
+
+        # Test TORQUE mode
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.TORQUE,
+            torque_commands=np.array([1.0]),
+        )
+        controller._send_command(cmd)
+
+        q, qd = controller._sim_state  # type: ignore
+        # After 1 step (dt=0.01) with tau=1: v=0.01, p=0.0001
+        assert qd[0] > 0
+        assert q[0] > 0
+
+        # Test VELOCITY mode
+        cmd_vel = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.array([2.0]),
+        )
+        controller._send_command(cmd_vel)
+
+        q_new, qd_new = controller._sim_state  # type: ignore
+        assert qd_new[0] == 2.0
+        assert q_new[0] > q[0]
+
+        # Test POSITION mode
+        cmd_pos = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+            position_targets=np.array([10.0]),
+        )
+        controller._send_command(cmd_pos)
+
+        q_pos, qd_pos = controller._sim_state  # type: ignore
+        assert q_pos[0] == 10.0
+        assert qd_pos[0] == 0.0
+
 
 class TestRobotConfig:
     """Tests for RobotConfig."""
