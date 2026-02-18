@@ -1,4 +1,4 @@
-# Dependabot configuration (Issue #767)
+# Dependabot configuration (Issues #767, #1493)
 # Automatically creates PRs to update dependencies
 
 version: 2
@@ -9,7 +9,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automated"
@@ -30,10 +30,23 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "ci/cd"
       - "automated"
     commit-message:
       prefix: "chore(ci)"
+
+  # npm (UI dependencies)
+  - package-ecosystem: "npm"
+    directory: "/src/ui"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+    commit-message:
+      prefix: "chore(ui-deps)"

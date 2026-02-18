@@ -1,6 +1,24 @@
 ## Summary
 
-Explain what changed and why.
+<!-- 1-3 bullet points describing what this PR does -->
+
+## Type
+
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactoring
+- [ ] Documentation
+- [ ] CI/CD
+
+## Test plan
+
+- [ ] Tests pass locally
+- [ ] New tests added (if applicable)
+
+## Breaking changes?
+
+- [ ] No
+- [ ] Yes (describe below)
 
 ## AI Changes
 
@@ -9,7 +27,6 @@ Explain what changed and why.
 ## Checklist
 
 - [ ] Reproducible: `matlab/run_all.m` (or Python pipeline) completes
-- [ ] Tests pass (MATLAB + Python)
 - [ ] Large binaries tracked via LFS
 - [ ] Env files updated
 - [ ] No secrets added
