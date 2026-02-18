@@ -150,8 +150,10 @@ class TestURDFExporter:
         import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io as urdf_io_mod
 
         mock_mujoco = MagicMock()
-        mock_mujoco.MjModel = MagicMock
-        mock_mujoco.MjData = MagicMock
+        # Do NOT set MjModel/MjData to the MagicMock CLASS; Python 3.11+
+        # raises InvalidSpecError when a Mock is passed as the first
+        # positional arg (interpreted as spec=).  Auto-attributes handle
+        # callability correctly via __call__ -> return_value.
         mock_mujoco.mjtObj.mjOBJ_BODY = 1
         mock_mujoco.mjtObj.mjOBJ_JOINT = 2
         mock_mujoco.mjtObj.mjOBJ_MODEL = 3
