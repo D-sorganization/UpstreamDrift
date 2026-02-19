@@ -71,4 +71,3 @@ Significant lack of documentation in:
 4.  **Accuracy Improvements:** Fix GRF fallback logic and impact model mass calculation.
 5.  **Legal Compliance:** Refactor `pca_analysis.py` and `injury_risk.py` to mitigate patent risks.
 6.  **Advanced Physics:** Implement missing ball flight aerodynamic models.
-
