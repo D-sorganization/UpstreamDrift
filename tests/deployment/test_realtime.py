@@ -182,6 +182,7 @@ class TestRealTimeController:
     def test_loopback_physics(self) -> None:
         """Test LOOPBACK physics simulation."""
         from src.deployment.realtime import (
+            CommunicationType,
             ControlCommand,
             ControlMode,
             RealTimeController,
@@ -192,7 +193,11 @@ class TestRealTimeController:
             control_frequency=100.0,
             communication_type="loopback",
         )
-        config = RobotConfig(name="test_robot", n_joints=1)
+        config = RobotConfig(
+            name="test_robot",
+            n_joints=1,
+            communication_type=CommunicationType.LOOPBACK,
+        )
         controller.connect(config)
 
         # Trigger initialization
@@ -206,7 +211,8 @@ class TestRealTimeController:
         )
         controller._send_command(cmd)
 
-        q, qd = controller._sim_state  # type: ignore
+        # Access internal state from interface
+        q, qd = controller._interface._sim_state  # type: ignore
         # After 1 step (dt=0.01) with tau=1: v=0.01, p=0.0001
         assert qd[0] > 0
         assert q[0] > 0
@@ -219,7 +225,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd_vel)
 
-        q_new, qd_new = controller._sim_state  # type: ignore
+        q_new, qd_new = controller._interface._sim_state  # type: ignore
         assert qd_new[0] == 2.0
         assert q_new[0] > q[0]
 
@@ -231,7 +237,7 @@ class TestRealTimeController:
         )
         controller._send_command(cmd_pos)
 
-        q_pos, qd_pos = controller._sim_state  # type: ignore
+        q_pos, qd_pos = controller._interface._sim_state  # type: ignore
         assert q_pos[0] == 10.0
         assert qd_pos[0] == 0.0
 

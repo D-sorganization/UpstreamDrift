@@ -10,6 +10,7 @@ and real robot hardware with support for:
 from __future__ import annotations
 
 from src.deployment.realtime.controller import (
+    CommunicationType,
     RealTimeController,
     RobotConfig,
     TimingStatistics,
@@ -22,6 +23,7 @@ from src.deployment.realtime.state import (
 )
 
 __all__ = [
+    "CommunicationType",
     "RealTimeController",
     "RobotConfig",
     "RobotState",
