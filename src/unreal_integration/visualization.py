@@ -425,6 +425,59 @@ class HUDDataProvider:
             },  # m/s to mph, m to yards
         }
 
+    def _build_hud_panels(
+        self, metrics: SwingMetrics, conv: dict[str, float]
+    ) -> dict[str, dict[str, Any]]:
+        """Build HUD panel entries from swing metrics.
+
+        Args:
+            metrics: Swing metrics to format.
+            conv: Unit conversion factors for the current unit system.
+
+        Returns:
+            Dictionary of panel_key -> panel_data.
+        """
+        speed_unit = "mph" if self.units == "imperial" else "m/s"
+        deg = "\u00b0"
+
+        # Panel definitions: (key, attr, label, unit, format, multiplier)
+        panel_defs: list[tuple[str, str, str, str, str, float]] = [
+            (
+                "club_head_speed",
+                "club_head_speed",
+                "Club Head Speed",
+                speed_unit,
+                "{:.1f}",
+                conv["speed"],
+            ),
+            (
+                "ball_speed",
+                "estimated_ball_speed",
+                "Ball Speed",
+                speed_unit,
+                "{:.1f}",
+                conv["speed"],
+            ),
+            ("smash_factor", "smash_factor", "Smash Factor", "", "{:.2f}", 1.0),
+            ("x_factor", "x_factor", "X-Factor", deg, "{:.1f}", 1.0),
+            ("attack_angle", "attack_angle", "Attack Angle", deg, "{:+.1f}", 1.0),
+            ("swing_path", "swing_path", "Swing Path", deg, "{:+.1f}", 1.0),
+            ("face_to_path", "face_to_path", "Face to Path", deg, "{:+.1f}", 1.0),
+            ("kinetic_energy", "kinetic_energy", "Kinetic Energy", "J", "{:.0f}", 1.0),
+        ]
+
+        panels: dict[str, dict[str, Any]] = {}
+        for key, attr, label, unit, fmt, multiplier in panel_defs:
+            value = getattr(metrics, attr, None)
+            if value is not None:
+                panels[key] = {
+                    "label": label,
+                    "value": value * multiplier,
+                    "unit": unit,
+                    "format": fmt,
+                }
+        return panels
+
     def get_hud_data(
         self,
         metrics: SwingMetrics | None = None,
@@ -451,77 +504,7 @@ class HUDDataProvider:
         }
 
         if metrics:
-            # Speed panel
-            if metrics.club_head_speed is not None:
-                hud["panels"]["club_head_speed"] = {
-                    "label": "Club Head Speed",
-                    "value": metrics.club_head_speed * conv["speed"],
-                    "unit": "mph" if self.units == "imperial" else "m/s",
-                    "format": "{:.1f}",
-                }
-
-            # Ball speed
-            if metrics.estimated_ball_speed is not None:
-                hud["panels"]["ball_speed"] = {
-                    "label": "Ball Speed",
-                    "value": metrics.estimated_ball_speed * conv["speed"],
-                    "unit": "mph" if self.units == "imperial" else "m/s",
-                    "format": "{:.1f}",
-                }
-
-            # Smash factor
-            if metrics.smash_factor is not None:
-                hud["panels"]["smash_factor"] = {
-                    "label": "Smash Factor",
-                    "value": metrics.smash_factor,
-                    "unit": "",
-                    "format": "{:.2f}",
-                }
-
-            # X-Factor
-            if metrics.x_factor is not None:
-                hud["panels"]["x_factor"] = {
-                    "label": "X-Factor",
-                    "value": metrics.x_factor,
-                    "unit": "\u00b0",  # Degree symbol
-                    "format": "{:.1f}",
-                }
-
-            # Attack angle
-            if metrics.attack_angle is not None:
-                hud["panels"]["attack_angle"] = {
-                    "label": "Attack Angle",
-                    "value": metrics.attack_angle,
-                    "unit": "\u00b0",
-                    "format": "{:+.1f}",
-                }
-
-            # Swing path
-            if metrics.swing_path is not None:
-                hud["panels"]["swing_path"] = {
-                    "label": "Swing Path",
-                    "value": metrics.swing_path,
-                    "unit": "\u00b0",
-                    "format": "{:+.1f}",
-                }
-
-            # Face to path
-            if metrics.face_to_path is not None:
-                hud["panels"]["face_to_path"] = {
-                    "label": "Face to Path",
-                    "value": metrics.face_to_path,
-                    "unit": "\u00b0",
-                    "format": "{:+.1f}",
-                }
-
-            # Kinetic energy
-            if metrics.kinetic_energy is not None:
-                hud["panels"]["kinetic_energy"] = {
-                    "label": "Kinetic Energy",
-                    "value": metrics.kinetic_energy,
-                    "unit": "J",
-                    "format": "{:.0f}",
-                }
+            hud["panels"] = self._build_hud_panels(metrics, conv)
 
         return hud
 
