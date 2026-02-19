@@ -4,21 +4,16 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, closed]
+    types: [closed]
   workflow_run:
     workflows: ["CI Standard"]
     types: [completed]
   schedule:
-    # OVERNIGHT SCHEDULE - All work done before morning (midnight-6 AM PST / 8 AM-2 PM UTC)
-    - cron: "0 0 * * 0,4" # Midnight PST (Mondays) - Assessment Generator
-    - cron: "0 0 * * 0,4" # 12:30 AM PST (Mondays) - Code Quality Reviewer
-    - cron: "0 0 * * 0,4" # 1 AM PST (Mondays) - Completist (incomplete impl)
-    - cron: "0 0 * * 0,4" # 1:30 AM PST (Mondays) - Documentation Auditor
-    - cron: "0 0 * * 0,4" # 2:30 AM PST (Mondays) - Sentinel (security)
-    - cron: "0 0 * * 0,4" # 3 AM PST (Mondays) - Auto-Refactor
-    - cron: "0 0 * * 0,4" # 3:30 AM PST (Mondays) - Issue Resolver (daily fix)
-    - cron: "0 0 * * 0,4" # 5 AM PST (Mondays) - Auto-Rebase
-    - cron: "0 0 * * 0,4" # 4 AM PST (Mondays) - PR Compiler (consolidate PRs)
+    # OVERNIGHT SCHEDULE - Remaining active workers only
+    - cron: "0 0 * * 0,4" # Assessment Generator
+    - cron: "0 0 * * 0,4" # Documentation Auditor
+    - cron: "0 0 * * 0,4" # Auto-Rebase (PR Cleanup)
+    - cron: "0 0 * * 0,4" # PR Compiler (consolidate PRs)
   workflow_dispatch:
     inputs:
       target:
@@ -29,13 +24,8 @@ on:
         options:
           - auto
           - assessment-generator
-          - code-quality-reviewer
-          - completist
           - documentation-auditor
-          - sentinel
-          - auto-refactor
           - auto-rebase
-          - issue-resolver
           - pr-compiler
 
 # SAFEGUARD: Maximum iterations to prevent infinite repair loops
@@ -107,15 +97,10 @@ jobs:
               target = manualTarget;
               console.log(`Manual dispatch: ${target}`);
             }
-            // 1. CI FAILURE -> AUTO-REPAIR or HOTFIX-CREATOR
+            // 1. CI FAILURE -> AUTO-REPAIR
             else if (event === "workflow_run" && context.payload.workflow_run.conclusion === "failure") {
                // Allow bot to trigger repair (handled by check-limits loop protection)
-               const failedBranch = context.payload.workflow_run.head_branch;
-               if (failedBranch === "main" || failedBranch === "master") {
-                  target = "hotfix-creator";
-               } else {
-                  target = "auto-repair";
-               }
+               target = "auto-repair";
             }
             // 2. SCHEDULED RUNS - Route by cron pattern (deterministic) with UTC time fallback
             else if (event === "schedule" || (event === "workflow_dispatch" && (!manualTarget || manualTarget === "auto"))) {
@@ -126,23 +111,8 @@ jobs:
                   case "0 8 */3 * *":
                     target = "assessment-generator";
                     break;
-                  case "30 8 */3 * *":
-                    target = "code-quality-reviewer";
-                    break;
-                  case "0 9 */3 * *":
-                    target = "completist";
-                    break;
                   case "30 9 */3 * *":
                     target = "documentation-auditor";
-                    break;
-                  case "30 10 */3 * *":
-                    target = "sentinel";
-                    break;
-                  case "0 11 */3 * *":
-                    target = "auto-refactor";
-                    break;
-                  case "30 11 */3 * *":
-                    target = "issue-resolver";
                     break;
                   case "0 12 */3 * *":
                     target = "pr-compiler";
@@ -159,22 +129,11 @@ jobs:
               if (target === "none") {
                 const now = new Date();
                 const hour = now.getUTCHours();
-                const minute = now.getUTCMinutes();
 
-                if (hour === 8 && minute < 30) {
+                if (hour === 8) {
                   target = "assessment-generator";
-                } else if (hour === 8 && minute >= 30) {
-                  target = "code-quality-reviewer";
-                } else if (hour === 9 && minute < 30) {
-                  target = "completist";
-                } else if (hour === 9 && minute >= 30) {
+                } else if (hour === 9 || hour === 10) {
                   target = "documentation-auditor";
-                } else if (hour === 10 && minute >= 30) {
-                  target = "sentinel";
-                } else if (hour === 11 && minute < 30) {
-                  target = "auto-refactor";
-                } else if (hour === 11 && minute >= 30) {
-                  target = "issue-resolver";
                 } else if (hour === 12) {
                   target = "pr-compiler";
                 } else if (hour === 13) {
@@ -193,16 +152,7 @@ jobs:
                  target = "doc-scribe";
               }
             }
-            // 4. NEW PR -> TEST GENERATOR
-            else if (event === "pull_request" && context.payload.action === 'opened') {
-               if (actor === 'jules-bot' || actor === 'jules-ai[bot]') {
-                  console.log("Ignoring PR open by bot.");
-                  target = "none";
-               } else {
-                  target = "test-generator";
-               }
-            }
-            // 5. PR CLOSED -> ARCHIVIST
+            // 4. PR CLOSED -> ARCHIVIST
             else if (event === "pull_request" && context.payload.action === 'closed' && context.payload.pull_request.merged) {
                target = "archivist";
             }
@@ -221,31 +171,10 @@ jobs:
       branch: ${{ github.event.workflow_run.head_branch || '' }}
     secrets: inherit
 
-  call-hotfix-creator:
-    needs: triage
-    if: needs.triage.outputs.target == 'hotfix-creator'
-    uses: ./.github/workflows/Jules-Hotfix-Creator.yml
-    with:
-      run_id: ${{ format('{0}', github.event.workflow_run.id) }}
-      failed_branch: ${{ github.event.workflow_run.head_branch || '' }}
-    secrets: inherit
-
   call-scribe:
     needs: triage
     if: needs.triage.outputs.target == 'doc-scribe'
     uses: ./.github/workflows/Jules-Documentation-Auditor.yml
-    secrets: inherit
-
-  call-tests:
-    needs: triage
-    if: needs.triage.outputs.target == 'test-generator'
-    uses: ./.github/workflows/Jules-Test-Generator.yml
-    secrets: inherit
-
-  call-auto-refactor:
-    needs: triage
-    if: needs.triage.outputs.target == 'auto-refactor'
-    uses: ./.github/workflows/Jules-Code-Quality-Fixer.yml
     secrets: inherit
 
   call-auto-rebase:
@@ -260,34 +189,10 @@ jobs:
     uses: ./.github/workflows/Jules-Archivist.yml
     secrets: inherit
 
-  call-sentinel:
-    needs: triage
-    if: needs.triage.outputs.target == 'sentinel'
-    uses: ./.github/workflows/Jules-Sentinel.yml
-    secrets: inherit
-
-  call-code-quality-reviewer:
-    needs: triage
-    if: needs.triage.outputs.target == 'code-quality-reviewer'
-    uses: ./.github/workflows/Jules-Code-Quality-Fixer.yml
-    secrets: inherit
-
   call-assessment-generator:
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
     uses: ./.github/workflows/Jules-Comprehensive-Assessment.yml
-    secrets: inherit
-
-  call-issue-resolver:
-    needs: triage
-    if: needs.triage.outputs.target == 'issue-resolver'
-    uses: ./.github/workflows/Jules-Issue-Resolver.yml
-    secrets: inherit
-
-  call-completist:
-    needs: triage
-    if: needs.triage.outputs.target == 'completist'
-    uses: ./.github/workflows/Jules-Completist.yml
     secrets: inherit
 
   call-documentation-auditor:
