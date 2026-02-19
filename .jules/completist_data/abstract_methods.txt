@@ -1,8 +1,17 @@
 ./.github/workflows/Jules-Comprehensive-Assessment.yml:83:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./.github/workflows/Jules-Completist.yml:62:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
-./scripts/analyze_completist_data.py:189:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./scripts/analyze_completist_data.py:186:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./scripts/refresh_completist_data.py:65:    run_grep("@abstractmethod", os.path.join(DATA_DIR, "abstract_methods.txt"))
 ./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./vendor/ud-tools/scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:36:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:41:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:45:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:49:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:177:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:181:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:185:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:189:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:39:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:45:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:50:    @abstractmethod
@@ -12,12 +21,13 @@
 ./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:20:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:26:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:31:    @abstractmethod
+./vendor/ud-tools/src/shared/python/upstream_drift_tools/calculators/base.py:19:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:67:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:73:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:78:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
-./src/research/deformable/objects.py:151:    @abstractmethod
-./src/research/deformable/objects.py:159:    @abstractmethod
+./src/research/deformable/objects.py:153:    @abstractmethod
+./src/research/deformable/objects.py:161:    @abstractmethod
 ./src/engines/common/simulation_control.py:187:    @abstractmethod
 ./src/engines/common/simulation_control.py:193:    @abstractmethod
 ./src/engines/common/simulation_control.py:205:    @abstractmethod
@@ -45,15 +55,17 @@
 ./src/robotics/planning/collision/geometric_primitives.py:38:    @abstractmethod
 ./src/robotics/planning/collision/geometric_primitives.py:47:    @abstractmethod
 ./src/robotics/planning/collision/geometric_primitives.py:59:    @abstractmethod
-./src/robotics/control/whole_body/qp_solver.py:126:    @abstractmethod
-./src/robotics/control/whole_body/qp_solver.py:138:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:207:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:214:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:218:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:240:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:257:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:268:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:272:    @abstractmethod
+./src/robotics/control/whole_body/qp_solver.py:128:    @abstractmethod
+./src/robotics/control/whole_body/qp_solver.py:140:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:219:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:226:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:230:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:252:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:269:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:280:    @abstractmethod
+./src/unreal_integration/viewer_backends.py:284:    @abstractmethod
+./src/launchers/base.py:307:    @abstractmethod
+./src/launchers/base.py:316:            The @abstractmethod decorator serves as documentation; enforcement
 ./src/tools/model_generation/library/repository.py:41:    @abstractmethod
 ./src/tools/model_generation/library/repository.py:47:    @abstractmethod
 ./src/tools/model_generation/library/repository.py:52:    @abstractmethod
@@ -67,21 +79,22 @@
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:103:    @abstractmethod
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:123:    @abstractmethod
-./src/shared/python/physics/flight_models.py:156:    @abstractmethod
-./src/shared/python/physics/flight_models.py:161:    @abstractmethod
-./src/shared/python/physics/flight_models.py:166:    @abstractmethod
-./src/shared/python/physics/flight_models.py:170:    @abstractmethod
-./src/shared/python/physics/impact_model.py:137:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:290:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:294:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:298:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:307:    @abstractmethod
+./src/shared/python/club_data/display.py:465:    @abstractmethod
+./src/shared/python/physics/flight_models.py:159:    @abstractmethod
+./src/shared/python/physics/flight_models.py:165:    @abstractmethod
+./src/shared/python/physics/flight_models.py:171:    @abstractmethod
+./src/shared/python/physics/flight_models.py:176:    @abstractmethod
+./src/shared/python/physics/impact_model.py:138:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py:293:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py:297:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py:301:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py:310:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:105:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:133:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:159:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:171:    @abstractmethod
-./src/shared/python/engine_core/base_physics_engine.py:241:    @abstractmethod
-./src/shared/python/engine_core/base_physics_engine.py:249:    @abstractmethod
+./src/shared/python/engine_core/base_physics_engine.py:255:    @abstractmethod
+./src/shared/python/engine_core/base_physics_engine.py:263:    @abstractmethod
 ./src/shared/python/engine_core/interfaces.py:52:    @abstractmethod
 ./src/shared/python/engine_core/interfaces.py:65:    @abstractmethod
 ./src/shared/python/engine_core/interfaces.py:90:    @abstractmethod
@@ -104,14 +117,14 @@
 ./src/shared/python/engine_core/interfaces.py:683:    @abstractmethod
 ./src/shared/python/engine_core/interfaces.py:699:    @abstractmethod
 ./src/shared/python/engine_core/interfaces.py:713:    @abstractmethod
-./src/shared/python/pose_editor/core.py:308:    @abstractmethod
-./src/shared/python/pose_editor/core.py:312:    @abstractmethod
-./src/shared/python/pose_editor/core.py:336:    @abstractmethod
-./src/shared/python/pose_editor/core.py:340:    @abstractmethod
-./src/shared/python/pose_editor/core.py:344:    @abstractmethod
-./src/shared/python/pose_editor/core.py:348:    @abstractmethod
-./src/shared/python/pose_editor/core.py:361:    @abstractmethod
-./src/shared/python/pose_editor/core.py:365:    @abstractmethod
+./src/shared/python/pose_editor/core.py:309:    @abstractmethod
+./src/shared/python/pose_editor/core.py:313:    @abstractmethod
+./src/shared/python/pose_editor/core.py:337:    @abstractmethod
+./src/shared/python/pose_editor/core.py:341:    @abstractmethod
+./src/shared/python/pose_editor/core.py:345:    @abstractmethod
+./src/shared/python/pose_editor/core.py:349:    @abstractmethod
+./src/shared/python/pose_editor/core.py:362:    @abstractmethod
+./src/shared/python/pose_editor/core.py:366:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:23:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:31:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:42:    @abstractmethod
@@ -121,13 +134,13 @@
 ./src/shared/python/ui/adapters/thread.py:62:    @abstractmethod
 ./src/shared/python/ui/adapters/thread.py:66:    @abstractmethod
 ./src/shared/python/ui/adapters/thread.py:77:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:443:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:451:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:458:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:467:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:475:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:482:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:486:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:490:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:494:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:501:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:442:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:450:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:457:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:466:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:474:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:481:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:485:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:489:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:493:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py:500:    @abstractmethod
