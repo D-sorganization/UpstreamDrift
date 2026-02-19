@@ -68,7 +68,7 @@ def add_missing_init_files():
                         f.write('"""\nAuto-generated __init__.py\n"""\n')
                     print(f"Fixed: Created {init_path}")
                     fixed_count += 1
-                except Exception as e:
+                except (OSError, PermissionError) as e:
                     print(f"Error creating {init_path}: {e}")
 
     print(f"\nTotal fixed: {fixed_count} missing __init__.py files.")

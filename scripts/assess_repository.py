@@ -429,7 +429,7 @@ def run_all_assessments():
         try:
             report = assessor()
             reports.append(report)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error("Error running assessment: %s", e)
 
     return reports
