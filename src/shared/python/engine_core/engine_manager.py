@@ -239,7 +239,7 @@ class EngineManager(ContractChecker):
         except GolfModelingError:
             self.engine_status[engine_type] = EngineStatus.ERROR
             raise
-        except Exception as e:  # noqa: BLE001 - engine factories may raise anything
+        except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
             self.engine_status[engine_type] = EngineStatus.ERROR
             logger.error(
                 "engine_load_failed",
@@ -293,7 +293,7 @@ class EngineManager(ContractChecker):
             try:
                 self._matlab_engine.quit()
                 logger.info("matlab_engine_shutdown", status="success")
-            except Exception as e:  # noqa: BLE001 - cleanup must not propagate
+            except (RuntimeError, OSError) as e:
                 logger.warning(
                     "matlab_engine_shutdown_failed", error=str(e), exc_info=True
                 )
