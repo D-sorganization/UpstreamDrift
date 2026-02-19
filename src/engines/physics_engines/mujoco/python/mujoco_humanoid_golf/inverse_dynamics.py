@@ -686,84 +686,6 @@ class RecursiveNewtonEuler:
         return result
 
 
-def _validate_inverse_dynamics_export_inputs(
-    times: np.ndarray,
-    results: list[InverseDynamicsResult],
-) -> int:
-    """Validate inputs for inverse dynamics CSV export.
-
-    Args:
-        times: Time array [N].
-        results: List of InverseDynamicsResult.
-
-    Returns:
-        Number of joints (nv) across all results.
-
-    Raises:
-        TypeError: If inputs are wrong type.
-        ValueError: If inputs are empty or inconsistent.
-    """
-    if not isinstance(times, np.ndarray):
-        raise TypeError(f"times must be numpy array, got {type(times).__name__}")
-
-    if not isinstance(results, list):
-        raise TypeError(f"results must be list, got {type(results).__name__}")
-
-    if len(results) == 0:
-        raise ValueError("Cannot export empty results list")
-
-    if len(times) != len(results):
-        raise ValueError(
-            f"Length mismatch: times has {len(times)} elements, "
-            f"results has {len(results)} elements"
-        )
-
-    for i, result in enumerate(results):
-        if not isinstance(result, InverseDynamicsResult):
-            raise TypeError(
-                f"results[{i}] is {type(result).__name__}, "
-                f"expected InverseDynamicsResult"
-            )
-
-    nv = len(results[0].joint_torques)
-    for i, result in enumerate(results):
-        if len(result.joint_torques) != nv:
-            raise ValueError(
-                f"Inconsistent joint count: results[0] has {nv} joints, "
-                f"results[{i}] has {len(result.joint_torques)} joints"
-            )
-    return nv
-
-
-def _build_inverse_dynamics_csv_row(
-    result: InverseDynamicsResult, time_val: float, nv: int
-) -> list[float]:
-    """Build a single CSV row from an inverse dynamics result.
-
-    Args:
-        result: Single timestep result.
-        time_val: Time value for this row.
-        nv: Number of joints.
-
-    Returns:
-        List of float values for the CSV row.
-    """
-    row: list[float] = [time_val]
-    for i in range(nv):
-        row.append(result.joint_torques[i])
-        row.append(
-            result.inertial_torques[i] if result.inertial_torques is not None else 0.0
-        )
-        row.append(
-            result.coriolis_torques[i] if result.coriolis_torques is not None else 0.0
-        )
-        row.append(
-            result.gravity_torques[i] if result.gravity_torques is not None else 0.0
-        )
-    row.append(result.residual_norm)
-    return row
-
-
 def export_inverse_dynamics_to_csv(
     times: np.ndarray,
     results: list[InverseDynamicsResult],
@@ -785,23 +707,83 @@ def export_inverse_dynamics_to_csv(
         FIXED per Assessment A Finding A-007: Added comprehensive input
         validation to prevent malformed CSV output and silent failures.
     """
-    nv = _validate_inverse_dynamics_export_inputs(times, results)
+    # Input validation (Assessment A Finding A-007)
+    if not isinstance(times, np.ndarray):
+        raise TypeError(f"times must be numpy array, got {type(times).__name__}")
+
+    if not isinstance(results, list):
+        raise TypeError(f"results must be list, got {type(results).__name__}")
+
+    if len(results) == 0:
+        raise ValueError("Cannot export empty results list")
+
+    if len(times) != len(results):
+        raise ValueError(
+            f"Length mismatch: times has {len(times)} elements, "
+            f"results has {len(results)} elements"
+        )
+
+    # Validate all results are correct type
+    for i, result in enumerate(results):
+        if not isinstance(result, InverseDynamicsResult):
+            raise TypeError(
+                f"results[{i}] is {type(result).__name__}, "
+                f"expected InverseDynamicsResult"
+            )
+
+    # Validate consistency: all results must have same joint count
+    nv = len(results[0].joint_torques)
+    for i, result in enumerate(results):
+        if len(result.joint_torques) != nv:
+            raise ValueError(
+                f"Inconsistent joint count: results[0] has {nv} joints, "
+                f"results[{i}] has {len(result.joint_torques)} joints"
+            )
 
     with open(filepath, "w", newline="") as f:
         writer = csv.writer(f)
 
         # Header
         header = ["time"]
+
         for i in range(nv):
             header.extend(
                 [f"torque_{i}", f"inertial_{i}", f"coriolis_{i}", f"gravity_{i}"],
             )
+
         header.append("residual_norm")
         writer.writerow(header)
 
         # Data rows
         for t, result in zip(times, results, strict=False):
-            writer.writerow(_build_inverse_dynamics_csv_row(result, t, nv))
+            row = [t]
+
+            for i in range(nv):
+                row.append(result.joint_torques[i])
+                row.append(
+                    (
+                        result.inertial_torques[i]
+                        if result.inertial_torques is not None
+                        else 0.0
+                    ),
+                )
+                row.append(
+                    (
+                        result.coriolis_torques[i]
+                        if result.coriolis_torques is not None
+                        else 0.0
+                    ),
+                )
+                row.append(
+                    (
+                        result.gravity_torques[i]
+                        if result.gravity_torques is not None
+                        else 0.0
+                    ),
+                )
+
+            row.append(result.residual_norm)
+            writer.writerow(row)
 
 
 class InverseDynamicsAnalyzer:

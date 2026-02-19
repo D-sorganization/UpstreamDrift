@@ -74,9 +74,7 @@ _startup_metrics: dict[str, Any] = {
 
 def _resolve_ui_dist_path() -> Path:
     """Resolve the UI build path for static file serving."""
-    from src.shared.python.config.environment import get_golf_ui_dist
-
-    env_override = get_golf_ui_dist()
+    env_override = os.environ.get("GOLF_UI_DIST")
     if env_override:
         return Path(env_override)
     return Path(__file__).parent.parent.parent / "ui" / "dist"
@@ -225,15 +223,16 @@ def _execute_tile_launch(
             "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
         )
         return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
-    logger.error(
-        "[launch] Handler returned failure for tile %s (type=%s)",
-        tile_id,
-        model_type,
-    )
-    return JSONResponse(
-        status_code=500,
-        content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
-    )
+    else:
+        logger.error(
+            "[launch] Handler returned failure for tile %s (type=%s)",
+            tile_id,
+            model_type,
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
+        )
 
 
 def _register_launcher_endpoints(app: FastAPI) -> None:
@@ -685,9 +684,7 @@ def main() -> None:
     app = create_local_app()
 
     host = "127.0.0.1"
-    from src.shared.python.config.environment import get_golf_port
-
-    port = get_golf_port(default=8000)
+    port = int(os.environ.get("GOLF_PORT", 8000))
 
     # Print startup info in matrix green
     print_matrix_status("Loading physics engine manager...")
@@ -702,9 +699,7 @@ def main() -> None:
     # Open browser after server starts
     def open_browser() -> None:
         """Open the default web browser to the local server URL."""
-        from src.shared.python.config.environment import is_browser_suppressed
-
-        if not is_browser_suppressed():
+        if os.environ.get("GOLF_NO_BROWSER") != "true":
             webbrowser.open(f"http://{host}:{port}")
 
     Timer(1.5, open_browser).start()

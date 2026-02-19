@@ -6,12 +6,9 @@ from __future__ import annotations
 import argparse
 import ast
 import json
-import logging
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-
-logger = logging.getLogger(__name__)
 
 DEFAULT_RULES_PATH = Path("scripts/config/dependency_direction_rules.json")
 
@@ -103,7 +100,7 @@ def check_rules(src_root: Path, rules_path: Path, verbose: bool = False) -> list
 
         if not source_path.exists():
             if verbose:
-                logger.debug("  SKIP: %s does not exist", source_dir)
+                print(f"  SKIP: {source_dir} does not exist")
             continue
 
         for py_file in source_path.rglob("*.py"):
@@ -112,7 +109,7 @@ def check_rules(src_root: Path, rules_path: Path, verbose: bool = False) -> list
             # Skip active exceptions
             if rel_path in active_exceptions:
                 if verbose:
-                    logger.debug("  SKIP (exception): %s", rel_path)
+                    print(f"  SKIP (exception): {rel_path}")
                 continue
 
             imports = get_top_level_imports(py_file)
@@ -140,29 +137,23 @@ def main() -> int:
     project_root = script_dir.parent
     src_root = project_root / "src" if (project_root / "src").exists() else project_root
 
-    logging.basicConfig(
-        level=logging.DEBUG if args.verbose else logging.INFO,
-        format="%(message)s",
-    )
-
     if args.verbose:
-        logger.debug("Checking dependency directions in: %s", src_root)
-        logger.debug("")
+        print(f"Checking dependency directions in: {src_root}")
+        print()
 
     violations = check_rules(src_root, rules_path=args.rules_path, verbose=args.verbose)
 
     if violations:
-        logger.error(
-            "FAIL: %d dependency direction violation(s) found:\n", len(violations)
-        )
+        print(f"FAIL: {len(violations)} dependency direction violation(s) found:\n")
         for v in violations:
-            logger.error("  %s", v)
-        logger.error("")
-        logger.error("Fix: Move the import inside a function body, use TYPE_CHECKING,")
-        logger.error("     or relocate the module to the correct layer.")
+            print(f"  {v}")
+        print()
+        print("Fix: Move the import inside a function body, use TYPE_CHECKING,")
+        print("     or relocate the module to the correct layer.")
         return 1
-    logger.info("OK: No dependency direction violations found.")
-    return 0
+    else:
+        print("OK: No dependency direction violations found.")
+        return 0
 
 
 if __name__ == "__main__":

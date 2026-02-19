@@ -1,44 +1,1238 @@
 #!/usr/bin/env python3
-"""Golf Swing Visualizer - Tabular GUI Application.
-
-Supports multiple data sources including motion capture and future Simulink models.
-
-Decomposed into focused modules (SRP):
-- golf_playback_controller.py: SmoothPlaybackController
-- golf_gui_tabs.py: MotionCaptureTab, SimulinkModelTab, ComparisonTab
-- golf_visualizer_widget.py: GolfVisualizerWidget (OpenGL)
-- golf_gui_styles.py: QSS stylesheet constants
+"""
+Golf Swing Visualizer - Tabular GUI Application
+Supports multiple data sources including motion capture and future Simulink models
 """
 
 from __future__ import annotations
 
 import logging
 import sys
+import traceback
+from copy import copy
 
-from golf_gui_styles import get_full_modern_style
-from golf_gui_tabs import ComparisonTab, MotionCaptureTab, SimulinkModelTab
+import moderngl as mgl
+import numpy as np
+import pandas as pd
 
-# Re-export extracted classes for backward compatibility
-from golf_playback_controller import SmoothPlaybackController  # noqa: F401
+# Local imports
+from golf_data_core import FrameData, FrameProcessor, RenderConfig
+from golf_opengl_renderer import OpenGLRenderer
 from golf_video_export import VideoExportDialog
-from golf_visualizer_widget import GolfVisualizerWidget  # noqa: F401
+from PyQt6.QtCore import (
+    QEasingCurve,
+    QObject,
+    QPropertyAnimation,
+    Qt,
+    pyqtProperty,
+    pyqtSignal,
+)
 from PyQt6.QtGui import QAction, QKeySequence
+
+# OpenGL imports
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+
+# PyQt6 imports
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QComboBox,
     QGridLayout,
     QGroupBox,
     QLabel,
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QSlider,
     QStatusBar,
     QTabWidget,
     QVBoxLayout,
     QWidget,
 )
+from wiffle_data_loader import MotionDataLoader
 
 logger = logging.getLogger(__name__)
+
+# ============================================================================
+# SMOOTH PLAYBACK CONTROLLER
+# ============================================================================
+
+
+class SmoothPlaybackController(QObject):
+    """
+    Smooth playback controller with frame interpolation for 60+ FPS animation
+
+    Features:
+    - VSync-synchronized rendering (60+ FPS)
+    - Frame interpolation for smooth motion between keyframes
+    - Variable playback speed
+    - Scrubbing support
+    """
+
+    # Signals
+    frameUpdated = pyqtSignal(FrameData)  # Emits interpolated frame data
+    positionChanged = pyqtSignal(float)  # Emits current position (0.0 to total_frames)
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+
+        # Frame data
+        self.frame_processor: FrameProcessor | None = None
+        self._current_position: float = 0.0
+        self._playback_speed: float = 1.0
+
+        # Animation
+        self.animation = QPropertyAnimation(self, b"position")
+        self.animation.setEasingCurve(QEasingCurve.Type.Linear)
+        self.animation.valueChanged.connect(self._on_position_changed)
+        self.animation.finished.connect(self._on_animation_finished)
+
+        # State
+        self.is_playing = False
+        self.loop_playback = True  # Default to looping
+
+    def load_frame_processor(self, frame_processor: FrameProcessor) -> None:
+        """Load frame processor with motion data"""
+        self.frame_processor = frame_processor
+        self.stop()
+        self.seek(0.0)
+
+    # ========================================================================
+    # Position Property (for QPropertyAnimation)
+    # ========================================================================
+
+    @pyqtProperty(float)
+    def position(self) -> float:
+        """Current playback position (0.0 to total_frames - 1)"""
+        return self._current_position
+
+    @position.setter
+    def position(self, value: float) -> None:
+        """Set playback position with interpolation"""
+        if self.frame_processor is None:
+            return
+
+        total_frames = len(self.frame_processor.time_vector)
+        self._current_position = np.clip(value, 0.0, total_frames - 1)
+        self.positionChanged.emit(self._current_position)
+
+        # Interpolate frame data
+        interpolated_frame = self._get_interpolated_frame(self._current_position)
+        self.frameUpdated.emit(interpolated_frame)
+
+    # ========================================================================
+    # Playback Control
+    # ========================================================================
+
+    def play(self) -> None:
+        """Start smooth playback"""
+        if self.frame_processor is None:
+            return
+
+        if self.is_playing:
+            return  # Already playing
+
+        total_frames = len(self.frame_processor.time_vector)
+
+        # Calculate duration based on actual data time span
+        start_pos = self._current_position
+        end_pos = total_frames - 1
+
+        if start_pos >= end_pos - 0.1:  # Near end, restart from beginning
+            start_pos = 0.0
+            self.seek(0.0)
+
+        # Duration in milliseconds (maintain original timing)
+        frame_time_ms = 33.33  # ~30 FPS from motion capture
+        duration_ms = int((end_pos - start_pos) * frame_time_ms / self._playback_speed)
+
+        # Setup animation
+        self.animation.setStartValue(start_pos)
+        self.animation.setEndValue(end_pos)
+        self.animation.setDuration(duration_ms)
+        self.animation.start()
+
+        self.is_playing = True
+
+    def pause(self) -> None:
+        """Pause playback"""
+        if not self.is_playing:
+            return
+
+        self.animation.pause()
+        self.is_playing = False
+
+    def stop(self) -> None:
+        """Stop playback and reset to beginning"""
+        self.animation.stop()
+        self.is_playing = False
+        self.seek(0.0)
+
+    def toggle_playback(self) -> None:
+        """Toggle between play and pause"""
+        if self.is_playing:
+            self.pause()
+        else:
+            self.play()
+
+    def seek(self, position: float) -> None:
+        """Seek to specific frame position"""
+        if self.frame_processor is None:
+            return
+
+        was_playing = self.is_playing
+
+        if was_playing:
+            self.animation.stop()
+
+        self.position = position
+
+        if was_playing:
+            self.play()
+
+    def set_playback_speed(self, speed: float) -> None:
+        """Set playback speed multiplier (0.5 = half speed, 2.0 = double speed)"""
+        self._playback_speed = np.clip(speed, 0.1, 10.0)
+
+        # If playing, restart with new speed
+        if self.is_playing:
+            current_pos = self._current_position
+            self.pause()
+            self.seek(current_pos)
+            self.play()
+
+    # ========================================================================
+    # Frame Interpolation (The Magic!)
+    # ========================================================================
+
+    def _get_interpolated_frame(self, position: float) -> FrameData:
+        """
+        Get interpolated frame data at fractional position
+
+        For example:
+        - position = 5.0 → Frame 5 exactly
+        - position = 5.7 → 70% between frame 5 and 6
+
+        This creates smooth motion between keyframes!
+        """
+        if self.frame_processor is None:
+            raise ValueError("No frame processor loaded")
+
+        total_frames = len(self.frame_processor.time_vector)
+
+        # Clamp position
+        position = np.clip(position, 0.0, total_frames - 1)
+
+        # Get integer frame indices
+        low_idx = int(np.floor(position))
+        high_idx = min(low_idx + 1, total_frames - 1)
+
+        # Calculate interpolation factor (0.0 to 1.0)
+        t = position - low_idx
+
+        # Get frames at integer indices
+        frame_low = self.frame_processor.get_frame_data(low_idx)
+        frame_high = self.frame_processor.get_frame_data(high_idx)
+
+        # Interpolate all positions
+        return self._lerp_frame_data(frame_low, frame_high, t)
+
+    @staticmethod
+    def _lerp_frame_data(frame_a: FrameData, frame_b: FrameData, t: float) -> FrameData:
+        """
+        Linear interpolation between two frames
+
+        Args:
+            frame_a: Starting frame
+            frame_b: Ending frame
+            t: Interpolation factor (0.0 = frame_a, 1.0 = frame_b)
+
+        Returns:
+            Interpolated frame data
+        """
+        result = copy(frame_a)
+
+        # List of all position attributes to interpolate
+        position_attrs = [
+            "left_wrist",
+            "left_elbow",
+            "left_shoulder",
+            "right_wrist",
+            "right_elbow",
+            "right_shoulder",
+            "hub",
+            "butt",
+            "clubhead",
+            "midpoint",
+        ]
+
+        # Lerp each position: result = a * (1 - t) + b * t
+        for attr in position_attrs:
+            if not hasattr(frame_a, attr) or not hasattr(frame_b, attr):
+                continue
+
+            pos_a = getattr(frame_a, attr)
+            pos_b = getattr(frame_b, attr)
+
+            # Check for valid data
+            if np.isfinite(pos_a).all() and np.isfinite(pos_b).all():
+                interpolated_pos = pos_a * (1.0 - t) + pos_b * t
+                setattr(result, attr, interpolated_pos)
+
+        # Interpolate forces
+        result.forces = {}
+        if hasattr(frame_a, "forces") and hasattr(frame_b, "forces"):
+            for key in frame_a.forces:
+                if key in frame_b.forces:
+                    f_a = frame_a.forces[key]
+                    f_b = frame_b.forces[key]
+                    if np.isfinite(f_a).all() and np.isfinite(f_b).all():
+                        result.forces[key] = f_a * (1.0 - t) + f_b * t
+                    else:
+                        result.forces[key] = f_a
+
+        # Interpolate torques
+        result.torques = {}
+        if hasattr(frame_a, "torques") and hasattr(frame_b, "torques"):
+            for key in frame_a.torques:
+                if key in frame_b.torques:
+                    t_a = frame_a.torques[key]
+                    t_b = frame_b.torques[key]
+                    if np.isfinite(t_a).all() and np.isfinite(t_b).all():
+                        result.torques[key] = t_a * (1.0 - t) + t_b * t
+                    else:
+                        result.torques[key] = t_a
+
+        return result
+
+    # ========================================================================
+    # Internal Callbacks
+    # ========================================================================
+
+    def _on_position_changed(self, value: float) -> None:
+        """Called by QPropertyAnimation on every frame update"""
+        # Position property setter handles the interpolation
+
+    def _on_animation_finished(self) -> None:
+        """Called when animation completes"""
+        self.is_playing = False
+
+        if self.loop_playback:
+            self.seek(0.0)
+            self.play()
+
+
+# ============================================================================
+# TAB WIDGETS
+# ============================================================================
+
+
+class MotionCaptureTab(QWidget):
+    """Tab for motion capture data visualization with smooth playback"""
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.parent = parent
+        self.frame_processor = None
+
+        # Use smooth playback controller instead of QTimer
+        self.playback_controller = SmoothPlaybackController(self)
+        self.playback_controller.frameUpdated.connect(self._on_smooth_frame_updated)
+        self.playback_controller.positionChanged.connect(self._on_position_changed)
+
+        self._setup_ui()
+        self._setup_connections()
+
+    def _setup_ui(self) -> None:
+        """Setup the motion capture tab UI"""
+        layout = QVBoxLayout()
+
+        # Control panel
+        control_panel = self._create_control_panel()
+        layout.addWidget(control_panel)
+
+        # 3D visualization area
+        self.opengl_widget = GolfVisualizerWidget()
+        layout.addWidget(self.opengl_widget)
+
+        # Status bar
+        self.status_label = QLabel("Ready - Load motion capture data to begin")
+        layout.addWidget(self.status_label)
+
+        self.setLayout(layout)
+
+    def _create_control_panel(self) -> QGroupBox:
+        """Create the control panel for motion capture data"""
+        panel = QGroupBox("Motion Capture Controls")
+        layout = QGridLayout()
+
+        # Data selection
+        layout.addWidget(QLabel("Swing Type:"), 0, 0)
+        self.swing_combo = QComboBox()
+        self.swing_combo.addItems(["TW Wiffle", "TW ProV1", "GW Wiffle", "GW ProV1"])
+        layout.addWidget(self.swing_combo, 0, 1)
+
+        # Load button
+        self.load_button = QPushButton("Load Data")
+        self.load_button.setMaximumWidth(100)  # Make button smaller
+        layout.addWidget(self.load_button, 0, 2)
+
+        # Playback controls
+        layout.addWidget(QLabel("Playback:"), 1, 0)
+
+        self.play_button = QPushButton("Play")
+        layout.addWidget(self.play_button, 1, 1)
+
+        self.frame_slider = QSlider(Qt.Orientation.Horizontal)
+        self.frame_slider.setMinimum(0)
+        self.frame_slider.setMaximum(100)
+        layout.addWidget(self.frame_slider, 1, 2)
+
+        self.frame_label = QLabel("Frame: 0/0")
+        layout.addWidget(self.frame_label, 1, 3)
+
+        # Visualization options
+        layout.addWidget(QLabel("Display:"), 2, 0)
+
+        self.show_body_check = QCheckBox("Body Segments")
+        self.show_body_check.setChecked(True)
+        layout.addWidget(self.show_body_check, 2, 1)
+
+        self.show_club_check = QCheckBox("Golf Club")
+        self.show_club_check.setChecked(True)
+        layout.addWidget(self.show_club_check, 2, 2)
+
+        self.show_ground_check = QCheckBox("Ground")
+        self.show_ground_check.setChecked(True)
+        layout.addWidget(self.show_ground_check, 2, 3)
+
+        panel.setLayout(layout)
+        return panel
+
+    def _setup_connections(self) -> None:
+        """Setup signal connections"""
+        self.load_button.clicked.connect(self._load_motion_capture_data)
+        self.play_button.clicked.connect(self._toggle_playback)
+        self.frame_slider.valueChanged.connect(self._on_slider_moved)
+        self.swing_combo.currentTextChanged.connect(self._on_swing_changed)
+
+        # Visualization checkboxes don't need connections anymore
+        # (handled by smooth frame updates)
+
+    def _load_motion_capture_data(self) -> None:
+        """Load motion capture data"""
+        try:
+            swing_type = self.swing_combo.currentText()
+            self.status_label.setText(f"Loading {swing_type} data...")
+
+            # Load data using the existing MotionDataLoader
+            loader = MotionDataLoader()
+            excel_data = loader.load_data()  # Load the Excel data first
+            baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(
+                excel_data
+            )
+
+            # Create frame processor with config
+            config = RenderConfig()
+            self.frame_processor = FrameProcessor(
+                (baseq_data, ztcfq_data, deltaq_data), config
+            )
+
+            # Load into smooth playback controller
+            self.playback_controller.load_frame_processor(self.frame_processor)
+
+            # Update UI
+            total_frames = len(self.frame_processor.time_vector)
+            self.frame_slider.setMaximum(total_frames - 1)
+            self.frame_label.setText(f"Frame: 0/{total_frames}")
+
+            # Initialize visualization
+            self.opengl_widget.load_data_from_dataframes(
+                (baseq_data, ztcfq_data, deltaq_data)
+            )
+
+            self.status_label.setText(
+                f"Loaded {swing_type} data successfully - Smooth playback ready!"
+            )
+
+        except (RuntimeError, ValueError, OSError) as e:
+            self.status_label.setText(f"Error loading data: {str(e)}")
+            traceback.print_exc()
+
+    def _on_swing_changed(self, swing_type: str) -> None:
+        """Handle swing type change"""
+        if self.frame_processor is not None:
+            self._load_motion_capture_data()
+
+    def _toggle_playback(self) -> None:
+        """Toggle smooth playback"""
+        if not self.frame_processor:
+            return
+
+        self.playback_controller.toggle_playback()
+
+        if self.playback_controller.is_playing:
+            self.play_button.setText("Pause")
+        else:
+            self.play_button.setText("Play")
+
+    def _on_slider_moved(self, value: int) -> None:
+        """Handle manual slider movement (scrubbing)"""
+        # Seek to slider position for smooth scrubbing
+        self.playback_controller.seek(float(value))
+
+    def _on_position_changed(self, position: float) -> None:
+        """Update UI when playback position changes"""
+        total_frames = (
+            len(self.frame_processor.time_vector) if self.frame_processor else 0
+        )
+
+        # Update frame label with fractional position for smooth display
+        self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
+
+        # Update slider (without triggering valueChanged)
+        self.frame_slider.blockSignals(True)
+        self.frame_slider.setValue(int(position))
+        self.frame_slider.blockSignals(False)
+
+    def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
+        """Called on every interpolated frame update (60+ FPS!)"""
+        if not self.opengl_widget.renderer:
+            return
+
+        try:
+            # Get current render config from UI checkboxes
+            render_config = RenderConfig()
+            render_config.show_body_segments = {
+                "left_forearm": self.show_body_check.isChecked(),
+                "left_upper_arm": self.show_body_check.isChecked(),
+                "right_forearm": self.show_body_check.isChecked(),
+                "right_upper_arm": self.show_body_check.isChecked(),
+                "left_shoulder_neck": self.show_body_check.isChecked(),
+                "right_shoulder_neck": self.show_body_check.isChecked(),
+            }
+            render_config.show_club = self.show_club_check.isChecked()
+            render_config.show_ground = self.show_ground_check.isChecked()
+
+            # Update 3D visualization with interpolated frame
+            self.opengl_widget.update_frame(frame_data, render_config)
+
+        except ImportError as e:
+            self.status_label.setText(f"Visualization error: {str(e)}")
+
+
+class SimulinkModelTab(QWidget):
+    """Tab for Simulink model data visualization"""
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.parent = parent
+        self.frame_processor = None
+
+        # Use smooth playback controller
+        self.playback_controller = SmoothPlaybackController(self)
+        self.playback_controller.frameUpdated.connect(self._on_smooth_frame_updated)
+        self.playback_controller.positionChanged.connect(self._on_position_changed)
+
+        self._setup_ui()
+        self._setup_connections()
+
+    def _setup_ui(self) -> None:
+        """Setup the Simulink model tab UI"""
+        layout = QVBoxLayout()
+
+        # Control panel
+        control_panel = self._create_control_panel()
+        layout.addWidget(control_panel)
+
+        # 3D visualization area
+        self.opengl_widget = GolfVisualizerWidget()
+        layout.addWidget(self.opengl_widget)
+
+        # Status bar
+        self.status_label = QLabel("Ready - Load Simulink model data to begin")
+        layout.addWidget(self.status_label)
+
+        self.setLayout(layout)
+
+    def _create_control_panel(self) -> QGroupBox:
+        """Create the control panel for Simulink model data"""
+        panel = QGroupBox("Simulink Model Controls")
+        layout = QGridLayout()
+
+        # Data selection
+        layout.addWidget(QLabel("Model Source:"), 0, 0)
+        self.model_combo = QComboBox()
+        self.model_combo.addItems(
+            ["Simscape Multibody", "MuJoCo", "Drake", "Pinocchio"]
+        )
+        layout.addWidget(self.model_combo, 0, 1)
+
+        # Load button
+        self.load_button = QPushButton("Load Model Data")
+        self.load_button.setMaximumWidth(150)
+        layout.addWidget(self.load_button, 0, 2)
+
+        # Playback controls
+        layout.addWidget(QLabel("Playback:"), 1, 0)
+
+        self.play_button = QPushButton("Play")
+        layout.addWidget(self.play_button, 1, 1)
+
+        self.frame_slider = QSlider(Qt.Orientation.Horizontal)
+        self.frame_slider.setMinimum(0)
+        self.frame_slider.setMaximum(100)
+        layout.addWidget(self.frame_slider, 1, 2)
+
+        self.frame_label = QLabel("Frame: 0/0")
+        layout.addWidget(self.frame_label, 1, 3)
+
+        # Visualization options
+        layout.addWidget(QLabel("Display:"), 2, 0)
+
+        self.show_body_check = QCheckBox("Robot Segments")
+        self.show_body_check.setChecked(True)
+        layout.addWidget(self.show_body_check, 2, 1)
+
+        self.show_club_check = QCheckBox("Golf Club")
+        self.show_club_check.setChecked(True)
+        layout.addWidget(self.show_club_check, 2, 2)
+
+        self.show_ground_check = QCheckBox("Ground")
+        self.show_ground_check.setChecked(True)
+        layout.addWidget(self.show_ground_check, 2, 3)
+
+        panel.setLayout(layout)
+        return panel
+
+    def _setup_connections(self) -> None:
+        """Setup signal connections"""
+        self.load_button.clicked.connect(self._load_model_data)
+        self.play_button.clicked.connect(self._toggle_playback)
+        self.frame_slider.valueChanged.connect(self._on_slider_moved)
+
+    def _load_model_data(self) -> None:
+        """Load model data (currently using MotionDataLoader as proxy)"""
+        try:
+            model_source = self.model_combo.currentText()
+            self.status_label.setText(f"Loading {model_source} data...")
+
+            # Load data using the existing MotionDataLoader (proxy for now)
+            loader = MotionDataLoader()
+            excel_data = loader.load_data()
+            baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(
+                excel_data
+            )
+
+            # Create frame processor with config
+            config = RenderConfig()
+            self.frame_processor = FrameProcessor(
+                (baseq_data, ztcfq_data, deltaq_data), config
+            )
+
+            # Load into smooth playback controller
+            self.playback_controller.load_frame_processor(self.frame_processor)
+
+            # Update UI
+            total_frames = len(self.frame_processor.time_vector)
+            self.frame_slider.setMaximum(total_frames - 1)
+            self.frame_label.setText(f"Frame: 0/{total_frames}")
+
+            # Initialize visualization
+            self.opengl_widget.load_data_from_dataframes(
+                (baseq_data, ztcfq_data, deltaq_data)
+            )
+
+            self.status_label.setText(f"Loaded {model_source} data successfully")
+
+        except (RuntimeError, ValueError, OSError) as e:
+            self.status_label.setText(f"Error loading data: {str(e)}")
+            traceback.print_exc()
+
+    def _toggle_playback(self) -> None:
+        """Toggle smooth playback"""
+        if not self.frame_processor:
+            return
+
+        self.playback_controller.toggle_playback()
+
+        if self.playback_controller.is_playing:
+            self.play_button.setText("Pause")
+        else:
+            self.play_button.setText("Play")
+
+    def _on_slider_moved(self, value: int) -> None:
+        """Handle manual slider movement"""
+        self.playback_controller.seek(float(value))
+
+    def _on_position_changed(self, position: float) -> None:
+        """Update UI when playback position changes"""
+        total_frames = (
+            len(self.frame_processor.time_vector) if self.frame_processor else 0
+        )
+        self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
+        self.frame_slider.blockSignals(True)
+        self.frame_slider.setValue(int(position))
+        self.frame_slider.blockSignals(False)
+
+    def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
+        """Called on every interpolated frame update"""
+        if not self.opengl_widget.renderer:
+            return
+
+        try:
+            render_config = RenderConfig()
+            # For robot model, we might want different segment mapping
+            render_config.show_body_segments = {
+                "left_forearm": self.show_body_check.isChecked(),
+                "left_upper_arm": self.show_body_check.isChecked(),
+                "right_forearm": self.show_body_check.isChecked(),
+                "right_upper_arm": self.show_body_check.isChecked(),
+                "left_shoulder_neck": self.show_body_check.isChecked(),
+                "right_shoulder_neck": self.show_body_check.isChecked(),
+            }
+            render_config.show_club = self.show_club_check.isChecked()
+            render_config.show_ground = self.show_ground_check.isChecked()
+            # Distinguish model data visually
+            # (e.g., could add color override in RenderConfig later)
+
+            self.opengl_widget.update_frame(frame_data, render_config)
+
+        except ImportError as e:
+            self.status_label.setText(f"Visualization error: {str(e)}")
+
+
+class ComparisonTab(QWidget):
+    """Tab for comparing motion capture vs Simulink model data"""
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.parent = parent
+        self.frame_processor_mocap = None
+        self.frame_processor_model = None
+
+        # Shared playback controller driving both
+        self.playback_controller = SmoothPlaybackController(self)
+        self.playback_controller.frameUpdated.connect(self._on_smooth_frame_updated)
+        self.playback_controller.positionChanged.connect(self._on_position_changed)
+
+        self._setup_ui()
+        self._setup_connections()
+
+    def _setup_ui(self) -> None:
+        """Setup the comparison tab UI"""
+        layout = QVBoxLayout()
+
+        # Control panel
+        control_panel = self._create_control_panel()
+        layout.addWidget(control_panel)
+
+        # Split view visualization area
+        split_layout = QGridLayout()
+
+        # Left: Motion Capture
+        self.mocap_widget = GolfVisualizerWidget()
+        split_layout.addWidget(QLabel("Reference (Motion Capture)"), 0, 0)
+        split_layout.addWidget(self.mocap_widget, 1, 0)
+
+        # Right: Model
+        self.model_widget = GolfVisualizerWidget()
+        split_layout.addWidget(QLabel("Simulation (Model)"), 0, 1)
+        split_layout.addWidget(self.model_widget, 1, 1)
+
+        layout.addLayout(split_layout)
+
+        # Metrics Panel
+        self.metrics_label = QLabel("Comparison Metrics: Load data to begin analysis")
+        self.metrics_label.setStyleSheet(
+            "font-weight: bold; color: #333; padding: 5px;"
+        )
+        layout.addWidget(self.metrics_label)
+
+        self.setLayout(layout)
+
+    def _create_control_panel(self) -> QGroupBox:
+        """Create comparison controls"""
+        panel = QGroupBox("Comparison Controls")
+        layout = QGridLayout()
+
+        # Load buttons
+        self.load_btn = QPushButton("Load Comparison Data")
+        layout.addWidget(self.load_btn, 0, 0)
+
+        # Playback controls
+        layout.addWidget(QLabel("Playback:"), 0, 1)
+        self.play_button = QPushButton("Play Sync")
+        layout.addWidget(self.play_button, 0, 2)
+
+        self.frame_slider = QSlider(Qt.Orientation.Horizontal)
+        self.frame_slider.setMinimum(0)
+        self.frame_slider.setMaximum(100)
+        layout.addWidget(self.frame_slider, 0, 3)
+
+        self.frame_label = QLabel("Frame: 0/0")
+        layout.addWidget(self.frame_label, 0, 4)
+
+        panel.setLayout(layout)
+        return panel
+
+    def _setup_connections(self) -> None:
+        self.load_btn.clicked.connect(self._load_comparison_data)
+        self.play_button.clicked.connect(self._toggle_playback)
+        self.frame_slider.valueChanged.connect(self._on_slider_moved)
+
+    def _load_comparison_data(self) -> None:
+        """Load two datasets for comparison"""
+        try:
+            self.metrics_label.setText("Loading datasets...")
+
+            # Load Data 1 (MoCap)
+            loader1 = MotionDataLoader()
+            excel_data1 = loader1.load_data()  # Usually prompts file dialog
+            baseq1, ztcfq1, deltaq1 = loader1.convert_to_gui_format(excel_data1)
+            config1 = RenderConfig()
+            self.frame_processor_mocap = FrameProcessor(
+                (baseq1, ztcfq1, deltaq1), config1
+            )
+
+            # Load Data 2 (Model) - Reusing same loader for prototype
+            # ideally would prompt for second file or load specific model output
+            loader2 = MotionDataLoader()
+            excel_data2 = loader2.load_data()
+            baseq2, ztcfq2, deltaq2 = loader2.convert_to_gui_format(excel_data2)
+            config2 = RenderConfig()
+            self.frame_processor_model = FrameProcessor(
+                (baseq2, ztcfq2, deltaq2), config2
+            )
+
+            # Initialize visualizers
+            self.mocap_widget.load_data_from_dataframes((baseq1, ztcfq1, deltaq1))
+            self.model_widget.load_data_from_dataframes((baseq2, ztcfq2, deltaq2))
+
+            # Set controller to drive based on MoCap length (assuming same or similar)
+            self.playback_controller.load_frame_processor(self.frame_processor_mocap)
+
+            # Update UI
+            total_frames = len(self.frame_processor_mocap.time_vector)
+            self.frame_slider.setMaximum(total_frames - 1)
+            self.frame_label.setText(f"Frame: 0/{total_frames}")
+
+            self.metrics_label.setText("Datasets Loaded. Ready to Compare.")
+
+        except (RuntimeError, ValueError, OSError) as e:
+            self.metrics_label.setText(f"Error loading data: {str(e)}")
+            traceback.print_exc()
+
+    def _toggle_playback(self) -> None:
+        if not self.frame_processor_mocap:
+            return
+        self.playback_controller.toggle_playback()
+        text = "Pause Sync" if self.playback_controller.is_playing else "Play Sync"
+        self.play_button.setText(text)
+
+    def _on_slider_moved(self, value: int) -> None:
+        self.playback_controller.seek(float(value))
+
+    def _on_position_changed(self, position: float) -> None:
+        if self.frame_processor_mocap:
+            total_frames = len(self.frame_processor_mocap.time_vector)
+        else:
+            total_frames = 0
+        self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
+        self.frame_slider.blockSignals(True)
+        self.frame_slider.setValue(int(position))
+        self.frame_slider.blockSignals(False)
+
+    def _on_smooth_frame_updated(self, frame_data_mocap: FrameData) -> None:
+        """Update both visualizers and metrics"""
+        if not self.frame_processor_model:
+            return
+
+        # 1. Update MoCap View
+        if self.mocap_widget.renderer:
+            self.mocap_widget.update_frame(frame_data_mocap, RenderConfig())
+
+        # 2. Get Interpolated Model Frame at same position
+        # We manually use the controller's position to interpolate the model frame
+        # assuming the controller position is valid for both (same frame rate/count)
+        pos = self.playback_controller.position
+        # Use private method _get_interpolated_frame from controller is tricky
+        # because controller is bound to mocap processor.
+        # Workaround: Use helper logic directly or subclass/modify controller.
+        # Simpler: Get frame from model processor using integer index for now,
+        # or implement lerp locally.
+
+        # Let's implement local lerp for model frame to keep it smooth
+        total_frames_model = len(self.frame_processor_model.time_vector)
+        pos_clamped = np.clip(pos, 0.0, total_frames_model - 1)
+        low_idx = int(np.floor(pos_clamped))
+        high_idx = min(low_idx + 1, total_frames_model - 1)
+        t = pos_clamped - low_idx
+
+        frame_low = self.frame_processor_model.get_frame_data(low_idx)
+        frame_high = self.frame_processor_model.get_frame_data(high_idx)
+        frame_data_model = SmoothPlaybackController._lerp_frame_data(
+            frame_low, frame_high, t
+        )
+
+        # Update Model View
+        if self.model_widget.renderer:
+            self.model_widget.update_frame(frame_data_model, RenderConfig())
+
+        # 3. Calculate Metrics (e.g. Midpoint Distance)
+        mp1 = frame_data_mocap.midpoint
+        mp2 = frame_data_model.midpoint
+        if np.isfinite(mp1).all() and np.isfinite(mp2).all():
+            dist = np.linalg.norm(mp1 - mp2)
+            self.metrics_label.setText(
+                f"Comparison Metrics | Midpoint Error: {dist:.4f} m"
+            )
+
+
+# ============================================================================
+# OPENGL WIDGET
+# ============================================================================
+
+
+class GolfVisualizerWidget(QOpenGLWidget):
+    """OpenGL widget for 3D golf swing visualization"""
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.renderer = None
+        self.frame_processor = None
+        self.current_frame_data = None
+        self.current_render_config = None
+
+        # Camera state - Fixed for proper golf views
+        self.camera_distance = 3.0
+        self.camera_azimuth = 0.0  # Face-on view (looking at golfer from front)
+        self.camera_elevation = 15.0  # Slightly elevated for better view
+        self.camera_target = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+
+        # Ground level tracking
+        self.ground_level = 0.0
+
+        # Mouse interaction
+        self.last_mouse_pos = None
+        self.mouse_pressed = False
+
+        # Set focus policy for keyboard events
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    def initializeGL(self) -> None:
+        """Initialize OpenGL context"""
+        try:
+            # Create moderngl context
+            self.ctx = mgl.create_context()
+
+            # Initialize renderer
+            self.renderer = OpenGLRenderer()
+            self.renderer.initialize(self.ctx)
+
+            # Set viewport
+            self.renderer.set_viewport(self.width(), self.height())
+
+            logger.info("✅ OpenGL context initialized")
+            logger.info("   Version: %s", self.ctx.info["GL_VERSION"])
+            logger.info("   Vendor: %s", self.ctx.info["GL_VENDOR"])
+            logger.info("   Renderer: %s", self.ctx.info["GL_RENDERER"])
+
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("❌ OpenGL initialization failed: %s", e)
+            traceback.print_exc()
+
+    def resizeGL(self, w: int, h: int) -> None:
+        """Handle OpenGL widget resize"""
+        if self.renderer:
+            self.renderer.set_viewport(w, h)
+
+    def paintGL(self) -> None:
+        """Render the OpenGL scene"""
+        if not self.renderer or not self.current_frame_data:
+            return
+
+        try:
+            # Calculate view and projection matrices
+            view_matrix = self._calculate_view_matrix()
+            proj_matrix = self._calculate_projection_matrix()
+            view_position = self._calculate_view_position()
+
+            # Pass ground level to renderer
+            if hasattr(self.renderer, "ground_level"):
+                self.renderer.ground_level = self.ground_level
+
+            # Render frame
+            self.renderer.render_frame(
+                self.current_frame_data,
+                {},  # Empty dynamics data for now
+                self.current_render_config or RenderConfig(),
+                view_matrix,
+                proj_matrix,
+                view_position,
+            )
+
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("❌ Render error: %s", e)
+
+    def _calculate_view_matrix(self) -> np.ndarray:
+        """Calculate view matrix from camera parameters"""
+        # Convert spherical coordinates to Cartesian
+        x = (
+            self.camera_distance
+            * np.cos(np.radians(self.camera_elevation))
+            * np.cos(np.radians(self.camera_azimuth))
+        )
+        y = self.camera_distance * np.sin(np.radians(self.camera_elevation))
+        z = (
+            self.camera_distance
+            * np.cos(np.radians(self.camera_elevation))
+            * np.sin(np.radians(self.camera_azimuth))
+        )
+
+        camera_pos = np.array([x, y, z], dtype=np.float32) + self.camera_target
+
+        # Look-at matrix
+        forward = self.camera_target - camera_pos
+        forward_norm = np.linalg.norm(forward)
+        if forward_norm > 1e-6:
+            forward = forward / forward_norm
+        else:
+            forward = np.array(
+                [0, 0, -1], dtype=np.float32
+            )  # Default forward direction
+
+        right = np.cross(forward, np.array([0, 1, 0], dtype=np.float32))
+        right_norm = np.linalg.norm(right)
+        if right_norm > 1e-6:
+            right = right / right_norm
+        else:
+            right = np.array([1, 0, 0], dtype=np.float32)  # Default right direction
+
+        up = np.cross(right, forward)
+
+        view_matrix = np.eye(4, dtype=np.float32)
+        view_matrix[:3, 0] = right
+        view_matrix[:3, 1] = up
+        view_matrix[:3, 2] = -forward
+        view_matrix[:3, 3] = -camera_pos
+
+        return view_matrix
+
+    def _calculate_projection_matrix(self) -> np.ndarray:
+        """Calculate projection matrix"""
+        aspect = self.width() / max(self.height(), 1)
+        fov = 45.0
+        near = 0.1
+        far = 100.0
+
+        f = 1.0 / np.tan(np.radians(fov) / 2.0)
+
+        proj_matrix = np.array(
+            [
+                [f / aspect, 0, 0, 0],
+                [0, f, 0, 0],
+                [0, 0, (far + near) / (near - far), (2 * far * near) / (near - far)],
+                [0, 0, -1, 0],
+            ],
+            dtype=np.float32,
+        )
+
+        return proj_matrix
+
+    def _calculate_view_position(self) -> np.ndarray:
+        """Calculate view position"""
+        x = (
+            self.camera_distance
+            * np.cos(np.radians(self.camera_elevation))
+            * np.cos(np.radians(self.camera_azimuth))
+        )
+        y = self.camera_distance * np.sin(np.radians(self.camera_elevation))
+        z = (
+            self.camera_distance
+            * np.cos(np.radians(self.camera_elevation))
+            * np.sin(np.radians(self.camera_azimuth))
+        )
+
+        return np.array([x, y, z], dtype=np.float32) + self.camera_target
+
+    def load_data_from_dataframes(
+        self, dataframes: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+    ) -> None:
+        """Load data from pandas DataFrames"""
+        try:
+            baseq_df, ztcfq_df, deltaq_df = dataframes
+
+            # Create frame processor with config
+            config = RenderConfig()
+            self.frame_processor = FrameProcessor(
+                (baseq_df, ztcfq_df, deltaq_df), config
+            )
+
+            # Get first frame
+            if len(self.frame_processor.time_vector) > 0:
+                self.current_frame_data = self.frame_processor.get_frame_data(0)
+                self.current_render_config = RenderConfig()
+
+                # Frame camera to data
+                self._frame_camera_to_data()
+
+                # Trigger redraw
+                self.update()
+
+                logger.info(
+                    "✅ Loaded %s frames", len(self.frame_processor.time_vector)
+                )
+
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error("❌ Data loading failed: %s", e)
+            traceback.print_exc()
+
+    def update_frame(self, frame_data: FrameData, render_config: RenderConfig) -> None:
+        """Update the current frame data and render config"""
+        self.current_frame_data = frame_data
+        self.current_render_config = render_config
+        self.update()
+
+    def _frame_camera_to_data(self) -> None:
+        """Frame camera to show all data and set proper ground level"""
+        if not self.current_frame_data:
+            return
+
+        # Calculate bounding box of data
+        positions = [
+            self.current_frame_data.left_wrist,
+            self.current_frame_data.left_elbow,
+            self.current_frame_data.left_shoulder,
+            self.current_frame_data.right_wrist,
+            self.current_frame_data.right_elbow,
+            self.current_frame_data.right_shoulder,
+            self.current_frame_data.hub,
+            self.current_frame_data.butt,
+            self.current_frame_data.clubhead,
+        ]
+
+        positions = [pos for pos in positions if np.isfinite(pos).all()]
+
+        if not positions:
+            return
+
+        positions = np.array(positions)
+        center = np.mean(positions, axis=0)
+        max_distance = np.max(np.linalg.norm(positions - center, axis=1))
+
+        # Set ground level to lowest Z point in the data
+        self.ground_level = np.min(positions[:, 2])
+
+        # Update camera target to be centered horizontally but at ground level
+        self.camera_target = np.array(
+            [center[0], center[1], self.ground_level], dtype=np.float32
+        )
+        self.camera_distance = max_distance * 2.5
+
+        logger.info(
+            f"📷 Camera framed: center={center}, "
+            f"ground_level={self.ground_level:.3f}, "
+            f"distance={self.camera_distance:.2f}"
+        )
+
+    def set_face_on_view(self) -> None:
+        """Set camera to face-on view (looking at golfer from front)"""
+        self.camera_azimuth = 0.0
+        self.camera_elevation = 15.0
+        self.update()
+        logger.info("📷 Camera: Face-on view")
+
+    def set_down_the_line_view(self) -> None:
+        """Set camera to down-the-line view (90° from face-on)"""
+        self.camera_azimuth = 90.0  # 90° from face-on, not 180°
+        self.camera_elevation = 15.0
+        self.update()
+        logger.info("📷 Camera: Down-the-line view")
+
+    def set_behind_view(self) -> None:
+        """Set camera to behind view (180° from face-on)"""
+        self.camera_azimuth = 180.0
+        self.camera_elevation = 15.0
+        self.update()
+        logger.info("📷 Camera: Behind view")
+
+    def set_above_view(self) -> None:
+        """Set camera to overhead view"""
+        self.camera_azimuth = 0.0
+        self.camera_elevation = 80.0
+        self.update()
+        logger.info("📷 Camera: Overhead view")
+
+    def mousePressEvent(self, event) -> None:
+        """Handle mouse press events"""
+        self.last_mouse_pos = event.pos()
+        self.mouse_pressed = True
+
+    def mouseReleaseEvent(self, event) -> None:
+        """Handle mouse release events"""
+        self.mouse_pressed = False
+
+    def mouseMoveEvent(self, event) -> None:
+        """Handle mouse move events"""
+        if not self.mouse_pressed or not self.last_mouse_pos:
+            return
+
+        delta = event.pos() - self.last_mouse_pos
+
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            # Rotate camera
+            self.camera_azimuth += delta.x() * 0.5
+            self.camera_elevation += delta.y() * 0.5
+            self.camera_elevation = np.clip(self.camera_elevation, -89, 89)
+
+        elif event.buttons() & Qt.MouseButton.RightButton:
+            # Pan camera
+            pan_speed = self.camera_distance * 0.001
+            right = np.array(
+                [
+                    np.cos(np.radians(self.camera_azimuth - 90)),
+                    0,
+                    np.sin(np.radians(self.camera_azimuth - 90)),
+                ],
+                dtype=np.float32,
+            )
+            up = np.array([0, 1, 0], dtype=np.float32)
+
+            self.camera_target += (right * delta.x() - up * delta.y()) * pan_speed
+
+        self.last_mouse_pos = event.pos()
+        self.update()
+
+    def wheelEvent(self, event) -> None:
+        """Handle mouse wheel events"""
+        zoom_factor = 1.1 if event.angleDelta().y() > 0 else 0.9
+        self.camera_distance *= zoom_factor
+        self.camera_distance = np.clip(self.camera_distance, 0.1, 50.0)
+        self.update()
+
+    def keyPressEvent(self, event) -> None:
+        """Handle keyboard shortcuts"""
+        key = event.key()
+
+        if key == Qt.Key.Key_1:
+            self.set_face_on_view()
+        elif key == Qt.Key.Key_2:
+            self.set_down_the_line_view()
+        elif key == Qt.Key.Key_3:
+            self.set_behind_view()
+        elif key == Qt.Key.Key_4:
+            self.set_above_view()
+        elif key == Qt.Key.Key_R:
+            self._frame_camera_to_data()
+            self.update()
+        elif key == Qt.Key.Key_Space:
+            # Toggle playback if parent has this functionality
+            parent = self.parent()
+            if parent and hasattr(parent, "toggle_playback"):
+                parent.toggle_playback()
+        else:
+            super().keyPressEvent(event)
 
 
 # ============================================================================
@@ -47,15 +1241,15 @@ logger = logging.getLogger(__name__)
 
 
 class GolfVisualizerMainWindow(QMainWindow):
-    """Main window for the Golf Swing Visualizer with tabular interface."""
+    """Main window for the Golf Swing Visualizer with tabular interface"""
 
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Golf Swing Visualizer - Multi-Data Analysis Platform")
-        self.setGeometry(100, 100, 1200, 800)
+        self.setGeometry(100, 100, 1200, 800)  # More reasonable window size
 
         # Apply modern white theme
-        self.setStyleSheet(get_full_modern_style())
+        self._apply_modern_style()
 
         # Setup UI
         self._setup_ui()
@@ -65,7 +1259,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         logger.info("[*] Golf Visualizer main window created")
 
     def _setup_ui(self) -> None:
-        """Setup the main UI with tabular structure."""
+        """Setup the main UI with tabular structure"""
         # Create central widget with tab widget
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -93,7 +1287,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         main_layout.addWidget(global_controls)
 
     def _create_global_controls(self) -> QGroupBox:
-        """Create global control panel."""
+        """Create global control panel"""
         panel = QGroupBox("Global Controls")
         layout = QGridLayout()
 
@@ -143,7 +1337,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         return panel
 
     def _setup_menu(self) -> None:
-        """Setup the menu bar."""
+        """Setup the menu bar"""
         menubar = self.menuBar()
 
         # File menu
@@ -185,18 +1379,179 @@ class GolfVisualizerMainWindow(QMainWindow):
         help_menu.addAction(about_action)
 
     def _setup_status_bar(self) -> None:
-        """Setup the status bar."""
+        """Setup the status bar"""
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Ready - Select a tab to begin analysis")
 
+    def _apply_modern_style(self) -> None:
+        """Apply modern white theme"""
+        self.setStyleSheet(
+            self._get_window_tab_style()
+            + self._get_groupbox_button_style()
+            + self._get_slider_checkbox_style()
+            + self._get_combobox_label_statusbar_style()
+        )
+
+    @staticmethod
+    def _get_window_tab_style() -> str:
+        return """
+            QMainWindow {
+                background-color: #ffffff;
+                color: #333333;
+            }
+
+            QTabWidget::pane {
+                border: 1px solid #cccccc;
+                background-color: #ffffff;
+            }
+
+            QTabBar::tab {
+                background-color: #f0f0f0;
+                color: #333333;
+                padding: 8px 16px;
+                margin-right: 2px;
+                border: 1px solid #cccccc;
+                border-bottom: none;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+
+            QTabBar::tab:selected {
+                background-color: #ffffff;
+                border-bottom: 1px solid #ffffff;
+            }
+
+            QTabBar::tab:hover {
+                background-color: #e8e8e8;
+            }
+        """
+
+    @staticmethod
+    def _get_groupbox_button_style() -> str:
+        return """
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #cccccc;
+                border-radius: 4px;
+                margin-top: 8px;
+                padding-top: 8px;
+                background-color: #fafafa;
+            }
+
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 8px;
+                padding: 0 4px 0 4px;
+                color: #333333;
+            }
+
+            QPushButton {
+                background-color: #0078d4;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+
+            QPushButton:hover {
+                background-color: #106ebe;
+            }
+
+            QPushButton:pressed {
+                background-color: #005a9e;
+            }
+
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
+            }
+        """
+
+    @staticmethod
+    def _get_slider_checkbox_style() -> str:
+        return """
+            QSlider::groove:horizontal {
+                border: 1px solid #cccccc;
+                height: 6px;
+                background-color: #f0f0f0;
+                border-radius: 3px;
+            }
+
+            QSlider::handle:horizontal {
+                background-color: #0078d4;
+                border: 1px solid #0078d4;
+                width: 16px;
+                margin: -5px 0;
+                border-radius: 8px;
+            }
+
+            QSlider::handle:horizontal:hover {
+                background-color: #106ebe;
+            }
+
+            QCheckBox {
+                color: #333333;
+            }
+
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+                border: 1px solid #cccccc;
+                border-radius: 2px;
+                background-color: #ffffff;
+            }
+
+            QCheckBox::indicator:checked {
+                background-color: #0078d4;
+                border-color: #0078d4;
+            }
+        """
+
+    @staticmethod
+    def _get_combobox_label_statusbar_style() -> str:
+        return """
+            QComboBox {
+                border: 1px solid #cccccc;
+                border-radius: 4px;
+                padding: 4px 8px;
+                background-color: #ffffff;
+                color: #333333;
+            }
+
+            QComboBox::drop-down {
+                border: none;
+                width: 20px;
+            }
+
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #333333;
+            }
+
+            QLabel {
+                color: #333333;
+            }
+
+            QStatusBar {
+                background-color: #f0f0f0;
+                color: #333333;
+                border-top: 1px solid #cccccc;
+            }
+        """
+
     def _load_motion_capture_data(self) -> None:
-        """Load motion capture data."""
+        """Load motion capture data"""
+        # This will be handled by the motion capture tab
         self.tab_widget.setCurrentIndex(0)
         self.motion_capture_tab._load_motion_capture_data()
 
     def _export_video(self) -> None:
-        """Export current animation to high-quality video."""
+        """Export current animation to high-quality video"""
+        # Check if we have data loaded
         tab = self.motion_capture_tab
 
         if not tab.frame_processor or not tab.opengl_widget.renderer:
@@ -204,43 +1559,44 @@ class GolfVisualizerMainWindow(QMainWindow):
                 self,
                 "No Data Loaded",
                 "Please load motion capture data before exporting video.\n\n"
-                "Use File -> Load Motion Capture Data to get started.",
+                "Use File → Load Motion Capture Data to get started.",
             )
             return
 
+        # Show export dialog
         dialog = VideoExportDialog(
             self, tab.opengl_widget.renderer, tab.frame_processor
         )
         dialog.exec()
 
     def _reset_camera(self) -> None:
-        """Reset camera to default position."""
+        """Reset camera to default position"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget._frame_camera_to_data()
             self.gl_widget.update()
 
     def _set_face_on_view(self) -> None:
-        """Set face-on camera view."""
+        """Set face-on camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_face_on_view()
 
     def _set_down_line_view(self) -> None:
-        """Set down-the-line camera view."""
+        """Set down-the-line camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_down_the_line_view()
 
     def _set_behind_view(self) -> None:
-        """Set behind camera view."""
+        """Set behind camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_behind_view()
 
     def _set_above_view(self) -> None:
-        """Set overhead camera view."""
+        """Set overhead camera view"""
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_above_view()
 
     def _toggle_face_normal(self, state) -> None:
-        """Toggle face normal visibility."""
+        """Toggle face normal visibility"""
         if (
             hasattr(self, "gl_widget")
             and self.gl_widget
@@ -250,7 +1606,7 @@ class GolfVisualizerMainWindow(QMainWindow):
             self.gl_widget.update()
 
     def _toggle_ball(self, state) -> None:
-        """Toggle ball visibility."""
+        """Toggle ball visibility"""
         if (
             hasattr(self, "gl_widget")
             and self.gl_widget
@@ -260,17 +1616,17 @@ class GolfVisualizerMainWindow(QMainWindow):
             self.gl_widget.update()
 
     def _show_about(self) -> None:
-        """Show about dialog."""
+        """Show about dialog"""
         QMessageBox.about(
             self,
             "About Golf Swing Visualizer",
             "Golf Swing Visualizer - Multi-Data Analysis Platform\n\n"
             "Version: 2.0\n"
             "Features:\n"
-            "- Motion capture data visualization\n"
-            "- Future Simulink model integration\n"
-            "- Hand midpoint tracking analysis\n"
-            "- Real-time 3D rendering\n\n"
+            "• Motion capture data visualization\n"
+            "• Future Simulink model integration\n"
+            "• Hand midpoint tracking analysis\n"
+            "• Real-time 3D rendering\n\n"
             "Built with PyQt6 and ModernGL",
         )
 
@@ -281,7 +1637,7 @@ class GolfVisualizerMainWindow(QMainWindow):
 
 
 def main() -> None:
-    """Main application entry point."""
+    """Main application entry point"""
     app = QApplication(sys.argv)
 
     # Set application properties

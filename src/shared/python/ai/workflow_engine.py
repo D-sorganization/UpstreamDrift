@@ -438,7 +438,7 @@ class WorkflowEngine:
                     step.tool_name,
                     arguments,
                 )
-            except (RuntimeError, ValueError, TypeError, KeyError, OSError) as e:
+            except Exception as e:  # noqa: BLE001 - tools may raise anything
                 result = StepResult(
                     step_id=step.id,
                     status=StepStatus.FAILED,

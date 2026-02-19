@@ -52,8 +52,8 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-# Mutable holder to track if structured logging has been configured (avoids 'global')
-_logging_state: dict[str, bool] = {"configured": False}
+# Global flag to track if structured logging has been configured
+_structured_logging_configured = False
 
 
 def _build_base_processors() -> list[Any]:
@@ -80,12 +80,13 @@ def _build_output_processors(json_output: bool, dev_mode: bool) -> list[Any]:
                 exception_formatter=structlog.dev.plain_traceback,
             )
         ]
-    if json_output:
+    elif json_output:
         return [
             structlog.processors.dict_tracebacks,
             structlog.processors.JSONRenderer(),
         ]
-    return [structlog.processors.KeyValueRenderer()]
+    else:
+        return [structlog.processors.KeyValueRenderer()]
 
 
 def _apply_structlog_config(processors: list[Any], level: int) -> None:
@@ -126,15 +127,16 @@ def setup_structured_logging(
         >>> logger = get_logger(__name__)
         >>> logger.info("simulation_started", engine="mujoco", duration=2.5)
     """
+    global _structured_logging_configured
     import threading
 
     _logging_lock = threading.Lock()
 
-    if _logging_state["configured"]:
+    if _structured_logging_configured:
         return
 
     with _logging_lock:
-        if _logging_state["configured"]:
+        if _structured_logging_configured:
             return
 
     logging.basicConfig(
@@ -147,7 +149,7 @@ def setup_structured_logging(
     processors.extend(_build_output_processors(json_output, dev_mode))
     _apply_structlog_config(processors, level)
 
-    _logging_state["configured"] = True
+    _structured_logging_configured = True
 
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
@@ -173,7 +175,7 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
         >>> request_logger.info("request_completed", duration_ms=250)
     """
     # Ensure structured logging is configured with defaults
-    if not _logging_state["configured"]:
+    if not _structured_logging_configured:
         setup_structured_logging()
 
     return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))

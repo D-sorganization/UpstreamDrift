@@ -92,7 +92,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
     for file_path in files:
         try:
             content = file_path.read_text(encoding="utf-8", errors="ignore")
-        except (OSError, ValueError):
+        except Exception:
             continue
 
         lines = content.split("\n")
@@ -108,7 +108,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
                 last_hash = chunk_hash
 
     reported = 0
-    for locations in code_blocks.values():
+    for _, locations in code_blocks.items():
         if len(locations) > 1 and reported < 50:
             files_inv = sorted({str(loc[0]) for loc in locations})
             issues.append(
@@ -144,7 +144,7 @@ def check_orthogonality(files: list[Path]) -> list[dict]:
                             "recommendation": "Split function",
                         }
                     )
-        except (OSError, ValueError):
+        except Exception:
             pass
     return issues
 
@@ -167,7 +167,7 @@ def check_reversibility(root_path: Path) -> list[dict]:
                         "recommendation": "Use env vars",
                     }
                 )
-        except (OSError, ValueError):
+        except Exception:
             pass
     return issues
 
@@ -181,7 +181,7 @@ def check_quality(files: list[Path]) -> list[dict]:
             content = file_path.read_text(encoding="utf-8", errors="ignore")
             if "TODO" in content:
                 todos.append(str(file_path))
-        except (OSError, ValueError):
+        except Exception:
             pass
 
     if len(todos) > 10:
@@ -278,4 +278,4 @@ if __name__ == "__main__":
     repo_root = Path.cwd()
     results = run_review(repo_root)
     generate_markdown_report(results, args.output)
-    logger.info("Report generated at %s", args.output)
+    print(f"Report generated at {args.output}")

@@ -32,18 +32,18 @@ def mock_recorder():
             or field == "actuator_powers"
         ):
             return times, np.random.rand(100, 3)
-        if (
+        elif (
             field == "kinetic_energy"
             or field == "potential_energy"
             or field == "total_energy"
             or field == "club_head_speed"
         ):
             return times, np.random.rand(100)
-        if field == "club_head_position" or field == "angular_momentum":
+        elif field == "club_head_position" or field == "angular_momentum":
             return times, np.random.rand(100, 3)
-        if field == "cop_position":
+        elif field == "cop_position":
             return times, np.random.rand(100, 2)
-        if field == "joint_accelerations":
+        elif field == "joint_accelerations":
             return times, np.random.rand(100, 3)
         return [], []
 

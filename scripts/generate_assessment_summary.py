@@ -41,7 +41,7 @@ def extract_score_from_report(report_path: Path) -> float:
                 return float(match.group(1))
 
         return 7.0
-    except (OSError, ValueError, re.error) as e:
+    except Exception as e:
         logger.warning(f"Could not extract score from {report_path}: {e}")
         return 7.0
 
@@ -60,7 +60,9 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
                 stripped = line.strip()
                 if stripped:
                     # Handle both bullet points and plain text
-                    description = stripped.removeprefix("- ")
+                    description = (
+                        stripped[2:] if stripped.startswith("- ") else stripped
+                    )
                     issues.append(
                         {
                             "severity": "MAJOR",
@@ -68,7 +70,7 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
                             "source": report_path.stem,
                         }
                     )
-    except (OSError, ValueError, re.error) as e:
+    except Exception as e:
         logger.warning(f"Could not extract issues from {report_path}: {e}")
     return issues
 

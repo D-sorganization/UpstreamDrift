@@ -36,7 +36,7 @@ def run_grep(pattern, output_file, extended_regex=False):
     try:
         with open(output_file, "w") as f:
             subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, text=True)
-    except (OSError, subprocess.SubprocessError) as e:
+    except Exception as e:
         print(f"Error running grep: {e}")
 
 

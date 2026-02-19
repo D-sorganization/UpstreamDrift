@@ -43,67 +43,6 @@ class SimulationService:
         and len(request.engine_type) > 0,
         "Engine type must be specified",
     )
-    def _prepare_engine(self, request: SimulationRequest) -> Any:
-        """Load and configure the physics engine for simulation.
-
-        Args:
-            request: Simulation request with engine type and model path.
-
-        Returns:
-            Configured engine instance.
-
-        Raises:
-            EngineLaunchError: If engine fails to load.
-            ModelLoadError: If model file fails to load.
-        """
-        engine_type = EngineType(request.engine_type.lower())
-        self.engine_manager._load_engine(engine_type)
-
-        engine = self.engine_manager.get_active_physics_engine()
-        if not engine:
-            raise EngineLaunchError(
-                request.engine_type,
-                reason="engine loaded but no active engine returned",
-            )
-
-        if request.model_path:
-            try:
-                engine.load_from_path(request.model_path)
-            except (FileNotFoundError, OSError, ValueError) as e:
-                raise ModelLoadError(str(request.model_path), reason=str(e)) from e
-
-        if request.initial_state:
-            positions = request.initial_state.get("positions", [])
-            velocities = request.initial_state.get("velocities", [])
-            if positions and velocities:
-                engine.set_state(positions, velocities)
-
-        return engine
-
-    def _execute_simulation_loop(
-        self, engine: Any, recorder: GenericPhysicsRecorder,
-        request: SimulationRequest, timestep: float, steps: int,
-    ) -> None:
-        """Execute the main simulation stepping loop.
-
-        Args:
-            engine: Physics engine instance.
-            recorder: Recording object for simulation data.
-            request: Simulation request with control inputs.
-            timestep: Time step per simulation step.
-            steps: Total number of steps to execute.
-        """
-        if not recorder.is_recording:
-            recorder.record_step()
-
-        for step in range(steps):
-            if request.control_inputs and step < len(request.control_inputs):
-                control = request.control_inputs[step]
-                if "torques" in control:
-                    engine.set_control(control["torques"])
-            engine.step(timestep)
-            recorder.record_step()
-
     async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
         """Run a physics simulation based on request parameters.
 
@@ -114,12 +53,42 @@ class SimulationService:
             Simulation results and data
         """
         try:
-            engine = self._prepare_engine(request)
+            # Load requested engine
+            engine_type = EngineType(request.engine_type.lower())
+            self.engine_manager._load_engine(
+                engine_type
+            )  # This method doesn't return success status
+
+            engine = self.engine_manager.get_active_physics_engine()
+            if not engine:
+                raise EngineLaunchError(
+                    request.engine_type,
+                    reason="engine loaded but no active engine returned",
+                )
+
+            # Load model if specified
+            if request.model_path:
+                try:
+                    engine.load_from_path(request.model_path)
+                except (FileNotFoundError, OSError, ValueError) as e:
+                    raise ModelLoadError(str(request.model_path), reason=str(e)) from e
+
+            # Set initial state if provided
+            if request.initial_state:
+                initial_state = request.initial_state
+                positions = initial_state.get("positions", [])
+                velocities = initial_state.get("velocities", [])
+                if positions and velocities:
+                    engine.set_state(positions, velocities)
+
+            # Setup recorder
             recorder = GenericPhysicsRecorder(engine)
 
+            # Configure analysis if requested
             if request.analysis_config:
                 recorder.set_analysis_config(request.analysis_config)
 
+            # Run simulation
             timestep = request.timestep or 0.001
             if timestep <= 0:
                 raise ValueError(f"Timestep must be positive, got {timestep}")
@@ -129,9 +98,25 @@ class SimulationService:
                 )
             steps = int(request.duration / timestep)
 
-            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+            # Start recording (using is_recording to check state)
+            if not recorder.is_recording:
+                recorder.record_step()  # Start recording
 
+            for step in range(steps):
+                # Apply control inputs if provided
+                if request.control_inputs and step < len(request.control_inputs):
+                    control = request.control_inputs[step]
+                    if "torques" in control:
+                        engine.set_control(control["torques"])
+
+                # Step simulation
+                engine.step(timestep)
+                recorder.record_step()
+
+            # Extract recorded data
             simulation_data = self._extract_simulation_data(recorder)
+
+            # Perform analysis if requested
             analysis_results = None
             if request.analysis_config:
                 analysis_results = self._perform_analysis(
@@ -144,7 +129,7 @@ class SimulationService:
                 frames=steps,
                 data=simulation_data,
                 analysis_results=analysis_results,
-                export_paths=[],
+                export_paths=[],  # Add required field
             )
 
         except (GolfSuiteError, ValueError, RuntimeError) as e:
@@ -155,7 +140,7 @@ class SimulationService:
                 frames=0,
                 data={},
                 analysis_results=None,
-                export_paths=[],
+                export_paths=[],  # Add required field
             )
 
     @precondition(
@@ -184,7 +169,7 @@ class SimulationService:
 
             active_tasks[task_id] = {"status": "completed", "result": result.dict()}
 
-        except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
+        except Exception as e:  # noqa: BLE001 - background tasks must not crash
             active_tasks[task_id] = {"status": "failed", "error": str(e)}
 
     def _extract_simulation_data(
@@ -226,10 +211,10 @@ class SimulationService:
                 data["control_inputs"] = (
                     controls.tolist() if hasattr(controls, "tolist") else controls
                 )
-            except (KeyError, ValueError, AttributeError) as e:
+            except Exception as e:  # noqa: BLE001 - optional data
                 logger.debug("Control inputs not available: %s", e)
 
-        except (KeyError, ValueError, AttributeError, TypeError) as e:
+        except Exception as e:  # noqa: BLE001 - recorder may raise various errors
             logger.warning("Error extracting simulation data: %s", e)
 
         return data
@@ -270,7 +255,7 @@ class SimulationService:
                     drift.tolist() if hasattr(drift, "tolist") else drift
                 )
 
-        except (KeyError, ValueError, AttributeError, TypeError) as e:
+        except Exception as e:  # noqa: BLE001 - recorder may raise various errors
             logger.warning("Error performing analysis: %s", e)
 
         return results

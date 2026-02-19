@@ -1,10 +1,7 @@
 """Unit tests for path utilities."""
 
-from collections.abc import Callable
 from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 from src.shared.python.data_io.path_utils import (
     ensure_directory,
@@ -109,13 +106,13 @@ class TestGetOutputDir:
             # Clear the cache to force recalculation
             import src.shared.python.data_io.path_utils as path_utils
 
-            old_root = path_utils._path_cache["repo_root"]
-            path_utils._path_cache["repo_root"] = tmp_path
+            old_root = path_utils._REPO_ROOT
+            path_utils._REPO_ROOT = tmp_path
             try:
                 result = get_output_dir()
                 assert result.exists()
             finally:
-                path_utils._path_cache["repo_root"] = old_root
+                path_utils._REPO_ROOT = old_root
 
 
 class TestGetDocsDir:
@@ -278,25 +275,46 @@ class TestGetSharedPythonRoot:
         assert result.parent.name == "shared"
 
 
-class TestEnginePythonRoots:
-    """Parametrized tests for engine-specific python root getters."""
+class TestGetMujocoPythonRoot:
+    """Tests for get_mujoco_python_root function."""
 
-    @pytest.mark.parametrize(
-        "getter, expected_substring",
-        [
-            (get_mujoco_python_root, "mujoco"),
-            (get_pinocchio_python_root, "pinocchio"),
-            (get_drake_python_root, "drake"),
-        ],
-        ids=["mujoco", "pinocchio", "drake"],
-    )
-    def test_returns_path_with_engine_name(
-        self, getter: Callable[[], Path], expected_substring: str
-    ) -> None:
-        """Engine python root should return a Path containing the engine name."""
-        result = getter()
+    def test_returns_path(self) -> None:
+        """Test that returns a Path object."""
+        result = get_mujoco_python_root()
         assert isinstance(result, Path)
-        assert expected_substring in str(result)
+
+    def test_contains_mujoco(self) -> None:
+        """Test that path contains mujoco."""
+        result = get_mujoco_python_root()
+        assert "mujoco" in str(result)
+
+
+class TestGetPinocchioPythonRoot:
+    """Tests for get_pinocchio_python_root function."""
+
+    def test_returns_path(self) -> None:
+        """Test that returns a Path object."""
+        result = get_pinocchio_python_root()
+        assert isinstance(result, Path)
+
+    def test_contains_pinocchio(self) -> None:
+        """Test that path contains pinocchio."""
+        result = get_pinocchio_python_root()
+        assert "pinocchio" in str(result)
+
+
+class TestGetDrakePythonRoot:
+    """Tests for get_drake_python_root function."""
+
+    def test_returns_path(self) -> None:
+        """Test that returns a Path object."""
+        result = get_drake_python_root()
+        assert isinstance(result, Path)
+
+    def test_contains_drake(self) -> None:
+        """Test that path contains drake."""
+        result = get_drake_python_root()
+        assert "drake" in str(result)
 
 
 class TestGetSimscapeModelPath:

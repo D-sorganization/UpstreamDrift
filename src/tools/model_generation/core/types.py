@@ -162,10 +162,10 @@ class Inertia:
 
         if axis == "x":
             return cls(ixx=i_axial, iyy=i_perp, izz=i_perp, mass=mass)
-        if axis == "y":
+        elif axis == "y":
             return cls(ixx=i_perp, iyy=i_axial, izz=i_perp, mass=mass)
-        # z
-        return cls(ixx=i_perp, iyy=i_perp, izz=i_axial, mass=mass)
+        else:  # z
+            return cls(ixx=i_perp, iyy=i_perp, izz=i_axial, mass=mass)
 
     @classmethod
     def from_sphere(cls, mass: float, radius: float) -> Inertia:
@@ -215,10 +215,10 @@ class Inertia:
 
         if axis == "x":
             return cls(ixx=i_axial, iyy=i_perp, izz=i_perp, mass=mass)
-        if axis == "y":
+        elif axis == "y":
             return cls(ixx=i_perp, iyy=i_axial, izz=i_perp, mass=mass)
-        # z
-        return cls(ixx=i_perp, iyy=i_perp, izz=i_axial, mass=mass)
+        else:  # z
+            return cls(ixx=i_perp, iyy=i_perp, izz=i_axial, mass=mass)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Inertia:
@@ -329,7 +329,8 @@ class Material:
         rgba_str = " ".join(f"{v:.4g}" for v in self.color)
         if inline:
             return f'<material name="{self.name}"><color rgba="{rgba_str}"/></material>'
-        return f'<material name="{self.name}"/>'
+        else:
+            return f'<material name="{self.name}"/>'
 
     # Common materials
     @classmethod
@@ -436,26 +437,27 @@ class Geometry:
         if self.geometry_type == GeometryType.BOX:
             size_str = " ".join(f"{d:.6g}" for d in self.dimensions)
             return f'<geometry><box size="{size_str}"/></geometry>'
-        if self.geometry_type == GeometryType.CYLINDER:
+        elif self.geometry_type == GeometryType.CYLINDER:
             return (
                 f'<geometry><cylinder radius="{self.dimensions[0]:.6g}" '
                 f'length="{self.dimensions[1]:.6g}"/></geometry>'
             )
-        if self.geometry_type == GeometryType.SPHERE:
+        elif self.geometry_type == GeometryType.SPHERE:
             return f'<geometry><sphere radius="{self.dimensions[0]:.6g}"/></geometry>'
-        if self.geometry_type == GeometryType.CAPSULE:
+        elif self.geometry_type == GeometryType.CAPSULE:
             # URDF doesn't have capsule, approximate with cylinder
             return (
                 f'<geometry><cylinder radius="{self.dimensions[0]:.6g}" '
                 f'length="{self.dimensions[1]:.6g}"/></geometry>'
             )
-        if self.geometry_type == GeometryType.MESH:
+        elif self.geometry_type == GeometryType.MESH:
             scale_str = " ".join(f"{s:.6g}" for s in self.mesh_scale)
             return (
                 f'<geometry><mesh filename="{self.mesh_filename}" '
                 f'scale="{scale_str}"/></geometry>'
             )
-        raise ValueError(f"Unknown geometry type: {self.geometry_type}")
+        else:
+            raise ValueError(f"Unknown geometry type: {self.geometry_type}")
 
 
 @dataclass

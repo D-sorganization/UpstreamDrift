@@ -327,44 +327,60 @@ class UISetupMixin:
 
         self.btn_plot_iaa.setEnabled(enabled and MATPLOTLIB_AVAILABLE)
 
-    def _build_dimensions_group(self) -> QGroupBox:
-        """Build the physical dimensions group box with height and weight controls.
+    def setup_appearance_tab(self) -> None:
+        """Build the humanoid appearance customization tab."""
+        tab = QWidget()
 
-        Returns:
-            Configured QGroupBox widget.
-        """
+        layout = QVBoxLayout(tab)
+
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Dimensions
+
         dim_group = QGroupBox("📏 Physical Dimensions")
+
         dim_layout = QGridLayout()
 
         dim_layout.addWidget(QLabel("Height (m):"), 0, 0)
+
         self.spin_height = QDoubleSpinBox()
+
         self.spin_height.setRange(0.5, 3.0)
+
         self.spin_height.setSingleStep(0.05)
+
         self.spin_height.setValue(self.config.height_m)
+
         dim_layout.addWidget(self.spin_height, 0, 1)
 
         dim_layout.addWidget(QLabel("Weight (%):"), 1, 0)
+
         self.slider_weight = QSlider(Qt.Orientation.Horizontal)
+
         self.slider_weight.setRange(50, 200)
+
         self.slider_weight.setValue(int(self.config.weight_percent))
+
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
+
         self.slider_weight.valueChanged.connect(
             lambda v: self.lbl_weight_val.setText(f"{v}%")
         )
+
         dim_layout.addWidget(self.slider_weight, 1, 1)
+
         dim_layout.addWidget(self.lbl_weight_val, 1, 2)
 
         dim_group.setLayout(dim_layout)
-        return dim_group
 
-    def _build_colors_group(self) -> QGroupBox:
-        """Build the body colors group box with color picker buttons.
+        layout.addWidget(dim_group)
 
-        Returns:
-            Configured QGroupBox widget.
-        """
+        # Colors
+
         color_group = QGroupBox("🎨 Body Colors")
+
         self.color_layout = QGridLayout()
+
         self.color_buttons: dict[str, QPushButton] = {}
 
         parts = [
@@ -377,32 +393,37 @@ class UISetupMixin:
 
         for i, (name, key) in enumerate(parts):
             self.color_layout.addWidget(QLabel(name), i, 0)
+
             btn = QPushButton()
+
             btn.setFixedSize(50, 25)
+
             rgba = self.config.colors.get(key, [1, 1, 1, 1])
+
             self.set_btn_color(btn, rgba)
+
             btn.clicked.connect(lambda checked, k=key, b=btn: self.pick_color(k, b))
+
             self.color_layout.addWidget(btn, i, 1)
+
             self.color_buttons[key] = btn
 
         color_group.setLayout(self.color_layout)
-        return color_group
 
-    def setup_appearance_tab(self) -> None:
-        """Build the humanoid appearance customization tab."""
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.addWidget(color_group)
 
-        layout.addWidget(self._build_dimensions_group())
-        layout.addWidget(self._build_colors_group())
+        # Save Button
 
         btn_save = QPushButton("💾 Save Appearance Settings")
+
         btn_save.setStyleSheet(Styles.BTN_SAVE)
+
         btn_save.clicked.connect(self.save_config)
+
         layout.addWidget(btn_save)
 
         layout.addStretch()
+
         self.tabs.addTab(tab, "Appearance")
 
     def setup_equip_tab(self) -> None:

@@ -9,6 +9,7 @@ if "MUJOCO_PLUGIN_PATH" not in os.environ:
     os.environ["MUJOCO_PLUGIN_PATH"] = ""
 
 
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -100,7 +101,7 @@ class RemoteRecorder(RecorderInterface):
                 self.data["zvcf_accel"].append(np.array(cf["zvcf"]))
 
         except (ValueError, TypeError, RuntimeError) as e:
-            logger.error("Error processing packet: %s", e)
+            logging.error(f"Error processing packet: {e}")
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Return time-aligned arrays for a named data field."""

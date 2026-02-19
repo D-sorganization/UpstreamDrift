@@ -144,9 +144,10 @@ def validate_api_security() -> APIKeyValidationResults:
                 "GOLF_API_SECRET_KEY",
                 "GOLF_API_SECRET_KEY is required for production",
             )
-        results["warnings"].append(
-            "No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development."
-        )
+        else:
+            results["warnings"].append(
+                "No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development."
+            )
     else:
         try:
             validate_secret_key_strength(secret_key)
@@ -155,7 +156,8 @@ def validate_api_security() -> APIKeyValidationResults:
             if is_production():
                 results["issues"].append(f"CRITICAL: {e}")
                 raise
-            results["warnings"].append(str(e))
+            else:
+                results["warnings"].append(str(e))
 
     # Check admin password using centralized function
     admin_password = get_admin_password()

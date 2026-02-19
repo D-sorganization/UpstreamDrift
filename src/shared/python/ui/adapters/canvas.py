@@ -18,6 +18,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
@@ -214,9 +215,12 @@ def is_headless() -> bool:
     Returns:
         True if no display is available
     """
-    from src.shared.python.config.environment import is_headless as _is_headless
+    # Check environment variable
+    if os.environ.get("HEADLESS", "").lower() == "true":
+        return True
 
-    return _is_headless()
+    # Check for display on Linux
+    return bool(os.name == "posix" and not os.environ.get("DISPLAY"))
 
 
 def is_qt_available() -> bool:
@@ -265,8 +269,9 @@ def get_canvas_adapter(
     if force_headless or is_headless() or not is_qt_available():
         logger.debug("Using HeadlessCanvas")
         return HeadlessCanvas(width, height, dpi)
-    logger.debug("Using QtCanvas")
-    return QtCanvas(width, height, dpi)
+    else:
+        logger.debug("Using QtCanvas")
+        return QtCanvas(width, height, dpi)
 
 
 __all__ = [

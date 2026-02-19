@@ -195,9 +195,9 @@ class ErrorContext:
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool:
         """Exit context and handle errors."""
         if exc_type is not None:
-            logger.error(f"{self.operation} failed: {exc_val}")
+            logger.error(f"{self.operation} failed: {exc_val}", exc_info=True)
             return not self.reraise  # Suppress exception if not reraising
-        if self.log_success:
+        elif self.log_success:
             logger.info(f"{self.operation} completed successfully")
         return False
 

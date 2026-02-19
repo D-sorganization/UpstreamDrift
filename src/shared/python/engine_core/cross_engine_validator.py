@@ -196,22 +196,23 @@ class CrossEngineValidator(ContractChecker):
 
         if ratio <= 1.0:
             return True, "PASSED"
-        if ratio <= self.WARNING_THRESHOLD:
+        elif ratio <= self.WARNING_THRESHOLD:
             return True, "WARNING"  # Acceptable with caution
-        if ratio <= self.ERROR_THRESHOLD:
+        elif ratio <= self.ERROR_THRESHOLD:
             return False, "ERROR"  # Investigation required
-        return False, "BLOCKER"  # Fundamental model error
+        else:
+            return False, "BLOCKER"  # Fundamental model error
 
     def _build_message(self, severity: str, max_dev: float, tol: float) -> str:
         """Build appropriate message based on severity."""
         if severity == "PASSED":  # noqa: SIM116
             return ""
-        if severity == "WARNING":
+        elif severity == "WARNING":
             return f"Deviation {max_dev:.2e} acceptable but exceeds base tolerance {tol:.2e}"
-        if severity == "ERROR":
+        elif severity == "ERROR":
             return f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e} - investigation required"
-        # BLOCKER
-        return f"CRITICAL: Deviation {max_dev:.2e} is >{self.BLOCKER_THRESHOLD}× tolerance - fundamental error"
+        else:  # BLOCKER
+            return f"CRITICAL: Deviation {max_dev:.2e} is >{self.BLOCKER_THRESHOLD}× tolerance - fundamental error"
 
     def _log_result(
         self,

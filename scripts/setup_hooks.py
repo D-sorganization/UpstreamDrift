@@ -12,17 +12,14 @@ Usage:
     python scripts/setup_hooks.py
 """
 
-import logging
 import subprocess
 import sys
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
-
 
 def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
-    logger.info("  Running: %s", " ".join(cmd))
+    print(f"  Running: {' '.join(cmd)}")
     return subprocess.run(cmd, check=check, capture_output=True, text=True)
 
 
@@ -37,31 +34,31 @@ def check_pre_commit_installed() -> bool:
 
 def install_pre_commit() -> None:
     """Install pre-commit via pip."""
-    logger.info("\n[1/4] Installing pre-commit...")
+    print("\n[1/4] Installing pre-commit...")
     if check_pre_commit_installed():
-        logger.info("  pre-commit is already installed")
+        print("  pre-commit is already installed")
     else:
         run_command([sys.executable, "-m", "pip", "install", "pre-commit"])
-        logger.info("  pre-commit installed successfully")
+        print("  pre-commit installed successfully")
 
 
 def install_hooks() -> None:
     """Install pre-commit hooks."""
-    logger.info("\n[2/4] Installing pre-commit hooks...")
+    print("\n[2/4] Installing pre-commit hooks...")
     run_command(["pre-commit", "install"])
-    logger.info("  pre-commit hooks installed")
+    print("  pre-commit hooks installed")
 
 
 def install_push_hooks() -> None:
     """Install pre-push hooks."""
-    logger.info("\n[3/4] Installing pre-push hooks...")
+    print("\n[3/4] Installing pre-push hooks...")
     run_command(["pre-commit", "install", "--hook-type", "pre-push"])
-    logger.info("  pre-push hooks installed")
+    print("  pre-push hooks installed")
 
 
 def install_dev_dependencies() -> None:
     """Install development dependencies for hooks."""
-    logger.info("\n[4/4] Installing hook dependencies...")
+    print("\n[4/4] Installing hook dependencies...")
     deps = [
         "ruff>=0.14.0",
         "black>=26.0.0",
@@ -72,36 +69,36 @@ def install_dev_dependencies() -> None:
         "pydantic",
     ]
     run_command([sys.executable, "-m", "pip", "install"] + deps)
-    logger.info("  Dependencies installed")
+    print("  Dependencies installed")
 
 
 def verify_installation() -> None:
     """Verify hooks are installed correctly."""
-    logger.info("\n" + "=" * 60)
-    logger.info("VERIFICATION")
-    logger.info("=" * 60)
+    print("\n" + "=" * 60)
+    print("VERIFICATION")
+    print("=" * 60)
 
     git_hooks_dir = Path(".git/hooks")
     pre_commit_hook = git_hooks_dir / "pre-commit"
     pre_push_hook = git_hooks_dir / "pre-push"
 
     if pre_commit_hook.exists():
-        logger.info("  [OK] pre-commit hook: %s", pre_commit_hook)
+        print(f"  [OK] pre-commit hook: {pre_commit_hook}")
     else:
-        logger.warning("  [MISSING] pre-commit hook: %s", pre_commit_hook)
+        print(f"  [MISSING] pre-commit hook: {pre_commit_hook}")
 
     if pre_push_hook.exists():
-        logger.info("  [OK] pre-push hook: %s", pre_push_hook)
+        print(f"  [OK] pre-push hook: {pre_push_hook}")
     else:
-        logger.warning("  [MISSING] pre-push hook: %s", pre_push_hook)
+        print(f"  [MISSING] pre-push hook: {pre_push_hook}")
 
 
-def log_summary() -> None:
-    """Log usage summary."""
-    logger.info("\n" + "=" * 60)
-    logger.info("HOOK SUMMARY")
-    logger.info("=" * 60)
-    logger.info("""
+def print_summary() -> None:
+    """Print usage summary."""
+    print("\n" + "=" * 60)
+    print("HOOK SUMMARY")
+    print("=" * 60)
+    print("""
 PRE-COMMIT (runs on every commit, <15 seconds):
   - ruff (lint + auto-fix)
   - black (format)
@@ -125,11 +122,9 @@ MANUAL COMMANDS:
 
 def main() -> None:
     """Main entry point."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    logger.info("=" * 60)
-    logger.info("INSTALLING GIT HOOKS")
-    logger.info("=" * 60)
+    print("=" * 60)
+    print("INSTALLING GIT HOOKS")
+    print("=" * 60)
 
     try:
         install_pre_commit()
@@ -137,17 +132,17 @@ def main() -> None:
         install_push_hooks()
         install_dev_dependencies()
         verify_installation()
-        log_summary()
-        logger.info("\n[SUCCESS] All hooks installed successfully!")
-        logger.info("Your commits will now be checked locally before reaching CI.")
+        print_summary()
+        print("\n[SUCCESS] All hooks installed successfully!")
+        print("Your commits will now be checked locally before reaching CI.")
 
     except subprocess.CalledProcessError as e:
-        logger.error("\n[ERROR] Command failed: %s", e)
-        logger.error("  stdout: %s", e.stdout)
-        logger.error("  stderr: %s", e.stderr)
+        print(f"\n[ERROR] Command failed: {e}")
+        print(f"  stdout: {e.stdout}")
+        print(f"  stderr: {e.stderr}")
         sys.exit(1)
-    except (RuntimeError, OSError) as e:
-        logger.error("\n[ERROR] Unexpected error: %s", e)
+    except Exception as e:
+        print(f"\n[ERROR] Unexpected error: {e}")
         sys.exit(1)
 
 

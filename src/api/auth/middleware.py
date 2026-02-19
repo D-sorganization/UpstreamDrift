@@ -1,15 +1,18 @@
 """Authentication middleware that respects local mode."""
 
+import os
+
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-from src.shared.python.config.environment import is_auth_disabled
 
 
 # Check deployment mode
 def is_local_mode() -> bool:
     """Check if running in local mode (no auth required)."""
-    return is_auth_disabled()
+    return (
+        os.environ.get("GOLF_SUITE_MODE", "local") == "local"
+        or os.environ.get("GOLF_AUTH_DISABLED", "false").lower() == "true"
+    )
 
 
 class LocalUser:

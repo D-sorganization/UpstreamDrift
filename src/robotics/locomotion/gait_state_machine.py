@@ -289,9 +289,10 @@ class GaitStateMachine(ContractChecker):
             if self._state.phase == GaitPhase.LEFT_SWING:
                 return self.phase_progress
             return 1.0  # In stance
-        if self._state.phase == GaitPhase.RIGHT_SWING:
-            return self.phase_progress
-        return 1.0  # In stance
+        else:
+            if self._state.phase == GaitPhase.RIGHT_SWING:
+                return self.phase_progress
+            return 1.0  # In stance
 
     def _update_walking_state(self) -> None:
         """Update state during walking.
@@ -371,9 +372,10 @@ class GaitStateMachine(ContractChecker):
         """Get duration for a given phase."""
         if phase == GaitPhase.DOUBLE_SUPPORT:
             return self._parameters.double_support_duration
-        if phase in (GaitPhase.LEFT_SWING, GaitPhase.RIGHT_SWING):
+        elif phase in (GaitPhase.LEFT_SWING, GaitPhase.RIGHT_SWING):
             return self._parameters.swing_duration
-        return self._parameters.step_duration
+        else:
+            return self._parameters.step_duration
 
     def _invoke_callbacks(self, event_type: str, event: GaitEvent) -> None:
         """Invoke registered callbacks."""

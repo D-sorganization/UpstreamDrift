@@ -121,7 +121,7 @@ def validate_positive(
     """
     if strict and value <= 0:
         raise ValueError(f"{name} must be positive, got {value}")
-    if not strict and value < 0:
+    elif not strict and value < 0:
         raise ValueError(f"{name} must be non-negative, got {value}")
 
 

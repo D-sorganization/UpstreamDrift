@@ -1,6 +1,5 @@
 """CLI utility to display physics parameters."""
 
-import logging
 import sys
 from pathlib import Path
 
@@ -13,14 +12,11 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 from src.shared.python.physics.physics_parameters import get_registry  # noqa: E402
 
-logger = logging.getLogger(__name__)
-
 
 def main() -> None:
     """Display physics parameters."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     registry = get_registry()
-    logger.info(registry.get_summary())
+    print(registry.get_summary())
 
 
 if __name__ == "__main__":

@@ -502,8 +502,9 @@ class ControlFeaturesRegistry:
                 "shape": list(result.shape),
                 "data": result.tolist(),
             }
-        if isinstance(result, tuple):
+        elif isinstance(result, tuple):
             return [self._serialize_result(r) for r in result]
-        if isinstance(result, dict):
+        elif isinstance(result, dict):
             return {k: self._serialize_result(v) for k, v in result.items()}
-        return result
+        else:
+            return result

@@ -94,11 +94,12 @@ def mock_casadi():
         # Return data based on call order: Q, V, U, cost
         if call_count == 1:
             return np.zeros((2, 41))  # Q matrix
-        if call_count == 2:
+        elif call_count == 2:
             return np.zeros((2, 41))  # V matrix
-        if call_count == 3:
+        elif call_count == 3:
             return np.zeros((2, 40))  # U matrix
-        return 0.1234  # Cost (scalar)
+        else:
+            return 0.1234  # Cost (scalar)
 
     sol.value.side_effect = value_side_effect
 
@@ -178,7 +179,7 @@ def test_urdf_not_found():
 
 
 def test_optimization_failure(mock_casadi, mock_pinocchio):
-    mock_casadi.solve.side_effect = RuntimeError("Infeasible")
+    mock_casadi.solve.side_effect = Exception("Infeasible")
 
     with patch("os.path.exists", return_value=True), pytest.raises(SystemExit):
         main()

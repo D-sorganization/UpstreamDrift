@@ -23,15 +23,16 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Singleton holder for education system (avoids 'global' keyword)
-_education_holder: dict[str, EducationSystem | None] = {"instance": None}
+# Singleton education system for explanation tools
+_education_system: EducationSystem | None = None
 
 
 def _get_education_system() -> EducationSystem:
     """Get or create the education system singleton."""
-    if _education_holder["instance"] is None:
-        _education_holder["instance"] = EducationSystem()
-    return _education_holder["instance"]
+    global _education_system
+    if _education_system is None:
+        _education_system = EducationSystem()
+    return _education_system
 
 
 def register_golf_suite_tools(registry: ToolRegistry) -> None:
@@ -310,9 +311,10 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             """Classify a torque value relative to its typical range."""
             if value < range_info["low"]:
                 return "Below typical"
-            if value <= range_info["high"]:
+            elif value <= range_info["high"]:
                 return "Within typical range"
-            return "Above typical (high stress)"
+            else:
+                return "Above typical (high stress)"
 
         return {
             "shoulder": {

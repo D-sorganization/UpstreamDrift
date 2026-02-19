@@ -492,7 +492,9 @@ class LauncherUISetupMixin:
                 logger.info("Synced chat session: %s", session_id)
         except (ImportError, OSError) as e:
             logger.debug("Chat server sync skipped (server may not be running): %s", e)
-        except (ValueError, KeyError, IndexError, json.JSONDecodeError) as e:
+        except Exception as e:  # noqa: BLE001 - catch-all to prevent launcher crash during init
+            # Catch any other unexpected errors (e.g. urllib.error.HTTPError)
+            # to prevent crashing the launcher during initialization
             logger.debug("Chat session sync failed: %s", e)
 
     # -- Context Help --

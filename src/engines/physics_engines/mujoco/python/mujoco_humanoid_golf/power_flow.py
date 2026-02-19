@@ -327,15 +327,57 @@ class PowerFlowAnalyzer:
 
         for i in range(self.model.nbody):
             body = self.model.body(i)
+
+            # Get parent body
             parent_id = body.parentid[0]
             parent_name = "world" if parent_id == 0 else self.model.body(parent_id).name
 
-            power_from_parent, power_generation = self._compute_body_joint_power(
-                i, tau, qvel
-            )
-            power_to_children = self._compute_child_joint_power(i, tau, qvel)
-            power_diss = self._compute_joint_dissipation(i, qvel)
+            # For simplicity, assume power from parent is joint power
+            # at the joint connecting this body to parent
+            # This is approximate - full analysis requires wrench balance
 
+            # Find joint connecting to this body
+            power_from_parent = 0.0
+            power_generation = 0.0
+
+            for j in range(self.model.njnt):
+                joint = self.model.jnt(j)
+                if joint.bodyid[0] == i:
+                    # This joint belongs to this body
+                    v_start = joint.dofadr[0]
+                    if v_start < self.model.nv:
+                        joint_power = tau[v_start] * qvel[v_start]
+
+                        # Positive power = energy entering segment
+                        power_from_parent = joint_power
+
+                        # Check if this joint is actuated
+                        # (simplification: assume actuated if tau != 0)
+                        if abs(tau[v_start]) > 1e-6:
+                            power_generation = joint_power
+
+            # Power to children: sum of power at child joints
+            power_to_children = 0.0
+            for j in range(self.model.njnt):
+                joint = self.model.jnt(j)
+                child_body_id = joint.bodyid[0]
+                if child_body_id > 0:
+                    child_parent_id = self.model.body(child_body_id).parentid[0]
+                    if child_parent_id == i:
+                        v_start = joint.dofadr[0]
+                        if v_start < self.model.nv:
+                            power_to_children += tau[v_start] * qvel[v_start]
+
+            # Dissipation (damping at this body's joint)
+            power_diss = 0.0
+            for j in range(self.model.njnt):
+                joint = self.model.jnt(j)
+                if joint.bodyid[0] == i and joint.damping[0] > 0:
+                    v_start = joint.dofadr[0]
+                    if v_start < self.model.nv:
+                        power_diss += joint.damping[0] * qvel[v_start] ** 2
+
+            # Power balance: in - out - generation + dissipation = 0
             net_balance = (
                 power_from_parent - power_to_children - power_generation + power_diss
             )
@@ -353,78 +395,6 @@ class PowerFlowAnalyzer:
             )
 
         return transfers
-
-    def _compute_body_joint_power(
-        self, body_id: int, tau: np.ndarray, qvel: np.ndarray
-    ) -> tuple[float, float]:
-        """Compute power from parent and generation at joints owned by a body.
-
-        Args:
-            body_id: MuJoCo body index.
-            tau: Joint torques [nv].
-            qvel: Joint velocities [nv].
-
-        Returns:
-            Tuple of (power_from_parent, power_generation).
-        """
-        power_from_parent = 0.0
-        power_generation = 0.0
-        for j in range(self.model.njnt):
-            joint = self.model.jnt(j)
-            if joint.bodyid[0] == body_id:
-                v_start = joint.dofadr[0]
-                if v_start < self.model.nv:
-                    joint_power = tau[v_start] * qvel[v_start]
-                    power_from_parent = joint_power
-                    if abs(tau[v_start]) > 1e-6:
-                        power_generation = joint_power
-        return power_from_parent, power_generation
-
-    def _compute_child_joint_power(
-        self, body_id: int, tau: np.ndarray, qvel: np.ndarray
-    ) -> float:
-        """Compute total power transferred to child bodies through their joints.
-
-        Args:
-            body_id: MuJoCo body index.
-            tau: Joint torques [nv].
-            qvel: Joint velocities [nv].
-
-        Returns:
-            Total power flowing to children.
-        """
-        power_to_children = 0.0
-        for j in range(self.model.njnt):
-            joint = self.model.jnt(j)
-            child_body_id = joint.bodyid[0]
-            if child_body_id > 0:
-                child_parent_id = self.model.body(child_body_id).parentid[0]
-                if child_parent_id == body_id:
-                    v_start = joint.dofadr[0]
-                    if v_start < self.model.nv:
-                        power_to_children += tau[v_start] * qvel[v_start]
-        return power_to_children
-
-    def _compute_joint_dissipation(
-        self, body_id: int, qvel: np.ndarray
-    ) -> float:
-        """Compute power dissipation from joint damping for a body.
-
-        Args:
-            body_id: MuJoCo body index.
-            qvel: Joint velocities [nv].
-
-        Returns:
-            Total dissipated power at this body's joints.
-        """
-        power_diss = 0.0
-        for j in range(self.model.njnt):
-            joint = self.model.jnt(j)
-            if joint.bodyid[0] == body_id and joint.damping[0] > 0:
-                v_start = joint.dofadr[0]
-                if v_start < self.model.nv:
-                    power_diss += joint.damping[0] * qvel[v_start] ** 2
-        return power_diss
 
     @precondition(
         lambda self, times, results, joint_idx=0: joint_idx >= 0,

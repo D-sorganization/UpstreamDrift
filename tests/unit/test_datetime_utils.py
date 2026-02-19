@@ -58,21 +58,41 @@ class TestNowFunctions:
 class TestTimestampFormatting:
     """Tests for timestamp formatting functions."""
 
-    @pytest.mark.parametrize(
-        "fmt, check_fn",
-        [
-            ("iso", lambda ts: "T" in ts and ("+" in ts or "Z" in ts)),
-            ("filename", lambda ts: "_" in ts and len(ts) == 15),
-            ("display", lambda ts: " " in ts and "-" in ts and ":" in ts),
-            ("date", lambda ts: len(ts) == 10 and ts.count("-") == 2),
-            ("time", lambda ts: len(ts) == 8 and ts.count(":") == 2),
-        ],
-        ids=["iso", "filename", "display", "date", "time"],
-    )
-    def test_timestamp_format(self, fmt: str, check_fn: object) -> None:
-        """Test timestamp returns correct format for each format type."""
-        ts = timestamp(fmt)
-        assert check_fn(ts), f"Format {fmt!r} failed validation: {ts!r}"
+    def test_timestamp_iso_format(self) -> None:
+        """timestamp with iso format should return ISO 8601 string."""
+        ts = timestamp("iso")
+        # Should contain T separator and timezone info
+        assert "T" in ts
+        assert "+" in ts or "Z" in ts
+
+    def test_timestamp_filename_format(self) -> None:
+        """timestamp with filename format should be safe for filenames."""
+        ts = timestamp("filename")
+        # Format: YYYYMMDD_HHMMSS
+        assert "_" in ts
+        assert len(ts) == 15  # 8 + 1 + 6
+
+    def test_timestamp_display_format(self) -> None:
+        """timestamp with display format should be human readable."""
+        ts = timestamp("display")
+        # Format: YYYY-MM-DD HH:MM:SS
+        assert " " in ts
+        assert "-" in ts
+        assert ":" in ts
+
+    def test_timestamp_date_format(self) -> None:
+        """timestamp with date format should return date only."""
+        ts = timestamp("date")
+        # Format: YYYY-MM-DD
+        assert len(ts) == 10
+        assert ts.count("-") == 2
+
+    def test_timestamp_time_format(self) -> None:
+        """timestamp with time format should return time only."""
+        ts = timestamp("time")
+        # Format: HH:MM:SS
+        assert len(ts) == 8
+        assert ts.count(":") == 2
 
     def test_timestamp_compact_format(self) -> None:
         """timestamp with compact format should be compact."""
@@ -100,27 +120,41 @@ class TestTimestampFormatting:
 class TestFormatDatetime:
     """Tests for format_datetime function."""
 
-    @pytest.mark.parametrize(
-        "fmt, expected",
-        [
-            ("filename", "20240115_103000"),
-            ("display", "2024-01-15 10:30:00"),
-            ("date", "2024-01-15"),
-            ("time", "10:30:00"),
-            ("compact", "20240115103000"),
-        ],
-        ids=["filename", "display", "date", "time", "compact"],
-    )
-    def test_format_datetime_formats(self, fmt: str, expected: str) -> None:
-        """Test format_datetime returns correct string for each format."""
-        dt = datetime(2024, 1, 15, 10, 30, 0)
-        assert format_datetime(dt, fmt) == expected
-
     def test_format_datetime_iso(self) -> None:
-        """format_datetime with iso format needs timezone-aware datetime."""
+        """format_datetime with iso format should work correctly."""
         dt = datetime(2024, 1, 15, 10, 30, 0, tzinfo=timezone.utc)
         result = format_datetime(dt, "iso")
         assert result == "2024-01-15T10:30:00+00:00"
+
+    def test_format_datetime_filename(self) -> None:
+        """format_datetime with filename format should work correctly."""
+        dt = datetime(2024, 1, 15, 10, 30, 0)
+        result = format_datetime(dt, "filename")
+        assert result == "20240115_103000"
+
+    def test_format_datetime_display(self) -> None:
+        """format_datetime with display format should work correctly."""
+        dt = datetime(2024, 1, 15, 10, 30, 0)
+        result = format_datetime(dt, "display")
+        assert result == "2024-01-15 10:30:00"
+
+    def test_format_datetime_date(self) -> None:
+        """format_datetime with date format should work correctly."""
+        dt = datetime(2024, 1, 15, 10, 30, 0)
+        result = format_datetime(dt, "date")
+        assert result == "2024-01-15"
+
+    def test_format_datetime_time(self) -> None:
+        """format_datetime with time format should work correctly."""
+        dt = datetime(2024, 1, 15, 10, 30, 0)
+        result = format_datetime(dt, "time")
+        assert result == "10:30:00"
+
+    def test_format_datetime_compact(self) -> None:
+        """format_datetime with compact format should work correctly."""
+        dt = datetime(2024, 1, 15, 10, 30, 0)
+        result = format_datetime(dt, "compact")
+        assert result == "20240115103000"
 
     def test_format_datetime_invalid_format_raises(self) -> None:
         """format_datetime with invalid format should raise ValueError."""
@@ -132,31 +166,47 @@ class TestFormatDatetime:
 class TestParseTimestamp:
     """Tests for parse_timestamp function."""
 
-    @pytest.mark.parametrize(
-        "input_str, expected_year, expected_hour",
-        [
-            ("2024-01-15T10:30:00Z", 2024, 10),
-            ("2024-01-15T10:30:00+05:30", 2024, 10),
-            ("2024-01-15 10:30:00", 2024, 10),
-            ("2024-01-15", 2024, 0),
-            ("20240115_103000", 2024, 10),
-        ],
-        ids=["iso-z", "iso-offset", "space-format", "date-only", "filename-format"],
-    )
-    def test_parse_timestamp_formats(
-        self, input_str: str, expected_year: int, expected_hour: int
-    ) -> None:
-        """Test parse_timestamp handles various timestamp formats."""
-        result = parse_timestamp(input_str)
-        assert result is not None
-        assert result.year == expected_year
-        assert result.hour == expected_hour
-
-    def test_parse_iso_with_z_has_utc_timezone(self) -> None:
-        """parse_timestamp with Z suffix should have UTC timezone."""
+    def test_parse_iso_with_z(self) -> None:
+        """parse_timestamp should handle ISO format with Z suffix."""
         result = parse_timestamp("2024-01-15T10:30:00Z")
         assert result is not None
+        assert result.year == 2024
+        assert result.month == 1
+        assert result.day == 15
+        assert result.hour == 10
+        assert result.minute == 30
+        assert result.second == 0
         assert result.tzinfo == timezone.utc
+
+    def test_parse_iso_with_offset(self) -> None:
+        """parse_timestamp should handle ISO format with offset."""
+        result = parse_timestamp("2024-01-15T10:30:00+05:30")
+        assert result is not None
+        assert result.year == 2024
+        assert result.tzinfo is not None
+
+    def test_parse_common_format_with_space(self) -> None:
+        """parse_timestamp should handle YYYY-MM-DD HH:MM:SS format."""
+        result = parse_timestamp("2024-01-15 10:30:00")
+        assert result is not None
+        assert result.year == 2024
+        assert result.hour == 10
+
+    def test_parse_date_only(self) -> None:
+        """parse_timestamp should handle date-only format."""
+        result = parse_timestamp("2024-01-15")
+        assert result is not None
+        assert result.year == 2024
+        assert result.month == 1
+        assert result.day == 15
+        assert result.hour == 0
+
+    def test_parse_filename_format(self) -> None:
+        """parse_timestamp should handle filename format."""
+        result = parse_timestamp("20240115_103000")
+        assert result is not None
+        assert result.year == 2024
+        assert result.hour == 10
 
     def test_parse_empty_returns_default(self) -> None:
         """parse_timestamp with empty string should return default."""

@@ -180,29 +180,12 @@ class CustomThemeEditor(QDialog):
 
     def _setup_ui(self) -> None:
         layout = QHBoxLayout()
-        layout.addWidget(self._build_left_panel(), 1)
-        layout.addWidget(self._build_preview_panel(), 1)
 
-        button_box = self._build_dialog_buttons()
-
-        main_layout = QVBoxLayout(self)
-        main_layout.addLayout(layout)
-        main_layout.addWidget(button_box)
-
-    def _build_left_panel(self) -> QWidget:
-        """Build the left panel containing theme name, color editor, and presets."""
+        # Left side - Color editor
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
-        left_layout.addWidget(self._build_name_group())
-        left_layout.addWidget(self._build_colors_group())
-        left_layout.addWidget(self._build_preset_group())
-        left_layout.addStretch()
-
-        return left_widget
-
-    def _build_name_group(self) -> QGroupBox:
-        """Build the theme name input group."""
+        # Theme name
         name_group = QGroupBox("Theme Name")
         name_layout = QFormLayout(name_group)
         self.name_edit = QLineEdit()
@@ -212,12 +195,15 @@ class CustomThemeEditor(QDialog):
         else:
             self.name_edit.setPlaceholderText("Enter theme name...")
         name_layout.addRow("Name:", self.name_edit)
-        return name_group
+        left_layout.addWidget(name_group)
 
-    @staticmethod
-    def _color_definitions() -> list[tuple[str, str, str]]:
-        """Return (key, display_name, tooltip) tuples for all theme colors."""
-        return [
+        # Color editor
+        colors_group = QGroupBox("Theme Colors")
+        colors_scroll = QScrollArea()
+        colors_widget = QWidget()
+        colors_layout = QFormLayout(colors_widget)
+
+        color_definitions = [
             ("bg", "Background", "Main window background color"),
             ("group_bg", "Group Background", "Background for group boxes and panels"),
             ("border", "Border", "Border color for controls"),
@@ -234,14 +220,7 @@ class CustomThemeEditor(QDialog):
             ("button_hover", "Button Hover", "Button color when hovered"),
         ]
 
-    def _build_colors_group(self) -> QGroupBox:
-        """Build the scrollable color picker group."""
-        colors_group = QGroupBox("Theme Colors")
-        colors_scroll = QScrollArea()
-        colors_widget = QWidget()
-        colors_layout = QFormLayout(colors_widget)
-
-        for key, name, tooltip in self._color_definitions():
+        for key, name, tooltip in color_definitions:
             btn = ColorPickerButton()
             btn.setToolTip(tooltip)
             btn.color_changed.connect(partial(self._on_color_changed, key))
@@ -253,10 +232,9 @@ class CustomThemeEditor(QDialog):
         colors_scroll.setMaximumHeight(400)
         colors_group_layout = QVBoxLayout(colors_group)
         colors_group_layout.addWidget(colors_scroll)
-        return colors_group
+        left_layout.addWidget(colors_group)
 
-    def _build_preset_group(self) -> QGroupBox:
-        """Build the quick-start preset buttons group."""
+        # Quick start presets
         preset_group = QGroupBox("Quick Start")
         preset_layout = QVBoxLayout(preset_group)
         preset_layout.addWidget(QLabel("Start from an existing theme and modify it:"))
@@ -268,10 +246,12 @@ class CustomThemeEditor(QDialog):
             )
             preset_btn_layout.addWidget(preset_btn)
         preset_layout.addLayout(preset_btn_layout)
-        return preset_group
+        left_layout.addWidget(preset_group)
 
-    def _build_preview_panel(self) -> QWidget:
-        """Build the right panel with live theme preview."""
+        left_layout.addStretch()
+        layout.addWidget(left_widget, 1)
+
+        # Right side - Preview
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
         preview_label = QLabel("Live Preview")
@@ -279,10 +259,9 @@ class CustomThemeEditor(QDialog):
         right_layout.addWidget(preview_label)
         self.preview_widget = ThemePreviewWidget()
         right_layout.addWidget(self.preview_widget, 1)
-        return right_widget
+        layout.addWidget(right_widget, 1)
 
-    def _build_dialog_buttons(self) -> QDialogButtonBox:
-        """Build the Save/Cancel dialog button box."""
+        # Dialog buttons
         button_box = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save
             | QDialogButtonBox.StandardButton.Cancel
@@ -295,7 +274,10 @@ class CustomThemeEditor(QDialog):
         button_box.rejected.connect(self.reject)
         if self.save_apply_btn:
             self.save_apply_btn.clicked.connect(self._save_and_apply_theme)
-        return button_box
+
+        main_layout = QVBoxLayout(self)
+        main_layout.addLayout(layout)
+        main_layout.addWidget(button_box)
 
     def _load_initial_colors(self) -> None:
         if self.edit_theme:

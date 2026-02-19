@@ -88,7 +88,7 @@ def export_to_matlab(
 
         return True
 
-    except (OSError, ValueError, TypeError) as e:
+    except Exception as e:  # noqa: BLE001 - savemat may raise various errors
         logger.error(f"Failed to export to MATLAB: {e}")
         return False
 
@@ -159,7 +159,7 @@ def export_to_hdf5(
 
         return True
 
-    except (OSError, ValueError, TypeError) as e:
+    except Exception as e:  # noqa: BLE001 - h5py may raise various errors
         logger.error(f"Failed to export to HDF5: {e}")
         return False
 
@@ -334,99 +334,13 @@ def _export_to_c3d_py(
     return True
 
 
-def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
-    """Export data dictionary to JSON format.
-
-    Converts numpy arrays to lists for JSON serialization.
-    """
-    import json
-
-    json_data = {}
-    for k, v in data_dict.items():
-        if isinstance(v, np.ndarray):
-            json_data[k] = v.tolist()
-        elif isinstance(v, dict):
-            json_data[k] = {
-                sk: sv.tolist() if isinstance(sv, np.ndarray) else sv
-                for sk, sv in v.items()
-            }
-        else:
-            json_data[k] = v
-
-    with open(output_path, "w") as f:
-        json.dump(json_data, f, indent=2)
-    return True
-
-
-def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:
-    """Flatten a nested data dictionary into a flat dictionary for CSV export.
-
-    Handles time series arrays and nested dictionaries of arrays.
-    """
-    flat_data: dict[str, Any] = {}
-    if "times" in data_dict:
-        flat_data["time"] = data_dict["times"]
-
-    n_times = len(data_dict.get("times", []))
-
-    for k, v in data_dict.items():
-        if k == "times":
-            continue
-
-        # Handle direct arrays matching time length
-        if isinstance(v, np.ndarray) and len(v) == n_times:
-            if v.ndim == 1:
-                flat_data[k] = v
-            elif v.ndim == 2:
-                for i in range(v.shape[1]):
-                    flat_data[f"{k}_{i}"] = v[:, i]
-
-        # Handle nested dictionaries (e.g. induced_accelerations)
-        elif isinstance(v, dict):
-            for sub_k, sub_v in v.items():
-                if isinstance(sub_v, np.ndarray) and len(sub_v) == n_times:
-                    full_key = f"{k}_source_{sub_k}" if isinstance(sub_k, int) else f"{k}_{sub_k}"
-                    if sub_v.ndim == 1:
-                        flat_data[full_key] = sub_v
-                    elif sub_v.ndim == 2:
-                        for i in range(sub_v.shape[1]):
-                            flat_data[f"{full_key}_{i}"] = sub_v[:, i]
-
-    return flat_data
-
-
-def _export_csv(output_path: Path, data_dict: dict[str, Any]) -> bool:
-    """Export data dictionary to CSV format."""
-    import pandas as pd
-
-    flat_data = _flatten_dict_for_csv(data_dict)
-    df = pd.DataFrame(flat_data)
-    df.to_csv(output_path, index=False)
-    return True
-
-
 def export_recording_all_formats(
     base_path: str,
     data_dict: dict[str, Any],
     formats: list | None = None,
 ) -> dict[str, bool]:
-    """Export recording in multiple formats.
-
-    Args:
-        base_path: Base file path (without extension).
-        data_dict: Data dictionary to export.
-        formats: List of format strings. Defaults to ["json", "csv", "mat", "hdf5"].
-
-    Returns:
-        Dictionary mapping format names to success booleans.
-
-    Raises:
-        ValueError: If base_path is empty or data_dict is empty.
-    """
-    if not base_path:
-        raise ValueError("base_path must be a non-empty string")
-    if not isinstance(data_dict, dict):
-        raise TypeError(f"data_dict must be a dict, got {type(data_dict).__name__}")
+    """Export recording in multiple formats."""
+    import json
 
     if formats is None:
         formats = ["json", "csv", "mat", "hdf5"]
@@ -438,9 +352,68 @@ def export_recording_all_formats(
             output_path = base_path_obj.with_suffix(f".{fmt}")
 
             if fmt == "json":
-                success = _export_json(output_path, data_dict)
+                # Basic JSON dump of lists
+                json_data = {}
+                for k, v in data_dict.items():
+                    if isinstance(v, np.ndarray):
+                        json_data[k] = v.tolist()
+                    elif isinstance(v, dict):
+                        json_data[k] = {
+                            sk: sv.tolist() if isinstance(sv, np.ndarray) else sv
+                            for sk, sv in v.items()
+                        }
+                    else:
+                        json_data[k] = v
+
+                with open(output_path, "w") as f:
+                    json.dump(json_data, f, indent=2)
+                success = True
+
             elif fmt == "csv":
-                success = _export_csv(output_path, data_dict)
+                # Simple CSV of time series
+                import pandas as pd
+
+                # Flatten dictionary
+                flat_data = {}
+                if "times" in data_dict:
+                    flat_data["time"] = data_dict["times"]
+
+                for k, v in data_dict.items():
+                    if k == "times":
+                        continue
+
+                    # Handle direct arrays
+                    if isinstance(v, np.ndarray) and len(v) == len(
+                        data_dict.get("times", [])
+                    ):
+                        if v.ndim == 1:
+                            flat_data[k] = v
+                        elif v.ndim == 2:
+                            for i in range(v.shape[1]):
+                                flat_data[f"{k}_{i}"] = v[:, i]
+
+                    # Handle nested dictionaries (e.g. induced_accelerations)
+                    elif isinstance(v, dict):
+                        for sub_k, sub_v in v.items():
+                            if isinstance(sub_v, np.ndarray) and len(sub_v) == len(
+                                data_dict.get("times", [])
+                            ):
+                                # If sub_k is an int (source index), format nicely
+                                if isinstance(sub_k, int):
+                                    full_key = f"{k}_source_{sub_k}"
+                                else:
+                                    full_key = f"{k}_{sub_k}"
+
+                                if sub_v.ndim == 1:
+                                    flat_data[full_key] = sub_v
+                                elif sub_v.ndim == 2:
+                                    for i in range(sub_v.shape[1]):
+                                        flat_data[f"{full_key}_{i}"] = sub_v[:, i]
+
+                df = pd.DataFrame(flat_data)
+                df.to_csv(output_path, index=False)
+                success = True
+
             elif fmt == "mat":
                 success = export_to_matlab(str(output_path), data_dict)
             elif fmt in ["hdf5", "h5"]:

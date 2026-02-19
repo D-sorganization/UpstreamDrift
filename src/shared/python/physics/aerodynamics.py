@@ -279,11 +279,12 @@ class DragModel:
 
         if re < 8e4:
             return laminar_cd  # Laminar flow
-        if re < 2e5:
+        elif re < 2e5:
             # Transition region - interpolate between laminar and turbulent
             fraction = (re - 8e4) / (2e5 - 8e4)
             return laminar_cd - fraction * (laminar_cd - turbulent_cd)
-        return turbulent_cd  # Fully turbulent
+        else:
+            return turbulent_cd  # Fully turbulent
 
 
 class LiftModel:

@@ -209,7 +209,7 @@ class TestEngineManager:
             # Mock the registry to return a factory that raises an exception
             mock_registry = mock_get_registry.return_value
             mock_registration = MagicMock()
-            mock_registration.factory.side_effect = RuntimeError("Test error")
+            mock_registration.factory.side_effect = Exception("Test error")
             mock_registry.get.return_value = mock_registration
 
             result = manager.switch_engine(EngineType.MUJOCO)

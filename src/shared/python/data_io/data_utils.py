@@ -403,7 +403,8 @@ def resample_data(
             )
 
         return pd.DataFrame(resampled_data, index=new_time)
-    # Use pandas resample for datetime index
-    return data.resample(f"{1000 / target_rate:.0f}ms").interpolate(  # type: ignore[call-overload]
-        method=method
-    )
+    else:
+        # Use pandas resample for datetime index
+        return data.resample(f"{1000 / target_rate:.0f}ms").interpolate(  # type: ignore[call-overload]
+            method=method
+        )

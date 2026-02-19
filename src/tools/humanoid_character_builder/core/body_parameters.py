@@ -245,9 +245,10 @@ class BodyParameters:
         """
         if self.gender_model == GenderModel.MALE:
             return 1.0
-        if self.gender_model == GenderModel.FEMALE:
+        elif self.gender_model == GenderModel.FEMALE:
             return 0.0
-        return 0.5
+        else:
+            return 0.5
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""

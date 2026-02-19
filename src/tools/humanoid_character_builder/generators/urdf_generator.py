@@ -348,7 +348,8 @@ class HumanoidURDFGenerator:
                         return self.mesh_inertia_calc.compute_from_mesh(
                             mesh_path, mass=mass
                         )
-                    return self.mesh_inertia_calc.compute_from_mesh(mesh_path)
+                    else:
+                        return self.mesh_inertia_calc.compute_from_mesh(mesh_path)
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.warning(
                         f"Mesh inertia calculation failed for {segment_name}: {e}"
@@ -387,37 +388,38 @@ class HumanoidURDFGenerator:
                 "type": "box",
                 "size": (width, depth, length),
             }
-        if geom_spec.geometry_type == GeometryType.CYLINDER:
+        elif geom_spec.geometry_type == GeometryType.CYLINDER:
             radius = (width + depth) / 4
             return {
                 "type": "cylinder",
                 "radius": radius,
                 "length": length,
             }
-        if geom_spec.geometry_type == GeometryType.SPHERE:
+        elif geom_spec.geometry_type == GeometryType.SPHERE:
             radius = length / 2
             return {
                 "type": "sphere",
                 "radius": radius,
             }
-        if geom_spec.geometry_type == GeometryType.CAPSULE:
+        elif geom_spec.geometry_type == GeometryType.CAPSULE:
             radius = (width + depth) / 4
             return {
                 "type": "cylinder",  # URDF doesn't have capsule, use cylinder
                 "radius": radius,
                 "length": max(0.01, length - 2 * radius),
             }
-        if geom_spec.geometry_type == GeometryType.MESH:
+        elif geom_spec.geometry_type == GeometryType.MESH:
             return {
                 "type": "mesh",
                 "filename": geom_spec.mesh_path,
                 "scale": geom_spec.mesh_scale,
             }
-        # Default to box
-        return {
-            "type": "box",
-            "size": (width, depth, length),
-        }
+        else:
+            # Default to box
+            return {
+                "type": "box",
+                "size": (width, depth, length),
+            }
 
     def _generate_joint(
         self,
@@ -574,7 +576,8 @@ class HumanoidURDFGenerator:
             # Remove extra blank lines
             lines = [line for line in xml_str.split("\n") if line.strip()]
             return "\n".join(lines)
-        return ET.tostring(root, encoding="unicode")
+        else:
+            return ET.tostring(root, encoding="unicode")
 
     def _add_link_element(self, root: ET.Element, link: GeneratedLink) -> None:
         """Add a link element to the URDF."""

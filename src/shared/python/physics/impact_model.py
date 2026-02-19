@@ -617,11 +617,12 @@ def create_impact_model(model_type: ImpactModelType) -> ImpactModel:
     """
     if model_type == ImpactModelType.RIGID_BODY:
         return RigidBodyImpactModel()
-    if model_type == ImpactModelType.SPRING_DAMPER:
+    elif model_type == ImpactModelType.SPRING_DAMPER:
         return SpringDamperImpactModel()
-    if model_type == ImpactModelType.FINITE_TIME:
+    elif model_type == ImpactModelType.FINITE_TIME:
         return FiniteTimeImpactModel()
-    raise ValueError(f"Unknown impact model type: {model_type}")
+    else:
+        raise ValueError(f"Unknown impact model type: {model_type}")
 
 
 # =============================================================================

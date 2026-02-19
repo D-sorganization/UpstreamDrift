@@ -254,7 +254,7 @@ def plot_club_head_speed(
             xytext=(peak_time + 0.05, peak_speed + 5),
             fontsize=config.legend_size,
             color=config.colors.secondary,
-            arrowprops={"arrowstyle": "->", "color": config.colors.secondary},
+            arrowprops=dict(arrowstyle="->", color=config.colors.secondary),
         )
 
     ax.set_xlabel("Time [s]")

@@ -94,22 +94,23 @@ class SurfaceMaterialResponse(BaseModel):
 
 
 # ──────────────────────────────────────────────────────────────
-#  In-memory terrain state (singleton holder avoids 'global')
+#  In-memory terrain state
 # ──────────────────────────────────────────────────────────────
 
-_terrain_state: dict[str, Terrain | None] = {"active": None}
+_active_terrain: Terrain | None = None
 
 
 def _get_active_terrain() -> Terrain:
     """Get the active terrain, creating a default if none exists."""
-    if _terrain_state["active"] is None:
-        _terrain_state["active"] = create_flat_terrain(
+    global _active_terrain  # noqa: PLW0603
+    if _active_terrain is None:
+        _active_terrain = create_flat_terrain(
             name="default_fairway",
             width=100.0,
             length=200.0,
             terrain_type=TerrainType.FAIRWAY,
         )
-    return _terrain_state["active"]  # type: ignore[return-value]
+    return _active_terrain
 
 
 # ──────────────────────────────────────────────────────────────
@@ -346,6 +347,8 @@ async def list_presets() -> list[EnvironmentPreset]:
 )
 async def load_environment(request: CreateEnvironmentRequest) -> dict[str, Any]:
     """Load an environment preset as the active terrain."""
+    global _active_terrain  # noqa: PLW0603
+
     preset_name = request.preset.lower().strip()
     if preset_name not in _BUILDERS:
         return {
@@ -359,16 +362,15 @@ async def load_environment(request: CreateEnvironmentRequest) -> dict[str, Any]:
     length = request.length or preset_info["length"]
 
     builder = _BUILDERS[preset_name]
-    _terrain_state["active"] = builder(
+    _active_terrain = builder(
         width, length, request.slope_angle_deg, request.slope_direction_deg
     )
 
-    terrain = _terrain_state["active"]
     logger.info("Loaded environment preset: %s (%gx%g m)", preset_name, width, length)
 
     return {
         "success": True,
-        "name": terrain.name,  # type: ignore[union-attr]
+        "name": _active_terrain.name,
         "width_m": width,
         "length_m": length,
         "terrain_types": preset_info["terrain_types"],

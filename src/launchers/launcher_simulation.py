@@ -91,7 +91,7 @@ except ImportError as e:
     print(f"ImportError: {{e}}")
 except OSError as e:
     print(f"OSError: {{e}}")
-except (RuntimeError, TypeError, AttributeError) as e:
+except Exception as e:
     print(f"Error: {{type(e).__name__}}: {{e}}")
 """
         try:
@@ -106,7 +106,8 @@ except (RuntimeError, TypeError, AttributeError) as e:
             output = result.stdout.strip()
             if output == "OK":
                 return True, ""
-            return False, f"{display_name} dependency check failed:\n{output}"
+            else:
+                return False, f"{display_name} dependency check failed:\n{output}"
         except subprocess.TimeoutExpired:
             return False, f"{display_name} dependency check timed out"
         except (OSError, ValueError) as e:
@@ -136,10 +137,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
         if "urdf_generator" in model_id or "model_explorer" in model_id:
             self._launch_urdf_generator()
             return True
-        if "c3d_viewer" in model_id:
+        elif "c3d_viewer" in model_id:
             self._launch_c3d_viewer()
             return True
-        if "shot_tracer" in model_id:
+        elif "shot_tracer" in model_id:
             self._launch_shot_tracer()
             return True
         return False

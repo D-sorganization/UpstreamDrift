@@ -14,13 +14,10 @@ Options:
 
 import argparse
 import json
-import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import NamedTuple
-
-logger = logging.getLogger(__name__)
 
 
 class CheckResult(NamedTuple):
@@ -297,8 +294,8 @@ def run_all_checks(verbose: bool = False) -> list[CheckResult]:
             results.append(result)
             if verbose:
                 status = "" if result.passed else ""
-                logger.info("%s %s: %s", status, result.name, result.message)
-        except (ImportError, OSError, ValueError, RuntimeError) as e:
+                print(f"{status} {result.name}: {result.message}")
+        except Exception as e:
             results.append(
                 CheckResult(
                     name=check_fn.__name__,
@@ -319,12 +316,10 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    logger.info("=" * 60)
-    logger.info("UpstreamDrift Integration Check")
-    logger.info("=" * 60)
-    logger.info("")
+    print("=" * 60)
+    print("UpstreamDrift Integration Check")
+    print("=" * 60)
+    print()
 
     results = run_all_checks(verbose=args.verbose)
 
@@ -332,29 +327,29 @@ def main() -> int:
     passed = sum(1 for r in results if r.passed)
     failed = sum(1 for r in results if not r.passed)
 
-    logger.info("")
-    logger.info("=" * 60)
-    logger.info("Summary: %d passed, %d failed", passed, failed)
-    logger.info("=" * 60)
+    print()
+    print("=" * 60)
+    print(f"Summary: {passed} passed, {failed} failed")
+    print("=" * 60)
 
     if not args.verbose:
-        logger.info("\nFailed checks:")
+        print("\nFailed checks:")
         for result in results:
             if not result.passed:
-                logger.warning("  - %s: %s", result.name, result.message)
+                print(f"  - {result.name}: {result.message}")
                 if result.fix_command:
-                    logger.info("    Fix: %s", result.fix_command)
+                    print(f"    Fix: {result.fix_command}")
 
     if args.fix:
-        logger.info("\nAttempting fixes...")
+        print("\nAttempting fixes...")
         for result in results:
             if not result.passed and result.fix_command:
-                logger.info("  Running: %s", result.fix_command)
+                print(f"  Running: {result.fix_command}")
                 try:
                     subprocess.run(result.fix_command, shell=True, check=True)
-                    logger.info("  Success!")
+                    print("  Success!")
                 except subprocess.CalledProcessError as e:
-                    logger.error("  Failed: %s", e)
+                    print(f"  Failed: {e}")
 
     return 0 if failed == 0 else 1
 

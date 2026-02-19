@@ -298,30 +298,31 @@ class PrimitiveInertiaCalculator:
                 dimensions.get("y", dimensions.get("size_y", 0.1)),
                 dimensions.get("z", dimensions.get("size_z", 0.1)),
             )
-        if shape == PrimitiveShape.CYLINDER:
+        elif shape == PrimitiveShape.CYLINDER:
             return cls.compute_cylinder(
                 mass,
                 dimensions.get("radius", 0.05),
                 dimensions.get("length", dimensions.get("height", 0.1)),
                 axis,
             )
-        if shape == PrimitiveShape.SPHERE:
+        elif shape == PrimitiveShape.SPHERE:
             return cls.compute_sphere(mass, dimensions.get("radius", 0.05))
-        if shape == PrimitiveShape.CAPSULE:
+        elif shape == PrimitiveShape.CAPSULE:
             return cls.compute_capsule(
                 mass,
                 dimensions.get("radius", 0.05),
                 dimensions.get("length", dimensions.get("height", 0.1)),
                 axis,
             )
-        if shape == PrimitiveShape.ELLIPSOID:
+        elif shape == PrimitiveShape.ELLIPSOID:
             return cls.compute_ellipsoid(
                 mass,
                 dimensions.get("a", dimensions.get("semi_a", 0.1)),
                 dimensions.get("b", dimensions.get("semi_b", 0.1)),
                 dimensions.get("c", dimensions.get("semi_c", 0.1)),
             )
-        raise ValueError(f"Unknown shape: {shape}")
+        else:
+            raise ValueError(f"Unknown shape: {shape}")
 
     @staticmethod
     def _tuple_to_dict(
@@ -331,19 +332,19 @@ class PrimitiveInertiaCalculator:
         if shape == PrimitiveShape.BOX:
             if len(dims) >= 3:
                 return {"x": dims[0], "y": dims[1], "z": dims[2]}
-            if len(dims) == 1:
+            elif len(dims) == 1:
                 return {"x": dims[0], "y": dims[0], "z": dims[0]}
         elif shape in (PrimitiveShape.CYLINDER, PrimitiveShape.CAPSULE):
             if len(dims) >= 2:
                 return {"radius": dims[0], "length": dims[1]}
-            if len(dims) == 1:
+            elif len(dims) == 1:
                 return {"radius": dims[0], "length": dims[0] * 2}
         elif shape == PrimitiveShape.SPHERE:
             return {"radius": dims[0]}
         elif shape == PrimitiveShape.ELLIPSOID:
             if len(dims) >= 3:
                 return {"a": dims[0], "b": dims[1], "c": dims[2]}
-            if len(dims) == 1:
+            elif len(dims) == 1:
                 return {"a": dims[0], "b": dims[0], "c": dims[0]}
 
         # Default fallback

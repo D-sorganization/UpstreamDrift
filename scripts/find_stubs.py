@@ -1,9 +1,6 @@
 import ast
-import logging
 import os
 from typing import Any
-
-logger = logging.getLogger(__name__)
 
 
 def is_stub(node: Any) -> bool:
@@ -51,8 +48,8 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
         tree = ast.parse(content)
-    except (SyntaxError, UnicodeDecodeError, OSError) as e:
-        logger.warning("Error parsing %s: %s", filepath, e)
+    except Exception as e:
+        print(f"Error parsing {filepath}: {e}")
         return
 
     for node in ast.walk(tree):

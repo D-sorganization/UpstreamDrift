@@ -915,13 +915,14 @@ def create_viewer(
 
     if backend_type == BackendType.MESHCAT:
         return MeshcatBackend(config)
-    if backend_type == BackendType.MOCK:
+    elif backend_type == BackendType.MOCK:
         return MockBackend(config)
-    if backend_type == BackendType.PYVISTA:
+    elif backend_type == BackendType.PYVISTA:
         return PyVistaBackend(config)
-    if backend_type == BackendType.UNREAL_BRIDGE:
+    elif backend_type == BackendType.UNREAL_BRIDGE:
         return UnrealBridgeBackend(config)
-    raise ValueError(f"Unknown backend type: {backend_type}")
+    else:
+        raise ValueError(f"Unknown backend type: {backend_type}")
 
 
 class UnrealBridgeBackend(ViewerBackend):

@@ -5,14 +5,11 @@ Intended to prevent proliferation of identical scripts.
 """
 
 import hashlib
-import logging
 import sys
 from collections import defaultdict
 from pathlib import Path
 
 from src.shared.python.data_io.path_utils import get_src_root
-
-logger = logging.getLogger(__name__)
 
 # Directories to ignore
 IGNORE_DIRS = {
@@ -73,8 +70,7 @@ def find_duplicates(root_dir: Path) -> int:
     files_by_name = defaultdict(list)
     files_by_hash = defaultdict(list)
 
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logger.info("Scanning %s...", root_dir)
+    print(f"Scanning {root_dir}...")
 
     for path in root_dir.rglob("*"):
         # Skip ignored directories
@@ -101,7 +97,7 @@ def find_duplicates(root_dir: Path) -> int:
     exit_code = 0
 
     # Report duplicates by content (exact copies)
-    logger.info("\n=== Exact Content Duplicates ===")
+    print("\n=== Exact Content Duplicates ===")
     content_dupes = 0
     for file_hash, paths in files_by_hash.items():
         if len(paths) > 1:
@@ -109,34 +105,34 @@ def find_duplicates(root_dir: Path) -> int:
             if paths[0].stat().st_size == 0:
                 continue
 
-            logger.warning("\nHash: %s...", file_hash[:8])
+            print(f"\nHash: {file_hash[:8]}...")
             for p in paths:
-                logger.warning("  %s", p.relative_to(root_dir))
+                print(f"  {p.relative_to(root_dir)}")
             content_dupes += 1
             exit_code = 1
 
     if content_dupes == 0:
-        logger.info("None found.")
+        print("None found.")
 
     # Report duplicates by name (potential copies)
-    logger.info("\n=== Duplicate Filenames (Potential Copies) ===")
+    print("\n=== Duplicate Filenames (Potential Copies) ===")
     name_dupes = 0
     for name, paths in files_by_name.items():
         if len(paths) > 1:
             # Special check for matlab_quality_check.py (Issue #121)
             if name == "matlab_quality_check.py":
-                logger.warning("\nFilename: %s (CRITICAL - Issue #121)", name)
+                print(f"\nFilename: {name} (CRITICAL - Issue #121)")
                 for p in paths:
-                    logger.warning("  %s", p.relative_to(root_dir))
+                    print(f"  {p.relative_to(root_dir)}")
                 exit_code = 1
             elif len(paths) >= 3:  # Only report if 3+ duplicates to reduce noise
-                logger.info("\nFilename: %s", name)
+                print(f"\nFilename: {name}")
                 for p in paths:
-                    logger.info("  %s", p.relative_to(root_dir))
+                    print(f"  {p.relative_to(root_dir)}")
                 name_dupes += 1
 
     if name_dupes == 0 and exit_code == 0:
-        logger.info("No critical duplicates found.")
+        print("No critical duplicates found.")
 
     return exit_code
 

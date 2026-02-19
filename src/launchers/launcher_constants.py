@@ -42,32 +42,32 @@ else:
     CREATE_NEW_CONSOLE = 0
 
 
-# Lazy imports for heavy modules (mutable holder avoids 'global' keyword)
-_lazy_imports: dict[str, Any] = {
-    "EngineManager": None,
-    "EngineType": None,
-    "ModelRegistry": None,
-}
+# Lazy imports for heavy modules
+_EngineManager: Any = None
+_EngineType: Any = None
+_ModelRegistry: Any = None
 
 
 def _lazy_load_engine_manager() -> tuple[Any, Any]:
     """Lazily load EngineManager to speed up initial import."""
-    if _lazy_imports["EngineManager"] is None:
+    global _EngineManager, _EngineType
+    if _EngineManager is None:
         from src.shared.python.engine_core.engine_manager import EngineManager as _EM
         from src.shared.python.engine_core.engine_manager import EngineType as _ET
 
-        _lazy_imports["EngineManager"] = _EM
-        _lazy_imports["EngineType"] = _ET
-    return _lazy_imports["EngineManager"], _lazy_imports["EngineType"]
+        _EngineManager = _EM
+        _EngineType = _ET
+    return _EngineManager, _EngineType
 
 
 def _lazy_load_model_registry() -> Any:
     """Lazily load ModelRegistry to speed up initial import."""
-    if _lazy_imports["ModelRegistry"] is None:
+    global _ModelRegistry
+    if _ModelRegistry is None:
         from src.shared.python.config.model_registry import ModelRegistry as _MR
 
-        _lazy_imports["ModelRegistry"] = _MR
-    return _lazy_imports["ModelRegistry"]
+        _ModelRegistry = _MR
+    return _ModelRegistry
 
 
 # Feature availability checks using importlib for graceful degradation

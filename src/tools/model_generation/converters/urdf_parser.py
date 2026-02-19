@@ -386,7 +386,8 @@ class URDFParser:
                 mass=mass,
                 center_of_mass=com,
             )
-        return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com)
+        else:
+            return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com)
 
     def _parse_origin(self, elem: ET.Element) -> Origin:
         """Parse origin element."""

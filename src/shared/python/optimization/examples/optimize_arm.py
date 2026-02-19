@@ -102,7 +102,7 @@ def _solve_and_export(opti: Any, Q: Any, V: Any, U: Any) -> None:
         )
         logger.info("\nTest passed: CasADi + Pinocchio integration is working.")
 
-    except (RuntimeError, ValueError, ArithmeticError) as e:
+    except Exception as e:  # noqa: BLE001 - CasADi solver may raise various errors
         logger.error("\nFAILURE: Optimization failed.")
         logger.info(e)
         logger.debug("Debug values (last iteration):")

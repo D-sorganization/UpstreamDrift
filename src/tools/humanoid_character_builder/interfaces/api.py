@@ -175,12 +175,12 @@ class CharacterBuildResult:
         if self.mesh_result and options.generate_meshes:
             mesh_dir = output_dir / options.mesh_subdirectory
 
-            for src_path in self.mesh_result.mesh_paths.values():
+            for _seg_name, src_path in self.mesh_result.mesh_paths.items():
                 if src_path and src_path.exists():
                     dst_path = mesh_dir / "visual" / src_path.name
                     shutil.copy2(src_path, dst_path)
 
-            for src_path in self.mesh_result.collision_paths.values():
+            for _seg_name, src_path in self.mesh_result.collision_paths.items():
                 if src_path and src_path.exists():
                     dst_path = mesh_dir / "collision" / src_path.name
                     shutil.copy2(src_path, dst_path)
@@ -387,12 +387,14 @@ class CharacterBuilder:
                     return self._mesh_inertia_calc.compute_from_mesh(
                         mesh_path, mass=mass
                     )
-                return self._mesh_inertia_calc.compute_from_mesh(
-                    mesh_path, density=density
+                else:
+                    return self._mesh_inertia_calc.compute_from_mesh(
+                        mesh_path, density=density
+                    )
+            else:
+                logger.warning(
+                    f"No mesh path provided for {segment_name}, falling back to primitive"
                 )
-            logger.warning(
-                f"No mesh path provided for {segment_name}, falling back to primitive"
-            )
 
         # Primitive approximation
         length = dimensions.get("length", 0.1)

@@ -475,73 +475,103 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
         return screen_x, screen_y
 
-    def _draw_grid(self, painter: QPainter) -> None:
-        """Draw the XZ ground plane grid lines.
+    def paintGL(self) -> None:
+        """Paint the OpenGL scene using QPainter for fallback visualization."""
 
-        Args:
-            painter: Active QPainter with translation already applied.
-        """
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Draw background
+
+        painter.fillRect(self.rect(), QColor(40, 40, 40))
+
+        # Center of the widget
+
+        center_x = self.width() / 2
+
+        center_y = self.height() / 2
+
+        painter.translate(center_x, center_y)
+
+        # Draw Grid
+
         painter.setPen(QPen(QColor(80, 80, 80), 1))
+
         grid_size = 5
+
         grid_step = 1.0
+
+        # Draw lines parallel to X and Z
 
         for i in range(-grid_size, grid_size + 1):
             val = i * grid_step
+
+            # Line parallel to Z (varying Z, fixed X)
+
             x1, y1 = self.project_point(val, 0, -grid_size * grid_step)
+
             x2, y2 = self.project_point(val, 0, grid_size * grid_step)
+
             painter.drawLine(int(x1), int(y1), int(x2), int(y2))
+
+            # Line parallel to X (varying X, fixed Z)
 
             x1, y1 = self.project_point(-grid_size * grid_step, 0, val)
+
             x2, y2 = self.project_point(grid_size * grid_step, 0, val)
+
             painter.drawLine(int(x1), int(y1), int(x2), int(y2))
 
-    def _draw_axes(self, painter: QPainter) -> None:
-        """Draw the XYZ axis indicators with color coding.
+        # Draw Axes
 
-        Args:
-            painter: Active QPainter with translation already applied.
-        """
         origin_x, origin_y = self.project_point(0, 0, 0)
 
-        axes = [
-            (QColor(255, 100, 100), (1.5, 0, 0), "X"),
-            (QColor(100, 255, 100), (0, 1.5, 0), "Y"),
-            (QColor(100, 100, 255), (0, 0, 1.5), "Z"),
-        ]
-        for color, (ax, ay, az), label in axes:
-            painter.setPen(QPen(color, 2))
-            tip_x, tip_y = self.project_point(ax, ay, az)
-            painter.drawLine(int(origin_x), int(origin_y), int(tip_x), int(tip_y))
-            painter.drawText(int(tip_x), int(tip_y), label)
+        # X Axis - Red
 
-    def _draw_overlay_info(self, painter: QPainter) -> None:
-        """Draw camera state overlay text in the top-left corner.
+        painter.setPen(QPen(QColor(255, 100, 100), 2))
 
-        Args:
-            painter: Active QPainter (transform reset expected before calling).
-        """
+        ax_x, ax_y = self.project_point(1.5, 0, 0)
+
+        painter.drawLine(int(origin_x), int(origin_y), int(ax_x), int(ax_y))
+
+        painter.drawText(int(ax_x), int(ax_y), "X")
+
+        # Y Axis - Green (Up)
+
+        painter.setPen(QPen(QColor(100, 255, 100), 2))
+
+        ay_x, ay_y = self.project_point(0, 1.5, 0)
+
+        painter.drawLine(int(origin_x), int(origin_y), int(ay_x), int(ay_y))
+
+        painter.drawText(int(ay_x), int(ay_y), "Y")
+
+        # Z Axis - Blue
+
+        painter.setPen(QPen(QColor(100, 100, 255), 2))
+
+        az_x, az_y = self.project_point(0, 0, 1.5)
+
+        painter.drawLine(int(origin_x), int(origin_y), int(az_x), int(az_y))
+
+        painter.drawText(int(az_x), int(az_y), "Z")
+
+        # Draw overlay info (reset transform)
+
         painter.resetTransform()
+
         painter.setPen(QColor(255, 255, 255))
+
         painter.drawText(10, 20, f"Zoom: {self.camera_distance:.1f}x")
+
         painter.drawText(
-            10, 35,
+            10,
+            35,
             f"Rot: {self.camera_rotation_x:.1f}, {self.camera_rotation_y:.1f}",
         )
+
         painter.drawText(10, 50, "Grid View (Fallback)")
-
-    def paintGL(self) -> None:
-        """Paint the OpenGL scene using QPainter for fallback visualization."""
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.fillRect(self.rect(), QColor(40, 40, 40))
-
-        center_x = self.width() / 2
-        center_y = self.height() / 2
-        painter.translate(center_x, center_y)
-
-        self._draw_grid(painter)
-        self._draw_axes(painter)
-        self._draw_overlay_info(painter)
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press events.

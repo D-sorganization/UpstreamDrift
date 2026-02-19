@@ -232,7 +232,7 @@ class RoboticsGymEnv:
         """
         if self.render_mode == "rgb_array":
             return self._render_frame()
-        if self.render_mode == "human":
+        elif self.render_mode == "human":
             self._render_human()
             return None
         return None

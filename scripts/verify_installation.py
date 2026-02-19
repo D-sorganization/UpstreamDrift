@@ -14,10 +14,7 @@ Exit codes:
 
 from __future__ import annotations
 
-import logging
 import sys
-
-logger = logging.getLogger(__name__)
 
 
 def check_import(
@@ -40,18 +37,16 @@ def check_import(
         return True, f"✓ {display_name} (v{version})"
     except ImportError as e:
         return False, f"✗ {display_name}: {e}"
-    except (RuntimeError, OSError) as e:
+    except Exception as e:
         return False, f"✗ {display_name}: Unexpected error - {e}"
 
 
 def main() -> int:
     """Run all verification checks."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    logger.info("=" * 60)
-    logger.info("Golf Modeling Suite - Installation Verification")
-    logger.info("=" * 60)
-    logger.info("")
+    print("=" * 60)
+    print("Golf Modeling Suite - Installation Verification")
+    print("=" * 60)
+    print()
 
     # Define checks: (display_name, import_path, version_attr)
     checks: list[tuple[str, str | None, str]] = [
@@ -76,18 +71,18 @@ def main() -> int:
         ("jose", None, "__version__"),
     ]
 
-    logger.info("Checking core dependencies:")
-    logger.info("-" * 40)
+    print("Checking core dependencies:")
+    print("-" * 40)
 
     core_results = []
     for display_name, import_path, version_attr in checks:
         success, message = check_import(display_name, import_path, version_attr)
-        logger.info(message)
+        print(message)
         core_results.append(success)
 
-    logger.info("")
-    logger.info("Checking Golf Suite modules:")
-    logger.info("-" * 40)
+    print()
+    print("Checking Golf Suite modules:")
+    print("-" * 40)
 
     # Project-specific modules
     suite_checks: list[tuple[str, str | None]] = [
@@ -106,13 +101,13 @@ def main() -> int:
         success, message = check_import(display_name, import_path, "__version__")
         # Project modules may not have __version__, adjust message
         if success:
-            logger.info("✓ %s", display_name)
+            print(f"✓ {display_name}")
         else:
-            logger.warning("✗ %s: Import failed", display_name)
+            print(f"✗ {display_name}: Import failed")
         suite_results.append(success)
 
-    logger.info("")
-    logger.info("=" * 60)
+    print()
+    print("=" * 60)
 
     # Summary
     core_passed = sum(core_results)
@@ -122,25 +117,26 @@ def main() -> int:
     total_passed = core_passed + suite_passed
     total_checks = core_total + suite_total
 
-    logger.info("Core dependencies: %d/%d passed", core_passed, core_total)
-    logger.info("Suite modules:     %d/%d passed", suite_passed, suite_total)
-    logger.info("Overall:           %d/%d passed", total_passed, total_checks)
-    logger.info("")
+    print(f"Core dependencies: {core_passed}/{core_total} passed")
+    print(f"Suite modules:     {suite_passed}/{suite_total} passed")
+    print(f"Overall:           {total_passed}/{total_checks} passed")
+    print()
 
     if total_passed == total_checks:
-        logger.info("✓ Installation verified successfully!")
-        logger.info("")
-        logger.info("You can now run:")
-        logger.info("  python launchers/golf_suite_launcher.py")
-        logger.info("  python -m api.server")
+        print("✓ Installation verified successfully!")
+        print()
+        print("You can now run:")
+        print("  python launchers/golf_suite_launcher.py")
+        print("  python -m api.server")
         return 0
-    logger.warning("✗ Some checks failed.")
-    logger.info("")
-    logger.info("Troubleshooting:")
-    logger.info("  1. See docs/troubleshooting/installation.md")
-    logger.info("  2. Try: conda env create -f environment.yml")
-    logger.info("  3. Or:  pip install -e '.[dev,engines]'")
-    return 1
+    else:
+        print("✗ Some checks failed.")
+        print()
+        print("Troubleshooting:")
+        print("  1. See docs/troubleshooting/installation.md")
+        print("  2. Try: conda env create -f environment.yml")
+        print("  3. Or:  pip install -e '.[dev,engines]'")
+        return 1
 
 
 if __name__ == "__main__":

@@ -1,11 +1,3 @@
-"""
-MuJoCo Golf Simulation GUI.
-
-Decomposed via SRP into:
-- golf_gui_styles.py: StyleMixin (tkinter style configuration)
-- golf_gui_docker.py: DockerMixin (Docker build/run operations)
-"""
-
 import contextlib
 import datetime
 import json
@@ -14,12 +6,14 @@ import os
 import platform
 import subprocess
 import sys
+import tempfile
 import threading
 from functools import partial
 
 logger = logging.getLogger(__name__)
 
 try:
+    import queue
     import tkinter as tk
     from tkinter import colorchooser, filedialog, messagebox, ttk
 except ImportError:
@@ -27,9 +21,6 @@ except ImportError:
     if platform.system() == "Linux":
         logger.info("Please install it by running: sudo apt-get install python3-tk")
     sys.exit(1)
-
-from .golf_gui_docker import DockerMixin  # noqa: E402
-from .golf_gui_styles import StyleMixin  # noqa: E402
 
 # Default Config
 DEFAULT_COLORS = {
@@ -42,7 +33,7 @@ DEFAULT_COLORS = {
 }
 
 
-class GolfSimulationGUI(StyleMixin, DockerMixin):
+class GolfSimulationGUI:
     def __init__(self, root) -> None:
         """Initialize the GUI."""
         self.root = root
@@ -175,6 +166,132 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         except (FileNotFoundError, PermissionError, OSError) as e:
             messagebox.showerror("Error", f"Could not save config: {e}")
 
+    def setup_styles(self) -> None:
+        """Configure modern styling for the application."""
+        style = ttk.Style()
+        style.theme_use("clam")
+
+        colors = self._get_color_scheme()
+        self._configure_notebook_styles(style, colors)
+        self._configure_frame_styles(style, colors)
+        self._configure_label_styles(style, colors)
+        self._configure_button_styles(style)
+        self._configure_widget_styles(style, colors)
+
+    @staticmethod
+    def _get_color_scheme() -> dict[str, str]:
+        return {
+            "bg": "#2b2b2b",
+            "fg": "#ffffff",
+            "select_bg": "#404040",
+            "select_fg": "#ffffff",
+            "accent": "#0078d4",
+            "success": "#107c10",
+            "warning": "#ff8c00",
+            "error": "#d13438",
+            "purple": "#8b5cf6",
+        }
+
+    @staticmethod
+    def _configure_notebook_styles(style: ttk.Style, colors: dict[str, str]) -> None:
+        style.configure("Modern.TNotebook", background=colors["bg"], borderwidth=0)
+        style.configure(
+            "Modern.TNotebook.Tab",
+            background=colors["select_bg"],
+            foreground=colors["fg"],
+            padding=[20, 12],
+            font=("Segoe UI", 10, "bold"),
+            focuscolor="none",
+        )
+        style.map(
+            "Modern.TNotebook.Tab",
+            background=[
+                ("selected", colors["accent"]),
+                ("active", colors["select_bg"]),
+                ("!active", colors["select_bg"]),
+            ],
+            foreground=[
+                ("selected", "#ffffff"),
+                ("active", colors["fg"]),
+                ("!active", colors["fg"]),
+            ],
+            padding=[
+                ("selected", [20, 12]),
+                ("active", [20, 12]),
+                ("!active", [20, 12]),
+            ],
+        )
+
+    @staticmethod
+    def _configure_frame_styles(style: ttk.Style, colors: dict[str, str]) -> None:
+        style.configure("Modern.TFrame", background=colors["bg"])
+        style.configure(
+            "Card.TFrame", background=colors["select_bg"], relief="flat", borderwidth=1
+        )
+
+    @staticmethod
+    def _configure_label_styles(style: ttk.Style, colors: dict[str, str]) -> None:
+        style.configure(
+            "Modern.TLabel",
+            background=colors["bg"],
+            foreground=colors["fg"],
+            font=("Segoe UI", 10),
+        )
+        style.configure(
+            "Title.TLabel",
+            background=colors["bg"],
+            foreground=colors["fg"],
+            font=("Segoe UI", 16, "bold"),
+        )
+        style.configure(
+            "Heading.TLabel",
+            background=colors["bg"],
+            foreground=colors["accent"],
+            font=("Segoe UI", 12, "bold"),
+        )
+
+    @staticmethod
+    def _configure_button_styles(style: ttk.Style) -> None:
+        style.configure("Modern.TButton", font=("Segoe UI", 10), padding=[15, 8])
+        style.configure(
+            "Primary.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10]
+        )
+        style.configure(
+            "Success.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10]
+        )
+        style.configure("Warning.TButton", font=("Segoe UI", 10), padding=[15, 8])
+        style.configure(
+            "Danger.TButton", font=("Segoe UI", 11, "bold"), padding=[15, 8]
+        )
+
+    @staticmethod
+    def _configure_widget_styles(style: ttk.Style, colors: dict[str, str]) -> None:
+        style.configure(
+            "Modern.TCombobox",
+            fieldbackground=colors["select_bg"],
+            background=colors["select_bg"],
+            foreground=colors["fg"],
+            font=("Segoe UI", 10),
+        )
+        style.configure(
+            "Modern.TCheckbutton",
+            background=colors["bg"],
+            foreground=colors["fg"],
+            font=("Segoe UI", 10),
+        )
+        style.configure(
+            "Modern.TLabelframe",
+            background=colors["bg"],
+            foreground=colors["accent"],
+            font=("Segoe UI", 11, "bold"),
+        )
+        style.configure(
+            "Modern.TLabelframe.Label",
+            background=colors["bg"],
+            foreground=colors["accent"],
+            font=("Segoe UI", 11, "bold"),
+        )
+
     def setup_sim_tab(self) -> None:
         """Setup the simulation tab."""
         # Main container with padding
@@ -193,7 +310,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         title_frame.pack(fill="x", pady=(0, 20))
 
         title = ttk.Label(
-            title_frame, text="Humanoid Golf Simulation", style="Title.TLabel"
+            title_frame, text="🏌️ Humanoid Golf Simulation", style="Title.TLabel"
         )
         title.pack(anchor="center")
 
@@ -207,7 +324,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _setup_sim_settings_card(self, parent) -> None:
         """Create the simulation settings card with control mode and live view."""
         settings_card = ttk.LabelFrame(
-            parent, text="Simulation Settings", style="Modern.TLabelframe"
+            parent, text="⚙️ Simulation Settings", style="Modern.TLabelframe"
         )
         settings_card.pack(fill="x", pady=(0, 15))
 
@@ -237,7 +354,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         ttk.Checkbutton(
             live_view_frame,
-            text="Live Interactive View (requires X11/VcXsrv)",
+            text="🖥️ Live Interactive View (requires X11/VcXsrv)",
             variable=self.live_view_var,
             style="Modern.TCheckbutton",
         ).pack(side="left")
@@ -245,7 +362,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _setup_sim_state_card(self, parent) -> None:
         """Create the state management card with load/save path entries."""
         state_card = ttk.LabelFrame(
-            parent, text="State Management", style="Modern.TLabelframe"
+            parent, text="💾 State Management", style="Modern.TLabelframe"
         )
         state_card.pack(fill="x", pady=(0, 15))
 
@@ -276,7 +393,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         ttk.Button(
             load_entry_frame,
-            text="Browse",
+            text="📁 Browse",
             command=lambda: self.browse_file(self.load_path_var),
             style="Modern.TButton",
         ).pack(side="right")
@@ -305,7 +422,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         ttk.Button(
             save_entry_frame,
-            text="Browse",
+            text="📁 Browse",
             command=lambda: self.browse_file(self.save_path_var, save=True),
             style="Modern.TButton",
         ).pack(side="right")
@@ -313,7 +430,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _setup_sim_action_buttons(self, parent) -> None:
         """Create the simulation control and results action buttons."""
         action_card = ttk.LabelFrame(
-            parent, text="Simulation Controls", style="Modern.TLabelframe"
+            parent, text="🎮 Simulation Controls", style="Modern.TLabelframe"
         )
         action_card.pack(fill="x", pady=(0, 15))
 
@@ -329,7 +446,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         self.btn_run = tk.Button(
             primary_frame,
-            text="RUN SIMULATION",
+            text="🚀 RUN SIMULATION",
             command=self.start_simulation,
             bg="#107c10",
             fg="white",
@@ -344,7 +461,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         self.btn_stop = tk.Button(
             primary_frame,
-            text="STOP",
+            text="⏹️ STOP",
             command=self.stop_simulation,
             bg="#d13438",
             fg="white",
@@ -360,7 +477,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         self.btn_rebuild = tk.Button(
             primary_frame,
-            text="UPDATE ENV",
+            text="🔧 UPDATE ENV",
             command=self.rebuild_docker,
             bg="#8b5cf6",
             fg="white",
@@ -378,13 +495,13 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         secondary_frame.pack(fill="x")
 
         results_label = ttk.Label(
-            secondary_frame, text="Results:", style="Modern.TLabel"
+            secondary_frame, text="📊 Results:", style="Modern.TLabel"
         )
         results_label.pack(side="left", padx=(0, 10))
 
         self.btn_open_video = tk.Button(
             secondary_frame,
-            text="Open Video",
+            text="🎥 Open Video",
             command=self.open_video,
             bg="#404040",
             fg="white",
@@ -400,7 +517,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         self.btn_open_data = tk.Button(
             secondary_frame,
-            text="Open Data (CSV)",
+            text="📈 Open Data (CSV)",
             command=self.open_data,
             bg="#404040",
             fg="white",
@@ -417,7 +534,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _setup_sim_log_section(self, parent) -> None:
         """Create the simulation log section with text area and scrollbar."""
         log_card = ttk.LabelFrame(
-            parent, text="Simulation Log", style="Modern.TLabelframe"
+            parent, text="📋 Simulation Log", style="Modern.TLabelframe"
         )
         log_card.pack(fill="both", expand=True)
 
@@ -435,7 +552,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         self.btn_clear_log = tk.Button(
             log_header,
-            text="Clear Log",
+            text="🗑️ Clear Log",
             command=self.clear_log,
             bg="#ff8c00",
             fg="white",
@@ -487,7 +604,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         # Title
         title = ttk.Label(
             main_container,
-            text="Humanoid Appearance Customization",
+            text="🎨 Humanoid Appearance Customization",
             style="Title.TLabel",
         )
         title.pack(pady=(0, 20))
@@ -499,7 +616,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _setup_dimensions_card(self, parent: ttk.Frame) -> None:
         """Create the physical dimensions card with height and weight controls."""
         dimensions_card = ttk.LabelFrame(
-            parent, text="Physical Dimensions", style="Modern.TLabelframe"
+            parent, text="📏 Physical Dimensions", style="Modern.TLabelframe"
         )
         dimensions_card.pack(fill="x", pady=(0, 20))
 
@@ -568,7 +685,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _setup_colors_card(self, parent: ttk.Frame) -> None:
         """Create the body colors card with color pickers for each body part."""
         colors_card = ttk.LabelFrame(
-            parent, text="Body Colors", style="Modern.TLabelframe"
+            parent, text="🎨 Body Colors", style="Modern.TLabelframe"
         )
         colors_card.pack(fill="x", pady=(0, 20))
 
@@ -578,11 +695,11 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         self.color_widgets: dict[str, tk.Canvas] = {}
 
         color_parts = [
-            ("Shirt", "shirt"),
-            ("Pants", "pants"),
-            ("Shoes", "shoes"),
-            ("Skin", "skin"),
-            ("Club", "club"),
+            ("👕 Shirt", "shirt"),
+            ("👖 Pants", "pants"),
+            ("👟 Shoes", "shoes"),
+            ("👤 Skin", "skin"),
+            ("🏌️ Club", "club"),
         ]
 
         for _, (display_name, part_key) in enumerate(color_parts):
@@ -620,7 +737,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         # Pick color button
         color_btn = tk.Button(
             color_row,
-            text="Pick Color",
+            text="🎨 Pick Color",
             command=partial(self.pick_color, part_key),
             bg="#0078d4",
             fg="white",
@@ -640,7 +757,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         save_btn = tk.Button(
             save_frame,
-            text="Save Appearance Settings",
+            text="💾 Save Appearance Settings",
             command=self.save_config,
             bg="#107c10",
             fg="white",
@@ -660,7 +777,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         title = ttk.Label(
             main_container,
-            text="Equipment & Model Configuration",
+            text="⚙️ Equipment & Model Configuration",
             style="Title.TLabel",
         )
         title.pack(pady=(0, 20))
@@ -671,7 +788,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
     def _create_club_parameters_card(self, parent: ttk.Frame) -> None:
         club_card = ttk.LabelFrame(
-            parent, text="Golf Club Parameters", style="Modern.TLabelframe"
+            parent, text="🏌️ Golf Club Parameters", style="Modern.TLabelframe"
         )
         club_card.pack(fill="x", pady=(0, 20))
 
@@ -738,7 +855,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def _create_advanced_features_card(self, parent: ttk.Frame) -> None:
         features_card = ttk.LabelFrame(
             parent,
-            text="Advanced Model Features",
+            text="🔬 Advanced Model Features",
             style="Modern.TLabelframe",
         )
         features_card.pack(fill="x", pady=(0, 20))
@@ -747,9 +864,9 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         features_inner.pack(fill="x", padx=20, pady=15)
 
         features = [
-            ("Two-Handed Grip (Constrained)", self.two_handed_var),
-            ("Enhanced Face (Nose, Mouth)", self.enhance_face_var),
-            ("Articulated Fingers (Segments)", self.articulated_fingers_var),
+            ("🤝 Two-Handed Grip (Constrained)", self.two_handed_var),
+            ("😊 Enhanced Face (Nose, Mouth)", self.enhance_face_var),
+            ("🖐️ Articulated Fingers (Segments)", self.articulated_fingers_var),
         ]
 
         for feature_text, feature_var in features:
@@ -778,7 +895,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         save_btn = tk.Button(
             save_frame,
-            text="Save Equipment Settings",
+            text="💾 Save Equipment Settings",
             command=self.save_config,
             bg="#107c10",
             fg="white",
@@ -857,7 +974,287 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         if hasattr(self, "process") and self.process:
             self.log("Stopping simulation...")
             self.process.terminate()
+            # Force kill if needed
+            # self.process.kill()
         self.stop_event.set()
+
+    @staticmethod
+    def _generate_update_dockerfile() -> str:
+        """Generate a minimal Dockerfile to add missing dependencies."""
+        return (
+            "# Add missing dependencies to existing robotics_env\n"
+            "FROM robotics_env:latest\n\n"
+            "# Install missing dependencies in the existing virtual "
+            "environment\n"
+            'RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" '
+            '"PyQt6>=6.6.0"\n\n'
+            "# Update PATH to use robotics_env by default\n"
+            'ENV PATH="/opt/mujoco-env/bin:$PATH"\n'
+            'ENV VIRTUAL_ENV="/opt/mujoco-env"\n'
+        )
+
+    def _run_docker_build(self, temp_dir: str, cmd: list[str]) -> int:
+        """Execute the docker build command and return the exit code."""
+        if self.is_windows:
+            create_new_console = 0x00000010
+            result = subprocess.run(
+                ["cmd", "/k", *cmd],
+                cwd=temp_dir,
+                creationflags=create_new_console,  # type: ignore[call-arg]
+            )
+        else:
+            result = subprocess.run(cmd, cwd=temp_dir, check=True)
+        return result.returncode
+
+    def _verify_docker_update(self) -> None:
+        """Run a quick container test to verify defusedxml is available."""
+        test_cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "robotics_env",
+            "python",
+            "-c",
+            "import defusedxml; print('✅ defusedxml confirmed working')",
+        ]
+        test_result = subprocess.run(test_cmd, capture_output=True, text=True)
+        if test_result.returncode == 0:
+            self.root.after(0, self.log, test_result.stdout.strip())
+        else:
+            self.root.after(0, self.log, "⚠️ Update completed but test failed")
+
+    def rebuild_docker(self) -> None:
+        """Add missing dependencies to the existing robotics_env Docker image."""
+        from tkinter import messagebox
+
+        msg = (
+            "This will add missing dependencies (like defusedxml) to the existing "
+            "robotics_env.\n"
+            "This should be quick since we're just adding packages. Continue?"
+        )
+        result = messagebox.askyesno(
+            "Update Robotics Environment",
+            msg,
+        )
+
+        if not result:
+            return
+
+        self.log("Updating robotics_env with missing dependencies...")
+        self.btn_rebuild.config(state=tk.DISABLED)
+
+        def run_update() -> None:
+            """Rebuild the Docker image with missing dependencies."""
+            try:
+                dockerfile_content = self._generate_update_dockerfile()
+
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    dockerfile_path = os.path.join(temp_dir, "Dockerfile")
+                    with open(dockerfile_path, "w") as f:
+                        f.write(dockerfile_content)
+
+                    cmd = ["docker", "build", "-t", "robotics_env", "."]
+                    self.root.after(0, self.log, f"Running: {' '.join(cmd)}")
+                    self.root.after(0, self.log, "Adding defusedxml to robotics_env...")
+
+                    returncode = self._run_docker_build(temp_dir, cmd)
+
+                    if returncode == 0:
+                        self.root.after(
+                            0, self.log, "✅ robotics_env updated successfully!"
+                        )
+                        self.root.after(
+                            0,
+                            self.log,
+                            "defusedxml and other dependencies are now available.",
+                        )
+                        self._verify_docker_update()
+                    else:
+                        self.root.after(
+                            0,
+                            self.log,
+                            f"❌ Update failed with code {returncode}",
+                        )
+
+            except ImportError as e:
+                self.root.after(0, self.log, f"❌ Update failed: {e}")
+            finally:
+                self.root.after(0, lambda: self.btn_rebuild.config(state=tk.NORMAL))
+
+        threading.Thread(target=run_update, daemon=True).start()
+
+    def _build_docker_command(self) -> list[str]:
+        """Build the docker run command for the simulation subprocess."""
+        if self.is_windows:
+            cmd = [
+                "wsl",
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                f"{self.wsl_path}:/workspace",
+                "-w",
+                "/workspace/python",
+            ]
+
+            if self.live_view_var.get():
+                # Allow GUI to display on host Windows X Server (VcXsrv)
+                cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
+                cmd.extend(["-e", "MUJOCO_GL=glfw"])
+                cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+            else:
+                cmd.extend(["-e", "MUJOCO_GL=osmesa"])
+
+            cmd.extend(
+                [
+                    "robotics_env",
+                    "/opt/mujoco-env/bin/python",
+                    "-u",
+                    "-m",
+                    "mujoco_humanoid_golf",
+                ]
+            )
+        else:
+            cmd = [
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                f"{self.repo_path}:/workspace",
+                "-w",
+                "/workspace/python",
+            ]
+
+            if self.live_view_var.get():
+                cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
+                cmd.extend(["-e", "MUJOCO_GL=glfw"])
+                cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])  # nosec B108
+            else:
+                cmd.extend(["-e", "MUJOCO_GL=osmesa"])
+
+            cmd.extend(
+                [
+                    "robotics_env",
+                    "/opt/mujoco-env/bin/python",
+                    "-m",
+                    "mujoco_humanoid_golf",
+                ]
+            )
+
+        return cmd
+
+    def _stream_process_output(self) -> None:
+        """Read subprocess stdout via a queue and log lines to the GUI."""
+        q: queue.Queue[str | None] = queue.Queue()
+
+        def enqueue_output(out, output_queue) -> None:
+            """Enqueue output from subprocess."""
+            try:
+                for line in iter(out.readline, ""):
+                    output_queue.put(line)
+                out.close()
+            except (RuntimeError, ValueError, OSError) as e:
+                with contextlib.suppress(RuntimeError, ValueError, AttributeError):
+                    self.root.after(0, self.log, f"Exception in enqueue_output: {e}")
+            output_queue.put(None)  # Sentinel
+
+        t = threading.Thread(
+            target=enqueue_output, args=(self.process.stdout, q), daemon=True
+        )
+        t.start()
+
+        while True:
+            # Check user stop
+            if self.stop_event.is_set() and self.process.poll() is None:
+                self.process.terminate()
+
+            try:
+                output = q.get(timeout=0.1)
+            except queue.Empty:
+                if self.process.poll() is not None and not t.is_alive():
+                    break
+                continue
+
+            if output is None:  # Sentinel
+                break
+
+            self.root.after(0, self.log, output.strip())
+
+    def _handle_process_failure(self, rc) -> None:
+        """Log error details and suggest solutions for common failures."""
+        self.root.after(0, self.log, f"Process exited with code {rc}")
+        if self.process.stderr:
+            err = self.process.stderr.read()
+            if err:
+                self.root.after(0, self.log, f"ERROR: {err}")
+            # Check for specific common errors and provide solutions
+            if "defusedxml" in err:
+                self.root.after(
+                    0,
+                    self.log,
+                    "SOLUTION: Missing defusedxml dependency. "
+                    "Please rebuild Docker image.",
+                )
+                self.root.after(0, self.log, "Run: docker build -t robotics_env .")
+            elif "ModuleNotFoundError" in err:
+                self.root.after(
+                    0,
+                    self.log,
+                    "SOLUTION: Missing Python dependency. "
+                    "Check Dockerfile and rebuild.",
+                )
+            elif "DISPLAY" in err or "X11" in err:
+                self.root.after(
+                    0,
+                    self.log,
+                    "SOLUTION: X11/Display issue. "
+                    "Try disabling 'Live Interactive View'.",
+                )
+
+    def _reset_buttons_state(self) -> None:
+        """Reset run/stop buttons to their default enabled states."""
+        self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
+        self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+
+    def _run_docker_process(self) -> None:
+        """Run the simulation in a subprocess."""
+        cmd = self._build_docker_command()
+
+        try:
+            self.log(f"Running command: {' '.join(cmd)}")
+
+            # Race condition fix: Check stop event before starting
+            if self.stop_event.is_set():
+                self.log("Simulation cancelled.")
+                self._reset_buttons_state()
+                return
+
+            self.process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+            )
+
+            self._stream_process_output()
+
+            rc = self.process.poll()
+
+            # Check if stopped by user
+            if self.stop_event.is_set():
+                self.root.after(0, self.log, "Simulation stopped by user.")
+                self._reset_buttons_state()
+            elif rc == 0:
+                self.root.after(0, self.on_sim_success)
+            else:
+                self._handle_process_failure(rc)
+                self._reset_buttons_state()
+
+        except ImportError as e:
+            self.root.after(0, self.log, f"Failed to run subprocess: {e}")
+            self._reset_buttons_state()
 
     def on_sim_success(self) -> None:
         """Handle successful simulation completion."""

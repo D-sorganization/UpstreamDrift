@@ -45,13 +45,13 @@ class EngineProbeResult:
         """Get instructions for fixing issues."""
         if self.status == ProbeStatus.NOT_INSTALLED:
             return f"Install {self.engine_name} dependencies"
-        if self.status == ProbeStatus.MISSING_BINARY:
+        elif self.status == ProbeStatus.MISSING_BINARY:
             return f"Install {self.engine_name} binaries"
-        if self.status == ProbeStatus.MISSING_ASSETS:
+        elif self.status == ProbeStatus.MISSING_ASSETS:
             return f"Install {self.engine_name} assets/models"
-        if self.status == ProbeStatus.VERSION_MISMATCH:
+        elif self.status == ProbeStatus.VERSION_MISMATCH:
             return f"Update {self.engine_name} to compatible version"
-        if self.status == ProbeStatus.CONFIGURATION_ERROR:
+        elif self.status == ProbeStatus.CONFIGURATION_ERROR:
             return f"Fix {self.engine_name} configuration"
         return "Engine is available"
 

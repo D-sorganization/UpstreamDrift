@@ -711,7 +711,7 @@ class TerrainRegion:
             r = self.shape_data["radius"]
             return (x - cx) ** 2 + (y - cy) ** 2 <= r**2
 
-        if self.shape_type == "polygon":
+        elif self.shape_type == "polygon":
             vertices = self.shape_data["vertices"]
             return self._point_in_polygon(x, y, vertices)
 

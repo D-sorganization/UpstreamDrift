@@ -61,14 +61,14 @@ class Obstacle:
                 - self.inflation
             )
 
-        if self.obstacle_type in (ObstacleType.BOX, ObstacleType.HUMAN):
+        elif self.obstacle_type in (ObstacleType.BOX, ObstacleType.HUMAN):
             # Box distance
             half_dims = self.dimensions / 2
             local_point = point - self.position
             clamped = np.clip(local_point, -half_dims, half_dims)
             return float(np.linalg.norm(local_point - clamped) - self.inflation)
 
-        if self.obstacle_type == ObstacleType.CYLINDER:
+        elif self.obstacle_type == ObstacleType.CYLINDER:
             # Cylinder distance (axis along z)
             radius = self.dimensions[0]
             height = self.dimensions[1]
@@ -278,7 +278,7 @@ class CollisionAvoidance:
         link_positions = self.get_link_positions(state)
 
         # Compute repulsion for each link
-        for link_pos in link_positions.values():
+        for _link_name, link_pos in link_positions.items():
             for obstacle in obstacles:
                 distance = obstacle.get_distance(link_pos)
 
@@ -394,14 +394,15 @@ class CollisionAvoidance:
         # Scale velocity based on distance
         if min_distance <= 0:
             return 0.0
-        if min_distance < self.safety_distance:
+        elif min_distance < self.safety_distance:
             return min_distance / self.safety_distance
-        if min_distance < self._repulsion_distance:
+        elif min_distance < self._repulsion_distance:
             return 0.5 + 0.5 * (
                 (min_distance - self.safety_distance)
                 / (self._repulsion_distance - self.safety_distance)
             )
-        return 1.0
+        else:
+            return 1.0
 
     def get_minimum_distance(self, state: RobotState) -> float:
         """Get minimum distance to any obstacle.

@@ -256,8 +256,9 @@ class TopographyData:
         if self._heightmap is not None:
             # Regular grid interpolator (y, x order)
             return float(self._interpolator([[pos[1], pos[0]]])[0])
-        # RBF interpolator (x, y order)
-        return float(self._interpolator([[pos[0], pos[1]]])[0])
+        else:
+            # RBF interpolator (x, y order)
+            return float(self._interpolator([[pos[0], pos[1]]])[0])
 
     def get_gradient_at(self, position: np.ndarray, delta: float = 0.01) -> np.ndarray:
         """Get elevation gradient at position.

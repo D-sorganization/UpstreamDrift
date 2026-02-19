@@ -41,15 +41,16 @@ def detect_format(source: str | Path) -> ModelFormat:
 
         if suffix == ".urdf":
             return ModelFormat.URDF
-        if suffix == ".xml":
+        elif suffix == ".xml":
             # Could be MJCF or URDF, need to check content
             content = path.read_text() if path.exists() else ""
             return _detect_format_from_content(content)
-        if suffix == ".sdf":
+        elif suffix == ".sdf":
             return ModelFormat.SDF
-        if suffix in (".mdl", ".slx"):
+        elif suffix in (".mdl", ".slx"):
             return ModelFormat.SIMSCAPE
-        return ModelFormat.UNKNOWN
+        else:
+            return ModelFormat.UNKNOWN
 
     # It's an XML string
     return _detect_format_from_content(source)
@@ -61,11 +62,12 @@ def _detect_format_from_content(content: str) -> ModelFormat:
 
     if "<robot" in content_lower:
         return ModelFormat.URDF
-    if "<mujoco" in content_lower:
+    elif "<mujoco" in content_lower:
         return ModelFormat.MJCF
-    if "<sdf" in content_lower or "<world" in content_lower:
+    elif "<sdf" in content_lower or "<world" in content_lower:
         return ModelFormat.SDF
-    return ModelFormat.UNKNOWN
+    else:
+        return ModelFormat.UNKNOWN
 
 
 def convert_urdf_to_mjcf(

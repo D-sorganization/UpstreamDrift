@@ -23,21 +23,20 @@ from src.shared.python.core.type_utils import (
 class TestSafeInt:
     """Tests for safe_int function."""
 
-    @pytest.mark.parametrize(
-        "value, kwargs, expected",
-        [
-            (42, {}, 42),
-            ("42", {}, 42),
-            (3.9, {}, 3),
-            ("abc", {"default": 0}, 0),
-            (None, {"default": -1}, -1),
-        ],
-        ids=["int-passthrough", "string-conversion", "float-truncation",
-             "invalid-default", "none-default"],
-    )
-    def test_safe_int_conversions(self, value: object, kwargs: dict, expected: int) -> None:
-        """Test safe_int handles various input types correctly."""
-        assert safe_int(value, **kwargs) == expected
+    def test_int_passthrough(self) -> None:
+        assert safe_int(42) == 42
+
+    def test_string_conversion(self) -> None:
+        assert safe_int("42") == 42
+
+    def test_float_truncation(self) -> None:
+        assert safe_int(3.9) == 3
+
+    def test_invalid_returns_default(self) -> None:
+        assert safe_int("abc", default=0) == 0
+
+    def test_none_returns_default(self) -> None:
+        assert safe_int(None, default=-1) == -1
 
     def test_strict_raises(self) -> None:
         with pytest.raises(ValueError):
@@ -47,21 +46,17 @@ class TestSafeInt:
 class TestSafeFloat:
     """Tests for safe_float function."""
 
-    @pytest.mark.parametrize(
-        "value, kwargs, expected",
-        [
-            (3.14, {}, 3.14),
-            ("3.14", {}, 3.14),
-            (42, {}, 42.0),
-            ("abc", {"default": 0.0}, 0.0),
-        ],
-        ids=["float-passthrough", "string-conversion", "int-to-float", "invalid-default"],
-    )
-    def test_safe_float_conversions(
-        self, value: object, kwargs: dict, expected: float
-    ) -> None:
-        """Test safe_float handles various input types correctly."""
-        assert safe_float(value, **kwargs) == pytest.approx(expected)
+    def test_float_passthrough(self) -> None:
+        assert safe_float(3.14) == pytest.approx(3.14)
+
+    def test_string_conversion(self) -> None:
+        assert safe_float("3.14") == pytest.approx(3.14)
+
+    def test_int_to_float(self) -> None:
+        assert safe_float(42) == 42.0
+
+    def test_invalid_returns_default(self) -> None:
+        assert safe_float("abc", default=0.0) == 0.0
 
     def test_nan_rejected_by_default(self) -> None:
         result = safe_float(float("nan"), default=0.0)
@@ -107,17 +102,13 @@ class TestSafeStr:
 class TestSafeBool:
     """Tests for safe_bool function."""
 
-    @pytest.mark.parametrize(
-        "value", [True, 1, "true", "yes", "on", "1", "True", "YES"],
-    )
-    def test_true_values(self, value: object) -> None:
-        assert safe_bool(value) is True
+    def test_true_values(self) -> None:
+        for v in [True, 1, "true", "yes", "on", "1", "True", "YES"]:
+            assert safe_bool(v) is True
 
-    @pytest.mark.parametrize(
-        "value", [False, 0, "false", "no", "off", "0", "False", "NO"],
-    )
-    def test_false_values(self, value: object) -> None:
-        assert safe_bool(value) is False
+    def test_false_values(self) -> None:
+        for v in [False, 0, "false", "no", "off", "0", "False", "NO"]:
+            assert safe_bool(v) is False
 
     def test_default(self) -> None:
         assert safe_bool("maybe", default=True) is True
@@ -155,107 +146,90 @@ class TestToNumpyArray:
 class TestEnsureList:
     """Tests for ensure_list function."""
 
-    @pytest.mark.parametrize(
-        "value, expected",
-        [
-            ("item", ["item"]),
-            (["a", "b"], ["a", "b"]),
-            ((1, 2), [1, 2]),
-            (42, [42]),
-        ],
-        ids=["string-wraps", "list-passthrough", "tuple-converts", "int-wraps"],
-    )
-    def test_ensure_list_conversions(self, value: object, expected: list) -> None:
-        """Test ensure_list wraps/converts various types correctly."""
-        assert ensure_list(value) == expected
+    def test_string_wraps(self) -> None:
+        assert ensure_list("item") == ["item"]
+
+    def test_list_passthrough(self) -> None:
+        assert ensure_list(["a", "b"]) == ["a", "b"]
+
+    def test_tuple_converts(self) -> None:
+        assert ensure_list((1, 2)) == [1, 2]
 
     def test_none_wraps(self) -> None:
         result = ensure_list(None)
         assert isinstance(result, list)
 
+    def test_int_wraps(self) -> None:
+        assert ensure_list(42) == [42]
+
 
 class TestEnsureTuple:
     """Tests for ensure_tuple function."""
 
-    @pytest.mark.parametrize(
-        "value, expected",
-        [
-            ("item", ("item",)),
-            ([1, 2, 3], (1, 2, 3)),
-            ((1, 2), (1, 2)),
-        ],
-        ids=["string-wraps", "list-converts", "tuple-passthrough"],
-    )
-    def test_ensure_tuple_conversions(self, value: object, expected: tuple) -> None:
-        """Test ensure_tuple wraps/converts various types correctly."""
-        assert ensure_tuple(value) == expected
+    def test_string_wraps(self) -> None:
+        assert ensure_tuple("item") == ("item",)
+
+    def test_list_converts(self) -> None:
+        assert ensure_tuple([1, 2, 3]) == (1, 2, 3)
+
+    def test_tuple_passthrough(self) -> None:
+        assert ensure_tuple((1, 2)) == (1, 2)
 
 
 class TestCoerceNumeric:
     """Tests for coerce_numeric function."""
 
-    @pytest.mark.parametrize(
-        "value, kwargs, expected",
-        [
-            ("42", {}, 42),
-            ("3.14", {}, 3.14),
-            ("abc", {"default": 0}, 0),
-        ],
-        ids=["int-string", "float-string", "invalid-default"],
-    )
-    def test_coerce_numeric_cases(
-        self, value: str, kwargs: dict, expected: object
-    ) -> None:
-        """Test coerce_numeric handles various string inputs."""
-        result = coerce_numeric(value, **kwargs)
-        if isinstance(expected, float):
-            assert result == pytest.approx(expected)
-        else:
-            assert result == expected
+    def test_int_string(self) -> None:
+        assert coerce_numeric("42") == 42
+
+    def test_float_string(self) -> None:
+        assert coerce_numeric("3.14") == pytest.approx(3.14)
 
     def test_whole_float_prefers_int(self) -> None:
         assert coerce_numeric("3.0", prefer_int=True) == 3
         assert isinstance(coerce_numeric("3.0", prefer_int=True), int)
 
+    def test_invalid_returns_default(self) -> None:
+        assert coerce_numeric("abc", default=0) == 0
+
 
 class TestClamp:
     """Tests for clamp function."""
 
-    @pytest.mark.parametrize(
-        "value, kwargs, expected",
-        [
-            (50, {"min_value": 0, "max_value": 100}, 50),
-            (-5, {"min_value": 0}, 0),
-            (150, {"max_value": 100}, 100),
-            (999, {}, 999),
-            (-10, {"min_value": 0, "max_value": 100}, 0),
-            (200, {"min_value": 0, "max_value": 100}, 100),
-        ],
-        ids=["within-range", "below-min", "above-max", "no-bounds",
-             "below-with-both", "above-with-both"],
-    )
-    def test_clamp_cases(self, value: float, kwargs: dict, expected: float) -> None:
-        """Test clamp constrains values to bounds correctly."""
-        assert clamp(value, **kwargs) == expected
+    def test_within_range(self) -> None:
+        assert clamp(50, min_value=0, max_value=100) == 50
+
+    def test_below_min(self) -> None:
+        assert clamp(-5, min_value=0) == 0
+
+    def test_above_max(self) -> None:
+        assert clamp(150, max_value=100) == 100
+
+    def test_no_bounds(self) -> None:
+        assert clamp(999) == 999
+
+    def test_both_bounds(self) -> None:
+        assert clamp(-10, min_value=0, max_value=100) == 0
+        assert clamp(200, min_value=0, max_value=100) == 100
 
 
 class TestIsNumeric:
     """Tests for is_numeric function."""
 
-    @pytest.mark.parametrize(
-        "value, expected",
-        [
-            (42, True),
-            (3.14, True),
-            ("3.14", True),
-            ("hello", False),
-            (None, False),
-        ],
-        ids=["int", "float", "numeric-string", "non-numeric-string", "none"],
-    )
-    def test_is_numeric_cases(self, value: object, expected: bool) -> None:
-        """Test is_numeric correctly identifies numeric values."""
-        assert is_numeric(value) is expected
+    def test_int(self) -> None:
+        assert is_numeric(42) is True
+
+    def test_float(self) -> None:
+        assert is_numeric(3.14) is True
+
+    def test_numeric_string(self) -> None:
+        assert is_numeric("3.14") is True
+
+    def test_non_numeric_string(self) -> None:
+        assert is_numeric("hello") is False
+
+    def test_none(self) -> None:
+        assert is_numeric(None) is False
 
 
 class TestIsInteger:

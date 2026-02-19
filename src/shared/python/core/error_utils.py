@@ -26,7 +26,6 @@ Usage:
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import Any
 
@@ -37,8 +36,6 @@ from src.shared.python.core.contracts import (
     PreconditionError,
     StateError,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class GolfSuiteError(Exception):
@@ -358,7 +355,9 @@ def handle_import_error(
     message = format_import_error(module_name, feature)
 
     if log_warning:
-        logger.warning(message)
+        import logging
+
+        logging.warning(message)
 
     if raise_error:
         raise ImportError(message)

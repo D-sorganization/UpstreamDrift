@@ -49,7 +49,7 @@ class CollisionPair:
         """Equality based on sorted body names."""
         if not isinstance(other, CollisionPair):
             return NotImplemented
-        return {self.body_a, self.body_b} == {other.body_a, other.body_b}
+        return set([self.body_a, self.body_b]) == set([other.body_a, other.body_b])
 
 
 @dataclass

@@ -296,9 +296,10 @@ class SwingModificationRecommender:
 
         if value <= safe:
             return 0
-        if value >= high:
+        elif value >= high:
             return 100
-        return ((value - safe) / (high - safe)) * 100
+        else:
+            return ((value - safe) / (high - safe)) * 100
 
     def get_style_comparison(self) -> dict:
         """Get comparison of different swing styles."""
@@ -346,7 +347,7 @@ if __name__ == "__main__":
     recommender = SwingModificationRecommender()
 
     # Show style comparison
-    for info in recommender.get_style_comparison().values():
+    for _style, info in recommender.get_style_comparison().items():
         for _key, _value in info.items():
             pass
 

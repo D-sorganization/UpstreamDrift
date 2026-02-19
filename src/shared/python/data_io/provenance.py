@@ -268,7 +268,8 @@ def add_provenance_header_file(file: TextIO, provenance: ProvenanceInfo) -> None
         ...     f.write("time,position,velocity\\n")
         ...     # ... write data
     """
-    file.writelines(line + "\n" for line in provenance.to_header_lines())
+    for line in provenance.to_header_lines():
+        file.write(line + "\n")
     file.write("#\n")  # Blank comment line separator
 
 

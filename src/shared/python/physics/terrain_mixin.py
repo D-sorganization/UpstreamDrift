@@ -214,7 +214,7 @@ class TerrainMixin:
             return self._turf_model.compute_turf_contact_force(
                 x, y, z, radius, velocity
             )
-        if self._contact_model is not None:
+        elif self._contact_model is not None:
             return self._contact_model.compute_contact_force(x, y, z, radius, velocity)
 
         return np.zeros(3)

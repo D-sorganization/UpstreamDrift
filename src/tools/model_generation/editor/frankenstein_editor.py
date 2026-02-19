@@ -3,47 +3,87 @@ Frankenstein Editor for component composition.
 
 Allows combining parts from multiple URDF models into a single composite model,
 like building a video game character from different pieces.
-
-Decomposed via SRP into:
-- frankenstein_types.py: Shared data types and enums
-- frankenstein_clipboard.py: ClipboardMixin (copy/paste operations)
-- frankenstein_history.py: HistoryMixin (undo/redo state management)
-- frankenstein_transforms.py: TransformMixin (prefix, mirror batch ops)
 """
 
 from __future__ import annotations
 
+import copy
 import logging
 from collections.abc import Callable
+from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 from model_generation.core.types import Joint, JointType, Link, Material, Origin
 
-from .frankenstein_clipboard import ClipboardMixin
-from .frankenstein_history import HistoryMixin
-from .frankenstein_transforms import TransformMixin
-from .frankenstein_types import (
-    ComponentReference,
-    ComponentType,
-    EditorState,
-    PendingOperation,
-)
-
 logger = logging.getLogger(__name__)
 
-# Re-export types for backwards compatibility
-__all__ = [
-    "ComponentReference",
-    "ComponentType",
-    "EditorState",
-    "FrankensteinEditor",
-    "PendingOperation",
-]
+
+def _mirror_name(name: str, replacements: dict[str, str]) -> str:
+    result = name
+    for old, new in replacements.items():
+        result = result.replace(old, new)
+    if result == name:
+        result = name + "_mirrored"
+    return result
 
 
-class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
+def _flip_origin(origin: Origin, axis_idx: int) -> Origin:
+    xyz = list(origin.xyz)
+    xyz[axis_idx] = -xyz[axis_idx]
+    return Origin(xyz=(xyz[0], xyz[1], xyz[2]), rpy=origin.rpy)
+
+
+class ComponentType(Enum):
+    """Types of components that can be copied."""
+
+    LINK = "link"
+    SUBTREE = "subtree"
+    JOINT = "joint"
+    MATERIAL = "material"
+
+
+@dataclass
+class ComponentReference:
+    """Reference to a component in a model."""
+
+    model_id: str
+    component_type: ComponentType
+    component_name: str
+    # For subtree: the root link name
+    subtree_root: str | None = None
+
+    def __str__(self) -> str:
+        if self.component_type == ComponentType.SUBTREE:
+            return f"{self.model_id}:{self.subtree_root}/*"
+        return f"{self.model_id}:{self.component_name}"
+
+
+@dataclass
+class PendingOperation:
+    """A pending copy/paste operation."""
+
+    operation_type: str  # 'copy_link', 'copy_subtree', 'attach', 'rename', 'delete'
+    source_ref: ComponentReference | None
+    target_model_id: str | None
+    parameters: dict[str, Any] = field(default_factory=dict)
+    preview_links: list[Link] = field(default_factory=list)
+    preview_joints: list[Joint] = field(default_factory=list)
+
+
+@dataclass
+class EditorState:
+    """State of the Frankenstein editor for undo/redo."""
+
+    models: dict[str, ParsedModel]
+    clipboard: list[tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]]
+    operation_history: list[PendingOperation]
+    timestamp: float = 0.0
+
+
+class FrankensteinEditor:
     """
     Editor for composing URDF models from multiple sources.
 
@@ -274,6 +314,345 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             if joint.child == link_name:
                 return joint
         return None
+
+    # ============================================================
+    # Clipboard Operations
+    # ============================================================
+
+    def copy_link(
+        self,
+        model_id: str,
+        link_name: str,
+        include_joint: bool = True,
+    ) -> bool:
+        """
+        Copy a single link to clipboard.
+
+        Args:
+            model_id: Source model
+            link_name: Link to copy
+            include_joint: Include the connecting joint
+
+        Returns:
+            True if copied
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return False
+
+        link = model.get_link(link_name)
+        if not link:
+            logger.error(f"Link '{link_name}' not found in '{model_id}'")
+            return False
+
+        links = [Link.from_dict(link.to_dict())]
+        joints = []
+        materials = {}
+
+        if include_joint:
+            joint = self.get_connecting_joint(model_id, link_name)
+            if joint:
+                joints.append(Joint.from_dict(joint.to_dict()))
+
+        # Include materials
+        if link.visual_material:
+            materials[link.visual_material.name] = Material.from_dict(
+                link.visual_material.to_dict()
+            )
+
+        self._clipboard = [(ComponentType.LINK, links, joints, materials)]
+        logger.info(f"Copied link '{link_name}' to clipboard")
+        return True
+
+    def copy_subtree(
+        self,
+        model_id: str,
+        root_link: str,
+    ) -> bool:
+        """
+        Copy a subtree (link and all descendants) to clipboard.
+
+        Args:
+            model_id: Source model
+            root_link: Root link of subtree
+
+        Returns:
+            True if copied
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return False
+
+        subtree_names = model.get_subtree(root_link)
+        if not subtree_names:
+            logger.error(f"Link '{root_link}' not found in '{model_id}'")
+            return False
+
+        # Copy all links in subtree
+        links = []
+        for name in subtree_names:
+            link = model.get_link(name)
+            if link:
+                links.append(Link.from_dict(link.to_dict()))
+
+        # Copy all joints within subtree
+        joints = []
+        for joint in model.joints:
+            if joint.parent in subtree_names and joint.child in subtree_names:
+                joints.append(Joint.from_dict(joint.to_dict()))
+
+        # Also copy the connecting joint to the subtree root
+        root_joint = self.get_connecting_joint(model_id, root_link)
+        if root_joint:
+            joints.insert(0, Joint.from_dict(root_joint.to_dict()))
+
+        # Collect materials
+        materials = {}
+        for link in links:
+            if link.visual_material:
+                materials[link.visual_material.name] = Material.from_dict(
+                    link.visual_material.to_dict()
+                )
+
+        self._clipboard = [(ComponentType.SUBTREE, links, joints, materials)]
+        logger.info(
+            f"Copied subtree '{root_link}' ({len(links)} links, {len(joints)} joints) to clipboard"
+        )
+        return True
+
+    def copy_material(self, model_id: str, material_name: str) -> bool:
+        """
+        Copy a material definition to clipboard.
+
+        Args:
+            model_id: Source model
+            material_name: Material to copy
+
+        Returns:
+            True if copied
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return False
+
+        material = model.materials.get(material_name)
+        if not material:
+            logger.error(f"Material '{material_name}' not found in '{model_id}'")
+            return False
+
+        materials = {material_name: Material.from_dict(material.to_dict())}
+        self._clipboard = [(ComponentType.MATERIAL, [], [], materials)]
+        logger.info(f"Copied material '{material_name}' to clipboard")
+        return True
+
+    def get_clipboard_info(self) -> dict[str, Any]:
+        """Get information about clipboard contents."""
+        if not self._clipboard:
+            return {"empty": True}
+
+        comp_type, links, joints, materials = self._clipboard[0]
+        return {
+            "empty": False,
+            "type": comp_type.value,
+            "link_count": len(links),
+            "joint_count": len(joints),
+            "material_count": len(materials),
+            "link_names": [link.name for link in links],
+        }
+
+    def clear_clipboard(self) -> None:
+        """Clear the clipboard."""
+        self._clipboard = []
+
+    # ============================================================
+    # Paste Operations
+    # ============================================================
+
+    def paste(
+        self,
+        target_model_id: str,
+        attach_to: str | None = None,
+        attachment_origin: Origin | None = None,
+        prefix: str = "",
+        suffix: str = "",
+        joint_type: JointType = JointType.FIXED,
+    ) -> list[str]:
+        """
+        Paste clipboard contents to a model.
+
+        Args:
+            target_model_id: Target model
+            attach_to: Link to attach to (None for root)
+            attachment_origin: Origin for attachment joint
+            prefix: Prefix to add to all names
+            suffix: Suffix to add to all names
+            joint_type: Type for the attachment joint
+
+        Returns:
+            List of created link names
+        """
+        if not self._clipboard:
+            logger.error("Clipboard is empty")
+            return []
+
+        model = self._models.get(target_model_id)
+        if not model:
+            logger.error(f"Model '{target_model_id}' not found")
+            return []
+
+        if model.read_only:
+            logger.error(f"Model '{target_model_id}' is read-only")
+            return []
+
+        self._save_state()
+
+        comp_type, links, joints, materials = self._clipboard[0]
+
+        name_map = self._build_paste_name_map(model, links, joints, prefix, suffix)
+        self._paste_materials(model, materials, prefix, suffix)
+        created_links = self._paste_links(model, links, name_map, prefix, suffix)
+
+        first_link = name_map.get(links[0].name) if links else None
+        attachment_created = self._paste_joints(
+            model, links, joints, name_map, attach_to, attachment_origin, joint_type
+        )
+
+        if attach_to and first_link and not attachment_created:
+            attach_joint = Joint(
+                name=self._generate_unique_name(
+                    f"{attach_to}_to_{first_link}_joint",
+                    {j.name for j in model.joints},
+                ),
+                joint_type=joint_type,
+                parent=attach_to,
+                child=first_link,
+                origin=attachment_origin or Origin(),
+            )
+            model.joints.append(attach_joint)
+
+        logger.info(f"Pasted {len(created_links)} links to '{target_model_id}'")
+        return created_links
+
+    def _build_paste_name_map(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        joints: list[Joint],
+        prefix: str,
+        suffix: str,
+    ) -> dict[str, str]:
+        name_map: dict[str, str] = {}
+        existing_links = {link.name for link in model.links}
+        existing_joints = {j.name for j in model.joints}
+
+        for link in links:
+            new_name = self._generate_unique_name(
+                prefix + link.name + suffix, existing_links
+            )
+            name_map[link.name] = new_name
+            existing_links.add(new_name)
+
+        for joint in joints:
+            new_name = self._generate_unique_name(
+                prefix + joint.name + suffix, existing_joints
+            )
+            name_map[joint.name] = new_name
+            existing_joints.add(new_name)
+
+        return name_map
+
+    def _paste_materials(
+        self,
+        model: ParsedModel,
+        materials: dict[str, Material],
+        prefix: str,
+        suffix: str,
+    ) -> None:
+        for mat_name, mat in materials.items():
+            new_mat_name = prefix + mat_name + suffix
+            if new_mat_name not in model.materials:
+                new_mat = Material.from_dict(mat.to_dict())
+                new_mat.name = new_mat_name
+                model.materials[new_mat_name] = new_mat
+
+    def _paste_links(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        name_map: dict[str, str],
+        prefix: str,
+        suffix: str,
+    ) -> list[str]:
+        created_links = []
+        for link in links:
+            new_link = Link.from_dict(link.to_dict())
+            new_link.name = name_map[link.name]
+            if new_link.visual_material:
+                new_link.visual_material.name = (
+                    prefix + new_link.visual_material.name + suffix
+                )
+            model.links.append(new_link)
+            created_links.append(new_link.name)
+        return created_links
+
+    def _paste_joints(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        joints: list[Joint],
+        name_map: dict[str, str],
+        attach_to: str | None,
+        attachment_origin: Origin | None,
+        joint_type: JointType,
+    ) -> bool:
+        attachment_created = False
+        for joint in joints:
+            new_joint = Joint.from_dict(joint.to_dict())
+            new_joint.name = name_map.get(joint.name, joint.name)
+
+            if joint.parent in name_map:
+                new_joint.parent = name_map[joint.parent]
+            elif joint.child == links[0].name if links else None:
+                if attach_to:
+                    new_joint.parent = attach_to
+                    new_joint.joint_type = joint_type
+                    if attachment_origin:
+                        new_joint.origin = attachment_origin
+                    attachment_created = True
+                else:
+                    continue
+
+            if joint.child in name_map:
+                new_joint.child = name_map[joint.child]
+
+            model.joints.append(new_joint)
+        return attachment_created
+
+    def paste_subtree(
+        self,
+        target_model_id: str,
+        attach_to: str,
+        attachment_origin: Origin | None = None,
+        prefix: str = "",
+        suffix: str = "",
+        joint_type: JointType = JointType.FIXED,
+    ) -> list[str]:
+        """
+        Convenience method for pasting subtree with attachment.
+
+        Same as paste() but requires attach_to parameter.
+        """
+        return self.paste(
+            target_model_id,
+            attach_to=attach_to,
+            attachment_origin=attachment_origin,
+            prefix=prefix,
+            suffix=suffix,
+            joint_type=joint_type,
+        )
 
     # ============================================================
     # Direct Modifications
@@ -642,7 +1021,299 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         return True
 
     # ============================================================
-    # Export & Comparison
+    # Batch Operations
+    # ============================================================
+
+    def apply_prefix(
+        self,
+        model_id: str,
+        prefix: str,
+        include_links: bool = True,
+        include_joints: bool = True,
+        include_materials: bool = True,
+    ) -> bool:
+        """
+        Add a prefix to all names in a model.
+
+        Args:
+            model_id: Target model
+            prefix: Prefix to add
+            include_links: Rename links
+            include_joints: Rename joints
+            include_materials: Rename materials
+
+        Returns:
+            True if applied
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return False
+
+        if model.read_only:
+            logger.error(f"Model '{model_id}' is read-only")
+            return False
+
+        self._save_state()
+
+        # Build name maps
+        link_map = {}
+        joint_map = {}
+        material_map = {}
+
+        if include_links:
+            for link in model.links:
+                link_map[link.name] = prefix + link.name
+
+        if include_joints:
+            for joint in model.joints:
+                joint_map[joint.name] = prefix + joint.name
+
+        if include_materials:
+            for mat_name in model.materials:
+                material_map[mat_name] = prefix + mat_name
+
+        # Apply renames
+        for link in model.links:
+            if link.name in link_map:
+                link.name = link_map[link.name]
+            if link.visual_material and link.visual_material.name in material_map:
+                link.visual_material.name = material_map[link.visual_material.name]
+
+        for joint in model.joints:
+            if joint.name in joint_map:
+                joint.name = joint_map[joint.name]
+            if joint.parent in link_map:
+                joint.parent = link_map[joint.parent]
+            if joint.child in link_map:
+                joint.child = link_map[joint.child]
+
+        # Rename materials in dict
+        new_materials = {}
+        for old_name, mat in model.materials.items():
+            new_name = material_map.get(old_name, old_name)
+            mat.name = new_name
+            new_materials[new_name] = mat
+        model.materials = new_materials
+
+        logger.info(f"Applied prefix '{prefix}' to model '{model_id}'")
+        return True
+
+    def mirror_subtree(
+        self,
+        model_id: str,
+        root_link: str,
+        mirror_axis: str = "y",
+        name_replacements: dict[str, str] | None = None,
+    ) -> list[str]:
+        """
+        Create a mirrored copy of a subtree.
+
+        Useful for creating symmetric limbs (left/right).
+
+        Args:
+            model_id: Target model
+            root_link: Root of subtree to mirror
+            mirror_axis: Axis to mirror across ('x', 'y', or 'z')
+            name_replacements: Name substitutions (e.g., {"left": "right"})
+
+        Returns:
+            List of created link names
+        """
+        if not self.copy_subtree(model_id, root_link):
+            return []
+
+        model = self._models.get(model_id)
+        if not model:
+            return []
+
+        parent = model.get_parent(root_link)
+        if not parent:
+            logger.error("Cannot mirror root link")
+            return []
+
+        if name_replacements is None:
+            name_replacements = {
+                "left": "right",
+                "right": "left",
+                "Left": "Right",
+                "Right": "Left",
+                "_l_": "_r_",
+                "_r_": "_l_",
+                "_L_": "_R_",
+                "_R_": "_L_",
+            }
+
+        self._save_state()
+
+        _comp_type, links, joints, _materials = self._clipboard[0]
+        axis_idx = {"x": 0, "y": 1, "z": 2}[mirror_axis]
+
+        name_map = self._build_mirror_name_map(model, links, name_replacements)
+        created_links = self._create_mirrored_links(model, links, name_map, axis_idx)
+        self._create_mirrored_joints(
+            model, links, joints, name_map, parent, name_replacements, axis_idx
+        )
+
+        logger.info(f"Created mirrored subtree with {len(created_links)} links")
+        return created_links
+
+    def _build_mirror_name_map(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        name_replacements: dict[str, str],
+    ) -> dict[str, str]:
+        name_map: dict[str, str] = {}
+        existing_links = {link.name for link in model.links}
+
+        for link in links:
+            new_name = _mirror_name(link.name, name_replacements)
+            new_name = self._generate_unique_name(new_name, existing_links)
+            name_map[link.name] = new_name
+            existing_links.add(new_name)
+
+        return name_map
+
+    def _create_mirrored_links(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        name_map: dict[str, str],
+        axis_idx: int,
+    ) -> list[str]:
+        created_links: list[str] = []
+
+        for link in links:
+            new_link = Link.from_dict(link.to_dict())
+            new_link.name = name_map[link.name]
+
+            if new_link.visual_origin:
+                new_link.visual_origin = _flip_origin(new_link.visual_origin, axis_idx)
+
+            if new_link.collision_origin:
+                new_link.collision_origin = _flip_origin(
+                    new_link.collision_origin, axis_idx
+                )
+
+            model.links.append(new_link)
+            created_links.append(new_link.name)
+
+        return created_links
+
+    def _create_mirrored_joints(
+        self,
+        model: ParsedModel,
+        links: list[Link],
+        joints: list[Joint],
+        name_map: dict[str, str],
+        parent: str,
+        name_replacements: dict[str, str],
+        axis_idx: int,
+    ) -> None:
+        for joint in joints:
+            new_joint = Joint.from_dict(joint.to_dict())
+            new_joint.name = _mirror_name(joint.name, name_replacements)
+
+            if joint.parent in name_map:
+                new_joint.parent = name_map[joint.parent]
+            elif joint.child == links[0].name:
+                new_joint.parent = parent
+
+            if joint.child in name_map:
+                new_joint.child = name_map[joint.child]
+
+            new_joint.origin = _flip_origin(new_joint.origin, axis_idx)
+
+            if new_joint.joint_type in (JointType.REVOLUTE, JointType.CONTINUOUS):
+                axis = list(new_joint.axis)
+                axis[axis_idx] = -axis[axis_idx]
+                new_joint.axis = (axis[0], axis[1], axis[2])
+
+            model.joints.append(new_joint)
+
+    # ============================================================
+    # Undo/Redo
+    # ============================================================
+
+    def undo(self) -> bool:
+        """
+        Undo the last operation.
+
+        Returns:
+            True if undone
+        """
+        if not self._undo_stack:
+            logger.warning("Nothing to undo")
+            return False
+
+        # Save current state to redo stack
+        current_state = self._create_state()
+        self._redo_stack.append(current_state)
+
+        # Restore previous state
+        state = self._undo_stack.pop()
+        self._restore_state(state)
+
+        logger.info("Undone")
+        return True
+
+    def redo(self) -> bool:
+        """
+        Redo the last undone operation.
+
+        Returns:
+            True if redone
+        """
+        if not self._redo_stack:
+            logger.warning("Nothing to redo")
+            return False
+
+        # Save current state to undo stack
+        current_state = self._create_state()
+        self._undo_stack.append(current_state)
+
+        # Restore redo state
+        state = self._redo_stack.pop()
+        self._restore_state(state)
+
+        logger.info("Redone")
+        return True
+
+    def _save_state(self) -> None:
+        """Save current state to undo stack."""
+        state = self._create_state()
+        self._undo_stack.append(state)
+
+        # Clear redo stack on new operation
+        self._redo_stack = []
+
+        # Limit history size
+        while len(self._undo_stack) > self._max_history:
+            self._undo_stack.pop(0)
+
+    def _create_state(self) -> EditorState:
+        """Create a state snapshot."""
+        import time
+
+        models_copy = {}
+        for model_id, model in self._models.items():
+            models_copy[model_id] = model.copy()
+
+        return EditorState(
+            models=models_copy,
+            clipboard=copy.deepcopy(self._clipboard),
+            operation_history=[],
+            timestamp=time.time(),
+        )
+
+    def _restore_state(self, state: EditorState) -> None:
+        """Restore from a state snapshot."""
+        self._models = state.models
+        self._clipboard = state.clipboard
+
+    # ============================================================
+    # Export
     # ============================================================
 
     def export_model(
@@ -726,8 +1397,8 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
     # Utility Methods
     # ============================================================
 
-    @staticmethod
     def _generate_unique_name(
+        self,
         base_name: str,
         existing_names: set[str],
     ) -> str:

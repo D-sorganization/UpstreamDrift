@@ -6,14 +6,11 @@ runs validation tests, and generates a detailed compliance report.
 """
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import pytest
-
-logger = logging.getLogger(__name__)
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
@@ -66,25 +63,25 @@ def _run_engine_diagnostics(report_lines: list[str]) -> None:
     report_lines.append("| Engine | Status | Version | Notes |")
     report_lines.append("|---|---|---|---|")
 
-    logger.info("-" * 60)
-    logger.info("%-15s | %-15s | %-10s", "Engine", "Status", "Version")
-    logger.info("-" * 60)
+    print("-" * 60)
+    print(f"{'Engine':<15} | {'Status':<15} | {'Version':<10}")
+    print("-" * 60)
 
     for engine, result in probes.items():
         status_str = result.status.value
         version = result.version or "N/A"
         note = result.diagnostic_message
 
-        logger.info("%-15s | %-15s | %-10s", engine.value, status_str, version)
+        print(f"{engine.value:<15} | {status_str:<15} | {version:<10}")
         report_lines.append(f"| {engine.value} | {status_str} | {version} | {note} |")
 
-    logger.info("-" * 60)
+    print("-" * 60)
     report_lines.append("")
 
 
 def _run_tests_and_report(report_lines: list[str]) -> _PytestPlugin:
     report_lines.append("## 2. Validation Test Results")
-    logger.info("Running Pytest Suite...")
+    print("\nRunning Pytest Suite...")
 
     plugin = _PytestPlugin()
     test_dir = ROOT_DIR / "tests" / "physics_validation"
@@ -93,12 +90,12 @@ def _run_tests_and_report(report_lines: list[str]) -> _PytestPlugin:
     report_lines.append("| Test Case | Outcome | Duration (s) |")
     report_lines.append("|---|---|---|")
 
-    logger.info("Test Results:")
+    print("\nTest Results:")
     for res in plugin.results:
         outcome = res["outcome"].upper()
         test_name = res["nodeid"].split("::")[-1]
 
-        logger.info("[%s] %s (%.4fs)", outcome, test_name, res["duration"])
+        print(f"[{outcome}] {test_name} ({res['duration']:.4f}s)")
         report_lines.append(f"| {test_name} | {outcome} | {res['duration']:.4f} |")
 
     report_lines.append("")
@@ -135,8 +132,7 @@ def _build_recommendations(
 
 def run_verification() -> None:
     """Run the physics verification suite."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logger.info("Starting Physics Verification...")
+    print("Starting Physics Verification...")
 
     report_lines = _build_report_header()
     _run_engine_diagnostics(report_lines)
@@ -147,7 +143,7 @@ def run_verification() -> None:
     report_path.parent.mkdir(exist_ok=True, parents=True)
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
 
-    logger.info("Report generated at: %s", report_path)
+    print(f"\nReport generated at: {report_path}")
 
 
 if __name__ == "__main__":

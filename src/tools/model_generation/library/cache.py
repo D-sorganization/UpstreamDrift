@@ -327,7 +327,7 @@ class ModelCache:
         """Get total size of path (file or directory)."""
         if path.is_file():
             return path.stat().st_size
-        if path.is_dir():
+        elif path.is_dir():
             return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
         return 0
 

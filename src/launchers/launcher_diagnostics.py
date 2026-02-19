@@ -207,7 +207,7 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=0,
             )
-        if len(models) < len(self.EXPECTED_TILE_IDS):
+        elif len(models) < len(self.EXPECTED_TILE_IDS):
             return DiagnosticResult(
                 name="models_yaml",
                 status="warning",

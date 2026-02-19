@@ -398,9 +398,10 @@ class ProviderConfigWidget(QWidget):
         system = platform.system()
         if system == "Windows":
             return "Windows Credential Manager"
-        if system == "Darwin":
+        elif system == "Darwin":
             return "macOS Keychain"
-        return "System keyring"
+        else:
+            return "System keyring"
 
     def _test_ollama_connection(self) -> None:
         """Test connection to Ollama server."""

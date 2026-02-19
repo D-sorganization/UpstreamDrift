@@ -69,7 +69,7 @@ class TestBcryptAPIKeyVerification:
         key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt).decode("utf-8")
 
         # Verify the hash is bcrypt format (starts with $2b$)
-        assert key_hash.startswith(("$2b$", "$2a$"))
+        assert key_hash.startswith("$2b$") or key_hash.startswith("$2a$")
 
         # Verify the key can be verified
         assert bcrypt_lib.checkpw(api_key.encode("utf-8"), key_hash.encode("utf-8"))
@@ -278,7 +278,7 @@ class TestPasswordSecurity:
         hashed = security_manager.hash_password(password)
 
         # Verify bcrypt format
-        assert hashed.startswith(("$2b$", "$2a$"))
+        assert hashed.startswith("$2b$") or hashed.startswith("$2a$")
 
         # Verify password can be verified
         assert security_manager.verify_password(password, hashed)

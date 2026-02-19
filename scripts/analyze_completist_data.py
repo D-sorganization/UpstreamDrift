@@ -64,7 +64,8 @@ def is_excluded(filepath: str) -> bool:
         return True
 
     fp = filepath.replace("\\", "/")
-    fp = fp.removeprefix("./")
+    if fp.startswith("./"):
+        fp = fp[2:]
 
     return any(fp.startswith(excl) or excl in fp for excl in EXCLUDED_PATHS)
 

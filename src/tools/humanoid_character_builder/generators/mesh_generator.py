@@ -807,7 +807,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         factor = params.get_effective_gender_factor()
         if factor > 0.7:
             return "male"
-        if factor < 0.3:
+        elif factor < 0.3:
             return "female"
         return "neutral"
 

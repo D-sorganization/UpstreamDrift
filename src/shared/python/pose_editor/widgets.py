@@ -260,14 +260,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         layout = QtWidgets.QVBoxLayout(self)
         layout.setSpacing(6)
 
-        layout.addLayout(self._build_save_section())
-        self._build_pose_list(layout)
-        layout.addLayout(self._build_action_buttons())
-        layout.addWidget(self._build_interpolation_group())
-        layout.addLayout(self._build_presets_section())
-
-    def _build_save_section(self) -> QtWidgets.QHBoxLayout:
-        """Build the save pose name input and button row."""
+        # Save section
         save_layout = QtWidgets.QHBoxLayout()
         self.txt_pose_name = QtWidgets.QLineEdit()
         self.txt_pose_name.setPlaceholderText("Pose name...")
@@ -278,25 +271,24 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         self.btn_save.setToolTip("Save current pose to library")
         self.btn_save.clicked.connect(self._on_save_pose)
         save_layout.addWidget(self.btn_save)
-        return save_layout
+        layout.addLayout(save_layout)
 
-    def _build_pose_list(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
-        """Build the description field and saved poses list."""
+        # Description
         self.txt_description = QtWidgets.QLineEdit()
         self.txt_description.setPlaceholderText("Description (optional)...")
-        parent_layout.addWidget(self.txt_description)
+        layout.addWidget(self.txt_description)
 
-        parent_layout.addWidget(QtWidgets.QLabel("Saved Poses:"))
+        # Pose list
+        layout.addWidget(QtWidgets.QLabel("Saved Poses:"))
         self.list_poses = QtWidgets.QListWidget()
         self.list_poses.setMaximumHeight(150)
         self.list_poses.setSelectionMode(
             QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection
         )
         self.list_poses.itemDoubleClicked.connect(self._on_pose_double_clicked)
-        parent_layout.addWidget(self.list_poses)
+        layout.addWidget(self.list_poses)
 
-    def _build_action_buttons(self) -> QtWidgets.QGridLayout:
-        """Build the Load/Delete/Export/Import button grid."""
+        # Action buttons
         btn_layout = QtWidgets.QGridLayout()
 
         self.btn_load = QtWidgets.QPushButton("Load")
@@ -319,10 +311,9 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         self.btn_import.clicked.connect(self._on_import)
         btn_layout.addWidget(self.btn_import, 1, 1)
 
-        return btn_layout
+        layout.addLayout(btn_layout)
 
-    def _build_interpolation_group(self) -> QtWidgets.QGroupBox:
-        """Build the pose interpolation slider group."""
+        # Interpolation section
         interp_group = QtWidgets.QGroupBox("Pose Interpolation")
         interp_layout = QtWidgets.QVBoxLayout(interp_group)
 
@@ -347,10 +338,9 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         slider_layout.addWidget(self.lbl_interp)
 
         interp_layout.addLayout(slider_layout)
-        return interp_group
+        layout.addWidget(interp_group)
 
-    def _build_presets_section(self) -> QtWidgets.QHBoxLayout:
-        """Build the presets combo box and load button."""
+        # Presets section
         preset_layout = QtWidgets.QHBoxLayout()
         preset_layout.addWidget(QtWidgets.QLabel("Presets:"))
 
@@ -363,7 +353,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         self.btn_load_preset.clicked.connect(self._on_load_preset)
         preset_layout.addWidget(self.btn_load_preset)
 
-        return preset_layout
+        layout.addLayout(preset_layout)
 
     def _populate_presets(self) -> None:
         """Populate the presets combo box."""

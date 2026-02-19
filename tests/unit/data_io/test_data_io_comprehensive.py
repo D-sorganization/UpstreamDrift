@@ -50,24 +50,26 @@ from src.shared.python.data_io.reproducibility import (
 class TestConvertUnits:
     """Tests for unit conversion utility."""
 
-    @pytest.mark.parametrize(
-        "value, from_u, to_u, expected",
-        [
-            (42.0, "deg", "deg", 42.0),
-            (1.5, "m", "m", 1.5),
-            (180.0, "deg", "rad", np.pi),
-            (np.pi, "rad", "deg", 180.0),
-            (1.0, "m", "ft", 3.28084),
-            (3.28084, "ft", "m", 1.0),
-        ],
-        ids=["deg-identity", "m-identity", "deg-to-rad", "rad-to-deg",
-             "m-to-ft", "ft-to-m"],
-    )
-    def test_unit_conversion(
-        self, value: float, from_u: str, to_u: str, expected: float
-    ) -> None:
-        """Unit conversions should produce the expected result."""
-        assert convert_units(value, from_u, to_u) == pytest.approx(expected, rel=0.01)
+    def test_identity_conversion(self) -> None:
+        """Same from/to unit should return unchanged value."""
+        assert convert_units(42.0, "deg", "deg") == 42.0
+        assert convert_units(1.5, "m", "m") == 1.5
+
+    def test_deg_to_rad(self) -> None:
+        result = convert_units(180.0, "deg", "rad")
+        assert result == pytest.approx(np.pi)
+
+    def test_rad_to_deg(self) -> None:
+        result = convert_units(np.pi, "rad", "deg")
+        assert result == pytest.approx(180.0)
+
+    def test_m_to_ft(self) -> None:
+        result = convert_units(1.0, "m", "ft")
+        assert result == pytest.approx(3.28084, rel=0.01)
+
+    def test_ft_to_m(self) -> None:
+        result = convert_units(3.28084, "ft", "m")
+        assert result == pytest.approx(1.0, rel=0.01)
 
     def test_roundtrip(self) -> None:
         """Converting A→B→A should recover original value."""
@@ -182,25 +184,31 @@ class TestPathUtils:
         root = get_repo_root()
         assert (root / "pyproject.toml").exists()
 
-    @pytest.mark.parametrize(
-        "getter, expected_name",
-        [
-            (get_src_root, "src"),
-            (get_tests_root, "tests"),
-            (get_data_dir, "data"),
-            (get_docs_dir, "docs"),
-            (get_engines_dir, "engines"),
-            (get_shared_dir, "shared"),
-        ],
-        ids=["src", "tests", "data", "docs", "engines", "shared"],
-    )
-    def test_directory_getter_returns_expected_name(
-        self, getter: object, expected_name: str
-    ) -> None:
-        """All directory getters should return a Path with the correct name."""
-        result = getter()
-        assert isinstance(result, Path)
-        assert result.name == expected_name
+    def test_get_src_root(self) -> None:
+        src = get_src_root()
+        assert isinstance(src, Path)
+        assert src.name == "src"
+
+    def test_get_tests_root(self) -> None:
+        tests = get_tests_root()
+        assert tests.name == "tests"
+        assert tests.parent == get_repo_root()
+
+    def test_get_data_dir(self) -> None:
+        data = get_data_dir()
+        assert data.name == "data"
+
+    def test_get_docs_dir(self) -> None:
+        docs = get_docs_dir()
+        assert docs.name == "docs"
+
+    def test_get_engines_dir(self) -> None:
+        engines = get_engines_dir()
+        assert engines.name == "engines"
+
+    def test_get_shared_dir(self) -> None:
+        shared = get_shared_dir()
+        assert shared.name == "shared"
 
     def test_get_shared_python_root(self) -> None:
         sp = get_shared_python_root()

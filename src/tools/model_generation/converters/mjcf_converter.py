@@ -353,7 +353,7 @@ class MJCFConverter:
             half_size = f"{size[0] / 2:.6g} {size[1] / 2:.6g} {size[2] / 2:.6g}"
             return f'{indent}<geom type="box" size="{half_size}" pos="{pos_str}"/>'
 
-        if geometry.geometry_type == GeometryType.CYLINDER:
+        elif geometry.geometry_type == GeometryType.CYLINDER:
             radius, length = geometry.dimensions
             # MuJoCo cylinder: radius and half-length
             return (
@@ -361,24 +361,25 @@ class MJCFConverter:
                 f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
             )
 
-        if geometry.geometry_type == GeometryType.SPHERE:
+        elif geometry.geometry_type == GeometryType.SPHERE:
             radius = geometry.dimensions[0]
             return f'{indent}<geom type="sphere" size="{radius:.6g}" pos="{pos_str}"/>'
 
-        if geometry.geometry_type == GeometryType.CAPSULE:
+        elif geometry.geometry_type == GeometryType.CAPSULE:
             radius, length = geometry.dimensions
             return (
                 f'{indent}<geom type="capsule" '
                 f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
             )
 
-        if geometry.geometry_type == GeometryType.MESH:
+        elif geometry.geometry_type == GeometryType.MESH:
             mesh_name = (
                 Path(geometry.mesh_filename).stem if geometry.mesh_filename else "mesh"
             )
             return f'{indent}<geom type="mesh" mesh="{mesh_name}" pos="{pos_str}"/>'
 
-        return f'{indent}<geom type="box" size="0.05 0.05 0.05" pos="{pos_str}"/>'
+        else:
+            return f'{indent}<geom type="box" size="0.05 0.05 0.05" pos="{pos_str}"/>'
 
     def _parse_mjcf(self, root: ET.Element) -> ParsedModel:
         """Parse MJCF into ParsedModel."""
@@ -478,7 +479,7 @@ class MJCFConverter:
                 mass=mass,
                 center_of_mass=com,
             )
-        if full_str:
+        elif full_str:
             full = [float(v) for v in full_str.split()]
             return Inertia(
                 ixx=full[0],
@@ -490,7 +491,8 @@ class MJCFConverter:
                 mass=mass,
                 center_of_mass=com,
             )
-        return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com)
+        else:
+            return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com)
 
     def _parse_mjcf_joint(self, body_elem, parent_name, body_name, pos, joints):
         joint_elem = body_elem.find("joint")

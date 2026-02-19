@@ -100,7 +100,7 @@ def test_cleanup_releases_resources(mock_engine_manager):
 def test_cleanup_handles_exceptions(mock_engine_manager):
     """Test that cleanup handles exceptions during shutdown."""
     mock_matlab = MagicMock(spec=["quit", "exit"])
-    mock_matlab.quit.side_effect = RuntimeError("Shutdown error")
+    mock_matlab.quit.side_effect = Exception("Shutdown error")
     mock_engine_manager._matlab_engine = mock_matlab
 
     # Should not raise

@@ -5,20 +5,16 @@ Verifies that all components (Local Python, Docker Images, Libraries)
 are installed and functioning.
 """
 
-import logging
 import subprocess
 import time
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
 
-
-def log_result(component: str, status: str, message: str = "") -> None:
-    """Log a color-coded health check result line."""
+def print_result(component: str, status: str, message: str = "") -> None:
+    """Print a color-coded health check result line."""
     color = "\033[92m" if status == "OK" else "\033[91m"
     reset = "\033[0m"
-    line = f"{component:<30} [{color}{status}{reset}] {message}"
-    logger.info(line)
+    print(f"{component:<30} [{color}{status}{reset}] {message}")
 
 
 def check_python_module(module_name: str) -> tuple[bool, str]:
@@ -28,7 +24,7 @@ def check_python_module(module_name: str) -> tuple[bool, str]:
         return True, ""
     except ImportError as e:
         return False, str(e)
-    except (RuntimeError, OSError) as e:
+    except Exception as e:
         return False, f"Error: {e}"
 
 
@@ -40,7 +36,8 @@ def check_docker_image(image_name: str) -> tuple[bool, str]:
         )
         if result.returncode == 0:
             return True, "Found"
-        return False, "Not Found"
+        else:
+            return False, "Not Found"
     except FileNotFoundError:
         return False, "Docker command not found"
 
@@ -57,31 +54,32 @@ def check_nvidia_docker() -> tuple[bool, str]:
         if result.returncode == 0:
             if "nvidia" in result.stdout:
                 return True, "NVIDIA Docker Runtime OK"
-            return False, "NVIDIA runtime not active (warning)"
-        return False, "Could not query docker info"
-    except (FileNotFoundError, OSError, subprocess.SubprocessError) as e:
+            else:
+                return False, "NVIDIA runtime not active (warning)"
+        else:
+            return False, "Could not query docker info"
+    except Exception as e:
         return False, f"Docker check failed: {e}"
 
 
 def main() -> None:
-    """Run all system health checks and log results."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logger.info("=" * 60)
-    logger.info("System Health Check - %s", time.strftime("%Y-%m-%d %H:%M:%S"))
-    logger.info("=" * 60)
+    """Run all system health checks and print results."""
+    print("=" * 60)
+    print(f"System Health Check - {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 60)
 
     # 1. Local Python Environment
-    logger.info("\n--- Local Python Environment ---")
+    print("\n--- Local Python Environment ---")
     modules = ["mujoco", "PyQt6", "numpy", "matplotlib"]
 
     for mod in modules:
         ok, msg = check_python_module(mod)
-        log_result(f"Module: {mod}", "OK" if ok else "FAIL", msg)
+        print_result(f"Module: {mod}", "OK" if ok else "FAIL", msg)
 
     # 2. Docker Health
-    logger.info("\n--- Docker Environment ---")
+    print("\n--- Docker Environment ---")
     docker_ok, docker_msg = check_docker_image("robotics_env")
-    log_result("Image: robotics_env", "OK" if docker_ok else "FAIL", docker_msg)
+    print_result("Image: robotics_env", "OK" if docker_ok else "FAIL", docker_msg)
 
     # 3. Pinocchio / Docker Libraries Check
     # We verify if the critical libraries we added (libEGL) are present in the image
@@ -98,16 +96,16 @@ def main() -> None:
             ]
             res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             if res.returncode == 0:
-                log_result("Docker Libs (libEGL/XCB)", "OK", "Installed")
+                print_result("Docker Libs (libEGL/XCB)", "OK", "Installed")
             else:
-                log_result(
+                print_result(
                     "Docker Libs (libEGL/XCB)", "FAIL", "Missing dependencies in image"
                 )
-                logger.warning(res.stderr)
-        except (subprocess.SubprocessError, OSError) as e:
-            log_result("Docker Libs (libEGL/XCB)", "FAIL", str(e))
+                print(res.stderr)
+        except Exception as e:
+            print_result("Docker Libs (libEGL/XCB)", "FAIL", str(e))
 
-    logger.info("\n--- File Integrity ---")
+    print("\n--- File Integrity ---")
     # Check for critical launcher files
     files = [
         "launchers/golf_launcher.py",
@@ -119,12 +117,12 @@ def main() -> None:
     for f in files:
         path = root / f
         exists = path.exists()
-        log_result(
+        print_result(
             f"File: {f}", "OK" if exists else "FAIL", "Found" if exists else "Missing"
         )
 
-    logger.info("\n" + "=" * 60)
-    logger.info("Check complete.")
+    print("\n" + "=" * 60)
+    print("Check complete.")
 
 
 if __name__ == "__main__":

@@ -572,23 +572,24 @@ class ManualBuilder(BaseURDFBuilder):
                     dims.get("length", 0.1),
                 ),
             )
-        if shape == "cylinder":
+        elif shape == "cylinder":
             return Geometry(
                 geometry_type=GeometryType.CYLINDER,
                 dimensions=(dims.get("radius", 0.05), dims.get("length", 0.1)),
             )
-        if shape == "sphere":
+        elif shape == "sphere":
             return Geometry(
                 geometry_type=GeometryType.SPHERE,
                 dimensions=(dims.get("radius", 0.05),),
             )
-        if shape == "capsule":
+        elif shape == "capsule":
             return Geometry(
                 geometry_type=GeometryType.CAPSULE,
                 dimensions=(dims.get("radius", 0.05), dims.get("length", 0.1)),
             )
-        # Default box
-        return Geometry(
-            geometry_type=GeometryType.BOX,
-            dimensions=(0.1, 0.1, 0.1),
-        )
+        else:
+            # Default box
+            return Geometry(
+                geometry_type=GeometryType.BOX,
+                dimensions=(0.1, 0.1, 0.1),
+            )

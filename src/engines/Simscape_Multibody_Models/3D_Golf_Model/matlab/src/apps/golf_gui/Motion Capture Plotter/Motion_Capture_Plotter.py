@@ -1,14 +1,6 @@
-"""
-Motion Capture Plotter - 3D visualization of golf swing data.
-
-Decomposed via SRP into:
-- mocap_data_loader.py: Data parsing/loading (Excel, CSV formats)
-"""
-
 from __future__ import annotations
 
 import logging
-import os
 import sys
 
 import matplotlib
@@ -16,16 +8,10 @@ import numpy as np
 import pandas as pd
 
 matplotlib.use("QtAgg")  # Use QtAgg backend for PyQt6 compatibility
+import os
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from mocap_data_loader import (
-    find_available_joints,
-    get_simscape_joint_positions,
-    parse_excel_row,
-    process_excel_sheet,
-    safe_float,
-)
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
@@ -419,15 +405,75 @@ class MotionCapturePlotter(QMainWindow):
             logger.info(f"Auto-loading Simscape CSV file: {filename}")
             self.load_simscape_csv(filename)
 
-    # Delegates to mocap_data_loader module
-    _safe_float = staticmethod(safe_float)
-    _parse_excel_row = staticmethod(parse_excel_row)
+    @staticmethod
+    def _safe_float(value, default=0.0) -> float:
+        """Safely convert a value to float, returning default on failure."""
+        if pd.isna(value):
+            return default
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def _parse_excel_row(row, row_index) -> dict | None:
+        """Parse a single Excel row into a frame data dict.
+
+        Returns a dict with mid-hands and club head position/orientation data,
+        or None if the row has insufficient columns.
+        """
+        if len(row) < 25:
+            return None
+
+        sf = MotionCapturePlotter._safe_float
+
+        return {
+            "time": sf(row[1], row_index),  # Time is in column 1
+            # Mid-hands position (convert inches to meters) and orientation
+            "mid_X": sf(row[2]) * 0.0254,
+            "mid_Y": sf(row[3]) * 0.0254,
+            "mid_Z": sf(row[4]) * 0.0254,
+            "mid_Xx": sf(row[5]),  # Direction cosines (unitless)
+            "mid_Xy": sf(row[6]),
+            "mid_Xz": sf(row[7]),
+            "mid_Yx": sf(row[8]),
+            "mid_Yy": sf(row[9]),
+            "mid_Yz": sf(row[10]),
+            "mid_Zx": sf(row[11]),
+            "mid_Zy": sf(row[12]),
+            "mid_Zz": sf(row[13]),
+            # Club head position (convert inches to meters) and orientation
+            "club_X": sf(row[14]) * 0.0254,
+            "club_Y": sf(row[15]) * 0.0254,
+            "club_Z": sf(row[16]) * 0.0254,
+            "club_Xx": sf(row[17]),  # Direction cosines (unitless)
+            "club_Xy": sf(row[18]),
+            "club_Xz": sf(row[19]),
+            "club_Yx": sf(row[20]),
+            "club_Yy": sf(row[21]),
+            "club_Yz": sf(row[22]),
+            "club_Zx": sf(row[23]),
+            "club_Zy": sf(row[24]),
+            "club_Zz": sf(row[25]),
+        }
 
     def _process_excel_sheet(self, filename, sheet_name) -> None:
         """Process a single Excel sheet and store parsed frames in swing_data."""
-        result = process_excel_sheet(filename, sheet_name)
-        if result is not None:
-            self.swing_data[sheet_name] = result
+        df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
+
+        if len(df) <= 3:
+            return
+
+        # Extract position and orientation data for both mid-hands and club head
+        data = []
+        for i in range(3, len(df)):
+            frame_data = self._parse_excel_row(df.iloc[i], i - 3)
+            if frame_data is not None:
+                data.append(frame_data)
+
+        if data:
+            self.swing_data[sheet_name] = pd.DataFrame(data)
+            logger.debug(f"Successfully loaded {len(data)} frames for {sheet_name}")
             self.print_data_debug(sheet_name)
 
     def load_excel_file(self, filename) -> None:
@@ -458,9 +504,77 @@ class MotionCapturePlotter(QMainWindow):
             logger.error(f"Error loading file: {str(e)}")
             QMessageBox.critical(self, "Error", f"Failed to load file: {str(e)}")
 
-    # Delegates to mocap_data_loader module
-    _simscape_joint_position_definitions = staticmethod(get_simscape_joint_positions)
-    _find_available_joints = staticmethod(find_available_joints)
+    @staticmethod
+    def _simscape_joint_position_definitions() -> dict:
+        """Return the mapping of joint names to their CSV column names."""
+        return {
+            "club_head": [
+                "ClubLogs_CHGlobalPosition_1",
+                "ClubLogs_CHGlobalPosition_2",
+                "ClubLogs_CHGlobalPosition_3",
+            ],
+            "left_hand": [
+                "LWLogs_LHGlobalPosition_1",
+                "LWLogs_LHGlobalPosition_2",
+                "LWLogs_LHGlobalPosition_3",
+            ],
+            "right_hand": [
+                "RWLogs_RHGlobalPosition_1",
+                "RWLogs_RHGlobalPosition_2",
+                "RWLogs_RHGlobalPosition_3",
+            ],
+            "left_shoulder": [
+                "LSLogs_GlobalPosition_1",
+                "LSLogs_GlobalPosition_2",
+                "LSLogs_GlobalPosition_3",
+            ],
+            "right_shoulder": [
+                "RSLogs_GlobalPosition_1",
+                "RSLogs_GlobalPosition_2",
+                "RSLogs_GlobalPosition_3",
+            ],
+            "left_elbow": [
+                "LELogs_LArmonLForearmFGlobal_1",
+                "LELogs_LArmonLForearmFGlobal_2",
+                "LELogs_LArmonLForearmFGlobal_3",
+            ],
+            "right_elbow": [
+                "RELogs_RArmonLForearmFGlobal_1",
+                "RELogs_RArmonLForearmFGlobal_2",
+                "RELogs_RArmonLForearmFGlobal_3",
+            ],
+            "hub": [
+                "HipLogs_HUBGlobalPosition_1",
+                "HipLogs_HUBGlobalPosition_2",
+                "HipLogs_HUBGlobalPosition_3",
+            ],
+            "spine": [
+                "SpineLogs_GlobalPosition_1",
+                "SpineLogs_GlobalPosition_2",
+                "SpineLogs_GlobalPosition_3",
+            ],
+            "hip": [
+                "HipLogs_HipGlobalPosition_dim1",
+                "HipLogs_HipGlobalPosition_dim2",
+                "HipLogs_HipGlobalPosition_dim3",
+            ],
+        }
+
+    @staticmethod
+    def _find_available_joints(joint_positions, df_columns) -> dict:
+        """Check which joint positions are available in the CSV columns.
+
+        Returns a dict of available joint names to their column lists.
+        """
+        available_joints = {}
+        for joint_name, columns in joint_positions.items():
+            if all(col in df_columns for col in columns):
+                available_joints[joint_name] = columns
+                logger.info(f"✓ {joint_name}: AVAILABLE")
+            else:
+                missing_cols = [col for col in columns if col not in df_columns]
+                logger.warning(f"✗ {joint_name}: MISSING {len(missing_cols)} columns")
+        return available_joints
 
     def load_simscape_csv(self, filename) -> None:
         """Load and process Simscape CSV file."""

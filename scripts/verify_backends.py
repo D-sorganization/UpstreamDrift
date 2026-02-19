@@ -40,7 +40,7 @@ def verify_backend(backend_type: str):
     except NotImplementedError:
         logger.warning(f"{backend_type} not implemented yet.")
         return
-    except (RuntimeError, OSError, ImportError) as e:
+    except Exception as e:
         logger.error(f"Failed to create {backend_type} backend: {e}")
         return
 
@@ -66,16 +66,19 @@ def verify_backend(backend_type: str):
         backend.shutdown()
         logger.info(f"{backend_type} shutdown complete.")
 
-    except (RuntimeError, OSError, ValueError, AttributeError) as e:
-        logger.error(f"Error during {backend_type} verification: {e}", exc_info=True)
+    except Exception as e:
+        logger.error(f"Error during {backend_type} verification: {e}")
+        import traceback
+
+        traceback.print_exc()
 
 
 def main():
     """Main verification function."""
     verify_backend("mock")
-    logger.info("-" * 40)
+    print("-" * 40)
     verify_backend("pyvista")
-    logger.info("-" * 40)
+    print("-" * 40)
     verify_backend("unreal_bridge")
 
 

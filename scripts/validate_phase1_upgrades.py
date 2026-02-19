@@ -42,7 +42,7 @@ class Phase1Validator:
                 self.results[check_name] = result
                 status = "✅ PASS" if result else "❌ FAIL"
                 print(f"   {status}")
-            except (OSError, ValueError, ImportError, AttributeError) as e:
+            except Exception as e:
                 self.results[check_name] = False
                 self.errors.append(f"{check_name}: {str(e)}")
                 print(f"   ❌ ERROR: {str(e)}")
@@ -156,7 +156,7 @@ class Phase1Validator:
 
             return len(missing_groups) == 0
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error parsing pyproject.toml: {e}")
             return False
 
@@ -188,7 +188,7 @@ class Phase1Validator:
 
             return True
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error reading requirements.txt: {e}")
             return False
 
@@ -238,7 +238,7 @@ class Phase1Validator:
 
             return True
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error checking conf.py: {e}")
             return False
 
@@ -289,7 +289,7 @@ class Phase1Validator:
 
             return True
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error checking conftest.py: {e}")
             return False
 
@@ -363,7 +363,7 @@ class Phase1Validator:
 
             return True
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error checking OutputManager: {e}")
             return False
 
@@ -397,7 +397,7 @@ class Phase1Validator:
 
             return True
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error checking code quality config: {e}")
             return False
 
@@ -430,7 +430,7 @@ class Phase1Validator:
 
             return True
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
+        except Exception as e:
             print(f"   Error checking CI/CD config: {e}")
             return False
 

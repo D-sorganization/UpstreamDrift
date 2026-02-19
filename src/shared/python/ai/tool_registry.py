@@ -449,9 +449,10 @@ class ToolRegistry:
 
         if provider_format == "openai":
             return [t.to_openai_format() for t in tools]
-        if provider_format == "anthropic":
+        elif provider_format == "anthropic":
             return [t.to_anthropic_format() for t in tools]
-        return [t.to_json_schema() for t in tools]
+        else:
+            return [t.to_json_schema() for t in tools]
 
     def execute(
         self,
@@ -493,8 +494,8 @@ class ToolRegistry:
         return name in self._tools
 
 
-# Singleton holder (avoids 'global' keyword)
-_registry_holder: dict[str, ToolRegistry | None] = {"instance": None}
+# Global registry instance (optional singleton pattern)
+_global_registry: ToolRegistry | None = None
 
 
 def get_global_registry() -> ToolRegistry:
@@ -503,6 +504,7 @@ def get_global_registry() -> ToolRegistry:
     Returns:
         Global ToolRegistry instance.
     """
-    if _registry_holder["instance"] is None:
-        _registry_holder["instance"] = ToolRegistry()
-    return _registry_holder["instance"]
+    global _global_registry
+    if _global_registry is None:
+        _global_registry = ToolRegistry()
+    return _global_registry

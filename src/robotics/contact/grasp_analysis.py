@@ -219,7 +219,8 @@ def _check_origin_in_hull(
             # Compute quality margin as minimum weight
             margin = float(np.min(result.x))
             return True, margin
-        return False, 0.0
+        else:
+            return False, 0.0
     except (ValueError, TypeError, RuntimeError):
         return _heuristic_closure_check(generators)
 
@@ -243,7 +244,8 @@ def _heuristic_closure_check(
     if len(s) >= 6 and s[5] > 1e-6:
         # Full rank - likely has force closure
         return True, float(s[5])
-    return False, 0.0
+    else:
+        return False, 0.0
 
 
 def compute_grasp_quality(
@@ -285,11 +287,12 @@ def compute_grasp_quality(
 
     if metric == "min_singular_value":
         return float(np.min(s))
-    if metric == "volume":
+    elif metric == "volume":
         return float(np.prod(s))
-    if metric == "isotropy":
+    elif metric == "isotropy":
         return float(np.min(s) / np.max(s)) if np.max(s) > 1e-10 else 0.0
-    raise ValueError(f"Unknown metric: {metric}")
+    else:
+        raise ValueError(f"Unknown metric: {metric}")
 
 
 def compute_contact_wrench_cone(
@@ -364,6 +367,7 @@ def required_contact_forces(
 
         if result.success:
             return result.x
-        return None
+        else:
+            return None
     except (RuntimeError, ValueError, OSError):
         return None

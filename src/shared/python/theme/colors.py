@@ -152,10 +152,11 @@ def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[float, float, float, f
         b = int(hex_color[4:6], 16) / 255
         a = int(hex_color[6:8], 16) / 255
         return (r, g, b, a * alpha)
-    r = int(hex_color[0:2], 16) / 255
-    g = int(hex_color[2:4], 16) / 255
-    b = int(hex_color[4:6], 16) / 255
-    return (r, g, b, alpha)
+    else:
+        r = int(hex_color[0:2], 16) / 255
+        g = int(hex_color[2:4], 16) / 255
+        b = int(hex_color[4:6], 16) / 255
+        return (r, g, b, alpha)
 
 
 __all__ = [
