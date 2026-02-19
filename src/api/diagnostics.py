@@ -12,7 +12,6 @@ API and web application issues including:
 
 from __future__ import annotations
 
-import os
 import sys
 import time
 from dataclasses import dataclass, field
@@ -104,10 +103,12 @@ class APIDiagnostics:
         }
 
         # Check for required environment variables
+        from src.shared.python.config.environment import get_env
+
         env_vars = {
-            "GOLF_SUITE_MODE": os.environ.get("GOLF_SUITE_MODE", "not set"),
-            "GOLF_AUTH_DISABLED": os.environ.get("GOLF_AUTH_DISABLED", "not set"),
-            "GOLF_PORT": os.environ.get("GOLF_PORT", "not set"),
+            "GOLF_SUITE_MODE": get_env("GOLF_SUITE_MODE", default="not set") or "not set",
+            "GOLF_AUTH_DISABLED": get_env("GOLF_AUTH_DISABLED", default="not set") or "not set",
+            "GOLF_PORT": get_env("GOLF_PORT", default="not set") or "not set",
         }
         details["environment_variables"] = env_vars
 
