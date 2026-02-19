@@ -89,10 +89,11 @@ class TestProvenance(unittest.TestCase):
         with patch("builtins.open", m), open("test.csv", "w") as f:
             add_provenance_header_file(f, provenance)
 
-        m().write.assert_called()
-        # Verify call args contain provenance info
-        calls = [args[0] for args, _ in m().write.call_args_list]
-        self.assertTrue(any("2025-01-01T12:00:00Z" in call for call in calls))
+        # Check writelines called correctly
+        self.assertTrue(m().writelines.called)
+        args, _ = m().writelines.call_args
+        lines = list(args[0])
+        self.assertTrue(any("2025-01-01T12:00:00Z" in line for line in lines))
 
     @patch("src.shared.python.data_io.provenance.ProvenanceInfo.capture")
     def test_add_provenance_to_csv(self, mock_capture):
