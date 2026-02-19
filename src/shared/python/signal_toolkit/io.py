@@ -25,6 +25,83 @@ class SignalImporter:
     """Import signals from various file formats."""
 
     @staticmethod
+    def _read_csv_rows(
+        file_path: Path, delimiter: str, encoding: str
+    ) -> list[list[str]]:
+        """Read all rows from a CSV file.
+
+        Raises:
+            ValueError: If the file is empty.
+        """
+        with open(file_path, encoding=encoding) as f:
+            reader = csv.reader(f, delimiter=delimiter)
+            rows = list(reader)
+        if not rows:
+            msg = f"Empty CSV file: {file_path}"
+            raise ValueError(msg)
+        return rows
+
+    @staticmethod
+    def _resolve_column(col: str | int, header: list[str]) -> int:
+        """Convert a column name or index to a numeric column index.
+
+        Raises:
+            ValueError: If a named column is not found in the header.
+        """
+        if isinstance(col, int):
+            return col
+        try:
+            return header.index(col)
+        except ValueError:
+            msg = f"Column '{col}' not found in header: {header}"
+            raise ValueError(msg) from None
+
+    @staticmethod
+    def _resolve_value_columns(
+        value_columns: str | int | list[str | int] | None,
+        header: list[str],
+        time_idx: int,
+    ) -> tuple[list[int], list[str]]:
+        """Resolve value column specs into indices and names."""
+        if value_columns is None:
+            value_indices = [i for i in range(len(header)) if i != time_idx]
+            value_names = [header[i] for i in value_indices]
+        elif isinstance(value_columns, (str, int)):
+            idx = SignalImporter._resolve_column(value_columns, header)
+            value_indices = [idx]
+            value_names = [header[idx]]
+        else:
+            value_indices = [SignalImporter._resolve_column(c, header) for c in value_columns]
+            value_names = [header[i] for i in value_indices]
+        return value_indices, value_names
+
+    @staticmethod
+    def _parse_data_rows(
+        data_rows: list[list[str]],
+        time_idx: int,
+        value_indices: list[int],
+        time_scale: float,
+    ) -> tuple[np.ndarray, dict[int, list[float]]]:
+        """Parse numeric data from CSV rows into time and value arrays."""
+        time_data: list[float] = []
+        value_data: dict[int, list[float]] = {i: [] for i in value_indices}
+
+        for row in data_rows:
+            if len(row) <= time_idx:
+                continue
+            try:
+                time_data.append(float(row[time_idx]) * time_scale)
+                for idx in value_indices:
+                    if idx < len(row):
+                        value_data[idx].append(float(row[idx]))
+                    else:
+                        value_data[idx].append(np.nan)
+            except ValueError:
+                continue  # Skip rows with non-numeric data
+
+        return np.array(time_data), value_data
+
+    @staticmethod
     def from_csv(
         file_path: str | Path,
         time_column: str | int = 0,
@@ -48,16 +125,15 @@ class SignalImporter:
 
         Returns:
             Single Signal if one value column, list of Signals otherwise.
+
+        Raises:
+            ValueError: If file is empty, time_scale is non-positive, or column not found.
         """
+        if not isinstance(time_scale, (int, float)) or time_scale <= 0:
+            raise ValueError(f"time_scale must be positive, got {time_scale}")
+
         file_path = Path(file_path)
-
-        with open(file_path, encoding=encoding) as f:
-            reader = csv.reader(f, delimiter=delimiter)
-            rows = list(reader)
-
-        if not rows:
-            msg = f"Empty CSV file: {file_path}"
-            raise ValueError(msg)
+        rows = SignalImporter._read_csv_rows(file_path, delimiter, encoding)
 
         # Parse header
         if skip_header:
@@ -67,48 +143,14 @@ class SignalImporter:
             header = [str(i) for i in range(len(rows[0]))]
             data_rows = rows
 
-        # Resolve column indices
-        def resolve_column(col: str | int) -> int:
-            """Convert a column name or index to a numeric column index."""
-            if isinstance(col, int):
-                return col
-            try:
-                return header.index(col)
-            except ValueError:
-                msg = f"Column '{col}' not found in header: {header}"
-                raise ValueError(msg) from None
+        time_idx = SignalImporter._resolve_column(time_column, header)
+        value_indices, value_names = SignalImporter._resolve_value_columns(
+            value_columns, header, time_idx
+        )
 
-        time_idx = resolve_column(time_column)
-
-        if value_columns is None:
-            # Import all columns except time
-            value_indices = [i for i in range(len(header)) if i != time_idx]
-            value_names = [header[i] for i in value_indices]
-        elif isinstance(value_columns, (str, int)):
-            value_indices = [resolve_column(value_columns)]
-            value_names = [header[value_indices[0]]]
-        else:
-            value_indices = [resolve_column(c) for c in value_columns]
-            value_names = [header[i] for i in value_indices]
-
-        # Parse data
-        time_data = []
-        value_data: dict[int, list[float]] = {i: [] for i in value_indices}
-
-        for row in data_rows:
-            if len(row) <= time_idx:
-                continue
-            try:
-                time_data.append(float(row[time_idx]) * time_scale)
-                for idx in value_indices:
-                    if idx < len(row):
-                        value_data[idx].append(float(row[idx]))
-                    else:
-                        value_data[idx].append(np.nan)
-            except ValueError:
-                continue  # Skip rows with non-numeric data
-
-        time_array = np.array(time_data)
+        time_array, value_data = SignalImporter._parse_data_rows(
+            data_rows, time_idx, value_indices, time_scale
+        )
 
         # Create signals
         signals = []

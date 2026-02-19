@@ -32,58 +32,38 @@ from src.shared.python.core.datetime_utils import (
 class TestTimeAgo:
     """Tests for time_ago relative time formatting."""
 
-    def test_seconds_ago(self) -> None:
-        dt = now_utc() - timedelta(seconds=30)
-        result = time_ago(dt)
-        assert "second" in result
-        assert "ago" in result
+    @pytest.mark.parametrize(
+        "delta, expected_exact",
+        [
+            (timedelta(seconds=1), "1 second ago"),
+            (timedelta(minutes=1), "1 minute ago"),
+            (timedelta(minutes=5), "5 minutes ago"),
+            (timedelta(hours=1), "1 hour ago"),
+            (timedelta(hours=3), "3 hours ago"),
+            (timedelta(days=1), "1 day ago"),
+            (timedelta(days=7), "7 days ago"),
+        ],
+        ids=["1s", "1m", "5m", "1h", "3h", "1d", "7d"],
+    )
+    def test_exact_time_ago(self, delta: timedelta, expected_exact: str) -> None:
+        """time_ago should return exact string for known deltas."""
+        dt = now_utc() - delta
+        assert time_ago(dt) == expected_exact
 
-    def test_one_second_ago(self) -> None:
-        """Singular form for 1 second."""
-        dt = now_utc() - timedelta(seconds=1)
+    @pytest.mark.parametrize(
+        "delta, expected_unit",
+        [
+            (timedelta(seconds=30), "second"),
+            (timedelta(days=90), "month"),
+            (timedelta(days=400), "year"),
+        ],
+        ids=["30s", "90d-months", "400d-years"],
+    )
+    def test_unit_in_time_ago(self, delta: timedelta, expected_unit: str) -> None:
+        """time_ago should contain the correct unit for various deltas."""
+        dt = now_utc() - delta
         result = time_ago(dt)
-        assert result == "1 second ago"
-
-    def test_minutes_ago(self) -> None:
-        dt = now_utc() - timedelta(minutes=5)
-        result = time_ago(dt)
-        assert result == "5 minutes ago"
-
-    def test_one_minute_ago(self) -> None:
-        dt = now_utc() - timedelta(minutes=1)
-        result = time_ago(dt)
-        assert result == "1 minute ago"
-
-    def test_hours_ago(self) -> None:
-        dt = now_utc() - timedelta(hours=3)
-        result = time_ago(dt)
-        assert result == "3 hours ago"
-
-    def test_one_hour_ago(self) -> None:
-        dt = now_utc() - timedelta(hours=1)
-        result = time_ago(dt)
-        assert result == "1 hour ago"
-
-    def test_days_ago(self) -> None:
-        dt = now_utc() - timedelta(days=7)
-        result = time_ago(dt)
-        assert result == "7 days ago"
-
-    def test_one_day_ago(self) -> None:
-        dt = now_utc() - timedelta(days=1)
-        result = time_ago(dt)
-        assert result == "1 day ago"
-
-    def test_months_ago(self) -> None:
-        dt = now_utc() - timedelta(days=90)
-        result = time_ago(dt)
-        assert "month" in result
-        assert "ago" in result
-
-    def test_years_ago(self) -> None:
-        dt = now_utc() - timedelta(days=400)
-        result = time_ago(dt)
-        assert "year" in result
+        assert expected_unit in result
         assert "ago" in result
 
     def test_future_time(self) -> None:
@@ -252,17 +232,19 @@ class TestFormatDurationExtended:
         assert "h" in result
         assert "m" in result
 
-    def test_one_second_singular(self) -> None:
-        result = format_duration(1, short=False)
-        assert "second" in result
-
-    def test_one_minute_singular(self) -> None:
-        result = format_duration(60, short=False)
-        assert "minute" in result
-
-    def test_one_hour_singular(self) -> None:
-        result = format_duration(3600, short=False)
-        assert "hour" in result
+    @pytest.mark.parametrize(
+        "seconds, expected_unit",
+        [
+            (1, "second"),
+            (60, "minute"),
+            (3600, "hour"),
+        ],
+        ids=["1s-singular", "1m-singular", "1h-singular"],
+    )
+    def test_singular_units(self, seconds: int, expected_unit: str) -> None:
+        """Long-form format should use singular unit names."""
+        result = format_duration(seconds, short=False)
+        assert expected_unit in result
 
     def test_precision_control(self) -> None:
         result = format_duration(1.123456, precision=3)
@@ -323,25 +305,20 @@ class TestParseTimestampExtended:
 class TestFormatDatetimeExtended:
     """Extended tests for format_datetime."""
 
-    def test_display_format(self) -> None:
+    @pytest.mark.parametrize(
+        "fmt, expected",
+        [
+            ("display", "2024-06-15 14:30:00"),
+            ("date", "2024-06-15"),
+            ("time", "14:30:00"),
+            ("compact", "20240615143000"),
+        ],
+        ids=["display", "date", "time", "compact"],
+    )
+    def test_format_datetime_formats(self, fmt: str, expected: str) -> None:
+        """format_datetime should produce the correct string for each format."""
         dt = datetime(2024, 6, 15, 14, 30, 0)
-        result = format_datetime(dt, "display")
-        assert result == "2024-06-15 14:30:00"
-
-    def test_date_format(self) -> None:
-        dt = datetime(2024, 6, 15, 14, 30, 0)
-        result = format_datetime(dt, "date")
-        assert result == "2024-06-15"
-
-    def test_time_format(self) -> None:
-        dt = datetime(2024, 6, 15, 14, 30, 0)
-        result = format_datetime(dt, "time")
-        assert result == "14:30:00"
-
-    def test_compact_format(self) -> None:
-        dt = datetime(2024, 6, 15, 14, 30, 0)
-        result = format_datetime(dt, "compact")
-        assert result == "20240615143000"
+        assert format_datetime(dt, fmt) == expected
 
     def test_invalid_format_raises(self) -> None:
         dt = datetime(2024, 1, 15)

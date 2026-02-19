@@ -231,66 +231,74 @@ class TestContractChecker(unittest.TestCase):
 class TestCheckHelpers(unittest.TestCase):
     """check_finite, check_shape, check_positive, check_non_negative, check_symmetric."""
 
-    def test_check_finite_valid(self) -> None:
+    def _run_check_finite_cases(self) -> None:
+        """Parametrized via subTest for check_finite."""
         from src.shared.python.core.contracts import check_finite
 
-        self.assertTrue(check_finite(np.array([1.0, 2.0, 3.0])))
+        cases = [
+            (np.array([1.0, 2.0, 3.0]), True, "valid-array"),
+            (np.array([1.0, float("nan"), 3.0]), False, "nan-in-array"),
+            (np.array([1.0, float("inf"), 3.0]), False, "inf-in-array"),
+            (None, False, "none-input"),
+        ]
+        for value, expected, label in cases:
+            with self.subTest(label=label):
+                self.assertEqual(check_finite(value), expected)
 
-    def test_check_finite_nan(self) -> None:
-        from src.shared.python.core.contracts import check_finite
+    def test_check_finite_cases(self) -> None:
+        self._run_check_finite_cases()
 
-        self.assertFalse(check_finite(np.array([1.0, float("nan"), 3.0])))
-
-    def test_check_finite_inf(self) -> None:
-        from src.shared.python.core.contracts import check_finite
-
-        self.assertFalse(check_finite(np.array([1.0, float("inf"), 3.0])))
-
-    def test_check_finite_none(self) -> None:
-        from src.shared.python.core.contracts import check_finite
-
-        self.assertFalse(check_finite(None))
-
-    def test_check_shape_correct(self) -> None:
+    def _run_check_shape_cases(self) -> None:
+        """Parametrized via subTest for check_shape."""
         from src.shared.python.core.contracts import check_shape
 
-        self.assertTrue(check_shape(np.zeros((3, 3)), (3, 3)))
+        cases = [
+            (np.zeros((3, 3)), (3, 3), True, "correct-shape"),
+            (np.zeros((3, 3)), (3, 4), False, "wrong-shape"),
+            (None, (3, 3), False, "none-input"),
+        ]
+        for value, shape, expected, label in cases:
+            with self.subTest(label=label):
+                self.assertEqual(check_shape(value, shape), expected)
 
-    def test_check_shape_wrong(self) -> None:
-        from src.shared.python.core.contracts import check_shape
+    def test_check_shape_cases(self) -> None:
+        self._run_check_shape_cases()
 
-        self.assertFalse(check_shape(np.zeros((3, 3)), (3, 4)))
-
-    def test_check_shape_none(self) -> None:
-        from src.shared.python.core.contracts import check_shape
-
-        self.assertFalse(check_shape(None, (3, 3)))
-
-    def test_check_positive_scalar(self) -> None:
+    def _run_check_positive_cases(self) -> None:
+        """Parametrized via subTest for check_positive."""
         from src.shared.python.core.contracts import check_positive
 
-        self.assertTrue(check_positive(5.0))
-        self.assertFalse(check_positive(0.0))
-        self.assertFalse(check_positive(-1.0))
+        cases = [
+            (5.0, True, "positive-scalar"),
+            (0.0, False, "zero-scalar"),
+            (-1.0, False, "negative-scalar"),
+            (np.array([1.0, 2.0, 3.0]), True, "all-positive-array"),
+            (np.array([1.0, 0.0, 3.0]), False, "zero-in-array"),
+        ]
+        for value, expected, label in cases:
+            with self.subTest(label=label):
+                self.assertEqual(check_positive(value), expected)
 
-    def test_check_positive_array(self) -> None:
-        from src.shared.python.core.contracts import check_positive
+    def test_check_positive_cases(self) -> None:
+        self._run_check_positive_cases()
 
-        self.assertTrue(check_positive(np.array([1.0, 2.0, 3.0])))
-        self.assertFalse(check_positive(np.array([1.0, 0.0, 3.0])))
-
-    def test_check_non_negative_scalar(self) -> None:
+    def _run_check_non_negative_cases(self) -> None:
+        """Parametrized via subTest for check_non_negative."""
         from src.shared.python.core.contracts import check_non_negative
 
-        self.assertTrue(check_non_negative(0.0))
-        self.assertTrue(check_non_negative(5.0))
-        self.assertFalse(check_non_negative(-1.0))
+        cases = [
+            (0.0, True, "zero-scalar"),
+            (5.0, True, "positive-scalar"),
+            (-1.0, False, "negative-scalar"),
+            (np.array([0.0, 1.0, 2.0]), True, "non-negative-array"),
+            (np.array([0.0, -1.0, 2.0]), False, "negative-in-array"),
+        ]
+        for value, expected, label in cases:
+            with self.subTest(label=label):
+                self.assertEqual(check_non_negative(value), expected)
 
-    def test_check_non_negative_array(self) -> None:
-        from src.shared.python.core.contracts import check_non_negative
-
-        self.assertTrue(check_non_negative(np.array([0.0, 1.0, 2.0])))
-        self.assertFalse(check_non_negative(np.array([0.0, -1.0, 2.0])))
+    def test_check_non_negative_cases(self) -> None:
+        self._run_check_non_negative_cases()
 
     def test_check_symmetric_true(self) -> None:
         from src.shared.python.core.contracts import check_symmetric
@@ -358,37 +366,19 @@ class TestContractLevelSwitching(unittest.TestCase):
 class TestExceptionHierarchy(unittest.TestCase):
     """Exception hierarchy is correct."""
 
-    def test_precondition_is_contract_violation(self) -> None:
-        from src.shared.python.core.contracts import (
-            ContractViolationError,
-            PreconditionError,
-        )
-
-        self.assertTrue(issubclass(PreconditionError, ContractViolationError))
-
-    def test_postcondition_is_contract_violation(self) -> None:
-        from src.shared.python.core.contracts import (
-            ContractViolationError,
-            PostconditionError,
-        )
-
-        self.assertTrue(issubclass(PostconditionError, ContractViolationError))
-
-    def test_invariant_is_contract_violation(self) -> None:
+    def test_all_subclass_contract_violation(self) -> None:
+        """All contract exception types must be subclasses of ContractViolationError."""
         from src.shared.python.core.contracts import (
             ContractViolationError,
             InvariantError,
-        )
-
-        self.assertTrue(issubclass(InvariantError, ContractViolationError))
-
-    def test_state_is_contract_violation(self) -> None:
-        from src.shared.python.core.contracts import (
-            ContractViolationError,
+            PostconditionError,
+            PreconditionError,
             StateError,
         )
 
-        self.assertTrue(issubclass(StateError, ContractViolationError))
+        for exc_cls in (PreconditionError, PostconditionError, InvariantError, StateError):
+            with self.subTest(exc=exc_cls.__name__):
+                self.assertTrue(issubclass(exc_cls, ContractViolationError))
 
 
 class TestRequireState(unittest.TestCase):

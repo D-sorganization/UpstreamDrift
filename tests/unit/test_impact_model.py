@@ -299,20 +299,19 @@ class TestEnergyBalance:
 class TestImpactModelFactory:
     """Tests for impact model factory."""
 
-    def test_creates_rigid_body_model(self) -> None:
-        """Factory should create rigid body model."""
-        model = create_impact_model(ImpactModelType.RIGID_BODY)
-        assert isinstance(model, RigidBodyImpactModel)
-
-    def test_creates_spring_damper_model(self) -> None:
-        """Factory should create spring-damper model."""
-        model = create_impact_model(ImpactModelType.SPRING_DAMPER)
-        assert isinstance(model, SpringDamperImpactModel)
-
-    def test_creates_finite_time_model(self) -> None:
-        """Factory should create finite-time model."""
-        model = create_impact_model(ImpactModelType.FINITE_TIME)
-        assert isinstance(model, FiniteTimeImpactModel)
+    @pytest.mark.parametrize(
+        "model_type, expected_class",
+        [
+            (ImpactModelType.RIGID_BODY, RigidBodyImpactModel),
+            (ImpactModelType.SPRING_DAMPER, SpringDamperImpactModel),
+            (ImpactModelType.FINITE_TIME, FiniteTimeImpactModel),
+        ],
+        ids=["rigid-body", "spring-damper", "finite-time"],
+    )
+    def test_creates_correct_model(self, model_type: ImpactModelType, expected_class: type) -> None:
+        """Factory should create the correct model type."""
+        model = create_impact_model(model_type)
+        assert isinstance(model, expected_class)
 
 
 # =============================================================================
