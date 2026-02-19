@@ -44,10 +44,17 @@ def _resolve_contract_level() -> ContractLevel:
     return ContractLevel.ENFORCE if __debug__ else ContractLevel.OFF
 
 
-DBC_LEVEL: ContractLevel = _resolve_contract_level()
+# Mutable state holder (avoids 'global' keyword)
+_contract_state: dict[str, ContractLevel | bool] = {
+    "level": _resolve_contract_level(),
+    "enabled": _resolve_contract_level() != ContractLevel.OFF,
+}
+
+# Public module-level aliases (read via functions for correctness)
+DBC_LEVEL: ContractLevel = _contract_state["level"]  # type: ignore[assignment]
 
 # Legacy compatibility flag (derived from DBC_LEVEL)
-CONTRACTS_ENABLED = DBC_LEVEL != ContractLevel.OFF
+CONTRACTS_ENABLED: bool = _contract_state["enabled"]  # type: ignore[assignment]
 
 
 def set_contract_level(level: ContractLevel) -> None:
@@ -56,15 +63,14 @@ def set_contract_level(level: ContractLevel) -> None:
     Args:
         level: The desired enforcement level.
     """
-    global DBC_LEVEL, CONTRACTS_ENABLED  # noqa: PLW0603
-    DBC_LEVEL = level
-    CONTRACTS_ENABLED = level != ContractLevel.OFF
+    _contract_state["level"] = level
+    _contract_state["enabled"] = level != ContractLevel.OFF
     logger.info("Contract enforcement level set to %s", level.value)
 
 
 def get_contract_level() -> ContractLevel:
     """Return the current global contract enforcement level."""
-    return DBC_LEVEL
+    return _contract_state["level"]  # type: ignore[return-value]
 
 
 def enable_contracts() -> None:
@@ -79,4 +85,4 @@ def disable_contracts() -> None:
 
 def contracts_enabled() -> bool:
     """Check if contracts are currently enabled."""
-    return CONTRACTS_ENABLED
+    return bool(_contract_state["enabled"])

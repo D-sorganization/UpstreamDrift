@@ -137,11 +137,11 @@ _OPENPOSE_SKELETON: list[dict[str, Any]] = [
     {"name": "left_ankle", "parent": "left_knee"},
 ]
 
-# ── In-memory session state ──
+# ── In-memory session state (mutable holder avoids 'global') ──
 
 _sessions: dict[str, dict[str, Any]] = {}
 _recordings: dict[str, dict[str, Any]] = {}
-_session_counter = 0
+_session_state: dict[str, int] = {"counter": 0}
 
 
 # ── Endpoints ──
@@ -220,8 +220,6 @@ async def start_capture_session(
 
     See issue #1206
     """
-    global _session_counter  # noqa: PLW0603
-
     valid_sources = {"mediapipe", "openpose", "c3d"}
     if request.source_type not in valid_sources:
         raise HTTPException(
@@ -229,8 +227,8 @@ async def start_capture_session(
             detail=f"Invalid source type. Must be one of: {sorted(valid_sources)}",
         )
 
-    _session_counter += 1
-    session_id = f"session_{_session_counter}"
+    _session_state["counter"] += 1
+    session_id = f"session_{_session_state['counter']}"
 
     _sessions[session_id] = {
         "source_type": request.source_type,

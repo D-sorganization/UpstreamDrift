@@ -106,13 +106,13 @@ class TestGetOutputDir:
             # Clear the cache to force recalculation
             import src.shared.python.data_io.path_utils as path_utils
 
-            old_root = path_utils._REPO_ROOT
-            path_utils._REPO_ROOT = tmp_path
+            old_root = path_utils._path_cache["repo_root"]
+            path_utils._path_cache["repo_root"] = tmp_path
             try:
                 result = get_output_dir()
                 assert result.exists()
             finally:
-                path_utils._REPO_ROOT = old_root
+                path_utils._path_cache["repo_root"] = old_root
 
 
 class TestGetDocsDir:
