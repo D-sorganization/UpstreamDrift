@@ -92,19 +92,24 @@ class TestShaftProperties:
         # Tip is narrower than butt
         assert standard_shaft.outer_diameter[0] < standard_shaft.outer_diameter[-1]
 
-    def test_material_properties_graphite(self) -> None:
-        """Graphite shaft should have correct material properties."""
-        shaft = create_standard_shaft(material=ShaftMaterial.GRAPHITE)
-
-        assert shaft.youngs_modulus == pytest.approx(GRAPHITE_E)
-        assert shaft.density == pytest.approx(GRAPHITE_DENSITY)
-
-    def test_material_properties_steel(self) -> None:
-        """Steel shaft should have correct material properties."""
-        shaft = create_standard_shaft(material=ShaftMaterial.STEEL)
-
-        assert shaft.youngs_modulus == pytest.approx(STEEL_E)
-        assert shaft.density == pytest.approx(STEEL_DENSITY)
+    @pytest.mark.parametrize(
+        "material, expected_E, expected_density",
+        [
+            (ShaftMaterial.GRAPHITE, GRAPHITE_E, GRAPHITE_DENSITY),
+            (ShaftMaterial.STEEL, STEEL_E, STEEL_DENSITY),
+        ],
+        ids=["graphite", "steel"],
+    )
+    def test_material_properties(
+        self,
+        material: ShaftMaterial,
+        expected_E: float,
+        expected_density: float,
+    ) -> None:
+        """Shaft should have correct material properties for given material."""
+        shaft = create_standard_shaft(material=material)
+        assert shaft.youngs_modulus == pytest.approx(expected_E)
+        assert shaft.density == pytest.approx(expected_density)
 
 
 class TestEIProfile:
@@ -256,20 +261,19 @@ class TestStaticDeflection:
 class TestShaftModelFactory:
     """Tests for shaft model factory."""
 
-    def test_creates_rigid_model(self) -> None:
-        """Factory should create rigid model."""
-        model = create_shaft_model(ShaftFlexModel.RIGID)
-        assert isinstance(model, RigidShaftModel)
-
-    def test_creates_modal_model(self) -> None:
-        """Factory should create modal model."""
-        model = create_shaft_model(ShaftFlexModel.MODAL)
-        assert isinstance(model, ModalShaftModel)
-
-    def test_creates_fe_model(self) -> None:
-        """Factory should create FE model."""
-        model = create_shaft_model(ShaftFlexModel.FINITE_ELEMENT)
-        assert isinstance(model, FiniteElementShaftModel)
+    @pytest.mark.parametrize(
+        "flex_model, expected_class",
+        [
+            (ShaftFlexModel.RIGID, RigidShaftModel),
+            (ShaftFlexModel.MODAL, ModalShaftModel),
+            (ShaftFlexModel.FINITE_ELEMENT, FiniteElementShaftModel),
+        ],
+        ids=["rigid", "modal", "finite-element"],
+    )
+    def test_creates_correct_model(self, flex_model: ShaftFlexModel, expected_class: type) -> None:
+        """Factory should create the correct model type."""
+        model = create_shaft_model(flex_model)
+        assert isinstance(model, expected_class)
 
     def test_creates_fe_model_with_custom_elements(self) -> None:
         """Factory should respect n_elements parameter for FE model."""
