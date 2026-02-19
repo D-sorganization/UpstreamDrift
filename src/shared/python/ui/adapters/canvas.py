@@ -18,7 +18,6 @@ Usage:
 
 from __future__ import annotations
 
-import os
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
@@ -215,12 +214,9 @@ def is_headless() -> bool:
     Returns:
         True if no display is available
     """
-    # Check environment variable
-    if os.environ.get("HEADLESS", "").lower() == "true":
-        return True
+    from src.shared.python.config.environment import is_headless as _is_headless
 
-    # Check for display on Linux
-    return bool(os.name == "posix" and not os.environ.get("DISPLAY"))
+    return _is_headless()
 
 
 def is_qt_available() -> bool:

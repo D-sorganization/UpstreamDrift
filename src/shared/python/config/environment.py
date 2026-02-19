@@ -474,3 +474,100 @@ def is_wsl() -> bool:
             return "microsoft" in f.read().lower()
     except FileNotFoundError:
         return False
+
+
+# ─── Golf Suite Specific Accessors ─────────────────────────────
+
+
+def get_golf_port(default: int = 8000) -> int:
+    """Get the Golf Suite server port.
+
+    Reads from GOLF_PORT env var (distinct from GOLF_API_PORT).
+
+    Args:
+        default: Default port number.
+
+    Returns:
+        Port number.
+    """
+    return (
+        get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
+        or default
+    )
+
+
+def get_golf_suite_mode(default: str = "local") -> str:
+    """Get the Golf Suite operating mode.
+
+    Args:
+        default: Default mode (``"local"``).
+
+    Returns:
+        Mode string (e.g., ``"local"``, ``"remote"``).
+    """
+    return get_env("GOLF_SUITE_MODE", default=default) or default
+
+
+def is_auth_disabled() -> bool:
+    """Check if authentication is disabled.
+
+    Auth is disabled when ``GOLF_SUITE_MODE=local`` or
+    ``GOLF_AUTH_DISABLED=true``.
+
+    Returns:
+        True if authentication checks should be skipped.
+    """
+    return (
+        get_golf_suite_mode() == "local"
+        or get_env_bool("GOLF_AUTH_DISABLED", default=False)
+    )
+
+
+def get_golf_ui_dist() -> str | None:
+    """Get the path to the Golf UI distribution directory.
+
+    Returns:
+        Path string or None if not set.
+    """
+    return get_env("GOLF_UI_DIST")
+
+
+def is_browser_suppressed() -> bool:
+    """Check if auto-opening a browser is suppressed.
+
+    Returns:
+        True if ``GOLF_NO_BROWSER=true``.
+    """
+    return get_env_bool("GOLF_NO_BROWSER", default=False)
+
+
+def is_headless() -> bool:
+    """Check if running in headless mode.
+
+    Returns:
+        True if ``HEADLESS=true`` or no DISPLAY on POSIX.
+    """
+    if get_env_bool("HEADLESS", default=False):
+        return True
+    return bool(os.name == "posix" and not os.environ.get("DISPLAY"))
+
+
+def get_display(default: str = ":0") -> str:
+    """Get the X11 DISPLAY value.
+
+    Args:
+        default: Default display (``":0"``).
+
+    Returns:
+        DISPLAY string.
+    """
+    return get_env("DISPLAY", default=default) or default
+
+
+def get_dbc_level(default: str = "") -> str:
+    """Get the DbC enforcement level string.
+
+    Returns:
+        Raw DBC_LEVEL env value (lowercase, stripped).
+    """
+    return (get_env("DBC_LEVEL", default=default) or default).lower().strip()
