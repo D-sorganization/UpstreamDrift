@@ -117,7 +117,7 @@ def validate_launchers() -> bool:
 
         return False
 
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError, AttributeError, TypeError) as e:
         logger.error(f"Launcher validation error: {e}")
 
         return False
@@ -191,7 +191,7 @@ def validate_shared_components() -> bool:
 
         return False
 
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError, AttributeError, TypeError) as e:
         logger.error(f"Shared component validation error: {e}")
 
         return False
@@ -325,7 +325,7 @@ def run_comprehensive_validation() -> bool:
         try:
             results[name] = validation_func()
 
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError, AttributeError, TypeError) as e:
             logger.error(f"Validation {name} failed with exception: {e}")
 
             results[name] = False
