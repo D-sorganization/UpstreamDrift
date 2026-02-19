@@ -178,7 +178,7 @@ def test_urdf_not_found():
 
 
 def test_optimization_failure(mock_casadi, mock_pinocchio):
-    mock_casadi.solve.side_effect = Exception("Infeasible")
+    mock_casadi.solve.side_effect = RuntimeError("Infeasible")
 
     with patch("os.path.exists", return_value=True), pytest.raises(SystemExit):
         main()

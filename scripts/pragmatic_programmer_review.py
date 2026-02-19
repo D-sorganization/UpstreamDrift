@@ -278,4 +278,4 @@ if __name__ == "__main__":
     repo_root = Path.cwd()
     results = run_review(repo_root)
     generate_markdown_report(results, args.output)
-    print(f"Report generated at {args.output}")
+    logger.info("Report generated at %s", args.output)

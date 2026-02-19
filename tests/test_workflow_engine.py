@@ -109,7 +109,7 @@ class TestWorkflowEngine:
         engine.register_workflow(wf)
 
         # Mock registry failure
-        engine._tool_registry.execute.side_effect = Exception("Tool explosion")
+        engine._tool_registry.execute.side_effect = RuntimeError("Tool explosion")
 
         exe = engine.start_workflow("fail_wf", Context("u1"))
         res = engine.execute_next_step(exe)
