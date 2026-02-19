@@ -1,0 +1,222 @@
+name: Jules Code Quality Fixer (Worker)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      assessment_file:
+        description: "Path to assessment file"
+        required: false
+        default: "docs/assessments/Code_Quality_Review_Latest.md"
+        type: string
+      dry_run:
+        description: "Dry run - analyze only"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: jules-code-quality-fixer-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  fix-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          pip install ruff black mypy || true
+          npm install -g @google/jules
+
+      - name: Find or Create Fix Branch
+        id: branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check for existing open PR from this workflow
+          EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
+            --jq '[.[] | select(.headRefName | startswith("jules/code-quality-fix-"))] | .[0]')
+
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            # Reuse existing branch
+            BRANCH_NAME=$(echo "$EXISTING_PR" | jq -r '.headRefName')
+            PR_NUM=$(echo "$EXISTING_PR" | jq -r '.number')
+            echo "Found existing PR #$PR_NUM on branch $BRANCH_NAME - will push updates"
+            git fetch origin "$BRANCH_NAME" || true
+            git checkout -B "$BRANCH_NAME" "origin/$BRANCH_NAME" 2>/dev/null || git checkout -b "$BRANCH_NAME"
+            echo "reusing_pr=true" >> $GITHUB_OUTPUT
+            echo "existing_pr_num=$PR_NUM" >> $GITHUB_OUTPUT
+          else
+            # Create new branch
+            BRANCH_NAME="jules/code-quality-fix-$(date +%Y%m%d-%H%M%S)"
+            git checkout -b "$BRANCH_NAME"
+            echo "reusing_pr=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Check and Fix
+        if: inputs.dry_run != 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          ASSESSMENT_FILE: ${{ inputs.assessment_file || 'docs/assessments/Code_Quality_Review_Latest.md' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
+
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
+
+          echo "Found source: $SOURCE_ID"
+
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
+          You are the CODE QUALITY FIXER agent.
+
+          Fix issues in the assessment file. Priority: CRITICAL > HIGH > MEDIUM > LOW
+
+          Rules:
+          - DO NOT modify test assertions
+          - DO NOT disable linting rules without justification
+          - Run: ruff check . --fix && black .
+
+          Document fixes in docs/assessments/issues/
+          PROMPT_EOF
+          )
+
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              # automationMode: "AUTO_CREATE_PR"
+            }')
+
+          echo "Request: $REQUEST_JSON"
+
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
+
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+
+
+          ruff check . --fix || true
+          black . || true
+
+      - name: Commit and Create/Update PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REUSING_PR: ${{ steps.branch.outputs.reusing_pr }}
+          EXISTING_PR_NUM: ${{ steps.branch.outputs.existing_pr_num }}
+        run: |
+          git add -A
+          if ! git diff --staged --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "fix: code quality improvements
+
+          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
+            git push -u origin "$BRANCH_NAME"
+
+            if [ "$REUSING_PR" = "true" ] && [ -n "$EXISTING_PR_NUM" ]; then
+              # Update existing PR with comment
+              gh pr comment "$EXISTING_PR_NUM" --body "Updated with additional fixes - $(date +%Y-%m-%d %H:%M)"
+              echo "Updated existing PR #$EXISTING_PR_NUM"
+              PR_NUM="$EXISTING_PR_NUM"
+            else
+              # Create new PR
+              gh pr create \
+                --title "[Jules/Code-Quality-Fixer] Code Quality Fixes - $(date +%Y-%m-%d)" \
+                --body "Automated code quality fixes. This PR will be iteratively updated." \
+                --base main \
+                --head "$BRANCH_NAME"
+              PR_NUM=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
+            fi
+
+            # Post-processing: Remove reviewers to reduce noise
+            if [ -n "$PR_NUM" ]; then
+               gh pr edit "$PR_NUM" --remove-reviewer "dieterolson" || true
+            fi
+          fi

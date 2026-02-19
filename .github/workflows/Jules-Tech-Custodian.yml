@@ -1,0 +1,79 @@
+name: Jules Tech Debt Custodian
+on:
+  workflow_call:
+
+jobs:
+  refactor-worst-file:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: |
+          npm install -g @google/jules
+          pip install ruff==0.14.10
+
+      - name: Identify Target File
+        id: target
+        run: |
+          WORST_FILE=$(ruff check . --output-format text --select ALL 2>/dev/null | cut -d: -f1 | sort | uniq -c | sort -nr | head -n1 | awk '{print $2}')
+          if [ -z "$WORST_FILE" ]; then
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+          else
+            echo "file=$WORST_FILE" >> $GITHUB_OUTPUT
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Cleanup Branch
+        if: steps.target.outputs.has_issues == 'true'
+        id: branch # FIX: Added ID so we can output data
+        env:
+          TARGET: ${{ steps.target.outputs.file }}
+        run: |
+          BRANCH_NAME="refactor/custodian-$(date +%Y%m%d%H%M%S)-$(basename "$TARGET")"
+          git checkout -b $BRANCH_NAME
+          git push -u origin $BRANCH_NAME
+          # FIX: This output now belongs to step 'branch', not 'target'
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Authenticate Jules
+        if: steps.target.outputs.has_issues == 'true'
+        run: jules auth --token ${{ secrets.JULES_API_KEY }}
+
+      - name: Dispatch Jules
+        if: steps.target.outputs.has_issues == 'true'
+        env:
+          TARGET: ${{ steps.target.outputs.file }}
+          # FIX: Reference the correct step output
+          BRANCH: ${{ steps.branch.outputs.branch_name }}
+        run: |
+          jules task fix \
+            --branch $BRANCH \
+            --prompt "Refactor '$TARGET' to fix linting errors. Do not change logic."
+
+      - name: Open PR
+        if: steps.target.outputs.has_issues == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.branch.outputs.branch_name }}
+          TARGET: ${{ steps.target.outputs.file }}
+        run: |
+          # 1. Create the PR (Capture the URL)
+          PR_URL=$(gh pr create \
+            --title "[Jules/Tech-Custodian] chore: weekly refactor of $TARGET" \
+            --body "Automated cleanup." \
+            --base main \
+            --head $BRANCH \
+            --label "auto-fix")
+
+          echo "PR Created: $PR_URL"
+
+          # 2. FORCE READY STATE (Fixes Draft Issue)
+          # We use || true so it doesn't fail if the PR is already ready
+          gh pr ready "$PR_URL" || true
