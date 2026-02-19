@@ -52,8 +52,8 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-# Global flag to track if structured logging has been configured
-_structured_logging_configured = False
+# Mutable holder to track if structured logging has been configured (avoids 'global')
+_logging_state: dict[str, bool] = {"configured": False}
 
 
 def _build_base_processors() -> list[Any]:
@@ -126,16 +126,15 @@ def setup_structured_logging(
         >>> logger = get_logger(__name__)
         >>> logger.info("simulation_started", engine="mujoco", duration=2.5)
     """
-    global _structured_logging_configured
     import threading
 
     _logging_lock = threading.Lock()
 
-    if _structured_logging_configured:
+    if _logging_state["configured"]:
         return
 
     with _logging_lock:
-        if _structured_logging_configured:
+        if _logging_state["configured"]:
             return
 
     logging.basicConfig(
@@ -148,7 +147,7 @@ def setup_structured_logging(
     processors.extend(_build_output_processors(json_output, dev_mode))
     _apply_structlog_config(processors, level)
 
-    _structured_logging_configured = True
+    _logging_state["configured"] = True
 
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
@@ -174,7 +173,7 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
         >>> request_logger.info("request_completed", duration_ms=250)
     """
     # Ensure structured logging is configured with defaults
-    if not _structured_logging_configured:
+    if not _logging_state["configured"]:
         setup_structured_logging()
 
     return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
