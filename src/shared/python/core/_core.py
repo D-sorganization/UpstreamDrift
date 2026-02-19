@@ -80,13 +80,12 @@ def _build_output_processors(json_output: bool, dev_mode: bool) -> list[Any]:
                 exception_formatter=structlog.dev.plain_traceback,
             )
         ]
-    elif json_output:
+    if json_output:
         return [
             structlog.processors.dict_tracebacks,
             structlog.processors.JSONRenderer(),
         ]
-    else:
-        return [structlog.processors.KeyValueRenderer()]
+    return [structlog.processors.KeyValueRenderer()]
 
 
 def _apply_structlog_config(processors: list[Any], level: int) -> None:

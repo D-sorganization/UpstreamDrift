@@ -95,21 +95,21 @@ class DraggableModelCard(QFrame):
         model_id = self.model.id.lower()
         if "mujoco" in model_id:
             return "mujoco_humanoid.png"
-        elif "drake" in model_id:
+        if "drake" in model_id:
             return "drake.png"
-        elif "pinocchio" in model_id:
+        if "pinocchio" in model_id:
             return "pinocchio.png"
-        elif "opensim" in model_id:
+        if "opensim" in model_id:
             return "opensim.png"
-        elif "myosim" in model_id or "myosuite" in model_id:
+        if "myosim" in model_id or "myosuite" in model_id:
             return "myosim.png"
-        elif "matlab" in model_id:
+        if "matlab" in model_id:
             return "matlab_logo.png"
-        elif "motion" in model_id or "capture" in model_id or "c3d" in model_id:
+        if "motion" in model_id or "capture" in model_id or "c3d" in model_id:
             return "c3d_icon.png"
-        elif "model_explorer" in model_id or "urdf" in model_id:
+        if "model_explorer" in model_id or "urdf" in model_id:
             return "urdf_icon.png"
-        elif (
+        if (
             "engine_managed" in getattr(self.model, "type", "")
             and getattr(self.model, "engine_type", "") == "mujoco"
         ):
@@ -217,11 +217,11 @@ class DraggableModelCard(QFrame):
         path_str = str(getattr(self.model, "path", ""))
         if t == "mjcf" or path_str.endswith(".xml"):
             return "Viewer", c.chart_cyan, "#000000"
-        elif t in ["opensim", "myosim"]:
+        if t in ["opensim", "myosim"]:
             return "Engine Ready", c.success, "#000000"
-        elif t in ["matlab", "matlab_app"]:
+        if t in ["matlab", "matlab_app"]:
             return "External", c.chart_purple, "#ffffff"
-        elif t in ["urdf_generator", "c3d_viewer"]:
+        if t in ["urdf_generator", "c3d_viewer"]:
             return "Utility", c.text_tertiary, "#ffffff"
 
         return "Unknown", c.text_tertiary, "#ffffff"

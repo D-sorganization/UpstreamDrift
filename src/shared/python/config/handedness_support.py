@@ -123,9 +123,8 @@ def mirror_position(
 
     if position.ndim == 1:
         return np.asarray(transform.position_mirror @ position)
-    else:
-        # Handle (N, 3) trajectory
-        return np.asarray((transform.position_mirror @ position.T).T)
+    # Handle (N, 3) trajectory
+    return np.asarray((transform.position_mirror @ position.T).T)
 
 
 def mirror_velocity(
@@ -146,8 +145,7 @@ def mirror_velocity(
 
     if velocity.ndim == 1:
         return np.asarray(transform.velocity_mirror @ velocity)
-    else:
-        return np.asarray((transform.velocity_mirror @ velocity.T).T)
+    return np.asarray((transform.velocity_mirror @ velocity.T).T)
 
 
 def mirror_rotation_matrix(
@@ -209,8 +207,7 @@ def mirror_angular_velocity(
 
     if omega.ndim == 1:
         return np.asarray(pseudovector_mirror @ omega)
-    else:
-        return np.asarray((pseudovector_mirror @ omega.T).T)
+    return np.asarray((pseudovector_mirror @ omega.T).T)
 
 
 def mirror_joint_configuration(
@@ -319,7 +316,7 @@ def detect_handedness_from_metadata(
             val = str(metadata[key]).lower()
             if val in ("left", "l", "lh", "left_handed", "left-handed"):
                 return Handedness.LEFT_HANDED
-            elif val in ("right", "r", "rh", "right_handed", "right-handed"):
+            if val in ("right", "r", "rh", "right_handed", "right-handed"):
                 return Handedness.RIGHT_HANDED
 
     # Check boolean flags

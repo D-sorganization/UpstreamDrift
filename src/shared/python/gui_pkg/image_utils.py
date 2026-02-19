@@ -141,7 +141,7 @@ def create_optimized_icon(
             )
             final = final.filter(ImageFilter.SHARPEN).filter(ImageFilter.SHARPEN)
             return ImageEnhance.Contrast(final).enhance(1.4)
-        elif size <= 32:
+        if size <= 32:
             final = final.filter(
                 ImageFilter.UnsharpMask(radius=0.3, percent=250, threshold=1)
             ).filter(ImageFilter.SHARPEN)
