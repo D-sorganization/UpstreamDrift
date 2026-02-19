@@ -11,10 +11,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 # ── Route Registry Tests ─────────────────────────────────────────
 
@@ -379,9 +377,9 @@ class TestLinkageMechanismsDecomposition:
             assert "xml" in entry, f"Missing 'xml' in catalog entry: {name}"
             assert "actuators" in entry, f"Missing 'actuators' in catalog entry: {name}"
             assert "category" in entry, f"Missing 'category' in catalog entry: {name}"
-            assert (
-                "description" in entry
-            ), f"Missing 'description' in catalog entry: {name}"
+            assert "description" in entry, (
+                f"Missing 'description' in catalog entry: {name}"
+            )
 
     def test_four_bar_generates_valid_xml(self) -> None:
         """Four-bar linkage XML contains expected MuJoCo elements."""

@@ -14,7 +14,10 @@ from .parallel_mechanisms import (
     generate_stewart_platform_xml,
 )
 from .slider_mechanisms import generate_scotch_yoke_xml, generate_slider_crank_xml
-from .special_mechanisms import generate_geneva_mechanism_xml, generate_oldham_coupling_xml
+from .special_mechanisms import (
+    generate_geneva_mechanism_xml,
+    generate_oldham_coupling_xml,
+)
 from .straight_line import (
     generate_chebyshev_linkage_xml,
     generate_peaucellier_linkage_xml,
