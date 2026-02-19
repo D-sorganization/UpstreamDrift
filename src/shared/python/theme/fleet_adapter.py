@@ -84,8 +84,7 @@ except ImportError as e:
         value = value.strip()
         if not value:
             return False
-        if value.startswith("#"):
-            value = value[1:]
+        value = value.removeprefix("#")
         if len(value) == 3:
             return bool(re.fullmatch(r"[0-9a-fA-F]{3}", value))
         return bool(re.fullmatch(r"[0-9a-fA-F]{6}", value))

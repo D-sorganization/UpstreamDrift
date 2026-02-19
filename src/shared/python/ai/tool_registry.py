@@ -449,10 +449,9 @@ class ToolRegistry:
 
         if provider_format == "openai":
             return [t.to_openai_format() for t in tools]
-        elif provider_format == "anthropic":
+        if provider_format == "anthropic":
             return [t.to_anthropic_format() for t in tools]
-        else:
-            return [t.to_json_schema() for t in tools]
+        return [t.to_json_schema() for t in tools]
 
     def execute(
         self,

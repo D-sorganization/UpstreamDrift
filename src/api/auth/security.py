@@ -299,9 +299,9 @@ class UsageTracker:
 
         if resource_type == "api_calls":
             return int(user.api_calls_this_month) < quotas.api_calls_per_month
-        elif resource_type == "video_analyses":
+        if resource_type == "video_analyses":
             return int(user.video_analyses_this_month) < quotas.video_analyses_per_month
-        elif resource_type == "simulations":
+        if resource_type == "simulations":
             return int(user.simulations_this_month) < quotas.simulations_per_month
 
         return False
@@ -392,8 +392,7 @@ class AuthCache:
                 result, timestamp = self._cache[cache_key]
                 if self._time.time() - timestamp < self.TTL_SECONDS:
                     return result
-                else:
-                    del self._cache[cache_key]
+                del self._cache[cache_key]
         return None
 
     def set(self, api_key: str, result: Any) -> None:

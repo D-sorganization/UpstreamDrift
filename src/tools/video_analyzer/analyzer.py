@@ -246,7 +246,7 @@ class SwingAnalyzer:
 
         if angle > 20:
             return StanceDirection.RIGHT_HANDED
-        elif angle < -20:
+        if angle < -20:
             return StanceDirection.LEFT_HANDED
         return StanceDirection.UNKNOWN
 

@@ -243,8 +243,7 @@ class OutputManager:
             filename = filename.split(".")[-1]
             filename = "test_format"
 
-        if filename.endswith(f".{format_type.value}"):
-            filename = filename[: -len(f".{format_type.value}")]
+        filename = filename.removesuffix(f".{format_type.value}")
 
         if not any(char.isdigit() for char in filename) and "test_" not in filename:
             timestamp = timestamp_filename(utc=False)
@@ -305,9 +304,9 @@ class OutputManager:
             """Serialize numpy arrays, numbers, and datetimes to JSON-safe types."""
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
-            elif isinstance(obj, np.integer | np.floating):
+            if isinstance(obj, np.integer | np.floating):
                 return float(obj)
-            elif isinstance(obj, datetime):
+            if isinstance(obj, datetime):
                 return format_datetime(obj, "iso")
             raise TypeError(
                 f"Object of type {type(obj).__name__} is not JSON serializable"
@@ -481,13 +480,13 @@ class OutputManager:
             if format_type == OutputFormat.CSV:
                 return pd.read_csv(file_path, comment="#")
 
-            elif format_type == OutputFormat.JSON:
+            if format_type == OutputFormat.JSON:
                 with open(file_path) as f:
                     data = json.load(f)
                 result = data.get("results", data)
                 return dict(result) if isinstance(result, dict) else result
 
-            elif format_type == OutputFormat.HDF5:
+            if format_type == OutputFormat.HDF5:
                 result = pd.read_hdf(file_path, key="data")
                 if not isinstance(result, pd.DataFrame):
                     raise TypeError(
@@ -496,13 +495,13 @@ class OutputManager:
                     )
                 return result
 
-            elif format_type == OutputFormat.PICKLE:
+            if format_type == OutputFormat.PICKLE:
                 # Security hardening: Disable Pickle
                 raise ValueError(
                     "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
                 )
 
-            elif format_type == OutputFormat.PARQUET:
+            if format_type == OutputFormat.PARQUET:
                 return pd.read_parquet(file_path)
 
         except (FileNotFoundError, PermissionError, OSError) as e:
@@ -589,9 +588,9 @@ class OutputManager:
                     """Serialize numpy arrays, numbers, and datetimes for report JSON."""
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
-                    elif isinstance(obj, np.integer | np.floating):
+                    if isinstance(obj, np.integer | np.floating):
                         return float(obj)
-                    elif isinstance(obj, datetime):
+                    if isinstance(obj, datetime):
                         return format_datetime(obj, "iso")
                     raise TypeError(
                         f"Object of type {type(obj).__name__} is not JSON serializable"
