@@ -74,7 +74,9 @@ _startup_metrics: dict[str, Any] = {
 
 def _resolve_ui_dist_path() -> Path:
     """Resolve the UI build path for static file serving."""
-    env_override = os.environ.get("GOLF_UI_DIST")
+    from src.shared.python.config.environment import get_golf_ui_dist
+
+    env_override = get_golf_ui_dist()
     if env_override:
         return Path(env_override)
     return Path(__file__).parent.parent.parent / "ui" / "dist"
@@ -683,7 +685,9 @@ def main() -> None:
     app = create_local_app()
 
     host = "127.0.0.1"
-    port = int(os.environ.get("GOLF_PORT", 8000))
+    from src.shared.python.config.environment import get_golf_port
+
+    port = get_golf_port(default=8000)
 
     # Print startup info in matrix green
     print_matrix_status("Loading physics engine manager...")
@@ -698,7 +702,9 @@ def main() -> None:
     # Open browser after server starts
     def open_browser() -> None:
         """Open the default web browser to the local server URL."""
-        if os.environ.get("GOLF_NO_BROWSER") != "true":
+        from src.shared.python.config.environment import is_browser_suppressed
+
+        if not is_browser_suppressed():
             webbrowser.open(f"http://{host}:{port}")
 
     Timer(1.5, open_browser).start()
