@@ -1,0 +1,83 @@
+name: Jules Review Responder
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  jules-address-feedback:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: write
+    if: github.event.review.user.login != 'jules-bot'
+
+    steps:
+      - name: Validate Reviewer Permission
+        id: auth
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LOGIN="${{ github.event.review.user.login }}"
+          # Allow trusted quality bots
+          if [[ "$LOGIN" == "Copilot" || "$LOGIN" == "copilot" || "$LOGIN" == "cursor[bot]" || "$LOGIN" == "github-actions[bot]" || "$LOGIN" == "jules-bot" ]]; then
+            echo "authorized=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          PERM=$(gh api repos/${{ github.repository }}/collaborators/${{ github.event.review.user.login }}/permission --jq '.permission' || echo "none")
+          if [[ "$PERM" != "admin" && "$PERM" != "write" ]]; then
+            echo "authorized=false" >> $GITHUB_OUTPUT
+            echo "Reviewer does not have write access. Skipping."
+          else
+            echo "authorized=true" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.auth.outputs.authorized == 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        if: steps.auth.outputs.authorized == 'true'
+        with: { node-version: "20" }
+      - run: npm install -g @google/jules
+        if: steps.auth.outputs.authorized == 'true'
+
+      - name: Compile Feedback
+        if: steps.auth.outputs.authorized == 'true'
+        id: feedback
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_ID: ${{ github.event.review.id }}
+          REVIEWER_LOGIN: ${{ github.event.review.user.login }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REPO: ${{ github.repository }}
+        run: |
+          # SECURITY: Use environment variables instead of direct interpolation
+          echo "Reviewer: $REVIEWER_LOGIN" > feedback.txt
+          echo "Summary: $REVIEW_BODY" >> feedback.txt
+
+          echo -e "\nDetailed Inline Comments:" >> feedback.txt
+          gh api "repos/$REPO/pulls/$PR_NUMBER/reviews/$REVIEW_ID/comments" \
+            --jq '.[] | "- File: " + .path + "\n  Line: " + (.line | tostring) + "\n  Comment: " + .body + "\n"' >> feedback.txt
+
+          if grep -iq "lgtm\|looks good" feedback.txt && [ "$REVIEW_STATE" == "APPROVED" ]; then
+             echo "run_repair=false" >> $GITHUB_OUTPUT
+          else
+             echo "run_repair=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Execute Repairs
+        if: steps.feedback.outputs.run_repair == 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # SECURITY: Use environment variables and read feedback from file
+          FEEDBACK_CONTENT=$(cat feedback.txt)
+          jules remote new \
+            --repo "$REPO" \
+            --session "Address code review feedback on PR #$PR_NUMBER: $FEEDBACK_CONTENT" \
+            --pr "$PR_NUMBER"

@@ -4,7 +4,6 @@ name: Jules PR Cleanup
 # Preserves PRs that are actively being iterated on (recent commits)
 
 on:
-  workflow_call:
   schedule:
     - cron: "0 0 * * 0,4"  # Weekly on Sundays at 5 AM PST (13 UTC)
   workflow_dispatch:
