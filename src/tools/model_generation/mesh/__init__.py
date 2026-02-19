@@ -5,8 +5,6 @@ Re-exports mesh processing components from humanoid_character_builder.
 """
 
 try:
-    pass
-
     __all__ = [
         "MeshProcessor",
         "MeshExportConfig",

@@ -327,11 +327,10 @@ def get_worker_adapter(
     """
     if force_threading or not is_qt_available():
         return ThreadWorker(target, args, kwargs)
-    else:
-        try:
-            return QtWorker(target, args, kwargs)
-        except RuntimeError:
-            return ThreadWorker(target, args, kwargs)
+    try:
+        return QtWorker(target, args, kwargs)
+    except RuntimeError:
+        return ThreadWorker(target, args, kwargs)
 
 
 __all__ = [

@@ -206,17 +206,16 @@ class InertiaCalculator:
         # Route to appropriate method
         if mode == InertiaMode.MANUAL:
             return self._compute_manual(source, mass)
-        elif mode == InertiaMode.PRIMITIVE:
+        if mode == InertiaMode.PRIMITIVE:
             return self._compute_primitive(source, mass, dimensions)
-        elif mode in (
+        if mode in (
             InertiaMode.MESH_UNIFORM_DENSITY,
             InertiaMode.MESH_SPECIFIED_MASS,
         ):
             return self._compute_mesh(source, mass, density, mode)
-        elif mode == InertiaMode.ANTHROPOMETRIC:
+        if mode == InertiaMode.ANTHROPOMETRIC:
             return self._compute_anthropometric(source, mass, dimensions, **kwargs)
-        else:
-            raise ValueError(f"Unsupported inertia mode: {mode}")
+        raise ValueError(f"Unsupported inertia mode: {mode}")
 
     @precondition(
         lambda self, geometry, mass: geometry is not None,
@@ -601,15 +600,14 @@ class InertiaCalculator:
         """Create geometry from dimensions dict."""
         if "radius" in dimensions and "length" in dimensions:
             return Geometry.cylinder(dimensions["radius"], dimensions["length"])
-        elif "length" in dimensions and "width" in dimensions:
+        if "length" in dimensions and "width" in dimensions:
             depth = dimensions.get("depth", dimensions["width"])
             return Geometry.box(dimensions["length"], dimensions["width"], depth)
-        elif "radius" in dimensions:
+        if "radius" in dimensions:
             return Geometry.sphere(dimensions["radius"])
-        else:
-            # Default to small box
-            size = dimensions.get("size", 0.1)
-            return Geometry.box(size, size, size)
+        # Default to small box
+        size = dimensions.get("size", 0.1)
+        return Geometry.box(size, size, size)
 
     def clear_cache(self) -> None:
         """Clear the computation cache."""

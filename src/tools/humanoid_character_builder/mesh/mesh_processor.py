@@ -396,9 +396,8 @@ class MeshProcessor:
 
         if config.collision_convex_hull:
             return self.create_convex_hull(visual_mesh)
-        else:
-            target_faces = int(len(visual_mesh.faces) * config.collision_simplification)
-            return self.simplify_mesh(visual_mesh, target_faces=target_faces)
+        target_faces = int(len(visual_mesh.faces) * config.collision_simplification)
+        return self.simplify_mesh(visual_mesh, target_faces=target_faces)
 
     def export_mesh(
         self,
