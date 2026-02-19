@@ -186,11 +186,11 @@ class TeleoperationInterface:
 
         if self._mode == TeleoperationMode.POSITION:
             return self._compute_position_command(device_pose, gripper)
-        elif self._mode == TeleoperationMode.VELOCITY:
+        if self._mode == TeleoperationMode.VELOCITY:
             return self._compute_velocity_command(device_twist, gripper)
-        elif self._mode == TeleoperationMode.WRENCH:
+        if self._mode == TeleoperationMode.WRENCH:
             return self._compute_wrench_command(device_twist, gripper)
-        elif self._mode == TeleoperationMode.IMPEDANCE:
+        if self._mode == TeleoperationMode.IMPEDANCE:
             return self._compute_impedance_command(device_pose, gripper)
 
         # Default

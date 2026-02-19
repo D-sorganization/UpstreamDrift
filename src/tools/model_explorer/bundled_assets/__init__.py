@@ -350,8 +350,7 @@ def get_bundled_model_path(model_name: str, category: str = "human_models") -> P
     if category == "human_models":
         return assets.get_human_model_path(model_name)
 
-    elif category == "golf_equipment":
+    if category == "golf_equipment":
         return assets.get_golf_equipment_path(model_name)
 
-    else:
-        raise ValueError(f"Unknown category: {category}")
+    raise ValueError(f"Unknown category: {category}")

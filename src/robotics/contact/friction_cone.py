@@ -294,8 +294,7 @@ def project_to_friction_cone(
         if f_t_mag <= -cone.mu * f_n:
             return np.zeros(3)
         # Project to cone surface
-        else:
-            return _project_to_cone_surface(f_n, f_t, f_t_mag, cone)
+        return _project_to_cone_surface(f_n, f_t, f_t_mag, cone)
 
     # Case 3: Tangential force exceeds limit
     if f_t_mag > cone.mu * f_n:
