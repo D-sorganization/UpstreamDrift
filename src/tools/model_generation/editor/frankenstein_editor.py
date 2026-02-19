@@ -276,6 +276,28 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         return None
 
     # ============================================================
+    # Shared validation (DRY)
+    # ============================================================
+
+    def _get_writable_model(self, model_id: str) -> ParsedModel | None:
+        """Retrieve a model and verify it is writable.
+
+        DRY helper: eliminates the repeated pattern of looking up a model,
+        logging an error if not found, and checking read_only.
+
+        Returns:
+            The model if found and writable, otherwise None.
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return None
+        if model.read_only:
+            logger.error(f"Model '{model_id}' is read-only")
+            return None
+        return model
+
+    # ============================================================
     # Direct Modifications
     # ============================================================
 
@@ -296,13 +318,8 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if deleted
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         link = model.get_link(link_name)
@@ -359,13 +376,8 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if deleted
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         subtree = model.get_subtree(root_link)
@@ -410,13 +422,8 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if renamed
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         # Check for conflicts
@@ -465,13 +472,8 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if renamed
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         # Check for conflicts
@@ -507,13 +509,8 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if modified
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         joint = model.get_joint(joint_name)

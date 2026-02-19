@@ -21,6 +21,7 @@ from src.robotics.control.whole_body.qp_solver import (
 )
 from src.robotics.control.whole_body.task import (
     Task,
+    TaskGains,
     TaskType,
     create_com_task,
     create_contact_constraint,
@@ -117,9 +118,7 @@ class TestTask:
             com_target=com_target,
             com_current=com_current,
             com_velocity=com_vel,
-            gain_p=100.0,
-            gain_d=20.0,
-            weight=1.0,
+            gains=TaskGains(weight=1.0, priority=2, gain_p=100.0, gain_d=20.0),
         )
 
         assert task.name == "com_tracking"
@@ -138,9 +137,7 @@ class TestTask:
             q_target=q_target,
             q_current=q_current,
             v_current=v_current,
-            gain_p=50.0,
-            gain_d=10.0,
-            weight=0.1,
+            gains=TaskGains(weight=0.1, priority=4, gain_p=50.0, gain_d=10.0),
         )
 
         assert task.name == "posture"
@@ -159,9 +156,7 @@ class TestTask:
             ee_target=ee_target,
             ee_current=ee_current,
             ee_velocity=ee_velocity,
-            gain_p=100.0,
-            gain_d=20.0,
-            weight=1.0,
+            gains=TaskGains(weight=1.0, priority=3, gain_p=100.0, gain_d=20.0),
         )
 
         assert task.name == "end_effector"
@@ -508,9 +503,7 @@ class TestWholeBodyController:
             q_target=np.zeros(6),
             q_current=np.zeros(6),
             v_current=np.zeros(6),
-            gain_p=100.0,
-            gain_d=20.0,
-            weight=1.0,
+            gains=TaskGains(weight=1.0, priority=4, gain_p=100.0, gain_d=20.0),
         )
         wbc.add_task(task)
 
@@ -727,9 +720,7 @@ class TestIntegration:
             q_target=np.zeros(7),
             q_current=0.1 * np.ones(7),
             v_current=np.zeros(7),
-            gain_p=100.0,
-            gain_d=20.0,
-            weight=1.0,
+            gains=TaskGains(weight=1.0, priority=4, gain_p=100.0, gain_d=20.0),
         )
 
         wbc.add_task(posture_task)
@@ -754,8 +745,7 @@ class TestIntegration:
             q_target=np.array([1.0, 0.0, 0.0]),
             q_current=np.array([0.0, 0.0, 0.0]),
             v_current=np.zeros(3),
-            gain_p=100.0,
-            gain_d=20.0,
+            gains=TaskGains(weight=0.1, priority=4, gain_p=100.0, gain_d=20.0),
         )
         wbc.add_task(task)
 

@@ -46,7 +46,7 @@ class JointState:
     def __post_init__(self) -> None:
         """Post-initialization validation."""
 
-    def __new__(
+    def __new__(  # noqa: PLR0913
         cls,
         name: str,
         position: Vector3,
@@ -62,7 +62,7 @@ class JointState:
         instance = object.__new__(cls)
         return instance
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         position: Vector3,
@@ -180,7 +180,7 @@ class ForceVector:
     color: tuple[float, float, float, float] | None = None
     scale_factor: float = 1.0
 
-    def __new__(
+    def __new__(  # noqa: PLR0913
         cls,
         origin: Vector3,
         direction: Vector3,
@@ -195,7 +195,7 @@ class ForceVector:
         instance = object.__new__(cls)
         return instance
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         origin: Vector3,
         direction: Vector3,
