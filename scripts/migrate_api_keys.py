@@ -46,6 +46,7 @@ from typing import Any
 # Add parent directory to path for imports
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
+from sqlalchemy.exc import ArgumentError
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.api.auth.models import APIKey, User
@@ -115,7 +116,7 @@ def get_database_session(database_url: str | None = None) -> Session:
         url = make_url(database_url)
         masked_url = url.render_as_string(hide_password=True)
         logger.info(f"Connecting to database: {masked_url}")
-    except Exception:
+    except (ValueError, ArgumentError) as _:
         # Fallback to simple logic if URL parsing fails
         logger.info(f"Connecting to database: {database_url.split('@')[-1]}")
 
@@ -355,8 +356,8 @@ def main() -> int:
         logger.warning("\nMigration interrupted by user")
         return 1
 
-    except Exception as e:
-        logger.error(f"\n❌ Migration failed: {e}")
+    except (OSError, ValueError, RuntimeError, ArgumentError) as e:
+        logger.error(f"\nMigration failed: {e}")
         import traceback
 
         logger.error(traceback.format_exc())
