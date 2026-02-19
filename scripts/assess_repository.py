@@ -4,6 +4,7 @@ Assess repository against 15 categories (A-O) and generate reports.
 """
 
 import json
+import logging
 import subprocess
 import sys
 
@@ -27,6 +28,8 @@ from src.shared.python.assessment.reporting import (  # noqa: E402
     generate_markdown_report,
 )
 from src.shared.python.data_io.path_utils import get_repo_root  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 # Setup paths
 REPO_ROOT = get_repo_root()
@@ -129,7 +132,7 @@ def assess_D():
             )
             try_count += results["try_count"]
             bare_except_count += results["bare_except_count"]
-        except Exception:
+        except (OSError, KeyError, ValueError):
             pass
 
     score = 7.0
@@ -321,7 +324,7 @@ def assess_L():
             )
             logging_usage += results["logging_usage"]
             print_usage += results["print_usage"]
-        except Exception:
+        except (OSError, KeyError, ValueError):
             pass
 
     score = 7.0
@@ -427,7 +430,7 @@ def run_all_assessments():
             report = assessor()
             reports.append(report)
         except Exception as e:
-            print(f"Error running assessment: {e}")
+            logger.error("Error running assessment: %s", e)
 
     return reports
 
@@ -450,15 +453,16 @@ def generate_issues_locally(json_path):
                     details="The assessment for this category returned a score below 5/10.",
                     output_dir=ISSUES_DIR,
                 )
-                print(f"Created issue for category {cat_code}")
+                logger.info("Created issue for category %s", cat_code)
 
-    except Exception as e:
-        print(f"Error generating local issues: {e}")
+    except (OSError, json.JSONDecodeError, KeyError) as e:
+        logger.error("Error generating local issues: %s", e)
 
 
 def main():
     """Run all assessments and generate the summary report."""
-    print("Starting repository assessment...")
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    logger.info("Starting repository assessment...")
 
     # 1. Run individual assessments
     reports = run_all_assessments()
@@ -481,14 +485,14 @@ def main():
         str(summary_json),
     ]
 
-    print("Generating summary...")
+    logger.info("Generating summary...")
     subprocess.run(cmd, check=True)
 
     # 3. Create issues locally for low grades
-    print("Checking for low grades...")
+    logger.info("Checking for low grades...")
     generate_issues_locally(summary_json)
 
-    print("Assessment complete.")
+    logger.info("Assessment complete.")
 
 
 if __name__ == "__main__":

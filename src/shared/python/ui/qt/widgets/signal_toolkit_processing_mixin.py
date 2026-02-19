@@ -158,17 +158,25 @@ class SignalToolkitProcessingMixin:
             elif signal_type == "Custom":
                 expr = self.custom_expr.text()
                 if expr:
-                    safe_dict = {
+                    from simpleeval import EvalWithCompoundTypes
+
+                    safe_functions = {
                         "sin": np.sin,
                         "cos": np.cos,
                         "tan": np.tan,
                         "exp": np.exp,
                         "log": np.log,
                         "sqrt": np.sqrt,
+                    }
+                    safe_names = {
                         "pi": np.pi,
                         "t": t,
                     }
-                    values = eval(expr, {"__builtins__": {}}, safe_dict)  # noqa: S307
+                    evaluator = EvalWithCompoundTypes(
+                        functions=safe_functions,
+                        names=safe_names,
+                    )
+                    values = evaluator.eval(expr)
                     self.current_signal = Signal(t, values, name="custom")
                 else:
                     return
