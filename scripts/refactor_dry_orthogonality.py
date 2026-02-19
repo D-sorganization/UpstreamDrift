@@ -106,7 +106,7 @@ class DRYRefactorer:
 
             return False
 
-        except Exception as e:
+        except (OSError, ValueError, re.error) as e:
             logger.error(f"Failed to refactor {file_path}: {e}")
             return False
 
@@ -159,7 +159,7 @@ class DRYRefactorer:
 
             return False
 
-        except Exception as e:
+        except (OSError, ValueError, re.error) as e:
             logger.error(f"Failed to refactor paths in {file_path}: {e}")
             return False
 
@@ -215,7 +215,7 @@ class DRYRefactorer:
 
             return False
 
-        except Exception as e:
+        except (OSError, ValueError, re.error) as e:
             logger.error(f"Failed to refactor QApplication in {file_path}: {e}")
             return False
 
@@ -284,7 +284,7 @@ class DRYRefactorer:
 
             return False
 
-        except Exception as e:
+        except (OSError, ValueError, re.error) as e:
             logger.error(f"Failed to refactor array validation in {file_path}: {e}")
             return False
 
@@ -344,7 +344,7 @@ class DRYRefactorer:
 
             return False
 
-        except Exception as e:
+        except (OSError, ValueError, re.error) as e:
             logger.error(f"Failed to refactor path resolution in {file_path}: {e}")
             return False
 

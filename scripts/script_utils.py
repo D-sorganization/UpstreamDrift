@@ -64,7 +64,7 @@ def run_main(main_func: Callable[[], int | None], logger: logging.Logger) -> Non
 
         sys.exit(130)
 
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError, TypeError, KeyError) as e:
         logger.critical(f"FATAL ERROR: {e}", exc_info=True)
 
         sys.exit(1)
@@ -203,7 +203,7 @@ def run_pytest(
 
         return result.returncode == 0
 
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         if logger:
             logger.error(f"Test execution failed: {e}")
 

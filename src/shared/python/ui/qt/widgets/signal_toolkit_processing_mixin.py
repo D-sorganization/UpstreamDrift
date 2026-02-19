@@ -84,8 +84,116 @@ class SignalToolkitProcessingMixin:
         self.original_signal = self.current_signal.copy()
         self._update_plot()
 
-    def _generate_signal(self: Any) -> None:  # noqa: PLR0912
-        """Generate signal based on current settings."""
+    def _generate_sinusoid(self: Any, t: np.ndarray) -> Signal:
+        """Generate a sinusoid signal from current UI parameters."""
+        return SignalGenerator.sinusoid(
+            t,
+            amplitude=self.sin_amplitude.value(),
+            frequency=self.sin_frequency.value(),
+            phase=self.sin_phase.value(),
+            offset=self.sin_offset.value(),
+        )
+
+    def _generate_cosine(self: Any, t: np.ndarray) -> Signal:
+        """Generate a cosine signal from current UI parameters."""
+        return SignalGenerator.cosine(
+            t,
+            amplitude=self.sin_amplitude.value(),
+            frequency=self.sin_frequency.value(),
+            phase=self.sin_phase.value(),
+            offset=self.sin_offset.value(),
+        )
+
+    def _generate_polynomial(self: Any, t: np.ndarray) -> Signal:
+        """Generate a polynomial signal from current UI parameters."""
+        coeffs_str = self.poly_coeffs_input.text()
+        coeffs = [float(c.strip()) for c in coeffs_str.split(",")]
+        return SignalGenerator.polynomial(t, coeffs)
+
+    def _generate_exponential(self: Any, t: np.ndarray) -> Signal:
+        """Generate an exponential signal from current UI parameters."""
+        return SignalGenerator.exponential(
+            t,
+            amplitude=self.exp_amplitude.value(),
+            decay_rate=self.exp_decay.value(),
+            offset=self.exp_offset.value(),
+        )
+
+    def _generate_linear(self: Any, t: np.ndarray) -> Signal:
+        """Generate a linear signal from current UI parameters."""
+        return SignalGenerator.linear(
+            t,
+            slope=self.linear_slope.value(),
+            intercept=self.linear_intercept.value(),
+        )
+
+    def _generate_step(self: Any, t: np.ndarray) -> Signal:
+        """Generate a step signal from current UI parameters."""
+        return SignalGenerator.step(
+            t,
+            step_time=self.step_time.value(),
+            step_value=self.step_value.value(),
+            initial_value=self.step_initial.value(),
+        )
+
+    def _generate_chirp(self: Any, t: np.ndarray) -> Signal:
+        """Generate a chirp signal from current UI parameters."""
+        return SignalGenerator.chirp(
+            t,
+            f0=self.chirp_f0.value(),
+            f1=self.chirp_f1.value(),
+            amplitude=self.chirp_amplitude.value(),
+        )
+
+    def _generate_square(self: Any, t: np.ndarray) -> Signal:
+        """Generate a square wave signal from current UI parameters."""
+        return SignalGenerator.square(
+            t,
+            frequency=self.square_freq.value(),
+            amplitude=self.square_amplitude.value(),
+            duty_cycle=self.square_duty.value(),
+        )
+
+    def _generate_triangle(self: Any, t: np.ndarray) -> Signal:
+        """Generate a triangle wave signal from current UI parameters."""
+        return SignalGenerator.triangle(
+            t,
+            frequency=self.triangle_freq.value(),
+            amplitude=self.triangle_amplitude.value(),
+        )
+
+    def _generate_custom(self: Any, t: np.ndarray) -> Signal | None:
+        """Generate a custom expression signal from current UI parameters."""
+        expr = self.custom_expr.text()
+        if not expr:
+            return None
+
+        from simpleeval import EvalWithCompoundTypes
+
+        safe_functions = {
+            "sin": np.sin,
+            "cos": np.cos,
+            "tan": np.tan,
+            "exp": np.exp,
+            "log": np.log,
+            "sqrt": np.sqrt,
+        }
+        safe_names = {
+            "pi": np.pi,
+            "t": t,
+        }
+        evaluator = EvalWithCompoundTypes(
+            functions=safe_functions,
+            names=safe_names,
+        )
+        values = evaluator.eval(expr)
+        return Signal(t, values, name="custom")
+
+    def _generate_signal(self: Any) -> None:
+        """Generate signal based on current settings.
+
+        Dispatches to type-specific generator methods for each signal type.
+        """
         t = np.linspace(
             self.t_start_spin.value(),
             self.t_end_spin.value(),
@@ -94,93 +202,29 @@ class SignalToolkitProcessingMixin:
 
         signal_type = self.signal_type_combo.currentText()
 
+        generators: dict[str, Any] = {
+            "Sinusoid": self._generate_sinusoid,
+            "Cosine": self._generate_cosine,
+            "Polynomial": self._generate_polynomial,
+            "Exponential": self._generate_exponential,
+            "Linear": self._generate_linear,
+            "Step": self._generate_step,
+            "Chirp": self._generate_chirp,
+            "Square": self._generate_square,
+            "Triangle": self._generate_triangle,
+            "Custom": self._generate_custom,
+        }
+
         try:
-            if signal_type == "Sinusoid":
-                self.current_signal = SignalGenerator.sinusoid(
-                    t,
-                    amplitude=self.sin_amplitude.value(),
-                    frequency=self.sin_frequency.value(),
-                    phase=self.sin_phase.value(),
-                    offset=self.sin_offset.value(),
-                )
-            elif signal_type == "Cosine":
-                self.current_signal = SignalGenerator.cosine(
-                    t,
-                    amplitude=self.sin_amplitude.value(),
-                    frequency=self.sin_frequency.value(),
-                    phase=self.sin_phase.value(),
-                    offset=self.sin_offset.value(),
-                )
-            elif signal_type == "Polynomial":
-                coeffs_str = self.poly_coeffs_input.text()
-                coeffs = [float(c.strip()) for c in coeffs_str.split(",")]
-                self.current_signal = SignalGenerator.polynomial(t, coeffs)
-            elif signal_type == "Exponential":
-                self.current_signal = SignalGenerator.exponential(
-                    t,
-                    amplitude=self.exp_amplitude.value(),
-                    decay_rate=self.exp_decay.value(),
-                    offset=self.exp_offset.value(),
-                )
-            elif signal_type == "Linear":
-                self.current_signal = SignalGenerator.linear(
-                    t,
-                    slope=self.linear_slope.value(),
-                    intercept=self.linear_intercept.value(),
-                )
-            elif signal_type == "Step":
-                self.current_signal = SignalGenerator.step(
-                    t,
-                    step_time=self.step_time.value(),
-                    step_value=self.step_value.value(),
-                    initial_value=self.step_initial.value(),
-                )
-            elif signal_type == "Chirp":
-                self.current_signal = SignalGenerator.chirp(
-                    t,
-                    f0=self.chirp_f0.value(),
-                    f1=self.chirp_f1.value(),
-                    amplitude=self.chirp_amplitude.value(),
-                )
-            elif signal_type == "Square":
-                self.current_signal = SignalGenerator.square(
-                    t,
-                    frequency=self.square_freq.value(),
-                    amplitude=self.square_amplitude.value(),
-                    duty_cycle=self.square_duty.value(),
-                )
-            elif signal_type == "Triangle":
-                self.current_signal = SignalGenerator.triangle(
-                    t,
-                    frequency=self.triangle_freq.value(),
-                    amplitude=self.triangle_amplitude.value(),
-                )
-            elif signal_type == "Custom":
-                expr = self.custom_expr.text()
-                if expr:
-                    from simpleeval import EvalWithCompoundTypes
+            generator = generators.get(signal_type)
+            if generator is None:
+                return
 
-                    safe_functions = {
-                        "sin": np.sin,
-                        "cos": np.cos,
-                        "tan": np.tan,
-                        "exp": np.exp,
-                        "log": np.log,
-                        "sqrt": np.sqrt,
-                    }
-                    safe_names = {
-                        "pi": np.pi,
-                        "t": t,
-                    }
-                    evaluator = EvalWithCompoundTypes(
-                        functions=safe_functions,
-                        names=safe_names,
-                    )
-                    values = evaluator.eval(expr)
-                    self.current_signal = Signal(t, values, name="custom")
-                else:
-                    return
+            result = generator(t)
+            if result is None:
+                return
 
+            self.current_signal = result
             self.original_signal = self.current_signal.copy()
             self._update_plot()
             self._log(f"Generated {signal_type} signal")
