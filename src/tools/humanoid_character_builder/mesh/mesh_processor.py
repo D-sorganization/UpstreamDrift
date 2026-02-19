@@ -650,6 +650,41 @@ class LODGenerator:
                 error_message=str(e),
             )
 
+    def _simplify_and_append_lod(
+        self,
+        mesh: Any,
+        original_faces: int,
+        level: int,
+        output_path: Path,
+        output_format: str,
+        ratio: float,
+        levels: list[LODLevel],
+    ) -> None:
+        """Simplify a mesh and append the resulting LOD level to the list.
+
+        Args:
+            mesh: Source trimesh mesh object.
+            original_faces: Face count of the original mesh.
+            level: LOD level index.
+            output_path: Output file path.
+            output_format: Export format.
+            ratio: Simplification ratio.
+            levels: List to append the new LODLevel to.
+        """
+        simplified = self._processor.simplify_mesh(mesh, ratio=ratio)
+        self._processor.export_mesh(
+            simplified, output_path, MeshExportConfig(format=output_format)
+        )
+        levels.append(
+            LODLevel(
+                level=level,
+                mesh_path=output_path,
+                face_count=len(simplified.faces),
+                vertex_count=len(simplified.vertices),
+                reduction_ratio=len(simplified.faces) / original_faces,
+            )
+        )
+
     def generate_collision_lods(
         self,
         mesh_path: Path | str,
@@ -704,37 +739,17 @@ class LODGenerator:
                 )
             )
 
-            # LOD1: 10% simplified
-            simplified_10 = self._processor.simplify_mesh(mesh, ratio=0.1)
-            path_10 = output_dir / f"{mesh_path.stem}_collision_10pct.{output_format}"
-            self._processor.export_mesh(
-                simplified_10, path_10, MeshExportConfig(format=output_format)
-            )
-            levels.append(
-                LODLevel(
-                    level=1,
-                    mesh_path=path_10,
-                    face_count=len(simplified_10.faces),
-                    vertex_count=len(simplified_10.vertices),
-                    reduction_ratio=len(simplified_10.faces) / original_faces,
+            # LOD1 and LOD2: simplified meshes at different ratios
+            collision_ratios = [(1, 0.1, "10pct"), (2, 0.05, "5pct")]
+            for level_idx, ratio, suffix in collision_ratios:
+                out_path = (
+                    output_dir
+                    / f"{mesh_path.stem}_collision_{suffix}.{output_format}"
                 )
-            )
-
-            # LOD2: 5% simplified
-            simplified_5 = self._processor.simplify_mesh(mesh, ratio=0.05)
-            path_5 = output_dir / f"{mesh_path.stem}_collision_5pct.{output_format}"
-            self._processor.export_mesh(
-                simplified_5, path_5, MeshExportConfig(format=output_format)
-            )
-            levels.append(
-                LODLevel(
-                    level=2,
-                    mesh_path=path_5,
-                    face_count=len(simplified_5.faces),
-                    vertex_count=len(simplified_5.vertices),
-                    reduction_ratio=len(simplified_5.faces) / original_faces,
+                self._simplify_and_append_lod(
+                    mesh, original_faces, level_idx, out_path, output_format,
+                    ratio, levels,
                 )
-            )
 
             return LODGenerationResult(
                 success=True, source_mesh=mesh_path, levels=levels

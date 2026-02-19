@@ -16,6 +16,8 @@ import numpy as np
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.core.contracts import precondition
 
+logger = logging.getLogger(__name__)
+
 
 class BiomechanicalAnalyzer:
     """Analyzes MuJoCo simulation data for biomechanical insights.
@@ -65,7 +67,7 @@ class BiomechanicalAnalyzer:
             self._jacr_flat = None
         except TypeError:
             # Fallback to flat arrays
-            logging.getLogger(__name__).debug(
+            logger.debug(
                 "MuJoCo version requires flat array format for mj_jacBody"
             )
             self._use_shaped_jac = False
@@ -306,6 +308,51 @@ class BiomechanicalAnalyzer:
                 powers[i] = actuator_force * joint_velocity
         return powers
 
+    def _compute_advanced_induced_metrics(
+        self, selected_actuator_name: str | None = None
+    ) -> tuple[dict, Any, dict]:
+        """Compute induced accelerations and counterfactual metrics.
+
+        Args:
+            selected_actuator_name: Optional actuator name for specific analysis.
+
+        Returns:
+            Tuple of (induced_accelerations, club_induced, counterfactuals).
+        """
+        comps = self.induced_analyzer.compute_components()
+        induced: dict = {
+            "gravity": comps["gravity"],
+            "actuator": comps["control"],
+            "velocity": comps["velocity"],
+        }
+
+        if selected_actuator_name:
+            act_id = mujoco.mj_name2id(
+                self.model,
+                mujoco.mjtObj.mjOBJ_ACTUATOR,
+                selected_actuator_name,
+            )
+            if act_id != -1:
+                tau_spec = np.zeros(self.model.nu)
+                tau_spec[act_id] = 1.0
+                spec_comps = self.induced_analyzer.compute_components(
+                    tau_app=tau_spec
+                )
+                induced["selected_actuator"] = spec_comps["control"]
+
+        club_induced = None
+        if self.club_head_id is not None:
+            club_name = mujoco.mj_id2name(
+                self.model, mujoco.mjtObj.mjOBJ_BODY, self.club_head_id
+            )
+            if club_name:
+                club_induced = self.induced_analyzer.compute_task_space_components(
+                    club_name, qdd_comps=comps
+                )
+
+        counterfactuals = self.compute_counterfactuals()
+        return induced, club_induced, counterfactuals
+
     def extract_full_state(
         self,
         selected_actuator_name: str | None = None,
@@ -320,7 +367,6 @@ class BiomechanicalAnalyzer:
         Returns:
             BiomechanicalData object
         """
-        # Compute derived quantities
         qacc = self.compute_joint_accelerations()
         club_pos, club_vel, club_speed = self.get_club_head_data()
         left_grf, right_grf = self.get_ground_reaction_forces()
@@ -336,49 +382,14 @@ class BiomechanicalAnalyzer:
         if club_vel is not None:
             self._prev_club_vel = club_vel.copy()
 
-        induced = {}
+        induced: dict = {}
         club_induced = None
-        counterfactuals = {}
+        counterfactuals: dict = {}
 
         if compute_advanced_metrics:
-            # Use the optimized analyzer
-            comps = self.induced_analyzer.compute_components()
-            induced = {
-                "gravity": comps["gravity"],
-                "actuator": comps["control"],
-                "velocity": comps["velocity"],
-            }
-
-            # Compute specific induced acceleration if requested
-            if selected_actuator_name:
-                act_id = mujoco.mj_name2id(
-                    self.model,
-                    mujoco.mjtObj.mjOBJ_ACTUATOR,
-                    selected_actuator_name,
-                )
-                if act_id != -1:
-                    tau_spec = np.zeros(self.model.nu)
-                    tau_spec[act_id] = 1.0
-                    # Compute components with specific torque
-                    # The 'control' component corresponds to M^-1 * tau_spec
-                    spec_comps = self.induced_analyzer.compute_components(
-                        tau_app=tau_spec
-                    )
-                    induced["selected_actuator"] = spec_comps["control"]
-
-            # Compute task space induced accelerations for club head
-            if self.club_head_id is not None:
-                # Use actual body name to ensure correct lookup
-                club_name = mujoco.mj_id2name(
-                    self.model, mujoco.mjtObj.mjOBJ_BODY, self.club_head_id
-                )
-                if club_name:
-                    # Pass computed components to avoid re-computation
-                    club_induced = self.induced_analyzer.compute_task_space_components(
-                        club_name, qdd_comps=comps
-                    )
-
-            counterfactuals = self.compute_counterfactuals()
+            induced, club_induced, counterfactuals = (
+                self._compute_advanced_induced_metrics(selected_actuator_name)
+            )
 
         return BiomechanicalData(
             time=float(self.data.time),

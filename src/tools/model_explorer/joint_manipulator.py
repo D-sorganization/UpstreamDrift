@@ -332,57 +332,54 @@ class JointEditorPanel(QWidget):
         self._setup_ui()
         self._connect_signals()
 
-    def _setup_ui(self) -> None:
-        """Set up the user interface."""
-        layout = QVBoxLayout(self)
+    @staticmethod
+    def _create_axis_spinbox(
+        min_val: float = -1, max_val: float = 1, step: float = 0.1
+    ) -> QDoubleSpinBox:
+        """Create a configured axis component spinbox.
 
-        # Joint selection
-        select_layout = QHBoxLayout()
-        select_layout.addWidget(QLabel("Edit Joint:"))
-        self.joint_combo = QComboBox()
-        select_layout.addWidget(self.joint_combo)
-        layout.addLayout(select_layout)
+        Args:
+            min_val: Minimum value.
+            max_val: Maximum value.
+            step: Single step increment.
 
-        # Basic properties
-        basic_group = QGroupBox("Basic Properties")
-        basic_layout = QFormLayout(basic_group)
+        Returns:
+            Configured QDoubleSpinBox.
+        """
+        spin = QDoubleSpinBox()
+        spin.setRange(min_val, max_val)
+        spin.setSingleStep(step)
+        return spin
 
-        self.name_edit = QLineEdit()
-        basic_layout.addRow("Name:", self.name_edit)
+    def _build_axis_group(self) -> QGroupBox:
+        """Build the joint axis group box with X/Y/Z spinboxes.
 
-        self.type_combo = QComboBox()
-        self.type_combo.addItems(
-            ["fixed", "revolute", "prismatic", "continuous", "floating", "planar"]
-        )
-        basic_layout.addRow("Type:", self.type_combo)
-
-        layout.addWidget(basic_group)
-
-        # Axis
+        Returns:
+            Configured QGroupBox with axis controls.
+        """
         axis_group = QGroupBox("Joint Axis")
         axis_layout = QHBoxLayout(axis_group)
 
-        self.axis_x = QDoubleSpinBox()
-        self.axis_x.setRange(-1, 1)
-        self.axis_x.setSingleStep(0.1)
+        self.axis_x = self._create_axis_spinbox()
         axis_layout.addWidget(QLabel("X:"))
         axis_layout.addWidget(self.axis_x)
 
-        self.axis_y = QDoubleSpinBox()
-        self.axis_y.setRange(-1, 1)
-        self.axis_y.setSingleStep(0.1)
+        self.axis_y = self._create_axis_spinbox()
         axis_layout.addWidget(QLabel("Y:"))
         axis_layout.addWidget(self.axis_y)
 
-        self.axis_z = QDoubleSpinBox()
-        self.axis_z.setRange(-1, 1)
-        self.axis_z.setSingleStep(0.1)
+        self.axis_z = self._create_axis_spinbox()
         axis_layout.addWidget(QLabel("Z:"))
         axis_layout.addWidget(self.axis_z)
 
-        layout.addWidget(axis_group)
+        return axis_group
 
-        # Limits
+    def _build_limits_group(self) -> QGroupBox:
+        """Build the joint limits group box.
+
+        Returns:
+            Configured QGroupBox with limit controls.
+        """
         limits_group = QGroupBox("Joint Limits")
         limits_layout = QFormLayout(limits_group)
 
@@ -404,22 +401,45 @@ class JointEditorPanel(QWidget):
         self.velocity_spin.setRange(0, 1000)
         limits_layout.addRow("Velocity:", self.velocity_spin)
 
-        layout.addWidget(limits_group)
+        return limits_group
+
+    def _setup_ui(self) -> None:
+        """Set up the user interface."""
+        layout = QVBoxLayout(self)
+
+        # Joint selection
+        select_layout = QHBoxLayout()
+        select_layout.addWidget(QLabel("Edit Joint:"))
+        self.joint_combo = QComboBox()
+        select_layout.addWidget(self.joint_combo)
+        layout.addLayout(select_layout)
+
+        # Basic properties
+        basic_group = QGroupBox("Basic Properties")
+        basic_layout = QFormLayout(basic_group)
+        self.name_edit = QLineEdit()
+        basic_layout.addRow("Name:", self.name_edit)
+        self.type_combo = QComboBox()
+        self.type_combo.addItems(
+            ["fixed", "revolute", "prismatic", "continuous", "floating", "planar"]
+        )
+        basic_layout.addRow("Type:", self.type_combo)
+        layout.addWidget(basic_group)
+
+        layout.addWidget(self._build_axis_group())
+        layout.addWidget(self._build_limits_group())
 
         # Dynamics
         dynamics_group = QGroupBox("Dynamics")
         dynamics_layout = QFormLayout(dynamics_group)
-
         self.damping_spin = QDoubleSpinBox()
         self.damping_spin.setRange(0, 1000)
         self.damping_spin.setDecimals(4)
         dynamics_layout.addRow("Damping:", self.damping_spin)
-
         self.friction_spin = QDoubleSpinBox()
         self.friction_spin.setRange(0, 1000)
         self.friction_spin.setDecimals(4)
         dynamics_layout.addRow("Friction:", self.friction_spin)
-
         layout.addWidget(dynamics_group)
 
         # Apply button

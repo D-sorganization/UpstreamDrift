@@ -514,7 +514,43 @@ class URDFImporter:
     def __init__(self) -> None:
         """Initialize URDF importer."""
 
-    def import_from_urdf(  # noqa: PLR0915
+    @staticmethod
+    def _create_mjcf_skeleton(model_name: str) -> tuple[ET.Element, ET.Element]:
+        """Create the base MuJoCo MJCF XML structure with defaults.
+
+        Args:
+            model_name: Name for the MuJoCo model.
+
+        Returns:
+            Tuple of (mujoco_root, worldbody) elements.
+        """
+        mujoco_root = ET.Element("mujoco", model=model_name)
+
+        compiler = ET.SubElement(mujoco_root, "compiler")
+        compiler.set("angle", "radian")
+        compiler.set("coordinate", "local")
+        compiler.set("inertiafromgeom", "false")
+
+        option = ET.SubElement(mujoco_root, "option")
+        option.set("timestep", "0.001")
+        option.set("gravity", f"0 0 -{GRAVITY_STANDARD_M_S2}")
+        option.set("integrator", "RK4")
+
+        default = ET.SubElement(mujoco_root, "default")
+        geom_default = ET.SubElement(default, "geom")
+        geom_default.set("friction", "0.9 0.005 0.0001")
+        joint_default = ET.SubElement(default, "joint")
+        joint_default.set("damping", "0.5")
+        joint_default.set("armature", "0.01")
+
+        worldbody = ET.SubElement(mujoco_root, "worldbody")
+        floor = ET.SubElement(worldbody, "geom", name="floor", type="plane")
+        floor.set("size", "10 10 0.1")
+        floor.set("rgba", "0.8 0.8 0.8 1")
+
+        return mujoco_root, worldbody
+
+    def import_from_urdf(
         self,
         urdf_path: str | Path,
         model_name: str | None = None,
@@ -544,35 +580,7 @@ class URDFImporter:
             model_name or root.get("name", "imported_robot") or "imported_robot"
         )
 
-        # Build MuJoCo XML
-        mujoco_root = ET.Element("mujoco", model=model_name)
-
-        # Compiler options
-        compiler = ET.SubElement(mujoco_root, "compiler")
-        compiler.set("angle", "radian")
-        compiler.set("coordinate", "local")
-        compiler.set("inertiafromgeom", "false")
-
-        # Options
-        option = ET.SubElement(mujoco_root, "option")
-        option.set("timestep", "0.001")
-        # Use standard gravity constant (NIST reference: 9.80665 m/s²)
-        option.set("gravity", f"0 0 -{GRAVITY_STANDARD_M_S2}")
-        option.set("integrator", "RK4")
-
-        # Default settings
-        default = ET.SubElement(mujoco_root, "default")
-        geom_default = ET.SubElement(default, "geom")
-        geom_default.set("friction", "0.9 0.005 0.0001")
-        joint_default = ET.SubElement(default, "joint")
-        joint_default.set("damping", "0.5")
-        joint_default.set("armature", "0.01")
-
-        # Worldbody
-        worldbody = ET.SubElement(mujoco_root, "worldbody")
-        floor = ET.SubElement(worldbody, "geom", name="floor", type="plane")
-        floor.set("size", "10 10 0.1")
-        floor.set("rgba", "0.8 0.8 0.8 1")
+        mujoco_root, worldbody = self._create_mjcf_skeleton(model_name)
 
         # Parse URDF links and joints
         links: dict[str, ET.Element] = {
@@ -597,24 +605,60 @@ class URDFImporter:
 
         if root_link_name:
             self._build_mujoco_body(
-                worldbody,
-                links[root_link_name],
-                links,
-                joints,
-                root_link_name,
+                worldbody, links[root_link_name], links, joints, root_link_name,
             )
 
-        # Convert to string
         ET.indent(mujoco_root, space="  ")
         mujoco_xml = str(
             ET.tostring(mujoco_root, encoding="unicode", xml_declaration=True)
         )
 
         logger.info("Imported URDF from %s", urdf_path)
-
         return mujoco_xml
 
-    def _build_mujoco_body(  # noqa: C901,PLR0913,PLR0912,PLR0915
+    def _populate_body_geometry(
+        self, body: ET.Element, link: ET.Element
+    ) -> None:
+        """Add inertial, visual, and collision geometry to a MuJoCo body element.
+
+        Args:
+            body: MuJoCo XML body element to populate.
+            link: URDF link element with geometry definitions.
+        """
+        inertial = link.find("inertial")
+        if inertial is not None:
+            self._add_inertial(body, inertial)
+        for visual in link.findall("visual"):
+            self._add_visual_geom(body, visual)
+        for collision in link.findall("collision"):
+            self._add_collision_geom(body, collision)
+
+    def _find_child_links(
+        self, joints: list[ET.Element], parent_link_name: str
+    ) -> list[tuple[ET.Element, str]]:
+        """Find all joints whose parent is the given link name.
+
+        Args:
+            joints: All URDF joint elements.
+            parent_link_name: Name of the parent link.
+
+        Returns:
+            List of (joint_element, child_link_name) pairs.
+        """
+        children = []
+        for joint in joints:
+            parent_elem = joint.find("parent")
+            if parent_elem is None or parent_elem.get("link") != parent_link_name:
+                continue
+            child_elem = joint.find("child")
+            if child_elem is None:
+                continue
+            child_link_name_raw = child_elem.get("link")
+            if child_link_name_raw is not None:
+                children.append((joint, str(child_link_name_raw)))
+        return children
+
+    def _build_mujoco_body(  # noqa: PLR0913
         self,
         parent: ET.Element,
         link: ET.Element,
@@ -631,87 +675,35 @@ class URDFImporter:
             return  # Avoid cycles
         visited.add(link_name)
 
-        # Create body element
+        # Create body element and populate its geometry
         body = ET.SubElement(parent, "body", name=link_name)
+        self._populate_body_geometry(body, link)
 
-        # Add inertial properties
-        inertial = link.find("inertial")
-        if inertial is not None:
-            self._add_inertial(body, inertial)
-
-        # Add visual geometries
-        for visual in link.findall("visual"):
-            self._add_visual_geom(body, visual)
-
-        # Add collision geometries
-        for collision in link.findall("collision"):
-            self._add_collision_geom(body, collision)
-
-        # Find child joints
-        for joint in joints:
-            parent_elem = joint.find("parent")
-            if parent_elem is None:
-                continue
-            parent_link_name = parent_elem.get("link")
-            if parent_link_name != link_name:
-                continue
-
-            child_elem = joint.find("child")
-            if child_elem is None:
-                continue
-            child_link_name_raw = child_elem.get("link")
-            if child_link_name_raw is None:
-                continue
-            child_link_name = str(child_link_name_raw)
+        # Process child joints
+        for joint, child_link_name in self._find_child_links(joints, link_name):
             child_link = links.get(child_link_name)
+            if child_link is None:
+                continue
 
-            if child_link is not None:
-                # Create child body first
-                child_body = ET.SubElement(body, "body", name=child_link_name)
-                # Set body position from joint origin
-                # (URDF joint origin specifies child body position relative to parent)
-                origin = joint.find("origin")
-                if origin is not None:
-                    xyz = origin.get("xyz", "0 0 0").split()
-                    child_body.set("pos", f"{xyz[0]} {xyz[1]} {xyz[2]}")
-                # Add joint to child body (MuJoCo requires joints in child body)
-                self._add_joint(child_body, joint)
-                # Add inertial properties to child
-                inertial = child_link.find("inertial")
-                if inertial is not None:
-                    self._add_inertial(child_body, inertial)
-                # Add visual geometries to child
-                for visual in child_link.findall("visual"):
-                    self._add_visual_geom(child_body, visual)
-                # Add collision geometries to child
-                for collision in child_link.findall("collision"):
-                    self._add_collision_geom(child_body, collision)
-                # Recursively build grandchildren
-                for grandchild_joint in joints:
-                    grandchild_parent_elem = grandchild_joint.find("parent")
-                    if grandchild_parent_elem is None:
-                        continue
-                    grandchild_parent_link_name = grandchild_parent_elem.get("link")
-                    if grandchild_parent_link_name != child_link_name:
-                        continue
+            child_body = ET.SubElement(body, "body", name=child_link_name)
+            origin = joint.find("origin")
+            if origin is not None:
+                xyz = origin.get("xyz", "0 0 0").split()
+                child_body.set("pos", f"{xyz[0]} {xyz[1]} {xyz[2]}")
 
-                    grandchild_child_elem = grandchild_joint.find("child")
-                    if grandchild_child_elem is None:
-                        continue
-                    grandchild_link_name_raw = grandchild_child_elem.get("link")
-                    if grandchild_link_name_raw is None:
-                        continue
-                    grandchild_link_name = str(grandchild_link_name_raw)
-                    grandchild_link = links.get(grandchild_link_name)
-                    if grandchild_link is not None:
-                        self._build_mujoco_body(
-                            child_body,
-                            grandchild_link,
-                            links,
-                            joints,
-                            grandchild_link_name,
-                            visited,
-                        )
+            self._add_joint(child_body, joint)
+            self._populate_body_geometry(child_body, child_link)
+
+            # Recursively build grandchildren
+            for _grandchild_joint, gc_link_name in self._find_child_links(
+                joints, child_link_name
+            ):
+                grandchild_link = links.get(gc_link_name)
+                if grandchild_link is not None:
+                    self._build_mujoco_body(
+                        child_body, grandchild_link, links, joints,
+                        gc_link_name, visited,
+                    )
 
     def _add_inertial(self, body: ET.Element, inertial: ET.Element) -> None:
         """Add inertial properties to MuJoCo body."""
