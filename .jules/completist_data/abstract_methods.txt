@@ -1,133 +1,776 @@
-./.github/workflows/Jules-Comprehensive-Assessment.yml:83:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
-./.github/workflows/Jules-Completist.yml:62:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
-./scripts/analyze_completist_data.py:189:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
-./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
-./vendor/ud-tools/scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
-./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:39:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:45:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:50:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:55:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py:182:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py:192:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:20:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:26:    @abstractmethod
-./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:31:    @abstractmethod
-./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:67:    @abstractmethod
-./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:73:    @abstractmethod
-./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:78:    @abstractmethod
-./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
-./src/research/deformable/objects.py:151:    @abstractmethod
-./src/research/deformable/objects.py:159:    @abstractmethod
-./src/engines/common/simulation_control.py:187:    @abstractmethod
-./src/engines/common/simulation_control.py:193:    @abstractmethod
-./src/engines/common/simulation_control.py:205:    @abstractmethod
-./src/engines/common/simulation_control.py:239:    @abstractmethod
-./src/engines/common/simulation_control.py:251:    @abstractmethod
-./src/engines/common/export.py:68:    @abstractmethod
-./src/engines/common/export.py:80:    @abstractmethod
-./src/engines/common/export.py:94:    @abstractmethod
-./src/engines/common/export.py:103:    @abstractmethod
-./src/engines/common/export.py:108:    @abstractmethod
-./src/learning/imitation/learners.py:110:    @abstractmethod
-./src/learning/imitation/learners.py:126:    @abstractmethod
-./src/learning/imitation/learners.py:142:    @abstractmethod
-./src/learning/imitation/learners.py:150:    @abstractmethod
-./src/learning/rl/base_env.py:254:    @abstractmethod
-./src/learning/rl/base_env.py:262:    @abstractmethod
-./src/learning/rl/base_env.py:266:    @abstractmethod
-./src/learning/rl/base_env.py:274:    @abstractmethod
-./src/learning/rl/base_env.py:285:    @abstractmethod
-./src/learning/rl/base_env.py:293:    @abstractmethod
-./src/deployment/teleoperation/devices.py:111:    @abstractmethod
-./src/robotics/sensing/noise_models.py:27:    @abstractmethod
-./src/robotics/sensing/noise_models.py:39:    @abstractmethod
+./src/robotics/control/whole_body/qp_solver.py:128:    @abstractmethod
+./src/robotics/control/whole_body/qp_solver.py-129-    def solve(self, problem: QPProblem) -> QPSolution:
+./src/robotics/control/whole_body/qp_solver.py-130-        """Solve QP problem.
+./src/robotics/control/whole_body/qp_solver.py-131-
+./src/robotics/control/whole_body/qp_solver.py-132-        Args:
+./src/robotics/control/whole_body/qp_solver.py-133-            problem: QP problem definition.
+--
+./src/robotics/control/whole_body/qp_solver.py:140:    @abstractmethod
+./src/robotics/control/whole_body/qp_solver.py-141-    def is_available(self) -> bool:
+./src/robotics/control/whole_body/qp_solver.py-142-        """Check if solver backend is available.
+./src/robotics/control/whole_body/qp_solver.py-143-
+./src/robotics/control/whole_body/qp_solver.py-144-        Returns:
+./src/robotics/control/whole_body/qp_solver.py-145-            True if solver can be used.
+--
 ./src/robotics/planning/motion/planner_base.py:201:    @abstractmethod
+./src/robotics/planning/motion/planner_base.py-202-    def plan(
+./src/robotics/planning/motion/planner_base.py-203-        self,
+./src/robotics/planning/motion/planner_base.py-204-        q_start: np.ndarray,
+./src/robotics/planning/motion/planner_base.py-205-        q_goal: np.ndarray,
+./src/robotics/planning/motion/planner_base.py-206-    ) -> PlannerResult:
+--
 ./src/robotics/planning/collision/geometric_primitives.py:38:    @abstractmethod
+./src/robotics/planning/collision/geometric_primitives.py-39-    def get_aabb(self) -> tuple[np.ndarray, np.ndarray]:
+./src/robotics/planning/collision/geometric_primitives.py-40-        """Get axis-aligned bounding box.
+./src/robotics/planning/collision/geometric_primitives.py-41-
+./src/robotics/planning/collision/geometric_primitives.py-42-        Returns:
+./src/robotics/planning/collision/geometric_primitives.py-43-            Tuple of (min_corner, max_corner) in world frame.
+--
 ./src/robotics/planning/collision/geometric_primitives.py:47:    @abstractmethod
+./src/robotics/planning/collision/geometric_primitives.py-48-    def contains_point(self, point: np.ndarray) -> bool:
+./src/robotics/planning/collision/geometric_primitives.py-49-        """Check if point is inside primitive.
+./src/robotics/planning/collision/geometric_primitives.py-50-
+./src/robotics/planning/collision/geometric_primitives.py-51-        Args:
+./src/robotics/planning/collision/geometric_primitives.py-52-            point: 3D point in world frame.
+--
 ./src/robotics/planning/collision/geometric_primitives.py:59:    @abstractmethod
-./src/robotics/control/whole_body/qp_solver.py:126:    @abstractmethod
-./src/robotics/control/whole_body/qp_solver.py:138:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:207:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:214:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:218:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:240:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:257:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:268:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:272:    @abstractmethod
-./src/tools/model_generation/library/repository.py:41:    @abstractmethod
-./src/tools/model_generation/library/repository.py:47:    @abstractmethod
-./src/tools/model_generation/library/repository.py:52:    @abstractmethod
-./src/tools/model_generation/library/repository.py:57:    @abstractmethod
-./src/tools/model_generation/builders/base_builder.py:151:    @abstractmethod
-./src/tools/model_generation/builders/base_builder.py:161:    @abstractmethod
-./src/tools/model_generation/plugins/__init__.py:20:    @abstractmethod
-./src/tools/model_generation/plugins/__init__.py:26:    @abstractmethod
-./src/tools/model_generation/plugins/__init__.py:31:    @abstractmethod
+./src/robotics/planning/collision/geometric_primitives.py-60-    def compute_support(self, direction: np.ndarray) -> np.ndarray:
+./src/robotics/planning/collision/geometric_primitives.py-61-        """Compute support point in given direction.
+./src/robotics/planning/collision/geometric_primitives.py-62-
+./src/robotics/planning/collision/geometric_primitives.py-63-        Support mapping for GJK/EPA algorithms.
+./src/robotics/planning/collision/geometric_primitives.py-64-
+--
+./src/robotics/sensing/noise_models.py:27:    @abstractmethod
+./src/robotics/sensing/noise_models.py-28-    def apply(self, signal: NDArray[np.float64]) -> NDArray[np.float64]:
+./src/robotics/sensing/noise_models.py-29-        """Apply noise to signal.
+./src/robotics/sensing/noise_models.py-30-
+./src/robotics/sensing/noise_models.py-31-        Args:
+./src/robotics/sensing/noise_models.py-32-            signal: Clean signal array.
+--
+./src/robotics/sensing/noise_models.py:39:    @abstractmethod
+./src/robotics/sensing/noise_models.py-40-    def reset(self) -> None:
+./src/robotics/sensing/noise_models.py-41-        """Reset any internal state (e.g., bias drift)."""
+./src/robotics/sensing/noise_models.py-42-        ...
+./src/robotics/sensing/noise_models.py-43-
+./src/robotics/sensing/noise_models.py-44-
+--
+./src/unreal_integration/viewer_backends.py:219:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-220-    def initialize(self) -> None:
+./src/unreal_integration/viewer_backends.py-221-        """Initialize the backend.
+./src/unreal_integration/viewer_backends.py-222-
+./src/unreal_integration/viewer_backends.py-223-        Must be called before using other methods.
+./src/unreal_integration/viewer_backends.py-224-        """
+--
+./src/unreal_integration/viewer_backends.py:226:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-227-    def shutdown(self) -> None:
+./src/unreal_integration/viewer_backends.py-228-        """Shutdown and cleanup backend resources."""
+./src/unreal_integration/viewer_backends.py-229-
+./src/unreal_integration/viewer_backends.py:230:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-231-    def add_mesh(
+./src/unreal_integration/viewer_backends.py-232-        self,
+./src/unreal_integration/viewer_backends.py-233-        mesh: LoadedMesh,
+./src/unreal_integration/viewer_backends.py-234-        name: str | None = None,
+./src/unreal_integration/viewer_backends.py-235-        position: Vector3 | None = None,
+--
+./src/unreal_integration/viewer_backends.py:252:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-253-    def update_transform(
+./src/unreal_integration/viewer_backends.py-254-        self,
+./src/unreal_integration/viewer_backends.py-255-        name: str,
+./src/unreal_integration/viewer_backends.py-256-        position: Vector3 | None = None,
+./src/unreal_integration/viewer_backends.py-257-        rotation: Quaternion | None = None,
+--
+./src/unreal_integration/viewer_backends.py:269:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-270-    def remove_object(self, name: str) -> bool:
+./src/unreal_integration/viewer_backends.py-271-        """Remove object from scene.
+./src/unreal_integration/viewer_backends.py-272-
+./src/unreal_integration/viewer_backends.py-273-        Args:
+./src/unreal_integration/viewer_backends.py-274-            name: Object name to remove.
+--
+./src/unreal_integration/viewer_backends.py:280:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-281-    def clear(self) -> None:
+./src/unreal_integration/viewer_backends.py-282-        """Clear all objects from scene."""
+./src/unreal_integration/viewer_backends.py-283-
+./src/unreal_integration/viewer_backends.py:284:    @abstractmethod
+./src/unreal_integration/viewer_backends.py-285-    def render(self) -> np.ndarray | None:
+./src/unreal_integration/viewer_backends.py-286-        """Render current frame.
+./src/unreal_integration/viewer_backends.py-287-
+./src/unreal_integration/viewer_backends.py-288-        Returns:
+./src/unreal_integration/viewer_backends.py-289-            Rendered image as numpy array (RGBA), or None if not applicable.
+--
+./src/engines/common/export.py:68:    @abstractmethod
+./src/engines/common/export.py-69-    def start_recording(self, output_path: Path, config: VideoConfig) -> bool:
+./src/engines/common/export.py-70-        """Begin recording video frames.
+./src/engines/common/export.py-71-
+./src/engines/common/export.py-72-        Args:
+./src/engines/common/export.py-73-            output_path: Path for output video file
+--
+./src/engines/common/export.py:80:    @abstractmethod
+./src/engines/common/export.py-81-    def capture_frame(
+./src/engines/common/export.py-82-        self,
+./src/engines/common/export.py-83-        overlay_callback: Callable[[np.ndarray], np.ndarray] | None = None,
+./src/engines/common/export.py-84-    ) -> bool:
+./src/engines/common/export.py-85-        """Capture the current simulation state as a video frame.
+--
+./src/engines/common/export.py:94:    @abstractmethod
+./src/engines/common/export.py-95-    def finish_recording(self) -> Path | None:
+./src/engines/common/export.py-96-        """Finalize the recording and write the video file.
+./src/engines/common/export.py-97-
+./src/engines/common/export.py-98-        Returns:
+./src/engines/common/export.py-99-            Path to the completed video file, or None on failure
+--
+./src/engines/common/export.py:103:    @abstractmethod
+./src/engines/common/export.py-104-    def is_recording(self) -> bool:
+./src/engines/common/export.py-105-        """Check if recording is currently active."""
+./src/engines/common/export.py-106-
+./src/engines/common/export.py-107-    @property
+./src/engines/common/export.py:108:    @abstractmethod
+./src/engines/common/export.py-109-    def frame_count(self) -> int:
+./src/engines/common/export.py-110-        """Number of frames captured so far."""
+./src/engines/common/export.py-111-
+./src/engines/common/export.py-112-
+./src/engines/common/export.py-113-# =============================================================================
+--
+./src/engines/common/simulation_control.py:187:    @abstractmethod
+./src/engines/common/simulation_control.py-188-    def _do_step(self) -> None:
+./src/engines/common/simulation_control.py-189-        """Execute a single physics step (engine-specific)."""
+./src/engines/common/simulation_control.py-190-
+./src/engines/common/simulation_control.py-191-    # --- Model Positioning ---
+./src/engines/common/simulation_control.py-192-
+./src/engines/common/simulation_control.py:193:    @abstractmethod
+./src/engines/common/simulation_control.py-194-    def translate_body(self, body_name: str, delta: np.ndarray) -> bool:
+./src/engines/common/simulation_control.py-195-        """Translate a body by a displacement vector.
+./src/engines/common/simulation_control.py-196-
+./src/engines/common/simulation_control.py-197-        Args:
+./src/engines/common/simulation_control.py-198-            body_name: Name of the body to move
+--
+./src/engines/common/simulation_control.py:205:    @abstractmethod
+./src/engines/common/simulation_control.py-206-    def rotate_body(self, body_name: str, axis: np.ndarray, angle: float) -> bool:
+./src/engines/common/simulation_control.py-207-        """Rotate a body around an axis.
+./src/engines/common/simulation_control.py-208-
+./src/engines/common/simulation_control.py-209-        Args:
+./src/engines/common/simulation_control.py-210-            body_name: Name of the body to rotate
+--
+./src/engines/common/simulation_control.py:239:    @abstractmethod
+./src/engines/common/simulation_control.py-240-    def measure_distance(self, body_a: str, body_b: str) -> MeasurementResult:
+./src/engines/common/simulation_control.py-241-        """Measure distance between two bodies.
+./src/engines/common/simulation_control.py-242-
+./src/engines/common/simulation_control.py-243-        Args:
+./src/engines/common/simulation_control.py-244-            body_a: First body name
+--
+./src/engines/common/simulation_control.py:251:    @abstractmethod
+./src/engines/common/simulation_control.py-252-    def measure_angle(self, body_a: str, body_b: str, body_c: str) -> MeasurementResult:
+./src/engines/common/simulation_control.py-253-        """Measure angle between three bodies (vertex at body_b).
+./src/engines/common/simulation_control.py-254-
+./src/engines/common/simulation_control.py-255-        Args:
+./src/engines/common/simulation_control.py-256-            body_a: First body
+--
+./src/research/deformable/objects.py:153:    @abstractmethod
+./src/research/deformable/objects.py-154-    def step(self, dt: float) -> None:
+./src/research/deformable/objects.py-155-        """Advance simulation by one timestep.
+./src/research/deformable/objects.py-156-
+./src/research/deformable/objects.py-157-        Args:
+./src/research/deformable/objects.py-158-            dt: Timestep in seconds.
+--
+./src/research/deformable/objects.py:161:    @abstractmethod
+./src/research/deformable/objects.py-162-    def compute_internal_forces(self) -> NDArray[np.floating]:
+./src/research/deformable/objects.py-163-        """Compute internal elastic forces.
+./src/research/deformable/objects.py-164-
+./src/research/deformable/objects.py-165-        Returns:
+./src/research/deformable/objects.py-166-            Internal force vectors (N, 3).
+--
+./src/learning/rl/base_env.py:254:    @abstractmethod
+./src/learning/rl/base_env.py-255-    def _apply_action(self, action: NDArray[np.floating]) -> None:
+./src/learning/rl/base_env.py-256-        """Apply action to simulation.
+./src/learning/rl/base_env.py-257-
+./src/learning/rl/base_env.py-258-        Args:
+./src/learning/rl/base_env.py-259-            action: Processed action to apply.
+--
+./src/learning/rl/base_env.py:262:    @abstractmethod
+./src/learning/rl/base_env.py-263-    def _step_simulation(self) -> None:
+./src/learning/rl/base_env.py-264-        """Advance the simulation by one timestep."""
+./src/learning/rl/base_env.py-265-
+./src/learning/rl/base_env.py:266:    @abstractmethod
+./src/learning/rl/base_env.py-267-    def _get_observation(self) -> NDArray[np.floating]:
+./src/learning/rl/base_env.py-268-        """Get current observation from simulation.
+./src/learning/rl/base_env.py-269-
+./src/learning/rl/base_env.py-270-        Returns:
+./src/learning/rl/base_env.py-271-            Observation array.
+--
+./src/learning/rl/base_env.py:274:    @abstractmethod
+./src/learning/rl/base_env.py-275-    def _compute_reward(self, action: NDArray[np.floating]) -> float:
+./src/learning/rl/base_env.py-276-        """Compute reward for current state.
+./src/learning/rl/base_env.py-277-
+./src/learning/rl/base_env.py-278-        Args:
+./src/learning/rl/base_env.py-279-            action: Applied action.
+--
+./src/learning/rl/base_env.py:285:    @abstractmethod
+./src/learning/rl/base_env.py-286-    def _check_termination(self) -> bool:
+./src/learning/rl/base_env.py-287-        """Check if episode should terminate.
+./src/learning/rl/base_env.py-288-
+./src/learning/rl/base_env.py-289-        Returns:
+./src/learning/rl/base_env.py-290-            True if episode should terminate.
+--
+./src/learning/rl/base_env.py:293:    @abstractmethod
+./src/learning/rl/base_env.py-294-    def _reset_simulation(self, options: dict[str, Any] | None) -> None:
+./src/learning/rl/base_env.py-295-        """Reset simulation to initial state.
+./src/learning/rl/base_env.py-296-
+./src/learning/rl/base_env.py-297-        Args:
+./src/learning/rl/base_env.py-298-            options: Reset options.
+--
+./src/learning/imitation/learners.py:110:    @abstractmethod
+./src/learning/imitation/learners.py-111-    def train(
+./src/learning/imitation/learners.py-112-        self,
+./src/learning/imitation/learners.py-113-        dataset: DemonstrationDataset,
+./src/learning/imitation/learners.py-114-        validation_split: float = 0.1,
+./src/learning/imitation/learners.py-115-    ) -> dict[str, list[float]]:
+--
+./src/learning/imitation/learners.py:126:    @abstractmethod
+./src/learning/imitation/learners.py-127-    def predict(
+./src/learning/imitation/learners.py-128-        self,
+./src/learning/imitation/learners.py-129-        observation: NDArray[np.floating],
+./src/learning/imitation/learners.py-130-        deterministic: bool = True,
+./src/learning/imitation/learners.py-131-    ) -> NDArray[np.floating]:
+--
+./src/learning/imitation/learners.py:142:    @abstractmethod
+./src/learning/imitation/learners.py-143-    def save(self, path: str | Path) -> None:
+./src/learning/imitation/learners.py-144-        """Save trained policy.
+./src/learning/imitation/learners.py-145-
+./src/learning/imitation/learners.py-146-        Args:
+./src/learning/imitation/learners.py-147-            path: Path to save file.
+--
+./src/learning/imitation/learners.py:150:    @abstractmethod
+./src/learning/imitation/learners.py-151-    def load(self, path: str | Path) -> None:
+./src/learning/imitation/learners.py-152-        """Load trained policy.
+./src/learning/imitation/learners.py-153-
+./src/learning/imitation/learners.py-154-        Args:
+./src/learning/imitation/learners.py-155-            path: Path to load file.
+--
+./src/launchers/base.py:307:    @abstractmethod
+./src/launchers/base.py-308-    def get_items(self) -> list[LaunchItem]:
+./src/launchers/base.py-309-        """Get the list of items to display.
+./src/launchers/base.py-310-
+./src/launchers/base.py-311-        Subclasses must override this to provide their launch items.
+./src/launchers/base.py-312-
+--
+./src/launchers/base.py:316:            The @abstractmethod decorator serves as documentation; enforcement
+./src/launchers/base.py-317-            is at runtime via the method body.
+./src/launchers/base.py-318-
+./src/launchers/base.py-319-        Returns:
+./src/launchers/base.py-320-            List of LaunchItem objects
+./src/launchers/base.py-321-        """
+--
+./src/deployment/teleoperation/devices.py:111:    @abstractmethod
+./src/deployment/teleoperation/devices.py-112-    def update(self) -> None:
+./src/deployment/teleoperation/devices.py-113-        """Update device state (poll hardware)."""
+./src/deployment/teleoperation/devices.py-114-
+./src/deployment/teleoperation/devices.py-115-
+./src/deployment/teleoperation/devices.py-116-class SpaceMouseInput(BaseInputDevice):
+--
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:92:    @abstractmethod
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-93-    def backend_name(self) -> str:
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-94-        """Return the backend name."""
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-95-        ...
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-96-
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-97-    @property
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-99-    def is_available(self) -> bool:
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-100-        """Check if the backend is available (installed, configured)."""
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-101-        ...
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-102-
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:103:    @abstractmethod
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-104-    def generate(
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-105-        self,
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-106-        params: BodyParameters,
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-107-        output_dir: Path,
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-108-        **kwargs: Any,
+--
 ./src/tools/humanoid_character_builder/generators/mesh_generator.py:123:    @abstractmethod
-./src/shared/python/physics/flight_models.py:156:    @abstractmethod
-./src/shared/python/physics/flight_models.py:161:    @abstractmethod
-./src/shared/python/physics/flight_models.py:166:    @abstractmethod
-./src/shared/python/physics/flight_models.py:170:    @abstractmethod
-./src/shared/python/physics/impact_model.py:137:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:290:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:294:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:298:    @abstractmethod
-./src/shared/python/physics/flexible_shaft.py:307:    @abstractmethod
-./src/shared/python/ai/adapters/base.py:105:    @abstractmethod
-./src/shared/python/ai/adapters/base.py:133:    @abstractmethod
-./src/shared/python/ai/adapters/base.py:159:    @abstractmethod
-./src/shared/python/ai/adapters/base.py:171:    @abstractmethod
-./src/shared/python/engine_core/base_physics_engine.py:241:    @abstractmethod
-./src/shared/python/engine_core/base_physics_engine.py:249:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:52:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:65:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:90:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:111:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:127:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:149:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:169:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:191:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:214:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:235:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:316:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:338:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:357:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:376:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:402:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:444:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:476:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:512:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:564:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:683:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:699:    @abstractmethod
-./src/shared/python/engine_core/interfaces.py:713:    @abstractmethod
-./src/shared/python/pose_editor/core.py:308:    @abstractmethod
-./src/shared/python/pose_editor/core.py:312:    @abstractmethod
-./src/shared/python/pose_editor/core.py:336:    @abstractmethod
-./src/shared/python/pose_editor/core.py:340:    @abstractmethod
-./src/shared/python/pose_editor/core.py:344:    @abstractmethod
-./src/shared/python/pose_editor/core.py:348:    @abstractmethod
-./src/shared/python/pose_editor/core.py:361:    @abstractmethod
-./src/shared/python/pose_editor/core.py:365:    @abstractmethod
-./src/shared/python/pose_estimation/interface.py:23:    @abstractmethod
-./src/shared/python/pose_estimation/interface.py:31:    @abstractmethod
-./src/shared/python/pose_estimation/interface.py:42:    @abstractmethod
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-124-    def get_supported_segments(self) -> list[str]:
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-125-        """Return list of segment names this backend can generate."""
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-126-        ...
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-127-
+./src/tools/humanoid_character_builder/generators/mesh_generator.py-128-
+--
+./src/tools/model_generation/builders/base_builder.py:151:    @abstractmethod
+./src/tools/model_generation/builders/base_builder.py-152-    def build(self, **kwargs: Any) -> BuildResult:
+./src/tools/model_generation/builders/base_builder.py-153-        """
+./src/tools/model_generation/builders/base_builder.py-154-        Build the URDF model.
+./src/tools/model_generation/builders/base_builder.py-155-
+./src/tools/model_generation/builders/base_builder.py-156-        Returns:
+--
+./src/tools/model_generation/builders/base_builder.py:161:    @abstractmethod
+./src/tools/model_generation/builders/base_builder.py-162-    def clear(self) -> None:
+./src/tools/model_generation/builders/base_builder.py-163-        """Clear all links and joints."""
+./src/tools/model_generation/builders/base_builder.py-164-        ...
+./src/tools/model_generation/builders/base_builder.py-165-
+./src/tools/model_generation/builders/base_builder.py-166-    def validate(self) -> ValidationResult:
+--
+./src/tools/model_generation/library/repository.py:41:    @abstractmethod
+./src/tools/model_generation/library/repository.py-42-    def name(self) -> str:
+./src/tools/model_generation/library/repository.py-43-        """Repository name."""
+./src/tools/model_generation/library/repository.py-44-        ...
+./src/tools/model_generation/library/repository.py-45-
+./src/tools/model_generation/library/repository.py-46-    @property
+./src/tools/model_generation/library/repository.py:47:    @abstractmethod
+./src/tools/model_generation/library/repository.py-48-    def description(self) -> str:
+./src/tools/model_generation/library/repository.py-49-        """Repository description."""
+./src/tools/model_generation/library/repository.py-50-        ...
+./src/tools/model_generation/library/repository.py-51-
+./src/tools/model_generation/library/repository.py:52:    @abstractmethod
+./src/tools/model_generation/library/repository.py-53-    def list_models(self) -> list[RepositoryModel]:
+./src/tools/model_generation/library/repository.py-54-        """List all models in the repository."""
+./src/tools/model_generation/library/repository.py-55-        ...
+./src/tools/model_generation/library/repository.py-56-
+./src/tools/model_generation/library/repository.py:57:    @abstractmethod
+./src/tools/model_generation/library/repository.py-58-    def download_model(
+./src/tools/model_generation/library/repository.py-59-        self,
+./src/tools/model_generation/library/repository.py-60-        model_path: str,
+./src/tools/model_generation/library/repository.py-61-        destination: Path,
+./src/tools/model_generation/library/repository.py-62-    ) -> Path | None:
+--
+./src/tools/model_generation/plugins/__init__.py:20:    @abstractmethod
+./src/tools/model_generation/plugins/__init__.py-21-    def name(self) -> str:
+./src/tools/model_generation/plugins/__init__.py-22-        """Plugin name."""
+./src/tools/model_generation/plugins/__init__.py-23-        ...
+./src/tools/model_generation/plugins/__init__.py-24-
+./src/tools/model_generation/plugins/__init__.py-25-    @property
+./src/tools/model_generation/plugins/__init__.py:26:    @abstractmethod
+./src/tools/model_generation/plugins/__init__.py-27-    def version(self) -> str:
+./src/tools/model_generation/plugins/__init__.py-28-        """Plugin version."""
+./src/tools/model_generation/plugins/__init__.py-29-        ...
+./src/tools/model_generation/plugins/__init__.py-30-
+./src/tools/model_generation/plugins/__init__.py:31:    @abstractmethod
+./src/tools/model_generation/plugins/__init__.py-32-    def initialize(self, context: dict[str, Any]) -> None:
+./src/tools/model_generation/plugins/__init__.py-33-        """Initialize the plugin with context."""
+./src/tools/model_generation/plugins/__init__.py-34-        ...
+./src/tools/model_generation/plugins/__init__.py-35-
+./src/tools/model_generation/plugins/__init__.py-36-    def shutdown(self) -> None:  # noqa: B027
+--
+./src/shared/python/ui/simulation_gui_base.py:442:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-443-    def step_simulation(self) -> None:
+./src/shared/python/ui/simulation_gui_base.py-444-        """Advance the simulation by one time step.
+./src/shared/python/ui/simulation_gui_base.py-445-
+./src/shared/python/ui/simulation_gui_base.py-446-        Called by the game loop when in dynamic mode and running.
+./src/shared/python/ui/simulation_gui_base.py-447-        Must handle physics integration and recording.
+--
+./src/shared/python/ui/simulation_gui_base.py:450:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-451-    def reset_simulation(self) -> None:
+./src/shared/python/ui/simulation_gui_base.py-452-        """Reset the simulation to its initial state.
+./src/shared/python/ui/simulation_gui_base.py-453-
+./src/shared/python/ui/simulation_gui_base.py-454-        Must reset physics state, recorder, and sync kinematic controls.
+./src/shared/python/ui/simulation_gui_base.py-455-        """
+--
+./src/shared/python/ui/simulation_gui_base.py:457:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-458-    def update_visualization(self) -> None:
+./src/shared/python/ui/simulation_gui_base.py-459-        """Refresh all engine-specific visualizations.
+./src/shared/python/ui/simulation_gui_base.py-460-
+./src/shared/python/ui/simulation_gui_base.py-461-        Called every game loop tick. Should handle 3D viewer updates,
+./src/shared/python/ui/simulation_gui_base.py-462-        overlay rendering, force/torque vectors, and ellipsoids based
+--
+./src/shared/python/ui/simulation_gui_base.py:466:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-467-    def load_model(self, index: int) -> None:
+./src/shared/python/ui/simulation_gui_base.py-468-        """Load a model selected by the model combo at *index*.
+./src/shared/python/ui/simulation_gui_base.py-469-
+./src/shared/python/ui/simulation_gui_base.py-470-        Should handle engine-specific model loading and rebuild
+./src/shared/python/ui/simulation_gui_base.py-471-        kinematic controls.
+--
+./src/shared/python/ui/simulation_gui_base.py:474:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-475-    def sync_kinematic_controls(self) -> None:
+./src/shared/python/ui/simulation_gui_base.py-476-        """Synchronize kinematic slider/spinbox values with model state.
+./src/shared/python/ui/simulation_gui_base.py-477-
+./src/shared/python/ui/simulation_gui_base.py-478-        Called when switching to kinematic mode or after model load.
+./src/shared/python/ui/simulation_gui_base.py-479-        """
+--
+./src/shared/python/ui/simulation_gui_base.py:481:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-482-    def start_recording(self) -> None:
+./src/shared/python/ui/simulation_gui_base.py-483-        """Start recording simulation data."""
+./src/shared/python/ui/simulation_gui_base.py-484-
+./src/shared/python/ui/simulation_gui_base.py:485:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-486-    def stop_recording(self) -> None:
+./src/shared/python/ui/simulation_gui_base.py-487-        """Stop recording simulation data."""
+./src/shared/python/ui/simulation_gui_base.py-488-
+./src/shared/python/ui/simulation_gui_base.py:489:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-490-    def get_recording_frame_count(self) -> int:
+./src/shared/python/ui/simulation_gui_base.py-491-        """Return the number of recorded frames."""
+./src/shared/python/ui/simulation_gui_base.py-492-
+./src/shared/python/ui/simulation_gui_base.py:493:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-494-    def export_data(self, filename: str) -> None:
+./src/shared/python/ui/simulation_gui_base.py-495-        """Export recorded data to the given *filename*.
+./src/shared/python/ui/simulation_gui_base.py-496-
+./src/shared/python/ui/simulation_gui_base.py-497-        May export in multiple formats (CSV, Parquet, etc.).
+./src/shared/python/ui/simulation_gui_base.py-498-        """
+--
+./src/shared/python/ui/simulation_gui_base.py:500:    @abstractmethod
+./src/shared/python/ui/simulation_gui_base.py-501-    def get_joint_names(self) -> list[str]:
+./src/shared/python/ui/simulation_gui_base.py-502-        """Return joint names for plotting and analysis widgets."""
+./src/shared/python/ui/simulation_gui_base.py-503-
+./src/shared/python/ui/simulation_gui_base.py-504-    # ==================================================================
+./src/shared/python/ui/simulation_gui_base.py-505-    # Optional hooks (override for engine-specific behavior)
+--
 ./src/shared/python/ui/adapters/canvas.py:69:    @abstractmethod
+./src/shared/python/ui/adapters/canvas.py-70-    def get_figure(self) -> Figure:
+./src/shared/python/ui/adapters/canvas.py-71-        """Get the matplotlib Figure.
+./src/shared/python/ui/adapters/canvas.py-72-
+./src/shared/python/ui/adapters/canvas.py-73-        Returns:
+./src/shared/python/ui/adapters/canvas.py-74-            The Figure object for plotting
+--
 ./src/shared/python/ui/adapters/canvas.py:77:    @abstractmethod
+./src/shared/python/ui/adapters/canvas.py-78-    def refresh(self) -> None:
+./src/shared/python/ui/adapters/canvas.py-79-        """Refresh the canvas to display updates."""
+./src/shared/python/ui/adapters/canvas.py-80-
+./src/shared/python/ui/adapters/canvas.py-81-    def save(self, path: str, **kwargs: Any) -> None:
+./src/shared/python/ui/adapters/canvas.py-82-        """Save the figure to a file.
+--
 ./src/shared/python/ui/adapters/thread.py:58:    @abstractmethod
+./src/shared/python/ui/adapters/thread.py-59-    def start(self) -> None:
+./src/shared/python/ui/adapters/thread.py-60-        """Start the background task."""
+./src/shared/python/ui/adapters/thread.py-61-
 ./src/shared/python/ui/adapters/thread.py:62:    @abstractmethod
+./src/shared/python/ui/adapters/thread.py-63-    def is_running(self) -> bool:
+./src/shared/python/ui/adapters/thread.py-64-        """Check if task is still running."""
+./src/shared/python/ui/adapters/thread.py-65-
 ./src/shared/python/ui/adapters/thread.py:66:    @abstractmethod
+./src/shared/python/ui/adapters/thread.py-67-    def wait(self, timeout: float | None = None) -> bool:
+./src/shared/python/ui/adapters/thread.py-68-        """Wait for task to complete.
+./src/shared/python/ui/adapters/thread.py-69-
+./src/shared/python/ui/adapters/thread.py-70-        Args:
+./src/shared/python/ui/adapters/thread.py-71-            timeout: Maximum time to wait in seconds (None = infinite)
+--
 ./src/shared/python/ui/adapters/thread.py:77:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:443:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:451:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:458:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:467:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:475:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:482:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:486:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:490:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:494:    @abstractmethod
-./src/shared/python/ui/simulation_gui_base.py:501:    @abstractmethod
+./src/shared/python/ui/adapters/thread.py-78-    def cancel(self) -> None:
+./src/shared/python/ui/adapters/thread.py-79-        """Request cancellation of the task."""
+./src/shared/python/ui/adapters/thread.py-80-
+./src/shared/python/ui/adapters/thread.py-81-    def on_complete(self, callback: Callable[[Any], None]) -> BackgroundWorker:
+./src/shared/python/ui/adapters/thread.py-82-        """Set callback for successful completion.
+--
+./src/shared/python/pose_estimation/interface.py:23:    @abstractmethod
+./src/shared/python/pose_estimation/interface.py-24-    def load_model(self, model_path: Path | None = None) -> None:
+./src/shared/python/pose_estimation/interface.py-25-        """Load the estimation model/weights.
+./src/shared/python/pose_estimation/interface.py-26-
+./src/shared/python/pose_estimation/interface.py-27-        Args:
+./src/shared/python/pose_estimation/interface.py-28-            model_path: Path to model weights, or None for default.
+--
+./src/shared/python/pose_estimation/interface.py:31:    @abstractmethod
+./src/shared/python/pose_estimation/interface.py-32-    def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult:
+./src/shared/python/pose_estimation/interface.py-33-        """Estimate pose from a single image frame.
+./src/shared/python/pose_estimation/interface.py-34-
+./src/shared/python/pose_estimation/interface.py-35-        Args:
+./src/shared/python/pose_estimation/interface.py-36-            image: Input image (H, W, C) usually BGR or RGB.
+--
+./src/shared/python/pose_estimation/interface.py:42:    @abstractmethod
+./src/shared/python/pose_estimation/interface.py-43-    def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
+./src/shared/python/pose_estimation/interface.py-44-        """Process an entire video file.
+./src/shared/python/pose_estimation/interface.py-45-
+./src/shared/python/pose_estimation/interface.py-46-        Args:
+./src/shared/python/pose_estimation/interface.py-47-            video_path: Path to video file.
+--
+./src/shared/python/pose_editor/core.py:309:    @abstractmethod
+./src/shared/python/pose_editor/core.py-310-    def set_gravity_enabled(self, enabled: bool) -> None:
+./src/shared/python/pose_editor/core.py-311-        """Enable or disable gravity."""
+./src/shared/python/pose_editor/core.py-312-
+./src/shared/python/pose_editor/core.py:313:    @abstractmethod
+./src/shared/python/pose_editor/core.py-314-    def _get_gravity_magnitude(self) -> float:
+./src/shared/python/pose_editor/core.py-315-        """Get current gravity magnitude."""
+./src/shared/python/pose_editor/core.py-316-
+./src/shared/python/pose_editor/core.py-317-    def select_joint(self, joint_index: int) -> None:
+./src/shared/python/pose_editor/core.py-318-        """Select a joint for editing.
+--
+./src/shared/python/pose_editor/core.py:337:    @abstractmethod
+./src/shared/python/pose_editor/core.py-338-    def set_joint_position(self, joint_index: int, value: float | np.ndarray) -> None:
+./src/shared/python/pose_editor/core.py-339-        """Set a joint position."""
+./src/shared/python/pose_editor/core.py-340-
+./src/shared/python/pose_editor/core.py:341:    @abstractmethod
+./src/shared/python/pose_editor/core.py-342-    def get_joint_position(self, joint_index: int) -> float | np.ndarray:
+./src/shared/python/pose_editor/core.py-343-        """Get a joint position."""
+./src/shared/python/pose_editor/core.py-344-
+./src/shared/python/pose_editor/core.py:345:    @abstractmethod
+./src/shared/python/pose_editor/core.py-346-    def get_all_positions(self) -> np.ndarray:
+./src/shared/python/pose_editor/core.py-347-        """Get all joint positions."""
+./src/shared/python/pose_editor/core.py-348-
+./src/shared/python/pose_editor/core.py:349:    @abstractmethod
+./src/shared/python/pose_editor/core.py-350-    def set_all_positions(self, positions: np.ndarray) -> None:
+./src/shared/python/pose_editor/core.py-351-        """Set all joint positions."""
+./src/shared/python/pose_editor/core.py-352-
+./src/shared/python/pose_editor/core.py-353-    def zero_velocities(self) -> None:
+./src/shared/python/pose_editor/core.py-354-        """Set all joint velocities to zero.
+--
+./src/shared/python/pose_editor/core.py:362:    @abstractmethod
+./src/shared/python/pose_editor/core.py-363-    def set_all_velocities(self, velocities: np.ndarray) -> None:
+./src/shared/python/pose_editor/core.py-364-        """Set all joint velocities."""
+./src/shared/python/pose_editor/core.py-365-
+./src/shared/python/pose_editor/core.py:366:    @abstractmethod
+./src/shared/python/pose_editor/core.py-367-    def update_visualization(self) -> None:
+./src/shared/python/pose_editor/core.py-368-        """Update visualization to reflect current pose."""
+./src/shared/python/pose_editor/core.py-369-
+./src/shared/python/pose_editor/core.py-370-    def get_joint_by_name(self, name: str) -> JointInfo | None:
+./src/shared/python/pose_editor/core.py-371-        """Get joint info by name.
+--
+./src/shared/python/physics/impact_model.py:138:    @abstractmethod
+./src/shared/python/physics/impact_model.py-139-    def solve(
+./src/shared/python/physics/impact_model.py-140-        self,
+./src/shared/python/physics/impact_model.py-141-        pre_state: PreImpactState,
+./src/shared/python/physics/impact_model.py-142-        params: ImpactParameters,
+./src/shared/python/physics/impact_model.py-143-    ) -> PostImpactState:
+--
+./src/shared/python/physics/flight_models.py:159:    @abstractmethod
+./src/shared/python/physics/flight_models.py-160-    def name(self) -> str:
+./src/shared/python/physics/flight_models.py-161-        """Return the display name of the flight model."""
+./src/shared/python/physics/flight_models.py-162-        ...
+./src/shared/python/physics/flight_models.py-163-
+./src/shared/python/physics/flight_models.py-164-    @property
+./src/shared/python/physics/flight_models.py:165:    @abstractmethod
+./src/shared/python/physics/flight_models.py-166-    def description(self) -> str:
+./src/shared/python/physics/flight_models.py-167-        """Return a short description of the model approach."""
+./src/shared/python/physics/flight_models.py-168-        ...
+./src/shared/python/physics/flight_models.py-169-
+./src/shared/python/physics/flight_models.py-170-    @property
+./src/shared/python/physics/flight_models.py:171:    @abstractmethod
+./src/shared/python/physics/flight_models.py-172-    def reference(self) -> str:
+./src/shared/python/physics/flight_models.py-173-        """Return the citation or reference for the model."""
+./src/shared/python/physics/flight_models.py-174-        ...
+./src/shared/python/physics/flight_models.py-175-
+./src/shared/python/physics/flight_models.py:176:    @abstractmethod
+./src/shared/python/physics/flight_models.py-177-    def simulate(
+./src/shared/python/physics/flight_models.py-178-        self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+./src/shared/python/physics/flight_models.py-179-    ) -> FlightResult:
+./src/shared/python/physics/flight_models.py-180-        """Simulate ball flight and return the trajectory result."""
+./src/shared/python/physics/flight_models.py-181-        ...
+--
+./src/shared/python/physics/flexible_shaft.py:293:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py-294-    def initialize(self, properties: ShaftProperties) -> None:
+./src/shared/python/physics/flexible_shaft.py-295-        """Initialize the model with shaft properties."""
+./src/shared/python/physics/flexible_shaft.py-296-
+./src/shared/python/physics/flexible_shaft.py:297:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py-298-    def get_state(self) -> ShaftState:
+./src/shared/python/physics/flexible_shaft.py-299-        """Get current shaft deformation state."""
+./src/shared/python/physics/flexible_shaft.py-300-
+./src/shared/python/physics/flexible_shaft.py:301:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py-302-    def apply_load(
+./src/shared/python/physics/flexible_shaft.py-303-        self,
+./src/shared/python/physics/flexible_shaft.py-304-        position: float,
+./src/shared/python/physics/flexible_shaft.py-305-        force: np.ndarray,
+./src/shared/python/physics/flexible_shaft.py-306-        moment: np.ndarray | None = None,
+--
+./src/shared/python/physics/flexible_shaft.py:310:    @abstractmethod
+./src/shared/python/physics/flexible_shaft.py-311-    def step(self, dt: float) -> ShaftState:
+./src/shared/python/physics/flexible_shaft.py-312-        """Advance simulation by dt seconds."""
+./src/shared/python/physics/flexible_shaft.py-313-
+./src/shared/python/physics/flexible_shaft.py-314-
+./src/shared/python/physics/flexible_shaft.py-315-class RigidShaftModel(ShaftModel):
+--
+./src/shared/python/club_data/display.py:465:    @abstractmethod
+./src/shared/python/club_data/display.py-466-    def render(self, renderer: Any) -> None:
+./src/shared/python/club_data/display.py-467-        """Render the overlay.
+./src/shared/python/club_data/display.py-468-
+./src/shared/python/club_data/display.py-469-        This method should be overridden by subclasses for specific renderers.
+./src/shared/python/club_data/display.py-470-
+--
+./src/shared/python/engine_core/base_physics_engine.py:255:    @abstractmethod
+./src/shared/python/engine_core/base_physics_engine.py-256-    def _load_from_path_impl(self, path: str) -> None:
+./src/shared/python/engine_core/base_physics_engine.py-257-        """Engine-specific implementation of load_from_path.
+./src/shared/python/engine_core/base_physics_engine.py-258-
+./src/shared/python/engine_core/base_physics_engine.py-259-        Args:
+./src/shared/python/engine_core/base_physics_engine.py-260-            path: Validated path to model file
+--
+./src/shared/python/engine_core/base_physics_engine.py:263:    @abstractmethod
+./src/shared/python/engine_core/base_physics_engine.py-264-    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+./src/shared/python/engine_core/base_physics_engine.py-265-        """Engine-specific implementation of load_from_string.
+./src/shared/python/engine_core/base_physics_engine.py-266-
+./src/shared/python/engine_core/base_physics_engine.py-267-        Args:
+./src/shared/python/engine_core/base_physics_engine.py-268-            content: Model content as string
+--
+./src/shared/python/engine_core/interfaces.py:52:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-53-    def model_name(self) -> str:
+./src/shared/python/engine_core/interfaces.py-54-        """Return the name of the currently loaded model.
+./src/shared/python/engine_core/interfaces.py-55-
+./src/shared/python/engine_core/interfaces.py-56-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-57-            - None (can be called at any time)
+--
+./src/shared/python/engine_core/interfaces.py:65:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-66-    def load_from_path(self, path: str) -> None:
+./src/shared/python/engine_core/interfaces.py-67-        """Load a model from a file path.
+./src/shared/python/engine_core/interfaces.py-68-
+./src/shared/python/engine_core/interfaces.py-69-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-70-            - path must be a valid file path
+--
+./src/shared/python/engine_core/interfaces.py:90:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-91-    def load_from_string(self, content: str, extension: str | None = None) -> None:
+./src/shared/python/engine_core/interfaces.py-92-        """Load a model from a string content.
+./src/shared/python/engine_core/interfaces.py-93-
+./src/shared/python/engine_core/interfaces.py-94-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-95-            - content must be non-empty
+--
+./src/shared/python/engine_core/interfaces.py:111:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-112-    def reset(self) -> None:
+./src/shared/python/engine_core/interfaces.py-113-        """Reset the simulation to its initial state (time=0, q=q0, v=0).
+./src/shared/python/engine_core/interfaces.py-114-
+./src/shared/python/engine_core/interfaces.py-115-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-116-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:127:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-128-    def step(self, dt: float | None = None) -> None:
+./src/shared/python/engine_core/interfaces.py-129-        """Advance the simulation by one time step.
+./src/shared/python/engine_core/interfaces.py-130-
+./src/shared/python/engine_core/interfaces.py-131-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-132-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:149:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-150-    def forward(self) -> None:
+./src/shared/python/engine_core/interfaces.py-151-        """Compute forward kinematics and dynamics without advancing time.
+./src/shared/python/engine_core/interfaces.py-152-
+./src/shared/python/engine_core/interfaces.py-153-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-154-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:169:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-170-    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+./src/shared/python/engine_core/interfaces.py-171-        """Get the current state (positions, velocities).
+./src/shared/python/engine_core/interfaces.py-172-
+./src/shared/python/engine_core/interfaces.py-173-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-174-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:191:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-192-    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+./src/shared/python/engine_core/interfaces.py-193-        """Set the current state.
+./src/shared/python/engine_core/interfaces.py-194-
+./src/shared/python/engine_core/interfaces.py-195-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-196-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:214:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-215-    def set_control(self, u: np.ndarray) -> None:
+./src/shared/python/engine_core/interfaces.py-216-        """Apply control inputs (torques/forces).
+./src/shared/python/engine_core/interfaces.py-217-
+./src/shared/python/engine_core/interfaces.py-218-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-219-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:235:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-236-    def get_time(self) -> float:
+./src/shared/python/engine_core/interfaces.py-237-        """Get the current simulation time.
+./src/shared/python/engine_core/interfaces.py-238-
+./src/shared/python/engine_core/interfaces.py-239-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-240-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:316:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-317-    def compute_mass_matrix(self) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-318-        """Compute the dense inertia matrix M(q).
+./src/shared/python/engine_core/interfaces.py-319-
+./src/shared/python/engine_core/interfaces.py-320-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-321-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:338:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-339-    def compute_bias_forces(self) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-340-        """Compute bias forces C(q,v) + g(q).
+./src/shared/python/engine_core/interfaces.py-341-
+./src/shared/python/engine_core/interfaces.py-342-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-343-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:357:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-358-    def compute_gravity_forces(self) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-359-        """Compute gravity forces g(q).
+./src/shared/python/engine_core/interfaces.py-360-
+./src/shared/python/engine_core/interfaces.py-361-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-362-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:376:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-377-    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-378-        """Compute inverse dynamics tau = ID(q, v, a).
+./src/shared/python/engine_core/interfaces.py-379-
+./src/shared/python/engine_core/interfaces.py-380-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-381-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:402:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-403-    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
+./src/shared/python/engine_core/interfaces.py-404-        """Compute spatial Jacobian for a specific body.
+./src/shared/python/engine_core/interfaces.py-405-
+./src/shared/python/engine_core/interfaces.py-406-        Preconditions:
+./src/shared/python/engine_core/interfaces.py-407-            - Engine must be in INITIALIZED state
+--
+./src/shared/python/engine_core/interfaces.py:444:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-445-    def compute_drift_acceleration(self) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-446-        """Compute passive (drift) acceleration with zero control inputs.
+./src/shared/python/engine_core/interfaces.py-447-
+./src/shared/python/engine_core/interfaces.py-448-        Section F Requirement: Drift component = passive dynamics (Coriolis, centrifugal, gravity, constraints)
+./src/shared/python/engine_core/interfaces.py-449-        with all applied torques/muscle activations set to zero.
+--
+./src/shared/python/engine_core/interfaces.py:476:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-477-    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-478-        """Compute control-attributed acceleration from applied torques/forces only.
+./src/shared/python/engine_core/interfaces.py-479-
+./src/shared/python/engine_core/interfaces.py-480-        Section F Requirement: Control component = acceleration due solely to actuator torques,
+./src/shared/python/engine_core/interfaces.py-481-        excluding passive dynamics.
+--
+./src/shared/python/engine_core/interfaces.py:512:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-513-    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-514-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+./src/shared/python/engine_core/interfaces.py-515-
+./src/shared/python/engine_core/interfaces.py-516-        Compute acceleration with applied torques set to zero, preserving current state.
+./src/shared/python/engine_core/interfaces.py-517-        This isolates drift (gravity + Coriolis + constraints) from control effects.
+--
+./src/shared/python/engine_core/interfaces.py:564:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-565-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+./src/shared/python/engine_core/interfaces.py-566-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+./src/shared/python/engine_core/interfaces.py-567-
+./src/shared/python/engine_core/interfaces.py-568-        Compute acceleration with joint velocities set to zero, preserving configuration.
+./src/shared/python/engine_core/interfaces.py-569-        This isolates configuration-dependent effects (gravity, constraints)
+--
+./src/shared/python/engine_core/interfaces.py:683:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-684-    def get_time_series(
+./src/shared/python/engine_core/interfaces.py-685-        self, field_name: str
+./src/shared/python/engine_core/interfaces.py-686-    ) -> tuple[np.ndarray, np.ndarray | list[Any]]:
+./src/shared/python/engine_core/interfaces.py-687-        """Get time series data for a specific field.
+./src/shared/python/engine_core/interfaces.py-688-
+--
+./src/shared/python/engine_core/interfaces.py:699:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-700-    def get_induced_acceleration_series(
+./src/shared/python/engine_core/interfaces.py-701-        self, source_name: str | int
+./src/shared/python/engine_core/interfaces.py-702-    ) -> tuple[np.ndarray, np.ndarray]:
+./src/shared/python/engine_core/interfaces.py-703-        """Get time series for induced acceleration from a specific source.
+./src/shared/python/engine_core/interfaces.py-704-
+--
+./src/shared/python/engine_core/interfaces.py:713:    @abstractmethod
+./src/shared/python/engine_core/interfaces.py-714-    def set_analysis_config(self, config: dict[str, Any]) -> None:
+./src/shared/python/engine_core/interfaces.py-715-        """Configure which advanced metrics to record/compute.
+./src/shared/python/engine_core/interfaces.py-716-
+./src/shared/python/engine_core/interfaces.py-717-        Args:
+./src/shared/python/engine_core/interfaces.py-718-            config: Dictionary of configuration flags (e.g. {'ztcf': True}).
+--
+./src/shared/python/ai/adapters/base.py:105:    @abstractmethod
+./src/shared/python/ai/adapters/base.py-106-    def send_message(
+./src/shared/python/ai/adapters/base.py-107-        self,
+./src/shared/python/ai/adapters/base.py-108-        message: str,
+./src/shared/python/ai/adapters/base.py-109-        context: ConversationContext,
+./src/shared/python/ai/adapters/base.py-110-        tools: list[ToolDeclaration],
+--
+./src/shared/python/ai/adapters/base.py:133:    @abstractmethod
+./src/shared/python/ai/adapters/base.py-134-    def stream_response(
+./src/shared/python/ai/adapters/base.py-135-        self,
+./src/shared/python/ai/adapters/base.py-136-        message: str,
+./src/shared/python/ai/adapters/base.py-137-        context: ConversationContext,
+./src/shared/python/ai/adapters/base.py-138-        tools: list[ToolDeclaration],
+--
+./src/shared/python/ai/adapters/base.py:159:    @abstractmethod
+./src/shared/python/ai/adapters/base.py-160-    def capabilities(self) -> ProviderCapabilities:
+./src/shared/python/ai/adapters/base.py-161-        """Return the provider's capabilities.
+./src/shared/python/ai/adapters/base.py-162-
+./src/shared/python/ai/adapters/base.py-163-        This allows the AIP to adjust behavior based on what features
+./src/shared/python/ai/adapters/base.py-164-        the current provider supports.
+--
+./src/shared/python/ai/adapters/base.py:171:    @abstractmethod
+./src/shared/python/ai/adapters/base.py-172-    def validate_connection(self) -> tuple[bool, str]:
+./src/shared/python/ai/adapters/base.py-173-        """Test connection to the AI provider.
+./src/shared/python/ai/adapters/base.py-174-
+./src/shared/python/ai/adapters/base.py-175-        This method should perform a lightweight check to verify:
+./src/shared/python/ai/adapters/base.py-176-        1. Network connectivity
+--
+./scripts/analyze_completist_data.py:186:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./scripts/analyze_completist_data.py-187-            # Filter out regex definitions
+./scripts/analyze_completist_data.py-188-            if "re.compile" in c_txt or "grep" in c_txt:
+./scripts/analyze_completist_data.py-189-                return None
+./scripts/analyze_completist_data.py-190-            return {"file": f_path, "line": l_no, "text": c_txt, "type": "Abstract"}
+./scripts/analyze_completist_data.py-191-        return None
+--
+./scripts/refresh_completist_data.py:65:    run_grep("@abstractmethod", os.path.join(DATA_DIR, "abstract_methods.txt"))
+./scripts/refresh_completist_data.py-66-
+./scripts/refresh_completist_data.py-67-    print("Done.")
+./scripts/refresh_completist_data.py-68-
+./scripts/refresh_completist_data.py-69-
+./scripts/refresh_completist_data.py-70-if __name__ == "__main__":
