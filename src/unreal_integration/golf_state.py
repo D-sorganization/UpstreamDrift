@@ -157,10 +157,11 @@ class SwingMetrics:
         Returns:
             Dictionary representation with only non-None values.
         """
-        result: dict[str, Any] = {}
-        for key, value in self.__dict__.items():
-            if value is not None:
-                result[key] = value
+        result: dict[str, Any] = {
+            key: value
+            for key, value in self.__dict__.items()
+            if value is not None
+        }
         if self.estimated_ball_speed is not None:
             result["estimated_ball_speed"] = self.estimated_ball_speed
         return result

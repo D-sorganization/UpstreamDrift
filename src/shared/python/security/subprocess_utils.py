@@ -128,9 +128,8 @@ class ProcessManager:
                 if self.is_running(name):
                     logger.warning(f"Process '{name}' is already running")
                     return False
-                else:
-                    # Clean up dead process
-                    del self.processes[name]
+                # Clean up dead process
+                del self.processes[name]
 
             try:
                 logger.info(f"Starting process '{name}': {' '.join(cmd)}")

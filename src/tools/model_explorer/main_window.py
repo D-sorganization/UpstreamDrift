@@ -23,6 +23,13 @@ from .visualization_widget import VisualizationWidget
 
 logger = get_logger(__name__)
 
+try:
+    from upstream_drift_tools.ui.widgets.notepad_widget import NotepadWidget
+    HAS_NOTEPAD = True
+except ImportError:
+    HAS_NOTEPAD = False
+    logger.warning("upstream_drift_tools not found, Notepad disabled")
+
 
 class URDFGeneratorWindow(QMainWindow):
     """Main window for the Interactive URDF Generator."""
@@ -272,6 +279,13 @@ class URDFGeneratorWindow(QMainWindow):
         code_editor_action.setToolTip("Edit URDF XML directly with syntax highlighting")
         code_editor_action.triggered.connect(self._open_code_editor)
         tools_menu.addAction(code_editor_action)
+
+        if HAS_NOTEPAD:
+            tools_menu.addSeparator()
+            notepad_action = QAction("&Notepad...", self)
+            notepad_action.setShortcut("Ctrl+Shift+N")
+            notepad_action.triggered.connect(self._open_notepad)
+            tools_menu.addAction(notepad_action)
 
     def _setup_status_bar(self) -> None:
         """Set up the status bar."""
@@ -695,6 +709,38 @@ class URDFGeneratorWindow(QMainWindow):
         except ImportError as e:
             logger.error(f"Failed to open code editor: {e}")
             QMessageBox.critical(self, "Error", f"Failed to open code editor: {e}")
+
+    def _open_notepad(self) -> None:
+        """Open the notepad window."""
+        if not HAS_NOTEPAD:
+            return
+
+        try:
+            # Check if we already have a notepad window open
+            if not hasattr(self, "_notepad_window") or self._notepad_window is None:
+                # Use UpstreamDrift storage path
+                try:
+                    from src.shared.python.paths import get_user_data_dir
+                    storage_dir = get_user_data_dir() / "notepad"
+                except ImportError:
+                    storage_dir = Path.home() / ".upstream_drift" / "notepad"
+                
+                self._notepad_window = NotepadWidget(
+                    storage_dir=storage_dir,
+                    app_name="Upstream Drift"
+                )
+
+                # Position relative to main window
+                main_geo = self.geometry()
+                self._notepad_window.move(main_geo.x() + 100, main_geo.y() + 100)
+
+            self._notepad_window.show()
+            self._notepad_window.raise_()
+            self._notepad_window.activateWindow()
+
+        except (ImportError, OSError, RuntimeError) as e:
+            logger.error(f"Error opening notepad: {e}")
+            QMessageBox.warning(self, "Error", f"Failed to open notepad: {e}")
 
     def closeEvent(self, event: Any) -> None:
         """Handle window close event."""

@@ -513,29 +513,28 @@ class SignalLoader:
             delimiter = kwargs.pop("delimiter", "," if ext != ".tsv" else "\t")
             return SignalImporter.from_csv(file_path, delimiter=delimiter, **kwargs)
 
-        elif fmt == "json":
+        if fmt == "json":
             return SignalImporter.from_json(file_path, **kwargs)
 
-        elif fmt == "npz":
+        if fmt == "npz":
             return SignalImporter.from_npz(file_path, **kwargs)
 
-        elif fmt == "npy":
+        if fmt == "npy":
             # .npy files contain a single array
             data = np.load(file_path)
             if data.ndim == 1:
                 # Assume uniform time sampling
                 time = np.arange(len(data))
                 return Signal(time=time, values=data, name=file_path.stem)
-            elif data.ndim == 2:
+            if data.ndim == 2:
                 # Assume first column is time
                 time = data[:, 0]
                 values = data[:, 1]
                 return Signal(time=time, values=values, name=file_path.stem)
-            else:
-                msg = f"Unsupported array shape: {data.shape}"
-                raise ValueError(msg)
+            msg = f"Unsupported array shape: {data.shape}"
+            raise ValueError(msg)
 
-        elif fmt == "mat":
+        if fmt == "mat":
             return SignalImporter.from_mat(file_path, **kwargs)
 
         msg = f"Format handler not implemented: {fmt}"

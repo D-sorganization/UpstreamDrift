@@ -139,10 +139,9 @@ class MeshReference:
         """Format file size for display."""
         if self.file_size < 1024:
             return f"{self.file_size} B"
-        elif self.file_size < 1024 * 1024:
+        if self.file_size < 1024 * 1024:
             return f"{self.file_size / 1024:.1f} KB"
-        else:
-            return f"{self.file_size / (1024 * 1024):.1f} MB"
+        return f"{self.file_size / (1024 * 1024):.1f} MB"
 
 
 class MeshExtractor:

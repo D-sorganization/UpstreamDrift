@@ -238,12 +238,11 @@ class SwingCaptureImporter:
 
         if suffix == ".c3d":
             return self.import_c3d(filepath)
-        elif suffix == ".csv":
+        if suffix == ".csv":
             return self.import_csv(filepath)
-        elif suffix == ".json":
+        if suffix == ".json":
             return self.import_json(filepath)
-        else:
-            raise ValueError(f"Unsupported format: {suffix}")
+        raise ValueError(f"Unsupported format: {suffix}")
 
     def import_c3d(self, filepath: str | Path) -> JointTrajectory:
         """Import a C3D motion capture file.

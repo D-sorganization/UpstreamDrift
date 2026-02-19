@@ -163,13 +163,13 @@ class ContextHelpDock(QDockWidget):
 
         if "mujoco" in model_id:
             return docs_dir / "mujoco.md"
-        elif "drake" in model_id:
+        if "drake" in model_id:
             return docs_dir / "drake.md"
-        elif "pinocchio" in model_id:
+        if "pinocchio" in model_id:
             return docs_dir / "pinocchio.md"
-        elif "matlab" in model_id:
+        if "matlab" in model_id:
             return docs_dir / "matlab.md"
-        elif "urdf" in model_id:
+        if "urdf" in model_id:
             return REPOS_ROOT / "tools" / "urdf_generator" / "README.md"
 
         return None

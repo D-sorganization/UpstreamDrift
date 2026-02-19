@@ -323,21 +323,20 @@ async def export_analysis_data(
                     "Content-Disposition": "attachment; filename=analysis_export.csv"
                 },
             )
-        else:
-            # JSON export
-            export_data = {
-                "format": "json",
-                "record_count": len(filtered),
-                "data": filtered,
-            }
-            content = json.dumps(export_data, indent=2, default=str)
-            return StreamingResponse(
-                io.BytesIO(content.encode("utf-8")),
-                media_type="application/json",
-                headers={
-                    "Content-Disposition": "attachment; filename=analysis_export.json"
-                },
-            )
+        # JSON export
+        export_data = {
+            "format": "json",
+            "record_count": len(filtered),
+            "data": filtered,
+        }
+        content = json.dumps(export_data, indent=2, default=str)
+        return StreamingResponse(
+            io.BytesIO(content.encode("utf-8")),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": "attachment; filename=analysis_export.json"
+            },
+        )
     except ImportError as exc:
         if logger:
             logger.error("Export error: %s", exc)

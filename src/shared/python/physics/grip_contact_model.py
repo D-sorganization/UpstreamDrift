@@ -203,8 +203,7 @@ def classify_contact_state(
     # Check friction cone for sticking vs slipping
     if check_friction_cone(normal_force, tangent_force, params.static_friction):
         return ContactState.STICKING
-    else:
-        return ContactState.SLIPPING
+    return ContactState.SLIPPING
 
 
 def compute_center_of_pressure(

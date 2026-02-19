@@ -206,7 +206,7 @@ class KinematicTree:
         to_path = to_node.get_chain_to_root()
 
         # Find common ancestor
-        from_set = set(n.name for n in from_path)
+        from_set = {n.name for n in from_path}
         common_ancestor = None
         for node in to_path:
             if node.name in from_set:

@@ -59,11 +59,11 @@ class MockRecorder:
         """Return time and data arrays for the requested field."""
         if field_name == "joint_positions":  # noqa: SIM116
             return self.times, self.joint_positions
-        elif field_name == "joint_velocities":
+        if field_name == "joint_velocities":
             return self.times, self.joint_velocities
-        elif field_name == "joint_accelerations":
+        if field_name == "joint_accelerations":
             return self.times, self.joint_accelerations
-        elif field_name == "joint_torques":
+        if field_name == "joint_torques":
             return self.times, self.joint_torques
         return self.times, np.zeros_like(self.times)
 

@@ -87,7 +87,7 @@ def check_jacobian_conditioning(
         )
 
     # Severe ill-conditioning (use pseudoinverse)
-    elif kappa > SINGULARITY_FALLBACK_THRESHOLD and warn:
+    if kappa > SINGULARITY_FALLBACK_THRESHOLD and warn:
         sigma = np.linalg.svd(J, compute_uv=False)
         sigma_min = sigma.min()
         sigma_max = sigma.max()

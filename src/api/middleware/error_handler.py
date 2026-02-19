@@ -53,26 +53,25 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:
                 ) from e
 
         return async_wrapper
-    else:
 
-        @functools.wraps(func)
-        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                return func(*args, **kwargs)
-            except HTTPException:
-                raise
-            except ValueError as e:
-                raise HTTPException(status_code=400, detail=str(e)) from e
-            except FileNotFoundError as e:
-                raise HTTPException(status_code=404, detail=str(e)) from e
-            except PermissionError as e:
-                raise HTTPException(status_code=403, detail=str(e)) from e
-            except NotImplementedError as e:
-                raise HTTPException(status_code=501, detail=str(e)) from e
-            except Exception as e:
-                logger.exception("Unhandled error in %s: %s", func.__name__, e)
-                raise HTTPException(
-                    status_code=500, detail="Internal server error"
-                ) from e
+    @functools.wraps(func)
+    def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return func(*args, **kwargs)
+        except HTTPException:
+            raise
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        except FileNotFoundError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e)) from e
+        except NotImplementedError as e:
+            raise HTTPException(status_code=501, detail=str(e)) from e
+        except Exception as e:
+            logger.exception("Unhandled error in %s: %s", func.__name__, e)
+            raise HTTPException(
+                status_code=500, detail="Internal server error"
+            ) from e
 
-        return sync_wrapper
+    return sync_wrapper
