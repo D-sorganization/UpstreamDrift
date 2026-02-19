@@ -409,10 +409,9 @@ class InjuryRiskScorer:
         """Convert a value to a 0-100 risk score."""
         if value <= safe:
             return 0
-        elif value >= high:
+        if value >= high:
             return 100
-        else:
-            return ((value - safe) / (high - safe)) * 100
+        return ((value - safe) / (high - safe)) * 100
 
     def _compute_overall_scores(self, report: InjuryRiskReport) -> None:
         """Compute overall risk scores from individual factors."""

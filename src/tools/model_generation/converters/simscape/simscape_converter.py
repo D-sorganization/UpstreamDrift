@@ -433,17 +433,16 @@ class SimscapeToURDFConverter:
                 radius = block.get_param_float("Radius", 0.05) * length_scale
                 length = block.get_param_float("Length", 0.1) * length_scale
                 return Geometry.cylinder(radius, length)
-            elif "sphere" in shape:
+            if "sphere" in shape:
                 radius = block.get_param_float("Radius", 0.05) * length_scale
                 return Geometry.sphere(radius)
-            else:
-                dims = block.get_param_vector("Dimensions", (0.1, 0.1, 0.1))
-                if len(dims) >= 3:
-                    return Geometry.box(
-                        dims[0] * length_scale,
-                        dims[1] * length_scale,
-                        dims[2] * length_scale,
-                    )
+            dims = block.get_param_vector("Dimensions", (0.1, 0.1, 0.1))
+            if len(dims) >= 3:
+                return Geometry.box(
+                    dims[0] * length_scale,
+                    dims[1] * length_scale,
+                    dims[2] * length_scale,
+                )
 
         # Default box for unknown geometries
         if self.config.create_dummy_links:
@@ -455,14 +454,13 @@ class SimscapeToURDFConverter:
         """Calculate inertia from geometry."""
         if geometry.geometry_type == GeometryType.BOX:
             return Inertia.from_box(mass, *geometry.dimensions[:3])
-        elif geometry.geometry_type == GeometryType.CYLINDER:
+        if geometry.geometry_type == GeometryType.CYLINDER:
             return Inertia.from_cylinder(
                 mass, geometry.dimensions[0], geometry.dimensions[1]
             )
-        elif geometry.geometry_type == GeometryType.SPHERE:
+        if geometry.geometry_type == GeometryType.SPHERE:
             return Inertia.from_sphere(mass, geometry.dimensions[0])
-        else:
-            return Inertia(ixx=0.01, iyy=0.01, izz=0.01, mass=mass)
+        return Inertia(ixx=0.01, iyy=0.01, izz=0.01, mass=mass)
 
     def _convert_joint_block(
         self,
@@ -586,7 +584,7 @@ class SimscapeToURDFConverter:
         axis_dir = block.get_param("AxisDirection", "").lower()
         if "x" in axis_dir:
             return (1.0, 0.0, 0.0)
-        elif "y" in axis_dir:
+        if "y" in axis_dir:
             return (0.0, 1.0, 0.0)
 
         # Default to Z axis

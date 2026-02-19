@@ -108,7 +108,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
                 last_hash = chunk_hash
 
     reported = 0
-    for _, locations in code_blocks.items():
+    for locations in code_blocks.values():
         if len(locations) > 1 and reported < 50:
             files_inv = sorted({str(loc[0]) for loc in locations})
             issues.append(

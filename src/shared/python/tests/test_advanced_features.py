@@ -246,11 +246,11 @@ class MockRecorderNew(RecorderInterface):
         """Return time series data for the given field."""
         if field_name == "joint_positions":  # noqa: SIM116
             return self.times, self.positions
-        elif field_name == "joint_velocities":
+        if field_name == "joint_velocities":
             return self.times, self.velocities
-        elif field_name == "joint_accelerations":
+        if field_name == "joint_accelerations":
             return self.times, self.accelerations
-        elif field_name == "joint_torques":
+        if field_name == "joint_torques":
             return self.times, self.torques
         return [], []
 

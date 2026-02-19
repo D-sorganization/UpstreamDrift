@@ -687,8 +687,7 @@ class CustomFunctionFitter:
             # Build evaluation context with parameters
             names: dict[str, Any] = dict(safe_names)
             names["t"] = t
-            for name, val in zip(param_names, args, strict=False):
-                names[name] = val
+            names.update(dict(zip(param_names, args, strict=False)))
 
             # Use simpleeval for safe expression evaluation
             evaluator = EvalWithCompoundTypes(

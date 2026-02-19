@@ -387,10 +387,9 @@ class BallRollPhysics:
         """
         if self.integrator == "rk4":
             return self._step_rk4(state, dt)
-        elif self.integrator == "verlet":
+        if self.integrator == "verlet":
             return self._step_verlet(state, dt)
-        else:
-            return self._step_euler(state, dt)
+        return self._step_euler(state, dt)
 
     def _step_euler(self, state: BallState, dt: float) -> BallState:
         """Euler integration step."""

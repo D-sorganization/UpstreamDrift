@@ -103,9 +103,8 @@ def git_sync_repository(repo_path: Path | None = None) -> bool:
         if pull_result and pull_result.returncode == 0:
             logger.info("Repository sync complete.")
             return True
-        else:
-            logger.warning("Git pull failed.")
-            return False
+        logger.warning("Git pull failed.")
+        return False
     except (RuntimeError, ValueError, OSError) as e:
         logger.warning(f"Git sync failed (might be offline or have conflicts): {e}")
         return False

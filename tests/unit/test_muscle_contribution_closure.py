@@ -84,7 +84,7 @@ if MYOSUITE_AVAILABLE:
 
             # Sum all muscle contributions
             a_muscle_sum = np.zeros_like(a_total)
-            for _muscle_name, a_muscle in induced_accels.items():
+            for a_muscle in induced_accels.values():
                 a_muscle_sum += a_muscle
 
             # Closure: Σ a_induced ≈ a_total

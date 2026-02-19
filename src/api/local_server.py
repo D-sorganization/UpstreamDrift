@@ -223,16 +223,15 @@ def _execute_tile_launch(
             "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
         )
         return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
-    else:
-        logger.error(
-            "[launch] Handler returned failure for tile %s (type=%s)",
-            tile_id,
-            model_type,
-        )
-        return JSONResponse(
-            status_code=500,
-            content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
-        )
+    logger.error(
+        "[launch] Handler returned failure for tile %s (type=%s)",
+        tile_id,
+        model_type,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
+    )
 
 
 def _register_launcher_endpoints(app: FastAPI) -> None:

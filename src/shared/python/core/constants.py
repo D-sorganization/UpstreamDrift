@@ -44,7 +44,7 @@ from .physics_constants import (
 )
 
 # Backward compatibility: re-export physics constants from canonical module.
-__all__ = getattr(
+__all__ = getattr(  # noqa: PLE0605 - dynamically re-exported from physics_constants
     _physics_constants,
     "__all__",
     [name for name in dir(_physics_constants) if not name.startswith("_")],

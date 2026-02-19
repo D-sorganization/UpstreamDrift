@@ -523,7 +523,7 @@ class ClubDataLoader:
 
         clubs = []
         if isinstance(data, dict):
-            for _club_id, club_data in data.items():
+            for club_data in data.values():
                 if isinstance(club_data, dict):
                     club = ClubSpecification.from_dict(club_data)
                     clubs.append(club)
@@ -634,10 +634,9 @@ def load_club_data(file_path: str | Path) -> list[ClubSpecification]:
 
     if path.suffix.lower() in [".xlsx", ".xls"]:
         return loader.load_clubs_from_excel(path)
-    elif path.suffix.lower() == ".json":
+    if path.suffix.lower() == ".json":
         return loader.load_clubs_from_json(path)
-    else:
-        raise ValueError(f"Unsupported file format: {path.suffix}")
+    raise ValueError(f"Unsupported file format: {path.suffix}")
 
 
 def load_pro_player_data(file_path: str | Path) -> list[ProPlayerData]:

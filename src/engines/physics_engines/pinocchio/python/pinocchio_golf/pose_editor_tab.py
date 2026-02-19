@@ -405,7 +405,18 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(4, 4, 4, 4)
 
-        # Header
+        main_layout.addLayout(self._build_header())
+
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
+        splitter.addWidget(self._build_top_panel())
+        splitter.addWidget(self._build_joint_controls_group())
+        splitter.addWidget(self._build_library_panel())
+        splitter.setSizes([150, 300, 250])
+
+        main_layout.addWidget(splitter)
+
+    def _build_header(self) -> QtWidgets.QHBoxLayout:
+        """Build the header row with title and mode label."""
         header_layout = QtWidgets.QHBoxLayout()
         header_layout.addWidget(QtWidgets.QLabel("<b>Pose Editor</b>"))
         header_layout.addStretch()
@@ -413,24 +424,23 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.lbl_mode = QtWidgets.QLabel("Mode: Kinematic")
         self.lbl_mode.setStyleSheet("color: #4CAF50; font-weight: bold;")
         header_layout.addWidget(self.lbl_mode)
+        return header_layout
 
-        main_layout.addLayout(header_layout)
-
-        # Create splitter
-        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
-        main_layout.addWidget(splitter)
-
-        # Top: Gravity and actions
+    def _build_top_panel(self) -> QtWidgets.QWidget:
+        """Build the top panel with gravity control and quick action buttons."""
         top_widget = QtWidgets.QWidget()
         top_layout = QtWidgets.QVBoxLayout(top_widget)
         top_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Gravity control
         self.gravity_widget = GravityControlWidget()
         self.gravity_widget.gravity_changed.connect(self._on_gravity_changed)
         top_layout.addWidget(self.gravity_widget)
 
-        # Quick actions
+        top_layout.addWidget(self._build_quick_actions_group())
+        return top_widget
+
+    def _build_quick_actions_group(self) -> QtWidgets.QGroupBox:
+        """Build the Quick Actions button grid."""
         actions_group = QtWidgets.QGroupBox("Quick Actions")
         actions_layout = QtWidgets.QGridLayout(actions_group)
 
@@ -452,14 +462,14 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.btn_address.clicked.connect(lambda: self._load_preset("Address"))
         actions_layout.addWidget(self.btn_address, 1, 1)
 
-        top_layout.addWidget(actions_group)
-        splitter.addWidget(top_widget)
+        return actions_group
 
-        # Middle: Joint controls
+    def _build_joint_controls_group(self) -> QtWidgets.QGroupBox:
+        """Build the joint controls group with filter and scroll area."""
         joints_group = QtWidgets.QGroupBox("Joint Controls")
         joints_layout = QtWidgets.QVBoxLayout(joints_group)
 
-        # Filter
+        # Filter bar
         filter_layout = QtWidgets.QHBoxLayout()
         filter_layout.addWidget(QtWidgets.QLabel("Filter:"))
         self.txt_filter = QtWidgets.QLineEdit()
@@ -472,10 +482,9 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.combo_group.addItem("All Groups")
         self.combo_group.currentTextChanged.connect(self._filter_joints)
         filter_layout.addWidget(self.combo_group)
-
         joints_layout.addLayout(filter_layout)
 
-        # Scroll area
+        # Scroll area for joint sliders
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setMinimumHeight(200)
@@ -487,17 +496,16 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.scroll_area.setWidget(self.slider_container)
         joints_layout.addWidget(self.scroll_area)
 
-        splitter.addWidget(joints_group)
+        return joints_group
 
-        # Bottom: Pose library
+    def _build_library_panel(self) -> PoseLibraryWidget:
+        """Build the bottom pose library panel."""
         self.library_widget = PoseLibraryWidget(self._library)
         self.library_widget.pose_loaded.connect(self._on_pose_loaded)
         self.library_widget.interpolation_requested.connect(self._on_interpolation)
         self.library_widget.save_pose_requested = self._save_current_pose  # type: ignore[method-assign]
         self.library_widget.preset_load_requested = self._load_preset_from_data  # type: ignore[method-assign]
-        splitter.addWidget(self.library_widget)
-
-        splitter.setSizes([150, 300, 250])
+        return self.library_widget
 
     def set_model_and_data(
         self,

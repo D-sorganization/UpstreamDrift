@@ -601,7 +601,7 @@ class GreenSurface:
                 turf=TurfProperties.create_preset("practice_green"),
             )
 
-        elif name == "undulating_championship":
+        if name == "undulating_championship":
             green = cls(
                 width=25.0,
                 height=25.0,
@@ -632,7 +632,7 @@ class GreenSurface:
             green.set_hole_position(np.array([15.0, 15.0]))
             return green
 
-        elif name == "severe_slopes":
+        if name == "severe_slopes":
             green = cls(
                 width=20.0,
                 height=20.0,
@@ -656,7 +656,7 @@ class GreenSurface:
             green.set_hole_position(np.array([15.0, 10.0]))
             return green
 
-        elif name == "tiered":
+        if name == "tiered":
             green = cls(
                 width=20.0,
                 height=20.0,
@@ -672,8 +672,7 @@ class GreenSurface:
             green.set_hole_position(np.array([15.0, 5.0]))
             return green
 
-        else:
-            raise ValueError(f"Unknown preset: {name}")
+        raise ValueError(f"Unknown preset: {name}")
 
     def load_from_file(self, filepath: str | Path) -> None:
         """Load topographical data from file.

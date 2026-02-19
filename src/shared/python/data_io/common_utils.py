@@ -113,12 +113,11 @@ def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     suffix = data_path.suffix.lower()
     if suffix == ".csv":
         return pd.read_csv(data_path)
-    elif suffix in [".xlsx", ".xls"]:
+    if suffix in [".xlsx", ".xls"]:
         return pd.read_excel(data_path)
-    elif suffix == ".json":
+    if suffix == ".json":
         return pd.read_json(data_path)
-    else:
-        raise ValueError(f"Unsupported file format: {suffix}")
+    raise ValueError(f"Unsupported file format: {suffix}")
 
 
 def save_golf_data(

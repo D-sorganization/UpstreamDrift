@@ -60,9 +60,7 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
                 stripped = line.strip()
                 if stripped:
                     # Handle both bullet points and plain text
-                    description = (
-                        stripped[2:] if stripped.startswith("- ") else stripped
-                    )
+                    description = stripped.removeprefix("- ")
                     issues.append(
                         {
                             "severity": "MAJOR",

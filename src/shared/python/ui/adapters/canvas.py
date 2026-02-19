@@ -269,9 +269,8 @@ def get_canvas_adapter(
     if force_headless or is_headless() or not is_qt_available():
         logger.debug("Using HeadlessCanvas")
         return HeadlessCanvas(width, height, dpi)
-    else:
-        logger.debug("Using QtCanvas")
-        return QtCanvas(width, height, dpi)
+    logger.debug("Using QtCanvas")
+    return QtCanvas(width, height, dpi)
 
 
 __all__ = [

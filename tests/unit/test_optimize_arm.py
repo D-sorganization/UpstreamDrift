@@ -94,12 +94,11 @@ def mock_casadi():
         # Return data based on call order: Q, V, U, cost
         if call_count == 1:
             return np.zeros((2, 41))  # Q matrix
-        elif call_count == 2:
+        if call_count == 2:
             return np.zeros((2, 41))  # V matrix
-        elif call_count == 3:
+        if call_count == 3:
             return np.zeros((2, 40))  # U matrix
-        else:
-            return 0.1234  # Cost (scalar)
+        return 0.1234  # Cost (scalar)
 
     sol.value.side_effect = value_side_effect
 

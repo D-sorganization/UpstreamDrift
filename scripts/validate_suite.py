@@ -363,12 +363,11 @@ def run_comprehensive_validation() -> bool:
 
         return True
 
-    else:
-        logger.error(f"❌ {total - passed} validation(s) failed")
+    logger.error(f"❌ {total - passed} validation(s) failed")
 
-        logger.error("Please address the issues above before using the suite")
+    logger.error("Please address the issues above before using the suite")
 
-        return False
+    return False
 
 
 if __name__ == "__main__":

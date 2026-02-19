@@ -450,7 +450,7 @@ def _ensure_import(lines: list[str], import_statement: str) -> bool:
     in_docstring = False
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if stripped.startswith('"""') or stripped.startswith("'''"):
+        if stripped.startswith(('"""', "'''")):
             if in_docstring:
                 in_docstring = False
                 continue
@@ -471,7 +471,7 @@ def _ensure_import(lines: list[str], import_statement: str) -> bool:
         insert_at = 0
         for i, line in enumerate(lines):
             stripped = line.strip()
-            if stripped.startswith('"""') or stripped.startswith("'''"):
+            if stripped.startswith(('"""', "'''")):
                 # Skip past docstring
                 if stripped.count('"""') >= 2 or stripped.count("'''") >= 2:
                     insert_at = i + 1
@@ -481,7 +481,7 @@ def _ensure_import(lines: list[str], import_statement: str) -> bool:
                         insert_at = j + 1
                         break
                 break
-            elif stripped and not stripped.startswith("#"):
+            if stripped and not stripped.startswith("#"):
                 insert_at = i
                 break
         lines.insert(insert_at, import_statement + "\n")

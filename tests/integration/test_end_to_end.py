@@ -102,7 +102,7 @@ class TestEngineProbes:
         assert len(results) > 0
 
         # Each result should have required fields
-        for _engine_type, result in results.items():
+        for result in results.values():
             assert result.engine_name is not None
             assert isinstance(result.status, ProbeStatus)
             assert result.diagnostic_message is not None

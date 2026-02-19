@@ -175,8 +175,7 @@ def validate_magnitude(
 
         if level == ValidationLevel.STRICT:
             raise PhysicsValidationError(message)
-        else:
-            warnings.warn(message, category=UserWarning, stacklevel=3)
+        warnings.warn(message, category=UserWarning, stacklevel=3)
 
 
 def validate_joint_state(

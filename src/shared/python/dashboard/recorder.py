@@ -429,12 +429,11 @@ class GenericPhysicsRecorder:
         # Handle different data types
         if isinstance(values, np.ndarray):
             return times, values[: self.current_idx]
-        elif isinstance(values, list):
+        if isinstance(values, list):
             # Legacy support for list-based data
             return times, np.array(values[: self.current_idx])
-        else:
-            # For dict/other types
-            return times, values
+        # For dict/other types
+        return times, values
 
     def get_induced_acceleration_series(
         self, source_name: str | int

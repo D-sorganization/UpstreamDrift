@@ -97,14 +97,14 @@ class ParameterRange:
         """
         if self.distribution == "uniform":
             return float(rng.uniform(self.min_val, self.max_val))
-        elif self.distribution == "normal":
+        if self.distribution == "normal":
             mean = (self.min_val + self.max_val) / 2.0
             std = (self.max_val - self.min_val) / 6.0  # 99.7% within range
             val = float(rng.normal(mean, std))
             return float(np.clip(val, self.min_val, self.max_val))
-        else:  # linspace
-            points = np.linspace(self.min_val, self.max_val, self.num_points)
-            return float(rng.choice(points))
+        # linspace
+        points = np.linspace(self.min_val, self.max_val, self.num_points)
+        return float(rng.choice(points))
 
     def linspace(self) -> np.ndarray:
         """Generate evenly spaced values across the range.
@@ -145,19 +145,19 @@ class ControlProfile:
         """
         if self.profile_type == "zero":
             return np.zeros((n_steps, n_actuators))
-        elif self.profile_type == "constant":
+        if self.profile_type == "constant":
             magnitude = self.parameters.get("magnitude", 1.0)
             return np.full((n_steps, n_actuators), magnitude)
-        elif self.profile_type == "sinusoidal":
+        if self.profile_type == "sinusoidal":
             freq = self.parameters.get("frequency", 1.0)
             amplitude = self.parameters.get("amplitude", 1.0)
             t = np.arange(n_steps) * dt
             base = amplitude * np.sin(2.0 * np.pi * freq * t)
             return np.column_stack([base] * n_actuators)
-        elif self.profile_type == "random":
+        if self.profile_type == "random":
             scale = self.parameters.get("scale", 1.0)
             return rng.normal(0, scale, (n_steps, n_actuators))
-        elif self.profile_type == "step":
+        if self.profile_type == "step":
             magnitude = self.parameters.get("magnitude", 1.0)
             step_time = self.parameters.get("step_time", 0.5)
             step_idx = int(step_time / dt)
@@ -165,8 +165,7 @@ class ControlProfile:
             if step_idx < n_steps:
                 profile[step_idx:] = magnitude
             return profile
-        else:
-            return np.zeros((n_steps, n_actuators))
+        return np.zeros((n_steps, n_actuators))
 
 
 @dataclass
@@ -1070,11 +1069,10 @@ class DatasetGenerator:
         format = format.lower()
         if format == "hdf5":
             return self.export_to_hdf5(dataset, output_path)
-        elif format in ("sqlite", "db"):
+        if format in ("sqlite", "db"):
             return self.export_to_sqlite(dataset, output_path)
-        elif format == "csv":
+        if format == "csv":
             return self.export_to_csv(dataset, output_path)
-        else:
-            raise ValueError(
-                f"Unsupported export format: {format}. Supported: hdf5, sqlite, csv"
-            )
+        raise ValueError(
+            f"Unsupported export format: {format}. Supported: hdf5, sqlite, csv"
+        )

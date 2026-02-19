@@ -267,13 +267,12 @@ def _handle_violation(
     if DBC_LEVEL == ContractLevel.ENFORCE:
         if contract_type == "Precondition":
             raise PreconditionError(message, function_name=function_name, value=value)
-        elif contract_type == "Postcondition":
+        if contract_type == "Postcondition":
             raise PostconditionError(message, function_name=function_name, result=value)
-        elif contract_type == "Invariant":
+        if contract_type == "Invariant":
             raise InvariantError(message)
-        else:
-            raise ContractViolationError(contract_type, message)
-    elif DBC_LEVEL == ContractLevel.WARN:
+        raise ContractViolationError(contract_type, message)
+    if DBC_LEVEL == ContractLevel.WARN:
         detail = f"[DbC {contract_type}] {message}"
         if value is not None:
             detail += f" (got: {value!r})"
@@ -495,7 +494,7 @@ def require_state(
                         required_state=state_name,
                         operation=func.__qualname__,
                     )
-                elif DBC_LEVEL == ContractLevel.WARN:
+                if DBC_LEVEL == ContractLevel.WARN:
                     logger.warning(
                         "[DbC State] Cannot perform '%s' - not %s",
                         operation,
@@ -649,12 +648,11 @@ class ContractChecker:
                             message,
                             class_name=self.__class__.__name__,
                         )
-                    else:
-                        logger.warning(
-                            "[DbC invariant] %s: %s",
-                            self.__class__.__name__,
-                            message,
-                        )
+                    logger.warning(
+                        "[DbC invariant] %s: %s",
+                        self.__class__.__name__,
+                        message,
+                    )
             except InvariantError:
                 raise
             except (RuntimeError, TypeError, ValueError) as e:
@@ -687,13 +685,12 @@ class ContractChecker:
                             class_name=self.__class__.__name__,
                             method_name=method_name,
                         )
-                    else:
-                        logger.warning(
-                            "[DbC invariant] %s.%s: %s",
-                            self.__class__.__name__,
-                            method_name,
-                            message,
-                        )
+                    logger.warning(
+                        "[DbC invariant] %s.%s: %s",
+                        self.__class__.__name__,
+                        method_name,
+                        message,
+                    )
             except InvariantError:
                 raise
             except (RuntimeError, TypeError, ValueError) as e:
@@ -848,23 +845,21 @@ def invariant(
                         f"Failed to evaluate invariant: {exc}",
                         class_name=cls.__name__,
                     ) from exc
-                else:
-                    logger.warning(
-                        "[DbC invariant] %s: failed to evaluate – %s",
-                        cls.__name__,
-                        exc,
-                    )
+                logger.warning(
+                    "[DbC invariant] %s: failed to evaluate – %s",
+                    cls.__name__,
+                    exc,
+                )
                 return
 
             if not result:
                 if DBC_LEVEL == ContractLevel.ENFORCE:
                     raise InvariantError(message, class_name=cls.__name__)
-                else:
-                    logger.warning(
-                        "[DbC invariant] %s: %s",
-                        cls.__name__,
-                        message,
-                    )
+                logger.warning(
+                    "[DbC invariant] %s: %s",
+                    cls.__name__,
+                    message,
+                )
 
         cls.__init__ = new_init  # type: ignore[method-assign]
         return cls

@@ -246,7 +246,7 @@ class MyoConverter:
                 f"4. Try opening model in OpenSim GUI to validate geometry\\n"
                 f"\\nCommon fix: Download geometry from OpenSim model repository"
             ) from error
-        elif "muscle" in error_msg:
+        if "muscle" in error_msg:
             raise RuntimeError(
                 f"Conversion failed due to muscle configuration: {error}\\n"
                 f"\\nTroubleshooting steps:\\n"
@@ -255,7 +255,7 @@ class MyoConverter:
                 f"3. Try converting with muscle_list=[] to skip muscle optimization\\n"
                 f"4. Review muscle definitions in: {osim_file}"
             ) from error
-        elif "constraint" in error_msg:
+        if "constraint" in error_msg:
             raise RuntimeError(
                 f"Conversion failed due to constraints: {error}\\n"
                 f"\\nTroubleshooting steps:\\n"
@@ -263,19 +263,18 @@ class MyoConverter:
                 f"2. Check for complex kinematic constraints\\n"
                 f"3. Simplify model or remove unsupported constraints"
             ) from error
-        else:
-            # Generic error
-            raise RuntimeError(
-                f"Model conversion failed: {error}\\n"
-                f"\\nGeneral troubleshooting:\\n"
-                f"1. Verify .osim file opens in OpenSim GUI\\n"
-                f"2. Check for model compatibility with MyoConverter\\n"
-                f"3. Review conversion logs for detailed error messages\\n"
-                f"4. Try with speedy=True to skip some validation\\n"
-                f"5. Consult: https://myoconverter.readthedocs.io/\\n"
-                f"\\nIf issue persists, create an issue with the .osim file at:\\n"
-                f"https://github.com/MyoHub/myoconverter/issues"
-            ) from error
+        # Generic error
+        raise RuntimeError(
+            f"Model conversion failed: {error}\\n"
+            f"\\nGeneral troubleshooting:\\n"
+            f"1. Verify .osim file opens in OpenSim GUI\\n"
+            f"2. Check for model compatibility with MyoConverter\\n"
+            f"3. Review conversion logs for detailed error messages\\n"
+            f"4. Try with speedy=True to skip some validation\\n"
+            f"5. Consult: https://myoconverter.readthedocs.io/\\n"
+            f"\\nIf issue persists, create an issue with the .osim file at:\\n"
+            f"https://github.com/MyoHub/myoconverter/issues"
+        ) from error
 
     def load_converted_model_keyframe(self, model_path: Path) -> str:
         """Generate Python code to load converted model with keyframe.

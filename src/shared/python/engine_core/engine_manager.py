@@ -370,7 +370,7 @@ class EngineManager(ContractChecker):
             "",
         ]
 
-        for _engine_type, result in self.probe_results.items():
+        for result in self.probe_results.values():
             status_icon = "✅" if result.is_available() else "❌"
             lines.append(f"{status_icon} {result.engine_name.upper()}")
             lines.append(f"   Status: {result.status.value}")

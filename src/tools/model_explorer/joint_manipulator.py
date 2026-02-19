@@ -135,17 +135,15 @@ class JointInfo:
         """Get the valid position range for this joint."""
         if self.joint_type == "continuous":
             return (-math.pi * 2, math.pi * 2)
-        elif self.lower_limit is not None and self.upper_limit is not None:
+        if self.lower_limit is not None and self.upper_limit is not None:
             return (self.lower_limit, self.upper_limit)
-        else:
-            return (-math.pi, math.pi)
+        return (-math.pi, math.pi)
 
     def get_position_unit(self) -> str:
         """Get the unit for joint position."""
         if self.joint_type == "prismatic":
             return "m"
-        else:
-            return "rad"
+        return "rad"
 
 
 class JointSliderWidget(QWidget):

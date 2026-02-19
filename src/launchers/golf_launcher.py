@@ -493,13 +493,13 @@ class GolfLauncher(
 
         if "mujoco" in model_type:
             return EngineType.MUJOCO
-        elif "drake" in model_type:
+        if "drake" in model_type:
             return EngineType.DRAKE
-        elif "pinocchio" in model_type:
+        if "pinocchio" in model_type:
             return EngineType.PINOCCHIO
-        elif "opensim" in model_type:
+        if "opensim" in model_type:
             return EngineType.OPENSIM
-        elif "myosim" in model_type:
+        if "myosim" in model_type:
             return EngineType.MYOSIM
         return EngineType.MUJOCO
 

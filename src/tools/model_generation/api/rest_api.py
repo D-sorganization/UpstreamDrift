@@ -899,8 +899,7 @@ class ModelGenerationAPI:
                         "category": entry.category.value,
                     }
                 )
-            else:
-                return APIResponse.error("Failed to add model")
+            return APIResponse.error("Failed to add model")
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
@@ -1135,12 +1134,11 @@ class FastAPIAdapter:
                             media_type=response.content_type,
                             headers=response.headers,
                         )
-                    else:
-                        return JSONResponse(
-                            content=response.body,
-                            status_code=response.status_code,
-                            headers=response.headers,
-                        )
+                    return JSONResponse(
+                        content=response.body,
+                        status_code=response.status_code,
+                        headers=response.headers,
+                    )
 
                 return handler
 

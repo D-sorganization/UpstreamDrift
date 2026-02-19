@@ -85,7 +85,7 @@ class TestEngineManager(unittest.TestCase):
 
     def test_engine_paths_exist(self) -> None:
         """Test that engine paths are properly configured."""
-        for _engine_type, path in self.manager.engine_paths.items():
+        for path in self.manager.engine_paths.values():
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 

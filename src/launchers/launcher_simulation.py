@@ -106,8 +106,7 @@ except Exception as e:
             output = result.stdout.strip()
             if output == "OK":
                 return True, ""
-            else:
-                return False, f"{display_name} dependency check failed:\n{output}"
+            return False, f"{display_name} dependency check failed:\n{output}"
         except subprocess.TimeoutExpired:
             return False, f"{display_name} dependency check timed out"
         except (OSError, ValueError) as e:
@@ -137,10 +136,10 @@ except Exception as e:
         if "urdf_generator" in model_id or "model_explorer" in model_id:
             self._launch_urdf_generator()
             return True
-        elif "c3d_viewer" in model_id:
+        if "c3d_viewer" in model_id:
             self._launch_c3d_viewer()
             return True
-        elif "shot_tracer" in model_id:
+        if "shot_tracer" in model_id:
             self._launch_shot_tracer()
             return True
         return False

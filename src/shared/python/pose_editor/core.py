@@ -398,7 +398,7 @@ class BasePoseEditor(ABC):
         Returns:
             Unique group names
         """
-        groups = set(j.group for j in self._joint_info)
+        groups = {j.group for j in self._joint_info}
         return sorted(groups)
 
     def apply_joint_deltas(self, deltas: dict[int, float]) -> None:

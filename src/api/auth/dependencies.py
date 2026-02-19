@@ -183,9 +183,8 @@ async def get_current_user_flexible(
     # Try API key first (if it starts with gms_)
     if token.startswith("gms_"):
         return await get_current_user_from_api_key(credentials, db)
-    else:
-        # Try JWT token
-        return await get_current_user(credentials, db)
+    # Try JWT token
+    return await get_current_user(credentials, db)
 
 
 def require_role(required_role: UserRole) -> Callable[[User], User]:

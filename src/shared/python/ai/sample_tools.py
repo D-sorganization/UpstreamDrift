@@ -311,10 +311,9 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             """Classify a torque value relative to its typical range."""
             if value < range_info["low"]:
                 return "Below typical"
-            elif value <= range_info["high"]:
+            if value <= range_info["high"]:
                 return "Within typical range"
-            else:
-                return "Above typical (high stress)"
+            return "Above typical (high stress)"
 
         return {
             "shoulder": {

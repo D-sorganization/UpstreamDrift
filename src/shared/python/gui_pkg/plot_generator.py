@@ -329,7 +329,7 @@ class PlotGenerator:
                 "Joint Positions",
                 "Position (rad)",
             )
-        elif plot_type == PlotType.JOINT_VELOCITIES:
+        if plot_type == PlotType.JOINT_VELOCITIES:
             return self._plot_joint_data(
                 data.times,
                 data.velocities,
@@ -337,7 +337,7 @@ class PlotGenerator:
                 "Joint Velocities",
                 "Velocity (rad/s)",
             )
-        elif plot_type == PlotType.JOINT_ACCELERATIONS:
+        if plot_type == PlotType.JOINT_ACCELERATIONS:
             if data.accelerations is None:
                 return None
             return self._plot_joint_data(
@@ -347,7 +347,7 @@ class PlotGenerator:
                 "Joint Accelerations",
                 "Acceleration (rad/s²)",
             )
-        elif plot_type == PlotType.JOINT_TORQUES:
+        if plot_type == PlotType.JOINT_TORQUES:
             if data.torques is None:
                 return None
             return self._plot_joint_data(
@@ -357,21 +357,20 @@ class PlotGenerator:
                 "Joint Torques",
                 "Torque (N·m)",
             )
-        elif plot_type == PlotType.ENERGY:
+        if plot_type == PlotType.ENERGY:
             return self._plot_energy(data)
-        elif plot_type == PlotType.PHASE_PORTRAIT:
+        if plot_type == PlotType.PHASE_PORTRAIT:
             return self._plot_phase_portrait(data)
-        elif plot_type == PlotType.CONTACT_FORCES:
+        if plot_type == PlotType.CONTACT_FORCES:
             return self._plot_contact_forces(data)
-        elif plot_type == PlotType.DRIFT_VS_CONTROL:
+        if plot_type == PlotType.DRIFT_VS_CONTROL:
             return self._plot_drift_vs_control(data)
-        elif plot_type == PlotType.POWER:
+        if plot_type == PlotType.POWER:
             return self._plot_power(data)
-        elif plot_type == PlotType.MASS_MATRIX_CONDITION:
+        if plot_type == PlotType.MASS_MATRIX_CONDITION:
             return self._plot_mass_matrix_condition(data)
-        else:
-            logger.warning("Unknown plot type: %s", plot_type)
-            return None
+        logger.warning("Unknown plot type: %s", plot_type)
+        return None
 
     def _plot_joint_data(
         self,

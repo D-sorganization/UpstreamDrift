@@ -219,6 +219,118 @@ def _configure_structlog(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+def _resolve_log_level(level: LogLevel | int) -> int:
+    """Convert a LogLevel enum or int to an integer log level.
+
+    Args:
+        level: The logging level as LogLevel enum or raw int.
+
+    Returns:
+        Integer log level suitable for stdlib logging.
+    """
+    return level.value if isinstance(level, LogLevel) else level
+
+
+def _resolve_format_string(
+    format_string: str | None,
+    use_detailed_format: bool,
+    use_simple_format: bool,
+) -> str:
+    """Determine the log format string from the configuration flags.
+
+    Args:
+        format_string: Explicit format string (takes precedence).
+        use_detailed_format: If True, use file/line detailed format.
+        use_simple_format: If True, use level-only simple format.
+
+    Returns:
+        The resolved format string.
+    """
+    if format_string:
+        return format_string
+    if use_detailed_format:
+        return DETAILED_LOG_FORMAT
+    if use_simple_format:
+        return SIMPLE_LOG_FORMAT
+    return DEFAULT_LOG_FORMAT
+
+
+def _build_basic_config_kwargs(
+    log_level: int,
+    fmt: str,
+    stream: TextIO | None,
+    filename: str | Path | None,
+    filemode: str,
+    datefmt: str | None,
+    force: bool,
+) -> dict:
+    """Build keyword arguments for ``logging.basicConfig``.
+
+    Args:
+        log_level: Resolved integer log level.
+        fmt: Resolved format string.
+        stream: Output stream (default: sys.stderr when no filename).
+        filename: Optional log file path.
+        filemode: File open mode ('a' or 'w').
+        datefmt: Optional date format string.
+        force: Whether to force re-configuration.
+
+    Returns:
+        Dictionary of kwargs ready for ``logging.basicConfig``.
+    """
+    config_kwargs: dict = {
+        "level": log_level,
+        "format": fmt,
+    }
+
+    if stream is not None:
+        config_kwargs["stream"] = stream
+    elif filename is None:
+        config_kwargs["stream"] = sys.stderr
+
+    if filename is not None:
+        config_kwargs["filename"] = str(filename)
+        config_kwargs["filemode"] = filemode
+
+    if datefmt is not None:
+        config_kwargs["datefmt"] = datefmt
+
+    if force:
+        config_kwargs["force"] = True
+
+    return config_kwargs
+
+
+def _attach_redaction_filters(root_logger: logging.Logger) -> None:
+    """Attach a :class:`SensitiveDataFilter` to all handlers on *root_logger*.
+
+    Skips handlers that already have the filter to avoid duplicates.
+    """
+    redaction_filter = SensitiveDataFilter()
+    for handler in root_logger.handlers:
+        if not any(isinstance(f, SensitiveDataFilter) for f in handler.filters):
+            handler.addFilter(redaction_filter)
+
+
+def _quiet_noisy_libraries(
+    quiet_libraries: Sequence[str] | None,
+    use_qt_handler: bool,
+) -> None:
+    """Set noisy third-party library loggers to WARNING level.
+
+    Args:
+        quiet_libraries: Explicit list of library names to quiet.
+        use_qt_handler: When True, automatically quiets matplotlib/PIL.
+    """
+    default_quiet: list[str] = []
+    if use_qt_handler:
+        default_quiet.extend(["matplotlib", "matplotlib.font_manager", "PIL"])
+
+    libraries_to_quiet = list(quiet_libraries or []) + default_quiet
+    for lib_name in libraries_to_quiet:
+        logging.getLogger(lib_name).setLevel(logging.WARNING)
+
+
 def setup_logging(
     *,
     level: LogLevel | int = LogLevel.INFO,
@@ -282,64 +394,27 @@ def setup_logging(
         # Production JSON mode
         setup_logging(json_output=True, dev_mode=False)
     """
-    # Determine log level
-    log_level = level.value if isinstance(level, LogLevel) else level
+    log_level = _resolve_log_level(level)
+    fmt = _resolve_format_string(format_string, use_detailed_format, use_simple_format)
 
-    # Determine format string
-    if format_string:
-        fmt = format_string
-    elif use_detailed_format:
-        fmt = DETAILED_LOG_FORMAT
-    elif use_simple_format:
-        fmt = SIMPLE_LOG_FORMAT
-    else:
-        fmt = DEFAULT_LOG_FORMAT
-
-    # Build basicConfig kwargs
-    config_kwargs: dict = {
-        "level": log_level,
-        "format": fmt,
-    }
-
-    if stream is not None:
-        config_kwargs["stream"] = stream
-    elif filename is None:
-        config_kwargs["stream"] = sys.stderr
-
-    if filename is not None:
-        config_kwargs["filename"] = str(filename)
-        config_kwargs["filemode"] = filemode
-
-    if datefmt is not None:
-        config_kwargs["datefmt"] = datefmt
-
-    if force:
-        config_kwargs["force"] = True
-
-    # Configure logging
+    config_kwargs = _build_basic_config_kwargs(
+        log_level,
+        fmt,
+        stream,
+        filename,
+        filemode,
+        datefmt,
+        force,
+    )
     logging.basicConfig(**config_kwargs)
 
-    # Get root logger
     root_logger = logging.getLogger()
 
-    # Attach redaction filter to all handlers
     if enable_redaction:
-        redaction_filter = SensitiveDataFilter()
-        for handler in root_logger.handlers:
-            # Avoid adding duplicate filters
-            if not any(isinstance(f, SensitiveDataFilter) for f in handler.filters):
-                handler.addFilter(redaction_filter)
+        _attach_redaction_filters(root_logger)
 
-    # Quiet noisy libraries
-    default_quiet: list[str] = []
-    if use_qt_handler:
-        default_quiet.extend(["matplotlib", "matplotlib.font_manager", "PIL"])
+    _quiet_noisy_libraries(quiet_libraries, use_qt_handler)
 
-    libraries_to_quiet = list(quiet_libraries or []) + default_quiet
-    for lib_name in libraries_to_quiet:
-        logging.getLogger(lib_name).setLevel(logging.WARNING)
-
-    # Configure structlog when available
     if enable_structlog and _STRUCTLOG_AVAILABLE:
         _configure_structlog(log_level, json_output, dev_mode)
 
