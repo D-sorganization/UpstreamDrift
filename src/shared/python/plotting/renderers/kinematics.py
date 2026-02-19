@@ -434,6 +434,49 @@ class KinematicsRenderer(BaseRenderer):
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
 
+    @staticmethod
+    def _get_embedding_signal(
+        data, signal_type: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Retrieve and convert the signal for phase space embedding.
+
+        Args:
+            data: Recording data provider.
+            signal_type: One of 'position', 'velocity', or 'torque'.
+
+        Returns:
+            Tuple of (times, data_full) arrays.
+        """
+        if signal_type == "position":
+            times, data_full = data.get_series("joint_positions")
+            return times, np.rad2deg(np.asarray(data_full))
+        if signal_type == "velocity":
+            times, data_full = data.get_series("joint_velocities")
+            return times, np.rad2deg(np.asarray(data_full))
+        times, data_full = data.get_series("joint_torques")
+        return times, np.asarray(data_full)
+
+    @staticmethod
+    def _build_delay_embedding(
+        x: np.ndarray, delay: int, embedding_dim: int
+    ) -> np.ndarray:
+        """Construct time-delay embedding vectors from a 1D signal.
+
+        Args:
+            x: 1D signal array.
+            delay: Time delay (lag) in samples.
+            embedding_dim: Number of embedding dimensions.
+
+        Returns:
+            Array of shape (valid_len, embedding_dim).
+        """
+        valid_len = len(x) - delay * (embedding_dim - 1)
+        vectors = np.zeros((valid_len, embedding_dim))
+        for d in range(embedding_dim):
+            start = d * delay
+            vectors[:, d] = x[start : start + valid_len]
+        return vectors
+
     def plot_phase_space_reconstruction(
         self,
         fig: Figure,
@@ -443,15 +486,7 @@ class KinematicsRenderer(BaseRenderer):
         signal_type: str = "position",
     ) -> None:
         """Plot Phase Space Reconstruction using Time-Delay Embedding."""
-        if signal_type == "position":
-            times, data_full = self.data.get_series("joint_positions")
-            data_full = np.rad2deg(np.asarray(data_full))
-        elif signal_type == "velocity":
-            times, data_full = self.data.get_series("joint_velocities")
-            data_full = np.rad2deg(np.asarray(data_full))
-        else:
-            times, data_full = self.data.get_series("joint_torques")
-            data_full = np.asarray(data_full)
+        times, data_full = self._get_embedding_signal(self.data, signal_type)
 
         if len(times) == 0 or data_full.ndim < 2 or joint_idx >= data_full.shape[1]:
             ax = fig.add_subplot(111)
@@ -459,74 +494,37 @@ class KinematicsRenderer(BaseRenderer):
             return
 
         x = data_full[:, joint_idx]
-        N = len(x)
-
-        if delay * (embedding_dim - 1) + 1 > N:
+        if delay * (embedding_dim - 1) + 1 > len(x):
             ax = fig.add_subplot(111)
-            ax.text(
-                0.5,
-                0.5,
-                "Time series too short for embedding",
-                ha="center",
-                va="center",
-            )
+            ax.text(0.5, 0.5, "Time series too short for embedding",
+                    ha="center", va="center")
             return
 
-        valid_len = N - delay * (embedding_dim - 1)
-
-        vectors = np.zeros((valid_len, embedding_dim))
-        for d in range(embedding_dim):
-            start = d * delay
-            end = start + valid_len
-            vectors[:, d] = x[start:end]
-
-        plot_times = times[:valid_len]
+        vectors = self._build_delay_embedding(x, delay, embedding_dim)
+        plot_times = times[: vectors.shape[0]]
 
         if embedding_dim == 3:
             ax = fig.add_subplot(111, projection="3d")
-            sc = ax.scatter(
-                vectors[:, 0],
-                vectors[:, 1],
-                vectors[:, 2],
-                c=plot_times,
-                cmap="magma",
-                s=10,
-                alpha=0.6,
-            )
-            ax.plot(
-                vectors[:, 0],
-                vectors[:, 1],
-                vectors[:, 2],
-                color="gray",
-                alpha=0.2,
-                linewidth=0.5,
-            )
-
+            sc = ax.scatter(vectors[:, 0], vectors[:, 1], vectors[:, 2],
+                            c=plot_times, cmap="magma", s=10, alpha=0.6)
+            ax.plot(vectors[:, 0], vectors[:, 1], vectors[:, 2],
+                    color="gray", alpha=0.2, linewidth=0.5)
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
             ax.set_zlabel(f"x(t+{2 * delay})", fontsize=10)
         else:
             ax = fig.add_subplot(111)
-            sc = ax.scatter(
-                vectors[:, 0],
-                vectors[:, 1],
-                c=plot_times,
-                cmap="magma",
-                s=10,
-                alpha=0.6,
-            )
-            ax.plot(
-                vectors[:, 0], vectors[:, 1], color="gray", alpha=0.2, linewidth=0.5
-            )
-
+            sc = ax.scatter(vectors[:, 0], vectors[:, 1],
+                            c=plot_times, cmap="magma", s=10, alpha=0.6)
+            ax.plot(vectors[:, 0], vectors[:, 1],
+                    color="gray", alpha=0.2, linewidth=0.5)
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
 
         joint_name = self.data.get_joint_name(joint_idx)
         ax.set_title(
             f"Reconstructed Phase Space: {joint_name}\n(Lag={delay}, Dim={embedding_dim})",
-            fontsize=12,
-            fontweight="bold",
+            fontsize=12, fontweight="bold",
         )
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
