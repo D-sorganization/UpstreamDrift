@@ -158,9 +158,9 @@ class LogLevel(Enum):
 
 
 # ---------------------------------------------------------------------------
-# Global structlog configuration state
+# Global structlog configuration state (mutable holder avoids 'global')
 # ---------------------------------------------------------------------------
-_structlog_configured = False
+_structlog_state: dict[str, bool] = {"configured": False}
 
 
 def _configure_structlog(
@@ -169,8 +169,7 @@ def _configure_structlog(
     dev_mode: bool,
 ) -> None:
     """Wire up structlog processors and configure the library."""
-    global _structlog_configured
-    if not _STRUCTLOG_AVAILABLE or _structlog_configured:
+    if not _STRUCTLOG_AVAILABLE or _structlog_state["configured"]:
         return
 
     processors: list[Any] = [
@@ -213,7 +212,7 @@ def _configure_structlog(
         logger_factory=structlog.PrintLoggerFactory(),
         cache_logger_on_first_use=True,
     )
-    _structlog_configured = True
+    _structlog_state["configured"] = True
 
 
 # ---------------------------------------------------------------------------

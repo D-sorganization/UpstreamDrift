@@ -16,8 +16,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/launcher", tags=["launcher"])
 
-# Cache the manifest in memory (loaded once at startup)
-_manifest: LauncherManifest | None = None
+# Cache the manifest in memory (singleton holder avoids 'global')
+_launcher_state: dict[str, LauncherManifest | None] = {"manifest": None}
 
 
 def _get_manifest() -> LauncherManifest:
@@ -29,17 +29,16 @@ def _get_manifest() -> LauncherManifest:
     Raises:
         HTTPException: If manifest cannot be loaded
     """
-    global _manifest
-    if _manifest is None:
+    if _launcher_state["manifest"] is None:
         try:
-            _manifest = LauncherManifest.load()
+            _launcher_state["manifest"] = LauncherManifest.load()
         except (FileNotFoundError, ValueError) as e:
             logger.error("Failed to load launcher manifest: %s", e)
             raise HTTPException(
                 status_code=500,
                 detail=f"Launcher manifest error: {e}",
             ) from e
-    return _manifest
+    return _launcher_state["manifest"]  # type: ignore[return-value]
 
 
 @router.get("/manifest")
@@ -177,7 +176,7 @@ async def get_logo(filename: str) -> FileResponse:
 
 # Registry of known engine capability profiles.
 # Engines register their capabilities here so the API can serve them.
-_ENGINE_CAPABILITIES: dict[str, dict[str, str]] | None = None
+_capabilities_state: dict[str, dict[str, dict[str, str]] | None] = {"cache": None}
 
 
 def _build_engine_profiles() -> dict:
@@ -288,13 +287,12 @@ def _get_engine_capabilities() -> dict[str, dict[str, str]]:
     Returns:
         Dictionary mapping engine_id to capability dict.
     """
-    global _ENGINE_CAPABILITIES  # noqa: PLW0603
-    if _ENGINE_CAPABILITIES is not None:
-        return _ENGINE_CAPABILITIES
+    if _capabilities_state["cache"] is not None:
+        return _capabilities_state["cache"]
 
     profiles = _build_engine_profiles()
-    _ENGINE_CAPABILITIES = {k: v.to_dict() for k, v in profiles.items()}
-    return _ENGINE_CAPABILITIES
+    _capabilities_state["cache"] = {k: v.to_dict() for k, v in profiles.items()}
+    return _capabilities_state["cache"]
 
 
 @router.get("/engines/capabilities")

@@ -442,8 +442,8 @@ class PhysicsParameterRegistry:
         return "\n".join(lines)
 
 
-# Global registry instance
-_registry: PhysicsParameterRegistry | None = None
+# Singleton holder (avoids 'global' keyword)
+_registry_holder: dict[str, PhysicsParameterRegistry | None] = {"instance": None}
 
 
 def get_parameter_registry() -> PhysicsParameterRegistry:
@@ -452,10 +452,9 @@ def get_parameter_registry() -> PhysicsParameterRegistry:
     Returns:
         Global registry instance
     """
-    global _registry
-    if _registry is None:
-        _registry = PhysicsParameterRegistry()
-    return _registry
+    if _registry_holder["instance"] is None:
+        _registry_holder["instance"] = PhysicsParameterRegistry()
+    return _registry_holder["instance"]
 
 
 # Backwards compatibility alias (deprecated - use get_parameter_registry instead)

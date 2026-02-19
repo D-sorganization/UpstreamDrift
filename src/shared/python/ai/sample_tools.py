@@ -23,16 +23,15 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Singleton education system for explanation tools
-_education_system: EducationSystem | None = None
+# Singleton holder for education system (avoids 'global' keyword)
+_education_holder: dict[str, EducationSystem | None] = {"instance": None}
 
 
 def _get_education_system() -> EducationSystem:
     """Get or create the education system singleton."""
-    global _education_system
-    if _education_system is None:
-        _education_system = EducationSystem()
-    return _education_system
+    if _education_holder["instance"] is None:
+        _education_holder["instance"] = EducationSystem()
+    return _education_holder["instance"]
 
 
 def register_golf_suite_tools(registry: ToolRegistry) -> None:

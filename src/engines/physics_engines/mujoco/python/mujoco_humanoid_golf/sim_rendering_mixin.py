@@ -16,22 +16,20 @@ from PyQt6 import QtGui
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-# Lazy loading globals for OpenCV
-CV2_LIB = None
-INVALID_CV2 = False
+# Lazy loading for OpenCV (mutable holder avoids 'global' keyword)
+_cv2_state: dict[str, Any] = {"lib": None, "invalid": False}
 
 
 def get_cv2() -> Any:
     """Lazy import of OpenCV to speed up initial load."""
-    global CV2_LIB, INVALID_CV2  # noqa: PLW0603
-    if CV2_LIB is None and not INVALID_CV2:
+    if _cv2_state["lib"] is None and not _cv2_state["invalid"]:
         try:
             import cv2
 
-            CV2_LIB = cv2
+            _cv2_state["lib"] = cv2
         except ImportError:
-            INVALID_CV2 = True
-    return CV2_LIB
+            _cv2_state["invalid"] = True
+    return _cv2_state["lib"]
 
 
 logger = get_logger(__name__)

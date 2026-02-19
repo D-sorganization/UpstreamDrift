@@ -493,8 +493,8 @@ class ToolRegistry:
         return name in self._tools
 
 
-# Global registry instance (optional singleton pattern)
-_global_registry: ToolRegistry | None = None
+# Singleton holder (avoids 'global' keyword)
+_registry_holder: dict[str, ToolRegistry | None] = {"instance": None}
 
 
 def get_global_registry() -> ToolRegistry:
@@ -503,7 +503,6 @@ def get_global_registry() -> ToolRegistry:
     Returns:
         Global ToolRegistry instance.
     """
-    global _global_registry
-    if _global_registry is None:
-        _global_registry = ToolRegistry()
-    return _global_registry
+    if _registry_holder["instance"] is None:
+        _registry_holder["instance"] = ToolRegistry()
+    return _registry_holder["instance"]

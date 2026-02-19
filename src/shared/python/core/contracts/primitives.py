@@ -28,9 +28,10 @@ def _handle_violation(
     value: Any = None,
 ) -> None:
     """Handle a contract violation according to the current DBC_LEVEL."""
-    from .level import DBC_LEVEL  # re-import to capture runtime changes
+    from .level import get_contract_level  # read live state via function
 
-    if DBC_LEVEL == ContractLevel.ENFORCE:
+    level = get_contract_level()
+    if level == ContractLevel.ENFORCE:
         if contract_type == "Precondition":
             raise PreconditionError(message, function_name=function_name, value=value)
         if contract_type == "Postcondition":
@@ -38,7 +39,7 @@ def _handle_violation(
         if contract_type == "Invariant":
             raise InvariantError(message)
         raise ContractViolationError(contract_type, message)
-    if DBC_LEVEL == ContractLevel.WARN:
+    if level == ContractLevel.WARN:
         detail = f"[DbC {contract_type}] {message}"
         if value is not None:
             detail += f" (got: {value!r})"
@@ -54,9 +55,9 @@ def require(condition: bool, message: str, value: Any = None) -> None:
         message: Descriptive message for the violated contract.
         value: The offending value, for diagnostics.
     """
-    from .level import DBC_LEVEL  # re-import to capture runtime changes
+    from .level import get_contract_level  # read live state via function
 
-    if DBC_LEVEL == ContractLevel.OFF:
+    if get_contract_level() == ContractLevel.OFF:
         return
     if not condition:
         _handle_violation("Precondition", message, value=value)
@@ -70,9 +71,9 @@ def ensure(condition: bool, message: str, value: Any = None) -> None:
         message: Descriptive message for the violated contract.
         value: The offending value, for diagnostics.
     """
-    from .level import DBC_LEVEL  # re-import to capture runtime changes
+    from .level import get_contract_level  # read live state via function
 
-    if DBC_LEVEL == ContractLevel.OFF:
+    if get_contract_level() == ContractLevel.OFF:
         return
     if not condition:
         _handle_violation("Postcondition", message, value=value)

@@ -233,7 +233,7 @@ jobs:
   call-scribe:
     needs: triage
     if: needs.triage.outputs.target == 'doc-scribe'
-    uses: ./.github/workflows/Jules-Documentation-Scribe.yml
+    uses: ./.github/workflows/Jules-Documentation-Auditor.yml
     secrets: inherit
 
   call-tests:
@@ -245,13 +245,13 @@ jobs:
   call-auto-refactor:
     needs: triage
     if: needs.triage.outputs.target == 'auto-refactor'
-    uses: ./.github/workflows/Jules-Auto-Refactor.yml
+    uses: ./.github/workflows/Jules-Code-Quality-Fixer.yml
     secrets: inherit
 
   call-auto-rebase:
     needs: triage
     if: needs.triage.outputs.target == 'auto-rebase'
-    uses: ./.github/workflows/Jules-Auto-Rebase.yml
+    uses: ./.github/workflows/Jules-PR-Cleanup.yml
     secrets: inherit
 
   call-archivist:
@@ -269,13 +269,13 @@ jobs:
   call-code-quality-reviewer:
     needs: triage
     if: needs.triage.outputs.target == 'code-quality-reviewer'
-    uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
+    uses: ./.github/workflows/Jules-Code-Quality-Fixer.yml
     secrets: inherit
 
   call-assessment-generator:
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
-    uses: ./.github/workflows/Jules-Assessment-Generator.yml
+    uses: ./.github/workflows/Jules-Comprehensive-Assessment.yml
     secrets: inherit
 
   call-issue-resolver:
