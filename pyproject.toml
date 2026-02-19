@@ -143,8 +143,24 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "T201", "SIM"]
-ignore = ["E501", "B008"]
+select = [
+    "E", "F", "I", "UP", "B", "T201", "SIM",  # existing rules
+    "C4",    # unnecessary comprehensions / list/dict/set calls
+    "PIE",   # misc flake8-pie improvements
+    "PLE",   # pylint errors
+    "FURB",  # refurb modernization suggestions
+    "RSE",   # raise statement best practices
+    "LOG",   # logging best practices
+    "PERF",  # performance anti-patterns
+    "RET",   # return statement cleanup
+]
+ignore = [
+    "E501",    # line too long (handled by black)
+    "B008",    # function call in default arg (FastAPI Depends)
+    "RET504",  # unnecessary assign before return (often clearer)
+    "PERF203", # try-except in loop (unavoidable in some patterns)
+    "PERF401", # manual list comprehension (often clearer as explicit loop)
+]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/**" = ["T201"]

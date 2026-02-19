@@ -171,7 +171,7 @@ class ConservationMonitor:
             )
 
         # Warning drift (exceeds tolerance)
-        elif abs(drift_pct) > self.max_drift_pct:
+        if abs(drift_pct) > self.max_drift_pct:
             logger.warning(
                 f"⚠️ Energy conservation violated (Guideline O3):\\n"
                 f"  Time: {snapshot.time:.3f} s\\n"
@@ -218,10 +218,9 @@ class ConservationMonitor:
         # High-speed motion: ω ~ 100 rad/s → dt < 0.001 s
         if v_norm < 1.0:
             return 0.01  # Slow motion
-        elif v_norm < 10.0:
+        if v_norm < 10.0:
             return 0.001  # Normal motion
-        else:
-            return 0.0001  # High-speed motion
+        return 0.0001  # High-speed motion
 
     def project_to_energy_manifold(self) -> None:
         """Scale velocities to restore energy (variational integrator approximation).

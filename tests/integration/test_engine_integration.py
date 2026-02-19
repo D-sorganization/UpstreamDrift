@@ -169,7 +169,7 @@ class TestEngineIntegration:
         assert len(performance_results) > 0
 
         # All simulations should complete successfully
-        for _engine, perf_data in performance_results.items():
+        for perf_data in performance_results.values():
             assert "simulation_time" in perf_data
             assert "result" in perf_data
             assert perf_data["result"]["ball_distance"] == 250.0

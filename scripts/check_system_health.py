@@ -36,8 +36,7 @@ def check_docker_image(image_name: str) -> tuple[bool, str]:
         )
         if result.returncode == 0:
             return True, "Found"
-        else:
-            return False, "Not Found"
+        return False, "Not Found"
     except FileNotFoundError:
         return False, "Docker command not found"
 
@@ -54,10 +53,8 @@ def check_nvidia_docker() -> tuple[bool, str]:
         if result.returncode == 0:
             if "nvidia" in result.stdout:
                 return True, "NVIDIA Docker Runtime OK"
-            else:
-                return False, "NVIDIA runtime not active (warning)"
-        else:
-            return False, "Could not query docker info"
+            return False, "NVIDIA runtime not active (warning)"
+        return False, "Could not query docker info"
     except Exception as e:
         return False, f"Docker check failed: {e}"
 

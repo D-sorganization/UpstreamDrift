@@ -735,7 +735,7 @@ class SwingOptimizer(ContractChecker):
         risk = 0.0
 
         # Check joint velocities (high velocities = higher risk)
-        for _joint, vel in trajectory.joint_velocities.items():
+        for vel in trajectory.joint_velocities.values():
             max_vel = np.max(np.abs(vel))
             if max_vel > 20:  # rad/s
                 risk += 10

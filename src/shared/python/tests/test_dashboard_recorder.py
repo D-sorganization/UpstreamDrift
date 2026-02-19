@@ -176,7 +176,7 @@ class MockPhysicsEngine(PhysicsEngine):
 
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Restore state from a checkpoint."""
-        return None
+        return
 
 
 class TestGenericPhysicsRecorder:

@@ -344,15 +344,15 @@ def compute_tracking_look_at(
     """
     if target == TrackingTarget.CLUBHEAD and clubhead_position is not None:
         return clubhead_position.copy()
-    elif target == TrackingTarget.BALL and ball_position is not None:
+    if target == TrackingTarget.BALL and ball_position is not None:
         return ball_position.copy()
-    elif target == TrackingTarget.GOLFER_COM and golfer_com is not None:
+    if target == TrackingTarget.GOLFER_COM and golfer_com is not None:
         return golfer_com.copy()
-    elif target == TrackingTarget.SYSTEM_COM and system_com is not None:
+    if target == TrackingTarget.SYSTEM_COM and system_com is not None:
         return system_com.copy()
-    elif target == TrackingTarget.HANDS and hand_position is not None:
+    if target == TrackingTarget.HANDS and hand_position is not None:
         return hand_position.copy()
-    elif target == TrackingTarget.FIXED_WORLD and fixed_position is not None:
+    if target == TrackingTarget.FIXED_WORLD and fixed_position is not None:
         return fixed_position.copy()
 
     # Default fallback
@@ -498,10 +498,9 @@ class ViewpointController:
             self.transition_index = 0
             self.transition_in_progress = True
             return self.transition_frames[0]
-        else:
-            self.current_camera = target_camera
-            self.transition_in_progress = False
-            return target_camera
+        self.current_camera = target_camera
+        self.transition_in_progress = False
+        return target_camera
 
     def set_custom_view(
         self,
@@ -597,7 +596,6 @@ class ViewpointController:
             return create_standard_2x2_layout(
                 self.golfer_position, self.target_direction
             )
-        else:
-            return create_multiview_layout(
-                presets, self.golfer_position, self.target_direction
-            )
+        return create_multiview_layout(
+            presets, self.golfer_position, self.target_direction
+        )

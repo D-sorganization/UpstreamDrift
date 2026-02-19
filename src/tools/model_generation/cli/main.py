@@ -398,9 +398,8 @@ def cmd_library_add(args: argparse.Namespace) -> int:
     if entry:
         logger.info(f"Added model: {entry.id}")
         return 0
-    else:
-        logger.error("Failed to add model")
-        return 1
+    logger.error("Failed to add model")
+    return 1
 
 
 def cmd_library_download(args: argparse.Namespace) -> int:
@@ -419,9 +418,8 @@ def cmd_library_download(args: argparse.Namespace) -> int:
             output_path.write_text(urdf_string)
             logger.info(f"Wrote to {output_path}")
         return 0
-    else:
-        logger.error(f"Failed to download model: {args.model_id}")
-        return 1
+    logger.error(f"Failed to download model: {args.model_id}")
+    return 1
 
 
 def cmd_edit_compose(args: argparse.Namespace) -> int:
@@ -760,9 +758,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if hasattr(args, "func"):
         return args.func(args)
-    else:
-        parser.print_help()
-        return 0
+    parser.print_help()
+    return 0
 
 
 if __name__ == "__main__":

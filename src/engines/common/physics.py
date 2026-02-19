@@ -286,11 +286,10 @@ class AerodynamicsCalculator:
         # Above critical Re: lower drag (turbulent, dimple effect)
         if Re < 8e4:
             return 0.5  # Laminar flow
-        elif Re < 2e5:
+        if Re < 2e5:
             # Transition region
             return 0.5 - 0.25 * (Re - 8e4) / (2e5 - 8e4)
-        else:
-            return self.ball.drag_coefficient  # Fully turbulent
+        return self.ball.drag_coefficient  # Fully turbulent
 
     def _compute_lift_coefficient(self, spin_ratio: float) -> float:
         """Compute lift coefficient based on spin ratio.
