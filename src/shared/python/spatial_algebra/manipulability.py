@@ -57,6 +57,7 @@ def check_jacobian_conditioning(
 
     Raises:
         SingularityError: If κ > 1e12 (catastrophic)
+        TypeError: If J is not an ndarray or body_name is not a string
 
     Example:
         >>> J = engine.compute_jacobian("clubhead")["spatial"]
@@ -64,6 +65,11 @@ def check_jacobian_conditioning(
         >>> if kappa > 1e6:
         ...     logger.warning(f"Near-singularity: κ = {kappa:.2e}")
     """
+    if not isinstance(J, np.ndarray):
+        raise TypeError(f"J must be a numpy ndarray, got {type(J).__name__}")
+    if not isinstance(body_name, str) or not body_name:
+        raise ValueError(f"body_name must be a non-empty string, got {body_name!r}")
+
     if J.size == 0 or J.shape[0] == 0 or J.shape[1] == 0:
         logger.warning(f"{body_name}: Empty Jacobian provided")
         return float(np.inf)
@@ -172,6 +178,10 @@ def compute_manipulability_ellipsoid(J: np.ndarray) -> tuple[np.ndarray, np.ndar
             radii: Principal radii (singular values σ_i) (m,)
             axes: Principal axes (right singular vectors V) (n×n)
 
+    Raises:
+        TypeError: If J is not an ndarray
+        ValueError: If J is not a 2D matrix
+
     Example:
         >>> J = engine.compute_jacobian("clubhead")["spatial"]
         >>> radii, axes = compute_manipulability_ellipsoid(J)
@@ -179,6 +189,11 @@ def compute_manipulability_ellipsoid(J: np.ndarray) -> tuple[np.ndarray, np.ndar
         >>> print(f"Min manipulability: {radii.min():.3f}")
         >>> print(f"Condition number: {radii.max() / radii.min():.2e}")
     """
+    if not isinstance(J, np.ndarray):
+        raise TypeError(f"J must be a numpy ndarray, got {type(J).__name__}")
+    if J.ndim != 2:
+        raise ValueError(f"J must be a 2D matrix, got shape {J.shape}")
+
     # SVD: J = U Σ V^T
     # Σ contains singular values (ellipsoid radii)
     # V contains principal axes
@@ -203,6 +218,10 @@ def compute_manipulability_index(J: np.ndarray) -> float:
     Returns:
         Manipulability index μ [dimensionless]
 
+    Raises:
+        TypeError: If J is not an ndarray
+        ValueError: If J is not a 2D matrix
+
     Reference:
         Yoshikawa, T. (1985). "Manipulability of Robotic Mechanisms"
         The International Journal of Robotics Research, 4(2), 3-9.
@@ -212,6 +231,11 @@ def compute_manipulability_index(J: np.ndarray) -> float:
         >>> mu = compute_manipulability_index(J)
         >>> print(f"Manipulability: {mu:.3e}")
     """
+    if not isinstance(J, np.ndarray):
+        raise TypeError(f"J must be a numpy ndarray, got {type(J).__name__}")
+    if J.ndim != 2:
+        raise ValueError(f"J must be a 2D matrix, got shape {J.shape}")
+
     # Manipulability index = product of singular values
     # Equivalent to sqrt(det(J @ J.T))
     sigma = np.linalg.svd(J, compute_uv=False)
