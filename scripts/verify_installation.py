@@ -129,14 +129,13 @@ def main() -> int:
         print("  python launchers/golf_suite_launcher.py")
         print("  python -m api.server")
         return 0
-    else:
-        print("✗ Some checks failed.")
-        print()
-        print("Troubleshooting:")
-        print("  1. See docs/troubleshooting/installation.md")
-        print("  2. Try: conda env create -f environment.yml")
-        print("  3. Or:  pip install -e '.[dev,engines]'")
-        return 1
+    print("✗ Some checks failed.")
+    print()
+    print("Troubleshooting:")
+    print("  1. See docs/troubleshooting/installation.md")
+    print("  2. Try: conda env create -f environment.yml")
+    print("  3. Or:  pip install -e '.[dev,engines]'")
+    return 1
 
 
 if __name__ == "__main__":

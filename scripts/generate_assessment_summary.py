@@ -61,7 +61,7 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
                 if stripped:
                     # Handle both bullet points and plain text
                     description = (
-                        stripped[2:] if stripped.startswith("- ") else stripped
+                        stripped.removeprefix("- ")
                     )
                     issues.append(
                         {

@@ -151,9 +151,8 @@ def main() -> int:
         print("Fix: Move the import inside a function body, use TYPE_CHECKING,")
         print("     or relocate the module to the correct layer.")
         return 1
-    else:
-        print("OK: No dependency direction violations found.")
-        return 0
+    print("OK: No dependency direction violations found.")
+    return 0
 
 
 if __name__ == "__main__":
