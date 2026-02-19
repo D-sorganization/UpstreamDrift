@@ -1,6 +1,6 @@
 # Competitor Analysis
 
-**Last Updated:** 2025-02-12
+**Last Updated:** 2025-02-24
 
 This document maintains a comprehensive analysis of the golf technology market, focusing on launch monitors, software, biomechanics, and open-source alternatives.
 
@@ -151,6 +151,17 @@ This document maintains a comprehensive analysis of the golf technology market, 
 6.  **Technology Stack:** Proprietary engine.
 7.  **Recent Updates:** Apex engine (next-gen) development.
 8.  **Our Differentiation:** We offer open source physics models versus their proprietary "black box" simulation.
+
+### OpenGolf (Open Source Simulator Projects)
+
+1.  **Core Value Proposition:** Community-driven, free, and customizable simulation software for DIY builds.
+2.  **Key Features:** Full source code access, hardware-agnostic (often supports multiple launch monitors), community plugins.
+3.  **Limitations:** Fragmented ecosystem; setup requires technical expertise; lack of polished assets (courses/graphics) compared to commercial tools.
+4.  **Pricing Model:** Free (Open Source).
+5.  **Target Market:** Developers, Makers, DIY Simulator Enthusiasts.
+6.  **Technology Stack:** Typically Python, Unity, Godot, or Web-based.
+7.  **Recent Updates:** Growing interest in open hardware interfaces (e.g., R10 connectors) and integration with GSPro via bridge tools.
+8.  **Our Differentiation:** We provide the underlying *physics and biomechanics engine* that these open visualization layers can utilize, effectively becoming the high-fidelity "backend" for OpenGolf projects.
 
 ### Sportsbox AI
 
