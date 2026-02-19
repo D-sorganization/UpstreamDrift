@@ -14,7 +14,10 @@ Exit codes:
 
 from __future__ import annotations
 
+import logging
 import sys
+
+logger = logging.getLogger(__name__)
 
 
 def check_import(
@@ -37,16 +40,18 @@ def check_import(
         return True, f"✓ {display_name} (v{version})"
     except ImportError as e:
         return False, f"✗ {display_name}: {e}"
-    except Exception as e:
+    except (RuntimeError, OSError) as e:
         return False, f"✗ {display_name}: Unexpected error - {e}"
 
 
 def main() -> int:
     """Run all verification checks."""
-    print("=" * 60)
-    print("Golf Modeling Suite - Installation Verification")
-    print("=" * 60)
-    print()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    logger.info("=" * 60)
+    logger.info("Golf Modeling Suite - Installation Verification")
+    logger.info("=" * 60)
+    logger.info("")
 
     # Define checks: (display_name, import_path, version_attr)
     checks: list[tuple[str, str | None, str]] = [
@@ -71,18 +76,18 @@ def main() -> int:
         ("jose", None, "__version__"),
     ]
 
-    print("Checking core dependencies:")
-    print("-" * 40)
+    logger.info("Checking core dependencies:")
+    logger.info("-" * 40)
 
     core_results = []
     for display_name, import_path, version_attr in checks:
         success, message = check_import(display_name, import_path, version_attr)
-        print(message)
+        logger.info(message)
         core_results.append(success)
 
-    print()
-    print("Checking Golf Suite modules:")
-    print("-" * 40)
+    logger.info("")
+    logger.info("Checking Golf Suite modules:")
+    logger.info("-" * 40)
 
     # Project-specific modules
     suite_checks: list[tuple[str, str | None]] = [
@@ -101,13 +106,13 @@ def main() -> int:
         success, message = check_import(display_name, import_path, "__version__")
         # Project modules may not have __version__, adjust message
         if success:
-            print(f"✓ {display_name}")
+            logger.info("✓ %s", display_name)
         else:
-            print(f"✗ {display_name}: Import failed")
+            logger.warning("✗ %s: Import failed", display_name)
         suite_results.append(success)
 
-    print()
-    print("=" * 60)
+    logger.info("")
+    logger.info("=" * 60)
 
     # Summary
     core_passed = sum(core_results)
@@ -117,24 +122,24 @@ def main() -> int:
     total_passed = core_passed + suite_passed
     total_checks = core_total + suite_total
 
-    print(f"Core dependencies: {core_passed}/{core_total} passed")
-    print(f"Suite modules:     {suite_passed}/{suite_total} passed")
-    print(f"Overall:           {total_passed}/{total_checks} passed")
-    print()
+    logger.info("Core dependencies: %d/%d passed", core_passed, core_total)
+    logger.info("Suite modules:     %d/%d passed", suite_passed, suite_total)
+    logger.info("Overall:           %d/%d passed", total_passed, total_checks)
+    logger.info("")
 
     if total_passed == total_checks:
-        print("✓ Installation verified successfully!")
-        print()
-        print("You can now run:")
-        print("  python launchers/golf_suite_launcher.py")
-        print("  python -m api.server")
+        logger.info("✓ Installation verified successfully!")
+        logger.info("")
+        logger.info("You can now run:")
+        logger.info("  python launchers/golf_suite_launcher.py")
+        logger.info("  python -m api.server")
         return 0
-    print("✗ Some checks failed.")
-    print()
-    print("Troubleshooting:")
-    print("  1. See docs/troubleshooting/installation.md")
-    print("  2. Try: conda env create -f environment.yml")
-    print("  3. Or:  pip install -e '.[dev,engines]'")
+    logger.warning("✗ Some checks failed.")
+    logger.info("")
+    logger.info("Troubleshooting:")
+    logger.info("  1. See docs/troubleshooting/installation.md")
+    logger.info("  2. Try: conda env create -f environment.yml")
+    logger.info("  3. Or:  pip install -e '.[dev,engines]'")
     return 1
 
 

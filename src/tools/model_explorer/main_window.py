@@ -49,6 +49,7 @@ class URDFGeneratorWindow(QMainWindow):
         super().__init__(parent)
         self.urdf_builder = URDFBuilder()
         self.current_file_path: Path | None = None
+        self._notepad_window: Any | None = None
 
         self._setup_ui()
         self._setup_menu_bar()

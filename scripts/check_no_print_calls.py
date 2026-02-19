@@ -5,9 +5,12 @@ from __future__ import annotations
 
 import argparse
 import ast
+import logging
 import subprocess
 import sys
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_PRODUCTION_ROOTS = (
     "src/api",
@@ -103,8 +106,10 @@ def main() -> int:
         if args.base_ref != "HEAD~1":
             files = changed_python_files(repo_root, "HEAD~1", production_roots)
         else:
-            print(f"FAIL: Unable to compute changed files: {exc}")
+            logger.error("FAIL: Unable to compute changed files: %s", exc)
             return 1
+
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     violations: list[str] = []
     for path in files:
@@ -112,13 +117,13 @@ def main() -> int:
             violations.append(f"{path.relative_to(repo_root)}:{line}")
 
     if violations:
-        print("FAIL: print() usage detected in changed production files:")
+        logger.error("FAIL: print() usage detected in changed production files:")
         for violation in violations:
-            print(f"  {violation}")
-        print("\nUse structured logging via get_logger() instead of print().")
+            logger.error("  %s", violation)
+        logger.error("\nUse structured logging via get_logger() instead of print().")
         return 1
 
-    print("OK: No print() calls found in changed production files.")
+    logger.info("OK: No print() calls found in changed production files.")
     return 0
 
 

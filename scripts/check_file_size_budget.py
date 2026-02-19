@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = Path("scripts/config/file_size_budget.json")
 
@@ -110,16 +113,18 @@ def main() -> int:
         if count > budget:
             violations.append(f"{rel}: {count} lines (budget={budget})")
 
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
     if violations:
-        print("FAIL: file size budget violations detected:\n")
+        logger.error("FAIL: file size budget violations detected:\n")
         for violation in violations:
-            print(f"  {violation}")
-        print(
+            logger.error("  %s", violation)
+        logger.error(
             "\nSplit orchestration/domain/IO concerns or add owned, expiring exception."
         )
         return 1
 
-    print("OK: Changed files are within line-count budget.")
+    logger.info("OK: Changed files are within line-count budget.")
     return 0
 
 
