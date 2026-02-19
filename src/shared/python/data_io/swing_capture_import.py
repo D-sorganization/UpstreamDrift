@@ -405,6 +405,34 @@ class SwingCaptureImporter:
             source_file=str(filepath),
         )
 
+    @staticmethod
+    def _compute_three_point_angle(
+        positions: np.ndarray, frame: int, marker_indices: list[int]
+    ) -> float:
+        """Compute the angle at the vertex of three marker positions.
+
+        Args:
+            positions: Marker position array [frames, markers, 3].
+            frame: Frame index.
+            marker_indices: Three marker indices (endpoint, vertex, endpoint).
+
+        Returns:
+            Angle in radians, or 0.0 if vectors are degenerate.
+        """
+        p1 = positions[frame, marker_indices[0]]
+        p2 = positions[frame, marker_indices[1]]  # vertex
+        p3 = positions[frame, marker_indices[2]]
+
+        v1 = p1 - p2
+        v2 = p3 - p2
+
+        norm1 = np.linalg.norm(v1)
+        norm2 = np.linalg.norm(v2)
+        if norm1 > 1e-10 and norm2 > 1e-10:
+            cos_angle = np.clip(np.dot(v1, v2) / (norm1 * norm2), -1.0, 1.0)
+            return float(np.arccos(cos_angle))
+        return 0.0
+
     def _convert_markers_to_joints(
         self, marker_data: MarkerData, source_file: str
     ) -> JointTrajectory:
@@ -426,7 +454,6 @@ class SwingCaptureImporter:
         joint_angles = []
 
         for mapping in self.marker_mapping:
-            # Check if all required markers exist
             marker_indices = []
             all_found = True
             for mname in mapping.marker_names:
@@ -437,42 +464,23 @@ class SwingCaptureImporter:
                     break
 
             if not all_found or len(marker_indices) < 3:
-                # Skip this joint if markers not found
                 logger.debug(
                     "Skipping joint '%s': markers not found in capture",
                     mapping.joint_name,
                 )
                 continue
 
-            # Compute joint angle for each frame
             angles = np.zeros(n_frames)
             for frame in range(n_frames):
                 if mapping.computation == "angle_3pt":
-                    # Three-point angle computation
-                    p1 = marker_data.positions[frame, marker_indices[0]]
-                    p2 = marker_data.positions[frame, marker_indices[1]]  # vertex
-                    p3 = marker_data.positions[frame, marker_indices[2]]
-
-                    v1 = p1 - p2
-                    v2 = p3 - p2
-
-                    norm1 = np.linalg.norm(v1)
-                    norm2 = np.linalg.norm(v2)
-                    if norm1 > 1e-10 and norm2 > 1e-10:
-                        cos_angle = np.dot(v1, v2) / (norm1 * norm2)
-                        cos_angle = np.clip(cos_angle, -1.0, 1.0)
-                        angles[frame] = np.arccos(cos_angle)
-                    else:
-                        angles[frame] = 0.0
-                else:
-                    # Default to angle_3pt
-                    angles[frame] = 0.0
+                    angles[frame] = self._compute_three_point_angle(
+                        marker_data.positions, frame, marker_indices
+                    )
 
             joint_names.append(mapping.joint_name)
             joint_angles.append(angles)
 
         if not joint_angles:
-            # Fallback: use raw marker data as "joints"
             logger.warning(
                 "No marker-to-joint mappings matched. Using raw marker positions."
             )
@@ -483,7 +491,6 @@ class SwingCaptureImporter:
         positions = np.column_stack(joint_angles)
         velocities = np.gradient(positions, marker_data.times, axis=0)
 
-        # Resample if needed
         if abs(marker_data.frame_rate - self.target_frame_rate) > 1.0:
             positions, velocities, times = self._resample(
                 positions,
