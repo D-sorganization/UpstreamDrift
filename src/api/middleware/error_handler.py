@@ -70,8 +70,6 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:
             raise HTTPException(status_code=501, detail=str(e)) from e
         except Exception as e:
             logger.exception("Unhandled error in %s: %s", func.__name__, e)
-            raise HTTPException(
-                status_code=500, detail="Internal server error"
-            ) from e
+            raise HTTPException(status_code=500, detail="Internal server error") from e
 
     return sync_wrapper

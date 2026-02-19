@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 
 try:
     from upstream_drift_tools.ui.widgets.notepad_widget import NotepadWidget
+
     HAS_NOTEPAD = True
 except ImportError:
     HAS_NOTEPAD = False
@@ -721,13 +722,13 @@ class URDFGeneratorWindow(QMainWindow):
                 # Use UpstreamDrift storage path
                 try:
                     from src.shared.python.paths import get_user_data_dir
+
                     storage_dir = get_user_data_dir() / "notepad"
                 except ImportError:
                     storage_dir = Path.home() / ".upstream_drift" / "notepad"
-                
+
                 self._notepad_window = NotepadWidget(
-                    storage_dir=storage_dir,
-                    app_name="Upstream Drift"
+                    storage_dir=storage_dir, app_name="Upstream Drift"
                 )
 
                 # Position relative to main window

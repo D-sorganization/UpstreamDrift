@@ -398,7 +398,13 @@ def setup_logging(
     fmt = _resolve_format_string(format_string, use_detailed_format, use_simple_format)
 
     config_kwargs = _build_basic_config_kwargs(
-        log_level, fmt, stream, filename, filemode, datefmt, force,
+        log_level,
+        fmt,
+        stream,
+        filename,
+        filemode,
+        datefmt,
+        force,
     )
     logging.basicConfig(**config_kwargs)
 
