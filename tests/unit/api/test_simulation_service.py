@@ -417,7 +417,7 @@ class TestExtractSimulationData:
                     np.array([0.0, 0.1, 0.2]),
                     np.array([[0], [0.1], [0.2]]),
                 ),  # joint_accelerations
-                Exception("control_inputs not available"),  # control_inputs raises
+                KeyError("control_inputs not available"),  # control_inputs raises
             ]
         )
 
@@ -430,7 +430,7 @@ class TestExtractSimulationData:
     def test_handles_missing_data_gracefully(self, simulation_service):
         """Test handling missing data gracefully."""
         mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
-        mock_recorder.get_time_series = MagicMock(side_effect=Exception("No data"))
+        mock_recorder.get_time_series = MagicMock(side_effect=KeyError("No data"))
 
         data = simulation_service._extract_simulation_data(mock_recorder)
 
@@ -482,7 +482,7 @@ class TestPerformAnalysis:
         """Test handling analysis error."""
         mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
         mock_recorder.get_time_series = MagicMock(
-            side_effect=Exception("Analysis failed")
+            side_effect=KeyError("Analysis failed")
         )
 
         config = {"ztcf": True}
