@@ -192,6 +192,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)   |
 | 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)    |
 | 2.4     | 2026-02 | Added Implementation Gaps Report               |
+| 2.5     | 2026-02 | Added Critical Physics Issues                  |
 
 ---
 
