@@ -18,10 +18,34 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from src.shared.python.plotting.base import RecorderInterface
-from src.shared.python.plotting.config import DEFAULT_CONFIG, PlotConfig
+from src.shared.python.plotting.config import PlotConfig, resolve_figure
 
 if TYPE_CHECKING:
     pass
+
+
+def _retrieve_power_data(
+    recorder: RecorderInterface,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Retrieve power data from recorder, computing from torques if needed.
+
+    DRY helper: eliminates duplicated power retrieval logic in
+    plot_power_analysis and plot_cumulative_work.
+
+    Returns:
+        Tuple of (times, powers) or None if no data available.
+    """
+    try:
+        times, powers = recorder.get_time_series("actuator_powers")
+        return np.asarray(times), np.asarray(powers)
+    except (KeyError, AttributeError):
+        pass
+    try:
+        times, torques = recorder.get_time_series("joint_torques")
+        _, velocities = recorder.get_time_series("joint_velocities")
+        return np.asarray(times), np.asarray(torques) * np.asarray(velocities)
+    except (KeyError, AttributeError):
+        return None
 
 
 def plot_energy_overview(
@@ -41,12 +65,7 @@ def plot_energy_overview(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     # Get energy data
     try:
@@ -124,12 +143,7 @@ def plot_energy_breakdown(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     try:
         times, kinetic = recorder.get_time_series("kinetic_energy")
@@ -181,7 +195,7 @@ def plot_power_analysis(
 ) -> tuple[Figure, Axes]:
     """Plot instantaneous power for each actuator.
 
-    Power = torque × angular_velocity
+    Power = torque * angular_velocity
 
     Args:
         recorder: Data source implementing RecorderInterface
@@ -193,26 +207,14 @@ def plot_power_analysis(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
+    fig, ax, config = resolve_figure(ax, config)
 
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    result = _retrieve_power_data(recorder)
+    if result is None:
+        ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
+        return fig, ax
 
-    try:
-        times, powers = recorder.get_time_series("actuator_powers")
-    except (KeyError, AttributeError):
-        # Compute from torques and velocities
-        try:
-            times, torques = recorder.get_time_series("joint_torques")
-            _, velocities = recorder.get_time_series("joint_velocities")
-            torques = np.asarray(torques)
-            velocities = np.asarray(velocities)
-            powers = torques * velocities
-        except (KeyError, AttributeError):
-            ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
-            return fig, ax
+    times, powers = result
 
     if len(times) == 0:
         ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
@@ -250,7 +252,7 @@ def plot_cumulative_work(
 ) -> tuple[Figure, Axes]:
     """Plot cumulative work done by each actuator.
 
-    Work = ∫ power dt
+    Work = integral of power dt
 
     Args:
         recorder: Data source implementing RecorderInterface
@@ -262,25 +264,14 @@ def plot_cumulative_work(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
+    fig, ax, config = resolve_figure(ax, config)
 
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    result = _retrieve_power_data(recorder)
+    if result is None:
+        ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
+        return fig, ax
 
-    try:
-        times, powers = recorder.get_time_series("actuator_powers")
-    except (KeyError, AttributeError):
-        try:
-            times, torques = recorder.get_time_series("joint_torques")
-            _, velocities = recorder.get_time_series("joint_velocities")
-            torques = np.asarray(torques)
-            velocities = np.asarray(velocities)
-            powers = torques * velocities
-        except (KeyError, AttributeError):
-            ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
-            return fig, ax
+    times, powers = result
 
     if len(times) == 0:
         ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
@@ -334,12 +325,7 @@ def plot_energy_flow(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     try:
         times, kinetic = recorder.get_time_series("kinetic_energy")

@@ -19,7 +19,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from src.shared.python.plotting.base import RecorderInterface
-from src.shared.python.plotting.config import DEFAULT_CONFIG, PlotConfig
+from src.shared.python.plotting.config import PlotConfig, resolve_figure
 
 if TYPE_CHECKING:
     pass
@@ -44,12 +44,7 @@ def plot_joint_positions(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     times, positions = recorder.get_time_series("joint_positions")
 
@@ -98,12 +93,7 @@ def plot_joint_velocities(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     times, velocities = recorder.get_time_series("joint_velocities")
 
@@ -154,12 +144,7 @@ def plot_joint_accelerations(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     # Try to get accelerations directly, compute from velocities if not available
     try:
@@ -218,12 +203,7 @@ def plot_club_head_speed(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     times, speeds = recorder.get_time_series("club_head_speed")
 
@@ -282,7 +262,7 @@ def plot_com_trajectory(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
+    config = config or PlotConfig()
 
     times, positions = recorder.get_time_series("com_position")
 
@@ -371,12 +351,7 @@ def plot_phase_diagram(
     Returns:
         Tuple of (figure, axes)
     """
-    config = config or DEFAULT_CONFIG
-
-    if ax is None:
-        fig, ax = config.create_figure()
-    else:
-        fig = ax.figure  # type: ignore[assignment]
+    fig, ax, config = resolve_figure(ax, config)
 
     times, positions = recorder.get_time_series("joint_positions")
     _, velocities = recorder.get_time_series("joint_velocities")

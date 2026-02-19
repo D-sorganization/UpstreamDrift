@@ -291,21 +291,35 @@ class TestStateError:
 class TestContractHelpers:
     """Tests for contract helper functions."""
 
-    def test_check_finite(self):
-        """check_finite should detect NaN and Inf values."""
-        assert check_finite(np.array([1, 2, 3])) is True
-        assert check_finite(np.array([1, np.nan, 3])) is False
-        assert check_finite(np.array([1, np.inf, 3])) is False
-        assert check_finite(np.array([1, -np.inf, 3])) is False
-        assert check_finite(None) is False
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            (np.array([1, 2, 3]), True),
+            (np.array([1, np.nan, 3]), False),
+            (np.array([1, np.inf, 3]), False),
+            (np.array([1, -np.inf, 3]), False),
+            (None, False),
+        ],
+        ids=["finite", "nan", "inf", "neg_inf", "none"],
+    )
+    def test_check_finite(self, value, expected):
+        """check_finite should detect NaN, Inf, and None values."""
+        assert check_finite(value) is expected
 
-    def test_check_positive(self):
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            (5, True),
+            (-5, False),
+            (0, False),
+            (np.array([1, 2, 3]), True),
+            (np.array([1, -2, 3]), False),
+        ],
+        ids=["positive_scalar", "negative_scalar", "zero", "positive_array", "mixed_array"],
+    )
+    def test_check_positive(self, value, expected):
         """check_positive should verify all values are positive."""
-        assert check_positive(5) is True
-        assert check_positive(-5) is False
-        assert check_positive(0) is False
-        assert check_positive(np.array([1, 2, 3])) is True
-        assert check_positive(np.array([1, -2, 3])) is False
+        assert check_positive(value) is expected
 
     def test_check_symmetric(self):
         """check_symmetric should verify matrix symmetry."""
@@ -384,44 +398,31 @@ class TestContractEnableDisable:
 class TestContractViolationErrorHierarchy:
     """Tests for the contract exception hierarchy."""
 
-    def test_precondition_error_is_contract_violation(self):
-        """PreconditionError should be a ContractViolationError."""
-        error = PreconditionError("test")
+    @pytest.mark.parametrize(
+        "error_cls",
+        [PreconditionError, PostconditionError, InvariantError, StateError],
+        ids=["precondition", "postcondition", "invariant", "state"],
+    )
+    def test_error_is_contract_violation(self, error_cls):
+        """All contract errors should be ContractViolationError subclasses."""
+        error = error_cls("test")
         assert isinstance(error, ContractViolationError)
 
-    def test_postcondition_error_is_contract_violation(self):
-        """PostconditionError should be a ContractViolationError."""
-        error = PostconditionError("test")
-        assert isinstance(error, ContractViolationError)
-
-    def test_invariant_error_is_contract_violation(self):
-        """InvariantError should be a ContractViolationError."""
-        error = InvariantError("test")
-        assert isinstance(error, ContractViolationError)
-
-    def test_state_error_is_contract_violation(self):
-        """StateError should be a ContractViolationError."""
-        error = StateError("test")
-        assert isinstance(error, ContractViolationError)
-
-    def test_can_catch_all_contract_violations(self):
+    @pytest.mark.parametrize(
+        "error_cls",
+        [PreconditionError, PostconditionError, InvariantError, StateError],
+        ids=["precondition", "postcondition", "invariant", "state"],
+    )
+    def test_can_catch_as_contract_violation(self, error_cls):
         """Should be able to catch all contract errors with ContractViolationError."""
-        errors = [
-            PreconditionError("test"),
-            PostconditionError("test"),
-            InvariantError("test"),
-            StateError("test"),
-        ]
-
-        for error in errors:
-            try:
-                raise error
-            except ContractViolationError:
-                pass  # Expected
-            except Exception:
-                pytest.fail(
-                    f"{type(error).__name__} was not caught as ContractViolationError"
-                )
+        try:
+            raise error_cls("test")
+        except ContractViolationError:
+            pass  # Expected
+        except Exception:
+            pytest.fail(
+                f"{error_cls.__name__} was not caught as ContractViolationError"
+            )
 
 
 # ─── New: Function-call style contracts ───────────────────────

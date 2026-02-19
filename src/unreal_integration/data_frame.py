@@ -60,7 +60,7 @@ class UnrealDataFrame:
     trajectory: list[TrajectoryPoint] | None = None
     environment: EnvironmentState | None = None
 
-    def __new__(
+    def __new__(  # noqa: PLR0913
         cls,
         timestamp: float,
         frame_number: int,
@@ -77,7 +77,7 @@ class UnrealDataFrame:
         instance = object.__new__(cls)
         return instance
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         timestamp: float,
         frame_number: int,
@@ -223,7 +223,7 @@ class UnrealDataFrame:
         return cls.from_dict(d, validate=validate)
 
     @classmethod
-    def from_physics_state(
+    def from_physics_state(  # noqa: PLR0913
         cls,
         q: np.ndarray,
         v: np.ndarray,

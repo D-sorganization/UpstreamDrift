@@ -28,6 +28,8 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.constants import DEFAULT_FPS, HD_HEIGHT, HD_WIDTH
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,9 +51,9 @@ class VideoConfig:
         show_overlays: Whether to render metric overlays
     """
 
-    width: int = 1920
-    height: int = 1080
-    fps: int = 60
+    width: int = HD_WIDTH
+    height: int = HD_HEIGHT
+    fps: int = DEFAULT_FPS
     format: str = "mp4"
     codec: str | None = None
     show_overlays: bool = True

@@ -115,19 +115,24 @@ def typical_spin() -> NDArray[np.floating]:
 class TestAerodynamicsConfig:
     """Tests for AerodynamicsConfig dataclass."""
 
-    def test_default_all_enabled(self, default_aero_config: AerodynamicsConfig) -> None:
+    @pytest.mark.parametrize(
+        "attr",
+        ["drag_enabled", "lift_enabled", "magnus_enabled", "enabled"],
+    )
+    def test_default_all_enabled(
+        self, default_aero_config: AerodynamicsConfig, attr: str
+    ) -> None:
         """Test default configuration has all effects enabled."""
-        assert default_aero_config.drag_enabled is True
-        assert default_aero_config.lift_enabled is True
-        assert default_aero_config.magnus_enabled is True
-        assert default_aero_config.enabled is True
+        assert getattr(default_aero_config, attr) is True
 
-    def test_master_toggle_disabled(self) -> None:
+    @pytest.mark.parametrize(
+        "check_method",
+        ["is_drag_active", "is_lift_active", "is_magnus_active"],
+    )
+    def test_master_toggle_disabled(self, check_method: str) -> None:
         """Test master toggle disables all effects."""
         config = AerodynamicsConfig(enabled=False)
-        assert config.is_drag_active() is False
-        assert config.is_lift_active() is False
-        assert config.is_magnus_active() is False
+        assert getattr(config, check_method)() is False
 
     def test_individual_toggles(self) -> None:
         """Test individual effect toggles work independently (Orthogonal)."""
@@ -141,16 +146,18 @@ class TestAerodynamicsConfig:
         assert config.is_lift_active() is False
         assert config.is_magnus_active() is False
 
-    def test_tunable_coefficients(self) -> None:
+    @pytest.mark.parametrize(
+        "coeff_name, value",
+        [
+            ("drag_coefficient", 0.30),
+            ("lift_coefficient", 0.20),
+            ("magnus_coefficient", 0.35),
+        ],
+    )
+    def test_tunable_coefficients(self, coeff_name: str, value: float) -> None:
         """Test that aerodynamic coefficients are tunable."""
-        config = AerodynamicsConfig(
-            drag_coefficient=0.30,
-            lift_coefficient=0.20,
-            magnus_coefficient=0.35,
-        )
-        assert config.drag_coefficient == pytest.approx(0.30)
-        assert config.lift_coefficient == pytest.approx(0.20)
-        assert config.magnus_coefficient == pytest.approx(0.35)
+        config = AerodynamicsConfig(**{coeff_name: value})
+        assert getattr(config, coeff_name) == pytest.approx(value)
 
     def test_coefficient_bounds_validation(self) -> None:
         """Test coefficient validation (must be positive)."""
