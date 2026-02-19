@@ -1,6 +1,6 @@
 # Patent & Legal Risk Assessment
 
-**Last Updated:** 2026-02-24
+**Last Updated:** 2026-02-25
 **Status:** ACTIVE
 **Reviewer:** Jules (Patent Reviewer Agent)
 
@@ -10,7 +10,7 @@
 
 | Area                     | Patent(s) / Assignee                                                                           | Our Implementation                                                                                                                                                                                                                              | Risk Level              | Mitigation                                                                                                                                                                 | Issue Tracker |
 | ------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` in `src/shared/python/biomechanics/kinematic_sequence.py`.<br>`efficiency_score` logic in `src/shared/python/analysis/pca_analysis.py` (explicitly scores based on order).                                          | **HIGH (Active)**       | Rename "Kinematic Sequence" to "Segment Timing". **CRITICAL:** Remove `efficiency_score` calculation in `pca_analysis.py` which enforces TPI order. **Legal Review Required.** | [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md) |
+| **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` (alias `SegmentTimingAnalyzer`) in `src/shared/python/biomechanics/kinematic_sequence.py`.<br>`efficiency_score` logic in `src/shared/python/analysis/pca_analysis.py` (explicitly scores based on order).          | **HIGH (Active)**       | **Partial Remediation:** Class renamed to `SegmentTimingAnalyzer`, but backward compatibility alias exists. **CRITICAL:** `pca_analysis.py` still contains infringing `efficiency_score` logic enforcing TPI order. **Legal Review Required.** | [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md) |
 | **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `compute_dtw_distance` in `src/shared/python/validation_pkg/comparative_analysis.py`.<br>Calculates distance metric for swing comparison which is the core of Zepp's patent claims.                                                             | **HIGH (Active)**       | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance). The formula change is partial mitigation but DTW usage remains risk. | [`ISSUE_002`](../../assessments/issues/ISSUE_002_DTW_SCORING.md) |
 | **Swing DNA**            | **Mizuno** (Trademark/Method)<br>Club fitting based on specific metric vector                  | `SwingProfileMetrics` in `src/shared/python/analysis/reporting.py`. Visualization as Radar Chart in `src/shared/python/dashboard/window.py`.                                                                                                    | **VERIFIED REMEDIATED** | Renamed to "Swing Profile". Metrics changed to: Speed, Sequence, Stability, Efficiency, Power (distinct from Mizuno's). Audit confirmed no "Swing DNA" strings in UI code. | N/A           |
 
@@ -18,8 +18,8 @@
 
 | Area                         | Patent(s) / Assignee                                                | Our Implementation                                                                                                       | Risk Level | Mitigation                                                                                                                                                                              | Issue Tracker |
 | ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| **Injury Risk Scoring**      | **TPI**, **Various**<br>Methods for assessing injury risk (X-Factor) | `InjuryRiskScorer` in `src/shared/python/injury/injury_risk.py`. Uses specific thresholds for "X-Factor Stretch" and risk weighting. | **MEDIUM** | Verify thresholds against public academic literature (e.g., McHardy et al., 2006). Cite sources explicitly. Avoid proprietary "Risk Score" formulas if possible.                        | [`ISSUE_016`](../../assessments/issues/ISSUE_016_INJURY_RISK_SCORING.md) |
-| **Gear Effect Simulation**   | **TrackMan**, **Foresight**<br>Methods for simulating ball flight   | `compute_gear_effect_spin` in `src/shared/python/physics/impact_model.py`. Uses heuristic constants `100.0`, `50.0`.     | **MEDIUM** | Document source of constants. If derived from TrackMan data, ensure "fair use" or clean-room implementation.                                                                            | [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md) |
+| **Injury Risk Scoring**      | **TPI**, **Various**<br>Methods for assessing injury risk (X-Factor) | `InjuryRiskScorer` in `src/shared/python/injury/injury_risk.py`. Uses specific thresholds for "X-Factor Stretch" (45-55 deg) and risk weighting. | **MEDIUM** | Verify specific thresholds (`45.0`, `55.0`) against public academic literature. Cite sources explicitly. Avoid proprietary "Risk Score" formulas if possible.                        | [`ISSUE_016`](../../assessments/issues/ISSUE_016_INJURY_RISK_SCORING.md) |
+| **Gear Effect Simulation**   | **TrackMan**, **Foresight**<br>Methods for simulating ball flight   | `compute_gear_effect_spin` in `src/shared/python/physics/impact_model.py`. Uses heuristic constants `100.0`, `50.0`.     | **MEDIUM** | Document source of constants (`100.0`, `50.0`). If derived from TrackMan data, ensure "fair use" or clean-room implementation.                                                                            | [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md) |
 | **Ball Flight Coefficients** | **Unknown / Proprietary SDKs**<br>Specific aerodynamic coefficients | `BallProperties` in `src/shared/python/physics/ball_flight_physics.py`. Uses specific values (`cd0=0.21`, `cl1=0.38`).   | **MEDIUM** | Citation missing. If these match a specific competitor's SDK or proprietary research, it could be infringement. **Action:** Cite source (e.g., Smits & Smith) or externalize to config. | [`ISSUE_046`](../../assessments/issues/ISSUE_046_BALL_FLIGHT_COEFFICIENTS.md) |
 
 ### Low Risk Areas
@@ -41,8 +41,8 @@
 
 - **Risk**: `KinematicSequenceAnalyzer.analyze` and `efficiency_score` calculation.
 - **Finding**:
-    - `pca_analysis.py` explicitly calculates `efficiency_score = matches / len(expected_order)`. This is a DIRECT implementation of TPI's patented efficiency metric based on sequence order.
-    - `kinematic_sequence.py` defines `expected_order = ["Pelvis", "Torso", "Arm", "Club"]`.
+    - `kinematic_sequence.py`: Class renamed to `SegmentTimingAnalyzer`. Docstring claims no proprietary methodology.
+    - **BUT** `pca_analysis.py` explicitly calculates `efficiency_score = matches / len(expected_order)`. This is a DIRECT implementation of TPI's patented efficiency metric based on sequence order.
 - **Action**: **CRITICAL**. Remove the `efficiency_score` logic in `pca_analysis.py` that relies on order. The energy-based `efficiency_score` in `reporting.py` is safe.
 - **Tracker**: [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md)
 
@@ -57,16 +57,16 @@
 ### `src/shared/python/injury/injury_risk.py`
 
 - **Risk**: `InjuryRiskScorer` and "X-Factor Stretch"
-- **Finding**: Uses specific thresholds (e.g. X-Factor Stretch > 55 deg = High Risk) and weighted scoring.
-- **Context**: "X-Factor" and specific injury risk algorithms are often subject to patents (e.g., TPI).
+- **Finding**: Uses specific hardcoded thresholds: `threshold_safe=45.0`, `threshold_high=55.0` degrees for "X-Factor Stretch".
+- **Context**: "X-Factor" and these specific thresholds (often McLean/TPI associated) are subject to patents/copyright.
 - **Action**: Verify thresholds against public domain literature. Ensure "Risk Score" is generic.
 - **Tracker**: [`ISSUE_016`](../../assessments/issues/ISSUE_016_INJURY_RISK_SCORING.md)
 
 ### `src/shared/python/physics/impact_model.py`
 
 - **Risk**: `compute_gear_effect_spin`
-- **Finding**: Uses hardcoded scalars `h_scale=100.0`, `v_scale=50.0`.
-- **Context**: "Magic numbers" suggest empirical tuning against a reference (likely TrackMan).
+- **Finding**: Uses hardcoded scalars `gear_effect_h_scale=100.0`, `gear_effect_v_scale=50.0`.
+- **Context**: "Magic numbers" suggest empirical tuning against a reference (likely TrackMan/Foresight).
 - **Action**: Validate these constants against open literature (e.g., Cochran & Stobbs) to establish independent derivation.
 - **Tracker**: [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md)
 
@@ -92,7 +92,7 @@
 | **Kinematic Sequence** | TPI (Common Law?) | **Active**              | "Segment Timing" | Term is widely used in academia, might be genericized, but risky in commercial product. |
 | **Smash Factor**       | TrackMan (Orig.)  | **Generic**             | Keep             | Widely accepted as generic golf term now.                                               |
 | **TrackMan**           | TrackMan A/S      | **Ref Only**            | N/A              | Used only for data validation references. Acceptable nominative use.                    |
-| **X-Factor**           | TPI / Various     | **Medium Risk**         | "Torso-Pelvis Separation" | Used in `injury_risk.py`. Consider renaming. |
+| **X-Factor**           | TPI / Various     | **Medium Risk**         | "Torso-Pelvis Separation" | Used in `injury_risk.py` with specific thresholds. Consider renaming. |
 
 ## 4. Prior Art & Defense
 
@@ -105,13 +105,13 @@
 ## 5. Risk Mitigation Actions
 
 1.  **Kinematic Sequence**:
-    - [ ] **Refactor**: Rename `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer`.
-    - [ ] **Code Change**: Remove `efficiency_score` calculation in `pca_analysis.py`.
+    - [x] **Refactor**: Rename `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer` (Done in `kinematic_sequence.py`).
+    - [ ] **Code Change**: Remove `efficiency_score` calculation in `pca_analysis.py` (Pending).
 2.  **DTW Scoring**:
     - [ ] **Refactor**: Abstract the scoring mechanism.
     - [ ] **Alternative**: Implement `KeyframeSimilarity` (P-positions) as default.
 3.  **Injury Risk**:
-    - [ ] **Review**: Verify "X-Factor Stretch" thresholds.
+    - [ ] **Review**: Verify "X-Factor Stretch" thresholds (`45.0`, `55.0`).
     - [ ] **Rename**: Consider "Torso-Pelvis Separation" instead of "X-Factor".
 4.  **Ball Flight**:
     - [ ] **Documentation**: Cite source for `0.21` etc. coefficients.
@@ -120,6 +120,10 @@
 
 ## 6. Change Log
 
+- **2026-02-25**: Updated review (Audit).
+    - Confirmed specific "Magic Numbers" in `impact_model.py` (`100.0`, `50.0`) and `injury_risk.py` (`45.0`, `55.0`).
+    - Highlighted that `pca_analysis.py` remains a CRITICAL risk despite `kinematic_sequence.py` rename.
+    - Updated Status to "Partial Remediation" for Kinematic Sequence.
 - **2026-02-24**: Updated review.
     - Added **Injury Risk Scoring** (Medium Risk) due to `injury_risk.py`.
     - Flagged "X-Factor" as potential trademark/patent risk.
