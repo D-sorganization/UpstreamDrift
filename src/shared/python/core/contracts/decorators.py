@@ -53,11 +53,11 @@ def precondition(
         def sqrt(x: float) -> float:
             return math.sqrt(x)
     """
-    from .level import DBC_LEVEL  # defer to capture runtime changes
+    from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the function with precondition checking logic."""
-        if not enabled or DBC_LEVEL == ContractLevel.OFF:
+        if not enabled or get_contract_level() == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
@@ -125,11 +125,11 @@ def postcondition(
         def compute_acceleration(self) -> np.ndarray:
             ...
     """
-    from .level import DBC_LEVEL  # defer to capture runtime changes
+    from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the function with postcondition checking logic."""
-        if not enabled or DBC_LEVEL == ContractLevel.OFF:
+        if not enabled or get_contract_level() == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
@@ -190,11 +190,11 @@ def require_state(
             ...
     """
     from .exceptions import StateError
-    from .level import DBC_LEVEL  # defer to capture runtime changes
+    from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the method with state validation logic."""
-        if DBC_LEVEL == ContractLevel.OFF:
+        if get_contract_level() == ContractLevel.OFF:
             return func
 
         @functools.wraps(func)
@@ -202,14 +202,15 @@ def require_state(
             """Verify required object state before executing the wrapped method."""
             if not state_check(self):
                 operation = operation_desc or func.__name__
-                if DBC_LEVEL == ContractLevel.ENFORCE:
+                current_level = get_contract_level()
+                if current_level == ContractLevel.ENFORCE:
                     raise StateError(
                         f"Cannot perform '{operation}' - engine not {state_name}",
                         current_state="not " + state_name,
                         required_state=state_name,
                         operation=func.__qualname__,
                     )
-                if DBC_LEVEL == ContractLevel.WARN:
+                if current_level == ContractLevel.WARN:
                     logger.warning(
                         "[DbC State] Cannot perform '%s' - not %s",
                         operation,

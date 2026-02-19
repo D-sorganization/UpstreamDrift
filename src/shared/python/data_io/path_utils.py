@@ -17,9 +17,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Cache for path resolutions
-_REPO_ROOT: Path | None = None
-_SRC_ROOT: Path | None = None
+# Cache for path resolutions (mutable holder avoids 'global' keyword)
+_path_cache: dict[str, Path | None] = {"repo_root": None, "src_root": None}
 
 
 def get_repo_root() -> Path:
@@ -32,8 +31,7 @@ def get_repo_root() -> Path:
         repo_root = get_repo_root()
         data_dir = repo_root / "data"
     """
-    global _REPO_ROOT
-    if _REPO_ROOT is None:
+    if _path_cache["repo_root"] is None:
         # Start from this file and go up to find repo root.
         # Prefer .git directory (unique to repo root) over pyproject.toml
         # since pyproject.toml can exist in subdirectories too.
@@ -41,8 +39,8 @@ def get_repo_root() -> Path:
         pyproject_candidate: Path | None = None
         while current.parent != current:
             if (current / ".git").exists():
-                _REPO_ROOT = current
-                logger.debug(f"Repository root (via .git): {_REPO_ROOT}")
+                _path_cache["repo_root"] = current
+                logger.debug(f"Repository root (via .git): {_path_cache['repo_root']}")
                 break
             if (current / "pyproject.toml").exists():
                 # Track the highest pyproject.toml seen (overwrite each time)
@@ -50,14 +48,18 @@ def get_repo_root() -> Path:
             current = current.parent
         else:
             if pyproject_candidate is not None:
-                _REPO_ROOT = pyproject_candidate
-                logger.debug(f"Repository root (via pyproject.toml): {_REPO_ROOT}")
+                _path_cache["repo_root"] = pyproject_candidate
+                logger.debug(
+                    f"Repository root (via pyproject.toml): {_path_cache['repo_root']}"
+                )
             else:
                 # Fallback: assume standard structure
-                _REPO_ROOT = Path(__file__).resolve().parents[3]
-                logger.warning(f"Could not find .git, using fallback: {_REPO_ROOT}")
+                _path_cache["repo_root"] = Path(__file__).resolve().parents[3]
+                logger.warning(
+                    f"Could not find .git, using fallback: {_path_cache['repo_root']}"
+                )
 
-    return _REPO_ROOT
+    return _path_cache["repo_root"]  # type: ignore[return-value]
 
 
 def get_src_root() -> Path:
@@ -70,12 +72,11 @@ def get_src_root() -> Path:
         src_root = get_src_root()
         shared_dir = src_root / "shared"
     """
-    global _SRC_ROOT
-    if _SRC_ROOT is None:
-        _SRC_ROOT = get_repo_root() / "src"
-        logger.debug(f"Source root: {_SRC_ROOT}")
+    if _path_cache["src_root"] is None:
+        _path_cache["src_root"] = get_repo_root() / "src"
+        logger.debug(f"Source root: {_path_cache['src_root']}")
 
-    return _SRC_ROOT
+    return _path_cache["src_root"]  # type: ignore[return-value]
 
 
 def get_tests_root() -> Path:

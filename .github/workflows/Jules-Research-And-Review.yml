@@ -1,0 +1,160 @@
+name: Jules Research & Review (Consolidated)
+
+# Consolidates: Competitor Analyst, Ideas Generator, Patent Reviewer,
+# Layman's Terms Writer, Critics Comments Writer
+# Each task type is selectable via workflow_dispatch input.
+
+on:
+  workflow_call:
+    inputs:
+      task_type:
+        description: "Research task type"
+        required: false
+        type: string
+        default: "all"
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: "Research task type to run"
+        required: true
+        type: choice
+        options:
+          - all
+          - competitor-analysis
+          - ideas-generation
+          - patent-review
+          - laymans-terms
+          - critics-comments
+      target_file:
+        description: "Specific file to target (for laymans-terms/critics-comments)"
+        required: false
+        type: string
+  schedule:
+    - cron: "0 2 * * 1" # Weekly on Mondays at 2 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  research-task:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        task:
+          - competitor-analysis
+          - ideas-generation
+          - patent-review
+          - laymans-terms
+          - critics-comments
+    steps:
+      - name: Check if task should run
+        id: check
+        run: |
+          TASK_TYPE="${{ inputs.task_type || 'all' }}"
+          CURRENT="${{ matrix.task }}"
+          if [ "$TASK_TYPE" = "all" ] || [ "$TASK_TYPE" = "$CURRENT" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.should_run == 'true'
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.should_run == 'true'
+        with:
+          node-version: "20"
+
+      - name: Build prompt for task
+        if: steps.check.outputs.should_run == 'true'
+        id: prompt
+        run: |
+          TASK="${{ matrix.task }}"
+          case "$TASK" in
+            competitor-analysis)
+              PROMPT="You are the COMPETITOR ANALYST. Update docs/competitive_analysis/COMPETITOR_ANALYSIS.md with current market intelligence on golf technology competitors (TrackMan, Foresight, FlightScope, etc). DO NOT MAKE CODE CHANGES."
+              ;;
+            ideas-generation)
+              PROMPT="You are the IDEAS GENERATOR. Create or update docs/ideas/RESEARCH_IDEAS.md with new research directions for the Golf Modeling Suite covering biomechanics, ball flight, equipment, simulation, and control theory."
+              ;;
+            patent-review)
+              PROMPT="You are the PATENT REVIEWER. Review the codebase for IP risk and update docs/legal/PATENT_REVIEW.md. Identify any algorithms that may overlap with existing patents in golf technology."
+              ;;
+            laymans-terms)
+              PROMPT="You are the LAYMAN'S TERMS WRITER. Find .qmd files and add accessible 'In Plain English' sections explaining complex physics and biomechanics concepts."
+              ;;
+            critics-comments)
+              PROMPT="You are the CRITICS COMMENTS WRITER. Review recent changes and add constructive critique sections to .qmd documentation files."
+              ;;
+          esac
+          # Write prompt to file to avoid shell escaping issues
+          echo "$PROMPT" > /tmp/jules_prompt.txt
+          echo "task_name=$TASK" >> $GITHUB_OUTPUT
+
+      - name: Run Jules Session
+        if: steps.check.outputs.should_run == 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          set -e
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping."
+            exit 0
+          fi
+
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository not found in Jules sources."
+            exit 0
+          fi
+
+          PROMPT=$(cat /tmp/jules_prompt.txt)
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: { source: $source, githubRepoContext: { startingBranch: "main" } },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          SESSION_ID=$(jq -r '.name' /tmp/session_response.json)
+          echo "Created session: $SESSION_ID for ${{ steps.prompt.outputs.task_name }}"
+
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            STATE=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID" | jq -r '.state')
+            echo "State: $STATE (${ELAPSED}s)"
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED") echo "Done!"; break ;;
+              "FAILED"|"CANCELLED") echo "::error::Session $STATE"; exit 1 ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
