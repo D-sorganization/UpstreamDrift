@@ -49,6 +49,7 @@ class URDFGeneratorWindow(QMainWindow):
         super().__init__(parent)
         self.urdf_builder = URDFBuilder()
         self.current_file_path: Path | None = None
+        self._notepad_window: Any | None = None
 
         self._setup_ui()
         self._setup_menu_bar()
@@ -718,7 +719,7 @@ class URDFGeneratorWindow(QMainWindow):
 
         try:
             # Check if we already have a notepad window open
-            if not hasattr(self, "_notepad_window") or self._notepad_window is None:
+            if self._notepad_window is None:
                 # Use UpstreamDrift storage path
                 try:
                     from src.shared.python.paths import get_user_data_dir
