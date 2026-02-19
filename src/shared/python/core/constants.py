@@ -60,6 +60,32 @@ GOLF_BALL_RADIUS_FLOAT: float = float(GOLF_BALL_RADIUS_M)
 GOLF_BALL_DIAMETER_FLOAT: float = float(GOLF_BALL_DIAMETER_M)
 GOLF_BALL_MOMENT_INERTIA_FLOAT: float = float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
 
+# ============================================================
+# Display / Rendering Constants
+# ============================================================
+# Standard video resolutions used across video export, GUI rendering, and
+# offscreen render contexts. Centralizing these eliminates the 21+ instances
+# of bare 1920/1080/1024 literals scattered across the codebase.
+
+HD_WIDTH: int = 1920
+"""Full HD width in pixels (1080p)."""
+HD_HEIGHT: int = 1080
+"""Full HD height in pixels (1080p)."""
+OFFSCREEN_RENDER_SIZE: int = 1024
+"""Default offscreen render buffer size in pixels (square)."""
+SHADOW_MAP_SIZE: int = 4096
+"""Default MuJoCo shadow map resolution in pixels."""
+DEFAULT_FPS: int = 60
+"""Default frames per second for video export and real-time rendering."""
+MAX_COLOR_CHANNEL: int = 255
+"""Maximum value for an 8-bit color channel (RGB)."""
+FULL_ROTATION_DEG: int = 360
+"""Full rotation in degrees."""
+HALF_ROTATION_DEG: int = 180
+"""Half rotation in degrees (pi radians)."""
+DEFAULT_MAX_DISPLAY_JOINTS: int = 6
+"""Default maximum number of joints shown in a single plot (for readability)."""
+
 SUITE_ROOT = Path(__file__).resolve().parent.parent.parent
 ENGINES_ROOT = SUITE_ROOT / "engines"
 SHARED_ROOT = SUITE_ROOT / "shared"

@@ -357,39 +357,30 @@ class TestPhysicsValidation:
 class TestForceCalculations:
     """Tests for force calculation methods."""
 
-    def test_forces_include_gravity(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    @pytest.mark.parametrize(
+        "force_name",
+        ["gravity", "drag", "magnus"],
+    )
+    def test_forces_present_in_trajectory(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        force_name: str,
     ) -> None:
-        """Test that forces include gravity."""
+        """Test that expected force components are present in trajectory."""
         trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
         forces = trajectory[5].forces
+        assert force_name in forces
+        magnitude = np.linalg.norm(forces[force_name])
+        assert magnitude > 0
 
-        assert "gravity" in forces
-        # Gravity should be negative z
+    def test_gravity_direction(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that gravity force is in negative z direction."""
+        trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+        forces = trajectory[5].forces
         assert forces["gravity"][2] < 0
-
-    def test_forces_include_drag(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
-    ) -> None:
-        """Test that forces include drag when moving."""
-        trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
-        forces = trajectory[5].forces
-
-        assert "drag" in forces
-        drag_magnitude = np.linalg.norm(forces["drag"])
-        assert drag_magnitude > 0
-
-    def test_magnus_force_with_spin(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
-    ) -> None:
-        """Test that Magnus force is present with spin."""
-        trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
-        forces = trajectory[5].forces
-
-        assert "magnus" in forces
-        magnus_magnitude = np.linalg.norm(forces["magnus"])
-        # Should have some Magnus force with 2500 rpm spin
-        assert magnus_magnitude > 0
 
     def test_no_magnus_without_spin(self, simulator: BallFlightSimulator) -> None:
         """Test that Magnus force is zero without spin."""
@@ -433,42 +424,41 @@ class TestForceCalculations:
 class TestMetricCalculations:
     """Tests for trajectory metric calculations."""
 
-    def test_carry_distance_positive(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    @pytest.mark.parametrize(
+        "metric_method",
+        [
+            "calculate_carry_distance",
+            "calculate_max_height",
+            "calculate_flight_time",
+        ],
+    )
+    def test_metrics_positive_for_forward_flight(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        metric_method: str,
     ) -> None:
-        """Test carry distance is positive for forward flight."""
+        """Test that all trajectory metrics are positive for a forward flight."""
         trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
-        carry = simulator.calculate_carry_distance(trajectory)
+        result = getattr(simulator, metric_method)(trajectory)
+        assert result > 0
 
-        assert carry > 0
-
-    def test_max_height_positive(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
-    ) -> None:
-        """Test max height is positive for upward launch."""
-        trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
-        max_height = simulator.calculate_max_height(trajectory)
-
-        assert max_height > 0
-
-    def test_flight_time_positive(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
-    ) -> None:
-        """Test flight time is positive."""
-        trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
-        flight_time = simulator.calculate_flight_time(trajectory)
-
-        assert flight_time > 0
-
+    @pytest.mark.parametrize(
+        "metric_method",
+        [
+            "calculate_carry_distance",
+            "calculate_max_height",
+            "calculate_flight_time",
+        ],
+    )
     def test_empty_trajectory_returns_zero(
-        self, simulator: BallFlightSimulator
+        self,
+        simulator: BallFlightSimulator,
+        metric_method: str,
     ) -> None:
         """Test that empty trajectory returns zero for all metrics."""
         empty_trajectory: list[TrajectoryPoint] = []
-
-        assert simulator.calculate_carry_distance(empty_trajectory) == 0.0
-        assert simulator.calculate_max_height(empty_trajectory) == 0.0
-        assert simulator.calculate_flight_time(empty_trajectory) == 0.0
+        assert getattr(simulator, metric_method)(empty_trajectory) == 0.0
 
 
 # =============================================================================
@@ -479,20 +469,28 @@ class TestMetricCalculations:
 class TestTrajectoryAnalysis:
     """Tests for comprehensive trajectory analysis."""
 
-    def test_analyze_trajectory_returns_dict(
-        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
     ) -> None:
-        """Test that analysis returns dictionary with expected keys."""
+        """Test that analysis returns dictionary with expected key."""
         trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
         analysis = simulator.analyze_trajectory(trajectory)
-
         assert isinstance(analysis, dict)
-        assert "carry_distance" in analysis
-        assert "max_height" in analysis
-        assert "flight_time" in analysis
-        assert "landing_angle" in analysis
-        assert "apex_time" in analysis
-        assert "trajectory_points" in analysis
+        assert expected_key in analysis
 
     def test_apex_time_before_landing(
         self, simulator: BallFlightSimulator, driver_launch: LaunchConditions

@@ -25,6 +25,20 @@ class TaskType(Enum):
     SOFT = auto()  # Minimize ||A @ x - b||^2_W (soft objective)
 
 
+@dataclass(frozen=True)
+class TaskGains:
+    """PD gains and weighting parameters for task creation.
+
+    Groups the common (weight, priority, gain_p, gain_d) tuple shared by
+    create_com_task, create_posture_task, and create_ee_task, reducing PLR0913.
+    """
+
+    weight: float = 1.0
+    priority: int = 2
+    gain_p: float = 100.0
+    gain_d: float = 20.0
+
+
 @dataclass
 class Task:
     """Task descriptor for whole-body control.
@@ -143,10 +157,7 @@ def create_com_task(
     com_target: NDArray[np.float64],
     com_velocity: NDArray[np.float64],
     com_velocity_target: NDArray[np.float64] | None = None,
-    weight: float = 1.0,
-    priority: int = 2,
-    gain_p: float = 100.0,
-    gain_d: float = 20.0,
+    gains: TaskGains | None = None,
 ) -> Task:
     """Create a center-of-mass tracking task.
 
@@ -156,14 +167,15 @@ def create_com_task(
         com_target: Target CoM position (3,).
         com_velocity: Current CoM velocity (3,).
         com_velocity_target: Target CoM velocity (3,). Zero if None.
-        weight: Task weight.
-        priority: Task priority.
-        gain_p: Proportional gain.
-        gain_d: Derivative gain.
+        gains: TaskGains grouping weight/priority/gain_p/gain_d.
+            Defaults to TaskGains(weight=1.0, priority=2).
 
     Returns:
         Task configured for CoM tracking.
     """
+    if gains is None:
+        gains = TaskGains(weight=1.0, priority=2, gain_p=100.0, gain_d=20.0)
+
     com_current = np.asarray(com_current, dtype=np.float64)
     com_target = np.asarray(com_target, dtype=np.float64)
     com_velocity = np.asarray(com_velocity, dtype=np.float64)
@@ -177,17 +189,17 @@ def create_com_task(
     error_p = com_target - com_current
     error_v = com_velocity_target - com_velocity
 
-    target_accel = gain_p * error_p + gain_d * error_v
+    target_accel = gains.gain_p * error_p + gains.gain_d * error_v
 
     return Task(
         name="com_tracking",
         task_type=TaskType.SOFT,
-        priority=priority,
+        priority=gains.priority,
         jacobian=jacobian_com,
         target=target_accel,
-        weight=np.full(3, weight),
-        gain_p=gain_p,
-        gain_d=gain_d,
+        weight=np.full(3, gains.weight),
+        gain_p=gains.gain_p,
+        gain_d=gains.gain_d,
     )
 
 
@@ -196,11 +208,8 @@ def create_posture_task(
     q_current: NDArray[np.float64],
     q_target: NDArray[np.float64],
     v_current: NDArray[np.float64],
-    weight: float = 0.1,
-    priority: int = 4,
-    gain_p: float = 50.0,
-    gain_d: float = 10.0,
     mask: NDArray[np.bool_] | None = None,
+    gains: TaskGains | None = None,
 ) -> Task:
     """Create a posture regularization task.
 
@@ -209,15 +218,16 @@ def create_posture_task(
         q_current: Current joint positions.
         q_target: Target joint positions.
         v_current: Current joint velocities.
-        weight: Task weight.
-        priority: Task priority.
-        gain_p: Proportional gain.
-        gain_d: Derivative gain.
         mask: Boolean mask for which joints to include.
+        gains: TaskGains grouping weight/priority/gain_p/gain_d.
+            Defaults to TaskGains(weight=0.1, priority=4, gain_p=50.0, gain_d=10.0).
 
     Returns:
         Task configured for posture regularization.
     """
+    if gains is None:
+        gains = TaskGains(weight=0.1, priority=4, gain_p=50.0, gain_d=10.0)
+
     q_current = np.asarray(q_current, dtype=np.float64)
     q_target = np.asarray(q_target, dtype=np.float64)
     v_current = np.asarray(v_current, dtype=np.float64)
@@ -241,17 +251,17 @@ def create_posture_task(
     error_p = q_error[mask]
     error_v = (v_target - v_current)[mask]
 
-    target_accel = gain_p * error_p + gain_d * error_v
+    target_accel = gains.gain_p * error_p + gains.gain_d * error_v
 
     return Task(
         name="posture",
         task_type=TaskType.SOFT,
-        priority=priority,
+        priority=gains.priority,
         jacobian=jacobian,
         target=target_accel,
-        weight=np.full(n_active, weight),
-        gain_p=gain_p,
-        gain_d=gain_d,
+        weight=np.full(n_active, gains.weight),
+        gain_p=gains.gain_p,
+        gain_d=gains.gain_d,
     )
 
 
@@ -261,11 +271,8 @@ def create_ee_task(
     ee_target: NDArray[np.float64],
     ee_velocity: NDArray[np.float64],
     ee_velocity_target: NDArray[np.float64] | None = None,
-    weight: float = 1.0,
-    priority: int = 3,
-    gain_p: float = 100.0,
-    gain_d: float = 20.0,
     position_only: bool = False,
+    gains: TaskGains | None = None,
 ) -> Task:
     """Create an end-effector tracking task.
 
@@ -275,15 +282,16 @@ def create_ee_task(
         ee_target: Target EE pose.
         ee_velocity: Current EE velocity (twist (6,) or linear (3,)).
         ee_velocity_target: Target EE velocity. Zero if None.
-        weight: Task weight.
-        priority: Task priority.
-        gain_p: Proportional gain.
-        gain_d: Derivative gain.
         position_only: Use only position, ignore orientation.
+        gains: TaskGains grouping weight/priority/gain_p/gain_d.
+            Defaults to TaskGains(weight=1.0, priority=3).
 
     Returns:
         Task configured for end-effector tracking.
     """
+    if gains is None:
+        gains = TaskGains(weight=1.0, priority=3, gain_p=100.0, gain_d=20.0)
+
     jacobian_ee = np.asarray(jacobian_ee, dtype=np.float64)
     ee_current = np.asarray(ee_current, dtype=np.float64)
     ee_target = np.asarray(ee_target, dtype=np.float64)
@@ -311,17 +319,17 @@ def create_ee_task(
     error_p = ee_target - ee_current
     error_v = ee_velocity_target - ee_velocity
 
-    target_accel = gain_p * error_p + gain_d * error_v
+    target_accel = gains.gain_p * error_p + gains.gain_d * error_v
 
     return Task(
         name="end_effector",
         task_type=TaskType.SOFT,
-        priority=priority,
+        priority=gains.priority,
         jacobian=jacobian_ee,
         target=target_accel,
-        weight=np.full(task_dim, weight),
-        gain_p=gain_p,
-        gain_d=gain_d,
+        weight=np.full(task_dim, gains.weight),
+        gain_p=gains.gain_p,
+        gain_d=gains.gain_d,
     )
 
 
@@ -367,7 +375,7 @@ def create_joint_limit_task(
     q_max: NDArray[np.float64],
     margin: float = 0.1,
     priority: int = 1,
-    gain: float = 100.0,
+    gain: float = 100.0,  # noqa: PLR0913
 ) -> Task | None:
     """Create joint limit avoidance task.
 

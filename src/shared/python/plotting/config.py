@@ -217,3 +217,31 @@ class PlotConfig:
 # Module-level default
 # ---------------------------------------------------------------------------
 DEFAULT_CONFIG = PlotConfig()
+
+
+def resolve_figure(
+    ax: Any | None,
+    config: PlotConfig | None = None,
+) -> tuple[Figure, Any, PlotConfig]:
+    """Resolve figure, axes, and config from optional parameters.
+
+    This is a DRY helper that eliminates the repeated pattern:
+        config = config or DEFAULT_CONFIG
+        if ax is None:
+            fig, ax = config.create_figure()
+        else:
+            fig = ax.figure
+
+    Args:
+        ax: Optional Axes to plot on. If None, creates a new figure.
+        config: Optional PlotConfig. If None, uses DEFAULT_CONFIG.
+
+    Returns:
+        Tuple of (figure, axes, resolved_config).
+    """
+    config = config or DEFAULT_CONFIG
+    if ax is None:
+        fig, ax = config.create_figure()
+    else:
+        fig = ax.figure
+    return fig, ax, config

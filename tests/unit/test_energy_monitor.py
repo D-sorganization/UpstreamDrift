@@ -33,20 +33,29 @@ class TestEnergySnapshot:
         assert snapshot.kinetic == 5.0
         assert snapshot.potential == 10.0
 
-    def test_total_energy_property(self):
-        """Test that total property returns KE + PE."""
-        snapshot = EnergySnapshot(time=0.0, kinetic=3.0, potential=7.0)
-        assert snapshot.total == 10.0
-
-    def test_total_energy_with_negative_potential(self):
-        """Test total energy with negative potential energy."""
-        snapshot = EnergySnapshot(time=0.0, kinetic=15.0, potential=-5.0)
-        assert snapshot.total == 10.0
-
-    def test_zero_energy(self):
-        """Test with zero energy components."""
-        snapshot = EnergySnapshot(time=0.0, kinetic=0.0, potential=0.0)
-        assert snapshot.total == 0.0
+    @pytest.mark.parametrize(
+        "kinetic, potential, expected_total",
+        [
+            (3.0, 7.0, 10.0),
+            (15.0, -5.0, 10.0),
+            (0.0, 0.0, 0.0),
+            (5.0, 5.0, 10.0),
+            (100.0, 0.0, 100.0),
+            (0.0, 100.0, 100.0),
+        ],
+        ids=[
+            "positive_both",
+            "negative_potential",
+            "zero_energy",
+            "equal_components",
+            "kinetic_only",
+            "potential_only",
+        ],
+    )
+    def test_total_energy(self, kinetic, potential, expected_total):
+        """Test that total property returns KE + PE for various inputs."""
+        snapshot = EnergySnapshot(time=0.0, kinetic=kinetic, potential=potential)
+        assert snapshot.total == expected_total
 
     def test_total_is_computed_property(self):
         """Test that total is a computed property, not stored."""

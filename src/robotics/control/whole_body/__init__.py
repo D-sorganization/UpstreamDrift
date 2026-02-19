@@ -13,6 +13,7 @@ from src.robotics.control.whole_body.qp_solver import (
 )
 from src.robotics.control.whole_body.task import (
     Task,
+    TaskGains,
     TaskType,
     create_com_task,
     create_ee_task,
@@ -26,6 +27,7 @@ from src.robotics.control.whole_body.wbc_controller import (
 
 __all__ = [
     "Task",
+    "TaskGains",
     "TaskType",
     "create_com_task",
     "create_posture_task",

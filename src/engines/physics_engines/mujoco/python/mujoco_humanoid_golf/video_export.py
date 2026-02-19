@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any  # noqa: ICN003
 import mujoco as mj
 import numpy as np
 
+from src.shared.python.core.constants import DEFAULT_FPS, HD_HEIGHT, HD_WIDTH
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ class VideoResolution(Enum):
     """Standard video resolutions."""
 
     HD_720 = (1280, 720)
-    HD_1080 = (1920, 1080)
+    HD_1080 = (HD_WIDTH, HD_HEIGHT)
     UHD_4K = (3840, 2160)
     CUSTOM = (0, 0)  # User-defined
 
@@ -59,13 +60,13 @@ class VideoResolution(Enum):
 class VideoExporter:
     """Export MuJoCo simulations as video files."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         model: mj.MjModel,
         data: mj.MjData,
-        width: int = 1920,
-        height: int = 1080,
-        fps: int = 60,
+        width: int = HD_WIDTH,
+        height: int = HD_HEIGHT,
+        fps: int = DEFAULT_FPS,
         format: VideoFormat = VideoFormat.MP4,
     ) -> None:
         """Initialize video exporter.
@@ -195,7 +196,7 @@ class VideoExporter:
             self.writer.release()
             self.writer = None
 
-    def export_recording(
+    def export_recording(  # noqa: PLR0913
         self,
         output_path: str,
         initial_state: np.ndarray,
@@ -375,16 +376,16 @@ def _build_frame_metrics(
     return metrics
 
 
-def export_simulation_video(
+def export_simulation_video(  # noqa: PLR0913
     model: mj.MjModel,
     data: mj.MjData,
     output_path: str,
     recorded_states: np.ndarray,
     recorded_controls: np.ndarray,
     times: np.ndarray,
-    width: int = 1920,
-    height: int = 1080,
-    fps: int = 60,
+    width: int = HD_WIDTH,
+    height: int = HD_HEIGHT,
+    fps: int = DEFAULT_FPS,
     camera_id: int | None = None,
     show_metrics: bool = True,
     progress_callback: Callable[[int, int], None] | None = None,
