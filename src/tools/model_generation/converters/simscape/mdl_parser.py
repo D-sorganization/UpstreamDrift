@@ -277,10 +277,9 @@ class MDLParser:
 
         if suffix == ".slx":
             return self._parse_slx(source_path)
-        elif suffix == ".mdl":
+        if suffix == ".mdl":
             return self._parse_mdl(source_path)
-        else:
-            raise ValueError(f"Unsupported file format: {suffix}")
+        raise ValueError(f"Unsupported file format: {suffix}")
 
     def _parse_slx(self, path: Path) -> SimscapeModel:
         """Parse SLX (ZIP/XML) format."""

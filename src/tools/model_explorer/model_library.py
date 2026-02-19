@@ -243,12 +243,11 @@ class ModelLibrary:
             if path.exists():
                 logger.info(f"Using local submodule model: {path}")
                 return path
-            else:
-                logger.warning(
-                    f"Local submodule model not found at {path}.\n"
-                    f"Ensure submodules are initialized: git submodule update --init --recursive"
-                )
-                return None
+            logger.warning(
+                f"Local submodule model not found at {path}.\n"
+                f"Ensure submodules are initialized: git submodule update --init --recursive"
+            )
+            return None
 
         # First, try bundled assets (preferred)
         if BundledAssets is not None:
@@ -647,38 +646,37 @@ class ModelLibrary:
         """
         if category == "human":
             return self.HUMAN_MODELS.get(model_key)
-        elif category == "golf_clubs":
+        if category == "golf_clubs":
             return self.GOLF_CLUBS.get(model_key)
-        elif category == "pendulum":
+        if category == "pendulum":
             return self.PENDULUM_MODELS.get(model_key)
-        elif category == "robotic":
+        if category == "robotic":
             return self.ROBOTIC_MODELS.get(model_key)
-        elif category == "component":
+        if category == "component":
             return self.COMPONENT_MODELS.get(model_key)
-        elif category == "discovered":
+        if category == "discovered":
             discovered = self.discover_repo_models()
             for model in discovered:
                 if model["config_key"] == model_key:
                     return model
             return None
-        elif category == "embedded":
+        if category == "embedded":
             embedded = self.get_embedded_mujoco_models()
             return embedded.get(model_key)
-        elif category == "robot_descriptions":
+        if category == "robot_descriptions":
             models = self.discover_robot_descriptions()
             for model in models:
                 if model["config_key"] == model_key:
                     return model
             return None
-        elif category == "imported":
+        if category == "imported":
             models = self.discover_imported_models()
             for model in models:
                 if model["config_key"] == model_key:
                     return model
             return None
-        else:
-            logger.error(f"Unknown category: {category}")
-            return None
+        logger.error(f"Unknown category: {category}")
+        return None
 
     def discover_repo_models(self) -> list[dict[str, Any]]:
         """Scan the repository for URDF and MJCF models.
@@ -904,10 +902,9 @@ class ModelLibrary:
                 # For now just return the dir path, the discovery will find files inside.
                 logger.info(f"Imported directory to: {dest}")
                 return dest
-            else:
-                shutil.copy2(src, dest)
-                logger.info(f"Imported file to: {dest}")
-                return dest
+            shutil.copy2(src, dest)
+            logger.info(f"Imported file to: {dest}")
+            return dest
         except (FileNotFoundError, OSError, PermissionError) as e:
             logger.error(f"Failed to import model: {e}")
             return None

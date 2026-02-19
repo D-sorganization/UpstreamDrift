@@ -415,7 +415,7 @@ class TestLinkageMechanismsDecomposition:
         lines = content.split("\n")
         for line in lines:
             stripped = line.strip()
-            if stripped.startswith("def ") or stripped.startswith("class "):
+            if stripped.startswith(("def ", "class ")):
                 pytest.fail(
                     f"__init__.py should contain only imports, found: {stripped}"
                 )

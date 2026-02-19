@@ -348,12 +348,11 @@ class SegmentManager:
         """
         if engine.lower() == "mujoco":
             return self._export_for_mujoco()
-        elif engine.lower() == "drake":
+        if engine.lower() == "drake":
             return self._export_for_drake()
-        elif engine.lower() == "pinocchio":
+        if engine.lower() == "pinocchio":
             return self._export_for_pinocchio()
-        else:
-            raise ValueError(f"Unsupported engine: {engine}")
+        raise ValueError(f"Unsupported engine: {engine}")
 
     def _export_for_mujoco(self) -> dict:
         """Export data optimized for MuJoCo.
