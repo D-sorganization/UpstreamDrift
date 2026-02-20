@@ -505,4 +505,7 @@ def get_global_registry() -> ToolRegistry:
     """
     if _registry_holder["instance"] is None:
         _registry_holder["instance"] = ToolRegistry()
-    return _registry_holder["instance"]
+
+    registry = _registry_holder["instance"]
+    assert registry is not None  # Ensure it is not None for mypy
+    return registry

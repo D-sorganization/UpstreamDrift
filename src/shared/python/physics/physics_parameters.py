@@ -454,7 +454,10 @@ def get_parameter_registry() -> PhysicsParameterRegistry:
     """
     if _registry_holder["instance"] is None:
         _registry_holder["instance"] = PhysicsParameterRegistry()
-    return _registry_holder["instance"]
+
+    registry = _registry_holder["instance"]
+    assert registry is not None  # Ensure it is not None for mypy
+    return registry
 
 
 # Backwards compatibility alias (deprecated - use get_parameter_registry instead)

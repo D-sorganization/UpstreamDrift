@@ -6,6 +6,13 @@ This document outlines the identified implementation gaps, accuracy issues, and 
 
 Several modules contain placeholders or are missing key functionality described in the requirements or memory.
 
+*   **`src/deployment/realtime/controller.py`**:
+    *   **Missing Features:**
+        *   **Hardware Connectivity:** `_connect_ros2`, `_connect_udp`, and `_connect_ethercat` methods are empty or placeholders.
+        *   **State Reading:** `_read_state` raises `NotImplementedError` for protocols other than `SIMULATION` and `LOOPBACK`.
+        *   **Command Sending:** `_send_command` raises `NotImplementedError` for protocols other than `SIMULATION` and `LOOPBACK`.
+    *   **Status:** Critical incomplete implementation preventing real hardware integration.
+
 *   **`src/shared/python/physics/ball_flight_physics.py`**:
     *   **Missing Features:**
         *   Environmental Gradient Modeling
@@ -68,5 +75,7 @@ Several modules contain placeholders or are missing key functionality described 
 2.  **Mitigate Legal Risks:**
     *   Rename and redefine "efficiency_score" and "X-Factor Stretch" to use generic, non-infringing terminology and methodologies.
     *   Review the DTW implementation in `comparative_analysis.py` against relevant patents.
-3.  **Complete Missing Features:** Implement the missing environmental models for ball flight and torsional dynamics for the shaft to meet simulation fidelity requirements.
+3.  **Complete Missing Features:**
+    *   Implement `RealTimeController` connectivity methods for hardware integration.
+    *   Implement the missing environmental models for ball flight and torsional dynamics for the shaft to meet simulation fidelity requirements.
 4.  **Fix GRF Fallback:** Update `extract_grf_from_contacts` to include body acceleration in the force calculation.

@@ -31,7 +31,10 @@ def _get_education_system() -> EducationSystem:
     """Get or create the education system singleton."""
     if _education_holder["instance"] is None:
         _education_holder["instance"] = EducationSystem()
-    return _education_holder["instance"]
+
+    system = _education_holder["instance"]
+    assert system is not None  # Ensure it is not None for mypy
+    return system
 
 
 def register_golf_suite_tools(registry: ToolRegistry) -> None:

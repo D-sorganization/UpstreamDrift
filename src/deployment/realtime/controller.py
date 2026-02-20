@@ -196,14 +196,17 @@ class RealTimeController:
         """Connect via ROS2."""
         # ROS2 connection would be implemented here
         # For now, placeholder for integration
+        # TODO: Implement ROS2 connection (initialize rclpy node, subscribers, publishers).
 
     def _connect_udp(self) -> None:
         """Connect via UDP socket."""
         # UDP socket connection would be implemented here
+        # TODO: Implement UDP connection (create socket, bind port).
 
     def _connect_ethercat(self) -> None:
         """Connect via EtherCAT."""
         # EtherCAT connection would be implemented here
+        # TODO: Implement EtherCAT connection (initialize SOEM master).
 
     def disconnect(self) -> None:
         """Safely disconnect from robot."""
@@ -356,6 +359,7 @@ class RealTimeController:
             )
 
         # Real hardware reading would be implemented per protocol
+        # TODO: Implement hardware-specific state reading logic.
         raise NotImplementedError(
             f"State reading for communication type '{self.comm_type.value}' is not yet "
             f"supported. Currently only CommunicationType.SIMULATION is implemented."
@@ -421,6 +425,7 @@ class RealTimeController:
             return
 
         # Real hardware command sending would be implemented per protocol
+        # TODO: Implement hardware-specific command sending logic.
         raise NotImplementedError(
             f"Command sending for communication type '{self.comm_type.value}' is not yet "
             f"supported. Currently only CommunicationType.SIMULATION is implemented."
