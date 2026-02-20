@@ -197,9 +197,7 @@ class PendulumRendererMixin:
         import numpy as np
 
         gravity_len = max_range * 0.35
-        g_start = pivot + np.array(
-            [max_range * 0.6, max_range * 0.2, max_range * 0.3]
-        )
+        g_start = pivot + np.array([max_range * 0.6, max_range * 0.2, max_range * 0.3])
         g_vec = np.array([0, 0, -gravity_len])
         self.ax.quiver(
             g_start[0],

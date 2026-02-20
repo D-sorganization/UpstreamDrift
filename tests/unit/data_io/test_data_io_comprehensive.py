@@ -60,8 +60,14 @@ class TestConvertUnits:
             (1.0, "m", "ft", 3.28084),
             (3.28084, "ft", "m", 1.0),
         ],
-        ids=["deg-identity", "m-identity", "deg-to-rad", "rad-to-deg",
-             "m-to-ft", "ft-to-m"],
+        ids=[
+            "deg-identity",
+            "m-identity",
+            "deg-to-rad",
+            "rad-to-deg",
+            "m-to-ft",
+            "ft-to-m",
+        ],
     )
     def test_unit_conversion(
         self, value: float, from_u: str, to_u: str, expected: float

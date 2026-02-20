@@ -343,7 +343,12 @@ class TestValidatePositive:
             (0.0, "distance", False, False),
             (-1.0, "distance", False, True),
         ],
-        ids=["positive-strict", "zero-strict", "zero-non-strict", "negative-non-strict"],
+        ids=[
+            "positive-strict",
+            "zero-strict",
+            "zero-non-strict",
+            "negative-non-strict",
+        ],
     )
     def test_validate_positive(
         self, value: float, name: str, strict: bool, should_raise: bool

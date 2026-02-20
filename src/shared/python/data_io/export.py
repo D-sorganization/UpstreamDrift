@@ -185,9 +185,13 @@ class C3DExportData:
     forces: np.ndarray | None = None
     moments: np.ndarray | None = None
     frame_rate: float = 60.0
-    units: dict[str, str] = field(default_factory=lambda: {
-        "position": "mm", "force": "N", "moment": "Nmm",
-    })
+    units: dict[str, str] = field(
+        default_factory=lambda: {
+            "position": "mm",
+            "force": "N",
+            "moment": "Nmm",
+        }
+    )
 
 
 @precondition(
@@ -392,7 +396,11 @@ def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(v, dict):
             for sub_k, sub_v in v.items():
                 if isinstance(sub_v, np.ndarray) and len(sub_v) == n_times:
-                    full_key = f"{k}_source_{sub_k}" if isinstance(sub_k, int) else f"{k}_{sub_k}"
+                    full_key = (
+                        f"{k}_source_{sub_k}"
+                        if isinstance(sub_k, int)
+                        else f"{k}_{sub_k}"
+                    )
                     if sub_v.ndim == 1:
                         flat_data[full_key] = sub_v
                     elif sub_v.ndim == 2:

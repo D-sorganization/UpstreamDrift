@@ -25,7 +25,9 @@ for path, _subdirs, files in os.walk(root):
             modelnames.append(name)
 
 for i in range(len(osimpaths)):
-    logger.info("\n\n\n" + 80 * "=" + f"\nLoading model '{osimpaths[i]}'" + "\n" + 80 * "-")
+    logger.info(
+        "\n\n\n" + 80 * "=" + f"\nLoading model '{osimpaths[i]}'" + "\n" + 80 * "-"
+    )
     # Without this next line, the print above does not necessarily
     # precede OpenSim's output.
     sys.stdout.flush()
@@ -55,7 +57,9 @@ for i in range(len(osimpaths)):
     os.remove(filename_new)
 
     if not reloadedModel.isEqualTo(model):
-        logger.info(f"Initial instance of '{modelname}' is not equal to :\n{modelname_new}")
+        logger.info(
+            f"Initial instance of '{modelname}' is not equal to :\n{modelname_new}"
+        )
         raise Exception("Compared two instances of 4.0 models are not equal")
 
 logger.info("All models loaded successfully.")

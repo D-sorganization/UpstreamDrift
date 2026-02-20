@@ -143,9 +143,7 @@ class TestAerodynamicsConfig:
         ],
         ids=["drag-only", "lift-only", "magnus-only"],
     )
-    def test_individual_toggles(
-        self, drag: bool, lift: bool, magnus: bool
-    ) -> None:
+    def test_individual_toggles(self, drag: bool, lift: bool, magnus: bool) -> None:
         """Test individual effect toggles work independently (Orthogonal)."""
         config = AerodynamicsConfig(
             drag_enabled=drag,
