@@ -31,6 +31,7 @@ if TYPE_CHECKING:
             self, base_name: str, existing_names: set[str]
         ) -> str: ...
 
+
 logger = logging.getLogger(__name__)
 
 

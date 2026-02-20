@@ -17,8 +17,10 @@ import defusedxml.ElementTree as DefusedET
 from .text_editor_types import ValidationMessage, ValidationSeverity
 
 if TYPE_CHECKING:
+
     class ValidationProtocol(Protocol):
         _content: str
+
 
 logger = logging.getLogger(__name__)
 
