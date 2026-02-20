@@ -205,9 +205,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
                 # Trigger redraw
                 self.update()
 
-                logger.info(
-                    "Loaded %s frames", len(self.frame_processor.time_vector)
-                )
+                logger.info("Loaded %s frames", len(self.frame_processor.time_vector))
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error("Data loading failed: %s", e)

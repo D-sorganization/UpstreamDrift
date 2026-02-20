@@ -9,12 +9,27 @@ the core copy/paste and model management logic.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 
 from model_generation.core.types import Joint, JointType, Link, Material, Origin
 
 if TYPE_CHECKING:
     from model_generation.converters.urdf_parser import ParsedModel
+
+    from .frankenstein_types import ComponentType
+
+    class TransformProtocol(Protocol):
+        _models: dict[str, ParsedModel]
+        _clipboard: list[
+            tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]
+        ]
+
+        def _save_state(self) -> None: ...
+        def _generate_unique_name(
+            self, base_name: str, existing_names: set[str]
+        ) -> str: ...
+        def copy_subtree(self, model_id: str, root_link: str) -> bool: ...
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +83,8 @@ class TransformMixin:
         Returns:
             True if applied
         """
-        model = self._models.get(model_id)
+        host = cast("TransformProtocol", self)
+        model = host._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
             return False
@@ -77,7 +93,7 @@ class TransformMixin:
             logger.error(f"Model '{model_id}' is read-only")
             return False
 
-        self._save_state()
+        host._save_state()
 
         # Build name maps
         link_map: dict[str, str] = {}
@@ -125,10 +141,11 @@ class TransformMixin:
         Returns:
             List of created link names
         """
-        if not self.copy_subtree(model_id, root_link):
+        host = cast("TransformProtocol", self)
+        if not host.copy_subtree(model_id, root_link):
             return []
 
-        model = self._models.get(model_id)
+        model = host._models.get(model_id)
         if not model:
             return []
 
@@ -149,9 +166,9 @@ class TransformMixin:
                 "_R_": "_L_",
             }
 
-        self._save_state()
+        host._save_state()
 
-        _comp_type, links, joints, _materials = self._clipboard[0]
+        _comp_type, links, joints, _materials = host._clipboard[0]
         axis_idx = {"x": 0, "y": 1, "z": 2}[mirror_axis]
 
         name_map = self._build_mirror_name_map(model, links, name_replacements)
@@ -169,12 +186,13 @@ class TransformMixin:
         links: list[Link],
         name_replacements: dict[str, str],
     ) -> dict[str, str]:
+        host = cast("TransformProtocol", self)
         name_map: dict[str, str] = {}
         existing_links = {link.name for link in model.links}
 
         for link in links:
             new_name = _mirror_name(link.name, name_replacements)
-            new_name = self._generate_unique_name(new_name, existing_links)
+            new_name = host._generate_unique_name(new_name, existing_links)
             name_map[link.name] = new_name
             existing_links.add(new_name)
 

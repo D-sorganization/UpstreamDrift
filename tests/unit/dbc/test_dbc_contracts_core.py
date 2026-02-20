@@ -376,7 +376,12 @@ class TestExceptionHierarchy(unittest.TestCase):
             StateError,
         )
 
-        for exc_cls in (PreconditionError, PostconditionError, InvariantError, StateError):
+        for exc_cls in (
+            PreconditionError,
+            PostconditionError,
+            InvariantError,
+            StateError,
+        ):
             with self.subTest(exc=exc_cls.__name__):
                 self.assertTrue(issubclass(exc_cls, ContractViolationError))
 

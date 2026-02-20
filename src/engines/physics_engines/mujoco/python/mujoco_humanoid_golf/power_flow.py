@@ -405,9 +405,7 @@ class PowerFlowAnalyzer:
                         power_to_children += tau[v_start] * qvel[v_start]
         return power_to_children
 
-    def _compute_joint_dissipation(
-        self, body_id: int, qvel: np.ndarray
-    ) -> float:
+    def _compute_joint_dissipation(self, body_id: int, qvel: np.ndarray) -> float:
         """Compute power dissipation from joint damping for a body.
 
         Args:

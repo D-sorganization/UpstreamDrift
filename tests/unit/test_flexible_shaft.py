@@ -270,7 +270,9 @@ class TestShaftModelFactory:
         ],
         ids=["rigid", "modal", "finite-element"],
     )
-    def test_creates_correct_model(self, flex_model: ShaftFlexModel, expected_class: type) -> None:
+    def test_creates_correct_model(
+        self, flex_model: ShaftFlexModel, expected_class: type
+    ) -> None:
         """Factory should create the correct model type."""
         model = create_shaft_model(flex_model)
         assert isinstance(model, expected_class)

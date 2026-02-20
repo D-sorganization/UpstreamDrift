@@ -32,10 +32,17 @@ class TestSafeInt:
             ("abc", {"default": 0}, 0),
             (None, {"default": -1}, -1),
         ],
-        ids=["int-passthrough", "string-conversion", "float-truncation",
-             "invalid-default", "none-default"],
+        ids=[
+            "int-passthrough",
+            "string-conversion",
+            "float-truncation",
+            "invalid-default",
+            "none-default",
+        ],
     )
-    def test_safe_int_conversions(self, value: object, kwargs: dict, expected: int) -> None:
+    def test_safe_int_conversions(
+        self, value: object, kwargs: dict, expected: int
+    ) -> None:
         """Test safe_int handles various input types correctly."""
         assert safe_int(value, **kwargs) == expected
 
@@ -55,7 +62,12 @@ class TestSafeFloat:
             (42, {}, 42.0),
             ("abc", {"default": 0.0}, 0.0),
         ],
-        ids=["float-passthrough", "string-conversion", "int-to-float", "invalid-default"],
+        ids=[
+            "float-passthrough",
+            "string-conversion",
+            "int-to-float",
+            "invalid-default",
+        ],
     )
     def test_safe_float_conversions(
         self, value: object, kwargs: dict, expected: float
@@ -108,13 +120,15 @@ class TestSafeBool:
     """Tests for safe_bool function."""
 
     @pytest.mark.parametrize(
-        "value", [True, 1, "true", "yes", "on", "1", "True", "YES"],
+        "value",
+        [True, 1, "true", "yes", "on", "1", "True", "YES"],
     )
     def test_true_values(self, value: object) -> None:
         assert safe_bool(value) is True
 
     @pytest.mark.parametrize(
-        "value", [False, 0, "false", "no", "off", "0", "False", "NO"],
+        "value",
+        [False, 0, "false", "no", "off", "0", "False", "NO"],
     )
     def test_false_values(self, value: object) -> None:
         assert safe_bool(value) is False
@@ -231,8 +245,14 @@ class TestClamp:
             (-10, {"min_value": 0, "max_value": 100}, 0),
             (200, {"min_value": 0, "max_value": 100}, 100),
         ],
-        ids=["within-range", "below-min", "above-max", "no-bounds",
-             "below-with-both", "above-with-both"],
+        ids=[
+            "within-range",
+            "below-min",
+            "above-max",
+            "no-bounds",
+            "below-with-both",
+            "above-with-both",
+        ],
     )
     def test_clamp_cases(self, value: float, kwargs: dict, expected: float) -> None:
         """Test clamp constrains values to bounds correctly."""

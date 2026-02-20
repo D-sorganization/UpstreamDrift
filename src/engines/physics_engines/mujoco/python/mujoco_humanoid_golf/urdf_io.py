@@ -605,7 +605,11 @@ class URDFImporter:
 
         if root_link_name:
             self._build_mujoco_body(
-                worldbody, links[root_link_name], links, joints, root_link_name,
+                worldbody,
+                links[root_link_name],
+                links,
+                joints,
+                root_link_name,
             )
 
         ET.indent(mujoco_root, space="  ")
@@ -616,9 +620,7 @@ class URDFImporter:
         logger.info("Imported URDF from %s", urdf_path)
         return mujoco_xml
 
-    def _populate_body_geometry(
-        self, body: ET.Element, link: ET.Element
-    ) -> None:
+    def _populate_body_geometry(self, body: ET.Element, link: ET.Element) -> None:
         """Add inertial, visual, and collision geometry to a MuJoCo body element.
 
         Args:
@@ -701,8 +703,12 @@ class URDFImporter:
                 grandchild_link = links.get(gc_link_name)
                 if grandchild_link is not None:
                     self._build_mujoco_body(
-                        child_body, grandchild_link, links, joints,
-                        gc_link_name, visited,
+                        child_body,
+                        grandchild_link,
+                        links,
+                        joints,
+                        gc_link_name,
+                        visited,
                     )
 
     def _add_inertial(self, body: ET.Element, inertial: ET.Element) -> None:
