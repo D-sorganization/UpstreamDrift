@@ -10,6 +10,7 @@ Key Components:
 - ParametricSwingGenerator: Generate swings from high-level parameters
 - SwingSynthesizer: Inverse optimal control - find swing for desired ball flight
 - MuscleActivationOptimizer: Find optimal muscle activations for motion
+- SwingOptimizationBridge: Bridge to AffineDrift DDP-based optimization
 
 Optimization Objectives:
 - Maximize clubhead velocity at impact
@@ -23,11 +24,13 @@ Scientific Foundation:
 - Muscle-driven forward dynamics (MuJoCo/MyoSuite)
 - Multi-objective Pareto optimization
 - Constraint satisfaction for joint limits and strength
+- DDP-based iterative trajectory optimization (AffineDrift)
 
 References:
 - Sharp (2009) Kinetic Constrained Optimization of the Golf Swing Hub Path
 - MacKenzie & Sprigings (2009) Understanding the mechanisms of shaft deflection
 - Nesbit (2005) A three dimensional kinematic and kinetic study of the golf swing
+- Tassa, Erez & Todorov (2012) Synthesis and Stabilization of Complex Behaviors
 """
 
 __all__ = [
@@ -38,4 +41,7 @@ __all__ = [
     "ParametricSwingGenerator",
     "SwingParameters",
     "SwingStyle",
+    "SwingOptimizationConfig",
+    "SwingOptimizationResult",
+    "SwingOptimizationBridge",
 ]
