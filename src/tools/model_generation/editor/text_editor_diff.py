@@ -9,8 +9,7 @@ from __future__ import annotations
 
 import difflib
 import re
-
-from typing import Protocol, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from .text_editor_types import DiffHunk, DiffResult
 
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
 
 
 from typing import cast
+
 
 class DiffMixin:
     """Diff operations for the URDFTextEditor.

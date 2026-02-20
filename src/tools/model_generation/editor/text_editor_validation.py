@@ -10,15 +10,17 @@ from __future__ import annotations
 import logging
 import re
 import xml.etree.ElementTree as ET
-from typing import Protocol, TYPE_CHECKING, cast, Any
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import defusedxml.ElementTree as DefusedET
 
 from .text_editor_types import ValidationMessage, ValidationSeverity
 
 if TYPE_CHECKING:
+
     class ValidationProtocol(Protocol):
         _content: str
+
 
 logger = logging.getLogger(__name__)
 

@@ -15,6 +15,7 @@ from model_generation.core.types import Joint, JointType, Link, Material, Origin
 
 if TYPE_CHECKING:
     from model_generation.converters.urdf_parser import ParsedModel
+
     from .frankenstein_types import ComponentType
 
     class TransformProtocol(Protocol):
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
             self, base_name: str, existing_names: set[str]
         ) -> str: ...
         def copy_subtree(self, model_id: str, root_link: str) -> bool: ...
+
 
 logger = logging.getLogger(__name__)
 
