@@ -51,7 +51,9 @@ model_paths = [
 class TestSims(unittest.TestCase):
     """Test loading and verifying MyoSuite MuJoCo models."""
 
-    def get_sim(self, model_path: str | None = None, model_xmlstr: str | None = None) -> mujoco.MjModel:
+    def get_sim(
+        self, model_path: str | None = None, model_xmlstr: str | None = None
+    ) -> mujoco.MjModel:
         """Get sim using model_path or model_xmlstr."""
 
         # load from path

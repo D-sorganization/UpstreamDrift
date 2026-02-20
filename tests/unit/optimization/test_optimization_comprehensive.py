@@ -87,57 +87,84 @@ class TestOptimizationConstraint:
 class TestGolferModel:
     """Tests for the GolferModel dataclass."""
 
-    def test_default_anthropometrics(self) -> None:
+    @pytest.mark.parametrize(
+        "attr, expected",
+        [
+            ("height", 1.75),
+            ("mass", 75.0),
+            ("arm_length", 0.60),
+            ("trunk_length", 0.50),
+            ("arm_mass_ratio", 0.05),
+            ("trunk_mass_ratio", 0.43),
+            ("flexibility_factor", 1.0),
+        ],
+        ids=[
+            "height",
+            "mass",
+            "arm-length",
+            "trunk-length",
+            "arm-mass-ratio",
+            "trunk-mass-ratio",
+            "flexibility-factor",
+        ],
+    )
+    def test_default_values(self, attr: str, expected: float) -> None:
         g = GolferModel()
-        assert g.height == 1.75
-        assert g.mass == 75.0
-        assert g.arm_length == 0.60
-        assert g.trunk_length == 0.50
+        assert getattr(g, attr) == expected
 
-    def test_default_mass_ratios(self) -> None:
+    def test_default_mass_ratios_sum(self) -> None:
         g = GolferModel()
-        assert g.arm_mass_ratio == 0.05
-        assert g.trunk_mass_ratio == 0.43
-        # Mass ratios should sum to less than 1
         assert g.arm_mass_ratio + g.trunk_mass_ratio < 1.0
 
-    def test_default_joint_roms(self) -> None:
+    @pytest.mark.parametrize(
+        "rom_attr",
+        [
+            "shoulder_rom",
+            "elbow_rom",
+            "wrist_rom",
+            "hip_rom",
+            "trunk_rotation_rom",
+        ],
+    )
+    def test_default_joint_roms(self, rom_attr: str) -> None:
         g = GolferModel()
-        # ROM tuples must have lower < upper
-        for rom in [
-            g.shoulder_rom,
-            g.elbow_rom,
-            g.wrist_rom,
-            g.hip_rom,
-            g.trunk_rotation_rom,
-        ]:
-            assert rom[0] < rom[1], f"ROM {rom} invalid: lower >= upper"
+        rom = getattr(g, rom_attr)
+        assert rom[0] < rom[1], f"ROM {rom_attr} invalid: lower >= upper"
 
-    def test_default_torque_limits_positive(self) -> None:
+    @pytest.mark.parametrize(
+        "torque_attr",
+        [
+            "max_shoulder_torque",
+            "max_elbow_torque",
+            "max_wrist_torque",
+            "max_hip_torque",
+            "max_trunk_torque",
+        ],
+    )
+    def test_default_torque_limits_positive(self, torque_attr: str) -> None:
         g = GolferModel()
-        assert g.max_shoulder_torque > 0
-        assert g.max_elbow_torque > 0
-        assert g.max_wrist_torque > 0
-        assert g.max_hip_torque > 0
-        assert g.max_trunk_torque > 0
+        assert getattr(g, torque_attr) > 0
 
-    def test_torque_ordering(self) -> None:
+    @pytest.mark.parametrize(
+        "larger, smaller",
+        [
+            ("max_trunk_torque", "max_shoulder_torque"),
+            ("max_hip_torque", "max_shoulder_torque"),
+            ("max_shoulder_torque", "max_elbow_torque"),
+            ("max_elbow_torque", "max_wrist_torque"),
+        ],
+        ids=["trunk>shoulder", "hip>shoulder", "shoulder>elbow", "elbow>wrist"],
+    )
+    def test_torque_ordering(self, larger: str, smaller: str) -> None:
         """Larger muscle groups should produce greater torques."""
         g = GolferModel()
-        assert g.max_trunk_torque > g.max_shoulder_torque
-        assert g.max_hip_torque > g.max_shoulder_torque
-        assert g.max_shoulder_torque > g.max_elbow_torque
-        assert g.max_elbow_torque > g.max_wrist_torque
+        assert getattr(g, larger) > getattr(g, smaller)
 
     def test_custom_values(self) -> None:
         g = GolferModel(height=1.90, mass=90.0, arm_length=0.70)
         assert g.height == 1.90
         assert g.mass == 90.0
         assert g.arm_length == 0.70
-
-    def test_flexibility_factor_default(self) -> None:
-        g = GolferModel()
-        assert g.flexibility_factor == 1.0
 
 
 # ============================================================================
@@ -148,13 +175,30 @@ class TestGolferModel:
 class TestClubModel:
     """Tests for the ClubModel dataclass and its derived properties."""
 
-    def test_default_values(self) -> None:
+    @pytest.mark.parametrize(
+        "attr, expected",
+        [
+            ("total_length", 1.15),
+            ("shaft_length", 1.05),
+            ("head_mass", 0.20),
+            ("shaft_mass", 0.07),
+            ("grip_mass", 0.05),
+            ("face_angle", 0.0),
+            ("loft_angle", 10.5),
+        ],
+        ids=[
+            "total-length",
+            "shaft-length",
+            "head-mass",
+            "shaft-mass",
+            "grip-mass",
+            "face-angle",
+            "loft-angle",
+        ],
+    )
+    def test_default_values(self, attr: str, expected: float) -> None:
         c = ClubModel()
-        assert c.total_length == 1.15
-        assert c.shaft_length == 1.05
-        assert c.head_mass == 0.20
-        assert c.shaft_mass == 0.07
-        assert c.grip_mass == 0.05
+        assert getattr(c, attr) == expected
 
     def test_total_mass(self) -> None:
         c = ClubModel()
@@ -166,35 +210,35 @@ class TestClubModel:
         assert c.total_mass == pytest.approx(0.41)
 
     def test_club_moi_formula(self) -> None:
-        """MOI = m_head * L² + m_shaft * (L_shaft/2)²."""
+        """MOI = m_head * L^2 + m_shaft * (L_shaft/2)^2."""
         c = ClubModel()
         expected = (
             c.head_mass * c.total_length**2 + c.shaft_mass * (c.shaft_length / 2) ** 2
         )
         assert c.club_moi == pytest.approx(expected)
 
-    def test_moi_increases_with_head_mass(self) -> None:
-        c_light = ClubModel(head_mass=0.15)
-        c_heavy = ClubModel(head_mass=0.30)
-        assert c_heavy.club_moi > c_light.club_moi
+    @pytest.mark.parametrize(
+        "param, low_val, high_val",
+        [
+            ("head_mass", 0.15, 0.30),
+            ("total_length", 1.0, 1.3),
+        ],
+        ids=["head-mass", "total-length"],
+    )
+    def test_moi_increases_with_param(
+        self, param: str, low_val: float, high_val: float
+    ) -> None:
+        c_low = ClubModel(**{param: low_val})
+        c_high = ClubModel(**{param: high_val})
+        assert c_high.club_moi > c_low.club_moi
 
-    def test_moi_increases_with_length(self) -> None:
-        c_short = ClubModel(total_length=1.0)
-        c_long = ClubModel(total_length=1.3)
-        assert c_long.club_moi > c_short.club_moi
-
-    def test_shaft_flex_options(self) -> None:
-        for flex in ["stiff", "regular", "senior", "ladies"]:
-            c = ClubModel(shaft_flex=flex)
-            assert c.shaft_flex == flex
-
-    def test_face_angle_default_square(self) -> None:
-        c = ClubModel()
-        assert c.face_angle == 0.0
-
-    def test_loft_angle_default(self) -> None:
-        c = ClubModel()
-        assert c.loft_angle == 10.5  # Driver
+    @pytest.mark.parametrize(
+        "flex",
+        ["stiff", "regular", "senior", "ladies"],
+    )
+    def test_shaft_flex_options(self, flex: str) -> None:
+        c = ClubModel(shaft_flex=flex)
+        assert c.shaft_flex == flex
 
 
 # ============================================================================
@@ -304,14 +348,28 @@ class TestOptimizationResult:
         assert r.success is False
         assert r.trajectory is None
 
-    def test_default_metrics_zero(self) -> None:
+    @pytest.mark.parametrize(
+        "attr, expected",
+        [
+            ("predicted_carry_distance", 0.0),
+            ("injury_risk_score", 0.0),
+            ("computation_time", 0.0),
+            ("iterations", 0),
+            ("speed_improvement", 0.0),
+            ("risk_reduction", 0.0),
+        ],
+        ids=[
+            "carry-distance",
+            "injury-risk",
+            "computation-time",
+            "iterations",
+            "speed-improvement",
+            "risk-reduction",
+        ],
+    )
+    def test_default_metrics_zero(self, attr: str, expected: object) -> None:
         r = OptimizationResult(success=True, message="ok")
-        assert r.predicted_carry_distance == 0.0
-        assert r.injury_risk_score == 0.0
-        assert r.computation_time == 0.0
-        assert r.iterations == 0
-        assert r.speed_improvement == 0.0
-        assert r.risk_reduction == 0.0
+        assert getattr(r, attr) == expected
 
 
 # ============================================================================

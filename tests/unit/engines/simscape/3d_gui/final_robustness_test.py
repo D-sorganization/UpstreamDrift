@@ -229,9 +229,8 @@ def test_performance() -> bool:
         if load_time + convert_time < 5.0:
             logger.info("✅ Performance is acceptable")
             return True
-        else:
-            logger.info("⚠️ Performance is slower than expected")
-            return True  # Still pass, but warn
+        logger.info("⚠️ Performance is slower than expected")
+        return True  # Still pass, but warn
 
     except ImportError as e:
         logger.error("❌ Performance test failed: %s", e)

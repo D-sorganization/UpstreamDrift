@@ -9,8 +9,8 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 import pytest
-
 from src.c3d_reader import C3DDataReader, C3DEvent, load_tour_average_reader
+
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 # Skip tests if ezc3d is not available (e.g., Python 3.9)

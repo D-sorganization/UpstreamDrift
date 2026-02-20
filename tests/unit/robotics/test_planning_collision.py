@@ -263,24 +263,37 @@ class TestCylinder:
         assert cylinder.radius == 0.5
         assert cylinder.height == 1.0
 
-    def test_cylinder_invalid_dimensions(self) -> None:
+    @pytest.mark.parametrize(
+        "kwargs, match",
+        [
+            ({"radius": 0.0}, "radius must be positive"),
+            ({"height": -1.0}, "height must be positive"),
+        ],
+        ids=["zero-radius", "negative-height"],
+    )
+    def test_cylinder_invalid_dimensions(self, kwargs: dict, match: str) -> None:
         """Test invalid dimensions."""
-        with pytest.raises(ValueError, match="radius must be positive"):
-            Cylinder(radius=0.0)
-        with pytest.raises(ValueError, match="height must be positive"):
-            Cylinder(height=-1.0)
+        with pytest.raises(ValueError, match=match):
+            Cylinder(**kwargs)
 
-    def test_cylinder_contains_point(self) -> None:
+    @pytest.mark.parametrize(
+        "point, expected",
+        [
+            (np.array([0.0, 0.0, 0.5]), True),
+            (np.array([0.4, 0.0, 0.5]), True),
+            (np.array([0.6, 0.0, 0.5]), False),
+            (np.array([0.0, 0.0, 1.5]), False),
+        ],
+        ids=["center", "near-edge", "outside-radial", "outside-axial"],
+    )
+    def test_cylinder_contains_point(self, point: np.ndarray, expected: bool) -> None:
         """Test point containment."""
         cylinder = Cylinder(
             center=np.array([0.0, 0.0, 0.5]),
             radius=0.5,
             height=1.0,
         )
-        assert cylinder.contains_point(np.array([0.0, 0.0, 0.5]))
-        assert cylinder.contains_point(np.array([0.4, 0.0, 0.5]))
-        assert not cylinder.contains_point(np.array([0.6, 0.0, 0.5]))
-        assert not cylinder.contains_point(np.array([0.0, 0.0, 1.5]))
+        assert cylinder.contains_point(point) == expected
 
 
 # =============================================================================
@@ -350,34 +363,25 @@ class TestConvexHull:
 class TestPrimitiveDistance:
     """Tests for distance computation between primitives."""
 
-    def test_sphere_sphere_separated(self) -> None:
-        """Test distance between separated spheres."""
+    @pytest.mark.parametrize(
+        "center_b, expected_distance",
+        [
+            (np.array([3.0, 0.0, 0.0]), 1.0),
+            (np.array([2.0, 0.0, 0.0]), 0.0),
+            (np.array([1.0, 0.0, 0.0]), -1.0),
+        ],
+        ids=["separated", "touching", "overlapping"],
+    )
+    def test_sphere_sphere_distance(
+        self, center_b: np.ndarray, expected_distance: float
+    ) -> None:
+        """Test distance between sphere pairs at varying separation."""
         sphere_a = Sphere(center=np.array([0.0, 0.0, 0.0]), radius=1.0)
-        sphere_b = Sphere(center=np.array([3.0, 0.0, 0.0]), radius=1.0)
-
-        distance, point_a, point_b = compute_primitive_distance(sphere_a, sphere_b)
-
-        assert distance == pytest.approx(1.0, abs=1e-6)
-        assert np.allclose(point_a, [1.0, 0.0, 0.0])
-        assert np.allclose(point_b, [2.0, 0.0, 0.0])
-
-    def test_sphere_sphere_touching(self) -> None:
-        """Test distance between touching spheres."""
-        sphere_a = Sphere(center=np.array([0.0, 0.0, 0.0]), radius=1.0)
-        sphere_b = Sphere(center=np.array([2.0, 0.0, 0.0]), radius=1.0)
+        sphere_b = Sphere(center=center_b, radius=1.0)
 
         distance, _, _ = compute_primitive_distance(sphere_a, sphere_b)
 
-        assert distance == pytest.approx(0.0, abs=1e-6)
-
-    def test_sphere_sphere_overlapping(self) -> None:
-        """Test distance between overlapping spheres."""
-        sphere_a = Sphere(center=np.array([0.0, 0.0, 0.0]), radius=1.0)
-        sphere_b = Sphere(center=np.array([1.0, 0.0, 0.0]), radius=1.0)
-
-        distance, _, _ = compute_primitive_distance(sphere_a, sphere_b)
-
-        assert distance == pytest.approx(-1.0, abs=1e-6)
+        assert distance == pytest.approx(expected_distance, abs=1e-6)
 
     def test_sphere_capsule_distance(self) -> None:
         """Test distance between sphere and capsule."""
@@ -486,16 +490,20 @@ class TestCollisionResult:
         assert result.in_collision
         assert len(result.collision_pairs) == 1
 
-    def test_collision_result_inconsistent_state(self) -> None:
+    @pytest.mark.parametrize(
+        "in_collision, pairs, match",
+        [
+            (True, [], "in_collision=True but no collision"),
+            (False, [CollisionPair("a", "b")], "in_collision=False but collision"),
+        ],
+        ids=["true-no-pairs", "false-with-pairs"],
+    )
+    def test_collision_result_inconsistent_state(
+        self, in_collision: bool, pairs: list, match: str
+    ) -> None:
         """Test that inconsistent state raises error."""
-        with pytest.raises(ValueError, match="in_collision=True but no collision"):
-            CollisionResult(in_collision=True, collision_pairs=[])
-
-        with pytest.raises(ValueError, match="in_collision=False but collision"):
-            CollisionResult(
-                in_collision=False,
-                collision_pairs=[CollisionPair("a", "b")],
-            )
+        with pytest.raises(ValueError, match=match):
+            CollisionResult(in_collision=in_collision, collision_pairs=pairs)
 
 
 # =============================================================================
@@ -506,22 +514,26 @@ class TestCollisionResult:
 class TestDistanceResult:
     """Tests for DistanceResult dataclass."""
 
-    def test_create_distance_result(self) -> None:
-        """Test creating distance result."""
-        result = DistanceResult(distance=0.5)
-        assert result.distance == 0.5
-        assert not result.in_collision
-
-    def test_distance_result_penetration(self) -> None:
-        """Test penetration depth property."""
-        result = DistanceResult(distance=-0.1)
-        assert result.in_collision
-        assert result.penetration_depth == pytest.approx(0.1)
-
-    def test_distance_result_no_penetration(self) -> None:
-        """Test no penetration when separated."""
-        result = DistanceResult(distance=0.5)
-        assert result.penetration_depth == 0.0
+    @pytest.mark.parametrize(
+        "distance, in_collision, penetration_depth",
+        [
+            (0.5, False, 0.0),
+            (-0.1, True, 0.1),
+            (0.0, False, 0.0),
+        ],
+        ids=["separated", "penetrating", "touching"],
+    )
+    def test_distance_result_properties(
+        self,
+        distance: float,
+        in_collision: bool,
+        penetration_depth: float,
+    ) -> None:
+        """Test DistanceResult computed properties."""
+        result = DistanceResult(distance=distance)
+        assert result.distance == distance
+        assert result.in_collision == in_collision
+        assert result.penetration_depth == pytest.approx(penetration_depth)
 
 
 # =============================================================================
@@ -754,10 +766,15 @@ class TestCollisionCheckerConfig:
         assert config.default_margin == 0.05
         assert not config.use_broad_phase
 
-    def test_invalid_config(self) -> None:
+    @pytest.mark.parametrize(
+        "kwargs, match",
+        [
+            ({"default_margin": -0.1}, "default_margin must be non-negative"),
+            ({"max_contacts": 0}, "max_contacts must be positive"),
+        ],
+        ids=["negative-margin", "zero-max-contacts"],
+    )
+    def test_invalid_config(self, kwargs: dict, match: str) -> None:
         """Test invalid configuration values."""
-        with pytest.raises(ValueError, match="default_margin must be non-negative"):
-            CollisionCheckerConfig(default_margin=-0.1)
-
-        with pytest.raises(ValueError, match="max_contacts must be positive"):
-            CollisionCheckerConfig(max_contacts=0)
+        with pytest.raises(ValueError, match=match):
+            CollisionCheckerConfig(**kwargs)
