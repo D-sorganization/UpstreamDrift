@@ -308,7 +308,9 @@ class TestImpactModelFactory:
         ],
         ids=["rigid-body", "spring-damper", "finite-time"],
     )
-    def test_creates_correct_model(self, model_type: ImpactModelType, expected_class: type) -> None:
+    def test_creates_correct_model(
+        self, model_type: ImpactModelType, expected_class: type
+    ) -> None:
         """Factory should create the correct model type."""
         model = create_impact_model(model_type)
         assert isinstance(model, expected_class)

@@ -292,6 +292,8 @@ def _get_engine_capabilities() -> dict[str, dict[str, str]]:
 
     profiles = _build_engine_profiles()
     _capabilities_state["cache"] = {k: v.to_dict() for k, v in profiles.items()}
+
+    assert _capabilities_state["cache"] is not None  # Ensure not None for mypy
     return _capabilities_state["cache"]
 
 

@@ -179,12 +179,9 @@ def parse_simscape_csv(filename: str) -> pd.DataFrame:
     """
     df = pd.read_csv(filename)
     logger.debug(
-        f"Successfully loaded CSV with {len(df)} rows "
-        f"and {len(df.columns)} columns"
+        f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns"
     )
-    logger.info(
-        f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds"
-    )
+    logger.info(f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds")
 
     joint_positions = get_simscape_joint_positions()
     available_joints = find_available_joints(joint_positions, df.columns)

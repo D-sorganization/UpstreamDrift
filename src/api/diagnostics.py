@@ -106,8 +106,10 @@ class APIDiagnostics:
         from src.shared.python.config.environment import get_env
 
         env_vars = {
-            "GOLF_SUITE_MODE": get_env("GOLF_SUITE_MODE", default="not set") or "not set",
-            "GOLF_AUTH_DISABLED": get_env("GOLF_AUTH_DISABLED", default="not set") or "not set",
+            "GOLF_SUITE_MODE": get_env("GOLF_SUITE_MODE", default="not set")
+            or "not set",
+            "GOLF_AUTH_DISABLED": get_env("GOLF_AUTH_DISABLED", default="not set")
+            or "not set",
             "GOLF_PORT": get_env("GOLF_PORT", default="not set") or "not set",
         }
         details["environment_variables"] = env_vars

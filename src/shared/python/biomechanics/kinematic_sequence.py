@@ -8,6 +8,11 @@ expected order.
 Note: This module does NOT implement any proprietary or patented analysis
 methodology. The expected segment order must be supplied by the caller
 and is treated as a neutral, user-defined parameter.
+
+TODO: Implement Proximal Braking Efficiency calculation.
+TODO: Implement X-Factor Stretch calculation (currently missing here, present in injury_risk.py).
+TODO: Implement Inter-segmental Power Flow calculation.
+FIXME: The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation.
 """
 
 from __future__ import annotations

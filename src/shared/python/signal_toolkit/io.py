@@ -71,7 +71,9 @@ class SignalImporter:
             value_indices = [idx]
             value_names = [header[idx]]
         else:
-            value_indices = [SignalImporter._resolve_column(c, header) for c in value_columns]
+            value_indices = [
+                SignalImporter._resolve_column(c, header) for c in value_columns
+            ]
             value_names = [header[i] for i in value_indices]
         return value_indices, value_names
 

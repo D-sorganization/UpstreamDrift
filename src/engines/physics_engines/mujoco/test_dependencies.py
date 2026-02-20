@@ -7,6 +7,7 @@ and that all required libraries are importable and functional.
 from __future__ import annotations
 
 import importlib
+import importlib.util
 
 import pytest
 

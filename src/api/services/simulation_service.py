@@ -81,8 +81,12 @@ class SimulationService:
         return engine
 
     def _execute_simulation_loop(
-        self, engine: Any, recorder: GenericPhysicsRecorder,
-        request: SimulationRequest, timestep: float, steps: int,
+        self,
+        engine: Any,
+        recorder: GenericPhysicsRecorder,
+        request: SimulationRequest,
+        timestep: float,
+        steps: int,
     ) -> None:
         """Execute the main simulation stepping loop.
 

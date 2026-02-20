@@ -435,9 +435,7 @@ class KinematicsRenderer(BaseRenderer):
         fig.tight_layout()
 
     @staticmethod
-    def _get_embedding_signal(
-        data, signal_type: str
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def _get_embedding_signal(data, signal_type: str) -> tuple[np.ndarray, np.ndarray]:
         """Retrieve and convert the signal for phase space embedding.
 
         Args:
@@ -496,8 +494,13 @@ class KinematicsRenderer(BaseRenderer):
         x = data_full[:, joint_idx]
         if delay * (embedding_dim - 1) + 1 > len(x):
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Time series too short for embedding",
-                    ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                "Time series too short for embedding",
+                ha="center",
+                va="center",
+            )
             return
 
         vectors = self._build_delay_embedding(x, delay, embedding_dim)
@@ -505,26 +508,47 @@ class KinematicsRenderer(BaseRenderer):
 
         if embedding_dim == 3:
             ax = fig.add_subplot(111, projection="3d")
-            sc = ax.scatter(vectors[:, 0], vectors[:, 1], vectors[:, 2],
-                            c=plot_times, cmap="magma", s=10, alpha=0.6)
-            ax.plot(vectors[:, 0], vectors[:, 1], vectors[:, 2],
-                    color="gray", alpha=0.2, linewidth=0.5)
+            sc = ax.scatter(
+                vectors[:, 0],
+                vectors[:, 1],
+                vectors[:, 2],
+                c=plot_times,
+                cmap="magma",
+                s=10,
+                alpha=0.6,
+            )
+            ax.plot(
+                vectors[:, 0],
+                vectors[:, 1],
+                vectors[:, 2],
+                color="gray",
+                alpha=0.2,
+                linewidth=0.5,
+            )
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
             ax.set_zlabel(f"x(t+{2 * delay})", fontsize=10)
         else:
             ax = fig.add_subplot(111)
-            sc = ax.scatter(vectors[:, 0], vectors[:, 1],
-                            c=plot_times, cmap="magma", s=10, alpha=0.6)
-            ax.plot(vectors[:, 0], vectors[:, 1],
-                    color="gray", alpha=0.2, linewidth=0.5)
+            sc = ax.scatter(
+                vectors[:, 0],
+                vectors[:, 1],
+                c=plot_times,
+                cmap="magma",
+                s=10,
+                alpha=0.6,
+            )
+            ax.plot(
+                vectors[:, 0], vectors[:, 1], color="gray", alpha=0.2, linewidth=0.5
+            )
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
 
         joint_name = self.data.get_joint_name(joint_idx)
         ax.set_title(
             f"Reconstructed Phase Space: {joint_name}\n(Lag={delay}, Dim={embedding_dim})",
-            fontsize=12, fontweight="bold",
+            fontsize=12,
+            fontweight="bold",
         )
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()

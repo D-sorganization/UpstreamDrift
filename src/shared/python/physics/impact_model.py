@@ -161,6 +161,9 @@ class RigidBodyImpactModel(ImpactModel):
     """
 
     def _compute_effective_club_mass(self, pre_state: PreImpactState) -> float:
+        # FIXME: this uses a simplified scalar effective mass model.
+        # It ignores the full 3D inertia tensor and the direction of the impact force.
+        # Should be replaced with J = (1/m + r x (I^-1 * (r x n)))^-1 * (1 + e) * v_rel
         m_club = pre_state.clubhead_mass
         club_moi = pre_state.clubhead_moi
 

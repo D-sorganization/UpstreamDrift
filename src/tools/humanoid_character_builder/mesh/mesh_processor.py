@@ -743,12 +743,16 @@ class LODGenerator:
             collision_ratios = [(1, 0.1, "10pct"), (2, 0.05, "5pct")]
             for level_idx, ratio, suffix in collision_ratios:
                 out_path = (
-                    output_dir
-                    / f"{mesh_path.stem}_collision_{suffix}.{output_format}"
+                    output_dir / f"{mesh_path.stem}_collision_{suffix}.{output_format}"
                 )
                 self._simplify_and_append_lod(
-                    mesh, original_faces, level_idx, out_path, output_format,
-                    ratio, levels,
+                    mesh,
+                    original_faces,
+                    level_idx,
+                    out_path,
+                    output_format,
+                    ratio,
+                    levels,
                 )
 
             return LODGenerationResult(

@@ -8,7 +8,7 @@ clipboard copy/paste logic is independent of model management.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from model_generation.core.types import Joint, JointType, Link, Material, Origin
 
@@ -16,6 +16,21 @@ from .frankenstein_types import ComponentType
 
 if TYPE_CHECKING:
     from model_generation.converters.urdf_parser import ParsedModel
+
+    class ClipboardProtocol(Protocol):
+        _models: dict[str, ParsedModel]
+        _clipboard: list[
+            tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]
+        ]
+
+        def _save_state(self) -> None: ...
+        def get_connecting_joint(
+            self, model_id: str, link_name: str
+        ) -> Joint | None: ...
+        def _generate_unique_name(
+            self, base_name: str, existing_names: set[str]
+        ) -> str: ...
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +67,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        model = self._models.get(model_id)
+        host = cast("ClipboardProtocol", self)
+        model = host._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
             return False
@@ -67,7 +83,7 @@ class ClipboardMixin:
         materials: dict[str, Material] = {}
 
         if include_joint:
-            joint = self.get_connecting_joint(model_id, link_name)
+            joint = host.get_connecting_joint(model_id, link_name)
             if joint:
                 joints.append(Joint.from_dict(joint.to_dict()))
 
@@ -77,7 +93,7 @@ class ClipboardMixin:
                 link.visual_material.to_dict()
             )
 
-        self._clipboard = [(ComponentType.LINK, links, joints, materials)]
+        host._clipboard = [(ComponentType.LINK, links, joints, materials)]
         logger.info(f"Copied link '{link_name}' to clipboard")
         return True
 
@@ -96,7 +112,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        model = self._models.get(model_id)
+        host = cast("ClipboardProtocol", self)
+        model = host._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
             return False
@@ -120,7 +137,7 @@ class ClipboardMixin:
                 joints.append(Joint.from_dict(joint.to_dict()))
 
         # Also copy the connecting joint to the subtree root
-        root_joint = self.get_connecting_joint(model_id, root_link)
+        root_joint = host.get_connecting_joint(model_id, root_link)
         if root_joint:
             joints.insert(0, Joint.from_dict(root_joint.to_dict()))
 
@@ -132,7 +149,7 @@ class ClipboardMixin:
                     link.visual_material.to_dict()
                 )
 
-        self._clipboard = [(ComponentType.SUBTREE, links, joints, materials)]
+        host._clipboard = [(ComponentType.SUBTREE, links, joints, materials)]
         logger.info(
             f"Copied subtree '{root_link}' ({len(links)} links, {len(joints)} joints) to clipboard"
         )
@@ -149,7 +166,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        model = self._models.get(model_id)
+        host = cast("ClipboardProtocol", self)
+        model = host._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
             return False
@@ -160,16 +178,17 @@ class ClipboardMixin:
             return False
 
         materials = {material_name: Material.from_dict(material.to_dict())}
-        self._clipboard = [(ComponentType.MATERIAL, [], [], materials)]
+        host._clipboard = [(ComponentType.MATERIAL, [], [], materials)]
         logger.info(f"Copied material '{material_name}' to clipboard")
         return True
 
     def get_clipboard_info(self) -> dict[str, Any]:
         """Get information about clipboard contents."""
-        if not self._clipboard:
+        host = cast("ClipboardProtocol", self)
+        if not host._clipboard:
             return {"empty": True}
 
-        comp_type, links, joints, materials = self._clipboard[0]
+        comp_type, links, joints, materials = host._clipboard[0]
         return {
             "empty": False,
             "type": comp_type.value,
@@ -181,7 +200,8 @@ class ClipboardMixin:
 
     def clear_clipboard(self) -> None:
         """Clear the clipboard."""
-        self._clipboard = []
+        host = cast("ClipboardProtocol", self)
+        host._clipboard = []
 
     # ============================================================
     # Paste Operations
@@ -210,11 +230,12 @@ class ClipboardMixin:
         Returns:
             List of created link names
         """
-        if not self._clipboard:
+        host = cast("ClipboardProtocol", self)
+        if not host._clipboard:
             logger.error("Clipboard is empty")
             return []
 
-        model = self._models.get(target_model_id)
+        model = host._models.get(target_model_id)
         if not model:
             logger.error(f"Model '{target_model_id}' not found")
             return []
@@ -223,9 +244,9 @@ class ClipboardMixin:
             logger.error(f"Model '{target_model_id}' is read-only")
             return []
 
-        self._save_state()
+        host._save_state()
 
-        comp_type, links, joints, materials = self._clipboard[0]
+        comp_type, links, joints, materials = host._clipboard[0]
 
         name_map = self._build_paste_name_map(model, links, joints, prefix, suffix)
         self._paste_materials(model, materials, prefix, suffix)
@@ -238,7 +259,7 @@ class ClipboardMixin:
 
         if attach_to and first_link and not attachment_created:
             attach_joint = Joint(
-                name=self._generate_unique_name(
+                name=host._generate_unique_name(
                     f"{attach_to}_to_{first_link}_joint",
                     {j.name for j in model.joints},
                 ),
@@ -260,19 +281,20 @@ class ClipboardMixin:
         prefix: str,
         suffix: str,
     ) -> dict[str, str]:
+        host = cast("ClipboardProtocol", self)
         name_map: dict[str, str] = {}
         existing_links = {link.name for link in model.links}
         existing_joints = {j.name for j in model.joints}
 
         for link in links:
-            new_name = self._generate_unique_name(
+            new_name = host._generate_unique_name(
                 prefix + link.name + suffix, existing_links
             )
             name_map[link.name] = new_name
             existing_links.add(new_name)
 
         for joint in joints:
-            new_name = self._generate_unique_name(
+            new_name = host._generate_unique_name(
                 prefix + joint.name + suffix, existing_joints
             )
             name_map[joint.name] = new_name

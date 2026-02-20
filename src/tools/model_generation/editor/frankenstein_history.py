@@ -9,12 +9,22 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 
-from .frankenstein_types import EditorState
+from .frankenstein_types import ComponentType, EditorState
 
 if TYPE_CHECKING:
     from model_generation.converters.urdf_parser import ParsedModel
+    from model_generation.core.types import Joint, Link, Material
+
+    class HistoryProtocol(Protocol):
+        _models: dict[str, ParsedModel]
+        _clipboard: list[
+            tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]
+        ]
+        _undo_stack: list[EditorState]
+        _redo_stack: list[EditorState]
+        _max_history: int
 
 
 logger = logging.getLogger(__name__)
@@ -38,16 +48,17 @@ class HistoryMixin:
         Returns:
             True if undone
         """
-        if not self._undo_stack:
+        host = cast("HistoryProtocol", self)
+        if not host._undo_stack:
             logger.warning("Nothing to undo")
             return False
 
         # Save current state to redo stack
         current_state = self._create_state()
-        self._redo_stack.append(current_state)
+        host._redo_stack.append(current_state)
 
         # Restore previous state
-        state = self._undo_stack.pop()
+        state = host._undo_stack.pop()
         self._restore_state(state)
 
         logger.info("Undone")
@@ -60,16 +71,17 @@ class HistoryMixin:
         Returns:
             True if redone
         """
-        if not self._redo_stack:
+        host = cast("HistoryProtocol", self)
+        if not host._redo_stack:
             logger.warning("Nothing to redo")
             return False
 
         # Save current state to undo stack
         current_state = self._create_state()
-        self._undo_stack.append(current_state)
+        host._undo_stack.append(current_state)
 
         # Restore redo state
-        state = self._redo_stack.pop()
+        state = host._redo_stack.pop()
         self._restore_state(state)
 
         logger.info("Redone")
@@ -77,32 +89,35 @@ class HistoryMixin:
 
     def _save_state(self) -> None:
         """Save current state to undo stack."""
+        host = cast("HistoryProtocol", self)
         state = self._create_state()
-        self._undo_stack.append(state)
+        host._undo_stack.append(state)
 
         # Clear redo stack on new operation
-        self._redo_stack = []
+        host._redo_stack.clear()
 
         # Limit history size
-        while len(self._undo_stack) > self._max_history:
-            self._undo_stack.pop(0)
+        while len(host._undo_stack) > host._max_history:
+            host._undo_stack.pop(0)
 
     def _create_state(self) -> EditorState:
         """Create a state snapshot."""
         import time
 
+        host = cast("HistoryProtocol", self)
         models_copy: dict[str, ParsedModel] = {}
-        for model_id, model in self._models.items():
+        for model_id, model in host._models.items():
             models_copy[model_id] = model.copy()
 
         return EditorState(
             models=models_copy,
-            clipboard=copy.deepcopy(self._clipboard),
+            clipboard=copy.deepcopy(host._clipboard),
             operation_history=[],
             timestamp=time.time(),
         )
 
     def _restore_state(self, state: EditorState) -> None:
         """Restore from a state snapshot."""
-        self._models = state.models
-        self._clipboard = state.clipboard
+        host = cast("HistoryProtocol", self)
+        host._models = state.models
+        host._clipboard = state.clipboard

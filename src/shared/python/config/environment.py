@@ -517,9 +517,8 @@ def is_auth_disabled() -> bool:
     Returns:
         True if authentication checks should be skipped.
     """
-    return (
-        get_golf_suite_mode() == "local"
-        or get_env_bool("GOLF_AUTH_DISABLED", default=False)
+    return get_golf_suite_mode() == "local" or get_env_bool(
+        "GOLF_AUTH_DISABLED", default=False
     )
 
 

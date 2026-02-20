@@ -9,8 +9,22 @@ from __future__ import annotations
 
 import difflib
 import re
+from typing import TYPE_CHECKING, Protocol
 
 from .text_editor_types import DiffHunk, DiffResult
+
+if TYPE_CHECKING:
+    from .text_editor_types import EditorVersion
+
+    class EditorProtocol(Protocol):
+        """Protocol for editor host class."""
+
+        _content: str
+        _original_content: str
+        _history: list[EditorVersion]
+
+
+from typing import cast
 
 
 class DiffMixin:
@@ -29,7 +43,8 @@ class DiffMixin:
         Returns:
             DiffResult with changes
         """
-        return self._compute_diff(self._original_content, self._content)
+        host = cast("EditorProtocol", self)
+        return self._compute_diff(host._original_content, host._content)
 
     def get_diff_between_versions(
         self,
@@ -46,13 +61,14 @@ class DiffMixin:
         Returns:
             DiffResult with changes
         """
-        if version_a < 0 or version_a >= len(self._history):
+        host = cast("EditorProtocol", self)
+        if version_a < 0 or version_a >= len(host._history):
             raise IndexError(f"Invalid version index: {version_a}")
-        if version_b < 0 or version_b >= len(self._history):
+        if version_b < 0 or version_b >= len(host._history):
             raise IndexError(f"Invalid version index: {version_b}")
 
-        content_a = self._history[version_a].content
-        content_b = self._history[version_b].content
+        content_a = host._history[version_a].content
+        content_b = host._history[version_b].content
 
         return self._compute_diff(content_a, content_b)
 
@@ -66,7 +82,8 @@ class DiffMixin:
         Returns:
             DiffResult with changes
         """
-        return self._compute_diff(self._content, other_content)
+        host = cast("EditorProtocol", self)
+        return self._compute_diff(host._content, other_content)
 
     @staticmethod
     def _compute_diff(original: str, modified: str) -> DiffResult:
@@ -109,9 +126,7 @@ class DiffMixin:
                     current_hunk_lines = []
 
                 # Parse hunk header
-                match = re.match(
-                    r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line
-                )
+                match = re.match(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
                 if match:
                     old_start = int(match.group(1))
                     old_count = int(match.group(2) or 1)
@@ -168,10 +183,11 @@ class DiffMixin:
             List of (left_line, right_line, change_type) tuples.
             change_type is one of: 'equal', 'insert', 'delete', 'replace'
         """
+        host = cast("EditorProtocol", self)
         if original is None:
-            original = self._original_content
+            original = host._original_content
         if modified is None:
-            modified = self._content
+            modified = host._content
 
         original_lines = original.splitlines()
         modified_lines = modified.splitlines()
