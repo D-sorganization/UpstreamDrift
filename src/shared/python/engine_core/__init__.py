@@ -11,7 +11,10 @@ Sub-protocols (Interface Segregation):
 __all__: list[str] = [
     "CounterfactualComputable",
     "DynamicsComputable",
+    "EngineLifecycle",
+    "EnginePluginMetadata",
     "Loadable",
+    "PluginRegistry",
     "Queryable",
     "Recordable",
     "Steppable",

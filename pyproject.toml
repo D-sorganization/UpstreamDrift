@@ -109,6 +109,11 @@ all = ["upstream-drift[all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"
 
+[project.entry-points."upstream_drift.engines"]
+# Third-party engines register here via pyproject.toml:
+# [project.entry-points."upstream_drift.engines"]
+# my_engine = "my_package:get_engine_plugin"
+
 [project.urls]
 Homepage = "https://github.com/D-sorganization/UpstreamDrift"
 Documentation = "https://upstream-drift.readthedocs.io"
