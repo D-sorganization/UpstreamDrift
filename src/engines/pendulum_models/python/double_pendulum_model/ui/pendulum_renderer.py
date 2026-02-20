@@ -28,7 +28,6 @@ if typing.TYPE_CHECKING:
         state: DoublePendulumState | None
         dynamics: DoublePendulumDynamics | None
 
-
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -50,7 +49,9 @@ class PendulumRendererMixin:
 
         host = typing.cast("RendererProtocol", self)
         if host.state is None or host.dynamics is None:
-            logger.debug("DEBUG: state=%s, dynamics=%s", host.state, host.dynamics)
+            logger.debug(
+                "DEBUG: state=%s, dynamics=%s", host.state, host.dynamics
+            )
             return
 
         try:
@@ -206,7 +207,9 @@ class PendulumRendererMixin:
         arc_x = [pivot[0] + arc_radius * math.sin(t) for t in arc_theta]
         arc_z = [pivot[2] - arc_radius * math.cos(t) for t in arc_theta]
         if len(arc_x) > 1:
-            host.ax.plot(arc_x, [pivot[1]] * 20, arc_z, "b-", linewidth=2, alpha=0.5)
+            host.ax.plot(
+                arc_x, [pivot[1]] * 20, arc_z, "b-", linewidth=2, alpha=0.5
+            )
 
         # Gravity
         self._draw_gravity_arrow(pivot, max_range)
@@ -219,7 +222,9 @@ class PendulumRendererMixin:
 
         host = typing.cast("RendererProtocol", self)
         gravity_len = max_range * 0.35
-        g_start = pivot + np.array([max_range * 0.6, max_range * 0.2, max_range * 0.3])
+        g_start = pivot + np.array(
+            [max_range * 0.6, max_range * 0.2, max_range * 0.3]
+        )
         g_vec = np.array([0, 0, -gravity_len])
         host.ax.quiver(
             g_start[0],
@@ -388,7 +393,10 @@ class PendulumRendererMixin:
         import numpy as np
 
         host = typing.cast("RendererProtocol", self)
-        if host.dynamics is None or not host.dynamics.parameters.constrained_to_plane:
+        if (
+            host.dynamics is None
+            or not host.dynamics.parameters.constrained_to_plane
+        ):
             return
 
         plane_size = size * 1.2

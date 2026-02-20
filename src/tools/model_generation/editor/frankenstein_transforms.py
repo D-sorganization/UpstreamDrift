@@ -30,7 +30,6 @@ if TYPE_CHECKING:
         ) -> str: ...
         def copy_subtree(self, model_id: str, root_link: str) -> bool: ...
 
-
 logger = logging.getLogger(__name__)
 
 

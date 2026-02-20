@@ -39,7 +39,6 @@ if TYPE_CHECKING:
         def log(self, message: str) -> None: ...
         def on_sim_success(self) -> None: ...
 
-
 logger = logging.getLogger(__name__)
 
 try:
