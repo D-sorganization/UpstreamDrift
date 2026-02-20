@@ -67,9 +67,7 @@ class BiomechanicalAnalyzer:
             self._jacr_flat = None
         except TypeError:
             # Fallback to flat arrays
-            logger.debug(
-                "MuJoCo version requires flat array format for mj_jacBody"
-            )
+            logger.debug("MuJoCo version requires flat array format for mj_jacBody")
             self._use_shaped_jac = False
             self._jacp_flat = np.zeros(3 * self.model.nv)
             self._jacr_flat = np.zeros(3 * self.model.nv)
@@ -335,9 +333,7 @@ class BiomechanicalAnalyzer:
             if act_id != -1:
                 tau_spec = np.zeros(self.model.nu)
                 tau_spec[act_id] = 1.0
-                spec_comps = self.induced_analyzer.compute_components(
-                    tau_app=tau_spec
-                )
+                spec_comps = self.induced_analyzer.compute_components(tau_app=tau_spec)
                 induced["selected_actuator"] = spec_comps["control"]
 
         club_induced = None

@@ -315,7 +315,13 @@ class TestContractHelpers:
             (np.array([1, 2, 3]), True),
             (np.array([1, -2, 3]), False),
         ],
-        ids=["positive_scalar", "negative_scalar", "zero", "positive_array", "mixed_array"],
+        ids=[
+            "positive_scalar",
+            "negative_scalar",
+            "zero",
+            "positive_array",
+            "mixed_array",
+        ],
     )
     def test_check_positive(self, value, expected):
         """check_positive should verify all values are positive."""

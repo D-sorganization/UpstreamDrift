@@ -524,7 +524,8 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         painter.setPen(QColor(255, 255, 255))
         painter.drawText(10, 20, f"Zoom: {self.camera_distance:.1f}x")
         painter.drawText(
-            10, 35,
+            10,
+            35,
             f"Rot: {self.camera_rotation_x:.1f}, {self.camera_rotation_y:.1f}",
         )
         painter.drawText(10, 50, "Grid View (Fallback)")

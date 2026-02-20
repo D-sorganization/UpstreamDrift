@@ -109,9 +109,7 @@ class DiffMixin:
                     current_hunk_lines = []
 
                 # Parse hunk header
-                match = re.match(
-                    r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line
-                )
+                match = re.match(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
                 if match:
                     old_start = int(match.group(1))
                     old_count = int(match.group(2) or 1)
