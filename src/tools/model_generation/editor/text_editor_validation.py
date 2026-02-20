@@ -10,10 +10,15 @@ from __future__ import annotations
 import logging
 import re
 import xml.etree.ElementTree as ET
+from typing import Protocol, TYPE_CHECKING, cast, Any
 
 import defusedxml.ElementTree as DefusedET
 
 from .text_editor_types import ValidationMessage, ValidationSeverity
+
+if TYPE_CHECKING:
+    class ValidationProtocol(Protocol):
+        _content: str
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +51,10 @@ class ValidationMixin:
     def _validate_xml(self) -> list[ValidationMessage]:
         """Validate XML syntax."""
         messages: list[ValidationMessage] = []
+        host = cast("ValidationProtocol", self)
 
         try:
-            DefusedET.fromstring(self._content)
+            DefusedET.fromstring(host._content)
         except ET.ParseError as e:
             # Parse error message for line/column
             error_str = str(e)
@@ -77,9 +83,10 @@ class ValidationMixin:
     def _validate_urdf(self) -> list[ValidationMessage]:
         """Validate URDF-specific rules."""
         messages: list[ValidationMessage] = []
+        host = cast("ValidationProtocol", self)
 
         try:
-            root = DefusedET.fromstring(self._content)
+            root = DefusedET.fromstring(host._content)
         except ET.ParseError:
             return messages  # Already reported in XML validation
 
@@ -388,11 +395,12 @@ class ValidationMixin:
 
     def _find_element_line(self, elem: ET.Element) -> int:
         """Find the line number of an element (approximate)."""
+        host = cast("ValidationProtocol", self)
         ET.tostring(elem, encoding="unicode")
         tag_start = f"<{elem.tag}"
 
         # Find in content
-        lines = self._content.split("\n")
+        lines = host._content.split("\n")
         for idx, line in enumerate(lines, 1):
             if tag_start in line:
                 # Check if attributes match
@@ -401,3 +409,33 @@ class ValidationMixin:
                     return idx
 
         return 1
+
+    def get_structure_summary(self) -> dict[str, Any]:
+        """
+        Get high-level statistics about the URDF.
+
+        Returns:
+            Dictionary with counts
+        """
+        host = cast("ValidationProtocol", self)
+        try:
+            from model_generation.converters.urdf_parser import URDFParser
+
+            parser = URDFParser()
+            model = parser.parse_urdf_string(host._content)
+
+            return {
+                "valid": True,
+                "robot_name": model.robot_name,
+                "links": len(model.links),
+                "joints": len(model.joints),
+                "materials": len(model.materials),
+            }
+        except Exception as e:
+            return {
+                "valid": False,
+                "error": str(e),
+                "links": 0,
+                "joints": 0,
+                "materials": 0,
+            }

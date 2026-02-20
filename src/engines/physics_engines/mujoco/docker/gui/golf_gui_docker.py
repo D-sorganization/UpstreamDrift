@@ -13,11 +13,36 @@ import os
 import subprocess
 import tempfile
 import threading
+from typing import Protocol, TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    import queue
+    import tkinter as tk
+    from tkinter import messagebox
+
+    class DockerProtocol(Protocol):
+        """Protocol for Docker host class."""
+
+        root: tk.Tk
+        is_windows: bool
+        wsl_path: str
+        repo_path: str
+        live_view_var: tk.BooleanVar
+        stop_event: threading.Event
+        process: subprocess.Popen
+        btn_run: tk.Button
+        btn_stop: tk.Button
+        btn_rebuild: tk.Button
+        btn_open_video: tk.Button
+        btn_open_data: tk.Button
+
+        def log(self, message: str) -> None: ...
+        def on_sim_success(self) -> None: ...
 
 logger = logging.getLogger(__name__)
 
 try:
-    import queue
+    import queue  # noqa: F401
     import tkinter as tk
     from tkinter import messagebox
 except ImportError:
@@ -57,7 +82,8 @@ class DockerMixin:
 
     def _run_docker_build(self, temp_dir: str, cmd: list[str]) -> int:
         """Execute the docker build command and return the exit code."""
-        if self.is_windows:
+        host = cast("DockerProtocol", self)
+        if host.is_windows:
             create_new_console = 0x00000010
             result = subprocess.run(
                 ["cmd", "/k", *cmd],
@@ -70,6 +96,7 @@ class DockerMixin:
 
     def _verify_docker_update(self) -> None:
         """Run a quick container test to verify defusedxml is available."""
+        host = cast("DockerProtocol", self)
         test_cmd = [
             "docker",
             "run",
@@ -81,12 +108,13 @@ class DockerMixin:
         ]
         test_result = subprocess.run(test_cmd, capture_output=True, text=True)
         if test_result.returncode == 0:
-            self.root.after(0, self.log, test_result.stdout.strip())
+            host.root.after(0, host.log, test_result.stdout.strip())
         else:
-            self.root.after(0, self.log, "Update completed but test failed")
+            host.root.after(0, host.log, "Update completed but test failed")
 
     def rebuild_docker(self) -> None:
         """Add missing dependencies to the existing robotics_env Docker image."""
+        host = cast("DockerProtocol", self)
         msg = (
             "This will add missing dependencies (like defusedxml) to the existing "
             "robotics_env.\n"
@@ -100,8 +128,8 @@ class DockerMixin:
         if not result:
             return
 
-        self.log("Updating robotics_env with missing dependencies...")
-        self.btn_rebuild.config(state=tk.DISABLED)
+        host.log("Updating robotics_env with missing dependencies...")
+        host.btn_rebuild.config(state=tk.DISABLED)
 
         def run_update() -> None:
             """Rebuild the Docker image with missing dependencies."""
@@ -114,50 +142,51 @@ class DockerMixin:
                         f.write(dockerfile_content)
 
                     cmd = ["docker", "build", "-t", "robotics_env", "."]
-                    self.root.after(0, self.log, f"Running: {' '.join(cmd)}")
-                    self.root.after(0, self.log, "Adding defusedxml to robotics_env...")
+                    host.root.after(0, host.log, f"Running: {' '.join(cmd)}")
+                    host.root.after(0, host.log, "Adding defusedxml to robotics_env...")
 
                     returncode = self._run_docker_build(temp_dir, cmd)
 
                     if returncode == 0:
-                        self.root.after(
-                            0, self.log, "robotics_env updated successfully!"
+                        host.root.after(
+                            0, host.log, "robotics_env updated successfully!"
                         )
-                        self.root.after(
+                        host.root.after(
                             0,
-                            self.log,
+                            host.log,
                             "defusedxml and other dependencies are now available.",
                         )
                         self._verify_docker_update()
                     else:
-                        self.root.after(
+                        host.root.after(
                             0,
-                            self.log,
+                            host.log,
                             f"Update failed with code {returncode}",
                         )
 
             except ImportError as e:
-                self.root.after(0, self.log, f"Update failed: {e}")
+                host.root.after(0, host.log, f"Update failed: {e}")
             finally:
-                self.root.after(0, lambda: self.btn_rebuild.config(state=tk.NORMAL))
+                host.root.after(0, lambda: host.btn_rebuild.config(state=tk.NORMAL))
 
         threading.Thread(target=run_update, daemon=True).start()
 
     def _build_docker_command(self) -> list[str]:
         """Build the docker run command for the simulation subprocess."""
-        if self.is_windows:
+        host = cast("DockerProtocol", self)
+        if host.is_windows:
             cmd = [
                 "wsl",
                 "docker",
                 "run",
                 "--rm",
                 "-v",
-                f"{self.wsl_path}:/workspace",
+                f"{host.wsl_path}:/workspace",
                 "-w",
                 "/workspace/python",
             ]
 
-            if self.live_view_var.get():
+            if host.live_view_var.get():
                 # Allow GUI to display on host Windows X Server (VcXsrv)
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
@@ -180,12 +209,12 @@ class DockerMixin:
                 "run",
                 "--rm",
                 "-v",
-                f"{self.repo_path}:/workspace",
+                f"{host.repo_path}:/workspace",
                 "-w",
                 "/workspace/python",
             ]
 
-            if self.live_view_var.get():
+            if host.live_view_var.get():
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
@@ -206,6 +235,7 @@ class DockerMixin:
 
     def _stream_process_output(self) -> None:
         """Read subprocess stdout via a queue and log lines to the GUI."""
+        host = cast("DockerProtocol", self)
         q: queue.Queue[str | None] = queue.Queue()
 
         def enqueue_output(out, output_queue) -> None:
@@ -216,81 +246,84 @@ class DockerMixin:
                 out.close()
             except (RuntimeError, ValueError, OSError) as e:
                 with contextlib.suppress(RuntimeError, ValueError, AttributeError):
-                    self.root.after(0, self.log, f"Exception in enqueue_output: {e}")
+                    host.root.after(0, host.log, f"Exception in enqueue_output: {e}")
             output_queue.put(None)  # Sentinel
 
         t = threading.Thread(
-            target=enqueue_output, args=(self.process.stdout, q), daemon=True
+            target=enqueue_output, args=(host.process.stdout, q), daemon=True
         )
         t.start()
 
         while True:
             # Check user stop
-            if self.stop_event.is_set() and self.process.poll() is None:
-                self.process.terminate()
+            if host.stop_event.is_set() and host.process.poll() is None:
+                host.process.terminate()
 
             try:
                 output = q.get(timeout=0.1)
             except queue.Empty:
-                if self.process.poll() is not None and not t.is_alive():
+                if host.process.poll() is not None and not t.is_alive():
                     break
                 continue
 
             if output is None:  # Sentinel
                 break
 
-            self.root.after(0, self.log, output.strip())
+            host.root.after(0, host.log, output.strip())
 
     def _handle_process_failure(self, rc) -> None:
         """Log error details and suggest solutions for common failures."""
-        self.root.after(0, self.log, f"Process exited with code {rc}")
-        if self.process.stderr:
-            err = self.process.stderr.read()
+        host = cast("DockerProtocol", self)
+        host.root.after(0, host.log, f"Process exited with code {rc}")
+        if host.process.stderr:
+            err = host.process.stderr.read()
             if err:
-                self.root.after(0, self.log, f"ERROR: {err}")
+                host.root.after(0, host.log, f"ERROR: {err}")
             # Check for specific common errors and provide solutions
             if "defusedxml" in err:
-                self.root.after(
+                host.root.after(
                     0,
-                    self.log,
+                    host.log,
                     "SOLUTION: Missing defusedxml dependency. "
                     "Please rebuild Docker image.",
                 )
-                self.root.after(0, self.log, "Run: docker build -t robotics_env .")
+                host.root.after(0, host.log, "Run: docker build -t robotics_env .")
             elif "ModuleNotFoundError" in err:
-                self.root.after(
+                host.root.after(
                     0,
-                    self.log,
+                    host.log,
                     "SOLUTION: Missing Python dependency. "
                     "Check Dockerfile and rebuild.",
                 )
             elif "DISPLAY" in err or "X11" in err:
-                self.root.after(
+                host.root.after(
                     0,
-                    self.log,
+                    host.log,
                     "SOLUTION: X11/Display issue. "
                     "Try disabling 'Live Interactive View'.",
                 )
 
     def _reset_buttons_state(self) -> None:
         """Reset run/stop buttons to their default enabled states."""
-        self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
-        self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))
+        host = cast("DockerProtocol", self)
+        host.root.after(0, lambda: host.btn_run.config(state=tk.NORMAL))
+        host.root.after(0, lambda: host.btn_stop.config(state=tk.DISABLED))
 
     def _run_docker_process(self) -> None:
         """Run the simulation in a subprocess."""
+        host = cast("DockerProtocol", self)
         cmd = self._build_docker_command()
 
         try:
-            self.log(f"Running command: {' '.join(cmd)}")
+            host.log(f"Running command: {' '.join(cmd)}")
 
             # Race condition fix: Check stop event before starting
-            if self.stop_event.is_set():
-                self.log("Simulation cancelled.")
+            if host.stop_event.is_set():
+                host.log("Simulation cancelled.")
                 self._reset_buttons_state()
                 return
 
-            self.process = subprocess.Popen(
+            host.process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -300,18 +333,18 @@ class DockerMixin:
 
             self._stream_process_output()
 
-            rc = self.process.poll()
+            rc = host.process.poll()
 
             # Check if stopped by user
-            if self.stop_event.is_set():
-                self.root.after(0, self.log, "Simulation stopped by user.")
+            if host.stop_event.is_set():
+                host.root.after(0, host.log, "Simulation stopped by user.")
                 self._reset_buttons_state()
             elif rc == 0:
-                self.root.after(0, self.on_sim_success)
+                host.root.after(0, host.on_sim_success)
             else:
                 self._handle_process_failure(rc)
                 self._reset_buttons_state()
 
         except ImportError as e:
-            self.root.after(0, self.log, f"Failed to run subprocess: {e}")
+            host.root.after(0, host.log, f"Failed to run subprocess: {e}")
             self._reset_buttons_state()
