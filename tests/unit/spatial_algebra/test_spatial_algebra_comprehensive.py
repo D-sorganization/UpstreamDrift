@@ -106,46 +106,35 @@ class TestSkew:
 # ============================================================================
 
 
-class TestCrm:
-    """Tests for spatial cross product motion operator."""
+class TestCrmCrf:
+    """Tests for spatial cross product motion/force operators."""
 
-    def test_shape(self) -> None:
+    @pytest.mark.parametrize("func", [crm, crf], ids=["crm", "crf"])
+    def test_shape(self, func: object) -> None:
         v = np.zeros(6)
-        result = crm(v)
+        result = func(v)
         assert result.shape == (6, 6)
 
-    def test_zero_vector(self) -> None:
+    @pytest.mark.parametrize("func", [crm, crf], ids=["crm", "crf"])
+    def test_invalid_shape(self, func: object) -> None:
+        with pytest.raises(ValueError, match="6x1"):
+            func(np.array([1.0, 2.0, 3.0]))
+
+    def test_crm_zero_vector(self) -> None:
         result = crm(np.zeros(6))
         np.testing.assert_allclose(result, np.zeros((6, 6)))
 
-    def test_invalid_shape(self) -> None:
-        with pytest.raises(ValueError, match="6x1"):
-            crm(np.array([1.0, 2.0, 3.0]))
-
-    def test_antisymmetric_omega_block(self) -> None:
+    def test_crm_antisymmetric_omega_block(self) -> None:
         """Upper-left 3x3 block should be skew-symmetric."""
         v = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         result = crm(v)
         omega_block = result[:3, :3]
         np.testing.assert_allclose(omega_block, -omega_block.T)
 
-
-class TestCrf:
-    """Tests for spatial cross product force operator."""
-
-    def test_shape(self) -> None:
-        v = np.zeros(6)
-        result = crf(v)
-        assert result.shape == (6, 6)
-
     def test_crm_crf_relation(self) -> None:
         """crf(v) = -crm(v)^T (dual relationship)."""
         v = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         np.testing.assert_allclose(crf(v), -crm(v).T)
-
-    def test_invalid_shape(self) -> None:
-        with pytest.raises(ValueError, match="6x1"):
-            crf(np.array([1.0]))
 
 
 # ============================================================================
@@ -403,17 +392,24 @@ class TestMcI:
         eigenvalues = np.linalg.eigvalsh(I_s)
         assert np.all(eigenvalues >= -1e-10)
 
-    def test_invalid_mass(self) -> None:
-        with pytest.raises(ValueError, match="positive"):
-            mcI(-1.0, np.zeros(3), np.zeros((3, 3)))
-
-    def test_invalid_com_shape(self) -> None:
-        with pytest.raises(ValueError, match="3x1"):
-            mcI(1.0, np.zeros(2), np.zeros((3, 3)))
-
-    def test_invalid_inertia_shape(self) -> None:
-        with pytest.raises(ValueError, match="3x3"):
-            mcI(1.0, np.zeros(3), np.zeros((2, 2)))
+    @pytest.mark.parametrize(
+        "mass, com, inertia, match",
+        [
+            (-1.0, np.zeros(3), np.zeros((3, 3)), "positive"),
+            (1.0, np.zeros(2), np.zeros((3, 3)), "3x1"),
+            (1.0, np.zeros(3), np.zeros((2, 2)), "3x3"),
+        ],
+        ids=["negative-mass", "invalid-com-shape", "invalid-inertia-shape"],
+    )
+    def test_invalid_inputs_raise(
+        self,
+        mass: float,
+        com: np.ndarray,
+        inertia: np.ndarray,
+        match: str,
+    ) -> None:
+        with pytest.raises(ValueError, match=match):
+            mcI(mass, com, inertia)
 
     def test_alias_mci(self) -> None:
         """mci should produce same result as mcI."""
@@ -486,19 +482,14 @@ class TestJcalc:
         _, _, dof_idx = jcalc(jtype, 0.0)
         assert dof_idx == expected_idx
 
-    def test_rx_orthogonal(self) -> None:
+    @pytest.mark.parametrize(
+        "jtype, angle",
+        [("Rx", np.pi / 4), ("Ry", np.pi / 3), ("Rz", np.pi / 6)],
+        ids=["Rx-pi/4", "Ry-pi/3", "Rz-pi/6"],
+    )
+    def test_rotation_orthogonal(self, jtype: str, angle: float) -> None:
         """Rotation transform should be orthogonal (det = 1)."""
-        xj, _, _ = jcalc("Rx", np.pi / 4)
-        det = np.linalg.det(xj)
-        assert det == pytest.approx(1.0, abs=1e-10)
-
-    def test_ry_orthogonal(self) -> None:
-        xj, _, _ = jcalc("Ry", np.pi / 3)
-        det = np.linalg.det(xj)
-        assert det == pytest.approx(1.0, abs=1e-10)
-
-    def test_rz_orthogonal(self) -> None:
-        xj, _, _ = jcalc("Rz", np.pi / 6)
+        xj, _, _ = jcalc(jtype, angle)
         det = np.linalg.det(xj)
         assert det == pytest.approx(1.0, abs=1e-10)
 

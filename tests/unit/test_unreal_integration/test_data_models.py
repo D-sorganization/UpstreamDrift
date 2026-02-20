@@ -78,23 +78,22 @@ class TestVector3:
         assert v.y == 2.0
         assert v.z == 3.0
 
-    def test_addition(self):
-        """Test Vector3 addition."""
-        v1 = Vector3(x=1.0, y=2.0, z=3.0)
-        v2 = Vector3(x=4.0, y=5.0, z=6.0)
-        result = v1 + v2
-        assert result.x == 5.0
-        assert result.y == 7.0
-        assert result.z == 9.0
-
-    def test_subtraction(self):
-        """Test Vector3 subtraction."""
-        v1 = Vector3(x=4.0, y=5.0, z=6.0)
-        v2 = Vector3(x=1.0, y=2.0, z=3.0)
-        result = v1 - v2
-        assert result.x == 3.0
-        assert result.y == 3.0
-        assert result.z == 3.0
+    @pytest.mark.parametrize(
+        "op, v1_args, v2_args, expected",
+        [
+            ("add", (1.0, 2.0, 3.0), (4.0, 5.0, 6.0), (5.0, 7.0, 9.0)),
+            ("sub", (4.0, 5.0, 6.0), (1.0, 2.0, 3.0), (3.0, 3.0, 3.0)),
+        ],
+        ids=["addition", "subtraction"],
+    )
+    def test_vector_arithmetic(self, op, v1_args, v2_args, expected):
+        """Test Vector3 addition and subtraction."""
+        v1 = Vector3(x=v1_args[0], y=v1_args[1], z=v1_args[2])
+        v2 = Vector3(x=v2_args[0], y=v2_args[1], z=v2_args[2])
+        result = (v1 + v2) if op == "add" else (v1 - v2)
+        assert result.x == expected[0]
+        assert result.y == expected[1]
+        assert result.z == expected[2]
 
     def test_scalar_multiplication(self):
         """Test Vector3 scalar multiplication."""
@@ -130,18 +129,18 @@ class TestVector3:
 class TestQuaternion:
     """Tests for Quaternion data model."""
 
-    def test_create_from_values(self):
-        """Test Quaternion creation from individual values."""
-        q = Quaternion(w=1.0, x=0.0, y=0.0, z=0.0)
-        assert q.w == 1.0
-        assert q.x == 0.0
-        assert q.y == 0.0
-        assert q.z == 0.0
-
-    def test_identity(self):
-        """Test Quaternion.identity() factory method."""
-        q = Quaternion.identity()
-        assert q.w == 1.0
+    @pytest.mark.parametrize(
+        "factory, expected_w",
+        [
+            (lambda: Quaternion(w=1.0, x=0.0, y=0.0, z=0.0), 1.0),
+            (lambda: Quaternion.identity(), 1.0),
+        ],
+        ids=["from-values", "identity"],
+    )
+    def test_creation(self, factory, expected_w):
+        """Test Quaternion creation methods."""
+        q = factory()
+        assert q.w == expected_w
         assert q.x == 0.0
         assert q.y == 0.0
         assert q.z == 0.0
@@ -153,13 +152,18 @@ class TestQuaternion:
         assert q.w == pytest.approx(math.cos(math.pi / 4))
         assert q.z == pytest.approx(math.sin(math.pi / 4))
 
-    def test_to_euler(self):
-        """Test Quaternion conversion to Euler angles."""
-        q = Quaternion.from_euler(roll=0.1, pitch=0.2, yaw=0.3)
-        roll, pitch, yaw = q.to_euler()
-        assert roll == pytest.approx(0.1, abs=1e-6)
-        assert pitch == pytest.approx(0.2, abs=1e-6)
-        assert yaw == pytest.approx(0.3, abs=1e-6)
+    @pytest.mark.parametrize(
+        "roll, pitch, yaw",
+        [(0.1, 0.2, 0.3), (0.0, 0.0, 0.0), (0.5, -0.3, 0.8)],
+        ids=["small-angles", "zero", "mixed"],
+    )
+    def test_euler_roundtrip(self, roll, pitch, yaw):
+        """Test Quaternion Euler conversion roundtrip."""
+        q = Quaternion.from_euler(roll=roll, pitch=pitch, yaw=yaw)
+        r, p, y = q.to_euler()
+        assert r == pytest.approx(roll, abs=1e-6)
+        assert p == pytest.approx(pitch, abs=1e-6)
+        assert y == pytest.approx(yaw, abs=1e-6)
 
     def test_magnitude(self):
         """Test Quaternion magnitude calculation."""
@@ -557,15 +561,18 @@ class TestUnrealDataFrame:
 class TestDataModelContracts:
     """Tests for Design by Contract compliance."""
 
-    def test_vector3_nan_check(self):
-        """Test Vector3 rejects NaN values by default."""
-        with pytest.raises(ValueError, match="NaN"):
-            Vector3(x=float("nan"), y=0.0, z=0.0, validate=True)
-
-    def test_vector3_inf_check(self):
-        """Test Vector3 rejects infinite values by default."""
-        with pytest.raises(ValueError, match="infinite"):
-            Vector3(x=float("inf"), y=0.0, z=0.0, validate=True)
+    @pytest.mark.parametrize(
+        "x, match",
+        [
+            (float("nan"), "NaN"),
+            (float("inf"), "infinite"),
+        ],
+        ids=["nan", "infinite"],
+    )
+    def test_vector3_invalid_values(self, x, match):
+        """Test Vector3 rejects NaN and infinite values."""
+        with pytest.raises(ValueError, match=match):
+            Vector3(x=x, y=0.0, z=0.0, validate=True)
 
     def test_quaternion_normalization_check(self):
         """Test Quaternion validates normalization."""
@@ -593,22 +600,20 @@ class TestDataModelContracts:
                 validate=True,
             )
 
-    def test_data_frame_requires_valid_timestamp(self):
-        """Test UnrealDataFrame requires non-negative timestamp."""
-        with pytest.raises(ValueError, match="timestamp"):
+    @pytest.mark.parametrize(
+        "timestamp, frame_number, match",
+        [
+            (-1.0, 1, "timestamp"),
+            (0.0, -1, "frame"),
+        ],
+        ids=["negative-timestamp", "negative-frame"],
+    )
+    def test_data_frame_invalid_values(self, timestamp, frame_number, match):
+        """Test UnrealDataFrame rejects invalid timestamp and frame number."""
+        with pytest.raises(ValueError, match=match):
             UnrealDataFrame(
-                timestamp=-1.0,
-                frame_number=1,
-                joints={},
-                validate=True,
-            )
-
-    def test_data_frame_requires_valid_frame_number(self):
-        """Test UnrealDataFrame requires non-negative frame number."""
-        with pytest.raises(ValueError, match="frame"):
-            UnrealDataFrame(
-                timestamp=0.0,
-                frame_number=-1,
+                timestamp=timestamp,
+                frame_number=frame_number,
                 joints={},
                 validate=True,
             )

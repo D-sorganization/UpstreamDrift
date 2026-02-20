@@ -91,11 +91,8 @@ def check_signal_bus_structure() -> bool:
                         )
 
                     return True
-                else:
-                    logger.info(
-                        "⚠️  This appears to be traditional logging (fewer columns)"
-                    )
-                    return False
+                logger.info("⚠️  This appears to be traditional logging (fewer columns)")
+                return False
 
         return False
 

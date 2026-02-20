@@ -134,17 +134,25 @@ class TestAerodynamicsConfig:
         config = AerodynamicsConfig(enabled=False)
         assert getattr(config, check_method)() is False
 
-    def test_individual_toggles(self) -> None:
+    @pytest.mark.parametrize(
+        "drag, lift, magnus",
+        [
+            (True, False, False),
+            (False, True, False),
+            (False, False, True),
+        ],
+        ids=["drag-only", "lift-only", "magnus-only"],
+    )
+    def test_individual_toggles(self, drag: bool, lift: bool, magnus: bool) -> None:
         """Test individual effect toggles work independently (Orthogonal)."""
-        # Only drag
         config = AerodynamicsConfig(
-            drag_enabled=True,
-            lift_enabled=False,
-            magnus_enabled=False,
+            drag_enabled=drag,
+            lift_enabled=lift,
+            magnus_enabled=magnus,
         )
-        assert config.is_drag_active() is True
-        assert config.is_lift_active() is False
-        assert config.is_magnus_active() is False
+        assert config.is_drag_active() is drag
+        assert config.is_lift_active() is lift
+        assert config.is_magnus_active() is magnus
 
     @pytest.mark.parametrize(
         "coeff_name, value",
@@ -152,7 +160,9 @@ class TestAerodynamicsConfig:
             ("drag_coefficient", 0.30),
             ("lift_coefficient", 0.20),
             ("magnus_coefficient", 0.35),
+            ("spin_decay_rate", 0.08),
         ],
+        ids=["drag", "lift", "magnus", "spin-decay"],
     )
     def test_tunable_coefficients(self, coeff_name: str, value: float) -> None:
         """Test that aerodynamic coefficients are tunable."""
@@ -164,17 +174,15 @@ class TestAerodynamicsConfig:
         with pytest.raises(ValueError, match="coefficient"):
             AerodynamicsConfig(drag_coefficient=-0.1)
 
-    def test_spin_decay_rate_tunable(self) -> None:
-        """Test spin decay rate is configurable."""
-        config = AerodynamicsConfig(spin_decay_rate=0.08)
-        assert config.spin_decay_rate == pytest.approx(0.08)
-
-    def test_reynolds_number_correction_toggle(self) -> None:
+    @pytest.mark.parametrize(
+        "enabled",
+        [True, False],
+        ids=["on", "off"],
+    )
+    def test_reynolds_number_correction_toggle(self, enabled: bool) -> None:
         """Test Reynolds number correction can be toggled."""
-        config_on = AerodynamicsConfig(reynolds_correction_enabled=True)
-        config_off = AerodynamicsConfig(reynolds_correction_enabled=False)
-        assert config_on.reynolds_correction_enabled is True
-        assert config_off.reynolds_correction_enabled is False
+        config = AerodynamicsConfig(reynolds_correction_enabled=enabled)
+        assert config.reynolds_correction_enabled is enabled
 
     def test_immutability(self, default_aero_config: AerodynamicsConfig) -> None:
         """Test config is immutable (frozen dataclass)."""
@@ -590,12 +598,19 @@ class TestTurbulenceModel:
 class TestRandomizationConfig:
     """Tests for environment randomization configuration."""
 
-    def test_default_no_randomization(self) -> None:
+    @pytest.mark.parametrize(
+        "attr, expected",
+        [
+            ("enabled", False),
+            ("air_density_variance", 0.0),
+            ("temperature_variance", 0.0),
+        ],
+        ids=["enabled", "air-density-var", "temperature-var"],
+    )
+    def test_default_no_randomization(self, attr: str, expected: object) -> None:
         """Test default config has no randomization."""
         config = RandomizationConfig()
-        assert config.enabled is False
-        assert config.air_density_variance == 0.0
-        assert config.temperature_variance == 0.0
+        assert getattr(config, attr) == expected
 
     def test_enable_randomization(self) -> None:
         """Test enabling randomization."""

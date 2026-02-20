@@ -4,7 +4,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from src.c3d_reader import C3DDataReader
 
 

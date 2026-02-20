@@ -62,12 +62,10 @@ def test_gui_launch() -> bool:
                 window.show()
                 logger.info("✅ GUI window displayed")
                 return True
-            else:
-                logger.error("❌ Failed to load data into GUI")
-                return False
-        else:
-            logger.info("❌ No data available for GUI test")
+            logger.error("❌ Failed to load data into GUI")
             return False
+        logger.info("❌ No data available for GUI test")
+        return False
 
     except Exception as e:  # noqa: BLE001 - test helper; GUI init may raise various errors
         logger.error(f"❌ GUI launch failed: {e}")
