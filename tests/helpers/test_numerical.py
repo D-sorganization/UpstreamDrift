@@ -4,7 +4,6 @@ Follows TDD: every public function is exercised for both passing and
 failing paths, plus edge cases and precondition violations.
 """
 
-import math
 import pytest
 
 from tests.helpers.numerical import (
@@ -15,7 +14,6 @@ from tests.helpers.numerical import (
     assert_physics_state,
     is_finite,
 )
-
 
 # ── is_finite ────────────────────────────────────────────────────────────────
 

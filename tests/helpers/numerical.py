@@ -11,7 +11,8 @@ Design by Contract:
 """
 
 import math
-from typing import List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
 Number = Union[int, float]
 
@@ -188,14 +189,14 @@ def assert_monotonic(
         if violation:
             raise AssertionError(
                 f"{label} is not {strictness}{direction}: "
-                f"values[{i}]={a} vs values[{i+1}]={b}"
+                f"values[{i}]={a} vs values[{i + 1}]={b}"
             )
 
 
 def assert_physics_state(
     position: Sequence[Number],
     velocity: Sequence[Number],
-    acceleration: Optional[Sequence[Number]] = None,
+    acceleration: Sequence[Number] | None = None,
 ) -> None:
     """Validate that physics state vectors are well-formed.
 
@@ -211,6 +212,7 @@ def assert_physics_state(
         TypeError: If inputs are not sequences of numbers.
         ValueError: If vectors have inconsistent lengths or contain NaN/Inf.
     """
+
     def _check_vector(vec: Sequence[Number], name: str) -> int:
         if not hasattr(vec, "__len__") or not hasattr(vec, "__getitem__"):
             raise TypeError(f"{name} must be a sequence, got {type(vec).__name__}")
@@ -219,9 +221,7 @@ def assert_physics_state(
         for i, v in enumerate(vec):
             _validate_number(v, f"{name}[{i}]")
             if not is_finite(v):
-                raise ValueError(
-                    f"{name}[{i}] is not finite: {v}"
-                )
+                raise ValueError(f"{name}[{i}] is not finite: {v}")
         return len(vec)
 
     n_pos = _check_vector(position, "position")
@@ -268,13 +268,10 @@ def assert_jacobian_symmetry(
 
     for i, row in enumerate(J):
         if not hasattr(row, "__len__") or not hasattr(row, "__getitem__"):
-            raise TypeError(
-                f"J[{i}] must be a sequence, got {type(row).__name__}"
-            )
+            raise TypeError(f"J[{i}] must be a sequence, got {type(row).__name__}")
         if len(row) != n:
             raise ValueError(
-                f"Jacobian must be square: row {i} has length {len(row)}, "
-                f"expected {n}"
+                f"Jacobian must be square: row {i} has length {len(row)}, expected {n}"
             )
         for j, v in enumerate(row):
             _validate_number(v, f"J[{i}][{j}]")
@@ -293,5 +290,5 @@ def assert_jacobian_symmetry(
                 raise AssertionError(
                     f"Jacobian not symmetric at ({i},{j}): "
                     f"J[{i}][{j}]={a}, J[{j}][{i}]={b}, "
-                    f"rel_diff={diff/scale:.2e}, rtol={rtol_f}"
+                    f"rel_diff={diff / scale:.2e}, rtol={rtol_f}"
                 )

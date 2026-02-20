@@ -24,14 +24,12 @@ import argparse
 import json
 import os
 import sys
-from pathlib import Path
-from typing import Dict, Tuple
 
 # ── Coverage gates (module_prefix -> minimum percent) ────────────────────────
 # These thresholds are intentionally conservative starting points.
 # They should be ratcheted up as coverage improves.
 
-COVERAGE_GATES: Dict[str, float] = {
+COVERAGE_GATES: dict[str, float] = {
     "engines": 35.0,
     "api": 30.0,
     "core": 40.0,
@@ -41,7 +39,7 @@ COVERAGE_GATES: Dict[str, float] = {
 
 # Mapping from gate name to source directory prefix patterns.
 # A file matches a gate if its path contains one of these fragments.
-MODULE_PATTERNS: Dict[str, list] = {
+MODULE_PATTERNS: dict[str, list] = {
     "engines": ["src/engines/"],
     "api": ["src/api/"],
     "core": ["src/shared/python/engine_core/", "src/shared/python/physics/"],
@@ -71,7 +69,7 @@ def load_coverage_report(path: str) -> dict:
         sys.exit(2)
 
     try:
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
     except json.JSONDecodeError as exc:
         print(f"ERROR: Invalid JSON in {path}: {exc}", file=sys.stderr)
@@ -79,8 +77,8 @@ def load_coverage_report(path: str) -> dict:
 
     if "files" not in data:
         print(
-            f"ERROR: Coverage report missing 'files' key. "
-            f"Ensure you used --cov-report=json.",
+            "ERROR: Coverage report missing 'files' key. "
+            "Ensure you used --cov-report=json.",
             file=sys.stderr,
         )
         sys.exit(2)
@@ -90,7 +88,7 @@ def load_coverage_report(path: str) -> dict:
 
 def compute_module_coverage(
     report: dict,
-) -> Dict[str, Tuple[int, int, float]]:
+) -> dict[str, tuple[int, int, float]]:
     """Compute per-module coverage from the JSON report.
 
     Args:
@@ -100,7 +98,7 @@ def compute_module_coverage(
         Dict mapping gate name to (covered_lines, total_lines, percent).
         Only gates that have at least one matching source file are included.
     """
-    results: Dict[str, Tuple[int, int]] = {}
+    results: dict[str, tuple[int, int]] = {}
 
     for filepath, file_data in report["files"].items():
         summary = file_data.get("summary", {})
@@ -117,7 +115,7 @@ def compute_module_coverage(
                 # A file can match multiple gates (e.g. shared/physics -> core AND shared)
                 # This is intentional: "core" is a subset of "shared".
 
-    final: Dict[str, Tuple[int, int, float]] = {}
+    final: dict[str, tuple[int, int, float]] = {}
     for gate, (covered, total) in results.items():
         pct = (covered / total * 100.0) if total > 0 else 0.0
         final[gate] = (covered, total, pct)
@@ -126,8 +124,8 @@ def compute_module_coverage(
 
 
 def check_gates(
-    coverage: Dict[str, Tuple[int, int, float]],
-    gates: Dict[str, float],
+    coverage: dict[str, tuple[int, int, float]],
+    gates: dict[str, float],
 ) -> bool:
     """Check coverage against gates and print a summary table.
 
@@ -141,7 +139,9 @@ def check_gates(
     all_passed = True
 
     print()
-    print(f"{'Module':<12} {'Covered':>8} {'Total':>8} {'Pct':>7} {'Gate':>7} {'Status':>8}")
+    print(
+        f"{'Module':<12} {'Covered':>8} {'Total':>8} {'Pct':>7} {'Gate':>7} {'Status':>8}"
+    )
     print("-" * 58)
 
     for gate_name, threshold in sorted(gates.items()):
