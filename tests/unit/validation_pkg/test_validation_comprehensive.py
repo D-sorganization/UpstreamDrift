@@ -79,7 +79,7 @@ from src.shared.python.validation_pkg.validation_utils import (
 )
 
 # ============================================================================
-# validation.py — PhysicalValidationError
+# validation.py -- PhysicalValidationError
 # ============================================================================
 
 
@@ -100,73 +100,78 @@ class TestPhysicalValidationError:
 
 
 # ============================================================================
-# validation.py — validate_mass
+# validation.py -- validate_mass
 # ============================================================================
 
 
 class TestValidateMass:
     """Tests for validate_mass function."""
 
-    def test_valid_mass(self) -> None:
-        validate_mass(1.5)  # Should not raise
+    @pytest.mark.parametrize(
+        "value",
+        [1.5, 1e-10, 100.0, 0.001],
+        ids=["normal", "tiny-positive", "large", "small"],
+    )
+    def test_valid_mass(self, value: float) -> None:
+        validate_mass(value)  # Should not raise
 
-    def test_zero_mass_raises(self) -> None:
-        with pytest.raises(PhysicalValidationError, match="mass"):
-            validate_mass(0.0)
-
-    def test_negative_mass_raises(self) -> None:
+    @pytest.mark.parametrize(
+        "value",
+        [0.0, -1.0, -0.001],
+        ids=["zero", "negative", "small-negative"],
+    )
+    def test_invalid_mass_raises(self, value: float) -> None:
         with pytest.raises(PhysicalValidationError):
-            validate_mass(-1.0)
+            validate_mass(value)
 
     def test_custom_param_name(self) -> None:
         with pytest.raises(PhysicalValidationError, match="head_mass"):
             validate_mass(-0.5, param_name="head_mass")
 
-    def test_small_positive_mass(self) -> None:
-        validate_mass(1e-10)  # Should not raise
-
 
 # ============================================================================
-# validation.py — validate_timestep
+# validation.py -- validate_timestep
 # ============================================================================
 
 
 class TestValidateTimestep:
     """Tests for validate_timestep function."""
 
-    def test_valid_timestep(self) -> None:
-        validate_timestep(0.001)  # Should not raise
+    @pytest.mark.parametrize(
+        "value",
+        [0.001, 1.0, 1.5],
+        ids=["typical", "boundary", "large"],
+    )
+    def test_valid_timestep(self, value: float) -> None:
+        validate_timestep(value)  # Should not raise
 
-    def test_zero_raises(self) -> None:
+    @pytest.mark.parametrize(
+        "value",
+        [0.0, -0.01],
+        ids=["zero", "negative"],
+    )
+    def test_invalid_timestep_raises(self, value: float) -> None:
         with pytest.raises(PhysicalValidationError):
-            validate_timestep(0.0)
-
-    def test_negative_raises(self) -> None:
-        with pytest.raises(PhysicalValidationError):
-            validate_timestep(-0.01)
-
-    def test_large_timestep_warns(self) -> None:
-        # dt > 1.0 logs a warning but does not raise
-        validate_timestep(1.5)  # Should not raise
-
-    def test_boundary_timestep(self) -> None:
-        validate_timestep(1.0)  # Exactly 1.0 should not raise
+            validate_timestep(value)
 
 
 # ============================================================================
-# validation.py — validate_inertia_matrix
+# validation.py -- validate_inertia_matrix
 # ============================================================================
 
 
 class TestValidateInertiaMatrix:
     """Tests for validate_inertia_matrix function."""
 
-    def test_valid_diagonal_inertia(self) -> None:
-        inertia = np.diag([1.0, 2.0, 3.0])
-        validate_inertia_matrix(inertia)  # Should not raise
-
-    def test_valid_symmetric_inertia(self) -> None:
-        inertia = np.array([[2.0, 0.5, 0.0], [0.5, 3.0, 0.1], [0.0, 0.1, 1.5]])
+    @pytest.mark.parametrize(
+        "inertia",
+        [
+            np.diag([1.0, 2.0, 3.0]),
+            np.array([[2.0, 0.5, 0.0], [0.5, 3.0, 0.1], [0.0, 0.1, 1.5]]),
+        ],
+        ids=["diagonal", "symmetric"],
+    )
+    def test_valid_inertia(self, inertia: np.ndarray) -> None:
         validate_inertia_matrix(inertia)  # Should not raise
 
     def test_wrong_shape_raises(self) -> None:
@@ -178,19 +183,29 @@ class TestValidateInertiaMatrix:
         with pytest.raises(PhysicalValidationError, match="symmetric"):
             validate_inertia_matrix(inertia)
 
-    def test_negative_eigenvalue_raises(self) -> None:
-        inertia = np.array([[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]])
-        with pytest.raises(PhysicalValidationError, match="positive definite"):
-            validate_inertia_matrix(inertia)
-
-    def test_zero_eigenvalue_raises(self) -> None:
-        inertia = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+    @pytest.mark.parametrize(
+        "inertia, description",
+        [
+            (
+                np.array([[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]),
+                "negative-eigenvalue",
+            ),
+            (
+                np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]]),
+                "zero-eigenvalue",
+            ),
+        ],
+        ids=["negative-eigenvalue", "zero-eigenvalue"],
+    )
+    def test_non_positive_definite_raises(
+        self, inertia: np.ndarray, description: str
+    ) -> None:
         with pytest.raises(PhysicalValidationError):
             validate_inertia_matrix(inertia)
 
 
 # ============================================================================
-# validation.py — validate_joint_limits
+# validation.py -- validate_joint_limits
 # ============================================================================
 
 
@@ -219,18 +234,20 @@ class TestValidateJointLimits:
 
 
 # ============================================================================
-# validation.py — validate_friction_coefficient
+# validation.py -- validate_friction_coefficient
 # ============================================================================
 
 
 class TestValidateFrictionCoefficient:
     """Tests for validate_friction_coefficient function."""
 
-    def test_valid_friction(self) -> None:
-        validate_friction_coefficient(0.5)
-
-    def test_zero_friction(self) -> None:
-        validate_friction_coefficient(0.0)  # Frictionless is valid
+    @pytest.mark.parametrize(
+        "value",
+        [0.5, 0.0, 1.0],
+        ids=["typical", "frictionless", "high"],
+    )
+    def test_valid_friction(self, value: float) -> None:
+        validate_friction_coefficient(value)
 
     def test_negative_raises(self) -> None:
         with pytest.raises(PhysicalValidationError):
@@ -238,7 +255,7 @@ class TestValidateFrictionCoefficient:
 
 
 # ============================================================================
-# validation.py — validate_physical_bounds decorator
+# validation.py -- validate_physical_bounds decorator
 # ============================================================================
 
 
@@ -252,33 +269,28 @@ class TestValidatePhysicalBounds:
 
         assert set_mass(mass=1.5) == 1.5
 
-    def test_decorator_catches_invalid_mass(self) -> None:
+    @pytest.mark.parametrize(
+        "param_name, invalid_value",
+        [
+            ("mass", -1.0),
+            ("dt", 0.0),
+            ("friction", -0.5),
+        ],
+        ids=["negative-mass", "zero-dt", "negative-friction"],
+    )
+    def test_decorator_catches_invalid(
+        self, param_name: str, invalid_value: float
+    ) -> None:
         @validate_physical_bounds
-        def set_mass(mass: float) -> float:
-            return mass
+        def func(**kwargs: float) -> float:
+            return list(kwargs.values())[0]
 
         with pytest.raises(PhysicalValidationError):
-            set_mass(mass=-1.0)
-
-    def test_decorator_catches_invalid_dt(self) -> None:
-        @validate_physical_bounds
-        def step(dt: float) -> float:
-            return dt
-
-        with pytest.raises(PhysicalValidationError):
-            step(dt=0.0)
-
-    def test_decorator_catches_invalid_friction(self) -> None:
-        @validate_physical_bounds
-        def set_friction(friction: float) -> float:
-            return friction
-
-        with pytest.raises(PhysicalValidationError):
-            set_friction(friction=-0.5)
+            func(**{param_name: invalid_value})
 
 
 # ============================================================================
-# validation_utils.py — Array Validators
+# validation_utils.py -- Array Validators
 # ============================================================================
 
 
@@ -316,79 +328,118 @@ class TestValidateArrayLength:
 
 
 # ============================================================================
-# validation_utils.py — Scalar Validators
+# validation_utils.py -- Scalar Validators
 # ============================================================================
 
 
 class TestValidatePositive:
     """Tests for validate_positive."""
 
-    def test_positive_strict(self) -> None:
-        validate_positive(1.0, "mass")
-
-    def test_zero_strict_raises(self) -> None:
-        with pytest.raises(ValueError, match="positive"):
-            validate_positive(0.0, "mass")
-
-    def test_zero_non_strict(self) -> None:
-        validate_positive(0.0, "distance", strict=False)
-
-    def test_negative_non_strict_raises(self) -> None:
-        with pytest.raises(ValueError, match="non-negative"):
-            validate_positive(-1.0, "distance", strict=False)
+    @pytest.mark.parametrize(
+        "value, name, strict, should_raise",
+        [
+            (1.0, "mass", True, False),
+            (0.0, "mass", True, True),
+            (0.0, "distance", False, False),
+            (-1.0, "distance", False, True),
+        ],
+        ids=["positive-strict", "zero-strict", "zero-non-strict", "negative-non-strict"],
+    )
+    def test_validate_positive(
+        self, value: float, name: str, strict: bool, should_raise: bool
+    ) -> None:
+        if should_raise:
+            with pytest.raises(ValueError):
+                validate_positive(value, name, strict=strict)
+        else:
+            validate_positive(value, name, strict=strict)
 
 
 class TestValidateRange:
     """Tests for validate_range."""
 
-    def test_within_range_inclusive(self) -> None:
-        validate_range(0.0, -1.0, 1.0, "angle")
-
-    def test_at_boundary_inclusive(self) -> None:
-        validate_range(1.0, 0.0, 1.0, "probability")
-
-    def test_at_boundary_exclusive_raises(self) -> None:
-        with pytest.raises(ValueError):
-            validate_range(1.0, 0.0, 1.0, "val", inclusive=False)
-
-    def test_out_of_range_raises(self) -> None:
-        with pytest.raises(ValueError, match="must be in"):
-            validate_range(2.0, 0.0, 1.0, "probability")
+    @pytest.mark.parametrize(
+        "value, lo, hi, name, inclusive, should_raise",
+        [
+            (0.0, -1.0, 1.0, "angle", True, False),
+            (1.0, 0.0, 1.0, "probability", True, False),
+            (1.0, 0.0, 1.0, "val", False, True),
+            (2.0, 0.0, 1.0, "probability", True, True),
+        ],
+        ids=[
+            "within-range-inclusive",
+            "at-boundary-inclusive",
+            "at-boundary-exclusive",
+            "out-of-range",
+        ],
+    )
+    def test_validate_range(
+        self,
+        value: float,
+        lo: float,
+        hi: float,
+        name: str,
+        inclusive: bool,
+        should_raise: bool,
+    ) -> None:
+        if should_raise:
+            with pytest.raises(ValueError):
+                validate_range(value, lo, hi, name, inclusive=inclusive)
+        else:
+            validate_range(value, lo, hi, name, inclusive=inclusive)
 
 
 class TestValidateNumeric:
     """Tests for validate_numeric."""
 
-    def test_valid_int(self) -> None:
-        validate_numeric(42, "count")
-
-    def test_valid_float(self) -> None:
-        validate_numeric(3.14, "pi")
-
-    def test_valid_numpy_number(self) -> None:
-        validate_numeric(np.float64(1.5), "val")
+    @pytest.mark.parametrize(
+        "value, name",
+        [
+            (42, "count"),
+            (3.14, "pi"),
+            (np.float64(1.5), "val"),
+        ],
+        ids=["int", "float", "numpy-float"],
+    )
+    def test_valid_numeric(self, value: object, name: str) -> None:
+        validate_numeric(value, name)
 
     def test_string_raises_type_error(self) -> None:
         with pytest.raises(TypeError, match="numeric"):
             validate_numeric("hello", "val")
 
-    def test_nan_raises(self) -> None:
-        with pytest.raises(ValueError, match="NaN"):
-            validate_numeric(float("nan"), "val")
+    @pytest.mark.parametrize(
+        "value, kwargs, error_type, match",
+        [
+            (float("nan"), {}, ValueError, "NaN"),
+            (float("inf"), {}, ValueError, "infinite"),
+        ],
+        ids=["nan-default", "inf-default"],
+    )
+    def test_special_values_raise(
+        self,
+        value: float,
+        kwargs: dict,
+        error_type: type,
+        match: str,
+    ) -> None:
+        with pytest.raises(error_type, match=match):
+            validate_numeric(value, "val", **kwargs)
 
-    def test_nan_allowed(self) -> None:
-        validate_numeric(float("nan"), "val", allow_nan=True)
-
-    def test_inf_raises(self) -> None:
-        with pytest.raises(ValueError, match="infinite"):
-            validate_numeric(float("inf"), "val")
-
-    def test_inf_allowed(self) -> None:
-        validate_numeric(float("inf"), "val", allow_inf=True)
+    @pytest.mark.parametrize(
+        "value, kwargs",
+        [
+            (float("nan"), {"allow_nan": True}),
+            (float("inf"), {"allow_inf": True}),
+        ],
+        ids=["nan-allowed", "inf-allowed"],
+    )
+    def test_special_values_allowed(self, value: float, kwargs: dict) -> None:
+        validate_numeric(value, "val", **kwargs)
 
 
 # ============================================================================
-# validation_utils.py — Path/File Validators
+# validation_utils.py -- Path/File Validators
 # ============================================================================
 
 
@@ -431,20 +482,24 @@ class TestValidateDirectoryExists:
 class TestValidateExtension:
     """Tests for validate_extension."""
 
-    def test_valid_extension(self) -> None:
-        validate_extension("model.xml", [".xml", ".urdf"])
+    @pytest.mark.parametrize(
+        "filename, allowed",
+        [
+            ("model.xml", [".xml", ".urdf"]),
+            ("model.XML", [".xml"]),
+        ],
+        ids=["exact-match", "case-insensitive"],
+    )
+    def test_valid_extension(self, filename: str, allowed: list[str]) -> None:
+        validate_extension(filename, allowed)
 
     def test_invalid_extension_raises(self) -> None:
         with pytest.raises(ValueError, match="invalid extension"):
             validate_extension("model.json", [".xml", ".urdf"])
 
-    def test_case_insensitive(self) -> None:
-        # .suffix.lower() is used internally
-        validate_extension("model.XML", [".xml"])
-
 
 # ============================================================================
-# validation_utils.py — Type/Dict Validators
+# validation_utils.py -- Type/Dict Validators
 # ============================================================================
 
 
@@ -462,11 +517,18 @@ class TestValidateNotNone:
 class TestValidateType:
     """Tests for validate_type."""
 
-    def test_correct_type(self) -> None:
-        validate_type(42, int, "count")
-
-    def test_tuple_of_types(self) -> None:
-        validate_type(3.14, (int, float), "number")
+    @pytest.mark.parametrize(
+        "value, expected_type, name",
+        [
+            (42, int, "count"),
+            (3.14, (int, float), "number"),
+        ],
+        ids=["exact-type", "tuple-of-types"],
+    )
+    def test_correct_type(
+        self, value: object, expected_type: type | tuple, name: str
+    ) -> None:
+        validate_type(value, expected_type, name)
 
     def test_wrong_type_raises(self) -> None:
         with pytest.raises(TypeError, match="must be"):
@@ -496,7 +558,7 @@ class TestValidateDictKeys:
 
 
 # ============================================================================
-# validation_utils.py — validate_all
+# validation_utils.py -- validate_all
 # ============================================================================
 
 
@@ -520,27 +582,33 @@ class TestValidateAll:
 
 
 # ============================================================================
-# validation_helpers.py — Constants
+# validation_helpers.py -- Constants
 # ============================================================================
 
 
 class TestPhysicsConstants:
     """Tests for physics validation constants."""
 
-    def test_max_joint_velocity_positive(self) -> None:
-        assert MAX_JOINT_VELOCITY_RAD_S > 0
-
-    def test_max_joint_acceleration_positive(self) -> None:
-        assert MAX_JOINT_ACCELERATION_RAD_S2 > 0
+    @pytest.mark.parametrize(
+        "constant_value, name",
+        [
+            (MAX_JOINT_VELOCITY_RAD_S, "MAX_JOINT_VELOCITY_RAD_S"),
+            (MAX_JOINT_ACCELERATION_RAD_S2, "MAX_JOINT_ACCELERATION_RAD_S2"),
+            (MAX_CARTESIAN_VELOCITY_M_S, "MAX_CARTESIAN_VELOCITY_M_S"),
+            (MAX_CARTESIAN_ACCELERATION_M_S2, "MAX_CARTESIAN_ACCELERATION_M_S2"),
+        ],
+        ids=[
+            "joint-velocity",
+            "joint-acceleration",
+            "cartesian-velocity",
+            "cartesian-acceleration",
+        ],
+    )
+    def test_constant_positive(self, constant_value: float, name: str) -> None:
+        assert constant_value > 0, f"{name} must be positive"
 
     def test_max_joint_position_is_2pi(self) -> None:
         assert pytest.approx(2 * math.pi) == MAX_JOINT_POSITION_RAD
-
-    def test_max_cartesian_velocity_positive(self) -> None:
-        assert MAX_CARTESIAN_VELOCITY_M_S > 0
-
-    def test_max_cartesian_acceleration_positive(self) -> None:
-        assert MAX_CARTESIAN_ACCELERATION_M_S2 > 0
 
     def test_hierarchy(self) -> None:
         """Position limit in rad should be much smaller than velocity limit (rad/s)."""
@@ -548,7 +616,7 @@ class TestPhysicsConstants:
 
 
 # ============================================================================
-# validation_helpers.py — ValidationLevel
+# validation_helpers.py -- ValidationLevel
 # ============================================================================
 
 
@@ -561,7 +629,7 @@ class TestValidationLevel:
 
 
 # ============================================================================
-# validation_helpers.py — validate_finite
+# validation_helpers.py -- validate_finite
 # ============================================================================
 
 
@@ -590,7 +658,7 @@ class TestValidateFinite:
 
 
 # ============================================================================
-# validation_helpers.py — validate_magnitude
+# validation_helpers.py -- validate_magnitude
 # ============================================================================
 
 
@@ -616,7 +684,7 @@ class TestValidateMagnitude:
 
 
 # ============================================================================
-# validation_helpers.py — validate_joint_state
+# validation_helpers.py -- validate_joint_state
 # ============================================================================
 
 
@@ -647,18 +715,24 @@ class TestValidateJointState:
 
 
 # ============================================================================
-# validation_helpers.py — validate_cartesian_state
+# validation_helpers.py -- validate_cartesian_state
 # ============================================================================
 
 
 class TestValidateCartesianState:
     """Tests for validate_cartesian_state function."""
 
-    def test_valid_position(self) -> None:
-        validate_cartesian_state(position=np.array([1.0, 2.0, 3.0]))
-
-    def test_valid_velocity(self) -> None:
-        validate_cartesian_state(velocity=np.array([5.0, 10.0, 15.0]))
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"position": np.array([1.0, 2.0, 3.0])},
+            {"velocity": np.array([5.0, 10.0, 15.0])},
+            {},
+        ],
+        ids=["position-only", "velocity-only", "all-none"],
+    )
+    def test_valid_cartesian_state(self, kwargs: dict) -> None:
+        validate_cartesian_state(**kwargs)
 
     def test_nan_velocity_raises(self) -> None:
         with pytest.raises(PhysicsValidationError):
@@ -667,32 +741,38 @@ class TestValidateCartesianState:
                 level=ValidationLevel.STRICT,
             )
 
-    def test_all_none_does_nothing(self) -> None:
-        validate_cartesian_state()  # Should not raise
-
 
 # ============================================================================
-# validation_helpers.py — validate_model_parameters
+# validation_helpers.py -- validate_model_parameters
 # ============================================================================
 
 
 class TestValidateModelParameters:
     """Tests for validate_model_parameters function."""
 
-    def test_valid_masses(self) -> None:
-        validate_model_parameters(np.array([70.0, 5.0, 2.0]))
+    @pytest.mark.parametrize(
+        "masses",
+        [
+            np.array([70.0, 5.0, 2.0]),
+            np.array([500.0, 500.0]),
+        ],
+        ids=["valid-masses", "few-bodies-skip-total"],
+    )
+    def test_valid_masses(self, masses: np.ndarray) -> None:
+        validate_model_parameters(masses)
 
-    def test_zero_mass_raises(self) -> None:
-        with pytest.raises(PhysicsValidationError, match="positive"):
-            validate_model_parameters(np.array([70.0, 0.0, 2.0]))
-
-    def test_negative_mass_raises(self) -> None:
-        with pytest.raises(PhysicsValidationError, match="positive"):
-            validate_model_parameters(np.array([70.0, -1.0, 2.0]))
-
-    def test_nan_mass_raises(self) -> None:
-        with pytest.raises(PhysicsValidationError, match="NaN"):
-            validate_model_parameters(np.array([np.nan, 5.0]))
+    @pytest.mark.parametrize(
+        "masses, match",
+        [
+            (np.array([70.0, 0.0, 2.0]), "positive"),
+            (np.array([70.0, -1.0, 2.0]), "positive"),
+            (np.array([np.nan, 5.0]), "NaN"),
+        ],
+        ids=["zero-mass", "negative-mass", "nan-mass"],
+    )
+    def test_invalid_masses_raise(self, masses: np.ndarray, match: str) -> None:
+        with pytest.raises(PhysicsValidationError, match=match):
+            validate_model_parameters(masses)
 
     def test_implausible_total_warns(self) -> None:
         # Many bodies with huge total mass
@@ -702,13 +782,9 @@ class TestValidateModelParameters:
             validate_model_parameters(masses)
             assert any("mass" in str(x.message).lower() for x in w)
 
-    def test_few_bodies_skip_total_check(self) -> None:
-        # <= 10 bodies, so total mass plausibility is skipped
-        validate_model_parameters(np.array([500.0, 500.0]))
-
 
 # ============================================================================
-# validation_data.py — DataSource Enum
+# validation_data.py -- DataSource Enum
 # ============================================================================
 
 
@@ -726,7 +802,7 @@ class TestDataSource:
 
 
 # ============================================================================
-# validation_data.py — ValidationDataPoint
+# validation_data.py -- ValidationDataPoint
 # ============================================================================
 
 
@@ -753,17 +829,24 @@ class TestValidationDataPoint:
         # PGA Tour driver ~ 282 yards
         assert 200 < yards < 350
 
-    def test_is_valid_carry_within_tolerance(
-        self, driver_data: ValidationDataPoint
+    @pytest.mark.parametrize(
+        "multiplier, expected_valid",
+        [
+            (1.0, True),
+            (2.0, False),
+        ],
+        ids=["within-tolerance", "outside-tolerance"],
+    )
+    def test_is_valid_carry(
+        self,
+        driver_data: ValidationDataPoint,
+        multiplier: float,
+        expected_valid: bool,
     ) -> None:
-        # Exactly at ground truth
-        assert driver_data.is_valid_carry(driver_data.carry_distance_m)
-
-    def test_is_valid_carry_outside_tolerance(
-        self, driver_data: ValidationDataPoint
-    ) -> None:
-        # Way off
-        assert not driver_data.is_valid_carry(driver_data.carry_distance_m * 2)
+        assert (
+            driver_data.is_valid_carry(driver_data.carry_distance_m * multiplier)
+            == expected_valid
+        )
 
     def test_is_valid_carry_at_boundary(self, driver_data: ValidationDataPoint) -> None:
         tol = driver_data.carry_tolerance_pct / 100
@@ -772,37 +855,50 @@ class TestValidationDataPoint:
 
 
 # ============================================================================
-# validation_data.py — Reference Data Collections
+# validation_data.py -- Reference Data Collections
 # ============================================================================
 
 
 class TestReferenceData:
     """Tests for the reference data collections."""
 
-    def test_pga_tour_not_empty(self) -> None:
-        assert len(PGA_TOUR_2024) > 0
-
-    def test_amateur_not_empty(self) -> None:
-        assert len(AMATEUR_AVERAGES) > 0
+    @pytest.mark.parametrize(
+        "collection, expected_nonempty",
+        [
+            (PGA_TOUR_2024, True),
+            (AMATEUR_AVERAGES, True),
+        ],
+        ids=["pga-tour", "amateur"],
+    )
+    def test_collections_not_empty(
+        self, collection: list, expected_nonempty: bool
+    ) -> None:
+        assert (len(collection) > 0) == expected_nonempty
 
     def test_all_data_is_union(self) -> None:
         assert len(ALL_VALIDATION_DATA) == len(PGA_TOUR_2024) + len(AMATEUR_AVERAGES)
 
-    def test_pga_driver_exists(self) -> None:
+    @pytest.mark.parametrize(
+        "club_name",
+        ["Driver", "7-Iron"],
+        ids=["driver", "7-iron"],
+    )
+    def test_pga_club_exists(self, club_name: str) -> None:
         clubs = [d.club for d in PGA_TOUR_2024]
-        assert "Driver" in clubs
+        assert club_name in clubs
 
-    def test_pga_7iron_exists(self) -> None:
-        clubs = [d.club for d in PGA_TOUR_2024]
-        assert "7-Iron" in clubs
-
-    def test_all_have_positive_ball_speed(self) -> None:
+    @pytest.mark.parametrize(
+        "attr, assertion",
+        [
+            ("ball_speed_mps", "positive"),
+            ("carry_distance_m", "positive"),
+        ],
+        ids=["ball-speed", "carry-distance"],
+    )
+    def test_all_data_positive_values(self, attr: str, assertion: str) -> None:
         for d in ALL_VALIDATION_DATA:
-            assert d.ball_speed_mps > 0, f"{d.club} has non-positive ball speed"
-
-    def test_all_have_positive_carry(self) -> None:
-        for d in ALL_VALIDATION_DATA:
-            assert d.carry_distance_m > 0, f"{d.club} has non-positive carry"
+            value = getattr(d, attr)
+            assert value > 0, f"{d.club} has non-positive {attr}"
 
     def test_driver_carries_further_than_pw(self) -> None:
         driver = [d for d in PGA_TOUR_2024 if d.club == "Driver"][0]
@@ -815,21 +911,24 @@ class TestReferenceData:
 
 
 # ============================================================================
-# validation_data.py — get_validation_data_for_club
+# validation_data.py -- get_validation_data_for_club
 # ============================================================================
 
 
 class TestGetValidationDataForClub:
     """Tests for get_validation_data_for_club function."""
 
-    def test_driver_match(self) -> None:
-        results = get_validation_data_for_club("Driver")
-        assert len(results) >= 1
-        assert all("driver" in d.club.lower() for d in results)
-
-    def test_iron_match(self) -> None:
-        results = get_validation_data_for_club("Iron")
-        assert len(results) >= 1
+    @pytest.mark.parametrize(
+        "club_query, min_results",
+        [
+            ("Driver", 1),
+            ("Iron", 1),
+        ],
+        ids=["driver", "iron"],
+    )
+    def test_club_match(self, club_query: str, min_results: int) -> None:
+        results = get_validation_data_for_club(club_query)
+        assert len(results) >= min_results
 
     def test_case_insensitive(self) -> None:
         results_lower = get_validation_data_for_club("driver")
