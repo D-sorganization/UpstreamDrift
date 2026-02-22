@@ -73,9 +73,7 @@ class SwingOptimizationConfig:
     def __post_init__(self) -> None:
         """Validate configuration fields (DbC invariants)."""
         if not isinstance(self.n_joints, int):
-            raise TypeError(
-                f"n_joints must be int, got {type(self.n_joints).__name__}"
-            )
+            raise TypeError(f"n_joints must be int, got {type(self.n_joints).__name__}")
         if not (_MIN_JOINTS <= self.n_joints <= _MAX_JOINTS):
             raise ValueError(
                 f"n_joints must be in [{_MIN_JOINTS}, {_MAX_JOINTS}], "
@@ -84,8 +82,7 @@ class SwingOptimizationConfig:
 
         if not isinstance(self.horizon_steps, int):
             raise TypeError(
-                f"horizon_steps must be int, got "
-                f"{type(self.horizon_steps).__name__}"
+                f"horizon_steps must be int, got {type(self.horizon_steps).__name__}"
             )
         if not (_MIN_HORIZON <= self.horizon_steps <= _MAX_HORIZON):
             raise ValueError(
@@ -94,23 +91,16 @@ class SwingOptimizationConfig:
             )
 
         if not isinstance(self.dt, (int, float)):
-            raise TypeError(
-                f"dt must be numeric, got {type(self.dt).__name__}"
-            )
+            raise TypeError(f"dt must be numeric, got {type(self.dt).__name__}")
         if not (_MIN_DT <= self.dt <= _MAX_DT):
-            raise ValueError(
-                f"dt must be in [{_MIN_DT}, {_MAX_DT}], got {self.dt}"
-            )
+            raise ValueError(f"dt must be in [{_MIN_DT}, {_MAX_DT}], got {self.dt}")
 
         if not isinstance(self.max_iterations, int):
             raise TypeError(
-                f"max_iterations must be int, got "
-                f"{type(self.max_iterations).__name__}"
+                f"max_iterations must be int, got {type(self.max_iterations).__name__}"
             )
         if self.max_iterations < 1:
-            raise ValueError(
-                f"max_iterations must be >= 1, got {self.max_iterations}"
-            )
+            raise ValueError(f"max_iterations must be >= 1, got {self.max_iterations}")
 
         if not isinstance(self.convergence_tol, (int, float)):
             raise TypeError(
@@ -118,9 +108,7 @@ class SwingOptimizationConfig:
                 f"{type(self.convergence_tol).__name__}"
             )
         if self.convergence_tol <= 0:
-            raise ValueError(
-                f"convergence_tol must be > 0, got {self.convergence_tol}"
-            )
+            raise ValueError(f"convergence_tol must be > 0, got {self.convergence_tol}")
 
         if not isinstance(self.target_clubhead_velocity, (int, float)):
             raise TypeError(
@@ -140,8 +128,7 @@ class SwingOptimizationConfig:
             )
         if self.control_cost_weight < 0:
             raise ValueError(
-                f"control_cost_weight must be >= 0, got "
-                f"{self.control_cost_weight}"
+                f"control_cost_weight must be >= 0, got {self.control_cost_weight}"
             )
 
         if not isinstance(self.terminal_cost_weight, (int, float)):
@@ -151,8 +138,7 @@ class SwingOptimizationConfig:
             )
         if self.terminal_cost_weight < 0:
             raise ValueError(
-                f"terminal_cost_weight must be >= 0, got "
-                f"{self.terminal_cost_weight}"
+                f"terminal_cost_weight must be >= 0, got {self.terminal_cost_weight}"
             )
 
 
@@ -216,8 +202,7 @@ class SwingOptimizationBridge:
         # --- Preconditions (DbC) ---
         if not isinstance(config, SwingOptimizationConfig):
             raise TypeError(
-                f"config must be SwingOptimizationConfig, "
-                f"got {type(config).__name__}"
+                f"config must be SwingOptimizationConfig, got {type(config).__name__}"
             )
         self._config = config
         self._engine = engine
@@ -275,8 +260,7 @@ class SwingOptimizationBridge:
         # --- Preconditions (DbC) ---
         if not isinstance(initial_state, np.ndarray):
             raise TypeError(
-                f"initial_state must be np.ndarray, "
-                f"got {type(initial_state).__name__}"
+                f"initial_state must be np.ndarray, got {type(initial_state).__name__}"
             )
         if initial_state.ndim != 1:
             raise ValueError(
@@ -294,8 +278,7 @@ class SwingOptimizationBridge:
 
         # Initialise controls to zero
         controls = [
-            np.zeros(self._control_dim)
-            for _ in range(self._config.horizon_steps)
+            np.zeros(self._control_dim) for _ in range(self._config.horizon_steps)
         ]
 
         best_cost = float("inf")
@@ -309,17 +292,11 @@ class SwingOptimizationBridge:
             )
 
             # Compute running cost (sum of quadratic control cost)
-            running_cost = sum(
-                float(u @ self._R @ u) for u in controls
-            )
+            running_cost = sum(float(u @ self._R @ u) for u in controls)
 
             # Terminal cost: penalise deviation from target velocity
-            velocity_error = (
-                self._config.target_clubhead_velocity - clubhead_vel
-            )
-            terminal_cost = (
-                self._config.terminal_cost_weight * velocity_error ** 2
-            )
+            velocity_error = self._config.target_clubhead_velocity - clubhead_vel
+            terminal_cost = self._config.terminal_cost_weight * velocity_error**2
 
             total_cost = running_cost + terminal_cost
 
@@ -361,9 +338,7 @@ class SwingOptimizationBridge:
                 controls[k] = controls[k] - alpha * gradient
 
         # Final evaluation
-        trajectory, clubhead_vel = self._evaluate_trajectory(
-            controls, initial_state
-        )
+        trajectory, clubhead_vel = self._evaluate_trajectory(controls, initial_state)
 
         computation_time = time.perf_counter() - t_start
 
@@ -379,9 +354,7 @@ class SwingOptimizationBridge:
 
     # -- internal helpers ---------------------------------------------------
 
-    def _build_cost_matrices(
-        self, n: int
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def _build_cost_matrices(self, n: int) -> tuple[np.ndarray, np.ndarray]:
         """Build quadratic cost matrices for the objective.
 
         Parameters:
@@ -447,7 +420,7 @@ class SwingOptimizationBridge:
                 q = state[:n]
                 qd = state[n:]
                 qd_new = qd + u * dt
-                q_new = q + qd * dt + 0.5 * u * dt ** 2
+                q_new = q + qd * dt + 0.5 * u * dt**2
                 next_state = np.concatenate([q_new, qd_new])
 
             trajectory.append(next_state)

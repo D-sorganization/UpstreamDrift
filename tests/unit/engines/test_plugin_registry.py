@@ -124,9 +124,7 @@ class TestPluginRegistryBasics:
 
     def test_register_and_get(self) -> None:
         registry = PluginRegistry()
-        reg = EngineRegistration(
-            engine_type=EngineType.PENDULUM, factory=_stub_factory
-        )
+        reg = EngineRegistration(engine_type=EngineType.PENDULUM, factory=_stub_factory)
         registry.register(reg)
         assert registry.get(EngineType.PENDULUM) is reg
 
@@ -136,9 +134,7 @@ class TestPluginRegistryBasics:
 
     def test_all_types(self) -> None:
         registry = PluginRegistry()
-        reg = EngineRegistration(
-            engine_type=EngineType.MUJOCO, factory=_stub_factory
-        )
+        reg = EngineRegistration(engine_type=EngineType.MUJOCO, factory=_stub_factory)
         registry.register(reg)
         assert EngineType.MUJOCO in registry.all_types()
 
@@ -160,9 +156,7 @@ class TestPluginRegistryUnregister:
 
     def test_unregister_existing(self) -> None:
         registry = PluginRegistry()
-        reg = EngineRegistration(
-            engine_type=EngineType.PENDULUM, factory=_stub_factory
-        )
+        reg = EngineRegistration(engine_type=EngineType.PENDULUM, factory=_stub_factory)
         registry.register(reg)
         result = registry.unregister(EngineType.PENDULUM)
         assert result is True
@@ -175,9 +169,7 @@ class TestPluginRegistryUnregister:
 
     def test_unregister_removes_from_all_types(self) -> None:
         registry = PluginRegistry()
-        reg = EngineRegistration(
-            engine_type=EngineType.MUJOCO, factory=_stub_factory
-        )
+        reg = EngineRegistration(engine_type=EngineType.MUJOCO, factory=_stub_factory)
         registry.register(reg)
         registry.unregister(EngineType.MUJOCO)
         assert EngineType.MUJOCO not in registry.all_types()
@@ -192,9 +184,7 @@ class TestPluginRegistryThreadSafety:
 
         def register_engine(engine_type: EngineType) -> None:
             try:
-                reg = EngineRegistration(
-                    engine_type=engine_type, factory=_stub_factory
-                )
+                reg = EngineRegistration(engine_type=engine_type, factory=_stub_factory)
                 registry.register(reg)
             except Exception as e:
                 errors.append(e)
@@ -213,9 +203,7 @@ class TestPluginRegistryThreadSafety:
 
     def test_concurrent_read_write(self) -> None:
         registry = PluginRegistry()
-        reg = EngineRegistration(
-            engine_type=EngineType.PENDULUM, factory=_stub_factory
-        )
+        reg = EngineRegistration(engine_type=EngineType.PENDULUM, factory=_stub_factory)
         registry.register(reg)
         errors: list[Exception] = []
 
