@@ -125,6 +125,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-02-17 | Cross-Repo A-O + Pragmatic + DbC/DRY/TDD | `docs/assessments/Cross_Repo_Assessment_2026-02-17.md` |
 | 2026-02-19 | Critical Implementation Gaps             | `docs/assessments/implementation_gaps_report.md` (Updated) |
 | 2025-05-23 | Identified Gaps and Inaccuracies         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md` |
+| 2026-02-25 | Data Copyright Risk                      | `docs/assessments/issues/ISSUE_047_DATA_COPYRIGHT_TRACKMAN.md` |
+| 2026-02-25 | Patent Risk: Kinematic Sequence          | `docs/assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md` |
 
 ---
 
@@ -197,6 +199,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)    |
 | 2.4     | 2026-02 | Added Implementation Gaps Report               |
 | 2.5     | 2026-02 | Updated Gaps Report with Critical Issues       |
+| 2.6     | 2026-02 | Added Data Copyright and Kinematic Sequence Issues |
 
 ---
 
