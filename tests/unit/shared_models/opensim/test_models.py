@@ -36,8 +36,8 @@ for i in range(len(osimpaths)):
     try:
         model = opensim.Model(filename)
         s = model.initSystem()
-    except (ImportError, OSError):
-        logger.info(f"Oops, Model '{modelname}' failed:\n{e.message}")
+    except (ImportError, OSError) as e:
+        logger.info(f"Oops, Model '{modelname}' failed:\n{e}")
         sys.exit(1)
 
     # Print the 4.0 version to file and then read back into memory
@@ -49,8 +49,8 @@ for i in range(len(osimpaths)):
     try:
         reloadedModel = opensim.Model(filename_new)
         s2 = reloadedModel.initSystem()
-    except (ImportError, OSError):
-        logger.info(f"Oops, 4.0 written Model '{modelname_new}' failed:\n{e.message}")
+    except (ImportError, OSError) as e:
+        logger.info(f"Oops, 4.0 written Model '{modelname_new}' failed:\n{e}")
         sys.exit(1)
 
     # Remove the printed file

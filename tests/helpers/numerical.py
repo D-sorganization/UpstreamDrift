@@ -12,9 +12,8 @@ Design by Contract:
 
 import math
 from collections.abc import Sequence
-from typing import Union
 
-Number = Union[int, float]
+Number = int | float
 
 
 def _validate_number(value: object, name: str) -> float:

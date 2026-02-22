@@ -244,6 +244,8 @@ def discover_entry_point_plugins() -> list[dict[str, Any]]:
                     "Entry point %s did not return a valid plugin dict", ep.name
                 )
         except Exception:
-            logger.warning("Failed to load engine plugin %s", ep.name, exc_info=True)
+            logger.warning(
+                "Failed to load engine plugin %s", ep.name, exc_info=True
+            )
 
     return results
