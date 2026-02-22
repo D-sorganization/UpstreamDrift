@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-02-15
+**Last Updated**: 2026-02-18
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -60,6 +60,14 @@ This document serves as the central registry for scientific research topics, tec
 
 ### Injury & Learning
 
+- **Footwear Traction Modeling**: Simulate the interaction between specific cleat patterns (geometry) and turf shear strength. Slippage risk is a function of normal force and shear stress.
+  - _Data Needed_: Turf shear modulus and friction coefficients for various shoe outsoles.
+  - _Outcome_: "Stability Index" for shoe fitting and injury prevention.
+
+- **Heart Rate Variability (HRV) Correlation**: Link physiological arousal (HRV, LF/HF ratio) to tempo consistency and decision-making under pressure.
+  - _Data Needed_: ECG time-series and shot outcomes.
+  - _Outcome_: Biofeedback protocols for mental game training.
+
 - **Muscle-Tendon Strain Modeling**: Quantify strain in specific high-risk muscle groups (e.g., lead adductor magnus, trailing internal oblique) using Hill-type muscle models to predict acute injury risk beyond generic joint stress.
   - _Data Needed_: Musculoskeletal geometry and kinematics.
   - _Outcome_: Specific "Strain Hazard" map for injury prevention.
@@ -77,6 +85,14 @@ This document serves as the central registry for scientific research topics, tec
 ## 2. Ball Flight Physics
 
 ### Aerodynamics
+
+- **Boundary Layer Transition**: Explicitly model the movement of the laminar-turbulent transition point on the ball surface as a function of Reynolds number and surface roughness.
+  - _Data Needed_: Surface roughness parameters and transition criteria.
+  - _Outcome_: Precise drag prediction across critical Reynolds numbers (Driver vs. Wedge).
+
+- **Knuckleball Aerodynamics**: Model the erratic lateral forces on low-spin shots caused by asymmetric flow separation (von Kármán vortex shedding).
+  - _Data Needed_: Lateral force coefficients ($C_Y$) at low spin rates.
+  - _Outcome_: Accurate simulation of "dead knuckle" shots.
 
 - **Spin Decay Modeling**: Implement exponential decay of spin rate during flight. The current model uses constant spin, but real golf balls lose spin due to air friction, affecting lift and drag coefficients over the trajectory.
 
@@ -130,6 +146,18 @@ This document serves as the central registry for scientific research topics, tec
 ## 3. Equipment Science
 
 ### Club Dynamics
+
+- **Impact Acoustics ("Sound is Feel")**: Simulate the frequency spectrum of impact sound based on clubhead eigenmodes and material properties. Players perceive "feel" largely through sound.
+  - _Data Needed_: Modal analysis frequencies and damping ratios.
+  - _Outcome_: "Sound Signature" analysis for driver design.
+
+- **Composite Layup Optimization**: Use Genetic Algorithms to optimize the orientation of carbon fiber layers (plies) in shafts to achieve specific bending and torsional profiles.
+  - _Data Needed_: Lamina properties ($E_1, E_2, G_{12}, \nu_{12}$) and target stiffness matrix.
+  - _Outcome_: Custom shaft designs with tailored kick points and torque.
+
+- **Grip Friction Degradation**: Model the time-dependent reduction in coefficient of friction due to sweat accumulation and rubber aging/oxidation.
+  - _Data Needed_: Friction coefficients vs. moisture content and age.
+  - _Outcome_: Recommendations for grip replacement frequency.
 
 - **Shaft Torsional Dynamics**: Model the twisting (torque) of the shaft during the downswing and impact. High-torque shafts can close the face more rapidly but may be less stable.
 
@@ -192,6 +220,14 @@ This document serves as the central registry for scientific research topics, tec
 ## 4. Statistical Methods
 
 ### Analytics
+
+- **Clutch Performance Index**: Quantify performance variance in high-pressure situations (e.g., last 3 holes, hazards in play) compared to baseline.
+  - _Data Needed_: Shot outcomes tagged with "pressure level" context.
+  - _Outcome_: Identification of "clutch" players vs. those who choke.
+
+- **Weather-Adjusted Strokes Gained**: Normalize Strokes Gained baselines for environmental conditions (air density, wind, temperature) to isolate player skill from conditions.
+  - _Data Needed_: Historical weather data matched to shot data.
+  - _Outcome_: Fairer performance comparison across different venues/seasons.
 
 - **Strokes Gained Baseline**: Develop a "Strokes Gained" implementation.
 
@@ -272,6 +308,14 @@ This document serves as the central registry for scientific research topics, tec
 
 ### Haptics & Immersion
 
+- **Procedural Audio Synthesis**: Generate real-time impact sounds in the physics engine based on collision impulse, material stiffness, and resonance.
+  - _Data Needed_: Impulse response functions for club-ball collisions.
+  - _Outcome_: Realistic audio feedback in simulation without pre-recorded samples.
+
+- **Atmospheric Scattering**: Render physically-based atmospheric haze and aerial perspective to improve depth perception in VR environments.
+  - _Data Needed_: Scattering coefficients (Rayleigh/Mie) for local weather.
+  - _Outcome_: Enhanced visual realism and distance estimation cues.
+
 - **Haptic Feedback Modeling**: Calculate force-feedback vectors for VR controllers to simulate impact feel (vibration frequency and amplitude).
   - _Data Needed_: Impact impulse and shaft vibration modes.
   - _Outcome_: Immersive training in VR environments.
@@ -310,3 +354,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-13 | Added Muscle Strain, Wet Play, Dimple Opt, Multi-Layer Ball, Fatigue, Synthetic Data, PPO               | All      | Active |
 | 2026-02-14 | Added Force Vector, Stiffness, Turbulence, Mud Ball, Spine, Head Aero, Tempo, Soft Body, ILC            | All      | Active |
 | 2026-02-15 | Added Grip Pressure, Quiet Eye, Bulge/Roll Opt, Movable Weights, Clustering, Green Reading, Bunker, Fusion | All | Active |
+| 2026-02-18 | Added Footwear, HRV, Boundary Layer, Knuckleball, Acoustics, Layup, Grip Friction, Clutch Index, Weather SG, Audio, Scattering | All | Active |
