@@ -232,7 +232,8 @@ def discover_entry_point_plugins() -> list[dict[str, Any]]:
         eps = entry_points(group=ENTRY_POINT_GROUP)
     except TypeError:
         # Python 3.9 compatibility: entry_points() doesn't accept group kwarg
-        eps = entry_points().get(ENTRY_POINT_GROUP, [])  # type: ignore[union-attr]
+        # mypy complains about list[Never] vs EntryPoints, so we cast/ignore
+        eps = entry_points().get(ENTRY_POINT_GROUP, [])  # type: ignore[arg-type, union-attr]
 
     for ep in eps:
         try:

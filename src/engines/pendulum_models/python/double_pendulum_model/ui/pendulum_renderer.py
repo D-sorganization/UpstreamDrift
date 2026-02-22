@@ -74,12 +74,12 @@ class PendulumRendererMixin:
         self._draw_plane(upper.length_m + lower.length_m)
 
         # Finalize Plot
-        host.ax.set_xlim([-max_range, max_range])
-        host.ax.set_ylim([-max_range, max_range])
-        host.ax.set_zlim([-max_range * 0.5, max_range * 0.5])
+        host.ax.set_xlim(-max_range, max_range)
+        host.ax.set_ylim(-max_range, max_range)
+        host.ax.set_zlim(-max_range * 0.5, max_range * 0.5)  # type: ignore[attr-defined]
         host.ax.set_xlabel("X (m)", fontsize=10)
         host.ax.set_ylabel("Y (m)", fontsize=10)
-        host.ax.set_zlabel("Z (m)", fontsize=10)
+        host.ax.set_zlabel("Z (m)", fontsize=10)  # type: ignore[attr-defined]
         host.ax.set_title(
             "Double Pendulum 3D View\nPivot at origin, t1=0 deg is vertical down",
             fontsize=11,
@@ -251,7 +251,7 @@ class PendulumRendererMixin:
                 "edgecolor": "#00AA00",
                 "linewidth": 3,
             },
-        )
+        )  # type: ignore[arg-type]
 
     def _draw_segments(
         self,
@@ -312,7 +312,7 @@ class PendulumRendererMixin:
         host.ax.scatter(
             *pivot,
             color="black",
-            s=250,
+            s=250,  # type: ignore[arg-type]
             marker="o",
             label="Pivot (Hub)",
             edgecolors="white",
@@ -322,7 +322,7 @@ class PendulumRendererMixin:
         host.ax.scatter(
             *elbow,
             color="#2E86AB",
-            s=100,
+            s=100,  # type: ignore[arg-type]
             marker="o",
             edgecolors="white",
             linewidths=2,
@@ -331,7 +331,7 @@ class PendulumRendererMixin:
         host.ax.scatter(
             *wrist,
             color="#A23B72",
-            s=180,
+            s=180,  # type: ignore[arg-type]
             marker="o",
             label="End Point (Clubhead)",
             edgecolors="white",
@@ -363,7 +363,7 @@ class PendulumRendererMixin:
                 "alpha": 0.8,
                 "edgecolor": "#2E86AB",
             },
-        )
+        )  # type: ignore[arg-type]
 
         lower_mid = (elbow + wrist) / 2
         host.ax.text(
@@ -381,7 +381,7 @@ class PendulumRendererMixin:
                 "alpha": 0.8,
                 "edgecolor": "#A23B72",
             },
-        )
+        )  # type: ignore[arg-type]
 
     def _draw_plane(self, size: float) -> None:
         """Draw the inclined plane surface."""
@@ -402,4 +402,4 @@ class PendulumRendererMixin:
 
         host.ax.plot_surface(
             x_grid, y_rot, z_plane, alpha=0.15, color="gray", edgecolor="none"
-        )
+        )  # type: ignore[attr-defined]
