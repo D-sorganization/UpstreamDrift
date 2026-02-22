@@ -1,34 +1,40 @@
 ---
 title: "Legal Risk: Kinematic Sequence Implementation infringes TPI patents"
 labels: ["legal", "patent-risk", "critical", "high-priority"]
-assignee: "legal-team"
-status: "open"
+assignees: ["jules"]
 ---
 
-# Issue Description
+## Description
 
-The current implementation of `KinematicSequenceAnalyzer` in `src/shared/python/biomechanics/kinematic_sequence.py` and the `efficiency_score` calculation in `src/shared/python/analysis/pca_analysis.py` pose a high patent infringement risk.
+The implementation of "Kinematic Sequence" analysis in the codebase has been identified as a **CRITICAL** patent infringement risk. Specifically, the method of scoring efficiency based on the proximal-to-distal order of peak velocities is a core claim of Titleist Performance Institute (TPI) and K-Motion patents.
 
-## Technical Detail
+### Problem Areas
 
-The code explicitly validates and scores a specific segment firing order:
+1.  **`src/shared/python/analysis/pca_analysis.py`**:
+    - Contains `efficiency_score = matches / len(expected_order)`.
+    - This is a direct implementation of the patented sequencing score.
+    - **Status:** Active / Critical.
 
-```python
-expected_order = ["Pelvis", "Torso", "Arm", "Club"]
-```
+2.  **`src/shared/python/biomechanics/kinematic_sequence.py`**:
+    - Renamed to `SegmentTimingAnalyzer` (Good).
+    - But alias `KinematicSequenceAnalyzer` still exists (Acceptable for compat, but risky).
 
-In `src/shared/python/analysis/pca_analysis.py`, the `efficiency_score` is calculated based on adherence to this order:
+3.  **UI Strings (New Finding 2026-02-25)**:
+    - The term "Kinematic Sequence" is still used in user-facing UI strings.
+    - `src/shared/python/dashboard/window.py`: `"Kinematic Sequence (Bars)"`
+    - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py`: `"Kinematic Sequence"`
+    - **Risk:** Trademark / Method Claim confirmation.
 
-```python
-efficiency_score = matches / len(expected_order)
-```
+## Acceptance Criteria
 
-## Legal Context
+- [ ] **Code Removal:** Remove the `efficiency_score` calculation from `pca_analysis.py`.
+- [ ] **Refactor:** Implement a non-infringing scoring metric (e.g., "Energy Transfer Efficiency" or "Timing Consistency").
+- [ ] **UI Updates:** Rename all user-facing strings from "Kinematic Sequence" to "Segment Timing" or "Movement Sequence".
+    - [ ] Update `src/shared/python/dashboard/window.py`
+    - [ ] Update `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py`
+- [ ] **Documentation:** Ensure no claims of "Kinematic Sequence Efficiency" are made in docs.
 
-This methodology (quantifying kinematic sequence efficiency based on proximal-to-distal sequencing) is covered by patents held by **Titleist Performance Institute (TPI)** and **K-Motion Interactive**.
+## References
 
-## Required Actions
-
-1.  **Refactor Class**: Rename `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer`.
-2.  **Remove Scoring**: Remove the `sequence_consistency` score in `kinematic_sequence.py` and `efficiency_score` in `pca_analysis.py` that imply a "correct" order.
-3.  **UI Update**: Display timing data as neutral graphs/Gantt charts without normative "Good/Bad" coloring based on the TPI model.
+- TPI Patents (various) regarding Kinematic Sequence.
+- K-Motion Patents regarding Biofeedback.

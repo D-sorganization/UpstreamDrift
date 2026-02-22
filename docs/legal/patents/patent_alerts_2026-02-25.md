@@ -40,5 +40,11 @@
 - **Risk:** These coefficients are precise and uncited. They likely come from a specific research paper or competitor SDK.
 - **Action:** Add citation.
 
+### 5. Data Copyright / Database Rights (Low/Medium Risk)
+- **File:** `src/shared/python/validation_pkg/validation_data.py`
+- **Finding:** Contains hardcoded list `PGA_TOUR_2024` citing "Source: trackman.com".
+- **Risk:** While individual facts (averages) are generally not copyrightable, the collection/database might be protected, especially if scraped against terms of service.
+- **Action:** Ensure this usage falls under "Fair Use" (informational/educational) and that we are not redistributing a substantial portion of their proprietary database. Verify "trackman.com" Terms of Use regarding data scraping/usage.
+
 ## Summary
-The "Kinematic Sequence" risk remains **CRITICAL** due to the persistence of the scoring logic in `pca_analysis.py`. The "Injury Risk" and "Gear Effect" risks are now **CONFIRMED** with specific evidence in the codebase.
+The "Kinematic Sequence" risk remains **CRITICAL** due to the persistence of the scoring logic in `pca_analysis.py`. The "Injury Risk" and "Gear Effect" risks are now **CONFIRMED** with specific evidence in the codebase. New potential data copyright issue identified in validation module.
