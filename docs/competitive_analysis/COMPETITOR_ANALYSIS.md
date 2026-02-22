@@ -1,6 +1,6 @@
 # Competitor Analysis
 
-**Last Updated:** 2025-02-12
+**Last Updated:** 2025-05-24
 
 This document maintains a comprehensive analysis of the golf technology market, focusing on launch monitors, software, biomechanics, and open-source alternatives.
 
@@ -27,7 +27,7 @@ This document maintains a comprehensive analysis of the golf technology market, 
 | **GSPro**      | GSPro V2                 | 4K Unity Graphics, Open API, SGT Tour  | $250/yr          | Sim-Enthusiast Favorite |
 | **E6 Connect** | E6 Connect               | Cross-platform, Massive Course Library | $300 - $600/yr   | Legacy Standard         |
 | **TruGolf**    | E6 Connect (Owner)       | Integrated Sims, Hardware+Software     | Varies           | Commercial / Home       |
-| **OpenGolf**   | OpenGolf                 | Open Source Simulator                  | Free             | Open Source Niche       |
+| **OpenGolf**   | OpenGolf (Project)       | Open Source Simulator Framework        | Free             | Open Source Niche       |
 
 ### 3. Biomechanics/Instruction
 
@@ -151,6 +151,17 @@ This document maintains a comprehensive analysis of the golf technology market, 
 6.  **Technology Stack:** Proprietary engine.
 7.  **Recent Updates:** Apex engine (next-gen) development.
 8.  **Our Differentiation:** We offer open source physics models versus their proprietary "black box" simulation.
+
+### OpenGolf (Community Projects)
+
+1.  **Core Value Proposition:** A grassroots movement to build accessible, modifiable, and free golf simulation software.
+2.  **Key Features:** Extremely modular, supports DIY hardware (webcams, custom sensors), community-driven feature requests.
+3.  **Limitations:** Often lacks polish, documentation can be sparse, fragmented codebase across multiple repos.
+4.  **Pricing Model:** Free (Open Source / MIT / GPL).
+5.  **Target Market:** Developers, Makers, Budget-conscious enthusiasts.
+6.  **Technology Stack:** Varied (Python, C++, Unity integrations).
+7.  **Recent Updates:** Growing interest in open API standards (like GSPRO's OPCD) to standardize hardware communication.
+8.  **Our Differentiation:** We provide a centralized, rigorously tested physics and biomechanics core that can power these community projects, reducing duplicated effort on the difficult math/physics problems.
 
 ### Sportsbox AI
 
