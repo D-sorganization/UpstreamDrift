@@ -24,7 +24,6 @@ from src.shared.python.optimization.swing_bridge import (
     SwingOptimizationResult,
 )
 
-
 # =========================================================================
 # Fixtures
 # =========================================================================
