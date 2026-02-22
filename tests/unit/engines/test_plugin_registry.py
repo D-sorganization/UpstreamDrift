@@ -217,7 +217,7 @@ class TestPluginRegistryThreadSafety:
 
         def writer() -> None:
             try:
-                for i in range(100):
+                for _i in range(100):
                     new_reg = EngineRegistration(
                         engine_type=EngineType.PENDULUM, factory=_stub_factory
                     )
