@@ -24,7 +24,6 @@ from src.shared.python.optimization.swing_bridge import (
     SwingOptimizationResult,
 )
 
-
 # =========================================================================
 # Fixtures
 # =========================================================================
@@ -249,9 +248,7 @@ class TestSwingOptimizationResult:
 class TestSwingOptimizationBridgeInit:
     """Test bridge construction and property access."""
 
-    def test_init_with_default_config(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_init_with_default_config(self, bridge: SwingOptimizationBridge) -> None:
         assert bridge.config.n_joints == 7
         assert bridge.engine is None
 
@@ -261,9 +258,7 @@ class TestSwingOptimizationBridgeInit:
     def test_control_dim(self, bridge: SwingOptimizationBridge) -> None:
         assert bridge.control_dim == 7
 
-    def test_init_with_engine(
-        self, default_config: SwingOptimizationConfig
-    ) -> None:
+    def test_init_with_engine(self, default_config: SwingOptimizationConfig) -> None:
         engine = MagicMock()
         b = SwingOptimizationBridge(default_config, engine=engine)
         assert b.engine is engine
@@ -301,40 +296,30 @@ class TestCostMatrices:
         _, R = bridge._build_cost_matrices(7)
         np.testing.assert_array_equal(R, R.T)
 
-    def test_q_positive_semi_definite(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_q_positive_semi_definite(self, bridge: SwingOptimizationBridge) -> None:
         Q, _ = bridge._build_cost_matrices(7)
         eigenvalues = np.linalg.eigvalsh(Q)
         assert np.all(eigenvalues >= -1e-12), (
             f"Q is not PSD: min eigenvalue = {eigenvalues.min()}"
         )
 
-    def test_r_positive_semi_definite(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_r_positive_semi_definite(self, bridge: SwingOptimizationBridge) -> None:
         _, R = bridge._build_cost_matrices(7)
         eigenvalues = np.linalg.eigvalsh(R)
         assert np.all(eigenvalues >= -1e-12), (
             f"R is not PSD: min eigenvalue = {eigenvalues.min()}"
         )
 
-    def test_r_diagonal_values(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_r_diagonal_values(self, bridge: SwingOptimizationBridge) -> None:
         _, R = bridge._build_cost_matrices(7)
         expected = 0.01 * np.eye(7)
         np.testing.assert_allclose(R, expected)
 
-    def test_q_velocity_block_identity(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_q_velocity_block_identity(self, bridge: SwingOptimizationBridge) -> None:
         Q, _ = bridge._build_cost_matrices(7)
         np.testing.assert_array_equal(Q[7:, 7:], np.eye(7))
 
-    def test_q_position_block_zero(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_q_position_block_zero(self, bridge: SwingOptimizationBridge) -> None:
         Q, _ = bridge._build_cost_matrices(7)
         np.testing.assert_array_equal(Q[:7, :7], np.zeros((7, 7)))
 
@@ -344,9 +329,7 @@ class TestCostMatrices:
         with pytest.raises(ValueError, match="n must be >= 1"):
             bridge._build_cost_matrices(0)
 
-    def test_build_cost_matrices_n_one(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_build_cost_matrices_n_one(self, bridge: SwingOptimizationBridge) -> None:
         Q, R = bridge._build_cost_matrices(1)
         assert Q.shape == (2, 2)
         assert R.shape == (1, 1)
@@ -360,36 +343,26 @@ class TestCostMatrices:
 class TestInitialStateValidation:
     """Verify that optimize_swing rejects invalid initial states."""
 
-    def test_non_array_raises(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_non_array_raises(self, small_bridge: SwingOptimizationBridge) -> None:
         with pytest.raises(TypeError, match="initial_state must be np.ndarray"):
             small_bridge.optimize_swing([0.0] * 4)  # type: ignore[arg-type]
 
-    def test_wrong_length_raises(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_wrong_length_raises(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(10)  # config has n_joints=2 -> expects 4
         with pytest.raises(ValueError, match="initial_state length must be 4"):
             small_bridge.optimize_swing(x0)
 
-    def test_2d_array_raises(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_2d_array_raises(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros((4, 1))
         with pytest.raises(ValueError, match="must be 1-D"):
             small_bridge.optimize_swing(x0)
 
-    def test_nan_raises(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_nan_raises(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.array([0.0, 0.0, float("nan"), 0.0])
         with pytest.raises(ValueError, match="finite values"):
             small_bridge.optimize_swing(x0)
 
-    def test_inf_raises(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_inf_raises(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.array([0.0, 0.0, float("inf"), 0.0])
         with pytest.raises(ValueError, match="finite values"):
             small_bridge.optimize_swing(x0)
@@ -403,9 +376,7 @@ class TestInitialStateValidation:
 class TestTrajectoryEvaluation:
     """Test the internal _evaluate_trajectory with double-integrator."""
 
-    def test_trajectory_length(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_trajectory_length(self, small_bridge: SwingOptimizationBridge) -> None:
         n = small_bridge.config.n_joints
         controls = [np.zeros(n) for _ in range(small_bridge.config.horizon_steps)]
         x0 = np.zeros(small_bridge.state_dim)
@@ -452,16 +423,12 @@ class TestTrajectoryEvaluation:
 class TestOptimizeSwing:
     """End-to-end optimisation tests."""
 
-    def test_returns_result_type(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_returns_result_type(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert isinstance(result, SwingOptimizationResult)
 
-    def test_result_torques_length(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_result_torques_length(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert len(result.optimal_torques) == small_bridge.config.horizon_steps
@@ -494,9 +461,7 @@ class TestOptimizeSwing:
         result = small_bridge.optimize_swing(x0)
         assert result.clubhead_velocity >= 0.0
 
-    def test_total_cost_finite(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_total_cost_finite(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert np.isfinite(result.total_cost)
@@ -511,7 +476,7 @@ class TestOptimizeSwing:
         # Zero-control cost = terminal_cost_weight * target_vel^2
         zero_cost = (
             small_bridge.config.terminal_cost_weight
-            * small_bridge.config.target_clubhead_velocity ** 2
+            * small_bridge.config.target_clubhead_velocity**2
         )
         assert result.total_cost < zero_cost
 
@@ -525,9 +490,7 @@ class TestOptimizeSwingWithMockEngine:
     """Test that a mock engine's .step() is called during optimisation."""
 
     def test_engine_step_called(self) -> None:
-        config = SwingOptimizationConfig(
-            n_joints=2, horizon_steps=5, max_iterations=2
-        )
+        config = SwingOptimizationConfig(n_joints=2, horizon_steps=5, max_iterations=2)
         engine = MagicMock()
         # Engine returns a plausible next state
         engine.step.side_effect = lambda state, u, dt: state + np.concatenate(
@@ -543,9 +506,7 @@ class TestOptimizeSwingWithMockEngine:
 
     def test_engine_result_uses_engine_dynamics(self) -> None:
         """Verify that when an engine is provided, its dynamics are used."""
-        config = SwingOptimizationConfig(
-            n_joints=1, horizon_steps=3, max_iterations=1
-        )
+        config = SwingOptimizationConfig(n_joints=1, horizon_steps=3, max_iterations=1)
 
         # Engine that always returns a fixed state
         fixed_state = np.array([1.0, 99.0])
