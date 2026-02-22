@@ -1,69 +1,114 @@
-# Identified Implementation Gaps and Inaccuracies Report
+# Issue: Consolidated Implementation Gaps and Inaccuracies
 
-**Date:** 2025-05-23
-**Status:** Review Findings
+**Date:** 2026-02-20
+**Status:** Open
+**Severity:** Critical
+**Labels:** incomplete-implementation, critical, technical-debt, physics-fidelity, patent-risk
 
-This document consolidates all identified implementation gaps, inaccuracies, placeholder code, and potential risks found during a thorough review of the repository. It serves as a single source of truth for outstanding work required to bring the system to full fidelity and legal compliance.
+## Executive Summary
 
-## 1. Critical Implementation Gaps (Placeholders)
+This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 20, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and potential patent risks have also been identified.
 
-These features have been started (methods/classes exist) but contain `NotImplementedError` or empty bodies/TODOs, preventing core functionality.
+## 1. Critical Implementation Gaps (Blocking)
 
-### Real-Time Controller (`src/deployment/realtime/controller.py`)
-- **Hardware Connectivity:** The following methods are placeholders raising `NotImplementedError` or containing TODOs:
-  - `_connect_ros2()`: Empty/Placeholder.
-  - `_connect_udp()`: Empty/Placeholder.
-  - `_connect_ethercat()`: Empty/Placeholder.
-- **State & Command Interfaces:**
-  - `_read_state()`: Raises `NotImplementedError` for non-simulation modes.
-  - `_send_command()`: Raises `NotImplementedError` for non-simulation modes.
-- **Impact:** The controller cannot interface with real hardware (ROS2, EtherCAT, UDP), limiting it to simulation only.
+These issues prevent core functionality from working and must be addressed immediately to enable hardware testing and integration.
 
-## 2. Physics Fidelity & Accuracy Issues
+### Real-Time Controller Connectivity
+*   **File:** `src/deployment/realtime/controller.py`
+*   **Issues:**
+    *   `_connect_ros2` raises `NotImplementedError` (Line ~223)
+    *   `_connect_udp` raises `NotImplementedError` (Line ~230)
+    *   `_connect_ethercat` raises `NotImplementedError` (Line ~237)
+    *   `_read_state` raises `NotImplementedError` for non-simulation modes (Line ~353)
+    *   `_send_command` raises `NotImplementedError` for non-simulation modes (Line ~412)
+*   **Impact:** Prevents any communication with physical robots using ROS2, UDP, or EtherCAT protocols. The controller is currently limited to simulation and loopback modes.
 
-These implementations exist but are simplified or inaccurate, compromising simulation realism.
+## 2. Physics Fidelity Gaps
 
-### Ball Flight Physics (`src/shared/python/physics/ball_flight_physics.py`)
-- **Hardcoded Coefficients:** Aerodynamic coefficients (`cd0=0.21`, etc.) are hardcoded in `BallProperties` without citations or configurability.
-- **Missing Environmental Models:** Explicit TODOs indicate missing models for:
-  - Environmental Gradient Modeling (wind shear, temperature).
-  - Hydrodynamic Lubrication (wet ball).
-  - Dimple Geometry Optimization.
-  - Turbulence Modeling.
-  - Mud Ball Physics.
+Missing or simplified physics models that reduce simulation accuracy.
 
-### Flexible Shaft Model (`src/shared/python/physics/flexible_shaft.py`)
-- **Missing Torsional Dynamics:** The Euler-Bernoulli beam model (`FiniteElementShaftModel`) ignores torsional degrees of freedom (twisting).
-- **Symmetric Assumption:** No support for asymmetric cross-sections (spine alignment/puring).
+### Ball Flight Physics
+*   **File:** `src/shared/python/physics/ball_flight_physics.py`
+*   **Issues:**
+    *   Missing Environmental Gradient Modeling (TODO)
+    *   Missing Hydrodynamic Lubrication (TODO)
+    *   Missing Dimple Geometry Optimization (TODO)
+    *   Missing Turbulence Modeling (TODO)
+    *   Missing Mud Ball Physics (TODO)
+    *   Hardcoded aerodynamic coefficients (`cd0=0.21`, etc.) without configuration.
+*   **Impact:** High accuracy risk; simulation may not reflect real-world ball behavior under complex conditions.
 
-### Impact Model (`src/shared/python/physics/impact_model.py`)
-- **Simplified Effective Mass:** Uses a scalar approximation (`1 / (1/m + r^2/I)`) instead of the full 3D inertia tensor, leading to inaccuracies in off-center impacts.
+### Flexible Shaft Dynamics
+*   **File:** `src/shared/python/physics/flexible_shaft.py`
+*   **Issues:**
+    *   Missing Torsional Dynamics (Euler-Bernoulli beam model used, ignoring twist).
+    *   Missing Asymmetric Cross-Section support (assumes symmetry).
+*   **Impact:** Unable to model shaft spine alignment or manufacturing tolerances; reduced fidelity for shaft twisting effects.
 
-### Ground Reaction Forces (`src/shared/python/physics/ground_reaction_forces.py`)
-- **Inaccurate Fallback:** `extract_grf_from_contacts` falls back to summing static gravity ($W=mg$) when contact data is missing. It fails to account for dynamic body acceleration ($F=m(g+a)$), causing errors during dynamic swings.
+### Impact Model
+*   **File:** `src/shared/python/physics/impact_model.py`
+*   **Issues:**
+    *   Uses simplified scalar effective mass formula (`1 / (1/m + r^2/I)`).
+*   **Impact:** Ignores full 3D inertia tensor and impact vector direction, leading to inaccuracies in off-center impacts.
 
-## 3. Biomechanics & Legal Risks
+### Ground Reaction Forces (GRF)
+*   **File:** `src/shared/python/physics/ground_reaction_forces.py`
+*   **Issues:**
+    *   Fallback mechanism in `extract_grf_from_contacts` incorrectly sums static gravity ($W=mg$) instead of accounting for dynamic acceleration ($F=m(g+a)$).
+*   **Impact:** Inaccurate GRF estimation during dynamic movements when native contact data is unavailable.
 
-These areas contain logic that is either incomplete or poses potential patent/trademark risks.
+## 3. Biomechanical Metric Gaps
 
-### Kinematic Sequence (`src/shared/python/biomechanics/kinematic_sequence.py`)
-- **Missing Metrics:** TODOs present for:
-  - Proximal Braking Efficiency.
-  - X-Factor Stretch (calculation logic missing here, though present in `injury_risk.py`).
-  - Inter-segmental Power Flow.
-- **Patent Risk:** The `efficiency_score` (matches / expected) is flagged as potentially infringing on sequence efficiency patents (e.g., K-Motion).
+Missing metrics required for advanced swing analysis.
 
-### Injury Risk Analysis (`src/shared/python/injury/injury_risk.py`)
-- **Trademark Risk:** Explicitly uses the term "X-Factor Stretch" and specific thresholds (e.g., > 55 degrees) associated with TPI/McLean methodologies, posing a medium infringement risk.
+### Kinematic Sequence
+*   **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
+*   **Issues:**
+    *   Missing "Proximal Braking Efficiency" (TODO).
+    *   Missing "X-Factor Stretch" calculation (TODO).
+    *   Missing "Inter-segmental Power Flow" (TODO).
+*   **Impact:** Incomplete biomechanical analysis capabilities.
 
-### Comparative Analysis (`src/shared/python/validation_pkg/comparative_analysis.py`)
-- **Patent Risk:** The `compute_dtw_distance` function uses Dynamic Time Warping for swing comparison, which is a technique potentially covered by patents from competitors (e.g., Zepp, Blast Motion).
+## 4. Teleoperation Device Gaps
 
-## 4. Other Identified Gaps
+Placeholder implementations for input devices.
 
-- **Type Hinting:** Multiple files use `pass` within `if TYPE_CHECKING:` blocks, indicating incomplete type definitions (e.g., `src/shared/python/physics/impact_model.py`).
+### Input Devices
+*   **File:** `src/deployment/teleoperation/devices.py`
+*   **Issues:**
+    *   `SpaceMouseInput`: `connect` and `update` are placeholders.
+    *   `VRControllerInput`: `connect` and `update` are placeholders.
+    *   `HapticDeviceInput`: `connect`, `update`, and `set_force_feedback` are placeholders.
+*   **Impact:** Unable to use physical input devices for teleoperation.
 
-## Reference Issues
-- `docs/assessments/completist/issues/ISSUE_REALTIME_CONTROLLER.md`
-- `docs/assessments/completist/issues/ISSUE_PHYSICS_FIDELITY.md`
-- `docs/assessments/completist/issues/ISSUE_PATENT_RISKS.md`
+## 5. Tooling and Utility Gaps
+
+Missing implementations in utility scripts.
+
+### Signal Toolkit
+*   **File:** `src/shared/python/signal_toolkit/io.py`
+*   **Issue:** `resolve_column` raises `NotImplementedError`.
+*   **Impact:** Potential data import failures for signal analysis.
+
+### Format Conversion
+*   **File:** `src/tools/model_generation/converters/format_utils.py`
+*   **Issue:** `convert` function raises `NotImplementedError` for conversions other than URDF<->MJCF.
+*   **Impact:** Limited model format interoperability.
+
+## 6. Technical Debt and Legal Risks
+
+Implementation choices that pose legal or maintenance risks.
+
+### Patent Risks
+*   **File:** `src/shared/python/analysis/pca_analysis.py`
+    *   **Issue:** `efficiency_score` calculation (`matches / len(expected_order)`) may infringe on patents.
+*   **File:** `src/shared/python/injury/injury_risk.py`
+    *   **Issue:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
+
+## Recommendations
+
+1.  **Immediate Priority:** Implement the missing connection methods in `RealTimeController` to unblock hardware testing.
+2.  **High Priority:** Address physics fidelity gaps in `ball_flight_physics.py` and `flexible_shaft.py`.
+3.  **High Priority:** Refactor `pca_analysis.py` and `injury_risk.py` to mitigate patent risks by renaming terms and updating algorithms.
+4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py`.
+5.  **Low Priority:** Complete tooling utilities and remaining TODOs.
