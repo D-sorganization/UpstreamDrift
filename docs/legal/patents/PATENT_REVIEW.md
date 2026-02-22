@@ -21,6 +21,7 @@
 | **Injury Risk Scoring**      | **TPI**, **Various**<br>Methods for assessing injury risk (X-Factor) | `InjuryRiskScorer` in `src/shared/python/injury/injury_risk.py`. Uses specific thresholds for "X-Factor Stretch" (45-55 deg) and risk weighting. | **MEDIUM** | Verify specific thresholds (`45.0`, `55.0`) against public academic literature. Cite sources explicitly. Avoid proprietary "Risk Score" formulas if possible.                        | [`ISSUE_016`](../../assessments/issues/ISSUE_016_INJURY_RISK_SCORING.md) |
 | **Gear Effect Simulation**   | **TrackMan**, **Foresight**<br>Methods for simulating ball flight   | `compute_gear_effect_spin` in `src/shared/python/physics/impact_model.py`. Uses heuristic constants `100.0`, `50.0`.     | **MEDIUM** | Document source of constants (`100.0`, `50.0`). If derived from TrackMan data, ensure "fair use" or clean-room implementation.                                                                            | [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md) |
 | **Ball Flight Coefficients** | **Unknown / Proprietary SDKs**<br>Specific aerodynamic coefficients | `BallProperties` in `src/shared/python/physics/ball_flight_physics.py`. Uses specific values (`cd0=0.21`, `cl1=0.38`).   | **MEDIUM** | Citation missing. If these match a specific competitor's SDK or proprietary research, it could be infringement. **Action:** Cite source (e.g., Smits & Smith) or externalize to config. | [`ISSUE_046`](../../assessments/issues/ISSUE_046_BALL_FLIGHT_COEFFICIENTS.md) |
+| **Data Copyright**           | **TrackMan A/S**<br>Database Rights                                 | `src/shared/python/validation_pkg/validation_data.py`. Uses "PGA Tour TrackMan Averages" with explicit values.           | **LOW/MED**| Usage of factual averages is generally safe, but ensure compliance with TrackMan Terms of Service if data was scraped.                                                                  | N/A |
 
 ### Low Risk Areas
 
@@ -83,13 +84,21 @@
 - **Risk**: `efficiency_score` calculation.
 - **Finding**: Uses `peak_ke / total_work`.
 - **Status**: **SAFE**. This is based on energy efficiency, not kinematic sequence order. Distinct from TPI patent.
+- **Note**: Code inspection reveals hardcoded clubhead mass of `1.0 kg` in `reporting.py` (Line 183: `ke = 0.5 * 1.0 * ...`). While legally safe, this is physically inaccurate (typical driver ~0.2kg) and inflates the score. Flagged for Quality/Physics review.
+
+### `src/shared/python/validation_pkg/validation_data.py` (Data Copyright)
+
+- **Risk**: `PGA_TOUR_2024` constant list.
+- **Finding**: Contains specific data points attributed to "trackman.com".
+- **Context**: Using factual averages is generally permitted, but if this represents a substantial extraction from a database, it could be a Terms of Service or Database Right issue.
+- **Action**: Confirm source license. Ensure attribution is sufficient.
 
 ## 3. Trademark Concerns
 
 | Term                   | Owner             | Status                  | Alternative      | Notes                                                                                   |
 | ---------------------- | ----------------- | ----------------------- | ---------------- | --------------------------------------------------------------------------------------- |
 | **Swing DNA**          | Mizuno            | **Verified Remediated** | "Swing Profile"  | Code audit 2026-02-19 confirmed removal from UI and code logic.                         |
-| **Kinematic Sequence** | TPI (Common Law?) | **Active**              | "Segment Timing" | Term is widely used in academia, might be genericized, but risky in commercial product. |
+| **Kinematic Sequence** | TPI (Common Law?) | **Active**              | "Segment Timing" | Term appears in `window.py` (UI strings) and `advanced_gui_methods.py`. Refactor to "Segment Timing" or "Movement Sequence". |
 | **Smash Factor**       | TrackMan (Orig.)  | **Generic**             | Keep             | Widely accepted as generic golf term now.                                               |
 | **TrackMan**           | TrackMan A/S      | **Ref Only**            | N/A              | Used only for data validation references. Acceptable nominative use.                    |
 | **X-Factor**           | TPI / Various     | **Medium Risk**         | "Torso-Pelvis Separation" | Used in `injury_risk.py` with specific thresholds. Consider renaming. |
@@ -107,6 +116,7 @@
 1.  **Kinematic Sequence**:
     - [x] **Refactor**: Rename `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer` (Done in `kinematic_sequence.py`).
     - [ ] **Code Change**: Remove `efficiency_score` calculation in `pca_analysis.py` (Pending).
+    - [ ] **UI Update**: Rename "Kinematic Sequence" strings in `window.py` and `advanced_gui_methods.py`.
 2.  **DTW Scoring**:
     - [ ] **Refactor**: Abstract the scoring mechanism.
     - [ ] **Alternative**: Implement `KeyframeSimilarity` (P-positions) as default.
@@ -121,6 +131,9 @@
 ## 6. Change Log
 
 - **2026-02-25**: Updated review (Audit).
+    - Added **Data Copyright** risk for TrackMan averages in `validation_data.py`.
+    - Added physics note about 1.0kg mass in `reporting.py` (Quality issue, not Patent).
+    - Confirmed persistence of "Kinematic Sequence" strings in UI files (`window.py`, `advanced_gui_methods.py`).
     - Confirmed specific "Magic Numbers" in `impact_model.py` (`100.0`, `50.0`) and `injury_risk.py` (`45.0`, `55.0`).
     - Highlighted that `pca_analysis.py` remains a CRITICAL risk despite `kinematic_sequence.py` rename.
     - Updated Status to "Partial Remediation" for Kinematic Sequence.
