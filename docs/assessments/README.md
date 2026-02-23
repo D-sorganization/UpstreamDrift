@@ -121,6 +121,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | Date       | Topic                                    | Report File                                            |
 | ---------- | ---------------------------------------- | ------------------------------------------------------ |
 | 2025-02-24 | Physics Audit                            | `docs/assessments/physics/Physics_Audit_2025-02-24.md` |
+| 2025-05-24 | Implementation Gaps Review 2025          | `docs/assessments/implementation_gaps_review_2025.md`  |
 | 2026-02-17 | Implementation Gaps                      | `docs/assessments/implementation_gaps_report.md`       |
 | 2026-02-17 | Cross-Repo A-O + Pragmatic + DbC/DRY/TDD | `docs/assessments/Cross_Repo_Assessment_2026-02-17.md` |
 | 2026-02-19 | Critical Implementation Gaps             | `docs/assessments/implementation_gaps_report.md` (Updated) |
@@ -201,6 +202,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2.4     | 2026-02 | Added Implementation Gaps Report               |
 | 2.5     | 2026-02 | Updated Gaps Report with Critical Issues       |
 | 2.6     | 2026-02 | Added Data Copyright and Kinematic Sequence Issues |
+| 2.7     | 2025-05 | Added Implementation Gaps Review 2025              |
 
 ---
 
