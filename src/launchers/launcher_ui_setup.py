@@ -241,7 +241,8 @@ class LauncherUISetupMixin:
         self.chk_gpu.setChecked(False)
 
         self.chk_docker = QCheckBox("Docker")
-        self.chk_docker.setChecked(False)
+        # Default to Docker mode if available
+        self.chk_docker.setChecked(getattr(self, "docker_available", False))
         self.chk_docker.stateChanged.connect(self._on_docker_mode_changed)
 
         self.chk_wsl = QCheckBox("WSL")

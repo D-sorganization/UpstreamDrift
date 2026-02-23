@@ -34,7 +34,9 @@ from .startup import REPOS_ROOT
 
 logger = get_logger(__name__)
 
-DOCKER_IMAGE_NAME = "upstream-drift:engine"
+from src.shared.python.docker_config import (
+    DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME,
+)
 
 
 class SettingsDialog(QDialog):

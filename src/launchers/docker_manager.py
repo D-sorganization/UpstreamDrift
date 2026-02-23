@@ -18,11 +18,9 @@ from src.shared.python.security.secure_subprocess import (
     secure_run,
 )
 
-LEGACY_DOCKER_IMAGE_ALIASES: tuple[str, ...] = (
-    "robotics_env:latest",
-    "upstream-drift:latest",
-    "upstream-drift",
-    "golf-suite:latest",
+from src.shared.python.docker_config import (
+    DOCKER_IMAGE_ENGINE,
+    LEGACY_DOCKER_ALIASES as LEGACY_DOCKER_IMAGE_ALIASES,
 )
 
 
@@ -55,7 +53,7 @@ class DockerBuildThread(QThread):
     def __init__(
         self,
         target_stage: str = "all",
-        image_name: str = "upstream-drift:engine",
+        image_name: str = DOCKER_IMAGE_ENGINE,
         context_path: Path | None = None,
     ) -> None:
         """Initialize the build thread."""
@@ -137,7 +135,7 @@ class DockerLauncher:
     """
 
     def __init__(
-        self, repo_root: Path, image_name: str = "upstream-drift:engine"
+        self, repo_root: Path, image_name: str = DOCKER_IMAGE_ENGINE
     ) -> None:
         """Initialize the Docker launcher.
 

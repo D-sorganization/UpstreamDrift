@@ -347,9 +347,12 @@ class GolfLauncher(
         if hasattr(self, "chk_gpu"):
             self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
         if hasattr(self, "chk_docker"):
-            saved_docker = options.get("docker_mode", False)
+            # If "docker_mode" is not in options, default to self.docker_available
+            saved_docker = options.get("docker_mode", self.docker_available)
             if saved_docker and self.docker_available:
                 self.chk_docker.setChecked(True)
+            else:
+                self.chk_docker.setChecked(False)
 
         # Restore selected model
         saved_selection = layout_data.get("selected_model")
