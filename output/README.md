@@ -113,13 +113,13 @@ output.export_analysis_report(analysis_data, "swing_optimization")
 
 ```bash
 # List recent simulations
-golf-suite output list --recent 10
+upstream-drift output list --recent 10
 
 # Export simulation data
-golf-suite output export --simulation sim_001 --format csv
+upstream-drift output export --simulation sim_001 --format csv
 
 # Generate report
-golf-suite output report --type biomechanics --output pdf
+upstream-drift output report --type biomechanics --output pdf
 ```
 
 ## Cleanup and Maintenance

@@ -32,7 +32,7 @@ git lfs install && git lfs pull
 
 \`\`\`bash
 conda env create -f environment.yml
-conda activate golf-suite
+conda activate upstream-drift
 \`\`\`
 
 ### Verify Installation

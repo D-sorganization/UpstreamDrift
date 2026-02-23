@@ -122,7 +122,7 @@ git lfs pull
 
 # Create and activate conda environment
 conda env create -f environment.yml
-conda activate golf-suite
+conda activate upstream-drift
 
 # Verify installation
 python scripts/verify_installation.py

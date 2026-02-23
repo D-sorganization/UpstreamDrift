@@ -112,7 +112,7 @@ class StandardModelManager:
         if not urdf_path.exists():
             raise GolfModelingError(
                 f"Standard humanoid URDF not found at {urdf_path}. "
-                "Run 'golf-suite --setup-models' to download required models."
+                "Run 'upstream-drift --setup-models' to download required models."
             )
 
         return urdf_path

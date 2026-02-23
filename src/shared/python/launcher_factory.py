@@ -44,5 +44,5 @@ def launch_engine_directly(engine: str) -> None:
             sys.exit(1)
     except ImportError as e:
         logger.error("Failed to launch %s: %s", engine, e)
-        logger.info("Try using 'golf-suite' without --engine to use the web UI.")
+        logger.info("Try using 'upstream-drift' without --engine to use the web UI.")
         sys.exit(1)

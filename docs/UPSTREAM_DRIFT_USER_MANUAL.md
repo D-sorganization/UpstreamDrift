@@ -1272,7 +1272,7 @@ packages (for binary dependencies) and pip packages (for Python-only libraries):
 conda env create -f environment.yml
 ```
 
-This creates a conda environment named `golf-suite` with Python 3.11 and all
+This creates a conda environment named `upstream-drift` with Python 3.11 and all
 required dependencies. The environment includes:
 
 - **Core scientific stack**: NumPy, SciPy, pandas, SymPy, Matplotlib
@@ -1287,7 +1287,7 @@ required dependencies. The environment includes:
 ### Step 3: Activate the Environment
 
 ```bash
-conda activate golf-suite
+conda activate upstream-drift
 ```
 
 ### Step 4: Install the Package in Editable Mode
@@ -1654,7 +1654,7 @@ The pre-commit configuration runs the following checks on every commit:
 **PyCharm**:
 
 - Mark `src/` as a source root.
-- Configure the Python interpreter to use the `golf-suite` conda environment.
+- Configure the Python interpreter to use the `upstream-drift` conda environment.
 - Enable ruff as an external tool for linting.
 
 ### Makefile Targets
@@ -1840,7 +1840,7 @@ selection, model browsing, visualization, and analysis tools.
 python launch_golf_suite.py --classic
 
 # Or equivalently
-golf-suite --classic
+upstream-drift --classic
 ```
 
 ### GUI Features
@@ -1946,8 +1946,8 @@ python launch_golf_suite.py --api-only
 # Or directly
 python start_api_server.py
 
-# Or via the golf-suite CLI
-golf-suite --api-only --port 8000
+# Or via the upstream-drift CLI
+upstream-drift --api-only --port 8000
 ```
 
 **Local Mode vs. Authenticated Mode**
@@ -16117,7 +16117,7 @@ dependencies.
 
 **Location:** `/environment.yml`
 
-**Environment name:** `golf-suite`
+**Environment name:** `upstream-drift`
 
 **Channels:**
 
@@ -16159,7 +16159,7 @@ dependencies.
 ```bash
 # Full installation
 conda env create -f environment.yml
-conda activate golf-suite
+conda activate upstream-drift
 
 # Update existing environment
 conda env update -f environment.yml --prune
@@ -16217,7 +16217,7 @@ Multi-stage build for the complete application container.
 | User         | Non-root `golfer` (UID 1000)                                          |
 | Exposed port | 8000                                                                  |
 | Health check | `curl -f http://localhost:8000/api/health` (30s interval)             |
-| Default CMD  | `golf-suite --no-browser`                                             |
+| Default CMD  | `upstream-drift --no-browser`                                             |
 
 #### D.4.2 Running the Container
 
@@ -16239,7 +16239,7 @@ docker run -it upstream-drift:latest bash
 
 | Variable                    | Default      | Description               |
 | --------------------------- | ------------ | ------------------------- |
-| `ENV_NAME`                  | `golf-suite` | Conda environment name    |
+| `ENV_NAME`                  | `upstream-drift` | Conda environment name    |
 | `MAMBA_DOCKERFILE_ACTIVATE` | `1`          | Auto-activate environment |
 | `GMS_LOG_LEVEL`             | `INFO`       | Logging verbosity         |
 | `GMS_API_PORT`              | `8000`       | API server port           |
@@ -16364,7 +16364,7 @@ GMS-{CATEGORY}-{NUMBER}
 | `GMS-SIM-001` | SIMULATION_FAILED          | 500         | The simulation execution failed                           | Check simulation parameters for physical validity (time step, joint limits). Review model stability. |
 | `GMS-SIM-002` | SIMULATION_TIMEOUT         | 504         | The simulation exceeded the maximum allowed time          | Reduce simulation duration, increase time step, or simplify the model.                               |
 | `GMS-SIM-003` | SIMULATION_INVALID_PARAMS  | 400         | One or more simulation parameters are invalid             | Verify parameter ranges: time_step > 0, duration > 0, joint angles within limits.                    |
-| `GMS-SIM-004` | SIMULATION_MODEL_NOT_FOUND | 404         | The specified simulation model file was not found         | Verify the model path. Run `golf-suite --setup-models` to download standard models.                  |
+| `GMS-SIM-004` | SIMULATION_MODEL_NOT_FOUND | 404         | The specified simulation model file was not found         | Verify the model path. Run `upstream-drift --setup-models` to download standard models.                  |
 | `GMS-SIM-005` | SIMULATION_STATE_ERROR     | 500         | The simulation reached an invalid state (NaN, divergence) | Reduce time step, check for unrealistic forces, verify contact parameters.                           |
 | `GMS-SIM-006` | TASK_NOT_FOUND             | 404         | The specified async task ID was not found                 | The task may have expired or the ID is incorrect. Submit a new simulation request.                   |
 | `GMS-SIM-007` | TASK_NOT_COMPLETED         | 400         | The task has not completed yet; results not available     | Poll the task status endpoint until completion, or use the WebSocket notification channel.           |

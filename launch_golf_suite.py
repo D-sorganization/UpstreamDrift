@@ -3,10 +3,10 @@
 Golf Modeling Suite - Unified Launcher
 
 Usage:
-    golf-suite              # Launch web UI (default, recommended)
-    golf-suite --classic    # Launch classic PyQt6 launcher
-    golf-suite --api-only   # Launch API server only (for development)
-    golf-suite --engine X   # Launch specific engine directly
+    upstream-drift              # Launch web UI (default, recommended)
+    upstream-drift --classic    # Launch classic PyQt6 launcher
+    upstream-drift --api-only   # Launch API server only (for development)
+    upstream-drift --engine X   # Launch specific engine directly
 """
 
 import argparse
@@ -25,10 +25,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    golf-suite                    Launch web UI (opens in browser)
-    golf-suite --classic          Launch classic desktop UI
-    golf-suite --api-only         Start API server without UI
-    golf-suite --engine mujoco    Launch MuJoCo engine directly
+    upstream-drift                    Launch web UI (opens in browser)
+    upstream-drift --classic          Launch classic desktop UI
+    upstream-drift --api-only         Start API server without UI
+    upstream-drift --engine mujoco    Launch MuJoCo engine directly
         """,
     )
 
