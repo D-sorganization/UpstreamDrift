@@ -1,0 +1,57 @@
+name: Docker Size and Health Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  docker-smoke-and-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image (runtime)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime
+          load: true # Load image into local docker engine
+          tags: upstream-drift:runtime
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify Image Size Budget
+        run: |
+          # Set the maximum allowed size in MB (e.g., 4000 MB = 4GB)
+          MAX_SIZE_MB=4000
+
+          # Get size in bytes
+          IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:runtime --format='{{.Size}}')
+          
+          # Convert to MB
+          IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
+          
+          echo "Image size: ${IMAGE_SIZE_MB} MB"
+          echo "Budget: ${MAX_SIZE_MB} MB"
+          
+          if [ "$IMAGE_SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::Image size (${IMAGE_SIZE_MB} MB) exceeds budget (${MAX_SIZE_MB} MB)!"
+            exit 1
+          else
+            echo "Image size is within budget."
+          fi
+
+      - name: Run Basic Health Checks
+        run: |
+          # Run a simple Python command importing key libraries to verify the environment works 
+          docker run --rm upstream-drift:runtime python -c "import mujoco, numpy, scipy; print('Core ML/Physics imports successful!')"
+          
+          # We can also check that the API server module is importable
+          docker run --rm upstream-drift:runtime python -c "import fastapi; print('FastAPI imported successfully')"
