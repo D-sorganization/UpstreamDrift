@@ -4,7 +4,7 @@
 # This script builds (if missing) and runs the Docker development container
 # for the Golf Modeling Suite.
 
-IMAGE_NAME="golf-suite-dev"
+IMAGE_NAME="upstream-drift:dev"
 
 # 1. Check if image exists, build if needed
 if [[ "$(docker images -q ${IMAGE_NAME} 2> /dev/null)" == "" ]]; then

@@ -323,7 +323,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                     "Docker Image Not Found",
                     f"The Docker image '{self.docker_launcher.image_name}' is not available.\n\n"
                     "Build it first using:\n"
-                    "  docker build -t robotics_env .\n\n"
+                    "  docker build -t upstream-drift:engine .\n\n"
                     "Or use the Environment dialog to build.",
                 )
                 return

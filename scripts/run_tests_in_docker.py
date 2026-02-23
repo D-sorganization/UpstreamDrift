@@ -25,7 +25,7 @@ def main() -> None:
         logger.error(f"Dockerfile not found at {dockerfile_path}")
         sys.exit(1)
 
-    image_name = "golf-suite-dev"
+    image_name = "upstream-drift:dev"
 
     logger.info(f"Building Docker Image: {image_name}")
     # Build image

@@ -59,7 +59,7 @@ RUN conda create -y -n robot-viz -c conda-forge python=3.10 gepetto-viewer gepet
 # 4. Main Python Environment (VirtualEnv)
 # We use a venv to avoid conflicts with system python or base conda.
 # This will be the default environment for your code.
-ENV VIRTUAL_ENV=/opt/robotics_env
+ENV VIRTUAL_ENV=/opt/upstream-drift
 RUN python3.10 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 

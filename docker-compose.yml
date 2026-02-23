@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Backend API server with all physics engines
@@ -7,8 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runtime
-    image: golf-suite:latest
-    container_name: golf-suite-backend
+    image: upstream-drift:runtime
+    container_name: upstream-drift-backend
     ports:
       - "8001:8001"
     volumes:
@@ -32,12 +32,12 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - golf-suite
+      - upstream-drift
 
   # Frontend UI (optional - can also run locally)
   frontend:
     image: node:20-alpine
-    container_name: golf-suite-frontend
+    container_name: upstream-drift-frontend
     ports:
       - "5180:5180"
     volumes:
@@ -50,10 +50,10 @@ services:
     depends_on:
       - backend
     networks:
-      - golf-suite
+      - upstream-drift
 
 networks:
-  golf-suite:
+  upstream-drift:
     driver: bridge
 
 volumes:

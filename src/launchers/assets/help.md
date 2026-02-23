@@ -24,7 +24,7 @@ The Golf Modeling Suite is a comprehensive environment for biomechanical simulat
 
 ## Docker Environment
 
-The suite runs within a unified `robotics_env` Docker container to ensure consistent dependencies across all platforms.
+The suite runs within a unified `upstream-drift:engine` Docker container to ensure consistent dependencies across all platforms.
 
 ### Key Dependencies
 

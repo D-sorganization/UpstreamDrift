@@ -83,7 +83,7 @@ class SimulationMixin:
 
         self._append_display_env(cmd)
 
-        cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u"])
+        cmd.extend(["upstream-drift:engine", "/opt/mujoco-env/bin/python", "-u"])
         cmd.extend(["-m", "humanoid_golf.sim"])
 
         return cmd, None
@@ -192,7 +192,7 @@ class SimulationMixin:
 
             docker_dir = self.repo_path / "docker"
 
-            cmd = ["docker", "build", "-t", "robotics_env", "."]
+            cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
 
             # Start worker for build
 

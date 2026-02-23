@@ -16,7 +16,7 @@ logger = setup_script_logging("DockerRebuilder")
 
 
 def rebuild_docker_image() -> bool:
-    """Rebuild the robotics_env Docker image."""
+    """Rebuild the upstream-drift Docker image."""
     logger.info("Rebuilding Docker image with updated dependencies...")
 
     # Get the directory containing this script (should be mujoco engine root)
@@ -30,7 +30,7 @@ def rebuild_docker_image() -> bool:
     logger.info(f"Building from: {docker_dir}")
 
     # Build command
-    cmd = ["docker", "build", "-t", "robotics_env", "."]
+    cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
 
     logger.info("This may take several minutes...")
 

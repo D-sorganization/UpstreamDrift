@@ -12,6 +12,14 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+PRIMARY_DOCKER_IMAGE = "upstream-drift:engine"
+LEGACY_DOCKER_IMAGES: tuple[str, ...] = (
+    "robotics_env",
+    "upstream-drift",
+    "upstream-drift:latest",
+    "golf-suite",
+)
+
 
 def log_result(component: str, status: str, message: str = "") -> None:
     """Log a color-coded health check result line."""
@@ -80,8 +88,22 @@ def main() -> None:
 
     # 2. Docker Health
     logger.info("\n--- Docker Environment ---")
-    docker_ok, docker_msg = check_docker_image("robotics_env")
-    log_result("Image: robotics_env", "OK" if docker_ok else "FAIL", docker_msg)
+    resolved_image = PRIMARY_DOCKER_IMAGE
+    docker_ok, docker_msg = check_docker_image(resolved_image)
+
+    if not docker_ok:
+        for legacy_image in LEGACY_DOCKER_IMAGES:
+            legacy_ok, _ = check_docker_image(legacy_image)
+            if legacy_ok:
+                resolved_image = legacy_image
+                docker_ok = True
+                docker_msg = (
+                    f"Found legacy image '{legacy_image}' "
+                    f"(preferred: '{PRIMARY_DOCKER_IMAGE}')"
+                )
+                break
+
+    log_result(f"Image: {resolved_image}", "OK" if docker_ok else "FAIL", docker_msg)
 
     # 3. Pinocchio / Docker Libraries Check
     # We verify if the critical libraries we added (libEGL) are present in the image
@@ -91,7 +113,7 @@ def main() -> None:
                 "docker",
                 "run",
                 "--rm",
-                "robotics_env",
+                resolved_image,
                 "sh",
                 "-c",
                 "dpkg -l libegl1 libxkbcommon-x11-0 libxcb-cursor0",

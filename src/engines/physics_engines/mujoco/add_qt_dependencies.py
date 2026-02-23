@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to add Qt system dependencies to robotics_env."""
+"""Script to add Qt system dependencies to upstream-drift."""
 
 import logging
 import os
@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 def create_qt_dockerfile() -> str:
     """Create Dockerfile to add Qt system dependencies."""
-    dockerfile_content = """# Add Qt system dependencies to robotics_env
-FROM robotics_env:latest
+    dockerfile_content = """# Add Qt system dependencies to upstream-drift
+FROM upstream-drift:engine
 
 # Install Qt system dependencies
 RUN apt-get update && apt-get install -y \\
@@ -43,9 +43,9 @@ RUN /opt/mujoco-env/bin/pip install "PyQt6>=6.6.0" "PyQt6-Qt6>=6.6.0"
     return dockerfile_content
 
 
-def update_robotics_env_qt() -> bool:
-    """Update robotics_env with Qt dependencies."""
-    logger.info("🎨 Adding Qt dependencies to robotics_env...")
+def update_upstream_drift_qt() -> bool:
+    """Update upstream-drift with Qt dependencies."""
+    logger.info("🎨 Adding Qt dependencies to upstream-drift...")
 
     with tempfile.TemporaryDirectory() as temp_dir:
         dockerfile_path = os.path.join(temp_dir, "Dockerfile")
@@ -55,7 +55,7 @@ def update_robotics_env_qt() -> bool:
 
         logger.info("📝 Created Qt Dockerfile: %s", dockerfile_path)
 
-        cmd = ["docker", "build", "-t", "robotics_env", "."]
+        cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
 
         try:
             logger.info("🚀 Running: %s", " ".join(cmd))
@@ -63,11 +63,11 @@ def update_robotics_env_qt() -> bool:
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)
 
-            logger.info("✅ Successfully added Qt dependencies to robotics_env!")
+            logger.info("✅ Successfully added Qt dependencies to upstream-drift!")
             return True
 
         except subprocess.CalledProcessError as e:
-            logger.error("❌ Failed to update robotics_env: %s", e)
+            logger.error("❌ Failed to update upstream-drift: %s", e)
             return False
 
 
@@ -84,7 +84,7 @@ def test_qt_environment() -> bool:
                 "--rm",
                 "-e",
                 "QT_QPA_PLATFORM=offscreen",
-                "robotics_env",
+                "upstream-drift:engine",
                 "python",
                 "-c",
                 "from PyQt6 import QtWidgets, QtCore; "
@@ -105,7 +105,7 @@ def test_qt_environment() -> bool:
                 "--rm",
                 "-e",
                 "QT_QPA_PLATFORM=offscreen",
-                "robotics_env",
+                "upstream-drift:engine",
                 "python",
                 "-c",
                 "from PyQt6.QtWidgets import QApplication; "
@@ -131,13 +131,15 @@ def main() -> int:
     logger.info("🤖 Qt Dependencies Installer for Robotics Environment")
     logger.info("%s", "=" * 60)
 
-    success = update_robotics_env_qt()
+    success = update_upstream_drift_qt()
 
     if success:
         test_success = test_qt_environment()
 
         if test_success:
-            logger.info("\n🎉 Success! PyQt6 is now fully functional in robotics_env.")
+            logger.info(
+                "\n🎉 Success! PyQt6 is now fully functional in upstream-drift."
+            )
             logger.info("💡 MuJoCo GUI simulations should now work properly!")
         else:
             logger.error("\n⚠️  Qt installed but tests failed. May work in GUI mode.")

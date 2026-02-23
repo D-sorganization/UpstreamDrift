@@ -81,7 +81,7 @@ git lfs install && git lfs pull
 
 # Create conda environment (most reliable)
 conda env create -f environment.yml
-conda activate golf-suite
+conda activate upstream-drift
 
 # Verify installation
 python scripts/verify_installation.py

@@ -5,7 +5,7 @@ echo ==========================================
 echo      Robotics Environment Builder
 echo ==========================================
 
-docker build -t robotics_env .
+docker build -t upstream-drift:engine .
 if %ERRORLEVEL% NEQ 0 (
     echo Build failed!
     pause
@@ -26,4 +26,4 @@ docker run -it --rm ^
   -p 8888:8888 ^
   -v "%~dp0..":/workspace ^
   -w /workspace ^
-  robotics_env
+  upstream-drift:engine

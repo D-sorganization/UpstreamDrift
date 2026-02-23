@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to add defusedxml to the existing robotics_env Docker image."""
+"""Script to add defusedxml to the existing upstream-drift Docker image."""
 
 import logging
 import os
@@ -11,23 +11,23 @@ logger = logging.getLogger(__name__)
 
 
 def create_minimal_dockerfile() -> str:
-    """Create a minimal Dockerfile to add defusedxml to robotics_env."""
-    dockerfile_content = """# Add defusedxml to existing robotics_env
-FROM robotics_env:latest
+    """Create a minimal Dockerfile to add defusedxml to upstream-drift."""
+    dockerfile_content = """# Add defusedxml to existing upstream-drift
+FROM upstream-drift:engine
 
 # Install missing dependencies in the existing virtual environment
 RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" "PyQt6>=6.6.0"
 
-# Update PATH to use robotics_env by default
+# Update PATH to use upstream-drift by default
 ENV PATH="/opt/mujoco-env/bin:$PATH"
 ENV VIRTUAL_ENV="/opt/mujoco-env"
 """
     return dockerfile_content
 
 
-def update_robotics_env() -> bool:
-    """Update the robotics_env image with defusedxml."""
-    logger.info("🔧 Adding defusedxml to existing robotics_env Docker image...")
+def update_upstream_drift() -> bool:
+    """Update the upstream-drift image with defusedxml."""
+    logger.info("🔧 Adding defusedxml to existing upstream-drift Docker image...")
 
     # Create temporary directory for Dockerfile
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -40,7 +40,7 @@ def update_robotics_env() -> bool:
         logger.info("📝 Created temporary Dockerfile: %s", dockerfile_path)
 
         # Build the updated image
-        cmd = ["docker", "build", "-t", "robotics_env", "."]
+        cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
 
         try:
             logger.info("🚀 Running: %s", " ".join(cmd))
@@ -50,11 +50,11 @@ def update_robotics_env() -> bool:
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)
 
-            logger.info("✅ Successfully added defusedxml to robotics_env!")
+            logger.info("✅ Successfully added defusedxml to upstream-drift!")
             return True
 
         except subprocess.CalledProcessError as e:
-            logger.error("❌ Failed to update robotics_env: %s", e)
+            logger.error("❌ Failed to update upstream-drift: %s", e)
             return False
         except FileNotFoundError:
             logger.info("❌ Docker not found. Please install Docker Desktop.")
@@ -63,7 +63,7 @@ def update_robotics_env() -> bool:
 
 def test_updated_environment() -> bool:
     """Test that defusedxml is now available in the updated environment."""
-    logger.info("\n🧪 Testing updated robotics_env...")
+    logger.info("\n🧪 Testing updated upstream-drift...")
 
     try:
         # Test defusedxml import
@@ -72,7 +72,7 @@ def test_updated_environment() -> bool:
                 "docker",
                 "run",
                 "--rm",
-                "robotics_env",
+                "upstream-drift:engine",
                 "python",
                 "-c",
                 "import defusedxml; print('✅ defusedxml available')",
@@ -90,7 +90,7 @@ def test_updated_environment() -> bool:
                 "docker",
                 "run",
                 "--rm",
-                "robotics_env",
+                "upstream-drift:engine",
                 "python",
                 "-c",
                 "import defusedxml.ElementTree; "
@@ -106,7 +106,7 @@ def test_updated_environment() -> bool:
         # Show what robotics libraries are available
         logger.info("\n📚 Available robotics libraries:")
         result = subprocess.run(
-            ["docker", "run", "--rm", "robotics_env", "pip", "list"],
+            ["docker", "run", "--rm", "upstream-drift:engine", "pip", "list"],
             capture_output=True,
             text=True,
             check=True,
@@ -146,7 +146,7 @@ def main() -> int:
     logger.info("%s", "=" * 50)
 
     # Update the environment
-    success = update_robotics_env()
+    success = update_upstream_drift()
 
     if success:
         # Test the updated environment
@@ -154,7 +154,7 @@ def main() -> int:
 
         if test_success:
             logger.info(
-                "\n🎉 Success! The robotics_env now has all required dependencies."
+                "\n🎉 Success! The upstream-drift now has all required dependencies."
             )
             logger.info("💡 You can now run MuJoCo, Drake, and Pinocchio simulations!")
         else:
@@ -162,7 +162,9 @@ def main() -> int:
                 "\n⚠️  Update completed but tests failed. Check the output above."
             )
     else:
-        logger.error("\n💥 Failed to update robotics_env. Check error messages above.")
+        logger.error(
+            "\n💥 Failed to update upstream-drift. Check error messages above."
+        )
 
     return 0 if success else 1
 

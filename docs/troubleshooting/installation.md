@@ -13,7 +13,7 @@ cd Golf_Modeling_Suite
 
 # Create conda environment (handles binary dependencies)
 conda env create -f environment.yml
-conda activate golf-suite
+conda activate upstream-drift
 
 # Verify installation
 python -c "import mujoco; print(f'MuJoCo version: {mujoco.__version__}')"
@@ -302,11 +302,11 @@ For complete isolation and reproducibility:
 
 ```bash
 # Build and run
-docker-compose up golf-suite
+docker compose up backend
 
 # Or build manually
-docker build -t golf-suite .
-docker run -p 8000:8000 golf-suite
+docker build -t upstream-drift:runtime .
+docker run -p 8000:8000 upstream-drift:runtime
 ```
 
 ---

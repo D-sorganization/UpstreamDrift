@@ -31,7 +31,7 @@ from .startup import REPOS_ROOT
 
 logger = get_logger(__name__)
 
-DOCKER_IMAGE_NAME = "robotics_env"
+DOCKER_IMAGE_NAME = "upstream-drift:engine"
 
 
 class DockerCheckThread(QThread):

@@ -120,7 +120,7 @@ class GolfLauncher(QtWidgets.QMainWindow):
 
         # Docker command to run the GUI
         # Assumes:
-        # 1. 'robotics_env:latest' image is built
+        # 1. 'upstream-drift:engine' image is built
         # 2. X Server (VcXsrv) is running on host at :0
         # 3. Host Repositories are mounted to /workspace
 
@@ -153,7 +153,7 @@ class GolfLauncher(QtWidgets.QMainWindow):
                 "-v",
                 f"{repo_root_host}:/workspace",
                 # Image
-                "robotics_env:latest",
+                "upstream-drift:engine",
                 # Command inside container
                 "python",
                 "UpstreamDrift/engines/physics_engines/drake/python/src/golf_gui.py",

@@ -43,7 +43,7 @@ RUN micromamba create -y -f /tmp/environment.yml && \
 
 # Activate environment by default
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
-ENV ENV_NAME=golf-suite
+ENV ENV_NAME=upstream-drift
 
 WORKDIR /app
 
@@ -69,4 +69,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
 # Run server
-CMD ["micromamba", "run", "-n", "golf-suite", "golf-suite", "--no-browser"]
+CMD ["micromamba", "run", "-n", "upstream-drift", "upstream-drift", "--no-browser"]

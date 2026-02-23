@@ -7,14 +7,14 @@
 # USAGE:
 #   Full installation (all engines):
 #     conda env create -f environment.yml
-#     conda activate golf-suite
+#     conda activate upstream-drift
 #
 #   Light installation (UI development, no heavy engines):
-#     conda env create -f environment.yml --name golf-suite-light --prune
+#     conda env create -f environment.yml --name upstream-drift-light --prune
 #     # Then comment out the 'engines' section before running
 #
 # ACTIVATION:
-#   conda activate golf-suite
+#   conda activate upstream-drift
 #
 # UPDATING:
 #   conda env update -f environment.yml --prune
@@ -22,7 +22,7 @@
 # TROUBLESHOOTING:
 #   See docs/troubleshooting/installation.md for common issues.
 
-name: golf-suite
+name: upstream-drift
 channels:
   - conda-forge
   - defaults

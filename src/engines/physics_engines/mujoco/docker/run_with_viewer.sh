@@ -15,5 +15,5 @@ docker run -it --rm \
     -e MUJOCO_GL="glfw" \
     -v "$(pwd)":/workspace \
     -w /workspace \
-    robotics_env \
+    upstream-drift:engine \
     python3 /workspace/example_dynamic_stance.py

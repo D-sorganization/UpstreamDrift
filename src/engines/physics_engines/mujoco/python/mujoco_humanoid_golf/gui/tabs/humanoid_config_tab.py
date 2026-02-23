@@ -572,7 +572,7 @@ class HumanoidConfigTab(QWidget):
         else:
             cmd.extend(["-e", "MUJOCO_GL=osmesa"])
 
-        cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u"])
+        cmd.extend(["upstream-drift:engine", "/opt/mujoco-env/bin/python", "-u"])
         cmd.extend(["-m", "humanoid_golf.sim"])
         return cmd, None
 
@@ -628,7 +628,7 @@ class HumanoidConfigTab(QWidget):
         if reply == QMessageBox.StandardButton.Yes:
             self._log("Rebuilding Docker environment...")
             docker_dir = self._mujoco_dir / "docker"
-            cmd = ["docker", "build", "-t", "robotics_env", "."]
+            cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
             build_thread = ProcessWorker(cmd, cwd=str(docker_dir))
             build_thread.log_signal.connect(self._log)
             build_thread.finished_signal.connect(

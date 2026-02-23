@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 def _check_docker_image_exists() -> bool:
-    """Check whether the robotics_env Docker image is available."""
-    logger.debug("1. Checking if robotics_env Docker image exists...")
+    """Check whether the upstream-drift Docker image is available."""
+    logger.debug("1. Checking if upstream-drift Docker image exists...")
     try:
         result = subprocess.run(
             [
                 "docker",
                 "images",
-                "robotics_env",
+                "upstream-drift:engine",
                 "--format",
                 "{{.Repository}}:{{.Tag}}",
             ],
@@ -27,12 +27,12 @@ def _check_docker_image_exists() -> bool:
             text=True,
             check=True,
         )
-        if "robotics_env" in result.stdout:
-            logger.info("✓ robotics_env Docker image found")
+        if "upstream-drift:engine" in result.stdout:
+            logger.info("✓ upstream-drift Docker image found")
             return True
-        logger.warning("❌ robotics_env Docker image not found")
+        logger.warning("❌ upstream-drift Docker image not found")
         logger.info(
-            "   Run: docker build -t robotics_env . (from docker/ directory)",
+            "   Run: docker build -t upstream-drift:engine . (from docker/ directory)",
         )
         return False
     except (subprocess.CalledProcessError, OSError) as e:
@@ -44,7 +44,7 @@ def _check_python_path() -> None:
     """Verify the container uses the virtual environment Python."""
     logger.info("\n2. Testing Python executable path in container...")
     try:
-        cmd = ["docker", "run", "--rm", "robotics_env", "which", "python"]
+        cmd = ["docker", "run", "--rm", "upstream-drift:engine", "which", "python"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         python_path = result.stdout.strip()
         logger.info(f"   Python path: {python_path}")
@@ -65,7 +65,7 @@ def _check_defusedxml() -> bool:
             "docker",
             "run",
             "--rm",
-            "robotics_env",
+            "upstream-drift:engine",
             "python",
             "-c",
             (
@@ -92,7 +92,7 @@ def _check_defusedxml_elementtree() -> bool:
             "docker",
             "run",
             "--rm",
-            "robotics_env",
+            "upstream-drift:engine",
             "python",
             "-c",
             (
@@ -129,7 +129,7 @@ def _check_module_import() -> bool:
             f"{current_dir}:/workspace",
             "-w",
             "/workspace/python",
-            "robotics_env",
+            "upstream-drift:engine",
             "python",
             "-c",
             (
@@ -180,7 +180,7 @@ def main() -> int:
     if not success:
         logger.info("\n💡 Troubleshooting steps:")
         logger.info(
-            "   1. Rebuild Docker image: docker build -t robotics_env . "
+            "   1. Rebuild Docker image: docker build -t upstream-drift:engine . "
             "(from docker/ directory)",
         )
         logger.info("   2. Check if defusedxml was properly installed during build")

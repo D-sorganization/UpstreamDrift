@@ -18,6 +18,13 @@ from src.shared.python.security.secure_subprocess import (
     secure_run,
 )
 
+LEGACY_DOCKER_IMAGE_ALIASES: tuple[str, ...] = (
+    "robotics_env:latest",
+    "upstream-drift:latest",
+    "upstream-drift",
+    "golf-suite:latest",
+)
+
 
 class DockerCheckThread(QThread):
     """Asynchronous thread to check for Docker availability."""
@@ -48,7 +55,7 @@ class DockerBuildThread(QThread):
     def __init__(
         self,
         target_stage: str = "all",
-        image_name: str = "robotics_env",
+        image_name: str = "upstream-drift:engine",
         context_path: Path | None = None,
     ) -> None:
         """Initialize the build thread."""
@@ -130,7 +137,7 @@ class DockerLauncher:
     """
 
     def __init__(
-        self, repo_root: Path, image_name: str = "robotics_env:latest"
+        self, repo_root: Path, image_name: str = "upstream-drift:engine"
     ) -> None:
         """Initialize the Docker launcher.
 
@@ -156,7 +163,24 @@ class DockerLauncher:
                 capture_output=True,
                 timeout=10,
             )
-            return result.returncode == 0
+            if result.returncode == 0:
+                return True
+
+            for legacy_image in LEGACY_DOCKER_IMAGE_ALIASES:
+                legacy_result = subprocess.run(
+                    ["docker", "image", "inspect", legacy_image],
+                    capture_output=True,
+                    timeout=10,
+                )
+                if legacy_result.returncode == 0:
+                    self.logger.warning(
+                        "Using legacy Docker image '%s'. Retag to '%s' when convenient.",
+                        legacy_image,
+                        self.image_name,
+                    )
+                    self.image_name = legacy_image
+                    return True
+            return False
         except (OSError, ValueError) as e:
             self.logger.warning(f"Failed to check Docker image: {e}")
             return False

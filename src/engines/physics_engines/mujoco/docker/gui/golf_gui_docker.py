@@ -70,13 +70,13 @@ class DockerMixin:
     def _generate_update_dockerfile() -> str:
         """Generate a minimal Dockerfile to add missing dependencies."""
         return (
-            "# Add missing dependencies to existing robotics_env\n"
-            "FROM robotics_env:latest\n\n"
+            "# Add missing dependencies to existing upstream-drift\n"
+            "FROM upstream-drift:engine\n\n"
             "# Install missing dependencies in the existing virtual "
             "environment\n"
             'RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" '
             '"PyQt6>=6.6.0"\n\n'
-            "# Update PATH to use robotics_env by default\n"
+            "# Update PATH to use upstream-drift by default\n"
             'ENV PATH="/opt/mujoco-env/bin:$PATH"\n'
             'ENV VIRTUAL_ENV="/opt/mujoco-env"\n'
         )
@@ -102,7 +102,7 @@ class DockerMixin:
             "docker",
             "run",
             "--rm",
-            "robotics_env",
+            "upstream-drift:engine",
             "python",
             "-c",
             "import defusedxml; print('defusedxml confirmed working')",
@@ -114,11 +114,11 @@ class DockerMixin:
             host.root.after(0, host.log, "Update completed but test failed")
 
     def rebuild_docker(self) -> None:
-        """Add missing dependencies to the existing robotics_env Docker image."""
+        """Add missing dependencies to the existing upstream-drift Docker image."""
         host = cast("DockerProtocol", self)
         msg = (
             "This will add missing dependencies (like defusedxml) to the existing "
-            "robotics_env.\n"
+            "upstream-drift.\n"
             "This should be quick since we're just adding packages. Continue?"
         )
         result = messagebox.askyesno(
@@ -129,7 +129,7 @@ class DockerMixin:
         if not result:
             return
 
-        host.log("Updating robotics_env with missing dependencies...")
+        host.log("Updating upstream-drift with missing dependencies...")
         host.btn_rebuild.config(state=tk.DISABLED)
 
         def run_update() -> None:
@@ -142,15 +142,17 @@ class DockerMixin:
                     with open(dockerfile_path, "w") as f:
                         f.write(dockerfile_content)
 
-                    cmd = ["docker", "build", "-t", "robotics_env", "."]
+                    cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
                     host.root.after(0, host.log, f"Running: {' '.join(cmd)}")
-                    host.root.after(0, host.log, "Adding defusedxml to robotics_env...")
+                    host.root.after(
+                        0, host.log, "Adding defusedxml to upstream-drift..."
+                    )
 
                     returncode = self._run_docker_build(temp_dir, cmd)
 
                     if returncode == 0:
                         host.root.after(
-                            0, host.log, "robotics_env updated successfully!"
+                            0, host.log, "upstream-drift updated successfully!"
                         )
                         host.root.after(
                             0,
@@ -197,7 +199,7 @@ class DockerMixin:
 
             cmd.extend(
                 [
-                    "robotics_env",
+                    "upstream-drift:engine",
                     "/opt/mujoco-env/bin/python",
                     "-u",
                     "-m",
@@ -225,7 +227,7 @@ class DockerMixin:
 
             cmd.extend(
                 [
-                    "robotics_env",
+                    "upstream-drift:engine",
                     "/opt/mujoco-env/bin/python",
                     "-m",
                     "mujoco_humanoid_golf",
@@ -288,7 +290,11 @@ class DockerMixin:
                     "SOLUTION: Missing defusedxml dependency. "
                     "Please rebuild Docker image.",
                 )
-                host.root.after(0, host.log, "Run: docker build -t robotics_env .")
+                host.root.after(
+                    0,
+                    host.log,
+                    "Run: docker build -t upstream-drift:engine .",
+                )
             elif "ModuleNotFoundError" in err:
                 host.root.after(
                     0,
