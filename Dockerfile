@@ -63,8 +63,6 @@ RUN pip install --no-cache-dir \
     qpsolvers \
     osqp \
     myosuite \
-    gymnasium>=0.29.0 \
-    stable-baselines3>=2.0.0 \
     mediapipe>=0.10.0 \
     "imageio[ffmpeg]>=2.31.0" \
     trimesh>=4.0.0 \
@@ -168,4 +166,22 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Default command
+CMD ["/bin/bash"]
+
+
+# Stage 3: Training stage for advanced ML workflows
+FROM runtime AS training
+
+USER root
+
+# Install heavy ML dependencies specifically for training workloads
+RUN pip install --no-cache-dir \
+    gymnasium>=0.29.0 \
+    stable-baselines3>=2.0.0 \
+    "tensorboard>=2.14.0" \
+    "ray[rllib]>=2.9.0" \
+    && echo "Training dependencies installed successfully"
+
+USER ${USER_NAME}
+
 CMD ["/bin/bash"]
