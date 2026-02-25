@@ -320,9 +320,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
 
     @require_state(lambda self: self._is_initialized, "initialized")
     @invariant_checked
-    def set_state(  # type: ignore[override]
-        self, *args: Any, **kwargs: Any
-    ) -> None:
+    def set_state(self, *args: Any, **kwargs: Any) -> None:  # type: ignore[override]
         """Set engine state.
 
         Preconditions:

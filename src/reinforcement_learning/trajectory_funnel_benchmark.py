@@ -1,4 +1,8 @@
+import logging
+
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 class TrajectoryFunnelBenchmark:
@@ -10,9 +14,10 @@ class TrajectoryFunnelBenchmark:
     """
 
     def __init__(self, mode="transverse"):
-        assert mode in ["transverse", "setpoint"], (
-            "Mode must be 'transverse' or 'setpoint'"
-        )
+        assert mode in [
+            "transverse",
+            "setpoint",
+        ], "Mode must be 'transverse' or 'setpoint'"
         self.mode = mode
 
     def setpoint_reward(self, current_state, target_state):
@@ -48,25 +53,26 @@ class TrajectoryFunnelBenchmark:
         Mocks the RL convergence behavior discussed in Chapter 10.
         This will be replaced with Stable Baselines3 + MuJoCo in future PRs.
         """
-        print(f"Initializing {self.mode.upper()} RL Agent Benchmark...")
+        logger.info("Initializing %s RL Agent Benchmark...", self.mode.upper())
         if self.mode == "setpoint":
-            print("Agent is fighting phase asynchrony. High variance at target.")
+            logger.info("Agent is fighting phase asynchrony. High variance at target.")
             return {"convergence_epochs": 15000, "terminal_variance": 4.5}
-        print("Agent is exploiting passive dynamics within the funnel tube.")
+        logger.info("Agent is exploiting passive dynamics within the funnel tube.")
         return {"convergence_epochs": 2400, "terminal_variance": 0.03}
 
 
 if __name__ == "__main__":
-    print("--- Empirical Funnel Control Benchmark ---")
+    logging.basicConfig(level=logging.INFO)
+    logger.info("--- Empirical Funnel Control Benchmark ---")
 
     setpoint_benchmark = TrajectoryFunnelBenchmark("setpoint")
     res_sp = setpoint_benchmark.simulate_agent_training_mock()
-    print(f"Setpoint Results: {res_sp}\n")
+    logger.info("Setpoint Results: %s\n", res_sp)
 
     funnel_benchmark = TrajectoryFunnelBenchmark("transverse")
     res_fn = funnel_benchmark.simulate_agent_training_mock()
-    print(f"Transverse Results: {res_fn}")
+    logger.info("Transverse Results: %s", res_fn)
 
-    print(
+    logger.info(
         "\nResult: The Trajectory Tracking Cost Functional geometrically accelerates convergence."
     )

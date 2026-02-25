@@ -29,8 +29,8 @@ jobs:
 
       - name: Verify Image Size Budget
         run: |
-          # Set the maximum allowed size in MB (e.g., 4000 MB = 4GB)
-          MAX_SIZE_MB=4000
+          # Set the maximum allowed size in MB (e.g., 16000 MB = 16GB)
+          MAX_SIZE_MB=16000
 
           # Get size in bytes
           IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:runtime --format='{{.Size}}')

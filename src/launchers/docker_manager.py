@@ -12,15 +12,17 @@ from pathlib import Path
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
+from src.shared.python.docker_config import (
+    DOCKER_IMAGE_ENGINE,
+)
+from src.shared.python.docker_config import (
+    LEGACY_DOCKER_ALIASES as LEGACY_DOCKER_IMAGE_ALIASES,
+)
+
 # Reuse existing subprocess utilities
 from src.shared.python.security.secure_subprocess import (
     SecureSubprocessError,
     secure_run,
-)
-
-from src.shared.python.docker_config import (
-    DOCKER_IMAGE_ENGINE,
-    LEGACY_DOCKER_ALIASES as LEGACY_DOCKER_IMAGE_ALIASES,
 )
 
 
@@ -134,9 +136,7 @@ class DockerLauncher:
     and model-specific launch commands.
     """
 
-    def __init__(
-        self, repo_root: Path, image_name: str = DOCKER_IMAGE_ENGINE
-    ) -> None:
+    def __init__(self, repo_root: Path, image_name: str = DOCKER_IMAGE_ENGINE) -> None:
         """Initialize the Docker launcher.
 
         Args:

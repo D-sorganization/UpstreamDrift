@@ -1,13 +1,13 @@
 # Issue: Consolidated Implementation Gaps and Inaccuracies
 
-**Date:** 2026-02-20
+**Date:** 2026-02-21
 **Status:** Open
 **Severity:** Critical
 **Labels:** incomplete-implementation, critical, technical-debt, physics-fidelity, patent-risk
 
 ## Executive Summary
 
-This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 20, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and potential patent risks have also been identified.
+This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 21, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and potential patent risks have also been identified. Additionally, extensive mocking in integration tests suggests potential fragility in CI environments.
 
 ## 1. Critical Implementation Gaps (Blocking)
 
@@ -104,6 +104,11 @@ Implementation choices that pose legal or maintenance risks.
     *   **Issue:** `efficiency_score` calculation (`matches / len(expected_order)`) may infringe on patents.
 *   **File:** `src/shared/python/injury/injury_risk.py`
     *   **Issue:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
+
+### Testing Fragility
+*   **File:** `tests/integration/test_golf_launcher_integration.py`
+    *   **Issue:** Extensive use of `MockQtBase`, `MockQMainWindow`, and other mock classes with `pass` methods.
+*   **Impact:** While necessary for headless CI, the reliance on deep mocking suggests fragility in testing actual UI logic and integration. Real UI behavior might not be fully exercised.
 
 ## Recommendations
 
