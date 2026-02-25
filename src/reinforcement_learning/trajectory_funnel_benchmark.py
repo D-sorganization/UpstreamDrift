@@ -53,6 +53,10 @@ class TrajectoryFunnelBenchmark:
         Mocks the RL convergence behavior discussed in Chapter 10.
         This will be replaced with Stable Baselines3 + MuJoCo in future PRs.
         """
+        # Configure basic logging to ensure output is visible
+        if not logger.hasHandlers():
+            logging.basicConfig(level=logging.INFO)
+
         logger.info("Initializing %s RL Agent Benchmark...", self.mode.upper())
         if self.mode == "setpoint":
             logger.info("Agent is fighting phase asynchrony. High variance at target.")

@@ -117,3 +117,14 @@ Implementation choices that pose legal or maintenance risks.
 3.  **High Priority:** Refactor `pca_analysis.py` and `injury_risk.py` to mitigate patent risks by renaming terms and updating algorithms.
 4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py`.
 5.  **Low Priority:** Complete tooling utilities and remaining TODOs.
+
+## Update: 2026-02-25
+
+A comprehensive review of implementation gaps and inaccuracies was conducted on 2026-02-25. This review identified additional gaps in:
+*   **OpenSim GUI:** Potential fragility with hardcoded marker names.
+*   **Signal Toolkit:** `NotImplementedError` for unsupported file formats.
+*   **Format Conversion:** Incomplete implementation of model format converters.
+*   **MPC Controller:** Basic iLQR implementation which may need optimization.
+
+For the full detailed report, please refer to:
+[ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md](ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md)

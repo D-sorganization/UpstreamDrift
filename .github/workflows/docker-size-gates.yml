@@ -30,6 +30,7 @@ jobs:
       - name: Verify Image Size Budget
         run: |
           # Set the maximum allowed size in MB (e.g., 16000 MB = 16GB)
+          # Increased to 16GB to accommodate large dependencies (Drake, MuJoCo, PyTorch)
           MAX_SIZE_MB=16000
 
           # Get size in bytes
