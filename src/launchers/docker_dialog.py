@@ -24,16 +24,15 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.docker_manager import DockerBuildThread
+from src.shared.python.docker_config import (
+    DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_run
 
 from .startup import REPOS_ROOT
 
 logger = get_logger(__name__)
-
-from src.shared.python.docker_config import (
-    DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME,
-)
 
 
 class DockerCheckThread(QThread):

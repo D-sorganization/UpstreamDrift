@@ -1,26 +1,31 @@
 # GitHub Issue Draft: Critical Incomplete Implementation in RealTimeController
 
-**Title:** [CRITICAL] Implement missing RealTimeController connectivity methods
+**Title:** [CRITICAL] Implement missing RealTimeController connectivity and I/O methods
 **Labels:** incomplete-implementation, critical
 
 ## Description
-The `RealTimeController` class in `src/deployment/realtime/controller.py` contains placeholder methods for critical hardware connectivity features. These methods raise `NotImplementedError` when called, effectively blocking any integration with robotic hardware via ROS2, UDP, or EtherCAT.
+The `RealTimeController` class in `src/deployment/realtime/controller.py` contains placeholder methods for critical hardware connectivity and I/O features. These methods raise `NotImplementedError` or are empty pass-throughs when called for non-simulation modes, effectively blocking any integration with robotic hardware via ROS2, UDP, or EtherCAT.
 
 ## Impact
-- **Blocking:** Users cannot connect to physical robots using standard protocols.
-- **Critical:** This functionality is core to the deployment module.
+- **Blocking:** Users cannot connect to, read from, or control physical robots using standard protocols.
+- **Critical:** This functionality is core to the deployment module; currently only simulation mode works.
 
 ## Technical Details
 The following methods need implementation:
-1.  `_connect_ros2(self)`: Should initialize `rclpy` node and publishers/subscribers.
-2.  `_connect_udp(self)`: Should create a UDP socket and bind to the configured port.
-3.  `_connect_ethercat(self)`: Should initialize the EtherCAT master (e.g., using `pysoem`).
+1.  **Connectivity**:
+    - `_connect_ros2(self)`: Should initialize `rclpy` node and publishers/subscribers.
+    - `_connect_udp(self)`: Should create a UDP socket and bind to the configured port.
+    - `_connect_ethercat(self)`: Should initialize the EtherCAT master (e.g., using `pysoem`).
+
+2.  **Input/Output**:
+    - `_read_state(self)`: Raises `NotImplementedError` for ROS2, UDP, and EtherCAT. Needs to implement hardware-specific state reading logic.
+    - `_send_command(self)`: Raises `NotImplementedError` for ROS2, UDP, and EtherCAT. Needs to implement hardware-specific command sending logic.
 
 ## Acceptance Criteria
-- [ ] `_connect_ros2` successfully initializes communication with ROS2 nodes.
-- [ ] `_connect_udp` successfully binds a socket for communication.
-- [ ] `_connect_ethercat` initializes the EtherCAT bus.
-- [ ] Unit tests are added to verify connection logic (mocking external libraries where necessary).
+- [ ] `_connect_*` methods successfully initialize communication for their respective protocols.
+- [ ] `_read_state` returns valid `RobotState` objects from hardware streams.
+- [ ] `_send_command` correctly transmits `ControlCommand` data to hardware.
+- [ ] Unit tests are added to verify logic (mocking external libraries where necessary).
 - [ ] `NotImplementedError` is removed from these methods.
 
 ## References

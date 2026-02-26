@@ -1,6 +1,6 @@
 # Patent & Legal Risk Assessment
 
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-02-26
 **Status:** ACTIVE
 **Reviewer:** Jules (Patent Reviewer Agent)
 
@@ -98,12 +98,18 @@
 | Term                   | Owner             | Status                  | Alternative      | Notes                                                                                   |
 | ---------------------- | ----------------- | ----------------------- | ---------------- | --------------------------------------------------------------------------------------- |
 | **Swing DNA**          | Mizuno            | **Verified Remediated** | "Swing Profile"  | Code audit 2026-02-19 confirmed removal from UI and code logic.                         |
-| **Kinematic Sequence** | TPI (Common Law?) | **Active**              | "Segment Timing" | Term appears in `window.py` (UI strings) and `advanced_gui_methods.py`. Refactor to "Segment Timing" or "Movement Sequence". |
+| **Kinematic Sequence** | TPI (Common Law?) | **Active**              | "Movement Sequence" | Term appears in `window.py` (UI strings) and `advanced_gui_methods.py`. Refactor to "Segment Timing" or "Movement Sequence". |
 | **Smash Factor**       | TrackMan (Orig.)  | **Generic**             | Keep             | Widely accepted as generic golf term now.                                               |
 | **TrackMan**           | TrackMan A/S      | **Ref Only**            | N/A              | Used only for data validation references. Acceptable nominative use.                    |
 | **X-Factor**           | TPI / Various     | **Medium Risk**         | "Torso-Pelvis Separation" | Used in `injury_risk.py` with specific thresholds. Consider renaming. |
 
-## 4. Prior Art & Defense
+## 4. Future Risks / Watchlist
+
+| Area | Potential Risk | Source | Monitor For |
+|------|----------------|--------|-------------|
+| **Haptic Feedback** | Force feedback rendering patents (Immersion Corp) | `src/deployment/teleoperation/devices.py` | Implementation of specific "haptic effects" (textures, detents) or vibration patterns that match patented methods. Current implementation is generic force clipping. |
+
+## 5. Prior Art & Defense
 
 - **Kinematic Sequence**: Cheetham, P. J. (2014). "A Simple Model of the Pelvis-Thorax Kinematic Sequence." (Academic citation used in docs).
 - **Ball Flight**: Uses standard aerodynamic models (MacDonald & Hanzely). _Verify coefficient source._
@@ -111,7 +117,7 @@
 - **Anthropometry**: Explicitly based on Dempster, Winter, and de Leva (see `src/shared/python/validation_pkg/data_fitting.py`).
 - **Shaft Dynamics**: Finite Element Method is standard engineering practice (Euler-Bernoulli Beam Theory).
 
-## 5. Risk Mitigation Actions
+## 6. Risk Mitigation Actions
 
 1.  **Kinematic Sequence**:
     - [x] **Refactor**: Rename `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer` (Done in `kinematic_sequence.py`).
@@ -128,8 +134,12 @@
 5.  **Documentation**:
     - [ ] Add "Methodology" citations to all analysis classes to prove reliance on public academic research rather than competitor patents.
 
-## 6. Change Log
+## 7. Change Log
 
+- **2026-02-26**: Updated review (New Findings).
+    - Added **Future Risks / Watchlist** section.
+    - Added **Haptic Feedback** to Watchlist due to `HapticDeviceInput` in `devices.py`.
+    - Updated **Kinematic Sequence** trademark alternative to "Movement Sequence" to align with legal guidance.
 - **2026-02-25**: Updated review (Audit).
     - Added **Data Copyright** risk for TrackMan averages in `validation_data.py`.
     - Added physics note about 1.0kg mass in `reporting.py` (Quality issue, not Patent).

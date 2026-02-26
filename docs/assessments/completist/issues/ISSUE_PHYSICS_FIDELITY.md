@@ -38,4 +38,4 @@ A comprehensive review of the physics modules has identified several critical ga
 - `src/shared/python/physics/flexible_shaft.py`
 - `src/shared/python/physics/impact_model.py`
 - `src/shared/python/physics/ground_reaction_forces.py`
-- `docs/assessments/implementation_gaps_report.md`
+- `docs/assessments/completist/COMPLETIST_LATEST.md`

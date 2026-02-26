@@ -78,4 +78,4 @@ defusedxml>=0.7.1
 
 # Biomechanics engines
 myosuite>=2.0.0
-opensim>=4.4.0
+# opensim>=4.4.0

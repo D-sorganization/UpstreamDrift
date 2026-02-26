@@ -1,13 +1,13 @@
 # Issue: Consolidated Implementation Gaps and Inaccuracies
 
-**Date:** 2026-02-20
+**Date:** 2026-02-21
 **Status:** Open
 **Severity:** Critical
 **Labels:** incomplete-implementation, critical, technical-debt, physics-fidelity, patent-risk
 
 ## Executive Summary
 
-This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 20, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and potential patent risks have also been identified.
+This report consolidates all identified implementation gaps, inaccuracies, and placeholder code within the repository as of February 21, 2026. Critical blocking issues exist in the Real-Time Controller module, preventing hardware integration. Significant physics fidelity gaps and potential patent risks have also been identified. Additionally, extensive mocking in integration tests suggests potential fragility in CI environments.
 
 ## 1. Critical Implementation Gaps (Blocking)
 
@@ -105,6 +105,11 @@ Implementation choices that pose legal or maintenance risks.
 *   **File:** `src/shared/python/injury/injury_risk.py`
     *   **Issue:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
 
+### Testing Fragility
+*   **File:** `tests/integration/test_golf_launcher_integration.py`
+    *   **Issue:** Extensive use of `MockQtBase`, `MockQMainWindow`, and other mock classes with `pass` methods.
+*   **Impact:** While necessary for headless CI, the reliance on deep mocking suggests fragility in testing actual UI logic and integration. Real UI behavior might not be fully exercised.
+
 ## Recommendations
 
 1.  **Immediate Priority:** Implement the missing connection methods in `RealTimeController` to unblock hardware testing.
@@ -112,3 +117,14 @@ Implementation choices that pose legal or maintenance risks.
 3.  **High Priority:** Refactor `pca_analysis.py` and `injury_risk.py` to mitigate patent risks by renaming terms and updating algorithms.
 4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py`.
 5.  **Low Priority:** Complete tooling utilities and remaining TODOs.
+
+## Update: 2026-02-25
+
+A comprehensive review of implementation gaps and inaccuracies was conducted on 2026-02-25. This review identified additional gaps in:
+*   **OpenSim GUI:** Potential fragility with hardcoded marker names.
+*   **Signal Toolkit:** `NotImplementedError` for unsupported file formats.
+*   **Format Conversion:** Incomplete implementation of model format converters.
+*   **MPC Controller:** Basic iLQR implementation which may need optimization.
+
+For the full detailed report, please refer to:
+[ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md](ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md)
