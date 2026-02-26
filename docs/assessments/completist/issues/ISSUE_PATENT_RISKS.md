@@ -35,4 +35,4 @@ A comprehensive legal review of the biomechanics modules has identified signific
 - `src/shared/python/analysis/pca_analysis.py`
 - `src/shared/python/injury/injury_risk.py`
 - `src/shared/python/validation_pkg/comparative_analysis.py`
-- `docs/assessments/implementation_gaps_report.md`
+- `docs/assessments/completist/COMPLETIST_LATEST.md`
