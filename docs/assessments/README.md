@@ -129,6 +129,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-02-24 | Physics Audit Report                     | `docs/assessments/physics/Physics_Audit_2026-02-24.md` |
 | 2026-02-25 | Data Copyright Risk                      | `docs/assessments/issues/ISSUE_047_DATA_COPYRIGHT_TRACKMAN.md` |
 | 2026-02-25 | Patent Risk: Kinematic Sequence          | `docs/assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md` |
+| 2026-02-25 | Comprehensive Gaps Report                | `docs/assessments/completist/issues/ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md` |
+| 2026-02-26 | Physics Audit Report                     | `docs/assessments/physics/Physics_Audit_2026-02-26.md`   |
 
 ---
 
