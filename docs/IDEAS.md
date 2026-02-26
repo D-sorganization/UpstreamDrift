@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-02-26
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -19,6 +19,19 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: 3D orientation of pelvis and thorax during transition.
   - _Outcome_: Quantification of elastic energy potential.
   - _Ref_: Cheetham, P. J., et al. (2001). "The importance of stretching the 'X-Factor' in the downswing of golf."
+
+- **Pelvic Dynamics (6DOF)**: Quantify full 6DOF pelvic motion (tilt, rotation, obliquity, sway, thrust, lift). Most analyses only look at rotation, missing critical postural breakdowns like "Early Extension" (thrust).
+  - _Data Needed_: Optical or IMU 6DOF pose of the pelvis segment.
+  - _Outcome_: Detection of postural faults and stability analysis.
+  - _Ref_: Cheetham, P. J. (2014). "The dominance of the pelvis in the golf swing."
+
+- **Lead Wrist Dynamics**: Analyze the timing of Radial/Ulnar deviation (cocking/uncocking) versus Flexion/Extension (bowing/cupping). The coupling of these motions determines dynamic loft and face angle.
+  - _Data Needed_: Wrist joint angles ($ \alpha, \beta $) time-series.
+  - _Outcome_: Understanding of clubface control stability and "lag" release.
+
+- **Neck-Thorax Separation**: Measure the independence of cervical spine rotation from thoracic rotation. Limited neck mobility can restrict the backswing shoulder turn or cause "head sway."
+  - _Data Needed_: Head orientation versus Thorax orientation.
+  - _Outcome_: Diagnosis of physical limitations affecting swing geometry.
 
 - **Ground Reaction Force (GRF) Efficiency**: Calculate the ratio of peak Vertical GRF to Clubhead Speed. This measures how effectively a golfer uses the ground to generate power.
 
@@ -143,6 +156,14 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Empirical friction coefficients for different lie conditions (fairway, rough, wet).
   - _Outcome_: Accurate prediction of "flyers" and run-out from rough.
 
+- **Vertical Gear Effect**: Model the launch angle and spin rate changes due to high/low face impact location. Hits high on the face launch higher with less spin; low hits launch lower with more spin.
+  - _Data Needed_: Vertical distance of impact from CG and vertical gear ratio parameters.
+  - _Outcome_: Accurate launch prediction for "thin" or "high-toe" shots.
+
+- **Smash Factor Efficiency Cap**: Calculate the theoretical maximum smash factor ($v_{ball} / v_{club}$) based on dynamic loft and Coefficient of Restitution (COR). Values exceeding this cap indicate sensor error.
+  - _Data Needed_: Dynamic Loft, COR, and mass ratio.
+  - _Outcome_: Quality control metric for launch monitor data.
+
 ## 3. Equipment Science
 
 ### Club Dynamics
@@ -206,6 +227,15 @@ This document serves as the central registry for scientific research topics, tec
 - **Movable Weight Dynamics**: Model the shift in Center of Gravity (CG) and MOI tensor when moving discrete weights (e.g., sliding tracks).
   - _Data Needed_: Weight mass, track geometry, and base head properties.
   - _Outcome_: Prediction of shot shape bias (Draw/Fade) and stability changes.
+
+- **MOI Matching**: Build clubs to a target Moment of Inertia about the grip pivot point rather than Swingweight (which is a static moment). This ensures consistent resistance to angular acceleration across the set.
+  - _Data Needed_: MOI measurements of all components.
+  - _Outcome_: Consistent "heft" feel and timing across the set.
+  - _Ref_: Wishon, T. (2005). "The Search for the Perfect Golf Club."
+
+- **Counterbalancing Effects**: Model the effect of weight plugs (back-weighting) in the grip end. This increases static mass but can increase hand speed by altering the club's balance point and the biomechanical response.
+  - _Data Needed_: Mass and position of counterweights.
+  - _Outcome_: Optimization of club release speed and kinematic sequence.
 
 ### Ball & Face Mechanics
 
@@ -276,6 +306,15 @@ This document serves as the central registry for scientific research topics, tec
   - _Outcome_: AR overlay of optimal putting lines.
   - _Ref_: Penner, A. R. (2002). "The physics of putting."
 
+- **Putt Probability Surfaces**: Generate 3D probability surfaces of make percentage vs. distance and break severity. Standard "Make % by distance" ignores the difficulty of side-hill lies.
+  - _Data Needed_: Outcome data from thousands of putts with measured green slope.
+  - _Outcome_: "Expected Putts" metric adjusted for slope difficulty.
+  - _Ref_: Broadie, M. (2014). "Every Shot Counts."
+
+- **Shot Dispersion Ellipses**: Calculate the 2D covariance matrix of landing positions to generate confidence ellipses (e.g., 90% probability region).
+  - _Data Needed_: Shot distribution ($x, z$) coordinates for each club.
+  - _Outcome_: Risk management visualization for course strategy.
+
 ## 5. Simulation Technology
 
 ### Physics Engine
@@ -305,6 +344,14 @@ This document serves as the central registry for scientific research topics, tec
 - **Sensor Fusion (Radar + Optical)**: Combine Doppler Radar (TrackMan) and Optical (Camera) data using Kalman Filtering to resolve discrepancies (e.g., Spin Axis) and improve robustness.
   - _Data Needed_: Synchronized streams from multiple sensor types with known covariance.
   - _Outcome_: "Ground Truth" generation from imperfect sensors.
+
+- **Photogrammetry of Courses**: Use drone aerial imagery and photogrammetry pipelines (e.g., OpenDroneMap) to reconstruct 3D terrain meshes for simulation.
+  - _Data Needed_: Aerial photos with high overlap.
+  - _Outcome_: High-fidelity digital twins of real-world golf courses.
+
+- **Real-time Ray Tracing**: Implement ray tracing (e.g., Vulkan/DX12) for physically accurate reflections and sun glare. Glare can significantly affect player aim and visibility.
+  - _Data Needed_: Environment maps and BRDF material properties.
+  - _Outcome_: Visual realism for "blinded by sun" simulation scenarios.
 
 ### Haptics & Immersion
 
@@ -342,6 +389,14 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Reward function balancing distance, accuracy, and joint stress.
   - _Outcome_: Identification of theoretically optimal swing mechanics.
 
+- **Model Predictive Control (MPC)**: Use MPC to optimize robotic swing trajectories in real-time, accounting for motor torque limits and collision constraints.
+  - _Data Needed_: Accurate dynamic model of the robot and environment.
+  - _Outcome_: Smooth, feasible swing generation for hardware implementation.
+
+- **Haptic Guidance Synthesis**: Generate force-feedback cues to "guide" a user's hand along a perfect swing plane in VR. This "tunnel" effect provides proprioceptive learning cues.
+  - _Data Needed_: Target trajectory and current hand error vector.
+  - _Outcome_: Accelerated motor learning via haptic guidance.
+
 ---
 
 ## Workflow Log
@@ -355,3 +410,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-14 | Added Force Vector, Stiffness, Turbulence, Mud Ball, Spine, Head Aero, Tempo, Soft Body, ILC            | All      | Active |
 | 2026-02-15 | Added Grip Pressure, Quiet Eye, Bulge/Roll Opt, Movable Weights, Clustering, Green Reading, Bunker, Fusion | All | Active |
 | 2026-02-18 | Added Footwear, HRV, Boundary Layer, Knuckleball, Acoustics, Layup, Grip Friction, Clutch Index, Weather SG, Audio, Scattering | All | Active |
+| 2026-02-26 | Added Pelvis 6DOF, Wrist Dynamics, Vertical Gear, MOI Match, Putt Prob, Ray Tracing, MPC | All | Active |
