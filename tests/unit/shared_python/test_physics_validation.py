@@ -1,6 +1,7 @@
 """Tests for physics validation module."""
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -107,6 +108,29 @@ class TestPhysicsValidator(unittest.TestCase):
         work = 1.0
         error = abs(dE - work)
         assert abs(error - 0.5) < 1e-10, "Energy error should be 0.5"
+
+    def test_verify_energy_conservation_handles_mismatched_dof_lengths(self) -> None:
+        """Mismatched torque/velocity lengths should not raise during work calculation."""
+        from src.shared.python.physics.physics_validation import PhysicsValidator
+
+        validator = PhysicsValidator.__new__(PhysicsValidator)
+        validator.model = SimpleNamespace(nv=1)
+        validator.tolerance_energy = 1e-3
+
+        validator.compute_kinetic_energy = MagicMock(side_effect=[1.0, 1.0])
+        validator.compute_potential_energy = MagicMock(side_effect=[0.0, 0.0])
+        validator.step_forward = MagicMock(
+            return_value=(np.array([0.0]), np.array([], dtype=np.float64))
+        )
+
+        result = validator.verify_energy_conservation(
+            qpos=np.array([0.0]),
+            qvel=np.array([1.0]),
+            torques=np.array([0.0]),
+            dt=0.001,
+        )
+
+        assert isinstance(result.passes, bool)
 
 
 class TestPhysicsValidatorIntegration(unittest.TestCase):

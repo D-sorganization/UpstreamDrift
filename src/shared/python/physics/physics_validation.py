@@ -147,7 +147,13 @@ class PhysicsValidator:
         self._mujoco.mj_fullM(self.model, M, self._scratch_data.qM)
 
         # KE = 0.5 * v^T * M * v
-        return float(0.5 * qvel @ M @ qvel)
+        qvel_vector = np.asarray(qvel, dtype=np.float64)
+        dof_count = min(self.model.nv, qvel_vector.shape[0])
+        if dof_count == 0:
+            return 0.0
+        qvel_used = qvel_vector[:dof_count]
+        mass_matrix_used = M[:dof_count, :dof_count]
+        return float(0.5 * qvel_used @ mass_matrix_used @ qvel_used)
 
     def compute_potential_energy(self, qpos: np.ndarray) -> float:
         """Compute gravitational potential energy.
@@ -255,7 +261,13 @@ class PhysicsValidator:
         # Work done by applied torques: W = τ · Δq ≈ τ · q̇ · dt
         # Average velocity during step
         qvel_avg = 0.5 * (qvel + qvel_next)
-        work_applied = float(np.dot(torques[: self.model.nv], qvel_avg) * dt)
+        common_dofs = min(self.model.nv, torques.shape[0], qvel_avg.shape[0])
+        if common_dofs == 0:
+            work_applied = 0.0
+        else:
+            work_applied = float(
+                np.dot(torques[:common_dofs], qvel_avg[:common_dofs]) * dt
+            )
 
         # Energy balance
         dE = E_next - E_t
