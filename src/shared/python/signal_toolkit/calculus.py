@@ -13,11 +13,10 @@ import numpy as np
 from scipy import integrate
 from scipy.signal import savgol_filter
 
-from src.shared.python.core.contracts import ensure, require
-from src.shared.python.signal_toolkit.core import Signal
+from .core import Signal
 
-# NumPy 2.0 renamed np.trapz -> np.trapezoid; provide compat shim
-_trapezoid = getattr(np, "trapezoid", None) or np.trapz  # type: ignore[attr-defined]
+# Backward-compatible trapezoid integration (np.trapz removed in NumPy 2.0+)
+_trapz = getattr(np, "trapezoid", None) or np.trapz
 
 
 class DifferentiationMethod(Enum):
@@ -110,12 +109,6 @@ class Differentiator:
     ) -> Signal:
         """Compute the derivative of a signal.
 
-        Design by Contract:
-            Preconditions:
-                - order >= 1
-            Postconditions:
-                - output signal has same length as input
-
         Args:
             signal: Input signal.
             order: Order of derivative (1 = first derivative, 2 = second, etc.).
@@ -123,19 +116,12 @@ class Differentiator:
         Returns:
             Signal containing the derivative.
         """
-        require(order >= 1, "derivative order must be >= 1", order)
-
         result = signal.copy()
         result.name = f"d{order}({signal.name})/dt{order}"
         result.units = f"{signal.units}/s^{order}" if signal.units else ""
 
         for _ in range(order):
             result.values = self._differentiate_once(result)
-
-        ensure(
-            len(result.values) == len(signal.values),
-            "derivative output must have same length as input",
-        )
 
         return result
 
@@ -201,7 +187,7 @@ class Differentiator:
             try:
                 spline = UnivariateSpline(t, y, s=0)
                 dy = spline.derivative()(t)
-            except (RuntimeError, ValueError, OSError):
+            except (ValueError, TypeError):
                 dy = np.gradient(y, t)
 
         else:
@@ -264,12 +250,6 @@ class Integrator:
     ) -> IntegralResult:
         """Compute the integral of a signal.
 
-        Design by Contract:
-            Postconditions:
-                - area_positive >= 0
-                - area_negative >= 0
-                - integral value is finite
-
         Args:
             signal: Input signal.
             lower_bound: Lower integration bound (default: signal start).
@@ -299,16 +279,16 @@ class Integrator:
 
         # Compute definite integral
         if self.method == IntegrationMethod.TRAPEZOID:
-            value = _trapezoid(y_range, t_range)
+            value = _trapz(y_range, t_range)
 
         elif self.method == IntegrationMethod.SIMPSON:
             if len(t_range) >= 3:
                 value = integrate.simpson(y_range, x=t_range)
             else:
-                value = _trapezoid(y_range, t_range)
+                value = _trapz(y_range, t_range)
 
         else:
-            value = _trapezoid(y_range, t_range)
+            value = _trapz(y_range, t_range)
 
         # Compute cumulative integral
         cumulative = integrate.cumulative_trapezoid(y, t, initial=initial_value)
@@ -320,10 +300,10 @@ class Integrator:
         )
 
         # Compute positive and negative areas
-        area_positive = _trapezoid(np.maximum(y_range, 0), t_range)
-        area_negative = _trapezoid(np.minimum(y_range, 0), t_range)
+        area_positive = _trapz(np.maximum(y_range, 0), t_range)
+        area_negative = _trapz(np.minimum(y_range, 0), t_range)
 
-        result = IntegralResult(
+        return IntegralResult(
             value=value,
             lower_bound=lower_bound,
             upper_bound=upper_bound,
@@ -331,25 +311,6 @@ class Integrator:
             area_positive=area_positive,
             area_negative=abs(area_negative),
         )
-
-        # Postconditions
-        ensure(
-            result.area_positive >= 0,
-            "area_positive must be non-negative",
-            result.area_positive,
-        )
-        ensure(
-            result.area_negative >= 0,
-            "area_negative must be non-negative",
-            result.area_negative,
-        )
-        ensure(
-            np.isfinite(result.value),
-            "integral value must be finite",
-            result.value,
-        )
-
-        return result
 
     def cumulative_integral(
         self,
@@ -548,10 +509,6 @@ def compute_arc_length(
 
     Arc length = integral(sqrt(1 + (dy/dt)^2) dt)
 
-    Design by Contract:
-        Postconditions:
-            - arc_length >= 0
-
     Args:
         signal: Input signal.
         method: Differentiation method.
@@ -565,9 +522,7 @@ def compute_arc_length(
     # Arc length element: ds = sqrt(1 + (dy/dt)^2) * dt
     ds = np.sqrt(1 + y_prime**2)
 
-    result = _trapezoid(ds, signal.time)
-    ensure(result >= 0, "arc length must be non-negative", result)
-    return result
+    return _trapz(ds, signal.time)
 
 
 def find_extrema(

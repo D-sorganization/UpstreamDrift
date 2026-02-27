@@ -1,9 +1,27 @@
 {
-  "model_order": ["model_2", "model_1", "model_0", "model_3"],
+  "model_order": [
+    "mujoco_unified",
+    "drake_golf",
+    "pinocchio_golf",
+    "opensim_golf",
+    "myosim_suite",
+    "putting_green",
+    "simscape_2d",
+    "simscape_3d",
+    "dataset_generator",
+    "matlab_analysis",
+    "c3d_viewer",
+    "openpose_analysis",
+    "mediapipe_analysis",
+    "model_explorer",
+    "video_analyzer",
+    "data_explorer",
+    "project_map"
+  ],
   "selected_model": null,
   "window_geometry": {
     "x": 0,
-    "y": 50,
+    "y": 19,
     "width": 1920,
     "height": 1009
   },

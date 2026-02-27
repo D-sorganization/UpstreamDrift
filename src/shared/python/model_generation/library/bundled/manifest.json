@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "description": "Bundled model library for Model Explorer",
+  "models": [
+    {
+      "id": "mujoco_humanoid",
+      "name": "MuJoCo Humanoid",
+      "description": "Standard MuJoCo humanoid model with full-body articulation and actuators",
+      "category": "humanoid",
+      "format": "mjcf",
+      "file": "mujoco_humanoid/humanoid.xml",
+      "author": "DeepMind (adapted)",
+      "license": "Apache-2.0",
+      "tags": ["humanoid", "mujoco", "bipedal", "default"],
+      "link_count": 13,
+      "joint_count": 21,
+      "dof_count": 23
+    },
+    {
+      "id": "simple_humanoid",
+      "name": "Simple Humanoid",
+      "description": "Lightweight URDF humanoid with primitive geometries and anthropometric proportions",
+      "category": "humanoid",
+      "format": "urdf",
+      "file": "simple_humanoid/humanoid.urdf",
+      "author": "Model Generation",
+      "license": "MIT",
+      "tags": ["humanoid", "urdf", "bipedal", "simple"],
+      "link_count": 13,
+      "joint_count": 12,
+      "dof_count": 12
+    },
+    {
+      "id": "simple_arm",
+      "name": "Simple Robot Arm",
+      "description": "4-DOF articulated robot arm with revolute joints",
+      "category": "robot_arm",
+      "format": "urdf",
+      "file": "simple_arm/arm.urdf",
+      "author": "Model Generation",
+      "license": "MIT",
+      "tags": ["arm", "urdf", "manipulator", "simple"],
+      "link_count": 5,
+      "joint_count": 4,
+      "dof_count": 4
+    },
+    {
+      "id": "simple_quadruped",
+      "name": "Simple Quadruped",
+      "description": "8-DOF quadruped robot with articulated legs",
+      "category": "quadruped",
+      "format": "urdf",
+      "file": "quadruped/quadruped.urdf",
+      "author": "Model Generation",
+      "license": "MIT",
+      "tags": ["quadruped", "urdf", "legged", "simple"],
+      "link_count": 9,
+      "joint_count": 8,
+      "dof_count": 8
+    }
+  ]
+}

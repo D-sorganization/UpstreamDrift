@@ -23,6 +23,8 @@ import numpy as np
 
 if TYPE_CHECKING:
     import mujoco
+else:
+    mujoco = None
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +64,7 @@ class JacobianValidationResult:
         status = "PASS" if self.passes else "FAIL"
         return (
             f"Jacobian Validation [{status}]: "
-            f"Error={self.jacobian_error:.2e} (threshold=1e-6)"
+            f"Error={self.jacobian_error:.2e} (threshold=1e-06)"
         )
 
 
@@ -130,12 +132,28 @@ class PhysicsValidator:
         self._scratch_data.qvel[:] = qvel
         self._mujoco.mj_forward(self.model, self._scratch_data)
 
+        # Prefer MuJoCo-native energy computation when available.
+        if hasattr(self._mujoco, "mj_energyPos") and hasattr(
+            self._mujoco, "mj_energyVel"
+        ):
+            self._mujoco.mj_energyPos(self.model, self._scratch_data)
+            self._mujoco.mj_energyVel(self.model, self._scratch_data)
+            kinetic_energy = float(self._scratch_data.energy[1])
+            if np.isfinite(kinetic_energy):
+                return kinetic_energy
+
         # Get mass matrix
         M = np.zeros((self.model.nv, self.model.nv))
         self._mujoco.mj_fullM(self.model, M, self._scratch_data.qM)
 
         # KE = 0.5 * v^T * M * v
-        return float(0.5 * qvel @ M @ qvel)
+        qvel_vector = np.asarray(qvel, dtype=np.float64)
+        dof_count = min(self.model.nv, qvel_vector.shape[0])
+        if dof_count == 0:
+            return 0.0
+        qvel_used = qvel_vector[:dof_count]
+        mass_matrix_used = M[:dof_count, :dof_count]
+        return float(0.5 * qvel_used @ mass_matrix_used @ qvel_used)
 
     def compute_potential_energy(self, qpos: np.ndarray) -> float:
         """Compute gravitational potential energy.
@@ -149,6 +167,13 @@ class PhysicsValidator:
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = 0
         self._mujoco.mj_forward(self.model, self._scratch_data)
+
+        # Prefer MuJoCo-native energy computation when available.
+        if hasattr(self._mujoco, "mj_energyPos"):
+            self._mujoco.mj_energyPos(self.model, self._scratch_data)
+            potential_energy = float(self._scratch_data.energy[0])
+            if np.isfinite(potential_energy):
+                return potential_energy
 
         # PE = sum(m_i * g * h_i) for all bodies
         pe = 0.0
@@ -236,7 +261,13 @@ class PhysicsValidator:
         # Work done by applied torques: W = τ · Δq ≈ τ · q̇ · dt
         # Average velocity during step
         qvel_avg = 0.5 * (qvel + qvel_next)
-        work_applied = float(np.dot(torques[: self.model.nv], qvel_avg) * dt)
+        common_dofs = min(self.model.nv, torques.shape[0], qvel_avg.shape[0])
+        if common_dofs == 0:
+            work_applied = 0.0
+        else:
+            work_applied = float(
+                np.dot(torques[:common_dofs], qvel_avg[:common_dofs]) * dt
+            )
 
         # Energy balance
         dE = E_next - E_t

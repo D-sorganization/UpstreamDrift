@@ -931,7 +931,13 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
         try:
             return self._generate_impl(params, Path(output_dir), model_dir, **kwargs)
-        except (FileNotFoundError, OSError) as exc:
+        except (
+            FileNotFoundError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            ValueError,
+        ) as exc:
             logger.exception("SMPL-X mesh generation failed")
             return GeneratedMeshResult(
                 success=False,

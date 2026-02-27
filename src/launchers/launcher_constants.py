@@ -24,7 +24,16 @@ CONFIG_DIR = REPOS_ROOT / ".kiro" / "launcher"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 GRID_COLUMNS = 4  # Changed to 3x4 grid (12 tiles total)
 
-DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
+DOCKER_STAGES: tuple[str, ...] = ("all", "mujoco", "pinocchio", "drake", "base")
+
+
+def validate_docker_stage(stage: str) -> str:
+    """Validate Docker build stage names used by launcher components."""
+    if stage not in DOCKER_STAGES:
+        allowed = ", ".join(DOCKER_STAGES)
+        raise ValueError(f"Invalid Docker stage '{stage}'. Expected one of: {allowed}")
+    return stage
+
 
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int

@@ -1,0 +1,31 @@
+title:	Unify Docker entry points: compose, launcher, dev scripts, and health checks
+state:	OPEN
+author:	dieterolson
+labels:	
+comments:	1
+assignees:	
+projects:	
+milestone:	
+number:	1557
+--
+## Summary
+Ensure all Docker entry points run the same image/runtime contract.
+
+## Problem
+Even after naming cleanup, entry points can still drift over time unless enforced (compose, launcher, helper scripts, diagnostics).
+
+## Scope
+- Add one shared constant/module for image name and tags
+- Refactor scripts and health checks to consume shared config
+- Add a CI check that fails on image-name drift
+
+## Acceptance Criteria
+- [ ] Single source of truth for Docker image identity in code
+- [ ] `docker-compose.yml`, launcher, and scripts consume shared config
+- [ ] CI lint/check catches drift
+- [ ] Documentation references generated from same source or checked in CI
+
+## Rollback / Reversibility
+- Legacy aliases continue to work during transition
+- Shared config supports explicit override via env var
+

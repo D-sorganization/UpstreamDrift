@@ -732,9 +732,9 @@ class Transform6DOF:
     # -------------------------------------------------------------------------
 
     def compose(self, other: Transform6DOF) -> Transform6DOF:
-        """Compose this transform with another (this * other)."""
-        R = self._rotation @ other._rotation
-        t = self._rotation @ other._translation + self._translation
+        """Compose transforms using world-frame chaining (`other * this`)."""
+        R = other._rotation @ self._rotation
+        t = other._rotation @ self._translation + other._translation
         return Transform6DOF(rotation=R, translation=t)
 
     def inverse(self) -> Transform6DOF:

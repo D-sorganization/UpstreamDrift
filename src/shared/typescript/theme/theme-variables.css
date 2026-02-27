@@ -1,0 +1,72 @@
+/**
+ * Fleet-wide CSS Custom Properties for React/web applications.
+ *
+ * Import this file in your index.css (after Tailwind directives) to get
+ * theme-aware CSS variables.  The ThemeProvider or themeStore's
+ * applyThemeToDocument() will override these at runtime.
+ *
+ * Usage in Tailwind classes:
+ *   className="bg-[var(--theme-bg)] text-[var(--theme-text)]"
+ *
+ * Usage in plain CSS:
+ *   background-color: var(--theme-bg);
+ *
+ * See issue #610.
+ */
+
+:root {
+  /* Light theme defaults (overridden at runtime by ThemeProvider) */
+  --theme-bg: #ffffff;
+  --theme-group-bg: #f8f9fa;
+  --theme-border: #ced4da;
+  --theme-text: #212529;
+  --theme-text-secondary: #495057;
+  --theme-label: #6c757d;
+  --theme-focus: #80bdff;
+  --theme-input-bg: #ffffff;
+  --theme-accent: #5a8fc4;
+  --theme-title-bg: #e3f2fd;
+  --theme-title-border: #90caf9;
+  --theme-table-header: #e9ecef;
+  --theme-table-alt: #f8f9fa;
+  --theme-button-hover: #4a7ba7;
+
+  /* Semantic colors */
+  --theme-success: #28a745;
+  --theme-warning: #ffc107;
+  --theme-error: #dc3545;
+  --theme-info: #17a2b8;
+  --theme-link: #0366d6;
+  --theme-link-hover: #024fa2;
+  --theme-selection-bg: #b3d7ff;
+  --theme-selection-text: #000000;
+}
+
+/* Dark mode automatic override (system preference fallback) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --theme-bg: #1a1d23;
+    --theme-group-bg: #24272e;
+    --theme-border: #3a3f4a;
+    --theme-text: #e1e4e8;
+    --theme-text-secondary: #c9d1d9;
+    --theme-label: #8b949e;
+    --theme-focus: #58a6ff;
+    --theme-input-bg: #0d1117;
+    --theme-accent: #4a7ba7;
+    --theme-title-bg: #2d3748;
+    --theme-title-border: #4a7ba7;
+    --theme-table-header: #2d3748;
+    --theme-table-alt: #24272e;
+    --theme-button-hover: #5a8fc4;
+  }
+}
+
+/* Utility class: use on body or root container */
+.themed-app {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}

@@ -424,11 +424,11 @@ class ValidationMixin:
             from model_generation.converters.urdf_parser import URDFParser
 
             parser = URDFParser()
-            model = parser.parse_urdf_string(host._content)
+            model = parser.parse_string(host._content)
 
             return {
                 "valid": True,
-                "robot_name": model.robot_name,
+                "robot_name": model.name,
                 "links": len(model.links),
                 "joints": len(model.joints),
                 "materials": len(model.materials),

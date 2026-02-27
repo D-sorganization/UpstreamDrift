@@ -1,0 +1,266 @@
+# Pragmatic Programmer Review: UpstreamDrift
+**Date**: 2026-02-27
+**Files**: 2884
+
+## Findings
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\launch_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\tests\unit\test_engine_manager.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\launch_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\tests\unit\test_engine_manager.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\launch_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\tests\unit\test_engine_manager.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\setup_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\humanoid_config_tab.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 5 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\01_basic_simulation.py, C:\Users\diete\Repositories\UpstreamDrift\scripts\migrate_api_keys.py, C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\mujoco\python\playground_experiments\humanoid_cm_demo.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 3 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\launch.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\migrate_csv_to_parquet.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 3 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\launch.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\migrate_csv_to_parquet.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 3 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py, C:\Users\diete\Repositories\UpstreamDrift\src\launchers\assets\optimize_assets.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\launch.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py, C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\pinocchio\python\motion_training\training_pipeline.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 3 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py, C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\pinocchio\python\motion_training\training_pipeline.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **ORTHOGONALITY** [MAJOR]: God function: create_converter_left_content
+  - Length 51 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\archive\Data_Processor_Integrated.py
+- **ORTHOGONALITY** [MAJOR]: God function: calculate_grades
+  - Length 55 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\generate_comprehensive_assessment.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_body_params_tab
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\urdf_builder_gui\python\urdf_builder_gui\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_input_panel
+  - Length 70 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\trc_vessel_designer\python\trc_vessel_designer\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_input_panel
+  - Length 51 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\steam_engine_calculator\python\steam_engine_calculator\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_generation_tab
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\shared\python\signal_toolkit\widget_ui.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_calculus_tab
+  - Length 57 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\shared\python\signal_toolkit\widget_ui.py
+- **ORTHOGONALITY** [MAJOR]: God function: create_input_tab
+  - Length 58 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\shared\python\upstream_drift_tools\process_calculators\wgs_reactor_calculator.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\shared\python\upstream_drift_tools\process_calculators\psa_package\psa_gui.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
+  - Length 55 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\shared\python\theme\dialogs\theme_manager_dialog.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_acid_gas_group
+  - Length 65 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\scrubber_calculator\python\scrubber_calculator\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _build_ui
+  - Length 51 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\rotation_converter\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_adam_settings_tab
+  - Length 65 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\optimizer_gui\python\optimizer_gui\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_parameters_tab
+  - Length 66 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\multi_param_analysis\python\multi_param_analysis\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_manual_tab
+  - Length 59 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\inertia_calculator\python\inertia_calculator\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_body_params_tab
+  - Length 72 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\humanoid_builder_gui\python\humanoid_builder_gui\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _init_ui
+  - Length 65 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\function_generator\python\function_generator\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_parameter_widgets
+  - Length 74 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\function_generator\python\function_generator\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: create_api_tab
+  - Length 56 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\document_processing\pdf_renamer\src\pdf_renamer\gui.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_menu_bar
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\data_processing\data_processor\python\data_processor\ui\pyqt6\main_window.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_advanced_tab
+  - Length 67 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\data_processing\data_processor\python\data_processor\ui\pyqt6\main_window_tabs.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_plot_config_tab
+  - Length 64 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\data_processing\data_processor\python\data_processor\ui\pyqt6\main_window_tabs.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\data_processing\data_processor\python\data_processor\ui\pyqt6\statistical_widgets.py
+- **ORTHOGONALITY** [MAJOR]: God function: __init__
+  - Length 60 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\tools\model_explorer\end_effector_manager.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_geometry_tab
+  - Length 55 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\tools\model_explorer\segment_panel.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_generation_tab
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\signal_toolkit\widget_ui.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_calculus_tab
+  - Length 57 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\signal_toolkit\widget_ui.py
+- **ORTHOGONALITY** [MAJOR]: God function: create_input_tab
+  - Length 58 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\upstream_drift_tools\process_calculators\wgs_reactor_calculator.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
+  - Length 54 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\upstream_drift_tools\process_calculators\psa_package\psa_gui.py
+- **ORTHOGONALITY** [MAJOR]: God function: _create_calculus_tab
+  - Length 57 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\ui\qt\widgets\signal_toolkit_ui_mixin.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
+  - Length 55 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\theme\dialogs\theme_manager_dialog.py
+- **ORTHOGONALITY** [MAJOR]: God function: _setup_pose_library
+  - Length 52 > 50 lines
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\manipulation_tab.py
+- **REVERSIBILITY** [MAJOR]: Hardcoded API Key
+  - Secrets in code
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\tests\test_ai_adapters.py
+- **REVERSIBILITY** [MAJOR]: Hardcoded API Key
+  - Secrets in code
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\tests\unit\api\test_security.py
+- **REVERSIBILITY** [MAJOR]: Hardcoded API Key
+  - Secrets in code
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\ai\adapters\anthropic_adapter.py
+- **REVERSIBILITY** [MAJOR]: Hardcoded API Key
+  - Secrets in code
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\ai\adapters\openai_adapter.py
+- **QUALITY** [MINOR]: High TODO count (16)
+  - Accumulated technical debt
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\scripts\generate_todo_fixme_register.py, C:\Users\diete\Repositories\UpstreamDrift\scripts\pragmatic_programmer_review.py

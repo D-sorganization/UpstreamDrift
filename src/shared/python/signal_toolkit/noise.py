@@ -10,8 +10,12 @@ from enum import Enum
 
 import numpy as np
 
-from src.shared.python.core.contracts import ensure, require
-from src.shared.python.signal_toolkit.core import Signal
+from .core import Signal
+
+# Module-level constants for periodic noise generation
+DEFAULT_LINE_FREQUENCY_HZ: float = 60.0
+PERIODIC_NOISE_2ND_HARMONIC: float = 0.3
+PERIODIC_NOISE_3RD_HARMONIC: float = 0.1
 
 
 class NoiseType(Enum):
@@ -48,12 +52,6 @@ class NoiseGenerator:
     ) -> Signal:
         """Generate a noise signal.
 
-        Design by Contract:
-            Preconditions:
-                - amplitude >= 0
-            Postconditions:
-                - output signal has same length as input time array
-
         Args:
             t: Time array.
             noise_type: Type of noise to generate.
@@ -63,8 +61,6 @@ class NoiseGenerator:
         Returns:
             Signal containing the noise.
         """
-        require(amplitude >= 0, "noise amplitude must be non-negative", amplitude)
-
         n = len(t)
 
         if noise_type == NoiseType.WHITE:
@@ -94,26 +90,21 @@ class NoiseGenerator:
             values = self._generate_quantization_noise(n, amplitude, levels)
 
         elif noise_type == NoiseType.PERIODIC:
-            frequency = kwargs.get("frequency", 60.0)  # Default 60 Hz (line noise)
-            fs = float(1.0 / np.mean(np.diff(t))) if len(t) > 1 else 1000.0
+            frequency = kwargs.get(
+                "frequency", DEFAULT_LINE_FREQUENCY_HZ
+            )  # Default 60 Hz (line noise)
+            fs = 1.0 / np.mean(np.diff(t)) if len(t) > 1 else 1000.0
             values = self._generate_periodic_noise(n, amplitude, frequency, fs)
 
         else:
             values = self._generate_white_noise(n, amplitude)
 
-        result = Signal(
+        return Signal(
             time=t,
             values=values,
             name=f"{noise_type.value}_noise",
             metadata={"noise_type": noise_type.value, "amplitude": amplitude},
         )
-
-        ensure(
-            len(result.values) == len(t),
-            "noise signal length must match input time array",
-        )
-
-        return result
 
     def _generate_white_noise(self, n: int, amplitude: float) -> np.ndarray:
         """Generate Gaussian white noise."""
@@ -146,7 +137,7 @@ class NoiseGenerator:
 
         # Normalize to desired amplitude
         if np.std(values) > 0:
-            values = values / np.std(values) * amplitude  # type: ignore[assignment]
+            values = values / np.std(values) * amplitude
 
         return values
 
@@ -224,10 +215,14 @@ class NoiseGenerator:
         # Add some harmonics for realism
         values = amplitude * np.sin(2 * np.pi * frequency * t)
         values += (
-            0.3 * amplitude * np.sin(2 * np.pi * 2 * frequency * t)
+            PERIODIC_NOISE_2ND_HARMONIC
+            * amplitude
+            * np.sin(2 * np.pi * 2 * frequency * t)
         )  # 2nd harmonic
         values += (
-            0.1 * amplitude * np.sin(2 * np.pi * 3 * frequency * t)
+            PERIODIC_NOISE_3RD_HARMONIC
+            * amplitude
+            * np.sin(2 * np.pi * 3 * frequency * t)
         )  # 3rd harmonic
 
         return values
@@ -260,9 +255,9 @@ def add_noise_to_signal(
         # Calculate amplitude from SNR
         signal_power = np.mean(signal.values**2)
         noise_power = signal_power / (10 ** (snr_db / 10))
-        amplitude = float(np.sqrt(noise_power))
+        amplitude = np.sqrt(noise_power)
     elif amplitude is None:
-        amplitude = float(0.1 * np.std(signal.values))
+        amplitude = 0.1 * np.std(signal.values)
 
     noise = generator.generate(
         signal.time,
@@ -309,13 +304,13 @@ def generate_disturbance_profile(
     if disturbance_type == "step":
         step_time = kwargs.get("step_time", t[n // 2])
         magnitude = kwargs.get("magnitude", 1.0)
-        values = np.where(t >= step_time, magnitude, 0.0)  # type: ignore[assignment]
+        values = np.where(t >= step_time, magnitude, 0.0)
 
     elif disturbance_type == "pulse":
         start_time = kwargs.get("start_time", t[n // 4])
         duration = kwargs.get("duration", (t[-1] - t[0]) / 10)
         magnitude = kwargs.get("magnitude", 1.0)
-        values = np.where(  # type: ignore[assignment]
+        values = np.where(
             (t >= start_time) & (t < start_time + duration),
             magnitude,
             0.0,

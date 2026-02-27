@@ -6,11 +6,9 @@ Provides the Docker availability checker thread and the environment
 
 from __future__ import annotations
 
-import subprocess
 import time
 from typing import Any
 
-from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -24,33 +22,19 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.docker_manager import DockerBuildThread
+from src.launchers.docker_manager import DockerCheckThread as SharedDockerCheckThread
+from src.launchers.launcher_constants import DOCKER_STAGES
 from src.shared.python.docker_config import (
     DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.secure_subprocess import secure_run
 
 from .startup import REPOS_ROOT
 
 logger = get_logger(__name__)
 
-
-class DockerCheckThread(QThread):
-    result = pyqtSignal(bool)
-
-    def run(self) -> None:
-        """Run docker check."""
-        try:
-            secure_run(
-                ["docker", "--version"],
-                timeout=5.0,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            self.result.emit(True)
-        except (OSError, ValueError):
-            self.result.emit(False)
+# Preserve legacy import path while reusing shared implementation.
+DockerCheckThread = SharedDockerCheckThread
 
 
 class EnvironmentDialog(QDialog):
@@ -77,7 +61,7 @@ class EnvironmentDialog(QDialog):
         tab_build = QWidget()
         build_layout = QVBoxLayout(tab_build)
         self.combo_stage = QComboBox()
-        self.combo_stage.addItems(["all", "mujoco", "pinocchio", "drake", "base"])
+        self.combo_stage.addItems(list(DOCKER_STAGES))
         build_layout.addWidget(QLabel("Target Stage:"))
         build_layout.addWidget(self.combo_stage)
 

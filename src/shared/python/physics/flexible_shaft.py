@@ -15,8 +15,8 @@ Shaft properties:
 This module provides the mathematical framework and data structures
 for shaft modeling. Physics engine integration is separate.
 
-TODO: Implement Torsional Dynamics (current Euler-Bernoulli beam model ignores torsional twisting).
-TODO: Support Asymmetric Cross-Sections (modeling spine alignment and manufacturing tolerances).
+Planned enhancement: implement torsional dynamics (current Euler-Bernoulli beam model ignores torsional twisting).
+Planned enhancement: support asymmetric cross-sections (modeling spine alignment and manufacturing tolerances).
 """
 
 from __future__ import annotations

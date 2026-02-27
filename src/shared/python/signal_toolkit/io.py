@@ -15,93 +15,13 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.core.contracts import require
-from src.shared.python.signal_toolkit.core import Signal
+from .core import Signal
 
 logger = logging.getLogger(__name__)
 
 
 class SignalImporter:
     """Import signals from various file formats."""
-
-    @staticmethod
-    def _read_csv_rows(
-        file_path: Path, delimiter: str, encoding: str
-    ) -> list[list[str]]:
-        """Read all rows from a CSV file.
-
-        Raises:
-            ValueError: If the file is empty.
-        """
-        with open(file_path, encoding=encoding) as f:
-            reader = csv.reader(f, delimiter=delimiter)
-            rows = list(reader)
-        if not rows:
-            msg = f"Empty CSV file: {file_path}"
-            raise ValueError(msg)
-        return rows
-
-    @staticmethod
-    def _resolve_column(col: str | int, header: list[str]) -> int:
-        """Convert a column name or index to a numeric column index.
-
-        Raises:
-            ValueError: If a named column is not found in the header.
-        """
-        if isinstance(col, int):
-            return col
-        try:
-            return header.index(col)
-        except ValueError:
-            msg = f"Column '{col}' not found in header: {header}"
-            raise ValueError(msg) from None
-
-    @staticmethod
-    def _resolve_value_columns(
-        value_columns: str | int | list[str | int] | None,
-        header: list[str],
-        time_idx: int,
-    ) -> tuple[list[int], list[str]]:
-        """Resolve value column specs into indices and names."""
-        if value_columns is None:
-            value_indices = [i for i in range(len(header)) if i != time_idx]
-            value_names = [header[i] for i in value_indices]
-        elif isinstance(value_columns, (str, int)):
-            idx = SignalImporter._resolve_column(value_columns, header)
-            value_indices = [idx]
-            value_names = [header[idx]]
-        else:
-            value_indices = [
-                SignalImporter._resolve_column(c, header) for c in value_columns
-            ]
-            value_names = [header[i] for i in value_indices]
-        return value_indices, value_names
-
-    @staticmethod
-    def _parse_data_rows(
-        data_rows: list[list[str]],
-        time_idx: int,
-        value_indices: list[int],
-        time_scale: float,
-    ) -> tuple[np.ndarray, dict[int, list[float]]]:
-        """Parse numeric data from CSV rows into time and value arrays."""
-        time_data: list[float] = []
-        value_data: dict[int, list[float]] = {i: [] for i in value_indices}
-
-        for row in data_rows:
-            if len(row) <= time_idx:
-                continue
-            try:
-                time_data.append(float(row[time_idx]) * time_scale)
-                for idx in value_indices:
-                    if idx < len(row):
-                        value_data[idx].append(float(row[idx]))
-                    else:
-                        value_data[idx].append(np.nan)
-            except ValueError:
-                continue  # Skip rows with non-numeric data
-
-        return np.array(time_data), value_data
 
     @staticmethod
     def from_csv(
@@ -127,15 +47,16 @@ class SignalImporter:
 
         Returns:
             Single Signal if one value column, list of Signals otherwise.
-
-        Raises:
-            ValueError: If file is empty, time_scale is non-positive, or column not found.
         """
-        if not isinstance(time_scale, (int, float)) or time_scale <= 0:
-            raise ValueError(f"time_scale must be positive, got {time_scale}")
-
         file_path = Path(file_path)
-        rows = SignalImporter._read_csv_rows(file_path, delimiter, encoding)
+
+        with open(file_path, encoding=encoding) as f:
+            reader = csv.reader(f, delimiter=delimiter)
+            rows = list(reader)
+
+        if not rows:
+            msg = f"Empty CSV file: {file_path}"
+            raise ValueError(msg)
 
         # Parse header
         if skip_header:
@@ -145,14 +66,47 @@ class SignalImporter:
             header = [str(i) for i in range(len(rows[0]))]
             data_rows = rows
 
-        time_idx = SignalImporter._resolve_column(time_column, header)
-        value_indices, value_names = SignalImporter._resolve_value_columns(
-            value_columns, header, time_idx
-        )
+        # Resolve column indices
+        def resolve_column(col: str | int) -> int:
+            if isinstance(col, int):
+                return col
+            try:
+                return header.index(col)
+            except ValueError:
+                msg = f"Column '{col}' not found in header: {header}"
+                raise ValueError(msg) from None
 
-        time_array, value_data = SignalImporter._parse_data_rows(
-            data_rows, time_idx, value_indices, time_scale
-        )
+        time_idx = resolve_column(time_column)
+
+        if value_columns is None:
+            # Import all columns except time
+            value_indices = [i for i in range(len(header)) if i != time_idx]
+            value_names = [header[i] for i in value_indices]
+        elif isinstance(value_columns, (str, int)):
+            value_indices = [resolve_column(value_columns)]
+            value_names = [header[value_indices[0]]]
+        else:
+            value_indices = [resolve_column(c) for c in value_columns]
+            value_names = [header[i] for i in value_indices]
+
+        # Parse data
+        time_data = []
+        value_data = {i: [] for i in value_indices}
+
+        for row in data_rows:
+            if len(row) <= time_idx:
+                continue
+            try:
+                time_data.append(float(row[time_idx]) * time_scale)
+                for idx in value_indices:
+                    if idx < len(row):
+                        value_data[idx].append(float(row[idx]))
+                    else:
+                        value_data[idx].append(np.nan)
+            except ValueError:
+                continue  # Skip rows with non-numeric data
+
+        time_array = np.array(time_data)
 
         # Create signals
         signals = []
@@ -187,12 +141,6 @@ class SignalImporter:
         Returns:
             Signal object.
         """
-        require(len(time) > 0, "time array must be non-empty")
-        require(
-            len(time) == len(values),
-            "time and values must have same length",
-            {"time_len": len(time), "values_len": len(values)},
-        )
         return Signal(time=time, values=values, name=name, units=units)
 
     @staticmethod
@@ -398,9 +346,9 @@ class SignalExporter:
             data[sig.name] = sig.values
 
         if compressed:
-            np.savez_compressed(file_path, **data)  # type: ignore[arg-type]
+            np.savez_compressed(file_path, **data)
         else:
-            np.savez(file_path, **data)  # type: ignore[arg-type]
+            np.savez(file_path, **data)
 
     @staticmethod
     def to_json(
@@ -537,18 +485,49 @@ class SignalLoader:
     ) -> Signal | list[Signal]:
         """Load signal(s) from a file with automatic format detection.
 
+        Supported formats:
+            - ``.csv``, ``.txt``, ``.tsv`` -- delimited text (via ``SignalImporter.from_csv``)
+            - ``.json`` -- JSON with ``time``/``values`` keys (via ``SignalImporter.from_json``)
+            - ``.npz`` -- NumPy compressed archive (via ``SignalImporter.from_npz``)
+            - ``.npy`` -- single NumPy array (1-D assumes uniform sampling,
+              2-D assumes column 0 is time)
+            - ``.mat`` -- MATLAB v5 format (via ``SignalImporter.from_mat``;
+              requires ``scipy``)
+
+        Unsupported / not planned:
+            - ``.hdf5`` / ``.h5`` -- use ``h5py`` directly and pass arrays
+              to ``SignalImporter.from_numpy``
+            - ``.parquet`` -- use ``pandas`` / ``pyarrow`` and convert
+            - Proprietary oscilloscope formats (Tektronix ``.wfm``,
+              LeCroy ``.trc``, etc.)
+
         Args:
-            file_path: Path to the file.
-            **kwargs: Format-specific arguments.
+            file_path: Path to the signal file.  Must have one of the
+                extensions listed in ``SUPPORTED_EXTENSIONS``.
+            **kwargs: Format-specific keyword arguments forwarded to the
+                underlying importer method.
 
         Returns:
-            Signal or list of Signals.
+            A single ``Signal`` when the file contains one value column,
+            or a ``list[Signal]`` when multiple value columns are present.
+
+        Raises:
+            FileNotFoundError: If *file_path* does not exist.
+            ValueError: If the file extension is not in
+                ``SUPPORTED_EXTENSIONS``.
         """
         file_path = Path(file_path)
+
+        # -- Preconditions (Design by Contract) --
+        if not file_path.exists():
+            msg = f"Signal file does not exist: {file_path}"
+            raise FileNotFoundError(msg)
+
         ext = file_path.suffix.lower()
 
         if ext not in cls.SUPPORTED_EXTENSIONS:
-            msg = f"Unsupported file format: {ext}"
+            supported = ", ".join(sorted(cls.SUPPORTED_EXTENSIONS))
+            msg = f"Unsupported file format {ext!r}. Supported extensions: {supported}"
             raise ValueError(msg)
 
         fmt = cls.SUPPORTED_EXTENSIONS[ext]
@@ -581,8 +560,16 @@ class SignalLoader:
         if fmt == "mat":
             return SignalImporter.from_mat(file_path, **kwargs)
 
-        msg = f"Format handler not implemented: {fmt}"
-        raise NotImplementedError(msg)
+        # Invariant: every value in SUPPORTED_EXTENSIONS must have a
+        # handler branch above.  If we reach here a new format tag was
+        # added to the dict without a corresponding handler -- that is a
+        # programming error, not a user error.
+        msg = (
+            f"Internal error: no handler for format {fmt!r} "
+            f"(extension {ext!r}).  This is a bug -- every key in "
+            f"SUPPORTED_EXTENSIONS must have a matching handler in load()."
+        )
+        raise AssertionError(msg)
 
 
 class BatchProcessor:
@@ -630,7 +617,7 @@ class BatchProcessor:
         for file_path in files:
             try:
                 signals[file_path.stem] = SignalLoader.load(file_path, **kwargs)
-            except (RuntimeError, ValueError, OSError) as e:
+            except (ValueError, KeyError, json.JSONDecodeError, TypeError) as e:
                 logger.warning("Failed to load %s: %s", file_path, e)
 
         return signals
@@ -642,7 +629,7 @@ class BatchProcessor:
         output_dir: str | Path | None = None,
         output_format: str = "csv",
         **kwargs,
-    ) -> dict[str, Signal | list[Signal]]:
+    ) -> dict[str, Signal]:
         """Load, process, and optionally save all signals.
 
         Args:
@@ -656,7 +643,7 @@ class BatchProcessor:
             Dictionary mapping file names to processed signals.
         """
         files = self.find_files(pattern)
-        results: dict[str, Signal | list[Signal]] = {}
+        results = {}
 
         if output_dir:
             output_dir = Path(output_dir)
@@ -667,7 +654,6 @@ class BatchProcessor:
                 signal = SignalLoader.load(file_path, **kwargs)
 
                 # Handle multiple signals
-                processed: Signal | list[Signal]
                 if isinstance(signal, list):
                     processed = [processor(s) for s in signal]
                 else:
@@ -681,14 +667,13 @@ class BatchProcessor:
                     if output_format == "csv":
                         SignalExporter.to_csv(processed, output_path)
                     elif output_format == "json":
-                        json_signal = (
-                            processed[0] if isinstance(processed, list) else processed
-                        )
-                        SignalExporter.to_json(json_signal, output_path)
+                        if isinstance(processed, list):
+                            processed = processed[0]  # JSON only supports single signal
+                        SignalExporter.to_json(processed, output_path)
                     elif output_format == "npz":
                         SignalExporter.to_npz(processed, output_path)
 
-            except (RuntimeError, ValueError, OSError) as e:
-                logger.error("Warning: Failed to process %s: %s", file_path, e)
+            except (ValueError, KeyError, json.JSONDecodeError, TypeError) as e:
+                logger.error(f"Warning: Failed to process {file_path}: {e}")
 
         return results

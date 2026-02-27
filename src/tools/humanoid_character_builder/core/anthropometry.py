@@ -481,10 +481,17 @@ def estimate_segment_masses(
     Returns:
         Dict mapping segment name to mass in kg
     """
-    masses = {}
+    ratios: dict[str, float] = {}
     for segment_name in _SEGMENT_NAME_MAP:
-        ratio = get_segment_mass_ratio(segment_name, gender_factor)
-        masses[segment_name] = total_mass_kg * ratio
+        ratios[segment_name] = get_segment_mass_ratio(segment_name, gender_factor)
+
+    ratio_sum = sum(ratios.values())
+    if ratio_sum <= 0.0:
+        return dict.fromkeys(_SEGMENT_NAME_MAP, 0.0)
+
+    masses = {}
+    for segment_name, ratio in ratios.items():
+        masses[segment_name] = total_mass_kg * (ratio / ratio_sum)
     return masses
 
 

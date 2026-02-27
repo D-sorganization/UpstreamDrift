@@ -559,7 +559,8 @@ class MuJoCoViewerWidget(QWidget):
 
         # Create toggle group with visual separator
         toggle_frame = QFrame()
-        toggle_frame.setStyleSheet("""
+        toggle_frame.setStyleSheet(
+            """
             QFrame {
                 background-color: #3a3a3a;
                 border-radius: 4px;
@@ -577,7 +578,8 @@ class MuJoCoViewerWidget(QWidget):
                 background-color: #4a9eff;
                 border-radius: 2px;
             }
-        """)
+        """
+        )
         toggle_layout = QHBoxLayout(toggle_frame)
         toggle_layout.setContentsMargins(4, 2, 4, 2)
         toggle_layout.setSpacing(8)
@@ -617,13 +619,15 @@ class MuJoCoViewerWidget(QWidget):
         self._viewport = QLabel()
         self._viewport.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._viewport.setMinimumSize(320, 240)
-        self._viewport.setStyleSheet("""
+        self._viewport.setStyleSheet(
+            """
             QLabel {
                 background-color: #2a2a2a;
                 border: 1px solid #444;
                 border-radius: 4px;
             }
-        """)
+        """
+        )
         self._viewport.setMouseTracking(True)
         layout.addWidget(self._viewport, stretch=1)
 
@@ -658,7 +662,8 @@ class MuJoCoViewerWidget(QWidget):
 
     def _update_headless_placeholder(self) -> None:
         """Show a clear headless fallback message."""
-        self._viewport.setStyleSheet("""
+        self._viewport.setStyleSheet(
+            """
             QLabel {
                 background-color: #1a1a2e;
                 border: 2px dashed #4a4a6a;
@@ -666,7 +671,8 @@ class MuJoCoViewerWidget(QWidget):
                 color: #8888aa;
                 font-size: 14px;
             }
-        """)
+        """
+        )
         self._viewport.setText(
             "🖥️ Headless Mode\n\n"
             "MuJoCo is not installed.\n"

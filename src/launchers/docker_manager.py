@@ -12,6 +12,7 @@ from pathlib import Path
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
+from src.launchers.launcher_constants import validate_docker_stage
 from src.shared.python.docker_config import (
     DOCKER_IMAGE_ENGINE,
 )
@@ -60,7 +61,7 @@ class DockerBuildThread(QThread):
     ) -> None:
         """Initialize the build thread."""
         super().__init__()
-        self.target_stage = target_stage
+        self.target_stage = validate_docker_stage(target_stage)
         self.image_name = image_name
         self.context_path = context_path
 

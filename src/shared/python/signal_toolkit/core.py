@@ -10,6 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import numpy as np
+from contracts import require
 
 
 @dataclass
@@ -35,41 +36,44 @@ class Signal:
         self.time = np.asarray(self.time, dtype=np.float64)
         self.values = np.asarray(self.values, dtype=np.float64)
 
-        if self.time.ndim != 1:
-            msg = f"Time must be 1D array, got shape {self.time.shape}"
-            raise ValueError(msg)
+        require(
+            self.time.ndim == 1,
+            f"Time must be 1D array, got shape {self.time.shape}",
+            self.time.shape,
+        )
 
         if self.values.ndim == 1:
-            if len(self.time) != len(self.values):
-                msg = (
-                    f"Time and values must have same length: "
-                    f"{len(self.time)} vs {len(self.values)}"
-                )
-                raise ValueError(msg)
+            require(
+                len(self.time) == len(self.values),
+                f"Time and values must have same length: "
+                f"{len(self.time)} vs {len(self.values)}",
+            )
         elif self.values.ndim == 2:
-            if self.values.shape[0] != len(self.time):
-                msg = (
-                    f"First dimension of values must match time length: "
-                    f"{self.values.shape[0]} vs {len(self.time)}"
-                )
-                raise ValueError(msg)
+            require(
+                self.values.shape[0] == len(self.time),
+                f"First dimension of values must match time length: "
+                f"{self.values.shape[0]} vs {len(self.time)}",
+            )
         else:
-            msg = f"Values must be 1D or 2D array, got shape {self.values.shape}"
-            raise ValueError(msg)
+            require(
+                False,
+                f"Values must be 1D or 2D array, got shape {self.values.shape}",
+                self.values.shape,
+            )
 
     @property
     def fs(self) -> float:
         """Sampling frequency in Hz."""
         if len(self.time) < 2:
             return 1.0
-        return float(1.0 / np.mean(np.diff(self.time)))
+        return 1.0 / np.mean(np.diff(self.time))
 
     @property
     def dt(self) -> float:
         """Time step in seconds."""
         if len(self.time) < 2:
             return 1.0
-        return float(np.mean(np.diff(self.time)))
+        return np.mean(np.diff(self.time))
 
     @property
     def duration(self) -> float:
@@ -121,6 +125,7 @@ class Signal:
         Returns:
             New Signal with resampled data.
         """
+        require(new_fs > 0, "new_fs must be positive", new_fs)
         new_dt = 1.0 / new_fs
         new_time = np.arange(self.time[0], self.time[-1], new_dt)
         new_values = np.interp(new_time, self.time, self.values)
@@ -185,32 +190,6 @@ class Signal:
         )
 
 
-@dataclass(frozen=True)
-class WaveformParams:
-    """Parameters for periodic waveform generation.
-
-    Groups the common (amplitude, frequency, phase, offset) tuple used by
-    sinusoid, cosine, sawtooth, square, and chirp generators, reducing PLR0913.
-    """
-
-    amplitude: float = 1.0
-    frequency: float = 1.0
-    phase: float = 0.0
-    offset: float = 0.0
-    name: str = "waveform"
-
-
-@dataclass(frozen=True)
-class PulseParams:
-    """Parameters for pulse signal generation."""
-
-    start_time: float = 0.0
-    duration: float = 1.0
-    amplitude: float = 1.0
-    baseline: float = 0.0
-    name: str = "pulse"
-
-
 class SignalGenerator:
     """Factory class for generating common signal types."""
 
@@ -239,8 +218,6 @@ class SignalGenerator:
     @staticmethod
     def sinusoid(
         t: np.ndarray,
-        params: WaveformParams | None = None,
-        *,
         amplitude: float = 1.0,
         frequency: float = 1.0,
         phase: float = 0.0,
@@ -251,28 +228,21 @@ class SignalGenerator:
 
         Args:
             t: Time array.
-            params: WaveformParams grouping amplitude/frequency/phase/offset.
-                Overrides individual keyword args when provided.
-            amplitude: Peak amplitude (used when params is None).
-            frequency: Frequency in Hz (used when params is None).
-            phase: Phase offset in radians (used when params is None).
-            offset: DC offset (used when params is None).
-            name: Signal name (used when params is None).
+            amplitude: Peak amplitude.
+            frequency: Frequency in Hz.
+            phase: Phase offset in radians.
+            offset: DC offset.
+            name: Signal name.
 
         Returns:
             Signal: y = amplitude * sin(2*pi*frequency*t + phase) + offset
         """
-        if params is not None:
-            amplitude, frequency = params.amplitude, params.frequency
-            phase, offset, name = params.phase, params.offset, params.name
         values = amplitude * np.sin(2 * np.pi * frequency * t + phase) + offset
         return Signal(time=t, values=values, name=name)
 
     @staticmethod
     def cosine(
         t: np.ndarray,
-        params: WaveformParams | None = None,
-        *,
         amplitude: float = 1.0,
         frequency: float = 1.0,
         phase: float = 0.0,
@@ -283,20 +253,15 @@ class SignalGenerator:
 
         Args:
             t: Time array.
-            params: WaveformParams grouping amplitude/frequency/phase/offset.
-                Overrides individual keyword args when provided.
-            amplitude: Peak amplitude (used when params is None).
-            frequency: Frequency in Hz (used when params is None).
-            phase: Phase offset in radians (used when params is None).
-            offset: DC offset (used when params is None).
-            name: Signal name (used when params is None).
+            amplitude: Peak amplitude.
+            frequency: Frequency in Hz.
+            phase: Phase offset in radians.
+            offset: DC offset.
+            name: Signal name.
 
         Returns:
             Signal: y = amplitude * cos(2*pi*frequency*t + phase) + offset
         """
-        if params is not None:
-            amplitude, frequency = params.amplitude, params.frequency
-            phase, offset, name = params.phase, params.offset, params.name
         values = amplitude * np.cos(2 * np.pi * frequency * t + phase) + offset
         return Signal(time=t, values=values, name=name)
 
@@ -394,8 +359,6 @@ class SignalGenerator:
     @staticmethod
     def pulse(
         t: np.ndarray,
-        params: PulseParams | None = None,
-        *,
         start_time: float = 0.0,
         duration: float = 1.0,
         amplitude: float = 1.0,
@@ -406,20 +369,15 @@ class SignalGenerator:
 
         Args:
             t: Time array.
-            params: PulseParams grouping start_time/duration/amplitude/baseline.
-                Overrides individual keyword args when provided.
-            start_time: Start time of pulse (used when params is None).
-            duration: Duration of pulse (used when params is None).
-            amplitude: Pulse amplitude (used when params is None).
-            baseline: Baseline value outside pulse (used when params is None).
-            name: Signal name (used when params is None).
+            start_time: Start time of pulse.
+            duration: Duration of pulse.
+            amplitude: Pulse amplitude.
+            baseline: Baseline value outside pulse.
+            name: Signal name.
 
         Returns:
             Signal with rectangular pulse.
         """
-        if params is not None:
-            start_time, duration = params.start_time, params.duration
-            amplitude, baseline, name = params.amplitude, params.baseline, params.name
         values = np.where(
             (t >= start_time) & (t < start_time + duration),
             amplitude,
@@ -434,7 +392,7 @@ class SignalGenerator:
         f1: float = 10.0,
         amplitude: float = 1.0,
         method: str = "linear",
-        name: str = "chirp",  # noqa: PLR0913
+        name: str = "chirp",
     ) -> Signal:
         """Generate a frequency-swept chirp signal.
 
@@ -530,7 +488,7 @@ class SignalGenerator:
         amplitude: float = 1.0,
         duty_cycle: float = 0.5,
         offset: float = 0.0,
-        name: str = "square",  # noqa: PLR0913
+        name: str = "square",
     ) -> Signal:
         """Generate a square wave.
 

@@ -432,6 +432,20 @@ class EndEffectorManagerWidget(QWidget):
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # Left side - current model end effectors
+        splitter.addWidget(self._create_current_ee_widget())
+
+        # Right side - library
+        splitter.addWidget(self._create_library_widget())
+
+        layout.addWidget(splitter)
+
+        # Status
+        self.status_label = QLabel("Load a URDF to manage end effectors")
+        self.status_label.setStyleSheet("color: #888;")
+        layout.addWidget(self.status_label)
+
+    def _create_current_ee_widget(self) -> QWidget:
+        """Create the widget for managing current end effectors."""
         current_widget = QWidget()
         current_layout = QVBoxLayout(current_widget)
 
@@ -461,9 +475,10 @@ class EndEffectorManagerWidget(QWidget):
         info_layout.addWidget(self.ee_info_text)
         current_layout.addWidget(info_group)
 
-        splitter.addWidget(current_widget)
+        return current_widget
 
-        # Right side - library
+    def _create_library_widget(self) -> QWidget:
+        """Create the widget for the end effector library."""
         library_widget = QWidget()
         library_layout = QVBoxLayout(library_widget)
 
@@ -495,14 +510,7 @@ class EndEffectorManagerWidget(QWidget):
         self.attach_btn.setStyleSheet("font-weight: bold; padding: 10px;")
         library_layout.addWidget(self.attach_btn)
 
-        splitter.addWidget(library_widget)
-
-        layout.addWidget(splitter)
-
-        # Status
-        self.status_label = QLabel("Load a URDF to manage end effectors")
-        self.status_label.setStyleSheet("color: #888;")
-        layout.addWidget(self.status_label)
+        return library_widget
 
     def _connect_signals(self) -> None:
         """Connect signals."""

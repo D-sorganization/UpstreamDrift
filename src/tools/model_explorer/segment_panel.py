@@ -133,6 +133,17 @@ class SegmentPanel(QWidget):
         layout.addRow("Shape:", self.shape_combo)
 
         # Dimensions
+        layout.addRow(self._create_dimensions_group())
+
+        # Position
+        layout.addRow(self._create_position_group())
+
+        # Orientation
+        layout.addRow(self._create_orientation_group())
+
+        self.editor_tabs.addTab(tab, "Geometry")
+
+    def _create_dimensions_group(self) -> QGroupBox:
         dimensions_group = QGroupBox("Dimensions")
         dim_layout = QFormLayout(dimensions_group)
 
@@ -154,9 +165,9 @@ class SegmentPanel(QWidget):
         self.height_spin.setSuffix(" m")
         dim_layout.addRow("Height:", self.height_spin)
 
-        layout.addRow(dimensions_group)
+        return dimensions_group
 
-        # Position
+    def _create_position_group(self) -> QGroupBox:
         position_group = QGroupBox("Position")
         pos_layout = QFormLayout(position_group)
 
@@ -175,9 +186,9 @@ class SegmentPanel(QWidget):
         self.pos_z_spin.setSuffix(" m")
         pos_layout.addRow("Z:", self.pos_z_spin)
 
-        layout.addRow(position_group)
+        return position_group
 
-        # Orientation
+    def _create_orientation_group(self) -> QGroupBox:
         orientation_group = QGroupBox("Orientation (RPY)")
         ori_layout = QFormLayout(orientation_group)
 
@@ -196,9 +207,7 @@ class SegmentPanel(QWidget):
         self.yaw_spin.setSuffix("°")
         ori_layout.addRow("Yaw:", self.yaw_spin)
 
-        layout.addRow(orientation_group)
-
-        self.editor_tabs.addTab(tab, "Geometry")
+        return orientation_group
 
     def _setup_physics_tab(self) -> None:
         """Set up the physics properties tab."""

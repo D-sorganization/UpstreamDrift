@@ -113,14 +113,14 @@ class ProvenanceInfo:
         import sys
 
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        numpy_version = np.__version__
+        numpy_version = str(getattr(np, "__version__", "unknown"))
 
         # MuJoCo version (if available)
         mujoco_version = None
         try:
             import mujoco
 
-            mujoco_version = mujoco.__version__
+            mujoco_version = str(getattr(mujoco, "__version__", "unknown"))
         except ImportError:
             pass
 
