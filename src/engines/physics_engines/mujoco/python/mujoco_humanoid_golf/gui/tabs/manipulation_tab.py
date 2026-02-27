@@ -222,18 +222,7 @@ class ManipulationTab(QtWidgets.QWidget):
         pose_layout = QtWidgets.QVBoxLayout(pose_group)
 
         # Save pose
-        save_layout = QtWidgets.QHBoxLayout()
-        self.pose_name_input = QtWidgets.QLineEdit()
-        self.pose_name_input.setPlaceholderText("Pose name...")
-        self.pose_name_input.setClearButtonEnabled(True)
-        self.pose_name_input.setAccessibleName("Pose Name")
-        save_layout.addWidget(self.pose_name_input)
-        self.save_pose_btn = QtWidgets.QPushButton("Save Pose")
-        self.save_pose_btn.setToolTip(
-            "Save the current body configuration to the library"
-        )
-        self.save_pose_btn.clicked.connect(self.on_save_pose)
-        save_layout.addWidget(self.save_pose_btn)
+        save_layout = self._create_save_pose_controls()
         pose_layout.addLayout(save_layout)
 
         # Pose list
@@ -242,16 +231,48 @@ class ManipulationTab(QtWidgets.QWidget):
         pose_layout.addWidget(self.pose_list)
 
         # Pose actions
+        pose_btn_layout = self._create_pose_actions()
+        pose_layout.addLayout(pose_btn_layout)
+
+        # Pose interpolation
+        interp_group = self._create_pose_interpolation()
+        pose_layout.addWidget(interp_group)
+
+        return pose_group
+
+    def _create_save_pose_controls(self) -> QtWidgets.QHBoxLayout:
+        """Create save pose controls."""
+        save_layout = QtWidgets.QHBoxLayout()
+        self.pose_name_input = QtWidgets.QLineEdit()
+        self.pose_name_input.setPlaceholderText("Pose name...")
+        self.pose_name_input.setClearButtonEnabled(True)
+        self.pose_name_input.setAccessibleName("Pose Name")
+        save_layout.addWidget(self.pose_name_input)
+
+        self.save_pose_btn = QtWidgets.QPushButton("Save Pose")
+        self.save_pose_btn.setToolTip(
+            "Save the current body configuration to the library"
+        )
+        self.save_pose_btn.clicked.connect(self.on_save_pose)
+        save_layout.addWidget(self.save_pose_btn)
+        return save_layout
+
+    def _create_pose_actions(self) -> QtWidgets.QGridLayout:
+        """Create buttons for load, delete, export, import poses."""
         pose_btn_layout = QtWidgets.QGridLayout()
+
         self.load_pose_btn = QtWidgets.QPushButton("Load")
         self.load_pose_btn.setToolTip("Apply the selected pose to the model")
         self.load_pose_btn.clicked.connect(self.on_load_pose)
+
         self.delete_pose_btn = QtWidgets.QPushButton("Delete")
         self.delete_pose_btn.setToolTip("Remove the selected pose from the library")
         self.delete_pose_btn.clicked.connect(self.on_delete_pose)
+
         self.export_poses_btn = QtWidgets.QPushButton("Export Library")
         self.export_poses_btn.setToolTip("Save all poses to a JSON file")
         self.export_poses_btn.clicked.connect(self.on_export_poses)
+
         self.import_poses_btn = QtWidgets.QPushButton("Import Library")
         self.import_poses_btn.setToolTip("Load poses from a JSON file")
         self.import_poses_btn.clicked.connect(self.on_import_poses)
@@ -260,9 +281,11 @@ class ManipulationTab(QtWidgets.QWidget):
         pose_btn_layout.addWidget(self.delete_pose_btn, 0, 1)
         pose_btn_layout.addWidget(self.export_poses_btn, 1, 0)
         pose_btn_layout.addWidget(self.import_poses_btn, 1, 1)
-        pose_layout.addLayout(pose_btn_layout)
 
-        # Pose interpolation
+        return pose_btn_layout
+
+    def _create_pose_interpolation(self) -> QtWidgets.QGroupBox:
+        """Create pose interpolation controls."""
         interp_group = QtWidgets.QGroupBox("Pose Interpolation")
         interp_layout = QtWidgets.QVBoxLayout(interp_group)
 
@@ -273,6 +296,7 @@ class ManipulationTab(QtWidgets.QWidget):
         self.interp_slider.setValue(0)
         self.interp_slider.valueChanged.connect(self.on_interpolate_poses)
         self.interp_label = QtWidgets.QLabel("0%")
+
         interp_slider_layout.addRow("Blend:", self.interp_slider)
         interp_slider_layout.addRow("", self.interp_label)
         interp_layout.addLayout(interp_slider_layout)
@@ -281,9 +305,7 @@ class ManipulationTab(QtWidgets.QWidget):
         interp_note.setStyleSheet(Styles.TEXT_ITALIC_NOTE)
         interp_layout.addWidget(interp_note)
 
-        pose_layout.addWidget(interp_group)
-
-        return pose_group
+        return interp_group
 
     def _setup_ik_settings(self) -> QtWidgets.QGroupBox:
         """Create IK solver damping and step size controls."""

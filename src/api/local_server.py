@@ -650,7 +650,8 @@ def print_server_info(host: str, port: int) -> None:
     RESET = "\033[0m"
 
     try:
-        logger.info(f"""
+        logger.info(
+            f"""
 {CYAN}    ┌─────────────────────────────────────────────────────────┐
     │              Golf Modeling Suite - Local Server         │
     ├─────────────────────────────────────────────────────────┤
@@ -660,7 +661,8 @@ def print_server_info(host: str, port: int) -> None:
     │  Mode: LOCAL (no auth required)                         │
     │  Press Ctrl+C to stop.                                  │
     └─────────────────────────────────────────────────────────┘{RESET}
-    """)
+    """
+        )
     except UnicodeEncodeError:
         logger.info("\n    Golf Modeling Suite - Local Server")
         logger.info("    Running at: http://%s:%s", host, port)

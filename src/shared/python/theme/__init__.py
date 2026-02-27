@@ -1,134 +1,124 @@
-"""Unified theme system for UpstreamDrift.
+"""Fleet-wide shared theme management system.
 
-Source of Truth: UpstreamDrift (this repository)
-Consumers:
-    - Tools repo: src/shared/theme/ (vendored copy)
-    - Gasification_Model: vendor/ud-tools/ (vendored copy)
-Cross-repo install: pip install upstream-drift-shared[theme]
+This module provides a unified color theme system for all PyQt6 GUI applications
+across the D-sorganization repository fleet.
 
-This package provides a consistent, sophisticated visual identity across
-all components of the application:
-
-- Colors: Unified color palette for UI and data visualization
-- Typography: Cross-platform font stacks and sizing
-- Matplotlib: Professional plot styling
-- ThemeManager: Dynamic theme switching (Light/Dark/High Contrast)
+Features:
+- 12+ built-in themes (Light, Dark, Monokai, Dracula, One Dark, etc.)
+- Custom theme support with persistence
+- Theme inheritance for docked applications
+- Qt stylesheet generation
+- Matplotlib integration for consistent plotting colors
+- Signal-based theme change notifications
 
 Usage:
-    from shared.python.theme import Colors, Sizes, apply_golf_suite_style
+    from shared.python.theme import ThemeManager, get_theme_manager
 
-    # Apply matplotlib styling globally
-    apply_golf_suite_style()
+    # Get singleton instance
+    manager = get_theme_manager()
 
-    # Use colors in Qt widgets
-    widget.setStyleSheet(f"background-color: {Colors.BG_SURFACE};")
+    # Get available themes
+    themes = manager.get_available_themes()
 
-    # Create styled fonts
-    from shared.python.theme import get_display_font
-    label.setFont(get_display_font(size=16))
+    # Change theme
+    manager.change_theme("Dark")
 
-    # Dynamic theme switching
-    from shared.python.theme import ThemeManager, ThemePreset
-    manager = ThemeManager.instance()
-    manager.set_theme(ThemePreset.DARK)
+    # Apply to a window
+    manager.apply_theme_to_window(my_window)
+
+    # Connect to theme changes
+    manager.themeChanged.connect(self.on_theme_changed)
+
+    # Access current colors for custom styling
+    colors = manager.get_current_colors()
+    bg_color = colors["bg"]
 """
 
 from .colors import (
+    BUILTIN_THEMES,
     CHART_COLORS,
-    DEFAULT_COLORS,
-    ColorPalette,
-    Colors,
-    get_qcolor,
+    SEMANTIC_COLOR_KEYS,
+    THEME_COLOR_KEYS,
+    get_matplotlib_colors,
     get_rgba,
+    is_dark_theme,
+    is_valid_hex_color,
+    normalise_hex_color,
 )
-from .fleet_adapter import (
-    FLEET_THEMES,
-    fleet_to_theme_colors,
-    get_fleet_theme_names,
-    is_fleet_available,
-)
-from .matplotlib_style import (
-    GOLF_SUITE_STYLE,
-    apply_golf_suite_style,
-    create_styled_figure,
-    get_chart_color,
-    style_for_export,
-)
-from .style_constants import (
-    Styles,
-)
-from .theme_manager import (
-    DARK_THEME,
-    HIGH_CONTRAST_THEME,
-    LIGHT_THEME,
-    THEME_PRESETS,
-    ThemeColors,
-    ThemeManager,
-    ThemePreset,
-    get_current_colors,
-    get_theme_manager,
-    set_theme,
-)
-from .typography import (
-    CSS_FONT_DISPLAY,
-    CSS_FONT_MONO,
-    CSS_FONT_UI,
-    FONT_STACK_DISPLAY,
-    FONT_STACK_MONO,
-    FONT_STACK_UI,
-    FontSizes,
-    FontWeights,
-    Sizes,
-    Weights,
-    get_display_font,
-    get_mono_font,
-    get_qfont,
-)
+from .protocols import StylesheetGenerator, ThemeProvider, ThemeSwitcher
+from .stylesheets import generate_minimal_stylesheet, generate_stylesheet
+
+# PyQt6-dependent imports - only available when PyQt6 is installed
+try:
+    from .colors import get_qcolor
+    from .dialogs import (
+        ColorFieldEditor,
+        ColorPickerButton,
+        CustomThemeDialog,
+        CustomThemeEditor,
+        ThemeListItem,
+        ThemeManagerDialog,
+        ThemePreviewWidget,
+    )
+    from .integration import (
+        ThemedWindowMixin,
+        apply_theme_to_window,
+        create_theme_menu,
+        setup_themed_app,
+    )
+    from .theme_manager import ThemeManager, get_theme_manager
+
+    _PYQT6_AVAILABLE = True
+except ImportError:
+    _PYQT6_AVAILABLE = False
+    ThemeManager = None  # type: ignore[assignment, misc]
+    get_theme_manager = None  # type: ignore[assignment]
+    get_qcolor = None  # type: ignore[assignment]
+    ThemedWindowMixin = None  # type: ignore[assignment, misc]
+    apply_theme_to_window = None  # type: ignore[assignment]
+    create_theme_menu = None  # type: ignore[assignment]
+    setup_themed_app = None  # type: ignore[assignment]
+    ColorFieldEditor = None  # type: ignore[assignment, misc]
+    ColorPickerButton = None  # type: ignore[assignment, misc]
+    CustomThemeDialog = None  # type: ignore[assignment, misc]
+    CustomThemeEditor = None  # type: ignore[assignment, misc]
+    ThemeListItem = None  # type: ignore[assignment, misc]
+    ThemeManagerDialog = None  # type: ignore[assignment, misc]
+    ThemePreviewWidget = None  # type: ignore[assignment, misc]
 
 __all__ = [
-    # Colors
+    # Protocols (no PyQt6 dependency)
+    "StylesheetGenerator",
+    "ThemeProvider",
+    "ThemeSwitcher",
+    # Theme manager (requires PyQt6)
+    "ThemeManager",
+    "get_theme_manager",
+    # Integration helpers (requires PyQt6)
+    "ThemedWindowMixin",
+    "apply_theme_to_window",
+    "create_theme_menu",
+    "setup_themed_app",
+    # Dialogs (requires PyQt6)
+    "ColorFieldEditor",
+    "ColorPickerButton",
+    "CustomThemeDialog",
+    "CustomThemeEditor",
+    "ThemeListItem",
+    "ThemeManagerDialog",
+    "ThemePreviewWidget",
+    # Color utilities
+    "BUILTIN_THEMES",
     "CHART_COLORS",
-    "ColorPalette",
-    "Colors",
-    "DEFAULT_COLORS",
+    "SEMANTIC_COLOR_KEYS",
+    "THEME_COLOR_KEYS",
+    "get_matplotlib_colors",
     "get_qcolor",
     "get_rgba",
-    # Typography
-    "CSS_FONT_DISPLAY",
-    "CSS_FONT_MONO",
-    "CSS_FONT_UI",
-    "FONT_STACK_DISPLAY",
-    "FONT_STACK_MONO",
-    "FONT_STACK_UI",
-    "FontSizes",
-    "FontWeights",
-    "Sizes",
-    "Weights",
-    "get_display_font",
-    "get_mono_font",
-    "get_qfont",
-    # Matplotlib
-    "GOLF_SUITE_STYLE",
-    "apply_golf_suite_style",
-    "create_styled_figure",
-    "get_chart_color",
-    "style_for_export",
-    # Theme Manager
-    "DARK_THEME",
-    "HIGH_CONTRAST_THEME",
-    "LIGHT_THEME",
-    "THEME_PRESETS",
-    "ThemeColors",
-    "ThemeManager",
-    "ThemePreset",
-    "get_current_colors",
-    "get_theme_manager",
-    "set_theme",
-    # Style Constants
-    "Styles",
-    # Fleet-wide Theme Adapter
-    "FLEET_THEMES",
-    "fleet_to_theme_colors",
-    "get_fleet_theme_names",
-    "is_fleet_available",
+    "is_dark_theme",
+    "is_valid_hex_color",
+    "normalise_hex_color",
+    # Stylesheet generation
+    "generate_minimal_stylesheet",
+    "generate_stylesheet",
 ]

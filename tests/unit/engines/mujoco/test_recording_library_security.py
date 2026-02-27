@@ -10,7 +10,6 @@ import pytest
 # List of modules to mock
 MOCK_MODULES = [
     "mujoco",
-    "numpy",
     "scipy",
     "matplotlib",
     "matplotlib.pyplot",
@@ -40,13 +39,20 @@ def isolated_library() -> Iterator[tuple]:
     # Patch sys.modules. This context manager ensures changes are reverted.
     with patch.dict(sys.modules, mocks):
         # Locate source file
-        repo_root = Path(__file__).resolve().parent.parent
-        lib_path = repo_root / "mujoco_humanoid_golf/recording_library.py"
-
+        repo_root = Path(__file__).resolve().parents[4]
+        lib_path = (
+            repo_root
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "python"
+            / "mujoco_humanoid_golf"
+            / "recording_library.py"
+        )
         if not lib_path.exists():
-            lib_path = Path(
-                "python/mujoco_humanoid_golf/recording_library.py"
-            ).resolve()
+            msg = f"Recording library source not found at {lib_path}"
+            raise FileNotFoundError(msg)
 
         # Dynamic import
         module_name = "mujoco_humanoid_golf.recording_library"
@@ -59,7 +65,20 @@ def isolated_library() -> Iterator[tuple]:
         sys.modules[module_name] = mod
         spec.loader.exec_module(mod)
 
-        yield mod.RecordingLibrary, mod.RecordingMetadata
+        instances: list[object] = []
+
+        class TrackingRecordingLibrary(mod.RecordingLibrary):  # type: ignore[misc]
+            def __init__(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+                super().__init__(*args, **kwargs)
+                instances.append(self)
+
+        try:
+            yield TrackingRecordingLibrary, mod.RecordingMetadata
+        finally:
+            for instance in instances:
+                close_method = getattr(instance, "close", None)
+                if callable(close_method):
+                    close_method()
 
 
 @pytest.fixture()
@@ -89,9 +108,9 @@ def test_add_recording_path_traversal(isolated_library, temp_library) -> None:
 
     # Check if file exists outside library (vulnerability check)
     pwned_path = Path(temp_library).parent / "pwned.txt"
-    assert not pwned_path.exists(), (
-        "Path traversal succeeded! File created outside library."
-    )
+    assert (
+        not pwned_path.exists()
+    ), "Path traversal succeeded! File created outside library."
 
     # Check if file exists inside library (sanitized)
     sanitized_path = Path(temp_library) / "pwned.txt"

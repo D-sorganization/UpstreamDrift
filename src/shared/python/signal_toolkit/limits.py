@@ -12,8 +12,7 @@ from enum import Enum
 
 import numpy as np
 
-from src.shared.python.core.contracts import require
-from src.shared.python.signal_toolkit.core import Signal
+from .core import Signal
 
 
 class SaturationMode(Enum):
@@ -47,8 +46,6 @@ def apply_saturation(
     Returns:
         Signal with saturation applied.
     """
-    require(lower < upper, "lower limit must be less than upper limit")
-
     values = signal.values.copy()
     result = _apply_saturation_values(values, lower, upper, mode, smoothness)
 
@@ -222,8 +219,6 @@ def apply_rate_limiter(
     Returns:
         Rate-limited signal.
     """
-    require(max_rate > 0, "max_rate must be positive", max_rate)
-
     values = signal.values.copy()
     dt = signal.dt
 
@@ -283,8 +278,6 @@ def apply_deadband(
     Returns:
         Signal with deadband applied.
     """
-    require(threshold >= 0, "deadband threshold must be non-negative", threshold)
-
     values = signal.values.copy()
     offset = values - center
 
@@ -463,7 +456,6 @@ def create_saturation_function(
     """
 
     def saturate(values: np.ndarray) -> np.ndarray:
-        """Apply saturation limits to the input values."""
         return _apply_saturation_values(values, lower, upper, mode, smoothness)
 
     return saturate

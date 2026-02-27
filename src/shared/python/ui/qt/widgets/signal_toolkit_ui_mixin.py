@@ -539,6 +539,18 @@ class SignalToolkitUIMixin:
         layout = QVBoxLayout(tab)
 
         # Differentiation
+        diff_group = self._create_differentiation_group()
+        layout.addWidget(diff_group)
+
+        # Integration
+        int_group = self._create_integration_group()
+        layout.addWidget(int_group)
+
+        layout.addStretch()
+        return tab
+
+    def _create_differentiation_group(self: Any) -> QGroupBox:
+        """Create controls for differentiation."""
         diff_group = QGroupBox("Differentiation")
         diff_layout = QVBoxLayout(diff_group)
 
@@ -569,9 +581,10 @@ class SignalToolkitUIMixin:
         self.show_tangent_check = QCheckBox("Show Tangent Line")
         diff_layout.addWidget(self.show_tangent_check)
 
-        layout.addWidget(diff_group)
+        return diff_group
 
-        # Integration
+    def _create_integration_group(self: Any) -> QGroupBox:
+        """Create controls for integration."""
         int_group = QGroupBox("Integration")
         int_layout = QVBoxLayout(int_group)
 
@@ -604,9 +617,7 @@ class SignalToolkitUIMixin:
         self.integral_value_label = QLabel("Integral: --")
         int_layout.addWidget(self.integral_value_label)
 
-        layout.addWidget(int_group)
-        layout.addStretch()
-        return tab
+        return int_group
 
     # ------------------------------------------------------------------
     # Filters tab

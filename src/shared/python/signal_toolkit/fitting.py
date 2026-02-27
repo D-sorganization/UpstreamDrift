@@ -8,14 +8,13 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 from scipy import optimize
-from simpleeval import EvalWithCompoundTypes
 
-from src.shared.python.core.contracts import ensure, require
-from src.shared.python.signal_toolkit.core import Signal
+from shared.python.safe_eval import safe_eval
+
+from .core import Signal
 
 
 @dataclass
@@ -118,8 +117,6 @@ class SinusoidFitter:
         Returns:
             FitResult with fitted parameters and statistics.
         """
-        require(len(signal.values) > 0, "signal must be non-empty")
-
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -144,7 +141,7 @@ class SinusoidFitter:
             )
             success = True
             message = "Fit converged successfully"
-        except (RuntimeError, ValueError, OSError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -169,7 +166,7 @@ class SinusoidFitter:
             units=signal.units,
         )
 
-        result = FitResult(
+        return FitResult(
             parameters={
                 "amplitude": popt[0],
                 "frequency": popt[1],
@@ -184,8 +181,6 @@ class SinusoidFitter:
             success=success,
             message=message,
         )
-        ensure(result.rmse >= 0, "RMSE must be non-negative", result.rmse)
-        return result
 
     def get_function_string(self, params: dict[str, float]) -> str:
         """Get string representation of the fitted function."""
@@ -273,8 +268,6 @@ class ExponentialFitter:
         Returns:
             FitResult with fitted parameters.
         """
-        require(len(signal.values) > 0, "signal must be non-empty")
-
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -304,7 +297,7 @@ class ExponentialFitter:
             )
             success = True
             message = "Fit converged"
-        except (RuntimeError, ValueError, OSError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -374,7 +367,7 @@ class ExponentialFitter:
             )
             success = True
             message = "Fit converged"
-        except (RuntimeError, ValueError, OSError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -421,8 +414,6 @@ class LinearFitter:
         Returns:
             FitResult with slope and intercept parameters.
         """
-        require(len(signal.values) > 0, "signal must be non-empty")
-
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -490,12 +481,10 @@ class PolynomialFitter:
         Returns:
             FitResult with polynomial coefficients.
         """
-        order = order if order is not None else self.order
-        require(len(signal.values) > 0, "signal must be non-empty")
-        require(order >= 0, "polynomial order must be non-negative", order)
-
         t = signal.time - signal.time[0]
         y = signal.values
+
+        order = order if order is not None else self.order
 
         # Need at least order+1 points
         if len(t) < order + 1:
@@ -609,7 +598,7 @@ class CustomFunctionFitter:
             )
             success = True
             message = "Fit converged"
-        except (RuntimeError, ValueError, OSError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             popt = np.array(initial_guess)
             pcov = None
             success = False
@@ -661,11 +650,14 @@ class CustomFunctionFitter:
                 ["a", "f", "b", "c"]
             )
         """
-        # Build the function dynamically using simpleeval for safe evaluation
+        # Build the function dynamically
+        # Note: This uses eval which should only be used with trusted input
+        if "__" in expression:
+            raise ValueError("Expression contains forbidden pattern '__'")
+
         import numpy as np_module
 
-        # Safe functions available in expressions
-        safe_functions = {
+        safe_dict = {
             "sin": np_module.sin,
             "cos": np_module.cos,
             "tan": np_module.tan,
@@ -674,27 +666,15 @@ class CustomFunctionFitter:
             "log10": np_module.log10,
             "sqrt": np_module.sqrt,
             "abs": np_module.abs,
-        }
-
-        # Safe constants
-        safe_names = {
             "pi": np_module.pi,
             "e": np_module.e,
         }
 
         def custom_func(t: np.ndarray, *args: float) -> np.ndarray:
-            """Evaluate the user-defined expression with the given parameters."""
-            # Build evaluation context with parameters
-            names: dict[str, Any] = dict(safe_names)
-            names["t"] = t
-            names.update(dict(zip(param_names, args, strict=False)))
-
-            # Use simpleeval for safe expression evaluation
-            evaluator = EvalWithCompoundTypes(
-                functions=safe_functions,
-                names=names,
-            )
-            return evaluator.eval(expression)
+            local_dict = dict(safe_dict)
+            local_dict["t"] = t
+            local_dict.update(dict(zip(param_names, args, strict=False)))
+            return safe_eval(expression, local_dict)
 
         return cls(custom_func, param_names, expression)
 
@@ -818,7 +798,7 @@ class FunctionFitter:
                     results[candidate] = self.fit_exponential_decay(signal)
                 elif candidate == "exp_growth":
                     results[candidate] = self.fit_exponential_growth(signal)
-            except (RuntimeError, TypeError, ValueError):
+            except (KeyError, ValueError, TypeError):
                 continue
 
         if not results:

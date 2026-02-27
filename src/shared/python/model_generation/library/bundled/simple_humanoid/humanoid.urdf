@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="simple_humanoid">
+  <material name="skin">
+    <color rgba="0.8 0.6 0.4 1.0"/>
+  </material>
+  <material name="dark">
+    <color rgba="0.3 0.3 0.3 1.0"/>
+  </material>
+
+  <!-- Pelvis (root) -->
+  <link name="pelvis">
+    <visual>
+      <geometry><box size="0.2 0.3 0.15"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.2 0.3 0.15"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="8.36"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0260" iyy="0.0180" izz="0.0340" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- Torso -->
+  <link name="torso">
+    <visual>
+      <geometry><box size="0.18 0.28 0.35"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.18 0.28 0.35"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="26.58"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.1200" iyy="0.0800" izz="0.0900" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="pelvis_to_torso" type="fixed">
+    <parent link="pelvis"/>
+    <child link="torso"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Head -->
+  <link name="head">
+    <visual>
+      <geometry><sphere radius="0.09"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><sphere radius="0.09"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="5.20"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0040" iyy="0.0040" izz="0.0040" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="neck" type="revolute">
+    <parent link="torso"/>
+    <child link="head"/>
+    <origin xyz="0 0 0.27" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.75" upper="0.75" effort="50" velocity="2.0"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <!-- Right upper arm -->
+  <link name="right_upper_arm">
+    <visual>
+      <geometry><capsule radius="0.04" length="0.28"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.04" length="0.28"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2.03"/>
+      <origin xyz="0 0 -0.14"/>
+      <inertia ixx="0.0040" iyy="0.0040" izz="0.0005" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="right_shoulder" type="revolute">
+    <parent link="torso"/>
+    <child link="right_upper_arm"/>
+    <origin xyz="0 -0.19 0.16" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14" upper="1.0" effort="100" velocity="5.0"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <!-- Right forearm -->
+  <link name="right_forearm">
+    <visual>
+      <geometry><capsule radius="0.03" length="0.24"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.03" length="0.24"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="1.21"/>
+      <origin xyz="0 0 -0.12"/>
+      <inertia ixx="0.0020" iyy="0.0020" izz="0.0002" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="right_elbow" type="revolute">
+    <parent link="right_upper_arm"/>
+    <child link="right_forearm"/>
+    <origin xyz="0 0 -0.28" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.61" upper="0.0" effort="80" velocity="5.0"/>
+    <dynamics damping="0.5" friction="0.0"/>
+  </joint>
+
+  <!-- Left upper arm -->
+  <link name="left_upper_arm">
+    <visual>
+      <geometry><capsule radius="0.04" length="0.28"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.04" length="0.28"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2.03"/>
+      <origin xyz="0 0 -0.14"/>
+      <inertia ixx="0.0040" iyy="0.0040" izz="0.0005" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="left_shoulder" type="revolute">
+    <parent link="torso"/>
+    <child link="left_upper_arm"/>
+    <origin xyz="0 0.19 0.16" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14" upper="1.0" effort="100" velocity="5.0"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <!-- Left forearm -->
+  <link name="left_forearm">
+    <visual>
+      <geometry><capsule radius="0.03" length="0.24"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.03" length="0.24"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="1.21"/>
+      <origin xyz="0 0 -0.12"/>
+      <inertia ixx="0.0020" iyy="0.0020" izz="0.0002" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="left_elbow" type="revolute">
+    <parent link="left_upper_arm"/>
+    <child link="left_forearm"/>
+    <origin xyz="0 0 -0.28" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.61" upper="0.0" effort="80" velocity="5.0"/>
+    <dynamics damping="0.5" friction="0.0"/>
+  </joint>
+
+  <!-- Right thigh -->
+  <link name="right_thigh">
+    <visual>
+      <geometry><capsule radius="0.06" length="0.34"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.06" length="0.34"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="10.60"/>
+      <origin xyz="0 0 -0.17"/>
+      <inertia ixx="0.0400" iyy="0.0400" izz="0.0060" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="right_hip" type="revolute">
+    <parent link="pelvis"/>
+    <child link="right_thigh"/>
+    <origin xyz="0 -0.1 -0.04" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.0" upper="0.3" effort="300" velocity="5.0"/>
+    <dynamics damping="5.0" friction="0.0"/>
+  </joint>
+
+  <!-- Right shin -->
+  <link name="right_shin">
+    <visual>
+      <geometry><capsule radius="0.049" length="0.30"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.049" length="0.30"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="3.24"/>
+      <origin xyz="0 0 -0.15"/>
+      <inertia ixx="0.0100" iyy="0.0100" izz="0.0010" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="right_knee" type="revolute">
+    <parent link="right_thigh"/>
+    <child link="right_shin"/>
+    <origin xyz="0 0 -0.40" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.61" upper="-0.1" effort="200" velocity="5.0"/>
+    <dynamics damping="6.0" friction="0.0"/>
+  </joint>
+
+  <!-- Right foot -->
+  <link name="right_foot">
+    <visual>
+      <geometry><box size="0.15 0.09 0.05"/></geometry>
+      <material name="dark"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.15 0.09 0.05"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="1.03"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0005" iyy="0.0010" izz="0.0010" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="right_ankle" type="revolute">
+    <parent link="right_shin"/>
+    <child link="right_foot"/>
+    <origin xyz="0 0 -0.30" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.7" upper="0.78" effort="100" velocity="5.0"/>
+    <dynamics damping="3.0" friction="0.0"/>
+  </joint>
+
+  <!-- Left thigh -->
+  <link name="left_thigh">
+    <visual>
+      <geometry><capsule radius="0.06" length="0.34"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.06" length="0.34"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="10.60"/>
+      <origin xyz="0 0 -0.17"/>
+      <inertia ixx="0.0400" iyy="0.0400" izz="0.0060" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="left_hip" type="revolute">
+    <parent link="pelvis"/>
+    <child link="left_thigh"/>
+    <origin xyz="0 0.1 -0.04" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.0" upper="0.3" effort="300" velocity="5.0"/>
+    <dynamics damping="5.0" friction="0.0"/>
+  </joint>
+
+  <!-- Left shin -->
+  <link name="left_shin">
+    <visual>
+      <geometry><capsule radius="0.049" length="0.30"/></geometry>
+      <material name="skin"/>
+    </visual>
+    <collision>
+      <geometry><capsule radius="0.049" length="0.30"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="3.24"/>
+      <origin xyz="0 0 -0.15"/>
+      <inertia ixx="0.0100" iyy="0.0100" izz="0.0010" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="left_knee" type="revolute">
+    <parent link="left_thigh"/>
+    <child link="left_shin"/>
+    <origin xyz="0 0 -0.40" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.61" upper="-0.1" effort="200" velocity="5.0"/>
+    <dynamics damping="6.0" friction="0.0"/>
+  </joint>
+
+  <!-- Left foot -->
+  <link name="left_foot">
+    <visual>
+      <geometry><box size="0.15 0.09 0.05"/></geometry>
+      <material name="dark"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.15 0.09 0.05"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="1.03"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0005" iyy="0.0010" izz="0.0010" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="left_ankle" type="revolute">
+    <parent link="left_shin"/>
+    <child link="left_foot"/>
+    <origin xyz="0 0 -0.30" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.7" upper="0.78" effort="100" velocity="5.0"/>
+    <dynamics damping="3.0" friction="0.0"/>
+  </joint>
+</robot>
