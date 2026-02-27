@@ -18,7 +18,8 @@ def mock_openai_adapter():
     with patch.dict(sys.modules, {"openai": mock_openai_module}):
         from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
-        yield OpenAIAdapter(api_key="test-key")
+        dummy_key = "test-key"
+        yield OpenAIAdapter(api_key=dummy_key)
 
 
 @pytest.fixture
@@ -26,7 +27,8 @@ def mock_anthropic_adapter():
     with patch.dict(sys.modules, {"anthropic": mock_anthropic_module}):
         from src.shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
 
-        yield AnthropicAdapter(api_key="test-key")
+        dummy_key = "test-key"
+        yield AnthropicAdapter(api_key=dummy_key)
 
 
 @pytest.fixture

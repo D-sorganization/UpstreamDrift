@@ -314,7 +314,21 @@ class AttachmentPointSelector(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Attachment link selection
+        layout.addWidget(self._create_attachment_config(available_links))
+        layout.addWidget(self._create_position_offset())
+        layout.addWidget(self._create_orientation())
+        layout.addWidget(self._create_naming())
+
+        # Buttons
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def _create_attachment_config(self, available_links: list[str]) -> QGroupBox:
+        """Create attachment configuration group."""
         attach_group = QGroupBox("Attachment Configuration")
         attach_layout = QFormLayout(attach_group)
 
@@ -326,9 +340,10 @@ class AttachmentPointSelector(QDialog):
         self.joint_type_combo.addItems(["fixed", "revolute", "prismatic", "continuous"])
         attach_layout.addRow("Joint type:", self.joint_type_combo)
 
-        layout.addWidget(attach_group)
+        return attach_group
 
-        # Position offset
+    def _create_position_offset(self) -> QGroupBox:
+        """Create position offset group."""
         offset_group = QGroupBox("Position Offset")
         offset_layout = QFormLayout(offset_group)
 
@@ -350,9 +365,10 @@ class AttachmentPointSelector(QDialog):
         self.offset_z.setSuffix(" m")
         offset_layout.addRow("Z:", self.offset_z)
 
-        layout.addWidget(offset_group)
+        return offset_group
 
-        # Orientation
+    def _create_orientation(self) -> QGroupBox:
+        """Create orientation group."""
         orient_group = QGroupBox("Orientation (RPY)")
         orient_layout = QFormLayout(orient_group)
 
@@ -374,9 +390,10 @@ class AttachmentPointSelector(QDialog):
         self.yaw.setSuffix(" rad")
         orient_layout.addRow("Yaw:", self.yaw)
 
-        layout.addWidget(orient_group)
+        return orient_group
 
-        # Name prefix
+    def _create_naming(self) -> QGroupBox:
+        """Create naming group."""
         prefix_group = QGroupBox("Naming")
         prefix_layout = QFormLayout(prefix_group)
 
@@ -384,15 +401,7 @@ class AttachmentPointSelector(QDialog):
         self.prefix_edit.setPlaceholderText("optional prefix for link/joint names")
         prefix_layout.addRow("Name prefix:", self.prefix_edit)
 
-        layout.addWidget(prefix_group)
-
-        # Buttons
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        return prefix_group
 
     def get_configuration(self) -> dict[str, Any]:
         """Get the attachment configuration."""

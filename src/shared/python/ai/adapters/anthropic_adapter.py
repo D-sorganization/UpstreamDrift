@@ -14,7 +14,7 @@ Cost Model:
 
 Example:
     >>> from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
-    >>> adapter = AnthropicAdapter(api_key="sk-ant-...")
+    >>> adapter = AnthropicAdapter(api_key="your-api-key-here")
     >>> response = adapter.send_message("Analyze this swing", context, tools)
 """
 
@@ -71,7 +71,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         timeout: Request timeout [s].
 
     Example:
-        >>> adapter = AnthropicAdapter(api_key="sk-ant-...")
+        >>> adapter = AnthropicAdapter(api_key="your-api-key-here")
         >>> success, message = adapter.validate_connection()
         >>> if success:
         ...     response = adapter.send_message(

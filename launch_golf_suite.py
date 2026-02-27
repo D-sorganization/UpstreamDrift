@@ -42,18 +42,18 @@ Examples:
         action="store_true",
         help="Start API server only (no UI)",
     )
+
+    try:
+        from src.shared.python.engine_core.engine_manager import EngineType
+
+        engine_choices = [e.value for e in EngineType]
+    except ImportError:
+        engine_choices = ["mujoco", "drake", "pinocchio", "opensim", "myosim"]
+        engine_choices.extend(["matlab_2d", "matlab_3d", "pendulum"])
+
     parser.add_argument(
         "--engine",
-        choices=[
-            "mujoco",
-            "drake",
-            "pinocchio",
-            "opensim",
-            "myosim",
-            "matlab_2d",
-            "matlab_3d",
-            "pendulum",
-        ],
+        choices=engine_choices,
         help="Launch a specific engine directly",
     )
     parser.add_argument(

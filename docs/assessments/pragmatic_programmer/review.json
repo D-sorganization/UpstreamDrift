@@ -1,52 +1,8 @@
 {
-  "timestamp": "2026-02-27T12:09:11.641527",
+  "timestamp": "2026-02-27T13:05:45.845539",
   "repository": "UpstreamDrift",
   "files_analyzed": 2884,
   "issues": [
-    {
-      "principle": "DRY",
-      "severity": "MAJOR",
-      "title": "Duplicate code block",
-      "description": "Found in 2 locations",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\launch_golf_suite.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\tests\\unit\\test_engine_manager.py"
-      ],
-      "recommendation": "Refactor into shared utility"
-    },
-    {
-      "principle": "DRY",
-      "severity": "MAJOR",
-      "title": "Duplicate code block",
-      "description": "Found in 2 locations",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\launch_golf_suite.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\tests\\unit\\test_engine_manager.py"
-      ],
-      "recommendation": "Refactor into shared utility"
-    },
-    {
-      "principle": "DRY",
-      "severity": "MAJOR",
-      "title": "Duplicate code block",
-      "description": "Found in 2 locations",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\launch_golf_suite.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\tests\\unit\\test_engine_manager.py"
-      ],
-      "recommendation": "Refactor into shared utility"
-    },
-    {
-      "principle": "DRY",
-      "severity": "MAJOR",
-      "title": "Duplicate code block",
-      "description": "Found in 2 locations",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\setup_golf_suite.py",
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\mujoco\\python\\mujoco_humanoid_golf\\gui\\tabs\\humanoid_config_tab.py"
-      ],
-      "recommendation": "Refactor into shared utility"
-    },
     {
       "principle": "DRY",
       "severity": "MAJOR",
@@ -126,6 +82,50 @@
       "description": "Found in 2 locations",
       "files": [
         "C:\\Users\\diete\\Repositories\\UpstreamDrift\\examples\\motion_training_demo.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
+      ],
+      "recommendation": "Refactor into shared utility"
+    },
+    {
+      "principle": "DRY",
+      "severity": "MAJOR",
+      "title": "Duplicate code block",
+      "description": "Found in 2 locations",
+      "files": [
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\scripts\\analyze_completist_data.py",
+        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\scripts\\analyze_completist_data.py"
       ],
       "recommendation": "Refactor into shared utility"
     },
@@ -787,106 +787,6 @@
         "C:\\Users\\diete\\Repositories\\UpstreamDrift\\vendor\\ud-tools\\src\\data_processing\\data_processor\\python\\data_processor\\ui\\pyqt6\\statistical_widgets.py"
       ],
       "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: __init__",
-      "description": "Length 60 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\tools\\model_explorer\\end_effector_manager.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _setup_geometry_tab",
-      "description": "Length 55 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\tools\\model_explorer\\segment_panel.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _create_generation_tab",
-      "description": "Length 54 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\signal_toolkit\\widget_ui.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _create_calculus_tab",
-      "description": "Length 57 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\signal_toolkit\\widget_ui.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: create_input_tab",
-      "description": "Length 58 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\upstream_drift_tools\\process_calculators\\wgs_reactor_calculator.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _setup_ui",
-      "description": "Length 54 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\upstream_drift_tools\\process_calculators\\psa_package\\psa_gui.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _create_calculus_tab",
-      "description": "Length 57 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\ui\\qt\\widgets\\signal_toolkit_ui_mixin.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _setup_ui",
-      "description": "Length 55 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\shared\\python\\theme\\dialogs\\theme_manager_dialog.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "ORTHOGONALITY",
-      "severity": "MAJOR",
-      "title": "God function: _setup_pose_library",
-      "description": "Length 52 > 50 lines",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\src\\engines\\physics_engines\\mujoco\\python\\mujoco_humanoid_golf\\gui\\tabs\\manipulation_tab.py"
-      ],
-      "recommendation": "Split function"
-    },
-    {
-      "principle": "REVERSIBILITY",
-      "severity": "MAJOR",
-      "title": "Hardcoded API Key",
-      "description": "Secrets in code",
-      "files": [
-        "C:\\Users\\diete\\Repositories\\UpstreamDrift\\tests\\test_ai_adapters.py"
-      ],
-      "recommendation": "Use env vars"
     },
     {
       "principle": "REVERSIBILITY",

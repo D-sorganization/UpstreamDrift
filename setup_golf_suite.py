@@ -9,10 +9,10 @@ Pragmatic Programmer assessment (2026-01-23).
 
 from __future__ import annotations
 
+import pathlib
 import platform
 import subprocess
 import sys
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -54,7 +54,7 @@ def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
     return img
 
 
-def create_optimized_icon(source_path: Path, output_path: Path) -> bool:
+def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) -> bool:
     """Generate a Windows-optimized .ico file with correct mipmaps and sharpening.
 
     Orthogonality: Decouples image processing from file system management.
@@ -101,7 +101,10 @@ def create_optimized_icon(source_path: Path, output_path: Path) -> bool:
 
 
 def create_shortcut_windows(
-    target_script: str, working_dir: Path, icon_path: Path, description: str
+    target_script: str,
+    working_dir: pathlib.Path,
+    icon_path: pathlib.Path,
+    description: str,
 ) -> bool:
     """Create a desktop shortcut using PowerShell interaction."""
     python_exe = sys.executable
@@ -136,7 +139,7 @@ def create_shortcut_windows(
         return False
 
 
-def _find_source_image(repo_root: Path) -> Path | None:
+def _find_source_image(repo_root: pathlib.Path) -> pathlib.Path | None:
     """Find the best available source image for icon generation."""
     potential_sources = [
         repo_root / "GolfingRobot.png",
@@ -191,7 +194,7 @@ def main() -> int:
         create_shortcut_windows(
             target_script=script_path,
             working_dir=repo_root,
-            icon_path=output_icon if output_icon.exists() else Path(""),
+            icon_path=output_icon if output_icon.exists() else pathlib.Path(""),
             description="Launch the Unified Golf Modeling Suite",
         )
     else:

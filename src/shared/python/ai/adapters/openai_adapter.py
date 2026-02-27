@@ -13,7 +13,7 @@ Cost Model:
 
 Example:
     >>> from shared.python.ai.adapters.openai_adapter import OpenAIAdapter
-    >>> adapter = OpenAIAdapter(api_key="sk-...")
+    >>> adapter = OpenAIAdapter(api_key="your-api-key-here")
     >>> response = adapter.send_message("Analyze this swing", context, tools)
 """
 
@@ -74,7 +74,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         organization: Optional organization ID.
 
     Example:
-        >>> adapter = OpenAIAdapter(api_key="sk-...")
+        >>> adapter = OpenAIAdapter(api_key="your-api-key-here")
         >>> success, message = adapter.validate_connection()
         >>> if success:
         ...     response = adapter.send_message(

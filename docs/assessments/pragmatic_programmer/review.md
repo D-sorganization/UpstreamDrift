@@ -4,18 +4,6 @@
 
 ## Findings
 - **DRY** [MAJOR]: Duplicate code block
-  - Found in 2 locations
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\launch_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\tests\unit\test_engine_manager.py
-- **DRY** [MAJOR]: Duplicate code block
-  - Found in 2 locations
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\launch_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\tests\unit\test_engine_manager.py
-- **DRY** [MAJOR]: Duplicate code block
-  - Found in 2 locations
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\launch_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\tests\unit\test_engine_manager.py
-- **DRY** [MAJOR]: Duplicate code block
-  - Found in 2 locations
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\setup_golf_suite.py, C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\humanoid_config_tab.py
-- **DRY** [MAJOR]: Duplicate code block
   - Found in 5 locations
   - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\01_basic_simulation.py, C:\Users\diete\Repositories\UpstreamDrift\scripts\migrate_api_keys.py, C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\mujoco\python\playground_experiments\humanoid_cm_demo.py
 - **DRY** [MAJOR]: Duplicate code block
@@ -36,6 +24,18 @@
 - **DRY** [MAJOR]: Duplicate code block
   - Found in 2 locations
   - Files: C:\Users\diete\Repositories\UpstreamDrift\examples\motion_training_demo.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
+- **DRY** [MAJOR]: Duplicate code block
+  - Found in 2 locations
+  - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
 - **DRY** [MAJOR]: Duplicate code block
   - Found in 2 locations
   - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\scripts\analyze_completist_data.py
@@ -222,36 +222,6 @@
 - **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
   - Length 54 > 50 lines
   - Files: C:\Users\diete\Repositories\UpstreamDrift\vendor\ud-tools\src\data_processing\data_processor\python\data_processor\ui\pyqt6\statistical_widgets.py
-- **ORTHOGONALITY** [MAJOR]: God function: __init__
-  - Length 60 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\tools\model_explorer\end_effector_manager.py
-- **ORTHOGONALITY** [MAJOR]: God function: _setup_geometry_tab
-  - Length 55 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\tools\model_explorer\segment_panel.py
-- **ORTHOGONALITY** [MAJOR]: God function: _create_generation_tab
-  - Length 54 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\signal_toolkit\widget_ui.py
-- **ORTHOGONALITY** [MAJOR]: God function: _create_calculus_tab
-  - Length 57 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\signal_toolkit\widget_ui.py
-- **ORTHOGONALITY** [MAJOR]: God function: create_input_tab
-  - Length 58 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\upstream_drift_tools\process_calculators\wgs_reactor_calculator.py
-- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
-  - Length 54 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\upstream_drift_tools\process_calculators\psa_package\psa_gui.py
-- **ORTHOGONALITY** [MAJOR]: God function: _create_calculus_tab
-  - Length 57 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\ui\qt\widgets\signal_toolkit_ui_mixin.py
-- **ORTHOGONALITY** [MAJOR]: God function: _setup_ui
-  - Length 55 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\theme\dialogs\theme_manager_dialog.py
-- **ORTHOGONALITY** [MAJOR]: God function: _setup_pose_library
-  - Length 52 > 50 lines
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\manipulation_tab.py
-- **REVERSIBILITY** [MAJOR]: Hardcoded API Key
-  - Secrets in code
-  - Files: C:\Users\diete\Repositories\UpstreamDrift\tests\test_ai_adapters.py
 - **REVERSIBILITY** [MAJOR]: Hardcoded API Key
   - Secrets in code
   - Files: C:\Users\diete\Repositories\UpstreamDrift\tests\unit\api\test_security.py

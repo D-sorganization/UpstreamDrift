@@ -29,7 +29,7 @@ class TestSecurityManagerContract:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             assert manager is not None
 
     def test_has_required_methods(self):
@@ -39,7 +39,7 @@ class TestSecurityManagerContract:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             assert hasattr(manager, "hash_password")
             assert hasattr(manager, "verify_password")
             assert hasattr(manager, "create_access_token")
@@ -60,7 +60,7 @@ class TestSecurityManagerHashPassword:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             result = manager.hash_password("password123")
             assert isinstance(result, str)
 
@@ -71,7 +71,7 @@ class TestSecurityManagerHashPassword:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             password = "password123"
             hashed = manager.hash_password(password)
             assert hashed != password
@@ -83,7 +83,7 @@ class TestSecurityManagerHashPassword:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             password = "password123"
             hash1 = manager.hash_password(password)
             hash2 = manager.hash_password(password)
@@ -100,7 +100,7 @@ class TestSecurityManagerVerifyPassword:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             password = "correct_password"
             hashed = manager.hash_password(password)
             assert manager.verify_password(password, hashed) is True
@@ -112,7 +112,7 @@ class TestSecurityManagerVerifyPassword:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             hashed = manager.hash_password("correct_password")
             assert manager.verify_password("wrong_password", hashed) is False
 
@@ -123,7 +123,7 @@ class TestSecurityManagerVerifyPassword:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             assert manager.verify_password("password", "invalid_hash") is False
 
 
@@ -137,7 +137,7 @@ class TestSecurityManagerTokens:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             token = manager.create_access_token({"sub": "user123"})
             assert isinstance(token, str)
             assert len(token) > 0
@@ -149,7 +149,7 @@ class TestSecurityManagerTokens:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             token = manager.create_refresh_token({"sub": "user123"})
             assert isinstance(token, str)
             assert len(token) > 0
@@ -161,7 +161,7 @@ class TestSecurityManagerTokens:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             data = {"sub": "user123"}
             access = manager.create_access_token(data)
             refresh = manager.create_refresh_token(data)
@@ -174,7 +174,7 @@ class TestSecurityManagerTokens:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             data = {"sub": "user123", "email": "test@example.com"}
             token = manager.create_access_token(data)
             payload = manager.verify_token(token, "access")
@@ -189,7 +189,7 @@ class TestSecurityManagerTokens:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             data = {"sub": "user123"}
             token = manager.create_refresh_token(data)
             payload = manager.verify_token(token, "refresh")
@@ -205,7 +205,7 @@ class TestSecurityManagerTokens:
 
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             access_token = manager.create_access_token({"sub": "user123"})
 
             with pytest.raises(HTTPException) as exc_info:
@@ -222,7 +222,7 @@ class TestSecurityManagerTokens:
 
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
 
             with pytest.raises(HTTPException) as exc_info:
                 manager.verify_token("invalid.token.here", "access")
@@ -236,7 +236,7 @@ class TestSecurityManagerTokens:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            manager = SecurityManager(secret_key=str("test-secret-32-chars-long!!"))
             token = manager.create_access_token(
                 {"sub": "user123"}, expires_delta=timedelta(hours=1)
             )
@@ -254,7 +254,7 @@ class TestSecurityManagerApiKey:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             key = manager.generate_api_key()
             assert isinstance(key, str)
 
@@ -265,7 +265,7 @@ class TestSecurityManagerApiKey:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             key = manager.generate_api_key()
             assert key.startswith("gms_")
 
@@ -276,7 +276,7 @@ class TestSecurityManagerApiKey:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             keys = {manager.generate_api_key() for _ in range(100)}
             assert len(keys) == 100
 
@@ -287,7 +287,7 @@ class TestSecurityManagerApiKey:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             key = manager.generate_api_key()
             hashed = manager.hash_api_key(key)
             assert isinstance(hashed, str)
@@ -299,7 +299,7 @@ class TestSecurityManagerApiKey:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             key = manager.generate_api_key()
             hashed = manager.hash_api_key(key)
             assert manager.verify_api_key(key, hashed) is True
@@ -311,7 +311,7 @@ class TestSecurityManagerApiKey:
         ):
             from src.api.auth.security import SecurityManager
 
-            manager = SecurityManager(secret_key="test-secret")
+            manager = SecurityManager(secret_key=str("test-secret"))
             key = manager.generate_api_key()
             hashed = manager.hash_api_key(key)
             assert manager.verify_api_key("wrong_key", hashed) is False

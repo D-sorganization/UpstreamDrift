@@ -440,6 +440,40 @@ class HumanoidConfigTab(QWidget):
         "lradiusrx",
     ]
 
+    def _show_generator_dialog(
+        self,
+        title: str,
+        width: int,
+        height: int,
+        widget: QWidget,
+        signal_obj: pyqtSignal,
+        log_prefix: str,
+    ) -> None:
+        """Helper to show a generator dialog."""
+        from PyQt6.QtWidgets import QDialog
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(title)
+        dialog.setMinimumSize(width, height)
+        dlg_layout = QVBoxLayout(dialog)
+
+        if hasattr(widget, "set_joints"):
+            widget.set_joints(self._HUMANOID_JOINTS)
+
+        def on_generated(joint_name: str, coefficients: list[float]) -> None:
+            self.config.polynomial_coefficients[joint_name] = coefficients
+            self._save_config()
+            self._log(f"{log_prefix} generated for {joint_name}: {coefficients}")
+
+        signal_obj.connect(on_generated)
+        dlg_layout.addWidget(widget)
+
+        btn_close = QPushButton("Close")
+        btn_close.clicked.connect(dialog.accept)
+        dlg_layout.addWidget(btn_close)
+
+        dialog.exec()
+
     def _open_polynomial_generator(self) -> None:
         try:
             import importlib.util
@@ -466,27 +500,18 @@ class HumanoidConfigTab(QWidget):
             QMessageBox.warning(self, "Unavailable", str(e))
             return
 
-        from PyQt6.QtWidgets import QDialog
+        from PyQt6.QtWidgets import QDialog  # noqa: F401
 
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Polynomial Function Generator")
-        dialog.setMinimumSize(900, 700)
-        dlg_layout = QVBoxLayout(dialog)
-        poly_widget = PolynomialGeneratorWidget(dialog)
-        poly_widget.set_joints(self._HUMANOID_JOINTS)
+        poly_widget = PolynomialGeneratorWidget(None)
 
-        def on_generated(joint_name: str, coefficients: list[float]) -> None:
-            """Store generated polynomial coefficients for a joint."""
-            self.config.polynomial_coefficients[joint_name] = coefficients
-            self._save_config()
-            self._log(f"Polynomial generated for {joint_name}: {coefficients}")
-
-        poly_widget.polynomial_generated.connect(on_generated)
-        dlg_layout.addWidget(poly_widget)
-        btn_close = QPushButton("Close")
-        btn_close.clicked.connect(dialog.accept)
-        dlg_layout.addWidget(btn_close)
-        dialog.exec()
+        self._show_generator_dialog(
+            title="Polynomial Function Generator",
+            width=900,
+            height=700,
+            widget=poly_widget,
+            signal_obj=poly_widget.polynomial_generated,
+            log_prefix="Polynomial",
+        )
 
     def _open_signal_toolkit(self) -> None:
         try:
@@ -497,27 +522,16 @@ class HumanoidConfigTab(QWidget):
             QMessageBox.warning(self, "Unavailable", str(e))
             return
 
-        from PyQt6.QtWidgets import QDialog
+        toolkit_widget = SignalToolkitWidget(None)
 
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Signal Processing Toolkit")
-        dialog.setMinimumSize(1200, 800)
-        dlg_layout = QVBoxLayout(dialog)
-        toolkit_widget = SignalToolkitWidget(dialog)
-        toolkit_widget.set_joints(self._HUMANOID_JOINTS)
-
-        def on_generated(joint_name: str, coefficients: list[float]) -> None:
-            """Store generated signal coefficients for a joint."""
-            self.config.polynomial_coefficients[joint_name] = coefficients
-            self._save_config()
-            self._log(f"Signal generated for {joint_name}: {coefficients}")
-
-        toolkit_widget.signal_generated.connect(on_generated)
-        dlg_layout.addWidget(toolkit_widget)
-        btn_close = QPushButton("Close")
-        btn_close.clicked.connect(dialog.accept)
-        dlg_layout.addWidget(btn_close)
-        dialog.exec()
+        self._show_generator_dialog(
+            title="Signal Processing Toolkit",
+            width=1200,
+            height=800,
+            widget=toolkit_widget,
+            signal_obj=toolkit_widget.signal_generated,
+            log_prefix="Signal",
+        )
 
     # ------------------------------------------------------------------
     # Docker simulation launch
