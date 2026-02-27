@@ -1,0 +1,32 @@
+title:	ML integration strategy: optional training plugin/runtime for humanoid-motion workflows
+state:	OPEN
+author:	dieterolson
+labels:	
+comments:	1
+assignees:	
+projects:	
+milestone:	
+number:	1561
+--
+## Summary
+Define how UpstreamDrift consumes ML training capabilities without bloating core product runtime.
+
+## Problem
+Core product users should not need heavyweight ML stacks, but advanced users need a clear path to train humanoid-motion models.
+
+## Scope
+- Define plugin/module boundary between core app and ML training runtime
+- Specify data/model interfaces (input datasets, output artifacts, model registry)
+- Add reference workflow: finish core project -> start training -> import model back
+- Ensure non-GPU users retain full core functionality
+
+## Acceptance Criteria
+- [ ] Architecture doc for ML plugin/runtime boundary
+- [ ] One end-to-end reference workflow documented
+- [ ] Clear artifact contract for trained model import into UpstreamDrift
+- [ ] No required ML dependencies in core runtime
+
+## Rollback / Reversibility
+- ML runtime remains optional and isolated
+- Core runtime can operate unchanged if ML subsystem disabled
+

@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.docker_manager import DockerBuildThread
+from src.launchers.launcher_constants import DOCKER_STAGES
 from src.shared.python.docker_config import (
     DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME,
 )
@@ -36,6 +37,20 @@ from src.shared.python.theme.style_constants import Styles
 from .startup import REPOS_ROOT
 
 logger = get_logger(__name__)
+
+TAB_LAYOUT = 0
+TAB_CONFIG = 1
+TAB_DIAGNOSTICS = 2
+
+
+def validate_tab_index(tab_index: int) -> int:
+    """Validate SettingsDialog startup tab index."""
+    valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS}
+    if tab_index not in valid_indexes:
+        raise ValueError(
+            f"Invalid tab index {tab_index}; expected one of {sorted(valid_indexes)}"
+        )
+    return tab_index
 
 
 class SettingsDialog(QDialog):
@@ -50,9 +65,9 @@ class SettingsDialog(QDialog):
     reset_layout_requested = pyqtSignal()
 
     # Tab index constants for external callers
-    TAB_LAYOUT = 0
-    TAB_CONFIG = 1
-    TAB_DIAGNOSTICS = 2
+    TAB_LAYOUT = TAB_LAYOUT
+    TAB_CONFIG = TAB_CONFIG
+    TAB_DIAGNOSTICS = TAB_DIAGNOSTICS
 
     def __init__(
         self,
@@ -65,7 +80,7 @@ class SettingsDialog(QDialog):
         self.resize(850, 650)
         self._diagnostics_data = diagnostics_data
         self._setup_ui()
-        self.tabs.setCurrentIndex(initial_tab)
+        self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -176,7 +191,7 @@ class SettingsDialog(QDialog):
         stage_row = QHBoxLayout()
         stage_row.addWidget(QLabel("Target Stage:"))
         self.combo_stage = QComboBox()
-        self.combo_stage.addItems(["all", "mujoco", "pinocchio", "drake", "base"])
+        self.combo_stage.addItems(list(DOCKER_STAGES))
         stage_row.addWidget(self.combo_stage)
         build_inner.addLayout(stage_row)
 

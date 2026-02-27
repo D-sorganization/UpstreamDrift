@@ -1,0 +1,13 @@
+1562	OPEN	CLI naming cleanup: transition user-facing commands from golf-suite to upstream-drift		2026-02-23T18:02:59Z
+1561	OPEN	ML integration strategy: optional training plugin/runtime for humanoid-motion workflows		2026-02-23T18:01:04Z
+1558	OPEN	Docker runtime tiers: core vs training profiles for portable product delivery		2026-02-23T18:02:05Z
+1557	OPEN	Unify Docker entry points: compose, launcher, dev scripts, and health checks		2026-02-23T18:00:52Z
+1555	OPEN	Docker-First Migration: Canonical upstream-drift runtime and deprecation plan		2026-02-23T18:02:04Z
+1553	OPEN	Educational Platform: Bridge UpstreamDrift Engines to Geometry of Motion Textbook Series	enhancement	2026-02-23T02:55:59Z
+1549	OPEN	📊 Weekly CI Failure Digest - 2026-02-22	ci/cd, report, auto-generated	2026-02-22T00:39:05Z
+1543	OPEN	Shared: Sync theme system with Tools source (diverged file set)		2026-02-21T03:13:58Z
+1542	OPEN	Tauri: Add Content Security Policy to tauri.conf.json		2026-02-21T03:11:50Z
+1541	OPEN	React: Integrate engine capabilities UI into EngineSelector component		2026-02-21T03:11:43Z
+1540	OPEN	React: Complete URDF model rendering in Scene3D and URDFViewer		2026-02-21T03:11:33Z
+1539	OPEN	React: Consolidate duplicate engine management (useEngineManager vs useEngineStore)		2026-02-21T03:11:24Z
+1538	OPEN	React: Complete PuttingGreen and MotionCapture stub pages with backend API integration		2026-02-21T03:11:17Z
