@@ -64,7 +64,7 @@ class JacobianValidationResult:
         status = "PASS" if self.passes else "FAIL"
         return (
             f"Jacobian Validation [{status}]: "
-            f"Error={self.jacobian_error:.2e} (threshold=1e-6)"
+            f"Error={self.jacobian_error:.2e} (threshold=1e-06)"
         )
 
 
