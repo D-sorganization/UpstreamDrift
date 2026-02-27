@@ -23,6 +23,8 @@ import numpy as np
 
 if TYPE_CHECKING:
     import mujoco
+else:
+    mujoco = None
 
 logger = logging.getLogger(__name__)
 
