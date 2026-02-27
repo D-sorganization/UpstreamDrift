@@ -9,11 +9,11 @@ This module implements research-grade ball flight physics including:
 
 Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
 
-TODO: Implement Environmental Gradient Modeling (wind shear, temperature gradients).
-TODO: Implement Hydrodynamic Lubrication (wet ball physics).
-TODO: Implement Dimple Geometry Optimization.
-TODO: Implement Turbulence Modeling.
-TODO: Implement Mud Ball Physics.
+Planned enhancement: implement Environmental Gradient Modeling (wind shear, temperature gradients).
+Planned enhancement: implement Hydrodynamic Lubrication (wet ball physics).
+Planned enhancement: implement Dimple Geometry Optimization.
+Planned enhancement: implement Turbulence Modeling.
+Planned enhancement: implement Mud Ball Physics.
 """
 
 from __future__ import annotations

@@ -474,7 +474,7 @@ def extract_grf_from_contacts(
         logger.debug("GRF extracted from engine contact solver")
     else:
         # --- Fallback: static gravity approximation -----------------------
-        # FIXME: This fallback calculation is inaccurate for dynamic movements.
+        # Known limitation: fallback calculation is inaccurate for dynamic movements.
         # It only accounts for static weight (W=mg) and ignores dynamic acceleration forces (F=m(g+a)).
         # Need to implement proper inverse dynamics or force estimation.
         g = engine.compute_gravity_forces()

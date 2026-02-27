@@ -9,10 +9,10 @@ Note: This module does NOT implement any proprietary or patented analysis
 methodology. The expected segment order must be supplied by the caller
 and is treated as a neutral, user-defined parameter.
 
-TODO: Implement Proximal Braking Efficiency calculation.
-TODO: Implement X-Factor Stretch calculation (currently missing here, present in injury_risk.py).
-TODO: Implement Inter-segmental Power Flow calculation.
-FIXME: The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation.
+Planned enhancement: implement Proximal Braking Efficiency calculation.
+Planned enhancement: implement X-Factor Stretch calculation (currently missing here, present in injury_risk.py).
+Planned enhancement: implement Inter-segmental Power Flow calculation.
+Known limitation: `efficiency_score` may have patent exposure and should be re-reviewed before release.
 """
 
 from __future__ import annotations
