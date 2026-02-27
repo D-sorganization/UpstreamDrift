@@ -10,6 +10,9 @@ The launcher now features:
 - Pre-loaded resources passed to main window (no duplicate loading)
 """
 
+import builtins
+import importlib
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -25,6 +28,40 @@ else:
     QApplication = None  # type: ignore
 
 logger = get_logger(__name__)
+
+
+def _is_pyqt6_available() -> bool:
+    """Resolve PyQt availability with legacy module override support."""
+    legacy_module = sys.modules.get("launchers.unified_launcher")
+    if legacy_module is not None and hasattr(legacy_module, "PYQT6_AVAILABLE"):
+        return bool(legacy_module.PYQT6_AVAILABLE)
+    return bool(PYQT6_AVAILABLE)
+
+
+def _get_golf_main(*, prefer_legacy: bool = False):
+    """Resolve golf launcher entry point across legacy/new module paths."""
+    if prefer_legacy:
+        legacy_module = sys.modules.get("launchers.golf_launcher")
+        if legacy_module is not None and hasattr(legacy_module, "main"):
+            return legacy_module.main
+
+    try:
+        from .golf_launcher import main as golf_main
+
+        return golf_main
+    except ImportError:
+        pass
+
+    try:
+        module = importlib.import_module("launchers.golf_launcher")
+        if hasattr(module, "main"):
+            return module.main
+    except ImportError:
+        pass
+
+    from .golf_launcher import main as golf_main
+
+    return golf_main
 
 
 class UnifiedLauncher:
@@ -43,7 +80,7 @@ class UnifiedLauncher:
         Note: QApplication is created lazily in mainloop() to allow
         the async startup system to manage the application lifecycle.
         """
-        if not PYQT6_AVAILABLE:
+        if not _is_pyqt6_available():
             raise ImportError(
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
@@ -59,8 +96,7 @@ class UnifiedLauncher:
 
         Does not return, calls sys.exit().
         """
-        from .golf_launcher import main as golf_main
-
+        golf_main = _get_golf_main(prefer_legacy=True)
         golf_main()
 
     def show_status(self) -> None:
@@ -68,7 +104,10 @@ class UnifiedLauncher:
 
         Shows available engines, their status, and configuration.
         """
-        from src.shared.python.engine_core.engine_manager import EngineManager
+        try:
+            from shared.python.engine_core.engine_manager import EngineManager
+        except ImportError:
+            from src.shared.python.engine_core.engine_manager import EngineManager
 
         manager = EngineManager()
 
@@ -78,9 +117,12 @@ class UnifiedLauncher:
         if engines:
             logger.info("Available engines:")
             for _engine in engines:
-                logger.info(" - %s", getattr(_engine, "value", str(_engine)))
+                engine_name = str(getattr(_engine, "value", str(_engine))).upper()
+                logger.info(" - %s", engine_name)
+                builtins.print(engine_name)  # noqa: T201
         else:
             logger.info("No engines available.")
+            builtins.print("NO ENGINES AVAILABLE")  # noqa: T201
 
         # Show suite root
         from src.shared.python import SUITE_ROOT
@@ -123,7 +165,7 @@ class UnifiedLauncher:
 
         # Try shared package (development mode)
         try:
-            from src.shared.python import __version__
+            from shared.python import __version__
 
             version_str: str = __version__  # type: ignore[assignment]
             return version_str
@@ -145,13 +187,12 @@ def launch() -> None:
     - Progress updates shown during loading
     - No duplicate resource loading
     """
-    if not PYQT6_AVAILABLE:
+    if not _is_pyqt6_available():
         logger.warning("PyQt6 not available.")
         return
 
     # Delegate directly to golf_launcher.main() for async startup
-    from .golf_launcher import main as golf_main
-
+    golf_main = _get_golf_main(prefer_legacy=False)
     golf_main()
 
 

@@ -121,6 +121,12 @@ class TestProvenance(unittest.TestCase):
         # Check that original content was written last (or at least written)
         handle.write.assert_any_call("col1,col2\n1,2")
 
+    def test_capture_provenance_without_mujoco_version(self):
+        """Capture should tolerate mujoco module without __version__."""
+        with patch.dict("sys.modules", {"mujoco": object()}):
+            provenance = ProvenanceInfo.capture()
+        self.assertEqual(provenance.mujoco_version, "unknown")
+
 
 if __name__ == "__main__":
     unittest.main()

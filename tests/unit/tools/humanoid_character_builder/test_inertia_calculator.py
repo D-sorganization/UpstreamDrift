@@ -147,6 +147,14 @@ class TestPrimitiveInertiaCalculator:
         assert result.izz > 0
         assert result.validate_positive_definite()
 
+    def test_capsule_zero_geometry(self) -> None:
+        calc = PrimitiveInertiaCalculator()
+        result = calc.compute_capsule(mass=1.0, radius=0.0, length=0.0, axis="z")
+        assert result.ixx > 0.0
+        assert result.iyy > 0.0
+        assert result.izz > 0.0
+        assert result.volume > 0.0
+
     def test_ellipsoid_inertia(self) -> None:
         calc = PrimitiveInertiaCalculator()
         mass = 1.0

@@ -20,6 +20,8 @@ from humanoid_character_builder.mesh.inertia_calculator import (
     InertiaResult,
 )
 
+MIN_CAPSULE_DIMENSION_M = 1e-9
+
 
 class PrimitiveShape(Enum):
     """Primitive geometry shapes."""
@@ -171,8 +173,8 @@ class PrimitiveInertiaCalculator:
         Returns:
             InertiaResult for the capsule
         """
-        r = radius
-        h = length  # Cylinder length (not including caps)
+        r = max(float(radius), MIN_CAPSULE_DIMENSION_M)
+        h = max(float(length), MIN_CAPSULE_DIMENSION_M)  # Cylinder length
 
         # Volumes
         v_cylinder = math.pi * r**2 * h
