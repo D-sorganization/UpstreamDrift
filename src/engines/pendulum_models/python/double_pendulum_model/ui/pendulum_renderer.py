@@ -218,10 +218,11 @@ class PendulumRendererMixin:
         import numpy as np
 
         host = typing.cast("RendererProtocol", self)
+        ax3d = typing.cast(typing.Any, host.ax)
         gravity_len = max_range * 0.35
         g_start = pivot + np.array([max_range * 0.6, max_range * 0.2, max_range * 0.3])
         g_vec = np.array([0, 0, -gravity_len])
-        host.ax.quiver(
+        ax3d.quiver(
             g_start[0],
             g_start[1],
             g_start[2],
@@ -236,7 +237,7 @@ class PendulumRendererMixin:
         )
         # Gravity label
         g_label_pos = g_start + g_vec * 0.5
-        host.ax.text(
+        ax3d.text(
             g_label_pos[0] + max_range * 0.1,
             g_label_pos[1],
             g_label_pos[2],
@@ -309,7 +310,8 @@ class PendulumRendererMixin:
     ) -> None:
         """Draw the joint markers at pivot, elbow, and wrist."""
         host = typing.cast("RendererProtocol", self)
-        host.ax.scatter(
+        ax3d = typing.cast(typing.Any, host.ax)
+        ax3d.scatter(
             *pivot,
             color="black",
             s=250,
@@ -319,7 +321,7 @@ class PendulumRendererMixin:
             linewidths=3,
             zorder=10,
         )
-        host.ax.scatter(
+        ax3d.scatter(
             *elbow,
             color="#2E86AB",
             s=100,
@@ -328,7 +330,7 @@ class PendulumRendererMixin:
             linewidths=2,
             zorder=9,
         )
-        host.ax.scatter(
+        ax3d.scatter(
             *wrist,
             color="#A23B72",
             s=180,
@@ -347,8 +349,9 @@ class PendulumRendererMixin:
     ) -> None:
         """Draw labels at midpoints of segments."""
         host = typing.cast("RendererProtocol", self)
+        ax3d = typing.cast(typing.Any, host.ax)
         upper_mid = (pivot + elbow) / 2
-        host.ax.text(
+        ax3d.text(
             upper_mid[0],
             upper_mid[1],
             upper_mid[2],
@@ -366,7 +369,7 @@ class PendulumRendererMixin:
         )
 
         lower_mid = (elbow + wrist) / 2
-        host.ax.text(
+        ax3d.text(
             lower_mid[0],
             lower_mid[1],
             lower_mid[2],
