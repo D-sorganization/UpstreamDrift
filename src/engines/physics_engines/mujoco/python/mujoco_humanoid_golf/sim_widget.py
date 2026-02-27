@@ -30,6 +30,8 @@ from .sim_rendering_mixin import SimRenderingMixin
 from .telemetry import TelemetryRecorder
 
 logger = get_logger(__name__)
+
+DEFAULT_MJ_TIMESTEP = 1.0 / 60.0
 FORCE_VISUALIZATION_THRESHOLD: Final[float] = 1e-5
 
 
@@ -837,6 +839,26 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     # -------- Internal stepping --------
 
+    def _safe_model_timestep(self) -> float:
+        """Return a positive MuJoCo timestep with a stable fallback."""
+        if self.model is None:
+            return DEFAULT_MJ_TIMESTEP
+        try:
+            timestep = float(self.model.opt.timestep)
+        except (AttributeError, TypeError, ValueError):
+            return DEFAULT_MJ_TIMESTEP
+        return timestep if timestep > 0.0 else DEFAULT_MJ_TIMESTEP
+
+    def _safe_model_nu(self) -> int:
+        """Return actuator count as a non-negative integer."""
+        if self.model is None:
+            return 0
+        try:
+            nu = int(self.model.nu)
+        except (AttributeError, TypeError, ValueError):
+            return 0
+        return max(0, nu)
+
     def _on_timer(self) -> None:  # noqa: PLR0912, PLR0915
         """Handle timer event for simulation stepping."""
         if self.model is None or self.data is None:
@@ -848,17 +870,18 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 self._render_once()
                 return
 
-            steps_per_frame = max(1, int(1.0 / (self.fps * self.model.opt.timestep)))
+            steps_per_frame = max(
+                1, int(1.0 / (self.fps * self._safe_model_timestep()))
+            )
 
             for _ in range(steps_per_frame):
                 if self.control_system is not None:
                     self.control_system.update_time(self.data.time)
 
                 if self.control_system is not None:
+                    nu = self._safe_model_nu()
                     velocities = (
-                        self.data.qvel[: self.model.nu]
-                        if self.model.nu <= len(self.data.qvel)
-                        else None
+                        self.data.qvel[:nu] if nu <= len(self.data.qvel) else None
                     )
                     control_torques = self.control_system.compute_control_vector(
                         velocities,
