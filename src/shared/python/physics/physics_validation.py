@@ -132,6 +132,16 @@ class PhysicsValidator:
         self._scratch_data.qvel[:] = qvel
         self._mujoco.mj_forward(self.model, self._scratch_data)
 
+        # Prefer MuJoCo-native energy computation when available.
+        if hasattr(self._mujoco, "mj_energyPos") and hasattr(
+            self._mujoco, "mj_energyVel"
+        ):
+            self._mujoco.mj_energyPos(self.model, self._scratch_data)
+            self._mujoco.mj_energyVel(self.model, self._scratch_data)
+            kinetic_energy = float(self._scratch_data.energy[1])
+            if np.isfinite(kinetic_energy):
+                return kinetic_energy
+
         # Get mass matrix
         M = np.zeros((self.model.nv, self.model.nv))
         self._mujoco.mj_fullM(self.model, M, self._scratch_data.qM)
@@ -151,6 +161,13 @@ class PhysicsValidator:
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = 0
         self._mujoco.mj_forward(self.model, self._scratch_data)
+
+        # Prefer MuJoCo-native energy computation when available.
+        if hasattr(self._mujoco, "mj_energyPos"):
+            self._mujoco.mj_energyPos(self.model, self._scratch_data)
+            potential_energy = float(self._scratch_data.energy[0])
+            if np.isfinite(potential_energy):
+                return potential_energy
 
         # PE = sum(m_i * g * h_i) for all bodies
         pe = 0.0
