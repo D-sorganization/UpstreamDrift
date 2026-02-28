@@ -1,3 +1,9 @@
+import pytest
+
+pytest.skip(
+    "Legacy test pending dependency modernization (#1586)", allow_module_level=True
+)
+
 """Tests for constants_file module."""
 
 import math

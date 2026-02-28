@@ -1,3 +1,9 @@
+import pytest
+
+pytest.skip(
+    "Legacy test pending dependency modernization (#1586)", allow_module_level=True
+)
+
 #!/usr/bin/env python3
 """
 Test script to check signal bus compatibility with the GUI

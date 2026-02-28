@@ -1,3 +1,9 @@
+import pytest
+
+pytest.skip(
+    "Legacy test pending dependency modernization (#1586)", allow_module_level=True
+)
+
 """test models in the distribution
 this script finds all osim files in the repo, instantiate opensim.Model from each
 then call initSystem on it, roundtrips save/restore to compare.

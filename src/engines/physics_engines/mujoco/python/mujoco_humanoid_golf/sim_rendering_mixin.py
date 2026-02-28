@@ -102,6 +102,9 @@ class SimRenderingMixin:
         if self.visible_frames or self.visible_coms:
             rgb = self._add_frame_and_com_overlays(rgb)
 
+        if self.show_live_euler or self.show_live_quat or self.show_live_screw:
+            rgb = self._add_live_kinematics_overlays(rgb)
+
         if self.meshcat_adapter:
             try:
                 self.meshcat_adapter.update(self.data)
@@ -145,6 +148,114 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _add_live_kinematics_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
+        if self.model is None or self.data is None:
+            return rgb
+        cv2 = get_cv2()
+        if cv2 is None:
+            return rgb
+
+        selected_id = (
+            getattr(self.manipulator, "selected_body_id", None)
+            if self.manipulator
+            else None
+        )
+        if selected_id is None or selected_id < 0:
+            return rgb
+
+        img = rgb.copy()
+        body_id = selected_id
+        pos = self.data.xpos[body_id].copy()
+        quat = self.data.xquat[body_id].copy()
+        mat = self.data.xmat[body_id].reshape(3, 3).copy()
+
+        screen_pos = self._world_to_screen(pos)
+        if screen_pos is None:
+            return img
+
+        x, y = screen_pos
+        y_offset = 30
+
+        if getattr(self, "show_live_euler", False):
+            # Convert rotation matrix to xyz euler
+            sy = np.sqrt(mat[0, 0] * mat[0, 0] + mat[1, 0] * mat[1, 0])
+            singular = sy < 1e-6
+            if not singular:
+                x_e = np.arctan2(mat[2, 1], mat[2, 2])
+                y_e = np.arctan2(-mat[2, 0], sy)
+                z_e = np.arctan2(mat[1, 0], mat[0, 0])
+            else:
+                x_e = np.arctan2(-mat[1, 2], mat[1, 1])
+                y_e = np.arctan2(-mat[2, 0], sy)
+                z_e = 0
+            msg = (
+                f"Euler (xyz): [{np.rad2deg(x_e):.1f}, "
+                f"{np.rad2deg(y_e):.1f}, {np.rad2deg(z_e):.1f}] deg"
+            )
+            cv2.putText(
+                img,
+                msg,
+                (x + 10, y + y_offset),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.4,
+                (0, 255, 255),
+                1,
+            )
+            y_offset += 15
+
+        if getattr(self, "show_live_quat", False):
+            msg = (
+                f"Quat (w,x,y,z): [{quat[0]:.2f}, "
+                f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"
+            )
+            cv2.putText(
+                img,
+                msg,
+                (x + 10, y + y_offset),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.4,
+                (255, 255, 0),
+                1,
+            )
+            y_offset += 15
+
+        if getattr(self, "show_live_screw", False):
+            T2 = np.eye(4)
+            T2[:3, :3] = mat
+            T2[:3, 3] = pos
+            prev_T = self._prev_body_ts.get(body_id)
+            self._prev_body_ts[body_id] = T2
+
+            if prev_T is not None:
+                R_rel = prev_T[:3, :3].T @ T2[:3, :3]
+                tr = np.trace(R_rel)
+                theta = np.arccos(np.clip((tr - 1) / 2.0, -1.0, 1.0))
+                if abs(theta) > 1e-6:
+                    axis = np.array(
+                        [
+                            R_rel[2, 1] - R_rel[1, 2],
+                            R_rel[0, 2] - R_rel[2, 0],
+                            R_rel[1, 0] - R_rel[0, 1],
+                        ]
+                    ) / (2 * np.sin(theta))
+                    world_axis = prev_T[:3, :3] @ axis
+                    vec_end = pos + world_axis * 0.5
+                    end_px = self._world_to_screen(vec_end)
+                    if end_px:
+                        cv2.arrowedLine(
+                            img, (x, y), end_px, (255, 0, 255), 2, tipLength=0.2
+                        )
+                    cv2.putText(
+                        img,
+                        f"Screw Angle: {np.rad2deg(theta):.2f} deg",
+                        (x + 10, y + y_offset),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.4,
+                        (255, 0, 255),
+                        1,
+                    )
+        return img
 
     def _update_background_colors(self: Any) -> None:
         if self.scene is not None:

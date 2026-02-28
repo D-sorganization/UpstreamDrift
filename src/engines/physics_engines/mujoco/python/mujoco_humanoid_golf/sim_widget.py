@@ -101,6 +101,13 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_selected_body = True
         self.show_constraints = True
 
+        self.show_live_euler = False
+        self.show_live_quat = False
+        self.show_live_screw = False
+
+        # Store previous SE(3) pose for screw axis if screw is enabled
+        self._prev_body_ts: dict[int, np.ndarray] = {}
+
         self.visible_frames: set[int] = set()
         self.visible_coms: set[int] = set()
 
@@ -531,6 +538,19 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_torque_vectors = enabled
         if scale is not None:
             self.torque_scale = scale
+
+    def set_live_kinematics_visualization(
+        self,
+        euler: bool = False,
+        quat: bool = False,
+        screw: bool = False,
+    ) -> None:
+        """Toggle live overlay of Euler angles, quaternions, and screw axis."""
+        self.show_live_euler = euler
+        self.show_live_quat = quat
+        self.show_live_screw = screw
+        if not screw:
+            self._prev_body_ts.clear()
 
     def set_force_visualization(
         self, enabled: bool, scale: float | None = None

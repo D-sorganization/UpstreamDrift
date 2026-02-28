@@ -35,6 +35,7 @@ class VisualizationTab(QtWidgets.QWidget):
         viz_layout.addWidget(self._setup_background_controls())
         viz_layout.addWidget(self._setup_meshcat_controls())
         viz_layout.addWidget(self._setup_swing_plane_controls())
+        viz_layout.addWidget(self._setup_live_kinematics_controls())
         force_group, ellipsoid_group = self._setup_force_torque_controls()
         viz_layout.addWidget(ellipsoid_group)
         viz_layout.addWidget(force_group)
@@ -278,6 +279,24 @@ class VisualizationTab(QtWidgets.QWidget):
         swing_layout.addWidget(reset_traj_btn)
 
         return swing_group
+
+    def _setup_live_kinematics_controls(self) -> QtWidgets.QGroupBox:
+        group = QtWidgets.QGroupBox("Live Kinematics (Right-Click a Body)")
+        layout = QtWidgets.QVBoxLayout(group)
+
+        self.show_live_euler_cb = QtWidgets.QCheckBox("Show Euler Angles (XYZ)")
+        self.show_live_euler_cb.stateChanged.connect(self.on_live_kinematics_changed)
+        layout.addWidget(self.show_live_euler_cb)
+
+        self.show_live_quat_cb = QtWidgets.QCheckBox("Show Quaternions (WXYZ)")
+        self.show_live_quat_cb.stateChanged.connect(self.on_live_kinematics_changed)
+        layout.addWidget(self.show_live_quat_cb)
+
+        self.show_live_screw_cb = QtWidgets.QCheckBox("Show Screw Axis Motion")
+        self.show_live_screw_cb.stateChanged.connect(self.on_live_kinematics_changed)
+        layout.addWidget(self.show_live_screw_cb)
+
+        return group
 
     def _setup_force_torque_controls(
         self,
@@ -567,6 +586,14 @@ class VisualizationTab(QtWidgets.QWidget):
         # Update button colors
         self.sky_color_btn.setStyleSheet(Styles.SWATCH_SKY_DEFAULT)
         self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
+
+    def on_live_kinematics_changed(self, state: int = 0) -> None:
+        """Handle live kinematics visualization toggle."""
+        self.sim_widget.set_live_kinematics_visualization(
+            euler=self.show_live_euler_cb.isChecked(),
+            quat=self.show_live_quat_cb.isChecked(),
+            screw=self.show_live_screw_cb.isChecked(),
+        )
 
     def on_open_meshcat(self) -> None:
         """Open the Meshcat visualizer in the default browser."""

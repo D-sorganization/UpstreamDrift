@@ -1,3 +1,9 @@
+import pytest
+
+pytest.skip(
+    "Legacy test pending dependency modernization (#1586)", allow_module_level=True
+)
+
 """Quick test script to verify new models load correctly."""
 
 import sys

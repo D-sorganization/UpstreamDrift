@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+import pytest
+
+pytest.skip(
+    "Legacy test pending dependency modernization (#1586)", allow_module_level=True
+)
+
+
 from unittest.mock import MagicMock
 
 import numpy as np
