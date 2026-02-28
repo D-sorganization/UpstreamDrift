@@ -101,7 +101,11 @@ Implementation choices that pose legal or maintenance risks.
 
 ### Patent Risks
 *   **File:** `src/shared/python/analysis/pca_analysis.py`
-    *   **Issue:** `efficiency_score` calculation (`matches / len(expected_order)`) may infringe on patents.
+    *   **Issue:** `efficiency_score` calculation (`matches / len(expected_order)`) may infringe on patents (Zepp/Blast Motion).
+*   **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
+    *   **Issue:** `efficiency_score` calculation flagged as potential patent infringement risk.
+*   **File:** `src/deployment/teleoperation/devices.py`
+    *   **Issue:** `HapticDeviceInput.set_force_feedback` poses patent risk (Immersion Corp) if complex effects are implemented. Currently safe (clipping only), but future enhancements require legal review.
 *   **File:** `src/shared/python/injury/injury_risk.py`
     *   **Issue:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
 
@@ -114,13 +118,13 @@ Implementation choices that pose legal or maintenance risks.
 
 1.  **Immediate Priority:** Implement the missing connection methods in `RealTimeController` to unblock hardware testing.
 2.  **High Priority:** Address physics fidelity gaps in `ball_flight_physics.py` and `flexible_shaft.py`.
-3.  **High Priority:** Refactor `pca_analysis.py` and `injury_risk.py` to mitigate patent risks by renaming terms and updating algorithms.
-4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py`.
+3.  **High Priority:** Refactor `pca_analysis.py`, `kinematic_sequence.py` and `injury_risk.py` to mitigate patent risks by renaming terms and updating algorithms.
+4.  **Medium Priority:** Implement missing input device drivers in `teleoperation/devices.py` and ensure Haptic feedback remains physics-based to avoid patent infringement.
 5.  **Low Priority:** Complete tooling utilities and remaining TODOs.
 
-## Update: 2026-02-25
+## Update: 2026-02-26
 
-A comprehensive review of implementation gaps and inaccuracies was conducted on 2026-02-25. This review identified additional gaps in:
+A comprehensive review of implementation gaps and inaccuracies was conducted on 2026-02-26. This review identified additional gaps in:
 *   **OpenSim GUI:** Potential fragility with hardcoded marker names.
 *   **Signal Toolkit:** `NotImplementedError` for unsupported file formats.
 *   **Format Conversion:** Incomplete implementation of model format converters.
