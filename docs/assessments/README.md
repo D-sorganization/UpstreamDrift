@@ -138,6 +138,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-02-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-02-26.md`               |
 | 2026-02-28 | Widespread Testing Gaps Issue            | `docs/assessments/completist/issues/ISSUE_TESTING_GAPS_2026_02_28.md` |
 | 2026-02-28 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-02-28.md` |
+| 2026-03-01 | Physics Audit Report                     | `docs/assessments/physics/Physics_Audit_2026-03-01.md` |
 
 ---
 
