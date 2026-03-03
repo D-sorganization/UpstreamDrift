@@ -1,13 +1,16 @@
-# Completist Report: 2026-03-01
+# Completist Report: 2026-03-02
 
 ## Executive Summary
+
 - **Critical Gaps**: 300
 - **Feature Gaps (TODO)**: 79
 - **Technical Debt**: 25
 - **Documentation Gaps**: 283
 
 ## Visualization
+
 ### Status Overview
+
 ```mermaid
 pie title Completion Status
     "Impl Gaps (Critical)" : 300
@@ -17,6 +20,7 @@ pie title Completion Status
 ```
 
 ### Top Impacted Modules
+
 ```mermaid
 pie title Issues by Module
     "src" : 312
@@ -27,143 +31,147 @@ pie title Issues by Module
 ```
 
 ## Critical Incomplete (Top 50)
-| File | Line | Type | Impact | Coverage | Complexity |
-|---|---|---|---|---|---|
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 40 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 46 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 51 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 56 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py` | 183 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py` | 193 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 21 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 27 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 32 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 36 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py` | 713 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py` | 716 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py` | 863 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py` | 866 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/__init__.py` | 221 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py` | 156 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/mixins/calculator_state_mixin.py` | 428 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py` | 68 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py` | 74 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py` | 79 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py` | 99 | Stub | 5 | 3 | 4 |
-| `./src/engines/common/simulation_control.py` | 188 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/simulation_control.py` | 194 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/simulation_control.py` | 206 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/simulation_control.py` | 240 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/simulation_control.py` | 252 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/physics.py` | 482 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/physics.py` | 486 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/physics.py` | 490 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/export.py` | 71 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/export.py` | 83 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/export.py` | 97 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/export.py` | 106 | Stub | 5 | 2 | 4 |
-| `./src/engines/common/export.py` | 111 | Stub | 5 | 2 | 4 |
-| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py` | 558 | Stub | 5 | 2 | 4 |
-| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py` | 852 | Stub | 5 | 2 | 4 |
-| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_playback_controller.py` | 269 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py` | 79 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py` | 82 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py` | 128 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py` | 312 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/drake/python/src/drake_gui_app.py` | 358 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/docker/gui/golf_gui_docker.py` | 39 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/docker/gui/golf_gui_docker.py` | 40 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py` | 297 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/pinocchio_interface.py` | 154 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py` | 71 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py` | 75 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_io.py` | 514 | Stub | 5 | 2 | 4 |
-| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/core/main_window.py` | 465 | Stub | 5 | 2 | 4 |
+
+| File                                                                                                                                                                                | Line | Type | Impact | Coverage | Complexity |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ---- | ------ | -------- | ---------- |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                                                                                        | 40   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                                                                                        | 46   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                                                                                        | 51   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                                                                                        | 56   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py`                                                                                                     | 183  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py`                                                                                                     | 193  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                                                                                          | 21   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                                                                                          | 27   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                                                                                          | 32   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                                                                                          | 36   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py`                                                                      | 713  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py`                                                                      | 716  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py`                                                                      | 863  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py`                                                                      | 866  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/__init__.py`                                                                 | 221  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py`                                                                               | 156  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/mixins/calculator_state_mixin.py`                                                                                      | 428  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py`                                                                                       | 68   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py`                                                                                       | 74   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py`                                                                                       | 79   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py`                                                                                       | 99   | Stub | 5      | 3        | 4          |
+| `./src/engines/common/simulation_control.py`                                                                                                                                        | 188  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/simulation_control.py`                                                                                                                                        | 194  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/simulation_control.py`                                                                                                                                        | 206  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/simulation_control.py`                                                                                                                                        | 240  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/simulation_control.py`                                                                                                                                        | 252  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/physics.py`                                                                                                                                                   | 482  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/physics.py`                                                                                                                                                   | 486  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/physics.py`                                                                                                                                                   | 490  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/export.py`                                                                                                                                                    | 71   | Stub | 5      | 2        | 4          |
+| `./src/engines/common/export.py`                                                                                                                                                    | 83   | Stub | 5      | 2        | 4          |
+| `./src/engines/common/export.py`                                                                                                                                                    | 97   | Stub | 5      | 2        | 4          |
+| `./src/engines/common/export.py`                                                                                                                                                    | 106  | Stub | 5      | 2        | 4          |
+| `./src/engines/common/export.py`                                                                                                                                                    | 111  | Stub | 5      | 2        | 4          |
+| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py`      | 558  | Stub | 5      | 2        | 4          |
+| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py`      | 852  | Stub | 5      | 2        | 4          |
+| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_playback_controller.py` | 269  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py`                                                                                                          | 79   | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py`                                                                                                          | 82   | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py`                                                                                                          | 128  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py`                                                                                                              | 312  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/drake/python/src/drake_gui_app.py`                                                                                                                   | 358  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/docker/gui/golf_gui_docker.py`                                                                                                                | 39   | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/docker/gui/golf_gui_docker.py`                                                                                                                | 40   | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py`                                                                                                         | 297  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/pinocchio_interface.py`                                                                                           | 154  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py`                                                                                     | 71   | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py`                                                                                     | 75   | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_io.py`                                                                                                       | 514  | Stub | 5      | 2        | 4          |
+| `./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/core/main_window.py`                                                                                          | 465  | Stub | 5      | 2        | 4          |
 
 ## Feature Gap Matrix
-| Module | Feature Gap | Type |
-|---|---|---|
-| `./scripts/refresh_completist_data.py` | "TODO\|FIXME\|XXX\|HACK\|TEMP", | TODO |
-| `./scripts/pragmatic_programmer_review.py` | """Report high TODO counts as a technical debt indicator.""" | TODO |
-| `./scripts/pragmatic_programmer_review.py` | if "TODO" in content: | TODO |
-| `./scripts/pragmatic_programmer_review.py` | "title": f"High TODO count ({len(todos)})", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | ["rg", "-n", "TODO\|FIXME", "src", "tests", "scripts"], | TODO |
-| `./scripts/generate_todo_fixme_register.py` | "# TODO/FIXME Debt Register", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | "This register is generated from inline TODO/FIXME markers.", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | marker = "TODO" if "TODO" in text else "FIXME" | TODO |
-| `./vendor/ud-tools/drafts/Jules-Code-Quality-Reviewer.yml` | 5. **Placeholders**: Identify placeholder code (TODO, FIXME, NotImplemented, pass statements) | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | - **Markers**: 445 `TODO` and 140 `FIXME` markers indicate significant unfinished work. | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | -   445 `TODO` markers. | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | -   Convert valid `TODO` items into GitHub Issues. | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | f.write("    - **Issue**: 445 `TODO` markers.\n") | TODO |
-| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | if "TODO" in content: | TODO |
-| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | "title": f"High TODO count ({len(todos)})", | TODO |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-valu | TODO |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - [X] Zero TODO/FIXME/pass in diff | TODO |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | # TODO: implement this properly | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/logger.ts` | * TODO: Add pino when ready for production. | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | swingType: SwingType.UNKNOWN, // TODO: Implement swing type detection | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | armHang: 'good', // TODO: Implement arm hang detection | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts` | * TODO: Add DOMPurify when ready for production. | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts` | // TODO: Use DOMPurify to allow safe HTML tags | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts` | // TODO: Parse and validate RGB values | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TODO: Move fps to client-side config or use from video metadata | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TODO: Save to database when backend is ready | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TODO: Save pose data to state or database when ready | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/javascript/README.md` | - No placeholders (no TODO, FIXME, etc.) | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/matlab/models/pendulum_model.m` | % TODO: Implement pendulum model | TODO |
-| `./vendor/ud-tools/src/tools/README.md` | - **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError | TODO |
-| `./vendor/ud-tools/src/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | (r"\bTODO\b", "TODO placeholder found"), | TODO |
-| `./vendor/ud-tools/src/tools/quality_utils.py` | "Angle bracket TODO placeholder", | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TODO: Add Code to Begin Model here | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TODO: Set the coordinate properties | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/skeleton.cpp` | // TODO: Add Code to Begin Model here | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section A.1 TODO: Create the Pelvis and set the coordinate properties | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section A.2 TODO: Create the LeftThigh, LeftShank, RightThigh and RightShank bodies | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.1 TODO: Add ContactSphere to the left hip, the knee, and the foot points | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.2 TODO: Add HuntCrossleyForces | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.2 TODO: Add HuntCrossleyForces betweeen the remaining ContactSpheres | TODO |
-| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section C.1 TODO: Construct CoordinateLimitForces for the Hip and Knee | TODO |
-| `./shared/models/opensim/opensim-models/CMakeLists.txt` | RENAME run_forward.xml) # TODO inconsistent filename; which should we use? | TODO |
-| `./shared/models/opensim/opensim-models/CMakeLists.txt` | # TODO subject01_metabolics* files? | TODO |
-| `./shared/models/opensim/opensim-models/CMakeLists.txt` | # TODO should we copy over the OutputReference folder? | TODO |
-| `./shared/models/opensim/opensim-models/CMakeLists.txt` | PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not? | TODO |
-| `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
+
+| Module                                                                                                                                     | Feature Gap                                                                                          | Type |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ---- |
+| `./scripts/refresh_completist_data.py`                                                                                                     | "TODO\|FIXME\|XXX\|HACK\|TEMP",                                                                      | TODO |
+| `./scripts/pragmatic_programmer_review.py`                                                                                                 | """Report high TODO counts as a technical debt indicator."""                                         | TODO |
+| `./scripts/pragmatic_programmer_review.py`                                                                                                 | if "TODO" in content:                                                                                | TODO |
+| `./scripts/pragmatic_programmer_review.py`                                                                                                 | "title": f"High TODO count ({len(todos)})",                                                          | TODO |
+| `./scripts/generate_todo_fixme_register.py`                                                                                                | ["rg", "-n", "TODO\|FIXME", "src", "tests", "scripts"],                                              | TODO |
+| `./scripts/generate_todo_fixme_register.py`                                                                                                | "# TODO/FIXME Debt Register",                                                                        | TODO |
+| `./scripts/generate_todo_fixme_register.py`                                                                                                | "This register is generated from inline TODO/FIXME markers.",                                        | TODO |
+| `./scripts/generate_todo_fixme_register.py`                                                                                                | marker = "TODO" if "TODO" in text else "FIXME"                                                       | TODO |
+| `./vendor/ud-tools/drafts/Jules-Code-Quality-Reviewer.yml`                                                                                 | 5. **Placeholders**: Identify placeholder code (TODO, FIXME, NotImplemented, pass statements)        | TODO |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                                                        | - **Markers**: 445 `TODO` and 140 `FIXME` markers indicate significant unfinished work.              | TODO |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                                                        | - 445 `TODO` markers.                                                                                | TODO |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                                                        | - Convert valid `TODO` items into GitHub Issues.                                                     | TODO |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                                                        | f.write(" - **Issue**: 445 `TODO` markers.\n")                                                       | TODO |
+| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py`                                                                                 | if "TODO" in content:                                                                                | TODO |
+| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py`                                                                                 | "title": f"High TODO count ({len(todos)})",                                                          | TODO |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md`                                                                                          | - **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-valu | TODO |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md`                                                                                          | - [X] Zero TODO/FIXME/pass in diff                                                                   | TODO |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md`                                                                                          | # TODO: implement this properly                                                                      | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/logger.ts`                                                            | \* TODO: Add pino when ready for production.                                                         | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts`                                                | swingType: SwingType.UNKNOWN, // TODO: Implement swing type detection                                | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts`                                                | armHang: 'good', // TODO: Implement arm hang detection                                               | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts`                                                          | \* TODO: Add DOMPurify when ready for production.                                                    | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts`                                                          | // TODO: Use DOMPurify to allow safe HTML tags                                                       | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts`                                                          | // TODO: Parse and validate RGB values                                                               | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx`                                                             | // TODO: Move fps to client-side config or use from video metadata                                   | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx`                                                             | // TODO: Save to database when backend is ready                                                      | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx`                                                             | // TODO: Save pose data to state or database when ready                                              | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/javascript/README.md`                                                              | - No placeholders (no TODO, FIXME, etc.)                                                             | TODO |
+| `./vendor/ud-tools/src/media_processing/video_processor/matlab/models/pendulum_model.m`                                                    | % TODO: Implement pendulum model                                                                     | TODO |
+| `./vendor/ud-tools/src/tools/README.md`                                                                                                    | - **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError                                | TODO |
+| `./vendor/ud-tools/src/tools/matlab_utilities/README.md`                                                                                   | - TODO, FIXME, HACK, XXX placeholders                                                                | TODO |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                                                                                      | (r"\bTODO\b", "TODO placeholder found"),                                                             | TODO |
+| `./vendor/ud-tools/src/tools/quality_utils.py`                                                                                             | "Angle bracket TODO placeholder",                                                                    | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TODO: Add Code to Begin Model here                                                                | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TODO: Set the coordinate properties                                                               | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/skeleton.cpp`                                          | // TODO: Add Code to Begin Model here                                                                | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp`                           | // Section A.1 TODO: Create the Pelvis and set the coordinate properties                             | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp`                           | // Section A.2 TODO: Create the LeftThigh, LeftShank, RightThigh and RightShank bodies               | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp`                           | // Section B.1 TODO: Add ContactSphere to the left hip, the knee, and the foot points                | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp`                           | // Section B.2 TODO: Add HuntCrossleyForces                                                          | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp`                           | // Section B.2 TODO: Add HuntCrossleyForces betweeen the remaining ContactSpheres                    | TODO |
+| `./shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp`                           | // Section C.1 TODO: Construct CoordinateLimitForces for the Hip and Knee                            | TODO |
+| `./shared/models/opensim/opensim-models/CMakeLists.txt`                                                                                    | RENAME run_forward.xml) # TODO inconsistent filename; which should we use?                           | TODO |
+| `./shared/models/opensim/opensim-models/CMakeLists.txt`                                                                                    | # TODO subject01_metabolics\* files?                                                                 | TODO |
+| `./shared/models/opensim/opensim-models/CMakeLists.txt`                                                                                    | # TODO should we copy over the OutputReference folder?                                               | TODO |
+| `./shared/models/opensim/opensim-models/CMakeLists.txt`                                                                                    | PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not?                                     | TODO |
+| `./src/engines/pendulum_models/tools/matlab_utilities/README.md`                                                                           | - TODO, FIXME, HACK, XXX placeholders                                                                | TODO |
+| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md`                                                         | - TODO, FIXME, HACK, XXX placeholders                                                                | TODO |
+| `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md`                                                                 | - TODO, FIXME, HACK, XXX placeholders                                                                | TODO |
+| `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md`                                                                     | - TODO, FIXME, HACK, XXX placeholders                                                                | TODO |
 
 ## Technical Debt Register
-| File | Line | Issue | Type |
-|---|---|---|---|
-| `./tests/unit/utils/test_error_codes.py` | 39 | """Every error code must follow GMS-XXX-NNN pattern.""" | XXX |
-| `./tests/unit/utils/test_error_codes.py` | 42 | assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN" | XXX |
-| `./tests/unit/api/test_error_codes.py` | 36 | """Postcondition: All codes follow GMS-XXX-NNN format.""" | XXX |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | 213 | -   140 `FIXME` markers. | FIXME |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | 216 | -   Audit all `FIXME` items and resolve high-priority ones. | FIXME |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 231 | (r"\bFIXME\b", "FIXME placeholder found"), | FIXME |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 232 | (r"\bHACK\b", "HACK comment found"), | HACK |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 233 | (r"\bXXX\b", "XXX comment found"), | XXX |
-| `./vendor/ud-tools/src/tools/quality_utils.py` | 49 | "Angle bracket FIXME placeholder", | FIXME |
-| `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /* HACK: Temporary fix for CONF-15412 */ | HACK |
-| `./src/api/utils/error_codes.py` | 53 | # General Errors (GMS-GEN-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 59 | # Engine Errors (GMS-ENG-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 67 | # Simulation Errors (GMS-SIM-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 76 | # Video Errors (GMS-VID-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 83 | # Analysis Errors (GMS-ANL-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 88 | # Auth Errors (GMS-AUT-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 95 | # Validation Errors (GMS-VAL-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 101 | # Resource Errors (GMS-RES-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 106 | # System Errors (GMS-SYS-XXX) | XXX |
-| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py` | 77 | (r"\bHACK\b", "HACK comment found"), | HACK |
-| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py` | 78 | (r"\bXXX\b", "XXX comment found"), | XXX |
-| `./src/shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /* HACK: Temporary fix for CONF-15412 */ | HACK |
-| `./src/shared/python/biomechanics/kinematic_sequence.py` | 15 | FIXME: The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation | FIXME |
-| `./src/shared/python/physics/impact_model.py` | 164 | # FIXME: this uses a simplified scalar effective mass model. | FIXME |
-| `./src/shared/python/physics/ground_reaction_forces.py` | 477 | # FIXME: This fallback calculation is inaccurate for dynamic movements. | FIXME |
+
+| File                                                                       | Line | Issue                                                                                                | Type  |
+| -------------------------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------- | ----- |
+| `./tests/unit/utils/test_error_codes.py`                                   | 39   | """Every error code must follow GMS-XXX-NNN pattern."""                                              | XXX   |
+| `./tests/unit/utils/test_error_codes.py`                                   | 42   | assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN"                                    | XXX   |
+| `./tests/unit/api/test_error_codes.py`                                     | 36   | """Postcondition: All codes follow GMS-XXX-NNN format."""                                            | XXX   |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                        | 213  | - 140 `FIXME` markers.                                                                               | FIXME |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                        | 216  | - Audit all `FIXME` items and resolve high-priority ones.                                            | FIXME |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                      | 231  | (r"\bFIXME\b", "FIXME placeholder found"),                                                           | FIXME |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                      | 232  | (r"\bHACK\b", "HACK comment found"),                                                                 | HACK  |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                      | 233  | (r"\bXXX\b", "XXX comment found"),                                                                   | XXX   |
+| `./vendor/ud-tools/src/tools/quality_utils.py`                             | 49   | "Angle bracket FIXME placeholder",                                                                   | FIXME |
+| `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css`     | 3404 | html body { /_ HACK: Temporary fix for CONF-15412 _/                                                 | HACK  |
+| `./src/api/utils/error_codes.py`                                           | 53   | # General Errors (GMS-GEN-XXX)                                                                       | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 59   | # Engine Errors (GMS-ENG-XXX)                                                                        | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 67   | # Simulation Errors (GMS-SIM-XXX)                                                                    | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 76   | # Video Errors (GMS-VID-XXX)                                                                         | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 83   | # Analysis Errors (GMS-ANL-XXX)                                                                      | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 88   | # Auth Errors (GMS-AUT-XXX)                                                                          | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 95   | # Validation Errors (GMS-VAL-XXX)                                                                    | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 101  | # Resource Errors (GMS-RES-XXX)                                                                      | XXX   |
+| `./src/api/utils/error_codes.py`                                           | 106  | # System Errors (GMS-SYS-XXX)                                                                        | XXX   |
+| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py`             | 77   | (r"\bHACK\b", "HACK comment found"),                                                                 | HACK  |
+| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py`             | 78   | (r"\bXXX\b", "XXX comment found"),                                                                   | XXX   |
+| `./src/shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /_ HACK: Temporary fix for CONF-15412 _/                                                 | HACK  |
+| `./src/shared/python/biomechanics/kinematic_sequence.py`                   | 15   | FIXME: The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation | FIXME |
+| `./src/shared/python/physics/impact_model.py`                              | 164  | # FIXME: this uses a simplified scalar effective mass model.                                         | FIXME |
+| `./src/shared/python/physics/ground_reaction_forces.py`                    | 477  | # FIXME: This fallback calculation is inaccurate for dynamic movements.                              | FIXME |
 
 ## Recommended Implementation Order
+
 Prioritized by Impact (High) and Complexity (Low).
 | Priority | File | Issue | Metrics (I/C/C) |
 |---|---|---|---|
@@ -189,6 +197,7 @@ Prioritized by Impact (High) and Complexity (Low).
 | 20 | `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py` | clear | 5/3/4 |
 
 ## Issues Created
+
 - Created `docs/assessments/issues/Issue_049_Incomplete_Stub_in_repository_py_40.md`
 - Created `docs/assessments/issues/Issue_050_Incomplete_Stub_in_repository_py_46.md`
 - Created `docs/assessments/issues/Issue_051_Incomplete_Stub_in_repository_py_51.md`
