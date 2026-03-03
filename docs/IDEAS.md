@@ -1,6 +1,6 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-02-26
+**Last Updated**: 2026-03-01
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
@@ -32,6 +32,11 @@ This document serves as the central registry for scientific research topics, tec
 - **Neck-Thorax Separation**: Measure the independence of cervical spine rotation from thoracic rotation. Limited neck mobility can restrict the backswing shoulder turn or cause "head sway."
   - _Data Needed_: Head orientation versus Thorax orientation.
   - _Outcome_: Diagnosis of physical limitations affecting swing geometry.
+
+- **Forearm Supination/Pronation Dynamics**: Analyze the rate of forearm rotation during the release phase. The coupling of forearm rotation with wrist flexion determines the clubface closure rate and dynamic loft at impact.
+  - _Data Needed_: Forearm axial rotation velocity ($ \omega_x $) time-series.
+  - _Outcome_: Quantify face closure rate (ROC) contributions from forearm rotation versus wrist flexion.
+  - _Ref_: Neal, R. J., et al. (2007). "Kinematics and kinetics of the golf swing."
 
 - **Ground Reaction Force (GRF) Efficiency**: Calculate the ratio of peak Vertical GRF to Clubhead Speed. This measures how effectively a golfer uses the ground to generate power.
 
@@ -140,6 +145,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: CFD training data linking geometry features to aero coefficients.
   - _Outcome_: Rapid prototyping of ball designs.
 
+- **Magnus Effect Asymmetry**: Model the non-linear lift coefficient behavior at extreme spin rates (e.g., wedge shots) where flow separation is highly asymmetric.
+  - _Data Needed_: Wind tunnel lift coefficient data for $S > 0.4$.
+  - _Outcome_: Improved apex prediction for high-spin wedge shots.
+  - _Ref_: Bearman, P. W., & Harvey, J. K. (1993). "Control of Circular Cylinder Flow by the Use of Dimples."
+
 ### Trajectory
 
 - **Bounce and Roll Physics**: Implement a rigid-body collision model for the ball-ground interaction, accounting for turf compliance (COR), friction, and slope.
@@ -237,6 +247,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Mass and position of counterweights.
   - _Outcome_: Optimization of club release speed and kinematic sequence.
 
+- **Shaft Damping Optimization**: Investigate the use of constrained layer damping (CLD) or visco-elastic materials inside the shaft to attenuate high-frequency impact vibrations.
+  - _Data Needed_: Modal analysis and damping ratios ($ \zeta $) of various shaft constructions.
+  - _Outcome_: Improved "feel" metrics and reduced shock transmission to the hands.
+  - _Ref_: Roberts, J. R., et al. (2001). "The effect of shaft flexibility on the golf swing."
+
 ### Ball & Face Mechanics
 
 - **Multi-Layer Compression Dynamics**: Model the interaction between core, mantle, and cover layers to predict ball speed and spin separation. Finite Element or lumped-parameter modeling of deformation.
@@ -315,6 +330,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Shot distribution ($x, z$) coordinates for each club.
   - _Outcome_: Risk management visualization for course strategy.
 
+- **Hidden Markov Models for Swing Phases**: Utilize Hidden Markov Models (HMM) to automatically segment continuous motion capture data into distinct swing phases (takeaway, transition, downswing, follow-through) without manual tagging.
+  - _Data Needed_: Unsegmented full-swing kinematic data.
+  - _Outcome_: Automated data processing pipeline for large-scale biomechanics databases.
+  - _Ref_: Zheng, H., et al. (2008). "Time series segmentation and motif discovery."
+
 ## 5. Simulation Technology
 
 ### Physics Engine
@@ -352,6 +372,11 @@ This document serves as the central registry for scientific research topics, tec
 - **Real-time Ray Tracing**: Implement ray tracing (e.g., Vulkan/DX12) for physically accurate reflections and sun glare. Glare can significantly affect player aim and visibility.
   - _Data Needed_: Environment maps and BRDF material properties.
   - _Outcome_: Visual realism for "blinded by sun" simulation scenarios.
+
+- **Particle-Based Turf Interaction**: Simulate the divot taking process using Smoothed Particle Hydrodynamics (SPH) to capture the complex failure modes of soil and grass roots under the clubface.
+  - _Data Needed_: Soil cohesion, friction angle, and grass root tensile strength parameters.
+  - _Outcome_: Realistic simulation of "fat" shots and dynamic energy loss during turf impact.
+  - _Ref_: Müller, M., et al. (2003). "Particle-based fluid simulation for interactive applications."
 
 ### Haptics & Immersion
 
@@ -397,6 +422,11 @@ This document serves as the central registry for scientific research topics, tec
   - _Data Needed_: Target trajectory and current hand error vector.
   - _Outcome_: Accelerated motor learning via haptic guidance.
 
+- **Impedance Control for Impact Emulation**: Implement active impedance control on a robotic end-effector to emulate the mechanical impedance (stiffness and damping) of a golf ball during impact.
+  - _Data Needed_: High-bandwidth force/torque sensor data and ball compression curves.
+  - _Outcome_: Programmable physical feedback device for evaluating clubhead designs without hitting actual balls.
+  - _Ref_: Hogan, N. (1985). "Impedance control: An approach to manipulation."
+
 ---
 
 ## Workflow Log
@@ -411,3 +441,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-15 | Added Grip Pressure, Quiet Eye, Bulge/Roll Opt, Movable Weights, Clustering, Green Reading, Bunker, Fusion | All | Active |
 | 2026-02-18 | Added Footwear, HRV, Boundary Layer, Knuckleball, Acoustics, Layup, Grip Friction, Clutch Index, Weather SG, Audio, Scattering | All | Active |
 | 2026-02-26 | Added Pelvis 6DOF, Wrist Dynamics, Vertical Gear, MOI Match, Putt Prob, Ray Tracing, MPC | All | Active |
+| 2026-03-01 | Added Forearm Dynamics, Magnus Asymmetry, Shaft Damping, HMM Swing Phases, SPH Turf, Impedance Control | All | Active |
