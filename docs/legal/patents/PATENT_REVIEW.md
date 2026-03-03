@@ -1,6 +1,6 @@
 # Patent & Legal Risk Assessment
 
-**Last Updated:** 2026-02-26
+**Last Updated:** 2026-03-01
 **Status:** ACTIVE
 **Reviewer:** Jules (Patent Reviewer Agent)
 
@@ -10,7 +10,7 @@
 
 | Area                     | Patent(s) / Assignee                                                                           | Our Implementation                                                                                                                                                                                                                              | Risk Level              | Mitigation                                                                                                                                                                 | Issue Tracker |
 | ------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` (alias `SegmentTimingAnalyzer`) in `src/shared/python/biomechanics/kinematic_sequence.py`.<br>`efficiency_score` logic in `src/shared/python/analysis/pca_analysis.py` (explicitly scores based on order).          | **HIGH (Active)**       | **Partial Remediation:** Class renamed to `SegmentTimingAnalyzer`, but backward compatibility alias exists. **CRITICAL:** `pca_analysis.py` still contains infringing `efficiency_score` logic enforcing TPI order. **Legal Review Required.** | [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md) |
+| **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**, **Zepp**, **Blast Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` (alias `SegmentTimingAnalyzer`) in `src/shared/python/biomechanics/kinematic_sequence.py`.<br>`efficiency_score` logic in `src/shared/python/analysis/pca_analysis.py` (explicitly scores based on order).          | **HIGH (Active)**       | **Partial Remediation:** Class renamed to `SegmentTimingAnalyzer`, but backward compatibility alias exists. **CRITICAL:** `pca_analysis.py` still contains infringing `efficiency_score` logic enforcing TPI order, which also risks Zepp/Blast patents. **Legal Review Required.** | [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md), [`ISSUE_PHYSICS_PATENT_RISK`](../../assessments/completist/issues/ISSUE_PHYSICS_PATENT_RISK.md) |
 | **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `compute_dtw_distance` in `src/shared/python/validation_pkg/comparative_analysis.py`.<br>Calculates distance metric for swing comparison which is the core of Zepp's patent claims.                                                             | **HIGH (Active)**       | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance). The formula change is partial mitigation but DTW usage remains risk. | [`ISSUE_002`](../../assessments/issues/ISSUE_002_DTW_SCORING.md) |
 | **Swing DNA**            | **Mizuno** (Trademark/Method)<br>Club fitting based on specific metric vector                  | `SwingProfileMetrics` in `src/shared/python/analysis/reporting.py`. Visualization as Radar Chart in `src/shared/python/dashboard/window.py`.                                                                                                    | **VERIFIED REMEDIATED** | Renamed to "Swing Profile". Metrics changed to: Speed, Sequence, Stability, Efficiency, Power (distinct from Mizuno's). Audit confirmed no "Swing DNA" strings in UI code. | N/A           |
 
@@ -21,7 +21,8 @@
 | **Injury Risk Scoring**      | **TPI**, **Various**<br>Methods for assessing injury risk (X-Factor) | `InjuryRiskScorer` in `src/shared/python/injury/injury_risk.py`. Uses specific thresholds for "X-Factor Stretch" (45-55 deg) and risk weighting. | **MEDIUM** | Verify specific thresholds (`45.0`, `55.0`) against public academic literature. Cite sources explicitly. Avoid proprietary "Risk Score" formulas if possible.                        | [`ISSUE_016`](../../assessments/issues/ISSUE_016_INJURY_RISK_SCORING.md) |
 | **Gear Effect Simulation**   | **TrackMan**, **Foresight**<br>Methods for simulating ball flight   | `compute_gear_effect_spin` in `src/shared/python/physics/impact_model.py`. Uses heuristic constants `100.0`, `50.0`.     | **MEDIUM** | Document source of constants (`100.0`, `50.0`). If derived from TrackMan data, ensure "fair use" or clean-room implementation.                                                                            | [`Issue_011`](../../assessments/issues/Issue_011_Physics_Gear_Effect_Heuristic.md) |
 | **Ball Flight Coefficients** | **Unknown / Proprietary SDKs**<br>Specific aerodynamic coefficients | `BallProperties` in `src/shared/python/physics/ball_flight_physics.py`. Uses specific values (`cd0=0.21`, `cl1=0.38`).   | **MEDIUM** | Citation missing. If these match a specific competitor's SDK or proprietary research, it could be infringement. **Action:** Cite source (e.g., Smits & Smith) or externalize to config. | [`ISSUE_046`](../../assessments/issues/ISSUE_046_BALL_FLIGHT_COEFFICIENTS.md) |
-| **Data Copyright**           | **TrackMan A/S**<br>Database Rights                                 | `src/shared/python/validation_pkg/validation_data.py`. Uses "PGA Tour TrackMan Averages" with explicit values.           | **LOW/MED**| Usage of factual averages is generally safe, but ensure compliance with TrackMan Terms of Service if data was scraped.                                                                  | N/A |
+| **Data Copyright**           | **TrackMan A/S**<br>Database Rights                                 | `src/shared/python/validation_pkg/validation_data.py`. Uses "PGA Tour TrackMan Averages" with explicit values.           | **LOW/MED**| Usage of factual averages is generally safe, but ensure compliance with TrackMan Terms of Service if data was scraped.                                                                  | [`ISSUE_047`](../../assessments/issues/ISSUE_047_DATA_COPYRIGHT_TRACKMAN.md) |
+| **Haptic Feedback** | **Immersion Corp**<br>Force feedback rendering patents | `src/deployment/teleoperation/devices.py` (`set_force_feedback` / `HapticDeviceInput`) | **MEDIUM** | Current generic force clipping (`np.clip`) is safe but carries high future risk. Ensure all force feedback is derived directly from physics simulation. | [`ISSUE_HAPTICS_PATENT_RISK`](../../assessments/completist/issues/ISSUE_HAPTICS_PATENT_RISK.md) |
 
 ### Low Risk Areas
 
@@ -103,13 +104,7 @@
 | **TrackMan**           | TrackMan A/S      | **Ref Only**            | N/A              | Used only for data validation references. Acceptable nominative use.                    |
 | **X-Factor**           | TPI / Various     | **Medium Risk**         | "Torso-Pelvis Separation" | Used in `injury_risk.py` with specific thresholds. Consider renaming. |
 
-## 4. Future Risks / Watchlist
-
-| Area | Potential Risk | Source | Monitor For |
-|------|----------------|--------|-------------|
-| **Haptic Feedback** | Force feedback rendering patents (Immersion Corp) | `src/deployment/teleoperation/devices.py` | Implementation of specific "haptic effects" (textures, detents) or vibration patterns that match patented methods. Current implementation is generic force clipping. |
-
-## 5. Prior Art & Defense
+## 4. Prior Art & Defense
 
 - **Kinematic Sequence**: Cheetham, P. J. (2014). "A Simple Model of the Pelvis-Thorax Kinematic Sequence." (Academic citation used in docs).
 - **Ball Flight**: Uses standard aerodynamic models (MacDonald & Hanzely). _Verify coefficient source._
@@ -117,7 +112,7 @@
 - **Anthropometry**: Explicitly based on Dempster, Winter, and de Leva (see `src/shared/python/validation_pkg/data_fitting.py`).
 - **Shaft Dynamics**: Finite Element Method is standard engineering practice (Euler-Bernoulli Beam Theory).
 
-## 6. Risk Mitigation Actions
+## 5. Risk Mitigation Actions
 
 1.  **Kinematic Sequence**:
     - [x] **Refactor**: Rename `KinematicSequenceAnalyzer` to `SegmentTimingAnalyzer` (Done in `kinematic_sequence.py`).
@@ -134,8 +129,9 @@
 5.  **Documentation**:
     - [ ] Add "Methodology" citations to all analysis classes to prove reliance on public academic research rather than competitor patents.
 
-## 7. Change Log
+## 6. Change Log
 
+- **2026-03-01**: Updated review. Added Haptic Feedback to Medium Risk due to ISSUE_HAPTICS_PATENT_RISK.md. Added Zepp/Blast patent risk to Kinematic Sequence for pca_analysis.py. Added issue tracker link to Data Copyright risk.
 - **2026-02-26**: Updated review (New Findings).
     - Added **Future Risks / Watchlist** section.
     - Added **Haptic Feedback** to Watchlist due to `HapticDeviceInput` in `devices.py`.
