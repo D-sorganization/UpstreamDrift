@@ -67,6 +67,11 @@ MAGIC_NUMBERS = [
 
 def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:
     """Check if a pass statement is in a legitimate context."""
+    from src.shared.python.contracts import require
+
+    require(isinstance(lines, list), "lines must be a list")
+    require(isinstance(line_num, int), "line_num must be an integer")
+
     if line_num <= 0 or line_num > len(lines):
         return False
 
@@ -114,6 +119,11 @@ def check_banned_patterns(
     filepath: Path,
 ) -> list[tuple[int, str, str]]:
     """Check for banned patterns in lines."""
+    from src.shared.python.contracts import require
+
+    require(isinstance(lines, list), "lines must be a list")
+    require(isinstance(filepath, Path), "filepath must be a Path")
+
     issues: list[tuple[int, str, str]] = []
     # Skip checking quality check scripts for their own patterns
     if filepath.name in (
@@ -149,6 +159,11 @@ def check_banned_patterns(
 
 def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str, str]]:
     """Check for magic numbers in lines."""
+    from src.shared.python.contracts import require
+
+    require(isinstance(lines, list), "lines must be a list")
+    require(isinstance(filepath, Path), "filepath must be a Path")
+
     issues: list[tuple[int, str, str]] = []
     # Skip checking quality check scripts for magic numbers (they contain patterns
     # they check for)
@@ -170,6 +185,11 @@ def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str
 
 def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]:
     """Check AST for quality issues."""
+    from src.shared.python.contracts import require
+
+    require(isinstance(content, str), "content must be a string")
+    require(isinstance(filepath, Path), "filepath must be a Path")
+
     issues: list[tuple[int, str, str]] = []
     # Skip checking quality check scripts for AST issues
     if filepath.name in (
@@ -207,6 +227,12 @@ def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]
 
 def check_file(filepath: Path) -> list[tuple[int, str, str]]:
     """Check a Python file for quality issues."""
+    from src.shared.python.contracts import require
+
+    require(isinstance(filepath, Path), "filepath must be a Path")
+    require(filepath.exists(), f"File does not exist: {filepath}")
+    require(filepath.is_file(), f"Path is not a file: {filepath}")
+
     try:
         content = filepath.read_text(encoding="utf-8")
         lines = content.splitlines()
