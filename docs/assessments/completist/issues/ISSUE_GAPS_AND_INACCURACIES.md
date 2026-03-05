@@ -170,3 +170,7 @@ An updated automated analysis of implementation gaps generated [Completist_Repor
 - **19** `FIXME` markers denoting technical debt, inaccurate physics approximations, and potential legal risks.
 
 These widespread placeholders must be systematically addressed to ensure system reliability and fidelity.
+
+## Update: 2026-03-05
+
+An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-05.md](../Completist_Report_2026-03-05.md) using `scripts/analyze_completist_data.py`. The scan identifies 300 potential critical issues (Stubs) and 79 feature requests (TODOs) as well as technical debt and doc gaps. Many issues are missing implementations related to building and downloading models, and process calculators.
