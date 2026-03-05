@@ -145,7 +145,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-03 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-03.md`                 |
 | 2026-03-04 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-04.md`                 |
 | 2026-03-04 | Consolidated Implementation Gaps         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md`           |
-| 2026-03-05 | Patent Risk: PCA Analysis                | `docs/assessments/issues/ISSUE_PCA_PATENT_RISK.md`                            |
+| 2026-03-05 | Physics Audit Report                     | `docs/assessments/physics/Physics_Audit_2026-03-05.md`                        |
 
 ---
 
