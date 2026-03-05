@@ -1,8 +1,14 @@
 # Competitor Analysis
 
-**Last Updated:** 2025-05-24
+**Last Updated:** 2026-03-05
 
 This document maintains a comprehensive analysis of the golf technology market, focusing on launch monitors, software, biomechanics, and open-source alternatives.
+
+## Significant Market Changes & Attention Flags
+
+- **IP/Patent Risks (Biofeedback & Scoring):** High-risk overlap with methodologies patented by K-Motion Interactive and Zepp Labs (Blast Motion) regarding the use of Dynamic Time Warping (DTW) distance and time-warped comparison for swing evaluation scoring.
+- **Trademark Infringement Risk (Swing Profile):** Active use of the "Swing DNA" terminology conflicts with Mizuno Corporation's trademarked performance fitting system. Our metrics (Speed, Sequence, Stability, Efficiency, Power) structurally mimic their 5-axis fitting system.
+- **IP/Patent Risks (Kinematic Sequence):** Scoring methodologies for Kinematic Sequence efficiency may infringe upon core claims held by the Titleist Performance Institute (TPI) and K-Motion.
 
 ## Competitor Categories
 
@@ -14,9 +20,9 @@ This document maintains a comprehensive analysis of the golf technology market, 
 | **Foresight Sports** | GCQuad, GC3, QuadMAX  | Quadrascopic Photometric, High Indoor Accuracy       | $14,000 - $20,000+ | Premium Fitter / Indoor   |
 | **FlightScope**      | X3, Mevo+, Mevo       | Fusion Tracking (Radar+Cam), Portable                | $500 - $15,000     | Prosumer to Pro           |
 | **Full Swing**       | Full Swing KIT        | Radar-based, Tiger Woods endorsed, customizable OLED | $5,000             | High-end Consumer / Pro   |
-| **Uneekor**          | EYE XO, QED, EYE MINI | Ceiling Mounted, High Speed Cams, Ball/Club Optics   | $4,500 - $14,000   | Premium Home Sim          |
 | **Garmin**           | Approach R10          | Doppler Radar, Phone Integration, Portable           | ~$600              | Entry Level               |
 | **Rapsodo**          | MLM2PRO               | Radar + Camera, Simulation support                   | ~$700              | Entry Level               |
+| **Uneekor**          | EYE XO, QED, EYE MINI | Ceiling Mounted, High Speed Cams, Ball/Club Optics   | $4,500 - $14,000   | Premium Home Sim          |
 
 ### 2. Software/Analytics Platforms
 
@@ -24,22 +30,22 @@ This document maintains a comprehensive analysis of the golf technology market, 
 | -------------- | ------------------------ | -------------------------------------- | ---------------- | ----------------------- |
 | **TrackMan**   | Performance Studio (TPS) | Tracy AI, Virtual Golf, Deep Data      | Bundled / Sub    | Professional Ecosystem  |
 | **Foresight**  | FSX Play, FSX Pro        | 4K Graphics, Fitting Tools, Insights   | Bundled / Add-on | Professional Ecosystem  |
-| **GSPro**      | GSPro V2                 | 4K Unity Graphics, Open API, SGT Tour  | $250/yr          | Sim-Enthusiast Favorite |
 | **E6 Connect** | E6 Connect               | Cross-platform, Massive Course Library | $300 - $600/yr   | Legacy Standard         |
 | **TruGolf**    | E6 Connect (Owner)       | Integrated Sims, Hardware+Software     | Varies           | Commercial / Home       |
+| **GSPro**      | GSPro V2                 | 4K Unity Graphics, Open API, SGT Tour  | $250/yr          | Sim-Enthusiast Favorite |
 | **OpenGolf**   | OpenGolf (Project)       | Open Source Simulator Framework        | Free             | Open Source Niche       |
 
 ### 3. Biomechanics/Instruction
 
 | Competitor         | Products               | Key Features                                    | Price Range      | Market Position          |
 | ------------------ | ---------------------- | ----------------------------------------------- | ---------------- | ------------------------ |
-| **OPTICAL Golf**     | OPTICAL                  | Optical Motion Capture (Markers), "MRI of Golf" | $30,000+         | Research / Elite Fitting |
 | **K-Motion**       | K-Vest, K-Coach        | Wireless Sensors (IMU), Biofeedback             | $2,500+          | Instruction / Coaching   |
+| **OPTICAL Golf**     | OPTICAL                  | Optical Motion Capture (Markers), "MRI of Golf" | $30,000+         | Research / Elite Fitting |
 | **Sportsbox AI**   | Sportsbox 3D           | Markerless Single-Cam 3D, Mobile App            | SaaS ($/mo)      | Accessible Coaching      |
-| **Swing Catalyst** | Force Plates, Software | GRF Analysis, Video Sync, Pressure              | $5,000 - $15,000 | Force/Pressure Standard  |
-| **BodiTrak**       | Vector, Dash           | Pressure Mats, Portable                         | $1,500 - $3,000  | Affordable Pressure      |
 | **V1 Sports**      | V1 Pro, V1 Game        | Video Analysis, Pressure Integration            | SaaS             | Video Standard           |
 | **Hackmotion**     | Wrist Sensor           | Wrist Angle Biofeedback, Putting/Full Swing     | $300 - $1,000    | Specialized Training     |
+| **Swing Catalyst** | Force Plates, Software | GRF Analysis, Video Sync, Pressure              | $5,000 - $15,000 | Force/Pressure Standard  |
+| **BodiTrak**       | Vector, Dash           | Pressure Mats, Portable                         | $1,500 - $3,000  | Affordable Pressure      |
 
 ### 4. Open Source Alternatives
 
@@ -130,6 +136,28 @@ This document maintains a comprehensive analysis of the golf technology market, 
 7.  **Recent Updates:** Enhanced simulation connectors and Android stability.
 8.  **Our Differentiation:** We offer similar vision-based analysis tools without locking users into a subscription ecosystem.
 
+### TrackMan Performance Studio
+
+1.  **Core Value Proposition:** The premium, integrated analytics suite for the TrackMan ecosystem.
+2.  **Key Features:** Tracy AI practice assistant, Virtual Golf rendering, comprehensive reporting.
+3.  **Limitations:** Tied exclusively to TrackMan hardware; high cost barrier.
+4.  **Pricing Model:** Annual Software Subscription (Bundled / $1k+).
+5.  **Target Market:** Professionals, Elite Academies.
+6.  **Technology Stack:** Proprietary rendering and data analysis engine.
+7.  **Recent Updates:** Next-gen Virtual Golf rendering.
+8.  **Our Differentiation:** We provide a platform-agnostic alternative to their closed analytics suite.
+
+### Foresight FSX Play/FSX Pro
+
+1.  **Core Value Proposition:** High-fidelity simulation and fitting tools tailored for photometric data.
+2.  **Key Features:** 4K Graphics (FSX Play), detailed fitting parameters (FSX Pro).
+3.  **Limitations:** Hardware locked; UI can be fragmented between Play and Pro apps.
+4.  **Pricing Model:** High upfront software cost / bundled with hardware.
+5.  **Target Market:** Fitters, Commercial Indoor Centers.
+6.  **Technology Stack:** Proprietary rendering (Unity-based for Play).
+7.  **Recent Updates:** Improved physics and course additions in FSX Play.
+8.  **Our Differentiation:** We aim to replicate professional fitting logic within an open framework.
+
 ### GSPro (Software)
 
 1.  **Core Value Proposition:** The "People's Simulator" - a community-driven, open platform with realistic physics and 4K graphics.
@@ -141,16 +169,27 @@ This document maintains a comprehensive analysis of the golf technology market, 
 7.  **Recent Updates:** V2 release with new UI, physics tweaks, and improved graphics pipeline.
 8.  **Our Differentiation:** We are open source (code), whereas GSPro is open platform (API) but closed source. We focus on biomechanics over gameplay.
 
-### TruGolf / E6 Connect
+### E6 Connect
 
-1.  **Core Value Proposition:** The industry standard for commercial reliability and massive hardware compatibility.
+1.  **Core Value Proposition:** The legacy industry standard for commercial reliability and massive hardware compatibility.
 2.  **Key Features:** Largest library of licensed courses, stable for commercial use, cross-platform (iOS/PC).
 3.  **Limitations:** Graphics engine is aging compared to Unity-based competitors like GSPro; UI can feel dated.
-4.  **Pricing Model:** Subscription or one-time license (often bundled with hardware).
-5.  **Target Market:** Commercial Centers, Home Sims.
+4.  **Pricing Model:** Subscription or one-time license (often bundled with hardware) ($300 - $600/yr).
+5.  **Target Market:** Legacy Commercial Centers, Home Sims.
 6.  **Technology Stack:** Proprietary engine.
 7.  **Recent Updates:** Apex engine (next-gen) development.
 8.  **Our Differentiation:** We offer open source physics models versus their proprietary "black box" simulation.
+
+### TruGolf
+
+1.  **Core Value Proposition:** Integrated commercial simulator solutions combining robust hardware and E6 software.
+2.  **Key Features:** Turnkey commercial and home simulator setups; seamless integration with E6 Connect.
+3.  **Limitations:** High initial investment; locked into their ecosystem for the best experience.
+4.  **Pricing Model:** Varies (Hardware + Software Bundles).
+5.  **Target Market:** Commercial Centers, Premium Home Sims.
+6.  **Technology Stack:** Proprietary hardware and E6 Connect engine.
+7.  **Recent Updates:** Expansion of connected hardware ecosystem.
+8.  **Our Differentiation:** We focus on the analytical and biomechanical software layer without proprietary hardware lock-in.
 
 ### OpenGolf (Community Projects)
 
