@@ -1,12 +1,17 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-03-01
+**Last Updated**: 2026-03-05
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
 ## 1. Biomechanics & Human Movement
 
 ### Kinematic Sequence Analysis
+- **Dynamic GRF Estimation Modeling**: Develop robust inverse dynamics models to calculate true dynamic Ground Reaction Forces (GRF) purely from full-body kinematics when force plate contact data is unavailable, going beyond static gravity ($W=mg$) approximations.
+  - _Data Needed_: High-fidelity markerless motion capture kinematics and segment inertial properties.
+  - _Outcome_: Accurate power and efficiency metrics even in environments lacking physical force plates.
+  - _Ref_: Bobbert, M. F., et al. (1991). "Calculation of vertical ground reaction force estimates during running from positional data."
+
 
 - **Proximal Braking Efficiency**: Quantify the deceleration rates of proximal segments (pelvis, thorax) during the downswing. Research suggests that efficient energy transfer requires rapid deceleration of heavy segments to accelerate distal ones (whip effect).
 
@@ -177,6 +182,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 3. Equipment Science
 
 ### Club Dynamics
+- **Non-infringing Efficiency Scoring Models**: Research pure physics and energy-conservation-based formulations for evaluating swing efficiency that avoid overlapping with patented statistical sequence-matching methodologies (e.g., PCA or DTW).
+  - _Data Needed_: Comprehensive clubhead delivery energetics and segment mass approximations.
+  - _Outcome_: Legally safe, physics-driven efficiency metrics for performance comparison.
+
 
 - **Impact Acoustics ("Sound is Feel")**: Simulate the frequency spectrum of impact sound based on clubhead eigenmodes and material properties. Players perceive "feel" largely through sound.
   - _Data Needed_: Modal analysis frequencies and damping ratios.
@@ -265,6 +274,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 4. Statistical Methods
 
 ### Analytics
+- **Universal Format Topological Mapping**: Research graph-based or topological machine learning methods to automatically translate arbitrary robotic descriptive formats (beyond URDF/MJCF) into a unified internal representation.
+  - _Data Needed_: Large datasets of disparate robot description files (SDF, Webots, etc.).
+  - _Outcome_: A robust, format-agnostic import pipeline that minimizes NotImplementedErrors for niche formats.
+
 
 - **Clutch Performance Index**: Quantify performance variance in high-pressure situations (e.g., last 3 holes, hazards in play) compared to baseline.
   - _Data Needed_: Shot outcomes tagged with "pressure level" context.
@@ -338,6 +351,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 5. Simulation Technology
 
 ### Physics Engine
+- **OpenSim Marker Redundancy Models**: Develop predictive models to infer missing or occluded optical marker positions during OpenSim simulations, preventing simulation crashes when specific hardcoded markers (e.g., "Hand", "ClubHead") are lost.
+  - _Data Needed_: Sparse marker sets and underlying skeletal constraints.
+  - _Outcome_: Fault-tolerant biomechanical simulations resilient to marker dropout.
+
 
 - **Finite Element Impact**: Implement a simplified Finite Element (FE) or discrete element model for the clubface to generate a Coefficient of Restitution (COR) map, rather than a single scalar COR.
 
@@ -395,6 +412,14 @@ This document serves as the central registry for scientific research topics, tec
 ## 6. Control Theory
 
 ### Robotics
+- **Real-Time Hardware Telemetry Emulation**: Research virtual representations and network loopback models for EtherCAT and ROS2 communication paths to allow full-stack testing of real-time controllers when physical hardware is unavailable.
+  - _Data Needed_: Latency profiles and message packet structures for target hardware networks.
+  - _Outcome_: Unblocked software development and testing of hardware-in-the-loop (HIL) systems.
+
+- **Universal Teleoperation Input Translation**: Develop generalized mathematical mappings to translate arbitrary 6DOF input devices (SpaceMouse, VR Controllers, Haptic arms) into a unified teleoperation control space.
+  - _Data Needed_: Input coordinate frames and scaling factors for varied HID devices.
+  - _Outcome_: Plug-and-play teleoperation compatibility across different hardware platforms.
+
 
 - **Swing Robot Inverse Dynamics**: Calculate the required joint torques to drive a double-pendulum model along a desired kinematic path.
 
@@ -442,3 +467,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-18 | Added Footwear, HRV, Boundary Layer, Knuckleball, Acoustics, Layup, Grip Friction, Clutch Index, Weather SG, Audio, Scattering | All | Active |
 | 2026-02-26 | Added Pelvis 6DOF, Wrist Dynamics, Vertical Gear, MOI Match, Putt Prob, Ray Tracing, MPC | All | Active |
 | 2026-03-01 | Added Forearm Dynamics, Magnus Asymmetry, Shaft Damping, HMM Swing Phases, SPH Turf, Impedance Control | All | Active |
+| 2026-03-05 | Added Dynamic GRF, Efficiency Scoring, Universal Format Mapping, Marker Redundancy, Telemetry Emulation, Universal Teleoperation | All | Active |
