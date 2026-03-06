@@ -49,7 +49,7 @@ def _get_theme_colors() -> ThemeColors:
     except ImportError:
         from src.shared.python.theme import DARK_THEME
 
-        return DARK_THEME
+        return DARK_THEME  # type: ignore[return-value]
 
 
 class StartupResults:

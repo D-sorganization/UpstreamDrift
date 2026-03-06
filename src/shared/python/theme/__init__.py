@@ -34,6 +34,8 @@ Usage:
     bg_color = colors["bg"]
 """
 
+from types import SimpleNamespace as _NS
+
 from .colors import (
     BUILTIN_THEMES,
     CHART_COLORS,
@@ -47,6 +49,30 @@ from .colors import (
 )
 from .protocols import StylesheetGenerator, ThemeProvider, ThemeSwitcher
 from .stylesheets import generate_minimal_stylesheet, generate_stylesheet
+
+# Convenience fallback: a ThemeColors-compatible dark theme.
+# Used by launcher code as a safe default when PyQt6 ThemeManager is unavailable.
+# Built via fleet_to_theme_colors to get all proper semantic attributes.
+try:
+    from .fleet_adapter import fleet_to_theme_colors as _f2tc
+
+    DARK_THEME = _f2tc("Dark")
+except Exception:
+    # Ultimate fallback: minimal SimpleNamespace if fleet adapter is unavailable
+    _dark = BUILTIN_THEMES.get("Dark", {})
+    DARK_THEME = _NS(  # type: ignore[assignment]
+        bg=_dark.get("bg", "#1a1d23"),
+        bg_elevated=_dark.get("table_header", "#2a2d35"),
+        bg_highlight=_dark.get("title_bg", "#2e3340"),
+        border_default=_dark.get("border", "#3a3d45"),
+        border_strong=_dark.get("border", "#4a4d55"),
+        primary=_dark.get("accent", "#0A84FF"),
+        success=_dark.get("success", "#30D158"),
+        success_hover="#38e066",
+        error=_dark.get("error", "#FF375F"),
+        text_primary=_dark.get("text", "#FFFFFF"),
+        text_quaternary="#666666",
+    )
 
 # PyQt6-dependent imports - only available when PyQt6 is installed
 try:
@@ -110,6 +136,7 @@ __all__ = [
     # Color utilities
     "BUILTIN_THEMES",
     "CHART_COLORS",
+    "DARK_THEME",
     "SEMANTIC_COLOR_KEYS",
     "THEME_COLOR_KEYS",
     "get_matplotlib_colors",
