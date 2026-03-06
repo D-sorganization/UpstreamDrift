@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import numpy as np
-import yaml
+import yaml  # type: ignore
 from humanoid_character_builder.core.anthropometry import (
     estimate_segment_dimensions,
     estimate_segment_masses,

@@ -10,9 +10,9 @@ Unit tests for joint kinematics module.
 Tests joint transform and motion subspace calculations.
 """
 
-import numpy as np
-import pytest
-from src.spatial_algebra.joints import jcalc
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+from src.spatial_algebra.joints import jcalc  # noqa: E402
 
 
 class TestJointCalculations:

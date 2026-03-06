@@ -6,11 +6,11 @@ pytest.skip(
 
 """Tests for security vulnerabilities in C3D data reader."""
 
-from pathlib import Path
+from pathlib import Path  # noqa: E402
 
-import numpy as np
-import pandas as pd
-from src.c3d_reader import C3DDataReader
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from src.c3d_reader import C3DDataReader  # noqa: E402
 
 
 def _stub_reader_with_points_mock(

@@ -10,6 +10,8 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.core.contracts import require  # type: ignore[import-untyped]
+
 from .core import Signal
 
 # Module-level constants for periodic noise generation
@@ -60,7 +62,11 @@ class NoiseGenerator:
 
         Returns:
             Signal containing the noise.
+
+        Raises:
+            PreconditionError: If amplitude is negative.
         """
+        require(amplitude >= 0.0, f"amplitude must be non-negative, got {amplitude}")
         n = len(t)
 
         if noise_type == NoiseType.WHITE:
@@ -262,7 +268,7 @@ def add_noise_to_signal(
     noise = generator.generate(
         signal.time,
         noise_type=noise_type,
-        amplitude=amplitude,
+        amplitude=float(amplitude),  # type: ignore[arg-type]
         **kwargs,
     )
 

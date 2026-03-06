@@ -66,14 +66,14 @@ class Signal:
         """Sampling frequency in Hz."""
         if len(self.time) < 2:
             return 1.0
-        return 1.0 / np.mean(np.diff(self.time))
+        return 1.0 / float(np.mean(np.diff(self.time)))
 
     @property
     def dt(self) -> float:
         """Time step in seconds."""
         if len(self.time) < 2:
             return 1.0
-        return np.mean(np.diff(self.time))
+        return float(np.mean(np.diff(self.time)))
 
     @property
     def duration(self) -> float:

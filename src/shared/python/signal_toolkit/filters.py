@@ -26,6 +26,8 @@ from scipy.signal import (
     savgol_filter,
 )
 
+from src.shared.python.core.contracts import require  # type: ignore[import-untyped]
+
 from .core import Signal
 
 
@@ -172,6 +174,8 @@ class FilterDesigner:
         Returns:
             FilterSpec with filter coefficients.
         """
+        require(order > 0, f"Filter order must be positive, got {order}")
+        require(fs > 0, f"Sampling frequency must be positive, got {fs}")
         wn, btype = _normalize_cutoff(filter_type, cutoff, fs)
         b, a = butter(order, wn, btype=btype)
         return FilterSpec(
@@ -543,6 +547,7 @@ def apply_exponential_smoothing(
     Returns:
         Smoothed signal.
     """
+    require(0.0 < alpha <= 1.0, f"alpha must be in (0, 1], got {alpha}")
     values = signal.values
     smoothed = np.zeros_like(values)
     smoothed[0] = values[0]
@@ -572,6 +577,7 @@ def apply_gaussian_smoothing(
     Returns:
         Smoothed signal.
     """
+    require(sigma > 0.0, f"sigma must be positive, got {sigma}")
     from scipy.ndimage import gaussian_filter1d
 
     filtered_values = gaussian_filter1d(signal.values, sigma)

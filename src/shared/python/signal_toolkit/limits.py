@@ -12,6 +12,8 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.core.contracts import require  # type: ignore[import-untyped]
+
 from .core import Signal
 
 
@@ -43,9 +45,13 @@ def apply_saturation(
         mode: Type of saturation curve.
         smoothness: Smoothness parameter for soft modes (larger = sharper transition).
 
-    Returns:
-        Signal with saturation applied.
+    Raises:
+        PreconditionError: If lower >= upper.
     """
+    require(
+        lower < upper,
+        f"lower must be less than upper, got lower={lower}, upper={upper}",
+    )
     values = signal.values.copy()
     result = _apply_saturation_values(values, lower, upper, mode, smoothness)
 
@@ -216,9 +222,10 @@ def apply_rate_limiter(
         smooth_transition: Whether to smooth the rate transitions.
         transition_time: Time constant for smooth transitions.
 
-    Returns:
-        Rate-limited signal.
+    Raises:
+        PreconditionError: If max_rate <= 0.
     """
+    require(max_rate > 0, f"max_rate must be positive, got {max_rate}")
     values = signal.values.copy()
     dt = signal.dt
 
@@ -275,9 +282,10 @@ def apply_deadband(
         smooth: Whether to smooth the transition.
         smoothness: Smoothness parameter for transitions.
 
-    Returns:
-        Signal with deadband applied.
+    Raises:
+        PreconditionError: If threshold < 0.
     """
+    require(threshold >= 0.0, f"threshold must be non-negative, got {threshold}")
     values = signal.values.copy()
     offset = values - center
 

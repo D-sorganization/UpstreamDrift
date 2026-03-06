@@ -11,13 +11,13 @@ This script will analyze the current MATLAB data structure
 and test if the GUI can handle it.
 """
 
-import logging
-import os
-from pathlib import Path
+import logging  # noqa: E402
+import os  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-import numpy as np
-import scipy.io
-from golf_data_core import MatlabDataLoader
+import numpy as np  # noqa: E402
+import scipy.io  # noqa: E402
+from golf_data_core import MatlabDataLoader  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

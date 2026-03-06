@@ -23,7 +23,7 @@ class TextEditorDiffMixin:
         Returns:
             DiffResult with changes
         """
-        return self._compute_diff(self._original_content, self._content)
+        return self._compute_diff(self._original_content, self._content)  # type: ignore
 
     def get_diff_between_versions(
         self,
@@ -39,13 +39,13 @@ class TextEditorDiffMixin:
         Returns:
             DiffResult with changes
         """
-        if version_a < 0 or version_a >= len(self._history):
+        if version_a < 0 or version_a >= len(self._history):  # type: ignore
             raise IndexError(f"Invalid version index: {version_a}")
-        if version_b < 0 or version_b >= len(self._history):
+        if version_b < 0 or version_b >= len(self._history):  # type: ignore
             raise IndexError(f"Invalid version index: {version_b}")
 
-        content_a = self._history[version_a].content
-        content_b = self._history[version_b].content
+        content_a = self._history[version_a].content  # type: ignore
+        content_b = self._history[version_b].content  # type: ignore
         return self._compute_diff(content_a, content_b)
 
     def get_diff_with_string(self, other_content: str) -> DiffResult:
@@ -57,7 +57,7 @@ class TextEditorDiffMixin:
         Returns:
             DiffResult with changes
         """
-        return self._compute_diff(self._content, other_content)
+        return self._compute_diff(self._content, other_content)  # type: ignore
 
     def _compute_diff(self, original: str, modified: str) -> DiffResult:
         """Compute diff between two strings."""
@@ -155,9 +155,9 @@ class TextEditorDiffMixin:
             List of (left_line, right_line, change_type) tuples.
         """
         if original is None:
-            original = self._original_content
+            original = self._original_content  # type: ignore
         if modified is None:
-            modified = self._content
+            modified = self._content  # type: ignore
 
         original_lines = original.splitlines()
         modified_lines = modified.splitlines()

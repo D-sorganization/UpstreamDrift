@@ -174,3 +174,7 @@ These widespread placeholders must be systematically addressed to ensure system 
 ## Update: 2026-03-05
 
 An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-05.md](../Completist_Report_2026-03-05.md) using `scripts/analyze_completist_data.py`. The scan identifies 300 potential critical issues (Stubs) and 79 feature requests (TODOs) as well as technical debt and doc gaps. Many issues are missing implementations related to building and downloading models, and process calculators.
+
+## Update: 2026-03-06
+
+An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-06.md](../Completist_Report_2026-03-06.md) using `scripts/analyze_completist_data.py`. The scan identifies 300 critical gaps, 79 feature gaps, and 25 technical debt items, primarily impacting `src` and `vendor` directories.

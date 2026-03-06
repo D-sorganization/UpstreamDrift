@@ -38,6 +38,7 @@ class TestAPIClasses:
         response = APIResponse.ok({"status": "healthy"})
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["status"] == "healthy"
 
     def test_api_response_error(self):
@@ -47,6 +48,7 @@ class TestAPIClasses:
         response = APIResponse.error("Something went wrong", 400)
 
         assert response.status_code == 400
+        assert isinstance(response.body, dict)
         assert "error" in response.body
 
     def test_api_response_not_found(self):
@@ -104,6 +106,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["status"] == "healthy"
 
     def test_info_endpoint(self):
@@ -119,6 +122,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert "name" in response.body
         assert "endpoints" in response.body
 
@@ -140,6 +144,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert "urdf" in response.body
         assert "links" in response.body
         assert response.body["robot_name"] == "test_humanoid"
@@ -158,6 +163,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["valid"] is True
 
     def test_validate_endpoint_invalid_urdf(self):
@@ -174,6 +180,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["valid"] is False
         assert response.body["error_count"] > 0
 
@@ -191,6 +198,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["name"] == "test_robot"
         assert "links" in response.body
         assert "joints" in response.body
@@ -213,6 +221,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert "inertia" in response.body
         assert "ixx" in response.body["inertia"]
         assert response.body["is_positive_definite"] is True
@@ -235,6 +244,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         # Sphere should have equal ixx, iyy, izz
         inertia = response.body["inertia"]
         assert abs(inertia["ixx"] - inertia["iyy"]) < 1e-10
@@ -254,6 +264,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 400
+        assert isinstance(response.body, dict)
         assert "error" in response.body
 
     def test_library_list_endpoint(self):
@@ -269,6 +280,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert "models" in response.body
         assert "count" in response.body
 
@@ -293,6 +305,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["has_changes"] is True
         assert "unified_diff" in response.body
 
@@ -355,6 +368,7 @@ class TestModelGenerationAPI:
         response = api.handle_request(request)
 
         assert response.status_code == 200
+        assert isinstance(response.body, dict)
         assert response.body["robot_name"] == "custom_robot"
         assert response.body["links"] == 2
         assert response.body["joints"] == 1

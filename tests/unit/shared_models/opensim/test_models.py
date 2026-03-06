@@ -9,12 +9,12 @@ this script finds all osim files in the repo, instantiate opensim.Model from eac
 then call initSystem on it, roundtrips save/restore to compare.
 """
 
-import logging
-import os
-import sys
-from fnmatch import fnmatch
+import logging  # noqa: E402
+import os  # noqa: E402
+import sys  # noqa: E402
+from fnmatch import fnmatch  # noqa: E402
 
-import opensim
+import opensim  # noqa: E402
 
 logger = logging.getLogger(__name__)
 # import opensim as opensim

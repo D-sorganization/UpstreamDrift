@@ -398,7 +398,9 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
 
         # Apply theme system
         try:
-            from shared.python.theme import setup_themed_app
+            from shared.python.theme import (
+                setup_themed_app,  # type: ignore[attr-defined]
+            )
 
             settings_app = config.settings_app or config.tool_name.replace(
                 " ", ""

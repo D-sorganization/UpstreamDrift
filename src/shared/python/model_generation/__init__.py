@@ -339,7 +339,7 @@ def quick_build(
     builder.add_humanoid_segments()
     result = builder.build()
 
-    if output_path and result.success:
+    if output_path and result.success and result.urdf_xml is not None:
         path = Path(output_path)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(result.urdf_xml)

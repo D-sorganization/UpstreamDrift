@@ -24,8 +24,9 @@ jobs:
           target: runtime
           load: true # Load image into local docker engine
           tags: upstream-drift:runtime
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Temporarily disable gha cache to bypass corrupted blob cache issue
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
       - name: Verify Image Size Budget
         run: |

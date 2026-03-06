@@ -400,7 +400,7 @@ class ModelGenerationAPI:
         urdf_string = result.urdf_xml
 
         # Return as file or JSON based on query param
-        if request.query_params.get("download") == "true":
+        if request.query_params.get("download") == "true" and urdf_string is not None:
             return APIResponse.file(urdf_string, f"{robot_name}.urdf")
 
         return APIResponse.ok(
@@ -445,7 +445,7 @@ class ModelGenerationAPI:
 
         urdf_string = result.urdf_xml
 
-        if request.query_params.get("download") == "true":
+        if request.query_params.get("download") == "true" and urdf_string is not None:
             return APIResponse.file(urdf_string, f"{robot_name}.urdf")
 
         return APIResponse.ok(
@@ -489,7 +489,7 @@ class ModelGenerationAPI:
         config = ConversionConfig(robot_name=robot_name)
 
         converter = SimscapeToURDFConverter(config)
-        result = converter.convert_string(content, format_type)
+        result = converter.convert_string(content, format_type)  # type: ignore[arg-type]
 
         if not result.success:
             return APIResponse.error(
@@ -506,7 +506,10 @@ class ModelGenerationAPI:
             "urdf": result.urdf_string,
         }
 
-        if request.query_params.get("download") == "true":
+        if (
+            request.query_params.get("download") == "true"
+            and result.urdf_string is not None
+        ):
             return APIResponse.file(result.urdf_string, f"{result.robot_name}.urdf")
 
         return APIResponse.ok(response_data)
@@ -799,8 +802,8 @@ class ModelGenerationAPI:
         )
 
         models = library.list_models(
-            category=category,
-            source=source,
+            category=category,  # type: ignore[arg-type]
+            source=source,  # type: ignore[arg-type]
             search=search,
             tags=tags,
         )
@@ -834,10 +837,10 @@ class ModelGenerationAPI:
         models = library.list_models()
 
         for m in models:
-            if m.model_id == model_id:
+            if m.name == model_id or getattr(m, "model_id", m.name) == model_id:  # type: ignore[attr-defined]
                 return APIResponse.ok(
                     {
-                        "id": m.model_id,
+                        "id": getattr(m, "model_id", m.name),  # type: ignore[attr-defined]
                         "name": m.name,
                         "category": m.category.value,
                         "source": m.source.value if m.source else None,

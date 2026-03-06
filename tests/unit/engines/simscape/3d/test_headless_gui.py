@@ -4,12 +4,12 @@ pytest.skip(
     "Legacy test pending dependency modernization (#1586)", allow_module_level=True
 )
 
-import os
-import tempfile
-from unittest.mock import patch
+import os  # noqa: E402
+import tempfile  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import pytest
-from PyQt6 import QtWidgets
+import pytest  # noqa: E402
+from PyQt6 import QtWidgets  # noqa: E402
 
 # Use offscreen platform for headless testing
 os.environ["QT_QPA_PLATFORM"] = "offscreen"

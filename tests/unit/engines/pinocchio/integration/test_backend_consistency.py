@@ -9,7 +9,7 @@ pytest.skip(
 )
 
 
-from dtack.backends.backend_factory import BackendFactory, BackendType
+from dtack.backends.backend_factory import BackendFactory, BackendType  # noqa: E402
 
 
 class TestBackendConsistency:

@@ -165,7 +165,7 @@ class PhysicsValidator:
 
             # Compute condition number
             if eigenvalues.min() > 0:
-                result.condition_number = eigenvalues.max() / eigenvalues.min()
+                result.condition_number = float(eigenvalues.max() / eigenvalues.min())
                 if result.condition_number > 1e5:
                     result.warnings.append(
                         f"High condition number ({result.condition_number:.2e}) "
@@ -539,7 +539,7 @@ class PhysicsValidator:
                 pb = p1 + b * v
                 dist = np.linalg.norm(point - pb)
 
-            min_dist = float(min(min_dist, dist))
+            min_dist = min(min_dist, float(dist))
 
         return min_dist
 

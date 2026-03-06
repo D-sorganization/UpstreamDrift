@@ -9,13 +9,13 @@ pytest.skip(
 )
 
 
-import importlib.util
-import os
-import sys
-from unittest.mock import MagicMock
+import importlib.util  # noqa: E402
+import os  # noqa: E402
+import sys  # noqa: E402
+from unittest.mock import MagicMock  # noqa: E402
 
-import numpy as np
-import pytest
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
 
 # Mock mujoco before importing plotting
 sys.modules["mujoco"] = MagicMock()

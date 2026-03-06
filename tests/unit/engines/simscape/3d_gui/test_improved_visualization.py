@@ -15,15 +15,15 @@ Demonstrates:
 - Ball positioned for center strike
 """
 
-import logging
-import sys
+import logging  # noqa: E402
+import sys  # noqa: E402
 
-import numpy as np
-import pandas as pd
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
 
 # Add the current directory to Python path
-from golf_gui_application import GolfVisualizerMainWindow
-from PyQt6.QtWidgets import QApplication
+from golf_gui_application import GolfVisualizerMainWindow  # noqa: E402
+from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

@@ -72,7 +72,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         """Initialize the Frankenstein editor."""
         self._models: dict[str, ParsedModel] = {}
         self._parser = URDFParser()
-        self._clipboard: list[
+        self._clipboard: list[  # type: ignore[assignment]
             tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]
         ] = []
         self._undo_stack: list[EditorState] = []
@@ -528,7 +528,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
         return EditorState(
             models=models_copy,
-            clipboard=copy.deepcopy(self._clipboard),
+            clipboard=copy.deepcopy(self._clipboard),  # type: ignore
             operation_history=[],
             timestamp=time.time(),
         )
@@ -536,7 +536,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
     def _restore_state(self, state: EditorState) -> None:
         """Restore from a state snapshot."""
         self._models = state.models
-        self._clipboard = state.clipboard
+        self._clipboard = state.clipboard  # type: ignore
 
     # ============================================================
     # Export

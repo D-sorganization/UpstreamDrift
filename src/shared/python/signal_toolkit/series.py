@@ -167,7 +167,7 @@ class SeriesExpansion:
         # Create sample points centered at 'center'
         dx_values = np.linspace(-dx_range, dx_range, num_samples)
         x_samples = center + dx_values
-        y_samples = np.array([float(f(x)) for x in x_samples])
+        y_samples = np.array([float(f(float(x))) for x in x_samples])  # type: ignore[arg-type]
 
         # Fit polynomial of degree n_terms-1 in terms of (x - center)
         # This gives us Taylor coefficients directly
@@ -238,7 +238,7 @@ class SeriesExpansion:
             - errors_by_term: List of errors for each number of terms
         """
         try:
-            exact_value = float(f(x_test))
+            exact_value = float(f(x_test))  # type: ignore[arg-type]
         except (ValueError, RuntimeError, FloatingPointError):
             return {
                 "convergent": False,
@@ -254,7 +254,7 @@ class SeriesExpansion:
 
         for n in range(1, self.max_terms + 1):
             taylor_func = self.taylor_series(f, center, n)
-            approx = taylor_func(x_test)
+            approx = float(taylor_func(x_test))  # type: ignore[arg-type]
             error = abs(approx - exact_value)
             errors_by_term.append(error)
 
@@ -343,7 +343,7 @@ class SeriesExpansion:
             Approximate value of f^(n)(x)
         """
         if n == 0:
-            return float(f(x))
+            return float(f(x))  # type: ignore[arg-type]
 
         # Use Richardson extrapolation for better accuracy
         return self._richardson_derivative(f, x, n)
@@ -416,7 +416,7 @@ class SeriesExpansion:
             coeff = ((-1) ** k) * self._binomial(n, k)
             point = x + (n / 2 - k) * h
             try:
-                val = float(f(point))
+                val = float(f(point))  # type: ignore[arg-type]
                 if np.isfinite(val):
                     result += coeff * val
             except (ValueError, RuntimeError, FloatingPointError):

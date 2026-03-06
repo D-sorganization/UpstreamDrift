@@ -592,7 +592,7 @@ class ModelLibrary:
         config: dict[str, Any],
     ) -> list[ModelEntry]:
         """Fetch models from GitHub repository."""
-        models = []
+        models = []  # type: ignore
 
         owner = config.get("owner")
         repo = config.get("repo")

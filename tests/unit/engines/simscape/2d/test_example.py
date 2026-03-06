@@ -10,12 +10,12 @@ This module contains comprehensive tests for all package functionality,
 including positive tests, negative tests, and edge cases.
 """
 
-import logging
-import math
+import logging  # noqa: E402
+import math  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from src import constants, logger_utils
+from src import constants, logger_utils  # noqa: E402
 
 
 class TestConstants:

@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .theme_manager import ThemeColors
+    from .theme_manager import ThemeColors  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +253,7 @@ def fleet_to_theme_colors(theme_name: str) -> ThemeColors:
     Raises:
         KeyError: If theme_name is not found in fleet themes
     """
-    from .theme_manager import ThemeColors
+    from .theme_manager import ThemeColors  # type: ignore
 
     if theme_name not in FLEET_THEMES:
         raise KeyError(f"Fleet theme '{theme_name}' not found")

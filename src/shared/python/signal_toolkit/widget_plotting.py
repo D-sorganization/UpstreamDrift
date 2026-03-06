@@ -24,14 +24,14 @@ class PlottingMixin:
         self.canvas.axes.clear()  # type: ignore[attr-defined]
         self.canvas.setup_dark_theme()  # type: ignore[attr-defined]
 
-        if self.current_signal is None:
+        if self.current_signal is None:  # type: ignore
             self.canvas.draw()  # type: ignore[attr-defined]
             return
 
         # Plot current signal
         self.canvas.axes.plot(  # type: ignore[attr-defined]
-            self.current_signal.time,
-            self.current_signal.values,
+            self.current_signal.time,  # type: ignore
+            self.current_signal.values,  # type: ignore
             color="#4da6ff",
             linewidth=1.5,
             label="Signal",
@@ -51,7 +51,7 @@ class PlottingMixin:
         # Plot tangent line if enabled
         if self.show_tangent_check.isChecked():  # type: ignore[attr-defined]
             tangent = compute_tangent_line(
-                self.current_signal,
+                self.current_signal,  # type: ignore
                 self.tangent_t_spin.value(),  # type: ignore[attr-defined]
             )
             self.canvas.axes.plot(  # type: ignore[attr-defined]

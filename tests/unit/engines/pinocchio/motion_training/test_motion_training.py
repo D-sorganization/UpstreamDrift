@@ -9,13 +9,13 @@ pytest.skip(
 )
 
 
-import typing
+import typing  # noqa: E402
 
-import numpy as np
-import pytest
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
 
 # Import test subjects
-from motion_training.club_trajectory_parser import (
+from motion_training.club_trajectory_parser import (  # noqa: E402
     ClubFrame,
     ClubTrajectory,
     ClubTrajectoryParser,

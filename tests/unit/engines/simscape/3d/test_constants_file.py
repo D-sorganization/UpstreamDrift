@@ -6,10 +6,10 @@ pytest.skip(
 
 """Tests for constants_file module."""
 
-import math
-from pathlib import Path
+import math  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
 project_root = Path(__file__).parent.parent.parent
 

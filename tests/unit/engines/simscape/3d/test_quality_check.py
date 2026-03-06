@@ -6,9 +6,9 @@ pytest.skip(
 
 """Tests for quality check script."""
 
-import importlib.util
-import types
-from pathlib import Path
+import importlib.util  # noqa: E402
+import types  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 project_root = Path(__file__).parent.parent.parent
 scripts_path = project_root / "scripts"

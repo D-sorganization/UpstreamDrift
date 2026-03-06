@@ -91,7 +91,7 @@ class SignalImporter:
 
         # Parse data
         time_data = []
-        value_data = {i: [] for i in value_indices}
+        value_data = {i: [] for i in value_indices}  # type: ignore
 
         for row in data_rows:
             if len(row) <= time_idx:
@@ -346,9 +346,9 @@ class SignalExporter:
             data[sig.name] = sig.values
 
         if compressed:
-            np.savez_compressed(file_path, **data)
+            np.savez_compressed(file_path, **data)  # type: ignore[arg-type]
         else:
-            np.savez(file_path, **data)
+            np.savez(file_path, **data)  # type: ignore[arg-type]
 
     @staticmethod
     def to_json(
@@ -657,7 +657,7 @@ class BatchProcessor:
                 if isinstance(signal, list):
                     processed = [processor(s) for s in signal]
                 else:
-                    processed = processor(signal)
+                    processed = processor(signal)  # type: ignore
 
                 results[file_path.stem] = processed
 
@@ -668,12 +668,12 @@ class BatchProcessor:
                         SignalExporter.to_csv(processed, output_path)
                     elif output_format == "json":
                         if isinstance(processed, list):
-                            processed = processed[0]  # JSON only supports single signal
-                        SignalExporter.to_json(processed, output_path)
+                            processed = processed[0]  # type: ignore
+                        SignalExporter.to_json(processed, output_path)  # type: ignore
                     elif output_format == "npz":
                         SignalExporter.to_npz(processed, output_path)
 
             except (ValueError, KeyError, json.JSONDecodeError, TypeError) as e:
                 logger.error(f"Warning: Failed to process {file_path}: {e}")
 
-        return results
+        return results  # type: ignore

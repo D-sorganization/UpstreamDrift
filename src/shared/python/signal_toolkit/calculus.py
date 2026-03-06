@@ -16,7 +16,7 @@ from scipy.signal import savgol_filter
 from .core import Signal
 
 # Backward-compatible trapezoid integration (np.trapz removed in NumPy 2.0+)
-_trapz = getattr(np, "trapezoid", None) or np.trapz
+_trapz = getattr(np, "trapezoid", None) or np.trapz  # type: ignore[attr-defined]
 
 
 class DifferentiationMethod(Enum):

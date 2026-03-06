@@ -6,12 +6,12 @@ pytest.skip(
 
 """Tests for shared.python.__init__ coverage."""
 
-from unittest.mock import patch
+from unittest.mock import patch  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-import shared.python
-from shared.python import (  # type: ignore[attr-defined]
+import shared.python  # noqa: E402
+from shared.python import (  # type: ignore[attr-defined]  # noqa: E402
     ComparativePlotter,
     ComparativeSwingAnalyzer,
 )

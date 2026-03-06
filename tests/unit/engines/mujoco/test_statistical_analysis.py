@@ -4,11 +4,11 @@ pytest.skip(
     "Legacy test pending dependency modernization (#1586)", allow_module_level=True
 )
 
-import importlib.util
-import os
-import sys
+import importlib.util  # noqa: E402
+import os  # noqa: E402
+import sys  # noqa: E402
 
-import numpy as np
+import numpy as np  # noqa: E402
 
 # Import StatisticalAnalyzer directly from file to avoid mujoco dependency
 # Assuming this test file is in engines/physics_engines/mujoco/python/tests/

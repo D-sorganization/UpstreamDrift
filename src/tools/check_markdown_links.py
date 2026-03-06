@@ -18,15 +18,15 @@ def extract_links_from_markdown(content: str) -> list[str]:
     """Extract raw link targets from Markdown content."""
     require(isinstance(content, str), "content must be a string")
     links: list[str] = []
-    
+
     for match in LINK_PATTERN.finditer(content):
         link = match.group(2)
         # Ignore external or fragment-only links
         if link.startswith(("http://", "https://", "mailto:", "#")):
             continue
-            
+
         links.append(link)
-        
+
     return links
 
 
@@ -34,7 +34,7 @@ def resolve_and_verify_link(link: str, base_dir: Path) -> str | None:
     """Resolve a relative link against a base directory and verify existence."""
     require(isinstance(link, str), "link must be a string")
     require(isinstance(base_dir, Path), "base_dir must be a Path")
-    
+
     # Strip anchor if present
     link_path = link.split("#", 1)[0] if "#" in link else link
     if not link_path:
@@ -44,13 +44,13 @@ def resolve_and_verify_link(link: str, base_dir: Path) -> str | None:
         target = (base_dir / link_path).resolve()
         if target.exists():
             return None
-            
+
         # Try unquoting
         decoded_link = unquote(link_path)
         target_decoded = (base_dir / decoded_link).resolve()
         if target_decoded.exists():
             return None
-            
+
         return f"Broken link: {link} -> {target}"
     except (RuntimeError, ValueError, OSError) as e:
         return f"Invalid path configuration for link '{link}': {e}"
@@ -59,7 +59,10 @@ def resolve_and_verify_link(link: str, base_dir: Path) -> str | None:
 def check_links(root_dir: Path) -> list[str]:
     """Validate internal links in all Markdown files under root_dir."""
     require(isinstance(root_dir, Path), "root_dir must be a Path")
-    require(root_dir.exists(), f"Configuration error: root directory '{root_dir}' does not exist.")
+    require(
+        root_dir.exists(),
+        f"Configuration error: root directory '{root_dir}' does not exist.",
+    )
 
     errors = []
 

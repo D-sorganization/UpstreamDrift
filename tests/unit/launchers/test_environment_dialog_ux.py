@@ -4,13 +4,15 @@ pytest.skip(
     "Legacy test pending dependency modernization (#1586)", allow_module_level=True
 )
 
-import sys
-from unittest.mock import MagicMock, patch
+import sys  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-import pytest
-from PyQt6.QtWidgets import QApplication
+import pytest  # noqa: E402
+from PyQt6.QtWidgets import QApplication  # noqa: E402
 
-from src.launchers.golf_launcher import EnvironmentDialog  # type: ignore[attr-defined]
+from src.launchers.golf_launcher import (  # noqa: E402
+    EnvironmentDialog,  # type: ignore[attr-defined]  # noqa: E402
+)
 
 # Mocking modules that might cause issues in headless environment
 sys.modules["shared.python.engine_manager"] = MagicMock()

@@ -9,9 +9,9 @@ pytest.skip(
 )
 
 
-from pathlib import Path
+from pathlib import Path  # noqa: E402
 
-import yaml  # type: ignore[import-untyped]
+import yaml  # type: ignore[import-untyped]  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 

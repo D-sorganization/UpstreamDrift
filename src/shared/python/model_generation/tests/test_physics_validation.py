@@ -35,7 +35,7 @@ class MockInertial:
     """Mock inertial for testing."""
 
     mass: float = 1.0
-    origin: MockOrigin = None
+    origin: MockOrigin = None  # type: ignore
 
     def __post_init__(self) -> None:
         if self.origin is None:
@@ -53,8 +53,8 @@ class MockGeometry:
 class MockCollision:
     """Mock collision for testing."""
 
-    geometry: MockGeometry = None
-    origin: MockOrigin = None
+    geometry: MockGeometry = None  # type: ignore
+    origin: MockOrigin = None  # type: ignore
 
     def __post_init__(self) -> None:
         if self.geometry is None:
@@ -68,8 +68,8 @@ class MockLink:
     """Mock link for testing."""
 
     name: str
-    inertial: MockInertial = None
-    collision: MockCollision = None
+    inertial: MockInertial = None  # type: ignore
+    collision: MockCollision = None  # type: ignore
 
     def __post_init__(self) -> None:
         if self.inertial is None:
@@ -86,7 +86,7 @@ class TestInertiaValidation:
     def test_valid_inertia(self, validator: PhysicsValidator) -> None:
         """Test validation of valid inertia tensor."""
         inertia = MockInertia(mass=1.0, ixx=1.0, iyy=1.0, izz=1.0)
-        result = validator.validate_inertia_tensor(inertia)
+        result = validator.validate_inertia_tensor(inertia)  # type: ignore[arg-type]
 
         assert result.is_valid
         assert result.is_symmetric
@@ -96,7 +96,7 @@ class TestInertiaValidation:
     def test_negative_diagonal(self, validator: PhysicsValidator) -> None:
         """Test detection of negative diagonal elements."""
         inertia = MockInertia(mass=1.0, ixx=-1.0, iyy=1.0, izz=1.0)
-        result = validator.validate_inertia_tensor(inertia)
+        result = validator.validate_inertia_tensor(inertia)  # type: ignore[arg-type]
 
         assert not result.is_valid
         assert not result.is_positive_definite
@@ -105,7 +105,7 @@ class TestInertiaValidation:
         """Test detection of triangle inequality violation."""
         # Izz > Ixx + Iyy violates triangle inequality
         inertia = MockInertia(mass=1.0, ixx=0.1, iyy=0.1, izz=1.0)
-        result = validator.validate_inertia_tensor(inertia)
+        result = validator.validate_inertia_tensor(inertia)  # type: ignore[arg-type]
 
         assert not result.satisfies_triangle_inequality
         assert len(result.warnings) > 0
@@ -113,7 +113,7 @@ class TestInertiaValidation:
     def test_eigenvalue_computation(self, validator: PhysicsValidator) -> None:
         """Test eigenvalue computation."""
         inertia = MockInertia(mass=1.0, ixx=1.0, iyy=2.0, izz=3.0)
-        result = validator.validate_inertia_tensor(inertia)
+        result = validator.validate_inertia_tensor(inertia)  # type: ignore[arg-type]
 
         assert result.eigenvalues is not None
         assert len(result.eigenvalues) == 3
@@ -124,7 +124,7 @@ class TestInertiaValidation:
         """Test warning for high condition number."""
         # Very different diagonal elements
         inertia = MockInertia(mass=1.0, ixx=1e-6, iyy=1.0, izz=1.0)
-        result = validator.validate_inertia_tensor(inertia)
+        result = validator.validate_inertia_tensor(inertia)  # type: ignore[arg-type]
 
         assert result.condition_number is not None
         assert result.condition_number > 1e5
@@ -141,14 +141,14 @@ class TestStaticStability:
 
     def test_empty_links(self, validator: PhysicsValidator) -> None:
         """Test stability with no links."""
-        result = validator.check_static_stability([])
+        result = validator.check_static_stability([])  # type: ignore[list-item]
 
         assert not result.is_stable
 
     def test_single_link_stability(self, validator: PhysicsValidator) -> None:
         """Test stability with single link."""
         link = MockLink(name="base", inertial=MockInertial(mass=1.0))
-        result = validator.check_static_stability([link])
+        result = validator.check_static_stability([link])  # type: ignore[list-item]  # type: ignore[list-item]
 
         assert result.center_of_mass == (0.0, 0.0, 0.0)
 
@@ -169,7 +169,7 @@ class TestStaticStability:
             ),
         )
 
-        result = validator.check_static_stability([link1, link2])
+        result = validator.check_static_stability([link1, link2])  # type: ignore[list-item]  # type: ignore[list-item]
 
         # COM should be at origin (average of +1 and -1)
         assert result.center_of_mass == pytest.approx((0.0, 0.0, 0.0), abs=0.01)
@@ -185,8 +185,8 @@ class TestCollisionCheck:
     def test_no_collision(self, validator: PhysicsValidator) -> None:
         """Test links without collision geometry."""
         link = MockLink(name="link1")
-        link.collision = None
-        result = validator.check_collision_geometry([link])
+        link.collision = None  # type: ignore
+        result = validator.check_collision_geometry([link])  # type: ignore[list-item]
 
         assert not result.has_self_intersection
 
@@ -207,7 +207,7 @@ class TestCollisionCheck:
             ),
         )
 
-        result = validator.check_collision_geometry([link1, link2])
+        result = validator.check_collision_geometry([link1, link2])  # type: ignore[list-item]
 
         assert not result.has_self_intersection
         assert result.min_separation > 0
@@ -229,7 +229,7 @@ class TestCollisionCheck:
             ),
         )
 
-        result = validator.check_collision_geometry([link1, link2])
+        result = validator.check_collision_geometry([link1, link2])  # type: ignore[list-item]
 
         assert result.has_self_intersection
         assert ("link1", "link2") in result.penetration_pairs
@@ -250,7 +250,7 @@ class TestCompletePhysicsValidation:
             collision=MockCollision(),
         )
 
-        result = validator.validate_physics([link])
+        result = validator.validate_physics([link])  # type: ignore[list-item]
 
         assert result.is_valid
         assert result.total_mass == 1.0
@@ -260,7 +260,7 @@ class TestCompletePhysicsValidation:
         link = MockLink(name="base")
 
         result = validator.validate_physics(
-            [link],
+            [link],  # type: ignore[list-item]
             check_stability=False,
         )
 
@@ -271,7 +271,7 @@ class TestCompletePhysicsValidation:
         link = MockLink(name="base")
 
         result = validator.validate_physics(
-            [link],
+            [link],  # type: ignore[list-item]
             check_collisions=False,
         )
 

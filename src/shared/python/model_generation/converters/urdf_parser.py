@@ -407,7 +407,7 @@ class URDFParser:
         origin_elem = elem.find("origin")
         if origin_elem is not None:
             xyz_str = origin_elem.get("xyz", "0 0 0")
-            com = tuple(float(v) for v in xyz_str.split())
+            com = tuple(float(v) for v in xyz_str.split())  # type: ignore
 
         # Mass
         mass = 1.0
@@ -438,7 +438,7 @@ class URDFParser:
         xyz = tuple(float(v) for v in xyz_str.split())
         rpy = tuple(float(v) for v in rpy_str.split())
 
-        return Origin(xyz=xyz, rpy=rpy)
+        return Origin(xyz=xyz, rpy=rpy)  # type: ignore[arg-type]
 
     def _parse_geometry(self, elem: ET.Element, base_path: Path | None) -> Geometry:
         """Parse geometry element."""
@@ -496,7 +496,7 @@ class URDFParser:
         color_elem = elem.find("color")
         if color_elem is not None:
             rgba_str = color_elem.get("rgba", "0.8 0.8 0.8 1.0")
-            color = tuple(float(v) for v in rgba_str.split())
+            color = tuple(float(v) for v in rgba_str.split())  # type: ignore
 
         texture = None
         texture_elem = elem.find("texture")

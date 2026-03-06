@@ -12,12 +12,12 @@ pytest.skip(
 )
 
 
-import logging
-import sys
+import logging  # noqa: E402
+import sys  # noqa: E402
 
-from golf_gui_application import GolfVisualizerMainWindow
-from PyQt6.QtWidgets import QApplication
-from wiffle_data_loader import WiffleDataLoader
+from golf_gui_application import GolfVisualizerMainWindow  # noqa: E402
+from PyQt6.QtWidgets import QApplication  # noqa: E402
+from wiffle_data_loader import WiffleDataLoader  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

@@ -41,7 +41,7 @@ class UISetupMixin:
 
     def _setup_ui(self) -> None:
         """Setup the user interface."""
-        main_layout = QHBoxLayout(self)  # type: ignore[arg-type]
+        main_layout = QHBoxLayout(self)  # type: ignore[call-overload, arg-type]
         main_layout.setContentsMargins(10, 10, 10, 10)
 
         # Splitter for resizable panels
