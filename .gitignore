@@ -110,3 +110,22 @@ review_comments.json
 launch_status.txt
 test_output.txt
 =*
+
+# Additional patterns from 2026-03-07 audit remediation
+collect_errors*.txt
+ci_tests*.log
+full_test_run*.txt
+pr_checks*.txt
+out_*.txt
+error_log_*.txt
+*_err*.txt
+*_err[0-9].txt
+run_id.txt
+qg.log
+ruff_errors.txt
+remaining_lint_errors.txt
+simscape_errors.txt
+simscape_ux_err*.txt
+*.db
+golf_modeling_suite.db
+1[0-9][0-9][0-9].txt

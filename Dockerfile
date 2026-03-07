@@ -147,7 +147,6 @@ WORKDIR /workspace
 # Copy application source code and configuration
 COPY --chown=${USER_NAME}:${USER_NAME} src/ ./src/
 COPY --chown=${USER_NAME}:${USER_NAME} pyproject.toml ./
-COPY --chown=${USER_NAME}:${USER_NAME} setup.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} launch_golf_suite.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} start_api_server.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} conftest.py ./
@@ -158,12 +157,12 @@ COPY --chown=${USER_NAME}:${USER_NAME} .env.example ./.env.example
 USER ${USER_NAME}
 
 # Expose default port (if running web server)
-EXPOSE 8000
+EXPOSE 8001
 
 # Health check for container monitoring
 # The core routes register /health on the FastAPI app (src/api/routes/core.py)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8001/health || exit 1
 
 # Default command
 CMD ["/bin/bash"]
