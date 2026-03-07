@@ -288,9 +288,15 @@ jobs:
           fi
 
           if [ -n "$RUST_FILES" ]; then
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            echo "Changed Rust files:"
-            echo "$RUST_FILES"
+            # Only enable the gate if a Cargo workspace actually exists
+            if [ -f "Cargo.toml" ]; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              echo "Changed Rust files:"
+              echo "$RUST_FILES"
+            else
+              echo "has_changes=false" >> "$GITHUB_OUTPUT"
+              echo "Rust files changed but no Cargo.toml found — skipping quality gate."
+            fi
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No Rust changes detected — skipping Rust quality gate."
