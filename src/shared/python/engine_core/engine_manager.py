@@ -128,8 +128,8 @@ class EngineManager(ContractChecker):
 
         registry = get_registry()
         for engine_type, loader_func in LOADER_MAP.items():
-            # Create a partial to bind suite_root
-            factory = partial(loader_func, suite_root=self.suite_root)
+            # Create a partial to bind suite_root (positional, not keyword)
+            factory = partial(loader_func, self.suite_root)
             registry.register(
                 EngineRegistration(
                     engine_type=engine_type,

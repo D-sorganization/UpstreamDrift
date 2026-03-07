@@ -261,19 +261,36 @@ class ControlInterface:
     ) -> None:
         """Set PD/PID gains.
 
+        Design by Contract:
+            Preconditions:
+                - kp (if provided) must be positive (all elements > 0) for stable control.
+                - kd (if provided) must be non-negative (all elements >= 0).
+                - ki may be any value (including zero to disable).
+
         Args:
-            kp: Proportional gain(s). Scalar applies to all joints.
-            kd: Derivative gain(s). Scalar applies to all joints.
+            kp: Proportional gain(s). Scalar applies to all joints. Must be > 0.
+            kd: Derivative gain(s). Scalar applies to all joints. Must be >= 0.
             ki: Integral gain(s). Scalar applies to all joints.
+
+        Raises:
+            ValueError: If kp contains non-positive values or kd contains negative values.
         """
         if kp is not None:
-            self._state.kp = (
-                np.full(self._n_v, kp) if np.isscalar(kp) else np.asarray(kp)
-            )
+            kp_arr = np.full(self._n_v, kp) if np.isscalar(kp) else np.asarray(kp)
+            if not np.all(kp_arr > 0):
+                raise ValueError(
+                    f"DbC precondition violated: kp must be positive (> 0) for stable control. "
+                    f"Got: {kp_arr}"
+                )
+            self._state.kp = kp_arr
         if kd is not None:
-            self._state.kd = (
-                np.full(self._n_v, kd) if np.isscalar(kd) else np.asarray(kd)
-            )
+            kd_arr = np.full(self._n_v, kd) if np.isscalar(kd) else np.asarray(kd)
+            if not np.all(kd_arr >= 0):
+                raise ValueError(
+                    f"DbC precondition violated: kd must be non-negative (>= 0). "
+                    f"Got: {kd_arr}"
+                )
+            self._state.kd = kd_arr
         if ki is not None:
             self._state.ki = (
                 np.full(self._n_v, ki) if np.isscalar(ki) else np.asarray(ki)

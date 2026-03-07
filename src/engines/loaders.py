@@ -7,20 +7,69 @@ correct dependency direction (engines layer).
 
 Each loader function uses lazy imports to avoid importing concrete engine
 implementations at module level.
+
+Design by Contract
+------------------
+All loader functions enforce postconditions to guarantee the returned engine
+is in a usable state. Callers may rely on these guarantees without defensive
+checks.
 """
 
+from __future__ import annotations
+
+from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from src.shared.python.data_io.common_utils import GolfModelingError
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+if TYPE_CHECKING:
+    pass
+
 logger = get_logger(__name__)
+
+__all__ = [
+    "load_mujoco_engine",
+    "load_drake_engine",
+    "load_pinocchio_engine",
+    "load_opensim_engine",
+    "load_myosim_engine",
+    "load_pendulum_engine",
+    "load_putting_green_engine",
+    "LOADER_MAP",
+]
+
+
+def _ensure_engine_loaded(engine: PhysicsEngine, engine_name: str) -> None:
+    """DbC postcondition: verify the engine object is non-None after loading.
+
+    Parameters
+    ----------
+    engine:
+        The engine returned by a loader function.
+    engine_name:
+        Human-readable engine name for the error message.
+
+    Raises
+    ------
+    GolfModelingError
+        If the engine is None or otherwise falsy.
+    """
+    if engine is None:
+        raise GolfModelingError(
+            f"DbC postcondition violated: {engine_name} loader returned None. "
+            "The engine constructor must not return None."
+        )
 
 
 def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
-    """Load MuJoCo engine with full initialization."""
+    """Load MuJoCo engine with full initialization.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         import mujoco  # noqa: F401
 
@@ -55,6 +104,8 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         else:
             logger.warning(f"Default MuJoCo model not found at {model_path}")
 
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "MuJoCo")
         return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
@@ -64,7 +115,10 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
 
 
 def load_drake_engine(suite_root: Path) -> PhysicsEngine:
-    """Load Drake engine with full initialization."""
+    """Load Drake engine with full initialization.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         import pydrake  # noqa: F401
 
@@ -107,6 +161,8 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         else:
             logger.warning(f"Default URDF not found at {urdf_path}")
 
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "Drake")
         return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
@@ -114,7 +170,10 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
 
 
 def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
-    """Load Pinocchio engine."""
+    """Load Pinocchio engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         import pinocchio  # noqa: F401
 
@@ -150,6 +209,8 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
         else:
             logger.warning(f"Default Pinocchio model not found at {model_path}")
 
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "Pinocchio")
         return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
@@ -157,7 +218,10 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
 
 
 def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
-    """Load OpenSim engine."""
+    """Load OpenSim engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
             OpenSimPhysicsEngine,
@@ -174,6 +238,9 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
             )
 
         engine = OpenSimPhysicsEngine()  # type: ignore[abstract]
+
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "OpenSim")
         return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
@@ -181,7 +248,10 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
 
 
 def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
-    """Load MyoSim engine."""
+    """Load MyoSim engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
             MyoSuitePhysicsEngine,
@@ -197,14 +267,21 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        return MyoSuitePhysicsEngine()  # type: ignore[abstract,no-any-return]
+        engine = MyoSuitePhysicsEngine()  # type: ignore[abstract,no-any-return]
+
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "MyoSim")
+        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("MyoSim requirements not met.") from e
 
 
-def load_pendulum_engine(suite_root: Path) -> PhysicsEngine:
-    """Load Pendulum (double-pendulum) engine."""
+def load_pendulum_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load Pendulum (double-pendulum) engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
             PendulumPhysicsEngine,
@@ -212,20 +289,29 @@ def load_pendulum_engine(suite_root: Path) -> PhysicsEngine:
 
         engine = PendulumPhysicsEngine()
         logger.info("Pendulum engine loaded successfully")
+
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "Pendulum")
         return engine  # type: ignore[return-value]
 
     except ImportError as e:
         raise GolfModelingError("Pendulum engine not found.") from e
 
 
-def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:
-    """Load Putting Green engine."""
+def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load Putting Green engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
     try:
         from src.engines.physics_engines.putting_green import PuttingGreenSimulator
 
         # Putting green doesn't need probing - it's always available as pure Python
         simulator = PuttingGreenSimulator()
         logger.info("Putting Green engine loaded successfully")
+
+        # DbC postcondition
+        _ensure_engine_loaded(simulator, "PuttingGreen")  # type: ignore[arg-type]
         return simulator  # type: ignore[return-value]
 
     except ImportError as e:
@@ -233,7 +319,7 @@ def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:
 
 
 # Helper for loaders map
-LOADER_MAP = {
+LOADER_MAP: dict[EngineType, Callable[[Path], PhysicsEngine]] = {
     EngineType.MUJOCO: load_mujoco_engine,
     EngineType.DRAKE: load_drake_engine,
     EngineType.PINOCCHIO: load_pinocchio_engine,
