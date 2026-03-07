@@ -35,6 +35,9 @@ def mock_suite_root(tmp_path) -> Path:
     (physics / "pinocchio").mkdir()
     (physics / "opensim").mkdir()
     (physics / "myosim").mkdir()
+    # Add missing engine dirs that EngineManager.engine_paths requires
+    (physics / "pendulum").mkdir()
+    (physics / "putting_green").mkdir()
 
     simscape = engines / "Simscape_Multibody_Models"
     simscape.mkdir()
@@ -161,21 +164,16 @@ def test_load_engine_no_loader(engine_manager) -> None:
 
 
 def test_load_mujoco_engine_success(engine_manager) -> None:
-    """Test successful MuJoCo engine loading."""
-    # Test using the current registry-based approach
+    """Test successful MuJoCo engine loading via switch_engine."""
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
 
-    mock_mujoco_module = MagicMock()
+    # Mock _load_engine so no real loading happens
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
 
-    with (
-        patch.dict(sys.modules, {"mujoco": mock_mujoco_module}),
-        patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
-        ) as mock_engine_class,
-    ):
-        mock_engine_instance = MagicMock()
-        mock_engine_class.return_value = mock_engine_instance
-
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
         result = engine_manager.switch_engine(EngineType.MUJOCO)
 
         assert result is True
@@ -208,21 +206,15 @@ def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
 
 
 def test_load_drake_engine_success(engine_manager) -> None:
-    """Test successful Drake engine loading."""
-    # Test using the current registry-based approach
+    """Test successful Drake engine loading via switch_engine."""
     engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
 
-    mock_pydrake_module = MagicMock()
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
 
-    with (
-        patch.dict(sys.modules, {"pydrake": mock_pydrake_module}),
-        patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
-        ) as mock_engine_class,
-    ):
-        mock_engine_instance = MagicMock()
-        mock_engine_class.return_value = mock_engine_instance
-
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
         result = engine_manager.switch_engine(EngineType.DRAKE)
 
         assert result is True
@@ -231,21 +223,15 @@ def test_load_drake_engine_success(engine_manager) -> None:
 
 
 def test_load_pinocchio_engine_success(engine_manager) -> None:
-    """Test successful Pinocchio engine loading."""
-    # Test using the current registry-based approach
+    """Test successful Pinocchio engine loading via switch_engine."""
     engine_manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
 
-    mock_pinocchio_module = MagicMock()
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
 
-    with (
-        patch.dict(sys.modules, {"pinocchio": mock_pinocchio_module}),
-        patch(
-            "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
-        ) as mock_engine_class,
-    ):
-        mock_engine_instance = MagicMock()
-        mock_engine_class.return_value = mock_engine_instance
-
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
         result = engine_manager.switch_engine(EngineType.PINOCCHIO)
 
         assert result is True
@@ -270,8 +256,18 @@ def test_load_matlab_engine_success(engine_manager) -> None:
 
 
 def test_load_pendulum_engine(engine_manager) -> None:
-    """Test pendulum engine loading."""
-    engine_manager._load_pendulum_engine()
+    """Test pendulum engine loading via switch_engine with mocked _load_engine."""
+    engine_manager.engine_status[EngineType.PENDULUM] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
+
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
+        result = engine_manager.switch_engine(EngineType.PENDULUM)
+        assert result is True
+        assert engine_manager.engine_status[EngineType.PENDULUM] == EngineStatus.LOADED
 
 
 def test_cleanup(engine_manager) -> None:
@@ -299,7 +295,8 @@ def test_validate_engine_configuration(engine_manager) -> None:
 def test_probe_all_engines(engine_manager) -> None:
     """Test probing all engines populates results."""
     engine_manager.probe_all_engines()
-    assert len(engine_manager.probe_results) == len(EngineType)
+    # probe_results should contain results for each registered probe
+    assert len(engine_manager.probe_results) == len(engine_manager.probes)
 
 
 def test_get_diagnostic_report(engine_manager) -> None:

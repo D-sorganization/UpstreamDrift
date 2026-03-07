@@ -46,9 +46,9 @@ class SwingPlaneAnalyzer:
             Tuple of (centroid, normal)
 
         Raises:
-            ValueError: If fewer than 3 points are provided.
+            PreconditionError: If fewer than 3 points are provided.
         """
-        require(len(points) >= 3, "at least 3 points required to fit a plane")
+        require(len(points) >= 3, "At least 3 points required to fit a plane")
 
         centroid = np.mean(points, axis=0)
         centered_points = points - centroid

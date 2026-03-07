@@ -254,18 +254,16 @@ def validate_physical_bounds(func: F) -> F:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         """Validate physical parameters before calling the wrapped function."""
-        # Get function signature
         import inspect
 
         sig = inspect.signature(func)
         bound_args = sig.bind(*args, **kwargs)
         bound_args.apply_defaults()
 
-        # Validate parameters by name
-        for param_name, param_value in bound_args.arguments.items():
-            # Skip 'self' and 'cls'
+        def _validate_param(param_name: str, param_value: Any) -> None:
+            """Apply all physical validation rules to a single named parameter."""
             if param_name in ("self", "cls"):
-                continue
+                return
 
             # Mass validation
             if "mass" in param_name.lower() and isinstance(param_value, int | float):
@@ -285,21 +283,45 @@ def validate_physical_bounds(func: F) -> F:
             ):
                 validate_inertia_matrix(param_value, param_name)
 
-            # Joint limits validation
-            if param_name == "q_min" and "q_max" in bound_args.arguments:
-                q_max = bound_args.arguments["q_max"]
-                if isinstance(param_value, np.ndarray) and isinstance(
-                    q_max, np.ndarray
-                ):
-                    validate_joint_limits(param_value, q_max)
-
             # Friction validation
             if "friction" in param_name.lower() and isinstance(
                 param_value, int | float
             ):
                 validate_friction_coefficient(float(param_value), param_name)
 
-        # Call original function
+        # Validate parameters by name — normal and **kwargs parameters
+        for param_name, param_value in bound_args.arguments.items():
+            # Detect VAR_KEYWORD parameters (i.e. **kwargs in the function signature)
+            # For these, param_value is a dict — iterate its contents too.
+            param_obj = sig.parameters.get(param_name)
+            if (
+                param_obj is not None
+                and param_obj.kind == inspect.Parameter.VAR_KEYWORD
+                and isinstance(param_value, dict)
+            ):
+                for kw_name, kw_value in param_value.items():
+                    _validate_param(kw_name, kw_value)
+            else:
+                _validate_param(param_name, param_value)
+
+        # Joint limits validation (needs both q_min and q_max together)
+        all_params: dict[str, Any] = {}
+        for param_name, param_value in bound_args.arguments.items():
+            param_obj = sig.parameters.get(param_name)
+            if (
+                param_obj is not None
+                and param_obj.kind == inspect.Parameter.VAR_KEYWORD
+                and isinstance(param_value, dict)
+            ):
+                all_params.update(param_value)
+            else:
+                all_params[param_name] = param_value
+
+        if "q_min" in all_params and "q_max" in all_params:
+            q_min, q_max = all_params["q_min"], all_params["q_max"]
+            if isinstance(q_min, np.ndarray) and isinstance(q_max, np.ndarray):
+                validate_joint_limits(q_min, q_max)
+
         return func(*args, **kwargs)
 
     return wrapper  # type: ignore

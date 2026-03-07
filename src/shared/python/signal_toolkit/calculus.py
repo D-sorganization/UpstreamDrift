@@ -115,7 +115,20 @@ class Differentiator:
 
         Returns:
             Signal containing the derivative.
+
+        Raises:
+            PreconditionError: If order < 1 (0th or negative order is undefined).
         """
+        # DbC precondition: derivative order must be a positive integer
+        if order < 1:
+            from src.shared.python.core.contracts import PreconditionError
+
+            raise PreconditionError(
+                f"Differentiator.differentiate requires order >= 1, got {order}. "
+                "A 0th-order derivative is the identity function (no differentiation). "
+                "A negative order is mathematically undefined for a differentiator."
+            )
+
         result = signal.copy()
         result.name = f"d{order}({signal.name})/dt{order}"
         result.units = f"{signal.units}/s^{order}" if signal.units else ""
@@ -268,8 +281,8 @@ class Integrator:
             upper_bound = t[-1]
 
         # Find indices for bounds
-        lower_idx = np.searchsorted(t, lower_bound)
-        upper_idx = np.searchsorted(t, upper_bound)
+        lower_idx = np.searchsorted(t, lower_bound, side="left")
+        upper_idx = np.searchsorted(t, upper_bound, side="right")
 
         lower_idx = np.clip(lower_idx, 0, len(t) - 1)
         upper_idx = np.clip(upper_idx, 0, len(t))

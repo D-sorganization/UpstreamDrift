@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 
 
-class ContractViolationError(Exception):
+class ContractViolationError(ValueError):
     """Base exception for contract violations."""
 
     def __init__(

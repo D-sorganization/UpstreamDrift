@@ -22,7 +22,17 @@ Preferred imports (direct from package, since src/shared/python is on sys.path):
     from plot_theme import apply_plot_theme
 """
 
+from pathlib import Path
+
+# Suite root — the repository root (3 levels up from src/shared/python)
+SUITE_ROOT: Path = Path(__file__).parent.parent.parent.parent
+
+# Default output root — can be patched in tests
+OUTPUT_ROOT: Path = SUITE_ROOT / "output"
+
 __all__ = [
+    "SUITE_ROOT",
+    "OUTPUT_ROOT",
     "chat",
     "humanoid_character_builder",
     "model_generation",

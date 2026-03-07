@@ -83,8 +83,15 @@ def isolated_library() -> Iterator[tuple]:
 
 @pytest.fixture()
 def temp_library() -> Iterator[str]:
-    """Create a temporary recording library."""
-    with tempfile.TemporaryDirectory() as temp_dir:
+    """Create a temporary recording library.
+
+    Uses ``ignore_cleanup_errors=True`` (Python ≥ 3.10) so that Windows
+    SQLite file-lock issues during TemporaryDirectory teardown don't cause
+    spurious test errors. The SQLite connection pool holds the file open
+    until the thread terminates, and ``TemporaryDirectory.__exit__`` fires
+    before the thread-local connection is released.
+    """
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
         yield temp_dir
 
 

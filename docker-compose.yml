@@ -21,7 +21,7 @@ services:
       - API_HOST=0.0.0.0
       - API_PORT=8001
       - ENVIRONMENT=development
-      - MUJOCO_GL=egl
+      - MUJOCO_GL=${MUJOCO_GL:-osmesa}
     command: python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001 --reload
     restart: unless-stopped
     working_dir: /workspace
@@ -49,6 +49,27 @@ services:
       - VITE_API_URL=http://backend:8001
     depends_on:
       - backend
+    networks:
+      - upstream-drift
+
+  # Training stage for advanced ML workflows
+  training:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: training
+    image: upstream-drift:training
+    container_name: upstream-drift-training
+    volumes:
+      - .:/workspace:delegated
+      - ./data:/workspace/data
+    environment:
+      - PYTHONPATH=/workspace
+      - MUJOCO_GL=${MUJOCO_GL:-osmesa}
+    working_dir: /workspace
+    command: /bin/bash
+    stdin_open: true
+    tty: true
     networks:
       - upstream-drift
 

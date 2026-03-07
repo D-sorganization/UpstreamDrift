@@ -82,6 +82,13 @@ class TestSims(unittest.TestCase):
 
     def test_sims(self) -> None:
         """Load and verify each registered MuJoCo model."""
+        # Skip if model assets are not installed (not part of the repo)
+        first_model = os.path.join(os.path.dirname(__file__), model_paths[0])
+        if not os.path.exists(first_model):
+            self.skipTest(
+                f"MyoSuite model assets not found at {first_model}. "
+                "Install MyoSuite model files to run this test."
+            )
         for model_path in model_paths:
             logger.info(f"Testing: {model_path}")
             self.get_sim(model_path)

@@ -12,41 +12,34 @@ def test_load_mujoco_success(tmp_path: object) -> None:
 
     path = Path(str(tmp_path))
 
-    # Mock all required modules in a single patch.dict to avoid module state issues
-    mock_mujoco = MagicMock()
-    mock_physics_engine_module = MagicMock()
-    mock_probe_module = MagicMock()
-
     mock_engine_cls = MagicMock()
+    mock_engine_instance = MagicMock()
+    mock_engine_cls.return_value = mock_engine_instance
+
     mock_probe_cls = MagicMock()
-
-    mock_physics_engine_module.MuJoCoPhysicsEngine = mock_engine_cls
-    mock_probe_module.MuJoCoProbe = mock_probe_cls
-
-    # Setup probe result
     mock_probe_instance = mock_probe_cls.return_value
     mock_result = MagicMock()
     mock_result.is_available.return_value = True
     mock_probe_instance.probe.return_value = mock_result
 
-    with patch.dict(
-        sys.modules,
-        {
-            "mujoco": mock_mujoco,
-            "pydrake": MagicMock(),
-            "pydrake.all": MagicMock(),
-            "pinocchio": MagicMock(),
-            "matlab": MagicMock(),
-            "matlab.engine": MagicMock(),
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_module,
-            "shared.python.engine_probes": mock_probe_module,
-        },
+    # Patch at the canonical import location used by src.engines.loaders
+    with (
+        patch.dict(sys.modules, {"mujoco": MagicMock()}),
+        patch(
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine",
+            mock_engine_cls,
+        ),
+        patch(
+            "src.shared.python.engine_core.engine_probes.MuJoCoProbe",
+            mock_probe_cls,
+        ),
     ):
-        from shared.python.engine_core.engine_loaders import load_mujoco_engine
+        from src.engines.loaders import load_mujoco_engine
 
-        load_mujoco_engine(path)
+        result = load_mujoco_engine(path)
 
         mock_engine_cls.assert_called_once()
+        assert result is mock_engine_instance
 
 
 def test_load_drake_missing(tmp_path: object) -> None:

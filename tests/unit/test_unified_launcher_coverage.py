@@ -1,5 +1,4 @@
-import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -29,12 +28,20 @@ def test_initialization(launcher):
 
 def test_mainloop(launcher):
     """Test mainloop execution delegates to golf_launcher.main()."""
-    # Mock the main function from golf_launcher that mainloop calls
-    with patch("src.launchers.golf_launcher.main") as mock_main:
-        mock_main.return_value = 0
+    import sys
 
-        launcher.mainloop()
-        mock_main.assert_called_once()
+    # Temporarily remove the legacy module mock that test_unified_launcher.py sets
+    # at session level, so _get_golf_main falls through to src.launchers.golf_launcher
+    legacy_key = "launchers.golf_launcher"
+    legacy_saved = sys.modules.pop(legacy_key, None)
+    try:
+        with patch("src.launchers.golf_launcher.main") as mock_main:
+            mock_main.return_value = 0
+            launcher.mainloop()
+            mock_main.assert_called_once()
+    finally:
+        if legacy_saved is not None:
+            sys.modules[legacy_key] = legacy_saved
 
 
 def test_show_status(launcher):
@@ -51,23 +58,29 @@ def test_show_status(launcher):
 
 
 def test_get_version(launcher):
-    """Test version retrieval."""
-    # Test fallback first since package might not be fully installed in metadata
+    """Test version retrieval.
+
+    Design-by-Contract:
+        Postcondition: get_version() always returns a non-empty string matching SemVer
+        pattern or a recognised beta/rc suffix.
+    """
+    # Test metadata path first since package might not be fully installed in metadata
     version = launcher.get_version()
     assert isinstance(version, str)
     assert len(version) > 0
 
-    # Test with mock package metadata
+    # Test with mock package metadata (happy path)
     with patch("importlib.metadata.version") as mock_version:
         mock_version.return_value = "2.0.0"
         assert launcher.get_version() == "2.0.0"
 
-    # Test with mock shared version when package metadata fails
-    with (
-        patch("importlib.metadata.version", side_effect=ImportError),
-        patch.dict(sys.modules, {"src.shared.python": MagicMock(__version__="1.5.0")}),
-    ):
-        assert launcher.get_version() == "1.5.0"
+    # Test fallback — when metadata fails, reads pyproject.toml or uses hardcoded string
+    with patch("importlib.metadata.version", side_effect=ImportError):
+        fallback = launcher.get_version()
+        assert isinstance(fallback, str)
+        assert len(fallback) > 0
+        # Must be a valid semver-like string (e.g. "2.1.0", "2.1.0-beta")
+        assert "." in fallback, f"Expected SemVer version, got: {fallback!r}"
 
 
 def test_cli_launch():

@@ -74,30 +74,37 @@ def test_load_video_success(gui) -> None:
 
 def test_run_analysis(gui, qtbot) -> None:
     """Test running analysis workflow."""
-    # Setup state
+    from unittest.mock import MagicMock
+
+    # Setup state — must set _video_path directly (lbl_file.setText alone doesn't set it)
+    gui._video_path = "/path/to/video.mp4"
     gui.lbl_file.setText("/path/to/video.mp4")
     gui.btn_run.setEnabled(True)
 
-    # Mock message box to prevent blocking
-    with patch.object(QMessageBox, "information") as mock_msg:
+    # Mock the _AnalysisWorker so no real thread starts
+    mock_worker = MagicMock()
+    mock_worker.progress = MagicMock()
+    mock_worker.finished = MagicMock()
+    mock_worker.error = MagicMock()
+
+    with patch(
+        "shared.python.pose_estimation.openpose_gui._AnalysisWorker",
+        return_value=mock_worker,
+    ):
         gui.run_analysis()
 
         assert not gui.btn_run.isEnabled()
         assert not gui.btn_load.isEnabled()
-        assert "Starting analysis" in gui.log_area.toPlainText()
+        assert "Starting OpenPose analysis" in gui.log_area.toPlainText()
 
-        # Verify timer started, then manually trigger completion to avoid slow waits
-
-        assert gui.timer.isActive()
-        gui.timer.stop()
-
-        # Manually trigger completion
-        gui.progress.setValue(100)
-        gui.update_progress()
-
-        assert "Analysis Complete!" in gui.log_area.toPlainText()
-        assert gui.btn_run.isEnabled()
-        mock_msg.assert_called_once()
+        # Simulate worker completion: directly call _on_finished
+        with patch(
+            "shared.python.pose_estimation.openpose_gui.QMessageBox"
+        ) as mock_msg_cls:
+            gui._on_finished([])  # Trigger completion with empty results
+            assert "Analysis complete!" in gui.log_area.toPlainText()
+            assert gui.btn_run.isEnabled()
+            mock_msg_cls.information.assert_called_once()
 
 
 def test_log(gui) -> None:

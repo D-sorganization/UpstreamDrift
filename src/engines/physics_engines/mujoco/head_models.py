@@ -29,11 +29,12 @@ from .pendulum_models_xml import (  # noqa: F401
     TRIPLE_PENDULUM_XML,
 )
 
-# Convert to float for use in f-strings
+# Convert to float for use in f-strings (PhysicalConstant objects must be cast)
 _BALL_MASS = float(GOLF_BALL_MASS_KG)
 _BALL_RADIUS = float(GOLF_BALL_RADIUS_M)
 _BALL_RADIUS_INNER = _BALL_RADIUS * 0.998  # For dimple visualization
 _TIME_STEP = float(DEFAULT_TIME_STEP)
+_GRAVITY = float(GRAVITY_M_S2)  # e.g. 9.807
 
 
 # ==============================================================================
@@ -41,10 +42,10 @@ _TIME_STEP = float(DEFAULT_TIME_STEP)
 # ==============================================================================
 TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""
 <mujoco model="two_link_inclined_universal">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+  <option timestep="0.001" gravity="0 0 -{_GRAVITY:.4f}"
           integrator="RK4" solver="Newton"/>
 
-  <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <compiler angle="radian" inertiafromgeom="true"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -151,10 +152,10 @@ TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""
 # ==============================================================================
 GIMBAL_JOINT_DEMO_XML = rf"""
 <mujoco model="gimbal_joint_demo">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+  <option timestep="0.001" gravity="0 0 -{_GRAVITY:.4f}"
           integrator="RK4" solver="Newton"/>
 
-  <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <compiler angle="radian" inertiafromgeom="true"/>
 
   <visual>
     <map znear="0.01" zfar="20"/>

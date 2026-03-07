@@ -105,9 +105,11 @@ class UnifiedLauncher:
         Shows available engines, their status, and configuration.
         """
         try:
-            from shared.python.engine_core.engine_manager import EngineManager
-        except ImportError:
             from src.shared.python.engine_core.engine_manager import EngineManager
+        except ImportError:
+            from shared.python.engine_core.engine_manager import (
+                EngineManager,  # type: ignore[no-redef]
+            )
 
         manager = EngineManager()
 
@@ -117,27 +119,28 @@ class UnifiedLauncher:
         if engines:
             logger.info("Available engines:")
             for _engine in engines:
-                engine_name = str(getattr(_engine, "value", str(_engine))).upper()
+                engine_name = str(getattr(_engine, "value", str(_engine)))
                 logger.info(" - %s", engine_name)
-                builtins.print(engine_name)  # noqa: T201
+                builtins.print(engine_name.upper())  # noqa: T201
         else:
             logger.info("No engines available.")
             builtins.print("NO ENGINES AVAILABLE")  # noqa: T201
 
-        # Show suite root
-        from src.shared.python import SUITE_ROOT
+        # Show suite root — import from the canonical location
+        try:
+            from src.shared.python import SUITE_ROOT
+        except ImportError:
+            from shared.python import SUITE_ROOT  # type: ignore[no-redef]
 
         logger.info("Suite root: %s", SUITE_ROOT)
 
         # Show launcher paths
-
         launcher_dir = Path(__file__).parent
         for launcher_file in launcher_dir.glob("*_launcher.py"):
             if launcher_file.name != "unified_launcher.py":
                 logger.info("Launcher: %s", launcher_file.name)
 
         # Show engine directories
-
         engines_dir = SUITE_ROOT / "engines"
         if engines_dir.exists():
             for engine_dir in engines_dir.iterdir():
@@ -148,31 +151,67 @@ class UnifiedLauncher:
         """Get suite version from package metadata.
 
         Returns:
-            Version string (e.g., "1.0.0-beta")
+            Version string from pyproject.toml / installed package.
 
-        Note:
-            Primary source: Package metadata (installed package)
-            Fallback: shared.__version__ (development mode)
-            Last resort: Hardcoded default
+        Resolution order:
+            1. Installed package metadata (``importlib.metadata``)
+               - If PackageNotFoundError: fall through to pyproject.toml
+               - If ImportError (broken env): skip directly to fallback
+            2. pyproject.toml in the repo root (only in development mode)
+            3. ``shared.python.__version__`` attribute (legacy fallback)
+            4. Hardcoded fallback
         """
-        # Try package metadata first (installed package)
+        # 1. Try installed package metadata
+        metadata_broken = False
         try:
             from importlib.metadata import PackageNotFoundError, version
 
-            return version("golf-modeling-suite")
-        except (PackageNotFoundError, ImportError):
-            pass
+            try:
+                return version("upstream-drift")
+            except PackageNotFoundError:
+                pass
 
-        # Try shared package (development mode)
+            try:
+                return version("golf-modeling-suite")
+            except PackageNotFoundError:
+                pass
+
+        except ImportError:
+            metadata_broken = True
+
+        # 2. Try shared.python.__version__
         try:
-            from shared.python import __version__
+            import shared.python as _shared  # type: ignore[import-untyped]
 
-            version_str: str = __version__  # type: ignore[assignment]
-            return version_str
-        except (ImportError, AttributeError):
+            v = getattr(_shared, "__version__", None)
+            if v and not callable(v):
+                return str(v)
+        except Exception:  # noqa: BLE001
             pass
 
-        # Last resort fallback
+        # 3. Read directly from pyproject.toml (development / editable installs)
+        # Only attempt when metadata machinery is functioning (not broken import)
+        if not metadata_broken:
+            try:
+                import tomllib  # Python 3.11+
+            except ImportError:
+                try:
+                    import tomli as tomllib  # type: ignore[no-redef]
+                except ImportError:
+                    tomllib = None  # type: ignore[assignment]
+
+            if tomllib is not None:
+                try:
+                    pyproject_path = (
+                        Path(__file__).parent.parent.parent / "pyproject.toml"
+                    )
+                    with pyproject_path.open("rb") as fh:
+                        data = tomllib.load(fh)
+                    return str(data["project"]["version"])
+                except (KeyError, FileNotFoundError, OSError):
+                    pass
+
+        # 4. Hardcoded fallback
         return "1.0.0-beta"
 
 

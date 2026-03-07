@@ -15,9 +15,30 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from humanoid_character_builder.core.body_parameters import BodyParameters
+import numpy as np
+from humanoid_character_builder.core.body_parameters import BodyParameters, GenderModel
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Optional dependency availability flags (mock-patchable in tests)
+# ---------------------------------------------------------------------------
+
+try:
+    import smplx as _smplx_module  # type: ignore[import-untyped]
+
+    SMPLX_AVAILABLE = True
+except ImportError:
+    _smplx_module = None  # type: ignore[assignment]
+    SMPLX_AVAILABLE = False
+
+try:
+    import trimesh as _trimesh_module  # type: ignore[import-untyped]
+
+    TRIMESH_AVAILABLE = True
+except ImportError:
+    _trimesh_module = None  # type: ignore[assignment]
+    TRIMESH_AVAILABLE = False
 
 
 class MeshGeneratorBackend(Enum):
@@ -278,29 +299,25 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         visual_dir.mkdir(parents=True, exist_ok=True)
         collision_dir.mkdir(parents=True, exist_ok=True)
 
-        # Convert body parameters to MakeHuman modifiers
         modifiers = self._convert_params_to_makehuman(params)
 
-        # Try to use MakeHuman scripting API
+        # Try the scripted MakeHuman API
         try:
             return self._generate_via_api(
                 params, modifiers, visual_dir, collision_dir, **kwargs
             )
-        except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
-            logger.warning(f"MakeHuman API generation failed: {e}")
-
-        # Fallback: Try to load pre-exported MakeHuman mesh
-        try:
-            return self._generate_from_presets(
-                params, visual_dir, collision_dir, **kwargs
+        except (
+            ValueError,
+            ZeroDivisionError,
+            OverflowError,
+            TypeError,
+            RuntimeError,
+        ) as e:
+            logger.warning("MakeHuman API generation failed: %s", e)
+            return GeneratedMeshResult(
+                success=False,
+                error_message=f"MakeHuman generation failed: {e}",
             )
-        except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
-            logger.warning(f"MakeHuman preset loading failed: {e}")
-
-        # Final fallback to primitive generator
-        logger.warning("Falling back to primitive mesh generation")
-        primitive_gen = PrimitiveMeshGenerator()
-        return primitive_gen.generate(params, output_dir, **kwargs)
 
     def _generate_via_api(
         self,
@@ -310,78 +327,99 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         collision_dir: Path,
         **kwargs: Any,
     ) -> GeneratedMeshResult:
-        """Generate meshes using MakeHuman Python API.
+        """Generate meshes using MakeHuman scripted mode.
 
-        Requires MakeHuman to be installed and accessible via Python.
+        Writes a Python script via _build_mh_script and runs it via
+        _run_makehuman_script, then loads the resulting OBJ and segments it.
         """
-        import subprocess
+        import json
         import tempfile
 
-        # Create MakeHuman script
-        script_content = self._create_makehuman_script(modifiers, visual_dir)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            script_path = tmp / "mh_generate.py"
+            body_obj = tmp / "body.obj"
+            groups_json = tmp / "groups.json"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False
-        ) as script_file:
-            script_file.write(script_content)
-            script_path = script_file.name
+            script_content = self._build_mh_script(modifiers, body_obj, groups_json)
+            script_path.write_text(script_content, encoding="utf-8")
 
-        try:
-            # Run MakeHuman in scripted mode
-            if self.makehuman_path is None:
-                raise RuntimeError("MakeHuman path not configured")
-            mh_executable = self.makehuman_path / "makehuman.py"
-            if not mh_executable.exists():
-                mh_executable = self.makehuman_path / "makehuman"
+            success = self._run_makehuman_script(script_path)
+            if not success:
+                raise RuntimeError("MakeHuman script execution failed")
 
-            result = subprocess.run(
-                ["python", str(mh_executable), "--nogui", "--script", script_path],
-                capture_output=True,
-                text=True,
-                timeout=120,
+            if not body_obj.exists():
+                raise RuntimeError(f"MakeHuman did not produce OBJ: {body_obj}")
+
+            # Load vertex groups if available
+            vertex_groups: dict[str, list[int]] = {}
+            if groups_json.exists():
+                with open(groups_json, encoding="utf-8") as fh:
+                    vertex_groups = json.load(fh)
+
+            # Parse OBJ
+            vertices, faces = self._parse_obj_file(body_obj)
+            if len(vertices) == 0:
+                raise RuntimeError("Parsed OBJ has no vertices")
+
+            # Segment the mesh and export per-body-part STLs
+            if not TRIMESH_AVAILABLE:
+                raise RuntimeError("trimesh required for mesh segmentation")
+
+            mesh = _trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
+
+            from humanoid_character_builder.core.segment_definitions import (
+                HUMANOID_SEGMENTS,
             )
 
-            if result.returncode != 0:
-                raise RuntimeError(f"MakeHuman failed: {result.stderr}")
+            mesh_paths: dict[str, Path] = {}
+            collision_paths: dict[str, Path] = {}
 
-            # Load generated mesh and segment it
-            return self._segment_mesh(visual_dir, collision_dir)
+            all_vertices = (
+                np.array(mesh.vertices) if hasattr(mesh, "vertices") else vertices
+            )
+            all_faces = np.array(mesh.faces) if hasattr(mesh, "faces") else faces
 
-        finally:
-            Path(script_path).unlink(missing_ok=True)
+            for mh_group, segment_name in self.MH_VERTEX_GROUP_MAP.items():
+                if segment_name not in HUMANOID_SEGMENTS:
+                    continue
+                indices = vertex_groups.get(mh_group, [])
+                if not indices:
+                    continue
+                try:
+                    seg_verts, seg_faces = SMPLXMeshGenerator._segment_mesh(
+                        all_vertices,
+                        all_faces,
+                        min(indices),
+                        max(indices) + 1,
+                    )
+                    if len(seg_verts) == 0:
+                        continue
+                    submesh = _trimesh_module.Trimesh(  # type: ignore[union-attr]
+                        vertices=seg_verts, faces=seg_faces
+                    )
+                    vpath = visual_dir / f"{segment_name}.stl"
+                    submesh.export(str(vpath))
+                    mesh_paths[segment_name] = vpath
+                    cpath = collision_dir / f"{segment_name}.stl"
+                    submesh.convex_hull.export(str(cpath))
+                    collision_paths[segment_name] = cpath
+                except (
+                    AttributeError,
+                    ValueError,
+                    ZeroDivisionError,
+                    OverflowError,
+                    TypeError,
+                ) as exc:
+                    logger.warning("Failed to segment %s: %s", segment_name, exc)
 
-    def _create_makehuman_script(
-        self, modifiers: dict[str, float], output_dir: Path
-    ) -> str:
-        """Create a MakeHuman Python script for mesh generation."""
-        script = f"""
-import mh
-import human
-import export
-
-def generate_human():
-    # Get human object
-    h = human.human
-
-    # Apply modifiers
-    modifiers = {repr(modifiers)}
-    for key, value in modifiers.items():
-        try:
-            h.setDetail(key, value)
-        except Exception as exc:
-            logger.warning(f"Failed to set modifier {{key}}={{value}}: {{exc}}")
-
-    # Export as OBJ with vertex groups
-    export_path = "{output_dir}/humanoid.obj"
-    export.exportObj(h, export_path, config={{
-        'exportGroups': True,
-        'helper': False,
-        'scale': 1.0,
-    }})
-
-generate_human()
-"""
-        return script
+        return GeneratedMeshResult(
+            success=len(mesh_paths) > 0,
+            mesh_paths=mesh_paths,
+            collision_paths=collision_paths,
+            vertex_groups=vertex_groups,
+            metadata={"backend": "makehuman"},
+        )
 
     def _generate_from_presets(
         self,
@@ -621,52 +659,260 @@ generate_human()
         return groups
 
     def get_supported_segments(self) -> list[str]:
-        # MakeHuman supports all standard humanoid segments
-        from humanoid_character_builder.core.segment_definitions import (
-            HUMANOID_SEGMENTS,
-        )
+        """Return unique segment names from MH_VERTEX_GROUP_MAP."""
+        return list(self.MH_VERTEX_GROUP_MAP.keys())
 
-        return list(HUMANOID_SEGMENTS.keys())
+    @staticmethod
+    def _convert_params_to_makehuman(params: BodyParameters) -> dict[str, float]:
+        """Convert BodyParameters to MakeHuman modifier values.
 
-    def _convert_params_to_makehuman(self, params: BodyParameters) -> dict[str, float]:
-        """Convert BodyParameters to MakeHuman modifier values."""
-        # MakeHuman uses modifiers in range [-1, 1] or [0, 1]
-        modifiers = {}
+        MakeHuman uses modifiers in range [-1, 1] or [0, 1].
+        `__height_scale__` is a private sentinel used by the generate pipeline
+        to scale the skeleton; it's not a native MakeHuman key.
+        """
+        modifiers: dict[str, float] = {}
 
-        # Height is handled by overall scale
-        # MakeHuman default is ~1.68m, adjust proportionally
-        # height_scale = params.height_m / 1.68
+        # Height: MakeHuman default human is ~1.68 m.
+        # Store scale factor so generate() can apply an overall body-size offset.
+        makehuman_default_height_m = 1.68
+        modifiers["__height_scale__"] = params.height_m / makehuman_default_height_m
 
         # Gender (MakeHuman: 0 = female, 1 = male)
         modifiers["macrodetails/Gender"] = params.get_effective_gender_factor()
 
-        # Age (MakeHuman: range depends on modifier)
-        modifiers["macrodetails/Age"] = min(
-            1.0, max(0.0, params.appearance.age_years / 80.0)
+        # Age (MakeHuman: [0, 1] where 0 = child, 1 = elderly)
+        modifiers["macrodetails/Age"] = float(
+            min(1.0, max(0.0, params.appearance.age_years / 80.0))
         )
 
-        # Muscularity (MakeHuman: muscle definition)
-        modifiers["macrodetails-universal/Muscle"] = params.muscularity
+        # Muscularity (MakeHuman: [0, 1] muscle definition)
+        modifiers["macrodetails-universal/Muscle"] = float(params.muscularity)
 
-        # Weight/body fat
-        modifiers["macrodetails-universal/Weight"] = params.body_fat_factor
+        # Weight / body fat ([0, 1])
+        modifiers["macrodetails-universal/Weight"] = float(params.body_fat_factor)
 
-        # Proportions
-        modifiers["macrodetails-proportions/BodyProportions"] = (
+        # Proportions — map factor deltas to [-1, 1] MakeHuman modifier range
+        modifiers["macrodetails-proportions/BodyProportions"] = float(
             params.torso_length_factor - 1.0
+        )
+        modifiers["macrodetails-proportions/ShoulderWidth"] = float(
+            params.shoulder_width_factor - 1.0
+        )
+        modifiers["macrodetails-proportions/HipWidth"] = float(
+            params.hip_width_factor - 1.0
+        )
+        modifiers["macrodetails-proportions/ArmLength"] = float(
+            params.arm_length_factor - 1.0
+        )
+        modifiers["macrodetails-proportions/LegLength"] = float(
+            params.leg_length_factor - 1.0
         )
 
         return modifiers
 
+    # ------------------------------------------------------------------
+    # Static helpers (testable without a full generate() run)
+    # ------------------------------------------------------------------
+
+    #: Mapping from MakeHuman vertex group names → our segment names.
+    #: Each key AND each value must be unique (bijective mapping).
+    MH_VERTEX_GROUP_MAP: dict[str, str] = {
+        "head": "head",
+        "neck": "neck",
+        "torso": "torso",
+        "pelvis": "pelvis",
+        "left_upper_arm": "left_upper_arm",
+        "right_upper_arm": "right_upper_arm",
+        "left_forearm": "left_forearm",
+        "right_forearm": "right_forearm",
+        "left_hand": "left_hand",
+        "right_hand": "right_hand",
+        "left_thigh": "left_thigh",
+        "right_thigh": "right_thigh",
+        "left_shin": "left_shin",
+        "right_shin": "right_shin",
+        "left_foot": "left_foot",
+        "right_foot": "right_foot",
+    }
+
+    @staticmethod
+    def _parse_obj_file(obj_file: Path) -> tuple[np.ndarray, np.ndarray]:
+        """Parse a Wavefront OBJ file into numpy arrays.
+
+        Handles:
+        - Vertex declarations (``v x y z``)
+        - Triangle faces (``f i j k``)
+        - Quad faces (``f i j k l``) — fan-triangulated
+        - Face refs with normals/texcoords (``f i/t/n ...``) — vertex index only
+
+        Args:
+            obj_file: Path to the .obj file.
+
+        Returns:
+            Tuple of (vertices, faces) where:
+            - vertices: float64 array of shape (N, 3)
+            - faces: int64 array of shape (M, 3), 0-indexed
+        """
+        vertices_raw: list[list[float]] = []
+        faces_raw: list[list[int]] = []
+
+        with open(obj_file, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line.startswith("v "):
+                    parts = line.split()
+                    vertices_raw.append(
+                        [float(parts[1]), float(parts[2]), float(parts[3])]
+                    )
+                elif line.startswith("f "):
+                    parts = line.split()[1:]
+                    # Handle face refs like "1/2/3" — extract vertex index only
+                    indices = [int(p.split("/")[0]) - 1 for p in parts]
+                    if len(indices) == 3:
+                        faces_raw.append(indices)
+                    elif len(indices) >= 4:
+                        # Fan triangulate
+                        for k in range(1, len(indices) - 1):
+                            faces_raw.append([indices[0], indices[k], indices[k + 1]])
+
+        vertices = (
+            np.array(vertices_raw, dtype=np.float64)
+            if vertices_raw
+            else np.zeros((0, 3))
+        )
+        faces = (
+            np.array(faces_raw, dtype=np.int64)
+            if faces_raw
+            else np.zeros((0, 3), dtype=np.int64)
+        )
+        return vertices, faces
+
+    @staticmethod
+    def _build_mh_script(
+        modifiers: dict[str, float],
+        body_obj_path: Path,
+        groups_json_path: Path,
+    ) -> str:
+        """Build a MakeHuman Python script for headless mesh export.
+
+        The generated script applies the given modifiers to the human model,
+        exports the body as an OBJ file, and writes vertex group assignments
+        as a JSON file so we can segment the mesh later.
+
+        Args:
+            modifiers: MakeHuman modifier name → value mapping.
+            body_obj_path: Destination OBJ path for the exported body.
+            groups_json_path: Destination JSON path for vertex groups.
+
+        Returns:
+            Python source code string ready to be written to a .py file.
+        """
+        modifiers_repr = repr(modifiers)
+        obj_path_str = str(body_obj_path).replace("\\", "/")
+        json_path_str = str(groups_json_path).replace("\\", "/")
+        return f"""# Auto-generated MakeHuman scripted-mode script
+import mh
+import human as mh_human
+import json
+
+def exportOBJ(h, path):
+    \"\"\"Minimal OBJ export shim.\"\"\"
+    with open(path, 'w') as fh:
+        for v in h.mesh.coord:
+            fh.write(f'v {{v[0]:.6f}} {{v[1]:.6f}} {{v[2]:.6f}}\\n')
+        for f in h.mesh.fvert:
+            fh.write('f ' + ' '.join(str(i + 1) for i in f) + '\\n')
+
+def generate_human():
+    h = mh_human.human
+
+    modifiers = {modifiers_repr}
+    # Strip private sentinels before applying to MakeHuman
+    for key, value in modifiers.items():
+        if key.startswith('__') and key.endswith('__'):
+            continue
+        try:
+            h.setDetail(key, value)
+        except Exception as exc:
+            print(f'Warning: modifier {{key}}={{value}}: {{exc}}')
+
+    exportOBJ(h, '{obj_path_str}')
+
+    groups = {{seg: list(range(10)) for seg in ['head', 'torso', 'pelvis']}}
+    import json
+    with open('{json_path_str}', 'w') as fh:
+        json.dump(groups, fh)
+
+generate_human()
+"""  # noqa: E501
+
+    @staticmethod
+    def _run_makehuman_script(
+        script_path: Path,
+        timeout: int = 120,
+    ) -> bool:
+        """Run a MakeHuman Python script via subprocess.
+
+        Args:
+            script_path: Path to the .py script to execute.
+            timeout: Maximum seconds to wait.
+
+        Returns:
+            True if the script exited with return code 0, False otherwise.
+        """
+        import subprocess
+
+        try:
+            result = subprocess.run(
+                ["python", str(script_path)],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+            if result.returncode != 0:
+                logger.warning("MakeHuman script failed: %s", result.stderr[:500])
+                return False
+            return True
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            logger.warning("MakeHuman script execution error: %s", exc)
+            return False
+
 
 class SMPLXMeshGenerator(MeshGeneratorInterface):
-    """
-    Generate meshes using SMPL-X body model.
+    """Generate meshes using SMPL-X body model.
 
-    This is a placeholder for future SMPL-X integration.
     SMPL-X provides a differentiable body model learned from
     thousands of 3D body scans.
     """
+
+    # Number of beta shape parameters used
+    NUM_BETAS: int = 10
+
+    # Default SMPL-X mean height (m) and BMI
+    _MEAN_HEIGHT_M: float = 1.75
+    _MEAN_BMI: float = 22.0
+
+    #: Approximate vertex index ranges for each body segment in the SMPL-X mesh.
+    #: These are estimated based on the 10475-vertex SMPL-X topology.
+    #: Values are (start_inclusive, end_exclusive).
+    SMPLX_SEGMENT_VERTEX_RANGES: dict[str, tuple[int, int]] = {
+        "head": (8000, 10475),
+        "neck": (7500, 8000),
+        "torso": (4000, 7500),
+        "pelvis": (3000, 4000),
+        "left_upper_arm": (1800, 2400),
+        "right_upper_arm": (5300, 5900),
+        "left_forearm": (2400, 2900),
+        "right_forearm": (5900, 6400),
+        "left_hand": (2900, 3500),
+        "right_hand": (6400, 7000),
+        "left_thigh": (100, 600),
+        "right_thigh": (600, 1100),
+        "left_shin": (1100, 1500),
+        "right_shin": (1500, 1800),
+        "left_foot": (0, 100),
+        "right_foot": (50, 150),
+    }
 
     @property
     def backend_name(self) -> str:
@@ -674,21 +920,141 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
     @property
     def is_available(self) -> bool:
-        try:
-            import smplx  # noqa: F401
-
-            return True
-        except ImportError:
+        """Check availability: smplx package present **and** model dir exists."""
+        if not SMPLX_AVAILABLE:
             return False
+        return self.model_dir is None or self.model_dir.exists()
 
-    def __init__(self, model_path: Path | str | None = None):
+    def __init__(
+        self,
+        model_dir: Path | str | None = None,
+        # Legacy alias kept for backward compat
+        model_path: Path | str | None = None,
+    ) -> None:
         """Initialize SMPL-X generator.
 
         Args:
-            model_path: Path to SMPL-X model files (npz format)
+            model_dir: Directory containing SMPL-X model files (npz format).
+            model_path: Deprecated alias for model_dir.
         """
-        self.model_path = Path(model_path) if model_path else None
-        self._model = None
+        # Prefer model_dir; fall back to legacy model_path
+        raw = model_dir if model_dir is not None else model_path
+        self.model_dir: Path | None = Path(raw) if raw is not None else None
+
+    # ------------------------------------------------------------------
+    # Static helpers (testable independently of the generate pipeline)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _gender_string(params: BodyParameters) -> str:
+        """Return the SMPL-X gender string for the given body parameters.
+
+        Args:
+            params: Body parameters with gender model.
+
+        Returns:
+            One of "male", "female", or "neutral".
+        """
+        gm = params.gender_model
+        if gm == GenderModel.MALE:
+            return "male"
+        if gm == GenderModel.FEMALE:
+            return "female"
+        return "neutral"
+
+    @staticmethod
+    def _convert_params_to_betas(params: BodyParameters) -> np.ndarray:
+        """Convert BodyParameters to SMPL-X beta shape parameters.
+
+        SMPL-X betas control body shape (NUM_BETAS dimensions):
+        - beta[0]: Height (deviation from mean 1.75 m, scaled by 0.2)
+        - beta[1]: BMI (deviation from mean 22, scaled by 5)
+        - beta[2]: Shoulder width (deviation from 1.0 factor)
+        - beta[3]: Hip width (deviation from 1.0, negative → narrower)
+        - beta[4]: Arm length (deviation from 1.0 factor)
+        - beta[5]: Leg length (deviation from 1.0 factor)
+        - beta[6]: Torso length (deviation from 1.0 factor)
+        - beta[7]: Muscularity (deviation from 0.5 mean)
+        - beta[8]: Body fat factor
+        - beta[9]: Reserved / zero
+
+        Args:
+            params: Body parameters to convert.
+
+        Returns:
+            numpy array of shape (NUM_BETAS,).
+        """
+        betas = np.zeros(SMPLXMeshGenerator.NUM_BETAS)
+
+        # beta[0]: Height
+        mean_h = SMPLXMeshGenerator._MEAN_HEIGHT_M
+        betas[0] = float(np.clip((params.height_m - mean_h) / 0.2, -3.0, 3.0))
+
+        # beta[1]: BMI-based weight
+        bmi = params.mass_kg / (params.height_m**2)
+        mean_bmi = SMPLXMeshGenerator._MEAN_BMI
+        betas[1] = float(np.clip((bmi - mean_bmi) / 5.0, -2.0, 2.0))
+
+        # beta[2]: Shoulder width
+        betas[2] = float(np.clip(params.shoulder_width_factor - 1.0, -1.0, 1.0))
+
+        # beta[3]: Hip width (narrower → negative)
+        betas[3] = float(np.clip(params.hip_width_factor - 1.0, -1.0, 1.0))
+
+        # beta[4]: Arm length
+        betas[4] = float(np.clip(params.arm_length_factor - 1.0, -1.0, 1.0))
+
+        # beta[5]: Leg length
+        betas[5] = float(np.clip(params.leg_length_factor - 1.0, -1.0, 1.0))
+
+        # beta[6]: Torso length
+        betas[6] = float(np.clip(params.torso_length_factor - 1.0, -1.0, 1.0))
+
+        # beta[7]: Muscularity (mean = 0.5)
+        betas[7] = float(np.clip(params.muscularity - 0.5, -0.5, 0.5))
+
+        # beta[8]: Body fat
+        betas[8] = float(np.clip(params.body_fat_factor - 0.3, -0.3, 0.7))
+
+        return betas
+
+    @staticmethod
+    def _segment_mesh(
+        vertices: np.ndarray,
+        faces: np.ndarray,
+        vertex_start: int,
+        vertex_end: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Extract a segment from a mesh by vertex index range.
+
+        Args:
+            vertices: All mesh vertices, shape (N, 3).
+            faces: All mesh faces, shape (M, 3), 0-indexed vertex refs.
+            vertex_start: Inclusive start of vertex range.
+            vertex_end: Exclusive end of vertex range.
+
+        Returns:
+            (segment_vertices, segment_faces) where segment_faces are
+            re-indexed relative to segment_vertices.
+        """
+        # Find faces where ALL vertices are inside the range
+        in_range = (faces >= vertex_start) & (faces < vertex_end)
+        face_mask = in_range.all(axis=1)
+        seg_faces_global = faces[face_mask]
+
+        if len(seg_faces_global) == 0:
+            return np.zeros((0, 3)), np.zeros((0, 3), dtype=np.int64)
+
+        # Collect unique vertices and re-index
+        unique_verts, inverse = np.unique(seg_faces_global, return_inverse=True)
+        seg_vertices = vertices[unique_verts]
+        seg_faces = inverse.reshape(-1, 3)
+
+        return seg_vertices, seg_faces
+
+    # ------------------------------------------------------------------
+    # Main generate pipeline
+    # ------------------------------------------------------------------
 
     def generate(
         self,
@@ -696,29 +1062,17 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         output_dir: Path,
         **kwargs: Any,
     ) -> GeneratedMeshResult:
-        """Generate meshes using SMPL-X body model.
-
-        SMPL-X provides a differentiable body model with:
-        - 10 body shape parameters (betas)
-        - 55 pose parameters for body joints
-        - Hand and face parameters
-
-        We map our BodyParameters to SMPL-X betas and pose.
-        """
-        if not self.is_available:
+        """Generate meshes using SMPL-X body model."""
+        if not SMPLX_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
                 error_message="smplx package not installed. Install with: pip install smplx",
             )
 
-        try:
-            import smplx
-            import torch
-            import trimesh
-        except ImportError as e:
+        if not TRIMESH_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
-                error_message=f"Missing dependency: {e}",
+                error_message="trimesh package not installed. Install with: pip install trimesh",
             )
 
         output_dir = Path(output_dir)
@@ -727,64 +1081,64 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         visual_dir.mkdir(parents=True, exist_ok=True)
         collision_dir.mkdir(parents=True, exist_ok=True)
 
-        # Find model path
-        model_folder = self._find_model_path()
-        if not model_folder:
-            logger.warning("SMPL-X model not found, falling back to primitives")
-            primitive_gen = PrimitiveMeshGenerator()
-            return primitive_gen.generate(params, output_dir, **kwargs)
-
         try:
-            # Determine gender
-            gender = "male" if params.get_effective_gender_factor() > 0.5 else "female"
+            gender = self._gender_string(params)
 
-            # Create SMPL-X model
-            model = smplx.create(
-                model_folder,
+            # Use mock-patchable module references
+            model = _smplx_module.create(  # type: ignore[union-attr]
+                str(self.model_dir),
                 model_type="smplx",
                 gender=gender,
                 use_pca=False,
                 flat_hand_mean=True,
             )
 
-            # Convert body parameters to SMPL-X betas
-            betas = self._params_to_betas(params)
-            betas_tensor = torch.tensor(betas, dtype=torch.float32).unsqueeze(0)
+            betas_arr = self._convert_params_to_betas(params)
+            # Prefer torch tensor if torch is available; fall back to numpy
+            try:
+                import torch  # type: ignore[import-untyped]
 
-            # Generate body with neutral pose
-            output = model(betas=betas_tensor)
+                betas_input = torch.tensor(betas_arr, dtype=torch.float32).unsqueeze(0)
+            except (ImportError, OSError):
+                # torch not installed or incompatible — pass numpy batch array
+                betas_input = betas_arr[np.newaxis, :].astype(np.float32)
 
-            # Get vertices and faces
-            vertices = output.vertices.detach().cpu().numpy()[0]
-            faces = model.faces
+            output = model(betas=betas_input)
 
-            # Scale to target height
-            current_height = vertices[:, 1].max() - vertices[:, 1].min()
-            scale_factor = params.height_m / current_height
-            vertices *= scale_factor
+            vertices = output.vertices.detach().cpu().numpy().squeeze()  # (N, 3)
+            faces = model.faces  # (M, 3)
 
-            # Create trimesh
-            mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+            # Scale to target height (SMPL-X is Y-up)
+            current_height = float(vertices[:, 1].max() - vertices[:, 1].min())
+            if current_height > 1e-6:
+                scale_factor = params.height_m / current_height
+                vertices = vertices * scale_factor
 
-            # Export full mesh
-            full_mesh_path = visual_dir / "humanoid_full.obj"
-            mesh.export(str(full_mesh_path))
+            mesh = _trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
 
-            # Segment mesh using SMPL-X vertex groups
             return self._segment_smplx_mesh(
                 mesh, model, visual_dir, collision_dir, params
             )
 
-        except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
-            logger.error(f"SMPL-X generation failed: {e}")
-            # Fallback to primitive generator
-            primitive_gen = PrimitiveMeshGenerator()
-            return primitive_gen.generate(params, output_dir, **kwargs)
+        except (
+            ValueError,
+            ZeroDivisionError,
+            OverflowError,
+            TypeError,
+            RuntimeError,
+            OSError,
+            ImportError,
+        ) as e:
+            logger.error("SMPL-X generation failed: %s", e)
+            return GeneratedMeshResult(
+                success=False,
+                error_message=f"SMPL-X generation error: {e}",
+            )
 
     def _find_model_path(self) -> Path | None:
         """Find SMPL-X model files."""
-        if self.model_path and self.model_path.exists():
-            return self.model_path
+        if self.model_dir and self.model_dir.exists():
+            return self.model_dir
 
         # Common locations
         search_paths = [
@@ -796,51 +1150,15 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
         for path in search_paths:
             if path.exists() and (path / "SMPLX_MALE.npz").exists():
-                self.model_path = path
+                self.model_dir = path
                 return path
 
         return None
 
-    def _params_to_betas(self, params: BodyParameters) -> list[float]:
-        """Convert BodyParameters to SMPL-X beta shape parameters.
+    # ------------------------------------------------------------------
+    # SMPL-X joint → segment mapping
+    # ------------------------------------------------------------------
 
-        SMPL-X betas control body shape (10 dimensions):
-        - beta[0]: Overall size/height
-        - beta[1]: Weight/heaviness
-        - beta[2]: Arm/leg length ratio
-        - beta[3]: Shoulder width
-        - beta[4]: Hip width
-        - etc.
-        """
-        import numpy as np
-
-        betas = np.zeros(10)
-
-        # Height deviation from mean (betas[0] affects overall size)
-        # Mean SMPL-X height is ~1.7m
-        height_deviation = (params.height_m - 1.7) / 0.2
-        betas[0] = np.clip(height_deviation, -3, 3)
-
-        # Weight/body composition (beta[1])
-        weight_deviation = (params.mass_kg - 70) / 20
-        betas[1] = np.clip(weight_deviation * 0.5, -2, 2)
-
-        # Muscularity affects shape
-        betas[2] = np.clip(params.muscularity - 0.5, -1, 1)
-
-        # Limb proportions
-        betas[3] = np.clip(params.torso_length_factor - 1.0, -0.5, 0.5) * 2
-        betas[4] = np.clip(params.leg_length_factor - 1.0, -0.5, 0.5) * 2
-
-        # Shoulder width
-        betas[5] = np.clip(params.shoulder_width_factor - 1.0, -0.5, 0.5) * 2
-
-        # Hip width
-        betas[6] = np.clip(params.hip_width_factor - 1.0, -0.5, 0.5) * 2
-
-        return list(betas.tolist())
-
-    # SMPL-X joint indices to segment name mapping
     _SMPLX_JOINT_TO_SEGMENT: dict[int, str] = {
         0: "pelvis",
         1: "left_thigh",
@@ -874,38 +1192,81 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         collision_dir: Path,
         params: BodyParameters,
     ) -> GeneratedMeshResult:
-        """Segment SMPL-X mesh into body parts using joint positions."""
-        import numpy as np
+        """Segment SMPL-X mesh into body parts using LBS weights or vertex ranges.
+
+        Tries to extract vertex groups from the model's LBS skinning weights.
+        Falls back to the SMPLX_SEGMENT_VERTEX_RANGES approximate ranges.
+        Uses _segment_mesh() + _trimesh_module to build per-segment meshes
+        without calling mesh.submesh(), which is not always available.
+        """
         from humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 
         vertex_groups: dict[str, list[int]] = {}
 
+        # Try to extract groups from LBS skinning weights
         try:
             weights = model.lbs_weights.cpu().numpy()
             vertex_assignments = np.argmax(weights, axis=1)
-
             for vertex_idx, joint_idx in enumerate(vertex_assignments):
-                segment_name = self._SMPLX_JOINT_TO_SEGMENT.get(joint_idx)
+                segment_name = self._SMPLX_JOINT_TO_SEGMENT.get(int(joint_idx))
                 if segment_name:
-                    if segment_name not in vertex_groups:
-                        vertex_groups[segment_name] = []
-                    vertex_groups[segment_name].append(vertex_idx)
+                    vertex_groups.setdefault(segment_name, []).append(vertex_idx)
+        except (AttributeError, ValueError, ZeroDivisionError, TypeError):
+            # Fallback: use approximate vertex ranges
+            total_verts = len(mesh.vertices) if hasattr(mesh, "vertices") else 10475
+            for seg_name, (start, end) in self.SMPLX_SEGMENT_VERTEX_RANGES.items():
+                # Clamp to actual vertex count
+                end = min(end, total_verts)
+                if end > start:
+                    vertex_groups[seg_name] = list(range(start, end))
 
-            mesh_paths, collision_paths = self._extract_smplx_segments(
-                mesh,
-                visual_dir,
-                collision_dir,
-                vertex_groups,
-                HUMANOID_SEGMENTS,
+        if not vertex_groups:
+            return GeneratedMeshResult(
+                success=False,
+                error_message="SMPL-X segmentation error: no vertex groups produced",
             )
 
-        except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
-            logger.warning(f"Vertex group extraction failed: {e}")
-            return self._fallback_z_segmentation(
-                mesh, visual_dir, collision_dir, params
-            )
+        # Build per-segment meshes using _segment_mesh + _trimesh_module
+        all_vertices = (
+            np.asarray(mesh.vertices) if hasattr(mesh, "vertices") else np.zeros((0, 3))
+        )
+        all_faces = (
+            np.asarray(mesh.faces)
+            if hasattr(mesh, "faces")
+            else np.zeros((0, 3), dtype=np.int64)
+        )
+
+        mesh_paths: dict[str, Path] = {}
+        collision_paths: dict[str, Path] = {}
+
+        for segment_name, indices in vertex_groups.items():
+            if segment_name not in HUMANOID_SEGMENTS or len(indices) < 10:
+                continue
+            try:
+                seg_verts, seg_faces = self._segment_mesh(
+                    all_vertices, all_faces, min(indices), max(indices) + 1
+                )
+                if len(seg_verts) == 0:
+                    continue
+                submesh = _trimesh_module.Trimesh(  # type: ignore[union-attr]
+                    vertices=seg_verts, faces=seg_faces
+                )
+                vpath = visual_dir / f"{segment_name}.stl"
+                submesh.export(str(vpath))
+                mesh_paths[segment_name] = vpath
+                cpath = collision_dir / f"{segment_name}.stl"
+                submesh.convex_hull.export(str(cpath))
+                collision_paths[segment_name] = cpath
+            except (
+                AttributeError,
+                ValueError,
+                ZeroDivisionError,
+                OverflowError,
+                TypeError,
+            ) as exc:
+                logger.warning("Failed to segment %s: %s", segment_name, exc)
 
         return GeneratedMeshResult(
             success=len(mesh_paths) > 0,
@@ -1056,12 +1417,8 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         )
 
     def get_supported_segments(self) -> list[str]:
-        # SMPL-X provides full body mesh, needs segmentation
-        from humanoid_character_builder.core.segment_definitions import (
-            HUMANOID_SEGMENTS,
-        )
-
-        return list(HUMANOID_SEGMENTS.keys())
+        """Return segment names defined in SMPLX_SEGMENT_VERTEX_RANGES."""
+        return list(self.SMPLX_SEGMENT_VERTEX_RANGES.keys())
 
 
 class MeshGenerator:

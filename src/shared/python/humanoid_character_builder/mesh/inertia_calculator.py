@@ -137,13 +137,21 @@ class InertiaResult:
 
     @classmethod
     def create_default(cls, mass: float = 1.0) -> InertiaResult:
-        """Create default inertia (small sphere approximation)."""
+        """Create default inertia (small sphere approximation).
+
+        Returns a physically reasonable minimum inertia result for degenerate
+        (zero-size) geometry. Volume is set to a small non-zero value to
+        prevent downstream division-by-zero in density calculations.
+        """
         # Default to 0.1 kg*m^2 (reasonable for small-medium rigid body)
         i_default = 0.1 * mass
+        # Use volume of a sphere with 1 cm radius as minimum (~4.2e-6 m³)
+        _min_volume = (4.0 / 3.0) * 3.14159265358979 * (0.01**3)
         return cls(
             ixx=i_default,
             iyy=i_default,
             izz=i_default,
+            volume=_min_volume,
             mass=mass,
             mode=InertiaMode.PRIMITIVE_APPROXIMATION,
         )

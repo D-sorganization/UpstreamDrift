@@ -9,6 +9,7 @@ for educational demonstrations of chaos and control.
 
 from __future__ import annotations
 
+import ast
 import math
 import typing
 
@@ -54,6 +55,8 @@ class ExpressionFunction:
     (``t``). Uses simpleeval library to prevent arbitrary code execution.
 
     Security: Replaced eval() with simpleeval to eliminate code injection risk.
+    AST validation at construction time rejects disallowed constructs with
+    descriptive ValueError messages before evaluation.
     """
 
     _ALLOWED_FUNCTIONS: typing.ClassVar[dict[str, typing.Any]] = {
@@ -79,12 +82,79 @@ class ExpressionFunction:
         "tau": math.tau,
     }
 
+    #: AST node types that are never legal in an expression
+    _DISALLOWED_NODES: typing.ClassVar[tuple[type, ...]] = (
+        ast.List,
+        ast.Dict,
+        ast.Set,
+        ast.ListComp,
+        ast.DictComp,
+        ast.SetComp,
+        ast.GeneratorExp,
+        ast.Import,
+        ast.ImportFrom,
+        ast.Lambda,
+        ast.IfExp,
+    )
+
+    #: Names that map to state variables or constants at call time
+    _VALID_VARIABLE_NAMES: typing.ClassVar[frozenset[str]] = frozenset(
+        {
+            "t",
+            "theta1",
+            "theta2",
+            "omega1",
+            "omega2",
+            "pi",
+            "tau",
+        }
+    )
+
     def __init__(self, expression: str) -> None:
         self.expression = expression.strip()
+        # Validate the AST before accepting the expression
+        self._validate_ast(self.expression)
         # Initialize simpleeval with allowed functions and constants
         self._evaluator = SimpleEval()
         self._evaluator.functions = self._ALLOWED_FUNCTIONS.copy()
         self._evaluator.names = self._ALLOWED_NAMES.copy()
+
+    def _validate_ast(self, expression: str) -> None:
+        """Walk the AST and raise ValueError for any disallowed constructs."""
+        try:
+            tree = ast.parse(expression, mode="eval")
+        except SyntaxError as exc:
+            raise ValueError(f"Syntax error in expression: {exc}") from exc
+
+        allowed_func_names = set(self._ALLOWED_FUNCTIONS.keys())
+
+        for node in ast.walk(tree):
+            # Disallowed node types (lists, dicts, comprehensions, imports…)
+            if isinstance(node, self._DISALLOWED_NODES):
+                node_name = type(node).__name__
+                raise ValueError(f"Disallowed syntax in expression: {node_name}")
+
+            # Attribute access (e.g. sin.__doc__, theta1.__class__)
+            if isinstance(node, ast.Attribute):
+                raise ValueError("Disallowed syntax in expression: Attribute")
+
+            # Function calls: only allow direct name calls (Name node as func)
+            if isinstance(node, ast.Call):
+                if not isinstance(node.func, ast.Name):
+                    raise ValueError("Only direct function calls are permitted")
+                func_name = node.func.id
+                if func_name not in allowed_func_names:
+                    raise ValueError(f"Function '{func_name}' is not permitted")
+
+            # Name references: must be allowed variables or function names
+            if isinstance(node, ast.Name):
+                # Allow names that are functions (they appear as Call.func too)
+                name = node.id
+                if (
+                    name not in self._VALID_VARIABLE_NAMES
+                    and name not in allowed_func_names
+                ):
+                    raise ValueError(f"Use of unknown variable '{name}'")
 
     def __call__(self, t: float, state: DoublePendulumState) -> float:
         context: dict[str, float] = {

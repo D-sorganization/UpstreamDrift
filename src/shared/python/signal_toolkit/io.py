@@ -140,7 +140,23 @@ class SignalImporter:
 
         Returns:
             Signal object.
+
+        Raises:
+            PreconditionError: If time is empty or time/values lengths mismatch.
         """
+        from src.shared.python.core.contracts import PreconditionError
+
+        if len(time) == 0:
+            raise PreconditionError(
+                "SignalImporter.from_numpy requires non-empty time array. "
+                "An empty Signal has no samples to operate on."
+            )
+        if len(time) != len(values):
+            raise PreconditionError(
+                f"SignalImporter.from_numpy requires matching array lengths: "
+                f"time has {len(time)} samples but values has {len(values)} samples. "
+                "Every time point must have exactly one corresponding value."
+            )
         return Signal(time=time, values=values, name=name, units=units)
 
     @staticmethod

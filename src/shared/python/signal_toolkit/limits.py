@@ -96,8 +96,9 @@ def _apply_saturation_values(
     normalized = (values - center) / half_range
 
     if mode == SaturationMode.TANH:
-        # tanh saturates smoothly
-        result = np.tanh(smoothness * normalized) / np.tanh(smoothness)
+        # tanh saturates smoothly; clip to [-1,1] to guarantee output stays in bounds
+        raw = np.tanh(smoothness * normalized) / np.tanh(smoothness)
+        result = np.clip(raw, -1.0, 1.0)
 
     elif mode == SaturationMode.SIGMOID:
         # Logistic sigmoid: 2 / (1 + exp(-k*x)) - 1

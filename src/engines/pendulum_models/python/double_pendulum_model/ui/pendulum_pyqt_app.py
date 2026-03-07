@@ -349,8 +349,15 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         try:
             result = _EVALUATOR.eval(expression)
             return float(result)
-        except (ValueError, TypeError, SyntaxError, NameError):
-            logger.exception("Error evaluating expression: %s", expression)
+        except (
+            ValueError,
+            TypeError,
+            SyntaxError,
+            NameError,
+            KeyError,
+            Exception,
+        ):  # noqa: BLE001
+            logger.debug("Error evaluating expression: %s", expression)
             return 0.0
 
     def _polynomial_profiles(

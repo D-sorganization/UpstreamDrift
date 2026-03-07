@@ -116,7 +116,18 @@ class SinusoidFitter:
 
         Returns:
             FitResult with fitted parameters and statistics.
+
+        Raises:
+            PreconditionError: If signal is empty.
         """
+        from src.shared.python.core.contracts import PreconditionError
+
+        if len(signal.time) == 0:
+            raise PreconditionError(
+                "SinusoidFitter.fit requires a non-empty signal. "
+                "Cannot fit sinusoid to signal with zero samples."
+            )
+
         t = signal.time - signal.time[0]  # Shift to start at 0
         y = signal.values
 
@@ -267,7 +278,18 @@ class ExponentialFitter:
 
         Returns:
             FitResult with fitted parameters.
+
+        Raises:
+            PreconditionError: If signal is empty.
         """
+        from src.shared.python.core.contracts import PreconditionError
+
+        if len(signal.time) == 0:
+            raise PreconditionError(
+                "ExponentialFitter.fit_decay requires a non-empty signal. "
+                "Cannot fit exponential decay to signal with zero samples."
+            )
+
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -413,7 +435,18 @@ class LinearFitter:
 
         Returns:
             FitResult with slope and intercept parameters.
+
+        Raises:
+            PreconditionError: If signal is empty.
         """
+        from src.shared.python.core.contracts import PreconditionError
+
+        if len(signal.time) == 0:
+            raise PreconditionError(
+                "LinearFitter.fit requires a non-empty signal. "
+                "Cannot fit linear function to signal with zero samples."
+            )
+
         t = signal.time - signal.time[0]
         y = signal.values
 
@@ -480,11 +513,28 @@ class PolynomialFitter:
 
         Returns:
             FitResult with polynomial coefficients.
+
+        Raises:
+            PreconditionError: If signal is empty or order is negative.
         """
+        from src.shared.python.core.contracts import PreconditionError
+
+        effective_order = order if order is not None else self.order
+        if len(signal.time) == 0:
+            raise PreconditionError(
+                "PolynomialFitter.fit requires a non-empty signal. "
+                "Cannot fit polynomial to signal with zero samples."
+            )
+        if effective_order < 0:
+            raise PreconditionError(
+                f"PolynomialFitter.fit requires order >= 0, got {effective_order}. "
+                "A negative polynomial order is mathematically undefined."
+            )
+
         t = signal.time - signal.time[0]
         y = signal.values
 
-        order = order if order is not None else self.order
+        order = effective_order
 
         # Need at least order+1 points
         if len(t) < order + 1:

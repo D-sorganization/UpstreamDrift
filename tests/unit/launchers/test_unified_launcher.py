@@ -101,7 +101,7 @@ def test_show_status() -> None:
 
         with (
             patch(
-                "shared.python.engine_core.engine_manager.EngineManager"
+                "src.shared.python.engine_core.engine_manager.EngineManager"
             ) as mock_mgr_cls,
             patch("builtins.print") as mock_print,
         ):

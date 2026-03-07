@@ -204,6 +204,7 @@ class TestTerrainPhysicsParameters:
 
     def test_terrain_parameters_registered(self) -> None:
         """Terrain parameters should be in registry."""
+        import src.shared.python.physics.terrain_engine  # noqa: F401 — triggers auto-registration
         from src.shared.python.physics.physics_parameters import get_parameter_registry
 
         registry = get_parameter_registry()
@@ -219,6 +220,7 @@ class TestTerrainPhysicsParameters:
 
     def test_terrain_friction_values(self) -> None:
         """Terrain friction values should be physically reasonable."""
+        import src.shared.python.physics.terrain_engine  # noqa: F401 — triggers auto-registration
         from src.shared.python.physics.physics_parameters import get_parameter_registry
 
         registry = get_parameter_registry()

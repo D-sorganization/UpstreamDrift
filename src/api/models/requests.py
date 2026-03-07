@@ -15,6 +15,7 @@ VALID_ENGINE_TYPES = {
     "matlab_2d",
     "matlab_3d",
     "pendulum",
+    "golf_swing_pendulum",
     "putting_green",
 }
 

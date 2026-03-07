@@ -407,7 +407,7 @@ class TestSwingPlaneAnalyzer:
 
     def test_fit_plane_too_few_points(self, analyzer: SwingPlaneAnalyzer) -> None:
         """Fewer than 3 points should raise an error."""
-        with pytest.raises(PreconditionError, match="at least 3"):
+        with pytest.raises(PreconditionError, match="At least 3"):
             analyzer.fit_plane(np.array([[0, 0, 0], [1, 0, 0]]))
 
     def test_deviation_on_plane_is_zero(self, analyzer: SwingPlaneAnalyzer) -> None:

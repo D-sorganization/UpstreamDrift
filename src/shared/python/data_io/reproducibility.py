@@ -64,7 +64,9 @@ def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
         # Now all random operations are deterministic
     """
     if validate and not (0 <= seed <= MAX_SEED):
-        raise ValueError(f"Seed must be between 0 and {MAX_SEED}, got {seed}")
+        raise ValueError(
+            f"Seed must be an expected non-negative integer between 0 and {MAX_SEED}, got {seed}"
+        )
 
     # Python's random module
     random.seed(seed)

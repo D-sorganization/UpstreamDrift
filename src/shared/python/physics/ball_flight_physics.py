@@ -37,9 +37,30 @@ from src.shared.python.engine_core.engine_availability import NUMBA_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Performance: Optional Numba JIT compilation
+# Note: nopython=True is not used because numba's type inference for
+# tuple-typed arguments has compatibility issues with Python 3.13.
+# Using forceobj=True ensures we always get execution (at Python speed
+# when nopython inference fails) instead of crashing with a TypingError.
 if NUMBA_AVAILABLE:
-    from numba import jit
-else:
+    try:
+        from numba import jit as _numba_jit
+
+        def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
+            """Wrapper to apply numba JIT with safe fallback settings."""
+            # Override unsafe flags to prevent TypingError crashes on Py3.13
+            safe_kwargs = {
+                k: v for k, v in kwargs.items() if k not in ("nopython", "cache")
+            }
+            safe_kwargs["forceobj"] = True  # Always execute — no TypingError possible
+
+            if len(args) == 1 and callable(args[0]):
+                return _numba_jit(**safe_kwargs)(args[0])
+            return _numba_jit(**safe_kwargs)
+
+    except ImportError:
+        NUMBA_AVAILABLE = False  # type: ignore[assignment]
+
+if not NUMBA_AVAILABLE:
 
     def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
         """No-op decorator when numba is not installed."""

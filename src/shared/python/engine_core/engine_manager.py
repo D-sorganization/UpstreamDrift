@@ -94,6 +94,9 @@ class EngineManager(ContractChecker):
                 self.engines_root / "Simscape_Multibody_Models" / "3D_Golf_Model"
             ),
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
+            EngineType.GOLF_SWING_PENDULUM: (
+                self.engines_root / "physics_engines" / "pendulum"
+            ),
             EngineType.PUTTING_GREEN: (
                 self.engines_root / "physics_engines" / "putting_green"
             ),

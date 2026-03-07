@@ -40,9 +40,12 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
     (wait cursor, status bar update).
     """
     # Mock ezc3d in sys.modules throughout the test
+    c3d_viewer_mod = pytest.importorskip(
+        "apps.c3d_viewer",
+        reason="apps.c3d_viewer not available (requires simscape 3D engine setup)",
+    )
     with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
-        from apps.c3d_viewer import C3DViewerMainWindow
-
+        C3DViewerMainWindow = c3d_viewer_mod.C3DViewerMainWindow
         window = C3DViewerMainWindow()
 
         # We want to verify status bar messages.
@@ -127,9 +130,12 @@ def test_c3d_viewer_drag_and_drop(qapp: QApplication) -> None:
     """
     Test that drag and drop events trigger file loading.
     """
+    c3d_viewer_mod = pytest.importorskip(
+        "apps.c3d_viewer",
+        reason="apps.c3d_viewer not available (requires simscape 3D engine setup)",
+    )
     with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
-        from apps.c3d_viewer import C3DViewerMainWindow
-
+        C3DViewerMainWindow = c3d_viewer_mod.C3DViewerMainWindow
         window = C3DViewerMainWindow()
         assert window.acceptDrops()
 

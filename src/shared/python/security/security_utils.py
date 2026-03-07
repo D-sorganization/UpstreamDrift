@@ -22,7 +22,7 @@ def validate_path(
     """
     try:
         resolved_path = Path(path).resolve()
-    except (FileNotFoundError, OSError) as e:
+    except Exception as e:  # noqa: BLE001 — catch any resolve() failure
         if strict:
             raise ValueError(f"Invalid path format: {path}") from e
         return Path(path)

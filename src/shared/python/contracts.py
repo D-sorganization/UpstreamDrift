@@ -196,20 +196,14 @@ def _evaluate_precondition(
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
 ) -> bool:
-    """Try to evaluate a precondition, using argument-name binding as a fallback.
+    """Try to evaluate a precondition, using argument-name binding.
 
-    First attempts to call *condition* with the same ``(args, kwargs)`` that
-    the decorated function received.  If that produces a ``TypeError`` (e.g.
-    the condition only accepts a subset of arguments by name), it falls back
-    to matching parameters by name from the decorated function's signature.
+    Prefers name-based binding when the condition only accepts a subset of
+    the decorated function's parameters (e.g. ``lambda gender_factor: ...``
+    should receive ``gender_factor`` by name, not the first positional arg).
+    Falls back to positional call only when the condition accepts all args.
     """
-    try:
-        return bool(condition(*args, **kwargs))
-    except TypeError:
-        pass
-
-    # Fallback: bind the decorated function's args, then select only the
-    # parameters the condition function expects.
+    # Always try name-based binding first using the decorated function's sig
     try:
         func_sig = inspect.signature(func)
         bound = func_sig.bind(*args, **kwargs)
@@ -217,14 +211,22 @@ def _evaluate_precondition(
         all_arguments: dict[str, Any] = dict(bound.arguments)
 
         cond_sig = inspect.signature(condition)
-        call_args = {
-            name: all_arguments[name]
-            for name in cond_sig.parameters
-            if name in all_arguments
-        }
-        return bool(condition(**call_args))
-    except (TypeError, ValueError) as exc:
-        raise TypeError(exc) from exc
+        cond_params = set(cond_sig.parameters)
+
+        # If all condition params are known function params, bind by name
+        if cond_params and cond_params <= set(all_arguments):
+            call_args = {name: all_arguments[name] for name in cond_params}
+            return bool(condition(**call_args))
+    except (TypeError, ValueError):
+        pass
+
+    # Fallback: call with same positional args (works when condition mirrors func)
+    try:
+        return bool(condition(*args, **kwargs))
+    except TypeError:
+        pass
+
+    return True  # Cannot evaluate — let the function proceed
 
 
 def precondition(

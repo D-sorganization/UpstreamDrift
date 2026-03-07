@@ -173,6 +173,14 @@ FROM runtime AS training
 
 USER root
 
+# Install CUDA toolkit via conda for GPU training support
+RUN conda install -y -c conda-forge -c nvidia \
+    cuda-toolkit \
+    cudnn \
+    pytorch \
+    pytorch-cuda=12.4 \
+    && conda clean --all --yes
+
 # Install heavy ML dependencies specifically for training workloads
 RUN pip install --no-cache-dir \
     gymnasium>=0.29.0 \

@@ -55,8 +55,10 @@ def test_dashboard_launch(
     mock_engine = MagicMock()
     mock_engine_class.return_value = mock_engine
 
-    # Mock QApp
-    mock_get_qapp.return_value = qapp
+    # Use a MagicMock for qapp so app.exec() returns 0 immediately (not blocking)
+    mock_qapp = MagicMock()
+    mock_qapp.exec.return_value = 0
+    mock_get_qapp.return_value = mock_qapp
 
     # Run launch
     launcher.launch_dashboard(
