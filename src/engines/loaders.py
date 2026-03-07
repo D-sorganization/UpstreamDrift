@@ -13,13 +13,20 @@ Design by Contract
 All loader functions enforce postconditions to guarantee the returned engine
 is in a usable state. Callers may rely on these guarantees without defensive
 checks.
+
+DRY — Factory Pattern
+---------------------
+The 7 loader functions share an identical 8-step pattern. The shared logic
+is factored into :func:`_load_engine_with_probe` to eliminate ~150 LOC of
+duplication while preserving each loader's unique import paths and
+diagnostic messages.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from src.shared.python.data_io.common_utils import GolfModelingError
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -41,6 +48,11 @@ __all__ = [
     "load_putting_green_engine",
     "LOADER_MAP",
 ]
+
+
+# ---------------------------------------------------------------------------
+# DbC helpers
+# ---------------------------------------------------------------------------
 
 
 def _ensure_engine_loaded(engine: PhysicsEngine, engine_name: str) -> None:
@@ -65,6 +77,93 @@ def _ensure_engine_loaded(engine: PhysicsEngine, engine_name: str) -> None:
         )
 
 
+# ---------------------------------------------------------------------------
+# DRY — shared probe-based loading logic
+# ---------------------------------------------------------------------------
+
+
+def _load_engine_with_probe(
+    *,
+    engine_name: str,
+    probe_factory: Callable[[Path], Any],
+    engine_factory: Callable[[], PhysicsEngine],
+    model_path_fn: Callable[[Path], Path] | None = None,
+    load_model: bool = True,
+    install_hint: str = "",
+    suite_root: Path,
+) -> PhysicsEngine:
+    """Shared engine-loading scaffold used by all probe-based loaders.
+
+    Preconditions (DbC)
+    -------------------
+    - ``suite_root`` must be a Path (caller responsibility via type hint).
+
+    Postconditions (DbC)
+    --------------------
+    - Returned engine is non-None (enforced by :func:`_ensure_engine_loaded`).
+
+    Parameters
+    ----------
+    engine_name:
+        Human-readable engine name used in log and error messages.
+    probe_factory:
+        Callable(suite_root) -> Probe instance.
+    engine_factory:
+        Zero-argument callable that creates the engine instance.
+    model_path_fn:
+        Optional callable(suite_root) -> Path. If provided and the path
+        exists, ``engine.load_from_path()`` is called.
+    load_model:
+        Whether to attempt model loading (default ``True``).
+    install_hint:
+        Install instructions appended to ImportError messages.
+    suite_root:
+        Repository root path forwarded to probe and model path resolution.
+
+    Returns
+    -------
+    PhysicsEngine
+        A non-None, probe-verified engine.
+
+    Raises
+    ------
+    GolfModelingError
+        On ImportError, failed probe, or failed DbC postcondition.
+    """
+    probe = probe_factory(suite_root)
+    result = probe.probe()
+
+    if not result.is_available():
+        raise GolfModelingError(
+            f"{engine_name} not ready:\n{result.diagnostic_message}\n"
+            f"Fix: {result.get_fix_instructions()}"
+        )
+
+    engine = engine_factory()
+
+    if load_model and model_path_fn is not None:
+        model_path = model_path_fn(suite_root)
+        if model_path.exists():
+            logger.info(f"Loading default {engine_name} model: {model_path}")
+            try:
+                engine.load_from_path(str(model_path))
+            except (ValueError, RuntimeError, AttributeError) as exc:
+                logger.warning(
+                    f"Failed to load default model into {engine_name} "
+                    f"(expected if missing meshes): {exc}"
+                )
+        else:
+            logger.warning(f"Default {engine_name} model not found at {model_path}")
+
+    _ensure_engine_loaded(engine, engine_name)
+    return engine  # type: ignore[return-value]
+
+
+# ---------------------------------------------------------------------------
+# Public loader functions
+# ---------------------------------------------------------------------------
+
+
 def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
     """Load MuJoCo engine with full initialization.
 
@@ -78,35 +177,24 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         )
         from src.shared.python.engine_core.engine_probes import MuJoCoProbe
 
-        probe = MuJoCoProbe(suite_root)
-        result = probe.probe()
-
-        if not result.is_available():
-            raise GolfModelingError(
-                f"MuJoCo not ready:\n{result.diagnostic_message}\n"
-                f"Fix: {result.get_fix_instructions()}"
+        def _model_path(root: Path) -> Path:
+            return (
+                root
+                / "engines"
+                / "physics_engines"
+                / "mujoco"
+                / "models"
+                / "simple_pendulum.xml"
             )
 
-        engine = MuJoCoPhysicsEngine()  # type: ignore[abstract]
-
-        # Load default model to verify engine readiness
-        model_path = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "mujoco"
-            / "models"
-            / "simple_pendulum.xml"
+        return _load_engine_with_probe(
+            engine_name="MuJoCo",
+            probe_factory=MuJoCoProbe,
+            engine_factory=lambda: MuJoCoPhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=_model_path,
+            install_hint="Install mujoco>=3.2.3",
+            suite_root=suite_root,
         )
-        if model_path.exists():
-            logger.info(f"Loading default MuJoCo model: {model_path}")
-            engine.load_from_path(str(model_path))
-        else:
-            logger.warning(f"Default MuJoCo model not found at {model_path}")
-
-        # DbC postcondition
-        _ensure_engine_loaded(engine, "MuJoCo")
-        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError(
@@ -127,43 +215,25 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         )
         from src.shared.python.engine_core.engine_probes import DrakeProbe
 
-        probe = DrakeProbe(suite_root)
-        result = probe.probe()
-
-        if not result.is_available():
-            raise GolfModelingError(
-                f"Drake not ready:\n{result.diagnostic_message}\n"
-                f"Fix: {result.get_fix_instructions()}"
+        def _model_path(root: Path) -> Path:
+            return (
+                root
+                / "engines"
+                / "physics_engines"
+                / "pinocchio"
+                / "models"
+                / "generated"
+                / "golfer.urdf"
             )
 
-        engine = DrakePhysicsEngine()  # type: ignore[abstract]
-
-        # Try to load the shared golfer URDF if available
-        urdf_path = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "pinocchio"
-            / "models"
-            / "generated"
-            / "golfer.urdf"
+        return _load_engine_with_probe(
+            engine_name="Drake",
+            probe_factory=DrakeProbe,
+            engine_factory=lambda: DrakePhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=_model_path,
+            install_hint="Install drake>=1.22.0",
+            suite_root=suite_root,
         )
-        if urdf_path.exists():
-            logger.info(
-                f"Attempting to load shared golfer URDF into Drake: {urdf_path}"
-            )
-            try:
-                engine.load_from_path(str(urdf_path))
-            except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(
-                    f"Failed to load default URDF into Drake (expected if missing meshes): {e}"
-                )
-        else:
-            logger.warning(f"Default URDF not found at {urdf_path}")
-
-        # DbC postcondition
-        _ensure_engine_loaded(engine, "Drake")
-        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("Drake requirements not met.") from e
@@ -182,36 +252,25 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
         )
         from src.shared.python.engine_core.engine_probes import PinocchioProbe
 
-        probe = PinocchioProbe(suite_root)
-        result = probe.probe()
-
-        if not result.is_available():
-            raise GolfModelingError(
-                f"Pinocchio not ready:\n{result.diagnostic_message}\n"
-                f"Fix: {result.get_fix_instructions()}"
+        def _model_path(root: Path) -> Path:
+            return (
+                root
+                / "engines"
+                / "physics_engines"
+                / "pinocchio"
+                / "models"
+                / "generated"
+                / "golfer.urdf"
             )
 
-        engine = PinocchioPhysicsEngine()  # type: ignore[abstract]
-
-        # Load default golfer URDF
-        model_path = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "pinocchio"
-            / "models"
-            / "generated"
-            / "golfer.urdf"
+        return _load_engine_with_probe(
+            engine_name="Pinocchio",
+            probe_factory=PinocchioProbe,
+            engine_factory=lambda: PinocchioPhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=_model_path,
+            install_hint="Install pin>=2.6.0",
+            suite_root=suite_root,
         )
-        if model_path.exists():
-            logger.info(f"Loading default Pinocchio model: {model_path}")
-            engine.load_from_path(str(model_path))
-        else:
-            logger.warning(f"Default Pinocchio model not found at {model_path}")
-
-        # DbC postcondition
-        _ensure_engine_loaded(engine, "Pinocchio")
-        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("Pinocchio requirements not met.") from e
@@ -228,20 +287,15 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
         )
         from src.shared.python.engine_core.engine_probes import OpenSimProbe
 
-        probe = OpenSimProbe(suite_root)
-        result = probe.probe()
-
-        if not result.is_available():
-            raise GolfModelingError(
-                f"OpenSim not ready:\n{result.diagnostic_message}\n"
-                f"Fix: {result.get_fix_instructions()}"
-            )
-
-        engine = OpenSimPhysicsEngine()  # type: ignore[abstract]
-
-        # DbC postcondition
-        _ensure_engine_loaded(engine, "OpenSim")
-        return engine  # type: ignore[no-any-return]
+        return _load_engine_with_probe(
+            engine_name="OpenSim",
+            probe_factory=OpenSimProbe,
+            engine_factory=lambda: OpenSimPhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=None,
+            load_model=False,
+            install_hint="Install opensim>=4.4.0",
+            suite_root=suite_root,
+        )
 
     except ImportError as e:
         raise GolfModelingError("OpenSim requirements not met.") from e
@@ -258,20 +312,15 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
         )
         from src.shared.python.engine_core.engine_probes import MyoSimProbe
 
-        probe = MyoSimProbe(suite_root)
-        result = probe.probe()
-
-        if not result.is_available():
-            raise GolfModelingError(
-                f"MyoSim not ready:\n{result.diagnostic_message}\n"
-                f"Fix: {result.get_fix_instructions()}"
-            )
-
-        engine = MyoSuitePhysicsEngine()  # type: ignore[abstract,no-any-return]
-
-        # DbC postcondition
-        _ensure_engine_loaded(engine, "MyoSim")
-        return engine  # type: ignore[no-any-return]
+        return _load_engine_with_probe(
+            engine_name="MyoSim",
+            probe_factory=MyoSimProbe,
+            engine_factory=lambda: MyoSuitePhysicsEngine(),  # type: ignore[abstract,no-any-return]
+            model_path_fn=None,
+            load_model=False,
+            install_hint="Install myosuite>=2.0.0",
+            suite_root=suite_root,
+        )
 
     except ImportError as e:
         raise GolfModelingError("MyoSim requirements not met.") from e

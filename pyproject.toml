@@ -277,6 +277,8 @@ markers = [
     "asyncio: marks tests as async tests",
     "benchmark: marks tests as performance benchmarks",
     "serial: marks tests that must not run in parallel (sys.modules manipulation)",
+    "requires_network: marks tests that require network access (skip with '-m not requires_network')",
+    "requires_gpu: marks tests that require a GPU (skip with '-m not requires_gpu')",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
@@ -309,8 +311,8 @@ omit = [
 
 [tool.coverage.report]
 # Coverage threshold — enforced in CI and locally when running with --cov.
-# Raise this value as coverage improves.
-fail_under = 40
+# Raise this value as coverage improves toward the 60% target (#1630).
+fail_under = 50
 show_missing = true
 skip_empty = true
 precision = 1

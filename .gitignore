@@ -129,3 +129,26 @@ simscape_ux_err*.txt
 *.db
 golf_modeling_suite.db
 1[0-9][0-9][0-9].txt
+
+# Stale root-level duplicate directories (#1628)
+# These are legacy aliases for src/ subdirectories. They should not be
+# re-introduced. If you see them locally, delete them manually.
+/engines/__pycache__/
+/launchers/__pycache__/
+/python/__pycache__/
+
+# Additional log/output debris patterns
+full_collect.txt
+pytest_collect_out.txt
+timeout_test.txt
+line_run.txt
+open_issues.txt
+issues.json
+saved_states/
+
+# Root-level junk analysis docs (belong in docs/development/ per AGENTS.md)
+BUILD_INFRASTRUCTURE_REVIEW.md
+CONFIG_ISSUES_QUICK_REFERENCE.md
+INFRASTRUCTURE_REVIEW_INDEX.md
+REVIEW_SUMMARY.txt
+COMPREHENSIVE_REPO_AUDIT_*.md
