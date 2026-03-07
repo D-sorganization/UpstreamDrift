@@ -256,3 +256,81 @@ jobs:
       - name: Verify Build
         working-directory: ./arduino
         run: pio run -e uno
+
+  # =============================================================================
+  # RUST QUALITY GATE
+  # =============================================================================
+  # Only runs when Rust source files or Cargo manifests change.
+  # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
+  # =============================================================================
+  rust-quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Rust changes
+        id: rust-changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+            RUST_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            RUST_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          else
+            RUST_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || echo "")
+          fi
+
+          if [ -n "$RUST_FILES" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Changed Rust files:"
+            echo "$RUST_FILES"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust changes detected — skipping Rust quality gate."
+          fi
+
+      - name: Install Rust toolchain
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry and build
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Format Check (rustfmt)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo fmt --all -- --check
+
+      - name: Lint (Clippy)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run Rust Tests
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo test --all-features
+
+      - name: Rust Quality Gate Summary
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          echo "## Rust Quality Gate" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ clippy: no warnings" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,8 @@
+# Rust toolchain configuration for UpstreamDrift.
+# Pins the same stable channel as the Tools repository for consistency.
+# See: https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
+
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]
