@@ -38,13 +38,10 @@ jobs:
       - name: Lint
         run: ruff check src scripts tests
 
-      # Use ruff format (consistent with pre-commit hooks)
+      # Use ruff format (consistent with pre-commit hooks) - ruff format is
+      # a strict superset of black's style; running both causes conflicts.
       - name: Check Formatting (ruff)
         run: ruff format --check src scripts tests
-
-      # Enforce Black formatting (fleet standard)
-      - name: Check Formatting (black)
-        run: black --check src scripts tests
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -e .[dev]

@@ -214,8 +214,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Global Stylesheet for Rounded Buttons and Modern Look
-    app.setStyleSheet(
-        """
+    app.setStyleSheet("""
         QPushButton {
             border-radius: 5px;
             padding: 5px;
@@ -261,8 +260,7 @@ if __name__ == "__main__":
         QMessageBox QLabel {
             color: white;
         }
-    """
-    )
+    """)
 
     window = HumanoidLauncher()
     window.show()

@@ -873,16 +873,13 @@ class DatasetGenerator:
     @staticmethod
     def _create_sqlite_tables(cursor: sqlite3.Cursor) -> None:
         """Create the SQLite schema tables."""
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS dataset_metadata (
                 key TEXT PRIMARY KEY,
                 value TEXT
             )
-        """
-        )
-        cursor.execute(
-            """
+        """)
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS samples (
                 sample_id INTEGER PRIMARY KEY,
                 metadata_json TEXT,
@@ -890,10 +887,8 @@ class DatasetGenerator:
                 n_q INTEGER,
                 n_v INTEGER
             )
-        """
-        )
-        cursor.execute(
-            """
+        """)
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS frames (
                 sample_id INTEGER,
                 step INTEGER,
@@ -906,8 +901,7 @@ class DatasetGenerator:
                 PRIMARY KEY (sample_id, step),
                 FOREIGN KEY (sample_id) REFERENCES samples(sample_id)
             )
-        """
-        )
+        """)
 
     @staticmethod
     def _insert_sqlite_metadata(

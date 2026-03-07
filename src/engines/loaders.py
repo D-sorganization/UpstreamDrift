@@ -45,6 +45,7 @@ __all__ = [
     "load_opensim_engine",
     "load_myosim_engine",
     "load_pendulum_engine",
+    "load_golf_swing_pendulum_engine",
     "load_putting_green_engine",
     "LOADER_MAP",
 ]
@@ -347,6 +348,41 @@ def load_pendulum_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
         raise GolfModelingError("Pendulum engine not found.") from e
 
 
+def load_golf_swing_pendulum_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load Golf Swing Pendulum engine (Tools vendor model).
+
+    Wraps the ``double_pendulum_golf`` package from the vendored Tools
+    repository (``vendor/ud-tools``).  This model uses relative coordinates
+    with explicit clubhead mass, viscous+Coulomb damping, and joint-limit
+    barriers — complementing the primary :func:`load_pendulum_engine` which
+    uses distributed inertia.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        from src.engines.physics_engines.pendulum.python.golf_swing_physics_engine import (
+            GolfSwingPendulumEngine,
+        )
+
+        if not GolfSwingPendulumEngine.is_available():
+            raise GolfModelingError(
+                "GolfSwingPendulumEngine requires the vendor/ud-tools submodule. "
+                "Run: git submodule update --init vendor/ud-tools"
+            )
+
+        engine = GolfSwingPendulumEngine()
+        logger.info("Golf Swing Pendulum engine (Tools model) loaded successfully")
+
+        _ensure_engine_loaded(engine, "GolfSwingPendulum")
+        return engine  # type: ignore[return-value]
+
+    except ImportError as e:
+        raise GolfModelingError(
+            "Golf Swing Pendulum engine not found. "
+            "Ensure vendor/ud-tools submodule is initialised."
+        ) from e
+
+
 def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
     """Load Putting Green engine.
 
@@ -375,5 +411,6 @@ LOADER_MAP: dict[EngineType, Callable[[Path], PhysicsEngine]] = {
     EngineType.OPENSIM: load_opensim_engine,
     EngineType.MYOSIM: load_myosim_engine,
     EngineType.PENDULUM: load_pendulum_engine,
+    EngineType.GOLF_SWING_PENDULUM: load_golf_swing_pendulum_engine,
     EngineType.PUTTING_GREEN: load_putting_green_engine,
 }

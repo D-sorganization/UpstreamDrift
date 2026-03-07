@@ -1,0 +1,122 @@
+name: Vendor Submodule Freshness
+
+on:
+  schedule:
+    # Run nightly at 02:00 UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      auto_bump:
+        description: "Automatically open a PR if a submodule is stale?"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-vendor-freshness:
+    name: Check vendor submodule freshness
+    runs-on: ubuntu-latest
+    outputs:
+      stale: ${{ steps.check.outputs.stale }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run freshness check
+        id: check
+        run: |
+          python scripts/check_vendor_updates.py --no-network --json > vendor_status.json 2>&1 || true
+          cat vendor_status.json
+          STALE=$(python -c "
+          import json, sys
+          data = json.load(open('vendor_status.json'))
+          stale = [d for d in data if not d['is_current']]
+          print('true' if stale else 'false')
+          ")
+          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload status report
+        uses: actions/upload-artifact@v4
+        with:
+          name: vendor-freshness-report
+          path: vendor_status.json
+          retention-days: 7
+
+  bump-submodule:
+    name: Open bump PR if stale
+    needs: check-vendor-freshness
+    if: >
+      needs.check-vendor-freshness.outputs.stale == 'true' &&
+      (github.event_name == 'schedule' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_bump == 'true'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update vendor/ud-tools to latest Tools main
+        run: |
+          git submodule update --remote vendor/ud-tools
+          NEW_SHA=$(git -C vendor/ud-tools rev-parse HEAD)
+          echo "NEW_SHA=$NEW_SHA" >> "$GITHUB_ENV"
+
+      - name: Check for actual changes
+        id: diff
+        run: |
+          if git diff --quiet HEAD -- vendor/ud-tools; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create bump branch
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          BRANCH="chore/bump-ud-tools-$(date +%Y%m%d)"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+          git add vendor/ud-tools
+          SHORT="${NEW_SHA:0:12}"
+          git commit -m "chore(vendor): bump ud-tools to ${SHORT}"
+
+      - name: Push branch
+        if: steps.diff.outputs.changed == 'true'
+        run: git push origin "$BRANCH"
+
+      - name: Open PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHORT="${NEW_SHA:0:12}"
+          gh pr create \
+            --title "chore(vendor): bump ud-tools to ${SHORT}" \
+            --body "Automated nightly submodule bump from vendor-freshness CI job. Review the Tools CHANGELOG before merging." \
+            --label "dependencies" \
+            --label "automated"
