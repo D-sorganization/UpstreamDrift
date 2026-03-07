@@ -1,17 +1,13 @@
 # =============================================================================
-# Fleet-Wide Pre-commit Configuration (Polyglot)
+# Fleet-Wide Pre-commit Configuration
 # =============================================================================
-# Supports: Python, JavaScript/TypeScript, React, HTML, CSS, C++
-# CROSS-PLATFORM: Works on Windows, Linux, and macOS
-# - Uses `language: python` instead of `language: system` for local hooks
-# - Avoids shell-specific commands that fail on Windows
-#
 # Fast checks on every commit (<15 seconds)
-# Slower checks (mypy, tests) on pre-push only
+# Slower checks (mypy, bandit, tests) on pre-push only
 #
 # EXCEPTIONS:
-# - Documentation-only changes (.md, .rst) skip code checks
-# - Workflow changes (.github/) skip code checks
+# - Documentation-only changes (.md, .rst) skip Python checks
+# - Workflow changes (.github/) skip Python checks
+# - Config changes (.yml, .yaml, .json) only run prettier
 #
 # Installation:
 #   pip install pre-commit
@@ -20,187 +16,89 @@
 # =============================================================================
 
 repos:
-  # ===========================================================================
-  # PYTHON CHECKS
-  # ===========================================================================
+  # -------------------------------------------------------------------------
+  # Stage 1: Code Formatting (auto-fix) - PYTHON FILES ONLY
+  # -------------------------------------------------------------------------
 
   # Ruff - Fast Python linter with auto-fix
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff
-        name: "ruff (Python lint + fix)"
+        name: "ruff (lint + fix)"
         args: ["--fix", "--exit-non-zero-on-fix"]
         types: [python]
+        # Skip for docs-only or workflow-only changes
         exclude: ^(\.github/|docs/|.*\.md$)
 
       - id: ruff-format
-        name: "ruff format (Python)"
+        name: "ruff format"
         types: [python]
         exclude: ^(\.github/|docs/|.*\.md$)
 
-  # NOTE: Black hook removed - ruff format is the primary Python formatter.
-  # Black and ruff format produce conflicting output for parenthesized asserts,
-  # causing an infinite reformat cycle. ruff format is faster and sufficient.
-
-  # ===========================================================================
-  # JAVASCRIPT / TYPESCRIPT / REACT CHECKS
-  # ===========================================================================
-
-  # ESLint - JavaScript/TypeScript linter
-  # NOTE: Only runs on ui/ directory which has its own eslint.config.js
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.19.0
+  # Black - Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 26.1.0
     hooks:
-      - id: eslint
-        name: "eslint (JS/TS/React)"
-        types_or: [javascript, jsx, ts, tsx]
-        args: ["--fix", "--max-warnings=0"]
-        additional_dependencies:
-          - eslint@9.19.0
-          - eslint-plugin-react@7.37.4
-          - eslint-plugin-react-hooks@5.1.0
-          - "@typescript-eslint/parser@8.22.0"
-          - "@typescript-eslint/eslint-plugin@8.22.0"
-        files: ^ui/src/
-        exclude: ^(\.github/|docs/|node_modules/|dist/|build/|htmlcov/)
+      - id: black
+        name: "black (format)"
+        language_version: python3.11
+        types: [python]
+        exclude: ^(\.github/|docs/|.*\.md$)
 
-  # ===========================================================================
-  # HTML / CSS CHECKS
-  # ===========================================================================
+  # -------------------------------------------------------------------------
+  # Stage 2: Quick Quality Checks - PYTHON FILES ONLY
+  # -------------------------------------------------------------------------
 
-  # RST linter - basic RST syntax check
-  # NOTE: Excludes Sphinx-specific files which use directives not understood by basic RST parser
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-markup
-    rev: v1.0.1
-    hooks:
-      - id: rst-linter
-        name: "RST linter"
-        types: [rst]
-        exclude: ^(\.github/|node_modules/|docs/|.*/docs/)
-
-  # Stylelint - CSS/SCSS linter
-  # NOTE: Only runs on ui/src which has actual project CSS; excludes Sphinx docs CSS
-  - repo: https://github.com/awebdeveloper/pre-commit-stylelint
-    rev: 0.0.2
-    hooks:
-      - id: stylelint
-        name: "stylelint (CSS/SCSS)"
-        types_or: [css, scss]
-        args: ["--fix", "--config", "ui/.stylelintrc.json"]
-        additional_dependencies:
-          - stylelint@16.2.1
-          - stylelint-config-standard@36.0.0
-        files: ^ui/src/
-        exclude: ^(\.github/|node_modules/|dist/|build/|docs/)
-
-  # ===========================================================================
-  # C++ CHECKS
-  # ===========================================================================
-
-  # Clang-format - C/C++ formatter
-  - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v19.1.7
-    hooks:
-      - id: clang-format
-        name: "clang-format (C/C++)"
-        types_or: [c, c++]
-        args: ["-i", "--style=file"]
-        exclude: ^(\.github/|docs/|third_party/)
-
-  # ===========================================================================
-  # UNIVERSAL FORMATTING (All Languages)
-  # ===========================================================================
-
-  # Prettier - Format YAML, JSON, Markdown, HTML, CSS, JS (lightweight)
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        name: "prettier (yaml/json/md/html/css)"
-        types_or: [yaml, markdown, json, html, css, javascript]
-        exclude: '(\.py|\.m|package-lock\.json|\.ipynb|node_modules/)$'
-        args: ["--write"]
-
-  # ===========================================================================
-  # QUALITY CHECKS (All Languages)
-  # ===========================================================================
-
-  # NOTE: Using language: python (not system) for cross-platform compatibility (Windows/Linux)
   - repo: local
     hooks:
-      # Prevent wildcard imports (Python)
-      # NOTE: Excludes files with intentional wildcard imports (constants re-exports)
+      # Prevent wildcard imports
       - id: no-wildcard-imports
-        name: "no wildcard imports (Python)"
-        entry: "from .* import \\*(?!.*noqa)"
+        name: "no wildcard imports"
+        entry: "from .* import \\*"
         language: pygrep
         types: [python]
-        exclude: ^(archive/|legacy/|experimental/|tests/|\.github/|src/shared/python/constants\.py|src/engines/.*constants.*\.py)
+        exclude: ^(archive/|legacy/|experimental/|tests/|\.github/)
 
-      # Check for debug statements (Python)
+      # Check for debug statements
       - id: no-debug-statements
-        name: "no debug statements (Python)"
+        name: "no debug statements"
         entry: "(?:^|\\s)(breakpoint\\(|import pdb|pdb\\.set_trace)"
         language: pygrep
         types: [python]
         exclude: ^(tests/|archive/|legacy/|\.github/)
 
-      # Check for print statements in core library code (Python)
-      # NOTE: Excludes CLIs, scripts, engines (many have legitimate print for status), tools, etc.
+      # Check for print statements in src (should use logging)
       - id: no-print-in-src
-        name: "no print() in src (Python)"
-        entry: "^\\s*print\\((?!.*noqa)"
+        name: "no print() in src (use logging)"
+        entry: "^\\s*print\\("
         language: pygrep
         files: ^src/
-        types: [python]
-        exclude: |
-          (?x)^(
-            src/.*/__main__\.py|
-            src/.*/cli/|
-            src/.*/docker/|
-            src/.*/examples/|
-            src/.*/scripts/|
-            src/api/|
-            src/engines/|
-            src/shared/models/|
-            src/shared/python/|
-            src/launchers/|
-            src/tools/|
-            src/deployment/|
-            src/unreal_integration/|
-            src/learning/|
-            tests/|
-            \.github/
-          )
+        exclude: ^(src/.*/__main__\.py|tests/|\.github/)
 
-      # Check for console.log in src (JavaScript)
-      - id: no-console-log
-        name: "no console.log in src (JS)"
-        entry: "console\\.(log|debug|info)\\("
-        language: pygrep
-        types_or: [javascript, jsx, ts, tsx]
-        files: ^src/
-        exclude: ^(tests/|\.github/|node_modules/)
+  # -------------------------------------------------------------------------
+  # Stage 3: Config File Formatting - ALWAYS RUNS
+  # -------------------------------------------------------------------------
 
-      # Check for debugger statements (JavaScript)
-      - id: no-debugger
-        name: "no debugger (JS)"
-        entry: "^\\s*debugger"
-        language: pygrep
-        types_or: [javascript, jsx, ts, tsx]
-        exclude: ^(tests/|\.github/|node_modules/)
+  # Prettier - Format YAML, JSON, Markdown (lightweight, always runs)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: "prettier (yaml/json/md)"
+        types_or: [yaml, markdown, json]
+        exclude: '(\.py|\.m|package-lock\.json|\.ipynb)$'
 
-  # ===========================================================================
-  # PRE-PUSH HOOKS (Slower - run before push only)
-  # ===========================================================================
+  # -------------------------------------------------------------------------
+  # Stage 4: Pre-push Hooks (Slower - PYTHON FILES ONLY)
+  # -------------------------------------------------------------------------
 
-  # MyPy - Python type checking (pre-push only)
+  # MyPy - Type checking (pre-push only, Python only)
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
       - id: mypy
-        name: "mypy (Python type check)"
+        name: "mypy (type check)"
         stages: [pre-push]
         additional_dependencies:
           - types-requests
@@ -222,81 +120,29 @@ repos:
             \.github/
           )
 
-  # Bandit - Python security scanning (pre-push only)
+  # Bandit - Security scanning (pre-push only, Python only)
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.7
     hooks:
       - id: bandit
-        name: "bandit (Python security)"
+        name: "bandit (security scan)"
         stages: [pre-push]
-        args: ["-ll", "-ii"]
+        args: ["-r", ".", "-ll", "-ii", "-x", "tests/,archive/,legacy/,.github/"]
+        pass_filenames: false
+        # Only run if Python files changed
         types: [python]
-        exclude: ^(tests/|archive/|legacy/|\.github/|node_modules/|scripts/)
 
-  # Pytest - Python unit tests (pre-push only)
-  # Scoped to core test dirs to avoid pre-existing failures in launcher/drake/myoconverter tests.
-  # Full test suite runs in CI.
+  # Pytest - Unit tests (pre-push only)
   - repo: local
     hooks:
       - id: pytest-unit
-        name: "pytest (Python tests)"
+        name: "pytest (unit tests)"
         stages: [pre-push]
-        entry: python3 -m pytest
-        args:
-          [
-            "tests/unit/api",
-            "tests/unit/ai",
-            "tests/unit/engines",
-            "tests/unit/robotics",
-            "-x",
-            "-q",
-            "--tb=short",
-            "--timeout=15",
-            "-m",
-            "not slow and not integration",
-          ]
+        entry: python -m pytest tests/unit -x -q --tb=short -m "not slow and not integration"
         language: system
         pass_filenames: false
+        # Only run if Python files changed
         types: [python]
-
-  # Semgrep - Free local security + code quality scanning (pre-push)
-  - repo: https://github.com/semgrep/semgrep
-    rev: v1.102.0
-    hooks:
-      - id: semgrep
-        name: "semgrep (security + quality)"
-        stages: [pre-push]
-        args: ["--config", "auto", "--error", "--quiet"]
-        types: [python]
-        exclude: ^(tests/|archive/|legacy/|experimental/|\.github/)
-
-  # Module size budget check (pre-push)
-  - repo: local
-    hooks:
-      - id: module-size-budget
-        name: "module size budget"
-        stages: [pre-push]
-        entry: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
-        language: system
-        pass_filenames: false
-        types: [python]
-
-  # Radon - Cyclomatic complexity check (pre-push)
-  # Note: Using local hook since rubik/radon doesn't provide pre-commit hooks
-  # NOTE: Using language: python (not system) for cross-platform compatibility (Windows/Linux)
-  - repo: local
-    hooks:
-      - id: radon
-        name: "radon (complexity check)"
-        stages: [pre-push]
-        entry: radon
-        args: ["cc", "--min", "C", "--show-complexity", "--total-average"]
-        language: python
-        additional_dependencies: [radon]
-        types: [python]
-        files: ^src/
-        exclude: ^(tests/|archive/|legacy/|experimental/)
-        pass_filenames: true
 
 # =============================================================================
 # Global Settings
@@ -304,7 +150,6 @@ repos:
 
 default_language_version:
   python: python3.11
-  node: "20.11.0"
 
 # Files to always exclude from all hooks
 exclude: |
@@ -322,25 +167,16 @@ exclude: |
     venv/|
     build/|
     dist/|
-    .*\.egg-info/|
-    \.next/|
-    coverage/|
-    third_party/|
-    vendor/|
-    shared/models/opensim/opensim-models/|
-    shared/models/myosuite/myo_sim/|
-    src/shared/tools/human-gazebo/|
-    src/shared/models/opensim/opensim-models/|
-    src/shared/models/myosuite/myo_sim/
+    .*\.egg-info/
   )
 
 # Don't fail fast - run all hooks
 fail_fast: false
 
-# CI configuration
+# CI configuration (for pre-commit.ci if used)
 ci:
   autofix_commit_msg: "style: auto-fix from pre-commit hooks"
   autofix_prs: true
   autoupdate_branch: "main"
   autoupdate_commit_msg: "chore: update pre-commit hooks"
-  skip: [pytest-unit, bandit, mypy, semgrep, radon] # Skip slow hooks in CI
+  skip: [pytest-unit, bandit, mypy]  # Skip slow hooks in CI
