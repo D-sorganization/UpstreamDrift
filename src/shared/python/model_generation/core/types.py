@@ -221,7 +221,7 @@ class Inertia:
         i_sphere = (2.0 / 5.0) * m_sphere * radius**2
         # Parallel axis theorem for hemisphere offset
         hemisphere_offset = length / 2.0 + (3.0 / 8.0) * radius
-        i_sphere_perp = i_sphere + 0.5 * m_sphere * hemisphere_offset**2
+        i_sphere_perp = i_sphere + m_sphere * hemisphere_offset**2
 
         i_axial = i_cyl_axial + i_sphere
         i_perp = i_cyl_perp + i_sphere_perp
