@@ -117,6 +117,10 @@ class HumanoidURDFGenerator:
         self._materials: dict[str, tuple[float, float, float, float]] = {}
 
     @precondition(
+        lambda params: params is not None,
+        "params must not be None",
+    )
+    @precondition(
         lambda params: params.height_m > 0,
         "Height must be positive",
     )
@@ -184,6 +188,10 @@ class HumanoidURDFGenerator:
 
         return HumanoidModel(self._links, self._joints)
 
+    @precondition(
+        lambda params: params is not None,
+        "params must not be None",
+    )
     @precondition(
         lambda params: params.height_m > 0,
         "Height must be positive",
