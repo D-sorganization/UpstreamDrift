@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.physics.terrain import (
     MATERIALS,
@@ -323,6 +324,7 @@ _BUILDERS = {
 
 
 @router.get("/presets", response_model=list[EnvironmentPreset])
+@handle_api_errors
 async def list_presets() -> list[EnvironmentPreset]:
     """List available environment presets."""
     return [
@@ -338,6 +340,7 @@ async def list_presets() -> list[EnvironmentPreset]:
 
 
 @router.post("/load", response_model=dict[str, Any])
+@handle_api_errors
 @precondition(
     lambda request: request is not None
     and request.preset is not None
@@ -376,6 +379,7 @@ async def load_environment(request: CreateEnvironmentRequest) -> dict[str, Any]:
 
 
 @router.post("/query", response_model=TerrainQueryResponse)
+@handle_api_errors
 async def query_terrain(request: TerrainQueryRequest) -> TerrainQueryResponse:
     """Query terrain properties at a specific point."""
     terrain = _get_active_terrain()
@@ -407,6 +411,7 @@ async def query_terrain(request: TerrainQueryRequest) -> TerrainQueryResponse:
 
 
 @router.get("/materials", response_model=list[SurfaceMaterialResponse])
+@handle_api_errors
 async def list_materials() -> list[SurfaceMaterialResponse]:
     """List all available surface materials and their properties."""
     return [
@@ -424,12 +429,14 @@ async def list_materials() -> list[SurfaceMaterialResponse]:
 
 
 @router.get("/types", response_model=list[str])
+@handle_api_errors
 async def list_terrain_types() -> list[str]:
     """List all available terrain types."""
     return [t.name.lower() for t in TerrainType]
 
 
 @router.get("/active", response_model=dict[str, Any])
+@handle_api_errors
 async def get_active_terrain() -> dict[str, Any]:
     """Get information about the currently active terrain."""
     terrain = _get_active_terrain()

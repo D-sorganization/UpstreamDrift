@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
 
 from ..dependencies import get_engine_manager, get_logger
@@ -147,6 +148,7 @@ def _get_features_registry(
 
 
 @router.post("/simulation/actuators", response_model=ActuatorStateResponse)
+@handle_api_errors
 async def update_actuators(
     request: ActuatorUpdateRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -207,6 +209,7 @@ async def update_actuators(
 
 
 @router.get("/simulation/actuators", response_model=ActuatorStateResponse)
+@handle_api_errors
 async def get_actuator_state(
     engine_manager: EngineManager = Depends(get_engine_manager),
 ) -> ActuatorStateResponse:
@@ -238,6 +241,7 @@ async def get_actuator_state(
 
 
 @router.get("/simulation/forces", response_model=ForceVectorResponse)
+@handle_api_errors
 async def get_forces(
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
@@ -312,6 +316,7 @@ async def get_forces(
 
 
 @router.get("/simulation/metrics", response_model=BiomechanicsMetricsResponse)
+@handle_api_errors
 async def get_metrics(
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
@@ -393,6 +398,7 @@ async def get_metrics(
 
 
 @router.get("/simulation/control-features", response_model=ControlFeaturesResponse)
+@handle_api_errors
 async def get_control_features(
     category: str | None = None,
     available_only: bool = False,
@@ -436,6 +442,7 @@ async def get_control_features(
 
 
 @router.get("/simulation/stats", response_model=SimulationStatsResponse)
+@handle_api_errors
 async def get_simulation_stats(
     engine_manager: EngineManager = Depends(get_engine_manager),
 ) -> SimulationStatsResponse:
@@ -472,6 +479,7 @@ async def get_simulation_stats(
 
 
 @router.post("/simulation/speed", response_model=SpeedControlResponse)
+@handle_api_errors
 async def set_simulation_speed(
     request: SpeedControlRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -494,6 +502,7 @@ async def set_simulation_speed(
 
 
 @router.post("/simulation/camera", response_model=CameraPresetResponse)
+@handle_api_errors
 async def set_camera_preset(
     request: CameraPresetRequest,
 ) -> CameraPresetResponse:
@@ -524,6 +533,7 @@ async def set_camera_preset(
 
 
 @router.post("/simulation/recording", response_model=TrajectoryRecordResponse)
+@handle_api_errors
 async def control_recording(
     request: TrajectoryRecordRequest,
     engine_manager: EngineManager = Depends(get_engine_manager),

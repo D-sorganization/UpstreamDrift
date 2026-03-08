@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
@@ -36,6 +37,7 @@ class EngineListResponse(BaseModel):
 
 
 @router.get("/engines", response_model=EngineListResponse)
+@handle_api_errors
 async def get_engines(
     engine_manager: EngineManager = Depends(get_engine_manager),
     _user: Any = Depends(OptionalAuth(auto_error=False)),
@@ -85,6 +87,7 @@ async def get_engines(
 
 
 @router.get("/api/engines/{engine_name}/probe")
+@handle_api_errors
 async def probe_engine(
     engine_name: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -99,6 +102,7 @@ async def probe_engine(
 
 
 @router.post("/api/engines/{engine_name}/load")
+@handle_api_errors
 async def load_engine_lazy(
     engine_name: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
@@ -201,6 +205,7 @@ async def unload_engine(
     "/engines/{engine_type}/capabilities",
     response_model=EngineCapabilitiesResponse,
 )
+@handle_api_errors
 async def get_engine_capabilities(
     engine_type: str,
     engine_manager: EngineManager = Depends(get_engine_manager),
