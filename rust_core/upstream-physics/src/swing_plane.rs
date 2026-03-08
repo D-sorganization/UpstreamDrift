@@ -96,13 +96,15 @@ pub fn fit_plane(points: &[Vector3]) -> Result<SwingPlaneResult, &'static str> {
         compute_plane_normal_for_axis(points, cx, cy, cz, 2), // y = f(x,z)
     ];
 
-    // Pick the candidate with the best R²
-    let (best_normal, best_r2) = candidates
+    let (best_normal, best_r2) = match candidates
         .iter()
         .filter_map(|c| c.as_ref().ok())
         .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
         .cloned()
-        .unwrap_or((Vector3::new(0.0, 1.0, 0.0), 0.0));
+    {
+        Some(result) => result,
+        None => return Err("All plane fit candidates failed (collinear or degenerate points)"),
+    };
 
     // Compute residuals
     let residuals: Vec<f64> = points
@@ -327,6 +329,23 @@ mod tests {
             result.plane_angle < 0.1,
             "Horizontal plane angle should be ~0, got {}",
             result.plane_angle
+        );
+    }
+
+    /// Test 7: Collinear points should return an explicit error.
+    #[test]
+    fn test_collinear_points_returns_error() {
+        let points = vec![
+            Vector3::new(0.0, 0.0, 0.0),
+            Vector3::new(1.0, 1.0, 1.0),
+            Vector3::new(2.0, 2.0, 2.0),
+        ];
+
+        let result = fit_plane(&points);
+        assert!(
+            result.is_err(),
+            "Collinear points should return Err, got {:?}",
+            result
         );
     }
 }
