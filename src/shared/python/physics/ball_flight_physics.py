@@ -160,7 +160,7 @@ class TrajectoryPoint:
 # ... (JIT functions skipped) ...
 
 
-@jit(nopython=True, cache=True)
+@jit(nopython=True, cache=True)  # type: ignore[operator]
 def _calculate_accel_core(
     rel_vel: np.ndarray,
     speed: float,
@@ -201,7 +201,7 @@ def _calculate_accel_core(
     return cast(np.ndarray, acc)
 
 
-@jit(nopython=True, cache=True)
+@jit(nopython=True, cache=True)  # type: ignore[operator]
 def _flight_dynamics_step(
     state: np.ndarray,
     gravity_acc: np.ndarray,
@@ -236,7 +236,7 @@ def _flight_dynamics_step(
     return res
 
 
-@jit(nopython=True, cache=True)
+@jit(nopython=True, cache=True)  # type: ignore[operator]
 def _compute_rk4_step(
     curr: np.ndarray,
     dt: float,
@@ -296,13 +296,13 @@ def _compute_rk4_step(
     return (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
 
 
-@jit(nopython=True, cache=True)
+@jit(nopython=True, cache=True)  # type: ignore[operator]
 def _apply_spin_decay(omega: float, decay_rate: float, dt: float) -> float:
     """Apply exponential spin decay: omega(t+dt) = omega(t) * exp(-lambda * dt)."""
     return omega * np.exp(-decay_rate * dt)
 
 
-@jit(nopython=True, cache=True)
+@jit(nopython=True, cache=True)  # type: ignore[operator]
 def _solve_rk4_loop(
     initial_state: np.ndarray,
     dt: float,
