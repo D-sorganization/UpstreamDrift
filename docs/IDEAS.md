@@ -1,12 +1,17 @@
 # Golf Modeling Suite - Research Ideas & Scientific Roadmap
 
-**Last Updated**: 2026-03-05
+**Last Updated**: 2026-03-06
 
 This document serves as the central registry for scientific research topics, technical resources, and implementation ideas for the Golf Modeling Suite. It focuses on rigorous, scientifically grounded concepts in biomechanics, physics, and engineering.
 
 ## 1. Biomechanics & Human Movement
 
 ### Kinematic Sequence Analysis
+- **Inverse Kinematics with Soft Tissue Artifact (STA) Compensation**: Develop robust multi-body optimization methods that model skin deformation over bones, reducing errors in joint center estimation.
+  - _Data Needed_: Bone-pin validation data vs. optical marker data.
+  - _Outcome_: Higher fidelity joint kinematics and reduced spurious joint torques in inverse dynamics.
+  - _Ref_: Leardini, A., et al. (2005). "Human movement analysis using stereophotogrammetry."
+
 - **Dynamic GRF Estimation Modeling**: Develop robust inverse dynamics models to calculate true dynamic Ground Reaction Forces (GRF) purely from full-body kinematics when force plate contact data is unavailable, going beyond static gravity ($W=mg$) approximations.
   - _Data Needed_: High-fidelity markerless motion capture kinematics and segment inertial properties.
   - _Outcome_: Accurate power and efficiency metrics even in environments lacking physical force plates.
@@ -109,6 +114,10 @@ This document serves as the central registry for scientific research topics, tec
 
 ### Aerodynamics
 
+- **Gyroscopic Precession and Spin Axis Migration**: Model the migration of the spin axis during flight due to gyroscopic precession and aerodynamic torque.
+  - _Data Needed_: Mass moments of inertia ($I_x, I_y, I_z$) for ball constructions.
+  - _Outcome_: Better prediction of late-flight curve (fade/draw exaggeration).
+
 - **Boundary Layer Transition**: Explicitly model the movement of the laminar-turbulent transition point on the ball surface as a function of Reynolds number and surface roughness.
   - _Data Needed_: Surface roughness parameters and transition criteria.
   - _Outcome_: Precise drag prediction across critical Reynolds numbers (Driver vs. Wedge).
@@ -182,6 +191,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 3. Equipment Science
 
 ### Club Dynamics
+- **Shaft Recovery Dynamics and Deflection Timing**: Measure the correlation between the shaft's return to a neutral (or specific lead) deflection state at impact and the golfer's kinematic sequence timing.
+  - _Data Needed_: High-speed strain gauge telemetry aligned with full-body 3D motion capture.
+  - _Outcome_: A quantifiable matching metric linking golfer timing to shaft natural frequency.
+
 - **Non-infringing Efficiency Scoring Models**: Research pure physics and energy-conservation-based formulations for evaluating swing efficiency that avoid overlapping with patented statistical sequence-matching methodologies (e.g., PCA or DTW).
   - _Data Needed_: Comprehensive clubhead delivery energetics and segment mass approximations.
   - _Outcome_: Legally safe, physics-driven efficiency metrics for performance comparison.
@@ -274,6 +287,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 4. Statistical Methods
 
 ### Analytics
+- **Uncertainty Propagation in Physics Models**: Implement Monte Carlo methods or unscented transforms to propagate input parameter uncertainties (e.g., wind speed, launch conditions) through deterministic physics engines.
+  - _Data Needed_: Covariance matrices for launch monitor measurements and environmental sensors.
+  - _Outcome_: Probabilistic landing zones instead of deterministic points, addressing deterministic outputs in physics engines.
+
 - **Universal Format Topological Mapping**: Research graph-based or topological machine learning methods to automatically translate arbitrary robotic descriptive formats (beyond URDF/MJCF) into a unified internal representation.
   - _Data Needed_: Large datasets of disparate robot description files (SDF, Webots, etc.).
   - _Outcome_: A robust, format-agnostic import pipeline that minimizes NotImplementedErrors for niche formats.
@@ -351,6 +368,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 5. Simulation Technology
 
 ### Physics Engine
+- **Non-Infringing Photometric Tracking Emulation**: Research novel computer vision synthesis approaches to simulate camera-based tracking without relying on patented stroboscopic or sequential contrast methods.
+  - _Data Needed_: Rendered synthetic high-speed camera frames under variable lighting.
+  - _Outcome_: Development of legally safe tracking algorithms that avoid overlap with Foresight or TrackMan method claims.
+
 - **OpenSim Marker Redundancy Models**: Develop predictive models to infer missing or occluded optical marker positions during OpenSim simulations, preventing simulation crashes when specific hardcoded markers (e.g., "Hand", "ClubHead") are lost.
   - _Data Needed_: Sparse marker sets and underlying skeletal constraints.
   - _Outcome_: Fault-tolerant biomechanical simulations resilient to marker dropout.
@@ -412,6 +433,10 @@ This document serves as the central registry for scientific research topics, tec
 ## 6. Control Theory
 
 ### Robotics
+- **Robust Control for Environmental Disturbances**: Implement H-infinity or sliding mode controllers on swing robots to maintain perfect kinematic trajectories despite wind gusts or turf inconsistencies.
+  - _Data Needed_: Disturbance rejection profiles for wind and ground impedance.
+  - _Outcome_: Consistent robotic testing in outdoor, uncontrolled environments.
+
 - **Real-Time Hardware Telemetry Emulation**: Research virtual representations and network loopback models for EtherCAT and ROS2 communication paths to allow full-stack testing of real-time controllers when physical hardware is unavailable.
   - _Data Needed_: Latency profiles and message packet structures for target hardware networks.
   - _Outcome_: Unblocked software development and testing of hardware-in-the-loop (HIL) systems.
@@ -468,3 +493,4 @@ This document serves as the central registry for scientific research topics, tec
 | 2026-02-26 | Added Pelvis 6DOF, Wrist Dynamics, Vertical Gear, MOI Match, Putt Prob, Ray Tracing, MPC | All | Active |
 | 2026-03-01 | Added Forearm Dynamics, Magnus Asymmetry, Shaft Damping, HMM Swing Phases, SPH Turf, Impedance Control | All | Active |
 | 2026-03-05 | Added Dynamic GRF, Efficiency Scoring, Universal Format Mapping, Marker Redundancy, Telemetry Emulation, Universal Teleoperation | All | Active |
+| 2026-03-06 | Added STA Comp, Spin Migration, Shaft Recovery, Uncertainty Prop, Tracking Emulation, Robust Control | All | Active |
