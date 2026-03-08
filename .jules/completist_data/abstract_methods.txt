@@ -4,6 +4,14 @@
 ./scripts/refresh_completist_data.py:65:    run_grep("@abstractmethod", os.path.join(DATA_DIR, "abstract_methods.txt"))
 ./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
 ./vendor/ud-tools/scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:36:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:41:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:45:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/undo_redo.py:49:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:177:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:181:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:185:    @abstractmethod
+./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/state_space.py:189:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:39:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:45:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:50:    @abstractmethod
@@ -13,6 +21,7 @@
 ./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:20:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:26:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:31:    @abstractmethod
+./vendor/ud-tools/src/shared/python/upstream_drift_tools/calculators/base.py:19:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:67:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:73:    @abstractmethod
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:78:    @abstractmethod
@@ -80,6 +89,16 @@
 ./src/shared/python/physics/flexible_shaft.py:300:    @abstractmethod
 ./src/shared/python/physics/flexible_shaft.py:304:    @abstractmethod
 ./src/shared/python/physics/flexible_shaft.py:313:    @abstractmethod
+./src/shared/python/model_generation/library/repository.py:39:    @abstractmethod
+./src/shared/python/model_generation/library/repository.py:45:    @abstractmethod
+./src/shared/python/model_generation/library/repository.py:50:    @abstractmethod
+./src/shared/python/model_generation/library/repository.py:55:    @abstractmethod
+./src/shared/python/model_generation/builders/base_builder.py:182:    @abstractmethod
+./src/shared/python/model_generation/builders/base_builder.py:192:    @abstractmethod
+./src/shared/python/model_generation/plugins/__init__.py:20:    @abstractmethod
+./src/shared/python/model_generation/plugins/__init__.py:26:    @abstractmethod
+./src/shared/python/model_generation/plugins/__init__.py:31:    @abstractmethod
+./src/shared/python/upstream_drift_tools/calculators/base.py:19:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:105:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:133:    @abstractmethod
 ./src/shared/python/ai/adapters/base.py:159:    @abstractmethod
@@ -141,6 +160,10 @@
 ./src/shared/python/pose_estimation/interface.py:23:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:31:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:42:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:88:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:94:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:99:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:119:    @abstractmethod
 ./src/shared/python/ui/adapters/canvas.py:68:    @abstractmethod
 ./src/shared/python/ui/adapters/canvas.py:76:    @abstractmethod
 ./src/shared/python/ui/adapters/thread.py:58:    @abstractmethod
