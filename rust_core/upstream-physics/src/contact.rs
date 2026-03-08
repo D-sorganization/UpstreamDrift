@@ -185,6 +185,39 @@ pub fn calculate_impact(
     }
 }
 
+// ── WASM bindings ────────────────────────────────────────────────────────────
+// ContactParameters and ContactResult contain Vector3 (cross-crate),
+// so we use serde-wasm-bindgen for JS ↔ Rust conversion instead of
+// struct-level #[wasm_bindgen] derives.
+
+/// WASM-exposed contact impact calculation.
+///
+/// # JS API
+/// ```js
+/// const result = calculateImpact(
+///   { x: 0, y: -10, z: 0 },  // velocity
+///   3000.0,                    // spin_rate
+///   { cor: 0.78, friction: 0.4, normal: { x: 0, y: 1, z: 0 } }
+/// );
+/// // result = { velocity: { x, y, z }, spin_rate, energy_lost, is_rolling }
+/// ```
+#[cfg(feature = "wasm")]
+#[wasm_bindgen::prelude::wasm_bindgen(js_name = "calculateImpact")]
+pub fn wasm_calculate_impact(
+    velocity_js: wasm_bindgen::JsValue,
+    spin_rate: f64,
+    params_js: wasm_bindgen::JsValue,
+) -> Result<wasm_bindgen::JsValue, wasm_bindgen::JsValue> {
+    let velocity: Vector3 = serde_wasm_bindgen::from_value(velocity_js)
+        .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Invalid velocity: {e}")))?;
+    let params: ContactParameters = serde_wasm_bindgen::from_value(params_js)
+        .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Invalid params: {e}")))?;
+
+    let result = calculate_impact(&velocity, spin_rate, &params);
+    serde_wasm_bindgen::to_value(&result)
+        .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Serialization error: {e}")))
+}
+
 // ── Tests (TDD) ─────────────────────────────────────────────────────────────
 
 #[cfg(test)]

@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 /// Configuration for the RK4 integrator.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
+#[cfg_attr(feature = "wasm", wasm_bindgen::prelude::wasm_bindgen)]
 pub struct IntegratorConfig {
     /// Fixed time step [s].
     pub dt: f64,
@@ -77,6 +78,18 @@ impl IntegrationResult {
         let start = index * self.state_dim;
         let end = start + self.state_dim;
         self.states[start..end].to_vec()
+    }
+}
+
+// ── WASM bindings ────────────────────────────────────────────────────────────
+
+#[cfg(feature = "wasm")]
+#[wasm_bindgen::prelude::wasm_bindgen]
+impl IntegratorConfig {
+    /// Create integrator configuration.
+    #[wasm_bindgen(constructor)]
+    pub fn wasm_new(dt: f64, max_steps: usize) -> Self {
+        Self { dt, max_steps }
     }
 }
 
