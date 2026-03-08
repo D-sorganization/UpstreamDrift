@@ -45,7 +45,7 @@ impl Default for AirProperties {
 /// Golf ball physical properties.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
-pub struct BallProperties {
+pub struct AeroBallProperties {
     /// Ball mass [kg]
     pub mass: f64,
     /// Ball radius [m]
@@ -58,7 +58,7 @@ pub struct BallProperties {
     pub spin_decay_rate: f64,
 }
 
-impl Default for BallProperties {
+impl Default for AeroBallProperties {
     /// Standard golf ball (45.93 g, 42.7 mm diameter).
     fn default() -> Self {
         let radius = 0.02135;
@@ -99,7 +99,7 @@ pub struct AeroForces {
 pub fn compute_aero_forces(
     velocity: &Vector3,
     spin: &Vector3,
-    ball: &BallProperties,
+    ball: &AeroBallProperties,
     air: &AirProperties,
 ) -> AeroForces {
     debug_assert!(
@@ -124,7 +124,7 @@ pub fn compute_aero_forces(
 ///
 /// F_drag = -0.5 * ρ * Cd * A * |v|² * v̂
 #[must_use]
-pub fn compute_drag(velocity: &Vector3, ball: &BallProperties, air: &AirProperties) -> Vector3 {
+pub fn compute_drag(velocity: &Vector3, ball: &AeroBallProperties, air: &AirProperties) -> Vector3 {
     let speed = velocity.magnitude();
     if speed < 1e-6 {
         return Vector3::new(0.0, 0.0, 0.0);
@@ -149,7 +149,7 @@ pub fn compute_drag(velocity: &Vector3, ball: &BallProperties, air: &AirProperti
 pub fn compute_lift(
     velocity: &Vector3,
     spin: &Vector3,
-    ball: &BallProperties,
+    ball: &AeroBallProperties,
     air: &AirProperties,
 ) -> Vector3 {
     let speed = velocity.magnitude();
@@ -190,7 +190,7 @@ pub fn compute_lift(
 pub fn compute_magnus(
     velocity: &Vector3,
     spin: &Vector3,
-    ball: &BallProperties,
+    ball: &AeroBallProperties,
     air: &AirProperties,
 ) -> Vector3 {
     let speed = velocity.magnitude();
@@ -224,7 +224,7 @@ pub fn compute_magnus(
 /// Golf ball dimples reduce drag at high Re through turbulent boundary
 /// layer transition.
 #[must_use]
-pub fn compute_drag_coefficient(speed: f64, ball: &BallProperties, air: &AirProperties) -> f64 {
+pub fn compute_drag_coefficient(speed: f64, ball: &AeroBallProperties, air: &AirProperties) -> f64 {
     let re = air.density * speed * (2.0 * ball.radius) / air.viscosity;
 
     if re < 8e4 {
@@ -320,7 +320,7 @@ impl AirProperties {
 
 #[cfg(feature = "python")]
 #[pyo3::prelude::pymethods]
-impl BallProperties {
+impl AeroBallProperties {
     #[new]
     #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=0.25, spin_decay_rate=0.1))]
     fn py_new(mass: f64, radius: f64, drag_coefficient: f64, spin_decay_rate: f64) -> Self {
@@ -365,8 +365,8 @@ impl AeroForces {
 mod tests {
     use super::*;
 
-    fn default_ball() -> BallProperties {
-        BallProperties::default()
+    fn default_ball() -> AeroBallProperties {
+        AeroBallProperties::default()
     }
 
     fn default_air() -> AirProperties {

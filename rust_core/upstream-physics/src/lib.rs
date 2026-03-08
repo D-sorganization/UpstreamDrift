@@ -44,7 +44,7 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Aerodynamics
     m.add_class::<aerodynamics::AirProperties>()?;
-    m.add_class::<aerodynamics::BallProperties>()?;
+    m.add_class::<aerodynamics::AeroBallProperties>()?;
     m.add_class::<aerodynamics::AeroForces>()?;
 
     Ok(())
@@ -92,7 +92,7 @@ pub fn wasm_compute_aero_forces(
 ) -> JsValue {
     let velocity = Vector3::new(vx, vy, vz);
     let spin = Vector3::new(sx, sy, sz);
-    let ball = aerodynamics::BallProperties::default();
+    let ball = aerodynamics::AeroBallProperties::default();
     let air = aerodynamics::AirProperties {
         density: air_density,
         ..Default::default()
