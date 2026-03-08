@@ -14,7 +14,7 @@
 //! - Jorgensen, T. (1999). The Physics of Golf. Springer.
 
 use serde::{Deserialize, Serialize};
-use tools_core::Vector3;
+use tools_core::{Vector3, R_GAS};
 
 /// Air properties at given atmospheric conditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -280,7 +280,7 @@ pub fn air_from_altitude(altitude_m: f64) -> AirProperties {
     let lapse: f64 = 0.0065;
     let g: f64 = 9.80665;
     let m_air: f64 = 0.0289644;
-    let r: f64 = 8.31447;
+    let r = R_GAS;
 
     let t = t0 - lapse * altitude_m;
     let p = p0 * (t / t0).powf(g * m_air / (r * lapse));
@@ -644,5 +644,48 @@ mod tests {
             high.temperature < sea.temperature,
             "Higher altitude → lower temperature"
         );
+    }
+
+    // ── Edge case tests (TDD) ───────────────────────────────────────────
+
+    /// Zero velocity should produce zero aerodynamic forces.
+    #[test]
+    fn test_aero_forces_zero_velocity() {
+        let ball = default_ball();
+        let air = AirProperties::default();
+        let velocity = Vector3::zero();
+        let spin = Vector3::new(0.0, 0.0, 300.0);
+
+        let forces = compute_aero_forces(&velocity, &spin, &ball, &air);
+        assert!(forces.drag.magnitude() < 1e-10, "Zero velocity → zero drag");
+    }
+
+    /// Tropopause altitude (11000m) should give valid but thin air.
+    #[test]
+    fn test_air_from_altitude_tropopause() {
+        let air = air_from_altitude(11000.0);
+        assert!(air.density > 0.0, "Density must be positive at 11km");
+        assert!(
+            air.density < 0.5,
+            "Density at 11km should be < 0.5 kg/m³, got {}",
+            air.density
+        );
+        assert!(
+            air.temperature > 200.0 && air.temperature < 230.0,
+            "Tropopause temp ~216.65 K, got {}",
+            air.temperature
+        );
+    }
+
+    /// Zero spin should produce zero Magnus/lift forces.
+    #[test]
+    fn test_aero_forces_zero_spin() {
+        let ball = default_ball();
+        let air = AirProperties::default();
+        let velocity = Vector3::new(40.0, 0.0, 0.0);
+        let spin = Vector3::zero();
+
+        let forces = compute_aero_forces(&velocity, &spin, &ball, &air);
+        assert!(forces.magnus.magnitude() < 1e-10, "Zero spin → zero Magnus");
     }
 }

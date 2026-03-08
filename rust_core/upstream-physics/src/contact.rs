@@ -11,6 +11,15 @@
 use serde::{Deserialize, Serialize};
 use tools_core::Vector3;
 
+/// Speed below which a ball is considered to be rolling [m/s].
+const ROLLING_SPEED_THRESHOLD: f64 = 0.5;
+
+/// Fraction of spin retained after impact (multiplied by COR).
+const SPIN_RETENTION_FACTOR: f64 = 0.9;
+
+/// Minimum magnitude for a valid surface normal vector.
+const MIN_NORMAL_MAGNITUDE: f64 = 1e-10;
+
 /// Parameters for a contact surface.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
@@ -38,12 +47,22 @@ impl Default for ContactParameters {
 impl ContactParameters {
     #[new]
     #[pyo3(signature = (cor=0.78, friction=0.4))]
-    fn py_new(cor: f64, friction: f64) -> Self {
-        Self {
+    fn py_new(cor: f64, friction: f64) -> pyo3::PyResult<Self> {
+        if !(0.0..=1.0).contains(&cor) {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "COR must be in [0, 1], got {cor}"
+            )));
+        }
+        if friction < 0.0 {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "Friction must be non-negative, got {friction}"
+            )));
+        }
+        Ok(Self {
             cor,
             friction,
             normal: Vector3::new(0.0, 1.0, 0.0),
-        }
+        })
     }
 }
 
@@ -82,6 +101,11 @@ impl ContactResult {
 /// * `spin_rate` - Incoming spin rate [rad/s]
 /// * `params` - Surface contact parameters
 ///
+/// # Contracts (DbC)
+/// - Precondition: `params.cor` in [0, 1]
+/// - Precondition: `params.friction` >= 0
+/// - Postcondition: `energy_lost` >= 0
+///
 /// # Returns
 /// `ContactResult` with post-impact state
 pub fn calculate_impact(
@@ -99,7 +123,7 @@ pub fn calculate_impact(
     debug_assert!(params.friction >= 0.0, "Friction must be non-negative");
 
     // Rolling threshold
-    if speed < 0.5 {
+    if speed < ROLLING_SPEED_THRESHOLD {
         return ContactResult {
             velocity: *velocity,
             spin_rate: 0.0,
@@ -110,7 +134,7 @@ pub fn calculate_impact(
 
     let normal = &params.normal;
     let normal_mag = normal.magnitude();
-    if normal_mag < 1e-10 {
+    if normal_mag < MIN_NORMAL_MAGNITUDE {
         // Degenerate normal, return unchanged
         return ContactResult {
             velocity: *velocity,
@@ -121,44 +145,22 @@ pub fn calculate_impact(
     }
 
     // Normalize the surface normal
-    let n = Vector3::new(
-        normal.x / normal_mag,
-        normal.y / normal_mag,
-        normal.z / normal_mag,
-    );
+    let n = normal.scale(1.0 / normal_mag);
 
     // Decompose velocity into normal and tangential components
-    let v_dot_n = velocity.x * n.x + velocity.y * n.y + velocity.z * n.z;
-
-    let v_normal = Vector3::new(v_dot_n * n.x, v_dot_n * n.y, v_dot_n * n.z);
-
-    let v_tangential = Vector3::new(
-        velocity.x - v_normal.x,
-        velocity.y - v_normal.y,
-        velocity.z - v_normal.z,
-    );
+    let v_dot_n = velocity.dot(&n);
+    let v_normal = n * v_dot_n;
+    let v_tangential = *velocity - v_normal;
 
     // Apply COR to normal component (reflect)
-    let v_normal_out = Vector3::new(
-        -params.cor * v_normal.x,
-        -params.cor * v_normal.y,
-        -params.cor * v_normal.z,
-    );
+    let v_normal_out = v_normal * (-params.cor);
 
     // Apply friction to tangential component
     let friction_factor = (1.0 - params.friction).max(0.0);
-    let v_tangential_out = Vector3::new(
-        friction_factor * v_tangential.x,
-        friction_factor * v_tangential.y,
-        friction_factor * v_tangential.z,
-    );
+    let v_tangential_out = v_tangential * friction_factor;
 
     // Combine
-    let v_out = Vector3::new(
-        v_normal_out.x + v_tangential_out.x,
-        v_normal_out.y + v_tangential_out.y,
-        v_normal_out.z + v_tangential_out.z,
-    );
+    let v_out = v_normal_out + v_tangential_out;
 
     // Energy calculation
     let ke_in = 0.5 * speed * speed; // Per unit mass
@@ -166,14 +168,20 @@ pub fn calculate_impact(
     let ke_out = 0.5 * speed_out * speed_out;
     let energy_lost = ke_in - ke_out;
 
+    // DbC postcondition: energy lost must be non-negative
+    debug_assert!(
+        energy_lost >= -1e-10,
+        "DbC postcondition: energy_lost must be non-negative, got {energy_lost}"
+    );
+
     // Spin modification: reduce by COR-weighted factor
-    let spin_out = spin_rate * params.cor * 0.9;
+    let spin_out = spin_rate * params.cor * SPIN_RETENTION_FACTOR;
 
     ContactResult {
         velocity: v_out,
         spin_rate: spin_out,
         energy_lost: energy_lost.max(0.0),
-        is_rolling: speed_out < 0.5,
+        is_rolling: speed_out < ROLLING_SPEED_THRESHOLD,
     }
 }
 
@@ -312,5 +320,31 @@ mod tests {
             result.velocity.x.abs() > 0.1,
             "Should deflect on angled surface"
         );
+    }
+
+    // ── DbC precondition tests (TDD) ────────────────────────────────────
+
+    /// Test 8: COR > 1 triggers debug_assert.
+    #[test]
+    #[should_panic(expected = "COR must be in [0, 1]")]
+    fn test_dbc_cor_out_of_range() {
+        let params = ContactParameters {
+            cor: 1.5,
+            friction: 0.0,
+            normal: Vector3::new(0.0, 1.0, 0.0),
+        };
+        let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
+    }
+
+    /// Test 9: Negative friction triggers debug_assert.
+    #[test]
+    #[should_panic(expected = "Friction must be non-negative")]
+    fn test_dbc_negative_friction() {
+        let params = ContactParameters {
+            cor: 0.5,
+            friction: -0.1,
+            normal: Vector3::new(0.0, 1.0, 0.0),
+        };
+        let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
     }
 }
