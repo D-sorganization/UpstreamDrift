@@ -18,6 +18,8 @@ repository = "https://github.com/D-sorganization/UpstreamDrift"
 # Local path for development; CI overrides via .cargo/config.toml
 tools-core = { path = "../Tools/rust_core/tools-core" }
 pyo3 = { version = "0.22", features = ["extension-module"] }
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 nalgebra = "0.33"

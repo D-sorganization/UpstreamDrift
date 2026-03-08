@@ -14,10 +14,13 @@ crate-type = ["cdylib", "rlib"]
 [features]
 default = []
 python = ["pyo3"]
+wasm = ["dep:wasm-bindgen", "dep:serde-wasm-bindgen"]
 
 [dependencies]
 tools-core = { workspace = true }
 pyo3 = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+serde-wasm-bindgen = { workspace = true, optional = true }
 serde = { workspace = true }
 nalgebra = { workspace = true }
 

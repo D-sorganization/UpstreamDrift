@@ -43,3 +43,31 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     Ok(())
 }
+
+// ── WASM bindings (feature-gated) ────────────────────────────────────────────
+
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::*;
+
+/// Create a default IntegratorConfig for browser-side physics (WASM).
+#[cfg(feature = "wasm")]
+#[wasm_bindgen(js_name = "createIntegratorConfig")]
+pub fn create_integrator_config(dt: f64, max_steps: u32) -> JsValue {
+    let config = rk4::IntegratorConfig {
+        dt,
+        max_steps: max_steps as usize,
+    };
+    serde_wasm_bindgen::to_value(&config).unwrap_or(JsValue::NULL)
+}
+
+/// Create default ContactParameters for browser-side physics (WASM).
+#[cfg(feature = "wasm")]
+#[wasm_bindgen(js_name = "createContactParameters")]
+pub fn create_contact_parameters(cor: f64, friction: f64) -> JsValue {
+    let params = contact::ContactParameters {
+        cor,
+        friction,
+        ..Default::default()
+    };
+    serde_wasm_bindgen::to_value(&params).unwrap_or(JsValue::NULL)
+}

@@ -373,6 +373,13 @@ jobs:
           print('All Python bindings verified!')
           "
 
+      - name: Build WASM Module (wasm-pack)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo build --target wasm32-unknown-unknown --features wasm -p upstream-physics
+          echo "WASM target build successful"
+
       - name: Rust Quality Gate Summary
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
@@ -382,3 +389,4 @@ jobs:
           echo "- ✅ cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ WASM: target compiled" >> $GITHUB_STEP_SUMMARY
