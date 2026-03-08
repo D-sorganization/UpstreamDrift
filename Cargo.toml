@@ -1,0 +1,23 @@
+# UpstreamDrift Rust Workspace
+# Phase 2: Physics kernels consuming tools-core from the Tools hub.
+# See: https://github.com/D-sorganization/UpstreamDrift/issues/1639
+
+[workspace]
+resolver = "2"
+members = ["rust_core/upstream-physics"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["D-sorganization"]
+repository = "https://github.com/D-sorganization/UpstreamDrift"
+
+[workspace.dependencies]
+# Shared kernel from Tools repository
+# Local path for development; CI overrides via .cargo/config.toml
+tools-core = { path = "../Tools/rust_core/tools-core" }
+pyo3 = { version = "0.22", features = ["extension-module"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+nalgebra = "0.33"

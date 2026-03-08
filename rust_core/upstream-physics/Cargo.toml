@@ -1,0 +1,25 @@
+[package]
+name = "upstream-physics"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Physics kernels for UpstreamDrift: RK4 solvers, contact models, swing plane fitting"
+
+[lib]
+name = "upstream_physics"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+python = ["pyo3"]
+
+[dependencies]
+tools-core = { workspace = true }
+pyo3 = { workspace = true, optional = true }
+serde = { workspace = true }
+nalgebra = { workspace = true }
+
+[dev-dependencies]
+approx = "0.5"

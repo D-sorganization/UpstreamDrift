@@ -162,3 +162,6 @@ COMPREHENSIVE_REPO_AUDIT_*.md
 Cargo.lock
 pkg/
 
+
+# Rust build artifacts
+target/
