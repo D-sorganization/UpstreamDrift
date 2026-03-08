@@ -1,9 +1,0 @@
-[
-  {
-    "path": "vendor/ud-tools",
-    "pinned_sha": "0d0c5285482714caabc276eeca6329db187435c9",
-    "upstream_sha": "0d0c5285482714caabc276eeca6329db187435c9",
-    "is_current": true,
-    "message": "\u2705  vendor/ud-tools is current (0d0c52854827)"
-  }
-]

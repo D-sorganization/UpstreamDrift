@@ -225,15 +225,27 @@ class ControlInterface:
     def set_torques(self, torques: np.ndarray | list[float]) -> None:
         """Set direct torque inputs for all joints.
 
+        Design by Contract:
+            Preconditions:
+                - len(torques) == n_joints (dimension match).
+                - torques must not contain NaN or Inf (safety-critical).
+            Postconditions:
+                - Torques are clipped to per-joint limits.
+
         Args:
             torques: Torque values for each joint (n_v,).
 
         Raises:
-            ValueError: If dimensions don't match.
+            ValueError: If dimensions don't match or values contain NaN/Inf.
         """
         torques = np.asarray(torques, dtype=np.float64)
         if len(torques) != self._n_v:
             raise ValueError(f"Expected {self._n_v} torques, got {len(torques)}")
+        if not np.all(np.isfinite(torques)):
+            raise ValueError(
+                "DbC precondition violated: torques must be finite "
+                f"(no NaN/Inf). Got: {torques}"
+            )
 
         # Clip to torque limits
         torques = self._clip_torques(torques)
@@ -242,13 +254,25 @@ class ControlInterface:
     def set_joint_torque(self, joint: int | str, torque: float) -> None:
         """Set torque for a single joint.
 
+        Design by Contract:
+            Preconditions:
+                - joint must be a valid index or name.
+                - torque must be finite (no NaN/Inf).
+            Postconditions:
+                - Torque is clipped to the joint's limit.
+
         Args:
             joint: Joint index or name.
             torque: Torque value.
 
         Raises:
-            ValueError: If joint not found.
+            ValueError: If joint not found or torque is NaN/Inf.
         """
+        if not np.isfinite(torque):
+            raise ValueError(
+                "DbC precondition violated: torque must be finite "
+                f"(no NaN/Inf). Got: {torque}"
+            )
         idx = self._resolve_joint_index(joint)
         limit = self._joint_info[idx].torque_limit
         self._state.torques[idx] = np.clip(torque, -limit, limit)
