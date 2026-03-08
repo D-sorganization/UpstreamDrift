@@ -166,7 +166,7 @@ pub fn compute_lift(
     let spin_axis = Vector3::new(spin.x * spin_inv, spin.y * spin_inv, spin.z * spin_inv);
 
     // Lift direction: spin_axis × velocity
-    let lift_dir = cross(&spin_axis, velocity);
+    let lift_dir = spin_axis.cross(velocity);
     let lift_norm = lift_dir.magnitude();
 
     if lift_norm < 1e-6 {
@@ -200,7 +200,7 @@ pub fn compute_magnus(
         return Vector3::new(0.0, 0.0, 0.0);
     }
 
-    let magnus_dir = cross(spin, velocity);
+    let magnus_dir = spin.cross(velocity);
     let magnus_norm = magnus_dir.magnitude();
 
     if magnus_norm < 1e-6 {
@@ -294,16 +294,7 @@ pub fn air_from_altitude(altitude_m: f64) -> AirProperties {
     }
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/// Cross product of two Vector3s.
-fn cross(a: &Vector3, b: &Vector3) -> Vector3 {
-    Vector3::new(
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x,
-    )
-}
+// NOTE: cross product uses Vector3::cross() from tools-core (DRY).
 
 // ── Python bindings ──────────────────────────────────────────────────────────
 
