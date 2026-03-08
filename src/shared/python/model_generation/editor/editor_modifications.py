@@ -10,8 +10,11 @@ import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
+
 from model_generation.core.contracts import precondition
 from model_generation.core.types import Joint, JointType, Link, Origin
+from scipy.spatial.transform import Rotation
 
 if TYPE_CHECKING:
     from model_generation.converters.urdf_parser import ParsedModel
@@ -126,12 +129,22 @@ class ModificationMixin:
                     child_joint.parent = parent_name
                     # Adjust origin if we have parent joint info
                     if parent_joint:
-                        # Combine transforms (simplified - just add positions)
-                        px, py, pz = parent_joint.origin.xyz
-                        cx, cy, cz = child_joint.origin.xyz
+                        # Compose SE(3) transforms properly (not just position addition)
+                        p_rot = Rotation.from_euler("xyz", parent_joint.origin.rpy)
+                        p_pos = np.array(parent_joint.origin.xyz)
+                        c_pos = np.array(child_joint.origin.xyz)
+                        c_rpy = np.array(child_joint.origin.rpy)
+
+                        # Transform child position through parent frame
+                        new_pos = p_pos + p_rot.apply(c_pos)
+
+                        # Compose rotations
+                        c_rot = Rotation.from_euler("xyz", c_rpy)
+                        new_rpy = (p_rot * c_rot).as_euler("xyz")
+
                         child_joint.origin = Origin(
-                            xyz=(px + cx, py + cy, pz + cz),
-                            rpy=child_joint.origin.rpy,
+                            xyz=tuple(new_pos.tolist()),
+                            rpy=tuple(new_rpy.tolist()),
                         )
         elif not reparent_children:
             # Delete children recursively
