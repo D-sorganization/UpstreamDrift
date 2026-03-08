@@ -1,0 +1,24 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "upstream-physics"
+version = "0.1.0"
+description = "Rust-compiled physics kernels: RK4 integrator, contact models, swing plane fitting"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "numpy>=1.24",
+]
+
+[tool.maturin]
+# Build with the 'python' feature gate to enable PyO3 bindings
+features = ["python"]
+# Module name matches the #[pymodule] name in lib.rs
+module-name = "upstream_physics"
+# Use the Cargo manifest relative to this pyproject.toml
+manifest-path = "Cargo.toml"

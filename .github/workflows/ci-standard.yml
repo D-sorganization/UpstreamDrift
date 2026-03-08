@@ -349,6 +349,30 @@ jobs:
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: cargo test --all-features
 
+      - name: Build PyO3 Wheel (Maturin)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          pip install maturin
+          cd rust_core/upstream-physics
+          maturin build --features python --release
+          echo "Wheel built successfully"
+          ls ../../target/wheels/
+
+      - name: Verify Python Bindings
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          pip install target/wheels/upstream_physics-*.whl
+          python -c "
+          import upstream_physics
+          # Verify key types are importable
+          cfg = upstream_physics.IntegratorConfig()
+          cp = upstream_physics.ContactParameters()
+          print('IntegratorConfig:', cfg)
+          print('ContactParameters:', cp)
+          print('SwingPlaneResult available:', hasattr(upstream_physics, 'SwingPlaneResult'))
+          print('All Python bindings verified!')
+          "
+
       - name: Rust Quality Gate Summary
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
@@ -356,3 +380,5 @@ jobs:
           echo "- ✅ rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ clippy: no warnings" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
