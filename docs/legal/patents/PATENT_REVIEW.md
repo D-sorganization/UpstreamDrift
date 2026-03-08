@@ -1,6 +1,6 @@
 # Patent & Legal Risk Assessment
 
-**Last Updated:** 2026-03-05
+**Last Updated:** 2026-03-08
 **Status:** ACTIVE
 **Reviewer:** Jules (Patent Reviewer Agent)
 
@@ -13,6 +13,8 @@
 | **Kinematic Sequence**   | **TPI (Titleist)**, **K-Motion**, **Zepp**, **Blast Motion**<br>Methods for analyzing proximal-to-distal sequencing        | `KinematicSequenceAnalyzer` (alias `SegmentTimingAnalyzer`) in `src/shared/python/biomechanics/kinematic_sequence.py`.<br>`efficiency_score` logic in `src/shared/python/analysis/pca_analysis.py` (explicitly scores based on order).          | **HIGH (Active)**       | **Partial Remediation:** Class renamed to `SegmentTimingAnalyzer`, but backward compatibility alias exists. **CRITICAL:** `pca_analysis.py` still contains infringing `efficiency_score` logic enforcing TPI order, which also risks Zepp/Blast patents. **Legal Review Required.** | [`ISSUE_001`](../../assessments/issues/ISSUE_001_KINEMATIC_SEQUENCE.md), [`ISSUE_PHYSICS_PATENT_RISK`](../../assessments/completist/issues/ISSUE_PHYSICS_PATENT_RISK.md) |
 | **Kinematic Sequence Efficiency** | **Zepp Labs**, **Blast Motion**<br>Methods for scoring sequence timing efficiency | `efficiency_score` logic in `src/shared/python/analysis/pca_analysis.py` (`matches / len(expected_order)`). | **HIGH (Active)** | **CRITICAL:** Metric overlaps directly with sequence adherence patents. **Legal Review Required.** Redesign metric to avoid sequence-matching formula. | [`ISSUE_PCA_PATENT_RISK`](../../assessments/issues/ISSUE_PCA_PATENT_RISK.md) |
 | **Motion Scoring (DTW)** | **Zepp**, **Blast Motion**, **K-Motion**<br>Scoring athletic motion via time-warped comparison | `compute_dtw_distance` in `src/shared/python/validation_pkg/comparative_analysis.py`.<br>Calculates distance metric for swing comparison which is the core of Zepp's patent claims.                                                             | **HIGH (Active)**       | Replace DTW scoring with discrete keyframe correlation or strictly spatial comparison (Hausdorff distance). The formula change is partial mitigation but DTW usage remains risk. | [`ISSUE_002`](../../assessments/issues/ISSUE_002_DTW_SCORING.md) |
+| **Radar Tracking**       | **TrackMan**<br>Radar ball tracking methods                                                    | N/A (No implementation of radar signal processing. We use simulation only)                                                                                                                                                                      | **HIGH (Active)**       | Legal review needed to ensure simulation methods do not infringe on underlying method claims of radar-based measurements.                                                  | [`ISSUE_TRACKMAN_RADAR_PATENT_RISK`](../../assessments/issues/ISSUE_TRACKMAN_RADAR_PATENT_RISK.md) |
+| **Photometric Measure**  | **Foresight**<br>Photometric measurement methods                                               | N/A (No implementation of camera-based ball tracking logic. We use simulation only)                                                                                                                                                             | **HIGH (Active)**       | Legal review needed to ensure simulation methods do not infringe on underlying method claims of photometric-based measurements.                                            | [`ISSUE_FORESIGHT_CAMERA_PATENT_RISK`](../../assessments/issues/ISSUE_FORESIGHT_CAMERA_PATENT_RISK.md) |
 | **Swing DNA**            | **Mizuno** (Trademark/Method)<br>Club fitting based on specific metric vector                  | `SwingProfileMetrics` in `src/shared/python/analysis/reporting.py`. Visualization as Radar Chart in `src/shared/python/dashboard/window.py`.                                                                                                    | **VERIFIED REMEDIATED** | Renamed to "Swing Profile". Metrics changed to: Speed, Sequence, Stability, Efficiency, Power (distinct from Mizuno's). Audit confirmed no "Swing DNA" strings in UI code. | N/A           |
 
 ### Medium Risk Areas
@@ -34,8 +36,6 @@
 | **Physics Engine**      | Public Domain                                        | Standard rigid body dynamics (Newtonian/Lagrangian).                                                  | **LOW**    | Standard physics.                                                                                                        |
 | **Ball Flight ODE**     | Public Domain                                        | Implementation of standard aerodynamic equations (drag, lift, Magnus).                                | **LOW**    | Equations are standard; coefficients are the only risk (see Medium).                                                     |
 | **Statistical Metrics** | Public Domain                                        | Standard deviations, correlations, PCA.                                                               | **LOW**    | Generic math.                                                                                                            |
-| **Photometric Measure** | **Foresight**                                        | N/A                                                                                                   | **N/A**    | No implementation of camera-based ball tracking logic. We use simulation only.                                           |
-| **Radar Tracking**      | **TrackMan**                                         | N/A                                                                                                   | **N/A**    | No implementation of radar signal processing. We use simulation only.                                                    |
 | **Ground Reaction**     | Public Domain                                        | `src/shared/python/physics/ground_reaction_forces.py` implements standard Newtonian mechanics.        | **LOW**    | Standard physics guideline E5 implementation.                                                                            |
 
 ## 2. Code-Specific Analysis
@@ -99,9 +99,9 @@
 
 | Term                   | Owner             | Status                  | Alternative      | Notes                                                                                   |
 | ---------------------- | ----------------- | ----------------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| **Swing DNA**          | Mizuno            | **Verified Remediated** | "Swing Profile"  | Code audit 2026-02-19 confirmed removal from UI and code logic.                         |
-| **Kinematic Sequence** | TPI (Common Law?) | **Active**              | "Movement Sequence" | Term appears in `window.py` (UI strings) and `advanced_gui_methods.py`. Refactor to "Segment Timing" or "Movement Sequence". |
-| **Smash Factor**       | TrackMan (Orig.)  | **Generic**             | Keep             | Widely accepted as generic golf term now.                                               |
+| **Swing DNA**          | Zepp              | **Verified Remediated** | "Swing Profile"  | Code audit 2026-02-19 confirmed removal from UI and code logic.                         |
+| **Kinematic Sequence** | TPI               | **Avoid**               | "Movement Sequence" | Term appears in `window.py` (UI strings) and `advanced_gui_methods.py`. Refactor to "Segment Timing" or "Movement Sequence". |
+| **Smash Factor**       | TrackMan          | **Generic now**         | OK to use        | Widely accepted as generic golf term now.                                               |
 | **TrackMan**           | TrackMan A/S      | **Ref Only**            | N/A              | Used only for data validation references. Acceptable nominative use.                    |
 | **X-Factor**           | TPI / Various     | **Medium Risk**         | "Torso-Pelvis Separation" | Used in `injury_risk.py` with specific thresholds. Consider renaming. |
 
@@ -132,6 +132,7 @@
 
 ## 6. Change Log
 
+- **2026-03-08**: Updated review. Moved TrackMan and Foresight tracking methods to High Risk Areas as per revised risk assessment framework. Updated Trademark Concerns table owner for "Swing DNA" to Zepp and "Smash Factor" to TrackMan.
 - **2026-03-01**: Updated review. Added Haptic Feedback to Medium Risk due to ISSUE_HAPTICS_PATENT_RISK.md. Added Zepp/Blast patent risk to Kinematic Sequence for pca_analysis.py. Added issue tracker link to Data Copyright risk.
 - **2026-02-26**: Updated review (New Findings).
     - Added **Future Risks / Watchlist** section.
