@@ -14,7 +14,7 @@
 //! - Jorgensen, T. (1999). The Physics of Golf. Springer.
 
 use serde::{Deserialize, Serialize};
-use tools_core::{Vector3, R_GAS};
+use tools_core::Vector3;
 
 /// Air properties at given atmospheric conditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -269,28 +269,20 @@ pub fn compute_spin_decay(spin: &Vector3, dt: f64, spin_decay_rate: f64) -> Vect
 
 /// Create air properties for a given altitude using ISA model.
 ///
+/// # DRY
+/// Delegates to `tools_core::atmosphere::atmosphere_at_altitude` —
+/// the canonical ISA implementation.
+///
 /// # Preconditions
 /// - `altitude_m` should be in [0, 11000] for accuracy (troposphere)
 #[must_use]
 pub fn air_from_altitude(altitude_m: f64) -> AirProperties {
-    debug_assert!(altitude_m.is_finite(), "DbC: altitude must be finite");
-
-    let t0: f64 = 288.15;
-    let p0: f64 = 101_325.0;
-    let lapse: f64 = 0.0065;
-    let g: f64 = 9.80665;
-    let m_air: f64 = 0.0289644;
-    let r = R_GAS;
-
-    let t = t0 - lapse * altitude_m;
-    let p = p0 * (t / t0).powf(g * m_air / (r * lapse));
-    let rho = p * m_air / (r * t);
-
+    let atm = tools_core::atmosphere::atmosphere_at_altitude(altitude_m);
     AirProperties {
-        density: rho,
-        viscosity: 1.81e-5 * (t / 288.15_f64).powf(0.76),
-        temperature: t,
-        pressure: p,
+        density: atm.density,
+        viscosity: atm.viscosity,
+        temperature: atm.temperature,
+        pressure: atm.pressure,
     }
 }
 
