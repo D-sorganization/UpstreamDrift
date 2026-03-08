@@ -3,6 +3,12 @@
 This module provides standardized physics calculations shared across all
 physics engine implementations, eliminating code duplication.
 
+.. deprecated::
+    Vector math (magnitude, dot, cross, normalize) and ball flight types
+    have Rust kernel equivalents in ``tools_core`` (Vector3, BallProperties,
+    LaunchConditions). New code should use the Rust-backed types via
+    ``rust_kernel`` adapter for WASM parity.
+
 Design by Contract:
     - All functions validate input arrays have correct shapes
     - All outputs are guaranteed finite (no NaN/Inf)

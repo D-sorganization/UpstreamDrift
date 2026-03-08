@@ -9,6 +9,11 @@ Provides standalone impact solver for ball-clubface collision including:
 - Spin generation models (gear effect, offset impact)
 
 The module is engine-agnostic with Python API for external solvers.
+
+.. note::
+    Contact parameters (COR, friction) have Rust kernel equivalents in
+    ``src.shared.python.physics.rust_kernel``. New code should use
+    ``create_contact_parameters()`` from the adapter instead of hardcoded values.
 """
 
 from __future__ import annotations

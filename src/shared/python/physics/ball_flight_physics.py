@@ -9,6 +9,12 @@ This module implements research-grade ball flight physics including:
 
 Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
 
+.. deprecated::
+    The RK4 integration loop in this module has a Rust kernel equivalent
+    in ``upstream_physics`` (via ``rust_kernel.create_integrator_config``).
+    New simulation code should use the Rust-backed integrator for native
+    performance and WASM parity with the React frontend.
+
 Planned enhancement: implement Environmental Gradient Modeling (wind shear, temperature gradients).
 Planned enhancement: implement Hydrodynamic Lubrication (wet ball physics).
 Planned enhancement: implement Dimple Geometry Optimization.

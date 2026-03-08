@@ -80,6 +80,51 @@ def create_contact_parameters(cor: float = 0.82, friction: float = 0.4) -> Any:
     return {"cor": cor, "friction": friction}
 
 
+# ── Vector Math (delegates to Rust Vector3 when available) ────────────────────
+
+
+def clamp(value: float, min_val: float, max_val: float) -> float:
+    """Clamp a value between min and max.
+
+    Uses Rust tools_core::clamp when available, pure Python otherwise.
+    """
+    if _RUST_AVAILABLE and hasattr(_rust, "clamp"):
+        return float(_rust.clamp(value, min_val, max_val))
+    return max(min_val, min(max_val, value))
+
+
+def lerp(a: float, b: float, t: float) -> float:
+    """Linear interpolation between a and b.
+
+    Uses Rust tools_core::lerp when available, pure Python otherwise.
+    """
+    if _RUST_AVAILABLE and hasattr(_rust, "lerp"):
+        return float(_rust.lerp(a, b, t))
+    return a + t * (b - a)
+
+
+# ── Deprecation Helpers ───────────────────────────────────────────────────────
+
+_DEPRECATION_EMITTED: set[str] = set()
+
+
+def mark_legacy(func_name: str, module: str) -> None:
+    """Emit a one-time deprecation warning for legacy physics functions.
+
+    Call this at the top of legacy functions that have Rust replacements.
+    """
+    key = f"{module}.{func_name}"
+    if key not in _DEPRECATION_EMITTED:
+        _DEPRECATION_EMITTED.add(key)
+        logger.info(
+            "DEPRECATION: %s has a Rust kernel replacement. "
+            "Migrate to src.shared.python.physics.rust_kernel. "
+            "Rust available: %s",
+            key,
+            _RUST_AVAILABLE,
+        )
+
+
 # ── Module Diagnostics ────────────────────────────────────────────────────────
 
 

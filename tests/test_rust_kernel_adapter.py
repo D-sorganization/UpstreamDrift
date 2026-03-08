@@ -89,5 +89,58 @@ class TestKernelDiagnostics:
             assert info["types"]["ContactParameters"] is True
 
 
+class TestMathUtilities:
+    """Test clamp and lerp delegation."""
+
+    def test_clamp_in_range(self) -> None:
+        """Value in range is returned unchanged."""
+        from src.shared.python.physics.rust_kernel import clamp
+
+        assert clamp(5.0, 0.0, 10.0) == 5.0
+
+    def test_clamp_below_min(self) -> None:
+        """Value below min is clamped to min."""
+        from src.shared.python.physics.rust_kernel import clamp
+
+        assert clamp(-3.0, 0.0, 10.0) == 0.0
+
+    def test_clamp_above_max(self) -> None:
+        """Value above max is clamped to max."""
+        from src.shared.python.physics.rust_kernel import clamp
+
+        assert clamp(15.0, 0.0, 10.0) == 10.0
+
+    def test_lerp_endpoints(self) -> None:
+        """lerp at t=0 and t=1."""
+        from src.shared.python.physics.rust_kernel import lerp
+
+        assert abs(lerp(10.0, 20.0, 0.0) - 10.0) < 1e-10
+        assert abs(lerp(10.0, 20.0, 1.0) - 20.0) < 1e-10
+
+    def test_lerp_midpoint(self) -> None:
+        """lerp at t=0.5."""
+        from src.shared.python.physics.rust_kernel import lerp
+
+        assert abs(lerp(0.0, 100.0, 0.5) - 50.0) < 1e-10
+
+
+class TestDeprecationHelpers:
+    """Test mark_legacy deprecation helper."""
+
+    def test_mark_legacy_no_crash(self) -> None:
+        """mark_legacy should not crash."""
+        from src.shared.python.physics.rust_kernel import mark_legacy
+
+        mark_legacy("test_func", "test_module")
+
+    def test_mark_legacy_deduplication(self) -> None:
+        """mark_legacy should only emit once per key."""
+        from src.shared.python.physics.rust_kernel import mark_legacy
+
+        # Should not raise even if called multiple times
+        mark_legacy("test_dedup", "test_module")
+        mark_legacy("test_dedup", "test_module")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
