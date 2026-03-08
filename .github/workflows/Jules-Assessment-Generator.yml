@@ -87,7 +87,7 @@ jobs:
           echo "Found source: $SOURCE_ID"
 
           # Create assessment session
-          PROMPT=$(cat << 'PROMPT_EOF'
+          PROMPT=$(cat << PROMPT_EOF
           You are the ASSESSMENT GENERATOR agent.
 
           ## Mission

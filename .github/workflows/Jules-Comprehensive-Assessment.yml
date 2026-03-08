@@ -142,7 +142,7 @@ jobs:
           fi
 
           # Construct Prompt
-          PROMPT=$(cat << 'PROMPT_EOF'
+          PROMPT=$(cat << PROMPT_EOF
           You are the COMPREHENSIVE ASSESSMENT AGENT.
 
           ## Mission

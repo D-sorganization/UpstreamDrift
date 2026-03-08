@@ -82,7 +82,7 @@ jobs:
           echo "Found source: $SOURCE_ID"
 
           # Create session prompt
-          PROMPT=$(cat << 'PROMPT_EOF'
+          PROMPT=$(cat << PROMPT_EOF
           '
           You are the SENTINEL security agent.
 
