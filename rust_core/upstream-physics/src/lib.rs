@@ -15,6 +15,7 @@
 //! - **DbC**: Precondition validation via `debug_assert!`
 //! - **DRY**: Consumes `tools-core` for math primitives
 
+pub mod aerodynamics;
 pub mod contact;
 pub mod rk4;
 pub mod swing_plane;
@@ -40,6 +41,11 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Swing plane
     m.add_class::<swing_plane::SwingPlaneResult>()?;
+
+    // Aerodynamics
+    m.add_class::<aerodynamics::AirProperties>()?;
+    m.add_class::<aerodynamics::BallProperties>()?;
+    m.add_class::<aerodynamics::AeroForces>()?;
 
     Ok(())
 }
@@ -70,4 +76,27 @@ pub fn create_contact_parameters(cor: f64, friction: f64) -> JsValue {
         ..Default::default()
     };
     serde_wasm_bindgen::to_value(&params).unwrap_or(JsValue::NULL)
+}
+
+/// Compute aerodynamic forces for browser-side physics (WASM).
+#[cfg(feature = "wasm")]
+#[wasm_bindgen(js_name = "computeAeroForces")]
+pub fn wasm_compute_aero_forces(
+    vx: f64,
+    vy: f64,
+    vz: f64,
+    sx: f64,
+    sy: f64,
+    sz: f64,
+    air_density: f64,
+) -> JsValue {
+    let velocity = Vector3::new(vx, vy, vz);
+    let spin = Vector3::new(sx, sy, sz);
+    let ball = aerodynamics::BallProperties::default();
+    let air = aerodynamics::AirProperties {
+        density: air_density,
+        ..Default::default()
+    };
+    let forces = aerodynamics::compute_aero_forces(&velocity, &spin, &ball, &air);
+    serde_wasm_bindgen::to_value(&forces).unwrap_or(JsValue::NULL)
 }

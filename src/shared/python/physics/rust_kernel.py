@@ -103,6 +103,87 @@ def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
+# ── Aerodynamics ──────────────────────────────────────────────────────────────
+
+
+def create_air_properties(
+    density: float = 1.225,
+    viscosity: float = 1.81e-5,
+    temperature: float = 288.15,
+    pressure: float = 101325.0,
+) -> Any:
+    """Create air properties for aerodynamics calculations.
+
+    Design by Contract:
+        Preconditions:
+            - density must be positive
+            - viscosity must be positive
+            - temperature must be positive (Kelvin)
+
+    Args:
+        density: Air density [kg/m³].
+        viscosity: Dynamic viscosity [Pa·s].
+        temperature: Temperature [K].
+        pressure: Atmospheric pressure [Pa].
+
+    Returns:
+        AirProperties (Rust) or dict fallback.
+    """
+    if _RUST_AVAILABLE:
+        return _rust.AirProperties(
+            density=density,
+            viscosity=viscosity,
+            temperature=temperature,
+            pressure=pressure,
+        )
+    return {
+        "density": density,
+        "viscosity": viscosity,
+        "temperature": temperature,
+        "pressure": pressure,
+    }
+
+
+def create_ball_properties(
+    mass: float = 0.04593,
+    radius: float = 0.02135,
+    drag_coefficient: float = 0.25,
+    spin_decay_rate: float = 0.1,
+) -> Any:
+    """Create golf ball properties for aerodynamics calculations.
+
+    Design by Contract:
+        Preconditions:
+            - mass must be positive
+            - radius must be positive
+
+    Args:
+        mass: Ball mass [kg].
+        radius: Ball radius [m].
+        drag_coefficient: Baseline drag coefficient.
+        spin_decay_rate: Spin decay time constant [1/s].
+
+    Returns:
+        BallProperties (Rust) or dict fallback.
+    """
+    import math
+
+    if _RUST_AVAILABLE:
+        return _rust.BallProperties(
+            mass=mass,
+            radius=radius,
+            drag_coefficient=drag_coefficient,
+            spin_decay_rate=spin_decay_rate,
+        )
+    return {
+        "mass": mass,
+        "radius": radius,
+        "area": math.pi * radius**2,
+        "drag_coefficient": drag_coefficient,
+        "spin_decay_rate": spin_decay_rate,
+    }
+
+
 # ── Deprecation Helpers ───────────────────────────────────────────────────────
 
 _DEPRECATION_EMITTED: set[str] = set()
@@ -143,5 +224,8 @@ def get_kernel_info() -> dict[str, Any]:
             "ContactParameters": hasattr(_rust, "ContactParameters"),
             "ContactResult": hasattr(_rust, "ContactResult"),
             "SwingPlaneResult": hasattr(_rust, "SwingPlaneResult"),
+            "AirProperties": hasattr(_rust, "AirProperties"),
+            "BallProperties": hasattr(_rust, "BallProperties"),
+            "AeroForces": hasattr(_rust, "AeroForces"),
         }
     return info
