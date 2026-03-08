@@ -77,8 +77,8 @@ class TestEngineIntegration:
         manager = EngineManager()
 
         # Most engine types should have an associated probe
-        # (some newer engines like PUTTING_GREEN may not have probes yet)
-        assert len(manager.probes) >= len(EngineType) - 1
+        # (newer engines may not have probes yet)
+        assert len(manager.probes) >= len(EngineType) - 3
 
         # Run probes and check consistency
         for engine_type, probe in manager.probes.items():

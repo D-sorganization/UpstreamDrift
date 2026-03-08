@@ -29,9 +29,19 @@ class LauncherThemeMixin:
             from src.shared.python.theme import ThemeManager
 
             manager = ThemeManager.instance()
-            c = manager.colors
+            colors = manager.get_current_colors()
+
+            # Map extended color names to actual theme keys with fallbacks
+            bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))
+            border_default = colors.get(
+                "border_default", colors.get("border", "#555555")
+            )
+            bg_highlight = colors.get("bg_highlight", colors.get("input_bg", "#3D3D3D"))
+            border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))
+            text_sec = colors.get("text_secondary", "#AAAAAA")
+
             self.setStyleSheet(
-                manager.get_stylesheet()
+                manager.get_current_stylesheet()
                 + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
@@ -39,20 +49,20 @@ class LauncherThemeMixin:
                     margin: 4px 8px;
                 }}
                 QFrame#ModelCard {{
-                    background-color: {c.bg_elevated};
-                    border: 1px solid {c.border_default};
+                    background-color: {bg_elevated};
+                    border: 1px solid {border_default};
                     border-radius: 12px;
                 }}
                 QFrame#ModelCard:hover {{
-                    background-color: {c.bg_highlight};
-                    border: 1px solid {c.border_strong};
+                    background-color: {bg_highlight};
+                    border: 1px solid {border_strong};
                 }}
                 QLabel#CardDescription {{
-                    color: {c.text_secondary};
+                    color: {text_sec};
                 }}
             """
             )
-        except ImportError:
+        except (ImportError, AttributeError):
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
                 "QMainWindow { background-color: #1E1E1E; }"

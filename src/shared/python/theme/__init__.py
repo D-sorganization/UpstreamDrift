@@ -67,11 +67,16 @@ except Exception:
         border_default=_dark.get("border", "#3a3d45"),
         border_strong=_dark.get("border", "#4a4d55"),
         primary=_dark.get("accent", "#0A84FF"),
+        accent=_dark.get("accent", "#0A84FF"),
         success=_dark.get("success", "#30D158"),
         success_hover="#38e066",
         error=_dark.get("error", "#FF375F"),
         text_primary=_dark.get("text", "#FFFFFF"),
+        text_secondary="#AAAAAA",
+        text_tertiary="#888888",
         text_quaternary="#666666",
+        chart_cyan="#00BCD4",
+        chart_purple="#9C27B0",
     )
 
 # PyQt6-dependent imports - only available when PyQt6 is installed

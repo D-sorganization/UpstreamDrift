@@ -124,7 +124,10 @@ class TestCSVExportValidation:
 
         # Verify file content (basic check)
         content = filepath.read_text()
-        assert "time,torque_0,torque_1" in content
+        # Header includes all decomposition columns (torque, inertial, coriolis, gravity, residual)
+        assert "time" in content
+        assert "torque_0" in content
+        assert "torque_1" in content
         assert "0.0,1.0" in content
         assert "1.0,3.0" in content
         assert "2.0,5.0" in content

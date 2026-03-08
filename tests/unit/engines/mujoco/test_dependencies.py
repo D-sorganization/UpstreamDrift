@@ -66,9 +66,12 @@ def test_optional_dependencies() -> None:
     missing = []
 
     for pkg in optionals:
-        if importlib.util.find_spec(pkg):
-            found.append(pkg)
-        else:
+        try:
+            if importlib.util.find_spec(pkg):
+                found.append(pkg)
+            else:
+                missing.append(pkg)
+        except (ValueError, ModuleNotFoundError):
             missing.append(pkg)
 
     logger.info(f"Optional dependencies found: {found}")

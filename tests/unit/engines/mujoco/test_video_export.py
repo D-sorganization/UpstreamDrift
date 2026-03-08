@@ -75,6 +75,9 @@ def mock_cv2() -> Any:
     mock.COLOR_RGB2BGR = 1  # type: ignore[attr-defined]
     mock.FONT_HERSHEY_SIMPLEX = 1  # type: ignore[attr-defined]
 
+    # Mock VideoWriter_fourcc to return an int (like real cv2)
+    mock.VideoWriter_fourcc.return_value = 0x7634706D  # mp4v
+
     return mock
 
 
