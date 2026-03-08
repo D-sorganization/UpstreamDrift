@@ -61,7 +61,15 @@ impl SwingPlaneResult {
 pub fn fit_plane(points: &[Vector3]) -> Result<SwingPlaneResult, &'static str> {
     let n = points.len();
 
-    // DbC: Need at least 3 points
+    // DbC: All coordinates must be finite (finiteness is an invariant)
+    debug_assert!(
+        points
+            .iter()
+            .all(|p| p.x.is_finite() && p.y.is_finite() && p.z.is_finite()),
+        "All input coordinates must be finite"
+    );
+
+    // Graceful error when too few points (not a panic — callers may pass validated input)
     if n < 3 {
         return Err("Need at least 3 points for plane fit");
     }

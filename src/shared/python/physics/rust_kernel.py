@@ -113,15 +113,17 @@ def mark_legacy(func_name: str, module: str) -> None:
 
     Call this at the top of legacy functions that have Rust replacements.
     """
+    import warnings
+
     key = f"{module}.{func_name}"
     if key not in _DEPRECATION_EMITTED:
         _DEPRECATION_EMITTED.add(key)
-        logger.info(
-            "DEPRECATION: %s has a Rust kernel replacement. "
-            "Migrate to src.shared.python.physics.rust_kernel. "
-            "Rust available: %s",
-            key,
-            _RUST_AVAILABLE,
+        warnings.warn(
+            f"{key} has a Rust kernel replacement. "
+            f"Migrate to src.shared.python.physics.rust_kernel. "
+            f"Rust available: {_RUST_AVAILABLE}",
+            DeprecationWarning,
+            stacklevel=2,
         )
 
 
