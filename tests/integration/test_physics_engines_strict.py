@@ -167,9 +167,10 @@ class TestMuJoCoStrict:
         engine = self.MuJoCoPhysicsEngine()
         assert hasattr(engine, "get_sensors"), "MuJoCo must implement get_sensors"
 
-        engine.model = MagicMock(spec=["nv", "nu", "nsensor"])
+        engine.model = MagicMock(spec=["nv", "nu", "nsensor", "sensor_adr"])
         engine.data = MagicMock(spec=["sensordata"])
         engine.model.nsensor = 1
+        engine.model.sensor_adr = [0]
         mock_mujoco.mj_id2name.return_value = "sensor_0"
         engine.data.sensordata = [0.123]
 
@@ -229,7 +230,7 @@ class TestMyoSuiteStrict:
     def test_step_uses_sim_if_available(self):
         """MyoSuite should prefer underlying sim.step() if accessible."""
         engine = MyoSuitePhysicsEngine()
-        mock_env = MagicMock(spec=["sim", "reset", "step", "close"])
+        mock_env = MagicMock(spec=["sim", "reset", "step", "close", "action_space"])
         mock_sim = MagicMock(spec=["model", "data", "step"])
         mock_sim.model.opt.timestep = 0.01
 
