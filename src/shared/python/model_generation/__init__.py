@@ -169,6 +169,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "cylinder_inertia": ("model_generation.inertia.primitives", "cylinder_inertia"),
     "sphere_inertia": ("model_generation.inertia.primitives", "sphere_inertia"),
     "capsule_inertia": ("model_generation.inertia.primitives", "capsule_inertia"),
+    # TODO(DRY): humanoid_character_builder.mesh.primitive_inertia.PrimitiveInertiaCalculator
+    # duplicates the analytical formulas above (box, cylinder, sphere, capsule, ellipsoid).
+    # Both modules implement the same physics independently. A larger refactor should
+    # consolidate them so humanoid_character_builder delegates to
+    # model_generation.inertia.primitives (or a shared tools-core module).
+    # Tracked in: see DRY issues log.
     # Builders
     "BaseURDFBuilder": ("model_generation.builders.base_builder", "BaseURDFBuilder"),
     "BuildResult": ("model_generation.builders.base_builder", "BuildResult"),
@@ -247,7 +253,8 @@ def __getattr__(name: str) -> Any:
 
 
 # ---------------------------------------------------------------------------
-# Shared constants for convenience functions
+# Shared preset configuration (DRY: single source of truth used by both
+# quick_urdf() and quick_build() -- eliminates the duplicated local dict).
 # ---------------------------------------------------------------------------
 
 _HUMANOID_PRESETS: dict[str, dict[str, float]] = {
