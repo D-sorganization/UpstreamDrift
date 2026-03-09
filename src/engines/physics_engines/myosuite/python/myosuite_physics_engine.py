@@ -264,7 +264,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control (ctrl)."""
-        self._last_action = np.array(u).copy()
+        self._last_action = np.array(u, copy=True)
 
         if not self.sim:
             return
