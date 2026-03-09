@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import os
 import tempfile
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -136,6 +138,27 @@ class ModelGenerationAPI:
         """
         self.prefix = prefix
         self._routes: list[Route] = []
+
+        # Security configuration from environment
+        self._api_key: str | None = os.environ.get("MODEL_GEN_API_KEY")
+        self._cors_origins: str = os.environ.get(
+            "MODEL_GEN_CORS_ORIGINS", ""
+        )
+        self._rate_limit: int | None = None
+        rate_limit_str = os.environ.get("MODEL_GEN_RATE_LIMIT")
+        if rate_limit_str:
+            try:
+                self._rate_limit = int(rate_limit_str)
+            except ValueError:
+                logger.warning("Invalid MODEL_GEN_RATE_LIMIT value: %s", rate_limit_str)
+
+        self._is_production: bool = (
+            os.environ.get("MODEL_GEN_ENV", "").lower() == "production"
+        )
+
+        # In-memory sliding window rate limiter: client_ip -> list[timestamp]
+        self._rate_limit_windows: dict[str, list[float]] = {}
+
         self._register_routes()
 
     def _register_routes(self) -> None:
@@ -299,9 +322,90 @@ class ModelGenerationAPI:
         """Get all registered routes."""
         return self._routes
 
+    def _check_api_key(self, request: APIRequest) -> APIResponse | None:
+        """Check API key authentication if MODEL_GEN_API_KEY is set.
+
+        Returns None if auth passes, or a 401 APIResponse if auth fails.
+        """
+        if not self._api_key:
+            return None  # No API key configured, skip auth
+        provided_key = request.headers.get("X-API-Key")
+        if not provided_key or provided_key != self._api_key:
+            return APIResponse.error("Unauthorized: invalid or missing API key", 401)
+        return None
+
+    def _check_rate_limit(self, request: APIRequest) -> APIResponse | None:
+        """Sliding window rate limiter.  Returns 429 if limit exceeded.
+
+        Uses MODEL_GEN_RATE_LIMIT (requests per minute).  The client IP
+        is extracted from the X-Forwarded-For header or defaults to
+        "unknown".
+        """
+        if self._rate_limit is None:
+            return None
+
+        client_ip = request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
+        now = time.time()
+        window_start = now - 60.0  # 1-minute sliding window
+
+        # Prune old entries
+        timestamps = self._rate_limit_windows.setdefault(client_ip, [])
+        self._rate_limit_windows[client_ip] = [
+            ts for ts in timestamps if ts > window_start
+        ]
+
+        if len(self._rate_limit_windows[client_ip]) >= self._rate_limit:
+            return APIResponse.error("Rate limit exceeded. Try again later.", 429)
+
+        self._rate_limit_windows[client_ip].append(now)
+        return None
+
+    def _add_cors_headers(self, response: APIResponse) -> None:
+        """Add CORS headers to response.
+
+        The allowed origin is configured via the MODEL_GEN_CORS_ORIGINS
+        environment variable (comma-separated list).  If not set, defaults
+        to an empty string (no cross-origin access).
+        """
+        origin = self._cors_origins.split(",")[0].strip() if self._cors_origins else ""
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key"
+
+    def _add_security_headers(self, response: APIResponse) -> None:
+        """Add security headers to response."""
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+
     def handle_request(self, request: APIRequest) -> APIResponse:
-        """Handle an API request."""
-        # Find matching route
+        """Handle an API request.
+
+        Applies security middleware in order:
+        1. API key authentication (if MODEL_GEN_API_KEY is set)
+        2. Rate limiting (if MODEL_GEN_RATE_LIMIT is set)
+        3. Route matching and handler dispatch
+        4. Error sanitization (production mode hides stack traces)
+        5. CORS and security headers on every response
+        """
+        # --- Authentication ---
+        auth_error = self._check_api_key(request)
+        if auth_error is not None:
+            self._add_security_headers(auth_error)
+            self._add_cors_headers(auth_error)
+            return auth_error
+
+        # --- Rate limiting ---
+        rate_error = self._check_rate_limit(request)
+        if rate_error is not None:
+            self._add_security_headers(rate_error)
+            self._add_cors_headers(rate_error)
+            return rate_error
+
+        # --- Route matching ---
         for route in self._routes:
             if route.method != request.method:
                 continue
@@ -327,14 +431,27 @@ class ModelGenerationAPI:
                 # Add path params to query params
                 request.query_params.update(params)
                 try:
-                    return route.handler(request)
+                    response = route.handler(request)
+                    self._add_security_headers(response)
+                    self._add_cors_headers(response)
+                    return response
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.exception("Error handling request")
-                    return APIResponse.error(str(e), 500)
+                    if self._is_production:
+                        error_msg = "Internal server error"
+                    else:
+                        error_msg = str(e)
+                    response = APIResponse.error(error_msg, 500)
+                    self._add_security_headers(response)
+                    self._add_cors_headers(response)
+                    return response
 
-        return APIResponse.not_found(
+        response = APIResponse.not_found(
             f"No route for {request.method.value} {request.path}"
         )
+        self._add_security_headers(response)
+        self._add_cors_headers(response)
+        return response
 
     # ============================================================
     # Health/Info Handlers
