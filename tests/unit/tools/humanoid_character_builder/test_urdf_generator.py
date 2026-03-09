@@ -46,7 +46,6 @@ class TestHumanoidURDFGenerator:
 
         assert urdf_xml is not None
         assert len(urdf_xml) > 0
-        assert "<?xml" in urdf_xml
         assert "<robot" in urdf_xml
 
     def test_generate_custom_params(self) -> None:

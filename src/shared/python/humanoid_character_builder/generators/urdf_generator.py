@@ -13,7 +13,6 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
-from xml.dom import minidom
 
 from humanoid_character_builder.contracts import postcondition, precondition
 from humanoid_character_builder.core.anthropometry import (
@@ -597,12 +596,8 @@ class HumanoidURDFGenerator:
 
         # Format XML
         if self.config.pretty_print:
-            xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(
-                indent=self.config.indent
-            )
-            # Remove extra blank lines
-            lines = [line for line in xml_str.split("\n") if line.strip()]
-            return "\n".join(lines)
+            ET.indent(root, space=self.config.indent)
+            return ET.tostring(root, encoding="unicode")
         return ET.tostring(root, encoding="unicode")
 
     def _add_link_element(self, root: ET.Element, link: GeneratedLink) -> None:
