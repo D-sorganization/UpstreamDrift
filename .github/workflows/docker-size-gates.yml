@@ -2,9 +2,7 @@ name: Docker Size and Health Check
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   docker-smoke-and-size:
@@ -24,9 +22,8 @@ jobs:
           target: runtime
           load: true # Load image into local docker engine
           tags: upstream-drift:runtime
-          # Temporarily disable gha cache to bypass corrupted blob cache issue
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Verify Image Size Budget
         run: |
@@ -36,13 +33,13 @@ jobs:
 
           # Get size in bytes
           IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:runtime --format='{{.Size}}')
-          
+
           # Convert to MB
           IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
-          
+
           echo "Image size: ${IMAGE_SIZE_MB} MB"
           echo "Budget: ${MAX_SIZE_MB} MB"
-          
+
           if [ "$IMAGE_SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
             echo "::error::Image size (${IMAGE_SIZE_MB} MB) exceeds budget (${MAX_SIZE_MB} MB)!"
             exit 1
@@ -54,6 +51,6 @@ jobs:
         run: |
           # Run a simple Python command importing key libraries to verify the environment works 
           docker run --rm upstream-drift:runtime python -c "import mujoco, numpy, scipy; print('Core ML/Physics imports successful!')"
-          
+
           # We can also check that the API server module is importable
           docker run --rm upstream-drift:runtime python -c "import fastapi; print('FastAPI imported successfully')"
