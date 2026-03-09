@@ -16,8 +16,8 @@ ENGINE_MODULES: dict[str, str] = {
     "mujoco": "src.engines.physics_engines.mujoco.python.humanoid_launcher",
     "drake": "src.engines.physics_engines.drake.python.src.drake_gui_app",
     "pinocchio": "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui",
-    "opensim": "src.engines.physics_engines.opensim.python.opensim_launcher",
-    "myosim": "src.engines.physics_engines.myosim.python.myosim_launcher",
+    "opensim": "src.engines.physics_engines.opensim.python.opensim_gui",
+    "myosuite": "src.engines.physics_engines.myosuite.python.myosuite_physics_engine",
     "pendulum": "src.engines.pendulum_models.python.pendulum_launcher",
 }
 

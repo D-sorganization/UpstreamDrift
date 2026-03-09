@@ -159,58 +159,24 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         lambda self, dt=None: self.env is not None, "Environment must be loaded"
     )
     def step(self, dt: float | None = None) -> None:
-        """Step simulation."""
+        """Step simulation.
 
+        Bridges Gym interface properly to pass set_control values as actions.
+        """
         if not self.env:
             return
 
-        # Gym steps by fixed internal dt (usually frame_skip * model_dt).
+        if dt is not None and dt != getattr(self, "_dt", None):
+            logger.warning(
+                "Runtime timestep modification is unsafe in MuJoCo. Ignoring dt override."
+            )
 
-        # We can't easily force arbitrary dt without hacking the sim.
+        action = getattr(self, "_last_action", None)
+        if action is None:
+            # Fallback to zero action
+            action = self.env.action_space.sample() * 0.0
 
-        # We'll just call step(). Controls should be set beforehand.
-
-        # We need the action.
-
-        # In PhysicsEngine protocol, set_control() sets the action buffer?
-
-        # But Gym step() TAKES the action.
-
-        # This is a protocol mismatch.
-
-        # Capability: If self.sim is present, we can just step self.sim directly?
-
-        # But that bypasses MyoSuite's muscle activation dynamics (if implemented in python steps).
-
-        # MyoSuite generally puts muscle dynamics in the MuJoCo model or usage of sim.step().
-
-        # Strategy: Use sim.step() if available to respect 'PhysicsEngine' low-level vibe,
-
-        # preserving state.
-
-        if self.sim:
-            # Handle dt override if possible
-
-            if dt is not None:
-                old_dt = self.sim.model.opt.timestep
-
-                self.sim.model.opt.timestep = dt
-
-                self.sim.step()
-
-                self.sim.model.opt.timestep = old_dt
-
-            else:
-                self.sim.step()
-
-        else:
-            # Fallback to env.step() with zero action if we can't control it
-
-            # (Bad, but fallback)
-
-            zero_action = self.env.action_space.sample() * 0
-
-            self.env.step(zero_action)
+        self.env.step(action)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
@@ -288,6 +254,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control (ctrl)."""
+        self._last_action = np.array(u).copy()
 
         if not self.sim:
             return
@@ -797,7 +764,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZTCF: {e}")
-
             return np.array([])
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
@@ -894,3 +860,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return []
 
         return list(analyzer.muscle_names)
+
+
+def main() -> None:
+    """Entry point for standalone execution."""
+    logger.error("MyoSuite does not have a standalone GUI. Use the web UI.")
+    import sys
+
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
