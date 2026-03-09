@@ -10,14 +10,11 @@ Covers:
 
 from __future__ import annotations
 
-import hashlib
-import http.client
 import json
 import tempfile
-import time
 import urllib.error
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, call, mock_open, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 

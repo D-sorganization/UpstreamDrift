@@ -7,12 +7,10 @@ Covers GitHub issues #1695, #1691, #1700.
 from __future__ import annotations
 
 import os
-import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # 1. REST API security tests (issue #1695)
@@ -327,8 +325,9 @@ class TestPathTraversalPrevention:
 
     def test_cache_path_rejects_dot_dot(self):
         """get_cache_path should reject model IDs containing '..'."""
-        from model_generation.library.cache import CacheConfig, ModelCache
         import tempfile
+
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -338,8 +337,9 @@ class TestPathTraversalPrevention:
 
     def test_cache_path_rejects_encoded_traversal(self):
         """get_cache_path should reject encoded path traversal."""
-        from model_generation.library.cache import CacheConfig, ModelCache
         import tempfile
+
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -349,8 +349,9 @@ class TestPathTraversalPrevention:
 
     def test_cache_path_allows_normal_ids(self):
         """Normal model IDs should work fine."""
-        from model_generation.library.cache import CacheConfig, ModelCache
         import tempfile
+
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -361,8 +362,9 @@ class TestPathTraversalPrevention:
 
     def test_cache_path_allows_slashes_without_traversal(self):
         """Model IDs with slashes (but no ..) should work."""
-        from model_generation.library.cache import CacheConfig, ModelCache
         import tempfile
+
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
