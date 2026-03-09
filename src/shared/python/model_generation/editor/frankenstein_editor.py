@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
+from model_generation.core.contracts import precondition
 from model_generation.core.types import Joint, JointType, Link, Material, Origin
 
 from .editor_clipboard import ClipboardMixin
@@ -31,6 +32,11 @@ from .editor_types import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _is_non_empty_str(value: object) -> bool:
+    """Return True if *value* is a non-empty string."""
+    return isinstance(value, str) and bool(value.strip())
 
 
 class FrankensteinEditor(ClipboardMixin, ModificationMixin):
@@ -435,6 +441,14 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
         return created_links
 
+    @precondition(
+        lambda target_model_id: _is_non_empty_str(target_model_id),
+        "target_model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda attach_to: _is_non_empty_str(attach_to),
+        "attach_to must be a non-empty string",
+    )
     def paste_subtree(
         self,
         target_model_id: str,

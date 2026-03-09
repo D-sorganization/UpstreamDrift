@@ -10,6 +10,7 @@ import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
+from model_generation.core.contracts import precondition
 from model_generation.core.types import Joint, JointType, Link, Origin
 
 if TYPE_CHECKING:
@@ -18,6 +19,11 @@ if TYPE_CHECKING:
     from model_generation.editor.editor_types import ComponentType
 
 logger = logging.getLogger(__name__)
+
+
+def _is_non_empty_str(value: object) -> bool:
+    """Return True if *value* is a non-empty string."""
+    return isinstance(value, str) and bool(value.strip())
 
 
 class ModificationMixin:
@@ -69,6 +75,14 @@ class ModificationMixin:
     # Direct Modifications
     # ============================================================
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda link_name: _is_non_empty_str(link_name),
+        "link_name must be a non-empty string",
+    )
     def delete_link(
         self,
         model_id: str,
@@ -133,6 +147,14 @@ class ModificationMixin:
         logger.info(f"Deleted link '{link_name}' from '{model_id}'")
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda root_link: _is_non_empty_str(root_link),
+        "root_link must be a non-empty string",
+    )
     def delete_subtree(self, model_id: str, root_link: str) -> bool:
         """
         Delete a subtree (link and all descendants).
@@ -173,6 +195,18 @@ class ModificationMixin:
         )
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda old_name: _is_non_empty_str(old_name),
+        "old_name must be a non-empty string",
+    )
+    @precondition(
+        lambda new_name: _is_non_empty_str(new_name),
+        "new_name must be a non-empty string",
+    )
     def rename_link(
         self,
         model_id: str,
@@ -190,10 +224,6 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        if not new_name or not new_name.strip():
-            logger.error("new_name must be a non-empty string")
-            return False
-
         if old_name == new_name:
             return True  # No-op
 
@@ -230,6 +260,18 @@ class ModificationMixin:
         logger.info(f"Renamed link '{old_name}' to '{new_name}'")
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda old_name: _is_non_empty_str(old_name),
+        "old_name must be a non-empty string",
+    )
+    @precondition(
+        lambda new_name: _is_non_empty_str(new_name),
+        "new_name must be a non-empty string",
+    )
     def rename_joint(
         self,
         model_id: str,
@@ -247,10 +289,6 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        if not new_name or not new_name.strip():
-            logger.error("new_name must be a non-empty string")
-            return False
-
         if old_name == new_name:
             return True  # No-op
 
@@ -274,6 +312,14 @@ class ModificationMixin:
         logger.info(f"Renamed joint '{old_name}' to '{new_name}'")
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda joint_name: _is_non_empty_str(joint_name),
+        "joint_name must be a non-empty string",
+    )
     def modify_joint(
         self,
         model_id: str,
@@ -342,6 +388,18 @@ class ModificationMixin:
         logger.info(f"Modified joint '{joint_name}'")
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda parent_link: _is_non_empty_str(parent_link),
+        "parent_link must be a non-empty string",
+    )
+    @precondition(
+        lambda child_link: _is_non_empty_str(child_link),
+        "child_link must be a non-empty string",
+    )
     def attach_link(
         self,
         model_id: str,
@@ -403,6 +461,14 @@ class ModificationMixin:
         logger.info(f"Attached '{child_link}' to '{parent_link}'")
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda link_name: _is_non_empty_str(link_name),
+        "link_name must be a non-empty string",
+    )
     def detach_link(
         self,
         model_id: str,
@@ -439,6 +505,14 @@ class ModificationMixin:
     # Batch Operations
     # ============================================================
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda prefix: _is_non_empty_str(prefix),
+        "prefix must be a non-empty string",
+    )
     def apply_prefix(
         self,
         model_id: str,
@@ -581,6 +655,14 @@ class ModificationMixin:
 
             model.joints.append(new_joint)
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda root_link: _is_non_empty_str(root_link),
+        "root_link must be a non-empty string",
+    )
     def mirror_subtree(
         self,
         model_id: str,
