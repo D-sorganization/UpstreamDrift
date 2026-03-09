@@ -8,6 +8,7 @@ including proper formatting, material definitions, and composite joint expansion
 from __future__ import annotations
 
 import logging
+from collections import deque
 from dataclasses import dataclass
 from typing import Any
 
@@ -251,6 +252,10 @@ class URDFWriter:
             lines.append(f'{indent2}<sphere radius="{geometry.dimensions[0]:.6g}"/>')
         elif geometry.geometry_type == GeometryType.CAPSULE:
             # URDF doesn't have capsule, use cylinder approximation
+            logger.warning(
+                "Capsule geometry approximated as cylinder"
+                " (URDF has no native capsule support)"
+            )
             lines.append(
                 f'{indent2}<cylinder radius="{geometry.dimensions[0]:.6g}" '
                 f'length="{geometry.dimensions[1]:.6g}"/>'
@@ -323,11 +328,11 @@ class URDFWriter:
         # BFS to order links
         ordered: list[Link] = []
         link_by_name = {link.name: link for link in links}
-        queue = [link.name for link in roots]
+        queue: deque[str] = deque(link.name for link in roots)
         visited: set[str] = set()
 
         while queue:
-            name = queue.pop(0)
+            name = queue.popleft()
             if name in visited or name not in link_by_name:
                 continue
             visited.add(name)
