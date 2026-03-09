@@ -81,6 +81,26 @@ def test_load_from_path(engine):
     assert engine.model_name == "TestModel"
 
 
+def test_load_from_path_rejects_reload_without_mutating_state(engine):
+    path = "test_model.osim"
+
+    mock_model = MagicMock(spec=_OSIM_MODEL_SPEC)
+    mock_model.getName.return_value = "TestModel"
+    mock_opensim.Model.return_value = mock_model
+
+    with patch("os.path.exists", return_value=True):
+        engine.load_from_path(path)
+
+        original_state = engine._state
+        with pytest.raises(RuntimeError, match="Re-loading is not supported"):
+            engine.load_from_path("other_model.osim")
+
+    mock_opensim.Model.assert_called_once_with(path)
+    assert engine._model is mock_model
+    assert engine._state is original_state
+    assert engine._model_path == path
+
+
 @patch("tempfile.NamedTemporaryFile")
 def test_load_from_string(mock_named_temp, engine):
     # Setup mock temp file
@@ -183,3 +203,53 @@ def test_compute_mass_matrix(engine):
 
     mock_matter.calcM.assert_called()
     assert M.shape == (2, 2)
+
+
+def test_compute_jacobian_scales_finite_difference_step(engine):
+    model = MagicMock(spec=_OSIM_MODEL_SPEC + ["getBodySet"])
+    state = MagicMock(spec=_OSIM_STATE_SPEC + ["getNQ", "getNU", "updQ"])
+    engine._model = model
+    engine._state = state
+
+    q_current = [1000.0]
+    q_write_history: list[float] = []
+
+    class MutableQ:
+        def __getitem__(self, index):
+            return q_current[index]
+
+        def __setitem__(self, index, value):
+            q_write_history.append(value)
+            q_current[index] = value
+
+    q_proxy = MutableQ()
+    state.getQ.return_value = q_current
+    state.getNQ.return_value = 1
+    state.getNU.return_value = 1
+    state.updQ.return_value = q_proxy
+
+    class Transform:
+        def __init__(self, x):
+            self._x = x
+
+        def p(self):
+            return [self._x, 0.0, 0.0]
+
+        def R(self):
+            return MagicMock()
+
+    body = MagicMock()
+    body.getTransformInGround.side_effect = lambda _: Transform(q_current[0])
+    body_set = MagicMock()
+    body_set.get.return_value = body
+    model.getBodySet.return_value = body_set
+
+    with patch.object(engine, "_rotation_difference", return_value=np.zeros(3)):
+        jacobian = engine.compute_jacobian("pelvis")
+
+    expected_eps = np.sqrt(np.finfo(float).eps) * abs(q_current[0])
+    assert jacobian is not None
+    np.testing.assert_allclose(jacobian["linear"], np.array([[1.0], [0.0], [0.0]]))
+    np.testing.assert_allclose(jacobian["angular"], np.zeros((3, 1)))
+    assert q_write_history[0] == pytest.approx(1000.0 + expected_eps)
+    assert q_write_history[-1] == pytest.approx(1000.0)
