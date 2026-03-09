@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from contracts import InvariantError
 from model_generation.core.contracts import precondition
 from model_generation.core.types import Joint, Link
 from model_generation.core.validation import ValidationResult
@@ -193,6 +194,50 @@ class BaseURDFBuilder(ABC):
     def clear(self) -> None:
         """Clear all links and joints."""
         ...
+
+    def _check_invariants(self) -> None:
+        """Validate that _links and _joints remain consistent.
+
+        Checks:
+        - No duplicate link names
+        - No duplicate joint names
+        - Every joint parent references an existing link
+        - Every joint child references an existing link
+
+        Raises:
+            InvariantError: If any invariant is violated.
+        """
+        # Check for duplicate link names
+        link_names = [link.name for link in self._links]
+        if len(link_names) != len(set(link_names)):
+            seen: set[str] = set()
+            for name in link_names:
+                if name in seen:
+                    raise InvariantError(f"Duplicate link name detected: '{name}'")
+                seen.add(name)
+
+        # Check for duplicate joint names
+        joint_names = [joint.name for joint in self._joints]
+        if len(joint_names) != len(set(joint_names)):
+            seen_joints: set[str] = set()
+            for name in joint_names:
+                if name in seen_joints:
+                    raise InvariantError(f"Duplicate joint name detected: '{name}'")
+                seen_joints.add(name)
+
+        # Check joint references
+        link_name_set = set(link_names)
+        for joint in self._joints:
+            if joint.parent not in link_name_set:
+                raise InvariantError(
+                    f"Joint '{joint.name}' references non-existent "
+                    f"parent link '{joint.parent}'"
+                )
+            if joint.child not in link_name_set:
+                raise InvariantError(
+                    f"Joint '{joint.name}' references non-existent "
+                    f"child link '{joint.child}'"
+                )
 
     def validate(self) -> ValidationResult:
         """

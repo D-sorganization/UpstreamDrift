@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from model_generation.core.contracts import precondition
 from model_generation.core.types import Joint, Link, Material
 
 from .editor_types import ComponentType
@@ -17,6 +18,11 @@ if TYPE_CHECKING:
     from model_generation.converters.urdf_parser import ParsedModel
 
 logger = logging.getLogger(__name__)
+
+
+def _is_non_empty_str(value: object) -> bool:
+    """Return True if *value* is a non-empty string."""
+    return isinstance(value, str) and bool(value.strip())
 
 
 class ClipboardMixin:
@@ -34,6 +40,14 @@ class ClipboardMixin:
 
     def get_connecting_joint(self, model_id: str, link_name: str) -> Joint | None: ...
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda link_name: _is_non_empty_str(link_name),
+        "link_name must be a non-empty string",
+    )
     def copy_link(
         self,
         model_id: str,
@@ -80,6 +94,14 @@ class ClipboardMixin:
         logger.info(f"Copied link '{link_name}' to clipboard")
         return True
 
+    @precondition(
+        lambda model_id: _is_non_empty_str(model_id),
+        "model_id must be a non-empty string",
+    )
+    @precondition(
+        lambda root_link: _is_non_empty_str(root_link),
+        "root_link must be a non-empty string",
+    )
     def copy_subtree(
         self,
         model_id: str,
