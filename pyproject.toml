@@ -38,7 +38,7 @@ dependencies = [
 [project.optional-dependencies]
 # Additional physics engines
 drake = ["drake>=1.22.0"]
-pinocchio = ["pin>=2.6.0", "meshcat>=0.3.0"]
+pinocchio = ["pinocchio>=2.6.0", "meshcat>=0.3.0"]
 all-engines = ["upstream-drift[drake,pinocchio]"]
 
 # Analysis extras

@@ -14,7 +14,14 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pinocchio as pin  # type: ignore
+
+try:
+    import pinocchio as pin  # type: ignore
+
+    PINOCCHIO_AVAILABLE = True
+except ImportError:
+    pin = None  # type: ignore
+    PINOCCHIO_AVAILABLE = False
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.data_io.common_utils import get_shared_urdf_path
