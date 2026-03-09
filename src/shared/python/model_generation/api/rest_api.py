@@ -8,7 +8,9 @@ Can be used with Flask, FastAPI, or other frameworks via adapters.
 from __future__ import annotations
 
 import logging
+import os
 import tempfile
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -135,6 +137,27 @@ class ModelGenerationAPI:
         """
         self.prefix = prefix
         self._routes: list[Route] = []
+
+        # Security configuration from environment
+        self._api_key: str | None = os.environ.get("MODEL_GEN_API_KEY")
+        self._cors_origins: str = os.environ.get(
+            "MODEL_GEN_CORS_ORIGINS", ""
+        )
+        self._rate_limit: int | None = None
+        rate_limit_str = os.environ.get("MODEL_GEN_RATE_LIMIT")
+        if rate_limit_str:
+            try:
+                self._rate_limit = int(rate_limit_str)
+            except ValueError:
+                logger.warning("Invalid MODEL_GEN_RATE_LIMIT value: %s", rate_limit_str)
+
+        self._is_production: bool = (
+            os.environ.get("MODEL_GEN_ENV", "").lower() == "production"
+        )
+
+        # In-memory sliding window rate limiter: client_ip -> list[timestamp]
+        self._rate_limit_windows: dict[str, list[float]] = {}
+
         self._register_routes()
 
     def _register_core_routes(self) -> None:
@@ -292,6 +315,56 @@ class ModelGenerationAPI:
     def get_routes(self) -> list[Route]:
         """Get all registered routes."""
         return self._routes
+
+    def _check_api_key(self, request: APIRequest) -> APIResponse | None:
+        """Check API key authentication if MODEL_GEN_API_KEY is set.
+
+        Returns None if auth passes, or a 401 APIResponse if auth fails.
+        """
+        if not self._api_key:
+            return None  # No API key configured, skip auth
+        provided_key = request.headers.get("X-API-Key")
+        if not provided_key or provided_key != self._api_key:
+            return APIResponse.error("Unauthorized: invalid or missing API key", 401)
+        return None
+
+    def _check_rate_limit(self, request: APIRequest) -> APIResponse | None:
+        """Sliding window rate limiter.  Returns 429 if limit exceeded.
+
+        Uses MODEL_GEN_RATE_LIMIT (requests per minute).  The client IP
+        is extracted from the X-Forwarded-For header or defaults to
+        "unknown".
+        """
+        if self._rate_limit is None:
+            return None
+
+        client_ip = request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
+        now = time.time()
+        window_start = now - 60.0  # 1-minute sliding window
+
+        # Prune old entries
+        timestamps = self._rate_limit_windows.setdefault(client_ip, [])
+        self._rate_limit_windows[client_ip] = [
+            ts for ts in timestamps if ts > window_start
+        ]
+
+        if len(self._rate_limit_windows[client_ip]) >= self._rate_limit:
+            return APIResponse.error("Rate limit exceeded. Try again later.", 429)
+
+        self._rate_limit_windows[client_ip].append(now)
+        return None
+
+    def _add_cors_headers(self, response: APIResponse) -> None:
+        """Add CORS headers to response.
+
+        The allowed origin is configured via the MODEL_GEN_CORS_ORIGINS
+        environment variable (comma-separated list).  If not set, defaults
+        to an empty string (no cross-origin access).
+        """
+        origin = self._cors_origins.split(",")[0].strip() if self._cors_origins else ""
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key"
 
     def _add_security_headers(self, response: APIResponse) -> None:
         """Add security headers to response."""

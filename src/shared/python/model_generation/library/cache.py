@@ -282,7 +282,18 @@ class ModelCache:
         return current_checksum == entry.checksum
 
     def get_cache_path(self, model_id: str) -> Path:
-        """Get the cache path for a model (may not exist yet)."""
+        """Get the cache path for a model (may not exist yet).
+
+        Raises:
+            ValueError: If *model_id* contains path traversal sequences
+                such as .. or URL-encoded equivalents (%2e%2e).
+        """
+        # Reject path traversal attempts (literal or URL-encoded)
+        if ".." in model_id or "%2e" in model_id.lower() or "%2f" in model_id.lower():
+            raise ValueError(
+                f"Path traversal blocked: model_id '{model_id}' contains "
+                "disallowed sequences ('..', '%2e', or '%2f')"
+            )
         safe_id = model_id.replace("/", "_").replace("\\", "_")
         return self.config.cache_dir / safe_id
 
