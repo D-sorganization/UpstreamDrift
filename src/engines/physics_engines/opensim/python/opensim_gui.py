@@ -391,7 +391,8 @@ For more help, see the documentation in docs/ folder.
         """.strip()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Launch the OpenSim Golf GUI."""
     app = QApplication(sys.argv)
 
     # Check for command line model path
@@ -400,3 +401,7 @@ if __name__ == "__main__":
     window = OpenSimGolfGUI(model_path=model_path)
     window.show()
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
