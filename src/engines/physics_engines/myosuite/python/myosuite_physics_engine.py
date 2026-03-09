@@ -65,6 +65,30 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         self._dt = 0.002  # Default
 
+    def _reset_loaded_state(self) -> None:
+        """Clear all engine state after a failed or closed load attempt."""
+        self.env = None
+        self.sim = None
+        self.env_id = ""
+        self._dt = 0.002
+
+    @staticmethod
+    def _extract_sim_from_env(env: Any) -> Any:
+        """Extract the underlying MuJoCo simulation object from a Gym env."""
+        sim = getattr(env, "sim", None)
+        if sim is not None:
+            return sim
+
+        unwrapped = getattr(env, "unwrapped", None)
+        if unwrapped is not None:
+            sim = getattr(unwrapped, "sim", None)
+            if sim is not None:
+                return sim
+
+        raise RuntimeError(
+            "Could not extract underlying MuJoCo sim object from MyoSuite env"
+        )
+
     @property
     def model_name(self) -> str:
         """Return the Gym environment ID as the model name."""
@@ -108,31 +132,17 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         env_id = path.strip()
 
         try:
-            self.env = gym.make(env_id)
+            env = gym.make(env_id)
+            env.reset()
+            sim = self._extract_sim_from_env(env)
 
+            self.env = env
+            self.sim = sim
             self.env_id = env_id
+            self._dt = self.sim.model.opt.timestep
 
-            self.env.reset()
-
-            # Access underlying sim
-
-            # specific to myosuite/mujoco-py structure
-
-            if hasattr(self.env, "sim"):
-                self.sim = self.env.sim
-
-            elif hasattr(self.env, "unwrapped") and hasattr(self.env.unwrapped, "sim"):
-                self.sim = self.env.unwrapped.sim
-
-            else:
-                logger.warning(
-                    "Could not access underlying MuJoCo sim object in MyoSuite env"
-                )
-
-            if self.sim:
-                self._dt = self.sim.model.opt.timestep
-
-        except (RuntimeError, TypeError, ValueError) as e:
+        except (RuntimeError, TypeError, ValueError, AttributeError) as e:
+            self._reset_loaded_state()
             logger.error("Failed to load MyoSuite environment '%s': %s", env_id, e)
 
             raise
@@ -254,7 +264,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control (ctrl)."""
-        self._last_action = np.array(u).copy()
+        self._last_action = np.array(u, copy=True)
 
         if not self.sim:
             return
