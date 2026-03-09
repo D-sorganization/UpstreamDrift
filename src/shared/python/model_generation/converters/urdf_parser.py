@@ -268,14 +268,11 @@ class URDFParser:
             if result.returncode == 0:
                 return result.stdout
             logger.warning(
-                f"xacro processing failed (exit {result.returncode}): "
-                f"{result.stderr}"
+                f"xacro processing failed (exit {result.returncode}): {result.stderr}"
             )
             return None
         except FileNotFoundError:
-            logger.warning(
-                "xacro CLI tool not found. Install with: pip install xacro"
-            )
+            logger.warning("xacro CLI tool not found. Install with: pip install xacro")
             return None
         except subprocess.TimeoutExpired:
             logger.warning(f"xacro processing timed out for {path}")

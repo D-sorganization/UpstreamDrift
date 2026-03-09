@@ -141,9 +141,7 @@ class ModelGenerationAPI:
 
         # Security configuration from environment
         self._api_key: str | None = os.environ.get("MODEL_GEN_API_KEY")
-        self._cors_origins: str = os.environ.get(
-            "MODEL_GEN_CORS_ORIGINS", ""
-        )
+        self._cors_origins: str = os.environ.get("MODEL_GEN_CORS_ORIGINS", "")
         self._rate_limit: int | None = None
         rate_limit_str = os.environ.get("MODEL_GEN_RATE_LIMIT")
         if rate_limit_str:
@@ -344,7 +342,9 @@ class ModelGenerationAPI:
         if self._rate_limit is None:
             return None
 
-        client_ip = request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
+        client_ip = (
+            request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
+        )
         now = time.time()
         window_start = now - 60.0  # 1-minute sliding window
 
@@ -369,7 +369,9 @@ class ModelGenerationAPI:
         """
         origin = self._cors_origins.split(",")[0].strip() if self._cors_origins else ""
         response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Methods"] = (
+            "GET, POST, PUT, DELETE, OPTIONS"
+        )
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key"
 
     def _add_security_headers(self, response: APIResponse) -> None:

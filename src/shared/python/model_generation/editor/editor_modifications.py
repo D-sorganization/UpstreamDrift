@@ -11,7 +11,6 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-
 from model_generation.core.contracts import precondition
 from model_generation.core.types import Joint, JointType, Link, Origin
 from scipy.spatial.transform import Rotation
