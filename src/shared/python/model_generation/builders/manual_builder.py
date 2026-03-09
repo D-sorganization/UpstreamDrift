@@ -8,6 +8,8 @@ with validation at each step.
 from __future__ import annotations
 
 import logging
+import math
+from collections import deque
 from enum import Enum
 from typing import Any
 
@@ -398,10 +400,10 @@ class ManualBuilder(BaseURDFBuilder):
     def _get_descendants(self, link_name: str) -> set[str]:
         """Get all descendant link names."""
         descendants: set[str] = set()
-        queue = [link_name]
+        queue: deque[str] = deque([link_name])
 
         while queue:
-            current = queue.pop(0)
+            current = queue.popleft()
             for joint in self._joints:
                 if joint.parent == current and joint.child not in descendants:
                     descendants.add(joint.child)
@@ -435,8 +437,6 @@ class ManualBuilder(BaseURDFBuilder):
         # Handle origin
         origin_data = geom_data.get("position", {}) if geom_data else {}
         orientation_data = geom_data.get("orientation", {}) if geom_data else {}
-        import math
-
         origin = Origin(
             xyz=(
                 origin_data.get("x", 0.0),
@@ -484,8 +484,6 @@ class ManualBuilder(BaseURDFBuilder):
         # Get origin from geometry
         pos = geom_data.get("position", {})
         orient = geom_data.get("orientation", {})
-        import math
-
         origin = Origin(
             xyz=(pos.get("x", 0.0), pos.get("y", 0.0), pos.get("z", 0.0)),
             rpy=(
