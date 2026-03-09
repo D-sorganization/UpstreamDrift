@@ -29,6 +29,7 @@ class TestDrakeInducedAcceleration:
         plant = MagicMock()
         # Setup basic mock behavior
         plant.num_velocities.return_value = 2
+        plant.MakeMultibodyForces.return_value = MagicMock()
         return plant
 
     @pytest.fixture
@@ -47,7 +48,7 @@ class TestDrakeInducedAcceleration:
         # Setup mock return values for plant methods
         # 1. Mass Matrix (M) = Identity
         M = np.eye(2)
-        mock_plant.CalcMassMatrix.return_value = M
+        mock_plant.CalcMassMatrixViaInverseDynamics.return_value = M
 
         # 2. Gravity Forces (tau_g)
         # Assume gravity force is [10, 0] (e.g. gravity acting on first joint)
@@ -57,7 +58,7 @@ class TestDrakeInducedAcceleration:
         # 3. Bias Term (bias = C*v - tau_g)
         # Let's say C*v = [2, 2]. Then bias = [2, 2] - [10, 0] = [-8, 2]
         bias = np.array([-8.0, 2.0])
-        mock_plant.CalcBiasTerm.return_value = bias
+        mock_plant.CalcInverseDynamics.return_value = bias
 
         # Call compute
         results = analyzer.compute_components(context)
@@ -76,9 +77,15 @@ class TestDrakeInducedAcceleration:
         np.testing.assert_allclose(results["total"], [8.0, -2.0])
 
         # Verify plant calls
-        mock_plant.CalcMassMatrix.assert_called_with(context)
+        mock_plant.CalcMassMatrixViaInverseDynamics.assert_called_with(context)
         mock_plant.CalcGravityGeneralizedForces.assert_called_with(context)
-        mock_plant.CalcBiasTerm.assert_called_with(context)
+        mock_plant.CalcInverseDynamics.assert_called_once()
+        called_context, called_vdot, called_forces = (
+            mock_plant.CalcInverseDynamics.call_args.args
+        )
+        assert called_context is context
+        np.testing.assert_allclose(called_vdot, np.zeros(2))
+        assert called_forces is mock_plant.MakeMultibodyForces.return_value
 
     def test_compute_components_with_non_identity_mass(
         self, analyzer, mock_plant
@@ -88,7 +95,7 @@ class TestDrakeInducedAcceleration:
 
         # M = [[2, 0], [0, 0.5]]
         M = np.array([[2.0, 0.0], [0.0, 0.5]])
-        mock_plant.CalcMassMatrix.return_value = M
+        mock_plant.CalcMassMatrixViaInverseDynamics.return_value = M
 
         # tau_g = [4, 1]
         tau_g = np.array([4.0, 1.0])
@@ -97,7 +104,7 @@ class TestDrakeInducedAcceleration:
         # bias = [0, 0] => Cv = tau_g => Coriolis/Centrifugal exactly opposes gravity?
         # bias = Cv - tau_g => if bias=0, Cv = tau_g.
         bias = np.zeros(2)
-        mock_plant.CalcBiasTerm.return_value = bias
+        mock_plant.CalcInverseDynamics.return_value = bias
 
         results = analyzer.compute_components(context)
 
@@ -112,9 +119,9 @@ class TestDrakeInducedAcceleration:
 
     def test_compute_components_structure(self, analyzer, mock_plant) -> None:
         """Verify the result dictionary structure."""
-        mock_plant.CalcMassMatrix.return_value = np.eye(2)
+        mock_plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
         mock_plant.CalcGravityGeneralizedForces.return_value = np.zeros(2)
-        mock_plant.CalcBiasTerm.return_value = np.zeros(2)
+        mock_plant.CalcInverseDynamics.return_value = np.zeros(2)
 
         results = analyzer.compute_components(MagicMock())
 

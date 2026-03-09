@@ -195,7 +195,7 @@ class DrakeVisualizationMixin:
         self._cleanup_disabled_vector_categories()
         self._sync_eval_context()
 
-        from .drake_recorder import DrakeInducedAccelerationAnalyzer
+        from .drake_analysis import DrakeInducedAccelerationAnalyzer
 
         if self.chk_show_torques.isChecked():
             self._draw_torque_vectors()
@@ -300,7 +300,7 @@ class DrakeVisualizationMixin:
         )
         J = J_spatial[3:, :]  # Translational
 
-        M = self.plant.CalcMassMatrix(plant_context)
+        M = self.plant.CalcMassMatrixViaInverseDynamics(plant_context)
 
         try:
             s = np.linalg.svd(J, compute_uv=False)
@@ -465,7 +465,7 @@ class DrakeVisualizationMixin:
 
         from shared.python.plotting import GolfSwingPlotter
 
-        from .drake_recorder import DrakeInducedAccelerationAnalyzer
+        from .drake_analysis import DrakeInducedAccelerationAnalyzer
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(
@@ -550,7 +550,7 @@ class DrakeVisualizationMixin:
 
         from shared.python.plotting import GolfSwingPlotter
 
-        from .drake_recorder import DrakeInducedAccelerationAnalyzer
+        from .drake_analysis import DrakeInducedAccelerationAnalyzer
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(
