@@ -703,6 +703,9 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
     See issue #980
     """
 
+    #: Expected vertex count for the standard SMPL-X body model topology.
+    SMPLX_EXPECTED_VERTEX_COUNT: int = 10475
+
     # SMPL-X default body-part vertex ranges (approximate, 10475 vertices)
     # These correspond to the SMPL-X part segmentation.
     SMPLX_SEGMENT_VERTEX_RANGES: dict[str, tuple[int, int]] = {
@@ -740,6 +743,105 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                 conventional locations.
         """
         self.model_dir = Path(model_dir) if model_dir else None
+
+    @classmethod
+    def validate_vertex_ranges(
+        cls,
+        actual_vertex_count: int,
+    ) -> bool:
+        """Validate that hardcoded vertex ranges are consistent with a model.
+
+        Checks that every range in ``SMPLX_SEGMENT_VERTEX_RANGES`` falls
+        within ``[0, actual_vertex_count)`` and that *actual_vertex_count*
+        matches ``SMPLX_EXPECTED_VERTEX_COUNT``.
+
+        Args:
+            actual_vertex_count: Total number of vertices in the loaded
+                SMPL-X model mesh.
+
+        Returns:
+            ``True`` if all ranges are valid, ``False`` otherwise.
+        """
+        if actual_vertex_count != cls.SMPLX_EXPECTED_VERTEX_COUNT:
+            logger.warning(
+                "SMPL-X vertex count mismatch: expected %d, got %d. "
+                "Hardcoded segment ranges may be inaccurate.",
+                cls.SMPLX_EXPECTED_VERTEX_COUNT,
+                actual_vertex_count,
+            )
+            return False
+
+        for name, (start, end) in cls.SMPLX_SEGMENT_VERTEX_RANGES.items():
+            if not (0 <= start < actual_vertex_count):
+                logger.warning(
+                    "Segment '%s' start index %d is out of range [0, %d)",
+                    name, start, actual_vertex_count,
+                )
+                return False
+            if not (0 < end <= actual_vertex_count):
+                logger.warning(
+                    "Segment '%s' end index %d is out of range (0, %d]",
+                    name, end, actual_vertex_count,
+                )
+                return False
+        return True
+
+    @classmethod
+    def load_part_segmentation(
+        cls,
+        model_dir: Path,
+    ) -> dict[str, tuple[int, int]]:
+        """Load official SMPL-X part segmentation from model files if available.
+
+        Looks for ``smplx_part_segmentation.json`` or
+        ``smplx_vert_segmentation.json`` in *model_dir*.  If found, parses
+        it into the same ``{segment_name: (start, end)}`` format used by
+        ``SMPLX_SEGMENT_VERTEX_RANGES``.
+
+        If no segmentation file is found, falls back to the hardcoded
+        ranges and emits a warning.
+
+        Args:
+            model_dir: Directory containing SMPL-X model files.
+
+        Returns:
+            Mapping of segment names to ``(start_inclusive, end_exclusive)``
+            vertex index ranges.
+        """
+        import json as _json
+
+        segmentation_files = [
+            "smplx_part_segmentation.json",
+            "smplx_vert_segmentation.json",
+        ]
+
+        for seg_file in segmentation_files:
+            seg_path = model_dir / seg_file
+            if seg_path.exists():
+                try:
+                    raw = _json.loads(seg_path.read_text())
+                    # Expected format: {segment_name: [vertex_indices...]}
+                    ranges: dict[str, tuple[int, int]] = {}
+                    for seg_name, indices in raw.items():
+                        if isinstance(indices, list) and len(indices) > 0:
+                            ranges[seg_name] = (min(indices), max(indices) + 1)
+                    if ranges:
+                        logger.info(
+                            "Loaded SMPL-X part segmentation from %s (%d segments)",
+                            seg_path, len(ranges),
+                        )
+                        return ranges
+                except (_json.JSONDecodeError, OSError, TypeError, ValueError) as exc:
+                    logger.warning(
+                        "Failed to parse segmentation file %s: %s", seg_path, exc,
+                    )
+
+        logger.warning(
+            "No SMPL-X part segmentation file found in %s; "
+            "falling back to hardcoded vertex ranges.",
+            model_dir,
+        )
+        return dict(cls.SMPLX_SEGMENT_VERTEX_RANGES)
 
     @property
     def backend_name(self) -> str:
