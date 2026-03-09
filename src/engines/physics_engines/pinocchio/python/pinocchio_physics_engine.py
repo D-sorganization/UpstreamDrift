@@ -290,24 +290,19 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Compute total contact forces (ground reaction force, GRF).
 
         Notes:
-            Returns placeholder zero vector. Pinocchio's standard ABA
-            does not compute contact forces without a constraint solver.
+            Pinocchio's standard ABA does not compute contact forces
+            without a constraint solver.
 
-        Returns:
-            f: (3,) zero vector (placeholder).
+        Raises:
+            NotImplementedError: To prevent silent simulation failures from
+                fabricated zero GRF data.
         """
-        if self.data is None:
-            return np.zeros(3)
-
-        logger.warning(
-            "PinocchioPhysicsEngine.compute_contact_forces currently "
-            "returns a placeholder zero GRF vector. Standard ABA "
-            "dynamics in Pinocchio do not compute contact forces "
+        raise NotImplementedError(
+            "PinocchioPhysicsEngine.compute_contact_forces is not implemented. "
+            "Standard ABA dynamics in Pinocchio do not compute contact forces "
             "without a constraint solver. "
             "This is a known limitation of this wrapper."
         )
-
-        return np.zeros(3)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
