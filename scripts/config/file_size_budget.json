@@ -60,6 +60,12 @@
       "owner": "@mujoco-core",
       "reason": "Docker GUI split tracked in phase-1",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_generation/api/rest_api.py",
+      "owner": "@model-generation",
+      "reason": "REST API grew past 1200 lines due to security features (auth, CORS, rate limiting). Decomposition into handler modules planned.",
+      "expires_on": "2027-03-09"
     }
   ]
 }

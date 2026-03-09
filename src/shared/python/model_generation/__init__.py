@@ -247,7 +247,8 @@ def __getattr__(name: str) -> Any:
 
 
 # ---------------------------------------------------------------------------
-# Shared constants for convenience functions
+# Shared preset configuration (DRY: single source of truth used by both
+# quick_urdf() and quick_build() -- eliminates the duplicated local dict).
 # ---------------------------------------------------------------------------
 
 _HUMANOID_PRESETS: dict[str, dict[str, float]] = {
