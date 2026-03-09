@@ -271,6 +271,31 @@ class TestMyoSuiteStrict:
         assert not mock_sim.step.called
         assert mock_sim.model.opt.timestep == 0.01
 
+    def test_step_uses_last_control_action_when_available(self):
+        """MyoSuite should send the last control through the Gym step bridge."""
+        engine = MyoSuitePhysicsEngine()
+        mock_env = MagicMock(
+            spec=["sim", "reset", "step", "close", "action_space", "observation_space"]
+        )
+        mock_sim = MagicMock(spec=["model", "data", "step"])
+        mock_sim.model.opt.timestep = 0.01
+        mock_sim.data.ctrl = np.zeros(2)
+        mock_env.action_space.sample.return_value = np.array([1.0, -1.0])
+
+        mock_env.sim = mock_sim
+        mock_gym.make.return_value = mock_env
+
+        engine.load_from_path("foo")
+        control = np.array([0.25, -0.75])
+        engine.set_control(control)
+        engine.step()
+
+        mock_env.step.assert_called_once()
+        called_action = mock_env.step.call_args.args[0]
+        np.testing.assert_array_equal(called_action, control)
+        np.testing.assert_array_equal(mock_sim.data.ctrl, control)
+        assert not mock_sim.step.called
+
 
 class TestPendulumStrict:
     def test_protocol_methods(self):
