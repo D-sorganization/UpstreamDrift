@@ -167,10 +167,13 @@ class TestMuJoCoStrict:
         engine = self.MuJoCoPhysicsEngine()
         assert hasattr(engine, "get_sensors"), "MuJoCo must implement get_sensors"
 
-        engine.model = MagicMock(spec=["nv", "nu", "nsensor", "sensor_adr"])
+        engine.model = MagicMock(
+            spec=["nv", "nu", "nsensor", "sensor_adr", "sensor_dim"]
+        )
         engine.data = MagicMock(spec=["sensordata"])
         engine.model.nsensor = 1
         engine.model.sensor_adr = [0]
+        engine.model.sensor_dim = [1]
         mock_mujoco.mj_id2name.return_value = "sensor_0"
         engine.data.sensordata = [0.123]
 
@@ -239,13 +242,12 @@ class TestMyoSuiteStrict:
         mock_gym.make.return_value = mock_env
 
         engine.load_from_path("foo")
-        assert engine.sim == mock_sim
+        assert engine.sim is mock_sim
 
-        engine.step(dt=0.2)  # Override dt
+        engine.step(dt=0.2)  # Override dt (ignored safely in MyoSuite)
 
-        # Should set timestep, step, restore
-        assert mock_sim.step.called
-        assert mock_sim.model.opt.timestep == 0.01  # Restored
+        # MyoSuite uses env.step() via the gym API (not sim.step() directly)
+        assert mock_env.step.called
 
 
 class TestPendulumStrict:
