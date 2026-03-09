@@ -247,6 +247,18 @@ def __getattr__(name: str) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# Shared constants for convenience functions
+# ---------------------------------------------------------------------------
+
+_HUMANOID_PRESETS: dict[str, dict[str, float]] = {
+    "athletic": {"gender_factor": 0.7, "shoulder_width_factor": 1.1},
+    "average": {"gender_factor": 0.5},
+    "heavy": {"gender_factor": 0.5, "hip_width_factor": 1.15},
+    "lean": {"gender_factor": 0.5, "shoulder_width_factor": 0.95},
+}
+
+
+# ---------------------------------------------------------------------------
 # Convenience functions (use lazy imports internally)
 # ---------------------------------------------------------------------------
 
@@ -277,13 +289,7 @@ def quick_urdf(
     builder = ParametricBuilder(robot_name)
 
     if preset:
-        presets = {
-            "athletic": {"gender_factor": 0.7, "shoulder_width_factor": 1.1},
-            "average": {"gender_factor": 0.5},
-            "heavy": {"gender_factor": 0.5, "hip_width_factor": 1.15},
-            "lean": {"gender_factor": 0.5, "shoulder_width_factor": 0.95},
-        }
-        preset_config = presets.get(preset.lower(), {})
+        preset_config = _HUMANOID_PRESETS.get(preset.lower(), {})
         builder.set_parameters(height_m=height_m, mass_kg=mass_kg, **preset_config)
     else:
         builder.set_parameters(height_m=height_m, mass_kg=mass_kg)
@@ -325,13 +331,7 @@ def quick_build(
     builder = ParametricBuilder("humanoid")
 
     if preset:
-        presets = {
-            "athletic": {"gender_factor": 0.7, "shoulder_width_factor": 1.1},
-            "average": {"gender_factor": 0.5},
-            "heavy": {"gender_factor": 0.5, "hip_width_factor": 1.15},
-            "lean": {"gender_factor": 0.5, "shoulder_width_factor": 0.95},
-        }
-        preset_config = presets.get(preset.lower(), {})
+        preset_config = _HUMANOID_PRESETS.get(preset.lower(), {})
         builder.set_parameters(height_m=height_m, mass_kg=mass_kg, **preset_config)
     else:
         builder.set_parameters(height_m=height_m, mass_kg=mass_kg)
