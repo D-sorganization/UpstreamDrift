@@ -5,11 +5,12 @@ from __future__ import annotations
 import typing
 from pathlib import Path
 
+import numpy as np
+import numpy.typing as npt
+
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
-    import numpy as np
-    import numpy.typing as npt
     import pinocchio as pin
 
 logger = get_logger(__name__)
