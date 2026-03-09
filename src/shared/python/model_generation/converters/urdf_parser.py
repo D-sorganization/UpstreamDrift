@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import logging
 import math
+import os
+import subprocess
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -168,7 +170,20 @@ class URDFParser:
             source_path = Path(source)
             if not source_path.exists():
                 raise FileNotFoundError(f"URDF file not found: {source_path}")
-            xml_string = source_path.read_text()
+            # Handle xacro files
+            raw_text = source_path.read_text()
+            if self._is_xacro(source_path) or self._has_xacro_namespace(raw_text):
+                processed = self._preprocess_xacro(source_path)
+                if processed is not None:
+                    xml_string = processed
+                else:
+                    logger.warning(
+                        f"Could not preprocess xacro file {source_path}, "
+                        "attempting to parse as plain XML"
+                    )
+                    xml_string = raw_text
+            else:
+                xml_string = raw_text
         else:
             xml_string = source
 
@@ -223,6 +238,48 @@ class URDFParser:
     def parse_string(self, xml_string: str, read_only: bool = False) -> ParsedModel:
         """Parse URDF from XML string."""
         return self.parse(xml_string, read_only=read_only)
+
+    def _is_xacro(self, path: Path) -> bool:
+        """Check if a file is a xacro file based on extension."""
+        suffixes = path.suffixes
+        return ".xacro" in suffixes
+
+    def _has_xacro_namespace(self, xml_string: str) -> bool:
+        """Check if XML string contains xacro namespace declaration."""
+        return "xmlns:xacro" in xml_string or "xacro:" in xml_string
+
+    def _preprocess_xacro(self, path: Path) -> str | None:
+        """
+        Preprocess a xacro file using the xacro CLI tool.
+
+        Args:
+            path: Path to the .xacro file
+
+        Returns:
+            Processed XML string, or None if xacro is not available
+        """
+        try:
+            result = subprocess.run(
+                ["xacro", str(path)],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                return result.stdout
+            logger.warning(
+                f"xacro processing failed (exit {result.returncode}): "
+                f"{result.stderr}"
+            )
+            return None
+        except FileNotFoundError:
+            logger.warning(
+                "xacro CLI tool not found. Install with: pip install xacro"
+            )
+            return None
+        except subprocess.TimeoutExpired:
+            logger.warning(f"xacro processing timed out for {path}")
+            return None
 
     def _parse_link(
         self,
@@ -506,16 +563,63 @@ class URDFParser:
         return Material(name=name, color=color, texture=texture)
 
     def _resolve_mesh_path(self, filename: str, base_path: Path) -> Path | None:
-        """Resolve mesh file path."""
+        """
+        Resolve mesh file path.
+
+        Supports:
+        - package:// URIs via ROS_PACKAGE_PATH and catkin/colcon workspaces
+        - Relative paths resolved against URDF parent directory
+        - Absolute paths
+        """
         # Handle package:// URLs
         if filename.startswith("package://"):
-            # Strip package:// prefix
-            package_path = filename[10:]
-            # Try to find in common locations
+            package_path = filename[10:]  # e.g. "my_robot/meshes/body.stl"
+
+            # 1. Try parent directory search (original behavior)
             for search_dir in [base_path.parent, base_path.parent.parent]:
                 candidate = search_dir / package_path
                 if candidate.exists():
                     return candidate
+
+            # 2. Try ROS_PACKAGE_PATH
+            ros_package_path = os.environ.get("ROS_PACKAGE_PATH", "")
+            if ros_package_path:
+                for search_dir in ros_package_path.split(":"):
+                    search_dir = search_dir.strip()
+                    if not search_dir:
+                        continue
+                    candidate = Path(search_dir) / package_path
+                    if candidate.exists():
+                        return candidate
+
+            # 3. Try catkin/colcon workspace paths
+            cmake_prefix = os.environ.get("CMAKE_PREFIX_PATH", "")
+            if cmake_prefix:
+                for ws_path in cmake_prefix.split(":"):
+                    ws_path = ws_path.strip()
+                    if not ws_path:
+                        continue
+                    # Check src/ subdirectory (catkin workspace layout)
+                    candidate = Path(ws_path) / "src" / package_path
+                    if candidate.exists():
+                        return candidate
+
+            # 4. Try COLCON_PREFIX_PATH
+            colcon_prefix = os.environ.get("COLCON_PREFIX_PATH", "")
+            if colcon_prefix:
+                for ws_path in colcon_prefix.split(":"):
+                    ws_path = ws_path.strip()
+                    if not ws_path:
+                        continue
+                    candidate = Path(ws_path) / package_path
+                    if candidate.exists():
+                        return candidate
+
+            logger.warning(
+                f"Could not resolve package URI: {filename}. "
+                f"Searched ROS_PACKAGE_PATH, CMAKE_PREFIX_PATH, "
+                f"and parent directories of {base_path}"
+            )
             return None
 
         # Handle relative paths
