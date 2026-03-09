@@ -59,6 +59,11 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     def load_from_path(self, path: str) -> None:
         """Load an OpenSim model from a file path."""
+        if self.is_initialized:
+            raise RuntimeError(
+                "Engine already has a loaded model. Re-loading is not supported."
+            )
+
         if opensim is None:
             raise ImportError("OpenSim library not installed")
 
@@ -371,7 +376,10 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             for i in range(nv):
                 # Perturb coordinate i
                 q_pert = q_orig.copy()
-                q_pert[i] += eps
+                # Scale the finite-difference step so large-angle states do not
+                # collapse to machine-noise perturbations.
+                local_eps = eps * max(1.0, abs(q_orig[i]))
+                q_pert[i] += local_eps
 
                 # Set perturbed state
                 for j in range(nq):
@@ -389,15 +397,17 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                 )
 
                 # Position Jacobian column
-                jacp[:, i] = (pos_pert - pos_0) / eps
+                jacp[:, i] = (pos_pert - pos_0) / local_eps
 
                 # Angular Jacobian (using rotation matrix difference)
                 rotation_pert = transform_pert.R()
 
                 # Compute angular velocity from rotation difference
-                # R_pert = R_0 * exp([w] * eps) => [w] ≈ logm(R_0^T * R_pert) / eps
+                # R_pert = R_0 * exp([w] * local_eps) => [w] ≈ logm(R_0^T * R_pert) / local_eps
                 # Simplified: use axis-angle representation difference
-                jacr[:, i] = self._rotation_difference(rotation_0, rotation_pert) / eps
+                jacr[:, i] = (
+                    self._rotation_difference(rotation_0, rotation_pert) / local_eps
+                )
 
             # Restore original state
             for i in range(nq):
