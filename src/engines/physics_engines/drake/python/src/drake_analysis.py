@@ -28,30 +28,47 @@ class DrakeInducedAccelerationAnalyzer:
     def __init__(self, plant: MultibodyPlant | None) -> None:
         self.plant = plant
 
-    def compute_components(self, context: Context) -> dict[str, np.ndarray]:
+    def _calc_mass_matrix(self, context: Context) -> np.ndarray:
+        """Compute the joint-space mass matrix using Drake's supported API."""
+        return self.plant.CalcMassMatrixViaInverseDynamics(context)
+
+    def _calc_bias_term(self, context: Context) -> np.ndarray:
+        """Compute the bias term using inverse dynamics with zero acceleration."""
+        vdot_zero = np.zeros(self.plant.num_velocities())
+        return self.plant.CalcInverseDynamics(
+            context,
+            vdot_zero,
+            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]
+        )
+
+    def compute_components(
+        self, context: Context, tau_app: np.ndarray | None = None
+    ) -> dict[str, np.ndarray]:
         """Compute induced acceleration components.
 
         Args:
             context: The plant context (with q, v set)
+            tau_app: Applied control torques (optional)
 
         Returns:
-            Dict with 'gravity', 'velocity', 'total' (passive)
+            Dict with 'gravity', 'velocity', 'control', 'total'
         """
         if self.plant is None:
             return {
                 "gravity": np.array([]),
                 "velocity": np.array([]),
+                "control": np.array([]),
                 "total": np.array([]),
             }
 
         # 1. Calc Mass Matrix
-        M = self.plant.CalcMassMatrix(context)
+        M = self._calc_mass_matrix(context)
 
         # 2. Calc Gravity Torque
         tau_g = self.plant.CalcGravityGeneralizedForces(context)
 
         # 3. Calc Bias Term (Cv - tau_g)
-        bias = self.plant.CalcBiasTerm(context)
+        bias = self._calc_bias_term(context)
 
         # Invert M
         try:
@@ -63,8 +80,14 @@ class DrakeInducedAccelerationAnalyzer:
 
         # Force due to velocity = -Cv = -(bias + tau_g)
         a_v = Minv @ (-(bias + tau_g))
+        a_c = np.zeros_like(a_g) if tau_app is None else Minv @ tau_app
 
-        return {"gravity": a_g, "velocity": a_v, "total": a_g + a_v}
+        return {
+            "gravity": a_g,
+            "velocity": a_v,
+            "control": a_c,
+            "total": a_g + a_v + a_c,
+        }
 
     def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
         """Compute ZTCF and ZVCF."""
@@ -78,8 +101,8 @@ class DrakeInducedAccelerationAnalyzer:
         # Or specifically: M a + Cv - tau_g = 0 => M a = tau_g - Cv = -bias.
         # So a_ztcf = -M^-1 * bias.
 
-        M = self.plant.CalcMassMatrix(context)
-        bias = self.plant.CalcBiasTerm(context)
+        M = self._calc_mass_matrix(context)
+        bias = self._calc_bias_term(context)
 
         try:
             Minv = np.linalg.inv(M)
@@ -117,7 +140,7 @@ class DrakeInducedAccelerationAnalyzer:
             return np.array([])
 
         # M * a = tau
-        M = self.plant.CalcMassMatrix(context)
+        M = self._calc_mass_matrix(context)
         try:
             Minv = np.linalg.inv(M)
         except np.linalg.LinAlgError:

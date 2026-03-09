@@ -109,12 +109,12 @@ class TestDrakeInducedAccelerationAnalyzer:
         analyzer = DrakeInducedAccelerationAnalyzer(plant)
 
         # M = I => a = tau
-        plant.CalcMassMatrix.return_value = np.eye(2)
+        plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
         tau = np.array([1.0, 2.0])
         result = analyzer.compute_specific_control(context, tau)
 
         np.testing.assert_array_almost_equal(result, np.array([1.0, 2.0]))
-        plant.CalcMassMatrix.assert_called_with(context)
+        plant.CalcMassMatrixViaInverseDynamics.assert_called_with(context)
 
     def test_compute_specific_control_scaled_mass(self) -> None:
         """Test compute_specific_control with a scaled mass matrix."""
@@ -127,7 +127,7 @@ class TestDrakeInducedAccelerationAnalyzer:
         analyzer = DrakeInducedAccelerationAnalyzer(plant)
 
         # M = 2*I => a = tau/2
-        plant.CalcMassMatrix.return_value = 2.0 * np.eye(3)
+        plant.CalcMassMatrixViaInverseDynamics.return_value = 2.0 * np.eye(3)
         tau = np.array([4.0, 6.0, 8.0])
         result = analyzer.compute_specific_control(context, tau)
 
@@ -158,9 +158,11 @@ class TestDrakeInducedAccelerationAnalyzer:
         context = MagicMock()
         analyzer = DrakeInducedAccelerationAnalyzer(plant)
 
-        plant.CalcMassMatrix.return_value = np.eye(2)
+        plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
+        plant.num_velocities.return_value = 2
+        plant.MakeMultibodyForces.return_value = MagicMock()
         plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.81])
-        plant.CalcBiasTerm.return_value = np.array([0.1, 0.2])
+        plant.CalcInverseDynamics.return_value = np.array([0.1, 0.2])
 
         result = analyzer.compute_components(context)
 
@@ -194,8 +196,10 @@ class TestDrakeInducedAccelerationAnalyzer:
         context = MagicMock()
         analyzer = DrakeInducedAccelerationAnalyzer(plant)
 
-        plant.CalcMassMatrix.return_value = np.eye(2)
-        plant.CalcBiasTerm.return_value = np.array([0.5, 1.0])
+        plant.CalcMassMatrixViaInverseDynamics.return_value = np.eye(2)
+        plant.num_velocities.return_value = 2
+        plant.MakeMultibodyForces.return_value = MagicMock()
+        plant.CalcInverseDynamics.return_value = np.array([0.5, 1.0])
         plant.CalcGravityGeneralizedForces.return_value = np.array([0.0, -9.81])
 
         result = analyzer.compute_counterfactuals(context)
@@ -223,7 +227,9 @@ class TestDrakeInducedAccelerationAnalyzer:
         analyzer = DrakeInducedAccelerationAnalyzer(plant)
 
         # Singular matrix - rank 1
-        plant.CalcMassMatrix.return_value = np.array([[1.0, 0.0], [0.0, 0.0]])
+        plant.CalcMassMatrixViaInverseDynamics.return_value = np.array(
+            [[1.0, 0.0], [0.0, 0.0]]
+        )
         tau = np.array([2.0, 0.0])
         result = analyzer.compute_specific_control(context, tau)
 
