@@ -581,11 +581,11 @@ class URDFParser:
             # 2. Try ROS_PACKAGE_PATH
             ros_package_path = os.environ.get("ROS_PACKAGE_PATH", "")
             if ros_package_path:
-                for search_dir in ros_package_path.split(":"):
-                    search_dir = search_dir.strip()
-                    if not search_dir:
+                for ros_dir in ros_package_path.split(":"):
+                    ros_dir = ros_dir.strip()
+                    if not ros_dir:
                         continue
-                    candidate = Path(search_dir) / package_path
+                    candidate = Path(ros_dir) / package_path
                     if candidate.exists():
                         return candidate
 
