@@ -9,10 +9,7 @@ Verifies that:
 
 from __future__ import annotations
 
-import importlib
-import types
 from unittest.mock import MagicMock, patch
-
 
 # ---------------------------------------------------------------------------
 # Helper to reload the module cleanly for each test that inspects globals
@@ -245,6 +242,7 @@ class TestPresetsNotMutated:
     def test_presets_unchanged_after_quick_urdf(self):
         """The module-level constant must be identical before and after calling quick_urdf."""
         import copy
+
         import model_generation
 
         before = copy.deepcopy(model_generation._HUMANOID_PRESETS)
@@ -261,6 +259,6 @@ class TestPresetsNotMutated:
         ):
             model_generation.quick_urdf(preset="athletic")
 
-        assert model_generation._HUMANOID_PRESETS == before, (
+        assert before == model_generation._HUMANOID_PRESETS, (
             "_HUMANOID_PRESETS was mutated during quick_urdf call"
         )
