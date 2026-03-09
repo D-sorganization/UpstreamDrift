@@ -10,20 +10,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from model_generation.core.composite_joints import (
+    expand_gimbal_joint,
+    expand_universal_joint,
+)
 from model_generation.core.constants import (
-    INTERMEDIATE_LINK_MASS,
     URDF_INDENT,
     URDF_XML_DECLARATION,
 )
 from model_generation.core.types import (
     Geometry,
-    Inertia,
     Joint,
-    JointLimits,
     JointType,
     Link,
     Material,
-    Origin,
 )
 
 
@@ -334,7 +334,11 @@ class URDFWriter:
     def _expand_composite_joints(
         self, links: list[Link], joints: list[Joint]
     ) -> tuple[list[Link], list[Joint]]:
-        """Expand composite joints (gimbal, universal) to multiple revolute joints."""
+        """Expand composite joints (gimbal, universal) to multiple revolute joints.
+
+        Delegates to the shared utilities in
+        ``model_generation.core.composite_joints``.
+        """
         if not self.expand_composite_joints:
             return links, joints
 
@@ -343,116 +347,17 @@ class URDFWriter:
 
         for joint in joints:
             if joint.joint_type == JointType.GIMBAL:
-                # Expand to 3 revolute joints (Z-Y-X Euler)
-                intermediate_links, revolute_joints = self._expand_gimbal_joint(joint)
+                intermediate_links, revolute_joints = expand_gimbal_joint(joint)
                 new_links.extend(intermediate_links)
                 new_joints.extend(revolute_joints)
             elif joint.joint_type == JointType.UNIVERSAL:
-                # Expand to 2 revolute joints
-                intermediate_links, revolute_joints = self._expand_universal_joint(
-                    joint
-                )
+                intermediate_links, revolute_joints = expand_universal_joint(joint)
                 new_links.extend(intermediate_links)
                 new_joints.extend(revolute_joints)
             else:
                 new_joints.append(joint)
 
         return new_links, new_joints
-
-    def _expand_gimbal_joint(self, joint: Joint) -> tuple[list[Link], list[Joint]]:
-        """Expand gimbal joint to 3 revolute joints."""
-        # Default axes: Z-Y-X Euler sequence
-        axes = joint.composite_axes or [(0, 0, 1), (0, 1, 0), (1, 0, 0)]
-        limits = joint.composite_limits or [joint.limits or JointLimits()] * 3
-
-        intermediate_links: list[Link] = []
-        revolute_joints: list[Joint] = []
-
-        # Create intermediate links
-        for i in range(2):
-            link_name = f"{joint.name}_intermediate_{i + 1}"
-            intermediate_links.append(
-                Link(
-                    name=link_name,
-                    inertia=Inertia(
-                        ixx=1e-6,
-                        iyy=1e-6,
-                        izz=1e-6,
-                        mass=INTERMEDIATE_LINK_MASS,
-                    ),
-                )
-            )
-
-        # Create 3 revolute joints
-        parents = [
-            joint.parent,
-            f"{joint.name}_intermediate_1",
-            f"{joint.name}_intermediate_2",
-        ]
-        children = [
-            f"{joint.name}_intermediate_1",
-            f"{joint.name}_intermediate_2",
-            joint.child,
-        ]
-
-        for i in range(3):
-            revolute_joints.append(
-                Joint(
-                    name=f"{joint.name}_dof{i + 1}",
-                    joint_type=JointType.REVOLUTE,
-                    parent=parents[i],
-                    child=children[i],
-                    origin=joint.origin if i == 0 else Origin(),
-                    axis=axes[i] if i < len(axes) else (0, 0, 1),
-                    limits=limits[i] if limits and i < len(limits) else JointLimits(),
-                    dynamics=joint.dynamics,
-                )
-            )
-
-        return intermediate_links, revolute_joints
-
-    def _expand_universal_joint(self, joint: Joint) -> tuple[list[Link], list[Joint]]:
-        """Expand universal joint to 2 revolute joints."""
-        # Default axes: perpendicular
-        axes = joint.composite_axes or [(1, 0, 0), (0, 1, 0)]
-        limits = joint.composite_limits or [joint.limits or JointLimits()] * 2
-
-        intermediate_links: list[Link] = []
-        revolute_joints: list[Joint] = []
-
-        # Create one intermediate link
-        link_name = f"{joint.name}_intermediate"
-        intermediate_links.append(
-            Link(
-                name=link_name,
-                inertia=Inertia(
-                    ixx=1e-6,
-                    iyy=1e-6,
-                    izz=1e-6,
-                    mass=INTERMEDIATE_LINK_MASS,
-                ),
-            )
-        )
-
-        # Create 2 revolute joints
-        for i in range(2):
-            parent = joint.parent if i == 0 else link_name
-            child = link_name if i == 0 else joint.child
-
-            revolute_joints.append(
-                Joint(
-                    name=f"{joint.name}_dof{i + 1}",
-                    joint_type=JointType.REVOLUTE,
-                    parent=parent,
-                    child=child,
-                    origin=joint.origin if i == 0 else Origin(),
-                    axis=axes[i] if i < len(axes) else (0, 0, 1),
-                    limits=limits[i] if limits and i < len(limits) else JointLimits(),
-                    dynamics=joint.dynamics,
-                )
-            )
-
-        return intermediate_links, revolute_joints
 
     def _escape(self, text: str) -> str:
         """Escape special XML characters."""
