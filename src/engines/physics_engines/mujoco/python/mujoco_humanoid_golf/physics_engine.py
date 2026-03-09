@@ -392,26 +392,27 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
         total_force = np.zeros(3)
 
-        # Iterate over contacts
         for i in range(self.data.ncon):
-            # Contact force in contact frame
-            c_force = np.zeros(6)
+            # c_force contains [normal, tan1, tan2, torsional, rolling1, rolling2]
+            # defined in the local contact frame.
+            c_force = np.zeros(6, dtype=np.float64)
             mujoco.mj_contactForce(self.model, self.data, i, c_force)
 
-            # Contact frame orientation
+            # Contact frame maps from world to local
+            # frame rows: normal, tangent1, tangent2
             contact_frame = self.data.contact[i].frame.reshape(3, 3)
 
-            # Transform to world frame (only linear part c_force[0:3])
-            # Note: mj_contactForce returns [normal, tangent1, tangent2, torque...]
-            # The contact frame's X axis is the normal.
+            # Force exerted BY geom2 ON geom1
             f_local = c_force[:3]
             f_world = contact_frame.T @ f_local
 
-            total_force += f_world
+            # The ground reaction force (GRF) acting ON the system (geom2 usually)
+            # is the negative of the force exerted BY geom2 on the ground (geom1).
+            total_force -= f_world
 
         return total_force
 
-    def get_sensors(self) -> dict[str, float]:
+    def get_sensors(self) -> dict[str, float | np.ndarray]:
         """Get all sensor readings."""
         if self.data is None or self.model is None:
             return {}
@@ -423,10 +424,14 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
                 if not name:
                     name = f"sensor_{i}"
 
-                # Sensors can have dim > 1, but for simplicity handled as scalar or list
-                # This is a basic implementation
-                # Robust implementation would read adr and dim
-                sensors[name] = float(self.data.sensordata[i])
+                adr = self.model.sensor_adr[i]
+                dim = self.model.sensor_dim[i]
+                val = self.data.sensordata[adr : adr + dim].copy()
+
+                if dim == 1:
+                    sensors[name] = float(val[0])
+                else:
+                    sensors[name] = val
         return sensors
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
