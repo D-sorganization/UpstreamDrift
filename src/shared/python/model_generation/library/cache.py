@@ -31,6 +31,7 @@ class CacheEntry:
     last_accessed: float = field(default_factory=time.time)
     size_bytes: int = 0
     is_complete: bool = True
+    version: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -43,6 +44,7 @@ class CacheEntry:
             "last_accessed": self.last_accessed,
             "size_bytes": self.size_bytes,
             "is_complete": self.is_complete,
+            "version": self.version,
         }
 
     @classmethod
@@ -57,6 +59,7 @@ class CacheEntry:
             last_accessed=data.get("last_accessed", time.time()),
             size_bytes=data.get("size_bytes", 0),
             is_complete=data.get("is_complete", True),
+            version=data.get("version"),
         )
 
 
@@ -140,14 +143,32 @@ class ModelCache:
         """
         Get a cached model.
 
+        Validates the integrity of the cached entry by checking the
+        SHA-256 checksum before returning it.
+
         Args:
             model_id: Model identifier
 
         Returns:
-            CacheEntry if cached, None otherwise
+            CacheEntry if cached and valid, None otherwise
         """
         entry = self._entries.get(model_id)
         if entry and entry.local_path.exists():
+            # Validate integrity if checksum exists
+            if (
+                entry.checksum
+                and self.config.verify_checksums
+                and entry.local_path.is_file()
+            ):
+                current_checksum = self._compute_checksum(entry.local_path)
+                if current_checksum != entry.checksum:
+                    logger.warning(
+                        f"Cache integrity check failed for {model_id}: "
+                        f"expected {entry.checksum[:12]}..., "
+                        f"got {current_checksum[:12]}..."
+                    )
+                    return None
+
             entry.last_accessed = time.time()
             self._save_index()
             return entry
@@ -158,16 +179,19 @@ class ModelCache:
         model_id: str,
         local_path: Path,
         source_url: str | None = None,
-        compute_checksum: bool = True,
+        version: str | None = None,
     ) -> CacheEntry:
         """
         Add a model to the cache.
+
+        SHA-256 checksums are always computed for file integrity verification.
+        Version metadata is recorded for cache management.
 
         Args:
             model_id: Model identifier
             local_path: Path to cached files
             source_url: Original source URL
-            compute_checksum: If True, compute file checksum
+            version: Version string for cache entry metadata
 
         Returns:
             Created CacheEntry
@@ -175,13 +199,16 @@ class ModelCache:
         # Check if cleanup needed
         self._maybe_cleanup()
 
-        # Compute checksum if requested
+        # Always compute checksum for integrity verification
         checksum = None
-        if compute_checksum and local_path.is_file():
+        if local_path.is_file():
             checksum = self._compute_checksum(local_path)
 
         # Calculate size
         size = self._get_size(local_path)
+
+        # Use provided version or generate from timestamp
+        entry_version = version or time.strftime("%Y%m%d.%H%M%S")
 
         entry = CacheEntry(
             model_id=model_id,
@@ -189,6 +216,7 @@ class ModelCache:
             local_path=local_path,
             checksum=checksum,
             size_bytes=size,
+            version=entry_version,
         )
 
         self._entries[model_id] = entry

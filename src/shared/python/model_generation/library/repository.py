@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import re
 import tempfile
+import time
+import urllib.error
 import urllib.request
 import zipfile
 from abc import ABC, abstractmethod
@@ -196,6 +200,125 @@ class GitHubRepository(Repository):
     def description(self) -> str:
         return self._description
 
+    def _build_api_request(self, url: str) -> urllib.request.Request:
+        """
+        Build an API request with proper headers and authentication.
+
+        Args:
+            url: API endpoint URL
+
+        Returns:
+            Configured Request object
+        """
+        req = urllib.request.Request(url)
+        req.add_header("Accept", "application/vnd.github.v3+json")
+
+        token = os.environ.get("GITHUB_TOKEN")
+        if token:
+            req.add_header("Authorization", f"token {token}")
+
+        return req
+
+    def _api_request_with_retry(
+        self,
+        url: str,
+        max_retries: int = 3,
+        timeout: int = 10,
+        paginate: bool = False,
+    ) -> list:
+        """
+        Make an API request with retry logic and optional pagination.
+
+        Args:
+            url: API endpoint URL
+            max_retries: Maximum number of retries on transient failures
+            timeout: Request timeout in seconds
+            paginate: If True, follow Link headers for pagination
+
+        Returns:
+            Parsed JSON response (list)
+
+        Raises:
+            urllib.error.HTTPError: On non-retryable HTTP errors
+            OSError: On network errors after retries exhausted
+        """
+        all_results: list = []
+        current_url: str | None = url
+
+        while current_url:
+            data, next_url = self._single_api_request(
+                current_url, max_retries, timeout
+            )
+            if isinstance(data, list):
+                all_results.extend(data)
+            else:
+                all_results.append(data)
+
+            if paginate and next_url:
+                current_url = next_url
+            else:
+                break
+
+        return all_results
+
+    def _single_api_request(
+        self, url: str, max_retries: int, timeout: int
+    ) -> tuple[Any, str | None]:
+        """
+        Execute a single API request with retries.
+
+        Returns:
+            Tuple of (parsed data, next page URL or None)
+        """
+        last_error: Exception | None = None
+
+        for attempt in range(max_retries + 1):
+            try:
+                req = self._build_api_request(url)
+                with urllib.request.urlopen(req, timeout=timeout) as response:
+                    data = json.loads(response.read().decode())
+                    # Extract next page URL from Link header
+                    next_url = self._parse_link_header(response)
+                    return data, next_url
+
+            except urllib.error.HTTPError as e:
+                # Don't retry client errors (4xx)
+                if 400 <= e.code < 500:
+                    raise
+                last_error = e
+                if attempt < max_retries:
+                    wait = 2 ** attempt  # exponential backoff
+                    logger.warning(
+                        f"API request failed (HTTP {e.code}), "
+                        f"retrying in {wait}s (attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(wait)
+
+            except (TimeoutError, OSError) as e:
+                last_error = e
+                if attempt < max_retries:
+                    wait = 2 ** attempt
+                    logger.warning(
+                        f"API request failed ({type(e).__name__}), "
+                        f"retrying in {wait}s (attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(wait)
+
+        # All retries exhausted
+        if last_error is not None:
+            raise last_error
+        raise OSError(f"API request failed after {max_retries + 1} attempts")
+
+    @staticmethod
+    def _parse_link_header(response: Any) -> str | None:
+        """Parse the next page URL from a Link header."""
+        link_header = response.headers.get("Link")
+        if not link_header:
+            return None
+        # Parse: <url>; rel="next"
+        match = re.search(r'<([^>]+)>;\s*rel="next"', link_header)
+        return match.group(1) if match else None
+
     def list_models(self) -> list[RepositoryModel]:
         """List all URDF models in the repository."""
         if self._models_cache is not None:
@@ -219,11 +342,7 @@ class GitHubRepository(Repository):
         api_url = f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{path}"
 
         try:
-            req = urllib.request.Request(api_url)
-            req.add_header("Accept", "application/vnd.github.v3+json")
-
-            with urllib.request.urlopen(req, timeout=10) as response:
-                contents = json.loads(response.read().decode())
+            contents = self._api_request_with_retry(api_url, paginate=True)
 
             for item in contents:
                 if item["type"] == "file" and item["name"].endswith(".urdf"):
@@ -283,9 +402,7 @@ class GitHubRepository(Repository):
         )
 
         try:
-            req = urllib.request.Request(api_url)
-            with urllib.request.urlopen(req, timeout=10) as response:
-                contents = json.loads(response.read().decode())
+            contents = self._api_request_with_retry(api_url)
 
             local_mesh_dir = destination / "meshes"
             local_mesh_dir.mkdir(exist_ok=True)
