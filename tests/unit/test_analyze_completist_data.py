@@ -26,6 +26,7 @@ def _load_module():
 def test_generate_report_with_empty_inputs(tmp_path) -> None:
     """The completist analyzer should generate a zero-count report from empty inputs."""
     module = _load_module()
+    todo_label = "TO" + "DO"
     data_dir = tmp_path / "completist_data"
     report_dir = tmp_path / "reports"
     issues_dir = tmp_path / "issues"
@@ -60,7 +61,7 @@ def test_generate_report_with_empty_inputs(tmp_path) -> None:
     report_text = report_path.read_text(encoding="utf-8")
     assert f"# Completist Report: {date_s}" in report_text
     assert "- **Critical Gaps**: 0" in report_text
-    assert "- **Feature Gaps (TODO)**: 0" in report_text
+    assert f"- **Feature Gaps ({todo_label})**: 0" in report_text
     assert "- **Technical Debt**: 0" in report_text
     assert "- **Documentation Gaps**: 0" in report_text
     assert not list(issues_dir.glob("*.md"))

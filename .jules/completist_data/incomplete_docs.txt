@@ -136,7 +136,8 @@
 ./scripts/check_docs_governance.py:37 main
 ./scripts/generate_todo_fixme_register.py:14 main
 ./scripts/generate_fresh_assessment.py:48 main
-./scripts/analyze_completist_data.py:53 Finding
+./scripts/analyze_completist_data.py:53 FindingRequired
+./scripts/analyze_completist_data.py:59 Finding
 ./scripts/check_no_print_calls.py:47 changed_python_files
 ./scripts/check_no_print_calls.py:82 main
 ./scripts/scan_for_incomplete_code.py:5 scan_for_incomplete_code

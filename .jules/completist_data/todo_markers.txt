@@ -179,14 +179,14 @@
 ./scripts/generate_todo_fixme_register.py:41:        marker = "TODO" if "TODO" in text else "FIXME"
 ./scripts/refresh_completist_data.py:54:    # 2. Grep for TODOs
 ./scripts/refresh_completist_data.py:56:        "TODO|FIXME|XXX|HACK|TEMP",
-./scripts/analyze_completist_data.py:104:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
-./scripts/analyze_completist_data.py:116:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
-./scripts/analyze_completist_data.py:130:        if marker_item["type"] == "TODO":
-./scripts/analyze_completist_data.py:211:        "FIXME": 2,
-./scripts/analyze_completist_data.py:212:        "TODO": 3,
-./scripts/analyze_completist_data.py:285:    chart.append(f'    "Feature Requests (TODO)" : {len(todos)}')
-./scripts/analyze_completist_data.py:286:    chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
-./scripts/analyze_completist_data.py:432:        f"- **Feature Gaps (TODO)**: {len(todos)}",
+./scripts/analyze_completist_data.py:107:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
+./scripts/analyze_completist_data.py:119:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
+./scripts/analyze_completist_data.py:133:        if marker_item["type"] == "TODO":
+./scripts/analyze_completist_data.py:214:        "FIXME": 2,
+./scripts/analyze_completist_data.py:215:        "TODO": 3,
+./scripts/analyze_completist_data.py:288:    chart.append(f'    "Feature Requests (TODO)" : {len(todos)}')
+./scripts/analyze_completist_data.py:289:    chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
+./scripts/analyze_completist_data.py:435:        f"- **Feature Gaps (TODO)**: {len(todos)}",
 ./scripts/scan_for_incomplete_code.py:7:        "TODO": re.compile(r"TODO"),
 ./scripts/scan_for_incomplete_code.py:8:        "FIXME": re.compile(r"FIXME"),
 ./scripts/pragmatic_programmer_review.py:176:    """Report high TODO counts as a technical debt indicator."""

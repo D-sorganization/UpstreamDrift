@@ -29,7 +29,7 @@
 ./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./scripts/refresh_completist_data.py:61:    # 3. Grep for NotImplementedError
 ./scripts/refresh_completist_data.py:62:    run_grep("NotImplementedError", os.path.join(DATA_DIR, "not_implemented.txt"))
-./scripts/analyze_completist_data.py:210:        "NotImplementedError": 4,
+./scripts/analyze_completist_data.py:213:        "NotImplementedError": 4,
 ./scripts/scan_for_incomplete_code.py:9:        "NotImplementedError": re.compile(r"raise NotImplementedError"),
 ./scripts/verify_backends.py:40:    except NotImplementedError:
 ./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
