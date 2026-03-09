@@ -54,6 +54,23 @@ class ModificationMixin:
         self, base_name: str, existing_names: set[str]
     ) -> str: ...  # type: ignore[empty-body]
 
+    def _get_writable_model(self, model_id: str) -> ParsedModel | None:
+        """Look up a model by *model_id* and verify it is writable.
+
+        Returns the model if it exists and is not read-only, otherwise logs
+        an error and returns ``None``.
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return None
+
+        if model.read_only:
+            logger.error(f"Model '{model_id}' is read-only")
+            return None
+
+        return model
+
     # ============================================================
     # Direct Modifications
     # ============================================================
@@ -83,13 +100,8 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         link = model.get_link(link_name)
@@ -154,13 +166,8 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         subtree = model.get_subtree(root_link)
@@ -220,13 +227,8 @@ class ModificationMixin:
         if old_name == new_name:
             return True  # No-op
 
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         # Check for conflicts
@@ -290,13 +292,8 @@ class ModificationMixin:
         if old_name == new_name:
             return True  # No-op
 
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         # Check for conflicts
@@ -340,13 +337,8 @@ class ModificationMixin:
         Returns:
             True if modified
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         joint = model.get_joint(joint_name)
@@ -431,13 +423,8 @@ class ModificationMixin:
         Returns:
             True if attached
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         # Verify links exist
@@ -499,13 +486,8 @@ class ModificationMixin:
         Returns:
             True if detached
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         joint = self.get_connecting_joint(model_id, link_name)
@@ -552,13 +534,8 @@ class ModificationMixin:
         Returns:
             True if applied
         """
-        model = self._models.get(model_id)
+        model = self._get_writable_model(model_id)
         if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
             return False
 
         self._save_state()

@@ -171,7 +171,7 @@ def capsule_inertia(
     hemisphere_offset = length / 2.0 + (3.0 / 8.0) * radius
 
     # Perpendicular axis (parallel axis theorem)
-    i_sphere_perp = i_sphere_center + 0.5 * m_sphere * hemisphere_offset**2
+    i_sphere_perp = i_sphere_center + m_sphere * hemisphere_offset**2
 
     # Total inertia
     i_axial = i_cyl_axial + i_sphere_center
