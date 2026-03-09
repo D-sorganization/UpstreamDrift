@@ -11,6 +11,7 @@ needing heavy binary dependencies.
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 # --- Global Mocking Setup ---
 # We must mock these libs BEFORE importing the engines, because some engines
@@ -230,24 +231,45 @@ class TestMyoSuiteStrict:
         mock_gym.make.assert_called_with("myoElbow-v0")
         mock_env.reset.assert_called()
 
-    def test_step_uses_sim_if_available(self):
-        """MyoSuite should prefer underlying sim.step() if accessible."""
+    def test_loading_without_sim_raises_and_rolls_back_state(self):
+        """MyoSuite should fail fast if the env does not expose a MuJoCo sim."""
         engine = MyoSuitePhysicsEngine()
-        mock_env = MagicMock(spec=["sim", "reset", "step", "close", "action_space"])
+        mock_env = MagicMock(
+            spec=["reset", "step", "close", "observation_space", "action_space"]
+        )
+        mock_gym.make.return_value = mock_env
+
+        with pytest.raises(RuntimeError, match="MuJoCo sim"):
+            engine.load_from_path("myoElbow-v0")
+
+        assert engine.env is None
+        assert engine.sim is None
+        assert engine.env_id == ""
+
+    def test_step_uses_env_step_and_preserves_timestep(self):
+        """MyoSuite should step via Gym and ignore unsafe dt overrides."""
+        engine = MyoSuitePhysicsEngine()
+        mock_env = MagicMock(
+            spec=["sim", "reset", "step", "close", "action_space", "observation_space"]
+        )
         mock_sim = MagicMock(spec=["model", "data", "step"])
         mock_sim.model.opt.timestep = 0.01
+        mock_env.action_space.sample.return_value = np.array([1.0, -1.0])
 
         # Mock Env structure where env.sim exists
         mock_env.sim = mock_sim
         mock_gym.make.return_value = mock_env
 
         engine.load_from_path("foo")
-        assert engine.sim is mock_sim
+        assert engine.sim == mock_sim
 
-        engine.step(dt=0.2)  # Override dt (ignored safely in MyoSuite)
+        engine.step(dt=0.2)  # Override dt
 
-        # MyoSuite uses env.step() via the gym API (not sim.step() directly)
-        assert mock_env.step.called
+        mock_env.step.assert_called_once()
+        called_action = mock_env.step.call_args.args[0]
+        np.testing.assert_array_equal(called_action, np.zeros(2))
+        assert not mock_sim.step.called
+        assert mock_sim.model.opt.timestep == 0.01
 
 
 class TestPendulumStrict:
