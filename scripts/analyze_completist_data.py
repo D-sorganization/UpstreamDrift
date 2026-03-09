@@ -16,7 +16,7 @@ import os
 import re
 from collections.abc import Callable, Mapping
 from datetime import datetime
-from typing import Any, NotRequired, TypedDict, cast
+from typing import Any, TypedDict, cast
 
 # Constants and Configuration
 DATA_DIR = ".jules/completist_data"
@@ -50,12 +50,15 @@ EXCLUDED_PATHS = [
 logger = logging.getLogger(__name__)
 
 
-class Finding(TypedDict):
+class FindingRequired(TypedDict):
     file: str
     line: str
     type: str
-    text: NotRequired[str]
-    name: NotRequired[str]
+
+
+class Finding(FindingRequired, total=False):
+    text: str
+    name: str
 
 
 def is_excluded(filepath: str) -> bool:
