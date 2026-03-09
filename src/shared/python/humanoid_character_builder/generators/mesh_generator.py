@@ -948,13 +948,17 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             if not (0 <= start < actual_vertex_count):
                 logger.warning(
                     "Segment '%s' start index %d is out of range [0, %d)",
-                    name, start, actual_vertex_count,
+                    name,
+                    start,
+                    actual_vertex_count,
                 )
                 return False
             if not (0 < end <= actual_vertex_count):
                 logger.warning(
                     "Segment '%s' end index %d is out of range (0, %d]",
-                    name, end, actual_vertex_count,
+                    name,
+                    end,
+                    actual_vertex_count,
                 )
                 return False
         return True
@@ -1001,12 +1005,15 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                     if ranges:
                         logger.info(
                             "Loaded SMPL-X part segmentation from %s (%d segments)",
-                            seg_path, len(ranges),
+                            seg_path,
+                            len(ranges),
                         )
                         return ranges
                 except (json.JSONDecodeError, OSError, TypeError, ValueError) as exc:
                     logger.warning(
-                        "Failed to parse segmentation file %s: %s", seg_path, exc,
+                        "Failed to parse segmentation file %s: %s",
+                        seg_path,
+                        exc,
                     )
 
         logger.warning(

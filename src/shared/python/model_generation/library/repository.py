@@ -246,9 +246,7 @@ class GitHubRepository(Repository):
         current_url: str | None = url
 
         while current_url:
-            data, next_url = self._single_api_request(
-                current_url, max_retries, timeout
-            )
+            data, next_url = self._single_api_request(current_url, max_retries, timeout)
             if isinstance(data, list):
                 all_results.extend(data)
             else:
@@ -287,7 +285,7 @@ class GitHubRepository(Repository):
                     raise
                 last_error = e
                 if attempt < max_retries:
-                    wait = 2 ** attempt  # exponential backoff
+                    wait = 2**attempt  # exponential backoff
                     logger.warning(
                         f"API request failed (HTTP {e.code}), "
                         f"retrying in {wait}s (attempt {attempt + 1}/{max_retries})"
@@ -297,7 +295,7 @@ class GitHubRepository(Repository):
             except (TimeoutError, OSError) as e:
                 last_error = e
                 if attempt < max_retries:
-                    wait = 2 ** attempt
+                    wait = 2**attempt
                     logger.warning(
                         f"API request failed ({type(e).__name__}), "
                         f"retrying in {wait}s (attempt {attempt + 1}/{max_retries})"

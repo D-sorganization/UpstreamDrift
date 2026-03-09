@@ -10,14 +10,11 @@ Covers:
 
 from __future__ import annotations
 
-import hashlib
-import http.client
 import json
 import tempfile
-import time
 import urllib.error
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, call, mock_open, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -54,9 +51,7 @@ class TestXacroPreprocessing:
 
         parser = URDFParser()
         expected_xml = "<robot name='processed'></robot>"
-        mock_run.return_value = Mock(
-            returncode=0, stdout=expected_xml, stderr=""
-        )
+        mock_run.return_value = Mock(returncode=0, stdout=expected_xml, stderr="")
 
         result = parser._preprocess_xacro(Path("/tmp/robot.xacro"))
         assert result == expected_xml
@@ -64,9 +59,7 @@ class TestXacroPreprocessing:
         assert "xacro" in mock_run.call_args[0][0]
 
     @patch("subprocess.run")
-    def test_preprocess_xacro_fallback_on_failure(
-        self, mock_run: Mock
-    ) -> None:
+    def test_preprocess_xacro_fallback_on_failure(self, mock_run: Mock) -> None:
         """Should log warning and return None if xacro CLI fails."""
         from model_generation.converters.urdf_parser import URDFParser
 
@@ -82,9 +75,7 @@ class TestXacroPreprocessing:
         from model_generation.converters.urdf_parser import URDFParser
 
         parser = URDFParser()
-        mock_run.return_value = Mock(
-            returncode=1, stdout="", stderr="Error processing"
-        )
+        mock_run.return_value = Mock(returncode=1, stdout="", stderr="Error processing")
 
         result = parser._preprocess_xacro(Path("/tmp/robot.xacro"))
         assert result is None
@@ -106,13 +97,9 @@ class TestXacroPreprocessing:
             </link>
         </robot>
         """
-        mock_run.return_value = Mock(
-            returncode=0, stdout=processed_xml, stderr=""
-        )
+        mock_run.return_value = Mock(returncode=0, stdout=processed_xml, stderr="")
 
-        with tempfile.NamedTemporaryFile(
-            suffix=".xacro", delete=False, mode="w"
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".xacro", delete=False, mode="w") as f:
             f.write('<robot xmlns:xacro="http://www.ros.org/wiki/xacro"/>')
             xacro_path = Path(f.name)
 
@@ -143,9 +130,7 @@ class TestROSPackageResolution:
             mesh_file = pkg_dir / "body.stl"
             mesh_file.touch()
 
-            with patch.dict(
-                "os.environ", {"ROS_PACKAGE_PATH": tmpdir}
-            ):
+            with patch.dict("os.environ", {"ROS_PACKAGE_PATH": tmpdir}):
                 result = parser._resolve_mesh_path(
                     "package://my_robot/meshes/body.stl",
                     Path("/some/urdf/dir/robot.urdf"),
@@ -159,8 +144,10 @@ class TestROSPackageResolution:
 
         parser = URDFParser()
 
-        with tempfile.TemporaryDirectory() as tmpdir1, \
-             tempfile.TemporaryDirectory() as tmpdir2:
+        with (
+            tempfile.TemporaryDirectory() as tmpdir1,
+            tempfile.TemporaryDirectory() as tmpdir2,
+        ):
             # Mesh exists only in second path
             pkg_dir = Path(tmpdir2) / "my_robot" / "meshes"
             pkg_dir.mkdir(parents=True)
@@ -168,9 +155,7 @@ class TestROSPackageResolution:
             mesh_file.touch()
 
             ros_path = f"{tmpdir1}:{tmpdir2}"
-            with patch.dict(
-                "os.environ", {"ROS_PACKAGE_PATH": ros_path}
-            ):
+            with patch.dict("os.environ", {"ROS_PACKAGE_PATH": ros_path}):
                 result = parser._resolve_mesh_path(
                     "package://my_robot/meshes/body.stl",
                     Path("/some/urdf/dir/robot.urdf"),
@@ -212,11 +197,10 @@ class TestROSPackageResolution:
 
         parser = URDFParser()
 
-        with patch.dict(
-            "os.environ", {"ROS_PACKAGE_PATH": ""}, clear=False
-        ), patch(
-            "model_generation.converters.urdf_parser.logger"
-        ) as mock_logger:
+        with (
+            patch.dict("os.environ", {"ROS_PACKAGE_PATH": ""}, clear=False),
+            patch("model_generation.converters.urdf_parser.logger") as mock_logger,
+        ):
             result = parser._resolve_mesh_path(
                 "package://nonexistent_pkg/mesh.stl",
                 Path("/some/urdf/dir/robot.urdf"),
@@ -300,9 +284,7 @@ class TestGitHubAPIAuth:
         ]
 
         with patch("time.sleep"):  # Don't actually sleep
-            result = repo._api_request_with_retry(
-                "https://api.github.com/test"
-            )
+            result = repo._api_request_with_retry("https://api.github.com/test")
         assert result == []
         assert mock_urlopen.call_count == 3
 
@@ -367,16 +349,12 @@ class TestGitHubAPIAuth:
         ]
 
         with patch("time.sleep"):
-            result = repo._api_request_with_retry(
-                "https://api.github.com/test"
-            )
+            result = repo._api_request_with_retry("https://api.github.com/test")
         assert result == []
         assert mock_urlopen.call_count == 2
 
     @patch("urllib.request.urlopen")
-    def test_pagination_follows_link_header(
-        self, mock_urlopen: Mock
-    ) -> None:
+    def test_pagination_follows_link_header(self, mock_urlopen: Mock) -> None:
         """Should follow Link headers for pagination."""
         from model_generation.library.repository import GitHubRepository
 
