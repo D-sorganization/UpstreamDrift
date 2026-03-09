@@ -379,6 +379,19 @@ class ModelGenerationAPI:
 
     def handle_request(self, request: APIRequest) -> APIResponse:
         """Handle an API request."""
+        # Security pre-flight checks
+        auth_error = self._check_api_key(request)
+        if auth_error is not None:
+            self._add_security_headers(auth_error)
+            self._add_cors_headers(auth_error)
+            return auth_error
+
+        rate_error = self._check_rate_limit(request)
+        if rate_error is not None:
+            self._add_security_headers(rate_error)
+            self._add_cors_headers(rate_error)
+            return rate_error
+
         # Find matching route
         for route in self._routes:
             if route.method != request.method:
@@ -407,17 +420,20 @@ class ModelGenerationAPI:
                 try:
                     response = route.handler(request)
                     self._add_security_headers(response)
+                    self._add_cors_headers(response)
                     return response
                 except Exception as e:
                     logger.exception("Error handling request")
                     response = APIResponse.error(str(e), 500)
                     self._add_security_headers(response)
+                    self._add_cors_headers(response)
                     return response
 
         response = APIResponse.not_found(
             f"No route for {request.method.value} {request.path}"
         )
         self._add_security_headers(response)
+        self._add_cors_headers(response)
         return response
 
     # ============================================================
