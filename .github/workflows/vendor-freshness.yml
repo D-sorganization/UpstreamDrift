@@ -3,7 +3,7 @@ name: Vendor Submodule Freshness
 on:
   schedule:
     # Run nightly at 02:00 UTC
-    - cron: "0 2 * * *"
+    - cron: "0 8 * * 0,4"
   workflow_dispatch:
     inputs:
       auto_bump:
