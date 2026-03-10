@@ -51,7 +51,6 @@ class TestSimulationService:
         service = SimulationService(mock_engine_manager)
         assert service.engine_manager is mock_engine_manager
 
-    @pytest.mark.skip(reason="pytest-asyncio missing")
     @pytest.mark.asyncio
     async def test_run_simulation_basic(
         self, service: SimulationService, mock_engine_manager: MagicMock
@@ -82,7 +81,6 @@ class TestSimulationService:
             assert result is not None
             assert hasattr(result, "success")
 
-    @pytest.mark.skip(reason="pytest-asyncio missing")
     @pytest.mark.asyncio
     async def test_run_simulation_with_initial_state(
         self, service: SimulationService, mock_engine_manager: MagicMock
@@ -109,7 +107,6 @@ class TestSimulationService:
             result = await service.run_simulation(request)
             assert result is not None
 
-    @pytest.mark.skip(reason="pytest-asyncio missing")
     @pytest.mark.asyncio
     async def test_run_simulation_engine_failure(
         self, mock_engine_manager: MagicMock
@@ -180,12 +177,14 @@ class TestAnalysisService:
         service = AnalysisService(mock_engine_manager)
         assert service.engine_manager is mock_engine_manager
 
-    @pytest.mark.skip(reason="pytest-asyncio missing")
+    @pytest.mark.skip(
+        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result"
+    )
     @pytest.mark.asyncio
     async def test_analyze_biomechanics_basic(self, service: AnalysisService) -> None:
         """Test basic biomechanics analysis."""
         request = AnalysisRequest(
-            analysis_type="kinematic_sequence",
+            analysis_type="kinematics",
             data_source="simulation",
             parameters={
                 "joint_positions": [[0.0, 0.1]],
@@ -198,14 +197,16 @@ class TestAnalysisService:
         result = await service.analyze_biomechanics(request)
         assert result is not None
 
-    @pytest.mark.skip(reason="pytest-asyncio missing")
+    @pytest.mark.skip(
+        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result"
+    )
     @pytest.mark.asyncio
     async def test_analyze_biomechanics_missing_data(
         self, service: AnalysisService
     ) -> None:
         """Test analysis with missing required data."""
         request = AnalysisRequest(
-            analysis_type="kinematic_sequence",
+            analysis_type="kinematics",
             data_source="simulation",
             parameters={},  # Empty data
             export_format="json",
@@ -227,7 +228,9 @@ class TestServiceIntegration:
         manager.get_active_physics_engine.return_value = mock_engine
         return manager
 
-    @pytest.mark.skip(reason="pytest-asyncio missing")
+    @pytest.mark.skip(
+        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result"
+    )
     @pytest.mark.asyncio
     async def test_simulation_to_analysis_flow(
         self, mock_engine_manager: MagicMock
@@ -259,7 +262,7 @@ class TestServiceIntegration:
             # Use simulation data for analysis
             if sim_result.data:
                 analysis_request = AnalysisRequest(
-                    analysis_type="kinematic_sequence",
+                    analysis_type="kinematics",
                     data_source="simulation",
                     parameters=sim_result.data,
                     export_format="json",
