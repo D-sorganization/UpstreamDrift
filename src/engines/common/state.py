@@ -23,7 +23,7 @@ from typing import Any, TypeVar
 
 import numpy as np
 
-from src.shared.python.core.contracts import StateError
+from src.shared.python.core.contracts import StateError, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -121,6 +121,10 @@ class StateManager:
         >>> q, v = manager.get_state()
     """
 
+    @precondition(
+        lambda self, nq, nv, max_history=100: nq > 0 and nv > 0,
+        "nq and nv must be positive integers",
+    )
     def __init__(
         self,
         nq: int,
@@ -206,6 +210,10 @@ class StateManager:
         """
         return self._state.q.copy(), self._state.v.copy()
 
+    @precondition(
+        lambda self, dt: dt > 0,
+        "time step dt must be positive",
+    )
     def advance_time(self, dt: float) -> None:
         """Advance simulation time.
 
@@ -387,6 +395,10 @@ class ForceAccumulator:
         >>> by_source = accumulator.get_forces_by_source()
     """
 
+    @precondition(
+        lambda self, nv: nv > 0,
+        "nv must be a positive integer",
+    )
     def __init__(self, nv: int) -> None:
         """Initialize force accumulator.
 
@@ -402,6 +414,13 @@ class ForceAccumulator:
         self._sources.clear()
         self._generalized_forces.clear()
 
+    @precondition(
+        lambda self, name, force, torque=None, category="external": isinstance(
+            name, str
+        )
+        and len(name) > 0,
+        "force source name must be a non-empty string",
+    )
     def add_force(
         self,
         name: str,

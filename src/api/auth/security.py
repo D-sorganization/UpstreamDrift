@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
 from src.api.utils.datetime_compat import UTC
+from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 try:
@@ -61,6 +62,10 @@ REFRESH_TOKEN_EXPIRE_DAYS = 30
 BCRYPT_ROUNDS = 12
 
 
+@precondition(
+    lambda prefix: isinstance(prefix, str) and len(prefix) > 0,
+    "prefix must be a non-empty string",
+)
 def compute_prefix_hash(prefix: str) -> str:
     """Compute SHA256 hash of a non-sensitive prefix for database indexing.
 
@@ -93,6 +98,10 @@ class SecurityManager:
         self.secret_key = secret_key
         self.algorithm = ALGORITHM
 
+    @precondition(
+        lambda self, password: isinstance(password, str) and len(password) > 0,
+        "password must be a non-empty string",
+    )
     def hash_password(self, password: str) -> str:
         """Hash a password using bcrypt.
 
@@ -106,6 +115,16 @@ class SecurityManager:
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
         return hashed.decode("utf-8")  # type: ignore[no-any-return]
 
+    @precondition(
+        lambda self, plain_password, hashed_password: isinstance(plain_password, str)
+        and len(plain_password) > 0,
+        "plain_password must be a non-empty string",
+    )
+    @precondition(
+        lambda self, plain_password, hashed_password: isinstance(hashed_password, str)
+        and len(hashed_password) > 0,
+        "hashed_password must be a non-empty string",
+    )
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash.
 
@@ -123,13 +142,17 @@ class SecurityManager:
         except (ValueError, TypeError):
             return False
 
+    @precondition(
+        lambda self, data, expires_delta=None: isinstance(data, dict) and "sub" in data,
+        "data must be a dict containing a 'sub' (subject) claim",
+    )
     def create_access_token(
         self, data: dict[str, Any], expires_delta: timedelta | None = None
     ) -> str:
         """Create a JWT access token.
 
         Args:
-            data: Token payload data
+            data: Token payload data (must contain 'sub' key)
             expires_delta: Token expiration time
 
         Returns:
@@ -161,6 +184,15 @@ class SecurityManager:
         to_encode.update({"exp": expire, "type": "refresh"})
         return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
 
+    @precondition(
+        lambda self, token, token_type="access": isinstance(token, str)
+        and len(token) > 0,
+        "token must be a non-empty string",
+    )
+    @precondition(
+        lambda self, token, token_type="access": token_type in ("access", "refresh"),
+        "token_type must be 'access' or 'refresh'",
+    )
     def verify_token(self, token: str, token_type: str = "access") -> dict[str, Any]:
         """Verify and decode a JWT token.
 
@@ -282,6 +314,11 @@ class UsageTracker:
     def __init__(self) -> None:
         """Initialize usage tracker."""
 
+    @precondition(
+        lambda self, user, resource_type: resource_type
+        in ("api_calls", "video_analyses", "simulations"),
+        "resource_type must be 'api_calls', 'video_analyses', or 'simulations'",
+    )
     def check_quota(self, user: User, resource_type: str) -> bool:
         """Check if user has quota remaining for a resource.
 

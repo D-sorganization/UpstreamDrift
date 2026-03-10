@@ -8,6 +8,8 @@ from pathlib import Path
 
 import httpx
 
+from src.shared.python.core.contracts import precondition
+
 CLOUD_API_URL = "https://api.golf-suite.io"
 
 
@@ -29,6 +31,14 @@ class CloudClient:
         """Return whether the client has an active authentication token."""
         return self.token is not None
 
+    @precondition(
+        lambda self, email, password: isinstance(email, str) and "@" in email,
+        "email must be a valid email address",
+    )
+    @precondition(
+        lambda self, email, password: isinstance(password, str) and len(password) > 0,
+        "password must be a non-empty string",
+    )
     async def login(self, email: str, password: str) -> bool:
         """
         Log in to cloud services (optional).
