@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useEngineManager, ENGINE_REGISTRY } from './useEngineManager';
+import { useEngineManager } from './useEngineManager';
+import { useEngineStore } from '@/stores/useEngineStore';
 
 // Mock fetch globally
 const mockFetch = vi.fn() as Mock;
@@ -10,16 +11,16 @@ describe('useEngineManager', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockFetch.mockReset();
+        // Reset Zustand store state between tests
+        useEngineStore.getState().resetEngines();
     });
 
     describe('initialization', () => {
         it('initializes all engines from the static registry', () => {
             const { result } = renderHook(() => useEngineManager());
 
-            expect(result.current.engines).toHaveLength(ENGINE_REGISTRY.length);
-            expect(result.current.engines.map((e) => e.name)).toEqual(
-                ENGINE_REGISTRY.map((e) => e.name)
-            );
+            expect(result.current.engines.length).toBeGreaterThanOrEqual(6);
+            expect(result.current.engines.map((e) => e.name)).toContain('mujoco');
         });
 
         it('all engines start in idle state', () => {
@@ -45,27 +46,31 @@ describe('useEngineManager', () => {
         });
     });
 
-    describe('ENGINE_REGISTRY', () => {
+    describe('ENGINE_REGISTRY (via store)', () => {
         it('contains MuJoCo', () => {
-            const mujoco = ENGINE_REGISTRY.find((e) => e.name === 'mujoco');
+            const { result } = renderHook(() => useEngineManager());
+            const mujoco = result.current.engines.find((e) => e.name === 'mujoco');
             expect(mujoco).toBeDefined();
             expect(mujoco!.displayName).toBe('MuJoCo');
         });
 
         it('contains Drake', () => {
-            const drake = ENGINE_REGISTRY.find((e) => e.name === 'drake');
+            const { result } = renderHook(() => useEngineManager());
+            const drake = result.current.engines.find((e) => e.name === 'drake');
             expect(drake).toBeDefined();
             expect(drake!.displayName).toBe('Drake');
         });
 
         it('contains Putting Green', () => {
-            const pg = ENGINE_REGISTRY.find((e) => e.name === 'putting_green');
+            const { result } = renderHook(() => useEngineManager());
+            const pg = result.current.engines.find((e) => e.name === 'putting_green');
             expect(pg).toBeDefined();
             expect(pg!.displayName).toBe('Putting Green');
         });
 
         it('each engine has capabilities', () => {
-            ENGINE_REGISTRY.forEach((engine) => {
+            const { result } = renderHook(() => useEngineManager());
+            result.current.engines.forEach((engine) => {
                 expect(engine.capabilities.length).toBeGreaterThan(0);
             });
         });

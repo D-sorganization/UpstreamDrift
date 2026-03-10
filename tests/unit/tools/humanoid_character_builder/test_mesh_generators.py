@@ -188,18 +188,37 @@ class TestSMPLXGenerate:
     def _mock_smplx_output(
         self, n_verts: int = 10475, n_faces: int = 20000
     ) -> MagicMock:
-        """Create a mock SMPL-X model output."""
+        """Create a mock SMPL-X model output.
+
+        Generates face indices that are coherent with SMPLX_SEGMENT_VERTEX_RANGES
+        so that _segment_mesh can extract valid segments.
+        """
+        rng = np.random.default_rng(42)
+
         mock_output = MagicMock()
         mock_output.vertices = MagicMock()
-        mock_output.vertices.detach.return_value.cpu.return_value.numpy.return_value.squeeze.return_value = np.random.randn(
-            n_verts, 3
+        mock_output.vertices.detach.return_value.cpu.return_value.numpy.return_value.squeeze.return_value = rng.standard_normal(
+            (n_verts, 3)
         ).astype(np.float32)
 
         mock_model = MagicMock()
         mock_model.return_value = mock_output
-        mock_model.faces = np.random.randint(0, n_verts, size=(n_faces, 3)).astype(
-            np.int64
-        )
+
+        # Build faces that stay within segment vertex ranges so _segment_mesh
+        # can find them.  We allocate ~n_faces total across all segments.
+        ranges = list(SMPLXMeshGenerator.SMPLX_SEGMENT_VERTEX_RANGES.values())
+        faces_per_seg = max(1, n_faces // len(ranges))
+        all_faces: list[np.ndarray] = []
+        for start, end in ranges:
+            seg_size = end - start
+            if seg_size < 3:
+                continue
+            seg_faces = rng.integers(start, end, size=(faces_per_seg, 3))
+            all_faces.append(seg_faces)
+        mock_model.faces = np.vstack(all_faces).astype(np.int64)
+
+        # Make lbs_weights raise AttributeError so fallback path is used
+        del mock_model.lbs_weights
 
         return mock_model
 

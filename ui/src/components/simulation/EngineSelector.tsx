@@ -1,5 +1,5 @@
 import { Loader2, Check, AlertCircle, Power, PowerOff } from 'lucide-react';
-import type { ManagedEngine, EngineLoadState } from '@/api/useEngineManager';
+import type { ManagedEngine, EngineLoadState } from '@/stores/useEngineStore';
 
 interface Props {
   engines: ManagedEngine[];
@@ -108,6 +108,19 @@ export function EngineSelector({
                 <div className="text-xs text-gray-400 mt-1 ml-6">
                   {engine.description}
                 </div>
+                {engine.capabilities.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5 ml-6">
+                    {engine.capabilities.map((cap) => (
+                      <span
+                        key={cap}
+                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-600/50 text-gray-300 border border-gray-500/30"
+                        title={cap.replace(/_/g, ' ')}
+                      >
+                        {cap.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="text-xs mt-1 ml-6">
                   <LoadStateLabel engine={engine} />
                 </div>

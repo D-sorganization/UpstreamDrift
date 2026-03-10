@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen, fireEvent } from '@testing-library/dom';
 import { EngineSelector } from './EngineSelector';
-import type { ManagedEngine } from '@/api/useEngineManager';
+import type { ManagedEngine } from '@/stores/useEngineStore';
 
 const createEngine = (overrides: Partial<ManagedEngine> = {}): ManagedEngine => ({
   name: 'mujoco',
