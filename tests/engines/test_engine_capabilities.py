@@ -26,6 +26,7 @@ from src.engines.common.simulation_control import (
     SimulationController,
     SimulationMode,
 )
+from src.shared.python.core.contracts.exceptions import PreconditionError
 
 # =============================================================================
 # EngineCapabilities Tests
@@ -346,13 +347,15 @@ class TestSimulationController:
         assert ctrl.mode == SimulationMode.IDLE
 
     def test_invalid_start_from_running(self, ctrl: _MockController) -> None:
-        """Cannot start when already running."""
+        """Cannot start when already running — raises PreconditionError."""
         ctrl.start()
-        assert not ctrl.start()
+        with pytest.raises(PreconditionError):
+            ctrl.start()
 
     def test_invalid_pause_from_idle(self, ctrl: _MockController) -> None:
-        """Cannot pause when idle."""
-        assert not ctrl.pause()
+        """Cannot pause when idle — raises PreconditionError."""
+        with pytest.raises(PreconditionError):
+            ctrl.pause()
 
     def test_single_step(self, ctrl: _MockController) -> None:
         """Single step should execute one step and pause."""

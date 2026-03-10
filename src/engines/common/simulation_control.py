@@ -27,6 +27,8 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
+
 logger = logging.getLogger(__name__)
 
 
@@ -135,54 +137,62 @@ class SimulationController(ABC):
 
     # --- Lifecycle ---
 
+    @precondition(
+        lambda self: self._mode in {SimulationMode.IDLE, SimulationMode.PAUSED},
+        "Can only start from IDLE or PAUSED state",
+    )
     def start(self) -> bool:
         """Start or resume simulation.
 
         Returns:
             True if transition was successful
         """
-        if self._mode in {SimulationMode.IDLE, SimulationMode.PAUSED}:
-            self._mode = SimulationMode.RUNNING
-            logger.info("Simulation started")
-            return True
-        return False
+        self._mode = SimulationMode.RUNNING
+        logger.info("Simulation started")
+        return True
 
+    @precondition(
+        lambda self: self._mode == SimulationMode.RUNNING,
+        "Can only pause from RUNNING state",
+    )
     def pause(self) -> bool:
         """Pause simulation.
 
         Returns:
             True if transition was successful
         """
-        if self._mode == SimulationMode.RUNNING:
-            self._mode = SimulationMode.PAUSED
-            logger.info("Simulation paused")
-            return True
-        return False
+        self._mode = SimulationMode.PAUSED
+        logger.info("Simulation paused")
+        return True
 
+    @precondition(
+        lambda self: self._mode in {SimulationMode.RUNNING, SimulationMode.PAUSED},
+        "Can only stop from RUNNING or PAUSED state",
+    )
     def stop(self) -> bool:
         """Stop simulation and return to idle.
 
         Returns:
             True if transition was successful
         """
-        if self._mode in {SimulationMode.RUNNING, SimulationMode.PAUSED}:
-            self._mode = SimulationMode.IDLE
-            logger.info("Simulation stopped")
-            return True
-        return False
+        self._mode = SimulationMode.IDLE
+        logger.info("Simulation stopped")
+        return True
 
+    @precondition(
+        lambda self: self._mode in {SimulationMode.IDLE, SimulationMode.PAUSED},
+        "Can only single-step from IDLE or PAUSED state",
+    )
     def single_step(self) -> bool:
         """Execute a single timestep.
 
         Returns:
             True if step was executed
         """
-        if self._mode in {SimulationMode.IDLE, SimulationMode.PAUSED}:
-            self._mode = SimulationMode.STEPPING
-            self._do_step()
-            self._mode = SimulationMode.PAUSED
-            return True
-        return False
+        self._mode = SimulationMode.STEPPING
+        self._do_step()
+        self._mode = SimulationMode.PAUSED
+        return True
 
     @abstractmethod
     def _do_step(self) -> None:
