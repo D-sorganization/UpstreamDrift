@@ -58,24 +58,26 @@ use wasm_bindgen::prelude::*;
 /// Create a default IntegratorConfig for browser-side physics (WASM).
 #[cfg(feature = "wasm")]
 #[wasm_bindgen(js_name = "createIntegratorConfig")]
-pub fn create_integrator_config(dt: f64, max_steps: u32) -> JsValue {
+pub fn create_integrator_config(dt: f64, max_steps: u32) -> Result<JsValue, JsValue> {
     let config = rk4::IntegratorConfig {
         dt,
         max_steps: max_steps as usize,
     };
-    serde_wasm_bindgen::to_value(&config).unwrap_or(JsValue::NULL)
+    serde_wasm_bindgen::to_value(&config)
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize IntegratorConfig: {e}")))
 }
 
 /// Create default ContactParameters for browser-side physics (WASM).
 #[cfg(feature = "wasm")]
 #[wasm_bindgen(js_name = "createContactParameters")]
-pub fn create_contact_parameters(cor: f64, friction: f64) -> JsValue {
+pub fn create_contact_parameters(cor: f64, friction: f64) -> Result<JsValue, JsValue> {
     let params = contact::ContactParameters {
         cor,
         friction,
         ..Default::default()
     };
-    serde_wasm_bindgen::to_value(&params).unwrap_or(JsValue::NULL)
+    serde_wasm_bindgen::to_value(&params)
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize ContactParameters: {e}")))
 }
 
 /// Compute aerodynamic forces for browser-side physics (WASM).
@@ -89,7 +91,7 @@ pub fn wasm_compute_aero_forces(
     sy: f64,
     sz: f64,
     air_density: f64,
-) -> JsValue {
+) -> Result<JsValue, JsValue> {
     let velocity = Vector3::new(vx, vy, vz);
     let spin = Vector3::new(sx, sy, sz);
     let ball = aerodynamics::AeroBallProperties::default();
@@ -98,5 +100,6 @@ pub fn wasm_compute_aero_forces(
         ..Default::default()
     };
     let forces = aerodynamics::compute_aero_forces(&velocity, &spin, &ball, &air);
-    serde_wasm_bindgen::to_value(&forces).unwrap_or(JsValue::NULL)
+    serde_wasm_bindgen::to_value(&forces)
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize AeroForces: {e}")))
 }

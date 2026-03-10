@@ -346,52 +346,56 @@ class DrakePhysicsEngine(PhysicsEngine):
         )
         return cast(np.ndarray, forces)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def compute_contact_forces(self) -> np.ndarray:
         """Compute total contact forces (ground reaction force, GRF).
 
-        Notes:
-            This Drake wrapper currently returns a placeholder zero vector for the
-            GRF. Retrieving precise contact forces in Drake requires querying
-            :class:`ContactResults` from the simulation :class:`Context`, which is
-            typically produced and managed by a :class:`Simulator` and is not
-            readily accessible through this lightweight wrapper interface.
-
-            If you need accurate GRFs, integrate directly with Drake's
-            ``MultibodyPlant`` and ``Simulator`` APIs and accumulate forces from
-            the ``ContactResults`` output.
+        Uses Drake's ContactResults API to query real contact forces from the
+        simulation context. Requires that the simulator has advanced at least
+        one step so contact results are populated.
 
         Returns:
-            f: (3,) vector representing total ground reaction force (currently
-                always zeros as a placeholder).
+            f: (3,) vector representing total ground reaction force [N].
+                Returns zeros if no contacts exist or simulator is unavailable.
         """
-        if not self.plant_context:
+        if not self.plant_context or not self.diagram or not self.context:
             return np.zeros(3)
 
-        # In Drake, contact forces are typically accessed via GetContactResults.
-        # This requires the context to have been updated with contact results.
-        #
-        # NOTE: This implementation assumes CalcContactResults has been called
-        # by simulation or we force it here if possible.
-        # But contact results are usually output of Simulator.
-        #
-        # For simplicity in this wrapper, we try to access generalized contact forces
-        # or return zero if not easily accessible without full simulation integration.
-        #
-        # Placeholder: Retrieving precise GRF in Drake requires querying ContactResults
-        # from the Context, summing up forces on 'ground' bodies.
-        #
-        # As a simplified proxy, we can inspect generalized contact forces if available
-        # but that's in joint space.
+        try:
+            # Get the contact results output port from the plant
+            contact_results_port = self.plant.get_contact_results_output_port()
+            contact_results = contact_results_port.Eval(self.plant_context)
 
-        logger.warning(
-            "DrakePhysicsEngine.compute_contact_forces currently returns a "
-            "placeholder zero GRF vector. Precise contact forces require querying "
-            "ContactResults from a Simulator-managed Context, which is not exposed "
-            "through this wrapper. For accurate GRFs, use Drake's MultibodyPlant/"
-            "Simulator APIs directly."
-        )
+            # Sum all point contact forces
+            total_force = np.zeros(3)
+            n_contacts = contact_results.num_point_pair_contacts()
 
-        return np.zeros(3)
+            for i in range(n_contacts):
+                point_contact = contact_results.point_pair_contact_info(i)
+                # Contact force is along the contact normal, scaled by force magnitude
+                contact_force = point_contact.contact_force()
+                total_force += np.array(
+                    [contact_force[0], contact_force[1], contact_force[2]]
+                )
+
+            if n_contacts > 0:
+                logger.debug(
+                    "Computed GRF from %d contact points: magnitude=%.2f N",
+                    n_contacts,
+                    float(np.linalg.norm(total_force)),
+                )
+
+            return total_force
+
+        except (AttributeError, RuntimeError, TypeError) as e:
+            # ContactResults API may not be available in all Drake configurations
+            logger.warning(
+                "Could not query ContactResults: %s. "
+                "Returning zero GRF. Ensure the simulator has advanced at "
+                "least one step for contact results to be populated.",
+                e,
+            )
+            return np.zeros(3)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
