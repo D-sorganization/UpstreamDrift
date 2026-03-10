@@ -145,6 +145,11 @@ line_run.txt
 open_issues.txt
 issues.json
 saved_states/
+pr_checks.json
+*.docx
+failed_pytest.log
+ci_failed_pytest.log
+.tmp_gui_test.log
 
 # Root-level junk analysis docs (belong in docs/development/ per AGENTS.md)
 BUILD_INFRASTRUCTURE_REVIEW.md
