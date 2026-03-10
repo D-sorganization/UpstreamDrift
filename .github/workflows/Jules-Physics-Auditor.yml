@@ -15,8 +15,7 @@ on:
           - ball_flight
           - equipment
           - statistics
-  schedule:
-    - cron: "0 0 * * 0,4" # Tuesdays and Fridays at 2 AM UTC (within midnight-4 AM window)
+  # schedule: DISABLED to reduce CI cost (see #1751)
 
 permissions:
   contents: write

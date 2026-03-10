@@ -23,9 +23,8 @@ on:
           - "security"
           - "documentation"
           - "testing"
-  schedule:
+  # schedule: DISABLED to reduce CI cost (see #1751)
     # Run weekly on Mondays at 3 AM UTC to fix top 5 issues
-    - cron: "0 0 * * 0,4"
 
 permissions:
   contents: write

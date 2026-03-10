@@ -11,11 +11,15 @@ HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"
 
 # Import URDFGenerator if PyQt6 is available
 if PYQT6_AVAILABLE:
-    from src.tools.model_explorer.main_window import (
-        URDFGeneratorWindow as URDFGenerator,
-    )
+    try:
+        from src.tools.model_explorer.main_window import (
+            URDFGeneratorWindow as URDFGenerator,
+        )
+    except (ImportError, OSError):
+        # QtOpenGLWidgets DLL may fail to load in CI or headless environments
+        URDFGenerator = None  # type: ignore[assignment, misc]
 else:
-    URDFGenerator = None  # type: ignore
+    URDFGenerator = None  # type: ignore[assignment, misc]
 
 
 class MockFileDialog:

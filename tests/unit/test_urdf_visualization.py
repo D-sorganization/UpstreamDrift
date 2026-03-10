@@ -17,11 +17,18 @@ pytestmark = pytest.mark.skipif(
 )
 
 if PYQT6_AVAILABLE:
-    from src.tools.model_explorer.mujoco_viewer import (
-        MuJoCoViewerWidget,
-        VisualizationFlags,
-    )
-    from src.tools.model_explorer.visualization_widget import VisualizationWidget
+    try:
+        from src.tools.model_explorer.mujoco_viewer import (
+            MuJoCoViewerWidget,
+            VisualizationFlags,
+        )
+        from src.tools.model_explorer.visualization_widget import VisualizationWidget
+    except (ImportError, OSError):
+        # QtOpenGLWidgets DLL may fail to load in CI or headless environments
+        pytest.skip(
+            "PyQt6 OpenGL widgets unavailable (DLL load failure)",
+            allow_module_level=True,
+        )
 
 
 def test_visualization_widget_init(qtbot):

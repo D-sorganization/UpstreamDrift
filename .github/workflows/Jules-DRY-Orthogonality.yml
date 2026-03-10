@@ -10,9 +10,8 @@ name: Jules DRY & Orthogonality
 # Note: Creates issues instead of PRs to avoid CI blocking on TODO comments
 
 on:
-  schedule:
+  # schedule: DISABLED to reduce CI cost (see #1751)
     # Daily at 4 AM PST (12 UTC)
-    - cron: "0 0 * * 0,4"
   workflow_dispatch:
     inputs:
       target_category:

@@ -33,9 +33,8 @@ on:
         description: "Specific issue number (overrides other filters)"
         required: false
         type: string
-  schedule:
+  # schedule: DISABLED to reduce CI cost (see #1751)
     # Weekly on Monday at 6 AM UTC - conservative to prevent PR explosion
-    - cron: "0 0 * * 0,4"
 
 permissions:
   contents: read

@@ -14,8 +14,7 @@ on:
         required: false
         default: "10"
         type: string
-  schedule:
-    - cron: "0 0 * * 0,4" # Weekly on Sunday at 5 AM PST / 1 PM UTC
+  # schedule: DISABLED to reduce CI cost (see #1751)
 
 permissions:
   contents: write

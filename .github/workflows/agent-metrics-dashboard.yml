@@ -1,9 +1,8 @@
 name: Agent Metrics Dashboard
 
 on:
-  schedule:
+  # schedule: DISABLED to reduce CI cost (see #1751)
     # Every Monday at 10am UTC (after CI failure digest)
-    - cron: "0 0 * * 0,4"
   workflow_dispatch: # Allow manual trigger
 
 permissions:

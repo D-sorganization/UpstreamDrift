@@ -17,8 +17,7 @@ on:
           - statistics
           - simulation
           - control_theory
-  schedule:
-    - cron: "0 0 * * 0,4" # Wednesdays at 03:00 UTC (within the 00:00–04:00 UTC window)
+  # schedule: DISABLED to reduce CI cost (see #1751)
 
 permissions:
   contents: write

@@ -27,8 +27,7 @@ on:
           - auto
           - create
           - refine
-  schedule:
-    - cron: "0 0 * * 0,4" # Daily at 2 AM UTC (overnight schedule)
+  # schedule: DISABLED to reduce CI cost (see #1751)
 
 permissions:
   contents: write
