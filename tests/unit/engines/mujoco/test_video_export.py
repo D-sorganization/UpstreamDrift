@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -22,10 +21,30 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export
     export_simulation_video,
 )
 
+# Path to the mujoco module reference inside video_export (imported as `mj`)
+_VID_EXPORT_MJ = (
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.mj"
+)
+
 # Mock constants for headless environment
 WIDTH = 640
 HEIGHT = 480
 FPS = 30
+
+
+def _make_mock_mj(**overrides: Any) -> MagicMock:
+    """Create a mock mujoco module that preserves enum types but stubs C functions."""
+    mock = MagicMock()
+    mock.mjtObj = mujoco.mjtObj
+    mock.mjtJoint = mujoco.mjtJoint
+    mock.mjtGeom = mujoco.mjtGeom
+    # Return a dummy black frame from the Renderer mock
+    renderer_inst = MagicMock()
+    renderer_inst.render.return_value = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
+    mock.Renderer.return_value = renderer_inst
+    for key, val in overrides.items():
+        setattr(mock, key, val)
+    return mock
 
 
 @pytest.fixture
@@ -45,37 +64,17 @@ def mock_mujoco() -> tuple[MagicMock, MagicMock]:
 
 
 @pytest.fixture
-def mock_renderer() -> Generator[MagicMock, None, None]:
-    """Mock the MuJoCo Renderer."""
-    with patch("mujoco.Renderer") as mock:
-        renderer = mock.return_value
-        # Return a dummy black frame
-        renderer.render.return_value = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
-        yield mock
-
-
-@pytest.fixture
 def mock_cv2() -> Any:
     """Mock cv2 module."""
-    # Since we mocked it in sys.modules, we can just grab it
     mock = sys.modules["cv2"]
-
-    # Reset mock
     mock.reset_mock()
 
-    # Mock VideoWriter
     writer = MagicMock()
     writer.isOpened.return_value = True
     mock.VideoWriter.return_value = writer
-
-    # Mock cvtColor (pass-through for shape check)
     mock.cvtColor.side_effect = lambda img, code: img
-
-    # Mock constants
     mock.COLOR_RGB2BGR = 1  # type: ignore[attr-defined]
     mock.FONT_HERSHEY_SIMPLEX = 1  # type: ignore[attr-defined]
-
-    # Mock VideoWriter_fourcc to return an int (like real cv2)
     mock.VideoWriter_fourcc.return_value = 0x7634706D  # mp4v
 
     return mock
@@ -92,26 +91,37 @@ def mock_imageio() -> Any:
 class TestVideoExporter:
     """Tests for the VideoExporter class."""
 
-    def test_init(self, mock_mujoco, mock_renderer) -> None:
+    def test_init(self, mock_mujoco: tuple[MagicMock, MagicMock]) -> None:
         """Test VideoExporter initialization."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS)
+        mock_mj = _make_mock_mj()
+
+        with patch(_VID_EXPORT_MJ, mock_mj):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS)
 
         assert exporter.width == WIDTH
         assert exporter.height == HEIGHT
         assert exporter.fps == FPS
         assert exporter.format == VideoFormat.MP4
-        mock_renderer.assert_called_once_with(model, width=WIDTH, height=HEIGHT)
+        mock_mj.Renderer.assert_called_once_with(model, width=WIDTH, height=HEIGHT)
 
-    def test_start_recording_mp4(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+    def test_start_recording_mp4(
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_cv2: Any,
+    ) -> None:
         """Test starting MP4 recording."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
+        mock_mj = _make_mock_mj()
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-            True,
+        with (
+            patch(_VID_EXPORT_MJ, mock_mj),
+            patch(
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
+                True,
+            ),
         ):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             success = exporter.start_recording("test.mp4")
 
         assert success
@@ -123,82 +133,119 @@ class TestVideoExporter:
         assert exporter.writer is not None
 
     def test_start_recording_gif(
-        self, mock_mujoco, mock_renderer, mock_imageio
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_imageio: Any,
     ) -> None:
         """Test starting GIF recording."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
+        mock_mj = _make_mock_mj()
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
-            True,
+        with (
+            patch(_VID_EXPORT_MJ, mock_mj),
+            patch(
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
+                True,
+            ),
         ):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
             success = exporter.start_recording("test.gif")
 
         assert success
         assert exporter.frames == []
         assert exporter.writer is None
 
-    def test_add_frame_video(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+    def test_add_frame_video(
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_cv2: Any,
+    ) -> None:
         """Test adding a frame to video recording."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
+        mock_mj = _make_mock_mj()
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-            True,
+        with (
+            patch(_VID_EXPORT_MJ, mock_mj),
+            patch(
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
+                True,
+            ),
         ):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             exporter.start_recording("test.mp4")
             exporter.add_frame()
 
-        mock_renderer.return_value.update_scene.assert_called_with(data, camera=None)
-        mock_renderer.return_value.render.assert_called_once()
+        renderer = mock_mj.Renderer.return_value
+        renderer.update_scene.assert_called_with(data, camera=None)
+        renderer.render.assert_called_once()
         mock_cv2.cvtColor.assert_called_once()
         exporter.writer.write.assert_called_once()
         assert exporter.frame_count == 1
 
-    def test_add_frame_gif(self, mock_mujoco, mock_renderer, mock_imageio) -> None:
+    def test_add_frame_gif(
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_imageio: Any,
+    ) -> None:
         """Test adding a frame to GIF recording."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
+        mock_mj = _make_mock_mj()
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
-            True,
+        with (
+            patch(_VID_EXPORT_MJ, mock_mj),
+            patch(
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
+                True,
+            ),
         ):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
             exporter.start_recording("test.gif")
             exporter.add_frame()
 
         assert len(exporter.frames) == 1
         assert exporter.frame_count == 1
 
-    def test_finish_recording_video(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+    def test_finish_recording_video(
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_cv2: Any,
+    ) -> None:
         """Test finishing video recording."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
+        mock_mj = _make_mock_mj()
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
-            True,
+        with (
+            patch(_VID_EXPORT_MJ, mock_mj),
+            patch(
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
+                True,
+            ),
         ):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             exporter.start_recording("test.mp4")
-            writer = exporter.writer  # Capture the writer before it's cleared
+            writer = exporter.writer
             exporter.finish_recording()
 
         writer.release.assert_called_once()
         assert exporter.writer is None
 
     def test_finish_recording_gif(
-        self, mock_mujoco, mock_renderer, mock_imageio
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_imageio: Any,
     ) -> None:
         """Test finishing GIF recording."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
+        mock_mj = _make_mock_mj()
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
-            True,
+        with (
+            patch(_VID_EXPORT_MJ, mock_mj),
+            patch(
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.IMAGEIO_AVAILABLE",
+                True,
+            ),
         ):
+            exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.GIF)
             exporter.start_recording("test.gif")
             exporter.add_frame()
             exporter.finish_recording("test.gif")
@@ -206,10 +253,14 @@ class TestVideoExporter:
         mock_imageio.mimsave.assert_called_once()
         assert exporter.frames == []
 
-    def test_export_recording(self, mock_mujoco, mock_renderer, mock_cv2) -> None:
+    def test_export_recording(
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_cv2: Any,
+    ) -> None:
         """Test full export recording workflow."""
         model, data = mock_mujoco
-        exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
+        mock_mj = _make_mock_mj()
 
         initial_state = np.zeros(4)  # nq=2 + nv=2
 
@@ -221,23 +272,20 @@ class TestVideoExporter:
             """No-op progress callback."""
 
         with (
-            patch("mujoco.mj_forward"),
-            patch("mujoco.mj_step"),
+            patch(_VID_EXPORT_MJ, mock_mj),
             patch(
-                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
                 True,
             ),
         ):
-            # We need to capture the writer after start_recording is called inside
-            # export_recording
-            # But we can't easily access it from outside.
-            # We can verify the mock_cv2.VideoWriter().release() was called.
-
+            success = exporter = VideoExporter(
+                model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4
+            )
             success = exporter.export_recording(
                 "test.mp4",
                 initial_state,
                 control_func,
-                duration=0.1,  # Short duration -> few frames
+                duration=0.1,
                 progress_callback=progress_cb,
             )
 
@@ -245,7 +293,11 @@ class TestVideoExporter:
         assert exporter.frame_count > 0
         mock_cv2.VideoWriter.return_value.release.assert_called_once()
 
-    def test_metrics_overlay(self, mock_mujoco, mock_cv2) -> None:
+    def test_metrics_overlay(
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_cv2: Any,
+    ) -> None:
         """Test metrics overlay rendering on frames."""
         model, data = mock_mujoco
         frame = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
@@ -253,20 +305,22 @@ class TestVideoExporter:
         metrics = {"Test Metric": lambda d: 42.0}
 
         with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
             True,
         ):
             out_frame = create_metrics_overlay(frame, 1.0, data, metrics)
 
-        # Check that putText was called for time and metric
         assert mock_cv2.putText.call_count >= 2
-        assert out_frame is not frame  # Should return a copy or modified frame
+        assert out_frame is not frame
 
     def test_export_simulation_video_function(
-        self, mock_mujoco, mock_renderer, mock_cv2
+        self,
+        mock_mujoco: tuple[MagicMock, MagicMock],
+        mock_cv2: Any,
     ) -> None:
         """Test the export_simulation_video convenience function."""
         model, data = mock_mujoco
+        mock_mj = _make_mock_mj()
 
         N = 10
         states = np.zeros((N, 4))
@@ -274,10 +328,9 @@ class TestVideoExporter:
         times = np.linspace(0, 1, N)
 
         with (
-            patch("mujoco.mj_forward"),
-            patch("mujoco.mj_name2id", return_value=-1),
+            patch(_VID_EXPORT_MJ, mock_mj),
             patch(
-                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.CV2_AVAILABLE",
                 True,
             ),
         ):
@@ -295,5 +348,4 @@ class TestVideoExporter:
             )
 
         assert success
-        # Verify VideoExporter usage implicitly via mock_cv2
         mock_cv2.VideoWriter.assert_called_once()

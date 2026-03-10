@@ -43,7 +43,12 @@ def mock_mujoco_model_data() -> tuple:
 def test_telemetry_recorder_init(mock_mujoco_model_data) -> None:
     model, _ = mock_mujoco_model_data
 
-    with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
+    with patch(
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
+    ) as mock_mujoco:
+        mock_mujoco.mjtObj = mujoco.mjtObj
+        mock_mujoco.mjtTrn = mujoco.mjtTrn
+        mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
         recorder = TelemetryRecorder(model)
 
     assert len(recorder._body_names) == 2
@@ -54,7 +59,12 @@ def test_telemetry_recorder_init(mock_mujoco_model_data) -> None:
 def test_telemetry_recorder_record_step(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
-    with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
+    with patch(
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
+    ) as mock_mujoco:
+        mock_mujoco.mjtObj = mujoco.mjtObj
+        mock_mujoco.mjtTrn = mujoco.mjtTrn
+        mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
         recorder = TelemetryRecorder(model)
         recorder.add_custom_metric("test_metric", 123.45)
         recorder.record_step(data)
@@ -76,7 +86,12 @@ def test_telemetry_recorder_record_step(mock_mujoco_model_data) -> None:
 def test_telemetry_report_generation(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
-    with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
+    with patch(
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
+    ) as mock_mujoco:
+        mock_mujoco.mjtObj = mujoco.mjtObj
+        mock_mujoco.mjtTrn = mujoco.mjtTrn
+        mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
         recorder = TelemetryRecorder(model)
 
         # Step 1
@@ -101,7 +116,12 @@ def test_telemetry_report_generation(mock_mujoco_model_data) -> None:
 def test_telemetry_reset(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
-    with patch("mujoco.mj_id2name", side_effect=lambda m, t, i: f"obj_{i}"):
+    with patch(
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
+    ) as mock_mujoco:
+        mock_mujoco.mjtObj = mujoco.mjtObj
+        mock_mujoco.mjtTrn = mujoco.mjtTrn
+        mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
         recorder = TelemetryRecorder(model)
         recorder.record_step(data)
         assert len(recorder.samples) == 1

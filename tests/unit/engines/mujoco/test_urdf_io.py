@@ -17,6 +17,24 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io impo
     import_urdf_to_mujoco,
 )
 
+# Path to the mujoco module reference inside urdf_io
+_URDF_IO_MUJOCO = (
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco"
+)
+
+
+def _make_mock_mujoco(**overrides: Any) -> MagicMock:
+    """Create a mock mujoco module that preserves enum types but stubs C functions."""
+    mock = MagicMock()
+    # Preserve real enum types so comparisons work
+    mock.mjtObj = mujoco.mjtObj
+    mock.mjtJoint = mujoco.mjtJoint
+    mock.mjtGeom = mujoco.mjtGeom
+    mock.mjtTrn = getattr(mujoco, "mjtTrn", MagicMock())
+    for key, val in overrides.items():
+        setattr(mock, key, val)
+    return mock
+
 
 @pytest.fixture
 def mock_mujoco_model() -> MagicMock:
@@ -102,86 +120,59 @@ def sample_urdf_xml() -> str:
     """
 
 
-def test_urdf_exporter_init(mock_mujoco_model) -> None:
+def test_urdf_exporter_init(mock_mujoco_model: MagicMock) -> None:
     """Test URDFExporter initialization."""
-    with patch("mujoco.MjData", autospec=True) as mock_data_cls:
+    mock_mj = _make_mock_mujoco()
+    mock_mj.MjData.return_value = MagicMock()
+
+    with patch(_URDF_IO_MUJOCO, mock_mj):
         exporter = URDFExporter(mock_mujoco_model)
         assert exporter.model == mock_mujoco_model
-        assert exporter.data == mock_data_cls.return_value
+        assert exporter.data == mock_mj.MjData.return_value
 
 
-def test_export_to_urdf(mock_mujoco_model) -> None:
+def test_export_to_urdf(mock_mujoco_model: MagicMock) -> None:
     """Test exporting a MuJoCo model to URDF format."""
-    with patch("mujoco.MjData", autospec=True):
+
+    def id2name(m: Any, obj_type: int, obj_id: int) -> str:
+        """Map MuJoCo object type and id to a name string."""
+        if obj_type == mujoco.mjtObj.mjOBJ_BODY:
+            return ["world", "link1", "link2"][obj_id]
+        if obj_type == mujoco.mjtObj.mjOBJ_JOINT:
+            return f"joint_{obj_id}"
+        if obj_type == mujoco.mjtObj.mjOBJ_GEOM:
+            return f"geom_{obj_id}"
+        return "obj"
+
+    mock_mj = _make_mock_mujoco(
+        mj_id2name=MagicMock(side_effect=id2name),
+    )
+    mock_mj.MjData.return_value = MagicMock()
+
+    with patch(_URDF_IO_MUJOCO, mock_mj), patch("pathlib.Path.write_text"):
         exporter = URDFExporter(mock_mujoco_model)
+        urdf_str = exporter.export_to_urdf("output.urdf", "test_robot")
 
-        # Mock mj_id2name to return names
-        def id2name(m: Any, obj_type: int, obj_id: int) -> str:
-            """Map MuJoCo object type and id to a name string."""
-            if obj_type == mujoco.mjtObj.mjOBJ_BODY:
-                return ["world", "link1", "link2"][obj_id]
-            if obj_type == mujoco.mjtObj.mjOBJ_JOINT:
-                return f"joint_{obj_id}"
-            return "obj"
-
-        with (
-            patch("mujoco.mj_id2name", side_effect=id2name),
-            patch("pathlib.Path.write_text"),
-        ):
-            urdf_str = exporter.export_to_urdf("output.urdf", "test_robot")
-
-            assert 'robot name="test_robot"' in urdf_str
-            assert 'link name="link1"' in urdf_str
-            assert 'link name="link2"' in urdf_str
-
-            # Check for joint_1 instead of joint_0 because link1 is root (body_id 1)
-            # and joint_0 is attached to link1.
-            # Wait, body_jntadr=[ -1, 0, 1]. body 1 (link1) has joint 0.
-            # In _build_children:
-            #   Iterate children of root (link1).
-            #   Link1 is found as root in _find_root_body because it's first child
-            #   of world.
-            #   So root link is created for Link1.
-            #   Then _build_children for Link1.
-            #   Child is Link2 (parent=1).
-            #   Creates joint between Link1 and Link2.
-            #   Joint is defined by child body (Link2). Link2 has joint 1.
-            #   So we should see joint_1.
-
-            # The joint attached to Link1 (joint 0) is effectively the "root joint"
-            # connecting to world.
-            # URDF roots don't have joints.
-            # But wait, MJCF uses joints inside bodies to define DOF.
-            # If Link1 is floating base, it has free joint.
-            # Here Link1 has HINGE joint (joint 0).
-            # If it's attached to world (parent 0), it should be connected to world
-            # with a fixed joint or the robot base link should be world?
-            # Typically URDF robot "base_link" is the first link.
-            # If MJCF "world" is 0, and Link1 is 1 attached to 0.
-            # Exporter finds root body = Link1.
-            # Creates Link1.
-            # It does NOT create a joint for Link1 because it's the root of the
-            # URDF tree.
-            # So joint 0 is LOST in this export unless we have a dummy world link.
-            # But normally URDF roots are floating or fixed to world implicitly.
-
-            # Joint 1 connects Link1 -> Link2.
-            assert 'joint name="joint_1"' in urdf_str
-            assert 'type="prismatic"' in urdf_str
+        assert 'robot name="test_robot"' in urdf_str
+        assert 'link name="link1"' in urdf_str
+        assert 'link name="link2"' in urdf_str
+        assert 'joint name="joint_1"' in urdf_str
+        assert 'type="prismatic"' in urdf_str
 
 
-def test_export_model_to_urdf_function(mock_mujoco_model) -> None:
+def test_export_model_to_urdf_function(mock_mujoco_model: MagicMock) -> None:
     """Test the export_model_to_urdf convenience function."""
-    with (
-        patch("mujoco.mj_id2name", return_value="test_name"),
-        patch("pathlib.Path.write_text"),
-        patch("mujoco.MjData", autospec=True),
-    ):
+    mock_mj = _make_mock_mujoco(
+        mj_id2name=MagicMock(return_value="test_name"),
+    )
+    mock_mj.MjData.return_value = MagicMock()
+
+    with patch(_URDF_IO_MUJOCO, mock_mj), patch("pathlib.Path.write_text"):
         urdf_str = export_model_to_urdf(mock_mujoco_model, "out.urdf")
         assert len(urdf_str) > 0
 
 
-def test_urdf_importer_import(sample_urdf_xml) -> None:
+def test_urdf_importer_import(sample_urdf_xml: str) -> None:
     """Test importing a URDF file to MJCF format."""
     importer = URDFImporter()
 
@@ -202,7 +193,7 @@ def test_urdf_importer_import(sample_urdf_xml) -> None:
         assert 'pos="1 0 0"' in mjcf_str  # From joint origin
 
 
-def test_import_urdf_to_mujoco_function(sample_urdf_xml) -> None:
+def test_import_urdf_to_mujoco_function(sample_urdf_xml: str) -> None:
     """Test the import_urdf_to_mujoco convenience function."""
     with (
         patch("defusedxml.ElementTree.parse") as mock_parse,
@@ -223,17 +214,18 @@ def test_importer_file_not_found() -> None:
         importer.import_from_urdf("nonexistent.urdf")
 
 
-def test_exporter_no_root_body(mock_mujoco_model) -> None:
+def test_exporter_no_root_body(mock_mujoco_model: MagicMock) -> None:
     """Test exporting a model with only the world body and no root."""
     mock_mujoco_model.nbody = 1  # Only world
 
-    with patch("mujoco.MjData", autospec=True):
+    mock_mj = _make_mock_mujoco(
+        mj_id2name=MagicMock(return_value="world"),
+    )
+    mock_mj.MjData.return_value = MagicMock()
+
+    with patch(_URDF_IO_MUJOCO, mock_mj), patch("pathlib.Path.write_text"):
         exporter = URDFExporter(mock_mujoco_model)
-        with (
-            patch("mujoco.mj_id2name", return_value="world"),
-            patch("pathlib.Path.write_text"),
-        ):
-            urdf_str = exporter.export_to_urdf("out.urdf")
-            # Should just be empty robot tag basically
-            assert "<robot" in urdf_str
-            assert "<link" not in urdf_str
+        urdf_str = exporter.export_to_urdf("out.urdf")
+        # Should just be empty robot tag basically
+        assert "<robot" in urdf_str
+        assert "<link" not in urdf_str
