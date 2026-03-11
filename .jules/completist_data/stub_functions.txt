@@ -4,7 +4,7 @@
 ./tests/test_tool_registry.py:90 t2
 ./tests/test_golf_gui_tabs.py:42 show
 ./tests/test_golf_gui_tabs.py:45 setFocusPolicy
-./tests/test_urdf_tools.py:34 test_urdf_generation_logic
+./tests/test_urdf_tools.py:38 test_urdf_generation_logic
 ./tests/test_comparative_analysis.py:67 set_analysis_config
 ./tests/test_dashboard_enhancements.py:37 load_from_path
 ./tests/test_dashboard_enhancements.py:40 load_from_string
@@ -142,7 +142,7 @@
 ./tests/unit/engines/test_plugin_registry.py:106 restore_checkpoint
 ./tests/unit/engines/drake/test_drake_visualizer.py:38 __init__
 ./tests/unit/engines/drake/test_drake_visualizer.py:51 __init__
-./tests/unit/engines/mujoco/test_video_export.py:220 progress_cb
+./tests/unit/engines/mujoco/test_video_export.py:271 progress_cb
 ./tests/unit/ai/test_tool_registry.py:241 test
 ./tests/unit/dashboard/test_widgets.py:41 start
 ./tests/unit/dashboard/test_widgets.py:44 stop
@@ -300,11 +300,11 @@
 ./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:99 get_supported_segments
 ./src/research/deformable/objects.py:154 step
 ./src/research/deformable/objects.py:162 compute_internal_forces
-./src/engines/common/simulation_control.py:188 _do_step
-./src/engines/common/simulation_control.py:194 translate_body
-./src/engines/common/simulation_control.py:206 rotate_body
-./src/engines/common/simulation_control.py:240 measure_distance
-./src/engines/common/simulation_control.py:252 measure_angle
+./src/engines/common/simulation_control.py:198 _do_step
+./src/engines/common/simulation_control.py:204 translate_body
+./src/engines/common/simulation_control.py:216 rotate_body
+./src/engines/common/simulation_control.py:250 measure_distance
+./src/engines/common/simulation_control.py:262 measure_angle
 ./src/engines/common/physics.py:488 compute_drag
 ./src/engines/common/physics.py:492 compute_lift
 ./src/engines/common/physics.py:496 compute_magnus
@@ -400,7 +400,7 @@
 ./src/robotics/core/protocols.py:400 step
 ./src/robotics/core/protocols.py:408 reset
 ./src/robotics/core/protocols.py:412 forward
-./src/api/auth/security.py:282 __init__
+./src/api/auth/security.py:314 __init__
 ./src/unreal_integration/viewer_backends.py:220 initialize
 ./src/unreal_integration/viewer_backends.py:227 shutdown
 ./src/unreal_integration/viewer_backends.py:231 add_mesh
