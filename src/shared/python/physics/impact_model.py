@@ -38,7 +38,7 @@ from ..core.physics_constants import (
 )
 
 if TYPE_CHECKING:
-    pass
+    ...
 
 logger = get_logger(__name__)
 

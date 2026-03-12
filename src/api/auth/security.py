@@ -97,6 +97,7 @@ class SecurityManager:
         """
         self.secret_key = secret_key
         self.algorithm = ALGORITHM
+        self.pwd_context = bcrypt
 
     @precondition(
         lambda self, password: isinstance(password, str) and len(password) > 0,
