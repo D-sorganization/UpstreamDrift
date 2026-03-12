@@ -310,16 +310,7 @@ class TopographyData:
         Returns:
             2D array of elevations [resolution x resolution]
         """
-        x = np.linspace(self._bounds.min_x, self._bounds.max_x, resolution)
-        y = np.linspace(self._bounds.min_y, self._bounds.max_y, resolution)
-
-        heightmap = np.zeros((resolution, resolution))
-
-        for i, yi in enumerate(y):
-            for j, xi in enumerate(x):
-                heightmap[i, j] = self.get_elevation_at(np.array([xi, yi]))
-
-        return heightmap
+        return self.sample_uniform(resolution, resolution)
 
     @classmethod
     def from_file(
@@ -560,6 +551,10 @@ class TopographyData:
     def sample_uniform(self, nx: int, ny: int) -> np.ndarray:
         """Sample elevations on uniform grid.
 
+        Uses vectorized evaluation when available for performance.
+        For a regular-grid interpolator the entire grid is evaluated
+        in a single C-level numpy call instead of O(nx * ny) Python loops.
+
         Args:
             nx: Number of samples in X
             ny: Number of samples in Y
@@ -567,15 +562,27 @@ class TopographyData:
         Returns:
             Array of shape (ny, nx) with elevations
         """
+        if not self._is_loaded or self._interpolator is None:
+            return np.zeros((ny, nx))
+
         x = np.linspace(self._bounds.min_x, self._bounds.max_x, nx)
         y = np.linspace(self._bounds.min_y, self._bounds.max_y, ny)
+        X, Y = np.meshgrid(x, y)
 
-        result = np.zeros((ny, nx))
-        for i, yi in enumerate(y):
-            for j, xi in enumerate(x):
-                result[i, j] = self.get_elevation_at(np.array([xi, yi]))
+        # Clamp to bounds
+        X_clamped = np.clip(X, self._bounds.min_x, self._bounds.max_x)
+        Y_clamped = np.clip(Y, self._bounds.min_y, self._bounds.max_y)
 
-        return result
+        if self._heightmap is not None:
+            # RegularGridInterpolator uses (y, x) ordering
+            pts = np.column_stack([Y_clamped.ravel(), X_clamped.ravel()])
+            result = self._interpolator(pts)
+        else:
+            # RBF/LinearNDInterpolator uses (x, y) ordering
+            pts = np.column_stack([X_clamped.ravel(), Y_clamped.ravel()])
+            result = self._interpolator(pts)
+
+        return result.reshape(ny, nx)
 
     def get_statistics(self) -> dict[str, float]:
         """Get statistics about the topography.

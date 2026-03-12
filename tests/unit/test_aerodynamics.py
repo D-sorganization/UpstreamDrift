@@ -933,3 +933,41 @@ class TestAerodynamicsIntegration:
 
         # Should be identical
         np.testing.assert_array_almost_equal(forces1["total"], forces2["total"])
+
+
+class TestAerodynamicsPreconditions:
+    """Tests for DbC preconditions on AerodynamicsEngine.
+
+    Added 2026-03-12 per assessment finding [A-MAJOR] Issue #1774.
+    """
+
+    def test_compute_acceleration_zero_mass_raises(self) -> None:
+        """Precondition: mass > 0 must be enforced."""
+        from src.shared.python.core.contracts.exceptions import PreconditionError
+
+        engine = AerodynamicsEngine()
+        velocity = np.array([60.0, 0.0, 20.0])
+        spin = np.array([0.0, -250.0, 0.0])
+
+        with pytest.raises(PreconditionError):
+            engine.compute_acceleration(velocity, spin, mass=0.0)
+
+    def test_compute_acceleration_negative_mass_raises(self) -> None:
+        """Precondition: negative mass must be rejected."""
+        from src.shared.python.core.contracts.exceptions import PreconditionError
+
+        engine = AerodynamicsEngine()
+        velocity = np.array([60.0, 0.0, 20.0])
+        spin = np.array([0.0, -250.0, 0.0])
+
+        with pytest.raises(PreconditionError):
+            engine.compute_acceleration(velocity, spin, mass=-0.046)
+
+    def test_compute_acceleration_positive_mass_succeeds(self) -> None:
+        """Positive mass should not raise a precondition error."""
+        engine = AerodynamicsEngine()
+        velocity = np.array([60.0, 0.0, 20.0])
+        spin = np.array([0.0, -250.0, 0.0])
+        result = engine.compute_acceleration(velocity, spin, mass=0.046)
+        assert result.shape == (3,)
+        assert np.all(np.isfinite(result))

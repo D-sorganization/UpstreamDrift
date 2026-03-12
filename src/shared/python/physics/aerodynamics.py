@@ -32,6 +32,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import precondition
 from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     AIR_VISCOSITY_KG_M_S,
@@ -980,6 +981,11 @@ class AerodynamicsEngine:
             "total": total,
         }
 
+    @precondition(
+        lambda self, velocity, spin, mass, t=0.0, position=None, resample=False: mass
+        > 0,
+        "mass must be positive (non-zero, non-negative) to avoid ZeroDivisionError",
+    )
     def compute_acceleration(
         self,
         velocity: np.ndarray,
@@ -994,13 +1000,16 @@ class AerodynamicsEngine:
         Args:
             velocity: Ball velocity [m/s]
             spin: Angular velocity [rad/s]
-            mass: Ball mass [kg]
+            mass: Ball mass [kg] — must be positive
             t: Current time [s]
             position: Current position [m]
             resample: Resample random environment
 
         Returns:
             Acceleration vector [m/s^2]
+
+        Raises:
+            PreconditionError: If mass <= 0
         """
         forces = self.compute_forces(velocity, spin, t, position, resample)
         return forces["total"] / mass

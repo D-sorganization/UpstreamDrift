@@ -157,6 +157,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-10 | Consolidated Implementation Gaps         | `docs/assessments/completist/issues/ISSUE_GAPS_AND_INACCURACIES.md`           |
 | 2026-03-11 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-11.md`                 |
 | 2026-03-12 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-12.md`                 |
+| 2026-03-12 | Comprehensive A-O Assessment             | `docs/assessments/Comprehensive_Assessment_2026-03-12.md`                     |
+| 2026-03-12 | Pragmatic Programmer Assessment          | `docs/assessments/pragmatic_programmer/Pragmatic_Assessment_2026-03-12.md`    |
 
 ---
 
@@ -220,20 +222,20 @@ In addition to the standard framework, specialized audits monitor specific quali
 
 ## Version History
 
-| Version | Date    | Changes                                                  |
-| ------- | ------- | -------------------------------------------------------- |
-| 1.0     | 2025-12 | Initial 15-point framework                               |
-| 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis           |
-| 2.1     | 2026-02 | Added comprehensive multi-framework assessment           |
-| 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)             |
-| 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)              |
-| 2.4     | 2026-02 | Added Implementation Gaps Report                         |
-| 2.5     | 2026-02 | Updated Gaps Report with Critical Issues                 |
-| 2.6     | 2026-02 | Added Data Copyright and Kinematic Sequence Issues       |
-| 2.7     | 2025-05 | Added Implementation Gaps Review 2025                    |
-| 2.8     | 2026-02 | Updated Completist Report 2026-02-21                     |
-| 2.9     | 2026-02 | Updated Comprehensive Gaps Report (Testing & Patent)     |
-| 3.0     | 2026-02 | Consolidated Implementation Gaps and Inaccuracies Report |
+| Version | Date    | Changes                                                      |
+| ------- | ------- | ------------------------------------------------------------ |
+| 1.0     | 2025-12 | Initial 15-point framework                                   |
+| 2.0     | 2026-01 | Reorganized based on UX/strategic gap analysis               |
+| 2.1     | 2026-02 | Added comprehensive multi-framework assessment               |
+| 2.2     | 2026-02 | Added Physics Audit (Specialized Assessment)                 |
+| 2.3     | 2026-02 | Added Injury Risk Scoring issue (ISSUE-016)                  |
+| 2.4     | 2026-02 | Added Implementation Gaps Report                             |
+| 2.5     | 2026-02 | Updated Gaps Report with Critical Issues                     |
+| 2.6     | 2026-02 | Added Data Copyright and Kinematic Sequence Issues           |
+| 2.7     | 2025-05 | Added Implementation Gaps Review 2025                        |
+| 2.8     | 2026-02 | Updated Completist Report 2026-02-21                         |
+| 2.9     | 2026-02 | Updated Comprehensive Gaps Report (Testing & Patent)         |
+| 3.0     | 2026-02 | Consolidated Implementation Gaps and Inaccuracies Report     |
 | 3.1     | 2026-03 | Removed stale assessments and archives older than 2026-03-08 |
 
 ---
