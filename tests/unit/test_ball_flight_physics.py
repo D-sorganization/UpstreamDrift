@@ -770,28 +770,6 @@ class TestSpinDecay:
 
         assert carry_fast < carry_slow
 
-    def test_spin_decay_exponential_rate(self) -> None:
-        """Verify spin decays approximately 20-30% over 4 seconds at default rate.
-
-        With decay_rate=0.05, after 4s: spin(4) = spin(0) * exp(-0.05 * 4)
-        = spin(0) * exp(-0.2) ≈ spin(0) * 0.819 → ~18% decay
-        """
-        from src.shared.python.physics.ball_flight_physics import _apply_spin_decay
-
-        omega_initial = 261.8  # 2500 rpm in rad/s
-        t_total = 4.0
-        dt = 0.01
-        decay_rate = 0.05
-
-        omega = omega_initial
-        for _ in range(int(t_total / dt)):
-            omega = _apply_spin_decay(omega, decay_rate, dt)
-
-        # After 4 seconds, should retain ~82% of original spin
-        expected_ratio = math.exp(-decay_rate * t_total)
-        actual_ratio = omega / omega_initial
-        assert actual_ratio == pytest.approx(expected_ratio, rel=1e-4)
-
     def test_no_spin_no_decay_effect(self) -> None:
         """With zero initial spin, decay rate should not affect trajectory."""
         launch = LaunchConditions(

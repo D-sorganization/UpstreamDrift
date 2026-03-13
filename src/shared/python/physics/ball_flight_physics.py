@@ -25,7 +25,7 @@ Planned enhancement: implement Mud Ball Physics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -39,46 +39,7 @@ if TYPE_CHECKING:
 from src.shared.python.core.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
 from src.shared.python.core.contracts import invariant, postcondition, precondition
 from src.shared.python.core.physics_constants import SPIN_DECAY_RATE_S
-from src.shared.python.engine_core.engine_availability import NUMBA_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
-
-# Performance: Optional Numba JIT compilation
-# Note: nopython=True is not used because numba's type inference for
-# tuple-typed arguments has compatibility issues with Python 3.13.
-# Using forceobj=True ensures we always get execution (at Python speed
-# when nopython inference fails) instead of crashing with a TypingError.
-if NUMBA_AVAILABLE:
-    try:
-        from numba import jit as _numba_jit
-
-        def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
-            """Wrapper to apply numba JIT with safe fallback settings."""
-            # Override unsafe flags to prevent TypingError crashes on Py3.13
-            safe_kwargs = {
-                k: v for k, v in kwargs.items() if k not in ("nopython", "cache")
-            }
-            safe_kwargs["forceobj"] = True  # Always execute — no TypingError possible
-
-            if len(args) == 1 and callable(args[0]):
-                return _numba_jit(**safe_kwargs)(args[0])
-            return _numba_jit(**safe_kwargs)
-
-    except ImportError:
-        NUMBA_AVAILABLE = False  # type: ignore[assignment]
-
-if not NUMBA_AVAILABLE:
-
-    def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
-        """No-op decorator when numba is not installed."""
-
-        def decorator(func: object) -> object:
-            """Return the function unchanged as a no-op JIT substitute."""
-            return func
-
-        if len(args) == 1 and callable(args[0]):
-            return args[0]
-        return decorator
-
 
 logger = get_logger(__name__)
 
@@ -163,205 +124,6 @@ class TrajectoryPoint:
         return float(self.position[2])
 
 
-# ... (JIT functions skipped) ...
-
-
-@jit(nopython=True, cache=True)  # type: ignore[operator]
-def _calculate_accel_core(
-    rel_vel: np.ndarray,
-    speed: float,
-    gravity_acc: np.ndarray,
-    ball_radius: float,
-    const_term: float,
-    coeffs: tuple[float, float, float, float, float, float],
-    omega: float,
-    spin_axis: np.ndarray,
-) -> np.ndarray:
-    """Unified core for acceleration calculation."""
-    cd0, cd1, cd2, cl0, cl1, cl2 = coeffs
-    spin_ratio = (omega * ball_radius) / speed if omega > 0 else 0.0
-
-    # Drag
-    cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
-    acc = gravity_acc - (const_term * cd * speed) * rel_vel
-
-    # Magnus
-    if omega > 0 and spin_ratio > 0:
-        cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
-        if cl > MAX_LIFT_COEFFICIENT:
-            cl = MAX_LIFT_COEFFICIENT
-
-        magnus_mag = const_term * cl * (speed**2)
-        # Manual cross product for Numba optimization
-        c0 = spin_axis[1] * rel_vel[2] - spin_axis[2] * rel_vel[1]
-        c1 = spin_axis[2] * rel_vel[0] - spin_axis[0] * rel_vel[2]
-        c2 = spin_axis[0] * rel_vel[1] - spin_axis[1] * rel_vel[0]
-
-        cross_mag = np.sqrt(c0**2 + c1**2 + c2**2)
-        if cross_mag > NUMERICAL_EPSILON:
-            factor = magnus_mag / cross_mag
-            acc[0] += c0 * factor
-            acc[1] += c1 * factor
-            acc[2] += c2 * factor
-
-    return cast(np.ndarray, acc)
-
-
-@jit(nopython=True, cache=True)  # type: ignore[operator]
-def _flight_dynamics_step(
-    state: np.ndarray,
-    gravity_acc: np.ndarray,
-    wind_velocity: np.ndarray,
-    ball_radius: float,
-    const_term: float,
-    coeffs: tuple[float, float, float, float, float, float],
-    omega: float,
-    spin_axis: np.ndarray,
-) -> np.ndarray:
-    """State transition derivative."""
-    velocity = state[3:]
-    rel_vel = velocity - wind_velocity
-    speed_sq = rel_vel @ rel_vel
-
-    if speed_sq <= MIN_SPEED_THRESHOLD**2:
-        acc = gravity_acc
-    else:
-        acc = _calculate_accel_core(
-            rel_vel,
-            np.sqrt(speed_sq),
-            gravity_acc,
-            ball_radius,
-            const_term,
-            coeffs,
-            omega,
-            spin_axis,
-        )
-
-    res = np.empty(6)
-    res[:3], res[3:] = velocity, acc
-    return res
-
-
-@jit(nopython=True, cache=True)  # type: ignore[operator]
-def _compute_rk4_step(
-    curr: np.ndarray,
-    dt: float,
-    gravity_acc: np.ndarray,
-    wind_velocity: np.ndarray,
-    ball_radius: float,
-    const_term: float,
-    coeffs: tuple[float, float, float, float, float, float],
-    omega: float,
-    spin_axis: np.ndarray,
-) -> np.ndarray:
-    """Compute a single RK4 integration step.
-
-    Orthogonality: Isolates the mathematical core of the integration step.
-    """
-    k1 = _flight_dynamics_step(
-        curr,
-        gravity_acc,
-        wind_velocity,
-        ball_radius,
-        const_term,
-        coeffs,
-        omega,
-        spin_axis,
-    )
-    k2 = _flight_dynamics_step(
-        curr + 0.5 * dt * k1,
-        gravity_acc,
-        wind_velocity,
-        ball_radius,
-        const_term,
-        coeffs,
-        omega,
-        spin_axis,
-    )
-    k3 = _flight_dynamics_step(
-        curr + 0.5 * dt * k2,
-        gravity_acc,
-        wind_velocity,
-        ball_radius,
-        const_term,
-        coeffs,
-        omega,
-        spin_axis,
-    )
-    k4 = _flight_dynamics_step(
-        curr + dt * k3,
-        gravity_acc,
-        wind_velocity,
-        ball_radius,
-        const_term,
-        coeffs,
-        omega,
-        spin_axis,
-    )
-
-    return (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
-
-
-@jit(nopython=True, cache=True)  # type: ignore[operator]
-def _apply_spin_decay(omega: float, decay_rate: float, dt: float) -> float:
-    """Apply exponential spin decay: omega(t+dt) = omega(t) * exp(-lambda * dt)."""
-    return omega * np.exp(-decay_rate * dt)
-
-
-@jit(nopython=True, cache=True)  # type: ignore[operator]
-def _solve_rk4_loop(
-    initial_state: np.ndarray,
-    dt: float,
-    max_steps: int,
-    gravity_acc: np.ndarray,
-    wind_velocity: np.ndarray,
-    ball_radius: float,
-    const_term: float,
-    coeffs: tuple[float, float, float, float, float, float],
-    omega: float,
-    spin_axis: np.ndarray,
-    spin_decay_rate: float = 0.0,
-) -> np.ndarray:
-    """Numba-optimized RK4 loop with spin decay.
-
-    Spin decays exponentially at each step: omega(t+dt) = omega(t) * exp(-lambda * dt).
-    This models aerodynamic torque on the dimpled ball surface causing angular
-    deceleration. Typical decay: ~20-30% over 4 seconds of flight.
-    """
-    out = np.empty((max_steps, 7))
-    curr = initial_state.copy()
-    t = 0.0
-
-    out[0, 0], out[0, 1:] = t, curr
-    actual_steps = 1
-
-    for i in range(1, max_steps):
-        step_delta = _compute_rk4_step(
-            curr,
-            dt,
-            gravity_acc,
-            wind_velocity,
-            ball_radius,
-            const_term,
-            coeffs,
-            omega,
-            spin_axis,
-        )
-        curr += step_delta
-        t += dt
-        out[i, 0], out[i, 1:] = t, curr
-        actual_steps += 1
-
-        # Apply spin decay
-        if spin_decay_rate > 0.0:
-            omega = _apply_spin_decay(omega, spin_decay_rate, dt)
-
-        if curr[2] <= 0:
-            break
-
-    return out[:actual_steps]
-
-
 @invariant(lambda self: self.ball.mass > 0, "Ball mass must be positive")
 @invariant(lambda self: self.environment.gravity > 0, "Gravity must be positive")
 class BallFlightSimulator:
@@ -375,16 +137,6 @@ class BallFlightSimulator:
     ) -> None:
         self.ball = ball or BallProperties()
         self.environment = env or environment or EnvironmentalConditions()
-
-    def _get_coeffs(self) -> tuple[float, float, float, float, float, float]:
-        return (
-            self.ball.cd0,
-            self.ball.cd1,
-            self.ball.cd2,
-            self.ball.cl0,
-            self.ball.cl1,
-            self.ball.cl2,
-        )
 
     @precondition(
         lambda self, launch, max_time=10.0, dt=0.01: launch is not None
@@ -408,88 +160,69 @@ class BallFlightSimulator:
         is delegated to the native Rust implementation for performance.
         Otherwise, falls back to the Python/Numba implementation.
         """
-        from src.shared.python.physics.rust_kernel import is_rust_available, mark_legacy
+        from src.shared.python.physics.rust_kernel import is_rust_available
+
+        if not is_rust_available():
+            raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+
+        import upstream_physics  # type: ignore[import-untyped]
 
         v0 = launch.velocity
         ca, sa = np.cos(launch.azimuth_angle), np.sin(launch.azimuth_angle)
         cv, sv = np.cos(launch.launch_angle), np.sin(launch.launch_angle)
 
         initial = np.array([0.0, 0.0, 0.0, v0 * cv * ca, v0 * cv * sa, v0 * sv])
-        gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
-        const_term = (
-            0.5 * self.environment.air_density * self.ball.cross_sectional_area
-        ) / self.ball.mass
         omega = launch.spin_rate * 2 * np.pi / 60
 
-        if is_rust_available():
-            try:
-                import upstream_physics  # type: ignore[import-untyped]
-
-                config = upstream_physics.IntegratorConfig(
-                    dt=dt, max_steps=int(max_time / dt) + 1
-                )
-                ball_props = upstream_physics.AeroBallProperties()
-                ball_props.mass = self.ball.mass
-                ball_props.radius = self.ball.radius
-                ball_props.area = self.ball.cross_sectional_area
-                ball_props.drag_coefficient = self.ball.cd0
-                ball_props.spin_decay_rate = self.ball.spin_decay_rate
-
-                air_props = upstream_physics.AirProperties()
-                air_props.density = self.environment.air_density
-
-                pos0 = [0.0, 0.0, 0.0]
-                vel0 = [
-                    float(initial[3]),
-                    float(initial[4]),
-                    float(initial[5]),
-                ]
-                spin_axis = [
-                    float(launch.spin_axis[0]),
-                    float(launch.spin_axis[1]),
-                    float(launch.spin_axis[2]),
-                ]
-                gravity = [0.0, 0.0, float(-self.environment.gravity)]
-                wind = [
-                    float(self.environment.wind_velocity[0]),
-                    float(self.environment.wind_velocity[1]),
-                    float(self.environment.wind_velocity[2]),
-                ]
-                logger.debug("Using Rust ball_flight trajectory (dt=%.4f)", dt)
-                rust_result = upstream_physics.simulate_ball_trajectory(
-                    pos0,
-                    vel0,
-                    spin_axis,
-                    omega,
-                    gravity,
-                    wind,
-                    ball_props,
-                    air_props,
-                    config,
-                )
-                # Convert Rust trajectory points to Python TrajectoryPoint list
-                return self._post_process_rust(rust_result, launch)
-            except (ImportError, AttributeError, TypeError, Exception) as e:
-                logger.debug("Rust trajectory failed (%s), using Python fallback", e)
-
-        # Python fallback
-        mark_legacy("_solve_rk4_loop", "ball_flight_physics")
-
-        raw_data = _solve_rk4_loop(
-            initial,
-            dt,
-            int(max_time / dt) + 1,
-            gravity_acc,
-            self.environment.wind_velocity,
-            self.ball.radius,
-            const_term,
-            self._get_coeffs(),
-            omega,
-            launch.spin_axis,
-            self.ball.spin_decay_rate,
+        config = upstream_physics.IntegratorConfig(
+            dt=dt, max_steps=int(max_time / dt) + 1
+        )
+        ball_props = upstream_physics.AeroBallProperties(
+            mass=self.ball.mass,
+            radius=self.ball.radius,
+            drag_coefficient=self.ball.cd0,
+            spin_decay_rate=self.ball.spin_decay_rate,
         )
 
-        return self._post_process(raw_data, launch)
+        air_props = upstream_physics.AirProperties(
+            density=self.environment.air_density,
+            viscosity=1.81e-5,
+            temperature=self.environment.temperature,
+            pressure=101325.0,
+        )
+
+        pos0 = [0.0, 0.0, 0.0]
+        vel0 = [
+            float(initial[3]),
+            float(initial[4]),
+            float(initial[5]),
+        ]
+        spin_axis = [
+            float(launch.spin_axis[0]),
+            float(launch.spin_axis[1]),
+            float(launch.spin_axis[2]),
+        ]
+        gravity = [0.0, 0.0, float(-self.environment.gravity)]
+        wind = [
+            float(self.environment.wind_velocity[0]),
+            float(self.environment.wind_velocity[1]),
+            float(self.environment.wind_velocity[2]),
+        ]
+        logger.debug("Using Rust ball_flight trajectory (dt=%.4f)", dt)
+        rust_result = upstream_physics.simulate_ball_trajectory_py(
+            pos0,
+            vel0,
+            spin_axis,
+            omega,
+            gravity,
+            wind,
+            ball_props,
+            air_props,
+            config,
+        )
+        return self._post_process_rust(rust_result, launch)
 
     def _post_process_rust(
         self, rust_result: Any, launch: LaunchConditions
@@ -504,33 +237,6 @@ class BallFlightSimulator:
                 forces["gravity"] + forces["drag"] + forces["magnus"]
             ) / self.ball.mass
             points.append(TrajectoryPoint(p.t, pos, vel, acc, forces))
-        return points
-
-    def _post_process(
-        self, data: np.ndarray, launch: LaunchConditions
-    ) -> list[TrajectoryPoint]:
-        """Convert raw integration data to rich TrajectoryPoint objects."""
-        points = []
-
-        for row in data:
-            t, pos, vel = row[0], row[1:4], row[4:]
-
-            # Use _calculate_forces helper (works for single vector too)
-            forces = self._calculate_forces(vel, launch)
-            acc = (
-                forces["gravity"] + forces["drag"] + forces["magnus"]
-            ) / self.ball.mass
-
-            points.append(
-                TrajectoryPoint(
-                    t,
-                    pos,
-                    vel,
-                    acc,
-                    forces,
-                )
-            )
-
         return points
 
     def calculate_carry_distance(self, trajectory: list[TrajectoryPoint]) -> float:

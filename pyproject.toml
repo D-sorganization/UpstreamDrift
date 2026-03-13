@@ -33,17 +33,16 @@ dependencies = [
 
     # Structured logging (OBS-001: required for observability)
     "structlog>=24.1.0",
+    
+    # Rust native physics integration (Core computational source of truth)
+    "upstream-physics>=0.1.0",
 ]
 
 [project.optional-dependencies]
-# Additional physics engines
 drake = ["drake>=1.22.0"]
 pinocchio = ["pinocchio>=2.6.0", "meshcat>=0.3.0"]
-# Rust-compiled physics kernels (RK4 integrator, contact models, swing plane fitting)
-# Build locally with: pip install ./rust_core/upstream-physics
-# Requires: Rust toolchain + maturin (pip install maturin)
-rust-physics = ["upstream-physics>=0.1.0"]
-all-engines = ["upstream-drift[drake,pinocchio,rust-physics]"]
+
+all-engines = ["upstream-drift[drake,pinocchio]"]
 
 # Analysis extras
 analysis = ["opencv-python>=4.8.0", "scikit-learn>=1.3.0"]

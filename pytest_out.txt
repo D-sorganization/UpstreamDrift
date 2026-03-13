@@ -1,0 +1,2473 @@
+C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.3.3, pluggy-1.6.0 -- C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+PyQt6 6.9.1 -- Qt runtime 6.9.1 -- Qt compiled 6.9.0
+rootdir: c:\Users\diete\Repositories\UpstreamDrift
+configfile: pyproject.toml
+plugins: anyio-4.10.0, hypothesis-6.148.7, asyncio-1.3.0, benchmark-5.2.3, cov-6.0.0, mock-3.15.1, qt-4.5.0, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 62 items
+
+tests/unit/test_ball_flight_physics.py::TestBallProperties::test_default_values PASSED [  1%]
+tests/unit/test_ball_flight_physics.py::TestBallProperties::test_radius_calculation PASSED [  3%]
+tests/unit/test_ball_flight_physics.py::TestBallProperties::test_cross_sectional_area PASSED [  4%]
+tests/unit/test_ball_flight_physics.py::TestBallProperties::test_custom_ball_properties PASSED [  6%]
+tests/unit/test_ball_flight_physics.py::TestLaunchConditions::test_default_spin_axis PASSED [  8%]
+tests/unit/test_ball_flight_physics.py::TestLaunchConditions::test_custom_spin_axis PASSED [  9%]
+tests/unit/test_ball_flight_physics.py::TestLaunchConditions::test_zero_spin_rate_allowed PASSED [ 11%]
+tests/unit/test_ball_flight_physics.py::TestEnvironmentalConditions::test_default_values PASSED [ 12%]
+tests/unit/test_ball_flight_physics.py::TestEnvironmentalConditions::test_default_wind_is_zero PASSED [ 14%]
+tests/unit/test_ball_flight_physics.py::TestEnvironmentalConditions::test_custom_wind PASSED [ 16%]
+tests/unit/test_ball_flight_physics.py::TestSimulatorInitialization::test_default_initialization PASSED [ 17%]
+tests/unit/test_ball_flight_physics.py::TestSimulatorInitialization::test_custom_ball PASSED [ 19%]
+tests/unit/test_ball_flight_physics.py::TestSimulatorInitialization::test_custom_environment PASSED [ 20%]
+tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_trajectory_returns_list FAILED [ 22%]
+tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_trajectory_point_structure FAILED [ 24%]
+tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_initial_position_at_origin FAILED [ 25%]
+tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_trajectory_descends_to_ground FAILED [ 27%]
+tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_time_increases_monotonically FAILED [ 29%]
+tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_gravity_only_trajectory FAILED [ 30%]
+tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_higher_launch_angle_higher_flight FAILED [ 32%]
+tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_backspin_adds_lift FAILED [ 33%]
+tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_higher_velocity_longer_carry FAILED [ 35%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_forces_present_in_trajectory[gravity] FAILED [ 37%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_forces_present_in_trajectory[drag] FAILED [ 38%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_forces_present_in_trajectory[magnus] FAILED [ 40%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_gravity_direction FAILED [ 41%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_no_magnus_without_spin FAILED [ 43%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_calculate_forces_vectorized PASSED [ 45%]
+tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_calculate_forces_scalar_speed_threshold PASSED [ 46%]
+tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_metrics_positive_for_forward_flight[calculate_carry_distance] FAILED [ 48%]
+tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_metrics_positive_for_forward_flight[calculate_max_height] FAILED [ 50%]
+tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_metrics_positive_for_forward_flight[calculate_flight_time] FAILED [ 51%]
+tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_empty_trajectory_returns_zero[calculate_carry_distance] PASSED [ 53%]
+tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_empty_trajectory_returns_zero[calculate_max_height] PASSED [ 54%]
+tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_empty_trajectory_returns_zero[calculate_flight_time] PASSED [ 56%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[carry_distance] FAILED [ 58%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[max_height] FAILED [ 59%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[flight_time] FAILED [ 61%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[landing_angle] FAILED [ 62%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[apex_time] FAILED [ 64%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[trajectory_points] FAILED [ 66%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_apex_time_before_landing FAILED [ 67%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_landing_angle_reasonable FAILED [ 69%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_calculate_landing_angle_empty PASSED [ 70%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_calculate_landing_angle_vertical_drop PASSED [ 72%]
+tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_calculate_apex_time_empty PASSED [ 74%]
+tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_driver_carry_reasonable_range FAILED [ 75%]
+tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_iron_7_carry_reasonable_range FAILED [ 77%]
+tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_driver_max_height_reasonable FAILED [ 79%]
+tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_driver_flight_time_reasonable FAILED [ 80%]
+tests/unit/test_ball_flight_physics.py::TestEdgeCases::test_very_low_velocity FAILED [ 82%]
+tests/unit/test_ball_flight_physics.py::TestEdgeCases::test_very_high_spin FAILED [ 83%]
+tests/unit/test_ball_flight_physics.py::TestEdgeCases::test_zero_launch_angle FAILED [ 85%]
+tests/unit/test_ball_flight_physics.py::TestWindEffects::test_headwind_reduces_carry FAILED [ 87%]
+tests/unit/test_ball_flight_physics.py::TestWindEffects::test_tailwind_increases_carry FAILED [ 88%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_default_spin_decay_rate PASSED [ 90%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_custom_spin_decay_rate PASSED [ 91%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_zero_spin_decay_rate PASSED [ 93%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_spin_decay_reduces_carry FAILED [ 95%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_higher_decay_rate_less_carry FAILED [ 96%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_spin_decay_exponential_rate FAILED [ 98%]
+tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_no_spin_no_decay_effect FAILED [100%]
+
+================================== FAILURES ===================================
+____________ TestTrajectorySimulation.test_trajectory_returns_list ____________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectorySimulation object at 0x000001359E62E990>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6ED0F0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_trajectory_returns_list(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that simulation returns a list of trajectory points."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6ED0F0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+------------------------------ Captured log call ------------------------------
+WARNING  src.shared.python.physics.rust_kernel:rust_kernel.py:35 upstream_physics Rust wheel not installed — falling back to pure-Python physics. Install with: pip install upstream_physics
+__________ TestTrajectorySimulation.test_trajectory_point_structure ___________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectorySimulation object at 0x000001359E62EAD0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6EDA70>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_trajectory_point_structure(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test trajectory point has correct structure."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6EDA70>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+__________ TestTrajectorySimulation.test_initial_position_at_origin ___________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectorySimulation object at 0x000001359E63F820>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6D1B50>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_initial_position_at_origin(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that trajectory starts at origin."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:243: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6D1B50>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________ TestTrajectorySimulation.test_trajectory_descends_to_ground _________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectorySimulation object at 0x000001359E63F950>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6485A0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_trajectory_descends_to_ground(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that ball eventually returns to ground level."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=10.0)
+
+tests\unit\test_ball_flight_physics.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6485A0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 10.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________ TestTrajectorySimulation.test_time_increases_monotonically __________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectorySimulation object at 0x000001359E6D2D50>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E73C8D0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_time_increases_monotonically(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that time increases throughout trajectory."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E73C8D0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_____________ TestPhysicsValidation.test_gravity_only_trajectory ______________
+
+self = <tests.unit.test_ball_flight_physics.TestPhysicsValidation object at 0x000001359E62EC10>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E87CA50>
+
+    def test_gravity_only_trajectory(self, simulator: BallFlightSimulator) -> None:
+        """Test trajectory with no spin (gravity and drag only)."""
+        launch = LaunchConditions(
+            velocity=30.0,
+            launch_angle=math.radians(45.0),
+            spin_rate=0.0,
+        )
+>       trajectory = simulator.simulate_trajectory(launch, max_time=5.0)
+
+tests\unit\test_ball_flight_physics.py:287: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E87CA50>
+launch = LaunchConditions(velocity=30.0, launch_angle=0.7853981633974483, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 5.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+________ TestPhysicsValidation.test_higher_launch_angle_higher_flight _________
+
+self = <tests.unit.test_ball_flight_physics.TestPhysicsValidation object at 0x000001359E62ED50>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E87CD50>
+
+    def test_higher_launch_angle_higher_flight(
+        self, simulator: BallFlightSimulator
+    ) -> None:
+        """Test that higher launch angle produces higher trajectory."""
+        low_launch = LaunchConditions(
+            velocity=50.0, launch_angle=math.radians(10.0), spin_rate=0.0
+        )
+        high_launch = LaunchConditions(
+            velocity=50.0, launch_angle=math.radians(30.0), spin_rate=0.0
+        )
+    
+>       low_trajectory = simulator.simulate_trajectory(low_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E87CD50>
+launch = LaunchConditions(velocity=50.0, launch_angle=0.17453292519943295, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+________________ TestPhysicsValidation.test_backspin_adds_lift ________________
+
+self = <tests.unit.test_ball_flight_physics.TestPhysicsValidation object at 0x000001359E63FA80>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E7CD400>
+
+    def test_backspin_adds_lift(self, simulator: BallFlightSimulator) -> None:
+        """Test that backspin produces lift (higher trajectory)."""
+        no_spin = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=0.0
+        )
+        with_spin = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=3000.0
+        )
+    
+>       no_spin_traj = simulator.simulate_trajectory(no_spin, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E7CD400>
+launch = LaunchConditions(velocity=60.0, launch_angle=0.20943951023931956, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+___________ TestPhysicsValidation.test_higher_velocity_longer_carry ___________
+
+self = <tests.unit.test_ball_flight_physics.TestPhysicsValidation object at 0x000001359E63FBB0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E7CDC70>
+
+    def test_higher_velocity_longer_carry(self, simulator: BallFlightSimulator) -> None:
+        """Test that higher velocity produces longer carry distance."""
+        slow_launch = LaunchConditions(
+            velocity=40.0, launch_angle=math.radians(12.0), spin_rate=2500.0
+        )
+        fast_launch = LaunchConditions(
+            velocity=70.0, launch_angle=math.radians(12.0), spin_rate=2500.0
+        )
+    
+>       slow_traj = simulator.simulate_trajectory(slow_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E7CDC70>
+launch = LaunchConditions(velocity=40.0, launch_angle=0.20943951023931956, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+______ TestForceCalculations.test_forces_present_in_trajectory[gravity] _______
+
+self = <tests.unit.test_ball_flight_physics.TestForceCalculations object at 0x000001359E62F110>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E70BD90>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+force_name = 'gravity'
+
+    @pytest.mark.parametrize(
+        "force_name",
+        ["gravity", "drag", "magnus"],
+    )
+    def test_forces_present_in_trajectory(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        force_name: str,
+    ) -> None:
+        """Test that expected force components are present in trajectory."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:371: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E70BD90>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+________ TestForceCalculations.test_forces_present_in_trajectory[drag] ________
+
+self = <tests.unit.test_ball_flight_physics.TestForceCalculations object at 0x000001359E62F250>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E709390>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+force_name = 'drag'
+
+    @pytest.mark.parametrize(
+        "force_name",
+        ["gravity", "drag", "magnus"],
+    )
+    def test_forces_present_in_trajectory(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        force_name: str,
+    ) -> None:
+        """Test that expected force components are present in trajectory."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:371: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E709390>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_______ TestForceCalculations.test_forces_present_in_trajectory[magnus] _______
+
+self = <tests.unit.test_ball_flight_physics.TestForceCalculations object at 0x000001359E63FE10>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E8061A0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+force_name = 'magnus'
+
+    @pytest.mark.parametrize(
+        "force_name",
+        ["gravity", "drag", "magnus"],
+    )
+    def test_forces_present_in_trajectory(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        force_name: str,
+    ) -> None:
+        """Test that expected force components are present in trajectory."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:371: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E8061A0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+________________ TestForceCalculations.test_gravity_direction _________________
+
+self = <tests.unit.test_ball_flight_physics.TestForceCalculations object at 0x000001359E6EC050>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E625790>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_gravity_direction(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that gravity force is in negative z direction."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:381: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E625790>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+______________ TestForceCalculations.test_no_magnus_without_spin ______________
+
+self = <tests.unit.test_ball_flight_physics.TestForceCalculations object at 0x000001359E6E83B0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E626F90>
+
+    def test_no_magnus_without_spin(self, simulator: BallFlightSimulator) -> None:
+        """Test that Magnus force is zero without spin."""
+        no_spin_launch = LaunchConditions(
+            velocity=50.0, launch_angle=math.radians(12.0), spin_rate=0.0
+        )
+>       trajectory = simulator.simulate_trajectory(no_spin_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:390: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E626F90>
+launch = LaunchConditions(velocity=50.0, launch_angle=0.20943951023931956, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_ TestMetricCalculations.test_metrics_positive_for_forward_flight[calculate_carry_distance] _
+
+self = <tests.unit.test_ball_flight_physics.TestMetricCalculations object at 0x000001359E62F390>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E776710>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+metric_method = 'calculate_carry_distance'
+
+    @pytest.mark.parametrize(
+        "metric_method",
+        [
+            "calculate_carry_distance",
+            "calculate_max_height",
+            "calculate_flight_time",
+        ],
+    )
+    def test_metrics_positive_for_forward_flight(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        metric_method: str,
+    ) -> None:
+        """Test that all trajectory metrics are positive for a forward flight."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:442: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E776710>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_ TestMetricCalculations.test_metrics_positive_for_forward_flight[calculate_max_height] _
+
+self = <tests.unit.test_ball_flight_physics.TestMetricCalculations object at 0x000001359E62F4D0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E775810>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+metric_method = 'calculate_max_height'
+
+    @pytest.mark.parametrize(
+        "metric_method",
+        [
+            "calculate_carry_distance",
+            "calculate_max_height",
+            "calculate_flight_time",
+        ],
+    )
+    def test_metrics_positive_for_forward_flight(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        metric_method: str,
+    ) -> None:
+        """Test that all trajectory metrics are positive for a forward flight."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:442: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E775810>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_ TestMetricCalculations.test_metrics_positive_for_forward_flight[calculate_flight_time] _
+
+self = <tests.unit.test_ball_flight_physics.TestMetricCalculations object at 0x000001359E6EC180>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E77BC80>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+metric_method = 'calculate_flight_time'
+
+    @pytest.mark.parametrize(
+        "metric_method",
+        [
+            "calculate_carry_distance",
+            "calculate_max_height",
+            "calculate_flight_time",
+        ],
+    )
+    def test_metrics_positive_for_forward_flight(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        metric_method: str,
+    ) -> None:
+        """Test that all trajectory metrics are positive for a forward flight."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:442: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E77BC80>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_ TestTrajectoryAnalysis.test_analyze_trajectory_contains_key[carry_distance] _
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E62F750>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6F41A0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+expected_key = 'carry_distance'
+
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
+    ) -> None:
+        """Test that analysis returns dictionary with expected key."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E6F41A0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+___ TestTrajectoryAnalysis.test_analyze_trajectory_contains_key[max_height] ___
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E62F890>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E99B470>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+expected_key = 'max_height'
+
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
+    ) -> None:
+        """Test that analysis returns dictionary with expected key."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E99B470>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+__ TestTrajectoryAnalysis.test_analyze_trajectory_contains_key[flight_time] ___
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E6EC3E0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E99B590>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+expected_key = 'flight_time'
+
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
+    ) -> None:
+        """Test that analysis returns dictionary with expected key."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E99B590>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_ TestTrajectoryAnalysis.test_analyze_trajectory_contains_key[landing_angle] __
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E6EC510>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E999130>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+expected_key = 'landing_angle'
+
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
+    ) -> None:
+        """Test that analysis returns dictionary with expected key."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E999130>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+___ TestTrajectoryAnalysis.test_analyze_trajectory_contains_key[apex_time] ____
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E6E9A30>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9997F0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+expected_key = 'apex_time'
+
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
+    ) -> None:
+        """Test that analysis returns dictionary with expected key."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9997F0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_ TestTrajectoryAnalysis.test_analyze_trajectory_contains_key[trajectory_points] _
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E64A140>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E99A030>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+expected_key = 'trajectory_points'
+
+    @pytest.mark.parametrize(
+        "expected_key",
+        [
+            "carry_distance",
+            "max_height",
+            "flight_time",
+            "landing_angle",
+            "apex_time",
+            "trajectory_points",
+        ],
+    )
+    def test_analyze_trajectory_contains_key(
+        self,
+        simulator: BallFlightSimulator,
+        driver_launch: LaunchConditions,
+        expected_key: str,
+    ) -> None:
+        """Test that analysis returns dictionary with expected key."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E99A030>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+____________ TestTrajectoryAnalysis.test_apex_time_before_landing _____________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E649AE0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E999310>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_apex_time_before_landing(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that apex time is before total flight time."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:499: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E999310>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+____________ TestTrajectoryAnalysis.test_landing_angle_reasonable _____________
+
+self = <tests.unit.test_ball_flight_physics.TestTrajectoryAnalysis object at 0x000001359E0DA350>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9993D0>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_landing_angle_reasonable(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test that landing angle is within reasonable range."""
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:508: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9993D0>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________ TestRealWorldValidation.test_driver_carry_reasonable_range __________
+
+self = <tests.unit.test_ball_flight_physics.TestRealWorldValidation object at 0x000001359E62F610>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9A9F70>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_driver_carry_reasonable_range(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test driver carry distance is in reasonable range.
+    
+        The current empirical model targets:
+        - Driver (73 m/s, 11°, 2500 rpm): ~200 yards
+    
+        Note: Model accuracy depends on lift/drag coefficient tuning.
+        Wider tolerance allows for different coefficient sets.
+        """
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:556: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9A9F70>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________ TestRealWorldValidation.test_iron_7_carry_reasonable_range __________
+
+self = <tests.unit.test_ball_flight_physics.TestRealWorldValidation object at 0x000001359E62F9D0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9A85F0>
+iron_7_launch = LaunchConditions(velocity=53.0, launch_angle=0.2792526803190927, azimuth_angle=0.0, spin_rate=7000.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_iron_7_carry_reasonable_range(
+        self, simulator: BallFlightSimulator, iron_7_launch: LaunchConditions
+    ) -> None:
+        """Test 7-iron carry distance is in reasonable range.
+    
+        The current empirical model targets:
+        - 7-iron (53 m/s, 16°, 7000 rpm): ~165 yards
+        """
+>       trajectory = simulator.simulate_trajectory(iron_7_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:571: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9A85F0>
+launch = LaunchConditions(velocity=53.0, launch_angle=0.2792526803190927, azimuth_angle=0.0, spin_rate=7000.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+__________ TestRealWorldValidation.test_driver_max_height_reasonable __________
+
+self = <tests.unit.test_ball_flight_physics.TestRealWorldValidation object at 0x000001359E6EC640>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E204050>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_driver_max_height_reasonable(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test driver max height is reasonable.
+    
+        Model produces heights in range 10-25m for driver trajectory.
+        """
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:585: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E204050>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________ TestRealWorldValidation.test_driver_flight_time_reasonable __________
+
+self = <tests.unit.test_ball_flight_physics.TestRealWorldValidation object at 0x000001359E6EC770>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E206870>
+driver_launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+
+    def test_driver_flight_time_reasonable(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test driver flight time is reasonable.
+    
+        Model produces flight times of 3-6 seconds for driver.
+        """
+>       trajectory = simulator.simulate_trajectory(driver_launch, max_time=10.0)
+
+tests\unit\test_ball_flight_physics.py:598: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E206870>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 10.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+____________________ TestEdgeCases.test_very_low_velocity _____________________
+
+self = <tests.unit.test_ball_flight_physics.TestEdgeCases object at 0x000001359E62FB10>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E2414F0>
+
+    def test_very_low_velocity(self, simulator: BallFlightSimulator) -> None:
+        """Test trajectory with very low velocity."""
+        low_velocity_launch = LaunchConditions(
+            velocity=5.0, launch_angle=math.radians(45.0), spin_rate=0.0
+        )
+>       trajectory = simulator.simulate_trajectory(low_velocity_launch, max_time=2.0)
+
+tests\unit\test_ball_flight_physics.py:618: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E2414F0>
+launch = LaunchConditions(velocity=5.0, launch_angle=0.7853981633974483, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 2.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+______________________ TestEdgeCases.test_very_high_spin ______________________
+
+self = <tests.unit.test_ball_flight_physics.TestEdgeCases object at 0x000001359E62FC50>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E13FC50>
+
+    def test_very_high_spin(self, simulator: BallFlightSimulator) -> None:
+        """Test trajectory with extreme spin rate."""
+        high_spin_launch = LaunchConditions(
+            velocity=50.0, launch_angle=math.radians(15.0), spin_rate=10000.0
+        )
+>       trajectory = simulator.simulate_trajectory(high_spin_launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:629: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E13FC50>
+launch = LaunchConditions(velocity=50.0, launch_angle=0.2617993877991494, azimuth_angle=0.0, spin_rate=10000.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+____________________ TestEdgeCases.test_zero_launch_angle _____________________
+
+self = <tests.unit.test_ball_flight_physics.TestEdgeCases object at 0x000001359E6EC8A0>
+simulator = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E19C4D0>
+
+    def test_zero_launch_angle(self, simulator: BallFlightSimulator) -> None:
+        """Test horizontal launch (zero launch angle).
+    
+        When launched horizontally from ground level (z=0) with no spin,
+        the ball immediately contacts the ground due to gravity.
+        """
+        horizontal_launch = LaunchConditions(
+            velocity=50.0, launch_angle=0.0, spin_rate=0.0
+        )
+>       trajectory = simulator.simulate_trajectory(horizontal_launch, max_time=3.0)
+
+tests\unit\test_ball_flight_physics.py:645: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E19C4D0>
+launch = LaunchConditions(velocity=50.0, launch_angle=0.0, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 3.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________________ TestWindEffects.test_headwind_reduces_carry _________________
+
+self = <tests.unit.test_ball_flight_physics.TestWindEffects object at 0x000001359E62FD90>
+
+    def test_headwind_reduces_carry(self) -> None:
+        """Test that headwind reduces carry distance."""
+        launch = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=2500.0
+        )
+    
+        no_wind_sim = BallFlightSimulator()
+        headwind_sim = BallFlightSimulator(
+            environment=EnvironmentalConditions(
+                wind_velocity=np.array([-10.0, 0.0, 0.0])  # 10 m/s headwind
+            )
+        )
+    
+>       no_wind_traj = no_wind_sim.simulate_trajectory(launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:675: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E19DC10>
+launch = LaunchConditions(velocity=60.0, launch_angle=0.20943951023931956, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+________________ TestWindEffects.test_tailwind_increases_carry ________________
+
+self = <tests.unit.test_ball_flight_physics.TestWindEffects object at 0x000001359E62FED0>
+
+    def test_tailwind_increases_carry(self) -> None:
+        """Test that tailwind increases carry distance."""
+        launch = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=2500.0
+        )
+    
+        no_wind_sim = BallFlightSimulator()
+        tailwind_sim = BallFlightSimulator(
+            environment=EnvironmentalConditions(
+                wind_velocity=np.array([10.0, 0.0, 0.0])  # 10 m/s tailwind
+            )
+        )
+    
+>       no_wind_traj = no_wind_sim.simulate_trajectory(launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:696: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E19DB50>
+launch = LaunchConditions(velocity=60.0, launch_angle=0.20943951023931956, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_________________ TestSpinDecay.test_spin_decay_reduces_carry _________________
+
+self = <tests.unit.test_ball_flight_physics.TestSpinDecay object at 0x000001359E6ECB00>
+
+    def test_spin_decay_reduces_carry(self) -> None:
+        """Spin decay should reduce carry distance vs constant spin.
+    
+        With spin decaying, Magnus lift decreases over time, leading
+        to a shorter carry than if spin were constant.
+        """
+        launch = LaunchConditions(
+            velocity=73.0,
+            launch_angle=math.radians(11.0),
+            spin_rate=2500.0,
+        )
+    
+        # Simulator with no spin decay (constant spin)
+        no_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.0))
+        # Simulator with default spin decay
+        with_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.05))
+    
+>       traj_no_decay = no_decay.simulate_trajectory(launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:745: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E19CB90>
+launch = LaunchConditions(velocity=73.0, launch_angle=0.19198621771937624, azimuth_angle=0.0, spin_rate=2500.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_______________ TestSpinDecay.test_higher_decay_rate_less_carry _______________
+
+self = <tests.unit.test_ball_flight_physics.TestSpinDecay object at 0x000001359E714830>
+
+    def test_higher_decay_rate_less_carry(self) -> None:
+        """Higher spin decay rate should produce shorter carry."""
+        launch = LaunchConditions(
+            velocity=53.0,
+            launch_angle=math.radians(16.0),
+            spin_rate=7000.0,
+        )
+    
+        slow_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.02))
+        fast_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.2))
+    
+>       traj_slow = slow_decay.simulate_trajectory(launch, max_time=8.0)
+
+tests\unit\test_ball_flight_physics.py:765: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E204050>
+launch = LaunchConditions(velocity=53.0, launch_angle=0.2792526803190927, azimuth_angle=0.0, spin_rate=7000.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 8.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+_______________ TestSpinDecay.test_spin_decay_exponential_rate ________________
+
+self = <tests.unit.test_ball_flight_physics.TestSpinDecay object at 0x000001359E649D00>
+
+    def test_spin_decay_exponential_rate(self) -> None:
+        """Verify spin decays approximately 20-30% over 4 seconds at default rate.
+    
+        With decay_rate=0.05, after 4s: spin(4) = spin(0) * exp(-0.05 * 4)
+        = spin(0) * exp(-0.2) \u2248 spin(0) * 0.819 \u2192 ~18% decay
+        """
+>       from src.shared.python.physics.ball_flight_physics import _apply_spin_decay
+E       ImportError: cannot import name '_apply_spin_decay' from 'src.shared.python.physics.ball_flight_physics' (c:\Users\diete\Repositories\UpstreamDrift\src\shared\python\physics\ball_flight_physics.py)
+
+tests\unit\test_ball_flight_physics.py:779: ImportError
+_________________ TestSpinDecay.test_no_spin_no_decay_effect __________________
+
+self = <tests.unit.test_ball_flight_physics.TestSpinDecay object at 0x000001359E64A7A0>
+
+    def test_no_spin_no_decay_effect(self) -> None:
+        """With zero initial spin, decay rate should not affect trajectory."""
+        launch = LaunchConditions(
+            velocity=50.0,
+            launch_angle=math.radians(15.0),
+            spin_rate=0.0,
+        )
+    
+        no_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.0))
+        with_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.1))
+    
+>       traj_no = no_decay.simulate_trajectory(launch, max_time=6.0)
+
+tests\unit\test_ball_flight_physics.py:806: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:92: in wrapper
+    return func(*args, **kwargs)
+src\shared\python\core\contracts\decorators.py:138: in wrapper
+    result = func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.shared.python.physics.ball_flight_physics.BallFlightSimulator object at 0x000001359E9AAF90>
+launch = LaunchConditions(velocity=50.0, launch_angle=0.2617993877991494, azimuth_angle=0.0, spin_rate=0.0, spin_axis=array([ 0., -1.,  0.]))
+max_time = 6.0, dt = 0.01
+
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
+        and launch.velocity >= 0,
+        "Launch conditions must not be None and velocity must be non-negative",
+    )
+    @precondition(
+        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        "Max time and time step must be positive",
+    )
+    @postcondition(
+        lambda result: result is not None and isinstance(result, list),
+        "Trajectory must be returned as a non-None list",
+    )
+    def simulate_trajectory(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> list[TrajectoryPoint]:
+        """Simulate trajectory using Rust kernel (preferred) or JIT-optimized RK4.
+    
+        When the upstream_physics Rust wheel is installed, the RK4 integration
+        is delegated to the native Rust implementation for performance.
+        Otherwise, falls back to the Python/Numba implementation.
+        """
+        from src.shared.python.physics.rust_kernel import is_rust_available
+    
+        if not is_rust_available():
+>           raise RuntimeError(
+                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+            )
+E           RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+
+src\shared\python\physics\ball_flight_physics.py:166: RuntimeError
+============================== warnings summary ===============================
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\_hypothesis_pytestplugin.py:469
+  C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_hypothesis_pytestplugin.py:469: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_trajectory_returns_list - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_trajectory_point_structure - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_initial_position_at_origin - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_trajectory_descends_to_ground - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectorySimulation::test_time_increases_monotonically - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_gravity_only_trajectory - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_higher_launch_angle_higher_flight - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_backspin_adds_lift - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestPhysicsValidation::test_higher_velocity_longer_carry - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_forces_present_in_trajectory[gravity] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_forces_present_in_trajectory[drag] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_forces_present_in_trajectory[magnus] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_gravity_direction - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestForceCalculations::test_no_magnus_without_spin - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_metrics_positive_for_forward_flight[calculate_carry_distance] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_metrics_positive_for_forward_flight[calculate_max_height] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestMetricCalculations::test_metrics_positive_for_forward_flight[calculate_flight_time] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[carry_distance] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[max_height] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[flight_time] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[landing_angle] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[apex_time] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_analyze_trajectory_contains_key[trajectory_points] - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_apex_time_before_landing - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestTrajectoryAnalysis::test_landing_angle_reasonable - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_driver_carry_reasonable_range - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_iron_7_carry_reasonable_range - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_driver_max_height_reasonable - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestRealWorldValidation::test_driver_flight_time_reasonable - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestEdgeCases::test_very_low_velocity - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestEdgeCases::test_very_high_spin - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestEdgeCases::test_zero_launch_angle - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestWindEffects::test_headwind_reduces_carry - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestWindEffects::test_tailwind_increases_carry - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_spin_decay_reduces_carry - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_higher_decay_rate_less_carry - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+FAILED tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_spin_decay_exponential_rate - ImportError: cannot import name '_apply_spin_decay' from 'src.shared.python.physics.ball_flight_physics' (c:\Users\diete\Repositories\UpstreamDrift\src\shared\python\physics\ball_flight_physics.py)
+FAILED tests/unit/test_ball_flight_physics.py::TestSpinDecay::test_no_spin_no_decay_effect - RuntimeError: upstream-physics Rust kernel not found! Strict Rust Parity Enforced.
+================== 38 failed, 24 passed, 1 warning in 1.70s ===================
