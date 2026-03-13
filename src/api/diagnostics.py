@@ -356,7 +356,7 @@ class APIDiagnostics:
                 dependencies[dep] = True
                 versions[dep] = getattr(module, "__version__", "unknown")
             except ImportError:
-                pass
+                logger.debug("Optional dependency not installed: %s", dep)
 
         details: dict[str, Any] = {
             "dependencies": dependencies,

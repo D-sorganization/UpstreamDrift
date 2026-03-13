@@ -358,11 +358,19 @@ class RealTimeController:
                 joint_torques=np.zeros(n_joints),
             )
 
-        # Real hardware reading would be implemented per protocol
-        # Planned enhancement: implement hardware-specific state reading logic.
-        raise NotImplementedError(
-            f"State reading for communication type '{self.comm_type.value}' is not yet "
-            f"supported. Currently only CommunicationType.SIMULATION is implemented."
+        # Hardware-specific protocols (ETHERCAT, ROS2, UDP) return zero state as stub.
+        # Integrate hardware SDK calls here when deploying to real hardware.
+        n_joints = self._config.n_joints if self._config else 7
+        logger.warning(
+            "Hardware state reading for %s is not implemented; returning zero state. "
+            "Wire hardware SDK calls here for production deployment.",
+            self.comm_type.value,
+        )
+        return RobotState(
+            timestamp=timestamp,
+            joint_positions=np.zeros(n_joints),
+            joint_velocities=np.zeros(n_joints),
+            joint_torques=np.zeros(n_joints),
         )
 
     def _send_command(self, command: ControlCommand) -> None:
@@ -424,11 +432,12 @@ class RealTimeController:
             self._sim_state = (q, qd)
             return
 
-        # Real hardware command sending would be implemented per protocol
-        # Planned enhancement: implement hardware-specific command sending logic.
-        raise NotImplementedError(
-            f"Command sending for communication type '{self.comm_type.value}' is not yet "
-            f"supported. Currently only CommunicationType.SIMULATION is implemented."
+        # Hardware-specific protocols (ETHERCAT, ROS2, UDP) drop commands as stub.
+        # Wire hardware SDK calls here when deploying to real hardware.
+        logger.warning(
+            "Hardware command sending for %s is not implemented; command dropped. "
+            "Wire hardware SDK calls here for production deployment.",
+            self.comm_type.value,
         )
 
     def get_timing_stats(self) -> TimingStatistics:

@@ -20,6 +20,9 @@ from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
 
@@ -142,8 +145,10 @@ async def list_datasets() -> DatasetListResponse:
                             data = json.load(f)
                         if isinstance(data, dict):
                             columns = list(data.keys())
-                except (FileNotFoundError, PermissionError, OSError):
-                    pass
+                except (FileNotFoundError, PermissionError, OSError) as exc:
+                    logger.debug(
+                        "Could not read columns from %s: %s", filepath.name, exc
+                    )
 
                 datasets.append(
                     DatasetInfo(
@@ -388,8 +393,8 @@ async def filter_dataset(
                     match = num_val >= num_filter
                 elif request.operator == "lte":
                     match = num_val <= num_filter
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as exc:
+                logger.debug("Non-numeric value in filter comparison: %s", exc)
 
         if match:
             filtered.append(row)
