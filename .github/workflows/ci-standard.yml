@@ -17,6 +17,10 @@ on:
       - ".gitignore"
       - ".github/**"
   workflow_dispatch:
+  schedule:
+    # Weekly run every Monday at 06:00 UTC — catches test drift and
+    # coverage regression independent of code changes (issue #1789)
+    - cron: "0 6 * * 1"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -161,7 +165,7 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
-            --cov-fail-under=35 \
+            --cov-fail-under=40 \
             --tb=short \
             -v
 
