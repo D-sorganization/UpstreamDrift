@@ -4,6 +4,7 @@ import mujoco
 import numpy as np
 import pytest
 
+import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry as _telemetry_mod
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry import (
     TelemetryRecorder,
     export_telemetry_csv,
@@ -43,9 +44,7 @@ def mock_mujoco_model_data() -> tuple:
 def test_telemetry_recorder_init(mock_mujoco_model_data) -> None:
     model, _ = mock_mujoco_model_data
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
-    ) as mock_mujoco:
+    with patch.object(_telemetry_mod, "mujoco") as mock_mujoco:
         mock_mujoco.mjtObj = mujoco.mjtObj
         mock_mujoco.mjtTrn = mujoco.mjtTrn
         mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
@@ -59,9 +58,7 @@ def test_telemetry_recorder_init(mock_mujoco_model_data) -> None:
 def test_telemetry_recorder_record_step(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
-    ) as mock_mujoco:
+    with patch.object(_telemetry_mod, "mujoco") as mock_mujoco:
         mock_mujoco.mjtObj = mujoco.mjtObj
         mock_mujoco.mjtTrn = mujoco.mjtTrn
         mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
@@ -86,9 +83,7 @@ def test_telemetry_recorder_record_step(mock_mujoco_model_data) -> None:
 def test_telemetry_report_generation(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
-    ) as mock_mujoco:
+    with patch.object(_telemetry_mod, "mujoco") as mock_mujoco:
         mock_mujoco.mjtObj = mujoco.mjtObj
         mock_mujoco.mjtTrn = mujoco.mjtTrn
         mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
@@ -116,9 +111,7 @@ def test_telemetry_report_generation(mock_mujoco_model_data) -> None:
 def test_telemetry_reset(mock_mujoco_model_data) -> None:
     model, data = mock_mujoco_model_data
 
-    with patch(
-        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry.mujoco"
-    ) as mock_mujoco:
+    with patch.object(_telemetry_mod, "mujoco") as mock_mujoco:
         mock_mujoco.mjtObj = mujoco.mjtObj
         mock_mujoco.mjtTrn = mujoco.mjtTrn
         mock_mujoco.mj_id2name = MagicMock(side_effect=lambda m, t, i: f"obj_{i}")
