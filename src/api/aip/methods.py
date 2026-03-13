@@ -8,9 +8,12 @@ See issue #763
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from .dispatcher import MethodRegistry
+
+_logger = logging.getLogger(__name__)
 
 
 def create_registry() -> MethodRegistry:
@@ -216,8 +219,8 @@ def _simulation_status(
                     "sim_time": state.get("time", 0.0),
                     "state_keys": list(state.keys()),
                 }
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning("simulation.status: engine query failed: %s", exc)
 
     return {"running": False, "engine": None, "sim_time": 0.0}
 
@@ -312,8 +315,10 @@ def _model_query(
                     return {"joints": list(engine.joint_names)}
                 if property_name == "joints" and hasattr(engine, "get_joint_names"):
                     return {"joints": list(engine.get_joint_names())}
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning(
+                "model.get_property(%r): engine query failed: %s", property_name, exc
+            )
 
     return {"property": property_name, "data": None, "note": "No active model"}
 
@@ -367,8 +372,8 @@ def _analysis_metrics(
                     "velocities": state.get("velocities", []),
                     "torques": state.get("torques", []),
                 }
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning("analysis.get_metrics: engine query failed: %s", exc)
 
     return {"sim_time": 0.0, "note": "No active simulation"}
 

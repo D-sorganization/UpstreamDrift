@@ -54,7 +54,17 @@ __all__ = [
 
 
 def __getattr__(name: str):
-    """Lazy import for module components."""
+    """Lazy import for module components.
+
+    Each group of names is loaded from its respective sub-module only when
+    first accessed, keeping import cost low for callers that only need a
+    subset of the package.
+
+    Raises:
+        AttributeError: If *name* is not a public export of this package.
+        ImportError: Propagated if the underlying sub-module cannot be loaded
+            (e.g. missing optional dependency such as pinocchio or meshcat).
+    """
     if name in (
         "ClubTrajectory",
         "ClubTrajectoryParser",
@@ -62,9 +72,9 @@ def __getattr__(name: str):
         "SwingEventMarkers",
         "compute_hand_positions",
     ):
-        pass
+        from . import club_trajectory_parser as _parser_mod  # noqa: PLC0415
 
-        return locals()[name]
+        return getattr(_parser_mod, name)
 
     if name in (
         "DualHandIKSolver",
@@ -74,14 +84,14 @@ def __getattr__(name: str):
         "TrajectoryIKResult",
         "create_ik_solver",
     ):
-        pass
+        from . import dual_hand_ik_solver as _ik_mod  # noqa: PLC0415
 
-        return locals()[name]
+        return getattr(_ik_mod, name)
 
     if name in ("MotionVisualizer", "MatplotlibVisualizer", "VisualizerSettings"):
-        pass
+        from . import motion_visualizer as _viz_mod  # noqa: PLC0415
 
-        return locals()[name]
+        return getattr(_viz_mod, name)
 
     if name in (
         "MotionTrainingPipeline",
@@ -89,13 +99,13 @@ def __getattr__(name: str):
         "PipelineResult",
         "run_motion_training",
     ):
-        pass
+        from . import training_pipeline as _pipeline_mod  # noqa: PLC0415
 
-        return locals()[name]
+        return getattr(_pipeline_mod, name)
 
     if name in ("TrajectoryExporter", "export_for_mujoco", "export_for_drake"):
-        pass
+        from . import trajectory_exporter as _exporter_mod  # noqa: PLC0415
 
-        return locals()[name]
+        return getattr(_exporter_mod, name)
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -1,3 +1,10 @@
+"""Utility helpers for the MuJoCo humanoid-golf Docker simulation.
+
+Provides model-loading helpers, environment variable resolution, and
+miscellaneous numerical utilities shared across the Docker-containerised
+MuJoCo humanoid golf simulation backend.
+"""
+
 from __future__ import annotations
 
 import logging

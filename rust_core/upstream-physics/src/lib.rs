@@ -16,6 +16,7 @@
 //! - **DRY**: Consumes `tools-core` for math primitives
 
 pub mod aerodynamics;
+pub mod ball_flight;
 pub mod contact;
 pub mod rk4;
 pub mod swing_plane;
@@ -27,6 +28,39 @@ pub use tools_core::Vector3;
 
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
+
+/// Simulate a ball trajectory from Python.
+///
+/// Returns a `BallTrajectoryResult` with all trajectory points.
+///
+/// # Arguments
+/// - `pos0`: `[x, y, z]` initial position [m]
+/// - `vel0`: `[vx, vy, vz]` initial velocity [m/s]
+/// - `spin_axis`: unit vector for spin axis direction
+/// - `omega0`: initial spin rate [rad/s]
+/// - `gravity`: gravity vector (e.g. `[0, 0, -9.81]`)
+/// - `wind`: wind velocity [m/s]
+/// - `ball`: `AeroBallProperties` instance
+/// - `air`: `AirProperties` instance
+/// - `config`: `IntegratorConfig` instance
+#[cfg(feature = "python")]
+#[pyfunction]
+#[pyo3(signature = (pos0, vel0, spin_axis, omega0, gravity, wind, ball, air, config))]
+fn simulate_ball_trajectory_py(
+    pos0: [f64; 3],
+    vel0: [f64; 3],
+    spin_axis: [f64; 3],
+    omega0: f64,
+    gravity: [f64; 3],
+    wind: [f64; 3],
+    ball: aerodynamics::AeroBallProperties,
+    air: aerodynamics::AirProperties,
+    config: rk4::IntegratorConfig,
+) -> ball_flight::BallTrajectoryResult {
+    ball_flight::simulate_ball_trajectory(
+        pos0, vel0, spin_axis, omega0, gravity, wind, &ball, &air, &config,
+    )
+}
 
 #[cfg(feature = "python")]
 #[pymodule]
@@ -46,6 +80,11 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<aerodynamics::AirProperties>()?;
     m.add_class::<aerodynamics::AeroBallProperties>()?;
     m.add_class::<aerodynamics::AeroForces>()?;
+
+    // Ball flight trajectory simulation (wires aerodynamics + RK4)
+    m.add_class::<ball_flight::TrajectoryPoint>()?;
+    m.add_class::<ball_flight::BallTrajectoryResult>()?;
+    m.add_function(pyo3::wrap_pyfunction!(simulate_ball_trajectory_py, m)?)?;
 
     Ok(())
 }

@@ -497,6 +497,15 @@ class FlightModelRegistry:
         return list(cls._models.values())
 
     @classmethod
+    def reset(cls) -> None:
+        """Clear the registry, forcing re-initialization on next access.
+
+        Use in test teardown to prevent cross-test pollution from the shared
+        class-level ``_models`` dict.  See issue #1775.
+        """
+        cls._models.clear()
+
+    @classmethod
     def _initialize(cls) -> None:
         cls._models[FlightModelType.WATERLOO_PENNER] = WaterlooPennerModel()
         cls._models[FlightModelType.MACDONALD_HANZELY] = MacDonaldHanzelyModel()

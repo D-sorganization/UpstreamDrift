@@ -24,7 +24,7 @@ on:
           - "documentation"
           - "testing"
   # schedule: DISABLED to reduce CI cost (see #1751)
-    # Run weekly on Mondays at 3 AM UTC to fix top 5 issues
+  # Run weekly on Mondays at 3 AM UTC to fix top 5 issues
 
 permissions:
   contents: write
@@ -178,7 +178,7 @@ jobs:
 
       - name: Install tools
         run: |
-          pip install ruff==0.14.10 black==25.12.0
+          pip install ruff==0.14.10
 
       - name: Run comprehensive auto-fixes
         run: |
@@ -200,9 +200,9 @@ jobs:
           echo "Applying safe fixes..."
           ruff check --fix . || true
 
-          # Apply black formatting
-          echo "Applying black formatting..."
-          black . || true
+          # Apply ruff formatting (ruff format is the canonical formatter)
+          echo "Applying ruff formatting..."
+          ruff format . || true
 
       - name: Generate fix report
         run: |

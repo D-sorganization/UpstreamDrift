@@ -1,3 +1,10 @@
+"""MuJoCo humanoid-golf simulation core (Docker backend).
+
+Implements the main simulation loop, state management, and trajectory
+recording for the humanoid golf swing in the Docker-hosted MuJoCo
+environment.  Supports headless rendering for CI and batch processing.
+"""
+
 from __future__ import annotations
 
 import contextlib

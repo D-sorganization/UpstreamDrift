@@ -2,7 +2,7 @@ name: Jules Assessment Auto-Fix
 
 on:
   # schedule: DISABLED to reduce CI cost (see #1751)
-    # Daily at 5 AM PST (13:00 UTC) - runs after overnight assessments complete
+  # Daily at 5 AM PST (13:00 UTC) - runs after overnight assessments complete
   workflow_dispatch:
     inputs:
       assessment_type:
@@ -69,7 +69,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install ruff black mypy pytest pytest-cov pip-audit bandit
+          pip install ruff mypy pytest pytest-cov pip-audit bandit
 
       - name: Run Assessment A (Architecture)
         id: assessment_a
@@ -231,7 +231,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt || true
-          pip install ruff black mypy pip-tools
+          pip install ruff mypy pip-tools
 
       - name: Create consolidated fix branch
         run: |
@@ -247,12 +247,8 @@ jobs:
           echo "=== Running Linting Fixes ==="
           CHANGES_BEFORE=$(git status --porcelain | wc -l)
 
-          # Auto-fix with black (if directories exist)
-          [ -d python ] && black python/ || true
-          [ -d tests ] && black tests/ || true
-          [ -d src ] && black src/ || true
-
-          # Auto-fix with ruff
+          # Auto-fix formatting and linting
+          ruff format . || true
           ruff check --fix . || true
 
           CHANGES_AFTER=$(git status --porcelain | wc -l)
@@ -316,7 +312,7 @@ jobs:
 
           # Build fix summary
           FIX_SUMMARY=""
-          [ "${{ steps.fix_linting.outputs.fixed }}" = "true" ] && FIX_SUMMARY="$FIX_SUMMARY\n- Linting (ruff, black)"
+          [ "${{ steps.fix_linting.outputs.fixed }}" = "true" ] && FIX_SUMMARY="$FIX_SUMMARY\n- Linting (ruff format + ruff check)"
           [ "${{ steps.fix_deps.outputs.fixed }}" = "true" ] && FIX_SUMMARY="$FIX_SUMMARY\n- Dependencies"
 
           git add -A

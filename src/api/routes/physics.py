@@ -19,6 +19,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import (
+    get_logger as _get_module_logger,
+)
 
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import (
@@ -40,6 +43,8 @@ from ..models.responses import (
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
+
+_logger = _get_module_logger(__name__)
 
 router = APIRouter()
 _CONTROL_INTERFACE_CACHE: dict[int, Any] = {}
@@ -270,16 +275,16 @@ async def get_forces(
         try:
             g = engine.compute_gravity_forces()
             gravity = g.tolist() if hasattr(g, "tolist") else list(g)
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning("compute_gravity_forces unavailable: %s", exc)
 
         # Contact forces
         contact = None
         try:
             c = engine.compute_contact_forces()
             contact = c.tolist() if hasattr(c, "tolist") else list(c)
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning("compute_contact_forces unavailable: %s", exc)
 
         # Applied torques from control interface
         ctrl = _get_control_interface(engine_manager)
@@ -292,8 +297,8 @@ async def get_forces(
         try:
             b = engine.compute_bias_forces()
             bias = b.tolist() if hasattr(b, "tolist") else list(b)
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning("compute_bias_forces unavailable: %s", exc)
 
         return ForceVectorResponse(
             sim_time=sim_time,
@@ -349,8 +354,10 @@ async def get_metrics(
 
                 linear_vel = jac["linear"] @ v
                 club_head_speed = float(np.linalg.norm(linear_vel))
-        except ImportError:
-            pass
+        except ImportError as exc:
+            _logger.warning(
+                "numpy unavailable for club-head speed calculation: %s", exc
+            )
 
         # Energy calculations
         kinetic_energy = None
@@ -360,8 +367,8 @@ async def get_metrics(
 
             M = engine.compute_mass_matrix()
             kinetic_energy = float(0.5 * v @ M @ v)
-        except ImportError:
-            pass
+        except ImportError as exc:
+            _logger.warning("numpy unavailable for kinetic energy calculation: %s", exc)
 
         # Torque metrics
         ctrl = _get_control_interface(engine_manager)

@@ -444,20 +444,29 @@ class AuthCache:
             self._cache[cache_key] = (result, self._time.time())
 
     def _cache_lookup_token(self, token_value: str) -> str:
-        """Generate a fast lookup token for the auth cache.
+        """Generate a lookup token for the auth cache.
 
         SECURITY NOTE: This is NOT used for password/key storage or protection.
         The actual API key verification uses bcrypt (see verify_api_key method).
-        This is purely a fast dictionary lookup key to avoid repeated bcrypt calls.
+        This is purely a deterministic dictionary lookup key to avoid repeated
+        bcrypt calls across multiple requests.
 
-        We use Python's built-in hash for speed. The actual security comes from:
+        We use SHA-256 (not Python's built-in hash()) because:
+        1. Python's hash() is randomised per-process (PYTHONHASHSEED), making
+           cache keys inconsistent across workers and process restarts.
+        2. SHA-256 is deterministic, ensuring cache correctness in multi-worker
+           deployments and preventing potential authentication-bypass scenarios.
+
+        The actual security comes from:
         1. Short TTL (5 minutes) limiting exposure window
         2. bcrypt verification on cache miss
         3. The token_value itself is never stored, only this derived lookup key
         """
-        # Use a combination of hash and length to create a lookup key
-        # This is intentionally NOT cryptographic - it's for cache performance only
-        return f"{hash(token_value)}:{len(token_value)}"
+        import hashlib
+
+        # Use SHA-256 for a deterministic, process-stable lookup key.
+        # PYTHONHASHSEED does not affect hashlib, so this is safe across workers.
+        return hashlib.sha256(token_value.encode()).hexdigest()
 
 
 auth_cache = AuthCache()

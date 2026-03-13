@@ -43,7 +43,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt || true
-          pip install ruff black mypy || true
+          pip install ruff mypy || true
           npm install -g @google/jules
 
       - name: Find or Create Fix Branch
@@ -116,7 +116,7 @@ jobs:
           Rules:
           - DO NOT modify test assertions
           - DO NOT disable linting rules without justification
-          - Run: ruff check . --fix && black .
+          - Run: ruff format . && ruff check . --fix
 
           Document fixes in docs/assessments/issues/
           PROMPT_EOF
@@ -182,8 +182,8 @@ jobs:
 
 
 
+          ruff format . || true
           ruff check . --fix || true
-          black . || true
 
       - name: Commit and Create/Update PR
         env:

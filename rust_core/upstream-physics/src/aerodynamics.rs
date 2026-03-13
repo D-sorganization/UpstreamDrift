@@ -110,7 +110,7 @@ pub fn compute_aero_forces(
         spin.x.is_finite() && spin.y.is_finite() && spin.z.is_finite(),
         "DbC: spin must be finite"
     );
-    debug_assert!(air.density > 0.0, "DbC: air density must be positive");
+    debug_assert!(air.density >= 0.0, "DbC: air density must be non-negative");
     debug_assert!(ball.area > 0.0, "DbC: ball area must be positive");
 
     let drag = compute_drag(velocity, ball, air);

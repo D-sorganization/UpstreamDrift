@@ -25,7 +25,7 @@ Planned enhancement: implement Mud Ball Physics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -428,16 +428,51 @@ class BallFlightSimulator:
                 config = upstream_physics.IntegratorConfig(
                     dt=dt, max_steps=int(max_time / dt) + 1
                 )
-                logger.debug("Using Rust RK4 integrator (dt=%.4f)", dt)
-                # Rust integrator returns the trajectory as an array.
-                # For now, fall through if the Rust API doesn't match yet.
-                # This call-site is wired; the actual Rust integration
-                # will activate once the Rust crate exposes simulate_trajectory.
-                _ = config  # Mark as used; full delegation TBD
-            except (ImportError, AttributeError, TypeError):
-                pass  # Fall through to Python implementation
+                ball_props = upstream_physics.AeroBallProperties()
+                ball_props.mass = self.ball.mass
+                ball_props.radius = self.ball.radius
+                ball_props.area = self.ball.cross_sectional_area
+                ball_props.drag_coefficient = self.ball.cd0
+                ball_props.spin_decay_rate = self.ball.spin_decay_rate
 
-        # Python fallback (current default until Rust API is fully wired)
+                air_props = upstream_physics.AirProperties()
+                air_props.density = self.environment.air_density
+
+                pos0 = [0.0, 0.0, 0.0]
+                vel0 = [
+                    float(initial[3]),
+                    float(initial[4]),
+                    float(initial[5]),
+                ]
+                spin_axis = [
+                    float(launch.spin_axis[0]),
+                    float(launch.spin_axis[1]),
+                    float(launch.spin_axis[2]),
+                ]
+                gravity = [0.0, 0.0, float(-self.environment.gravity)]
+                wind = [
+                    float(self.environment.wind_velocity[0]),
+                    float(self.environment.wind_velocity[1]),
+                    float(self.environment.wind_velocity[2]),
+                ]
+                logger.debug("Using Rust ball_flight trajectory (dt=%.4f)", dt)
+                rust_result = upstream_physics.simulate_ball_trajectory(
+                    pos0,
+                    vel0,
+                    spin_axis,
+                    omega,
+                    gravity,
+                    wind,
+                    ball_props,
+                    air_props,
+                    config,
+                )
+                # Convert Rust trajectory points to Python TrajectoryPoint list
+                return self._post_process_rust(rust_result, launch)
+            except (ImportError, AttributeError, TypeError, Exception) as e:
+                logger.debug("Rust trajectory failed (%s), using Python fallback", e)
+
+        # Python fallback
         mark_legacy("_solve_rk4_loop", "ball_flight_physics")
 
         raw_data = _solve_rk4_loop(
@@ -455,6 +490,21 @@ class BallFlightSimulator:
         )
 
         return self._post_process(raw_data, launch)
+
+    def _post_process_rust(
+        self, rust_result: Any, launch: LaunchConditions
+    ) -> list[TrajectoryPoint]:
+        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
+        points = []
+        for p in rust_result.get_points():
+            pos = np.array([p.x, p.y, p.z])
+            vel = np.array([p.vx, p.vy, p.vz])
+            forces = self._calculate_forces(vel, launch)
+            acc = (
+                forces["gravity"] + forces["drag"] + forces["magnus"]
+            ) / self.ball.mass
+            points.append(TrajectoryPoint(p.t, pos, vel, acc, forces))
+        return points
 
     def _post_process(
         self, data: np.ndarray, launch: LaunchConditions

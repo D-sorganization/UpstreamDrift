@@ -1,3 +1,10 @@
+"""Launcher entry point for the MuJoCo humanoid golf simulation.
+
+Sets up the runtime environment (MuJoCo plugin paths, display settings)
+and launches the interactive humanoid-golf simulation window.  Can also
+be invoked headlessly for automated trajectory generation and testing.
+"""
+
 import os
 import sys
 

@@ -17,6 +17,9 @@ from typing import TYPE_CHECKING, Any, cast
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import (
+    get_logger as _get_module_logger,
+)
 
 from ..dependencies import get_engine_manager, get_logger
 from ..models.requests import (
@@ -31,6 +34,8 @@ from ..models.responses import (
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
+
+_logger = _get_module_logger(__name__)
 
 router = APIRouter()
 
@@ -85,8 +90,13 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
                 limits = engine.get_joint_limits()
                 if i < len(limits):
                     min_val, max_val = limits[i]
-            except (ValueError, RuntimeError, AttributeError):
-                pass
+            except (ValueError, RuntimeError, AttributeError) as exc:
+                _logger.warning(
+                    "Could not retrieve joint limits for joint %d (%s): %s",
+                    i,
+                    name,
+                    exc,
+                )
 
         actuators.append(
             ActuatorInfo(
@@ -163,8 +173,8 @@ async def get_actuator_panel(
                 engine_name = str(active.engine_type)
             elif active:
                 engine_name = type(active).__name__
-        except (RuntimeError, ValueError, AttributeError):
-            pass
+        except (RuntimeError, ValueError, AttributeError) as exc:
+            _logger.warning("Could not determine active engine name: %s", exc)
 
         return ActuatorPanelResponse(
             n_actuators=len(actuators),
@@ -320,8 +330,12 @@ async def send_actuator_batch(
             engine = engine_manager.get_active_engine()
             if engine and hasattr(engine, "set_control"):
                 engine.set_control(cmd.actuator_index, applied_value)
-        except (ValueError, RuntimeError, AttributeError):
-            pass
+        except (ValueError, RuntimeError, AttributeError) as exc:
+            _logger.warning(
+                "Batch actuator command failed for index %d: %s",
+                cmd.actuator_index,
+                exc,
+            )
 
         results.append(
             ActuatorCommandResponse(

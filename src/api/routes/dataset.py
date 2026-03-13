@@ -27,6 +27,11 @@ from pydantic import BaseModel, Field
 from src.api.dependencies import get_engine_manager, get_logger
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import (
+    get_logger as _get_module_logger,
+)
+
+_logger = _get_module_logger(__name__)
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
@@ -252,8 +257,8 @@ async def import_swing_capture(
             "impact": phase_labels.impact,
             "follow_through_end": phase_labels.follow_through_end,
         }
-    except (RuntimeError, ValueError, AttributeError):
-        pass
+    except (RuntimeError, ValueError, AttributeError) as exc:
+        _logger.warning("Swing phase detection failed, phases will be omitted: %s", exc)
 
     rl_export_path = None
     if request.export_for_rl:

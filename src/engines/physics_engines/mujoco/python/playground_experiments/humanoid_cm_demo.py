@@ -1,3 +1,10 @@
+"""Centre-of-mass demonstration for the MuJoCo humanoid model.
+
+Playground experiment that visualises centre-of-mass trajectories during
+a parameterised golf swing.  Used for manual exploration of dynamic balance
+and weight-transfer characteristics of the humanoid model.
+"""
+
 from pathlib import Path
 
 from src.shared.python.engine_core.engine_availability import (
