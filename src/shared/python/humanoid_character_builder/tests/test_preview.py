@@ -1,3 +1,5 @@
+"""Tests for the humanoid character builder preview functionality."""
+
 import sys
 from unittest.mock import patch
 

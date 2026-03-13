@@ -1,3 +1,5 @@
+"""Utility script: print all joint and actuator names from a MuJoCo model."""
+
 import logging
 
 from dm_control import suite

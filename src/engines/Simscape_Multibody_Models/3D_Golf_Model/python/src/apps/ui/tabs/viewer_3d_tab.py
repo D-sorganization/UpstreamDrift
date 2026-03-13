@@ -1,3 +1,5 @@
+"""Three-dimensional scene viewer tab for the 3-D Golf Model GUI."""
+
 from typing import Any
 
 import numpy as np

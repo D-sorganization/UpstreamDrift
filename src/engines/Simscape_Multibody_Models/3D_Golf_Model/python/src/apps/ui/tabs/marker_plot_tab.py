@@ -1,3 +1,5 @@
+"""Marker-trajectory plot tab for the 3-D Golf Model GUI."""
+
 import numpy as np
 from PyQt6 import QtWidgets
 

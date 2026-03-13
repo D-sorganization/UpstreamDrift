@@ -1,3 +1,5 @@
+"""Benchmark comparing trajectory-funnel RL policies across solver configurations."""
+
 import logging
 
 import numpy as np

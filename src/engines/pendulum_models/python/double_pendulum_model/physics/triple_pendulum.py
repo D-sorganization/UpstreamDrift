@@ -1,3 +1,5 @@
+"""Triple-pendulum physics model: equations of motion and numerical integration."""
+
 # ruff: noqa: PLR0913, ARG001, N803, TID253
 from __future__ import annotations
 

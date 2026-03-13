@@ -1,3 +1,5 @@
+"""Analog-data plot tab for the 3-D Golf Model GUI."""
+
 from PyQt6 import QtWidgets
 
 from ...core.models import C3DDataModel

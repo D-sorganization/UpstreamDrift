@@ -1,3 +1,5 @@
+"""Induced-Acceleration Analysis (IAA) helpers for the MuJoCo humanoid golf sim."""
+
 import logging
 from typing import Any
 

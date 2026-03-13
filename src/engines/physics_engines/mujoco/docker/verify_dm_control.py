@@ -1,3 +1,5 @@
+"""Smoke-test script: verify that dm_control is correctly installed inside Docker."""
+
 import logging
 import sys
 

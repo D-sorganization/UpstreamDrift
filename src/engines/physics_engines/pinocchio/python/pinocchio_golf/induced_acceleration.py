@@ -1,3 +1,5 @@
+"""Induced-acceleration analysis for golf swings via the Pinocchio library."""
+
 import numpy as np
 import pinocchio as pin
 

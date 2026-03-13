@@ -1,3 +1,5 @@
+"""OpenSim tutorial: evaluate CMC simulation results for metabolic-cost optimisation."""
+
 # --------------------------------------------------------------------------- #
 # OpenSim: CMC_EvaluateResults.py                                             #
 # --------------------------------------------------------------------------- #

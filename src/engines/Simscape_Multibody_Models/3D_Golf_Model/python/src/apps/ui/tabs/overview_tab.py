@@ -1,3 +1,5 @@
+"""Overview tab providing a summary view of the 3-D Golf Model simulation."""
+
 from PyQt6 import QtWidgets
 
 from ...core.models import C3DDataModel

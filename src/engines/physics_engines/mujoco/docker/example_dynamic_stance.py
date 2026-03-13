@@ -1,3 +1,5 @@
+"""Example: run a dynamic stance simulation in MuJoCo."""
+
 from __future__ import annotations
 
 import logging

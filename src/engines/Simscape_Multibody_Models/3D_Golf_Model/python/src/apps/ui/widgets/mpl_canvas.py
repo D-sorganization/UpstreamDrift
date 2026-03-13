@@ -1,3 +1,5 @@
+"""Reusable Matplotlib canvas widget for embedding plots in Qt GUIs."""
+
 from typing import Any
 
 from matplotlib.axes import Axes

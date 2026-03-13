@@ -1,3 +1,5 @@
+"""PyQt application entry point for the double/triple pendulum interactive simulation."""
+
 from __future__ import annotations
 
 import ast

@@ -1,3 +1,5 @@
+"""OpenSim tutorial: add a plot-device output to an OpenSim simulation."""
+
 # --------------------------------------------------------------------------- #
 # OpenSim: addPlotDeviceResults.py                                            #
 # --------------------------------------------------------------------------- #

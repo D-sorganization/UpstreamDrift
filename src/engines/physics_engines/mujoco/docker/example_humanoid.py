@@ -1,3 +1,5 @@
+"""Example: load and run a MuJoCo humanoid model."""
+
 import logging
 
 import imageio

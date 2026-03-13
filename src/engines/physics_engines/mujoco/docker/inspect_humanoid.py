@@ -1,3 +1,5 @@
+"""Utility script: print joint/body/actuator info from the humanoid MuJoCo model."""
+
 import logging
 
 from dm_control import suite

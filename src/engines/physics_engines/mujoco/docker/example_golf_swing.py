@@ -1,3 +1,5 @@
+"""Example: simulate a golf swing motion with MuJoCo."""
+
 import logging
 
 import imageio

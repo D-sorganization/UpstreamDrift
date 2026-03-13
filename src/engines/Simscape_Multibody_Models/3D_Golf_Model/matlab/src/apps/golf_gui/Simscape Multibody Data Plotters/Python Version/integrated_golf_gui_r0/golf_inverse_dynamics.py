@@ -1,3 +1,5 @@
+"""Compute golf-swing inverse dynamics from Simscape Multibody simulation data."""
+
 import numpy as np
 from scipy import signal
 from scipy.interpolate import UnivariateSpline

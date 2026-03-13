@@ -1,3 +1,5 @@
+"""Analyse and visualise coordinate system orientation for motion-capture data."""
+
 from __future__ import annotations
 
 import logging

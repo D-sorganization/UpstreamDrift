@@ -1,3 +1,5 @@
+"""Example: optimise arm motion using the shared optimisation framework."""
+
 import logging
 import os
 import sys

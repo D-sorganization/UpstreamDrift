@@ -1,3 +1,5 @@
+"""Analysis tab for post-processing simulation results in the 3-D Golf Model GUI."""
+
 import numpy as np
 from PyQt6 import QtWidgets
 

@@ -1,3 +1,5 @@
+"""Utility script: measure the standing height of the MuJoCo humanoid model."""
+
 import logging
 
 from dm_control import suite

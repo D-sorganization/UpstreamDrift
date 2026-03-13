@@ -1,3 +1,5 @@
+"""OpenSim tutorial: add an ankle spring for the Static-Optimisation tutorial model."""
+
 # Get a handle to the current model and create a new copy
 baseModel = getCurrentModel()
 ankleSpringModel = baseModel.clone()

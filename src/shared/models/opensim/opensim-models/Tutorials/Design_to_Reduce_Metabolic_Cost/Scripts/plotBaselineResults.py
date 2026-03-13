@@ -1,3 +1,5 @@
+"""OpenSim tutorial: plot baseline simulation results for the metabolic-cost study."""
+
 # --------------------------------------------------------------------------- #
 # OpenSim: plotBaselineResults.py                                             #
 # --------------------------------------------------------------------------- #

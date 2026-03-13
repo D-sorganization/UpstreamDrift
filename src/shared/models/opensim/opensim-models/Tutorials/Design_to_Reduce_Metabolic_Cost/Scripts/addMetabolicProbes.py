@@ -1,3 +1,5 @@
+"""OpenSim tutorial: attach metabolic-energy probes to an OpenSim model."""
+
 # --------------------------------------------------------------------------- #
 # OpenSim: addMetabolicProbes.py                                              #
 # --------------------------------------------------------------------------- #

@@ -1,3 +1,5 @@
+"""Script: convert binary VTP mesh files to ASCII format for human readability."""
+
 import os
 
 import vtk

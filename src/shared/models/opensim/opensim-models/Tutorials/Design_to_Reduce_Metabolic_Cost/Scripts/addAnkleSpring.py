@@ -1,3 +1,5 @@
+"""OpenSim tutorial: add a passive ankle spring to a musculoskeletal model."""
+
 # --------------------------------------------------------------------------- #
 # OpenSim: addAnkleSpring.py                                                  #
 # --------------------------------------------------------------------------- #

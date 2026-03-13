@@ -1,3 +1,5 @@
+"""Script: strip explicit normal vectors from VTP mesh files for OpenSim compatibility."""
+
 #!/usr/bin/env python
 
 import argparse

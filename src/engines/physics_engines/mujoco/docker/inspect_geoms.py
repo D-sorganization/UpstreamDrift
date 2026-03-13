@@ -1,3 +1,5 @@
+"""Utility script: inspect and print geometry information from a MuJoCo model."""
+
 import logging
 
 from dm_control import suite

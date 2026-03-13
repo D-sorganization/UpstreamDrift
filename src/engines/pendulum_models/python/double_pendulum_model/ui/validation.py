@@ -1,3 +1,5 @@
+"""Input validation helpers for the pendulum simulation UI parameters."""
+
 import ast
 
 
