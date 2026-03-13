@@ -85,20 +85,37 @@ class OpenPoseEstimator(PoseEstimator):
         if op is None:
             raise ImportError("pyopenpose module is not installed.")
 
+        import os
+
         self.params = {}
 
         # Set model folder
         if model_path:
             self.params["model_folder"] = str(model_path)
         else:
-            # Try to guess or rely on default
-            # Often assumes models are at relative path or configured in ENV
-            # Placeholder default for Windows standard install
-            default_path = Path("C:/openpose/models")
-            if default_path.exists():
-                self.params["model_folder"] = str(default_path)
+            # Check environment variable first (cross-platform)
+            env_path = os.environ.get("OPENPOSE_MODELS_DIR")
+            if env_path and Path(env_path).exists():
+                self.params["model_folder"] = env_path
             else:
-                logger.warning("No model_path provided and default not found.")
+                # Platform-specific defaults
+                candidate_paths = [
+                    Path("C:/openpose/models"),  # Windows
+                    Path("/usr/local/share/openpose/models"),  # Linux system
+                    Path("/opt/openpose/models"),  # Linux /opt install
+                    Path.home() / "openpose" / "models",  # User home
+                ]
+                found = False
+                for candidate in candidate_paths:
+                    if candidate.exists():
+                        self.params["model_folder"] = str(candidate)
+                        found = True
+                        break
+                if not found:
+                    logger.warning(
+                        "No model_path provided and no default found. "
+                        "Set OPENPOSE_MODELS_DIR environment variable."
+                    )
 
         # Default configuration
         self.params["model_pose"] = "BODY_25"

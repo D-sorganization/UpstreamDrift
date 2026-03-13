@@ -566,12 +566,8 @@ class TestOpenPoseIntegrationAudit:
         # Verify indices are 0-24
         assert set(OpenPoseEstimator.KEYPOINT_MAP.keys()) == set(range(25))
 
-    def test_openpose_no_hardcoded_windows_only_default(self) -> None:
-        """Model path fallback should not ONLY support Windows.
-
-        The code has Path('C:/openpose/models') as default — this is
-        Windows-specific and will never work on Linux/macOS.
-        """
+    def test_openpose_has_cross_platform_model_paths(self) -> None:
+        """Model path fallback must support Linux/macOS in addition to Windows."""
         import inspect
 
         from src.shared.python.pose_estimation.openpose_estimator import (
@@ -579,12 +575,23 @@ class TestOpenPoseIntegrationAudit:
         )
 
         source = inspect.getsource(OpenPoseEstimator.load_model)
-        # This is a documentation test — we record the finding
-        if "C:/openpose/models" in source and "/usr/local" not in source:
-            pytest.xfail(
-                "OpenPose load_model has Windows-only default path, "
-                "no Linux/macOS fallback (Issue #1815)"
-            )
+        # Verify cross-platform support
+        assert "/usr/local" in source or "OPENPOSE_MODELS_DIR" in source, (
+            "OpenPose load_model must support cross-platform model paths"
+        )
+
+    def test_openpose_supports_env_var(self) -> None:
+        """OpenPose must support OPENPOSE_MODELS_DIR environment variable."""
+        import inspect
+
+        from src.shared.python.pose_estimation.openpose_estimator import (
+            OpenPoseEstimator,
+        )
+
+        source = inspect.getsource(OpenPoseEstimator.load_model)
+        assert "OPENPOSE_MODELS_DIR" in source, (
+            "OpenPose load_model must support OPENPOSE_MODELS_DIR env var"
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -646,6 +653,40 @@ class TestMediaPipeIntegrationAudit:
         )
 
         assert issubclass(MediaPipeEstimator, PoseEstimator)
+
+    def test_mediapipe_video_resets_kalman_state(self) -> None:
+        """estimate_from_video must call reset_temporal_state at start.
+
+        This prevents Kalman filter contamination between video files.
+        """
+        import inspect
+
+        from src.shared.python.pose_estimation.mediapipe_estimator import (
+            MediaPipeEstimator,
+        )
+
+        source = inspect.getsource(MediaPipeEstimator.estimate_from_video)
+        assert "reset_temporal_state" in source, (
+            "estimate_from_video must call reset_temporal_state() at start "
+            "to prevent Kalman filter contamination between videos"
+        )
+
+    def test_mediapipe_reset_clears_kalman_filters(self) -> None:
+        """reset_temporal_state must clear all Kalman filter state."""
+        from src.shared.python.pose_estimation.mediapipe_estimator import (
+            MediaPipeEstimator,
+        )
+
+        estimator = MediaPipeEstimator()
+        # Simulate having some state
+        estimator.kalman_filters["test"] = MagicMock()
+        estimator.previous_landmarks = {"test": np.array([1, 2, 3])}
+
+        # Reset
+        estimator.reset_temporal_state()
+
+        assert len(estimator.kalman_filters) == 0
+        assert estimator.previous_landmarks is None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -781,17 +822,31 @@ class TestDtackSubpackageAudit:
 
     def test_dtack_backends_importable(self) -> None:
         """dtack backends package must be importable."""
-        try:
-            from src.engines.physics_engines.pinocchio.python.dtack import backends
+        from src.engines.physics_engines.pinocchio.python.dtack import backends
 
-            assert backends is not None
-        except ModuleNotFoundError:
-            # dtack/backends/__init__.py uses 'from dtack.backends.*' imports
-            # that don't resolve from the project root sys.path (#1812)
-            pytest.xfail(
-                "dtack backends __init__.py has non-standard internal imports "
-                "(uses 'from dtack.backends.*' instead of relative or full path)"
-            )
+        assert backends is not None
+
+    def test_dtack_mujoco_backend_has_import_guard(self) -> None:
+        """MuJoCoBackend must not crash when mujoco is not installed."""
+        from src.engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend import (  # noqa: E501
+            MuJoCoBackend,
+        )
+
+        assert MuJoCoBackend is not None
+
+    def test_dtack_backend_factory_importable(self) -> None:
+        """BackendFactory must be importable."""
+        from src.engines.physics_engines.pinocchio.python.dtack.backends.backend_factory import (  # noqa: E501
+            BackendFactory,
+            BackendType,
+        )
+
+        assert BackendFactory is not None
+        assert BackendType is not None
+        # Verify enum values
+        assert BackendType.PINOCCHIO == "pinocchio"
+        assert BackendType.MUJOCO == "mujoco"
+        assert BackendType.PINK == "pink"
 
     def test_dtack_ik_importable(self) -> None:
         """dtack ik package must be importable."""
