@@ -2,574 +2,447 @@
 """Unit Conversion Constants
 
 NIST-standard conversion factors and physical constants for unit conversions.
-All values are sourced from NIST Special Publication 811 (2008 Edition) and
-CODATA 2018 recommended values.
-
-References:
-- NIST SP 811: Guide for the Use of the International System of Units (SI)
-- CODATA 2018: Committee on Data for Science and Technology
+Loaded dynamically from JSON configuration for reversibility.
 """
 
+import json
+from pathlib import Path
 from typing import Final
 
-# =============================================================================
-# FUNDAMENTAL PHYSICAL CONSTANTS (CODATA 2018)
-# =============================================================================
-
-# Universal gas constant [J/(mol·K)]
-R_UNIVERSAL: Final[float] = 8.314462618
-# Universal gas constant [J/(kmol·K)] - for legacy engineering units
-R_UNIVERSAL_KMOL: Final[float] = R_UNIVERSAL * 1000.0
-
-# Standard gravity [m/s²]
-STANDARD_GRAVITY: Final[float] = 9.80665
-
-# Avogadro constant [1/mol]
-AVOGADRO_NUMBER: Final[float] = 6.02214076e23
-
-# Boltzmann constant [J/K]
-BOLTZMANN_CONSTANT: Final[float] = 1.380649e-23
-
-# =============================================================================
-# STANDARD CONDITIONS
-# =============================================================================
-
-# Standard Temperature and Pressure (IUPAC - Since 1982)
-# Reference: IUPAC. Compendium of Chemical Terminology, 2nd ed. (the "Gold Book").
-# STP is defined as 273.15 K (0°C) and 10^5 Pa (1 bar).
-STP_TEMPERATURE_K: Final[float] = 273.15  # 0°C
-STP_PRESSURE_PA: Final[float] = 100000.0  # 1 bar
-
-# Old Standard Temperature and Pressure (Pre-1982) / Physical Chemistry
-# Often used in older data (e.g., JANAF tables often reference 1 atm)
-STP_OLD_PRESSURE_PA: Final[float] = 101325.0  # 1 atm (Standard Atmosphere)
-
-# Normal Temperature and Pressure (NTP - common industrial)
-NTP_TEMPERATURE_K: Final[float] = 293.15  # 20°C
-NTP_PRESSURE_PA: Final[float] = 101325.0  # 1 atm
-
-# Standard Ambient Temperature and Pressure (SATP)
-SATP_TEMPERATURE_K: Final[float] = 298.15  # 25°C
-SATP_PRESSURE_PA: Final[float] = 100000.0  # 1 bar
-
-# SCFM Standard Conditions (US Engineering)
-# Note: SCFM is ambiguous and requires explicit definition.
-# Common definitions include 60°F or 70°F and 1 atm (14.696 psia).
-SCFM_60F_TEMPERATURE_K: Final[float] = 288.706  # 60°F
-SCFM_70F_TEMPERATURE_K: Final[float] = 294.261  # 70°F
-SCFM_PRESSURE_PA: Final[float] = 101325.0  # 1 atm
-
-# Ideal gas molar volume at STP (IUPAC current) [m³/mol]
-MOLAR_VOLUME_STP: Final[float] = 0.02271095  # R * 273.15 / 100000
-
-# Ideal gas molar volume at STP (Old/Standard Atmosphere) [m³/mol]
-MOLAR_VOLUME_STP_OLD: Final[float] = 0.022413969545  # R * 273.15 / 101325
-
-# =============================================================================
-# LENGTH CONVERSIONS (all to meters) - NIST Exact Values
-# =============================================================================
-
-METER_TO_METER: Final[float] = 1.0
-CENTIMETER_TO_METER: Final[float] = 0.01
-MILLIMETER_TO_METER: Final[float] = 0.001
-KILOMETER_TO_METER: Final[float] = 1000.0
-MICROMETER_TO_METER: Final[float] = 1.0e-6
-NANOMETER_TO_METER: Final[float] = 1.0e-9
-ANGSTROM_TO_METER: Final[float] = 1.0e-10
-
-# US/Imperial units (exact by definition)
-INCH_TO_METER: Final[float] = 0.0254
-FOOT_TO_METER: Final[float] = 0.3048
-YARD_TO_METER: Final[float] = 0.9144
-MILE_TO_METER: Final[float] = 1609.344
-MIL_TO_METER: Final[float] = 2.54e-5  # 1/1000 inch
-
-# =============================================================================
-# AREA CONVERSIONS (all to m²)
-# =============================================================================
-
-SQ_METER_TO_SQ_METER: Final[float] = 1.0
-SQ_CENTIMETER_TO_SQ_METER: Final[float] = 1.0e-4
-SQ_MILLIMETER_TO_SQ_METER: Final[float] = 1.0e-6
-SQ_KILOMETER_TO_SQ_METER: Final[float] = 1.0e6
-
-SQ_INCH_TO_SQ_METER: Final[float] = 6.4516e-4
-SQ_FOOT_TO_SQ_METER: Final[float] = 0.09290304
-SQ_YARD_TO_SQ_METER: Final[float] = 0.83612736
-ACRE_TO_SQ_METER: Final[float] = 4046.8564224
-HECTARE_TO_SQ_METER: Final[float] = 10000.0
-
-# =============================================================================
-# VOLUME CONVERSIONS (all to m³)
-# =============================================================================
-
-CU_METER_TO_CU_METER: Final[float] = 1.0
-LITER_TO_CU_METER: Final[float] = 0.001
-MILLILITER_TO_CU_METER: Final[float] = 1.0e-6
-CU_CENTIMETER_TO_CU_METER: Final[float] = 1.0e-6
-CU_MILLIMETER_TO_CU_METER: Final[float] = 1.0e-9
-
-CU_FOOT_TO_CU_METER: Final[float] = 0.028316846592
-CU_INCH_TO_CU_METER: Final[float] = 1.6387064e-5
-
-# US liquid measures (exact by definition)
-US_GALLON_TO_CU_METER: Final[float] = 0.003785411784
-US_QUART_TO_CU_METER: Final[float] = 0.000946352946
-US_PINT_TO_CU_METER: Final[float] = 0.000473176473
-US_FLUID_OUNCE_TO_CU_METER: Final[float] = 2.95735295625e-5
-US_BARREL_TO_CU_METER: Final[float] = 0.158987294928
-
-# Imperial measures
-IMPERIAL_GALLON_TO_CU_METER: Final[float] = 0.00454609
-
-# =============================================================================
-# MASS CONVERSIONS (all to kg)
-# =============================================================================
-
-KILOGRAM_TO_KILOGRAM: Final[float] = 1.0
-GRAM_TO_KILOGRAM: Final[float] = 0.001
-MILLIGRAM_TO_KILOGRAM: Final[float] = 1.0e-6
-METRIC_TON_TO_KILOGRAM: Final[float] = 1000.0
-
-# US/Imperial (exact by definition)
-POUND_TO_KILOGRAM: Final[float] = 0.45359237
-OUNCE_TO_KILOGRAM: Final[float] = 2.8349523125e-2  # [kg/oz] Source: NIST SP 811
-
-# Derived Mass Constants
-LB_TO_G: Final[float] = POUND_TO_KILOGRAM * 1000.0  # [g/lb]
-SHORT_TON_TO_KILOGRAM: Final[float] = 907.18474
-LONG_TON_TO_KILOGRAM: Final[float] = 1016.0469088
-SLUG_TO_KILOGRAM: Final[float] = 14.59390294
-GRAIN_TO_KILOGRAM: Final[float] = 6.479891e-5
-
-# Derived mass conversions
-KG_TO_LB: Final[float] = 1.0 / POUND_TO_KILOGRAM
-LB_TO_KG: Final[float] = POUND_TO_KILOGRAM
-TPD_TO_LB: Final[float] = (
-    METRIC_TON_TO_KILOGRAM * KG_TO_LB
-)  # 2204.6226 [lb/ton] 1 Metric Ton = 1000 kg
-
-# =============================================================================
-# TIME CONVERSIONS (all to seconds)
-# =============================================================================
-
-SECOND_TO_SECOND: Final[float] = 1.0
-MINUTE_TO_SECOND: Final[float] = 60.0
-HOUR_TO_SECOND: Final[float] = 3600.0
-DAY_TO_SECOND: Final[float] = 86400.0
-HOURS_PER_DAY: Final[int] = 24  # [hr/day] 24-hour civil day
-
-# =============================================================================
-# TEMPERATURE - Note: These require special handling as they're not linear
-# =============================================================================
-
-CELSIUS_OFFSET: Final[float] = 273.15
-RANKINE_RATIO: Final[float] = 5.0 / 9.0
-
-# =============================================================================
-# PRESSURE CONVERSIONS (all to Pa)
-# =============================================================================
-
-PASCAL_TO_PASCAL: Final[float] = 1.0
-KILOPASCAL_TO_PASCAL: Final[float] = 1000.0
-MEGAPASCAL_TO_PASCAL: Final[float] = 1.0e6
-GIGAPASCAL_TO_PASCAL: Final[float] = 1.0e9
-
-BAR_TO_PASCAL: Final[float] = 100000.0
-MILLIBAR_TO_PASCAL: Final[float] = 100.0
-ATMOSPHERE_TO_PASCAL: Final[float] = 101325.0  # Exact by definition
-ATM_TO_KPA: Final[float] = 101.325
-BAR_TO_KPA: Final[float] = 100.0
-
-# US/Imperial pressure (exact by definition)
-PSI_TO_PASCAL: Final[float] = 6894.757293168
-PSI_TO_KPA: Final[float] = 6.894757293168
-TORR_TO_PASCAL: Final[float] = 133.322387415
-MMHG_TO_PASCAL: Final[float] = 133.322387415
-
-# Other pressure units
-INCH_HG_TO_PASCAL: Final[float] = 3386.389
-INCH_H2O_TO_PASCAL: Final[float] = 249.082
-FOOT_H2O_TO_PASCAL: Final[float] = 2989.07
-CM_H2O_TO_PASCAL: Final[float] = 98.0665
-
-# =============================================================================
-# ENERGY CONVERSIONS (all to Joules)
-# =============================================================================
-
-JOULE_TO_JOULE: Final[float] = 1.0
-KILOJOULE_TO_JOULE: Final[float] = 1000.0
-MEGAJOULE_TO_JOULE: Final[float] = 1.0e6
-GIGAJOULE_TO_JOULE: Final[float] = 1.0e9
-
-# Calorie (International Table calorie, exact by definition)
-CALORIE_TO_JOULE: Final[float] = 4.184
-KILOCALORIE_TO_JOULE: Final[float] = 4184.0
-
-# BTU (International Table BTU, exact by definition)
-BTU_TO_JOULE: Final[float] = 1055.05585262
-THERM_TO_JOULE: Final[float] = 105505585.262
-
-# Electrical
-WATT_HOUR_TO_JOULE: Final[float] = 3600.0
-KILOWATT_HOUR_TO_JOULE: Final[float] = 3.6e6
-MEGAWATT_HOUR_TO_JOULE: Final[float] = 3.6e9
-
-# Other
-ERG_TO_JOULE: Final[float] = 1.0e-7
-ELECTRON_VOLT_TO_JOULE: Final[float] = 1.602176634e-19
-
-# =============================================================================
-# SPECIFIC ENERGY CONVERSIONS (Energy per Mass)
-# =============================================================================
-
-# BTU/lb to J/kg and MJ/kg
-BTU_PER_LB_TO_J_PER_KG: Final[float] = BTU_TO_JOULE / 0.45359237
-BTU_PER_LB_TO_MJ_PER_KG: Final[float] = BTU_PER_LB_TO_J_PER_KG / 1.0e6
-
-
-# =============================================================================
-# POWER CONVERSIONS (all to Watts)
-# =============================================================================
-
-WATT_TO_WATT: Final[float] = 1.0
-KILOWATT_TO_WATT: Final[float] = 1000.0
-MEGAWATT_TO_WATT: Final[float] = 1.0e6
-GIGAWATT_TO_WATT: Final[float] = 1.0e9
-
-# BTU/hr (derived from BTU and hour)
-BTU_PER_HOUR_TO_WATT: Final[float] = BTU_TO_JOULE / HOUR_TO_SECOND  # 0.29307107017222
-MMBTU_PER_HOUR_TO_WATT: Final[float] = BTU_PER_HOUR_TO_WATT * 1.0e6
-
-
-# Other power units
-HORSEPOWER_TO_WATT: Final[float] = 745.69987158227022  # Mechanical HP (exact)
-METRIC_HORSEPOWER_TO_WATT: Final[float] = 735.49875
-CALORIE_PER_SECOND_TO_WATT: Final[float] = 4.184
-KCAL_PER_HOUR_TO_WATT: Final[float] = 1.163
-FOOT_POUND_PER_SECOND_TO_WATT: Final[float] = 1.3558179483314004
-
-# =============================================================================
-# FLOW RATE CONVERSIONS
-# =============================================================================
-
-# Mass flow (all to kg/s)
-KG_PER_SECOND_TO_KG_PER_SECOND: Final[float] = 1.0
-KG_PER_MINUTE_TO_KG_PER_SECOND: Final[float] = 1.0 / 60.0
-KG_PER_HOUR_TO_KG_PER_SECOND: Final[float] = 1.0 / 3600.0
-GRAM_PER_SECOND_TO_KG_PER_SECOND: Final[float] = 0.001
-POUND_PER_SECOND_TO_KG_PER_SECOND: Final[float] = POUND_TO_KILOGRAM
-POUND_PER_MINUTE_TO_KG_PER_SECOND: Final[float] = POUND_TO_KILOGRAM / 60.0
-POUND_PER_HOUR_TO_KG_PER_SECOND: Final[float] = POUND_TO_KILOGRAM / 3600.0
-
-# Volumetric flow for SCFM (Standard Cubic Feet per Minute)
-# 1 ft³ = 0.028316846592 m³, at standard conditions
-# Note: SCFM requires specifying which standard conditions are being used
-SCFM_TO_CU_METER_PER_HOUR_AT_60F: Final[float] = (
-    CU_FOOT_TO_CU_METER * 60.0
-)  # 1.699010795
-
-# =============================================================================
-# DENSITY CONVERSIONS (all to kg/m³)
-# =============================================================================
-
-KG_PER_CU_METER_TO_KG_PER_CU_METER: Final[float] = 1.0
-GRAM_PER_CU_CM_TO_KG_PER_CU_METER: Final[float] = 1000.0
-GRAM_PER_LITER_TO_KG_PER_CU_METER: Final[float] = 1.0
-POUND_PER_CU_FOOT_TO_KG_PER_CU_METER: Final[float] = 16.01846337396
-POUND_PER_GALLON_TO_KG_PER_CU_METER: Final[float] = 119.8264273
-
-# =============================================================================
-# VISCOSITY CONVERSIONS
-# =============================================================================
-
-# Dynamic viscosity (all to Pa·s)
-PASCAL_SECOND_TO_PASCAL_SECOND: Final[float] = 1.0
-CENTIPOISE_TO_PASCAL_SECOND: Final[float] = 0.001
-POISE_TO_PASCAL_SECOND: Final[float] = 0.1
-POUND_PER_FOOT_SECOND_TO_PASCAL_SECOND: Final[float] = 1.4881639436
-
-# Kinematic viscosity (all to m²/s)
-SQ_METER_PER_SECOND_TO_SQ_METER_PER_SECOND: Final[float] = 1.0
-CENTISTOKE_TO_SQ_METER_PER_SECOND: Final[float] = 1.0e-6
-STOKE_TO_SQ_METER_PER_SECOND: Final[float] = 1.0e-4
-SQ_FOOT_PER_SECOND_TO_SQ_METER_PER_SECOND: Final[float] = 0.09290304
-
-# =============================================================================
-# THERMAL PROPERTY CONVERSIONS
-# =============================================================================
-
-# Thermal conductivity (all to W/(m·K))
-WATT_PER_METER_KELVIN: Final[float] = 1.0
-BTU_PER_FOOT_HOUR_FAHRENHEIT_TO_W_PER_M_K: Final[float] = 1.7307346664
-CAL_PER_CM_SECOND_CELSIUS_TO_W_PER_M_K: Final[float] = 418.4
-
-# Heat transfer coefficient (all to W/(m²·K))
-WATT_PER_SQ_METER_KELVIN: Final[float] = 1.0
-BTU_PER_SQ_FOOT_HOUR_FAHRENHEIT_TO_W_PER_M2_K: Final[float] = 5.6782633411
-
-# Specific heat (all to J/(kg·K))
-JOULE_PER_KG_KELVIN: Final[float] = 1.0
-BTU_PER_POUND_FAHRENHEIT_TO_J_PER_KG_K: Final[float] = 4186.8
-CAL_PER_GRAM_CELSIUS_TO_J_PER_KG_K: Final[float] = 4186.8
-
-# =============================================================================
-# GAS PROPERTIES AT STP (0°C, 101.325 kPa)
-# =============================================================================
-
-# Molecular weights [kg/kmol]
-MW_AIR: Final[float] = 28.9647
-MW_NITROGEN: Final[float] = 28.0134
-MW_OXYGEN: Final[float] = 31.9988
-MW_HYDROGEN: Final[float] = 2.01588
-MW_METHANE: Final[float] = 16.0425
-MW_CARBON_MONOXIDE: Final[float] = 28.0101
-MW_CARBON_DIOXIDE: Final[float] = 44.0095
-MW_WATER_VAPOR: Final[float] = 18.01528
-MW_AMMONIA: Final[float] = 17.0305
-MW_HYDROGEN_SULFIDE: Final[float] = 34.0809
-
-# Densities at STP [kg/m³]
-DENSITY_STP_AIR: Final[float] = 1.2922
-DENSITY_STP_NITROGEN: Final[float] = 1.2506
-DENSITY_STP_OXYGEN: Final[float] = 1.4289
-DENSITY_STP_HYDROGEN: Final[float] = 0.08988
-DENSITY_STP_METHANE: Final[float] = 0.7168
-DENSITY_STP_CO: Final[float] = 1.2500
-DENSITY_STP_CO2: Final[float] = 1.9768
-DENSITY_STP_WATER_VAPOR: Final[float] = (
-    0.00485  # [kg/m³] Saturated water vapor at STP (0°C, 1 atm);
-    # Source: Perry's Chemical Engineers' Handbook, 9th Ed., Table 2-95
+
+# Load Configuration dynamically
+def _load_config() -> dict:
+    """Load constants from external JSON config."""
+    # Find assets across development and built application
+    base_dir = Path(__file__).resolve().parent
+    # Check parent hierarchy up to 6 levels for assets
+    for _ in range(7):
+        config_path = base_dir / "assets" / "config" / "unit_constants.json"
+        if config_path.exists():
+            with open(config_path, encoding="utf-8") as f:
+                return json.load(f)
+        base_dir = base_dir.parent
+
+    return {}
+
+
+_CONFIG = _load_config()
+
+
+def _t(key: str, default: float) -> float:
+    return float(_CONFIG.get(key, default))
+
+
+def _t_str(key: str, default: str) -> str:
+    return str(_CONFIG.get(key, default))
+
+
+def _t_int(key: str, default: int) -> int:
+    return int(_CONFIG.get(key, default))
+
+
+def _t_dict_str(key: str, default: dict) -> dict[str, float]:
+    d = _CONFIG.get(key, default)
+    return {k: float(v) for k, v in d.items()}
+
+
+def _t_dict_list(key: str, default: dict) -> dict[str, list[str]]:
+    d = _CONFIG.get(key, default)
+    return {str(k): [str(x) for x in v] for k, v in d.items()}
+
+
+def _t_dict_tuple(key: str, default: dict) -> dict[str, tuple[float, float]]:
+    d = _CONFIG.get(key, default)
+    return {str(k): (float(v[0]), float(v[1])) for k, v in d.items()}
+
+
+ACRE_TO_SQ_METER: Final[float] = _t("ACRE_TO_SQ_METER", 4046.8564224)
+ANGSTROM_TO_METER: Final[float] = _t("ANGSTROM_TO_METER", 1e-10)
+ATMOSPHERE_TO_PASCAL: Final[float] = _t("ATMOSPHERE_TO_PASCAL", 101325.0)
+ATM_TO_KPA: Final[float] = _t("ATM_TO_KPA", 101.325)
+AVOGADRO_NUMBER: Final[float] = _t("AVOGADRO_NUMBER", 6.02214076e23)
+BAR_TO_KPA: Final[float] = _t("BAR_TO_KPA", 100.0)
+BAR_TO_PASCAL: Final[float] = _t("BAR_TO_PASCAL", 100000.0)
+BOLTZMANN_CONSTANT: Final[float] = _t("BOLTZMANN_CONSTANT", 1.380649e-23)
+BTU_PER_FOOT_HOUR_FAHRENHEIT_TO_W_PER_M_K: Final[float] = _t(
+    "BTU_PER_FOOT_HOUR_FAHRENHEIT_TO_W_PER_M_K", 1.7307346664
 )
-
-# =============================================================================
-# STANDARD FLUID PROPERTIES (WATER)
-# =============================================================================
-
-# Specific Heat Capacity [J/(kg·K)]
-# Source: IAPWS-IF97 at standard conditions
-CP_WATER_LIQUID: Final[float] = 4181.3  # liquid at 25°C, 1 atm
-CP_WATER_VAPOR: Final[float] = 1858.9  # vapor at 100°C, 1 atm (ideal gas limit ~1860)
-# Note: Average engineering value often used is 2.01 kJ/kgK (2010 J/kgK) for steam
-
-# Latent Heat of Vaporization [J/kg] at 100°C, 1 atm
-H_VAP_WATER: Final[float] = 2257000.0  # 2257 kJ/kg
-
-# Density [kg/m³]
-DENSITY_WATER_STD: Final[float] = 997.0  # Liquid at 25°C
-
-
-# =============================================================================
-# UNIT ALIASES AND CANONICAL NAMES
-# =============================================================================
-
-# Define canonical unit names and their aliases
-UNIT_ALIASES: dict[str, list[str]] = {
-    # Length
-    "m": ["meter", "meters", "metre", "metres"],
-    "cm": ["centimeter", "centimeters", "centimetre", "centimetres"],
-    "mm": ["millimeter", "millimeters", "millimetre", "millimetres"],
-    "um": ["µm", "micrometer", "micrometre", "micron"],
-    "nm": ["nanometer", "nanometers", "nanometre", "nanometres"],
-    "Å": ["angstrom", "ångström", "a"],
-    "mil": ["thou"],
-    "km": ["kilometer", "kilometers", "kilometre", "kilometres"],
-    "ft": ["foot", "feet", "ft"],
-    "in": ["inch", "inches", "in"],
-    "yd": ["yard", "yards"],
-    "mi": ["mile", "miles"],
-    # Area
-    "m2": ["m^2", "square meter", "square metre"],
-    "cm2": ["cm^2", "square centimeter", "square centimetre"],
-    "mm2": ["square millimeter", "square millimetre"],
-    "km2": ["square kilometer", "square kilometre"],
-    "in2": ["square inch", "sq in"],
-    "ft2": ["square foot", "sq ft"],
-    "yd2": ["square yard", "sq yd"],
-    "acre": ["acres"],
-    "hectare": ["hectares"],
-    # Volume
-    "m3": ["m³", "m^3", "cubic meter", "cubic metre", "cu m"],
-    "L": ["l", "liter", "litre", "liters", "litres"],
-    "mL": ["ml", "milliliter", "millilitre"],
-    "cm3": ["cm³", "cm^3", "cubic centimeter", "cubic centimetre", "cc"],
-    "mm3": ["mm³", "mm^3", "cubic millimeter", "cubic millimetre"],
-    "ft3": ["ft³", "ft^3", "cubic foot", "cubic feet", "cu ft"],
-    "in3": ["in³", "in^3", "cubic inch", "cu in"],
-    "gal": ["gallon", "gallons", "us gallon"],
-    "imp_gal": ["imperial gallon", "uk gallon"],
-    "qt": ["quart", "quarts"],
-    "pt": ["pint", "pints"],
-    "fl_oz": ["fluid ounce", "fluid ounces", "fl oz"],
-    "bbl": ["barrel", "barrels"],
-    # Mass
-    "kg": ["kilogram", "kilograms"],
-    "g": ["gram", "grams"],
-    "mg": ["milligram", "milligrams"],
-    "µg": ["ug", "microgram", "micrograms"],
-    "lb": ["pound", "pounds", "lbs"],
-    "oz": ["ounce", "ounces"],
-    "ton": ["short ton", "us ton"],
-    "tonne": ["metric ton", "metric tons", "t"],
-    "long_ton": ["long ton", "uk ton"],
-    "slug": ["slugs"],
-    "grain": ["grains", "gr"],
-    # Time
-    "s": ["sec", "second", "seconds"],
-    "min": ["minute", "minutes"],
-    "hr": ["hour", "hours", "h"],
-    "day": ["days", "d"],
-    # Temperature
-    "K": ["kelvin", "k"],
-    "C": ["celsius", "degC", "°C"],
-    "F": ["fahrenheit", "degF", "°F"],
-    "R": ["rankine", "degR", "°R"],
-    # Pressure
-    "Pa": ["pascal", "pascals"],
-    "kPa": ["kilopascal", "kilopascals"],
-    "MPa": ["megapascal", "megapascals"],
-    "GPa": ["gigapascal", "gigapascals"],
-    "bar": ["bars"],
-    "atm": ["atmosphere", "atmospheres"],
-    "psi": ["pounds per square inch"],
-    "mbar": ["millibar", "millibars"],
-    "torr": ["torr"],
-    "mmHg": ["mm hg", "millimeter of mercury"],
-    "inHg": ["inch of mercury", "in hg"],
-    "inH2O": ["inch of water", "in h2o"],
-    "ftH2O": ["foot of water", "ft h2o"],
-    "cmH2O": ["centimeter of water", "cm h2o"],
-    # Mass flow
-    "kg/s": ["kilogram per second"],
-    "kg/min": ["kilogram per minute"],
-    "kg/hr": ["kg/h", "kilogram per hour"],
-    "kg/day": ["kilogram per day", "kg/d"],
-    "g/s": ["gram per second"],
-    "g/min": ["gram per minute"],
-    "g/hr": ["gram per hour"],
-    "g/day": ["gram per day"],
-    "lb/s": ["pound per second"],
-    "lb/min": ["pound per minute", "lb/min"],
-    "lb/hr": ["lb/h", "pound per hour"],
-    "lb/day": ["pound per day", "lb/d"],
-    "ton/hr": ["short ton per hour"],
-    "tonne/hr": ["metric ton per hour"],
-    "tonne/day": ["metric ton per day"],
-    "ton/day": ["short ton per day"],
-    # Volumetric flow
-    "SCFM": ["scfm", "standard cubic feet per minute"],
-    "ACFM": ["acfm", "actual cubic feet per minute"],
-    "Nm3/hr": ["Nm³/hr", "nm3/hr", "nm³/hr", "normal cubic meter per hour"],
-    "m3/s": ["m³/s", "cubic meter per second"],
-    "m3/min": ["m³/min", "cubic meter per minute"],
-    "m3/hr": ["m³/hr", "cubic meter per hour"],
-    "m3/day": ["m³/day", "cubic meter per day"],
-    "ft3/s": ["ft³/s", "cubic foot per second"],
-    "ft3/min": ["ft³/min", "cubic foot per minute", "cfm"],
-    "ft3/hr": ["ft³/hr", "cubic foot per hour"],
-    "L/s": ["l/s", "liter per second"],
-    "L/min": ["l/min", "liter per minute"],
-    "L/hr": ["l/hr", "liter per hour"],
-    "L/day": ["l/day", "liter per day"],
-    "gal/min": ["gpm", "gallon per minute"],
-    "gal/hr": ["gallon per hour", "gph"],
-    "gal/day": ["gallon per day", "gpd"],
-    "imp_gal/min": ["imperial gallon per minute"],
-    "imp_gal/hr": ["imperial gallon per hour"],
-    "imp_gal/day": ["imperial gallon per day"],
-    "bbl/day": ["barrel per day", "bpd"],
-    # Power
-    "W": ["watt", "watts"],
-    "kW": ["kilowatt", "kilowatts"],
-    "MW": ["megawatt", "megawatts"],
-    "GW": ["gigawatt", "gigawatts"],
-    "hp": ["horsepower", "HP"],
-    "metric_hp": ["metric horsepower", "ps"],
-    "BTU/hr": ["btu/hr", "BTU/h", "btu/h"],
-    "MMBTU/hr": ["mmbtu/hr", "MMBTU/h", "mmbtu/h"],
-    "cal/s": ["calorie per second"],
-    "kcal/hr": ["kilocalorie per hour"],
-    "ft·lbf/s": ["ft-lbf/s", "foot pound per second"],
-    # Energy
-    "J": ["joule", "joules"],
-    "kJ": ["kilojoule", "kilojoules"],
-    "MJ": ["megajoule", "megajoules"],
-    "GJ": ["gigajoule", "gigajoules"],
-    "Wh": ["watt hour", "watt-hour"],
-    "kWh": ["kilowatt hour", "kilowatt-hour"],
-    "MWh": ["megawatt hour", "megawatt-hour"],
-    "BTU": ["btu"],
-    "cal": ["calorie", "calories"],
-    "kcal": ["kilocalorie", "kilocalories"],
-    "therm": ["therms"],
-    "erg": ["ergs"],
-    "eV": ["ev", "electron volt", "electron volts"],
-    # Density
-    "kg/m3": ["kg/m³", "kilogram per cubic meter"],
-    "kg/L": ["kg/l", "kilogram per liter"],
-    "g/cm3": ["g/cm³", "gram per cubic centimeter", "specific gravity"],
-    "g/L": ["g/l", "gram per liter"],
-    "lb/ft3": ["lb/ft³", "pound per cubic foot"],
-    "lb/gal": ["pound per gallon"],
-    # Dynamic viscosity
-    "Pa·s": ["pa.s", "pascal second", "pascal-second"],
-    "mPa·s": ["mpa.s", "millipascal second", "millipascal-second"],
-    "cP": ["cp", "centipoise"],
-    "P": ["poise"],
-    "lb/ft·s": ["lb/ft*s", "pound per foot second"],
-    # Kinematic viscosity
-    "m2/s": ["square meter per second"],
-    "cSt": ["cst", "centistokes"],
-    "St": ["st", "stokes"],
-    "ft2/s": ["ft²/s", "square foot per second"],
-    # Thermal conductivity
-    "W/m·K": ["w/mk", "watt per meter kelvin"],
-    "BTU/(ft·hr·°F)": ["btu/ft·hr·f", "btu/(ft hr f)"],
-    "cal/(cm·s·°C)": ["cal/(cm s C)", "cal/cm·s·°C"],
-    # Heat transfer coefficient
-    "W/m2·K": ["w/m²k", "watt per square meter kelvin"],
-    "BTU/(ft2·hr·°F)": ["btu/(ft² hr f)", "btu/ft²·hr·°F"],
-    # Specific heat
-    "J/kg·K": ["j/kgk", "joule per kilogram kelvin"],
-    "kJ/kg·K": ["kj/kgk", "kilojoule per kilogram kelvin"],
-    "BTU/lb·°F": ["btu/lb-f", "btu per pound fahrenheit"],
-    "cal/g·°C": ["cal/g-c", "calorie per gram celsius"],
-}
-
-# =============================================================================
-# VALIDATION RANGES
-# =============================================================================
-
-# Define physically meaningful ranges for validation
-VALIDATION_RANGES = {
-    "temperature_K": (0.0, 10000.0),  # Absolute zero to plasma temps
-    "pressure_Pa": (0.0, 1.0e12),  # Vacuum to extreme high pressure
-    "mass_kg": (0.0, 1.0e12),  # Non-negative
-    "length_m": (0.0, 1.0e12),  # Non-negative
-    "energy_J": (-1.0e15, 1.0e15),  # Can be negative (e.g., exothermic)
-    "power_W": (0.0, 1.0e15),  # Non-negative
-}
-
-# =============================================================================
-# NUMERICAL CONSTANTS
-# =============================================================================
-
-# =============================================================================
-# NUMERICAL CONSTANTS
-# =============================================================================
-
-# Minimum basis for molar calculations to avoid scaling issues
-MIN_BASIS_MOLES: Final[float] = 1.0
-
-
-# =============================================================================
-# UI DISPLAY LABELS
-# =============================================================================
-
-UNIT_LABEL_WT_PERCENT: Final[str] = "wt%"
-UNIT_LABEL_MG_KG: Final[str] = "mg/kg"
-UNIT_LABEL_BTU_LB: Final[str] = "BTU/lb"
-UNIT_LABEL_MJ_KG: Final[str] = "MJ/kg"
-UNIT_LABEL_LB_HR: Final[str] = "lb/hr"
-UNIT_LABEL_KG_HR: Final[str] = "kg/hr"
-UNIT_LABEL_SCFM: Final[str] = "SCFM"
+BTU_PER_HOUR_TO_WATT: Final[float] = _t("BTU_PER_HOUR_TO_WATT", 0.2930710701722222)
+BTU_PER_LB_TO_J_PER_KG: Final[float] = _t("BTU_PER_LB_TO_J_PER_KG", 2326.0)
+BTU_PER_LB_TO_MJ_PER_KG: Final[float] = _t("BTU_PER_LB_TO_MJ_PER_KG", 0.002326)
+BTU_PER_POUND_FAHRENHEIT_TO_J_PER_KG_K: Final[float] = _t(
+    "BTU_PER_POUND_FAHRENHEIT_TO_J_PER_KG_K", 4186.8
+)
+BTU_PER_SQ_FOOT_HOUR_FAHRENHEIT_TO_W_PER_M2_K: Final[float] = _t(
+    "BTU_PER_SQ_FOOT_HOUR_FAHRENHEIT_TO_W_PER_M2_K", 5.6782633411
+)
+BTU_TO_JOULE: Final[float] = _t("BTU_TO_JOULE", 1055.05585262)
+CALORIE_PER_SECOND_TO_WATT: Final[float] = _t("CALORIE_PER_SECOND_TO_WATT", 4.184)
+CALORIE_TO_JOULE: Final[float] = _t("CALORIE_TO_JOULE", 4.184)
+CAL_PER_CM_SECOND_CELSIUS_TO_W_PER_M_K: Final[float] = _t(
+    "CAL_PER_CM_SECOND_CELSIUS_TO_W_PER_M_K", 418.4
+)
+CAL_PER_GRAM_CELSIUS_TO_J_PER_KG_K: Final[float] = _t(
+    "CAL_PER_GRAM_CELSIUS_TO_J_PER_KG_K", 4186.8
+)
+CELSIUS_OFFSET: Final[float] = _t("CELSIUS_OFFSET", 273.15)
+CENTIMETER_TO_METER: Final[float] = _t("CENTIMETER_TO_METER", 0.01)
+CENTIPOISE_TO_PASCAL_SECOND: Final[float] = _t("CENTIPOISE_TO_PASCAL_SECOND", 0.001)
+CENTISTOKE_TO_SQ_METER_PER_SECOND: Final[float] = _t(
+    "CENTISTOKE_TO_SQ_METER_PER_SECOND", 1e-06
+)
+CM_H2O_TO_PASCAL: Final[float] = _t("CM_H2O_TO_PASCAL", 98.0665)
+CP_WATER_LIQUID: Final[float] = _t("CP_WATER_LIQUID", 4181.3)
+CP_WATER_VAPOR: Final[float] = _t("CP_WATER_VAPOR", 1858.9)
+CU_CENTIMETER_TO_CU_METER: Final[float] = _t("CU_CENTIMETER_TO_CU_METER", 1e-06)
+CU_FOOT_TO_CU_METER: Final[float] = _t("CU_FOOT_TO_CU_METER", 0.028316846592)
+CU_INCH_TO_CU_METER: Final[float] = _t("CU_INCH_TO_CU_METER", 1.6387064e-05)
+CU_METER_TO_CU_METER: Final[float] = _t("CU_METER_TO_CU_METER", 1.0)
+CU_MILLIMETER_TO_CU_METER: Final[float] = _t("CU_MILLIMETER_TO_CU_METER", 1e-09)
+DAY_TO_SECOND: Final[float] = _t("DAY_TO_SECOND", 86400.0)
+DENSITY_STP_AIR: Final[float] = _t("DENSITY_STP_AIR", 1.2922)
+DENSITY_STP_CO: Final[float] = _t("DENSITY_STP_CO", 1.25)
+DENSITY_STP_CO2: Final[float] = _t("DENSITY_STP_CO2", 1.9768)
+DENSITY_STP_HYDROGEN: Final[float] = _t("DENSITY_STP_HYDROGEN", 0.08988)
+DENSITY_STP_METHANE: Final[float] = _t("DENSITY_STP_METHANE", 0.7168)
+DENSITY_STP_NITROGEN: Final[float] = _t("DENSITY_STP_NITROGEN", 1.2506)
+DENSITY_STP_OXYGEN: Final[float] = _t("DENSITY_STP_OXYGEN", 1.4289)
+DENSITY_STP_WATER_VAPOR: Final[float] = _t("DENSITY_STP_WATER_VAPOR", 0.00485)
+DENSITY_WATER_STD: Final[float] = _t("DENSITY_WATER_STD", 997.0)
+ELECTRON_VOLT_TO_JOULE: Final[float] = _t("ELECTRON_VOLT_TO_JOULE", 1.602176634e-19)
+ERG_TO_JOULE: Final[float] = _t("ERG_TO_JOULE", 1e-07)
+FOOT_H2O_TO_PASCAL: Final[float] = _t("FOOT_H2O_TO_PASCAL", 2989.07)
+FOOT_POUND_PER_SECOND_TO_WATT: Final[float] = _t(
+    "FOOT_POUND_PER_SECOND_TO_WATT", 1.3558179483314003
+)
+FOOT_TO_METER: Final[float] = _t("FOOT_TO_METER", 0.3048)
+GIGAJOULE_TO_JOULE: Final[float] = _t("GIGAJOULE_TO_JOULE", 1000000000.0)
+GIGAPASCAL_TO_PASCAL: Final[float] = _t("GIGAPASCAL_TO_PASCAL", 1000000000.0)
+GIGAWATT_TO_WATT: Final[float] = _t("GIGAWATT_TO_WATT", 1000000000.0)
+GRAIN_TO_KILOGRAM: Final[float] = _t("GRAIN_TO_KILOGRAM", 6.479891e-05)
+GRAM_PER_CU_CM_TO_KG_PER_CU_METER: Final[float] = _t(
+    "GRAM_PER_CU_CM_TO_KG_PER_CU_METER", 1000.0
+)
+GRAM_PER_LITER_TO_KG_PER_CU_METER: Final[float] = _t(
+    "GRAM_PER_LITER_TO_KG_PER_CU_METER", 1.0
+)
+GRAM_PER_SECOND_TO_KG_PER_SECOND: Final[float] = _t(
+    "GRAM_PER_SECOND_TO_KG_PER_SECOND", 0.001
+)
+GRAM_TO_KILOGRAM: Final[float] = _t("GRAM_TO_KILOGRAM", 0.001)
+HECTARE_TO_SQ_METER: Final[float] = _t("HECTARE_TO_SQ_METER", 10000.0)
+HORSEPOWER_TO_WATT: Final[float] = _t("HORSEPOWER_TO_WATT", 745.6998715822702)
+HOURS_PER_DAY: Final[int] = _t_int("HOURS_PER_DAY", 24)
+HOUR_TO_SECOND: Final[float] = _t("HOUR_TO_SECOND", 3600.0)
+H_VAP_WATER: Final[float] = _t("H_VAP_WATER", 2257000.0)
+IMPERIAL_GALLON_TO_CU_METER: Final[float] = _t(
+    "IMPERIAL_GALLON_TO_CU_METER", 0.00454609
+)
+INCH_H2O_TO_PASCAL: Final[float] = _t("INCH_H2O_TO_PASCAL", 249.082)
+INCH_HG_TO_PASCAL: Final[float] = _t("INCH_HG_TO_PASCAL", 3386.389)
+INCH_TO_METER: Final[float] = _t("INCH_TO_METER", 0.0254)
+JOULE_PER_KG_KELVIN: Final[float] = _t("JOULE_PER_KG_KELVIN", 1.0)
+JOULE_TO_JOULE: Final[float] = _t("JOULE_TO_JOULE", 1.0)
+KCAL_PER_HOUR_TO_WATT: Final[float] = _t("KCAL_PER_HOUR_TO_WATT", 1.163)
+KG_PER_CU_METER_TO_KG_PER_CU_METER: Final[float] = _t(
+    "KG_PER_CU_METER_TO_KG_PER_CU_METER", 1.0
+)
+KG_PER_HOUR_TO_KG_PER_SECOND: Final[float] = _t(
+    "KG_PER_HOUR_TO_KG_PER_SECOND", 0.0002777777777777778
+)
+KG_PER_MINUTE_TO_KG_PER_SECOND: Final[float] = _t(
+    "KG_PER_MINUTE_TO_KG_PER_SECOND", 0.016666666666666666
+)
+KG_PER_SECOND_TO_KG_PER_SECOND: Final[float] = _t("KG_PER_SECOND_TO_KG_PER_SECOND", 1.0)
+KG_TO_LB: Final[float] = _t("KG_TO_LB", 2.2046226218487757)
+KILOCALORIE_TO_JOULE: Final[float] = _t("KILOCALORIE_TO_JOULE", 4184.0)
+KILOGRAM_TO_KILOGRAM: Final[float] = _t("KILOGRAM_TO_KILOGRAM", 1.0)
+KILOJOULE_TO_JOULE: Final[float] = _t("KILOJOULE_TO_JOULE", 1000.0)
+KILOMETER_TO_METER: Final[float] = _t("KILOMETER_TO_METER", 1000.0)
+KILOPASCAL_TO_PASCAL: Final[float] = _t("KILOPASCAL_TO_PASCAL", 1000.0)
+KILOWATT_HOUR_TO_JOULE: Final[float] = _t("KILOWATT_HOUR_TO_JOULE", 3600000.0)
+KILOWATT_TO_WATT: Final[float] = _t("KILOWATT_TO_WATT", 1000.0)
+LB_TO_G: Final[float] = _t("LB_TO_G", 453.59237)
+LB_TO_KG: Final[float] = _t("LB_TO_KG", 0.45359237)
+LITER_TO_CU_METER: Final[float] = _t("LITER_TO_CU_METER", 0.001)
+LONG_TON_TO_KILOGRAM: Final[float] = _t("LONG_TON_TO_KILOGRAM", 1016.0469088)
+MEGAJOULE_TO_JOULE: Final[float] = _t("MEGAJOULE_TO_JOULE", 1000000.0)
+MEGAPASCAL_TO_PASCAL: Final[float] = _t("MEGAPASCAL_TO_PASCAL", 1000000.0)
+MEGAWATT_HOUR_TO_JOULE: Final[float] = _t("MEGAWATT_HOUR_TO_JOULE", 3600000000.0)
+MEGAWATT_TO_WATT: Final[float] = _t("MEGAWATT_TO_WATT", 1000000.0)
+METER_TO_METER: Final[float] = _t("METER_TO_METER", 1.0)
+METRIC_HORSEPOWER_TO_WATT: Final[float] = _t("METRIC_HORSEPOWER_TO_WATT", 735.49875)
+METRIC_TON_TO_KILOGRAM: Final[float] = _t("METRIC_TON_TO_KILOGRAM", 1000.0)
+MICROMETER_TO_METER: Final[float] = _t("MICROMETER_TO_METER", 1e-06)
+MILE_TO_METER: Final[float] = _t("MILE_TO_METER", 1609.344)
+MILLIBAR_TO_PASCAL: Final[float] = _t("MILLIBAR_TO_PASCAL", 100.0)
+MILLIGRAM_TO_KILOGRAM: Final[float] = _t("MILLIGRAM_TO_KILOGRAM", 1e-06)
+MILLILITER_TO_CU_METER: Final[float] = _t("MILLILITER_TO_CU_METER", 1e-06)
+MILLIMETER_TO_METER: Final[float] = _t("MILLIMETER_TO_METER", 0.001)
+MIL_TO_METER: Final[float] = _t("MIL_TO_METER", 2.54e-05)
+MINUTE_TO_SECOND: Final[float] = _t("MINUTE_TO_SECOND", 60.0)
+MIN_BASIS_MOLES: Final[float] = _t("MIN_BASIS_MOLES", 1.0)
+MMBTU_PER_HOUR_TO_WATT: Final[float] = _t("MMBTU_PER_HOUR_TO_WATT", 293071.0701722222)
+MMHG_TO_PASCAL: Final[float] = _t("MMHG_TO_PASCAL", 133.322387415)
+MOLAR_VOLUME_STP: Final[float] = _t("MOLAR_VOLUME_STP", 0.02271095)
+MOLAR_VOLUME_STP_OLD: Final[float] = _t("MOLAR_VOLUME_STP_OLD", 0.022413969545)
+MW_AIR: Final[float] = _t("MW_AIR", 28.9647)
+MW_AMMONIA: Final[float] = _t("MW_AMMONIA", 17.0305)
+MW_CARBON_DIOXIDE: Final[float] = _t("MW_CARBON_DIOXIDE", 44.0095)
+MW_CARBON_MONOXIDE: Final[float] = _t("MW_CARBON_MONOXIDE", 28.0101)
+MW_HYDROGEN: Final[float] = _t("MW_HYDROGEN", 2.01588)
+MW_HYDROGEN_SULFIDE: Final[float] = _t("MW_HYDROGEN_SULFIDE", 34.0809)
+MW_METHANE: Final[float] = _t("MW_METHANE", 16.0425)
+MW_NITROGEN: Final[float] = _t("MW_NITROGEN", 28.0134)
+MW_OXYGEN: Final[float] = _t("MW_OXYGEN", 31.9988)
+MW_WATER_VAPOR: Final[float] = _t("MW_WATER_VAPOR", 18.01528)
+NANOMETER_TO_METER: Final[float] = _t("NANOMETER_TO_METER", 1e-09)
+NTP_PRESSURE_PA: Final[float] = _t("NTP_PRESSURE_PA", 101325.0)
+NTP_TEMPERATURE_K: Final[float] = _t("NTP_TEMPERATURE_K", 293.15)
+OUNCE_TO_KILOGRAM: Final[float] = _t("OUNCE_TO_KILOGRAM", 0.028349523125)
+PASCAL_SECOND_TO_PASCAL_SECOND: Final[float] = _t("PASCAL_SECOND_TO_PASCAL_SECOND", 1.0)
+PASCAL_TO_PASCAL: Final[float] = _t("PASCAL_TO_PASCAL", 1.0)
+POISE_TO_PASCAL_SECOND: Final[float] = _t("POISE_TO_PASCAL_SECOND", 0.1)
+POUND_PER_CU_FOOT_TO_KG_PER_CU_METER: Final[float] = _t(
+    "POUND_PER_CU_FOOT_TO_KG_PER_CU_METER", 16.01846337396
+)
+POUND_PER_FOOT_SECOND_TO_PASCAL_SECOND: Final[float] = _t(
+    "POUND_PER_FOOT_SECOND_TO_PASCAL_SECOND", 1.4881639436
+)
+POUND_PER_GALLON_TO_KG_PER_CU_METER: Final[float] = _t(
+    "POUND_PER_GALLON_TO_KG_PER_CU_METER", 119.8264273
+)
+POUND_PER_HOUR_TO_KG_PER_SECOND: Final[float] = _t(
+    "POUND_PER_HOUR_TO_KG_PER_SECOND", 0.00012599788055555556
+)
+POUND_PER_MINUTE_TO_KG_PER_SECOND: Final[float] = _t(
+    "POUND_PER_MINUTE_TO_KG_PER_SECOND", 0.007559872833333333
+)
+POUND_PER_SECOND_TO_KG_PER_SECOND: Final[float] = _t(
+    "POUND_PER_SECOND_TO_KG_PER_SECOND", 0.45359237
+)
+POUND_TO_KILOGRAM: Final[float] = _t("POUND_TO_KILOGRAM", 0.45359237)
+PSI_TO_KPA: Final[float] = _t("PSI_TO_KPA", 6.894757293168)
+PSI_TO_PASCAL: Final[float] = _t("PSI_TO_PASCAL", 6894.757293168)
+RANKINE_RATIO: Final[float] = _t("RANKINE_RATIO", 0.5555555555555556)
+R_UNIVERSAL: Final[float] = _t("R_UNIVERSAL", 8.314462618)
+R_UNIVERSAL_KMOL: Final[float] = _t("R_UNIVERSAL_KMOL", 8314.462618)
+SATP_PRESSURE_PA: Final[float] = _t("SATP_PRESSURE_PA", 100000.0)
+SATP_TEMPERATURE_K: Final[float] = _t("SATP_TEMPERATURE_K", 298.15)
+SCFM_60F_TEMPERATURE_K: Final[float] = _t("SCFM_60F_TEMPERATURE_K", 288.706)
+SCFM_70F_TEMPERATURE_K: Final[float] = _t("SCFM_70F_TEMPERATURE_K", 294.261)
+SCFM_PRESSURE_PA: Final[float] = _t("SCFM_PRESSURE_PA", 101325.0)
+SCFM_TO_CU_METER_PER_HOUR_AT_60F: Final[float] = _t(
+    "SCFM_TO_CU_METER_PER_HOUR_AT_60F", 1.69901079552
+)
+SECOND_TO_SECOND: Final[float] = _t("SECOND_TO_SECOND", 1.0)
+SHORT_TON_TO_KILOGRAM: Final[float] = _t("SHORT_TON_TO_KILOGRAM", 907.18474)
+SLUG_TO_KILOGRAM: Final[float] = _t("SLUG_TO_KILOGRAM", 14.59390294)
+SQ_CENTIMETER_TO_SQ_METER: Final[float] = _t("SQ_CENTIMETER_TO_SQ_METER", 0.0001)
+SQ_FOOT_PER_SECOND_TO_SQ_METER_PER_SECOND: Final[float] = _t(
+    "SQ_FOOT_PER_SECOND_TO_SQ_METER_PER_SECOND", 0.09290304
+)
+SQ_FOOT_TO_SQ_METER: Final[float] = _t("SQ_FOOT_TO_SQ_METER", 0.09290304)
+SQ_INCH_TO_SQ_METER: Final[float] = _t("SQ_INCH_TO_SQ_METER", 0.00064516)
+SQ_KILOMETER_TO_SQ_METER: Final[float] = _t("SQ_KILOMETER_TO_SQ_METER", 1000000.0)
+SQ_METER_PER_SECOND_TO_SQ_METER_PER_SECOND: Final[float] = _t(
+    "SQ_METER_PER_SECOND_TO_SQ_METER_PER_SECOND", 1.0
+)
+SQ_METER_TO_SQ_METER: Final[float] = _t("SQ_METER_TO_SQ_METER", 1.0)
+SQ_MILLIMETER_TO_SQ_METER: Final[float] = _t("SQ_MILLIMETER_TO_SQ_METER", 1e-06)
+SQ_YARD_TO_SQ_METER: Final[float] = _t("SQ_YARD_TO_SQ_METER", 0.83612736)
+STANDARD_GRAVITY: Final[float] = _t("STANDARD_GRAVITY", 9.80665)
+STOKE_TO_SQ_METER_PER_SECOND: Final[float] = _t("STOKE_TO_SQ_METER_PER_SECOND", 0.0001)
+STP_OLD_PRESSURE_PA: Final[float] = _t("STP_OLD_PRESSURE_PA", 101325.0)
+STP_PRESSURE_PA: Final[float] = _t("STP_PRESSURE_PA", 100000.0)
+STP_TEMPERATURE_K: Final[float] = _t("STP_TEMPERATURE_K", 273.15)
+THERM_TO_JOULE: Final[float] = _t("THERM_TO_JOULE", 105505585.262)
+TORR_TO_PASCAL: Final[float] = _t("TORR_TO_PASCAL", 133.322387415)
+TPD_TO_LB: Final[float] = _t("TPD_TO_LB", 2204.6226218487755)
+UNIT_ALIASES: dict[str, list[str]] = _t_dict_list(
+    "UNIT_ALIASES",
+    {
+        "m": ["meter", "meters", "metre", "metres"],
+        "cm": ["centimeter", "centimeters", "centimetre", "centimetres"],
+        "mm": ["millimeter", "millimeters", "millimetre", "millimetres"],
+        "um": ["µm", "micrometer", "micrometre", "micron"],
+        "nm": ["nanometer", "nanometers", "nanometre", "nanometres"],
+        "Å": ["angstrom", "ångström", "a"],
+        "mil": ["thou"],
+        "km": ["kilometer", "kilometers", "kilometre", "kilometres"],
+        "ft": ["foot", "feet", "ft"],
+        "in": ["inch", "inches", "in"],
+        "yd": ["yard", "yards"],
+        "mi": ["mile", "miles"],
+        "m2": ["m^2", "square meter", "square metre"],
+        "cm2": ["cm^2", "square centimeter", "square centimetre"],
+        "mm2": ["square millimeter", "square millimetre"],
+        "km2": ["square kilometer", "square kilometre"],
+        "in2": ["square inch", "sq in"],
+        "ft2": ["square foot", "sq ft"],
+        "yd2": ["square yard", "sq yd"],
+        "acre": ["acres"],
+        "hectare": ["hectares"],
+        "m3": ["m³", "m^3", "cubic meter", "cubic metre", "cu m"],
+        "L": ["l", "liter", "litre", "liters", "litres"],
+        "mL": ["ml", "milliliter", "millilitre"],
+        "cm3": ["cm³", "cm^3", "cubic centimeter", "cubic centimetre", "cc"],
+        "mm3": ["mm³", "mm^3", "cubic millimeter", "cubic millimetre"],
+        "ft3": ["ft³", "ft^3", "cubic foot", "cubic feet", "cu ft"],
+        "in3": ["in³", "in^3", "cubic inch", "cu in"],
+        "gal": ["gallon", "gallons", "us gallon"],
+        "imp_gal": ["imperial gallon", "uk gallon"],
+        "qt": ["quart", "quarts"],
+        "pt": ["pint", "pints"],
+        "fl_oz": ["fluid ounce", "fluid ounces", "fl oz"],
+        "bbl": ["barrel", "barrels"],
+        "kg": ["kilogram", "kilograms"],
+        "g": ["gram", "grams"],
+        "mg": ["milligram", "milligrams"],
+        "µg": ["ug", "microgram", "micrograms"],
+        "lb": ["pound", "pounds", "lbs"],
+        "oz": ["ounce", "ounces"],
+        "ton": ["short ton", "us ton"],
+        "tonne": ["metric ton", "metric tons", "t"],
+        "long_ton": ["long ton", "uk ton"],
+        "slug": ["slugs"],
+        "grain": ["grains", "gr"],
+        "s": ["sec", "second", "seconds"],
+        "min": ["minute", "minutes"],
+        "hr": ["hour", "hours", "h"],
+        "day": ["days", "d"],
+        "K": ["kelvin", "k"],
+        "C": ["celsius", "degC", "°C"],
+        "F": ["fahrenheit", "degF", "°F"],
+        "R": ["rankine", "degR", "°R"],
+        "Pa": ["pascal", "pascals"],
+        "kPa": ["kilopascal", "kilopascals"],
+        "MPa": ["megapascal", "megapascals"],
+        "GPa": ["gigapascal", "gigapascals"],
+        "bar": ["bars"],
+        "atm": ["atmosphere", "atmospheres"],
+        "psi": ["pounds per square inch"],
+        "mbar": ["millibar", "millibars"],
+        "torr": ["torr"],
+        "mmHg": ["mm hg", "millimeter of mercury"],
+        "inHg": ["inch of mercury", "in hg"],
+        "inH2O": ["inch of water", "in h2o"],
+        "ftH2O": ["foot of water", "ft h2o"],
+        "cmH2O": ["centimeter of water", "cm h2o"],
+        "kg/s": ["kilogram per second"],
+        "kg/min": ["kilogram per minute"],
+        "kg/hr": ["kg/h", "kilogram per hour"],
+        "kg/day": ["kilogram per day", "kg/d"],
+        "g/s": ["gram per second"],
+        "g/min": ["gram per minute"],
+        "g/hr": ["gram per hour"],
+        "g/day": ["gram per day"],
+        "lb/s": ["pound per second"],
+        "lb/min": ["pound per minute", "lb/min"],
+        "lb/hr": ["lb/h", "pound per hour"],
+        "lb/day": ["pound per day", "lb/d"],
+        "ton/hr": ["short ton per hour"],
+        "tonne/hr": ["metric ton per hour"],
+        "tonne/day": ["metric ton per day"],
+        "ton/day": ["short ton per day"],
+        "SCFM": ["scfm", "standard cubic feet per minute"],
+        "ACFM": ["acfm", "actual cubic feet per minute"],
+        "Nm3/hr": ["Nm³/hr", "nm3/hr", "nm³/hr", "normal cubic meter per hour"],
+        "m3/s": ["m³/s", "cubic meter per second"],
+        "m3/min": ["m³/min", "cubic meter per minute"],
+        "m3/hr": ["m³/hr", "cubic meter per hour"],
+        "m3/day": ["m³/day", "cubic meter per day"],
+        "ft3/s": ["ft³/s", "cubic foot per second"],
+        "ft3/min": ["ft³/min", "cubic foot per minute", "cfm"],
+        "ft3/hr": ["ft³/hr", "cubic foot per hour"],
+        "L/s": ["l/s", "liter per second"],
+        "L/min": ["l/min", "liter per minute"],
+        "L/hr": ["l/hr", "liter per hour"],
+        "L/day": ["l/day", "liter per day"],
+        "gal/min": ["gpm", "gallon per minute"],
+        "gal/hr": ["gallon per hour", "gph"],
+        "gal/day": ["gallon per day", "gpd"],
+        "imp_gal/min": ["imperial gallon per minute"],
+        "imp_gal/hr": ["imperial gallon per hour"],
+        "imp_gal/day": ["imperial gallon per day"],
+        "bbl/day": ["barrel per day", "bpd"],
+        "W": ["watt", "watts"],
+        "kW": ["kilowatt", "kilowatts"],
+        "MW": ["megawatt", "megawatts"],
+        "GW": ["gigawatt", "gigawatts"],
+        "hp": ["horsepower", "HP"],
+        "metric_hp": ["metric horsepower", "ps"],
+        "BTU/hr": ["btu/hr", "BTU/h", "btu/h"],
+        "MMBTU/hr": ["mmbtu/hr", "MMBTU/h", "mmbtu/h"],
+        "cal/s": ["calorie per second"],
+        "kcal/hr": ["kilocalorie per hour"],
+        "ft·lbf/s": ["ft-lbf/s", "foot pound per second"],
+        "J": ["joule", "joules"],
+        "kJ": ["kilojoule", "kilojoules"],
+        "MJ": ["megajoule", "megajoules"],
+        "GJ": ["gigajoule", "gigajoules"],
+        "Wh": ["watt hour", "watt-hour"],
+        "kWh": ["kilowatt hour", "kilowatt-hour"],
+        "MWh": ["megawatt hour", "megawatt-hour"],
+        "BTU": ["btu"],
+        "cal": ["calorie", "calories"],
+        "kcal": ["kilocalorie", "kilocalories"],
+        "therm": ["therms"],
+        "erg": ["ergs"],
+        "eV": ["ev", "electron volt", "electron volts"],
+        "kg/m3": ["kg/m³", "kilogram per cubic meter"],
+        "kg/L": ["kg/l", "kilogram per liter"],
+        "g/cm3": ["g/cm³", "gram per cubic centimeter", "specific gravity"],
+        "g/L": ["g/l", "gram per liter"],
+        "lb/ft3": ["lb/ft³", "pound per cubic foot"],
+        "lb/gal": ["pound per gallon"],
+        "Pa·s": ["pa.s", "pascal second", "pascal-second"],
+        "mPa·s": ["mpa.s", "millipascal second", "millipascal-second"],
+        "cP": ["cp", "centipoise"],
+        "P": ["poise"],
+        "lb/ft·s": ["lb/ft*s", "pound per foot second"],
+        "m2/s": ["square meter per second"],
+        "cSt": ["cst", "centistokes"],
+        "St": ["st", "stokes"],
+        "ft2/s": ["ft²/s", "square foot per second"],
+        "W/m·K": ["w/mk", "watt per meter kelvin"],
+        "BTU/(ft·hr·°F)": ["btu/ft·hr·f", "btu/(ft hr f)"],
+        "cal/(cm·s·°C)": ["cal/(cm s C)", "cal/cm·s·°C"],
+        "W/m2·K": ["w/m²k", "watt per square meter kelvin"],
+        "BTU/(ft2·hr·°F)": ["btu/(ft² hr f)", "btu/ft²·hr·°F"],
+        "J/kg·K": ["j/kgk", "joule per kilogram kelvin"],
+        "kJ/kg·K": ["kj/kgk", "kilojoule per kilogram kelvin"],
+        "BTU/lb·°F": ["btu/lb-f", "btu per pound fahrenheit"],
+        "cal/g·°C": ["cal/g-c", "calorie per gram celsius"],
+    },
+)
+UNIT_LABEL_BTU_LB: Final[str] = _t_str("UNIT_LABEL_BTU_LB", "BTU/lb")
+UNIT_LABEL_KG_HR: Final[str] = _t_str("UNIT_LABEL_KG_HR", "kg/hr")
+UNIT_LABEL_LB_HR: Final[str] = _t_str("UNIT_LABEL_LB_HR", "lb/hr")
+UNIT_LABEL_MG_KG: Final[str] = _t_str("UNIT_LABEL_MG_KG", "mg/kg")
+UNIT_LABEL_MJ_KG: Final[str] = _t_str("UNIT_LABEL_MJ_KG", "MJ/kg")
+UNIT_LABEL_SCFM: Final[str] = _t_str("UNIT_LABEL_SCFM", "SCFM")
+UNIT_LABEL_WT_PERCENT: Final[str] = _t_str("UNIT_LABEL_WT_PERCENT", "wt%")
+US_BARREL_TO_CU_METER: Final[float] = _t("US_BARREL_TO_CU_METER", 0.158987294928)
+US_FLUID_OUNCE_TO_CU_METER: Final[float] = _t(
+    "US_FLUID_OUNCE_TO_CU_METER", 2.95735295625e-05
+)
+US_GALLON_TO_CU_METER: Final[float] = _t("US_GALLON_TO_CU_METER", 0.003785411784)
+US_PINT_TO_CU_METER: Final[float] = _t("US_PINT_TO_CU_METER", 0.000473176473)
+US_QUART_TO_CU_METER: Final[float] = _t("US_QUART_TO_CU_METER", 0.000946352946)
+VALIDATION_RANGES: dict[str, tuple[float, float]] = _t_dict_tuple(
+    "VALIDATION_RANGES",
+    {
+        "temperature_K": [0.0, 10000.0],
+        "pressure_Pa": [0.0, 1000000000000.0],
+        "mass_kg": [0.0, 1000000000000.0],
+        "length_m": [0.0, 1000000000000.0],
+        "energy_J": [-1000000000000000.0, 1000000000000000.0],
+        "power_W": [0.0, 1000000000000000.0],
+    },
+)
+WATT_HOUR_TO_JOULE: Final[float] = _t("WATT_HOUR_TO_JOULE", 3600.0)
+WATT_PER_METER_KELVIN: Final[float] = _t("WATT_PER_METER_KELVIN", 1.0)
+WATT_PER_SQ_METER_KELVIN: Final[float] = _t("WATT_PER_SQ_METER_KELVIN", 1.0)
+WATT_TO_WATT: Final[float] = _t("WATT_TO_WATT", 1.0)
+YARD_TO_METER: Final[float] = _t("YARD_TO_METER", 0.9144)
