@@ -301,9 +301,9 @@ try:
 except (ImportError, OSError):
     pass
 
-# Check OpenPose
+# Check OpenPose (Python bindings are named 'pyopenpose', not 'openpose')
 try:
-    import openpose  # noqa: F401
+    import pyopenpose  # noqa: F401
 
     OPENPOSE_AVAILABLE = True
 except (ImportError, OSError):

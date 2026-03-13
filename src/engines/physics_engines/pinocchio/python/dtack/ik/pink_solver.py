@@ -5,11 +5,20 @@ from __future__ import annotations
 import typing
 from dataclasses import dataclass
 
-import pink
-import pinocchio as pin
-from pink import Task
-
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+# Guard pink/pinocchio imports — these are optional heavy dependencies
+try:
+    import pink
+    import pinocchio as pin
+    from pink import Task
+
+    PINK_SOLVER_AVAILABLE = True
+except ImportError:
+    PINK_SOLVER_AVAILABLE = False
+    pink = None  # type: ignore[assignment]
+    pin = None  # type: ignore[assignment]
+    Task = None  # type: ignore[assignment,misc]
 
 if typing.TYPE_CHECKING:
     import numpy as np
@@ -42,7 +51,16 @@ class PinkSolver:
             robot_data: Pinocchio setup data
             robot_visual: Pinocchio visual model
             robot_collision: Pinocchio collision model
+
+        Raises:
+            ImportError: If pink or pinocchio are not installed.
         """
+        if not PINK_SOLVER_AVAILABLE:
+            raise ImportError(
+                "Pink and pinocchio are required for PinkSolver. "
+                "Install with: pip install pink pinocchio"
+            )
+
         # Pink expects a 'Configuration' object usually, but can work with models.
         # We'll maintain the pinocchio model references.
         self.model = robot_model
