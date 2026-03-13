@@ -39,12 +39,17 @@ if not _secret_key_env:
             "environment variable to a secure, random value."
         )
     else:
+        # Issue #1779: Generate a random per-process key in non-production mode.
+        # A known-public static string in source code allows ANYONE reading the
+        # code to forge valid JWT tokens. A randomly generated key is unguessable
+        # and scoped to this process lifetime, so forged tokens cannot be externally
+        # crafted. Tokens will be invalidated on process restart.
+        SECRET_KEY = secrets.token_urlsafe(32)
         logger.warning(
-            "SECURITY WARNING: No SECRET_KEY set. Using unsafe placeholder. "
-            "API authentication will fail. Set GOLF_API_SECRET_KEY for production."
+            "SECURITY WARNING: No GOLF_API_SECRET_KEY or SECRET_KEY env var set. "
+            "A random per-process key has been generated; all JWT tokens will be "
+            "invalidated on restart. Set GOLF_API_SECRET_KEY for production."
         )
-        # Use a clearly-unsafe placeholder that will cause authentication to fail
-        SECRET_KEY = "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL"
 elif len(_secret_key_env) < 32:
     logger.warning(
         "SECURITY WARNING: SECRET_KEY is less than 32 characters. "

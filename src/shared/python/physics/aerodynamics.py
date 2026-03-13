@@ -918,6 +918,18 @@ class AerodynamicsEngine:
             ball_radius=self.config.ball_radius,
         )
 
+    @precondition(
+        lambda self, velocity, spin, t=0.0, position=None, resample=False: (
+            np.ndim(velocity) == 1 and len(velocity) == 3
+        ),
+        "velocity must be a 1-D array of length 3",
+    )
+    @precondition(
+        lambda self, velocity, spin, t=0.0, position=None, resample=False: (
+            np.ndim(spin) == 1 and len(spin) == 3
+        ),
+        "spin must be a 1-D array of length 3",
+    )
     def compute_forces(
         self,
         velocity: np.ndarray,
