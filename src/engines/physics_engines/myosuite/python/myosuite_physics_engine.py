@@ -39,7 +39,11 @@ if not MYOSUITE_AVAILABLE:
     logger.warning("MyoSuite not installed. MyoSuitePhysicsEngine will not function.")
 
 else:
-    import gym
+    # Prefer gymnasium (modern fork) over legacy gym
+    try:
+        import gymnasium as gym
+    except ImportError:
+        import gym  # type: ignore[no-redef]
     import myosuite  # noqa: F401
 
 
