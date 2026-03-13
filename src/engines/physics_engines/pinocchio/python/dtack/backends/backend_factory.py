@@ -9,9 +9,15 @@ from enum import Enum
 if typing.TYPE_CHECKING:
     from pathlib import Path
 
-from dtack.backends.mujoco_backend import MuJoCoBackend
-from dtack.backends.pink_backend import PINKBackend
-from dtack.backends.pinocchio_backend import PinocchioBackend
+from src.engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend import (
+    MuJoCoBackend,
+)
+from src.engines.physics_engines.pinocchio.python.dtack.backends.pink_backend import (
+    PINKBackend,
+)
+from src.engines.physics_engines.pinocchio.python.dtack.backends.pinocchio_backend import (  # noqa: E501
+    PinocchioBackend,
+)
 
 
 class BackendType(str, Enum):  # noqa: UP042

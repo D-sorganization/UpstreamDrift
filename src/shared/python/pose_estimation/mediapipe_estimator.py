@@ -229,6 +229,10 @@ class MediaPipeEstimator(PoseEstimator):
         if not self._is_loaded:
             raise StateError("Model not loaded. Call load_model() first.")
 
+        # Reset temporal smoothing state to prevent contamination from
+        # previous video files (stale Kalman filter state)
+        self.reset_temporal_state()
+
         results = []
         cap = cv2.VideoCapture(str(video_path))
 

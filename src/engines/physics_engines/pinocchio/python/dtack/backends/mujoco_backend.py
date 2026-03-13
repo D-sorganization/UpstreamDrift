@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import mujoco
 import numpy as np  # noqa: TID253
 import numpy.typing as npt  # noqa: TID253
 
+from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+if MUJOCO_AVAILABLE:
+    import mujoco
+else:
+    mujoco = None  # type: ignore[assignment]
 
 logger = get_logger(__name__)
 
@@ -35,6 +40,11 @@ class MuJoCoBackend:
             ValueError: If model cannot be loaded
         """
         model_path_obj = Path(model_path)
+        if not MUJOCO_AVAILABLE:
+            msg = (
+                "MuJoCo is required but not installed. Install with: pip install mujoco"
+            )
+            raise ImportError(msg)
         if not model_path_obj.exists():
             msg = f"Model file not found: {model_path}"
             raise FileNotFoundError(msg)
