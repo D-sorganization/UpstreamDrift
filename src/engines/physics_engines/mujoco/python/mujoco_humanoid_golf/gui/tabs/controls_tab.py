@@ -238,7 +238,10 @@ class ControlsTab(QtWidgets.QWidget):
         self._clear_actuator_controls()
 
         actuators = config.get("actuators", [])
-        if self.sim_widget.model and len(actuators) != self.sim_widget.model.nu:
+        if (
+            self.sim_widget.has_model()
+            and len(actuators) != self.sim_widget.get_num_actuators()
+        ):
             # Re-verify if fixup happened in PhysicsTab, but just in case
             logger.warning("Actuator count mismatch in ControlsTab update")
 
@@ -252,7 +255,7 @@ class ControlsTab(QtWidgets.QWidget):
         if mode == "kinematic":
             self._refresh_kinematic_controls()
             # Ensure simulation is "running" so interactive events work
-            if self.sim_widget.model is not None:
+            if self.sim_widget.has_model():
                 if self.play_pause_btn.isChecked():  # If paused
                     self.play_pause_btn.setChecked(False)  # Resume
                 else:
@@ -552,7 +555,7 @@ class ControlsTab(QtWidgets.QWidget):
     def on_play_pause_toggled(self, checked: bool) -> None:
         """Toggle simulation between paused and running states."""
         # Toggle simulation running state
-        self.sim_widget.running = not checked
+        self.sim_widget.set_running(not checked)
         self.play_pause_btn.setText("Resume" if checked else "Pause")
 
         style = self.style()
@@ -568,7 +571,7 @@ class ControlsTab(QtWidgets.QWidget):
         """Reset the simulation to the initial state."""
         self.sim_widget.reset_state()
         self.play_pause_btn.setChecked(False)  # Resume if paused
-        self.sim_widget.running = True
+        self.sim_widget.set_running(True)
 
     def on_record_toggled(self, checked: bool) -> None:
         """Start or stop recording simulation data."""

@@ -480,6 +480,31 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         mujoco.mj_forward(self.model, self.data)
         self._render_once()
 
+    # -------- Facades --------
+    def has_model(self) -> bool:
+        return self.model is not None
+
+    def get_num_bodies(self) -> int:
+        return self.model.nbody if self.model else 0
+
+    def get_num_actuators(self) -> int:
+        return self.model.nu if self.model else 0
+
+    def get_body_name(self, body_id: int) -> str | None:
+        if self.model is None:
+            return None
+        return mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
+
+    def get_actuator_name(self, actuator_id: int) -> str | None:
+        if self.model is None:
+            return None
+        return mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id)
+
+    def get_body_id(self, body_name: str) -> int:
+        if self.model is None:
+            return -1
+        return mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+
     # -------- Control interface --------
 
     def set_joint_torque(self, index: int, torque: float) -> None:
@@ -507,6 +532,9 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if self.control_system is None:
             return False
         return bool(self.control_system.num_actuators == self.model.nu)
+
+    def is_running(self) -> bool:
+        return self.running
 
     def set_running(self, running: bool) -> None:
         """Enable or disable the simulation stepping loop."""

@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import mujoco
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 
@@ -474,12 +474,14 @@ class VisualizationTab(QtWidgets.QWidget):
     # -------- Callbacks --------
 
     def on_camera_changed(self, camera_name: str) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle camera view change."""
         self.sim_widget.set_camera(camera_name)
         # Update sliders to match camera preset
         self.update_camera_sliders()
 
     def update_camera_sliders(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Update camera control sliders to match current camera state."""
         if self.sim_widget.camera is not None:
             # Update azimuth (0-360)
@@ -505,16 +507,19 @@ class VisualizationTab(QtWidgets.QWidget):
             self.lookat_z_spin.setValue(lookat[2])
 
     def on_azimuth_changed(self, value: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle azimuth slider change."""
         self.sim_widget.set_camera_azimuth(float(value))
         self.azimuth_label.setText(f"{value}\u00b0")
 
     def on_elevation_changed(self, value: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle elevation slider change."""
         self.sim_widget.set_camera_elevation(float(value))
         self.elevation_label.setText(f"{value}\u00b0")
 
     def on_distance_changed(self, value: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle distance slider change."""
         # Convert slider value (1-500) to distance (0.1-50.0)
         distance = 0.1 + (value - 1) / 499.0 * (50.0 - 0.1)
@@ -522,6 +527,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.distance_label.setText(f"{distance:.2f}")
 
     def on_lookat_changed(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle lookat position change."""
         x = self.lookat_x_spin.value()
         y = self.lookat_y_spin.value()
@@ -529,11 +535,13 @@ class VisualizationTab(QtWidgets.QWidget):
         self.sim_widget.set_camera_lookat(x, y, z)
 
     def on_reset_camera(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Reset camera to default position."""
         self.sim_widget.reset_camera()
         self.update_camera_sliders()
 
     def on_sky_color_clicked(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle sky color button click - open color picker."""
         current_color = QtGui.QColor(
             int(self.sim_widget.sky_color[0] * 255),
@@ -556,6 +564,7 @@ class VisualizationTab(QtWidgets.QWidget):
             )
 
     def on_ground_color_clicked(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle ground color button click - open color picker."""
         current_color = QtGui.QColor(
             int(self.sim_widget.ground_color[0] * 255),
@@ -582,6 +591,7 @@ class VisualizationTab(QtWidgets.QWidget):
             )
 
     def on_reset_background(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Reset background colors to defaults."""
         default_sky = [0.2, 0.3, 0.4, 1.0]
         default_ground = [0.2, 0.2, 0.2, 1.0]
@@ -594,6 +604,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
 
     def on_live_kinematics_changed(self, state: int = 0) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle live kinematics visualization toggle."""
         self.sim_widget.set_live_kinematics_visualization(
             euler=self.show_live_euler_cb.isChecked(),
@@ -602,6 +613,7 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_open_meshcat(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Open the Meshcat visualizer in the default browser."""
         if (
             hasattr(self.sim_widget, "meshcat_adapter")
@@ -614,11 +626,13 @@ class VisualizationTab(QtWidgets.QWidget):
             )
 
     def on_show_torques_changed(self, state: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle torque visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_torque_visualization(enabled)
 
     def on_torque_scale_changed(self, value: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle torque scale slider change."""
         scale = value / 100.0  # Convert to 0.01 - 1.0
         self.torque_scale_label.setText(f"{scale:.2f}%")
@@ -628,11 +642,13 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_show_forces_changed(self, state: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle force visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_force_visualization(enabled)
 
     def on_force_scale_changed(self, value: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle force scale slider change."""
         scale = value / 10.0
         self.force_scale_label.setText(f"{scale:.1f}%")
@@ -642,12 +658,14 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_isolate_forces_changed(self, state: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle isolate forces toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         if hasattr(self.sim_widget, "set_isolate_forces_visualization"):
             self.sim_widget.set_isolate_forces_visualization(enabled)
 
     def on_advanced_vector_changed(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle advanced vector visualization changes."""
         self.sim_widget.set_advanced_vector_visualization(
             self.show_induced_cb.isChecked(),
@@ -657,17 +675,20 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_show_contacts_changed(self, state: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle contact force visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_contact_force_visualization(enabled)
 
     def on_ellipsoid_visualization_changed(self, state: int) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle ellipsoid visualization toggle."""
         show_mobility = self.show_mobility_ellipsoid_cb.isChecked()
         show_force = self.show_force_ellipsoid_cb.isChecked()
         self.sim_widget.set_ellipsoid_visualization(show_mobility, show_force)
 
     def on_swing_plane_changed(self, state: int = 0) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle swing plane / trajectory visualization toggle."""
         self.sim_widget.set_swing_plane_visualization(
             show_plane=self.show_swing_plane_cb.isChecked(),
@@ -676,15 +697,18 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_tracked_body_changed(self, body_name: str) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle tracked body change for trajectory recording."""
         if body_name:
             self.sim_widget.swing_plane_body_name = body_name
 
     def on_reset_trajectory(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Reset recorded trajectory and swing plane data."""
         self.sim_widget.reset_swing_plane()
 
     def on_change_body_color(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle body color change."""
         body_name = self.viz_body_combo.currentText()
         if not body_name:
@@ -709,6 +733,7 @@ class VisualizationTab(QtWidgets.QWidget):
             self.sim_widget.set_body_color(body_name, rgba)
 
     def on_reset_body_color(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle body color reset."""
         body_name = self.viz_body_combo.currentText()
         if not body_name:
@@ -724,24 +749,22 @@ class VisualizationTab(QtWidgets.QWidget):
         rank: int | str,
         nefc: int | str,
     ) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Update matrix analysis labels."""
         self.jacobian_cond_label.setText(f"Condition: {cond}")
         self.constraint_rank_label.setText(f"Rank: {rank}")
         self.nefc_label.setText(f"Constraints: {nefc}")
 
     def update_body_list(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
         """Update body selection list and actuator list."""
-        if self.sim_widget.model is None:
+        if not self.sim_widget.has_model():
             return
 
         # Update Bodies
         self.viz_body_combo.clear()
-        for body_id in range(1, self.sim_widget.model.nbody):
-            body_name = mujoco.mj_id2name(
-                self.sim_widget.model,
-                mujoco.mjtObj.mjOBJ_BODY,
-                body_id,
-            )
+        for body_id in range(1, self.sim_widget.get_num_bodies()):
+            body_name = self.sim_widget.get_body_name(body_id)
             if body_name:
                 self.viz_body_combo.addItem(f"{body_id}: {body_name}")
 
@@ -753,11 +776,9 @@ class VisualizationTab(QtWidgets.QWidget):
         self.induced_source_combo.clear()
         self.induced_source_combo.addItems(standard_items)
 
-        for i in range(self.sim_widget.model.nu):
+        for i in range(self.sim_widget.get_num_actuators()):
             # Actuator name
-            act_name = mujoco.mj_id2name(
-                self.sim_widget.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i
-            )
+            act_name = self.sim_widget.get_actuator_name(i)
             if not act_name:
                 act_name = f"actuator_{i}"
             self.induced_source_combo.addItem(act_name)
@@ -768,12 +789,8 @@ class VisualizationTab(QtWidgets.QWidget):
         # Update tracked body combo for swing plane
         current_tracked = self.tracked_body_combo.currentText()
         self.tracked_body_combo.clear()
-        for body_id in range(1, self.sim_widget.model.nbody):
-            body_name = mujoco.mj_id2name(
-                self.sim_widget.model,
-                mujoco.mjtObj.mjOBJ_BODY,
-                body_id,
-            )
+        for body_id in range(1, self.sim_widget.get_num_bodies()):
+            body_name = self.sim_widget.get_body_name(body_id)
             if body_name:
                 self.tracked_body_combo.addItem(body_name)
         if current_tracked:
