@@ -12,8 +12,7 @@ import os
 # Ensure offscreen platform BEFORE any Qt imports so that a QApplication can be
 # created even when no X server / Wayland display is available (headless CI).
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-# Use EGL for MuJoCo rendering when no display is available (avoids gladLoadGL errors).
-os.environ.setdefault("MUJOCO_GL", "egl")
+os.environ.setdefault("MUJOCO_GL", "osmesa")
 
 from unittest.mock import MagicMock
 

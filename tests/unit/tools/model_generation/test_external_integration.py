@@ -136,7 +136,7 @@ class TestROSPackageResolution:
                     Path("/some/urdf/dir/robot.urdf"),
                 )
             assert result is not None
-            assert result == mesh_file
+            assert result.resolve() == mesh_file.resolve()
 
     def test_resolve_via_multiple_ros_paths(self) -> None:
         """Should search all paths in ROS_PACKAGE_PATH (colon-separated)."""
@@ -161,7 +161,7 @@ class TestROSPackageResolution:
                     Path("/some/urdf/dir/robot.urdf"),
                 )
             assert result is not None
-            assert result == mesh_file
+            assert result.resolve() == mesh_file.resolve()
 
     def test_resolve_catkin_workspace(self) -> None:
         """Should search catkin workspace src/ directories."""
@@ -189,7 +189,7 @@ class TestROSPackageResolution:
                     Path("/some/urdf/dir/robot.urdf"),
                 )
             assert result is not None
-            assert result == mesh_file
+            assert result.resolve() == mesh_file.resolve()
 
     def test_resolve_logs_failure(self) -> None:
         """Should log warning when resolution fails."""

@@ -45,6 +45,7 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
+from src.shared.python.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -140,6 +141,9 @@ class OpenAIAdapter(BaseAgentAdapter):
                 ) from e
         return self._client
 
+    @precondition(
+        lambda message: bool(message.strip()), "message must not be empty or blank"
+    )
     def send_message(
         self,
         message: str,

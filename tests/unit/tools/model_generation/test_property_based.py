@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from model_generation.builders.manual_builder import ManualBuilder
 from model_generation.core.types import (
@@ -235,7 +235,7 @@ class TestLinkJointHierarchyConsistency:
         root_link=valid_link(),
         child_link=valid_link(),
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_two_link_chain_hierarchy_is_consistent(
         self,
         root_link: Link,

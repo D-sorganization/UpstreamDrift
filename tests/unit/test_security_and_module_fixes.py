@@ -406,7 +406,7 @@ class TestPhysicsModuleDocstrings:
         """Shared physics module must have a module-level docstring."""
         import ast
 
-        with open(module_path) as fh:
+        with open(module_path, encoding="utf-8") as fh:
             content = fh.read()
         tree = ast.parse(content)
         docstring = ast.get_docstring(tree)
@@ -417,7 +417,7 @@ class TestPhysicsModuleDocstrings:
         """Engine physics module must have a module-level docstring."""
         import ast
 
-        with open(module_path) as fh:
+        with open(module_path, encoding="utf-8") as fh:
             content = fh.read()
         tree = ast.parse(content)
         docstring = ast.get_docstring(tree)
@@ -431,7 +431,7 @@ class TestPhysicsModuleDocstrings:
         passing = 0
         for path in all_modules:
             try:
-                with open(path) as fh:
+                with open(path, encoding="utf-8") as fh:
                     content = fh.read()
                 tree = ast.parse(content)
                 ds = ast.get_docstring(tree)

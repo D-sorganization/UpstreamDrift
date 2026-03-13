@@ -19,7 +19,7 @@ import pytest
 try:
     import upstream_physics  # type: ignore[import-untyped]
 
-    HAS_RUST = True
+    HAS_RUST = hasattr(upstream_physics, "clamp")
 except ImportError:
     HAS_RUST = False
 

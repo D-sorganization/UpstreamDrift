@@ -24,12 +24,18 @@ class TestProcessIsolationStrict:
         """Helper to run pytest on a single file in a subprocess."""
         cmd = [sys.executable, "-m", "pytest", str(test_file), "-v", "--no-cov"]
 
+        import os
+
+        env = os.environ.copy()
+        env.pop("MUJOCO_GL", None)
+
         # Capture output to help debugging if it fails
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             check=False,  # We check returncode manually for better error reporting
+            env=env,
         )
 
         if result.returncode != 0:
