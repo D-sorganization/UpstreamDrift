@@ -42,8 +42,7 @@ class MuJoCoBackend:
         model_path_obj = Path(model_path)
         if not MUJOCO_AVAILABLE:
             msg = (
-                "MuJoCo is required but not installed. "
-                "Install with: pip install mujoco"
+                "MuJoCo is required but not installed. Install with: pip install mujoco"
             )
             raise ImportError(msg)
         if not model_path_obj.exists():
