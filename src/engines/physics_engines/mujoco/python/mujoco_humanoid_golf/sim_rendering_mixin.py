@@ -136,8 +136,8 @@ class SimRenderingMixin:
                 else:
                     self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
 
-            except (RuntimeError, ValueError, AttributeError):
-                pass
+            except (RuntimeError, ValueError, AttributeError) as exc:
+                logger.debug("Counterfactual vector rendering failed: %s", exc)
 
         if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:
             return
@@ -264,8 +264,8 @@ class SimRenderingMixin:
                     self.scene.sky_rgba[:] = self.sky_color
                 if hasattr(self.scene, "ground_rgba"):
                     self.scene.ground_rgba[:] = self.ground_color
-            except (AttributeError, TypeError):
-                pass
+            except (AttributeError, TypeError) as exc:
+                logger.debug("Background colour update failed: %s", exc)
 
     def set_background_color(
         self: Any, sky_color: Any = None, ground_color: Any = None

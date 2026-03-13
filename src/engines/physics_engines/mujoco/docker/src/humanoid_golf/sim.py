@@ -94,8 +94,8 @@ class PDController(BaseController):
                         torque.item() if isinstance(torque, np.ndarray) else torque
                     )
                     action[self.actuators[joint_name]] = scalar_torque
-            except (ValueError, TypeError, RuntimeError):
-                pass
+            except (ValueError, TypeError, RuntimeError) as exc:
+                logger.debug("Could not map joint torque command: %s", exc)
         return action
 
 
@@ -126,8 +126,10 @@ class PolynomialController(BaseController):
                 # for a golf swing.
                 self.coeffs[act_idx, 1] = 60.0
                 self.coeffs[act_idx, 3] = -20.0
-        except ImportError:
-            pass
+        except ImportError as exc:
+            logger.debug(
+                "Optional polynomial controller dependency not available: %s", exc
+            )
 
     def get_action(self, physics) -> np.ndarray:
         """Calculate polynomial control action."""
@@ -193,8 +195,8 @@ class LQRController(BaseController):
                 K[i, qpos_adr] = kp
                 # D gain (on velocity error)
                 K[i, nq + dof_adr] = kd
-            except (RuntimeError, ValueError, AttributeError):
-                pass
+            except (RuntimeError, ValueError, AttributeError) as exc:
+                logger.debug("Could not set LQR gain for joint index %d: %s", i, exc)
         return K
 
     def get_action(self, physics) -> np.ndarray:
@@ -330,8 +332,8 @@ def _load_simulation_config() -> dict:
         try:
             with open("simulation_config.json") as f:
                 config = json.load(f)
-        except (FileNotFoundError, PermissionError, OSError):
-            pass
+        except (FileNotFoundError, PermissionError, OSError) as exc:
+            logger.debug("Could not load simulation_config.json: %s", exc)
     return config
 
 

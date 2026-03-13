@@ -157,8 +157,12 @@ class VisualizationMixin:
                     if 0 <= act_idx < len(tau):
                         tau[act_idx] = 1.0
                         found = True
-                except ValueError:
-                    pass
+                except ValueError as exc:
+                    LOGGER.debug(
+                        "Actuator index '%s' is not an integer: %s",
+                        source,
+                        exc,
+                    )
 
             if found:
                 accels = analyzer.compute_specific_control(self.eval_context, tau)  # type: ignore[attr-defined]
