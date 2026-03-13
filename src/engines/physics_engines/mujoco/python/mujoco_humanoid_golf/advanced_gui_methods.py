@@ -1,4 +1,11 @@
 # mypy: disable-error-code="attr-defined"
+"""Advanced GUI methods mixin for MuJoCo humanoid golf simulation.
+
+Provides extended GUI controls for pose editing, trajectory visualization,
+constraint management, and advanced simulation analysis within the
+MuJoCo humanoid golf viewer.
+"""
+
 from __future__ import annotations
 
 import json

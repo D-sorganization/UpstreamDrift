@@ -1,3 +1,9 @@
+"""Analysis tab for the MuJoCo humanoid golf GUI.
+
+Provides biomechanical analysis tools including joint torque display,
+energy metrics, swing kinematics, and CSV export functionality.
+"""
+
 from __future__ import annotations
 
 import csv

@@ -1,3 +1,9 @@
+"""MuJoCo physics engine integration for humanoid golf simulation.
+
+Wraps the MuJoCo physics backend to provide a unified interface for
+running golf swing simulations with humanoid models.
+"""
+
 from __future__ import annotations
 
 import os

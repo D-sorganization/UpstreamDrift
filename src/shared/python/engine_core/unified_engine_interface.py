@@ -224,8 +224,8 @@ class UnifiedEngineInterface(ContractChecker):
                 q, v = self.current_engine.get_state()
                 info["dof"] = len(q)
                 info["state_size"] = {"positions": len(q), "velocities": len(v)}
-            except (ValueError, RuntimeError, AttributeError):
-                pass
+            except (ValueError, RuntimeError, AttributeError) as e:
+                logger.debug("Could not retrieve state info from engine: %s", e)
 
             return info
 

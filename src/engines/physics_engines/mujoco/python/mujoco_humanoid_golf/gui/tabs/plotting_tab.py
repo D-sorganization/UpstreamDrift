@@ -1,3 +1,9 @@
+"""Plotting tab for the MuJoCo humanoid golf GUI.
+
+Provides real-time plot widgets for joint positions, velocities,
+contact forces, and energy time-series during simulation.
+"""
+
 from __future__ import annotations
 
 import typing

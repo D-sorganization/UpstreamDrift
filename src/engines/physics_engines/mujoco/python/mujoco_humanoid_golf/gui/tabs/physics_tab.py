@@ -1,3 +1,9 @@
+"""Physics tab for the MuJoCo humanoid golf GUI.
+
+Provides controls for adjusting physics parameters including gravity,
+contact stiffness, damping, friction, and simulation timestep settings.
+"""
+
 from __future__ import annotations
 
 import typing

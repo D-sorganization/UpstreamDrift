@@ -631,7 +631,9 @@ def main() -> None:
                 "UpstreamDrift.GolfModelingSuite.Launcher.1"
             )
         except ImportError:
-            pass
+            logger.debug(
+                "ctypes not available; skipping Windows AppUserModelID assignment"
+            )
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")

@@ -306,8 +306,8 @@ class SettingsDialog(QDialog):
                         self._log_viewer.textCursor().End  # type: ignore[arg-type]
                     )
                     return
-                except (RuntimeError, ValueError, AttributeError):
-                    pass
+                except (RuntimeError, ValueError, AttributeError) as e:
+                    logger.debug("Could not display log file %s: %s", log_path, e)
         self._log_viewer.setPlainText("(No log file found)")
 
     def _load_process_log(self) -> None:
@@ -323,8 +323,8 @@ class SettingsDialog(QDialog):
                     self._proc_log_viewer.textCursor().End  # type: ignore[arg-type]
                 )
                 return
-            except (RuntimeError, ValueError, AttributeError):
-                pass
+            except (RuntimeError, ValueError, AttributeError) as e:
+                logger.debug("Could not display process log %s: %s", log_path, e)
         self._proc_log_viewer.setPlainText(
             "(No process output log yet — launch a model to generate output)"
         )

@@ -50,14 +50,18 @@ def _get_golf_main(*, prefer_legacy: bool = False):
 
         return golf_main
     except ImportError:
-        pass
+        logger.debug(
+            "Could not import golf_launcher via relative import, trying absolute"
+        )
 
     try:
         module = importlib.import_module("launchers.golf_launcher")
         if hasattr(module, "main"):
             return module.main
     except ImportError:
-        pass
+        logger.debug(
+            "Could not import launchers.golf_launcher, falling back to direct import"
+        )
 
     from .golf_launcher import main as golf_main
 
@@ -169,12 +173,12 @@ class UnifiedLauncher:
             try:
                 return version("upstream-drift")
             except PackageNotFoundError:
-                pass
+                logger.debug("Package 'upstream-drift' not found in metadata")
 
             try:
                 return version("golf-modeling-suite")
             except PackageNotFoundError:
-                pass
+                logger.debug("Package 'golf-modeling-suite' not found in metadata")
 
         except ImportError:
             metadata_broken = True
@@ -186,8 +190,8 @@ class UnifiedLauncher:
             v = getattr(_shared, "__version__", None)
             if v and not callable(v):
                 return str(v)
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as e:  # noqa: BLE001
+            logger.debug("Could not read version from shared.python: %s", e)
 
         # 3. Read directly from pyproject.toml (development / editable installs)
         # Only attempt when metadata machinery is functioning (not broken import)
@@ -208,8 +212,8 @@ class UnifiedLauncher:
                     with pyproject_path.open("rb") as fh:
                         data = tomllib.load(fh)
                     return str(data["project"]["version"])
-                except (KeyError, FileNotFoundError, OSError):
-                    pass
+                except (KeyError, FileNotFoundError, OSError) as e:
+                    logger.debug("Could not read version from pyproject.toml: %s", e)
 
         # 4. Hardcoded fallback
         return "1.0.0-beta"

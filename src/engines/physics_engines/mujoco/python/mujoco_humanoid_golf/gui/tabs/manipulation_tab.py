@@ -1,3 +1,10 @@
+"""Manipulation tab for the MuJoCo humanoid golf GUI.
+
+Provides interactive object manipulation controls including
+drag-and-drop for objects, constraint attachment, and
+perturbation tools for the humanoid golf model.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

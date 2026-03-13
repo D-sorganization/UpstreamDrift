@@ -1,3 +1,9 @@
+"""Controls tab for the MuJoCo humanoid golf GUI.
+
+Provides joint angle sliders, actuator controls, and simulation
+playback controls for the humanoid golf simulation viewer.
+"""
+
 from __future__ import annotations
 
 import typing

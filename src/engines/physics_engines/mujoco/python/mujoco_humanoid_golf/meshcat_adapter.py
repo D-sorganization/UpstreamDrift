@@ -1,3 +1,9 @@
+"""MeshCat adapter for MuJoCo humanoid golf visualization.
+
+Provides a browser-based 3D visualization backend via MeshCat,
+wrapping MuJoCo model data for interactive display.
+"""
+
 import os
 import webbrowser
 from typing import Any

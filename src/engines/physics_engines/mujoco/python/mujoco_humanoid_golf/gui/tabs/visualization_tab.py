@@ -1,3 +1,9 @@
+"""Visualization tab for the MuJoCo humanoid golf GUI.
+
+Provides controls for camera, rendering options, and visual overlays
+used during humanoid golf simulations.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
