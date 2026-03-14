@@ -98,6 +98,7 @@ class Vector3:
             New Vector3 instance.
         """
         assert d is not None, "d must be provided"
+        assert d is not None, "d must be provided"
         v = cls(x=float(d["x"]), y=float(d["y"]), z=float(d["z"]))
         if validate:
             v._validate()
@@ -113,6 +114,7 @@ class Vector3:
     ) -> Vector3:
         """Create new Vector3 with optional validation."""
         assert x is not None, "x must be provided"
+        assert x is not None, "x must be provided"
         instance = object.__new__(cls)
         return instance
 
@@ -127,6 +129,7 @@ class Vector3:
             z: Z component.
             validate: If True, validate values are finite.
         """
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         self.x = float(x)
         self.y = float(y)
@@ -228,6 +231,7 @@ class Vector3:
     def __eq__(self, other: object) -> bool:
         """Check equality with another vector."""
         assert other is not None, "other must be provided"
+        assert other is not None, "other must be provided"
         if not isinstance(other, Vector3):
             return NotImplemented
         return self.x == other.x and self.y == other.y and self.z == other.z
@@ -272,6 +276,7 @@ class Quaternion:
     ) -> Quaternion:
         """Create new Quaternion."""
         assert w is not None, "w must be provided"
+        assert w is not None, "w must be provided"
         instance = object.__new__(cls)
         return instance
 
@@ -292,6 +297,7 @@ class Quaternion:
             z: Z component of vector part.
             validate: If True, normalize the quaternion.
         """
+        assert w is not None, "w must be provided"
         assert w is not None, "w must be provided"
         self.w = float(w)
         self.x = float(x)
@@ -332,6 +338,7 @@ class Quaternion:
             New Quaternion representing the rotation.
         """
         assert roll is not None, "roll must be provided"
+        assert roll is not None, "roll must be provided"
         cy = math.cos(yaw * 0.5)
         sy = math.sin(yaw * 0.5)
         cp = math.cos(pitch * 0.5)
@@ -360,6 +367,7 @@ class Quaternion:
         Returns:
             New Quaternion instance.
         """
+        assert d is not None, "d must be provided"
         assert d is not None, "d must be provided"
         return cls(
             w=float(d["w"]),
