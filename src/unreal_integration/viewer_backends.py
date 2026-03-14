@@ -416,6 +416,7 @@ class MeshcatBackend(ViewerBackend):
     ) -> str:
         """Add mesh to Meshcat scene."""
         assert mesh is not None, "mesh must be provided"
+        assert mesh is not None, "mesh must be provided"
         if not self._is_initialized:
             raise RuntimeError("Backend not initialized")
 
@@ -496,6 +497,7 @@ class MeshcatBackend(ViewerBackend):
         """Apply transform to Meshcat object."""
         # Build transformation matrix
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         T = np.eye(4)
 
         # Apply scale
@@ -534,6 +536,7 @@ class MeshcatBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove object from Meshcat scene."""
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if not self._is_initialized:
             return False
@@ -602,6 +605,7 @@ class MockBackend(ViewerBackend):
     ) -> str:
         """Add mesh to mock scene."""
         assert mesh is not None, "mesh must be provided"
+        assert mesh is not None, "mesh must be provided"
         if name is None:
             name = f"mock_mesh_{len(self._objects)}"
 
@@ -631,6 +635,7 @@ class MockBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove mock object."""
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if name in self._objects:
             del self._objects[name]
@@ -731,6 +736,7 @@ class PyVistaBackend(ViewerBackend):
     ) -> str:
         """Add mesh to PyVista scene."""
         assert mesh is not None, "mesh must be provided"
+        assert mesh is not None, "mesh must be provided"
         if not self._is_initialized:
             raise RuntimeError("Backend not initialized")
 
@@ -814,6 +820,7 @@ class PyVistaBackend(ViewerBackend):
         """Apply transform to PyVista actor."""
         # Build transformation matrix
         assert scale is not None, "scale must be provided"
+        assert scale is not None, "scale must be provided"
         T = np.eye(4)
 
         # Apply scale
@@ -853,6 +860,7 @@ class PyVistaBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove object from PyVista scene."""
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if not self._is_initialized:
             return False
@@ -1050,6 +1058,7 @@ class UnrealBridgeBackend(ViewerBackend):
     ) -> str:
         """Add mesh to tracked objects."""
         assert mesh is not None, "mesh must be provided"
+        assert mesh is not None, "mesh must be provided"
         if not self._is_initialized:
             raise RuntimeError("Backend not initialized")
 
@@ -1090,6 +1099,7 @@ class UnrealBridgeBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove object."""
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if not self._is_initialized:
             return False
