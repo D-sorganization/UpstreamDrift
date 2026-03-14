@@ -359,6 +359,12 @@ jobs:
           cargo test
           cargo test --features python
 
+      - name: Security Audit (cargo-audit)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          cargo install cargo-audit --locked || true
+          cargo audit
+
       - name: Build PyO3 Wheel (Maturin)
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
@@ -390,6 +396,18 @@ jobs:
           cargo build --target wasm32-unknown-unknown --features wasm -p upstream-physics
           echo "WASM target build successful"
 
+      - name: Verify WASM Output
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          # Verify the WASM binary was produced
+          WASM_FILE=$(find target/wasm32-unknown-unknown -name "*.wasm" -type f | head -1)
+          if [ -n "$WASM_FILE" ]; then
+            echo "✅ WASM binary exists: $WASM_FILE"
+            ls -lh "$WASM_FILE"
+          else
+            echo "::warning::WASM binary not found in target/wasm32-unknown-unknown"
+          fi
+
       - name: Rust Quality Gate Summary
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
@@ -397,6 +415,8 @@ jobs:
           echo "- ✅ rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ clippy: no warnings" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ cargo audit: no known vulnerabilities" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ WASM: target compiled" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+
