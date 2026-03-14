@@ -711,7 +711,7 @@ class GripModellingTab(QtWidgets.QWidget):
         # Initial value (qpos) - Assuming qpos address matches joint id for 1-dof joints
         # Need strict qpos address.
         qpos_adr = model.jnt_qposadr[i]
-        init_val = self.sim_widget.data.qpos[qpos_adr]
+        init_val = self.sim_widget.get_state()[0][qpos_adr]
 
         slider.setValue(self._val_to_slider(init_val, range_min, range_max))
         spin.setValue(init_val)
@@ -760,7 +760,9 @@ class GripModellingTab(QtWidgets.QWidget):
         """Update joint value in simulation."""
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
-        self.sim_widget.data.qpos[q_idx] = val
+        state = self.sim_widget.get_state()
+        state[0][q_idx] = val
+        self.sim_widget.set_state_and_forward(*state)
         mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
         self.sim_widget.render()
 

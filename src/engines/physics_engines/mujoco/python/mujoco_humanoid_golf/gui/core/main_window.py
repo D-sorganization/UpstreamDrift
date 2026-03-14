@@ -315,14 +315,14 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
             config_idx = self.physics_tab.model_combo.currentIndex()
             if config_idx < len(self.physics_tab.model_configs):
                 model_name = self.physics_tab.model_configs[config_idx]["name"]
-                num_actuators = self.sim_widget.model.nu
+                num_actuators = self.sim_widget.get_num_actuators()
                 self.status_model_label.setText(
                     f"Model: {model_name} ({num_actuators} actuators)",
                 )
 
         # Update time
         if self.sim_widget.data is not None:
-            time = self.sim_widget.data.time
+            time = self.sim_widget.get_time()
             self.status_time_label.setText(f"Time: {time:.2f}s")
 
         # Update camera info
@@ -522,7 +522,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         """Return joint names from the MuJoCo model."""
         if self.sim_widget.model is not None:
             return [
-                self.sim_widget.model.joint(i).name
-                for i in range(self.sim_widget.model.njnt)
+                self.sim_widget.get_joint_name(i)
+                for i in range(self.sim_widget.get_num_joints())
             ]
         return []

@@ -80,12 +80,12 @@ class AdvancedGuiMethodsMixin:
         # Helper to set color for geoms containing string
         def set_color_contain(name_part: str, rgba: list) -> None:
             """Set RGBA color for all geoms whose name contains a string."""
-            for i in range(self.sim_widget.model.ngeom):
+            for i in range(self.sim_widget.get_num_geoms()):
                 name = mujoco.mj_id2name(
                     self.sim_widget.model, mujoco.mjtObj.mjOBJ_GEOM, i
                 )
                 if name and name_part in name:
-                    self.sim_widget.model.geom_rgba[i] = rgba
+                    self.sim_widget.set_geom_rgba(i, rgba)
 
         if "shirt" in colors:
             set_color_contain("torso", colors["shirt"])

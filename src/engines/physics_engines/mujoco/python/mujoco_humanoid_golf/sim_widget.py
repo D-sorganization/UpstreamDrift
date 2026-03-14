@@ -508,6 +508,29 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def get_num_bodies(self) -> int:
         return self.model.nbody if self.model else 0
 
+    def get_num_joints(self) -> int:
+        return self.model.njnt if self.model else 0
+
+    def get_num_geoms(self) -> int:
+        return self.model.ngeom if self.model else 0
+
+    def get_joint_name(self, index: int) -> str | None:
+        if self.model is None or index < 0 or index >= self.model.njnt:
+            return None
+        return mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, index)
+
+    def get_geom_rgba(self, index: int) -> np.ndarray | None:
+        if self.model is None or index < 0 or index >= self.model.ngeom:
+            return None
+        return self.model.geom_rgba[index].copy()
+
+    def set_geom_rgba(self, index: int, rgba: np.ndarray) -> None:
+        if self.model is not None and 0 <= index < self.model.ngeom:
+            self.model.geom_rgba[index] = rgba
+
+    def get_time(self) -> float:
+        return self.data.time if self.data else 0.0
+
     def get_num_actuators(self) -> int:
         return self.model.nu if self.model else 0
 

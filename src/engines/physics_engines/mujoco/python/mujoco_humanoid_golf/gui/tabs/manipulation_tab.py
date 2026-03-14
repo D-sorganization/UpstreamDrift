@@ -369,7 +369,7 @@ class ManipulationTab(QtWidgets.QWidget):
         self.manip_body_combo.clear()
 
         # Add all bodies
-        for body_id in range(1, self.sim_widget.model.nbody):  # Skip world (0)
+        for body_id in range(1, self.sim_widget.get_num_bodies()):  # Skip world (0)
             body_name = mujoco.mj_id2name(
                 self.sim_widget.model,
                 mujoco.mjtObj.mjOBJ_BODY,

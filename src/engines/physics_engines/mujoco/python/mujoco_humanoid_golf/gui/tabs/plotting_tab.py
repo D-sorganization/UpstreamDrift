@@ -152,7 +152,7 @@ class PlottingTab(QtWidgets.QWidget):
 
         import mujoco
 
-        for i in range(self.sim_widget.model.njnt):
+        for i in range(self.sim_widget.get_num_joints()):
             name = mujoco.mj_id2name(
                 self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
             )
