@@ -314,8 +314,6 @@ class PlottingTab(QtWidgets.QWidget):
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
 
-        import mujoco
-
         total_frames = len(recorder.frames)
         progress = QtWidgets.QProgressDialog(
             "Computing Induced Accelerations...",
@@ -333,23 +331,19 @@ class PlottingTab(QtWidgets.QWidget):
             progress.setValue(i)
 
             # Save current state
-            qpos_bak = self.sim_widget.data.qpos.copy()
-            qvel_bak = self.sim_widget.data.qvel.copy()
-            ctrl_bak = self.sim_widget.data.ctrl.copy()
+            qpos_bak, qvel_bak, ctrl_bak = self.sim_widget.get_state()
 
-            self.sim_widget.data.qpos[:] = frame.joint_positions
-            self.sim_widget.data.qvel[:] = frame.joint_velocities
-            self.sim_widget.data.ctrl[:] = frame.joint_torques
-            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+            self.sim_widget.set_state_and_forward(
+                frame.joint_positions,
+                frame.joint_velocities,
+                frame.joint_torques,
+            )
 
             res = analyzer.compute_induced_acceleration("actuator")
             vals_list.append(res)
 
             # Restore
-            self.sim_widget.data.qpos[:] = qpos_bak
-            self.sim_widget.data.qvel[:] = qvel_bak
-            self.sim_widget.data.ctrl[:] = ctrl_bak
-            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+            self.sim_widget.set_state_and_forward(qpos_bak, qvel_bak, ctrl_bak)
 
         progress.setValue(total_frames)
 
@@ -385,8 +379,6 @@ class PlottingTab(QtWidgets.QWidget):
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
 
-        import mujoco
-
         total_frames = len(recorder.frames)
         progress = QtWidgets.QProgressDialog(
             "Computing Counterfactuals...",
@@ -397,19 +389,18 @@ class PlottingTab(QtWidgets.QWidget):
         )
         progress.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
 
-        qpos_bak = self.sim_widget.data.qpos.copy()
-        qvel_bak = self.sim_widget.data.qvel.copy()
-        ctrl_bak = self.sim_widget.data.ctrl.copy()
+        qpos_bak, qvel_bak, ctrl_bak = self.sim_widget.get_state()
 
         for i, frame in enumerate(recorder.frames):
             if progress.wasCanceled():
                 raise RuntimeError("Operation canceled")
             progress.setValue(i)
 
-            self.sim_widget.data.qpos[:] = frame.joint_positions
-            self.sim_widget.data.qvel[:] = frame.joint_velocities
-            self.sim_widget.data.ctrl[:] = frame.joint_torques
-            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+            self.sim_widget.set_state_and_forward(
+                frame.joint_positions,
+                frame.joint_velocities,
+                frame.joint_torques,
+            )
 
             cf_results: dict[str, np.ndarray] = analyzer.compute_counterfactuals()
             if cf_name in cf_results:
@@ -418,7 +409,4 @@ class PlottingTab(QtWidgets.QWidget):
 
         progress.setValue(total_frames)
 
-        self.sim_widget.data.qpos[:] = qpos_bak
-        self.sim_widget.data.qvel[:] = qvel_bak
-        self.sim_widget.data.ctrl[:] = ctrl_bak
-        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+        self.sim_widget.set_state_and_forward(qpos_bak, qvel_bak, ctrl_bak)

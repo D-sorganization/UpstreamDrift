@@ -480,6 +480,27 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         mujoco.mj_forward(self.model, self.data)
         self._render_once()
 
+    def get_state(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Get a copy of the current simulation state (qpos, qvel, ctrl)."""
+        if self.data is None:
+            return np.array([]), np.array([]), np.array([])
+        return (
+            self.data.qpos.copy(),
+            self.data.qvel.copy(),
+            self.data.ctrl.copy(),
+        )
+
+    def set_state_and_forward(
+        self, qpos: np.ndarray, qvel: np.ndarray, ctrl: np.ndarray
+    ) -> None:
+        """Set simulation state and run forward kinematics."""
+        if self.model is None or self.data is None:
+            return
+        self.data.qpos[:] = qpos
+        self.data.qvel[:] = qvel
+        self.data.ctrl[:] = ctrl
+        mujoco.mj_forward(self.model, self.data)
+
     # -------- Facades --------
     def has_model(self) -> bool:
         return self.model is not None
