@@ -161,6 +161,24 @@ pinocchio_engine.set_gravity(GRAVITY)
 
 ## Diagnostic Workflow
 
+Before investigating numeric deviations, verify that the expected engines are
+actually importable in the current environment:
+
+```bash
+python scripts/check_native_engine_imports.py \
+  --json-output /tmp/native-engine-imports.json \
+  --markdown-output /tmp/native-engine-imports.md
+```
+
+If you are running a dedicated native-engine lane locally, enable strict probe
+behavior so broken installed engines fail instead of silently degrading to
+skips:
+
+```bash
+UPSTREAM_DRIFT_STRICT_ENGINE_PROBES=true \
+pytest tests/integration/test_cross_engine_validation.py -v
+```
+
 ### Step 1: Check Basic Configuration
 
 ```python

@@ -31,6 +31,9 @@ We measure test quality by:
 
 ## Types of Tests
 
+For the current repo-specific lane structure and expansion plan, see
+`docs/testing/integration-testing-strategy.md`.
+
 ### Unit Tests (`tests/unit/`)
 
 **Purpose**: Test individual functions/classes in isolation
@@ -114,6 +117,37 @@ def test_mujoco_drake_comparison():
 - Use real filesystem with `tempfile.TemporaryDirectory()`
 - Check if dependencies are mocked before running
 - Test actual data flow, not mocked interactions
+
+**Important repo convention:**
+
+- Mock-driven native-engine adapter tests belong in `tests/unit/`, even if they
+  run in isolated subprocesses.
+- `tests/integration/` is reserved for real component wiring and real
+  dependency interactions.
+
+### Native-Engine Integration Strategy
+
+UpstreamDrift uses a tiered approach for optional engines such as MuJoCo,
+Drake, Pinocchio, OpenSim, and MyoSuite.
+
+- The default PR lane is a **core** lane, not a full native-engine lane.
+- Dedicated native-engine lanes should set
+  `UPSTREAM_DRIFT_STRICT_ENGINE_PROBES=true` so installed-but-broken engines
+  fail loudly.
+- Shared cross-engine fixtures report `missing`, `broken`, and `ready`
+  statuses so CI can distinguish absent optional dependencies from broken
+  expected environments.
+
+Example:
+
+```bash
+# Core lane behavior: optional engines may skip
+pytest tests/integration/test_cross_engine_validation.py -v
+
+# Dedicated native-engine lane behavior: broken expected engines should fail
+UPSTREAM_DRIFT_STRICT_ENGINE_PROBES=true \
+pytest tests/integration/test_cross_engine_validation.py -v
+```
 
 ### End-to-End Tests (`tests/e2e/`)
 

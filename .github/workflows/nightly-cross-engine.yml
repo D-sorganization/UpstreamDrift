@@ -64,44 +64,9 @@ jobs:
           UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
         run: |
           mkdir -p test-results coverage
-          python - <<'PY'
-          import importlib
-          import json
-          import sys
-          from pathlib import Path
-
-          checks = {
-              "mujoco": "mujoco",
-              "drake": "pydrake.all",
-              "pinocchio": "pinocchio",
-          }
-
-          results = {}
-          failures = []
-          for name, module_name in checks.items():
-              try:
-                  importlib.import_module(module_name)
-                  results[name] = "ok"
-              except Exception as exc:  # pragma: no cover - CI-only path
-                  results[name] = f"failed: {exc}"
-                  failures.append(f"{name}: {exc}")
-
-          Path("test-results/native-engine-imports.json").write_text(
-              json.dumps(results, indent=2),
-              encoding="utf-8",
-          )
-
-          summary = Path("test-results/native-engine-imports.md")
-          lines = ["## Native Engine Import Check", ""]
-          for name, status in results.items():
-              icon = "OK" if status == "ok" else "FAIL"
-              lines.append(f"- {icon} {name}: {status}")
-          summary.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
-
-          if failures:
-              print("\\n".join(failures), file=sys.stderr)
-              sys.exit(1)
-          PY
+          python scripts/check_native_engine_imports.py \
+            --json-output test-results/native-engine-imports.json \
+            --markdown-output test-results/native-engine-imports.md
 
       - name: Run cross-engine validation tests
         id: validation
