@@ -166,6 +166,7 @@ class GeometryManager:
 
     def __init__(self, ctx: mgl.Context) -> None:
         assert ctx is not None, "ctx must be provided"
+        assert ctx is not None, "ctx must be provided"
         self.ctx = ctx
         self.geometry_objects: dict[str, GeometryObject] = {}
         self.mesh_library: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
@@ -328,6 +329,7 @@ class GeometryManager:
     ) -> None:
         """Update object transformation efficiently"""
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         if name not in self.geometry_objects:
             return
 
@@ -348,6 +350,7 @@ class GeometryManager:
     def get_model_matrix(self, obj: GeometryObject) -> np.ndarray:
         """Calculate model matrix for object"""
         # Translation matrix
+        assert obj is not None, "obj must be provided"
         assert obj is not None, "obj must be provided"
         T = np.eye(4, dtype=np.float32)
         if obj.position is not None:
@@ -407,6 +410,7 @@ class OpenGLRenderer:
     def initialize(self, ctx: mgl.Context) -> None:
         """Initialize OpenGL context and resources"""
         assert ctx is not None, "ctx must be provided"
+        assert ctx is not None, "ctx must be provided"
         self.ctx = ctx
 
         # Setup OpenGL state
@@ -461,6 +465,7 @@ class OpenGLRenderer:
     def set_viewport(self, width: int, height: int) -> None:
         """Set viewport size"""
         assert width is not None, "width must be provided"
+        assert width is not None, "width must be provided"
         self.viewport_size = (width, height)
         if self.ctx:
             self.ctx.viewport = (0, 0, width, height)
@@ -475,6 +480,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render complete frame with all elements"""
+        assert frame_data is not None, "frame_data must be provided"
         assert frame_data is not None, "frame_data must be provided"
         if not self.ctx or not self.geometry_manager:
             return
@@ -512,6 +518,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render ground plane at proper level with golf grid"""
+        assert view_matrix is not None, "view_matrix must be provided"
         assert view_matrix is not None, "view_matrix must be provided"
         if not self.geometry_manager:
             return
@@ -654,6 +661,7 @@ class OpenGLRenderer:
     ) -> None:
         """Render all body segments"""
         assert frame_data is not None, "frame_data must be provided"
+        assert frame_data is not None, "frame_data must be provided"
         if not self.geometry_manager:
             return
 
@@ -721,6 +729,7 @@ class OpenGLRenderer:
         program: mgl.Program,
     ) -> None:
         """Render cylinder between two 3D points"""
+        assert obj_name is not None, "obj_name must be provided"
         assert obj_name is not None, "obj_name must be provided"
         if not self.geometry_manager:
             return
@@ -791,6 +800,7 @@ class OpenGLRenderer:
     ) -> None:
         """Render sphere at specific point"""
         assert obj_name is not None, "obj_name must be provided"
+        assert obj_name is not None, "obj_name must be provided"
         if not self.geometry_manager:
             return
 
@@ -844,6 +854,7 @@ class OpenGLRenderer:
     def _render_club_face_normal(self, frame_data, face_normal, program) -> None:
         """Render the club face normal vector arrow."""
         assert frame_data is not None, "frame_data must be provided"
+        assert frame_data is not None, "frame_data must be provided"
         normal_length = 0.1  # 10cm normal vector
         normal_end = frame_data.clubhead + face_normal * normal_length
         normal_color = [1.0, 0.0, 0.0]  # Red for face normal
@@ -866,6 +877,7 @@ class OpenGLRenderer:
     def _render_club_ball(self, frame_data, face_normal, program) -> None:
         """Render the golf ball positioned for center strike."""
         assert frame_data is not None, "frame_data must be provided"
+        assert frame_data is not None, "frame_data must be provided"
         ball_offset = face_normal * 0.05  # 5cm in front of face
         ball_position = frame_data.clubhead + ball_offset
         ball_color = [1.0, 1.0, 1.0]  # White ball
@@ -884,6 +896,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render golf club with improved geometry and face normal"""
+        assert frame_data is not None, "frame_data must be provided"
         assert frame_data is not None, "frame_data must be provided"
         if not self.geometry_manager:
             return

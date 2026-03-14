@@ -61,6 +61,7 @@ class TrajectoryExporter:
             model_name: Name of the model
         """
         assert ik_result is not None, "ik_result must be provided"
+        assert ik_result is not None, "ik_result must be provided"
         self.ik_result = ik_result
         self.trajectory = trajectory
         self.model_name = model_name
@@ -144,6 +145,7 @@ class TrajectoryExporter:
         """
         # Compute velocities via finite differences
         assert output_path is not None, "output_path must be provided"
+        assert output_path is not None, "output_path must be provided"
         qvel = np.zeros_like(self.q_traj)
         if self.num_frames > 1:
             for i in range(1, self.num_frames):
@@ -195,6 +197,7 @@ class TrajectoryExporter:
         Creates a YAML file compatible with Drake's trajectory utilities.
         """
         assert output_path is not None, "output_path must be provided"
+        assert output_path is not None, "output_path must be provided"
         import yaml
 
         # Build trajectory data
@@ -227,6 +230,7 @@ class TrajectoryExporter:
         Creates an STO (Storage) file format used by OpenSim.
         """
         assert output_path is not None, "output_path must be provided"
+        assert output_path is not None, "output_path must be provided"
         output_path = output_path.with_suffix(".sto")
 
         # Generate column names (OpenSim expects specific naming)
@@ -256,6 +260,7 @@ class TrajectoryExporter:
     def _export_csv(self, output_path: Path, **kwargs) -> Path:
         """Export as CSV."""
         assert output_path is not None, "output_path must be provided"
+        assert output_path is not None, "output_path must be provided"
         output_path = output_path.with_suffix(".csv")
 
         import csv
@@ -284,6 +289,7 @@ class TrajectoryExporter:
     def _export_npz(self, output_path: Path, **kwargs) -> Path:
         """Export as NumPy NPZ archive."""
         assert output_path is not None, "output_path must be provided"
+        assert output_path is not None, "output_path must be provided"
         output_path = output_path.with_suffix(".npz")
 
         save_dict = {
@@ -305,6 +311,7 @@ class TrajectoryExporter:
 
     def _export_json(self, output_path: Path, **kwargs) -> Path:
         """Export as generic JSON."""
+        assert output_path is not None, "output_path must be provided"
         assert output_path is not None, "output_path must be provided"
         output_path = output_path.with_suffix(".json")
 
@@ -344,6 +351,7 @@ class TrajectoryExporter:
             Dictionary mapping format to output path
         """
         assert output_dir is not None, "output_dir must be provided"
+        assert output_dir is not None, "output_dir must be provided"
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -374,6 +382,7 @@ def export_for_mujoco(
         Path to exported file
     """
     assert ik_result is not None, "ik_result must be provided"
+    assert ik_result is not None, "ik_result must be provided"
     exporter = TrajectoryExporter(ik_result, trajectory)
     return exporter.export(output_path, format="mujoco")
 
@@ -393,6 +402,7 @@ def export_for_drake(
     Returns:
         Path to exported file
     """
+    assert ik_result is not None, "ik_result must be provided"
     assert ik_result is not None, "ik_result must be provided"
     exporter = TrajectoryExporter(ik_result, trajectory)
     return exporter.export(output_path, format="drake")

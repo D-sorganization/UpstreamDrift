@@ -39,6 +39,7 @@ class PlaybackController:
             controls: Control array (N, nu)
         """
         assert times is not None, "times must be provided"
+        assert times is not None, "times must be provided"
         self.times = times
         self.states = states
         self.controls = controls
@@ -80,6 +81,7 @@ class PlaybackController:
             num_frames: Number of frames to step
         """
         assert num_frames is not None, "num_frames must be provided"
+        assert num_frames is not None, "num_frames must be provided"
         new_frame = min(self.current_frame + num_frames, self.num_frames - 1)
         self.seek_to_frame(new_frame)
 
@@ -90,6 +92,7 @@ class PlaybackController:
             num_frames: Number of frames to step
         """
         assert num_frames is not None, "num_frames must be provided"
+        assert num_frames is not None, "num_frames must be provided"
         new_frame = max(self.current_frame - num_frames, 0)
         self.seek_to_frame(new_frame)
 
@@ -99,6 +102,7 @@ class PlaybackController:
         Args:
             frame: Frame index (0 to num_frames-1)
         """
+        assert frame is not None, "frame must be provided"
         assert frame is not None, "frame must be provided"
         frame = max(0, min(frame, self.num_frames - 1))
         if frame != self.current_frame:
@@ -114,6 +118,7 @@ class PlaybackController:
         """
         # Find closest frame
         assert time is not None, "time must be provided"
+        assert time is not None, "time must be provided"
         frame = np.argmin(np.abs(self.times - time))
         self.seek_to_frame(int(frame))
 
@@ -123,6 +128,7 @@ class PlaybackController:
         Args:
             percent: Percentage (0.0 to 100.0)
         """
+        assert percent is not None, "percent must be provided"
         assert percent is not None, "percent must be provided"
         frame = int((percent / 100.0) * (self.num_frames - 1))
         self.seek_to_frame(frame)
@@ -157,6 +163,7 @@ class PlaybackController:
         Returns:
             True if frame changed
         """
+        assert dt is not None, "dt must be provided"
         assert dt is not None, "dt must be provided"
         if self.mode != PlaybackMode.PLAYING:
             return False
@@ -262,6 +269,7 @@ class PlaybackController:
             output_path: Output image path
             render_callback: Function that takes (state, control) and returns RGB image
         """
+        assert frame is not None, "frame must be provided"
         assert frame is not None, "frame must be provided"
         frame = max(0, min(frame, self.num_frames - 1))
         state = self.states[frame]

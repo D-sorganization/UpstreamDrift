@@ -220,6 +220,7 @@ class VisualizationMixin:
     ) -> None:
         """Draw vectors at joints (accel, torque, etc)."""
         assert values is not None, "values must be provided"
+        assert values is not None, "values must be provided"
         if not self.meshcat or self.plant is None:  # type: ignore[attr-defined]
             return
 

@@ -83,6 +83,7 @@ class DriftControlDecomposer:
             model: MuJoCo model
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
 
         # Create private data structures for thread-safe analysis
@@ -96,6 +97,7 @@ class DriftControlDecomposer:
         qvel: np.ndarray,
         ctrl: np.ndarray,
     ) -> np.ndarray:
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._data_full.qpos[:] = qpos
         self._data_full.qvel[:] = qvel
@@ -116,6 +118,7 @@ class DriftControlDecomposer:
     def _compute_drift_acceleration(
         self, qpos: np.ndarray, qvel: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._data_drift.qpos[:] = qpos
         self._data_drift.qvel[:] = qvel
@@ -143,6 +146,7 @@ class DriftControlDecomposer:
     def _validate_superposition(
         self, qacc_full: np.ndarray, qacc_drift: np.ndarray, qacc_control: np.ndarray
     ) -> float:
+        assert qacc_full is not None, "qacc_full must be provided"
         assert qacc_full is not None, "qacc_full must be provided"
         qacc_reconstructed = qacc_drift + qacc_control
         residual = float(np.linalg.norm(qacc_full - qacc_reconstructed))
@@ -181,6 +185,7 @@ class DriftControlDecomposer:
         Raises:
             ValueError: If superposition fails (residual > 1e-5)
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         qacc_full = self._compute_full_acceleration(qpos, qvel, ctrl)
 
@@ -230,6 +235,7 @@ class DriftControlDecomposer:
             List of DriftControlResult for each timestep
         """
         assert qpos_traj is not None, "qpos_traj must be provided"
+        assert qpos_traj is not None, "qpos_traj must be provided"
         results = []
 
         for i in range(len(qpos_traj)):
@@ -261,6 +267,7 @@ class DriftControlDecomposer:
             results: Decomposition results for trajectory
             joint_idx: Joint index to plot
         """
+        assert times is not None, "times must be provided"
         assert times is not None, "times must be provided"
         try:
             import matplotlib.pyplot as plt

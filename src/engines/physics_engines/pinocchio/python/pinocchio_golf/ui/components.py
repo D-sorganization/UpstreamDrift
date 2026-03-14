@@ -17,6 +17,7 @@ class GUIBuilder:
     def setup_toolbar(gui: PinocchioGUI, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the top bar with model selector, load button, and mode selector."""
         assert gui is not None, "gui must be provided"
+        assert gui is not None, "gui must be provided"
         toolbar = QtWidgets.QHBoxLayout()
 
         gui.model_combo = QtWidgets.QComboBox()
@@ -41,6 +42,7 @@ class GUIBuilder:
         gui: PinocchioGUI, parent_layout: QtWidgets.QVBoxLayout
     ) -> None:
         """Build the visualization group box."""
+        assert gui is not None, "gui must be provided"
         assert gui is not None, "gui must be provided"
         vis_group = QtWidgets.QGroupBox("Visualization Overlays")
         vis_layout = QtWidgets.QVBoxLayout()

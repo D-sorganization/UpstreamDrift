@@ -97,6 +97,7 @@ def _rnea_forward_pass_body(
     buf: _RneaScratchBuffers,
 ):
     assert i is not None, "i must be provided"
+    assert i is not None, "i must be provided"
     xj_transform, s_subspace, dof_idx = jcalc(mdl.jtype[i], q[i], out=buf.xj_buf)
     s_subspace_list[i] = s_subspace
     dof_indices[i] = dof_idx
@@ -219,6 +220,7 @@ def rnea(
         >>> qdd = np.array([0.5, -0.2])
         >>> tau = rnea(model, q, qd, qdd)
     """
+    assert model is not None, "model must be provided"
     assert model is not None, "model must be provided"
     q, qd, qdd, nb = _rnea_validate_inputs(model, q, qd, qdd)
 

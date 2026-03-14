@@ -48,6 +48,7 @@ class DataLoadingThread(QThread):
 
     def __init__(self, excel_file_path: str, config: WiffleDataConfig) -> None:
         assert excel_file_path is not None, "excel_file_path must be provided"
+        assert excel_file_path is not None, "excel_file_path must be provided"
         super().__init__()
         self.excel_file_path = excel_file_path
         self.config = config
@@ -395,6 +396,7 @@ class WiffleGolfMainWindow(QMainWindow):
     def _load_excel_file(self, file_path: str = None) -> None:
         """Load Excel file with Wiffle_ProV1 data"""
         assert file_path is not None, "file_path must be provided"
+        assert file_path is not None, "file_path must be provided"
         if file_path is None:
             file_path, _ = QFileDialog.getOpenFileName(
                 self,
@@ -430,11 +432,13 @@ class WiffleGolfMainWindow(QMainWindow):
     def _on_loading_progress(self, message: str) -> None:
         """Handle loading progress updates"""
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         self.progress_text.append(message)
         self.statusBar().showMessage(message)
 
     def _on_data_loaded(self, baseq, ztcfq, deltaq) -> None:
         """Handle successful data loading"""
+        assert baseq is not None, "baseq must be provided"
         assert baseq is not None, "baseq must be provided"
         self.baseq_data = baseq
         self.ztcfq_data = ztcfq
@@ -467,6 +471,7 @@ class WiffleGolfMainWindow(QMainWindow):
     def _on_loading_error(self, error_message: str) -> None:
         """Handle loading errors"""
         assert error_message is not None, "error_message must be provided"
+        assert error_message is not None, "error_message must be provided"
         self.progress_bar.setVisible(False)
         self.progress_text.setVisible(False)
         QMessageBox.critical(self, "Loading Error", error_message)
@@ -474,6 +479,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_ball_type_changed(self, ball_type: str) -> None:
         """Handle ball type selection change"""
+        assert ball_type is not None, "ball_type must be provided"
         assert ball_type is not None, "ball_type must be provided"
         if not self.data_loaded:
             return
@@ -593,6 +599,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _update_frame_metrics(self, frame_idx: int) -> None:
         """Update metrics for current frame"""
+        assert frame_idx is not None, "frame_idx must be provided"
         assert frame_idx is not None, "frame_idx must be provided"
         if not self.data_loaded or frame_idx >= len(self.baseq_data):
             return

@@ -63,6 +63,7 @@ class MousePickingRay:
             data: MuJoCo data
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.data = data
 
@@ -87,6 +88,7 @@ class MousePickingRay:
             Tuple of (ray_origin [3], ray_direction [3])
         """
         # Normalize screen coordinates to [-1, 1]
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         x_ndc = (2.0 * x) / width - 1.0
         y_ndc = 1.0 - (2.0 * y) / height  # Flip y
@@ -151,6 +153,7 @@ class MousePickingRay:
             Tuple of (body_id, intersection_point, distance) or None
         """
         assert x is not None, "x must be provided"
+        assert x is not None, "x must be provided"
         ray_origin, ray_dir = self.screen_to_ray(x, y, width, height, camera)
 
         # Test ray against all body geometries
@@ -207,6 +210,7 @@ class InteractiveManipulator:
             data: MuJoCo data
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.data = data
 
@@ -260,6 +264,7 @@ class InteractiveManipulator:
             Selected body ID or None
         """
         assert x is not None, "x must be provided"
+        assert x is not None, "x must be provided"
         if not self.drag_enabled:
             return None
 
@@ -308,6 +313,7 @@ class InteractiveManipulator:
         Returns:
             True if IK succeeded
         """
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         if self.selected_body_id is None or not self.drag_enabled:
             return False
@@ -379,6 +385,7 @@ class InteractiveManipulator:
         maintain_orientation: bool,
     ) -> np.ndarray:
         assert body_id is not None, "body_id must be provided"
+        assert body_id is not None, "body_id must be provided"
         current_pos = self.data.xpos[body_id].copy()
         pos_error = target_position - current_pos
 
@@ -395,6 +402,7 @@ class InteractiveManipulator:
         task_dim: int,
         maintain_orientation: bool,
     ) -> np.ndarray | None:
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         jacp = np.zeros((3, self.model.nv))
         jacr = np.zeros((3, self.model.nv))
@@ -415,6 +423,7 @@ class InteractiveManipulator:
         q: np.ndarray,
         maintain_orientation: bool,
     ) -> np.ndarray:
+        assert J_damped is not None, "J_damped must be provided"
         assert J_damped is not None, "J_damped must be provided"
         if not self.use_nullspace_posture or self.original_qpos is None:
             return J_damped
@@ -455,6 +464,7 @@ class InteractiveManipulator:
         Returns:
             True if IK succeeded
         """
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         q = self.data.qpos.copy()
         task_dim = 6 if maintain_orientation else 3
@@ -511,6 +521,7 @@ class InteractiveManipulator:
         """Compute orientation error in axis-angle form."""
         # Quaternion difference
         assert q_current is not None, "q_current must be provided"
+        assert q_current is not None, "q_current must be provided"
         q_current_conj = np.array(
             [q_current[0], -q_current[1], -q_current[2], -q_current[3]],
         )
@@ -533,6 +544,7 @@ class InteractiveManipulator:
 
     def _clamp_joint_limits(self, q: np.ndarray) -> np.ndarray:
         """Clamp joint configuration to limits."""
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         q_clamped = q.copy()
 
@@ -562,6 +574,7 @@ class InteractiveManipulator:
             constraint_type: Type of constraint
             reference_body_id: Reference body for relative constraints
         """
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         if constraint_type == ConstraintType.FIXED_IN_SPACE:
             # Store current position and orientation
@@ -604,6 +617,7 @@ class InteractiveManipulator:
         Returns:
             New active state
         """
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         if body_id in self.constraints:
             self.constraints[body_id].active = not self.constraints[body_id].active
@@ -676,6 +690,7 @@ class InteractiveManipulator:
             Stored pose
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         pose = StoredPose(
             name=name,
             qpos=self.data.qpos.copy(),
@@ -697,6 +712,7 @@ class InteractiveManipulator:
         Returns:
             True if pose was loaded
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if name not in self.pose_library:
             return False
@@ -722,6 +738,7 @@ class InteractiveManipulator:
             True if pose was deleted
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         if name in self.pose_library:
             del self.pose_library[name]
             return True
@@ -743,6 +760,7 @@ class InteractiveManipulator:
         Returns:
             True if interpolation succeeded
         """
+        assert pose_name_a is not None, "pose_name_a must be provided"
         assert pose_name_a is not None, "pose_name_a must be provided"
         if pose_name_a not in self.pose_library or pose_name_b not in self.pose_library:
             return False
@@ -766,6 +784,7 @@ class InteractiveManipulator:
         Args:
             filepath: Path to save file
         """
+        assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         data = {}
         for name, pose in self.pose_library.items():
@@ -828,6 +847,7 @@ class InteractiveManipulator:
             Body name or "body_<id>"
         """
         assert body_id is not None, "body_id must be provided"
+        assert body_id is not None, "body_id must be provided"
         name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
         if name is not None:
             return str(name)
@@ -842,6 +862,7 @@ class InteractiveManipulator:
         Returns:
             Body ID or None
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         for body_id in range(self.model.nbody):
             body_name = self.get_body_name(body_id)

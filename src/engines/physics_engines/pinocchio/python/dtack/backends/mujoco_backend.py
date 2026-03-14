@@ -138,6 +138,7 @@ class MuJoCoBackend:
             Joint torques [nv]
         """
         assert q is not None, "q must be provided"
+        assert q is not None, "q must be provided"
         q_arr = np.asarray(q, dtype=np.float64)
         v_arr = np.asarray(v, dtype=np.float64)
         a_arr = np.asarray(a, dtype=np.float64)

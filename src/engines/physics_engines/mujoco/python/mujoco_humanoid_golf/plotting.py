@@ -37,6 +37,7 @@ class GolfSwingPlotter(SharedGolfSwingPlotter):
         """
         # Create joint names list if model is provided
         assert recorder is not None, "recorder must be provided"
+        assert recorder is not None, "recorder must be provided"
         joint_names = None
         if model is not None:
             joint_names = []

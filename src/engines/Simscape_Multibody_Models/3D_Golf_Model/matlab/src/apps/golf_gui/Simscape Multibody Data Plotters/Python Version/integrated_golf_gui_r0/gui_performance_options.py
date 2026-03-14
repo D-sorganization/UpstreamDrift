@@ -18,6 +18,7 @@ class PerformanceOptionsDialog:
 
     def __init__(self, parent):
         assert parent is not None, "parent must be provided"
+        assert parent is not None, "parent must be provided"
         self.parent = parent
         self.result = None
 

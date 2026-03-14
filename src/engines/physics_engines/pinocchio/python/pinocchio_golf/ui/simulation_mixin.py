@@ -167,6 +167,7 @@ class SimulationMixin:
     def _add_joint_control_widget(self: PinocchioGUI, i: int) -> None:
         """Add a single joint control row."""
         assert i is not None, "i must be provided"
+        assert i is not None, "i must be provided"
         if self.model is None:
             return
 
@@ -237,6 +238,7 @@ class SimulationMixin:
     def _on_slider(
         self: PinocchioGUI, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
     ) -> None:
+        assert val is not None, "val must be provided"
         assert val is not None, "val must be provided"
         angle = val / SLIDER_SCALE
         with SignalBlocker(spin):
@@ -341,6 +343,7 @@ class SimulationMixin:
         self: PinocchioGUI, tau: np.ndarray
     ) -> tuple[dict[str, np.ndarray] | None, dict[str, np.ndarray] | None]:
         """Run real-time induced/counterfactual analysis if enabled."""
+        assert tau is not None, "tau must be provided"
         assert tau is not None, "tau must be provided"
         if not self.chk_live_analysis.isChecked():
             return None, None

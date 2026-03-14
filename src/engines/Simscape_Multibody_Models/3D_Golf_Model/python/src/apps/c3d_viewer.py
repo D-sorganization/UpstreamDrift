@@ -113,6 +113,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
     def _update_ui_state(self, enabled: bool) -> None:
         """Update the enabled state of UI widgets after loading a model."""
         assert enabled is not None, "enabled must be provided"
+        assert enabled is not None, "enabled must be provided"
         widgets = [
             self.tabs,
         ]
@@ -133,6 +134,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
         """Handle drag enter event."""
         assert event is not None, "event must be provided"
+        assert event is not None, "event must be provided"
         if event.mimeData().hasUrls():
             urls = event.mimeData().urls()
             if len(urls) == 1:
@@ -145,6 +147,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         """Handle drop event."""
         assert event is not None, "event must be provided"
+        assert event is not None, "event must be provided"
         urls = event.mimeData().urls()
         if urls:
             path = urls[0].toLocalFile()
@@ -154,6 +157,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         """Load a C3D file from the given path."""
         # Security validation (F-004)
         # shared module import must be available
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         from shared.python.security.security_utils import validate_path
 
@@ -200,6 +204,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
     def _on_load_success(self, model: C3DDataModel) -> None:
         """Handle successful model load."""
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self._populate_ui_with_model()
         self._update_ui_state(True)
@@ -208,6 +213,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
     def _on_load_failure(self, error_msg: str) -> None:
         """Handle load failure."""
+        assert error_msg is not None, "error_msg must be provided"
         assert error_msg is not None, "error_msg must be provided"
         if (sb := self.statusBar()) is not None:
             sb.showMessage("Error loading file.")

@@ -37,6 +37,7 @@ class SimulationMixin:
 
     def _toggle_run(self: Any, checked: bool = False) -> None:  # noqa: FBT001, FBT002
         assert checked is not None, "checked must be provided"
+        assert checked is not None, "checked must be provided"
         self.is_running = not self.is_running
         self.btn_run.setText(
             "Pause Simulation" if self.is_running else "Run Simulation"
@@ -199,6 +200,7 @@ class SimulationMixin:
         Returns:
             Tuple of (induced_accelerations, counterfactuals), each may be None.
         """
+        assert tau is not None, "tau must be provided"
         assert tau is not None, "tau must be provided"
         induced = None
         counterfactuals = None

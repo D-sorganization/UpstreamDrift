@@ -36,6 +36,7 @@ class AnalysisTab(QtWidgets.QWidget):
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
         assert sim_widget is not None, "sim_widget must be provided"
+        assert sim_widget is not None, "sim_widget must be provided"
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.main_window = main_window
