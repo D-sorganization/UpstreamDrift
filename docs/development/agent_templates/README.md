@@ -109,13 +109,6 @@ Agent templates define specialized AI assistants with specific expertise, guidel
 - Design principle enforcement
 - Technical debt prevention
 
-**[thesis_defender.md](thesis_defender.md)**
-
-- Argument construction
-- Design decision defense
-- Trade-off analysis
-- Technical justification
-
 ## Using Agent Templates
 
 ### For AI Assistants
