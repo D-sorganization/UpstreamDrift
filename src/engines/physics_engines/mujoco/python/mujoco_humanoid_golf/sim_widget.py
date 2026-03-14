@@ -531,6 +531,35 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     def get_time(self) -> float:
         return self.data.time if self.data else 0.0
 
+    def get_camera_azimuth(self) -> float:
+        return self.camera.azimuth if self.camera else 0.0
+
+    def get_camera_elevation(self) -> float:
+        return self.camera.elevation if self.camera else 0.0
+
+    def get_camera_distance(self) -> float:
+        return self.camera.distance if self.camera else 0.0
+
+    def get_camera_lookat(self):
+        return self.camera.lookat if self.camera else None
+
+    def connect_timer(self, slot) -> None:
+        if self.timer:
+            self.timer.timeout.connect(slot)
+
+    def connect_loading_signals(self, start_slot, finish_slot) -> None:
+        self.loading_started.connect(start_slot)
+        self.loading_finished.connect(finish_slot)
+
+    def get_pixmap(self):
+        if hasattr(self, "label") and self.label:
+            return self.label.pixmap()
+        return None
+
+    def open_meshcat_browser(self):
+        if hasattr(self, "meshcat_adapter") and self.meshcat_adapter:
+            self.meshcat_adapter.open_browser()
+
     def get_num_actuators(self) -> int:
         return self.model.nu if self.model else 0
 

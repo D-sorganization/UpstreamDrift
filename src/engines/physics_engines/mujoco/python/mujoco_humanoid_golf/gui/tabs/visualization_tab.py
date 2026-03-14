@@ -485,23 +485,23 @@ class VisualizationTab(QtWidgets.QWidget):
         """Update camera control sliders to match current camera state."""
         if self.sim_widget.camera is not None:
             # Update azimuth (0-360)
-            az = self.sim_widget.camera.azimuth % 360
+            az = self.sim_widget.get_camera_azimuth() % 360
             self.azimuth_slider.setValue(int(az))
             self.azimuth_label.setText(f"{az:.1f}\u00b0")
 
             # Update elevation
-            el = self.sim_widget.camera.elevation
+            el = self.sim_widget.get_camera_elevation()
             self.elevation_slider.setValue(int(el))
             self.elevation_label.setText(f"{el:.1f}\u00b0")
 
             # Update distance (convert to slider scale: 1-500 represents 0.1-50.0)
-            dist = self.sim_widget.camera.distance
+            dist = self.sim_widget.get_camera_distance()
             slider_val = int((dist - 0.1) / (50.0 - 0.1) * 499) + 1
             self.distance_slider.setValue(slider_val)
             self.distance_label.setText(f"{dist:.2f}")
 
             # Update lookat
-            lookat = self.sim_widget.camera.lookat
+            lookat = self.sim_widget.get_camera_lookat()
             self.lookat_x_spin.setValue(lookat[0])
             self.lookat_y_spin.setValue(lookat[1])
             self.lookat_z_spin.setValue(lookat[2])
@@ -619,7 +619,7 @@ class VisualizationTab(QtWidgets.QWidget):
             hasattr(self.sim_widget, "meshcat_adapter")
             and self.sim_widget.meshcat_adapter
         ):
-            self.sim_widget.meshcat_adapter.open_browser()
+            self.sim_widget.open_meshcat_browser()
         else:
             QtWidgets.QMessageBox.warning(
                 self, "Meshcat", "Meshcat adapter not initialized or not available."

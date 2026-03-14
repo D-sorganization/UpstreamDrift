@@ -164,7 +164,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self.status_timer.start(200)
 
         if hasattr(self.sim_widget, "timer"):
-            self.sim_widget.timer.timeout.connect(self.live_plot.update_plot)
+            self.sim_widget.connect_timer(self.live_plot.update_plot)
 
     @property
     def model_configs(self) -> list[dict]:
@@ -327,9 +327,9 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
         # Update camera info
         if self.sim_widget.camera is not None:
-            az = self.sim_widget.camera.azimuth
-            el = self.sim_widget.camera.elevation
-            dist = self.sim_widget.camera.distance
+            az = self.sim_widget.get_camera_azimuth()
+            el = self.sim_widget.get_camera_elevation()
+            dist = self.sim_widget.get_camera_distance()
             self.status_camera_label.setText(
                 f"Camera: Az={az:.0f}° El={el:.0f}° D={dist:.1f}",
             )

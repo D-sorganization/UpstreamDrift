@@ -225,11 +225,9 @@ class ControlsTab(QtWidgets.QWidget):
     def _on_quick_camera_clicked(self, preset_name: str) -> None:
         self.sim_widget.set_camera(preset_name)
         if hasattr(self.main_window, "visualization_tab"):
-            self.main_window.visualization_tab._update_camera_sliders()
+            self.main_window.update_visualization_camera_sliders()
             # Update combo box in vis tab loop back
-            idx = self.main_window.visualization_tab.camera_combo.findText(preset_name)
-            if idx >= 0:
-                self.main_window.visualization_tab.camera_combo.setCurrentIndex(idx)
+            self.main_window.set_visualization_camera_preset(preset_name)
 
     # -------- Signal Handlers (Connected by Main Window) --------
 
@@ -595,7 +593,7 @@ class ControlsTab(QtWidgets.QWidget):
 
     def on_take_screenshot(self) -> None:
         """Save the current simulation view as a PNG screenshot."""
-        pixmap = self.sim_widget.label.pixmap()
+        pixmap = self.sim_widget.get_pixmap()
         if not pixmap or pixmap.isNull():
             return
 
