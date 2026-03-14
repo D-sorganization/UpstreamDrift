@@ -99,8 +99,8 @@ def test_estimate_from_image_success(estimator, op_mock):
     op_mock.Datum.return_value = datum
 
     # Mock wrapper behavior
-    estimator.wrapper.emplaceAndPop.side_effect = (
-        lambda x: None
+    estimator.wrapper.emplaceAndPop.side_effect = lambda x: (
+        None
     )  # Modify datum in place effectively
 
     img = np.zeros((100, 100, 3))

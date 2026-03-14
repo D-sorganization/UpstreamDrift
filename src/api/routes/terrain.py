@@ -348,9 +348,11 @@ async def list_presets() -> list[EnvironmentPreset]:
 @router.post("/load", response_model=dict[str, Any])
 @handle_api_errors
 @precondition(
-    lambda request: request is not None
-    and request.preset is not None
-    and len(request.preset.strip()) > 0,
+    lambda request: (
+        request is not None
+        and request.preset is not None
+        and len(request.preset.strip()) > 0
+    ),
     "Environment request must contain a non-empty preset name",
 )
 async def load_environment(request: CreateEnvironmentRequest) -> dict[str, Any]:

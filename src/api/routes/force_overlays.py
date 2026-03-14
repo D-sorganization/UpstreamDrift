@@ -380,7 +380,7 @@ def _get_sim_time(engine_manager: EngineManager) -> float:
     show_labels=False,
     scale_factor=0.01,
     engine_manager=None,
-    logger=None: scale_factor > 0 and len(force_types.strip()) > 0,
+    logger=None: (scale_factor > 0 and len(force_types.strip()) > 0),
     "Scale factor must be positive and force_types must be non-empty",
 )
 @handle_api_errors

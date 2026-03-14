@@ -51,8 +51,9 @@ class UnifiedEngineInterface(ContractChecker):
         """Define class invariants for UnifiedEngineInterface."""
         return [
             (
-                lambda: self.suite_root is not None
-                and isinstance(self.suite_root, Path),
+                lambda: (
+                    self.suite_root is not None and isinstance(self.suite_root, Path)
+                ),
                 "suite_root must be a valid Path",
             ),
             (
@@ -60,8 +61,9 @@ class UnifiedEngineInterface(ContractChecker):
                 "engine_manager must not be None",
             ),
             (
-                lambda: self.current_engine is None
-                or self.current_engine_type is not None,
+                lambda: (
+                    self.current_engine is None or self.current_engine_type is not None
+                ),
                 "If current_engine is set, current_engine_type must also be set",
             ),
         ]

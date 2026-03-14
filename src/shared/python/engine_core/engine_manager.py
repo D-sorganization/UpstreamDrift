@@ -49,18 +49,23 @@ class EngineManager(ContractChecker):
         """Define class invariants for EngineManager."""
         return [
             (
-                lambda: self.engine_status is not None
-                and isinstance(self.engine_status, dict),
+                lambda: (
+                    self.engine_status is not None
+                    and isinstance(self.engine_status, dict)
+                ),
                 "engine_status must be a non-None dict",
             ),
             (
-                lambda: self.engine_paths is not None
-                and isinstance(self.engine_paths, dict),
+                lambda: (
+                    self.engine_paths is not None
+                    and isinstance(self.engine_paths, dict)
+                ),
                 "engine_paths must be a non-None dict",
             ),
             (
-                lambda: self.suite_root is not None
-                and isinstance(self.suite_root, Path),
+                lambda: (
+                    self.suite_root is not None and isinstance(self.suite_root, Path)
+                ),
                 "suite_root must be a valid Path",
             ),
         ]

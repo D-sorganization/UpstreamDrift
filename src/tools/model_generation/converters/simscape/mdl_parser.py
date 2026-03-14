@@ -376,7 +376,7 @@ class MDLParser:
                 name=block_name,
                 block_type=block_type,
                 full_path=full_path,
-                parent=parent_path if parent_path else None,
+                parent=parent_path or None,
             )
 
             # Parse parameters

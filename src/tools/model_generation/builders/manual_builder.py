@@ -93,9 +93,9 @@ class ManualBuilder(BaseURDFBuilder):
         self._handedness = value
 
     @precondition(
-        lambda self, link: link is not None
-        and hasattr(link, "name")
-        and len(link.name) > 0,
+        lambda self, link: (
+            link is not None and hasattr(link, "name") and len(link.name) > 0
+        ),
         "Link must be a valid Link object with a non-empty name",
     )
     def add_link(self, link: Link) -> ManualBuilder:  # type: ignore[override]
@@ -127,9 +127,9 @@ class ManualBuilder(BaseURDFBuilder):
         return self
 
     @precondition(
-        lambda self, joint: joint is not None
-        and hasattr(joint, "name")
-        and len(joint.name) > 0,
+        lambda self, joint: (
+            joint is not None and hasattr(joint, "name") and len(joint.name) > 0
+        ),
         "Joint must be a valid Joint object with a non-empty name",
     )
     def add_joint(self, joint: Joint) -> ManualBuilder:  # type: ignore[override]

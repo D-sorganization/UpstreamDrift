@@ -423,10 +423,9 @@ class ForceAccumulator:
         self._generalized_forces.clear()
 
     @precondition(
-        lambda self, name, force, torque=None, category="external": isinstance(
-            name, str
-        )
-        and len(name) > 0,
+        lambda self, name, force, torque=None, category="external": (
+            isinstance(name, str) and len(name) > 0
+        ),
         "force source name must be a non-empty string",
     )
     def add_force(

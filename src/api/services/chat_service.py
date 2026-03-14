@@ -150,13 +150,15 @@ class ChatService:
             return ctx
 
     @precondition(
-        lambda self, session_id, message, engine_context=None: session_id is not None
-        and len(session_id) > 0,
+        lambda self, session_id, message, engine_context=None: (
+            session_id is not None and len(session_id) > 0
+        ),
         "Session ID must be a non-empty string",
     )
     @precondition(
-        lambda self, session_id, message, engine_context=None: message is not None
-        and len(message) > 0,
+        lambda self, session_id, message, engine_context=None: (
+            message is not None and len(message) > 0
+        ),
         "Message must be a non-empty string",
     )
     def add_user_message(

@@ -139,8 +139,9 @@ class BallFlightSimulator:
         self.environment = env or environment or EnvironmentalConditions()
 
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01: launch is not None
-        and launch.velocity >= 0,
+        lambda self, launch, max_time=10.0, dt=0.01: (
+            launch is not None and launch.velocity >= 0
+        ),
         "Launch conditions must not be None and velocity must be non-negative",
     )
     @precondition(
@@ -304,9 +305,9 @@ class BallFlightSimulator:
         "Trajectory must not be None",
     )
     @postcondition(
-        lambda result: result is not None
-        and "carry_distance" in result
-        and "max_height" in result,
+        lambda result: (
+            result is not None and "carry_distance" in result and "max_height" in result
+        ),
         "Analysis must include carry_distance and max_height",
     )
     def analyze_trajectory(self, trajectory: list[TrajectoryPoint]) -> dict:
@@ -511,14 +512,15 @@ class EnhancedBallFlightSimulator:
         )
 
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: launch
-        is not None
-        and launch.velocity >= 0,
+        lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: (
+            launch is not None and launch.velocity >= 0
+        ),
         "Launch conditions must not be None and velocity must be non-negative",
     )
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: max_time > 0
-        and dt > 0,
+        lambda self, launch, max_time=10.0, dt=0.01, include_gravity=True: (
+            max_time > 0 and dt > 0
+        ),
         "Max time and time step must be positive",
     )
     @postcondition(

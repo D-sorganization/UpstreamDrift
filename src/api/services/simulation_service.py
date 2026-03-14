@@ -39,8 +39,9 @@ class SimulationService:
         "Simulation duration must be positive",
     )
     @precondition(
-        lambda self, request: request.engine_type is not None
-        and len(request.engine_type) > 0,
+        lambda self, request: (
+            request.engine_type is not None and len(request.engine_type) > 0
+        ),
         "Engine type must be specified",
     )
     def _prepare_engine(self, request: SimulationRequest) -> Any:
@@ -165,8 +166,9 @@ class SimulationService:
             )
 
     @precondition(
-        lambda self, task_id, request, active_tasks: task_id is not None
-        and len(task_id) > 0,
+        lambda self, task_id, request, active_tasks: (
+            task_id is not None and len(task_id) > 0
+        ),
         "Task ID must be a non-empty string",
     )
     @precondition(

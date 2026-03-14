@@ -86,9 +86,11 @@ class CrossEngineValidator(ContractChecker):
                 "All tolerance values must be positive",
             ),
             (
-                lambda: self.WARNING_THRESHOLD
-                < self.ERROR_THRESHOLD
-                < self.BLOCKER_THRESHOLD,
+                lambda: (
+                    self.WARNING_THRESHOLD
+                    < self.ERROR_THRESHOLD
+                    < self.BLOCKER_THRESHOLD
+                ),
                 "Severity thresholds must be ordered: WARNING < ERROR < BLOCKER",
             ),
         ]

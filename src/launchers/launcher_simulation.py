@@ -421,8 +421,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
         "Process name must be a non-empty string",
     )
     @precondition(
-        lambda self, name, module_name, cwd: module_name is not None
-        and len(module_name.strip()) > 0,
+        lambda self, name, module_name, cwd: (
+            module_name is not None and len(module_name.strip()) > 0
+        ),
         "Module name must be a non-empty string",
     )
     def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:

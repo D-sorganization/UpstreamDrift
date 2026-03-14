@@ -47,8 +47,9 @@ class AnalysisService:
         "Analysis request must not be None",
     )
     @precondition(
-        lambda self, request: request.analysis_type is not None
-        and len(request.analysis_type) > 0,
+        lambda self, request: (
+            request.analysis_type is not None and len(request.analysis_type) > 0
+        ),
         "Analysis type must be specified",
     )
     @postcondition(

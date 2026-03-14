@@ -300,8 +300,9 @@ class ModelLibrary:
         return self._entries.get(model_id)
 
     @precondition(
-        lambda self, model_id, force_download=False: model_id is not None
-        and len(model_id.strip()) > 0,
+        lambda self, model_id, force_download=False: (
+            model_id is not None and len(model_id.strip()) > 0
+        ),
         "Model ID must be a non-empty string",
     )
     def load_model(
@@ -344,8 +345,9 @@ class ModelLibrary:
             return None
 
     @precondition(
-        lambda self, urdf_path, **kw: urdf_path is not None
-        and len(str(urdf_path).strip()) > 0,
+        lambda self, urdf_path, **kw: (
+            urdf_path is not None and len(str(urdf_path).strip()) > 0
+        ),
         "URDF path must be a non-empty string or Path",
     )
     def add_local_model(
@@ -721,8 +723,9 @@ class ModelLibrary:
         return new_entry
 
     @precondition(
-        lambda self, model_id, delete_files=False: model_id is not None
-        and len(model_id.strip()) > 0,
+        lambda self, model_id, delete_files=False: (
+            model_id is not None and len(model_id.strip()) > 0
+        ),
         "Model ID must be a non-empty string",
     )
     def remove_model(self, model_id: str, delete_files: bool = False) -> bool:

@@ -781,7 +781,7 @@ class ModelLibrary:
                     mjcf_path = getattr(module, "MJCF_PATH", None)
 
                     if urdf_path or mjcf_path:
-                        path = urdf_path if urdf_path else mjcf_path
+                        path = urdf_path or mjcf_path
                         m_type = "urdf" if urdf_path else "mjcf"
                         name = (
                             attr.replace("_description", "").replace("_", " ").title()

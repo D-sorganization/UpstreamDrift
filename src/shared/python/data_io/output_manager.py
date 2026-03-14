@@ -167,7 +167,7 @@ class OutputManager:
         engine="mujoco",
         metadata=None,
         model_path=None,
-        parameters=None: results is not None,
+        parameters=None: (results is not None),
         "Simulation results must not be None",
     )
     @precondition(
@@ -178,7 +178,7 @@ class OutputManager:
         engine="mujoco",
         metadata=None,
         model_path=None,
-        parameters=None: filename is not None and len(filename) > 0,
+        parameters=None: (filename is not None and len(filename) > 0),
         "Filename must be a non-empty string",
     )
     def save_simulation_results(
@@ -558,14 +558,15 @@ class OutputManager:
         return sorted(simulations)
 
     @precondition(
-        lambda self, analysis_data, report_name, format_type="json": analysis_data
-        is not None,
+        lambda self, analysis_data, report_name, format_type="json": (
+            analysis_data is not None
+        ),
         "Analysis data must not be None",
     )
     @precondition(
-        lambda self, analysis_data, report_name, format_type="json": report_name
-        is not None
-        and len(report_name) > 0,
+        lambda self, analysis_data, report_name, format_type="json": (
+            report_name is not None and len(report_name) > 0
+        ),
         "Report name must be a non-empty string",
     )
     def export_analysis_report(

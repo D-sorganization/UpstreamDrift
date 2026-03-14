@@ -40,9 +40,11 @@ router = APIRouter()
     min_confidence=0.5,
     enable_smoothing=True,
     video_pipeline=None,
-    logger=None: estimator_type is not None
-    and len(estimator_type.strip()) > 0
-    and 0.0 <= min_confidence <= 1.0,
+    logger=None: (
+        estimator_type is not None
+        and len(estimator_type.strip()) > 0
+        and 0.0 <= min_confidence <= 1.0
+    ),
     "Estimator type must be non-empty and min_confidence must be in [0.0, 1.0]",
 )
 async def analyze_video(
@@ -147,9 +149,11 @@ async def analyze_video(
     estimator_type="mediapipe",
     min_confidence=0.5,
     video_pipeline=None,
-    task_manager=None: estimator_type is not None
-    and len(estimator_type.strip()) > 0
-    and 0.0 <= min_confidence <= 1.0,
+    task_manager=None: (
+        estimator_type is not None
+        and len(estimator_type.strip()) > 0
+        and 0.0 <= min_confidence <= 1.0
+    ),
     "Estimator type must be non-empty and min_confidence must be in [0.0, 1.0]",
 )
 async def analyze_video_async(

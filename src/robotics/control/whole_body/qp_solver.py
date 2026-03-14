@@ -229,7 +229,7 @@ class ScipyQPSolver(QPSolver):
                 method=self._method,
                 jac=gradient,
                 bounds=bounds,
-                constraints=constraints if constraints else None,
+                constraints=constraints or None,
                 options={"maxiter": self._max_iter},
             )
 

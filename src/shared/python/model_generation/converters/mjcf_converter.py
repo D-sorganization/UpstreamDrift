@@ -222,7 +222,7 @@ class MJCFConverter:
         # Actuators (for non-fixed joints)
         actuator_lines = []
         for joint in model.joints:
-            if joint.joint_type not in (JointType.FIXED,):
+            if joint.joint_type != JointType.FIXED:
                 actuator_lines.append(
                     f'    <motor joint="{joint.name}" name="{joint.name}_motor"/>'
                 )

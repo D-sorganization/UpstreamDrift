@@ -444,7 +444,7 @@ def raise_api_error(
     Raises:
         APIException: Always raises
     """
-    raise APIException(code=code, message=message, details=details if details else None)
+    raise APIException(code=code, message=message, details=details or None)
 
 
 __all__ = [

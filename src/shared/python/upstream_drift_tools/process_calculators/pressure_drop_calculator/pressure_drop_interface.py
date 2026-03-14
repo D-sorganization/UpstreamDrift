@@ -677,7 +677,7 @@ def _wrap_text(text: str, width: int) -> list[str]:
     if current_line:
         lines.append(current_line)
 
-    return lines if lines else [""]
+    return lines or [""]
 
 
 # ============================================================================

@@ -225,18 +225,20 @@ class DrakeMotionOptimizer:
                     scipy_constraints.append(
                         {
                             "type": "ineq",
-                            "fun": lambda x, c=con: c.upper_bound
-                            - c.constraint_function(x.reshape(traj_shape)),
+                            "fun": lambda x, c=con: (
+                                c.upper_bound
+                                - c.constraint_function(x.reshape(traj_shape))
+                            ),
                         }
                     )
                 if con.lower_bound is not None:
                     scipy_constraints.append(
                         {
                             "type": "ineq",
-                            "fun": lambda x, c=con: c.constraint_function(
-                                x.reshape(traj_shape)
-                            )
-                            - c.lower_bound,
+                            "fun": lambda x, c=con: (
+                                c.constraint_function(x.reshape(traj_shape))
+                                - c.lower_bound
+                            ),
                         }
                     )
         return scipy_constraints

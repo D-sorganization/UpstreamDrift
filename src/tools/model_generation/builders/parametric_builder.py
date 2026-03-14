@@ -156,20 +156,21 @@ class ParametricBuilder(BaseURDFBuilder):
         return self
 
     @precondition(
-        lambda self, name, parent, mass_ratio, length_ratio, **kw: name is not None
-        and len(name.strip()) > 0,
+        lambda self, name, parent, mass_ratio, length_ratio, **kw: (
+            name is not None and len(name.strip()) > 0
+        ),
         "Segment name must be a non-empty string",
     )
     @precondition(
-        lambda self, name, parent, mass_ratio, length_ratio, **kw: 0
-        < mass_ratio
-        <= 1.0,
+        lambda self, name, parent, mass_ratio, length_ratio, **kw: (
+            0 < mass_ratio <= 1.0
+        ),
         "Mass ratio must be between 0 (exclusive) and 1.0 (inclusive)",
     )
     @precondition(
-        lambda self, name, parent, mass_ratio, length_ratio, **kw: 0
-        < length_ratio
-        <= 1.0,
+        lambda self, name, parent, mass_ratio, length_ratio, **kw: (
+            0 < length_ratio <= 1.0
+        ),
         "Length ratio must be between 0 (exclusive) and 1.0 (inclusive)",
     )
     def add_segment(

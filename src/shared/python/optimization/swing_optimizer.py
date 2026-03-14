@@ -463,9 +463,9 @@ class SwingOptimizer(ContractChecker):
         "Number of Pareto points must be positive",
     )
     @postcondition(
-        lambda result: result is not None
-        and isinstance(result, list)
-        and len(result) > 0,
+        lambda result: (
+            result is not None and isinstance(result, list) and len(result) > 0
+        ),
         "Pareto optimization must return at least one result",
     )
     def optimize_pareto(

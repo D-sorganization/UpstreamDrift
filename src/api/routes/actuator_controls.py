@@ -111,7 +111,7 @@ def _get_actuator_info(engine_manager: EngineManager) -> list[ActuatorInfo]:
             )
         )
 
-    return actuators if actuators else _demo_actuators()
+    return actuators or _demo_actuators()
 
 
 def _demo_actuators() -> list[ActuatorInfo]:

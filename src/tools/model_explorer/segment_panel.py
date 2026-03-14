@@ -577,7 +577,7 @@ class SegmentPanel(QWidget):
         # Load basic properties
         self.name_edit.setText(segment["name"])
         self.type_combo.setCurrentText(segment["type"])
-        parent_text = segment["parent"] if segment["parent"] else "None (Root)"
+        parent_text = segment["parent"] or "None (Root)"
         self.parent_combo.setCurrentText(parent_text)
 
         # Load geometry

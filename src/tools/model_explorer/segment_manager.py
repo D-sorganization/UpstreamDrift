@@ -16,8 +16,9 @@ class SegmentManager:
         self.parallel_chains: list[dict] = []  # For parallel kinematic chains
 
     @precondition(
-        lambda self, segment_data: segment_data is not None
-        and isinstance(segment_data, dict),
+        lambda self, segment_data: (
+            segment_data is not None and isinstance(segment_data, dict)
+        ),
         "Segment data must be a non-None dictionary",
     )
     @precondition(
@@ -94,8 +95,9 @@ class SegmentManager:
         logger.info(f"Removed segment: {name}")
 
     @precondition(
-        lambda self, segment_data: segment_data is not None
-        and isinstance(segment_data, dict),
+        lambda self, segment_data: (
+            segment_data is not None and isinstance(segment_data, dict)
+        ),
         "Segment data must be a non-None dictionary",
     )
     @precondition(
@@ -249,8 +251,9 @@ class SegmentManager:
         return errors
 
     @precondition(
-        lambda self, chain_data: chain_data is not None
-        and isinstance(chain_data, dict),
+        lambda self, chain_data: (
+            chain_data is not None and isinstance(chain_data, dict)
+        ),
         "Chain data must be a non-None dictionary",
     )
     @precondition(
@@ -329,14 +332,15 @@ class SegmentManager:
         logger.info("Segment manager cleared")
 
     @precondition(
-        lambda self, engine: engine is not None
-        and engine.lower() in ("mujoco", "drake", "pinocchio"),
+        lambda self, engine: (
+            engine is not None and engine.lower() in ("mujoco", "drake", "pinocchio")
+        ),
         "Engine must be one of: 'mujoco', 'drake', 'pinocchio'",
     )
     @postcondition(
-        lambda result: result is not None
-        and isinstance(result, dict)
-        and "engine" in result,
+        lambda result: (
+            result is not None and isinstance(result, dict) and "engine" in result
+        ),
         "Export result must be a dictionary containing an 'engine' key",
     )
     def export_for_engine(self, engine: str) -> dict:

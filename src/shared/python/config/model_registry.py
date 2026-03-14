@@ -53,8 +53,9 @@ class ModelRegistry(ContractChecker):
                 "models must be a non-None dict",
             ),
             (
-                lambda: self.config_path is not None
-                and isinstance(self.config_path, Path),
+                lambda: (
+                    self.config_path is not None and isinstance(self.config_path, Path)
+                ),
                 "config_path must be a valid Path",
             ),
             (

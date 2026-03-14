@@ -96,7 +96,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     @property
     def model_name(self) -> str:
         """Return the Gym environment ID as the model name."""
-        return self.env_id if self.env_id else "MyoSuite_NoModel"
+        return self.env_id or "MyoSuite_NoModel"
 
     @property
     def model(self) -> Any:  # mujoco.MjModel | None when available

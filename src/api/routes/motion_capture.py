@@ -354,9 +354,11 @@ async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
 
 @router.get("/frame/{recording_name}/{frame_index}", response_model=SkeletonFrame)
 @precondition(
-    lambda recording_name, frame_index: recording_name is not None
-    and len(recording_name.strip()) > 0
-    and frame_index >= 0,
+    lambda recording_name, frame_index: (
+        recording_name is not None
+        and len(recording_name.strip()) > 0
+        and frame_index >= 0
+    ),
     "Recording name must be non-empty and frame index must be non-negative",
 )
 async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:

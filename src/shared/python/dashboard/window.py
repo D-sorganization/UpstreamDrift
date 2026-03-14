@@ -309,8 +309,8 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             "Chaos Analysis (Lyapunov)": lambda: self.plotter.plot_lyapunov_exponent(
                 fig, joint_idx=0
             ),
-            "Stability Diagram (CoM vs CoP)": lambda: self.plotter.plot_stability_diagram(
-                fig
+            "Stability Diagram (CoM vs CoP)": lambda: (
+                self.plotter.plot_stability_diagram(fig)
             ),
             "CoP Trajectory": lambda: self.plotter.plot_cop_trajectory(fig),
             "GRF Butterfly Diagram": lambda: self.plotter.plot_grf_butterfly_diagram(

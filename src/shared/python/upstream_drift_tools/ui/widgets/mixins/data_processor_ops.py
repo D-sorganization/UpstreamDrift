@@ -151,7 +151,7 @@ class DataProcessorOpsMixin:
         transformation = self.transform_type.currentText()
 
         kwargs: dict[str, Any] = {}
-        if transformation in ["round"]:
+        if transformation == "round":
             kwargs["decimals"] = int(self.transform_param.value())
         elif transformation == "fillna":
             kwargs["value"] = self.transform_param.value()

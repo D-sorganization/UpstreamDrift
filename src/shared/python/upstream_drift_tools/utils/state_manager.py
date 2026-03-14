@@ -406,7 +406,7 @@ class StateManager:
                 return False
 
             # Use new name if provided, otherwise use original name
-            state_name = new_name if new_name else export_data["state_name"]
+            state_name = new_name or export_data["state_name"]
 
             # Check if state already exists
             if self._state_exists(state_name):

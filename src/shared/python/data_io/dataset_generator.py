@@ -1064,13 +1064,15 @@ class DatasetGenerator:
         "Dataset must not be None",
     )
     @precondition(
-        lambda self, dataset, output_path, format="hdf5": output_path is not None
-        and len(str(output_path)) > 0,
+        lambda self, dataset, output_path, format="hdf5": (
+            output_path is not None and len(str(output_path)) > 0
+        ),
         "Output path must be a non-empty string or Path",
     )
     @precondition(
-        lambda self, dataset, output_path, format="hdf5": format
-        in ("hdf5", "sqlite", "db", "csv"),
+        lambda self, dataset, output_path, format="hdf5": (
+            format in ("hdf5", "sqlite", "db", "csv")
+        ),
         "Export format must be one of: hdf5, sqlite, db, csv",
     )
     def export(

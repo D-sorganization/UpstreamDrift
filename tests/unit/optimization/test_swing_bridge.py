@@ -493,8 +493,8 @@ class TestOptimizeSwingWithMockEngine:
         config = SwingOptimizationConfig(n_joints=2, horizon_steps=5, max_iterations=2)
         engine = MagicMock()
         # Engine returns a plausible next state
-        engine.step.side_effect = lambda state, u, dt: state + np.concatenate(
-            [u * dt, u * dt]
+        engine.step.side_effect = lambda state, u, dt: (
+            state + np.concatenate([u * dt, u * dt])
         )
 
         b = SwingOptimizationBridge(config, engine=engine)

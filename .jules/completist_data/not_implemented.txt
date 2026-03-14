@@ -1,8 +1,6 @@
 ./src/api/middleware/error_handler.py:27:    - NotImplementedError -> 501 Not Implemented
 ./src/api/middleware/error_handler.py:47:            except NotImplementedError as e:
 ./src/api/middleware/error_handler.py:69:        except NotImplementedError as e:
-./src/deployment/realtime/controller.py:363:        raise NotImplementedError(
-./src/deployment/realtime/controller.py:429:        raise NotImplementedError(
 ./src/launchers/base.py:94:    NotImplementedError at runtime.
 ./src/shared/python/engine_core/base_physics_engine.py:400:            except (NotImplementedError, AttributeError):
 ./src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
@@ -19,7 +17,7 @@
 ./scripts/analyze_completist_data.py:213:        "NotImplementedError": 4,
 ./scripts/scan_for_incomplete_code.py:9:        "NotImplementedError": re.compile(r"raise NotImplementedError"),
 ./scripts/verify_backends.py:40:    except NotImplementedError:
-./pyproject.toml:323:    "raise NotImplementedError",
+./pyproject.toml:326:    "raise NotImplementedError",
 ./AGENTS.md:415:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
@@ -35,36 +33,24 @@
 ./.github/workflows/Jules-Tech-Debt-Assessor.yml:428:          | NotImplementedError | x5 | Incomplete features affect stability |
 ./.github/workflows/Jules-Comprehensive-Assessment.yml:72:          # Find NotImplementedError
 ./.github/workflows/Jules-Comprehensive-Assessment.yml:73:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
-./vendor/ud-tools/src/tools/quality_utils.py:39:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/src/tools/README.md:26:- **Banned Patterns**: TODO, FIXME, placeholders, NotImplementedError
-./vendor/ud-tools/scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
-./vendor/ud-tools/scripts/legacy_tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./vendor/ud-tools/pyproject.toml:154:    "raise NotImplementedError",
-./vendor/ud-tools/AGENTS.md:417:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
-./vendor/ud-tools/.github/copilot-instructions.md:22:- BANNED: `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<placeholder>`, "approximately"
-./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:73:          # Find NotImplementedError
-./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:74:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./vendor/ud-tools/.cursor/rules/.cursorrules.md:14:- **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-value-here>`
-./vendor/ud-tools/tests/shared/python/model_generation/test_format_utils.py:3:Covers issue #664: the former NotImplementedError in convert() has been
-./vendor/ud-tools/tests/shared/python/model_generation/test_format_utils.py:6:  - ValueError (not NotImplementedError) for unsupported pairs
-./vendor/ud-tools/tests/shared/python/model_generation/test_format_utils.py:23:    """Unsupported conversion pairs must raise ValueError, not NotImplementedError."""
-./vendor/ud-tools/tests/shared/python/model_generation/test_format_utils.py:50:        """Ensure NotImplementedError is never raised (issue #664)."""
-./vendor/ud-tools/tests/shared/python/model_generation/test_format_utils.py:54:        # If we got here, it means NotImplementedError was NOT raised
-./vendor/ud-tools/tests/shared/python/signal_toolkit/test_signal_loader.py:3:Covers issue #664: resolve NotImplementedError-style stubs in
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:5:- #627: NotImplementedError stub fixes
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:50:# #627 - NotImplementedError stubs
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:54:class TestNotImplementedErrorFixes:
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:55:    """Verify NotImplementedError stubs are properly handled."""
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:59:        not NotImplementedError, for unhandled internal format keys.
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:66:        # NotImplementedError must not appear
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:67:        assert "NotImplementedError" not in content
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:83:        # Must use ValueError, not NotImplementedError (issue #664)
-./vendor/ud-tools/tests/test_phase1_quick_wins.py:85:        assert "NotImplementedError" not in content
 ./tests/integration/test_physics_interfaces.py:79:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:80:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
 ./tests/integration/test_physics_interfaces.py:122:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:123:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:7:          NotImplementedError for simulation/loopback backends
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:214:# Issue #1778 – RealTimeController must not raise NotImplementedError for
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:222:    The issue reports NotImplementedError being raised on first control loop
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:241:        """_read_state must not raise NotImplementedError for SIMULATION."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:257:        """_send_command must not raise NotImplementedError for SIMULATION."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:270:        """_read_state must not raise NotImplementedError for LOOPBACK."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:276:        """_send_command must not raise NotImplementedError for LOOPBACK."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:351:        NotImplementedError (which crashes the first control loop iteration),
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:371:        # Must return a stub state without raising NotImplementedError
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:381:        than raising NotImplementedError.
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:401:        # Must not raise NotImplementedError
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:405:        """Full control loop must complete without NotImplementedError for simulation."""
+./tests/unit/test_third_party_integration_audit.py:242:        """compute_contact_forces must raise NotImplementedError (not fake zeros)."""
+./tests/unit/test_third_party_integration_audit.py:260:            with pytest.raises(NotImplementedError):
 ./tests/unit/engines/simscape/3d/test_quality_check.py:138:        """Test detection of NotImplementedError."""
 ./tests/unit/engines/simscape/3d/test_quality_check.py:139:        lines = ["def function():\n", "    raise NotImplementedError\n"]
 ./tests/unit/engines/simscape/3d/test_quality_check.py:144:        assert any("NotImplementedError" in issue[1] for issue in issues)

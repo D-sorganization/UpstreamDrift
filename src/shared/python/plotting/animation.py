@@ -266,8 +266,9 @@ class SwingAnimator:
         "Positions array must be non-empty",
     )
     @precondition(
-        lambda self, positions, vectors, times=None, label="Force": len(positions)
-        == len(vectors),
+        lambda self, positions, vectors, times=None, label="Force": (
+            len(positions) == len(vectors)
+        ),
         "Positions and vectors must have the same length",
     )
     def create_vector_field_animation(

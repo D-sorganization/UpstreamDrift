@@ -88,7 +88,7 @@ class TestCORSHeaders:
     def test_cors_headers_present_in_response(self):
         """Responses should include CORS headers."""
         env_overrides = {
-            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY",)
+            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
         }
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
@@ -112,7 +112,7 @@ class TestCORSHeaders:
     def test_cors_configurable_origins(self):
         """CORS origins should be configurable via env var."""
         env_overrides = {
-            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY",)
+            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
         }
         env_overrides["MODEL_GEN_CORS_ORIGINS"] = (
             "https://example.com,https://app.example.com"
@@ -144,7 +144,7 @@ class TestRateLimiting:
     def test_rate_limit_allows_under_threshold(self):
         """Requests under the limit should succeed."""
         env_overrides = {
-            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY",)
+            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
         }
         env_overrides["MODEL_GEN_RATE_LIMIT"] = "5"
         with patch.dict(os.environ, env_overrides, clear=True):
@@ -156,7 +156,7 @@ class TestRateLimiting:
     def test_rate_limit_blocks_over_threshold(self):
         """Requests over the limit should get 429."""
         env_overrides = {
-            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY",)
+            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
         }
         env_overrides["MODEL_GEN_RATE_LIMIT"] = "3"
         with patch.dict(os.environ, env_overrides, clear=True):
@@ -203,7 +203,7 @@ class TestInputValidation:
     def test_generate_humanoid_accepts_valid_body(self):
         """Valid body should not cause validation error."""
         env_overrides = {
-            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY",)
+            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
         }
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
@@ -237,7 +237,7 @@ class TestErrorResponseSanitization:
     def test_production_error_no_stack_trace(self):
         """In production mode, 500 errors should not contain traceback info."""
         env_overrides = {
-            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY",)
+            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
         }
         env_overrides["MODEL_GEN_ENV"] = "production"
         with patch.dict(os.environ, env_overrides, clear=True):

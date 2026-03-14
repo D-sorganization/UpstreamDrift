@@ -124,13 +124,15 @@ class SecurityManager:
         return hashed.decode("utf-8")  # type: ignore[no-any-return]
 
     @precondition(
-        lambda self, plain_password, hashed_password: isinstance(plain_password, str)
-        and len(plain_password) > 0,
+        lambda self, plain_password, hashed_password: (
+            isinstance(plain_password, str) and len(plain_password) > 0
+        ),
         "plain_password must be a non-empty string",
     )
     @precondition(
-        lambda self, plain_password, hashed_password: isinstance(hashed_password, str)
-        and len(hashed_password) > 0,
+        lambda self, plain_password, hashed_password: (
+            isinstance(hashed_password, str) and len(hashed_password) > 0
+        ),
         "hashed_password must be a non-empty string",
     )
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
@@ -195,8 +197,9 @@ class SecurityManager:
         return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
 
     @precondition(
-        lambda self, token, token_type="access": isinstance(token, str)
-        and len(token) > 0,
+        lambda self, token, token_type="access": (
+            isinstance(token, str) and len(token) > 0
+        ),
         "token must be a non-empty string",
     )
     @precondition(
@@ -328,8 +331,9 @@ class UsageTracker:
         """Initialize usage tracker."""
 
     @precondition(
-        lambda self, user, resource_type: resource_type
-        in ("api_calls", "video_analyses", "simulations"),
+        lambda self, user, resource_type: (
+            resource_type in ("api_calls", "video_analyses", "simulations")
+        ),
         "resource_type must be 'api_calls', 'video_analyses', or 'simulations'",
     )
     def check_quota(self, user: User, resource_type: str) -> bool:

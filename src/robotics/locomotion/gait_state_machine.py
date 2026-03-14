@@ -124,8 +124,9 @@ class GaitStateMachine(ContractChecker):
                 "Step count must be non-negative",
             ),
             (
-                lambda: self._callbacks is not None
-                and isinstance(self._callbacks, dict),
+                lambda: (
+                    self._callbacks is not None and isinstance(self._callbacks, dict)
+                ),
                 "Callbacks must be a non-None dict",
             ),
             (

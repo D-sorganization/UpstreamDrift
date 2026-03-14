@@ -130,8 +130,9 @@ async def login(
 
 @router.post("/refresh", response_model=dict)
 @precondition(
-    lambda refresh_token, db=None: refresh_token is not None
-    and len(refresh_token.strip()) > 0,
+    lambda refresh_token, db=None: (
+        refresh_token is not None and len(refresh_token.strip()) > 0
+    ),
     "Refresh token must be a non-empty string",
 )
 async def refresh_token(

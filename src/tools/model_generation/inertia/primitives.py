@@ -288,8 +288,9 @@ def ellipsoid_inertia(
     "Inner radius must be non-negative",
 )
 @precondition(
-    lambda mass, inner_radius, outer_radius, length, axis="z": outer_radius
-    > inner_radius,
+    lambda mass, inner_radius, outer_radius, length, axis="z": (
+        outer_radius > inner_radius
+    ),
     "Outer radius must be greater than inner radius",
 )
 def hollow_cylinder_inertia(

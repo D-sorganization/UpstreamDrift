@@ -191,8 +191,9 @@ class SwingCaptureImporter:
     """
 
     @precondition(
-        lambda self, marker_mapping=None, target_frame_rate=200.0: target_frame_rate
-        > 0,
+        lambda self, marker_mapping=None, target_frame_rate=200.0: (
+            target_frame_rate > 0
+        ),
         "Target frame rate must be positive",
     )
     def __init__(
@@ -518,13 +519,15 @@ class SwingCaptureImporter:
         )
 
     @precondition(
-        lambda self, positions, velocities, times, source_rate, target_rate: source_rate
-        > 0,
+        lambda self, positions, velocities, times, source_rate, target_rate: (
+            source_rate > 0
+        ),
         "Source frame rate must be positive",
     )
     @precondition(
-        lambda self, positions, velocities, times, source_rate, target_rate: target_rate
-        > 0,
+        lambda self, positions, velocities, times, source_rate, target_rate: (
+            target_rate > 0
+        ),
         "Target frame rate must be positive",
     )
     def _resample(

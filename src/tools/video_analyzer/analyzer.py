@@ -90,7 +90,7 @@ class SwingAnalyzer:
         lambda self,
         video_path,
         stance=StanceDirection.UNKNOWN,
-        progress_callback=None: video_path is not None and len(video_path) > 0,
+        progress_callback=None: (video_path is not None and len(video_path) > 0),
         "Video path must be a non-empty string",
     )
     def analyze_video(
@@ -147,14 +147,15 @@ class SwingAnalyzer:
         )
 
     @precondition(
-        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: poses
-        is not None
-        and len(poses) >= 10,
+        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: (
+            poses is not None and len(poses) >= 10
+        ),
         "Must have at least 10 valid pose frames",
     )
     @precondition(
-        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: fps
-        > 0,
+        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: (
+            fps > 0
+        ),
         "FPS must be positive",
     )
     def analyze_poses(

@@ -263,11 +263,13 @@ class PowerFlowAnalyzer:
         "Time array must be non-empty",
     )
     @precondition(
-        lambda self, times, qpos_traj, qvel_traj, qacc_traj, tau_traj: len(times)
-        == len(qpos_traj)
-        == len(qvel_traj)
-        == len(qacc_traj)
-        == len(tau_traj),
+        lambda self, times, qpos_traj, qvel_traj, qacc_traj, tau_traj: (
+            len(times)
+            == len(qpos_traj)
+            == len(qvel_traj)
+            == len(qacc_traj)
+            == len(tau_traj)
+        ),
         "All trajectory arrays must have the same length",
     )
     def analyze_trajectory(

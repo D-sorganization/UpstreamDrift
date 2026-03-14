@@ -353,8 +353,9 @@ async def export_analysis_data(
 
 @router.post("/simulation/position", response_model=BodyPositionResponse)
 @precondition(
-    lambda request, engine_manager=None, logger=None: request.body_name is not None
-    and len(request.body_name.strip()) > 0,
+    lambda request, engine_manager=None, logger=None: (
+        request.body_name is not None and len(request.body_name.strip()) > 0
+    ),
     "Body name must be a non-empty string",
 )
 async def set_body_position(
@@ -419,10 +420,12 @@ async def set_body_position(
 
 @router.post("/simulation/measure", response_model=MeasurementResult)
 @precondition(
-    lambda request, engine_manager=None, logger=None: request.body_a is not None
-    and len(request.body_a.strip()) > 0
-    and request.body_b is not None
-    and len(request.body_b.strip()) > 0,
+    lambda request, engine_manager=None, logger=None: (
+        request.body_a is not None
+        and len(request.body_a.strip()) > 0
+        and request.body_b is not None
+        and len(request.body_b.strip()) > 0
+    ),
     "Both body_a and body_b must be non-empty strings",
 )
 async def measure_distance(

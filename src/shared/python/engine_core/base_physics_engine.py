@@ -136,10 +136,12 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                 "Initialized engine must have a loaded model",
             ),
             (
-                lambda: self.state is None
-                or (
-                    len(self.state.q) == len(self.state.v)
-                    or len(self.state.q) == len(self.state.v) + 1  # Quaternion case
+                lambda: (
+                    self.state is None
+                    or (
+                        len(self.state.q) == len(self.state.v)
+                        or len(self.state.q) == len(self.state.v) + 1  # Quaternion case
+                    )
                 ),
                 "State arrays q and v must have compatible dimensions",
             ),

@@ -84,8 +84,10 @@ class ContactManager(ContractChecker):
                 "Default friction must be non-negative",
             ),
             (
-                lambda: len({c.contact_id for c in self._contact_cache})
-                == len(self._contact_cache),
+                lambda: (
+                    len({c.contact_id for c in self._contact_cache})
+                    == len(self._contact_cache)
+                ),
                 "All contact IDs must be unique",
             ),
         ]

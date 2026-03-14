@@ -105,8 +105,9 @@ class KinematicTree:
         self.nodes: dict[str, ChainNode] = {}
 
     @precondition(
-        lambda self, urdf_content: urdf_content is not None
-        and len(urdf_content.strip()) > 0,
+        lambda self, urdf_content: (
+            urdf_content is not None and len(urdf_content.strip()) > 0
+        ),
         "URDF content must be a non-empty string",
     )
     def build_from_urdf(self, urdf_content: str) -> None:
@@ -180,13 +181,15 @@ class KinematicTree:
         set_depth(self.root, 0)
 
     @precondition(
-        lambda self, from_link, to_link: from_link is not None
-        and len(from_link.strip()) > 0,
+        lambda self, from_link, to_link: (
+            from_link is not None and len(from_link.strip()) > 0
+        ),
         "Source link name must be a non-empty string",
     )
     @precondition(
-        lambda self, from_link, to_link: to_link is not None
-        and len(to_link.strip()) > 0,
+        lambda self, from_link, to_link: (
+            to_link is not None and len(to_link.strip()) > 0
+        ),
         "Target link name must be a non-empty string",
     )
     def get_chain(self, from_link: str, to_link: str) -> list[ChainNode]:

@@ -713,7 +713,7 @@ class AdvancedAnalysisDialog(QtWidgets.QDialog):
         self.tabs.addTab(self.tab_phase, "Phase Plane")
 
         # Coherence
-        initial_key2 = comparison_key if comparison_key else "joint_torques"
+        initial_key2 = comparison_key or "joint_torques"
         self.tab_coherence = CoherenceTab(recorder, key1=current_key, key2=initial_key2)
         self.tabs.addTab(self.tab_coherence, "Coherence")
 

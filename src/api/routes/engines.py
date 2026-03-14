@@ -125,9 +125,9 @@ async def load_engine_lazy(
 
 @router.post("/engines/{engine_type}/load")
 @precondition(
-    lambda engine_type, model_path=None, engine_manager=None, _user=None: engine_type
-    is not None
-    and len(engine_type.strip()) > 0,
+    lambda engine_type, model_path=None, engine_manager=None, _user=None: (
+        engine_type is not None and len(engine_type.strip()) > 0
+    ),
     "Engine type must be a non-empty string",
 )
 async def load_engine(
@@ -178,8 +178,9 @@ async def load_engine(
 
 @router.post("/engines/{engine_type}/unload")
 @precondition(
-    lambda engine_type, engine_manager=None, _user=None: engine_type is not None
-    and len(engine_type.strip()) > 0,
+    lambda engine_type, engine_manager=None, _user=None: (
+        engine_type is not None and len(engine_type.strip()) > 0
+    ),
     "Engine type must be a non-empty string",
 )
 async def unload_engine(

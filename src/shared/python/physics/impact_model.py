@@ -506,7 +506,7 @@ class FiniteTimeImpactModel(ImpactModel):
     clubface_normal,
     gear_factor=0.5,
     h_scale=100.0,
-    v_scale=50.0: 0 <= gear_factor <= 1,
+    v_scale=50.0: (0 <= gear_factor <= 1),
     "Gear effect factor must be between 0 and 1",
 )
 def compute_gear_effect_spin(
@@ -833,7 +833,7 @@ class ImpactSolverAPI:
         ball_velocity=None,
         ball_angular_velocity=None,
         clubhead_mass=0.200,
-        record=True: clubhead_mass > 0,
+        record=True: (clubhead_mass > 0),
         "Clubhead mass must be positive",
     )
     @precondition(
@@ -844,7 +844,7 @@ class ImpactSolverAPI:
         ball_velocity=None,
         ball_angular_velocity=None,
         clubhead_mass=0.200,
-        record=True: timestamp >= 0,
+        record=True: (timestamp >= 0),
         "Timestamp must be non-negative",
     )
     def solve_impact(

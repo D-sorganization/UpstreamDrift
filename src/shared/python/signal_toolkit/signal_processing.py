@@ -851,13 +851,15 @@ class KalmanFilter:
     """
 
     @precondition(
-        lambda self, dim_x, dim_z, F=None, H=None, Q=None, R=None, P=None, x=None: dim_x
-        > 0,
+        lambda self, dim_x, dim_z, F=None, H=None, Q=None, R=None, P=None, x=None: (
+            dim_x > 0
+        ),
         "State dimension must be positive",
     )
     @precondition(
-        lambda self, dim_x, dim_z, F=None, H=None, Q=None, R=None, P=None, x=None: dim_z
-        > 0,
+        lambda self, dim_x, dim_z, F=None, H=None, Q=None, R=None, P=None, x=None: (
+            dim_z > 0
+        ),
         "Measurement dimension must be positive",
     )
     def __init__(
