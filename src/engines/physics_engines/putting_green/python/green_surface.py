@@ -76,11 +76,13 @@ class SlopeRegion:
     def contains(self, position: np.ndarray) -> bool:
         """Check if position is within region."""
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         distance = np.linalg.norm(position[:2] - self.center[:2])
         return bool(distance <= self.radius)
 
     def get_weight(self, position: np.ndarray) -> float:
         """Get influence weight at position (0-1)."""
+        assert position is not None, "position must be provided"
         assert position is not None, "position must be provided"
         distance = np.linalg.norm(position[:2] - self.center[:2])
         if distance >= self.radius:
@@ -124,6 +126,7 @@ class GreenSurface:
             turf: Turf properties (defaults to standard)
         """
         assert width is not None, "width must be provided"
+        assert width is not None, "width must be provided"
         self.width = width
         self.height = height
         self.turf = turf or TurfProperties()
@@ -163,6 +166,7 @@ class GreenSurface:
         Args:
             points: List of ContourPoint objects
         """
+        assert points is not None, "points must be provided"
         assert points is not None, "points must be provided"
         self._contour_points = points
         self._build_contour_interpolator()
@@ -204,6 +208,7 @@ class GreenSurface:
             smooth_sigma: Gaussian smoothing sigma
         """
         assert heightmap is not None, "heightmap must be provided"
+        assert heightmap is not None, "heightmap must be provided"
         if smooth:
             heightmap = ndimage.gaussian_filter(heightmap, sigma=smooth_sigma)
 
@@ -231,6 +236,7 @@ class GreenSurface:
         Returns:
             Elevation at position [m]
         """
+        assert position is not None, "position must be provided"
         assert position is not None, "position must be provided"
         pos = np.clip(position[:2], [0, 0], [self.width, self.height])
 
@@ -268,6 +274,7 @@ class GreenSurface:
             [dz/dx, dz/dy] gradient vector
         """
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         pos = position[:2]
 
         # Central difference
@@ -294,6 +301,7 @@ class GreenSurface:
         Returns:
             [slope_x, slope_y] slope vector (gradient)
         """
+        assert position is not None, "position must be provided"
         assert position is not None, "position must be provided"
         pos = position[:2]
         total_slope = np.zeros(2)
@@ -324,6 +332,7 @@ class GreenSurface:
             [ax, ay] gravitational acceleration [m/s²]
         """
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         slope = self.get_slope_at(position)
         # Acceleration is proportional to slope and points downhill
         # a = g * sin(theta) ≈ g * slope for small slopes
@@ -346,6 +355,7 @@ class GreenSurface:
             True if ball is holed
         """
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         distance = np.linalg.norm(position[:2] - self._hole_position)
 
         if distance > self.hole_radius:
@@ -363,6 +373,7 @@ class GreenSurface:
 
     def is_on_green(self, position: np.ndarray) -> bool:
         """Check if position is on the green surface."""
+        assert position is not None, "position must be provided"
         assert position is not None, "position must be provided"
         x, y = position[:2]
         return 0 <= x <= self.width and 0 <= y <= self.height
@@ -415,6 +426,7 @@ class GreenSurface:
     def _ridge_elevation(self, position: np.ndarray, ridge: dict[str, Any]) -> float:
         """Compute elevation contribution from a ridge."""
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         start = ridge["start"]
         end = ridge["end"]
         height = ridge["height"]
@@ -450,6 +462,7 @@ class GreenSurface:
     ) -> float:
         """Compute elevation contribution from a depression."""
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         center = depression["center"]
         radius = depression["radius"]
         depth = depression["depth"]
@@ -481,6 +494,7 @@ class GreenSurface:
             Dictionary with break analysis
         """
         # Sample points along intended line
+        assert start is not None, "start must be provided"
         assert start is not None, "start must be provided"
         t_values = np.linspace(0, 1, num_samples)
         positions = [start + t * (end - start) for t in t_values]
@@ -537,6 +551,7 @@ class GreenSurface:
             Dictionary with positions, elevations, and slopes along line
         """
         assert start is not None, "start must be provided"
+        assert start is not None, "start must be provided"
         t_values = np.linspace(0, 1, num_samples)
         positions = [start + t * (end - start) for t in t_values]
 
@@ -556,6 +571,7 @@ class GreenSurface:
         Returns:
             2D array of elevations [resolution x resolution]
         """
+        assert resolution is not None, "resolution must be provided"
         assert resolution is not None, "resolution must be provided"
         x = np.linspace(0, self.width, resolution)
         y = np.linspace(0, self.height, resolution)
@@ -587,6 +603,7 @@ class GreenSurface:
         Returns:
             GreenSurface instance
         """
+        assert heightmap is not None, "heightmap must be provided"
         assert heightmap is not None, "heightmap must be provided"
         green = cls(width=width, height=height, turf=turf)
         green.set_heightmap(heightmap)
@@ -704,6 +721,7 @@ class GreenSurface:
             filepath: Path to data file
         """
         assert filepath is not None, "filepath must be provided"
+        assert filepath is not None, "filepath must be provided"
         filepath = Path(filepath)
         suffix = filepath.suffix.lower()
 
@@ -726,6 +744,7 @@ class GreenSurface:
     def _load_csv_topography(self, filepath: Path) -> None:
         """Load topography from CSV file."""
         assert filepath is not None, "filepath must be provided"
+        assert filepath is not None, "filepath must be provided"
         import csv
 
         points = []
@@ -746,6 +765,7 @@ class GreenSurface:
 
     def _load_json_topography(self, filepath: Path) -> None:
         """Load topography from JSON file."""
+        assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         import json
 
@@ -778,6 +798,7 @@ class GreenSurface:
 
     def _load_geotiff_topography(self, filepath: Path) -> None:
         """Load topography from GeoTIFF file."""
+        assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         try:
             import rasterio  # type: ignore

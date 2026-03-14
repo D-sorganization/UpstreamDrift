@@ -239,6 +239,7 @@ class MjDataContext:
             data: MuJoCo data structure to protect
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.data = data
         self.qpos_backup: np.ndarray | None = None
@@ -350,6 +351,7 @@ class KinematicForceAnalyzer:
             data: MuJoCo data (shared reference, not modified by compute methods)
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.data = data
 
@@ -382,6 +384,7 @@ class KinematicForceAnalyzer:
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern."""
         assert name_pattern is not None, "name_pattern must be provided"
+        assert name_pattern is not None, "name_pattern must be provided"
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
             if body_name and name_pattern.lower() in body_name.lower():
@@ -401,6 +404,7 @@ class KinematicForceAnalyzer:
             Tuple of (jacp, jacr) as (3, nv) arrays.
             Note: Returns views into internal buffers or copies depending on usage.
         """
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         if data is None:
             data = self.data
@@ -457,6 +461,7 @@ class KinematicForceAnalyzer:
         """
         # Use private/scratch data structure
         assert qpos is not None, "qpos must be provided"
+        assert qpos is not None, "qpos must be provided"
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
         # qacc must be zero for RNE to return inverse dynamics forces
@@ -488,6 +493,7 @@ class KinematicForceAnalyzer:
             Gravity forces [nv]
         """
         # FIXED: Use private/scratch data structure
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = 0.0
@@ -539,6 +545,7 @@ class KinematicForceAnalyzer:
         # For most golf swing analyses, the total Coriolis force is sufficient.
 
         assert qpos is not None, "qpos must be provided"
+        assert qpos is not None, "qpos must be provided"
         centrifugal = np.zeros(self.model.nv)
         coupling = np.zeros(self.model.nv)
 
@@ -572,6 +579,7 @@ class KinematicForceAnalyzer:
         """
         # FIXED: Use private data structure
         assert qpos is not None, "qpos must be provided"
+        assert qpos is not None, "qpos must be provided"
         self._perturb_data.qpos[:] = qpos
         mujoco.mj_forward(self.model, self._perturb_data)
 
@@ -595,6 +603,7 @@ class KinematicForceAnalyzer:
         """
         # Use finite differences to estimate C
         # (Deprecated - use RNE-based method instead)
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         epsilon = EPSILON_FINITE_DIFF_JACOBIAN
         C = np.zeros((self.model.nv, self.model.nv))
@@ -633,6 +642,7 @@ class KinematicForceAnalyzer:
         Returns:
             Tuple of (coriolis_force [3], centrifugal_force [3], total_apparent [3])
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         if self.club_head_id is None:
             return np.zeros(3), np.zeros(3), np.zeros(3)
@@ -720,6 +730,7 @@ class KinematicForceAnalyzer:
         """
         # Coriolis forces
         assert qpos is not None, "qpos must be provided"
+        assert qpos is not None, "qpos must be provided"
         coriolis_forces = self.compute_coriolis_forces(qpos, qvel)
 
         # Coriolis power (should be zero for conservative systems)
@@ -760,6 +771,7 @@ class KinematicForceAnalyzer:
             Dictionary with kinetic energy components
         """
         # FIXED: Use private data structure
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
@@ -809,6 +821,7 @@ class KinematicForceAnalyzer:
         Returns:
             List of KinematicForceData for each time step
         """
+        assert times is not None, "times must be provided"
         assert times is not None, "times must be provided"
         results = []
 
@@ -984,6 +997,7 @@ class KinematicForceAnalyzer:
             >>> m_eff = analyzer.compute_effective_mass(qpos, direction)
             >>> print(f"Effective mass: {m_eff:.2f} kg")
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         if body_id is None:
             body_id = self.club_head_id

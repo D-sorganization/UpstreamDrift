@@ -181,6 +181,7 @@ class MotionVisualizer:
         """Add a coordinate frame visualization."""
         # X axis (red)
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         x_cyl = mcg.Cylinder(size, 0.002)
         x_mat = mcg.MeshBasicMaterial(color=0xFF0000)
         self.viewer[f"{name}/x"].set_object(x_cyl, x_mat)
@@ -214,6 +215,7 @@ class MotionVisualizer:
         trajectory: ClubTrajectory,
     ) -> None:
         """Add the club trajectory as a path visualization."""
+        assert trajectory is not None, "trajectory must be provided"
         assert trajectory is not None, "trajectory must be provided"
         if not self.settings.show_trajectory_path:
             return
@@ -249,6 +251,7 @@ class MotionVisualizer:
     def _add_event_markers(self, trajectory: ClubTrajectory) -> None:
         """Add markers for swing events."""
         assert trajectory is not None, "trajectory must be provided"
+        assert trajectory is not None, "trajectory must be provided"
         events = {
             "address": (0x00FF00, trajectory.events.address),  # Green
             "top": (0xFFFF00, trajectory.events.top),  # Yellow
@@ -273,6 +276,7 @@ class MotionVisualizer:
     ) -> None:
         """Add club visualization at a specific frame."""
         assert frame is not None, "frame must be provided"
+        assert frame is not None, "frame must be provided"
         s = self.settings
 
         # Club shaft
@@ -294,6 +298,7 @@ class MotionVisualizer:
 
     def _update_club_transform(self, frame, name: str = "club") -> None:
         """Update club transform based on frame data."""
+        assert frame is not None, "frame must be provided"
         assert frame is not None, "frame must be provided"
         s = self.settings
 
@@ -322,6 +327,7 @@ class MotionVisualizer:
         right_pos: NDArray[np.float64],
     ) -> None:
         """Add hand target visualizations."""
+        assert left_pos is not None, "left_pos must be provided"
         assert left_pos is not None, "left_pos must be provided"
         s = self.settings
 
@@ -366,6 +372,7 @@ class MotionVisualizer:
             trajectory: Club trajectory
             ik_result: Optional IK result with body configurations
         """
+        assert trajectory is not None, "trajectory must be provided"
         assert trajectory is not None, "trajectory must be provided"
         s = self.settings
 
@@ -429,6 +436,7 @@ class MotionVisualizer:
             num_frames_to_show: Number of frames to display
         """
         assert trajectory is not None, "trajectory must be provided"
+        assert trajectory is not None, "trajectory must be provided"
         self.add_club_trajectory_path(trajectory)
 
         # Select frames to show
@@ -457,6 +465,7 @@ class MotionVisualizer:
         alpha: float,
     ) -> None:
         """Add a semi-transparent club visualization."""
+        assert frame is not None, "frame must be provided"
         assert frame is not None, "frame must be provided"
         s = self.settings
 
@@ -524,6 +533,7 @@ class MatplotlibVisualizer:
         Returns:
             Matplotlib figure
         """
+        assert trajectory is not None, "trajectory must be provided"
         assert trajectory is not None, "trajectory must be provided"
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111, projection="3d")
@@ -602,6 +612,7 @@ class MatplotlibVisualizer:
             Matplotlib figure
         """
         assert ik_result is not None, "ik_result must be provided"
+        assert ik_result is not None, "ik_result must be provided"
         fig, axes = plt.subplots(2, 1, figsize=figsize, sharex=True)
 
         times = np.array(ik_result.times)
@@ -646,6 +657,7 @@ class MatplotlibVisualizer:
         Returns:
             Matplotlib figure
         """
+        assert ik_result is not None, "ik_result must be provided"
         assert ik_result is not None, "ik_result must be provided"
         q_traj = ik_result.q_trajectory
         times = np.array(ik_result.times)

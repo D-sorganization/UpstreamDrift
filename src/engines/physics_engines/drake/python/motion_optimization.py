@@ -83,6 +83,7 @@ class DrakeMotionOptimizer:
             target_value: Optional target value for the objective
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         objective = OptimizationObjective(
             name=name,
             weight=weight,
@@ -109,6 +110,7 @@ class DrakeMotionOptimizer:
             lower_bound: Lower bound for inequality/bounds constraints
             upper_bound: Upper bound for inequality/bounds constraints
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         constraint = OptimizationConstraint(
             name=name,
@@ -204,6 +206,7 @@ class DrakeMotionOptimizer:
 
     def _build_scipy_constraints(self, traj_shape: tuple) -> list[dict]:
         assert traj_shape is not None, "traj_shape must be provided"
+        assert traj_shape is not None, "traj_shape must be provided"
         scipy_constraints: list[dict] = []
         for con in self.constraints:
             if con.constraint_function is None:
@@ -240,6 +243,7 @@ class DrakeMotionOptimizer:
 
     def _evaluate_objectives(self, optimal_trajectory: np.ndarray) -> dict[str, float]:
         assert optimal_trajectory is not None, "optimal_trajectory must be provided"
+        assert optimal_trajectory is not None, "optimal_trajectory must be provided"
         objective_values = {}
         for obj in self.objectives:
             if obj.cost_function is not None:
@@ -249,6 +253,7 @@ class DrakeMotionOptimizer:
     def _evaluate_constraint_violations(
         self, optimal_trajectory: np.ndarray, tolerance: float
     ) -> tuple[dict[str, float], bool]:
+        assert optimal_trajectory is not None, "optimal_trajectory must be provided"
         assert optimal_trajectory is not None, "optimal_trajectory must be provided"
         constraint_violations = {}
         all_satisfied = True
@@ -320,6 +325,7 @@ class DrakeMotionOptimizer:
             OptimizationResult with optimization results
         """
         assert initial_trajectory is not None, "initial_trajectory must be provided"
+        assert initial_trajectory is not None, "initial_trajectory must be provided"
         from scipy.optimize import minimize as scipy_minimize
 
         self.logger.info(
@@ -380,6 +386,7 @@ class DrakeMotionOptimizer:
         """
         # Clear existing objectives and add distance-specific ones
         assert initial_trajectory is not None, "initial_trajectory must be provided"
+        assert initial_trajectory is not None, "initial_trajectory must be provided"
         self.objectives.clear()
 
         def distance_cost(trajectory: np.ndarray) -> float:
@@ -410,6 +417,7 @@ class DrakeMotionOptimizer:
         """
         # Clear existing objectives and add accuracy-specific ones
         assert initial_trajectory is not None, "initial_trajectory must be provided"
+        assert initial_trajectory is not None, "initial_trajectory must be provided"
         self.objectives.clear()
 
         def accuracy_cost(trajectory: np.ndarray) -> float:
@@ -436,6 +444,7 @@ class DrakeMotionOptimizer:
             result: Optimization results to export
             output_path: Path to save results
         """
+        assert result is not None, "result must be provided"
         assert result is not None, "result must be provided"
         import json
         from pathlib import Path

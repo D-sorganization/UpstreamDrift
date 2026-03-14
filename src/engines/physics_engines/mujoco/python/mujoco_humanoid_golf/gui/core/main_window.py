@@ -184,6 +184,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         """Handle model change signal from PhysicsTab."""
         # Update body lists for interactive manipulation
         assert model_name is not None, "model_name must be provided"
+        assert model_name is not None, "model_name must be provided"
         self.update_body_lists()
 
         # Update camera controls to match new model
@@ -415,6 +416,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     def on_live_analysis_toggled(self, checked: bool) -> None:
         """Handle live analysis toggle."""
         assert checked is not None, "checked must be provided"
+        assert checked is not None, "checked must be provided"
         self.sim_widget.enable_live_analysis = checked
         status_bar = self.statusBar()
         if checked:
@@ -437,6 +439,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def _on_overlay_rec_toggled(self, checked: bool) -> None:
         """Handle overlay REC button toggle."""
+        assert checked is not None, "checked must be provided"
         assert checked is not None, "checked must be provided"
         recorder = self.sim_widget.get_recorder()
         if checked:
@@ -512,6 +515,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
 
     def export_data(self, filename: str) -> None:
         """Export recorded data to the given filename."""
+        assert filename is not None, "filename must be provided"
         assert filename is not None, "filename must be provided"
         recorder = self.sim_widget.get_recorder()
         data_dict = recorder.export_to_dict()

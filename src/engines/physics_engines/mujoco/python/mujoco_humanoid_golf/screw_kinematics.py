@@ -106,6 +106,7 @@ class ScrewKinematicsAnalyzer:
             model: MuJoCo model
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
 
         # Thread-safe data structure
@@ -135,6 +136,7 @@ class ScrewKinematicsAnalyzer:
         Returns:
             Twist with angular and linear velocities
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         import mujoco
 
@@ -187,6 +189,7 @@ class ScrewKinematicsAnalyzer:
         Returns:
             ScrewAxis with complete representation
         """
+        assert twist is not None, "twist must be provided"
         assert twist is not None, "twist must be provided"
         ω = twist.angular
         v = twist.linear
@@ -258,6 +261,7 @@ class ScrewKinematicsAnalyzer:
             Dict mapping body name to (twist, screw_axis) tuple
         """
         assert qpos is not None, "qpos must be provided"
+        assert qpos is not None, "qpos must be provided"
         import mujoco
 
         results = {}
@@ -293,6 +297,7 @@ class ScrewKinematicsAnalyzer:
             Tuple of (start_point, end_point) for line segment [3], [3]
         """
         assert screw is not None, "screw must be provided"
+        assert screw is not None, "screw must be provided"
         if screw.is_singular:
             # Pure translation: draw along velocity direction
             start = screw.axis_point
@@ -321,6 +326,7 @@ class ScrewKinematicsAnalyzer:
         Returns:
             Manipulability measure (dimensionless)
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         import mujoco
 
@@ -374,6 +380,7 @@ def plot_screw_axis_3d(
         label: Label for legend
     """
     # Compute visualization points directly without __new__ code smell
+    assert screw is not None, "screw must be provided"
     assert screw is not None, "screw must be provided"
     if screw.is_singular:
         # Pure translation: draw along velocity direction

@@ -193,6 +193,7 @@ class PerformanceStats:
     def update_frame_time(self, frame_time: float) -> None:
         """Update frame timing statistics"""
         assert frame_time is not None, "frame_time must be provided"
+        assert frame_time is not None, "frame_time must be provided"
         self.frame_times.append(frame_time)
         if len(self.frame_times) > 120:  # Keep last 2 seconds at 60fps
             self.frame_times.pop(0)
@@ -219,6 +220,7 @@ class MatlabDataLoader:
         self, baseq_file: str, ztcfq_file: str, delta_file: str
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """Load all three MATLAB datasets with comprehensive error handling"""
+        assert baseq_file is not None, "baseq_file must be provided"
         assert baseq_file is not None, "baseq_file must be provided"
         start_time = time.time()
 
@@ -331,6 +333,7 @@ class MatlabDataLoader:
         PERF-002: Optimized with vectorized operations where possible.
         """
         # Fast path for numeric 2D arrays (most common case)
+        assert col_data is not None, "col_data must be provided"
         assert col_data is not None, "col_data must be provided"
         if col_data.dtype != "object" and col_data.ndim == 2 and col_data.shape[1] == 3:
             # Vectorized operation - process all rows at once
@@ -467,6 +470,7 @@ class FrameProcessor:
         config: RenderConfig,
     ):
         assert datasets is not None, "datasets must be provided"
+        assert datasets is not None, "datasets must be provided"
         self.baseq_df, self.ztcfq_df, self.deltaq_df = datasets
         self.config = config
         self.num_frames = len(self.baseq_df)
@@ -503,6 +507,7 @@ class FrameProcessor:
     def get_frame_data(self, frame_idx: int) -> FrameData:
         """Get processed frame data, including calculated dynamics."""
         # Bounds checking
+        assert frame_idx is not None, "frame_idx must be provided"
         assert frame_idx is not None, "frame_idx must be provided"
         frame_idx = max(0, min(frame_idx, self.num_frames - 1))
 
@@ -563,6 +568,7 @@ class FrameProcessor:
 
     def _process_raw_frame(self, frame_idx: int) -> FrameData:
         """Process a single frame from raw data sources."""
+        assert frame_idx is not None, "frame_idx must be provided"
         assert frame_idx is not None, "frame_idx must be provided"
         frame_data = FrameData(
             frame_idx=frame_idx,
@@ -685,6 +691,7 @@ class FrameProcessor:
     def set_filter_param(self, param_name: str, value) -> None:
         """Set a filter parameter and invalidate cached filtered data"""
         assert param_name is not None, "param_name must be provided"
+        assert param_name is not None, "param_name must be provided"
         if not hasattr(self, "filter_params"):
             self.filter_params = {}
         self.filter_params[param_name] = value
@@ -721,6 +728,7 @@ class GeometryUtils:
     def rotation_matrix_from_vectors(vec1: np.ndarray, vec2: np.ndarray) -> np.ndarray:
         """Create rotation matrix to rotate vec1 to vec2 using Rodrigues formula"""
         # Normalize input vectors
+        assert vec1 is not None, "vec1 must be provided"
         assert vec1 is not None, "vec1 must be provided"
         v1 = vec1 / np.linalg.norm(vec1)
         v2 = vec2 / np.linalg.norm(vec2)
@@ -762,6 +770,7 @@ class GeometryUtils:
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Create optimized cylinder mesh with normals"""
         assert radius is not None, "radius must be provided"
+        assert radius is not None, "radius must be provided"
         vertices = []
         normals = []
         indices = []
@@ -801,6 +810,7 @@ class GeometryUtils:
         radius: float = 1.0, lat_segments: int = 12, lon_segments: int = 16
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Create optimized sphere mesh using UV sphere method"""
+        assert radius is not None, "radius must be provided"
         assert radius is not None, "radius must be provided"
         vertices = []
         normals = []
@@ -846,6 +856,7 @@ class GeometryUtils:
         segments: int = 8,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Create arrow mesh for force/torque visualization"""
+        assert shaft_radius is not None, "shaft_radius must be provided"
         assert shaft_radius is not None, "shaft_radius must be provided"
         vertices = []
         normals = []

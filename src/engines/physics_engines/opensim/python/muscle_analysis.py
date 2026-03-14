@@ -62,6 +62,7 @@ class OpenSimMuscleAnalyzer:
             state: Current state of the simulation
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.state = state
         self.muscle_set = model.getMuscles()
@@ -165,6 +166,7 @@ class OpenSimMuscleAnalyzer:
         Args:
             activations: Dictionary mapping muscle names to desired activation [0-1]
         """
+        assert activations is not None, "activations must be provided"
         assert activations is not None, "activations must be provided"
         if opensim is None:
             return
@@ -300,6 +302,7 @@ class OpenSimGripModel:
             model: OpenSim model (should have grip body and hand muscles)
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
 
     def add_cylindrical_wrap(
@@ -321,6 +324,7 @@ class OpenSimGripModel:
             length: Wrap cylinder length [m]
             location: (x, y, z) location in grip body frame [m]
         """
+        assert muscle_name is not None, "muscle_name must be provided"
         assert muscle_name is not None, "muscle_name must be provided"
         if opensim is None:
             logger.warning("OpenSim not installed - cannot add wrap")
@@ -369,6 +373,7 @@ class OpenSimGripModel:
             Dictionary mapping constraint names to reaction forces [N]
         """
         assert state is not None, "state must be provided"
+        assert state is not None, "state must be provided"
         if opensim is None:
             return {}
 
@@ -392,6 +397,7 @@ class OpenSimGripModel:
             Dictionary with grip analysis metrics
         """
         # Get forces from grip-related muscles
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         muscle_forces = analyzer.get_muscle_forces()
 

@@ -28,6 +28,7 @@ def _four_bar_worldbody_xml(
     ground: float, crank: float, coupler: float, follower: float
 ) -> str:
     assert ground is not None, "ground must be provided"
+    assert ground is not None, "ground must be provided"
     cx = crank * np.cos(np.pi / 4)
     cy = crank * np.sin(np.pi / 4)
     return f"""    <worldbody>
@@ -94,6 +95,7 @@ def generate_four_bar_linkage_xml(
     -------
     str : MuJoCo XML string
     """
+    assert link_type is not None, "link_type must be provided"
     assert link_type is not None, "link_type must be provided"
     configs = {
         "grashof_crank_rocker": [4.0, 1.0, 3.5, 3.0],

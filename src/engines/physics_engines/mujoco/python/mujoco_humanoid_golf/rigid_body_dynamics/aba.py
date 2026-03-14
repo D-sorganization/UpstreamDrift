@@ -165,6 +165,7 @@ def _aba_backward_body_inertia(
 ) -> None:
     """Compute articulated-body inertia update for a single body."""
     assert i is not None, "i must be provided"
+    assert i is not None, "i must be provided"
     if dof_idx != -1:
         u_force[:, i] = ia_articulated[i][:, dof_idx]
     else:
@@ -211,6 +212,7 @@ def _aba_propagate_to_parent(
     buf: _ScratchBuffers,
 ) -> None:
     """Propagate articulated-body quantities from body i to its parent."""
+    assert i is not None, "i must be provided"
     assert i is not None, "i must be provided"
     if abs(d[i]) < TOLERANCE:
         d[i] = np.sign(d[i]) * TOLERANCE if d[i] != 0 else TOLERANCE
@@ -396,6 +398,7 @@ def _aba_run_passes(
     """
     # Pass 1 - forward kinematics: velocities and bias accelerations
     assert nb is not None, "nb must be provided"
+    assert nb is not None, "nb must be provided"
     _aba_forward_kinematics(
         nb,
         q,
@@ -494,6 +497,7 @@ def aba(
         >>> tau = np.array([1.5, 0.5])
         >>> qdd = aba(model, q, qd, tau)
     """
+    assert model is not None, "model must be provided"
     assert model is not None, "model must be provided"
     q, qd, tau, nb = _aba_validate_inputs(model, q, qd, tau)
     neg_a_grav = _aba_resolve_gravity(model)

@@ -170,6 +170,7 @@ class PinocchioWrapper:
         Handles quaternion conventions (MuJoCo: w,x,y,z vs Pinocchio: x,y,z,w).
         """
         assert q_mj is not None, "q_mj must be provided"
+        assert q_mj is not None, "q_mj must be provided"
         q_pin = q_mj.copy()
 
         # MuJoCo uses freejoint for 7-DOF (3 pos + 4 quat)
@@ -201,6 +202,7 @@ class PinocchioWrapper:
 
         Handles quaternion conventions (Pinocchio: x,y,z,w vs MuJoCo: w,x,y,z).
         """
+        assert q_pin is not None, "q_pin must be provided"
         assert q_pin is not None, "q_pin must be provided"
         q_mj = q_pin.copy()
 

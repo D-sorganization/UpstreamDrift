@@ -32,6 +32,7 @@ class MotionCaptureTab(QWidget):
 
     def __init__(self, parent=None) -> None:
         assert parent is not None, "parent must be provided"
+        assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.parent = parent
         self.frame_processor = None
@@ -182,6 +183,7 @@ class MotionCaptureTab(QWidget):
     def _on_position_changed(self, position: float) -> None:
         """Update UI when playback position changes."""
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         total_frames = (
             len(self.frame_processor.time_vector) if self.frame_processor else 0
         )
@@ -196,6 +198,7 @@ class MotionCaptureTab(QWidget):
 
     def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
         """Called on every interpolated frame update (60+ FPS!)."""
+        assert frame_data is not None, "frame_data must be provided"
         assert frame_data is not None, "frame_data must be provided"
         if not self.opengl_widget.renderer:
             return
@@ -225,6 +228,7 @@ class SimulinkModelTab(QWidget):
     """Tab for Simulink model data visualization."""
 
     def __init__(self, parent=None) -> None:
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.parent = parent
@@ -369,6 +373,7 @@ class SimulinkModelTab(QWidget):
     def _on_position_changed(self, position: float) -> None:
         """Update UI when playback position changes."""
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         total_frames = (
             len(self.frame_processor.time_vector) if self.frame_processor else 0
         )
@@ -379,6 +384,7 @@ class SimulinkModelTab(QWidget):
 
     def _on_smooth_frame_updated(self, frame_data: FrameData) -> None:
         """Called on every interpolated frame update."""
+        assert frame_data is not None, "frame_data must be provided"
         assert frame_data is not None, "frame_data must be provided"
         if not self.opengl_widget.renderer:
             return
@@ -407,6 +413,7 @@ class ComparisonTab(QWidget):
     """Tab for comparing motion capture vs Simulink model data."""
 
     def __init__(self, parent=None) -> None:
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.parent = parent
@@ -536,6 +543,7 @@ class ComparisonTab(QWidget):
 
     def _on_position_changed(self, position: float) -> None:
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         if self.frame_processor_mocap:
             total_frames = len(self.frame_processor_mocap.time_vector)
         else:
@@ -547,6 +555,7 @@ class ComparisonTab(QWidget):
 
     def _on_smooth_frame_updated(self, frame_data_mocap: FrameData) -> None:
         """Update both visualizers and metrics."""
+        assert frame_data_mocap is not None, "frame_data_mocap must be provided"
         assert frame_data_mocap is not None, "frame_data_mocap must be provided"
         if not self.frame_processor_model:
             return

@@ -38,6 +38,7 @@ class ConnectionPool:
 
     def __init__(self, db_path: str) -> None:
         assert db_path is not None, "db_path must be provided"
+        assert db_path is not None, "db_path must be provided"
         self.db_path = db_path
         self._local = threading.local()
 
@@ -85,6 +86,7 @@ class RecordingLibrary:
         Args:
             library_path: Directory for recordings and database
         """
+        assert library_path is not None, "library_path must be provided"
         assert library_path is not None, "library_path must be provided"
         self.library_path = Path(library_path)
         self.library_path.mkdir(exist_ok=True)
@@ -303,6 +305,7 @@ class RecordingLibrary:
             RecordingMetadata or None if not found
         """
         assert recording_id is not None, "recording_id must be provided"
+        assert recording_id is not None, "recording_id must be provided"
         conn = self._get_connection()
         cursor = conn.cursor()
 
@@ -322,6 +325,7 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
+        assert metadata is not None, "metadata must be provided"
         assert metadata is not None, "metadata must be provided"
         if metadata.id is None:
             return False
@@ -380,6 +384,7 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
+        assert recording_id is not None, "recording_id must be provided"
         assert recording_id is not None, "recording_id must be provided"
         if delete_file:
             metadata = self.get_recording(recording_id)
@@ -447,6 +452,7 @@ class RecordingLibrary:
         Returns:
             List of matching RecordingMetadata
         """
+        assert min_rating is not None, "min_rating must be provided"
         assert min_rating is not None, "min_rating must be provided"
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -566,6 +572,7 @@ class RecordingLibrary:
             output_file: Output JSON file path
         """
         assert output_file is not None, "output_file must be provided"
+        assert output_file is not None, "output_file must be provided"
         recordings = self.get_all_recordings()
         data = {
             "library_path": str(self.library_path),
@@ -583,6 +590,7 @@ class RecordingLibrary:
             input_file: Input JSON file path
             merge: If True, merge with existing library; if False, replace
         """
+        assert input_file is not None, "input_file must be provided"
         assert input_file is not None, "input_file must be provided"
         with open(input_file) as f:
             data = json.load(f)
@@ -617,6 +625,7 @@ class RecordingLibrary:
             List of unique values
         """
         # Whitelist allowed fields to prevent SQL injection
+        assert field is not None, "field must be provided"
         assert field is not None, "field must be provided"
         allowed_fields = {
             "golfer_name",
@@ -664,6 +673,7 @@ class RecordingLibrary:
         SEC-006: Replaced MD5 with SHA-256 to prevent collision attacks.
         """
         assert file_path is not None, "file_path must be provided"
+        assert file_path is not None, "file_path must be provided"
         sha256 = hashlib.sha256()
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
@@ -679,6 +689,7 @@ class RecordingLibrary:
         Returns:
             Path to data file
         """
+        assert metadata is not None, "metadata must be provided"
         assert metadata is not None, "metadata must be provided"
         file_path = Path(metadata.filename)
         if not file_path.is_absolute():
@@ -703,6 +714,7 @@ def create_metadata_from_recording(
     Returns:
         RecordingMetadata with computed statistics
     """
+    assert data_dict is not None, "data_dict must be provided"
     assert data_dict is not None, "data_dict must be provided"
     times = data_dict.get("times", [])
     duration = times[-1] - times[0] if len(times) > 1 else 0.0

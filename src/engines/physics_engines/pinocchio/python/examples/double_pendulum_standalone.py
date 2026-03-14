@@ -95,6 +95,7 @@ def C_times_qdot(
         Vector C(q, qdot) * qdot.
     """
     assert q is not None, "q must be provided"
+    assert q is not None, "q must be provided"
     q1, q2 = q
     q1dot, q2dot = qdot
 
@@ -168,6 +169,7 @@ def tau_natural(
         Natural torque vector.
     """
     assert q is not None, "q must be provided"
+    assert q is not None, "q must be provided"
     mq = M_matrix(q) @ qddot
     cq = C_times_qdot(q, qdot)
     gq = g_vector(q)
@@ -207,6 +209,7 @@ def double_pendulum_dynamics(
     xdot : ndarray, shape (4,)
         Time derivative of the state.
     """
+    assert t is not None, "t must be provided"
     assert t is not None, "t must be provided"
     q = x[0:2]
     qdot = x[2:4]
@@ -257,6 +260,7 @@ def u_pd(
         Joint torques [u1, u2].
     """
     assert _t is not None, "_t must be provided"
+    assert _t is not None, "_t must be provided"
     q = x[0:2]
     qdot = x[2:4]
 
@@ -294,6 +298,7 @@ def compute_tau_natural_trajectory(
     tau_nat_traj : ndarray, shape (N, 2)
         Natural torque trajectory at each time sample.
     """
+    assert u_func is not None, "u_func must be provided"
     assert u_func is not None, "u_func must be provided"
     t = np.asarray(sol.t, dtype=np.float64)
     x = np.asarray(sol.y.T, dtype=np.float64)
@@ -377,6 +382,7 @@ def wrench_from_torque(
         Approximate planar wrench [Fx, Fy, Mz].
     """
     assert q is not None, "q must be provided"
+    assert q is not None, "q must be provided"
     J = J_end_effector(q)
     return np.linalg.pinv(J.T) @ tau
 
@@ -405,6 +411,7 @@ def natural_wrench(
     w_nat : ndarray, shape (3,)
         Natural planar wrench [Fx, Fy, Mz].
     """
+    assert q is not None, "q must be provided"
     assert q is not None, "q must be provided"
     tau_nat = tau_natural(q, qdot, qddot)
     return wrench_from_torque(q, tau_nat)

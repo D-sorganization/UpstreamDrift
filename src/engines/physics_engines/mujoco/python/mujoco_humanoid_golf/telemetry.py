@@ -68,6 +68,7 @@ class TelemetryRecorder:
     def __init__(self, model: mujoco.MjModel) -> None:
         """Initialize the telemetry recorder."""
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.samples: list[SimulationSample] = []
         self._current_custom_metrics: dict[str, float] = {}
@@ -127,6 +128,7 @@ class TelemetryRecorder:
     ) -> bool:
         """Check if actuator targets a joint."""
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         transmission_type = model.actuator_trntype[actuator_id]
         if transmission_type not in joint_transmission_types:
             return False
@@ -159,6 +161,7 @@ class TelemetryRecorder:
     def record_step(self, data: mujoco.MjData) -> None:
         """Capture telemetry for the current simulation state."""
 
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         actuator_torques = self._extract_actuator_torques(data)
         constraint_torques = self._extract_constraint_torques(data)
@@ -202,6 +205,7 @@ class TelemetryRecorder:
     def _extract_actuator_torques(self, data: mujoco.MjData) -> dict[str, float]:
         """Docstring for _extract_actuator_torques."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         actuator_torques: dict[str, float] = {}
         for actuator_id, dof_index in self._actuator_dof_map.items():
             torque_value = float(data.qfrc_actuator[dof_index])
@@ -218,6 +222,7 @@ class TelemetryRecorder:
     def _extract_constraint_torques(self, data: mujoco.MjData) -> dict[str, float]:
         """Docstring for _extract_constraint_torques."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         constraint_torques: dict[str, float] = {}
         for joint_id, joint_name in enumerate(self._joint_names):
             dof_index = self.model.jnt_dofadr[joint_id]
@@ -226,6 +231,7 @@ class TelemetryRecorder:
 
     def _extract_body_forces(self, data: mujoco.MjData) -> dict[str, np.ndarray]:
         """Docstring for _extract_body_forces."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         forces: dict[str, np.ndarray] = {}
         reshaped = data.cfrc_ext.reshape(-1, 6)
