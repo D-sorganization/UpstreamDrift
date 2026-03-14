@@ -65,6 +65,7 @@ class LaunchItem:
             action: Optional custom action callable (overrides path launching)
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         self.name = name
         self.description = description
         self.path = path
@@ -170,6 +171,7 @@ class BaseLauncher(QMainWindow):
             True if launch was successful, False otherwise
         """
         assert file_path is not None, "file_path must be provided"
+        assert file_path is not None, "file_path must be provided"
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
@@ -204,6 +206,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             QFrame containing the card UI
         """
+        assert item is not None, "item must be provided"
         assert item is not None, "item must be provided"
         card = QFrame()
         card.setStyleSheet(self.CARD_STYLE)
@@ -263,6 +266,7 @@ class BaseLauncher(QMainWindow):
             QGridLayout containing all cards
         """
         assert items is not None, "items must be provided"
+        assert items is not None, "items must be provided"
         if columns is None:
             columns = self.GRID_COLUMNS
 
@@ -287,6 +291,7 @@ class BaseLauncher(QMainWindow):
         Returns:
             QVBoxLayout containing header widgets
         """
+        assert title is not None, "title must be provided"
         assert title is not None, "title must be provided"
         layout = QVBoxLayout()
         layout.setSpacing(5)

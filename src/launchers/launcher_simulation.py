@@ -66,6 +66,7 @@ class LauncherSimulationMixin:
         """
         # Map model types to their required imports
         assert model_type is not None, "model_type must be provided"
+        assert model_type is not None, "model_type must be provided"
         dependency_checks = {
             "custom_humanoid": ("mujoco", "MuJoCo"),
             "custom_dashboard": ("mujoco", "MuJoCo"),
@@ -116,6 +117,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
     def _show_dependency_error(self, model_name: str, error_msg: str) -> None:
         """Show a dialog with dependency error information and suggestions."""
         assert model_name is not None, "model_name must be provided"
+        assert model_name is not None, "model_name must be provided"
         detailed_msg = f"Cannot launch {model_name}.\n\n{error_msg}\n\n"
 
         if "DLL" in error_msg or "OSError" in error_msg:
@@ -135,6 +137,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         QMessageBox.warning(self, "Dependency Error", detailed_msg)
 
     def _try_launch_special_app(self, model_id: str) -> bool:
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         if "urdf_generator" in model_id or "model_explorer" in model_id:
             self._launch_urdf_generator()
@@ -265,6 +268,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
     def _launch_generic_mjcf(self, path: Path) -> None:
         """Launch generic MJCF file in passive viewer."""
         assert path is not None, "path must be provided"
+        assert path is not None, "path must be provided"
         import mujoco
         import mujoco.viewer
 
@@ -303,6 +307,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         Delegates to DockerLauncher for container orchestration while
         handling UI feedback (prompts, status updates, error dialogs).
         """
+        assert repo_path is not None, "repo_path must be provided"
         assert repo_path is not None, "repo_path must be provided"
         from src.launchers.launcher_process_manager import start_vcxsrv
 
@@ -384,6 +389,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         """
         # Check if WSL mode is enabled
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
@@ -426,6 +432,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         If WSL mode is enabled, launches in WSL2 Ubuntu environment.
         """
         # Check if WSL mode is enabled
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
