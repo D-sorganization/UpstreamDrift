@@ -26,6 +26,14 @@ on:
         required: false
         default: "mujoco,drake,pinocchio,pendulum"
 
+concurrency:
+  group: nightly-cross-engine-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   cross-engine-validation:
     runs-on: ubuntu-latest
@@ -48,15 +56,57 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
+          pip install -e ".[dev,drake,pinocchio]"
+          pip install "mujoco>=3.3.0,<4.0.0"
 
-          # Install physics engines
-          pip install mujoco>=3.3.0
-          pip install drake
-          pip install pin  # Pinocchio
+      - name: Verify native engine imports
+        env:
+          UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
+        run: |
+          mkdir -p test-results coverage
+          python - <<'PY'
+          import importlib
+          import json
+          import sys
+          from pathlib import Path
+
+          checks = {
+              "mujoco": "mujoco",
+              "drake": "pydrake.all",
+              "pinocchio": "pinocchio",
+          }
+
+          results = {}
+          failures = []
+          for name, module_name in checks.items():
+              try:
+                  importlib.import_module(module_name)
+                  results[name] = "ok"
+              except Exception as exc:  # pragma: no cover - CI-only path
+                  results[name] = f"failed: {exc}"
+                  failures.append(f"{name}: {exc}")
+
+          Path("test-results/native-engine-imports.json").write_text(
+              json.dumps(results, indent=2),
+              encoding="utf-8",
+          )
+
+          summary = Path("test-results/native-engine-imports.md")
+          lines = ["## Native Engine Import Check", ""]
+          for name, status in results.items():
+              icon = "OK" if status == "ok" else "FAIL"
+              lines.append(f"- {icon} {name}: {status}")
+          summary.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+
+          if failures:
+              print("\\n".join(failures), file=sys.stderr)
+              sys.exit(1)
+          PY
 
       - name: Run cross-engine validation tests
         id: validation
+        env:
+          UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
         run: |
           pytest tests/integration/test_cross_engine_validation.py \
             -v \
@@ -64,7 +114,6 @@ jobs:
             --junitxml=test-results/cross-engine-junit.xml \
             --cov=shared/python/cross_engine_validator \
             --cov-report=xml:coverage/cross-engine-coverage.xml
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
@@ -80,79 +129,65 @@ jobs:
           name: cross-engine-coverage
           path: coverage/
 
-      - name: Check for WARNING-level deviations
-        id: check_warnings
-        run: |
-          # Parse test output for WARNING threshold exceedances (2× tolerance)
-          # Flag if any validation exceeds WARNING but not ERROR
-
-          if grep -q "WARNING.*deviation" test-results/cross-engine-junit.xml; then
-            echo "has_warnings=true" >> $GITHUB_OUTPUT
-            echo "⚠️ Cross-engine deviations detected (WARNING level)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "has_warnings=false" >> $GITHUB_OUTPUT
-            echo "✅ All cross-engine validations within tolerance" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Check for ERROR-level deviations
-        id: check_errors
-        run: |
-          # Parse for ERROR threshold exceedances (10× tolerance)
-          if grep -q "ERROR.*deviation" test-results/cross-engine-junit.xml; then
-            echo "has_errors=true" >> $GITHUB_OUTPUT
-            echo "❌ CRITICAL: Cross-engine deviations exceed ERROR threshold" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          else
-            echo "has_errors=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Generate deviation summary
+      - name: Summarize validation results
+        id: summarize
         if: always()
         run: |
-          python -c "
+          python - <<'PY'
+          import os
           import xml.etree.ElementTree as ET
-          import sys, os
+          from pathlib import Path
 
-          xml_path = 'test-results/cross-engine-junit.xml'
-          if not os.path.exists(xml_path):
-            print('## Cross-Engine Validation Summary')
-            print('- **No test results found** (tests may not have run)')
-            sys.exit(0)
+          summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
+          xml_path = Path("test-results/cross-engine-junit.xml")
+
+          if not xml_path.exists():
+              summary_path.write_text(
+                  "## Cross-Engine Validation Summary\n\n- No test results found.\n",
+                  encoding="utf-8",
+              )
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+                  fh.write("has_failures=true\n")
+              raise SystemExit(0)
 
           tree = ET.parse(xml_path)
           root = tree.getroot()
+          suite = root.find("testsuite") if root.tag == "testsuites" else root
+          if suite is None:
+              summary_path.write_text(
+                  "## Cross-Engine Validation Summary\n\n- No test suite found in results.\n",
+                  encoding="utf-8",
+              )
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+                  fh.write("has_failures=true\n")
+              raise SystemExit(0)
 
-          # Handle both <testsuites> (pytest) and <testsuite> root elements
-          if root.tag == 'testsuites':
-            suite = root.find('testsuite')
-            if suite is None:
-              print('## Cross-Engine Validation Summary')
-              print('- **No test suite found in results**')
-              sys.exit(0)
-          else:
-            suite = root
+          tests = int(suite.attrib.get("tests", "0"))
+          failures = int(suite.attrib.get("failures", "0"))
+          errors = int(suite.attrib.get("errors", "0"))
+          skipped = int(suite.attrib.get("skipped", "0"))
+          has_failures = failures > 0 or errors > 0
 
-          print('## Cross-Engine Validation Summary')
-          print(f'- **Tests run**: {suite.attrib.get(\"tests\", \"N/A\")}')
-          print(f'- **Failures**: {suite.attrib.get(\"failures\", \"N/A\")}')
-          print(f'- **Errors**: {suite.attrib.get(\"errors\", \"N/A\")}')
-          print(f'- **Skipped**: {suite.attrib.get(\"skipped\", \"N/A\")}')
+          lines = [
+              "## Cross-Engine Validation Summary",
+              "",
+              f"- Tests run: {tests}",
+              f"- Failures: {failures}",
+              f"- Errors: {errors}",
+              f"- Skipped: {skipped}",
+          ]
 
-          # Extract max deviation from test outputs
-          for testcase in root.findall('.//testcase'):
-            name = testcase.attrib.get('name', '')
-            if 'deviation' in name:
-              print(f'- **{name}**')
-              if testcase.find('failure') is not None:
-                print('  - Status: FAILED')
-              elif testcase.find('error') is not None:
-                print('  - Status: ERROR')
-              else:
-                print('  - Status: PASSED')
-          " >> $GITHUB_STEP_SUMMARY
+          imports_path = Path("test-results/native-engine-imports.md")
+          if imports_path.exists():
+              lines.extend(["", imports_path.read_text(encoding="utf-8").strip()])
+
+          summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"has_failures={'true' if has_failures else 'false'}\n")
+          PY
 
       - name: Send notification on ERROR
-        if: steps.check_errors.outputs.has_errors == 'true'
+        if: steps.summarize.outputs.has_failures == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -162,16 +197,17 @@ jobs:
               title: '🚨 Nightly Cross-Engine Validation FAILED',
               body: `## Critical Cross-Engine Deviation Detected
 
-              The nightly cross-engine validation has detected deviations exceeding the ERROR threshold (10× tolerance).
+              The nightly cross-engine validation failed or reported errors.
 
               **Action Required:**
               1. Review test results in [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-              2. Investigate which engines diverged
+              2. Investigate which engine import or cross-engine assertion failed
               3. Check for recent engine updates or integration changes
               4. Run local validation: \`pytest tests/integration/test_cross_engine_validation.py -v\`
 
               **Possible Causes:**
               - Engine library version upgrade
+              - Native dependency failed to import on runner
               - Integration timestep changes
               - Model definition drift
               - Constraint handling differences
@@ -180,33 +216,6 @@ jobs:
 
               Guideline P3 Compliance: **VIOLATION**`,
               labels: ['bug', 'cross-engine', 'ci-failure', 'priority-high']
-            })
-
-      - name: Send notification on WARNING
-        if: steps.check_warnings.outputs.has_warnings == 'true' && steps.check_errors.outputs.has_errors == 'false'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '⚠️ Cross-Engine Validation - WARNING Level Deviations',
-              body: `## Cross-Engine Deviations Detected (Acceptable but Monitor)
-
-              The nightly validation detected deviations between 2-10× tolerance (WARNING level).
-
-              **Status:** Acceptable but should be monitored for trends.
-
-              **Review:**
-              - [Workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-              - Check if deviation is increasing over time
-              - Document expected deviation sources
-
-              This is informational - no immediate action required unless trend continues.
-
-              Guideline P3 Compliance: **ACCEPTABLE WITH CAUTION**`,
-              labels: ['monitoring', 'cross-engine', 'low-priority']
             })
 
   publish-dashboard:
