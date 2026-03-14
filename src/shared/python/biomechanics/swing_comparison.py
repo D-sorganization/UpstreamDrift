@@ -58,6 +58,7 @@ class SwingComparator:
             student_data: Student swing data (User)
         """
         assert reference_data is not None, "reference_data must be provided"
+        assert reference_data is not None, "reference_data must be provided"
         self.ref = self._ensure_analyzer(reference_data)
         self.student = self._ensure_analyzer(student_data)
 
@@ -109,6 +110,7 @@ class SwingComparator:
         Returns:
             DTWResult object
         """
+        assert joint_idx is not None, "joint_idx must be provided"
         assert joint_idx is not None, "joint_idx must be provided"
         if feature == "position":
             ref_data = self.ref.joint_positions
@@ -180,6 +182,7 @@ class SwingComparator:
         Returns:
             Dictionary of comparison metrics
         """
+        assert segment_indices is not None, "segment_indices must be provided"
         assert segment_indices is not None, "segment_indices must be provided"
         require(
             len(segment_indices) > 0,

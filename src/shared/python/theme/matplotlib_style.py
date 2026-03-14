@@ -191,6 +191,7 @@ def create_styled_figure(
         Tuple of (Figure, Axes or array of Axes)
     """
     assert nrows is not None, "nrows must be provided"
+    assert nrows is not None, "nrows must be provided"
     if figsize is None:
         figsize = (10, 6)
 
@@ -212,6 +213,7 @@ def style_for_export(fig: Figure, dpi: int = 200) -> None:
         fig: Figure to prepare
         dpi: DPI for export (default 200 for crisp output)
     """
+    assert fig is not None, "fig must be provided"
     assert fig is not None, "fig must be provided"
     fig.set_dpi(dpi)
     fig.set_facecolor(Colors.BG_BASE)

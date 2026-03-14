@@ -307,6 +307,7 @@ def calculate_gas_viscosity(temperature_k: float, molecular_weight: float) -> fl
     """
     # Base viscosity at 300K for syngas (approximately air-like)
     assert temperature_k is not None, "temperature_k must be provided"
+    assert temperature_k is not None, "temperature_k must be provided"
     mu_ref = SYNGAS_VISCOSITY_REF  # Pa·s at 300K
     t_ref = SUTHERLAND_T_REF  # K
     s = SUTHERLAND_CONSTANT_AIR  # Sutherland constant for air-like gases
@@ -348,6 +349,7 @@ def calculate_flooding_velocity(
         Perry's Chemical Engineers' Handbook, 9th Edition, Eq. 14-139
     """
     # Flow parameter (Eckert abscissa)
+    assert liquid_mass_flux is not None, "liquid_mass_flux must be provided"
     assert liquid_mass_flux is not None, "liquid_mass_flux must be provided"
     flow_param = (liquid_mass_flux / 1.0) * np.sqrt(gas_density / liquid_density)
 
@@ -402,6 +404,7 @@ def calculate_pressure_drop(
     """
     # Gas mass flux
     assert gas_velocity is not None, "gas_velocity must be provided"
+    assert gas_velocity is not None, "gas_velocity must be provided"
     g_gas = gas_velocity * gas_density  # kg/(m²·s)
 
     # Flow parameter
@@ -450,6 +453,7 @@ def calculate_ntu_removal(inlet_conc: float, outlet_conc: float) -> float:
         Treybal, R.E., "Mass Transfer Operations", 3rd Edition, Chapter 8
     """
     assert inlet_conc is not None, "inlet_conc must be provided"
+    assert inlet_conc is not None, "inlet_conc must be provided"
     if outlet_conc <= 0 or inlet_conc <= 0:
         return 0.0
 
@@ -494,6 +498,7 @@ def calculate_htu(
         Strigle, R.F., "Packed Tower Design and Applications", 2nd Edition
     """
     # Convert kla from 1/hr to 1/s
+    assert gas_mass_flux is not None, "gas_mass_flux must be provided"
     assert gas_mass_flux is not None, "gas_mass_flux must be provided"
     kla_per_s = kla / SECONDS_PER_HOUR
 
@@ -567,6 +572,7 @@ def calculate_caustic_requirement(
         - salt_produced_kg_hr: Total salt produced [kg/hr]
     """
     # Stoichiometric ratios and molecular weights
+    assert acid_gas_removed is not None, "acid_gas_removed must be provided"
     assert acid_gas_removed is not None, "acid_gas_removed must be provided"
     stoich_data = {
         "hcl": (NAOH_STOICH_HCL, MW_HCL, MW_NACL),
@@ -651,6 +657,7 @@ def calculate_heat_transfer_duty(
     """
     # Convert flow to kg/s
     assert gas_flow_kg_hr is not None, "gas_flow_kg_hr must be provided"
+    assert gas_flow_kg_hr is not None, "gas_flow_kg_hr must be provided"
     gas_flow_kg_s = gas_flow_kg_hr / SECONDS_PER_HOUR
     water_condensed_kg_s = water_condensed_kg_hr / SECONDS_PER_HOUR
 
@@ -699,6 +706,7 @@ def calculate_cooling_water_requirement(
         - delta_t_water: Water temperature rise [°C]
     """
     # Water outlet temperature (limited by approach to gas outlet)
+    assert heat_duty_kw is not None, "heat_duty_kw must be provided"
     assert heat_duty_kw is not None, "heat_duty_kw must be provided"
     water_outlet_temp_c = outlet_gas_temp_c - approach_temp_c
     delta_t_water = water_outlet_temp_c - water_inlet_temp_c
@@ -759,6 +767,7 @@ def calculate_column_diameter(
         - diameter_ft: Column diameter [ft]
     """
     # Design velocity
+    assert gas_flow_kg_hr is not None, "gas_flow_kg_hr must be provided"
     assert gas_flow_kg_hr is not None, "gas_flow_kg_hr must be provided"
     design_velocity = flooding_velocity * (percent_of_flood / 100.0)
 

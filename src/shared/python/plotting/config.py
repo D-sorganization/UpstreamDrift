@@ -142,6 +142,7 @@ class PlotConfig:
             ``nrows == ncols == 1``, otherwise a numpy array of axes.
         """
         assert nrows is not None, "nrows must be provided"
+        assert nrows is not None, "nrows must be provided"
         if self.style:
             plt.style.use(self.style)
 

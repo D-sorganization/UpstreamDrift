@@ -30,6 +30,7 @@ def launch_dashboard(
         engine_kwargs: Optional keyword arguments for the engine constructor.
     """
     assert engine_class is not None, "engine_class must be provided"
+    assert engine_class is not None, "engine_class must be provided"
     configure_gui_logging()
 
     app = get_qapp()

@@ -68,6 +68,7 @@ def export_figure(
         List of paths to the saved files.
     """
     assert fig is not None, "fig must be provided"
+    assert fig is not None, "fig must be provided"
     config = config or ExportConfig()
     out_dir = Path(config.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -112,6 +113,7 @@ def export_plot_data(
     Returns:
         Path to the exported file.
     """
+    assert data is not None, "data must be provided"
     assert data is not None, "data must be provided"
     config = config or ExportConfig()
     out_dir = Path(config.output_dir)
@@ -181,6 +183,7 @@ def export_all_figures(
     Returns:
         ``{name: [paths]}`` mapping.
     """
+    assert figures is not None, "figures must be provided"
     assert figures is not None, "figures must be provided"
     results: dict[str, list[Path]] = {}
     for name, fig in figures.items():

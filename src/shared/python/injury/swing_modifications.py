@@ -188,6 +188,7 @@ class SwingModificationRecommender:
             ModificationPlan with prioritized modifications
         """
         assert injury_report is not None, "injury_report must be provided"
+        assert injury_report is not None, "injury_report must be provided"
         if injury_report is None:
             plan = ModificationPlan()
             plan.primary_modification = self.MODIFICATIONS["stabilize_spine"]
@@ -209,6 +210,7 @@ class SwingModificationRecommender:
         injury_report: object,
     ) -> list[tuple[SwingModification, float]]:
         """Match risk factors to applicable swing modifications."""
+        assert injury_report is not None, "injury_report must be provided"
         assert injury_report is not None, "injury_report must be provided"
         applicable_mods: list[tuple[SwingModification, float]] = []
 
@@ -246,6 +248,7 @@ class SwingModificationRecommender:
         performance_requirements: dict,
     ) -> list[tuple[SwingModification, float]]:
         """Remove modifications exceeding the allowed performance loss."""
+        assert applicable_mods is not None, "applicable_mods must be provided"
         assert applicable_mods is not None, "applicable_mods must be provided"
         max_loss = performance_requirements.get("max_performance_loss", 10)
         return [
@@ -293,6 +296,7 @@ class SwingModificationRecommender:
 
     def _factor_score(self, factor: object) -> float:
         """Convert risk factor to score."""
+        assert factor is not None, "factor must be provided"
         assert factor is not None, "factor must be provided"
         value = getattr(factor, "value", 0)
         safe = getattr(factor, "threshold_safe", 50)
@@ -358,6 +362,7 @@ if __name__ == "__main__":
 
     class MockFactor:
         def __init__(self, name: str, value: float, safe: float, high: float) -> None:
+            assert name is not None, "name must be provided"
             assert name is not None, "name must be provided"
             self.name = name
             self.value = value

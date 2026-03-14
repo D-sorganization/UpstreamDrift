@@ -207,6 +207,7 @@ class DataProcessorEngine(BaseCalculationEngine):
     def load_dataframe(self, df: pd.DataFrame) -> ProcessingResult:
         """Load data from an existing DataFrame."""
         assert df is not None, "df must be provided"
+        assert df is not None, "df must be provided"
         self._save_undo_state()
         self.data = df.copy()
         self.original_data = self.data.copy()

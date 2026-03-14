@@ -81,6 +81,7 @@ class ShortcutBadge(QFrame):
 
     def __init__(self, text: str, parent: QWidget | None = None) -> None:
         assert text is not None, "text must be provided"
+        assert text is not None, "text must be provided"
         super().__init__(parent)
         self.text = text
         self._setup_ui()
@@ -141,6 +142,7 @@ class ShortcutsOverlay(QWidget):
             shortcuts: List of shortcuts to display (uses defaults if None)
         """
         assert parent is not None, "parent must be provided"
+        assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.shortcuts = shortcuts or DEFAULT_SHORTCUTS
         self._setup_ui()
@@ -194,6 +196,7 @@ class ShortcutsOverlay(QWidget):
 
     def _create_header(self, content_layout: QVBoxLayout) -> None:
         assert content_layout is not None, "content_layout must be provided"
+        assert content_layout is not None, "content_layout must be provided"
         header = QHBoxLayout()
         title = QLabel("Keyboard Shortcuts")
         if THEME_AVAILABLE:
@@ -232,6 +235,7 @@ class ShortcutsOverlay(QWidget):
         content_layout.addLayout(header)
 
     def _create_shortcuts_scroll(self, content_layout: QVBoxLayout) -> None:
+        assert content_layout is not None, "content_layout must be provided"
         assert content_layout is not None, "content_layout must be provided"
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -274,6 +278,7 @@ class ShortcutsOverlay(QWidget):
         self, category: str, shortcuts: list[Shortcut]
     ) -> QWidget:
         """Create a section for a category of shortcuts."""
+        assert category is not None, "category must be provided"
         assert category is not None, "category must be provided"
         section = QWidget()
         layout = QVBoxLayout(section)

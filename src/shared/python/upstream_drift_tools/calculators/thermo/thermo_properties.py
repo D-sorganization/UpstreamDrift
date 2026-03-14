@@ -111,6 +111,7 @@ class ThermoPropertiesCalculator:
             ThermoResult with all computed properties.
         """
         assert temperature_c is not None, "temperature_c must be provided"
+        assert temperature_c is not None, "temperature_c must be provided"
         temp_k = temperature_c + 273.15
         pressure_pa = pressure_kpa * 1000.0
 

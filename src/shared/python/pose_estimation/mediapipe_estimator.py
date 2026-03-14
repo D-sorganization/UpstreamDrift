@@ -116,6 +116,9 @@ class MediaPipeEstimator(PoseEstimator):
         assert min_detection_confidence is not None, (
             "min_detection_confidence must be provided"
         )
+        assert min_detection_confidence is not None, (
+            "min_detection_confidence must be provided"
+        )
         self.pose_detector: Any | None = None
         self.min_detection_confidence = min_detection_confidence
         self.min_tracking_confidence = min_tracking_confidence
@@ -282,6 +285,7 @@ class MediaPipeEstimator(PoseEstimator):
         Returns:
             Smoothed keypoints
         """
+        assert keypoints_3d is not None, "keypoints_3d must be provided"
         assert keypoints_3d is not None, "keypoints_3d must be provided"
         smoothed = {}
 

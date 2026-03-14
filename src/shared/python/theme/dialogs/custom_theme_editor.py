@@ -43,6 +43,7 @@ class ColorPickerButton(QPushButton):
         self, initial_color: str = "#ffffff", parent: QWidget | None = None
     ) -> None:
         assert initial_color is not None, "initial_color must be provided"
+        assert initial_color is not None, "initial_color must be provided"
         super().__init__(parent)
         self._color = initial_color
         self.setFixedSize(60, 30)
@@ -122,6 +123,7 @@ class ThemePreviewWidget(QWidget):
     def apply_theme_colors(self, colors: dict[str, str]) -> None:
         """Apply theme colors to preview elements."""
         assert colors is not None, "colors must be provided"
+        assert colors is not None, "colors must be provided"
         stylesheet = f"""
             QWidget {{
                 background-color: {colors.get("bg", "#ffffff")};
@@ -178,6 +180,7 @@ class CustomThemeEditor(QDialog):
         parent: QWidget | None = None,
         edit_theme: str | None = None,
     ) -> None:
+        assert theme_manager is not None, "theme_manager must be provided"
         assert theme_manager is not None, "theme_manager must be provided"
         super().__init__(parent)
         self.theme_manager = theme_manager
@@ -350,6 +353,7 @@ class CustomThemeEditor(QDialog):
     def _load_preset_theme(self, theme_name: str) -> None:
         """Load colors from a preset theme."""
         assert theme_name is not None, "theme_name must be provided"
+        assert theme_name is not None, "theme_name must be provided"
         theme_def = self.theme_manager.get_theme_definition(theme_name)
         if theme_def:
             self.theme_colors = dict(theme_def)
@@ -368,6 +372,7 @@ class CustomThemeEditor(QDialog):
 
     def _on_color_changed(self, key: str, color: str) -> None:
         """Handle color change from color picker."""
+        assert key is not None, "key must be provided"
         assert key is not None, "key must be provided"
         self.theme_colors[key] = color
         self._update_preview()
@@ -408,6 +413,7 @@ class CustomThemeEditor(QDialog):
 
     def _perform_save(self, apply_immediately: bool = False) -> bool:
         """Perform the actual save operation."""
+        assert apply_immediately is not None, "apply_immediately must be provided"
         assert apply_immediately is not None, "apply_immediately must be provided"
         name = self.name_edit.text().strip()
 

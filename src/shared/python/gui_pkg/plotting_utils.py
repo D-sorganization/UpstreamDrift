@@ -57,6 +57,7 @@ def create_figure(
         fig, axes = create_figure(nrows=2, ncols=2)
     """
     assert figsize is not None, "figsize must be provided"
+    assert figsize is not None, "figsize must be provided"
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, **kwargs)
     logger.debug(f"Created figure with size {figsize}, {nrows}x{ncols} subplots")
     return fig, axes
@@ -82,6 +83,7 @@ def save_figure(
         save_figure(fig, "output/plot.png")
         save_figure(fig, "plot.pdf", dpi=600)
     """
+    assert fig is not None, "fig must be provided"
     assert fig is not None, "fig must be provided"
     path_obj = Path(path)
     ensure_directory(path_obj.parent)
@@ -129,6 +131,7 @@ def format_axis(
     Example:
         format_axis(ax, xlabel="Time [s]", ylabel="Position [m]", title="Trajectory")
     """
+    assert ax is not None, "ax must be provided"
     assert ax is not None, "ax must be provided"
     if xlabel:
         ax.set_xlabel(xlabel)
@@ -186,6 +189,7 @@ def plot_multiple_time_series(
         )
     """
     assert ax is not None, "ax must be provided"
+    assert ax is not None, "ax must be provided"
     for label, data in data_dict.items():
         ax.plot(time, data, label=label, **kwargs)
     ax.legend()
@@ -217,6 +221,7 @@ def create_comparison_plot(
     Example:
         fig, ax = create_comparison_plot(time, measured, simulated)
     """
+    assert time is not None, "time must be provided"
     assert time is not None, "time must be provided"
     fig, ax = create_figure(**kwargs)
     ax.plot(time, data1, label=label1, linestyle="-")
@@ -250,6 +255,7 @@ def create_error_plot(
         fig, ax = create_error_plot(time, measured, simulated)
     """
     assert time is not None, "time must be provided"
+    assert time is not None, "time must be provided"
     fig, ax = create_figure(**kwargs)
     error = data1 - data2
     ax.plot(time, error)
@@ -282,6 +288,7 @@ def create_subplot_grid(
         for ax in axes.flat:
             ax.plot(data)
     """
+    assert nrows is not None, "nrows must be provided"
     assert nrows is not None, "nrows must be provided"
     if figsize is None:
         # Auto-calculate figure size

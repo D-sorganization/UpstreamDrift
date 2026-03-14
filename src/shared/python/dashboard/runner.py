@@ -37,6 +37,7 @@ class SimulationRunner(QtCore.QThread):
             target_fps: Target frames per second
         """
         assert engine is not None, "engine must be provided"
+        assert engine is not None, "engine must be provided"
         super().__init__()
         self.engine = engine
         self.recorder = recorder

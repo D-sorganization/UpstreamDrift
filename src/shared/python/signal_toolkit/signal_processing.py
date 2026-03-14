@@ -85,6 +85,7 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
         DTW distance (float)
     """
     assert series1 is not None, "series1 must be provided"
+    assert series1 is not None, "series1 must be provided"
     n = len(series1)
     m = len(series2)
 
@@ -158,6 +159,7 @@ def _dtw_path_core(
         tuple: (distance, path_i, path_j)
         path_i, path_j are arrays of indices (reversed order)
     """
+    assert series1 is not None, "series1 must be provided"
     assert series1 is not None, "series1 must be provided"
     n = len(series1)
     m = len(series2)
@@ -285,6 +287,7 @@ def compute_coherence(
     Returns:
         tuple: (frequencies, coherence_values)
     """
+    assert x is not None, "x must be provided"
     assert x is not None, "x must be provided"
     require(fs > 0, "Sampling frequency must be positive", fs)
     require(len(x) > 0, "Input x must be non-empty")
@@ -431,6 +434,7 @@ def _morlet2_impl(M: int, s: float, w: float = 5.0) -> np.ndarray:
     PERFORMANCE FIX: Added LRU cache to avoid recomputing wavelets.
     """
     assert M is not None, "M must be provided"
+    assert M is not None, "M must be provided"
     x = np.arange(0, M) - (M - 1.0) / 2
     x = x / s
     output: np.ndarray = np.exp(1j * w * x) * np.exp(-0.5 * x**2) * np.pi ** (-0.25)
@@ -461,6 +465,7 @@ def _get_cached_wavelet(M: int, s_int: int, w0_int: int, n_fft: int) -> np.ndarr
         Wavelet FFT (complex array)
     """
     assert M is not None, "M must be provided"
+    assert M is not None, "M must be provided"
     s = s_int / 1000.0
     w0 = w0_int / 100.0
 
@@ -485,6 +490,7 @@ def _validate_cwt_inputs(fs, freq_range):
 
 def _prepare_cwt_fft(data, freqs, w0, fs):
     assert data is not None, "data must be provided"
+    assert data is not None, "data must be provided"
     n_data = len(data)
 
     # Determine maximum wavelet width (corresponds to smallest frequency / largest scale)
@@ -504,6 +510,7 @@ def _prepare_cwt_fft(data, freqs, w0, fs):
 
 
 def _convolve_wavelet_at_scale(data_fft, n_fft, n_data, s, w0):
+    assert data_fft is not None, "data_fft must be provided"
     assert data_fft is not None, "data_fft must be provided"
     M = int(2 * 5 * s + 1)
 
@@ -568,6 +575,7 @@ def compute_cwt(
         cwt_matrix: Complex CWT coefficients (freqs x time)
     """
     assert data is not None, "data must be provided"
+    assert data is not None, "data must be provided"
     _validate_cwt_inputs(fs, freq_range)
 
     freqs = np.geomspace(freq_range[0], freq_range[1], num=num_freqs)
@@ -608,6 +616,7 @@ def compute_xwt(
         (freqs, times, xwt_matrix)
         xwt_matrix is complex. Magnitude is cross-power, Angle is relative phase.
     """
+    assert data1 is not None, "data1 must be provided"
     assert data1 is not None, "data1 must be provided"
     f1, t1, w1 = compute_cwt(data1, fs, freq_range, num_freqs, w0)
     f2, t2, w2 = compute_cwt(data2, fs, freq_range, num_freqs, w0)
@@ -756,6 +765,7 @@ def compute_dtw_distance(
         DTW distance (float)
     """
     assert series1 is not None, "series1 must be provided"
+    assert series1 is not None, "series1 must be provided"
     n = len(series1)
     m = len(series2)
 
@@ -815,6 +825,7 @@ def compute_dtw_path(
     """
     # Ensure inputs are float64 arrays for Numba
     assert series1 is not None, "series1 must be provided"
+    assert series1 is not None, "series1 must be provided"
     s1 = np.asarray(series1, dtype=np.float64)
     s2 = np.asarray(series2, dtype=np.float64)
 
@@ -873,6 +884,7 @@ class KalmanFilter:
             x: Initial state (dim_x,)
         """
         assert dim_x is not None, "dim_x must be provided"
+        assert dim_x is not None, "dim_x must be provided"
         self.dim_x = dim_x
         self.dim_z = dim_z
 
@@ -906,6 +918,7 @@ class KalmanFilter:
             z: Measurement vector
         """
         # System uncertainty
+        assert z is not None, "z must be provided"
         assert z is not None, "z must be provided"
         S = self.H @ self.P @ self.H.T + self.R
 

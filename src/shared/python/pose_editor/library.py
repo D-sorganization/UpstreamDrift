@@ -77,6 +77,7 @@ class StoredPose:
     def from_dict(cls, data: dict[str, Any]) -> StoredPose:
         """Create from dictionary."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         category = PresetPoseCategory.CUSTOM
         if "category" in data:
             for cat in PresetPoseCategory:
@@ -121,6 +122,7 @@ class PoseInterpolator:
             Interpolated joint positions
         """
         assert pose_a is not None, "pose_a must be provided"
+        assert pose_a is not None, "pose_a must be provided"
         alpha = np.clip(alpha, 0.0, 1.0)
 
         # Handle size mismatch
@@ -160,6 +162,7 @@ class PoseInterpolator:
         """
         # Normalize angle difference
         assert angle_a is not None, "angle_a must be provided"
+        assert angle_a is not None, "angle_a must be provided"
         diff = angle_b - angle_a
 
         # Take shortest path
@@ -190,6 +193,7 @@ class PoseInterpolator:
         Returns:
             Interpolated joint positions
         """
+        assert pose_a is not None, "pose_a must be provided"
         assert pose_a is not None, "pose_a must be provided"
         alpha = np.clip(alpha, 0.0, 1.0)
         t = alpha
@@ -223,6 +227,7 @@ class PoseInterpolator:
         Returns:
             Interpolated joint positions
         """
+        assert poses is not None, "poses must be provided"
         assert poses is not None, "poses must be provided"
         if len(poses) < 2:
             return poses[0].joint_positions if poses else np.array([])
@@ -284,6 +289,7 @@ class PoseLibrary:
         """
         # Check for existing pose
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         existing = self._poses.get(name)
         created_at = existing.created_at if existing else datetime.now().isoformat()
 
@@ -324,6 +330,7 @@ class PoseLibrary:
             True if deleted, False if not found
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         if name in self._poses:
             del self._poses[name]
             logger.info("Deleted pose: %s", name)
@@ -340,6 +347,7 @@ class PoseLibrary:
         Returns:
             True if renamed successfully
         """
+        assert old_name is not None, "old_name must be provided"
         assert old_name is not None, "old_name must be provided"
         if old_name not in self._poses:
             return False
@@ -413,6 +421,7 @@ class PoseLibrary:
             Interpolated positions or None if poses not found
         """
         assert pose_name_a is not None, "pose_name_a must be provided"
+        assert pose_name_a is not None, "pose_name_a must be provided"
         pose_a = self._poses.get(pose_name_a)
         pose_b = self._poses.get(pose_name_b)
 
@@ -430,6 +439,7 @@ class PoseLibrary:
         Returns:
             Number of poses exported
         """
+        assert file_path is not None, "file_path must be provided"
         assert file_path is not None, "file_path must be provided"
         file_path = Path(file_path)
         data = {
@@ -458,6 +468,7 @@ class PoseLibrary:
         Returns:
             Number of poses imported
         """
+        assert file_path is not None, "file_path must be provided"
         assert file_path is not None, "file_path must be provided"
         file_path = Path(file_path)
 
@@ -494,6 +505,7 @@ class PoseLibrary:
         Returns:
             Number of poses merged
         """
+        assert other is not None, "other must be provided"
         assert other is not None, "other must be provided"
         merged = 0
         for name, pose in other._poses.items():

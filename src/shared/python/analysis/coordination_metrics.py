@@ -53,6 +53,7 @@ class CoordinationMetricsMixin:
             Array of coupling angles in degrees [0, 360)
         """
         assert joint_idx_1 is not None, "joint_idx_1 must be provided"
+        assert joint_idx_1 is not None, "joint_idx_1 must be provided"
         if (
             joint_idx_1 >= self.joint_velocities.shape[1]
             or joint_idx_2 >= self.joint_velocities.shape[1]
@@ -107,6 +108,7 @@ class CoordinationMetricsMixin:
         Returns:
             CoordinationMetrics object or None
         """
+        assert joint_idx_1 is not None, "joint_idx_1 must be provided"
         assert joint_idx_1 is not None, "joint_idx_1 must be provided"
         angles = self.compute_coupling_angles(joint_idx_1, joint_idx_2)
         if len(angles) == 0:
@@ -186,6 +188,7 @@ class CoordinationMetricsMixin:
             Array of phase angles in degrees (unwrapped)
         """
         assert joint_idx is not None, "joint_idx must be provided"
+        assert joint_idx is not None, "joint_idx must be provided"
         if (
             joint_idx >= self.joint_positions.shape[1]
             or joint_idx >= self.joint_velocities.shape[1]
@@ -232,6 +235,7 @@ class CoordinationMetricsMixin:
             Array of CRP values in degrees
         """
         assert joint_idx_1 is not None, "joint_idx_1 must be provided"
+        assert joint_idx_1 is not None, "joint_idx_1 must be provided"
         phi1 = self.compute_phase_angle(joint_idx_1)
         phi2 = self.compute_phase_angle(joint_idx_2)
 
@@ -253,6 +257,7 @@ class CoordinationMetricsMixin:
         Returns:
             Tuple of (correlation_matrix, labels)
         """
+        assert data_type is not None, "data_type must be provided"
         assert data_type is not None, "data_type must be provided"
         if data_type == "position":
             data = self.joint_positions
@@ -293,6 +298,7 @@ class CoordinationMetricsMixin:
         Returns:
             Tuple of (times, correlations). Times correspond to window centers.
         """
+        assert joint_idx_1 is not None, "joint_idx_1 must be provided"
         assert joint_idx_1 is not None, "joint_idx_1 must be provided"
         require(window_size >= 2, "window_size must be >= 2", window_size)
 
@@ -363,6 +369,7 @@ class CoordinationMetricsMixin:
             Matrix[i, j] > 0 means i leads j (j lags i).
         """
         assert data_type is not None, "data_type must be provided"
+        assert data_type is not None, "data_type must be provided"
         if data_type == "position":
             data = self.joint_positions
         elif data_type == "torque":
@@ -395,6 +402,7 @@ class CoordinationMetricsMixin:
 
             def compute_lag_pair(i: int, j: int) -> tuple[int, int, float]:
                 """Compute lag for a single pair of joints."""
+                assert i is not None, "i must be provided"
                 assert i is not None, "i must be provided"
                 lag = signal_processing.compute_time_shift(
                     data[:, i], data[:, j], fs, max_lag=max_lag

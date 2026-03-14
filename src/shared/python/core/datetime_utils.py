@@ -436,6 +436,7 @@ def add_days(dt: datetime | None = None, days: int = 0) -> datetime:
         New datetime with days added.
     """
     assert days is not None, "days must be provided"
+    assert days is not None, "days must be provided"
     if dt is None:
         dt = now_utc()
     return dt + timedelta(days=days)
@@ -484,6 +485,7 @@ def is_expired(dt: datetime, ttl_seconds: float) -> bool:
         >>> is_expired(created, ttl_seconds=1800)  # 30 min TTL
         True
     """
+    assert dt is not None, "dt must be provided"
     assert dt is not None, "dt must be provided"
     now = now_utc()
 

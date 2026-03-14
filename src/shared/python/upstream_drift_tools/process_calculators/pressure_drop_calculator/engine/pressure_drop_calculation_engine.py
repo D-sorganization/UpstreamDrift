@@ -122,6 +122,7 @@ def friction_factor_colebrook(
         The Moody diagram is a graphical representation of this equation.
     """
     assert reynolds_number is not None, "reynolds_number must be provided"
+    assert reynolds_number is not None, "reynolds_number must be provided"
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -174,6 +175,7 @@ def friction_factor_swamee_jain(
         Explicit formula, no iteration required. Excellent for computational efficiency.
     """
     assert reynolds_number is not None, "reynolds_number must be provided"
+    assert reynolds_number is not None, "reynolds_number must be provided"
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -217,6 +219,7 @@ def friction_factor_churchill(
         Single equation valid for all flow regimes. Very useful for transitional flow.
     """
     assert reynolds_number is not None, "reynolds_number must be provided"
+    assert reynolds_number is not None, "reynolds_number must be provided"
     Re = reynolds_number
 
     if Re < 1:
@@ -255,6 +258,7 @@ def friction_factor_haaland(reynolds_number: float, relative_roughness: float) -
         Haaland, S.E. (1983): "Simple and Explicit Formulas for Friction Factor"
         J. Fluids Engineering, 105(1), 89-90
     """
+    assert reynolds_number is not None, "reynolds_number must be provided"
     assert reynolds_number is not None, "reynolds_number must be provided"
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
@@ -496,6 +500,7 @@ def calculate_fitting_pressure_drop(
         Crane TP-410, Chapter 2: Resistance of Valves and Fittings
     """
     assert fittings is not None, "fittings must be provided"
+    assert fittings is not None, "fittings must be provided"
     total_k = 0.0
     velocity_head = 0.5 * density * (velocity**2)
 
@@ -550,6 +555,7 @@ def calculate_elevation_pressure_drop(density: float, elevation_change: float) -
         Negative elevation_change (downward flow) results in negative pressure drop (gain).
     """
     assert density is not None, "density must be provided"
+    assert density is not None, "density must be provided"
     dp_elevation = density * GRAVITY * elevation_change
 
     logger.debug(f"Elevation: Δh={elevation_change:.1f}m, ΔP={dp_elevation:.1f} Pa")
@@ -580,6 +586,7 @@ def _iterate_compressible_pressure(
     Returns:
         Tuple of (converged_P2, is_choked). If choked, P2 is meaningless.
     """
+    assert P1 is not None, "P1 must be provided"
     assert P1 is not None, "P1 must be provided"
     P2 = P2_initial
 
@@ -722,6 +729,7 @@ def calculate_expansion_factor(
         ISO 5167: Measurement of fluid flow
     """
     assert inlet_pressure is not None, "inlet_pressure must be provided"
+    assert inlet_pressure is not None, "inlet_pressure must be provided"
     if inlet_pressure <= 0 or pressure_drop < 0:
         return 1.0
 
@@ -789,6 +797,7 @@ def calculate_erosional_velocity(
         - Solid-free service: C = 150-200
     """
     assert density is not None, "density must be provided"
+    assert density is not None, "density must be provided"
     if service_type == "continuous":
         C = API_14E_C_CONTINUOUS
     elif service_type == "intermittent" or service_type == "non_corrosive":
@@ -840,6 +849,7 @@ class PressureDropCalculationEngine:
             (dp_friction, dp_fittings, dp_elevation, total_k_factor)
         """
         assert inputs is not None, "inputs must be provided"
+        assert inputs is not None, "inputs must be provided"
         dp_friction = calculate_frictional_pressure_drop(
             friction_factor,
             inputs.pipe_length,
@@ -880,6 +890,7 @@ class PressureDropCalculationEngine:
         Returns:
             (total_dp, outlet_pressure, dp_acceleration, warnings)
         """
+        assert inputs is not None, "inputs must be provided"
         assert inputs is not None, "inputs must be provided"
         warnings_list: list[str] = []
         pressure_ratio_initial = dp_incompressible / inputs.inlet_pressure

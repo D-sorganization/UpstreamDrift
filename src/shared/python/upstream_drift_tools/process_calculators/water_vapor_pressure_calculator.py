@@ -28,5 +28,6 @@ class WaterVaporPressureCalculator:
             Vapor pressure in Pa
         """
         assert temperature_c is not None, "temperature_c must be provided"
+        assert temperature_c is not None, "temperature_c must be provided"
         pressure, _ = self.calculator.calculate_vapor_pressure(temperature_c, method)
         return pressure

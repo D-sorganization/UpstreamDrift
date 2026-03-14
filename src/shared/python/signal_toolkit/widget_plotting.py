@@ -83,6 +83,7 @@ class PlottingMixin:
     ) -> None:
         """Update the secondary plot."""
         assert signal is not None, "signal must be provided"
+        assert signal is not None, "signal must be provided"
         self.canvas2.axes.clear()  # type: ignore[attr-defined]
         self.canvas2.setup_dark_theme()  # type: ignore[attr-defined]
 
@@ -105,6 +106,7 @@ class PlottingMixin:
 
     def set_joints(self, joints: list[str]) -> None:
         """Set the list of available joints."""
+        assert joints is not None, "joints must be provided"
         assert joints is not None, "joints must be provided"
         self.joint_names = joints
         self.joint_combo.clear()  # type: ignore[attr-defined]

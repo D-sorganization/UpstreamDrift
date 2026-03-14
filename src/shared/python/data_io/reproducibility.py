@@ -107,6 +107,7 @@ def log_execution_time(
             result = compute_fk(robot, q)
     """
     assert operation_name is not None, "operation_name must be provided"
+    assert operation_name is not None, "operation_name must be provided"
     logr = logger_obj or logger
     start_time = time.perf_counter()
     try:

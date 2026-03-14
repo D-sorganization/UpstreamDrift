@@ -192,6 +192,7 @@ def get_relative_path(path: Path | str, base: Path | str | None = None) -> Path:
         # Returns: src/file.py
     """
     assert path is not None, "path must be provided"
+    assert path is not None, "path must be provided"
     path_obj = Path(path).resolve()
     base_obj = Path(base).resolve() if base else get_repo_root()
 
@@ -220,6 +221,7 @@ def find_file_in_parents(
     Example:
         pyproject = find_file_in_parents("pyproject.toml")
     """
+    assert filename is not None, "filename must be provided"
     assert filename is not None, "filename must be provided"
     if start_path is None:
         current = Path(__file__).resolve().parent
