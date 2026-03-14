@@ -45,6 +45,7 @@ def plot_joint_positions(
         Tuple of (figure, axes)
     """
     assert recorder is not None, "recorder must be provided"
+    assert recorder is not None, "recorder must be provided"
     fig, ax, config = resolve_figure(ax, config)
 
     times, positions = recorder.get_time_series("joint_positions")
@@ -94,6 +95,7 @@ def plot_joint_velocities(
     Returns:
         Tuple of (figure, axes)
     """
+    assert recorder is not None, "recorder must be provided"
     assert recorder is not None, "recorder must be provided"
     fig, ax, config = resolve_figure(ax, config)
 
@@ -146,6 +148,7 @@ def plot_joint_accelerations(
     Returns:
         Tuple of (figure, axes)
     """
+    assert recorder is not None, "recorder must be provided"
     assert recorder is not None, "recorder must be provided"
     fig, ax, config = resolve_figure(ax, config)
 
@@ -207,6 +210,7 @@ def plot_club_head_speed(
         Tuple of (figure, axes)
     """
     assert recorder is not None, "recorder must be provided"
+    assert recorder is not None, "recorder must be provided"
     fig, ax, config = resolve_figure(ax, config)
 
     times, speeds = recorder.get_time_series("club_head_speed")
@@ -266,6 +270,7 @@ def plot_com_trajectory(
     Returns:
         Tuple of (figure, axes)
     """
+    assert recorder is not None, "recorder must be provided"
     assert recorder is not None, "recorder must be provided"
     config = config or PlotConfig()
 
@@ -356,6 +361,7 @@ def plot_phase_diagram(
     Returns:
         Tuple of (figure, axes)
     """
+    assert recorder is not None, "recorder must be provided"
     assert recorder is not None, "recorder must be provided"
     fig, ax, config = resolve_figure(ax, config)
 

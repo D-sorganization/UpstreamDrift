@@ -43,6 +43,7 @@ def evaluate_output(
         result (empty dicts if not present).
     """
     assert base_params is not None, "base_params must be provided"
+    assert base_params is not None, "base_params must be provided"
     params = {**base_params}
     if overrides:
         params.update(overrides)

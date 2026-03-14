@@ -180,6 +180,7 @@ class MeshProcessor:
     ) -> MeshSegmentResult:
         """Process and export a single mesh segment."""
         assert segment_name is not None, "segment_name must be provided"
+        assert segment_name is not None, "segment_name must be provided"
         import trimesh
 
         vertex_set = set(vertex_indices)
@@ -347,6 +348,7 @@ class MeshProcessor:
     def _simplify_mesh(self, mesh: Any, target_faces: int) -> Any:
         """Internal mesh simplification."""
         assert target_faces is not None, "target_faces must be provided"
+        assert target_faces is not None, "target_faces must be provided"
         import trimesh
 
         # Try quadric decimation if available
@@ -411,6 +413,7 @@ class MeshProcessor:
         Returns:
             Path to exported file
         """
+        assert output_path is not None, "output_path must be provided"
         assert output_path is not None, "output_path must be provided"
         config = config or MeshExportConfig()
         output_path = Path(output_path)
@@ -572,6 +575,7 @@ class LODGenerator:
             LODGenerationResult with all generated levels
         """
         assert mesh_path is not None, "mesh_path must be provided"
+        assert mesh_path is not None, "mesh_path must be provided"
         if not self._processor._trimesh_available:
             return LODGenerationResult(
                 success=False,
@@ -669,6 +673,7 @@ class LODGenerator:
             LODGenerationResult with collision-optimized LODs
         """
         assert mesh_path is not None, "mesh_path must be provided"
+        assert mesh_path is not None, "mesh_path must be provided"
         if not self._processor._trimesh_available:
             return LODGenerationResult(
                 success=False,
@@ -757,6 +762,7 @@ class LODGenerator:
         Returns:
             Dict with memory estimation details
         """
+        assert lod_result is not None, "lod_result must be provided"
         assert lod_result is not None, "lod_result must be provided"
         if not lod_result.success or not lod_result.levels:
             return {"error": "No LOD data available"}

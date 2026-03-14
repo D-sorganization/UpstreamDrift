@@ -40,6 +40,7 @@ class FrequencyAnalysisDialog(QtWidgets.QDialog):
         label: str = "Data",
     ) -> None:
         assert fs is not None, "fs must be provided"
+        assert fs is not None, "fs must be provided"
         super().__init__(parent)
         self.setWindowTitle(f"Frequency Analysis - {label}")
         self.resize(600, 400)
@@ -104,6 +105,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         Args:
             recorder: The data recorder instance.
         """
+        assert recorder is not None, "recorder must be provided"
         assert recorder is not None, "recorder must be provided"
         super().__init__()
         self.setAccessibleName("Live Simulation Plot")
@@ -180,6 +182,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         """Create the primary metric selector and compute checkbox."""
         # Selector for data type
         assert layout is not None, "layout must be provided"
+        assert layout is not None, "layout must be provided"
         self.combo = QtWidgets.QComboBox()
         self.combo.addItems(list(self.metric_options.keys()))
         self.combo.setToolTip("Select primary data to plot")
@@ -207,6 +210,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         """Create comparison and X-Y plot controls."""
         # Comparison Selector
         assert layout is not None, "layout must be provided"
+        assert layout is not None, "layout must be provided"
         self.chk_compare = QtWidgets.QCheckBox("Compare:")
         self.chk_compare.setToolTip("Enable comparison with another metric")
         self.chk_compare.stateChanged.connect(self._toggle_comparison)
@@ -228,6 +232,7 @@ class LivePlotWidget(QtWidgets.QWidget):
     def _setup_plot_mode_controls(self, layout: QtWidgets.QHBoxLayout) -> None:
         """Create plot mode selector and dimension spinner."""
         # Plot Mode Selector
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         self.mode_combo = QtWidgets.QComboBox()
         self.mode_combo.addItems(["All Dimensions", "Single Dimension", "Norm"])
@@ -257,6 +262,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         # Selector for Induced Accel Source (Hidden by default)
         # Using a ComboBox for user-friendly name selection
         assert layout is not None, "layout must be provided"
+        assert layout is not None, "layout must be provided"
         self.source_combo = QtWidgets.QComboBox()
         self.source_combo.setAccessibleName("Source Selector")
         self.source_combo.setAccessibleDescription(
@@ -281,6 +287,7 @@ class LivePlotWidget(QtWidgets.QWidget):
     def _setup_action_buttons(self, layout: QtWidgets.QHBoxLayout) -> None:
         """Create snapshot, frequency analysis, advanced, and export buttons."""
         # Snapshot Button
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
         self.btn_snapshot.setToolTip("Copy current plot to clipboard")
@@ -338,6 +345,7 @@ class LivePlotWidget(QtWidgets.QWidget):
     def set_joint_names(self, names: list[str]) -> None:
         """Update source selector with human-readable joint names."""
         assert names is not None, "names must be provided"
+        assert names is not None, "names must be provided"
         if not names:
             return
 
@@ -354,6 +362,7 @@ class LivePlotWidget(QtWidgets.QWidget):
     def set_plot_metric(self, label: str) -> None:
         """Change the metric being plotted."""
         assert label is not None, "label must be provided"
+        assert label is not None, "label must be provided"
         self.current_label = label
         self.current_key = self.metric_options[label]
 
@@ -369,6 +378,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
     def _toggle_comparison(self, state: int) -> None:
         """Enable or disable comparison mode."""
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         enabled = self.chk_compare.isChecked()
         self.combo_compare.setEnabled(enabled)
@@ -411,12 +421,14 @@ class LivePlotWidget(QtWidgets.QWidget):
     def _on_source_changed(self, index: int) -> None:
         """Handle source selection change."""
         assert index is not None, "index must be provided"
+        assert index is not None, "index must be provided"
         self._update_recorder_config()
         self._reset_plot()
         self.update_plot()
 
     def _toggle_xy_mode(self, state: int) -> None:
         """Handle X-Y mode toggle."""
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         is_xy = self.chk_xy.isChecked()
         if is_xy and not self.chk_compare.isChecked():
@@ -427,6 +439,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
     def _on_mode_changed(self, mode: str) -> None:
         """Handle plot mode change."""
+        assert mode is not None, "mode must be provided"
         assert mode is not None, "mode must be provided"
         self.dim_spin.setVisible(mode == "Single Dimension")
         self._reset_plot()
@@ -510,6 +523,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
     def _get_data_for_key(self, key: str) -> tuple[np.ndarray, np.ndarray | None, str]:
         """Fetch data for a specific key."""
+        assert key is not None, "key must be provided"
         assert key is not None, "key must be provided"
         times: np.ndarray = np.array([])
         data: np.ndarray | None = None
@@ -610,6 +624,7 @@ class LivePlotWidget(QtWidgets.QWidget):
     ) -> None:
         """Update the X-Y (parametric) plot mode."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         if not self.comparison_key:
             return
 
@@ -668,6 +683,7 @@ class LivePlotWidget(QtWidgets.QWidget):
     ) -> None:
         """Update the primary time-series lines on the main axis."""
         assert times is not None, "times must be provided"
+        assert times is not None, "times must be provided"
         n_dims = data.shape[1]
 
         # Initialize lines for primary axis
@@ -720,6 +736,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         max_points: int,
     ) -> None:
         """Update the comparison metric on the secondary axis."""
+        assert plot_mode is not None, "plot_mode must be provided"
         assert plot_mode is not None, "plot_mode must be provided"
         if not self.comparison_key or not self.ax2:
             return

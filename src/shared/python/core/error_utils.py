@@ -55,6 +55,7 @@ class EngineNotAvailableError(GolfSuiteError):
         install_hint: str | None = None,
     ) -> None:
         assert engine_name is not None, "engine_name must be provided"
+        assert engine_name is not None, "engine_name must be provided"
         self.engine_name = engine_name
         self.operation = operation
 
@@ -91,6 +92,7 @@ class ConfigurationError(GolfSuiteError):
         actual: Any = None,
     ) -> None:
         assert config_key is not None, "config_key must be provided"
+        assert config_key is not None, "config_key must be provided"
         self.config_key = config_key
         self.reason = reason
         self.expected = expected
@@ -118,6 +120,7 @@ class ValidationError(GolfSuiteError):
         valid_values: list[Any] | None = None,
         message: str | None = None,
     ) -> None:
+        assert field is not None, "field must be provided"
         assert field is not None, "field must be provided"
         self.field = field
         self.value = value
@@ -149,6 +152,7 @@ class ModelError(GolfSuiteError):
         details: str | None = None,
     ) -> None:
         assert model_name is not None, "model_name must be provided"
+        assert model_name is not None, "model_name must be provided"
         self.model_name = model_name
         self.operation = operation
         self.details = details
@@ -170,6 +174,7 @@ class SimulationError(GolfSuiteError):
         state: dict[str, Any] | None = None,
     ) -> None:
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         self.time_step = time_step
         self.state = state
 
@@ -189,6 +194,7 @@ class FileOperationError(GolfSuiteError):
         operation: str,
         reason: str | None = None,
     ) -> None:
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         self.path = Path(path)
         self.operation = operation
@@ -223,6 +229,7 @@ def format_import_error(
         raise ImportError(format_import_error("mujoco", "physics simulation"))
     """
     assert module_name is not None, "module_name must be provided"
+    assert module_name is not None, "module_name must be provided"
     message = f"Module '{module_name}' is not installed"
     if feature:
         message += f" but is required for {feature}"
@@ -252,6 +259,7 @@ def format_file_error(
     Example:
         raise FileNotFoundError(format_file_error("config.json", "read"))
     """
+    assert path is not None, "path must be provided"
     assert path is not None, "path must be provided"
     message = f"Cannot {operation} file: {path}"
     if reason:
@@ -299,6 +307,7 @@ def format_type_error(
         raise TypeError(format_type_error("position", "ndarray", type(value)))
     """
     assert field is not None, "field must be provided"
+    assert field is not None, "field must be provided"
     expected = (
         expected_type if isinstance(expected_type, str) else expected_type.__name__
     )
@@ -326,6 +335,7 @@ def format_range_error(
     Example:
         raise ValueError(format_range_error("angle", 400, 0, 360))
     """
+    assert field is not None, "field must be provided"
     assert field is not None, "field must be provided"
     message = f"Value for '{field}' ({value}) is out of range"
     if min_value is not None and max_value is not None:
@@ -395,6 +405,7 @@ class EnvironmentError(ConfigurationError):
         actual: str | None = None,
     ) -> None:
         assert var_name is not None, "var_name must be provided"
+        assert var_name is not None, "var_name must be provided"
         super().__init__(
             config_key=var_name,
             reason=reason or "Environment variable not set or invalid",
@@ -412,6 +423,7 @@ class IOError(GolfSuiteError):
 
     def __init__(self, message: str, path: Path | str | None = None) -> None:
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         self.path = Path(path) if path else None
         if self.path:
             message = f"{message}: {self.path}"
@@ -425,6 +437,7 @@ class FileNotFoundIOError(IOError):
     """
 
     def __init__(self, path: Path | str, context: str | None = None) -> None:
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         self.context = context
         message = "File not found"
@@ -445,6 +458,7 @@ class FileParseError(IOError):
         format_type: str,
         details: str | None = None,
     ) -> None:
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         self.format_type = format_type
         self.details = details
@@ -467,6 +481,7 @@ class PhysicalValidationError(ValidationError):
         physical_constraint: str | None = None,
     ) -> None:
         assert field is not None, "field must be provided"
+        assert field is not None, "field must be provided"
         super().__init__(
             field=field,
             value=value,
@@ -487,6 +502,7 @@ class DataFormatError(GolfSuiteError):
         expected_format: str | None = None,
         actual_format: str | None = None,
     ) -> None:
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         self.expected_format = expected_format
         self.actual_format = actual_format
@@ -513,6 +529,7 @@ class EngineLaunchError(PhysicsSimulationError):
 
     def __init__(self, engine_type: str, reason: str = "") -> None:
         assert engine_type is not None, "engine_type must be provided"
+        assert engine_type is not None, "engine_type must be provided"
         self.engine_type = engine_type
         msg = f"Failed to launch engine '{engine_type}'"
         if reason:
@@ -524,6 +541,7 @@ class SimulationStepError(PhysicsSimulationError):
     """Raised when a simulation step fails to complete."""
 
     def __init__(self, step: int, reason: str = "") -> None:
+        assert step is not None, "step must be provided"
         assert step is not None, "step must be provided"
         self.step = step
         msg = f"Simulation failed at step {step}"
@@ -537,6 +555,7 @@ class ModelLoadError(PhysicsSimulationError):
 
     def __init__(self, model_path: str, reason: str = "") -> None:
         assert model_path is not None, "model_path must be provided"
+        assert model_path is not None, "model_path must be provided"
         self.model_path = model_path
         msg = f"Failed to load model '{model_path}'"
         if reason:
@@ -548,6 +567,7 @@ class SimulationTimeoutError(PhysicsSimulationError):
     """Raised when a simulation exceeds its time budget."""
 
     def __init__(self, timeout_seconds: float) -> None:
+        assert timeout_seconds is not None, "timeout_seconds must be provided"
         assert timeout_seconds is not None, "timeout_seconds must be provided"
         self.timeout_seconds = timeout_seconds
         super().__init__(f"Simulation timed out after {timeout_seconds}s")
@@ -583,6 +603,7 @@ class TimeoutError(GolfSuiteError):
         details: str | None = None,
     ) -> None:
         assert operation is not None, "operation must be provided"
+        assert operation is not None, "operation must be provided"
         self.operation = operation
         self.timeout_seconds = timeout_seconds
         self.details = details
@@ -605,6 +626,7 @@ class ResourceError(GolfSuiteError):
         resource_type: str,
         reason: str | None = None,
     ) -> None:
+        assert resource_type is not None, "resource_type must be provided"
         assert resource_type is not None, "resource_type must be provided"
         self.resource_type = resource_type
         self.reason = reason

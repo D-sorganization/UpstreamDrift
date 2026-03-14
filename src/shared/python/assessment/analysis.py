@@ -100,6 +100,7 @@ def count_files(root: Path, pattern: str) -> int:
 def grep_count(root: Path, pattern: str, file_pattern: str = "**/*.py") -> int:
     """Count files where a regex pattern is found."""
     assert root is not None, "root must be provided"
+    assert root is not None, "root must be provided"
     count = 0
     regex = re.compile(pattern)
     for p in root.glob(file_pattern):
@@ -123,6 +124,7 @@ def classify_assessment_category(source_name: str, description: str = "") -> str
     Returns:
         A standardized category name.
     """
+    assert source_name is not None, "source_name must be provided"
     assert source_name is not None, "source_name must be provided"
     text = (source_name + " " + description).lower()
 

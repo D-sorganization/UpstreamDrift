@@ -104,6 +104,7 @@ class C3DDataReader:
     def __init__(self, file_path: Path | str) -> None:
         """Initialize the C3D data reader with a file path."""
         assert file_path is not None, "file_path must be provided"
+        assert file_path is not None, "file_path must be provided"
         self.file_path = Path(file_path)
         self._c3d_data: C3DMapping | None = None
         self._metadata: C3DMetadata | None = None
@@ -161,6 +162,7 @@ class C3DDataReader:
             an optional ``time`` column in seconds.
         """
 
+        assert include_time is not None, "include_time must be provided"
         assert include_time is not None, "include_time must be provided"
         c3d_data = self._load()
         metadata = self.get_metadata()
@@ -280,6 +282,7 @@ class C3DDataReader:
         """
 
         assert include_time is not None, "include_time must be provided"
+        assert include_time is not None, "include_time must be provided"
         c3d_data = self._load()
         metadata = self.get_metadata()
         analog_array = c3d_data["data"]["analogs"]
@@ -344,6 +347,7 @@ class C3DDataReader:
         """
 
         assert output_path is not None, "output_path must be provided"
+        assert output_path is not None, "output_path must be provided"
         dataframe = self.points_dataframe(
             include_time=include_time,
             markers=markers,
@@ -376,6 +380,7 @@ class C3DDataReader:
             CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
 
+        assert output_path is not None, "output_path must be provided"
         assert output_path is not None, "output_path must be provided"
         dataframe = self.analog_dataframe(include_time=include_time)
         return self._export_dataframe(
@@ -470,6 +475,7 @@ class C3DDataReader:
             - cop_x, cop_y, cop_z: COP position [m] (if compute_cop=True)
         """
         assert include_time is not None, "include_time must be provided"
+        assert include_time is not None, "include_time must be provided"
         plate_channels = self.get_force_plate_channels()
 
         if not plate_channels:
@@ -542,6 +548,7 @@ class C3DDataReader:
     ) -> list[str]:
         """Return column names for an empty force plate DataFrame."""
         assert include_time is not None, "include_time must be provided"
+        assert include_time is not None, "include_time must be provided"
         columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
         if include_time:
             columns.insert(1, "time")
@@ -559,6 +566,7 @@ class C3DDataReader:
         ground_height: float,
     ) -> pd.DataFrame | None:
         """Build a DataFrame for a single force plate, or None if channels missing."""
+        assert plate_num is not None, "plate_num must be provided"
         assert plate_num is not None, "plate_num must be provided"
         missing_keys = required_keys - set(channels.keys())
         if missing_keys:
@@ -745,6 +753,7 @@ class C3DDataReader:
 
         Includes validation, versioning, and telemetry.
         """
+        assert dataframe is not None, "dataframe must be provided"
         assert dataframe is not None, "dataframe must be provided"
         path = Path(output_path).resolve()
 

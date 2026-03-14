@@ -142,6 +142,7 @@ class StatisticalAnalyzer(
             joint_accelerations: Joint accelerations (N, nv) [optional]
         """
         assert times is not None, "times must be provided"
+        assert times is not None, "times must be provided"
         self.times = times
         self.joint_positions = joint_positions
         self.joint_velocities = joint_velocities

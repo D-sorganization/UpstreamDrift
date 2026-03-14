@@ -47,6 +47,7 @@ class AIError(Exception):
             details: Optional dictionary with additional context.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         super().__init__(message)
         self.message = message
         self.details = details or {}
@@ -85,6 +86,7 @@ class AIProviderError(AIError):
             status_code: HTTP status code if applicable.
             details: Optional dictionary with additional context.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         super().__init__(message, details)
         self.provider = provider
@@ -125,6 +127,7 @@ class AIRateLimitError(AIProviderError):
             details: Optional dictionary with additional context.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         super().__init__(message, provider, 429, details)
         self.retry_after = retry_after
 
@@ -153,6 +156,7 @@ class AITimeoutError(AIProviderError):
             timeout: The timeout value that was exceeded [s].
             details: Optional dictionary with additional context.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         super().__init__(message, provider, None, details)
         self.timeout = timeout
@@ -188,6 +192,7 @@ class ScientificValidationError(AIError):
             details: Optional dictionary with additional context.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         super().__init__(message, details)
         self.check_name = check_name
         self.value = value
@@ -220,6 +225,7 @@ class WorkflowError(AIError):
             details: Optional dictionary with additional context.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         super().__init__(message, details)
         self.workflow_id = workflow_id
         self.step_id = step_id
@@ -250,6 +256,7 @@ class ToolExecutionError(AIError):
             parameters: Parameters that were passed to the tool.
             details: Optional dictionary with additional context.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         super().__init__(message, details)
         self.tool_name = tool_name

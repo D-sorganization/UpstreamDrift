@@ -195,6 +195,7 @@ class SyngasCompressionEngine:
     ) -> dict[str, Any]:
         """Calculate mixture properties from component composition"""
         assert composition is not None, "composition must be provided"
+        assert composition is not None, "composition must be provided"
         mole_fractions = validate_gas_composition(composition, auto_normalize=True)
 
         mix_mw = 0.0
@@ -428,6 +429,7 @@ class SyngasCompressionEngine:
     ) -> dict[str, Any]:
         """Analyze process conditions and potential concerns"""
         assert compression_result is not None, "compression_result must be provided"
+        assert compression_result is not None, "compression_result must be provided"
         concerns = []
         warnings = []
         recommendations = []
@@ -512,6 +514,7 @@ class CompressionCalculationWorker(QThread):
         intercooling: bool,
     ) -> None:
         """Initialize the class."""
+        assert flow_rate is not None, "flow_rate must be provided"
         assert flow_rate is not None, "flow_rate must be provided"
         super().__init__()
         self.engine = engine
@@ -933,6 +936,7 @@ if HAS_PYQT:
                 data: Dictionary containing calculation results and analysis.
             """
             assert data is not None, "data must be provided"
+            assert data is not None, "data must be provided"
             result = data["result"]
             analysis = data["analysis"]
 
@@ -967,6 +971,7 @@ if HAS_PYQT:
                 analysis: Dictionary containing analysis data.
             """
             # Use list join for O(n) instead of O(n²) string concatenation
+            assert result is not None, "result must be provided"
             assert result is not None, "result must be provided"
             output_parts = [
                 "SYNGAS COMPRESSION CALCULATION RESULTS\n",
@@ -1042,6 +1047,7 @@ if HAS_PYQT:
             """
             # Use list join for O(n) instead of O(n²) string concatenation
             assert analysis is not None, "analysis must be provided"
+            assert analysis is not None, "analysis must be provided"
             output_parts = [
                 "PROCESS ANALYSIS & CONCERNS\n",
                 "=" * 40 + "\n\n",
@@ -1094,6 +1100,7 @@ if HAS_PYQT:
         def create_plots(self, result: dict[str, Any]) -> None:
             """Create visualization plots"""
             # Clear previous plots
+            assert result is not None, "result must be provided"
             assert result is not None, "result must be provided"
             self.figure.clear()
 

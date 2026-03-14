@@ -27,6 +27,7 @@ def get_logger(
         Configured logger instance
     """
     assert name is not None, "name must be provided"
+    assert name is not None, "name must be provided"
     logger = logging.getLogger(name)
     logger.setLevel(level)
 

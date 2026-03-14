@@ -276,6 +276,7 @@ class BodyParameters:
         """Create from dictionary."""
         # Handle enum conversions
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         if "build_type" in data and isinstance(data["build_type"], str):
             data["build_type"] = BuildType(data["build_type"])
         if "gender_model" in data and isinstance(data["gender_model"], str):

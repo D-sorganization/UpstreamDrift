@@ -102,6 +102,7 @@ class PhysicsValidator:
             tolerance_jacobian: Absolute error tolerance for Jacobian validation
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         try:
             import mujoco
         except ImportError as e:
@@ -129,6 +130,7 @@ class PhysicsValidator:
         Returns:
             Kinetic energy [J]
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = qvel
@@ -166,6 +168,7 @@ class PhysicsValidator:
         Returns:
             Potential energy [J]
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = 0
@@ -207,6 +210,7 @@ class PhysicsValidator:
         Returns:
             Tuple of (new_qpos, new_qvel)
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = qvel
@@ -250,6 +254,7 @@ class PhysicsValidator:
             EnergyValidationResult with pass/fail status
         """
         # Energy at t
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         KE_t = self.compute_kinetic_energy(qpos, qvel)
         PE_t = self.compute_potential_energy(qpos)
@@ -328,6 +333,7 @@ class PhysicsValidator:
         """
         # Set state
         assert qpos is not None, "qpos must be provided"
+        assert qpos is not None, "qpos must be provided"
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = 0
         self._mujoco.mj_forward(self.model, self._scratch_data)
@@ -398,6 +404,7 @@ class PhysicsValidator:
         Returns:
             Dictionary mapping check names to pass/fail status
         """
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         if torques is None:
             torques = np.zeros(self.model.nv)

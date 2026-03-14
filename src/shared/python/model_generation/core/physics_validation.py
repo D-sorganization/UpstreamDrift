@@ -126,6 +126,7 @@ class PhysicsValidator:
             Detailed InertiaValidationResult
         """
         assert inertia is not None, "inertia must be provided"
+        assert inertia is not None, "inertia must be provided"
         result = InertiaValidationResult(
             is_valid=True,
             is_symmetric=True,
@@ -240,6 +241,7 @@ class PhysicsValidator:
             Tuple of (support_points, resolved_support_link_names).
         """
         assert links is not None, "links must be provided"
+        assert links is not None, "links must be provided"
         if support_link_names is None:
             link_z_positions = []
             for link in links:
@@ -276,6 +278,7 @@ class PhysicsValidator:
         Returns:
             Tuple of (is_stable, margin, support_polygon, tipping_angle_deg).
         """
+        assert com is not None, "com must be provided"
         assert com is not None, "com must be provided"
         support_polygon: list[tuple[float, float]] | None = None
 
@@ -329,6 +332,7 @@ class PhysicsValidator:
             StabilityResult with stability metrics
         """
         assert links is not None, "links must be provided"
+        assert links is not None, "links must be provided"
         if not links:
             return StabilityResult(
                 is_stable=False,
@@ -373,6 +377,7 @@ class PhysicsValidator:
         Returns:
             CollisionCheckResult with intersection data
         """
+        assert links is not None, "links must be provided"
         assert links is not None, "links must be provided"
         result = CollisionCheckResult(has_self_intersection=False)
         collision_spheres = []
@@ -430,6 +435,7 @@ class PhysicsValidator:
         Returns:
             Complete PhysicsValidationResult
         """
+        assert links is not None, "links must be provided"
         assert links is not None, "links must be provided"
         result = PhysicsValidationResult(is_valid=True)
 
@@ -503,6 +509,7 @@ class PhysicsValidator:
     ) -> bool:
         """Check if a 2D point is inside a polygon using ray casting."""
         assert point is not None, "point must be provided"
+        assert point is not None, "point must be provided"
         x, y = point
         n = len(polygon)
         inside = False
@@ -524,6 +531,7 @@ class PhysicsValidator:
         polygon: list[tuple[float, float]],
     ) -> float:
         """Compute minimum distance from point to polygon edge."""
+        assert point is not None, "point must be provided"
         assert point is not None, "point must be provided"
         min_dist = float("inf")
         n = len(polygon)

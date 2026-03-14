@@ -98,6 +98,7 @@ except ImportError:
             None
         """
         assert operation_name is not None, "operation_name must be provided"
+        assert operation_name is not None, "operation_name must be provided"
         logr = logger_obj or get_logger(__name__)
         start_time = time.perf_counter()
         try:

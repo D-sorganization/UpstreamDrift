@@ -171,6 +171,7 @@ class StandardModelManager:
         """
         # Create basic temporary STL files
         assert mesh_dir is not None, "mesh_dir must be provided"
+        assert mesh_dir is not None, "mesh_dir must be provided"
         temporary_meshes = [
             "head.stl",
             "torso.stl",
@@ -219,6 +220,7 @@ class StandardModelManager:
 
     def _generate_golf_club_urdf(self, club_type: str, output_path: Path) -> None:
         """Generate golf club URDF file."""
+        assert club_type is not None, "club_type must be provided"
         assert club_type is not None, "club_type must be provided"
         club_config: dict[str, Any] = self.config["golf_clubs"][club_type]
 
@@ -322,6 +324,7 @@ class StandardModelManager:
         Returns:
             Dictionary mapping engine names to compatibility status
         """
+        assert urdf_path is not None, "urdf_path must be provided"
         assert urdf_path is not None, "urdf_path must be provided"
         results = {}
 

@@ -263,6 +263,7 @@ def validate_physical_bounds(func: F) -> F:
         def _validate_param(param_name: str, param_value: Any) -> None:
             """Apply all physical validation rules to a single named parameter."""
             assert param_name is not None, "param_name must be provided"
+            assert param_name is not None, "param_name must be provided"
             if param_name in ("self", "cls"):
                 return
 

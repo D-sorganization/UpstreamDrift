@@ -31,6 +31,7 @@ class ThreePhaseElectricalModelEnhanced:
         glass_interface: GlassPropertiesInterface,
     ) -> None:
         assert config is not None, "config must be provided"
+        assert config is not None, "config must be provided"
         self.config = config
         self.glass_interface = glass_interface
         self.electrode_positions = np.array([0, 120, 240]) * np.pi / 180  # radians
@@ -53,6 +54,7 @@ class ThreePhaseElectricalModelEnhanced:
     ) -> dict:
         """Calculate complete electrical system state with new path model"""
         # Electrode tip positions
+        assert depths is not None, "depths must be provided"
         assert depths is not None, "depths must be provided"
         r_bath = bath_diameter / 2.0
         tip_radius = tip_diameter / 2.0
@@ -122,6 +124,7 @@ class ThreePhaseElectricalModelEnhanced:
     ) -> tuple[float, dict]:
         """Calculate total resistance and path info for a single electrode pair."""
         assert electrode1_pos is not None, "electrode1_pos must be provided"
+        assert electrode1_pos is not None, "electrode1_pos must be provided"
         direct_resistance = self._calculate_trapezoidal_path_resistance(
             electrode1_pos,
             electrode2_pos,
@@ -182,6 +185,7 @@ class ThreePhaseElectricalModelEnhanced:
         Performance: Results are cached and reused when parameters unchanged.
         """
         # Build cache key from parameters
+        assert depths is not None, "depths must be provided"
         assert depths is not None, "depths must be provided"
         cache_key = (tuple(depths), r_bath, metal_depth, self.config.glass_depth)
 
@@ -246,6 +250,7 @@ class ThreePhaseElectricalModelEnhanced:
         Performance: Vectorized numpy operations replace 30-iteration loop.
         """
         # Get glass wall intersection points
+        assert electrode1_pos is not None, "electrode1_pos must be provided"
         assert electrode1_pos is not None, "electrode1_pos must be provided"
         e1_angle = electrode1_pos["angle"]
         e1_wall_glass = np.array(
@@ -330,6 +335,7 @@ class ThreePhaseElectricalModelEnhanced:
         """
         # Get glass wall positions
         assert electrode1_pos is not None, "electrode1_pos must be provided"
+        assert electrode1_pos is not None, "electrode1_pos must be provided"
         e1_angle = electrode1_pos["angle"]
         e1_wall = np.array(
             [
@@ -400,6 +406,7 @@ class ThreePhaseElectricalModelEnhanced:
     ) -> float:
         """Calculate resistance of a vertical glass segment (electrode to metal)."""
         assert electrode_length is not None, "electrode_length must be provided"
+        assert electrode_length is not None, "electrode_length must be provided"
         area_m2 = electrode_length * effective_width * 0.00064516  # in² → m²
         distance_m = abs(electrode_z - metal_depth) * 0.0254  # in → m
 
@@ -419,6 +426,7 @@ class ThreePhaseElectricalModelEnhanced:
         temperature: float,
     ) -> float:
         """Calculate resistance through the metal layer between two electrodes."""
+        assert electrode1_pos is not None, "electrode1_pos must be provided"
         assert electrode1_pos is not None, "electrode1_pos must be provided"
         center1 = (electrode1_pos["tip"] + e1_wall) / 2
         center2 = (electrode2_pos["tip"] + e2_wall) / 2
@@ -441,6 +449,7 @@ class ThreePhaseElectricalModelEnhanced:
 
     def _analyze_current_distribution_new(self, current_paths: dict) -> dict:
         """Analyze current distribution with new path model"""
+        assert current_paths is not None, "current_paths must be provided"
         assert current_paths is not None, "current_paths must be provided"
         analysis = {}
 
@@ -475,6 +484,7 @@ class ThreePhaseElectricalModelEnhanced:
 
     def _parallel_resistance(self, r1: float, r2: float) -> float:
         """Calculate parallel resistance safely"""
+        assert r1 is not None, "r1 must be provided"
         assert r1 is not None, "r1 must be provided"
         if np.isnan(r1) or np.isnan(r2) or r1 <= 0 or r2 <= 0:
             return max(r1, r2) if not (np.isnan(r1) or np.isnan(r2)) else np.nan

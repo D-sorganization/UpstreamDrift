@@ -90,6 +90,7 @@ class ReportingMixin:
 
     def _report_joint_stats(self, joint_idx: int) -> dict[str, Any]:
         assert joint_idx is not None, "joint_idx must be provided"
+        assert joint_idx is not None, "joint_idx must be provided"
         angles_deg = np.rad2deg(self.joint_positions[:, joint_idx])
         position_stats = self.compute_summary_stats(angles_deg)  # type: ignore[attr-defined]
 
@@ -183,6 +184,7 @@ class ReportingMixin:
             (frequencies, psd_values)
         """
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         fs = 1.0 / self.dt if self.dt > 0 else 0.0
         if fs == 0.0:
             return np.array([]), np.array([])
@@ -209,6 +211,7 @@ class ReportingMixin:
         Returns:
             Smoothness score (negative dimensionless value)
         """
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         fs = 1.0 / self.dt if self.dt > 0 else 0.0
         if fs == 0.0:
@@ -328,6 +331,7 @@ class ReportingMixin:
             JerkMetrics object or None
         """
         assert joint_idx is not None, "joint_idx must be provided"
+        assert joint_idx is not None, "joint_idx must be provided"
         if (
             hasattr(self, "joint_accelerations")
             and self.joint_accelerations is not None
@@ -386,6 +390,7 @@ class ReportingMixin:
 
     def _write_csv_overall_metrics(self, writer, report: dict) -> None:
         assert writer is not None, "writer must be provided"
+        assert writer is not None, "writer must be provided"
         writer.writerow(["Golf Swing Statistical Analysis"])
         writer.writerow([])
         writer.writerow(["Overall Metrics"])
@@ -397,6 +402,7 @@ class ReportingMixin:
 
     def _write_csv_stability_metrics(self, writer, report: dict) -> None:
         assert writer is not None, "writer must be provided"
+        assert writer is not None, "writer must be provided"
         if "stability_metrics" not in report:
             return
         writer.writerow(["Stability Metrics"])
@@ -406,6 +412,7 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_club_head_speed(self, writer, report: dict) -> None:
+        assert writer is not None, "writer must be provided"
         assert writer is not None, "writer must be provided"
         if "club_head_speed" not in report:
             return
@@ -417,6 +424,7 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_tempo(self, writer, report: dict) -> None:
+        assert writer is not None, "writer must be provided"
         assert writer is not None, "writer must be provided"
         if "tempo" not in report:
             return
@@ -432,6 +440,7 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_phases(self, writer, report: dict) -> None:
+        assert writer is not None, "writer must be provided"
         assert writer is not None, "writer must be provided"
         if "phases" not in report:
             return
@@ -450,6 +459,7 @@ class ReportingMixin:
 
     def _write_csv_grf_metrics(self, writer, report: dict) -> None:
         assert writer is not None, "writer must be provided"
+        assert writer is not None, "writer must be provided"
         if "grf_metrics" not in report:
             return
         writer.writerow(["GRF & CoP Metrics"])
@@ -460,6 +470,7 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_joint_statistics(self, writer, report: dict) -> None:
+        assert writer is not None, "writer must be provided"
         assert writer is not None, "writer must be provided"
         writer.writerow(["Joint Statistics"])
         writer.writerow(
@@ -505,6 +516,7 @@ class ReportingMixin:
             filename: Output filename
             report: Statistics report (if None, generates new one)
         """
+        assert filename is not None, "filename must be provided"
         assert filename is not None, "filename must be provided"
         if report is None:
             report = self.generate_comprehensive_report()

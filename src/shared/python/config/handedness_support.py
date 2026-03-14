@@ -119,6 +119,7 @@ def mirror_position(
         Mirrored position vector
     """
     assert position is not None, "position must be provided"
+    assert position is not None, "position must be provided"
     if transform is None:
         transform = create_mirror_transform()
 
@@ -141,6 +142,7 @@ def mirror_velocity(
     Returns:
         Mirrored velocity vector
     """
+    assert velocity is not None, "velocity must be provided"
     assert velocity is not None, "velocity must be provided"
     if transform is None:
         transform = create_mirror_transform()
@@ -169,6 +171,7 @@ def mirror_rotation_matrix(
         Mirrored rotation matrix (3, 3)
     """
     assert rotation is not None, "rotation must be provided"
+    assert rotation is not None, "rotation must be provided"
     if transform is None:
         transform = create_mirror_transform()
 
@@ -195,6 +198,7 @@ def mirror_angular_velocity(
     Returns:
         Mirrored angular velocity
     """
+    assert omega is not None, "omega must be provided"
     assert omega is not None, "omega must be provided"
     if transform is None:
         transform = create_mirror_transform()
@@ -236,6 +240,7 @@ def mirror_joint_configuration(
         Mirrored joint configuration
     """
     assert q is not None, "q must be provided"
+    assert q is not None, "q must be provided"
     q_mirrored = q.copy()
 
     for i, (jtype, axis) in enumerate(zip(joint_types, joint_axes, strict=True)):
@@ -273,6 +278,7 @@ def mirror_trajectory(
     Returns:
         Dictionary with mirrored trajectories
     """
+    assert positions is not None, "positions must be provided"
     assert positions is not None, "positions must be provided"
     transform = create_mirror_transform()
 
@@ -354,6 +360,7 @@ def validate_mirror_trajectory(
     """
     # Check coordinate transformations
     assert original_positions is not None, "original_positions must be provided"
+    assert original_positions is not None, "original_positions must be provided"
     y_flipped = np.allclose(original_positions[:, 1], -mirrored_positions[:, 1])
     x_preserved = np.allclose(original_positions[:, 0], mirrored_positions[:, 0])
     z_preserved = np.allclose(original_positions[:, 2], mirrored_positions[:, 2])
@@ -398,6 +405,7 @@ def validate_energy_conservation(
         Dictionary with validation results
     """
     assert original_velocities is not None, "original_velocities must be provided"
+    assert original_velocities is not None, "original_velocities must be provided"
     if masses is None:
         masses = np.ones(len(original_velocities))
 
@@ -433,6 +441,7 @@ class HandednessConverter:
             source_handedness: The handedness of the source model
         """
         assert source_handedness is not None, "source_handedness must be provided"
+        assert source_handedness is not None, "source_handedness must be provided"
         self.source_handedness = source_handedness
         self.transform = create_mirror_transform()
 
@@ -456,6 +465,7 @@ class HandednessConverter:
         Returns:
             Dictionary with converted trajectories
         """
+        assert target_handedness is not None, "target_handedness must be provided"
         assert target_handedness is not None, "target_handedness must be provided"
         if target_handedness == self.source_handedness:
             # No conversion needed

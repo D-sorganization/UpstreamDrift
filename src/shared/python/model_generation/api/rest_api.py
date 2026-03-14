@@ -136,6 +136,7 @@ class ModelGenerationAPI:
             prefix: URL prefix for all routes
         """
         assert prefix is not None, "prefix must be provided"
+        assert prefix is not None, "prefix must be provided"
         self.prefix = prefix
         self._routes: list[Route] = []
 
@@ -321,6 +322,7 @@ class ModelGenerationAPI:
         Returns None if auth passes, or a 401 APIResponse if auth fails.
         """
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         if not self._api_key:
             return None  # No API key configured, skip auth
         provided_key = request.headers.get("X-API-Key")
@@ -335,6 +337,7 @@ class ModelGenerationAPI:
         is extracted from the X-Forwarded-For header or defaults to
         "unknown".
         """
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         if self._rate_limit is None:
             return None
@@ -365,6 +368,7 @@ class ModelGenerationAPI:
         to an empty string (no cross-origin access).
         """
         assert response is not None, "response must be provided"
+        assert response is not None, "response must be provided"
         origin = self._cors_origins.split(",")[0].strip() if self._cors_origins else ""
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Methods"] = (
@@ -374,6 +378,7 @@ class ModelGenerationAPI:
 
     def _add_security_headers(self, response: APIResponse) -> None:
         """Add security headers to response."""
+        assert response is not None, "response must be provided"
         assert response is not None, "response must be provided"
         response.headers["Content-Security-Policy"] = "default-src 'self'"
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -385,6 +390,7 @@ class ModelGenerationAPI:
     def handle_request(self, request: APIRequest) -> APIResponse:
         """Handle an API request."""
         # Security pre-flight checks
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         auth_error = self._check_api_key(request)
         if auth_error is not None:
@@ -476,6 +482,7 @@ class ModelGenerationAPI:
     def generate_humanoid(self, request: APIRequest) -> APIResponse:
         """Generate humanoid URDF."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.builders.parametric_builder import ParametricBuilder
 
         body = request.body or {}
@@ -512,6 +519,7 @@ class ModelGenerationAPI:
 
     def generate_from_params(self, request: APIRequest) -> APIResponse:
         """Generate URDF from detailed parameters."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.builders.manual_builder import ManualBuilder
         from model_generation.core.types import (
@@ -562,6 +570,7 @@ class ModelGenerationAPI:
 
     def convert_simscape_to_urdf(self, request: APIRequest) -> APIResponse:
         """Convert SimScape MDL/SLX to URDF."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.converters.simscape import (
             ConversionConfig,
@@ -617,6 +626,7 @@ class ModelGenerationAPI:
     def convert_mjcf_to_urdf(self, request: APIRequest) -> APIResponse:
         """Convert MJCF to URDF."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.converters.mjcf_converter import MJCFConverter
 
         body = request.body or {}
@@ -644,6 +654,7 @@ class ModelGenerationAPI:
 
     def convert_urdf_to_mjcf(self, request: APIRequest) -> APIResponse:
         """Convert URDF to MJCF."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.converters.mjcf_converter import MJCFConverter
 
@@ -676,6 +687,7 @@ class ModelGenerationAPI:
 
     def validate_urdf(self, request: APIRequest) -> APIResponse:
         """Validate URDF content."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.editor.text_editor import (
             URDFTextEditor,
@@ -727,6 +739,7 @@ class ModelGenerationAPI:
     def parse_urdf(self, request: APIRequest) -> APIResponse:
         """Parse URDF and return structure."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.converters.urdf_parser import URDFParser
 
         body = request.body or {}
@@ -764,6 +777,7 @@ class ModelGenerationAPI:
 
     def calculate_inertia(self, request: APIRequest) -> APIResponse:
         """Calculate inertia for primitive shape."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.core.types import Inertia
 
@@ -827,6 +841,7 @@ class ModelGenerationAPI:
 
     def inertia_from_mesh(self, request: APIRequest) -> APIResponse:
         """Calculate inertia from mesh file."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         body = request.body or {}
 
@@ -895,6 +910,7 @@ class ModelGenerationAPI:
     def library_list_models(self, request: APIRequest) -> APIResponse:
         """List models in library."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.library import ModelLibrary
 
         library = ModelLibrary()
@@ -935,6 +951,7 @@ class ModelGenerationAPI:
     def library_get_model(self, request: APIRequest) -> APIResponse:
         """Get model details."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.library import ModelLibrary
 
         model_id = request.query_params.get("model_id")
@@ -962,6 +979,7 @@ class ModelGenerationAPI:
 
     def library_add_model(self, request: APIRequest) -> APIResponse:
         """Add model to library."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.library import ModelCategory, ModelLibrary
 
@@ -1014,6 +1032,7 @@ class ModelGenerationAPI:
     def library_remove_model(self, request: APIRequest) -> APIResponse:
         """Remove model from library."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.library import ModelLibrary
 
         model_id = request.query_params.get("model_id")
@@ -1028,6 +1047,7 @@ class ModelGenerationAPI:
 
     def library_download_model(self, request: APIRequest) -> APIResponse:
         """Download model URDF."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.library import ModelLibrary
 
@@ -1051,6 +1071,7 @@ class ModelGenerationAPI:
 
     def compose_models(self, request: APIRequest) -> APIResponse:
         """Compose model from multiple sources."""
+        assert request is not None, "request must be provided"
         assert request is not None, "request must be provided"
         from model_generation.editor import FrankensteinEditor
 
@@ -1111,6 +1132,7 @@ class ModelGenerationAPI:
     def diff_urdfs(self, request: APIRequest) -> APIResponse:
         """Compare two URDF files."""
         assert request is not None, "request must be provided"
+        assert request is not None, "request must be provided"
         from model_generation.editor.text_editor import URDFTextEditor
 
         body = request.body or {}
@@ -1146,6 +1168,7 @@ class FlaskAdapter:
     """Adapter for Flask framework."""
 
     def __init__(self, api: ModelGenerationAPI) -> None:
+        assert api is not None, "api must be provided"
         assert api is not None, "api must be provided"
         self.api = api
 
@@ -1202,6 +1225,7 @@ class FastAPIAdapter:
     """Adapter for FastAPI framework."""
 
     def __init__(self, api: ModelGenerationAPI) -> None:
+        assert api is not None, "api must be provided"
         assert api is not None, "api must be provided"
         self.api = api
 

@@ -15,6 +15,7 @@ class ClubRenderer(BaseRenderer):
     def plot_club_head_speed(self, fig: Figure) -> None:
         """Plot club head speed over time."""
         assert fig is not None, "fig must be provided"
+        assert fig is not None, "fig must be provided"
         times, speeds = self.data.get_series("club_head_speed")
 
         if len(times) == 0 or len(speeds) == 0:
@@ -51,6 +52,7 @@ class ClubRenderer(BaseRenderer):
 
     def plot_club_head_trajectory(self, fig: Figure) -> None:
         """Plot 3D club head trajectory."""
+        assert fig is not None, "fig must be provided"
         assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("club_head_position")
 
@@ -100,6 +102,7 @@ class ClubRenderer(BaseRenderer):
 
     def plot_swing_plane(self, fig: Figure) -> None:
         """Plot fitted swing plane and trajectory deviation."""
+        assert fig is not None, "fig must be provided"
         assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("club_head_position")
 
@@ -180,6 +183,7 @@ class ClubRenderer(BaseRenderer):
         breakdown_mode: bool = True,
     ) -> None:
         """Plot club head task-space induced accelerations."""
+        assert fig is not None, "fig must be provided"
         assert fig is not None, "fig must be provided"
         ax = fig.add_subplot(111)
 

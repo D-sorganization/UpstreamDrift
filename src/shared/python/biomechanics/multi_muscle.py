@@ -47,6 +47,7 @@ class MuscleGroup:
             name: Group name (e.g., "Elbow Flexors")
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         self.name = name
         self.muscles: dict[str, HillMuscleModel] = {}
         self.attachments: dict[str, MuscleAttachment] = {}
@@ -64,6 +65,7 @@ class MuscleGroup:
             muscle: HillMuscleModel instance
             moment_arm: Moment arm [m] (+ for flexion, - for extension)
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         require(bool(name), "muscle name must be non-empty", name)
         require(moment_arm != 0.0, "moment_arm must be non-zero", moment_arm)
@@ -90,6 +92,7 @@ class MuscleGroup:
         Returns:
             Net joint torque [N·m]
         """
+        assert activations is not None, "activations must be provided"
         assert activations is not None, "activations must be provided"
         for mname, act_val in activations.items():
             require(
@@ -141,6 +144,7 @@ class AntagonistPair:
             antagonist: MuscleGroup for negative torque (Extensors)
         """
         assert agonist is not None, "agonist must be provided"
+        assert agonist is not None, "agonist must be provided"
         self.agonist = agonist
         self.antagonist = antagonist
 
@@ -163,6 +167,7 @@ class AntagonistPair:
         Returns:
             Net torque [N·m]
         """
+        assert agonist_activations is not None, "agonist_activations must be provided"
         assert agonist_activations is not None, "agonist_activations must be provided"
         tau_agonist = self.agonist.compute_net_torque(
             agonist_activations, muscle_states

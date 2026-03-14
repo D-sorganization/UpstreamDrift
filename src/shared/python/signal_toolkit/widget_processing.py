@@ -316,6 +316,7 @@ class ProcessingMixin:
     def _update_tangent_position(self, value: int) -> None:
         """Update tangent line position from slider."""
         assert value is not None, "value must be provided"
+        assert value is not None, "value must be provided"
         if self.current_signal is None:
             return
 
@@ -611,6 +612,7 @@ class ProcessingMixin:
         Args:
             signal: Signal object to load.
         """
+        assert signal is not None, "signal must be provided"
         assert signal is not None, "signal must be provided"
         self.current_signal = signal
         self.original_signal = signal.copy()

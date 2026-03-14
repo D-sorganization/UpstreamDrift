@@ -228,6 +228,7 @@ def mass_to_molar(
         >>> print(f"{n_dot:.2f} kmol/h")
     """
     assert mass_flow is not None, "mass_flow must be provided"
+    assert mass_flow is not None, "mass_flow must be provided"
     _require_finite(mass_flow, "mass_flow")
     _require_positive_finite(molecular_weight, "molecular_weight")
     _require_known_unit(mass_unit, MASS_FLOW_CONVERSIONS, "mass flow")
@@ -272,6 +273,7 @@ def molar_to_mass(
         >>> print(f"{m_dot:.1f} kg/h")
     """
     assert molar_flow is not None, "molar_flow must be provided"
+    assert molar_flow is not None, "molar_flow must be provided"
     _require_finite(molar_flow, "molar_flow")
     _require_positive_finite(molecular_weight, "molecular_weight")
     _require_known_unit(molar_unit, MOLAR_FLOW_CONVERSIONS, "molar flow")
@@ -315,6 +317,7 @@ def volumetric_actual_to_mass(
         >>> m_dot = volumetric_actual_to_mass(1000, 'm3/h', 1.2, 'kg/h')
         >>> print(f"{m_dot:.1f} kg/h")
     """
+    assert vol_flow is not None, "vol_flow must be provided"
     assert vol_flow is not None, "vol_flow must be provided"
     _require_finite(vol_flow, "vol_flow")
     _require_positive_finite(density, "density")
@@ -362,6 +365,7 @@ def mass_to_volumetric_actual(
         >>> Q = mass_to_volumetric_actual(100, 'kg/h', 1.2, 'm3/h')
         >>> print(f"{Q:.1f} m³/h")
     """
+    assert mass_flow is not None, "mass_flow must be provided"
     assert mass_flow is not None, "mass_flow must be provided"
     _require_finite(mass_flow, "mass_flow")
     _require_positive_finite(density, "density")
@@ -421,6 +425,7 @@ def standard_volumetric_to_mass(
         - The standard parameter specifies which reference conditions to use
     """
     assert vol_flow_std is not None, "vol_flow_std must be provided"
+    assert vol_flow_std is not None, "vol_flow_std must be provided"
     _require_finite(vol_flow_std, "vol_flow_std")
     _require_positive_finite(molecular_weight, "molecular_weight")
     _require_known_unit(mass_unit, MASS_FLOW_CONVERSIONS, "mass flow")
@@ -467,6 +472,7 @@ def mass_to_standard_volumetric(
         >>> print(f"{Q_std:.1f} Nm³/h")
     """
     assert mass_flow is not None, "mass_flow must be provided"
+    assert mass_flow is not None, "mass_flow must be provided"
     _require_finite(mass_flow, "mass_flow")
     _require_positive_finite(molecular_weight, "molecular_weight")
     _require_known_unit(mass_unit, MASS_FLOW_CONVERSIONS, "mass flow")
@@ -509,6 +515,7 @@ def scfm_to_acfm(
         >>> print(f"{acfm:.0f} ACFM")
     """
     assert scfm is not None, "scfm must be provided"
+    assert scfm is not None, "scfm must be provided"
     _require_finite(scfm, "scfm")
     _require_positive_finite(temperature, "temperature")
     _require_positive_finite(pressure, "pressure")
@@ -542,6 +549,7 @@ def acfm_to_scfm(
     Raises:
         ValueError: If temperature or pressure is not positive and finite.
     """
+    assert acfm is not None, "acfm must be provided"
     assert acfm is not None, "acfm must be provided"
     _require_finite(acfm, "acfm")
     _require_positive_finite(temperature, "temperature")
