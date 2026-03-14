@@ -9,7 +9,10 @@ and P3 (tolerance-based validation).
 
 from __future__ import annotations
 
+import os
+from collections.abc import Callable
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -52,6 +55,14 @@ TOLERANCE_JACOBIAN = 1e-8
 TOLERANCE_CLOSURE_RAD_S2 = 1e-6
 
 
+class EngineProbeStatus(str, Enum):
+    """Engine fixture probe state."""
+
+    MISSING = "missing"
+    BROKEN = "broken"
+    READY = "ready"
+
+
 @dataclass
 class EngineInstance:
     """Container for a loaded physics engine instance.
@@ -65,6 +76,54 @@ class EngineInstance:
     name: str
     engine: Any  # PhysicsEngine, but using Any for optional dependency handling
     available: bool
+    status: EngineProbeStatus = EngineProbeStatus.MISSING
+    error: str | None = None
+
+
+def _strict_engine_probes_enabled() -> bool:
+    """Return whether broken optional engines should fail instead of skip."""
+    return os.environ.get("UPSTREAM_DRIFT_STRICT_ENGINE_PROBES", "").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _probe_engine_instance(
+    name: str,
+    availability_check: Callable[[], bool],
+    loader: Callable[[], Any],
+) -> EngineInstance:
+    """Build an EngineInstance while preserving missing vs broken state."""
+    if not availability_check():
+        return EngineInstance(
+            name=name,
+            engine=None,
+            available=False,
+            status=EngineProbeStatus.MISSING,
+        )
+
+    try:
+        engine = loader()
+        return EngineInstance(
+            name=name,
+            engine=engine,
+            available=True,
+            status=EngineProbeStatus.READY,
+        )
+    except Exception as exc:
+        message = f"{name} is installed but failed to initialize test fixture: {exc}"
+        if _strict_engine_probes_enabled():
+            pytest.fail(message)
+        logger.warning(message)
+        return EngineInstance(
+            name=name,
+            engine=None,
+            available=False,
+            status=EngineProbeStatus.BROKEN,
+            error=str(exc),
+        )
 
 
 # DRY: Use centralized availability flags from engine_availability module
@@ -125,10 +184,8 @@ def mujoco_pendulum(simple_pendulum_path: Path) -> EngineInstance:
     Returns:
         EngineInstance with loaded MuJoCo engine or unavailable marker.
     """
-    if not _check_mujoco_available():
-        return EngineInstance(name="MuJoCo", engine=None, available=False)
 
-    try:
+    def _load_engine() -> Any:
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
@@ -136,10 +193,9 @@ def mujoco_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         engine = MuJoCoPhysicsEngine()
         engine.load_from_path(str(simple_pendulum_path))
         engine.reset()
-        return EngineInstance(name="MuJoCo", engine=engine, available=True)
-    except Exception as e:
-        logger.warning(f"Failed to load MuJoCo pendulum: {e}")
-        return EngineInstance(name="MuJoCo", engine=None, available=False)
+        return engine
+
+    return _probe_engine_instance("MuJoCo", _check_mujoco_available, _load_engine)
 
 
 @pytest.fixture
@@ -149,10 +205,8 @@ def drake_pendulum(simple_pendulum_path: Path) -> EngineInstance:
     Returns:
         EngineInstance with loaded Drake engine or unavailable marker.
     """
-    if not _check_drake_available():
-        return EngineInstance(name="Drake", engine=None, available=False)
 
-    try:
+    def _load_engine() -> Any:
         from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
@@ -160,10 +214,9 @@ def drake_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         engine = DrakePhysicsEngine()
         engine.load_from_path(str(simple_pendulum_path))
         engine.reset()
-        return EngineInstance(name="Drake", engine=engine, available=True)
-    except Exception as e:
-        logger.warning(f"Failed to load Drake pendulum: {e}")
-        return EngineInstance(name="Drake", engine=None, available=False)
+        return engine
+
+    return _probe_engine_instance("Drake", _check_drake_available, _load_engine)
 
 
 @pytest.fixture
@@ -173,10 +226,8 @@ def pinocchio_pendulum(simple_pendulum_path: Path) -> EngineInstance:
     Returns:
         EngineInstance with loaded Pinocchio engine or unavailable marker.
     """
-    if not _check_pinocchio_available():
-        return EngineInstance(name="Pinocchio", engine=None, available=False)
 
-    try:
+    def _load_engine() -> Any:
         from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
             PinocchioPhysicsEngine,
         )
@@ -184,10 +235,9 @@ def pinocchio_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         engine = PinocchioPhysicsEngine()
         engine.load_from_path(str(simple_pendulum_path))
         engine.reset()
-        return EngineInstance(name="Pinocchio", engine=engine, available=True)
-    except Exception as e:
-        logger.warning(f"Failed to load Pinocchio pendulum: {e}")
-        return EngineInstance(name="Pinocchio", engine=None, available=False)
+        return engine
+
+    return _probe_engine_instance("Pinocchio", _check_pinocchio_available, _load_engine)
 
 
 @pytest.fixture
@@ -206,8 +256,9 @@ def all_available_pendulum_engines(
     available = [e for e in engines if e.available]
 
     if len(available) < 2:
+        states = ", ".join(f"{e.name}={e.status.value}" for e in engines)
         pytest.skip(
-            f"Need at least 2 engines for cross-validation, got {len(available)}"
+            f"Need at least 2 engines for cross-validation, got {len(available)} ({states})"
         )
 
     return available
@@ -297,7 +348,8 @@ def skip_if_insufficient_engines(
     assert engines is not None, "engines must be provided"
     available = [e for e in engines if e.available]
     if len(available) < min_count:
+        states = ", ".join(f"{e.name}={e.status.value}" for e in engines)
         pytest.skip(
             f"Need at least {min_count} engines for cross-validation, "
-            f"got {len(available)}: {[e.name for e in available]}"
+            f"got {len(available)}: {[e.name for e in available]} ({states})"
         )
