@@ -160,6 +160,7 @@ class MotionPlanner(ABC):
             config: Planner configuration.
         """
         assert collision_checker is not None, "collision_checker must be provided"
+        assert collision_checker is not None, "collision_checker must be provided"
         self._collision_checker = collision_checker
         self._config = config or PlannerConfig()
         self._lower_bounds: np.ndarray | None = None
@@ -239,6 +240,7 @@ class MotionPlanner(ABC):
             Sampled configuration (may be goal).
         """
         assert q_goal is not None, "q_goal must be provided"
+        assert q_goal is not None, "q_goal must be provided"
         if self._rng.random() < self._config.goal_bias:
             return q_goal.copy()
         return self._sample_random()
@@ -253,6 +255,7 @@ class MotionPlanner(ABC):
             True if configuration is valid.
         """
         # Check bounds
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if (
             self._lower_bounds is not None
@@ -281,6 +284,7 @@ class MotionPlanner(ABC):
         Returns:
             New configuration in direction of target.
         """
+        assert q_from is not None, "q_from must be provided"
         assert q_from is not None, "q_from must be provided"
         max_distance = max_distance or self._config.step_size
         direction = q_to - q_from
@@ -318,6 +322,7 @@ class MotionPlanner(ABC):
             True if path is collision-free.
         """
         assert q_from is not None, "q_from must be provided"
+        assert q_from is not None, "q_from must be provided"
         is_free, _ = self._collision_checker.check_path_collision(
             q_from,
             q_to,
@@ -334,6 +339,7 @@ class MotionPlanner(ABC):
         Returns:
             Total path length.
         """
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         if len(path) < 2:
             return 0.0

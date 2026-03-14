@@ -179,6 +179,7 @@ class GaitStateMachine(ContractChecker):
             parameters: New gait parameters.
         """
         assert parameters is not None, "parameters must be provided"
+        assert parameters is not None, "parameters must be provided"
         self._parameters = parameters
         self._state.gait_type = parameters.gait_type
 
@@ -230,6 +231,7 @@ class GaitStateMachine(ContractChecker):
         Returns:
             Updated gait state.
         """
+        assert dt is not None, "dt must be provided"
         assert dt is not None, "dt must be provided"
         if dt <= 0:
             return self.state
@@ -284,6 +286,7 @@ class GaitStateMachine(ContractChecker):
         Returns:
             Phase value for trajectory interpolation.
         """
+        assert foot is not None, "foot must be provided"
         assert foot is not None, "foot must be provided"
         if not self._state.is_walking:
             return 1.0  # Standing
@@ -372,6 +375,7 @@ class GaitStateMachine(ContractChecker):
 
     def _get_phase_duration(self, phase: GaitPhase) -> float:
         """Get duration for a given phase."""
+        assert phase is not None, "phase must be provided"
         assert phase is not None, "phase must be provided"
         if phase == GaitPhase.DOUBLE_SUPPORT:
             return self._parameters.double_support_duration

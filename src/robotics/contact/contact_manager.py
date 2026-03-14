@@ -176,6 +176,7 @@ class ContactManager(ContractChecker):
             ContactState object.
         """
         assert info is not None, "info must be provided"
+        assert info is not None, "info must be provided"
         contact_id = self._next_contact_id
         self._next_contact_id += 1
 
@@ -213,6 +214,7 @@ class ContactManager(ContractChecker):
         Returns:
             Contact Jacobian (3, n_v) or (6, n_v), or None if unavailable.
         """
+        assert contact is not None, "contact must be provided"
         assert contact is not None, "contact must be provided"
         if not self._is_contact_capable:
             return None
@@ -314,6 +316,7 @@ class ContactManager(ContractChecker):
         Returns:
             True if point is inside support polygon.
         """
+        assert point is not None, "point must be provided"
         assert point is not None, "point must be provided"
         polygon = self.compute_support_polygon(contacts)
         if polygon is None:
@@ -432,6 +435,7 @@ def _point_in_polygon(
     Returns:
         True if point is inside or on boundary.
     """
+    assert point is not None, "point must be provided"
     assert point is not None, "point must be provided"
     n = len(polygon)
     if n < 3:

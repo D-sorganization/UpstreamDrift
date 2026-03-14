@@ -66,6 +66,7 @@ class FrictionCone:
             True if force satisfies friction constraint.
         """
         assert force is not None, "force must be provided"
+        assert force is not None, "force must be provided"
         force = np.asarray(force, dtype=np.float64)
         f_n = float(np.dot(force, self.normal))
 
@@ -118,6 +119,7 @@ def _compute_cone_generators(
     Returns:
         Generator matrix (3, num_sides).
     """
+    assert normal is not None, "normal must be provided"
     assert normal is not None, "normal must be provided"
     normal = np.asarray(normal, dtype=np.float64)
     normal = normal / np.linalg.norm(normal)
@@ -187,6 +189,7 @@ def linearize_friction_cone(
         A has shape (num_faces, 3), b has shape (num_faces,).
     """
     assert mu is not None, "mu must be provided"
+    assert mu is not None, "mu must be provided"
     normal = np.asarray(normal, dtype=np.float64)
     normal = normal / np.linalg.norm(normal)
 
@@ -239,6 +242,7 @@ def compute_friction_cone_constraint(
             - 'generators': Cone generators (3, num_faces)
     """
     assert contact_normal is not None, "contact_normal must be provided"
+    assert contact_normal is not None, "contact_normal must be provided"
     contact_normal = np.asarray(contact_normal, dtype=np.float64)
     contact_normal = contact_normal / np.linalg.norm(contact_normal)
 
@@ -281,6 +285,7 @@ def project_to_friction_cone(
     Returns:
         Projected force (3,) inside the cone.
     """
+    assert force is not None, "force must be provided"
     assert force is not None, "force must be provided"
     force = np.asarray(force, dtype=np.float64)
 
@@ -331,6 +336,7 @@ def _project_to_cone_surface(
     """
     # Find point on cone edge that minimizes distance
     # The cone edge is at angle arctan(mu) from normal
+    assert f_n is not None, "f_n must be provided"
     assert f_n is not None, "f_n must be provided"
     if f_t_mag < 1e-10:
         return np.zeros(3)

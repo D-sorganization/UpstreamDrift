@@ -190,6 +190,7 @@ class WholeBodyController:
             True if task was removed, False if not found.
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         for i, task in enumerate(self._tasks):
             if task.name == name:
                 self._tasks.pop(i)
@@ -209,6 +210,7 @@ class WholeBodyController:
         Returns:
             Task if found, None otherwise.
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         for task in self._tasks:
             if task.name == name:
@@ -294,6 +296,7 @@ class WholeBodyController:
         Returns:
             WBCSolution from weighted QP.
         """
+        assert n_v is not None, "n_v must be provided"
         assert n_v is not None, "n_v must be provided"
         n_vars = n_v + n_contact_vars
 
@@ -382,6 +385,7 @@ class WholeBodyController:
             WBCSolution from hierarchical solve.
         """
         assert n_v is not None, "n_v must be provided"
+        assert n_v is not None, "n_v must be provided"
         priority_groups = self._group_tasks_by_priority()
 
         if not priority_groups:
@@ -406,6 +410,7 @@ class WholeBodyController:
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)
 
     def _build_priority_level_cost(self, tasks, n_v, n_vars, accumulated_A):
+        assert tasks is not None, "tasks must be provided"
         assert tasks is not None, "tasks must be provided"
         H = np.zeros((n_vars, n_vars))
         g = np.zeros(n_vars)
@@ -444,6 +449,7 @@ class WholeBodyController:
             )
 
     def _build_level_qp(self, H, g, n_v, n_contact_vars, M, nle, qd):
+        assert H is not None, "H must be provided"
         assert H is not None, "H must be provided"
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
         A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
@@ -485,6 +491,7 @@ class WholeBodyController:
         Returns:
             Tuple of (A_eq, b_eq) or (None, None) if no constraint.
         """
+        assert n_v is not None, "n_v must be provided"
         assert n_v is not None, "n_v must be provided"
         if not self._contact_jacobians:
             # No contacts - no dynamics constraint in QP
@@ -531,6 +538,7 @@ class WholeBodyController:
         Returns:
             Tuple of (A_ineq, lb_ineq, ub_ineq) or (None, None, None).
         """
+        assert n_v is not None, "n_v must be provided"
         assert n_v is not None, "n_v must be provided"
         constraints_A: list[NDArray[np.float64]] = []
         constraints_lb: list[NDArray[np.float64]] = []
@@ -587,6 +595,7 @@ class WholeBodyController:
             Tuple of (x_lb, x_ub) or (None, None).
         """
         assert n_v is not None, "n_v must be provided"
+        assert n_v is not None, "n_v must be provided"
         n_vars = n_v + n_contact_vars
 
         x_lb = -np.inf * np.ones(n_vars)
@@ -636,6 +645,7 @@ class WholeBodyController:
             WBCSolution.
         """
         assert qp_solution is not None, "qp_solution must be provided"
+        assert qp_solution is not None, "qp_solution must be provided"
         if not qp_solution.success or qp_solution.x is None:
             return WBCSolution(
                 success=False,
@@ -664,6 +674,7 @@ class WholeBodyController:
         Returns:
             WBCSolution.
         """
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         qdd = x[:n_v]
 
@@ -708,6 +719,7 @@ class WholeBodyController:
         Returns:
             Dictionary mapping task name to weighted error.
         """
+        assert qdd is not None, "qdd must be provided"
         assert qdd is not None, "qdd must be provided"
         errors: dict[str, float] = {}
 
@@ -764,6 +776,7 @@ class WholeBodyController:
         Returns:
             Nullspace projector matrix (n, n).
         """
+        assert A is not None, "A must be provided"
         assert A is not None, "A must be provided"
         A_pinv = np.linalg.pinv(A)
         return np.eye(n) - A_pinv @ A
