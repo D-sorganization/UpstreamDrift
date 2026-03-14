@@ -160,6 +160,7 @@ class VRControllerState:
     def from_dict(cls, d: dict[str, Any]) -> VRControllerState:
         """Create from dictionary."""
         assert d is not None, "d must be provided"
+        assert d is not None, "d must be provided"
         buttons = {k: VRButtonState[v.upper()] for k, v in d.get("buttons", {}).items()}
         return cls(
             hand=VRControllerHand[d["hand"].upper()],
@@ -231,6 +232,7 @@ class VRHeadsetState:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VRHeadsetState:
         """Create from dictionary."""
+        assert d is not None, "d must be provided"
         assert d is not None, "d must be provided"
         return cls(
             position=Vector3.from_dict(d["position"]),
@@ -305,6 +307,7 @@ class VRInteractionManager:
             locomotion_mode: Default locomotion mode.
         """
         assert locomotion_mode is not None, "locomotion_mode must be provided"
+        assert locomotion_mode is not None, "locomotion_mode must be provided"
         self.locomotion_mode = locomotion_mode
         self.interaction_mode = VRInteractionMode.IDLE
 
@@ -345,6 +348,7 @@ class VRInteractionManager:
             timestamp: Update timestamp.
         """
         assert state is not None, "state must be provided"
+        assert state is not None, "state must be provided"
         self._headset = state
         self._current_time = timestamp
 
@@ -355,6 +359,7 @@ class VRInteractionManager:
             state: New controller state.
             timestamp: Update timestamp.
         """
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         self._current_time = timestamp
 
@@ -380,6 +385,7 @@ class VRInteractionManager:
         prev: VRControllerState | None,
     ) -> None:
         """Process trigger state changes."""
+        assert current is not None, "current must be provided"
         assert current is not None, "current must be provided"
         curr_pressed = current.is_trigger_pressed
         prev_pressed = prev.is_trigger_pressed if prev else False
@@ -409,6 +415,7 @@ class VRInteractionManager:
         prev: VRControllerState | None,
     ) -> None:
         """Process grip state changes."""
+        assert current is not None, "current must be provided"
         assert current is not None, "current must be provided"
         curr_pressed = current.is_grip_pressed
         prev_pressed = prev.is_grip_pressed if prev else False
@@ -464,6 +471,7 @@ class VRInteractionManager:
     ) -> None:
         """Process thumbstick movement."""
         assert current is not None, "current must be provided"
+        assert current is not None, "current must be provided"
         x, y = current.thumbstick
         if abs(x) > 0.5 or abs(y) > 0.5:
             self._emit_event(
@@ -477,6 +485,7 @@ class VRInteractionManager:
 
     def _emit_event(self, event: VRInteractionEvent) -> None:
         """Emit interaction event to callbacks."""
+        assert event is not None, "event must be provided"
         assert event is not None, "event must be provided"
         event_type = event.event_type
         if event_type in self._callbacks:
@@ -503,6 +512,7 @@ class VRInteractionManager:
             event_type: Event type to listen for ("*" for all).
             callback: Callback function.
         """
+        assert event_type is not None, "event_type must be provided"
         assert event_type is not None, "event_type must be provided"
         if event_type not in self._callbacks:
             self._callbacks[event_type] = []
@@ -538,6 +548,7 @@ class VRInteractionManager:
             mode: New locomotion mode.
         """
         assert mode is not None, "mode must be provided"
+        assert mode is not None, "mode must be provided"
         self.locomotion_mode = mode
         self._emit_event(
             VRInteractionEvent(
@@ -553,6 +564,7 @@ class VRInteractionManager:
         Args:
             mode: New interaction mode.
         """
+        assert mode is not None, "mode must be provided"
         assert mode is not None, "mode must be provided"
         prev_mode = self.interaction_mode
         self.interaction_mode = mode
