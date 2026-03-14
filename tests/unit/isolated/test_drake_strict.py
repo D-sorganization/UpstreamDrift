@@ -1,3 +1,5 @@
+"""Unit tests for the Drake adapter using isolated subprocess execution."""
+
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -85,17 +87,14 @@ class TestDrakeStrict:
         np.testing.assert_allclose(spatial[:3, :], self.TEST_ANGULAR_VAL)
         np.testing.assert_allclose(spatial[3:, :], self.TEST_LINEAR_VAL)
 
-    def test_reset_protection(self):
-        """Drake reset should raise PreconditionError if uninitialized.
-
-        DBC @precondition decorator on reset() checks is_initialized before
-        the method body runs, so PreconditionError is raised rather than
-        reaching the warning log.
-        """
-        from src.shared.python.core.contracts import PreconditionError
-
+    def test_reset_logs_warning_when_uninitialized(self):
+        """Drake reset should warn and return when the engine is uninitialized."""
         engine = self.DrakePhysicsEngine()
         engine.context = None  # Force uninitialized
 
-        with pytest.raises(PreconditionError):
+        with patch.object(self.mod, "logger") as mock_logger:
             engine.reset()
+
+        mock_logger.warning.assert_called_once_with(
+            "Attempted to reset Drake engine before initialization."
+        )

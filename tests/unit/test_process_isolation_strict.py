@@ -1,7 +1,7 @@
-"""Process Isolation Tests for Strict Physics Engine Protocols.
+"""Process isolation tests for strict unit-level physics engine adapters.
 
-This module executes strict unit tests for aggressive engines (Drake, Pinocchio)
-in separate Python processes to avoid 'numpy' corruption caused by incompatible
+This module executes mock-driven Drake and Pinocchio adapter tests in separate
+Python processes to avoid 'numpy' corruption caused by incompatible
 C-extension mocking/reloading within a single pytest session (Issue #496).
 """
 
@@ -11,14 +11,14 @@ from pathlib import Path
 
 import pytest
 
-# Paths to the isolated test files
+# Paths to the isolated unit test files
 ISOLATED_TESTS_DIR = Path(__file__).parent / "isolated"
 TEST_DRAKE_STRICT = ISOLATED_TESTS_DIR / "test_drake_strict.py"
 TEST_PINOCCHIO_STRICT = ISOLATED_TESTS_DIR / "test_pinocchio_strict.py"
 
 
 class TestProcessIsolationStrict:
-    """Run specific strict tests in isolated subprocesses."""
+    """Run specific strict unit tests in isolated subprocesses."""
 
     def run_isolated_test(self, test_file: Path):
         """Helper to run pytest on a single file in a subprocess."""

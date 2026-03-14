@@ -1,3 +1,5 @@
+"""Unit tests for the Pinocchio adapter using isolated subprocess execution."""
+
 from unittest.mock import MagicMock, patch
 
 import numpy as np
