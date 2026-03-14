@@ -146,9 +146,9 @@ class TestPythonBallFlightBaseline:
         carry_no_drag = sim_no_drag.analyze_trajectory(traj_no_drag)["carry_distance"]
         carry_drag = sim_drag.analyze_trajectory(traj_drag)["carry_distance"]
 
-        assert (
-            carry_drag < carry_no_drag
-        ), f"Drag should reduce range: {carry_drag:.1f} vs {carry_no_drag:.1f}"
+        assert carry_drag < carry_no_drag, (
+            f"Drag should reduce range: {carry_drag:.1f} vs {carry_no_drag:.1f}"
+        )
 
     def test_export_reference_vectors(self) -> None:
         """Export test vectors as JSON for Rust parity verification."""

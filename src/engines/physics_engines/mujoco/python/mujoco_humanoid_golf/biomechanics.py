@@ -367,9 +367,9 @@ class BiomechanicalAnalyzer:
         Returns:
             BiomechanicalData object
         """
-        assert (
-            compute_advanced_metrics is not None
-        ), "compute_advanced_metrics must be provided"
+        assert compute_advanced_metrics is not None, (
+            "compute_advanced_metrics must be provided"
+        )
         qacc = self.compute_joint_accelerations()
         club_pos, club_vel, club_speed = self.get_club_head_data()
         left_grf, right_grf = self.get_ground_reaction_forces()

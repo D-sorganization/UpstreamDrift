@@ -253,12 +253,12 @@ class FinancialModelCalculator:
     ) -> FinancialResults:
         """Calculate comprehensive financial model."""
         # DbC preconditions
-        assert (
-            parameters.total_capital_investment >= 0
-        ), f"Capital investment must be non-negative, got {parameters.total_capital_investment}"
-        assert (
-            parameters.operating_days_per_year >= 0
-        ), f"Operating days must be non-negative, got {parameters.operating_days_per_year}"
+        assert parameters.total_capital_investment >= 0, (
+            f"Capital investment must be non-negative, got {parameters.total_capital_investment}"
+        )
+        assert parameters.operating_days_per_year >= 0, (
+            f"Operating days must be non-negative, got {parameters.operating_days_per_year}"
+        )
 
         self.parameters = parameters
         results = FinancialResults()

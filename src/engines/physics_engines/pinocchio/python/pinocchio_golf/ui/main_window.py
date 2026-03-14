@@ -154,7 +154,6 @@ class PinocchioGUI(
 
     def _build_base_ui(self) -> None:
         """Override base UI construction."""
-        pass
 
     def step_simulation(self) -> None:
         """Advance the Pinocchio simulation (SimulationMixin)."""
