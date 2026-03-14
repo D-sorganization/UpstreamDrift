@@ -54,6 +54,7 @@ class Obstacle:
         Returns:
             Signed distance (negative inside obstacle).
         """
+        assert point is not None, 'point must be provided'
         assert point is not None, "point must be provided"
         if self.obstacle_type == ObstacleType.SPHERE:
             return float(
@@ -94,6 +95,7 @@ class Obstacle:
         Returns:
             Gradient vector (points away from obstacle).
         """
+        assert point is not None, 'point must be provided'
         assert point is not None, "point must be provided"
         eps = 1e-6
         gradient = np.zeros(3)
@@ -176,6 +178,7 @@ class CollisionAvoidance:
             robot_model: Physics engine for kinematics.
             safety_distance: Minimum clearance in meters.
         """
+        assert robot_model is not None, 'robot_model must be provided'
         assert robot_model is not None, "robot_model must be provided"
         self.model = robot_model
         self.safety_distance = safety_distance
@@ -204,6 +207,7 @@ class CollisionAvoidance:
         Returns:
             True if obstacle was found and removed.
         """
+        assert name is not None, 'name must be provided'
         assert name is not None, "name must be provided"
         for i, obs in enumerate(self._obstacles):
             if obs.name == name:
@@ -235,6 +239,7 @@ class CollisionAvoidance:
         Returns:
             Dictionary mapping link names to positions.
         """
+        assert state is not None, 'state must be provided'
         assert state is not None, "state must be provided"
         positions = {}
 
@@ -268,6 +273,7 @@ class CollisionAvoidance:
         Returns:
             Repulsive force in joint space (n_joints,).
         """
+        assert state is not None, 'state must be provided'
         assert state is not None, "state must be provided"
         n_joints = len(state.joint_positions)
         repulsion = np.zeros(n_joints)
@@ -331,6 +337,7 @@ class CollisionAvoidance:
         Returns:
             Tuple of (is_clear, minimum_distance_found).
         """
+        assert trajectory is not None, 'trajectory must be provided'
         assert trajectory is not None, "trajectory must be provided"
         if min_distance is None:
             min_distance = self.safety_distance
@@ -381,6 +388,7 @@ class CollisionAvoidance:
         Returns:
             Velocity scaling factor (0-1).
         """
+        assert state is not None, 'state must be provided'
         assert state is not None, "state must be provided"
         link_positions = self.get_link_positions(state)
 
@@ -420,6 +428,7 @@ class CollisionAvoidance:
         Returns:
             Minimum distance in meters.
         """
+        assert state is not None, 'state must be provided'
         assert state is not None, "state must be provided"
         link_positions = self.get_link_positions(state)
 
