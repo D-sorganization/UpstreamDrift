@@ -88,7 +88,7 @@ class DigitalTwin:
             sim_engine: Physics engine for simulation.
             real_interface: Real robot interface.
         """
-        assert sim_engine is not None, 'sim_engine must be provided'
+        assert sim_engine is not None, "sim_engine must be provided"
         assert sim_engine is not None, "sim_engine must be provided"
         self.sim = sim_engine
         self.real = real_interface
@@ -159,7 +159,7 @@ class DigitalTwin:
         Returns:
             Predicted state trajectory (n_steps+1, n_states).
         """
-        assert horizon is not None, 'horizon must be provided'
+        assert horizon is not None, "horizon must be provided"
         assert horizon is not None, "horizon must be provided"
         n_steps = int(horizon / dt)
         n_steps = min(n_steps, len(control_sequence))

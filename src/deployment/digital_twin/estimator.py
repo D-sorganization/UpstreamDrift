@@ -54,7 +54,7 @@ class StateEstimator:
             n_dof: Number of degrees of freedom.
             config: Estimator configuration.
         """
-        assert n_dof is not None, 'n_dof must be provided'
+        assert n_dof is not None, "n_dof must be provided"
         assert n_dof is not None, "n_dof must be provided"
         self.config = config or EstimatorConfig()
         self.n_dof = n_dof
@@ -102,7 +102,7 @@ class StateEstimator:
         Returns:
             Dictionary with estimated position, velocity, acceleration.
         """
-        assert robot_state is not None, 'robot_state must be provided'
+        assert robot_state is not None, "robot_state must be provided"
         assert robot_state is not None, "robot_state must be provided"
         if dt is None:
             dt = robot_state.timestamp - self._last_timestamp
@@ -171,7 +171,7 @@ class StateEstimator:
         Returns:
             Filtered measurement with outliers replaced.
         """
-        assert measurement is not None, 'measurement must be provided'
+        assert measurement is not None, "measurement must be provided"
         assert measurement is not None, "measurement must be provided"
         predicted = self._H @ self._state
         residual = measurement - predicted
@@ -274,7 +274,7 @@ class StateEstimator:
         Returns:
             Predicted state.
         """
-        assert dt is not None, 'dt must be provided'
+        assert dt is not None, "dt must be provided"
         assert dt is not None, "dt must be provided"
         n = self.n_dof
 

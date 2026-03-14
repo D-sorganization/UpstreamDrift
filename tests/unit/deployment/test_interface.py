@@ -1,13 +1,10 @@
-import pytest
 import numpy as np
-from unittest.mock import Mock, MagicMock
 
+from src.deployment.realtime import ControlMode
 from src.deployment.teleoperation.interface import (
     TeleoperationInterface,
     TeleoperationMode,
-    WorkspaceMapping,
 )
-from src.deployment.realtime import ControlCommand, ControlMode
 
 
 class MockRobot:
@@ -59,6 +56,7 @@ def test_teleoperation_interface_init():
     assert interface.is_clutch_engaged
     assert not interface.is_recording
 
+
 def test_teleoperation_set_workspace_mapping():
     robot = MockRobot()
     device = MockInputDevice()
@@ -67,6 +65,7 @@ def test_teleoperation_set_workspace_mapping():
     interface.set_workspace_mapping(np.eye(4) * 2, np.eye(4) * 3, scaling=2.0)
     assert interface._scaling == 2.0
     assert interface._workspace.position_scale == 2.0
+
 
 def test_clutch_control():
     robot = MockRobot()
@@ -82,6 +81,7 @@ def test_clutch_control():
 
     interface.engage_clutch()
     assert interface.is_clutch_engaged
+
 
 def test_update_position_mode():
     robot = MockRobot()
@@ -100,6 +100,7 @@ def test_update_position_mode():
     assert cmd.position_targets is not None
     assert cmd.gripper_command == 1.0
 
+
 def test_update_velocity_mode():
     robot = MockRobot()
     device = MockInputDevice()
@@ -111,6 +112,7 @@ def test_update_velocity_mode():
 
     assert cmd.mode == ControlMode.VELOCITY
     assert cmd.velocity_targets is not None
+
 
 def test_update_wrench_mode():
     robot = MockRobot()
@@ -124,6 +126,7 @@ def test_update_wrench_mode():
     assert cmd.mode == ControlMode.TORQUE
     assert cmd.torque_commands is not None
 
+
 def test_update_impedance_mode():
     robot = MockRobot()
     device = MockInputDevice()
@@ -136,6 +139,7 @@ def test_update_impedance_mode():
     assert cmd.position_targets is not None
     assert cmd.stiffness is not None
 
+
 def test_get_haptic_feedback():
     robot = MockRobot()
     device = MockInputDevice()
@@ -145,6 +149,7 @@ def test_get_haptic_feedback():
     feedback = interface.get_haptic_feedback()
     assert feedback[0] == 1.0
     assert feedback[1] == 2.0
+
 
 def test_demonstration_recording():
     robot = MockRobot()

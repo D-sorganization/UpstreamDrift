@@ -75,7 +75,7 @@ class TeleoperationInterface:
             robot: Robot physics engine.
             input_device: Input device for commands.
         """
-        assert robot is not None, 'robot must be provided'
+        assert robot is not None, "robot must be provided"
         assert robot is not None, "robot must be provided"
         self.robot = robot
         self.input = input_device
@@ -129,7 +129,7 @@ class TeleoperationInterface:
             follower_frame: Follower reference frame (4x4).
             scaling: Position scaling factor.
         """
-        assert leader_frame is not None, 'leader_frame must be provided'
+        assert leader_frame is not None, "leader_frame must be provided"
         assert leader_frame is not None, "leader_frame must be provided"
         self._workspace.leader_frame = leader_frame
         self._workspace.follower_frame = follower_frame
@@ -218,7 +218,7 @@ class TeleoperationInterface:
         Returns:
             Position control command.
         """
-        assert device_pose is not None, 'device_pose must be provided'
+        assert device_pose is not None, "device_pose must be provided"
         assert device_pose is not None, "device_pose must be provided"
         from src.deployment.realtime import ControlCommand, ControlMode
 
@@ -284,7 +284,7 @@ class TeleoperationInterface:
         Returns:
             Velocity control command.
         """
-        assert device_twist is not None, 'device_twist must be provided'
+        assert device_twist is not None, "device_twist must be provided"
         assert device_twist is not None, "device_twist must be provided"
         from src.deployment.realtime import ControlCommand, ControlMode
 
@@ -329,7 +329,7 @@ class TeleoperationInterface:
         Returns:
             Torque control command.
         """
-        assert device_twist is not None, 'device_twist must be provided'
+        assert device_twist is not None, "device_twist must be provided"
         assert device_twist is not None, "device_twist must be provided"
         from src.deployment.realtime import ControlCommand, ControlMode
 
@@ -367,7 +367,7 @@ class TeleoperationInterface:
         Returns:
             Impedance control command.
         """
-        assert device_pose is not None, 'device_pose must be provided'
+        assert device_pose is not None, "device_pose must be provided"
         assert device_pose is not None, "device_pose must be provided"
         from src.deployment.realtime import ControlCommand, ControlMode
 
@@ -460,7 +460,7 @@ class TeleoperationInterface:
             joint_velocities: Current joint velocities.
             action: Applied action/torque.
         """
-        assert joint_positions is not None, 'joint_positions must be provided'
+        assert joint_positions is not None, "joint_positions must be provided"
         assert joint_positions is not None, "joint_positions must be provided"
         if not self._recording:
             return
