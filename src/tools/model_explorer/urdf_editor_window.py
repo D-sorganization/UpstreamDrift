@@ -52,6 +52,7 @@ class URDFEditorWindow(QMainWindow):
     def _show_status(self, message: str) -> None:
         """Show a message in the status bar."""
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         status_bar = self.statusBar()
         if status_bar:
             status_bar.showMessage(message)
@@ -269,6 +270,7 @@ class URDFEditorWindow(QMainWindow):
     def _on_content_changed(self, content: str) -> None:
         """Handle code editor content change."""
         assert content is not None, "content must be provided"
+        assert content is not None, "content must be provided"
         self.urdf_content = content
         self._is_modified = True
         self._update_title()
@@ -276,6 +278,7 @@ class URDFEditorWindow(QMainWindow):
 
     def _on_urdf_modified(self, content: str) -> None:
         """Handle URDF modification from any tool."""
+        assert content is not None, "content must be provided"
         assert content is not None, "content must be provided"
         self.urdf_content = content
         self._is_modified = True
@@ -316,6 +319,7 @@ class URDFEditorWindow(QMainWindow):
 
     def _on_tab_changed(self, index: int) -> None:
         """Handle tab change."""
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         current_widget = self.central_tabs.currentWidget()
 

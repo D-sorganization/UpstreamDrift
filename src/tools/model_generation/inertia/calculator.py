@@ -260,6 +260,7 @@ class InertiaCalculator:
             InertiaResult
         """
         assert mesh_path is not None, "mesh_path must be provided"
+        assert mesh_path is not None, "mesh_path must be provided"
         mode = (
             InertiaMode.MESH_SPECIFIED_MASS
             if mass is not None
@@ -415,6 +416,7 @@ class InertiaCalculator:
     ) -> InertiaResult:
         """Compute from mesh file using trimesh."""
         assert density is not None, "density must be provided"
+        assert density is not None, "density must be provided"
         mesh_path = self._resolve_mesh_path(source)
 
         cache_key = f"{mesh_path}:{density}:{mass}"
@@ -538,6 +540,7 @@ class InertiaCalculator:
         mode: InertiaMode,
     ) -> tuple[Any, float]:
         assert density is not None, "density must be provided"
+        assert density is not None, "density must be provided"
         if mode == InertiaMode.MESH_SPECIFIED_MASS and mass is not None:
             if volume and volume > 0:
                 computed_density = mass / volume
@@ -601,6 +604,7 @@ class InertiaCalculator:
 
     def _geometry_from_dimensions(self, dimensions: dict[str, float]) -> Geometry:
         """Create geometry from dimensions dict."""
+        assert dimensions is not None, "dimensions must be provided"
         assert dimensions is not None, "dimensions must be provided"
         if "radius" in dimensions and "length" in dimensions:
             return Geometry.cylinder(dimensions["radius"], dimensions["length"])

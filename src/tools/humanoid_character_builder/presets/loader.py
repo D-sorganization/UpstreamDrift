@@ -309,6 +309,7 @@ def save_preset_to_file(
         format: Output format (yaml or json)
     """
     assert params is not None, "params must be provided"
+    assert params is not None, "params must be provided"
     import json
 
     import yaml  # type: ignore[import-untyped]

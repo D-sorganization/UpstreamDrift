@@ -119,6 +119,7 @@ class HistoryMixin:
     def _restore_state(self, state: EditorState) -> None:
         """Restore from a state snapshot."""
         assert state is not None, "state must be provided"
+        assert state is not None, "state must be provided"
         host = cast("HistoryProtocol", self)
         host._models = state.models
         host._clipboard = state.clipboard
