@@ -83,6 +83,7 @@ class ProcessManager:
                 console window (legacy behaviour).
         """
         assert repo_root is not None, "repo_root must be provided"
+        assert repo_root is not None, "repo_root must be provided"
         self.repo_root = repo_root
         self.running_processes: dict[str, Popen[bytes]] = {}
         self.output_callback = output_callback
@@ -157,6 +158,7 @@ class ProcessManager:
     def _emit_output(self, name: str, line: str) -> None:
         """Route a line of process output to callback, logger, and log file."""
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         self._write_log_line(name, line)
         if self.output_callback is not None:
             self.output_callback(name, line)
@@ -170,6 +172,7 @@ class ProcessManager:
         containers) that still need their output captured in the unified
         console and log file.
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         self.running_processes[name] = process
         t = threading.Thread(
@@ -185,6 +188,7 @@ class ProcessManager:
 
         Runs in a daemon thread so the main GUI thread is never blocked.
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         try:
             if process.stdout:
@@ -381,6 +385,7 @@ class ProcessManager:
         """
         # Convert Windows path to WSL path
         assert script_path is not None, "script_path must be provided"
+        assert script_path is not None, "script_path must be provided"
         wsl_script_path = self._convert_to_wsl_path(script_path)
 
         wsl_cmd = f"""
@@ -427,6 +432,7 @@ python "{wsl_script_path}"
         """
         # Determine working directory
         assert module_name is not None, "module_name must be provided"
+        assert module_name is not None, "module_name must be provided"
         work_dir = project_dir
         if cwd:
             work_dir = self._convert_to_wsl_path(str(cwd))
@@ -467,6 +473,7 @@ python -m {module_name}
             WSL-style path string.
         """
         assert windows_path is not None, "windows_path must be provided"
+        assert windows_path is not None, "windows_path must be provided"
         if len(windows_path) > 1 and windows_path[1] == ":":
             drive = windows_path[0].lower()
             path_part = windows_path[2:].replace("\\", "/")
@@ -502,6 +509,7 @@ python -m {module_name}
         Returns:
             True if the process is running, False otherwise.
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if name not in self.running_processes:
             return False

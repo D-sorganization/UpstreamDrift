@@ -225,6 +225,7 @@ class GolfLauncher(
     def _get_model(self, model_id: str) -> Any | None:
         """Retrieve a model or application by ID."""
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         if model_id in self.available_models:
             return self.available_models[model_id]
 
@@ -268,6 +269,7 @@ class GolfLauncher(
     def _apply_model_selection(self, selected_ids: list[str]) -> None:
         """Apply a new set of selected models from the layout dialog."""
         assert selected_ids is not None, "selected_ids must be provided"
+        assert selected_ids is not None, "selected_ids must be provided"
         self.layout_manager.apply_model_selection(selected_ids)
         self.model_order = self.layout_manager.model_order
         self._sync_model_cards()
@@ -289,6 +291,7 @@ class GolfLauncher(
     def update_search_filter(self, text: str) -> None:
         """Update the search filter and rebuild grid."""
         assert text is not None, "text must be provided"
+        assert text is not None, "text must be provided"
         self.layout_manager.update_search_filter(text)
         self._rebuild_grid()
 
@@ -301,6 +304,7 @@ class GolfLauncher(
 
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         self.select_model(model_id)
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
@@ -386,6 +390,7 @@ class GolfLauncher(
     def _safe_int(self, value: Any, default: int) -> int:
         """Safely convert a value to int, handling Mock objects from tests."""
         assert default is not None, "default must be provided"
+        assert default is not None, "default must be provided"
         if hasattr(value, "return_value"):
             return default
         return int(value) if isinstance(value, int | float) else default
@@ -394,6 +399,7 @@ class GolfLauncher(
 
     def select_model(self, model_id: str) -> None:
         """Select a model and update UI."""
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         self.selected_model = model_id
 
@@ -499,6 +505,7 @@ class GolfLauncher(
     def _get_engine_type(self, model_type: str) -> Any:
         """Map model type to EngineType."""
         assert model_type is not None, "model_type must be provided"
+        assert model_type is not None, "model_type must be provided"
         _, EngineType = _lazy_load_engine_manager()
 
         if "mujoco" in model_type:
@@ -517,6 +524,7 @@ class GolfLauncher(
 
     def _apply_docker_status(self, available: bool) -> None:
         """Apply Docker availability status to UI."""
+        assert available is not None, "available must be provided"
         assert available is not None, "available must be provided"
         self.docker_available = available
         if available:
