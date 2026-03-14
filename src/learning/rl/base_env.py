@@ -163,6 +163,7 @@ class RoboticsGymEnv:
             Tuple of (observation, reward, terminated, truncated, info).
         """
         # Process action
+        assert action is not None, 'action must be provided'
         assert action is not None, "action must be provided"
         processed_action = self.action_config.process_action(action, self._prev_action)
 
