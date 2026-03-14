@@ -114,7 +114,6 @@ def _parse_urdf_joint_nodes(
         Tuple of (joint_count, child_links).
     """
     assert root is not None, "root must be provided"
-    assert root is not None, "root must be provided"
     child_links: set[str] = set()
     joint_count = 0
 
@@ -212,7 +211,6 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
     Raises:
         ValueError: If the URDF cannot be parsed.
     """
-    assert urdf_content is not None, "urdf_content must be provided"
     assert urdf_content is not None, "urdf_content must be provided"
     try:
         root = ElementTree.fromstring(urdf_content)
@@ -368,7 +366,6 @@ async def inspect_model(
         Model explorer data.
     """
     assert request is not None, "request must be provided"
-    assert request is not None, "request must be provided"
     filepath = _resolve_model_path(request.model_path)
     content = filepath.read_text(encoding="utf-8")
     return _parse_urdf_tree(content, request.model_path)
@@ -394,7 +391,6 @@ async def compare_models(
     Returns:
         Comparison data with both models and diff analysis.
     """
-    assert request is not None, "request must be provided"
     assert request is not None, "request must be provided"
     path_a = _resolve_model_path(request.model_a_path)
     path_b = _resolve_model_path(request.model_b_path)

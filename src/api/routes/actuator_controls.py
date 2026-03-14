@@ -300,7 +300,6 @@ async def send_actuator_batch(
         List of command acknowledgments.
     """
     assert batch is not None, "batch must be provided"
-    assert batch is not None, "batch must be provided"
     results: list[ActuatorCommandResponse] = []
     actuators = _get_actuator_info(engine_manager)
 

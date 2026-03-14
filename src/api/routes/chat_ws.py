@@ -32,7 +32,6 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
             {"type": "error", "detail": "..."}
     """
     assert websocket is not None, "websocket must be provided"
-    assert websocket is not None, "websocket must be provided"
     await websocket.accept()
 
     chat_service = websocket.app.state.chat_service
@@ -118,7 +117,6 @@ async def list_sessions(request: Request) -> list[dict]:
 )
 async def get_history(request: Request, session_id: str) -> dict:
     """Get message history for a session."""
-    assert request is not None, "request must be provided"
     assert request is not None, "request must be provided"
     messages = request.app.state.chat_service.get_session_history(session_id)
     return {"session_id": session_id, "messages": messages}
