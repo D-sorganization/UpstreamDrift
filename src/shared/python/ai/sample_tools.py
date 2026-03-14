@@ -251,6 +251,7 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
         Returns:
             Simulation results summary.
         """
+        assert file_path is not None, "file_path must be provided"
         valid_engines = ["mujoco", "drake", "pinocchio"]
         if engine.lower() not in valid_engines:
             return {
@@ -303,6 +304,7 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             Interpretation of torque values.
         """
         # Typical ranges for golf swing (approximate)
+        assert shoulder_torque is not None, "shoulder_torque must be provided"
         ranges = {
             "shoulder": {"low": 40, "typical": 80, "high": 150, "unit": "N·m"},
             "hip": {"low": 60, "typical": 120, "high": 200, "unit": "N·m"},
@@ -311,6 +313,7 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
 
         def classify(value: float, range_info: dict[str, Any]) -> str:
             """Classify a torque value relative to its typical range."""
+            assert value is not None, "value must be provided"
             if value < range_info["low"]:
                 return "Below typical"
             if value <= range_info["high"]:
@@ -369,6 +372,7 @@ def _register_explain_concept_tool(registry: ToolRegistry) -> None:
         Returns:
             Explanation at appropriate level.
         """
+        assert term is not None, "term must be provided"
         edu = _get_education_system()
 
         # Map level number to enum

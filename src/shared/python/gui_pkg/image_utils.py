@@ -43,6 +43,7 @@ def auto_crop_to_content(img: Image.Image, padding: int = 50) -> Image.Image:
     Returns:
         Cropped and squared PIL Image.
     """
+    assert img is not None, "img must be provided"
     ensure_pillow()
 
     # Find bounding box
@@ -94,6 +95,7 @@ def enhance_icon_source(
     Returns:
         Enhanced PIL Image.
     """
+    assert img is not None, "img must be provided"
     ensure_pillow()
 
     if contrast != 1.0:
@@ -119,6 +121,7 @@ def create_optimized_icon(
     Returns:
         Resized and sharpened PIL Image.
     """
+    assert img is not None, "img must be provided"
     ensure_pillow()
 
     if mode == "ultra":
@@ -191,6 +194,7 @@ def save_ico(
         sizes: List of square sizes to include.
         mode: Sharpening mode ('standard' or 'extreme').
     """
+    assert img is not None, "img must be provided"
     ensure_pillow()
     if sizes is None:
         sizes = [16, 32, 48, 64, 128, 256]
@@ -214,6 +218,7 @@ def save_png_icons(
     mode: str = "standard",
 ) -> None:
     """Save multiple PNG icons at specified sizes."""
+    assert img is not None, "img must be provided"
     ensure_pillow()
     for size in sizes:
         icon = create_optimized_icon(img, size, mode=mode)

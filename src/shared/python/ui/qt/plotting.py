@@ -29,5 +29,6 @@ class MplCanvas(FigureCanvasQTAgg):
             height: Figure height in inches
             dpi: Dots per inch for rendering
         """
+        assert width is not None, "width must be provided"
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.fig)

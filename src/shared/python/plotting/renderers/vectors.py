@@ -42,6 +42,7 @@ class VectorOverlayRenderer(BaseRenderer):
             scale: Arrow length scaling factor.
             subsample: Plot every *n*-th vector for clarity.
         """
+        assert fig is not None, "fig must be provided"
         if positions is None or forces is None:
             _t, pos_raw = self.data.get_series("contact_positions")
             _t, frc_raw = self.data.get_series("contact_forces")
@@ -105,6 +106,7 @@ class VectorOverlayRenderer(BaseRenderer):
             torque_magnitudes: ``(N,)`` signed magnitudes.
             scale: Arrow length scaling.
         """
+        assert fig is not None, "fig must be provided"
         if joint_positions is None:
             _t, jp_raw = self.data.get_series("joint_world_positions")
             _t, tm_raw = self.data.get_series("joint_torques")
@@ -180,6 +182,7 @@ class VectorOverlayRenderer(BaseRenderer):
             subsample: Plot every *n*-th arrow.
             times: Optional timestamps for coloring the trajectory.
         """
+        assert fig is not None, "fig must be provided"
         positions = np.asarray(positions)
         vectors = np.asarray(vectors)
 
@@ -260,6 +263,7 @@ class VectorOverlayRenderer(BaseRenderer):
             show_error_lines: Draw dashed lines between matched points.
             error_subsample: Subsample rate for error lines.
         """
+        assert fig is not None, "fig must be provided"
         actual = np.asarray(actual)
         desired = np.asarray(desired)
 
@@ -332,6 +336,7 @@ class VectorOverlayRenderer(BaseRenderer):
             scale: Arrow length scaling.
             subsample: Plot every *n*-th vector.
         """
+        assert fig is not None, "fig must be provided"
         if cop_positions is None or grf_vectors is None:
             _t, cop_raw = self.data.get_series("cop_position")
             _t, grf_raw = self.data.get_series("ground_reaction_force")

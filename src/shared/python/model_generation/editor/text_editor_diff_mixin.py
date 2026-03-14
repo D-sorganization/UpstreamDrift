@@ -61,6 +61,7 @@ class TextEditorDiffMixin:
 
     def _compute_diff(self, original: str, modified: str) -> DiffResult:
         """Compute diff between two strings."""
+        assert original is not None, "original must be provided"
         from .text_editor import DiffHunk, DiffResult
 
         original_lines = original.splitlines(keepends=True)
@@ -154,6 +155,7 @@ class TextEditorDiffMixin:
         Returns:
             List of (left_line, right_line, change_type) tuples.
         """
+        assert context_lines is not None, "context_lines must be provided"
         if original is None:
             original = self._original_content  # type: ignore
         if modified is None:

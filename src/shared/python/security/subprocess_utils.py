@@ -64,6 +64,7 @@ def run_command(
         if result and result.returncode == 0:
             print(result.stdout)
     """
+    assert cmd is not None, "cmd must be provided"
     effective_timeout = timeout if timeout is not None else DEFAULT_SUBPROCESS_TIMEOUT
     logger.debug(f"Running command: {' '.join(cmd)} (timeout={effective_timeout}s)")
 
@@ -199,6 +200,7 @@ class ProcessManager:
         Returns:
             True if running, False otherwise
         """
+        assert name is not None, "name must be provided"
         if name not in self.processes:
             return False
 
@@ -214,6 +216,7 @@ class ProcessManager:
         Returns:
             Tuple of (stdout, stderr) as strings
         """
+        assert name is not None, "name must be provided"
         if name not in self.processes:
             return "", ""
 
@@ -234,6 +237,7 @@ class ProcessManager:
         Args:
             timeout: Timeout for each process
         """
+        assert timeout is not None, "timeout must be provided"
         logger.info("Stopping all processes")
 
         # Get list of names to avoid modifying dict during iteration
@@ -350,6 +354,7 @@ class CommandRunner:
         Returns:
             CompletedProcess object or None if failed after all attempts
         """
+        assert cmd is not None, "cmd must be provided"
         for attempt in range(max_attempts):
             result = self.run(cmd)
 

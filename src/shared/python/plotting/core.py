@@ -50,6 +50,7 @@ class GolfSwingPlotter:
             joint_names: Optional list of joint names.
             enable_cache: If True, cache data fetches to improve performance
         """
+        assert recorder is not None, "recorder must be provided"
         self.recorder = recorder
         self.joint_names = joint_names or []
         self.enable_cache = enable_cache

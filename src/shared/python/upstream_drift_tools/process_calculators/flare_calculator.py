@@ -168,12 +168,12 @@ class FlareCalculator:
             radiation_intensity=target_radiation,
         )
         # DbC postconditions
-        assert result.height >= FLARE_MIN_HEIGHT, (
-            f"Flare height must be >= minimum ({FLARE_MIN_HEIGHT}), got {result.height}"
-        )
-        assert result.diameter >= 0, (
-            f"Flare diameter must be non-negative, got {result.diameter}"
-        )
+        assert (
+            result.height >= FLARE_MIN_HEIGHT
+        ), f"Flare height must be >= minimum ({FLARE_MIN_HEIGHT}), got {result.height}"
+        assert (
+            result.diameter >= 0
+        ), f"Flare diameter must be non-negative, got {result.diameter}"
         return result
 
     def calculate_radiation_zones(self, flare_design: FlareDesign) -> dict[str, float]:
@@ -185,6 +185,7 @@ class FlareCalculator:
         Returns:
             Dictionary with zone distances (m)
         """
+        assert flare_design is not None, "flare_design must be provided"
         zones = {
             "lethal": 0.0,  # 37.5 kW/m²
             "damage": 0.0,  # 12.5 kW/m²
@@ -228,6 +229,7 @@ class FlareCalculator:
             Combustion efficiency (0-1)
         """
         # Simplified efficiency calculation
+        assert gas_composition is not None, "gas_composition must be provided"
         efficiency = FLARE_BASE_EFFICIENCY  # Base efficiency
 
         # Normalize factors

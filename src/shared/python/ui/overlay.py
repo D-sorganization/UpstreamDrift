@@ -28,6 +28,7 @@ class OverlayWidget(QWidget):
         Args:
             parent: The widget to overlay.
         """
+        assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
@@ -91,6 +92,7 @@ class OverlayWidget(QWidget):
 
     def eventFilter(self, obj: object, event: Any) -> bool:  # type: ignore
         """Handle resize events from parent."""
+        assert obj is not None, "obj must be provided"
         if obj == self.parent() and event.type() == event.Type.Resize:
             self.resize(event.size())
         return super().eventFilter(obj, event)  # type: ignore[arg-type]

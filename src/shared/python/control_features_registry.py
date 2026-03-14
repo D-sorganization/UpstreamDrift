@@ -298,6 +298,7 @@ class ControlFeaturesRegistry:
         Args:
             engine: Physics engine to query for capabilities.
         """
+        assert engine is not None, "engine must be provided"
         self.engine = engine
         self._features = self._check_availability()
 
@@ -315,6 +316,7 @@ class ControlFeaturesRegistry:
         Returns:
             List of feature descriptors as dictionaries.
         """
+        assert available_only is not None, "available_only must be provided"
         features = self._features
 
         if category is not None:
@@ -349,6 +351,7 @@ class ControlFeaturesRegistry:
         Returns:
             Feature descriptor dict, or None if not found.
         """
+        assert name is not None, "name must be provided"
         for f in self._features:
             if f.name == name:
                 return {
@@ -373,6 +376,7 @@ class ControlFeaturesRegistry:
         Returns:
             True if the feature is available and callable.
         """
+        assert name is not None, "name must be provided"
         for f in self._features:
             if f.name == name:
                 return f.available

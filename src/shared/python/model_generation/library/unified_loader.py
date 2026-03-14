@@ -77,6 +77,7 @@ class UserPreferences:
 
     def add_recent(self, model_id: str) -> None:
         """Add a model to the recent list."""
+        assert model_id is not None, "model_id must be provided"
         if model_id in self.recent_models:
             self.recent_models.remove(model_id)
         self.recent_models.insert(0, model_id)
@@ -202,6 +203,7 @@ class UnifiedModelLoader:
         Args:
             model_id: ID of the model to set as default.
         """
+        assert model_id is not None, "model_id must be provided"
         self._preferences.default_model_id = model_id
         self.save_preferences()
 
@@ -233,6 +235,7 @@ class UnifiedModelLoader:
 
     def get_bundled_model_info(self, model_id: str) -> dict[str, Any] | None:
         """Get metadata for a specific bundled model."""
+        assert model_id is not None, "model_id must be provided"
         for entry in self.list_bundled_models():
             if entry["id"] == model_id:
                 return entry
@@ -255,6 +258,7 @@ class UnifiedModelLoader:
         Returns:
             LoadResult with the parsed model or error information.
         """
+        assert file_path is not None, "file_path must be provided"
         path = Path(file_path)
         if not path.exists():
             return LoadResult(
@@ -287,6 +291,7 @@ class UnifiedModelLoader:
         Returns:
             LoadResult with the parsed model.
         """
+        assert model_id is not None, "model_id must be provided"
         info = self.get_bundled_model_info(model_id)
         if info is None:
             return LoadResult(error=f"Bundled model not found: {model_id}")

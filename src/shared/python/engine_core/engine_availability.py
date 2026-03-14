@@ -625,6 +625,7 @@ def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F],
         def run_simulation():
             ...
     """
+    assert engine_name is not None, "engine_name must be provided"
     skip_reason = reason or f"{engine_name} not installed"
 
     def decorator(func: F) -> F:

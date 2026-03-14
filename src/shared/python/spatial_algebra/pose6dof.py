@@ -239,6 +239,7 @@ def axis_angle_to_rotation_matrix(axis: Vec3 | list[float], angle: float) -> Mat
     Returns:
         3x3 rotation matrix
     """
+    assert axis is not None, "axis must be provided"
     axis = np.asarray(axis, dtype=np.float64)
     axis = axis / np.linalg.norm(axis)  # Normalize
 
@@ -258,6 +259,7 @@ def quaternion_multiply(q1: Quat | list[float], q2: Quat | list[float]) -> Quat:
     Returns:
         Product quaternion
     """
+    assert q1 is not None, "q1 must be provided"
     q1 = np.asarray(q1, dtype=np.float64)
     q2 = np.asarray(q2, dtype=np.float64)
 
@@ -301,6 +303,7 @@ def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
     Returns:
         Interpolated quaternion
     """
+    assert q1 is not None, "q1 must be provided"
     q1 = np.asarray(q1, dtype=np.float64)
     q2 = np.asarray(q2, dtype=np.float64)
 
@@ -373,6 +376,7 @@ class Pose6DOF:
         quaternion: Quat | list[float],
     ) -> Pose6DOF:
         """Create pose from position and quaternion [w, x, y, z]."""
+        assert position is not None, "position must be provided"
         euler = quaternion_to_euler(quaternion)
         return cls(position=position, euler_angles=euler)
 
@@ -383,6 +387,7 @@ class Pose6DOF:
         rotation: Mat3,
     ) -> Pose6DOF:
         """Create pose from position and rotation matrix."""
+        assert position is not None, "position must be provided"
         euler = rotation_matrix_to_euler(rotation)
         return cls(position=position, euler_angles=euler)
 
@@ -502,6 +507,7 @@ class Pose6DOF:
 
     def translate(self, offset: Vec3 | list[float]) -> Pose6DOF:
         """Return new pose translated by offset (world frame)."""
+        assert offset is not None, "offset must be provided"
         offset = np.asarray(offset, dtype=np.float64)
         return Pose6DOF(
             position=self._position + offset,
@@ -511,6 +517,7 @@ class Pose6DOF:
     def rotate_euler(self, delta_euler: Vec3 | list[float]) -> Pose6DOF:
         """Return new pose with additional euler rotation."""
         # Compose rotations via quaternions for accuracy
+        assert delta_euler is not None, "delta_euler must be provided"
         q1 = self.to_quaternion()
         q2 = euler_to_quaternion(delta_euler)
         q3 = quaternion_multiply(q1, q2)
@@ -527,6 +534,7 @@ class Pose6DOF:
 
     def compose(self, other: Pose6DOF) -> Pose6DOF:
         """Compose this pose with another (this * other)."""
+        assert other is not None, "other must be provided"
         R1 = self.rotation_matrix
         p1 = self._position
         R2 = other.rotation_matrix
@@ -539,11 +547,13 @@ class Pose6DOF:
 
     def transform_point(self, point: Vec3 | list[float]) -> Vec3:
         """Transform a point by this pose."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point, dtype=np.float64)
         return self.rotation_matrix @ point + self._position
 
     def transform_vector(self, vector: Vec3 | list[float]) -> Vec3:
         """Transform a direction vector (rotation only, no translation)."""
+        assert vector is not None, "vector must be provided"
         vector = np.asarray(vector, dtype=np.float64)
         return self.rotation_matrix @ vector
 
@@ -560,6 +570,7 @@ class Pose6DOF:
 
     def __eq__(self, other: object) -> bool:
         """Check equality with tolerance."""
+        assert other is not None, "other must be provided"
         if not isinstance(other, Pose6DOF):
             return False
         return bool(
@@ -631,6 +642,7 @@ class Transform6DOF:
     @classmethod
     def from_rotation_x(cls, angle: float) -> Transform6DOF:
         """Create rotation about x-axis."""
+        assert angle is not None, "angle must be provided"
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[1, 0, 0], [0, c, -s], [0, s, c]], dtype=np.float64)
         return cls(rotation=R)
@@ -638,6 +650,7 @@ class Transform6DOF:
     @classmethod
     def from_rotation_y(cls, angle: float) -> Transform6DOF:
         """Create rotation about y-axis."""
+        assert angle is not None, "angle must be provided"
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]], dtype=np.float64)
         return cls(rotation=R)
@@ -645,6 +658,7 @@ class Transform6DOF:
     @classmethod
     def from_rotation_z(cls, angle: float) -> Transform6DOF:
         """Create rotation about z-axis."""
+        assert angle is not None, "angle must be provided"
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]], dtype=np.float64)
         return cls(rotation=R)
@@ -652,6 +666,7 @@ class Transform6DOF:
     @classmethod
     def from_axis_angle(cls, axis: Vec3 | list[float], angle: float) -> Transform6DOF:
         """Create rotation about arbitrary axis."""
+        assert axis is not None, "axis must be provided"
         R = axis_angle_to_rotation_matrix(axis, angle)
         return cls(rotation=R)
 
@@ -662,6 +677,7 @@ class Transform6DOF:
         translation: Vec3 | list[float] | None = None,
     ) -> Transform6DOF:
         """Create transform from rotation matrix and optional translation."""
+        assert rotation is not None, "rotation must be provided"
         if translation is None:
             translation = np.zeros(3)
         return cls(rotation=rotation, translation=translation)
@@ -669,6 +685,7 @@ class Transform6DOF:
     @classmethod
     def from_homogeneous_matrix(cls, H: Mat4) -> Transform6DOF:
         """Create transform from 4x4 homogeneous matrix."""
+        assert H is not None, "H must be provided"
         H = np.asarray(H, dtype=np.float64)
         return cls(rotation=H[:3, :3], translation=H[:3, 3])
 
@@ -695,6 +712,7 @@ class Transform6DOF:
             Interpolated transform
         """
         # Interpolate translation linearly
+        assert t1 is not None, "t1 must be provided"
         translation = (1 - alpha) * t1._translation + alpha * t2._translation
 
         # Interpolate rotation with SLERP
@@ -733,6 +751,7 @@ class Transform6DOF:
 
     def compose(self, other: Transform6DOF) -> Transform6DOF:
         """Compose transforms using world-frame chaining (`other * this`)."""
+        assert other is not None, "other must be provided"
         R = other._rotation @ self._rotation
         t = other._rotation @ self._translation + other._translation
         return Transform6DOF(rotation=R, translation=t)
@@ -745,6 +764,7 @@ class Transform6DOF:
 
     def transform_point(self, point: Vec3 | list[float]) -> Vec3:
         """Transform a point."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point, dtype=np.float64)
         return self._rotation @ point + self._translation
 
@@ -752,11 +772,13 @@ class Transform6DOF:
         self, points: npt.NDArray[np.float64]
     ) -> npt.NDArray[np.float64]:
         """Transform multiple points (Nx3 array)."""
+        assert points is not None, "points must be provided"
         points = np.asarray(points, dtype=np.float64)
         return (self._rotation @ points.T).T + self._translation
 
     def transform_vector(self, vector: Vec3 | list[float]) -> Vec3:
         """Transform a direction vector (rotation only)."""
+        assert vector is not None, "vector must be provided"
         vector = np.asarray(vector, dtype=np.float64)
         return self._rotation @ vector
 
@@ -816,6 +838,7 @@ class EntityPlacement:
             pose: Initial pose, defaults to origin with no rotation
             metadata: Optional metadata dictionary
         """
+        assert name is not None, "name must be provided"
         self.name = name
         self.pose = pose if pose is not None else Pose6DOF()
         self.metadata = metadata if metadata is not None else {}
@@ -838,6 +861,7 @@ class EntityPlacement:
 
     def rotate_euler(self, roll: float = 0, pitch: float = 0, yaw: float = 0) -> None:
         """Set entity rotation using euler angles."""
+        assert roll is not None, "roll must be provided"
         self.pose.euler_angles = np.array([roll, pitch, yaw], dtype=np.float64)
 
     def set_yaw(self, yaw: float) -> None:
@@ -846,6 +870,7 @@ class EntityPlacement:
 
     def rotate_axis(self, axis: Vec3 | list[float], angle: float) -> None:
         """Rotate entity about arbitrary axis."""
+        assert axis is not None, "axis must be provided"
         R = axis_angle_to_rotation_matrix(axis, angle)
         new_euler = rotation_matrix_to_euler(R @ self.pose.rotation_matrix)
         self.pose.euler_angles = new_euler
@@ -860,6 +885,7 @@ class EntityPlacement:
             target: Point to look at
             up: Up vector, defaults to [0, 0, 1]
         """
+        assert target is not None, "target must be provided"
         target = np.asarray(target, dtype=np.float64)
         if up is None:
             up = np.array([0, 0, 1], dtype=np.float64)
@@ -912,6 +938,7 @@ class EntityPlacement:
 
     def distance_to(self, point: Vec3 | list[float]) -> float:
         """Calculate distance to a point."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point, dtype=np.float64)
         return float(np.linalg.norm(self.pose.position - point))
 
@@ -949,6 +976,7 @@ class EntityPlacement:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> EntityPlacement:
         """Deserialize from dictionary."""
+        assert data is not None, "data must be provided"
         pose = Pose6DOF(
             position=data["position"],
             euler_angles=data["euler_angles"],
@@ -1016,6 +1044,7 @@ class PlacementGroup:
 
     def translate_all(self, offset: Vec3 | list[float]) -> None:
         """Translate all entities by offset."""
+        assert offset is not None, "offset must be provided"
         offset = np.asarray(offset, dtype=np.float64)
         for entity in self._entities.values():
             entity.pose._position += offset
@@ -1034,6 +1063,7 @@ class PlacementGroup:
             axis: Rotation axis
             angle: Rotation angle in radians
         """
+        assert point is not None, "point must be provided"
         point = np.asarray(point, dtype=np.float64)
         R = axis_angle_to_rotation_matrix(axis, angle)
 

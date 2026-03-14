@@ -15,6 +15,7 @@ class ComparisonRenderer(BaseRenderer):
         self, fig: Figure, cf_name: str, metric_idx: int = 0
     ) -> None:
         """Plot counterfactual data against actual data."""
+        assert fig is not None, "fig must be provided"
         if cf_name == "dual":
             self._plot_counterfactual_dual(fig, metric_idx)
             return
@@ -75,6 +76,7 @@ class ComparisonRenderer(BaseRenderer):
 
     def _plot_counterfactual_dual(self, fig: Figure, joint_idx: int) -> None:
         """Helper to plot ZTCF (Accel) and ZVCF (Torque) on dual axes."""
+        assert fig is not None, "fig must be provided"
         try:
             times_z, ztcf = self.data.get_counterfactual_series("ztcf_accel")
             times_v, zvcf = self.data.get_counterfactual_series("zvcf_torque")

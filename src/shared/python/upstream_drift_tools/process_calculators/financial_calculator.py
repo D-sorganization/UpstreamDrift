@@ -120,6 +120,7 @@ class FinancialModelCalculator:
         results: FinancialResults,
     ) -> None:
         """Compute annual volumes and revenue line items."""
+        assert parameters is not None, "parameters must be provided"
         results.annual_feedstock_tons = (
             parameters.plant_capacity_tpd
             * parameters.operating_days_per_year
@@ -144,6 +145,7 @@ class FinancialModelCalculator:
         results: FinancialResults,
     ) -> None:
         """Compute variable and fixed operating costs."""
+        assert parameters is not None, "parameters must be provided"
         tons = results.annual_feedstock_tons
 
         results.feedstock_costs = tons * parameters.feedstock_cost_per_ton
@@ -184,6 +186,7 @@ class FinancialModelCalculator:
         results: FinancialResults,
     ) -> None:
         """Compute financial metrics from gross margin through net income."""
+        assert parameters is not None, "parameters must be provided"
         results.gross_margin = results.total_revenue - results.total_variable_costs
         results.ebitda = results.gross_margin - results.total_fixed_costs
         results.depreciation = parameters.total_capital_investment / max(
@@ -250,12 +253,12 @@ class FinancialModelCalculator:
     ) -> FinancialResults:
         """Calculate comprehensive financial model."""
         # DbC preconditions
-        assert parameters.total_capital_investment >= 0, (
-            f"Capital investment must be non-negative, got {parameters.total_capital_investment}"
-        )
-        assert parameters.operating_days_per_year >= 0, (
-            f"Operating days must be non-negative, got {parameters.operating_days_per_year}"
-        )
+        assert (
+            parameters.total_capital_investment >= 0
+        ), f"Capital investment must be non-negative, got {parameters.total_capital_investment}"
+        assert (
+            parameters.operating_days_per_year >= 0
+        ), f"Operating days must be non-negative, got {parameters.operating_days_per_year}"
 
         self.parameters = parameters
         results = FinancialResults()
@@ -270,6 +273,7 @@ class FinancialModelCalculator:
 
     def generate_yearly_projections(self, years: int = 10) -> list[dict[str, Any]]:
         """Generate multi-year financial projections"""
+        assert years is not None, "years must be provided"
         projections = []
         base_params = self.parameters
 

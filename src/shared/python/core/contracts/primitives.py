@@ -55,6 +55,7 @@ def require(condition: bool, message: str, value: Any = None) -> None:
         message: Descriptive message for the violated contract.
         value: The offending value, for diagnostics.
     """
+    assert condition is not None, "condition must be provided"
     from .level import get_contract_level  # read live state via function
 
     if get_contract_level() == ContractLevel.OFF:
@@ -71,6 +72,7 @@ def ensure(condition: bool, message: str, value: Any = None) -> None:
         message: Descriptive message for the violated contract.
         value: The offending value, for diagnostics.
     """
+    assert condition is not None, "condition must be provided"
     from .level import get_contract_level  # read live state via function
 
     if get_contract_level() == ContractLevel.OFF:

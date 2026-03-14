@@ -30,6 +30,7 @@ class ODESolver:
             Mapping of parameter name to numerical value.
 
         """
+        assert derivatives is not None, "derivatives must be provided"
         self.derivatives = derivatives
         self.parameters = parameters
 
@@ -63,6 +64,7 @@ class ODESolver:
         Returns:
             List of derivatives for each variable.
         """
+        assert t is not None, "t must be provided"
         args = [t] + list(y) + [self.parameters[p] for p in self.parameters]
         return [func(*args) for func in self._functions]
 

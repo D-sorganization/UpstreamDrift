@@ -63,6 +63,7 @@ class Origin:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Origin:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         xyz = data.get("xyz", (0.0, 0.0, 0.0))
         rpy = data.get("rpy", (0.0, 0.0, 0.0))
         if isinstance(xyz, list):
@@ -145,6 +146,7 @@ class Inertia:
             mass: Mass in kg
             size_x, size_y, size_z: Full dimensions in meters
         """
+        assert mass is not None, "mass must be provided"
         ixx = (mass / 12.0) * (size_y**2 + size_z**2)
         iyy = (mass / 12.0) * (size_x**2 + size_z**2)
         izz = (mass / 12.0) * (size_x**2 + size_y**2)
@@ -167,6 +169,7 @@ class Inertia:
             axis: Cylinder axis ('x', 'y', or 'z')
         """
         # Inertia about cylinder axis
+        assert mass is not None, "mass must be provided"
         i_axial = 0.5 * mass * radius**2
         # Inertia about perpendicular axes
         i_perp = (mass / 12.0) * (3 * radius**2 + length**2)
@@ -189,6 +192,7 @@ class Inertia:
             mass: Mass in kg
             radius: Radius in meters
         """
+        assert mass is not None, "mass must be provided"
         i = (2.0 / 5.0) * mass * radius**2
         return cls(ixx=i, iyy=i, izz=i, mass=mass)
 
@@ -209,6 +213,7 @@ class Inertia:
             axis: Capsule axis ('x', 'y', or 'z')
         """
         # Volume fractions
+        assert mass is not None, "mass must be provided"
         v_cyl = math.pi * radius**2 * length
         v_sphere = (4.0 / 3.0) * math.pi * radius**3
         v_total = v_cyl + v_sphere
@@ -239,6 +244,7 @@ class Inertia:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Inertia:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         return cls(
             ixx=data.get("ixx", 0.1),
             iyy=data.get("iyy", 0.1),
@@ -324,6 +330,7 @@ class Material:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Material:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         color = data.get("color", (0.8, 0.8, 0.8, 1.0))
         if isinstance(color, list):
             color = tuple(color)
@@ -342,6 +349,7 @@ class Material:
 
     def to_urdf_string(self, inline: bool = False) -> str:
         """Generate URDF material element string."""
+        assert inline is not None, "inline must be provided"
         rgba_str = " ".join(f"{v:.4g}" for v in self.color)
         if inline:
             return f'<material name="{self.name}"><color rgba="{rgba_str}"/></material>'
@@ -420,6 +428,7 @@ class Geometry:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Geometry:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         geom_type = GeometryType(data.get("type", "box"))
         dims = data.get("dimensions", ())
         if isinstance(dims, list):
@@ -485,6 +494,7 @@ class JointLimits:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> JointLimits:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         return cls(
             lower=data.get("lower", -math.pi),
             upper=data.get("upper", math.pi),
@@ -519,6 +529,7 @@ class JointDynamics:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> JointDynamics:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         return cls(
             damping=data.get("damping", 0.5),
             friction=data.get("friction", 0.0),
@@ -555,6 +566,7 @@ class Link:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Link:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         inertia_data = data.get("inertia", {})
         if "mass" not in inertia_data:
             inertia_data["mass"] = data.get("mass", 1.0)
@@ -630,6 +642,7 @@ class Joint:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Joint:
         """Create from dictionary."""
+        assert data is not None, "data must be provided"
         joint_type = JointType(data.get("type", "revolute"))
         axis = data.get("axis", (0.0, 0.0, 1.0))
         if isinstance(axis, list):

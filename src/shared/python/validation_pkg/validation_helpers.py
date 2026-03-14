@@ -164,6 +164,7 @@ def validate_magnitude(
     Warns:
         UserWarning: If values exceed bounds (STANDARD or PERMISSIVE)
     """
+    assert array is not None, "array must be provided"
     max_observed = np.max(np.abs(array))
 
     if max_observed > max_value:
@@ -264,6 +265,7 @@ def validate_cartesian_state(
     Warns:
         UserWarning: For plausibility issues
     """
+    assert level is not None, "level must be provided"
     if position is not None:
         validate_finite(position, "Cartesian position", level)
 

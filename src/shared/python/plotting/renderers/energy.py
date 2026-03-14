@@ -12,6 +12,7 @@ class EnergyRenderer(BaseRenderer):
 
     def plot_energy_analysis(self, fig: Figure) -> None:
         """Plot kinetic, potential, and total energy over time."""
+        assert fig is not None, "fig must be provided"
         times_ke, ke = self.data.get_series("kinetic_energy")
         times_pe, pe = self.data.get_series("potential_energy")
         times_te, te = self.data.get_series("total_energy")
