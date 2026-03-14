@@ -119,6 +119,7 @@ class PendulumCanvas(FigureCanvasQTAgg):
 
     def draw_chain(self, points: np.ndarray[typing.Any, typing.Any]) -> None:
         """Render the pendulum chain as connected line segments."""
+        assert points is not None, "points must be provided"
         self.ax.cla()
         self._configure_axes()
         xs, ys, zs = points.T
@@ -186,6 +187,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(control_panel, stretch=1)
 
     def _build_form(self, parent: QtWidgets.QWidget) -> None:
+        assert parent is not None, "parent must be provided"
         form_layout = QtWidgets.QFormLayout(parent)
 
         self.status_group = QtWidgets.QGroupBox("Simulation Status")
@@ -365,6 +367,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _polynomial_profiles(
         self, expressions: tuple[str, ...]
     ) -> tuple[PolynomialProfile, ...]:
+        assert expressions is not None, "expressions must be provided"
         profiles = []
         for expr in expressions:
             cleaned = expr.replace(" ", "")
@@ -383,6 +386,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         state: DoublePendulumState,
         profiles: tuple[PolynomialProfile, PolynomialProfile],
     ) -> DoublePendulumState:
+        assert state is not None, "state must be provided"
         omega1 = profiles[0].omega(self.time)
         omega2 = profiles[1].omega(self.time)
         alpha1 = profiles[0].alpha(self.time)
@@ -410,6 +414,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         state: TriplePendulumState,
         profiles: tuple[PolynomialProfile, PolynomialProfile, PolynomialProfile],
     ) -> TriplePendulumState:
+        assert state is not None, "state must be provided"
         omega = [profile.omega(self.time) for profile in profiles]
         alpha = [profile.alpha(self.time) for profile in profiles]
         accelerations = tuple(alpha)
@@ -439,6 +444,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         self.canvas.draw_chain(points)
 
     def _update_status(self, state: DoublePendulumState | TriplePendulumState) -> None:
+        assert state is not None, "state must be provided"
         status_text = f"Time: {self.time:.3f} s\n"
 
         def fmt(val: float) -> str:
@@ -456,6 +462,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _points_double(
         self, state: DoublePendulumState
     ) -> np.ndarray[typing.Any, typing.Any]:
+        assert state is not None, "state must be provided"
         plane_rotation = self._plane_rotation(self.double_params.plane_inclination_deg)
         shoulder = np.array([0.0, 0.0, 0.0])
         upper = self._point_from_angles(
@@ -471,6 +478,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _points_triple(
         self, state: TriplePendulumState
     ) -> np.ndarray[typing.Any, typing.Any]:
+        assert state is not None, "state must be provided"
         shoulder = np.array([0.0, 0.0, 0.0])
         params = self.triple_params.segments
         plane_rotation = self._plane_rotation(35.0)
@@ -488,6 +496,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _point_from_angles(
         self, angle: float, rotation: np.ndarray[typing.Any, typing.Any], length: float
     ) -> np.ndarray[typing.Any, typing.Any]:
+        assert angle is not None, "angle must be provided"
         local = np.array(
             [
                 length * math.sin(angle),
@@ -501,6 +510,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _plane_rotation(
         self, inclination_deg: float
     ) -> np.ndarray[typing.Any, typing.Any]:
+        assert inclination_deg is not None, "inclination_deg must be provided"
         inclination_rad = math.radians(inclination_deg)
         cos_inc = math.cos(inclination_rad)
         sin_inc = math.sin(inclination_rad)

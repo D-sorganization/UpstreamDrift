@@ -25,6 +25,7 @@ class ComparativePlotter:
         Args:
             analyzer: ComparativeSwingAnalyzer containing the two swings
         """
+        assert analyzer is not None, "analyzer must be provided"
         self.analyzer = analyzer
         self.colors = {
             "a": "#1f77b4",  # Blue
@@ -50,6 +51,7 @@ class ComparativePlotter:
             title: Plot title
             ylabel: Y-axis label
         """
+        assert fig is not None, "fig must be provided"
         aligned = self.analyzer.align_signals(field_name, joint_idx=joint_idx)
 
         if aligned is None:
@@ -140,6 +142,7 @@ class ComparativePlotter:
             joint_name: Name of joint for labels
             ax: Matplotlib Axes to plot on (optional)
         """
+        assert joint_idx is not None, "joint_idx must be provided"
         if ax is None:
             if fig is None:
                 raise ValueError("Must provide either fig or ax")
@@ -218,6 +221,7 @@ class ComparativePlotter:
             title: Title
         """
         # Align both joints
+        assert fig is not None, "fig must be provided"
         pos1_aligned = self.analyzer.align_signals(
             "joint_positions", joint_idx=joint_idx_1
         )
@@ -311,6 +315,7 @@ class ComparativePlotter:
         # We will retrieve the raw data and just plot them in their original space,
         # maybe normalizing time for color.
 
+        assert fig is not None, "fig must be provided"
         rec_a = self.analyzer.recorder_a
         rec_b = self.analyzer.recorder_b
 
@@ -372,6 +377,7 @@ class ComparativePlotter:
         Args:
             fig: Matplotlib figure
         """
+        assert fig is not None, "fig must be provided"
         gs = fig.add_gridspec(2, 2, hspace=0.3, wspace=0.3)
 
         # 1. Club Head Speed Comparison
@@ -444,6 +450,7 @@ class ComparativePlotter:
             joint_idx: Joint index (optional)
             radius: Sakoe-Chiba radius used for calculation
         """
+        assert fig is not None, "fig must be provided"
         dist, path = self.analyzer.compute_dtw_distance(field_name, joint_idx, radius)
 
         if not path:
@@ -495,6 +502,7 @@ class ComparativePlotter:
             joint_idx: Optional joint index
             title: Optional title
         """
+        assert fig is not None, "fig must be provided"
         aligned = self.analyzer.align_signals(field_name, joint_idx=joint_idx)
 
         if aligned is None:

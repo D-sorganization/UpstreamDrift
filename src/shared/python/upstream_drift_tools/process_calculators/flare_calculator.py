@@ -185,6 +185,7 @@ class FlareCalculator:
         Returns:
             Dictionary with zone distances (m)
         """
+        assert flare_design is not None, "flare_design must be provided"
         zones = {
             "lethal": 0.0,  # 37.5 kW/m²
             "damage": 0.0,  # 12.5 kW/m²
@@ -228,6 +229,7 @@ class FlareCalculator:
             Combustion efficiency (0-1)
         """
         # Simplified efficiency calculation
+        assert gas_composition is not None, "gas_composition must be provided"
         efficiency = FLARE_BASE_EFFICIENCY  # Base efficiency
 
         # Normalize factors

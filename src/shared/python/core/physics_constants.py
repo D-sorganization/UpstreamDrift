@@ -27,6 +27,7 @@ class PhysicalConstant(float):
     def __init__(
         self, value: float, unit: str, source: str, description: str = ""
     ) -> None:
+        assert value is not None, "value must be provided"
         self.unit = unit
         self.source = source
         self.description = description

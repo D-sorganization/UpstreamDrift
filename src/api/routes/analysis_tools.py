@@ -123,6 +123,8 @@ def _store_metric_snapshot(
         engine_manager: Engine manager instance.
         metrics: Current metrics snapshot.
     """
+    assert engine_manager is not None, "engine_manager must be provided"
+    assert engine_manager is not None, "engine_manager must be provided"
     max_history = 500
     if not hasattr(engine_manager, "_metric_history"):
         engine_manager._metric_history = []  # type: ignore[attr-defined]

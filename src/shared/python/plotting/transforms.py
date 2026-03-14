@@ -26,6 +26,7 @@ class DataManager:
             joint_names: Optional list of joint names.
             enable_cache: If True, cache data fetches to improve performance
         """
+        assert recorder is not None, "recorder must be provided"
         self.recorder = recorder
         self.joint_names = joint_names or []
         self.enable_cache = enable_cache
@@ -70,6 +71,7 @@ class DataManager:
         Returns:
             Tuple of (times, values) arrays
         """
+        assert field_name is not None, "field_name must be provided"
         if not self.enable_cache:
             times, values = self.recorder.get_time_series(field_name)
             return np.asarray(times), np.asarray(values)
@@ -94,12 +96,14 @@ class DataManager:
 
     def get_joint_name(self, joint_idx: int) -> str:
         """Get human-readable joint name."""
+        assert joint_idx is not None, "joint_idx must be provided"
         if 0 <= joint_idx < len(self.joint_names):
             return self.joint_names[joint_idx]
         return f"Joint {joint_idx}"
 
     def get_aligned_label(self, idx: int, data_dim: int) -> str:
         """Get label aligned with data dimension (handling nq != nv)."""
+        assert idx is not None, "idx must be provided"
         if len(self.joint_names) == 0:
             return f"DoF {idx}"
 
@@ -128,6 +132,7 @@ class DataManager:
         self, source_name: str
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get club induced acceleration series (uncached)."""
+        assert source_name is not None, "source_name must be provided"
         if hasattr(self.recorder, "get_club_induced_acceleration_series"):
             return self.recorder.get_club_induced_acceleration_series(source_name)  # type: ignore
         return np.array([]), np.array([])

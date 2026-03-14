@@ -28,6 +28,7 @@ class VisualizationTab(QtWidgets.QWidget):
         sim_widget: MuJoCoSimWidget,
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
+        assert sim_widget is not None, "sim_widget must be provided"
         super().__init__(parent)
         self.sim_widget = sim_widget
         self._setup_ui()
@@ -69,6 +70,7 @@ class VisualizationTab(QtWidgets.QWidget):
         return camera_group
 
     def _create_camera_presets(self, camera_layout: QtWidgets.QVBoxLayout) -> None:
+        assert camera_layout is not None, "camera_layout must be provided"
         preset_layout = QtWidgets.QHBoxLayout()
         preset_layout.addWidget(QtWidgets.QLabel("Preset:"))
         self.camera_combo = QtWidgets.QComboBox()
@@ -78,6 +80,7 @@ class VisualizationTab(QtWidgets.QWidget):
         camera_layout.addLayout(preset_layout)
 
     def _create_reset_camera_button(self, camera_layout: QtWidgets.QVBoxLayout) -> None:
+        assert camera_layout is not None, "camera_layout must be provided"
         reset_cam_btn = QtWidgets.QPushButton("Reset Camera")
         style = self.style()
         if style:
@@ -91,6 +94,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def _create_camera_sliders(
         self, advanced_cam_layout: QtWidgets.QFormLayout
     ) -> None:
+        assert advanced_cam_layout is not None, "advanced_cam_layout must be provided"
         self.azimuth_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         self.azimuth_slider.setMinimum(0)
         self.azimuth_slider.setMaximum(360)
@@ -131,6 +135,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def _create_lookat_controls(
         self, advanced_cam_layout: QtWidgets.QFormLayout
     ) -> None:
+        assert advanced_cam_layout is not None, "advanced_cam_layout must be provided"
         lookat_layout = QtWidgets.QHBoxLayout()
         self.lookat_x_spin = QtWidgets.QDoubleSpinBox()
         self.lookat_x_spin.setRange(-10.0, 10.0)
@@ -329,6 +334,7 @@ class VisualizationTab(QtWidgets.QWidget):
         return force_group, ellipsoid_group
 
     def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
+        assert force_layout is not None, "force_layout must be provided"
         self.isolate_forces_cb = QtWidgets.QCheckBox("Isolate to Selected Body")
         self.isolate_forces_cb.setToolTip(
             "Only show forces/torques for the currently selected body (via Right-Click)"
@@ -343,6 +349,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def _create_torque_scale_controls(
         self, force_layout: QtWidgets.QVBoxLayout
     ) -> None:
+        assert force_layout is not None, "force_layout must be provided"
         torque_scale_layout = QtWidgets.QFormLayout()
         self.torque_scale_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         self.torque_scale_slider.setMinimum(1)
@@ -359,6 +366,7 @@ class VisualizationTab(QtWidgets.QWidget):
         force_layout.addLayout(torque_scale_layout)
 
     def _create_force_scale_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
+        assert force_layout is not None, "force_layout must be provided"
         self.show_forces_cb = QtWidgets.QCheckBox("Show Constraint Forces")
         self.show_forces_cb.stateChanged.connect(self.on_show_forces_changed)
         force_layout.addWidget(self.show_forces_cb)
@@ -379,6 +387,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def _create_advanced_vector_overlays(
         self, force_layout: QtWidgets.QVBoxLayout
     ) -> None:
+        assert force_layout is not None, "force_layout must be provided"
         advanced_vector_group = QtWidgets.QGroupBox("Advanced Vector Overlays")
         av_layout = QtWidgets.QFormLayout(advanced_vector_group)
 
@@ -474,6 +483,7 @@ class VisualizationTab(QtWidgets.QWidget):
     # -------- Callbacks --------
 
     def on_camera_changed(self, camera_name: str) -> None:
+        assert camera_name is not None, "camera_name must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle camera view change."""
         self.sim_widget.set_camera(camera_name)
@@ -507,18 +517,21 @@ class VisualizationTab(QtWidgets.QWidget):
             self.lookat_z_spin.setValue(lookat[2])
 
     def on_azimuth_changed(self, value: int) -> None:
+        assert value is not None, "value must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle azimuth slider change."""
         self.sim_widget.set_camera_azimuth(float(value))
         self.azimuth_label.setText(f"{value}\u00b0")
 
     def on_elevation_changed(self, value: int) -> None:
+        assert value is not None, "value must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle elevation slider change."""
         self.sim_widget.set_camera_elevation(float(value))
         self.elevation_label.setText(f"{value}\u00b0")
 
     def on_distance_changed(self, value: int) -> None:
+        assert value is not None, "value must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle distance slider change."""
         # Convert slider value (1-500) to distance (0.1-50.0)
@@ -604,6 +617,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
 
     def on_live_kinematics_changed(self, state: int = 0) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle live kinematics visualization toggle."""
         self.sim_widget.set_live_kinematics_visualization(
@@ -626,12 +640,14 @@ class VisualizationTab(QtWidgets.QWidget):
             )
 
     def on_show_torques_changed(self, state: int) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle torque visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_torque_visualization(enabled)
 
     def on_torque_scale_changed(self, value: int) -> None:
+        assert value is not None, "value must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle torque scale slider change."""
         scale = value / 100.0  # Convert to 0.01 - 1.0
@@ -642,12 +658,14 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_show_forces_changed(self, state: int) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle force visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_force_visualization(enabled)
 
     def on_force_scale_changed(self, value: int) -> None:
+        assert value is not None, "value must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle force scale slider change."""
         scale = value / 10.0
@@ -658,6 +676,7 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_isolate_forces_changed(self, state: int) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle isolate forces toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
@@ -675,12 +694,14 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_show_contacts_changed(self, state: int) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle contact force visualization toggle."""
         enabled = state == QtCore.Qt.CheckState.Checked.value
         self.sim_widget.set_contact_force_visualization(enabled)
 
     def on_ellipsoid_visualization_changed(self, state: int) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle ellipsoid visualization toggle."""
         show_mobility = self.show_mobility_ellipsoid_cb.isChecked()
@@ -688,6 +709,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.sim_widget.set_ellipsoid_visualization(show_mobility, show_force)
 
     def on_swing_plane_changed(self, state: int = 0) -> None:
+        assert state is not None, "state must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle swing plane / trajectory visualization toggle."""
         self.sim_widget.set_swing_plane_visualization(
@@ -697,6 +719,7 @@ class VisualizationTab(QtWidgets.QWidget):
         )
 
     def on_tracked_body_changed(self, body_name: str) -> None:
+        assert body_name is not None, "body_name must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Handle tracked body change for trajectory recording."""
         if body_name:
@@ -749,6 +772,7 @@ class VisualizationTab(QtWidgets.QWidget):
         rank: int | str,
         nefc: int | str,
     ) -> None:
+        assert cond is not None, "cond must be provided"
         require("sim_widget is set", lambda: self.sim_widget is not None)
         """Update matrix analysis labels."""
         self.jacobian_cond_label.setText(f"Condition: {cond}")

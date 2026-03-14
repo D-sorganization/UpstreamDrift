@@ -197,6 +197,7 @@ class InverseKinematicsSolver:
             tolerance: Convergence tolerance for numerical IK
             max_iterations: Maximum iterations for numerical IK
         """
+        assert segment_lengths is not None, "segment_lengths must be provided"
         self.segment_lengths = segment_lengths
         self.joint_names = joint_names
         self.tolerance = tolerance
@@ -270,6 +271,7 @@ class InverseKinematicsSolver:
         Returns:
             FitResult with optimized joint angles.
         """
+        assert target_positions is not None, "target_positions must be provided"
         n_joints = len(self.joint_names)
 
         if initial_angles is None:
@@ -335,6 +337,7 @@ class InverseKinematicsSolver:
             End effector positions [M x 3]
         """
         # Simple planar chain for demonstration
+        assert angles is not None, "angles must be provided"
         positions = []
         x, y, z = 0.0, 0.0, 0.0
         cumulative_angle = 0.0
@@ -381,6 +384,7 @@ class ParameterEstimator:
             anthropometric_model: Model for mass/inertia regression
                 ("dempster", "winter", "de_leva")
         """
+        assert anthropometric_model is not None, "anthropometric_model must be provided"
         self.anthropometric_model = anthropometric_model
         self._load_regression_coefficients()
 
@@ -437,6 +441,7 @@ class ParameterEstimator:
             Tuple of (mean_length, std_length) in meters.
         """
         # Compute distances for each frame
+        assert proximal_markers is not None, "proximal_markers must be provided"
         distances = np.linalg.norm(distal_markers - proximal_markers, axis=1)
 
         mean_length = float(np.mean(distances))
@@ -463,6 +468,7 @@ class ParameterEstimator:
             BodySegmentParams with estimated values.
         """
         # Get regression coefficients
+        assert segment_name is not None, "segment_name must be provided"
         if segment_name in self.coefficients:
             mass_frac, com_frac, rog_frac = self.coefficients[segment_name]
         else:
@@ -503,6 +509,7 @@ class ParameterEstimator:
         known_lengths: dict[str, float] | None,
     ) -> FitResult:
         """Estimate segment parameters using anthropometric tables only."""
+        assert segment_names is not None, "segment_names must be provided"
         logger.warning("No marker data - using anthropometric estimates only")
         params: dict[str, Any] = {}
         for segment_name in segment_names:
@@ -528,6 +535,7 @@ class ParameterEstimator:
         known_lengths: dict[str, float] | None,
     ) -> FitResult:
         """Fit segment parameters from marker position data."""
+        assert marker_array is not None, "marker_array must be provided"
         fitted_params: dict[str, Any] = {}
         all_residuals: list[float] = []
 
@@ -584,6 +592,7 @@ class ParameterEstimator:
         Returns:
             FitResult with fitted parameters.
         """
+        assert kinematic_data is not None, "kinematic_data must be provided"
         if not kinematic_data:
             return FitResult(
                 success=False,
@@ -630,6 +639,7 @@ class SensitivityAnalyzer:
         Args:
             perturbation_size: Fractional perturbation for finite differences
         """
+        assert perturbation_size is not None, "perturbation_size must be provided"
         self.perturbation_size = perturbation_size
 
     def compute_sensitivity(
@@ -652,6 +662,7 @@ class SensitivityAnalyzer:
         Returns:
             SensitivityResult with sensitivity indices.
         """
+        assert parameter_name is not None, "parameter_name must be provided"
         delta = nominal_value * self.perturbation_size
 
         # Perturb up and down
@@ -711,6 +722,7 @@ class SensitivityAnalyzer:
         Returns:
             Dictionary with summary statistics and rankings.
         """
+        assert sensitivities is not None, "sensitivities must be provided"
         if not sensitivities:
             return {"error": "No sensitivity data"}
 
@@ -773,6 +785,7 @@ def convert_poses_to_markers(
         Tuple of (marker_positions [M x 3], marker_names [M]).
     """
     # Standard mapping from pose estimation to biomechanical markers
+    assert pose_keypoints is not None, "pose_keypoints must be provided"
     pose_to_marker_map = {
         # MediaPipe / OpenPose keypoint names -> Biomechanics marker names
         "left_shoulder": "LSHO",
@@ -843,6 +856,7 @@ class A3FittingPipeline:
         Args:
             anthropometric_model: Model for parameter regression
         """
+        assert anthropometric_model is not None, "anthropometric_model must be provided"
         self.param_estimator = ParameterEstimator(anthropometric_model)
         self.sensitivity_analyzer = SensitivityAnalyzer()
 
@@ -877,6 +891,7 @@ class A3FittingPipeline:
         Returns:
             Complete ParameterEstimationReport.
         """
+        assert marker_positions is not None, "marker_positions must be provided"
         logger.info(
             f"Fitting A3 model for subject '{subject_id}' "
             f"({len(timestamps)} frames, {len(marker_names)} markers)"
@@ -951,6 +966,7 @@ class A3FittingPipeline:
         Returns:
             Complete ParameterEstimationReport.
         """
+        assert c3d_path is not None, "c3d_path must be provided"
         try:
             import ezc3d
         except ImportError as e:
@@ -999,6 +1015,7 @@ class A3FittingPipeline:
             output_path: Output file path
             format: Export format ("json", "csv")
         """
+        assert report is not None, "report must be provided"
         import json
 
         if format == "json":

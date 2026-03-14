@@ -81,6 +81,7 @@ class SwingAnalyzer:
             min_confidence: Minimum pose confidence threshold (0-1).
             smoothing_window: Window size for angle smoothing.
         """
+        assert min_confidence is not None, "min_confidence must be provided"
         self.min_confidence = min_confidence
         self.smoothing_window = smoothing_window
 
@@ -236,6 +237,7 @@ class SwingAnalyzer:
 
     def _detect_stance(self, landmarks: list[Landmark]) -> StanceDirection:
         """Detect if golfer is right or left handed based on body orientation."""
+        assert landmarks is not None, "landmarks must be provided"
         left_shoulder = landmarks[self.LEFT_SHOULDER]
         right_shoulder = landmarks[self.RIGHT_SHOULDER]
 
@@ -252,6 +254,7 @@ class SwingAnalyzer:
 
     def _calculate_angle(self, a: Landmark, b: Landmark, c: Landmark) -> float:
         """Calculate angle at point B between points A and C."""
+        assert a is not None, "a must be provided"
         ba = (a.x - b.x, a.y - b.y, a.z - b.z)
         bc = (c.x - b.x, c.y - b.y, c.z - b.z)
 
@@ -269,6 +272,7 @@ class SwingAnalyzer:
         self, landmarks: list[Landmark], stance: StanceDirection
     ) -> BodyAngles:
         """Calculate all body angles from landmarks."""
+        assert landmarks is not None, "landmarks must be provided"
         ls = landmarks[self.LEFT_SHOULDER]
         rs = landmarks[self.RIGHT_SHOULDER]
         lh = landmarks[self.LEFT_HIP]
@@ -341,6 +345,7 @@ class SwingAnalyzer:
         stance: StanceDirection,
     ) -> list[PhaseTransition]:
         """Detect swing phases from pose sequence."""
+        assert poses is not None, "poses must be provided"
         phases = []
         frame_duration = 1000 / fps
 
@@ -405,6 +410,7 @@ class SwingAnalyzer:
 
     def _get_key_frames(self, phases: list[PhaseTransition]) -> dict[str, int]:
         """Extract key frame indices from phases."""
+        assert phases is not None, "phases must be provided"
         key_frames = {}
 
         for phase in phases:
@@ -427,6 +433,7 @@ class SwingAnalyzer:
         stance: StanceDirection,
     ) -> dict[str, SwingPositionMetrics]:
         """Extract metrics at key swing positions."""
+        assert poses is not None, "poses must be provided"
         positions = {}
 
         for name, frame_num in key_frames.items():
@@ -445,6 +452,7 @@ class SwingAnalyzer:
 
     def _calculate_tempo(self, phases: list[PhaseTransition]) -> TempoMetrics:
         """Calculate tempo and timing metrics."""
+        assert phases is not None, "phases must be provided"
         backswing_dur = sum(
             p.duration
             for p in phases
@@ -484,6 +492,8 @@ class SwingAnalyzer:
         key_frames: dict[str, int],
     ) -> BalanceMetrics:
         """Calculate balance and weight shift metrics."""
+
+        assert poses is not None, "poses must be provided"
 
         def get_weight_distribution(landmarks: list[Landmark]) -> tuple[float, float]:
             """Estimate left/right weight distribution from hip and ankle landmarks."""
@@ -544,6 +554,7 @@ class SwingAnalyzer:
         stance: StanceDirection,
     ) -> PostureMetrics:
         """Calculate posture metrics."""
+        assert poses is not None, "poses must be provided"
         address_pose = next(
             (p for p in poses if p.frame_number == key_frames.get("address")),
             poses[0] if poses else None,
@@ -587,6 +598,7 @@ class SwingAnalyzer:
         posture: PostureMetrics,
     ) -> list[SwingIssue]:
         """Identify swing faults and issues."""
+        assert key_positions is not None, "key_positions must be provided"
         issues = []
 
         # Tempo issues
@@ -641,6 +653,7 @@ class SwingAnalyzer:
 
     def _generate_recommendations(self, issues: list[SwingIssue]) -> list[str]:
         """Generate practice recommendations."""
+        assert issues is not None, "issues must be provided"
         recommendations = []
 
         major_issues = [i for i in issues if i.severity == "major"]
@@ -671,6 +684,7 @@ class SwingAnalyzer:
     ) -> SwingScores:
         """Calculate swing scores (0-100)."""
         # Tempo score
+        assert tempo is not None, "tempo must be provided"
         tempo_dev = abs(tempo.tempo_ratio - 3)
         tempo_score = max(0, 100 - tempo_dev * 20)
 

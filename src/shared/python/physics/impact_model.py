@@ -169,6 +169,7 @@ class RigidBodyImpactModel(ImpactModel):
         # Known limitation: this uses a simplified scalar effective mass model.
         # It ignores the full 3D inertia tensor and the direction of the impact force.
         # Should be replaced with J = (1/m + r x (I^-1 * (r x n)))^-1 * (1 + e) * v_rel
+        assert pre_state is not None, "pre_state must be provided"
         m_club = pre_state.clubhead_mass
         club_moi = pre_state.clubhead_moi
 
@@ -185,6 +186,7 @@ class RigidBodyImpactModel(ImpactModel):
         m_club_effective: float,
         cor: float,
     ) -> tuple[float, float]:
+        assert v_rel is not None, "v_rel must be provided"
         v_approach = np.dot(v_rel, n)
         m_eff = (GOLF_BALL_MASS * m_club_effective) / (
             GOLF_BALL_MASS + m_club_effective
@@ -201,6 +203,7 @@ class RigidBodyImpactModel(ImpactModel):
         j: float,
         friction_coefficient: float,
     ) -> np.ndarray:
+        assert pre_state is not None, "pre_state must be provided"
         v_tangent = v_rel - v_approach * n
         tangent_mag = np.linalg.norm(v_tangent)
 
@@ -221,6 +224,7 @@ class RigidBodyImpactModel(ImpactModel):
         pre_ball_velocity: np.ndarray,
         post_ball_velocity: np.ndarray,
     ) -> float:
+        assert pre_ball_velocity is not None, "pre_ball_velocity must be provided"
         ke_pre = 0.5 * GOLF_BALL_MASS * np.dot(pre_ball_velocity, pre_ball_velocity)
         ke_post = 0.5 * GOLF_BALL_MASS * np.dot(post_ball_velocity, post_ball_velocity)
         return ke_post - ke_pre
@@ -259,6 +263,7 @@ class RigidBodyImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
+        assert pre_state is not None, "pre_state must be provided"
         m_club_effective = self._compute_effective_club_mass(pre_state)
 
         n = pre_state.clubhead_orientation / np.linalg.norm(
@@ -334,6 +339,7 @@ class SpringDamperImpactModel(ImpactModel):
                 Smaller values increase stability but decrease performance.
                 Typical range: 1e-8 to 1e-6 s.
         """
+        assert dt is not None, "dt must be provided"
         self.dt = dt
 
     @precondition(
@@ -361,6 +367,7 @@ class SpringDamperImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
+        assert pre_state is not None, "pre_state must be provided"
         m_ball = GOLF_BALL_MASS
         m_club = pre_state.clubhead_mass
 
@@ -469,6 +476,7 @@ class FiniteTimeImpactModel(ImpactModel):
         """
         # For finite-time model, we use the rigid body result
         # but report the specified contact duration
+        assert pre_state is not None, "pre_state must be provided"
         rigid_model = RigidBodyImpactModel()
         result = rigid_model.solve(pre_state, params)
 
@@ -520,6 +528,7 @@ def compute_gear_effect_spin(
     """
     # Horizontal offset creates hook/slice spin (vertical axis)
     # Vertical offset creates topspin/backspin
+    assert impact_offset is not None, "impact_offset must be provided"
     h_offset = impact_offset[0]  # + = toe side
     v_offset = impact_offset[1]  # + = high on face
 
@@ -563,6 +572,7 @@ def validate_energy_balance(
     Returns:
         Dictionary with energy analysis results
     """
+    assert pre_state is not None, "pre_state must be provided"
     m_ball = GOLF_BALL_MASS
     m_club = pre_state.clubhead_mass
     I_ball = GOLF_BALL_MOMENT_INERTIA
@@ -692,6 +702,7 @@ class ImpactRecorder:
         Returns:
             Recorded ImpactEvent
         """
+        assert timestamp is not None, "timestamp must be provided"
         energy_balance = validate_energy_balance(pre_state, post_state, params)
 
         event = ImpactEvent(
@@ -796,6 +807,7 @@ class ImpactSolverAPI:
             model_type: Type of impact model to use
             params: Impact parameters (uses defaults if None)
         """
+        assert model_type is not None, "model_type must be provided"
         self.model_type = model_type
         self.model = create_impact_model(model_type)
         self.params = params or ImpactParameters()
@@ -849,6 +861,7 @@ class ImpactSolverAPI:
         Returns:
             Post-impact state
         """
+        assert timestamp is not None, "timestamp must be provided"
         if ball_velocity is None:
             ball_velocity = np.zeros(3)
         if ball_angular_velocity is None:
@@ -898,6 +911,7 @@ class ImpactSolverAPI:
             Post-impact state with gear effect spin added
         """
         # Solve base impact
+        assert timestamp is not None, "timestamp must be provided"
         post_state = self.solve_impact(
             timestamp,
             clubhead_velocity,
@@ -1001,6 +1015,7 @@ class ImpactSolverAPI:
         Returns:
             Validation result with pass/fail and details
         """
+        assert tolerance is not None, "tolerance must be provided"
         if not self.recorder.events:
             return {"valid": False, "error": "No impacts recorded"}
 
@@ -1049,6 +1064,7 @@ class ImpactSolverAPI:
         Returns:
             Validation result with pass/fail and details
         """
+        assert max_spin_rpm is not None, "max_spin_rpm must be provided"
         if not self.recorder.events:
             return {"valid": False, "error": "No impacts recorded"}
 

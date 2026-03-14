@@ -165,6 +165,7 @@ class ScipyQPSolver(QPSolver):
             method: Scipy optimization method ('SLSQP' or 'trust-constr').
             max_iter: Maximum number of iterations.
         """
+        assert method is not None, "method must be provided"
         self._method = method
         self._max_iter = max_iter
         self._available = self._check_available()
@@ -191,6 +192,7 @@ class ScipyQPSolver(QPSolver):
         Returns:
             QP solution.
         """
+        assert problem is not None, "problem must be provided"
         import time
 
         if not self._available:
@@ -248,6 +250,7 @@ class ScipyQPSolver(QPSolver):
             )
 
     def _build_variable_bounds(self, problem: QPProblem):
+        assert problem is not None, "problem must be provided"
         from scipy.optimize import Bounds
 
         if problem.x_lb is None and problem.x_ub is None:
@@ -259,6 +262,7 @@ class ScipyQPSolver(QPSolver):
         return Bounds(lb, ub)
 
     def _build_constraints(self, problem: QPProblem) -> list[dict]:
+        assert problem is not None, "problem must be provided"
         constraints: list[dict] = []
 
         if problem.A_eq is not None and problem.b_eq is not None:
@@ -280,6 +284,7 @@ class ScipyQPSolver(QPSolver):
         constraints: list[dict],
         problem: QPProblem,
     ) -> None:
+        assert constraints is not None, "constraints must be provided"
         lb = (
             problem.lb_ineq
             if problem.lb_ineq is not None
@@ -323,6 +328,7 @@ class NullspaceQPSolver(QPSolver):
         Args:
             regularization: Regularization for matrix inversion.
         """
+        assert regularization is not None, "regularization must be provided"
         self._reg = regularization
 
     def is_available(self) -> bool:
@@ -340,6 +346,7 @@ class NullspaceQPSolver(QPSolver):
         Returns:
             QP solution.
         """
+        assert problem is not None, "problem must be provided"
         import time
 
         start_time = time.perf_counter()

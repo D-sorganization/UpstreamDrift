@@ -92,9 +92,7 @@ class TestDrakeSpecificVerification:
         )
 
         assert hasattr(DrakePhysicsEngine, "compute_drift_acceleration")
-        assert callable(
-            DrakePhysicsEngine.compute_drift_acceleration
-        )
+        assert callable(DrakePhysicsEngine.compute_drift_acceleration)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -169,8 +167,7 @@ class TestMyoSuiteGymnasiumCompatibility:
             )
         )
         assert "import gymnasium" in source_code, (
-            "MyoSuite engine should prefer 'import gymnasium' "
-            "over legacy 'import gym'"
+            "MyoSuite engine should prefer 'import gymnasium' over legacy 'import gym'"
         )
 
     def test_myosuite_has_gym_fallback(self) -> None:
@@ -368,8 +365,7 @@ class TestEngineAvailabilityDeep:
 
         for name, flag in _ENGINE_FLAGS.items():
             assert isinstance(flag, bool), (
-                f"_ENGINE_FLAGS['{name}'] is {type(flag).__name__}, "
-                f"expected bool"
+                f"_ENGINE_FLAGS['{name}'] is {type(flag).__name__}, expected bool"
             )
 
     def test_engine_availability_consistent_with_import(self) -> None:

@@ -78,6 +78,7 @@ class Demonstration:
         Returns:
             Dictionary with frame data.
         """
+        assert idx is not None, "idx must be provided"
         frame = {
             "timestamp": self.timestamps[idx],
             "joint_positions": self.joint_positions[idx],
@@ -98,6 +99,7 @@ class Demonstration:
         Returns:
             Subsampled demonstration.
         """
+        assert factor is not None, "factor must be provided"
         indices = np.arange(0, len(self.timestamps), factor)
         return Demonstration(
             timestamps=self.timestamps[indices],
@@ -237,6 +239,7 @@ class DemonstrationDataset:
         Returns:
             Filtered dataset.
         """
+        assert task_id is not None, "task_id must be provided"
         filtered = [d for d in self.demonstrations if d.task_id == task_id]
         return DemonstrationDataset(filtered)
 
@@ -317,6 +320,7 @@ class DemonstrationDataset:
         Returns:
             Augmented dataset.
         """
+        assert noise_std is not None, "noise_std must be provided"
         if rng is None:
             rng = np.random.default_rng()
 
@@ -359,6 +363,7 @@ class DemonstrationDataset:
         Args:
             path: Path to save file (JSON format).
         """
+        assert path is not None, "path must be provided"
         path = Path(path)
         data = {
             "version": "1.0",
@@ -378,6 +383,7 @@ class DemonstrationDataset:
         Returns:
             Loaded dataset.
         """
+        assert path is not None, "path must be provided"
         path = Path(path)
         with open(path) as f:
             data = json.load(f)
@@ -399,6 +405,7 @@ class DemonstrationDataset:
         Returns:
             Sampled dataset.
         """
+        assert n is not None, "n must be provided"
         if rng is None:
             rng = np.random.default_rng()
 

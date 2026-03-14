@@ -191,6 +191,7 @@ class VisualizationMixin:
         color: int,
     ) -> None:
         """Internal helper to render an ellipsoid in Meshcat."""
+        assert path is not None, "path must be provided"
         import meshcat.geometry as g
 
         if self.viewer is None:
@@ -299,6 +300,7 @@ class VisualizationMixin:
         self: PinocchioGUI, path: str, start: np.ndarray, vector: np.ndarray, color: int
     ) -> None:
         """Helper to draw an arrow in Meshcat."""
+        assert path is not None, "path must be provided"
         import meshcat.geometry as g
 
         if self.viewer is None:
@@ -372,6 +374,7 @@ class VisualizationMixin:
             self._update_viewer()
 
     def _toggle_forces(self: PinocchioGUI, checked: bool) -> None:
+        assert checked is not None, "checked must be provided"
         if self.viewer is None:
             return
         if not checked:
@@ -379,6 +382,7 @@ class VisualizationMixin:
         self._update_viewer()
 
     def _toggle_torques(self: PinocchioGUI, checked: bool) -> None:
+        assert checked is not None, "checked must be provided"
         if self.viewer is None:
             return
         if not checked:

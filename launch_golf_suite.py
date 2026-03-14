@@ -11,8 +11,8 @@ Usage:
 
 import argparse
 import logging
-import os
-import sys
+from os import environ, getcwd
+from sys import exit, path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -76,7 +76,7 @@ Examples:
             from src.shared.python.launcher_factory import launch_engine_directly
         except ImportError:
             # Fallback if PYTHONPATH is not set correctly
-            sys.path.append(os.getcwd())
+            path.append(getcwd())
             from src.shared.python.launcher_factory import launch_engine_directly
 
         # Check if engine is web-only
@@ -86,7 +86,7 @@ Examples:
                 "Engine '%s' requires the web UI. Launching web UI instead...",
                 args.engine,
             )
-            os.environ["GOLF_DEFAULT_ENGINE"] = args.engine
+            environ["GOLF_DEFAULT_ENGINE"] = args.engine
             from src.api.local_server import main as server_main
 
             server_main()
@@ -103,19 +103,19 @@ Examples:
             classic_main()
         except ImportError:
             logger.error("Could not load classic launcher. Check installation.")
-            sys.exit(1)
+            exit(1)
     elif args.api_only:
         # API server only
-        os.environ["GOLF_NO_BROWSER"] = "true"
-        os.environ["GOLF_PORT"] = str(args.port)
+        environ["GOLF_NO_BROWSER"] = "true"
+        environ["GOLF_PORT"] = str(args.port)
         from src.api.local_server import main as api_main
 
         api_main()
     else:
         # Default: Web UI (recommended)
-        os.environ["GOLF_PORT"] = str(args.port)
+        environ["GOLF_PORT"] = str(args.port)
         if args.no_browser:
-            os.environ["GOLF_NO_BROWSER"] = "true"
+            environ["GOLF_NO_BROWSER"] = "true"
         from src.api.local_server import main as server_main
 
         server_main()

@@ -438,6 +438,7 @@ def calculate_fitting_pressure_drop(
         >>> dp = calculate_fitting_pressure_drop(k, 1000, 5)
         >>> print(f"ΔP = {dp:.0f} Pa = {dp/1e5:.3f} bar")
     """
+    assert k_factor is not None, "k_factor must be provided"
     velocity_pressure = 0.5 * density * velocity**2
     return k_factor * velocity_pressure
 

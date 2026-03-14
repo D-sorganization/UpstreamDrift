@@ -60,6 +60,7 @@ class CanvasAdapter(ABC):
             height: Figure height in inches
             dpi: Dots per inch
         """
+        assert width is not None, "width must be provided"
         self.width = width
         self.height = height
         self.dpi = dpi
@@ -84,6 +85,7 @@ class CanvasAdapter(ABC):
             path: Output file path
             **kwargs: Additional arguments for savefig
         """
+        assert path is not None, "path must be provided"
         fig = self.get_figure()
         fig.savefig(path, dpi=kwargs.pop("dpi", self.dpi), **kwargs)
 
@@ -123,6 +125,7 @@ class HeadlessCanvas(CanvasAdapter):
             height: Figure height in inches
             dpi: Dots per inch
         """
+        assert width is not None, "width must be provided"
         super().__init__(width, height, dpi)
 
         # Use Agg backend for headless rendering
@@ -174,6 +177,7 @@ class QtCanvas(CanvasAdapter):
         Raises:
             RuntimeError: If Qt is not available
         """
+        assert width is not None, "width must be provided"
         super().__init__(width, height, dpi)
 
         try:
@@ -262,6 +266,7 @@ def get_canvas_adapter(
     Returns:
         Appropriate CanvasAdapter implementation
     """
+    assert width is not None, "width must be provided"
     if force_headless or is_headless() or not is_qt_available():
         logger.debug("Using HeadlessCanvas")
         return HeadlessCanvas(width, height, dpi)

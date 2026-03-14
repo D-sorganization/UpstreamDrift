@@ -111,6 +111,7 @@ class KinematicTree:
     )
     def build_from_urdf(self, urdf_content: str) -> None:
         """Build the tree from URDF XML content."""
+        assert urdf_content is not None, "urdf_content must be provided"
         try:
             root_elem = DefusedET.fromstring(urdf_content)
         except ET.ParseError as e:
@@ -169,6 +170,7 @@ class KinematicTree:
 
         def set_depth(node: ChainNode, depth: int) -> None:
             """Recursively assign depth values to each node."""
+            assert node is not None, "node must be provided"
             node.depth = depth
             for child in node.children:
                 set_depth(child, depth + 1)
@@ -195,6 +197,7 @@ class KinematicTree:
         Returns:
             List of nodes in the chain (may be empty if no path exists)
         """
+        assert from_link is not None, "from_link must be provided"
         if from_link not in self.nodes or to_link not in self.nodes:
             return []
 
@@ -241,6 +244,7 @@ class KinematicTree:
 
         def collect_chains(node: ChainNode, current_chain: list[ChainNode]) -> None:
             """Recursively collect root-to-leaf chains."""
+            assert node is not None, "node must be provided"
             current_chain = current_chain + [node]
             if node.is_leaf():
                 chains.append(current_chain)
@@ -283,6 +287,7 @@ class ChainVisualizer(QGraphicsView):
 
     def set_tree(self, tree: KinematicTree) -> None:
         """Set the kinematic tree to visualize."""
+        assert tree is not None, "tree must be provided"
         self.tree = tree
         self._render_tree()
 
@@ -354,6 +359,7 @@ class ChainVisualizer(QGraphicsView):
 
     def _draw_node(self, node: ChainNode, x: float, y: float) -> None:
         """Draw a single node."""
+        assert node is not None, "node must be provided"
         r = self.node_radius
 
         # Determine color based on node type
@@ -415,6 +421,7 @@ class InsertSegmentDialog(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
+        assert tree is not None, "tree must be provided"
         super().__init__(parent)
         self.tree = tree
         self.setWindowTitle("Insert Segment")
@@ -439,6 +446,7 @@ class InsertSegmentDialog(QDialog):
     def _create_insertion_group(
         self, tree: KinematicTree, insert_after: str | None
     ) -> QGroupBox:
+        assert tree is not None, "tree must be provided"
         insertion_group = QGroupBox("Insertion Point")
         insertion_layout = QFormLayout(insertion_group)
 
@@ -503,6 +511,7 @@ class InsertSegmentDialog(QDialog):
         return joint_group
 
     def _create_reparent_group(self, tree: KinematicTree) -> QGroupBox:
+        assert tree is not None, "tree must be provided"
         reparent_group = QGroupBox("Re-parent Children")
         reparent_layout = QVBoxLayout(reparent_group)
 
@@ -532,6 +541,7 @@ class InsertSegmentDialog(QDialog):
 
     def _update_reparent_list(self, parent_name: str) -> None:
         """Update the reparent list when parent selection changes."""
+        assert parent_name is not None, "parent_name must be provided"
         if self.reparent_list is None:
             return
 
@@ -669,6 +679,7 @@ class ChainManipulationWidget(QWidget):
     )
     def load_urdf(self, content: str) -> None:
         """Load URDF content and build the kinematic tree."""
+        assert content is not None, "content must be provided"
         self.urdf_content = content
         self.tree.build_from_urdf(content)
         self._update_info()
@@ -701,6 +712,7 @@ class ChainManipulationWidget(QWidget):
 
     def _on_node_selected(self, name: str) -> None:
         """Handle node selection."""
+        assert name is not None, "name must be provided"
         self.selected_node = name
         node = self.tree.nodes.get(name)
         if node:
@@ -738,6 +750,7 @@ class ChainManipulationWidget(QWidget):
 
     def _insert_segment(self, config: dict[str, Any]) -> None:
         """Insert a new segment into the URDF."""
+        assert config is not None, "config must be provided"
         try:
             root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:

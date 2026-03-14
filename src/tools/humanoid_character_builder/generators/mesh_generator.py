@@ -157,6 +157,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         **kwargs: Any,
     ) -> GeneratedMeshResult:
         """Generate primitive meshes for body segments."""
+        assert params is not None, "params must be provided"
         if not self.is_available:
             return GeneratedMeshResult(
                 success=False,
@@ -411,6 +412,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         JSON file mapping vertex-group names to vertex index lists.
         """
         # Filter out our synthetic __height_scale__ key
+        assert modifiers is not None, "modifiers must be provided"
         mh_mods = {k: v for k, v in modifiers.items() if not k.startswith("__")}
         mod_json = json.dumps(mh_mods)
 
@@ -444,6 +446,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
 
         Returns True on success, False on failure.
         """
+        assert script_path is not None, "script_path must be provided"
         mh_dir = self._find_makehuman()
         if mh_dir is None:
             return False
@@ -530,6 +533,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
         Returns:
             Tuple of (mesh_paths, collision_paths, vertex_groups).
         """
+        assert vertices is not None, "vertices must be provided"
         mesh_paths: dict[str, Path] = {}
         collision_paths: dict[str, Path] = {}
         vertex_groups: dict[str, list[int]] = {}
@@ -600,6 +604,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
 
         See issue #979
         """
+        assert params is not None, "params must be provided"
         mh_dir = self._find_makehuman()
         if mh_dir is None:
             return GeneratedMeshResult(
@@ -633,6 +638,7 @@ with open("{output_groups_json.as_posix()}", "w") as fp:
         **kwargs: Any,
     ) -> GeneratedMeshResult:
         """Internal generation logic."""
+        assert modifiers is not None, "modifiers must be provided"
         timeout = kwargs.get("timeout", 120)
 
         with tempfile.TemporaryDirectory(prefix="mh_gen_") as tmpdir:
@@ -762,6 +768,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         Returns:
             ``True`` if all ranges are valid, ``False`` otherwise.
         """
+        assert actual_vertex_count is not None, "actual_vertex_count must be provided"
         if actual_vertex_count != cls.SMPLX_EXPECTED_VERTEX_COUNT:
             logger.warning(
                 "SMPL-X vertex count mismatch: expected %d, got %d. "
@@ -812,6 +819,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             Mapping of segment names to ``(start_inclusive, end_exclusive)``
             vertex index ranges.
         """
+        assert model_dir is not None, "model_dir must be provided"
         import json as _json
 
         segmentation_files = [
@@ -973,6 +981,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         Returns:
             Tuple of (segment_vertices, segment_faces) with re-indexed faces.
         """
+        assert vertices is not None, "vertices must be provided"
         mask = np.zeros(len(vertices), dtype=bool)
         mask[start:end] = True
 
@@ -1011,6 +1020,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         Returns:
             A :class:`GeneratedMeshResult` with paths and vertex groups.
         """
+        assert params is not None, "params must be provided"
         if not SMPLX_AVAILABLE:
             return GeneratedMeshResult(
                 success=False,
@@ -1061,6 +1071,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         **kwargs: Any,
     ) -> GeneratedMeshResult:
         """Internal implementation that assumes dependencies are available."""
+        assert params is not None, "params must be provided"
         import torch
 
         num_betas = kwargs.get("num_betas", self.NUM_BETAS)

@@ -170,6 +170,7 @@ class StandardModelManager:
         In production, this would download actual STL files from human-gazebo.
         """
         # Create basic temporary STL files
+        assert mesh_dir is not None, "mesh_dir must be provided"
         temporary_meshes = [
             "head.stl",
             "torso.stl",
@@ -218,6 +219,7 @@ class StandardModelManager:
 
     def _generate_golf_club_urdf(self, club_type: str, output_path: Path) -> None:
         """Generate golf club URDF file."""
+        assert club_type is not None, "club_type must be provided"
         club_config: dict[str, Any] = self.config["golf_clubs"][club_type]
 
         # Ensure output directory exists
@@ -320,6 +322,7 @@ class StandardModelManager:
         Returns:
             Dictionary mapping engine names to compatibility status
         """
+        assert urdf_path is not None, "urdf_path must be provided"
         results = {}
 
         # Test MuJoCo compatibility

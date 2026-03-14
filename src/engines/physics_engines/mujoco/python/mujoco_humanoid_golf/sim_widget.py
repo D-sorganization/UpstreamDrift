@@ -41,6 +41,7 @@ class ModelLoaderThread(QtCore.QThread):
     finished_loading = QtCore.pyqtSignal(object, object, str)
 
     def __init__(self, xml_content: str, is_file: bool = False) -> None:
+        assert xml_content is not None, "xml_content must be provided"
         super().__init__()
         self.xml_content = xml_content
         self.is_file = is_file
@@ -141,6 +142,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         fps: int = 60,
     ) -> None:
         """Initialize the simulation widget."""
+        assert width is not None, "width must be provided"
         super().__init__(parent)
         self.setMinimumSize(width, height)
 
@@ -216,6 +218,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def load_model_async(self, xml_source: str, is_file: bool = False) -> None:
         """Load a MuJoCo model asynchronously to prevent UI freeze."""
+        assert xml_source is not None, "xml_source must be provided"
         if self.loader_thread and self.loader_thread.isRunning():
             logger.warning("Model loading already in progress.")
             return
@@ -232,6 +235,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def _on_model_loaded_async(self, model: Any, data: Any, error_msg: str) -> None:
         """Handle completion of async model loading."""
+        assert error_msg is not None, "error_msg must be provided"
         if error_msg:
             logger.error("Async load failed: %s", error_msg)
             self.label.setText(f"Error loading model: {error_msg}")
@@ -286,6 +290,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def load_model_from_xml(self, xml_string: str) -> None:
         """(Legacy/Sync) Load a MuJoCo model from an MJCF XML string."""
+        assert xml_string is not None, "xml_string must be provided"
         self.timer.stop()
         try:
             new_model = mujoco.MjModel.from_xml_string(xml_string)
@@ -297,6 +302,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def load_model_from_file(self, xml_path: str) -> None:
         """(Legacy/Sync) Load from file."""
+        assert xml_path is not None, "xml_path must be provided"
         self.timer.stop()
         try:
             if not os.path.isabs(xml_path):
@@ -468,6 +474,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_joint_qpos(self, joint_name: str, value: float) -> None:
         """Set qpos for a specific 1-DOF joint directly (Kinematic Mode)."""
+        assert joint_name is not None, "joint_name must be provided"
         if self.model is None or self.data is None:
             return
 
@@ -494,6 +501,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, qpos: np.ndarray, qvel: np.ndarray, ctrl: np.ndarray
     ) -> None:
         """Set simulation state and run forward kinematics."""
+        assert qpos is not None, "qpos must be provided"
         if self.model is None or self.data is None:
             return
         self.data.qpos[:] = qpos
@@ -615,6 +623,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_camera(self, camera_name: str) -> None:
         """Set the active camera view."""
+        assert camera_name is not None, "camera_name must be provided"
         self.camera_name = camera_name
         presets = {
             "side": (90.0, -20.0, 3.0),
@@ -636,6 +645,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, enabled: bool, scale: float | None = None
     ) -> None:
         """Toggle torque vector overlay and optionally set scale."""
+        assert enabled is not None, "enabled must be provided"
         self.show_torque_vectors = enabled
         if scale is not None:
             self.torque_scale = scale
@@ -647,6 +657,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         screw: bool = False,
     ) -> None:
         """Toggle live overlay of Euler angles, quaternions, and screw axis."""
+        assert euler is not None, "euler must be provided"
         self.show_live_euler = euler
         self.show_live_quat = quat
         self.show_live_screw = screw
@@ -657,6 +668,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, enabled: bool, scale: float | None = None
     ) -> None:
         """Toggle force vector overlay and optionally set scale."""
+        assert enabled is not None, "enabled must be provided"
         self.show_force_vectors = enabled
         if scale is not None:
             self.force_scale = scale
@@ -665,6 +677,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, mobility_enabled: bool, force_enabled: bool
     ) -> None:
         """Toggle mobility and force ellipsoid overlays."""
+        assert mobility_enabled is not None, "mobility_enabled must be provided"
         self.show_mobility_ellipsoid = mobility_enabled
         self.show_force_ellipsoid = force_enabled
 
@@ -675,6 +688,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         show_reference: bool | None = None,
     ) -> None:
         """Toggle swing plane and trajectory overlay rendering."""
+        assert show_plane is not None, "show_plane must be provided"
         self.show_swing_plane = show_plane
         self.show_club_trajectory = show_trajectory
         if show_reference is not None:
@@ -803,6 +817,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         cf_type: str,
     ) -> None:
         """Configure induced acceleration and counterfactual overlays."""
+        assert induced_enabled is not None, "induced_enabled must be provided"
         self.show_induced_vectors = induced_enabled
         self.induced_vector_source = induced_source
         self.show_cf_vectors = cf_enabled
@@ -810,6 +825,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
         """Toggle native MuJoCo contact force rendering."""
+        assert enabled is not None, "enabled must be provided"
         self.show_contact_forces = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled
@@ -876,6 +892,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_body_color(self, body_name: str, rgba: list[float]) -> None:
         """Set the RGBA color of all geoms belonging to a body."""
+        assert body_name is not None, "body_name must be provided"
         if self.model is None:
             return
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)

@@ -38,12 +38,14 @@ class ExpertiseLevel(Enum):
 
     def __lt__(self, other: object) -> bool:
         """Support comparison for level filtering."""
+        assert other is not None, "other must be provided"
         if isinstance(other, ExpertiseLevel):
             return self.value < other.value
         return NotImplemented
 
     def __le__(self, other: object) -> bool:
         """Support comparison for level filtering."""
+        assert other is not None, "other must be provided"
         if isinstance(other, ExpertiseLevel):
             return self.value <= other.value
         return NotImplemented
@@ -245,6 +247,7 @@ class ConversationContext:
         Returns:
             The created Message instance.
         """
+        assert role is not None, "role must be provided"
         message = Message(role=role, content=content, **kwargs)
         self.messages.append(message)
         self._update_token_estimate()
@@ -354,6 +357,7 @@ class ConversationContext:
             New ConversationContext instance.
         """
         # Reconstruct messages
+        assert data is not None, "data must be provided"
         messages = []
         for m_data in data.get("messages", []):
             timestamp_str = m_data.get("timestamp")
@@ -407,6 +411,7 @@ class ConversationContext:
         Args:
             path: Path to save to.
         """
+        assert path is not None, "path must be provided"
         import json
         from pathlib import Path
 
@@ -426,6 +431,7 @@ class ConversationContext:
         Returns:
             Loaded context, or new context if file not found.
         """
+        assert path is not None, "path must be provided"
         path_obj = Path(path) if isinstance(path, str) else path
         if not path_obj.exists():
             return cls()

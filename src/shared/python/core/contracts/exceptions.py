@@ -25,6 +25,7 @@ class ContractViolationError(ValueError):
         function_name: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
+        assert contract_type is not None, "contract_type must be provided"
         self.contract_type = contract_type
         self.function_name = function_name
         self.details = details or {}
@@ -50,6 +51,7 @@ class PreconditionError(ContractViolationError):
         parameter: str | None = None,
         value: Any = None,
     ) -> None:
+        assert message is not None, "message must be provided"
         details = {}
         if parameter:
             details["parameter"] = parameter
@@ -75,6 +77,7 @@ class PostconditionError(ContractViolationError):
         function_name: str | None = None,
         result: Any = None,
     ) -> None:
+        assert message is not None, "message must be provided"
         details: dict[str, Any] = {}
         if result is not None:
             # Avoid storing large arrays
@@ -102,6 +105,7 @@ class InvariantError(ContractViolationError):
         class_name: str | None = None,
         method_name: str | None = None,
     ) -> None:
+        assert message is not None, "message must be provided"
         details = {}
         if class_name:
             details["class"] = class_name
@@ -128,6 +132,7 @@ class StateError(ContractViolationError):
         required_state: str | None = None,
         operation: str | None = None,
     ) -> None:
+        assert message is not None, "message must be provided"
         details = {}
         if current_state:
             details["current_state"] = current_state

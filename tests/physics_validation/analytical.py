@@ -15,6 +15,7 @@ class AnalyticalPendulum:
         g: float = GRAVITY_M_S2,
         inertia: float | None = None,
     ):
+        assert length is not None, "length must be provided"
         self.L = length
         self.m = mass
         self.g = g
@@ -27,6 +28,7 @@ class AnalyticalPendulum:
         PE = m * g * h
         h = L * (1 - cos(theta))
         """
+        assert theta is not None, "theta must be provided"
         h = self.L * (1.0 - np.cos(theta))
         return float(self.m * self.g * h)
 
@@ -39,6 +41,7 @@ class AnalyticalPendulum:
 
     def total_energy(self, theta: float, omega: float) -> float:
         """Calculate total mechanical energy."""
+        assert theta is not None, "theta must be provided"
         return self.potential_energy(theta) + self.kinetic_energy(omega)
 
 
@@ -46,6 +49,7 @@ class AnalyticalBallistic:
     """Exact solution for a ballistic trajectory (no drag)."""
 
     def __init__(self, mass: float = 1.0, g: float = GRAVITY_M_S2):
+        assert mass is not None, "mass must be provided"
         self.m = mass
         self.g = g
 
@@ -54,6 +58,7 @@ class AnalyticalBallistic:
 
         E = PE + KE = mgh + 0.5mv^2
         """
+        assert height is not None, "height must be provided"
         pe = self.m * self.g * height
         ke = 0.5 * self.m * velocity**2
         return pe + ke

@@ -19,6 +19,7 @@ class ColumnNotFoundError(DataProcessingError):
     """Raised when a referenced column does not exist in the DataFrame."""
 
     def __init__(self, column: str, available: list[str] | None = None) -> None:
+        assert column is not None, "column must be provided"
         self.column = column
         self.available = available or []
         detail = f"Column '{column}' not found"

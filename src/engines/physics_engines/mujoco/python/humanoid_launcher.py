@@ -111,6 +111,7 @@ class RemoteRecorder(RecorderInterface):
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Return time-aligned arrays for a named data field."""
+        assert field_name is not None, "field_name must be provided"
         if not self.data["times"]:
             return np.array([]), np.array([])
 
@@ -137,6 +138,7 @@ class RemoteRecorder(RecorderInterface):
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Return induced acceleration time series for a source."""
+        assert source_name is not None, "source_name must be provided"
         if not self.data["times"]:
             return np.array([]), np.array([])
 

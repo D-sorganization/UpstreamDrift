@@ -135,6 +135,7 @@ class InjuryRiskScorer:
         Returns:
             InjuryRiskReport with scores and recommendations
         """
+        assert spinal_result is not None, "spinal_result must be provided"
         report = InjuryRiskReport()
         self.risk_factors = []
 
@@ -169,6 +170,7 @@ class InjuryRiskScorer:
     ) -> None:
         """Score spinal-related risk factors."""
         # Compression risk
+        assert spinal_result is not None, "spinal_result must be provided"
         compression_bw = getattr(spinal_result, "peak_compression_bw", 0)
         self.risk_factors.append(
             RiskFactor(
@@ -228,6 +230,7 @@ class InjuryRiskScorer:
     def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport) -> None:
         """Score joint-related risk factors."""
         # Hip risks
+        assert joint_results is not None, "joint_results must be provided"
         hip_scores = []
         for name, result in joint_results.items():
             if "hip" in name:
@@ -308,6 +311,7 @@ class InjuryRiskScorer:
     ) -> None:
         """Score technique-related risk factors."""
         # Kinematic sequence timing
+        assert swing_metrics is not None, "swing_metrics must be provided"
         if "sequence_timing_error" in swing_metrics:
             error = swing_metrics["sequence_timing_error"]
             self.risk_factors.append(
@@ -366,6 +370,7 @@ class InjuryRiskScorer:
     ) -> None:
         """Score training load-related risk factors."""
         # Acute:Chronic Workload Ratio
+        assert training_load is not None, "training_load must be provided"
         if "acwr" in training_load:
             acwr = training_load["acwr"]
             # Optimal range is 0.8-1.3
@@ -407,6 +412,7 @@ class InjuryRiskScorer:
 
     def _value_to_score(self, value: float, safe: float, high: float) -> float:
         """Convert a value to a 0-100 risk score."""
+        assert value is not None, "value must be provided"
         if value <= safe:
             return 0
         if value >= high:
@@ -416,6 +422,7 @@ class InjuryRiskScorer:
     def _compute_overall_scores(self, report: InjuryRiskReport) -> None:
         """Compute overall risk scores from individual factors."""
         # Acute risk from biomechanical loading
+        assert report is not None, "report must be provided"
         if report.region_scores:
             weighted_scores = [
                 report.region_scores.get(region, 0) * self.WEIGHTS.get(region, 0.1)
@@ -452,6 +459,7 @@ class InjuryRiskScorer:
 
     def _generate_recommendations(self, report: InjuryRiskReport) -> None:
         """Generate actionable recommendations based on risk factors."""
+        assert report is not None, "report must be provided"
         recommendations = []
 
         # Find high-risk modifiable factors

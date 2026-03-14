@@ -90,6 +90,7 @@ class CounterfactualAnalyzer:
         Args:
             model: MuJoCo model
         """
+        assert model is not None, "model must be provided"
         self.model = model
 
         # Thread-safe data structures
@@ -126,6 +127,7 @@ class CounterfactualAnalyzer:
             CounterfactualResult with torque attribution
         """
         # 1. Compute OBSERVED acceleration (with control)
+        assert qpos is not None, "qpos must be provided"
         self._data_observed.qpos[:] = qpos
         self._data_observed.qvel[:] = qvel
         self._data_observed.ctrl[: len(ctrl)] = ctrl
@@ -210,6 +212,7 @@ class CounterfactualAnalyzer:
             CounterfactualResult with velocity attribution
         """
         # 1. Compute OBSERVED acceleration (with velocity)
+        assert qpos is not None, "qpos must be provided"
         self._data_observed.qpos[:] = qpos
         self._data_observed.qvel[:] = qvel
         self._data_observed.ctrl[:] = 0  # No control for clean comparison
@@ -283,6 +286,7 @@ class CounterfactualAnalyzer:
         Returns:
             List of CounterfactualResult (ZTCF) for each timestep
         """
+        assert qpos_traj is not None, "qpos_traj must be provided"
         results = []
 
         for i in range(len(qpos_traj)):
@@ -305,6 +309,7 @@ class CounterfactualAnalyzer:
         Returns:
             List of CounterfactualResult (ZVCF) for each timestep
         """
+        assert qpos_traj is not None, "qpos_traj must be provided"
         results = []
 
         for i in range(len(qpos_traj)):
@@ -331,6 +336,7 @@ class CounterfactualAnalyzer:
             results: Counterfactual results for trajectory
             joint_idx: Joint index to plot
         """
+        assert times is not None, "times must be provided"
         try:
             import matplotlib.pyplot as plt
         except ImportError:

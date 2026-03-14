@@ -59,6 +59,7 @@ def _create_arm_bodies():
 
 
 def _create_arm_joints(arm, humerus, radius):
+    assert arm is not None, "arm must be provided"
     shoulder = osim.PinJoint(
         "shoulder",
         arm.getGround(),  # parent frame
@@ -82,6 +83,7 @@ def _create_arm_joints(arm, humerus, radius):
 
 
 def _create_biceps_muscle(humerus, radius):
+    assert humerus is not None, "humerus must be provided"
     biceps = osim.Millard2012EquilibriumMuscle(
         "biceps",  # name
         200.0,  # max isometric force [N]
@@ -102,6 +104,7 @@ def _create_controller(biceps):
 
 
 def _add_reporter(arm, biceps, elbow):
+    assert arm is not None, "arm must be provided"
     reporter = osim.ConsoleReporter()
     reporter.set_report_time_interval(1.0)
     reporter.addToReport(biceps.getOutput("fiber_force"))
@@ -111,6 +114,7 @@ def _add_reporter(arm, biceps, elbow):
 
 
 def _attach_body_visualization(body, name):
+    assert body is not None, "body must be provided"
     body_geometry = osim.Ellipsoid(0.1, 0.5, 0.1)
     body_geometry.setColor(osim.Gray)
 
@@ -163,6 +167,7 @@ def run_simulation(model: osim.Model, duration: float = 10.0) -> osim.State:
         Final state after simulation.
     """
     # Initialize the system
+    assert model is not None, "model must be provided"
     state = model.initSystem()
 
     # Get joint coordinates

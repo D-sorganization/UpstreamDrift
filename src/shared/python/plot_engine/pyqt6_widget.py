@@ -86,6 +86,7 @@ class PlotWidget(QWidget):
 
     def set_spec(self, spec: PlotSpec) -> None:
         """Set the plot specification and render it."""
+        assert spec is not None, "spec must be provided"
         self._current_spec = spec
         self._render()
         self.spec_changed.emit()
@@ -136,6 +137,7 @@ class PlotWidget(QWidget):
 
     def get_image_bytes(self, fmt: str = "png", dpi: int = 150) -> bytes:
         """Get the current plot as image bytes."""
+        assert fmt is not None, "fmt must be provided"
         if self._current_spec is None:
             return b""
         return self._renderer.to_image(self._current_spec, fmt=fmt, dpi=dpi)

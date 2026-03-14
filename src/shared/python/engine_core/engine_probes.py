@@ -66,6 +66,7 @@ class EngineProbe:
             engine_name: Name of the engine
             suite_root: Root directory of the suite
         """
+        assert engine_name is not None, "engine_name must be provided"
         self.engine_name = engine_name
         self.suite_root = suite_root
 
@@ -96,6 +97,7 @@ class MuJoCoProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize MuJoCo probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("MuJoCo", suite_root)
 
     def probe(self) -> EngineProbeResult:
@@ -189,6 +191,7 @@ class DrakeProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize Drake probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("Drake", suite_root)
 
     def _check_pydrake_import(self) -> tuple[str | None, EngineProbeResult | None]:
@@ -309,6 +312,7 @@ class PinocchioProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize Pinocchio probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("Pinocchio", suite_root)
 
     def probe(self) -> EngineProbeResult:
@@ -370,6 +374,7 @@ class PendulumProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize Pendulum probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("Pendulum", suite_root)
 
     def probe(self) -> EngineProbeResult:
@@ -430,6 +435,7 @@ class MatlabProbe(EngineProbe):
             suite_root: Root directory of the suite
             is_3d: Whether to probe for 3D model (default: 2D)
         """
+        assert suite_root is not None, "suite_root must be provided"
         name = "MATLAB 3D" if is_3d else "MATLAB 2D"
         super().__init__(name, suite_root)
         self.is_3d = is_3d
@@ -499,6 +505,7 @@ class OpenSimProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize OpenSim probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("OpenSim", suite_root)
 
     def probe(self) -> EngineProbeResult:
@@ -565,6 +572,7 @@ class MyoSimProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize MyoSim probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("MyoSim", suite_root)
 
     def probe(self) -> EngineProbeResult:
@@ -624,6 +632,7 @@ class OpenPoseProbe(EngineProbe):
 
     def __init__(self, suite_root: Path) -> None:
         """Initialize OpenPose probe."""
+        assert suite_root is not None, "suite_root must be provided"
         super().__init__("OpenPose", suite_root)
 
     def probe(self) -> EngineProbeResult:

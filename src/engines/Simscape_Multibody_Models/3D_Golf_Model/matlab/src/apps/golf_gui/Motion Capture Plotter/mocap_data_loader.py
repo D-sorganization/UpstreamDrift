@@ -20,6 +20,7 @@ INCHES_TO_METERS = 0.0254
 
 def safe_float(value: Any, default: float = 0.0) -> float:
     """Safely convert a value to float, returning default on failure."""
+    assert default is not None, "default must be provided"
     if pd.isna(value):
         return default
     try:
@@ -34,6 +35,7 @@ def parse_excel_row(row: pd.Series, row_index: int) -> dict[str, float] | None:
     Returns a dict with mid-hands and club head position/orientation data,
     or None if the row has insufficient columns.
     """
+    assert row is not None, "row must be provided"
     if len(row) < 25:
         return None
 
@@ -74,6 +76,7 @@ def process_excel_sheet(filename: str, sheet_name: str) -> pd.DataFrame | None:
     Returns:
         DataFrame with parsed frame data, or None if sheet is too small.
     """
+    assert filename is not None, "filename must be provided"
     df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
 
     if len(df) <= 3:
@@ -154,6 +157,7 @@ def find_available_joints(
 
     Returns a dict of available joint names to their column lists.
     """
+    assert joint_positions is not None, "joint_positions must be provided"
     available_joints: dict[str, list[str]] = {}
     for joint_name, columns in joint_positions.items():
         if all(col in df_columns for col in columns):

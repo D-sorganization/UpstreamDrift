@@ -47,6 +47,7 @@ class PlotThemeManager:
             settings_org: Organization name for QSettings
             settings_app: Application name for QSettings
         """
+        assert settings_org is not None, "settings_org must be provided"
         self._settings_org = settings_org
         self._settings_app = settings_app
         self._current_theme_name = DEFAULT_THEME
@@ -106,6 +107,7 @@ class PlotThemeManager:
             name: Theme name
             save: Whether to persist the choice
         """
+        assert name is not None, "name must be provided"
         theme = get_theme(name)
         normalized = name.lower().replace("-", "_").replace(" ", "_")
 
@@ -180,6 +182,7 @@ class PlotThemeManager:
         Args:
             fig: matplotlib Figure to style
         """
+        assert fig is not None, "fig must be provided"
         theme = self._current_theme
 
         fig.set_facecolor(theme.figure_facecolor)
@@ -193,6 +196,7 @@ class PlotThemeManager:
         Args:
             ax: matplotlib Axes to style
         """
+        assert ax is not None, "ax must be provided"
         theme = self._current_theme
 
         # Background
@@ -264,6 +268,7 @@ class PlotThemeManager:
         Args:
             index: Index into color cycle for multiple lines
         """
+        assert index is not None, "index must be provided"
         theme = self._current_theme
         colors = theme.get_color_cycle()
         return {
@@ -308,6 +313,7 @@ def get_plot_theme_manager(
     Returns:
         PlotThemeManager instance
     """
+    assert settings_org is not None, "settings_org must be provided"
     if _ManagerHolder.instance is None:
         _ManagerHolder.instance = PlotThemeManager(settings_org, settings_app)
     return _ManagerHolder.instance

@@ -160,6 +160,7 @@ class BallFlightSimulator:
         is delegated to the native Rust implementation for performance.
         Otherwise, falls back to the Python/Numba implementation.
         """
+        assert launch is not None, "launch must be provided"
         from src.shared.python.physics.rust_kernel import is_rust_available
 
         if not is_rust_available():
@@ -228,6 +229,7 @@ class BallFlightSimulator:
         self, rust_result: Any, launch: LaunchConditions
     ) -> list[TrajectoryPoint]:
         """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
+        assert launch is not None, "launch must be provided"
         points = []
         for p in rust_result.get_points():
             pos = np.array([p.x, p.y, p.z])
@@ -241,6 +243,7 @@ class BallFlightSimulator:
 
     def calculate_carry_distance(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate total carry distance."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
         last_pos = trajectory[-1].position
@@ -248,18 +251,21 @@ class BallFlightSimulator:
 
     def calculate_max_height(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate maximum height achieved."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
         return float(max(p.position[2] for p in trajectory))
 
     def calculate_flight_time(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate total flight time."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
         return trajectory[-1].time
 
     def _calculate_landing_angle(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate landing angle in degrees."""
+        assert trajectory is not None, "trajectory must be provided"
         if len(trajectory) < 2:
             return 0.0
 
@@ -274,6 +280,7 @@ class BallFlightSimulator:
 
     def _calculate_apex_time(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate time to reach apex."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
 
@@ -297,6 +304,7 @@ class BallFlightSimulator:
     )
     def analyze_trajectory(self, trajectory: list[TrajectoryPoint]) -> dict:
         """Generate comprehensive analysis dictionary."""
+        assert trajectory is not None, "trajectory must be provided"
         return {
             "carry_distance": self.calculate_carry_distance(trajectory),
             "max_height": self.calculate_max_height(trajectory),
@@ -310,6 +318,7 @@ class BallFlightSimulator:
         self, vel: np.ndarray, launch: LaunchConditions
     ) -> dict[str, np.ndarray]:
         """Calculate forces on the ball (supports vectorized input)."""
+        assert vel is not None, "vel must be provided"
         is_batch = vel.ndim > 1
         omega = launch.spin_rate * 2 * np.pi / 60
 
@@ -331,6 +340,7 @@ class BallFlightSimulator:
         spin_axis: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Vectorized force calculation for batch velocity arrays (3, N)."""
+        assert vel is not None, "vel must be provided"
         wind = (
             self.environment.wind_velocity.reshape(3, 1)
             if self.environment.wind_velocity.ndim == 1
@@ -380,6 +390,7 @@ class BallFlightSimulator:
         launch: LaunchConditions,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Scalar force calculation for a single velocity vector (3,)."""
+        assert vel is not None, "vel must be provided"
         rel_vel = vel - self.environment.wind_velocity
         speed = float(np.linalg.norm(rel_vel))
 
@@ -526,6 +537,7 @@ class EnhancedBallFlightSimulator:
             List of TrajectoryPoint objects representing the flight path
         """
         # Convert launch conditions to initial state
+        assert launch is not None, "launch must be provided"
         v0 = launch.velocity
         ca, sa = np.cos(launch.azimuth_angle), np.sin(launch.azimuth_angle)
         cv, sv = np.cos(launch.launch_angle), np.sin(launch.launch_angle)
@@ -617,10 +629,13 @@ class EnhancedBallFlightSimulator:
             Tuple of (new_position, new_velocity, spin)
         """
 
+        assert pos is not None, "pos must be provided"
+
         def derivatives(
             p: np.ndarray, v: np.ndarray, time: float
         ) -> tuple[np.ndarray, np.ndarray]:
             """Compute velocity and acceleration derivatives for RK4 integration."""
+            assert p is not None, "p must be provided"
             aero_forces = self._aero_engine.compute_forces(v, spin, t=time, position=p)
             gravity_force = self.ball.mass * gravity_acc
             total_force = aero_forces["total"] + gravity_force
@@ -662,6 +677,7 @@ class EnhancedBallFlightSimulator:
         Returns:
             Dictionary with 'with_aero' and 'without_aero' trajectories
         """
+        assert launch is not None, "launch must be provided"
         from src.shared.python.physics.aerodynamics import AerodynamicsConfig
 
         # Trajectory with current aerodynamics settings
@@ -714,6 +730,7 @@ class EnhancedBallFlightSimulator:
         Returns:
             List of analysis dictionaries for each run
         """
+        assert launch is not None, "launch must be provided"
         from src.shared.python.physics.aerodynamics import (
             AerodynamicsEngine,
             EnvironmentRandomizer,
@@ -756,6 +773,7 @@ class EnhancedBallFlightSimulator:
     # Delegate analysis methods to base simulator (DRY principle)
     def calculate_carry_distance(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate total carry distance."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
         last_pos = trajectory[-1].position
@@ -763,18 +781,21 @@ class EnhancedBallFlightSimulator:
 
     def calculate_max_height(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate maximum height achieved."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
         return float(max(p.position[2] for p in trajectory))
 
     def calculate_flight_time(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate total flight time."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return 0.0
         return trajectory[-1].time
 
     def analyze_trajectory(self, trajectory: list[TrajectoryPoint]) -> dict:
         """Generate comprehensive analysis dictionary."""
+        assert trajectory is not None, "trajectory must be provided"
         if not trajectory:
             return {
                 "carry_distance": 0.0,

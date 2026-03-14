@@ -261,6 +261,7 @@ class URDFBuilder:
             robot: Root robot element.
         """
         # Sort segments to ensure parents are processed before children
+        assert robot is not None, "robot must be provided"
         sorted_segments = self._sort_segments_by_hierarchy()
 
         for segment in sorted_segments:
@@ -305,6 +306,7 @@ class URDFBuilder:
             robot: Root robot element.
             segment: Segment data.
         """
+        assert robot is not None, "robot must be provided"
         link = ET.SubElement(robot, "link", name=segment["name"])
 
         # Add visual
@@ -323,6 +325,7 @@ class URDFBuilder:
             link: Link element.
             segment: Segment data.
         """
+        assert link is not None, "link must be provided"
         visual = ET.SubElement(link, "visual")
 
         # Add origin
@@ -344,6 +347,7 @@ class URDFBuilder:
             link: Link element.
             segment: Segment data.
         """
+        assert link is not None, "link must be provided"
         collision = ET.SubElement(link, "collision")
 
         # Add origin
@@ -360,6 +364,7 @@ class URDFBuilder:
             link: Link element.
             segment: Segment data.
         """
+        assert link is not None, "link must be provided"
         inertial = ET.SubElement(link, "inertial")
 
         # Add origin (center of mass)
@@ -389,6 +394,7 @@ class URDFBuilder:
             parent: Parent element.
             geometry: Geometry data containing position and orientation.
         """
+        assert parent is not None, "parent must be provided"
         position = geometry.get("position", {})
         orientation = geometry.get("orientation", {})
 
@@ -411,6 +417,7 @@ class URDFBuilder:
             geometry: Geometry element.
             geom_data: Geometry data.
         """
+        assert geometry is not None, "geometry must be provided"
         shape = geom_data.get("shape", "Box").lower()
         dimensions = geom_data.get("dimensions", {})
 
@@ -444,6 +451,7 @@ class URDFBuilder:
             robot: Root robot element.
             segment: Segment data.
         """
+        assert robot is not None, "robot must be provided"
         joint_name = f"{segment['parent']}_to_{segment['name']}"
         joint_data = segment.get("joint", {})
         joint_type = joint_data.get("type", "fixed")
@@ -493,6 +501,7 @@ class URDFBuilder:
         Args:
             name: New robot name.
         """
+        assert name is not None, "name must be provided"
         self.robot_name = name
         logger.info(f"Robot name set to: {name}")
 
@@ -531,6 +540,7 @@ class URDFBuilder:
             Returns:
                 True if a circular dependency is detected.
             """
+            assert segment_name is not None, "segment_name must be provided"
             if segment_name in visited:
                 return True
 
@@ -569,6 +579,7 @@ class URDFBuilder:
         Args:
             handedness: Handedness.LEFT or Handedness.RIGHT
         """
+        assert handedness is not None, "handedness must be provided"
         self.handedness = handedness
         logger.info(f"Handedness set to: {handedness.value}")
 
@@ -643,6 +654,7 @@ class URDFBuilder:
         Returns:
             URDF XML string configured for the target handedness.
         """
+        assert target_handedness is not None, "target_handedness must be provided"
         if target_handedness == self.handedness:
             return self.get_urdf()
 

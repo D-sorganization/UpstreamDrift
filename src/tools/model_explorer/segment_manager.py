@@ -220,6 +220,7 @@ class SegmentManager:
         # Check for circular dependencies
         def has_cycle(name: str, visited: set[str], rec_stack: set[str]) -> bool:
             """Check for cycles using DFS."""
+            assert name is not None, "name must be provided"
             visited.add(name)
             rec_stack.add(name)
 

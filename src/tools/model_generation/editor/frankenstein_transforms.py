@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 def _mirror_name(name: str, replacements: dict[str, str]) -> str:
     """Apply name replacements for mirroring (e.g., left->right)."""
+    assert name is not None, "name must be provided"
     result = name
     for old, new in replacements.items():
         result = result.replace(old, new)
@@ -46,6 +47,7 @@ def _mirror_name(name: str, replacements: dict[str, str]) -> str:
 
 def _flip_origin(origin: Origin, axis_idx: int) -> Origin:
     """Flip an origin across the given axis."""
+    assert origin is not None, "origin must be provided"
     xyz = list(origin.xyz)
     xyz[axis_idx] = -xyz[axis_idx]
     return Origin(xyz=(xyz[0], xyz[1], xyz[2]), rpy=origin.rpy)
@@ -83,6 +85,7 @@ class TransformMixin:
         Returns:
             True if applied
         """
+        assert model_id is not None, "model_id must be provided"
         host = cast("TransformProtocol", self)
         model = host._models.get(model_id)
         if not model:
@@ -141,6 +144,7 @@ class TransformMixin:
         Returns:
             List of created link names
         """
+        assert model_id is not None, "model_id must be provided"
         host = cast("TransformProtocol", self)
         if not host.copy_subtree(model_id, root_link):
             return []
@@ -186,6 +190,7 @@ class TransformMixin:
         links: list[Link],
         name_replacements: dict[str, str],
     ) -> dict[str, str]:
+        assert model is not None, "model must be provided"
         host = cast("TransformProtocol", self)
         name_map: dict[str, str] = {}
         existing_links = {link.name for link in model.links}
@@ -205,6 +210,7 @@ class TransformMixin:
         name_map: dict[str, str],
         axis_idx: int,
     ) -> list[str]:
+        assert model is not None, "model must be provided"
         created_links: list[str] = []
 
         for link in links:
@@ -289,6 +295,7 @@ def _apply_material_renames(
     material_map: dict[str, str],
 ) -> None:
     """Rename materials in the model's material dictionary."""
+    assert model is not None, "model must be provided"
     new_materials: dict[str, Material] = {}
     for old_name, mat in model.materials.items():
         new_name = material_map.get(old_name, old_name)

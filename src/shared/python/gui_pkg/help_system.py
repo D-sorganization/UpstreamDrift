@@ -106,6 +106,7 @@ def _extract_section_from_manual(content: str, topic: str) -> str | None:
         The extracted section content, or None if not found.
     """
     # Map topics to section headers in the manual
+    assert content is not None, "content must be provided"
     topic_mapping = {
         "engine_selection": "Physics Engines Guide",
         "simulation_controls": "Core Features",
@@ -472,6 +473,7 @@ class HelpDialog(QDialog):
         Args:
             topic: The topic identifier.
         """
+        assert topic is not None, "topic must be provided"
         if topic == "__user_manual__":
             self._load_user_manual()
             return
@@ -498,6 +500,7 @@ class HelpDialog(QDialog):
         Args:
             item: The clicked list item.
         """
+        assert item is not None, "item must be provided"
         topic = item.data(Qt.ItemDataRole.UserRole)
         if topic:
             self._load_topic(topic)
@@ -508,6 +511,7 @@ class HelpDialog(QDialog):
         Args:
             index: The selected index.
         """
+        assert index is not None, "index must be provided"
         topic = self.topic_combo.itemData(index)
         if topic:
             self._load_topic(topic)
@@ -519,6 +523,7 @@ class HelpDialog(QDialog):
             text: The search text.
         """
         # Filter topic list
+        assert text is not None, "text must be provided"
         search_lower = text.lower()
         for i in range(self.topic_list.count()):
             item = self.topic_list.item(i)
@@ -552,6 +557,7 @@ class HelpButton(QToolButton):
             tooltip: The tooltip text.
             parent: The parent widget.
         """
+        assert topic is not None, "topic must be provided"
         super().__init__(parent)
         self.topic = topic
 
@@ -619,6 +625,7 @@ class TooltipManager:
             help_topic: Optional help topic for "more info" link.
         """
         # Build tooltip HTML
+        assert widget is not None, "widget must be provided"
         tooltip_html = f"<b>{short_text}</b>"
         if long_text:
             tooltip_html += f"<br/><br/>{long_text}"
@@ -645,6 +652,7 @@ class TooltipManager:
         Returns:
             The help topic, or None if not registered.
         """
+        assert widget is not None, "widget must be provided"
         widget_id = id(widget)
         content = cls._tooltip_content.get(widget_id)
         return content.get("topic") if content else None
@@ -661,6 +669,7 @@ class TooltipManager:
             widget: The widget.
             position: Optional position to show tooltip.
         """
+        assert widget is not None, "widget must be provided"
         widget_id = id(widget)
         content = cls._tooltip_content.get(widget_id)
 
@@ -694,6 +703,8 @@ def create_help_menu_actions(
     Returns:
         A list of tuples (name, shortcut, callback) for menu actions.
     """
+
+    assert parent is not None, "parent must be provided"
 
     def default_open_manual() -> None:
         """Open the help dialog as a user manual."""
@@ -737,6 +748,7 @@ def add_help_button_to_widget(
     Returns:
         The created HelpButton.
     """
+    assert layout is not None, "layout must be provided"
     button = HelpButton(topic, tooltip)
     layout.addWidget(button)
     return button

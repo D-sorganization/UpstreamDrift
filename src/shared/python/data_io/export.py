@@ -51,6 +51,7 @@ def export_to_matlab(
     compress: bool = True,
 ) -> bool:
     """Export recording to MATLAB .mat format."""
+    assert output_path is not None, "output_path must be provided"
     if not SCIPY_AVAILABLE:
         logger.error("scipy required for MATLAB export (pip install scipy)")
         return False
@@ -109,6 +110,7 @@ def export_to_hdf5(
     compression: str = "gzip",
 ) -> bool:
     """Export recording to HDF5 format."""
+    assert output_path is not None, "output_path must be provided"
     if not H5PY_AVAILABLE:
         logger.error("h5py required for HDF5 export (pip install h5py)")
         return False
@@ -245,6 +247,7 @@ def export_to_c3d(
         For new code, prefer constructing a ``CaptureExportData`` and calling
         ``export_to_c3d_from_data`` instead of passing individual args.
     """
+    assert output_path is not None, "output_path must be provided"
     if not EZC3D_AVAILABLE and not C3D_AVAILABLE:
         logger.error("ezc3d or c3d required for C3D export (pip install ezc3d)")
         return False
@@ -273,6 +276,7 @@ def _export_to_c3d_ezc3d(
     data: CaptureExportData,
 ) -> bool:
     """Export using ezc3d library."""
+    assert output_path is not None, "output_path must be provided"
     import ezc3d
 
     c = ezc3d.c3d()
@@ -323,6 +327,7 @@ def _export_to_c3d_py(
     data: CaptureExportData,
 ) -> bool:
     """Export using c3d library (fallback)."""
+    assert output_path is not None, "output_path must be provided"
     import c3d
 
     writer = c3d.Writer(point_rate=data.frame_rate)
@@ -350,6 +355,7 @@ def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
 
     Converts numpy arrays to lists for JSON serialization.
     """
+    assert output_path is not None, "output_path must be provided"
     import json
 
     json_data = {}
@@ -412,6 +418,7 @@ def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:
 
 def _export_csv(output_path: Path, data_dict: dict[str, Any]) -> bool:
     """Export data dictionary to CSV format."""
+    assert output_path is not None, "output_path must be provided"
     import pandas as pd
 
     flat_data = _flatten_dict_for_csv(data_dict)

@@ -60,6 +60,7 @@ class ComparativeSwingAnalyzer:
             name_a: Label for first swing
             name_b: Label for second swing
         """
+        assert recorder_a is not None, "recorder_a must be provided"
         self.recorder_a = recorder_a
         self.recorder_b = recorder_b
         self.name_a = name_a
@@ -82,6 +83,7 @@ class ComparativeSwingAnalyzer:
             AlignedSignals object or None if data missing
         """
         # Get data
+        assert field_name is not None, "field_name must be provided"
         t_a, data_a = self.recorder_a.get_time_series(field_name)
         t_b, data_b = self.recorder_b.get_time_series(field_name)
 
@@ -149,6 +151,7 @@ class ComparativeSwingAnalyzer:
         Returns:
             ComparisonMetric object
         """
+        assert metric_name is not None, "metric_name must be provided"
         diff = val_a - val_b
         mean = (val_a + val_b) / 2.0
         percent = (diff / mean * 100) if abs(mean) > 1e-9 else 0.0
@@ -261,6 +264,7 @@ class ComparativeSwingAnalyzer:
             Tuple of (distance, path). Path is list of (i, j) indices.
         """
         # Get data
+        assert field_name is not None, "field_name must be provided"
         _, data_a_raw = self.recorder_a.get_time_series(field_name)
         _, data_b_raw = self.recorder_b.get_time_series(field_name)
 

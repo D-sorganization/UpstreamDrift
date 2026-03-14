@@ -29,6 +29,7 @@ class RoboticsError(Exception):
             message: Error description.
             details: Additional context for debugging.
         """
+        assert message is not None, "message must be provided"
         self.message = message
         self.details = details or {}
         super().__init__(self._format_message())
@@ -66,6 +67,7 @@ class ContactError(RoboticsError):
             body_names: Tuple of (body_a, body_b) names.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         details = details or {}
         if contact_id is not None:
             details["contact_id"] = contact_id
@@ -101,6 +103,7 @@ class ControlError(RoboticsError):
             control_values: Control values that caused error.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         details = details or {}
         if joint_indices is not None:
             details["joint_indices"] = joint_indices
@@ -137,6 +140,7 @@ class SolverError(RoboticsError):
             iterations: Number of iterations before failure.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         details = details or {}
         if solver_name is not None:
             details["solver"] = solver_name
@@ -174,6 +178,7 @@ class LocomotionError(RoboticsError):
             support_state: Support state (single/double) when error occurred.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         details = details or {}
         if gait_phase is not None:
             details["gait_phase"] = gait_phase
@@ -208,6 +213,7 @@ class KinematicsError(RoboticsError):
             configuration: Configuration where error occurred.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         details = details or {}
         if body_name is not None:
             details["body"] = body_name
