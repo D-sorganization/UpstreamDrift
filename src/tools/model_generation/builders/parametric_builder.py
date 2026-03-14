@@ -89,6 +89,7 @@ class ParametricBuilder(BaseURDFBuilder):
             robot_name: Name for the robot element
             config: Builder configuration
         """
+        assert robot_name is not None, "robot_name must be provided"
         super().__init__(robot_name)
         self._config = config or ParametricConfig()
         self._inertia_calc = InertiaCalculator(default_mode=self._config.inertia_mode)
@@ -204,6 +205,7 @@ class ParametricBuilder(BaseURDFBuilder):
             Self for method chaining
         """
         # Compute dimensions
+        assert name is not None, "name must be provided"
         length = self._height_m * length_ratio
         width = length * width_ratio
         mass = self._mass_kg * mass_ratio
@@ -288,6 +290,7 @@ class ParametricBuilder(BaseURDFBuilder):
 
         def get_mass(name: str, default: float) -> float:
             """Return the anthropometric mass ratio or the default value."""
+            assert name is not None, "name must be provided"
             if use_anthropometry:
                 try:
                     return get_segment_mass_ratio(name, gender_factor)
@@ -297,6 +300,7 @@ class ParametricBuilder(BaseURDFBuilder):
 
         def get_length(name: str, default: float) -> float:
             """Return the anthropometric length ratio or the default value."""
+            assert name is not None, "name must be provided"
             if use_anthropometry:
                 try:
                     return get_segment_length_ratio(name, gender_factor)
@@ -316,6 +320,7 @@ class ParametricBuilder(BaseURDFBuilder):
         Returns:
             Tuple of (pelvis_height, thorax_height, neck_height) for child offsets.
         """
+        assert get_mass is not None, "get_mass must be provided"
         import math
 
         self.add_segment(
@@ -388,6 +393,7 @@ class ParametricBuilder(BaseURDFBuilder):
         thorax_height: float,
     ) -> None:
         """Add shoulder, upper arm, forearm, and hand segments for both sides."""
+        assert get_mass is not None, "get_mass must be provided"
         import math
 
         shoulder_width = (
@@ -451,6 +457,7 @@ class ParametricBuilder(BaseURDFBuilder):
         pelvis_height: float,
     ) -> None:
         """Add thigh, shin, and foot segments for both sides."""
+        assert get_mass is not None, "get_mass must be provided"
         import math
 
         hip_width = (

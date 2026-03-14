@@ -92,6 +92,7 @@ class PoseEstimator:
             min_tracking_confidence: Minimum confidence for landmark tracking (0-1).
             smooth_landmarks: Whether to apply landmark smoothing.
         """
+        assert model_complexity is not None, "model_complexity must be provided"
         self.model_complexity = model_complexity
         self.min_detection_confidence = min_detection_confidence
         self.min_tracking_confidence = min_tracking_confidence
@@ -144,6 +145,7 @@ class PoseEstimator:
         Returns:
             PoseFrame with landmarks, or None if no pose detected.
         """
+        assert frame is not None, "frame must be provided"
         if not self._initialized and not self.initialize():
             return None
 
@@ -200,6 +202,7 @@ class PoseEstimator:
         Returns:
             PoseFrame with world-space landmarks, or None if no pose detected.
         """
+        assert frame is not None, "frame must be provided"
         if not self._initialized and not self.initialize():
             return None
 
@@ -262,6 +265,7 @@ class PoseEstimator:
         Returns:
             Frame with landmarks drawn.
         """
+        assert frame is not None, "frame must be provided"
         if not MEDIAPIPE_AVAILABLE:
             return frame
 
@@ -306,5 +310,6 @@ class PoseEstimator:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
+        assert exc_type is not None, "exc_type must be provided"
         self.close()
         return False
