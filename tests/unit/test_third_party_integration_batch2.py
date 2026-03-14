@@ -92,9 +92,7 @@ class TestDrakeSpecificVerification:
         )
 
         assert hasattr(DrakePhysicsEngine, "compute_drift_acceleration")
-        assert callable(
-            DrakePhysicsEngine.compute_drift_acceleration
-        )
+        assert callable(DrakePhysicsEngine.compute_drift_acceleration)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -168,10 +166,9 @@ class TestMyoSuiteGymnasiumCompatibility:
                 fromlist=["MyoSuitePhysicsEngine"],
             )
         )
-        assert "import gymnasium" in source_code, (
-            "MyoSuite engine should prefer 'import gymnasium' "
-            "over legacy 'import gym'"
-        )
+        assert (
+            "import gymnasium" in source_code
+        ), "MyoSuite engine should prefer 'import gymnasium' over legacy 'import gym'"
 
     def test_myosuite_has_gym_fallback(self) -> None:
         """MyoSuite must fall back to legacy gym if gymnasium is missing."""
@@ -181,9 +178,9 @@ class TestMyoSuiteGymnasiumCompatibility:
                 fromlist=["MyoSuitePhysicsEngine"],
             )
         )
-        assert "import gym" in source_code, (
-            "MyoSuite engine must have a fallback to legacy 'import gym'"
-        )
+        assert (
+            "import gym" in source_code
+        ), "MyoSuite engine must have a fallback to legacy 'import gym'"
 
     def test_myosuite_engine_load_from_string_raises(self) -> None:
         """load_from_string must raise (Gym envs don't support string loading)."""
@@ -367,10 +364,9 @@ class TestEngineAvailabilityDeep:
         )
 
         for name, flag in _ENGINE_FLAGS.items():
-            assert isinstance(flag, bool), (
-                f"_ENGINE_FLAGS['{name}'] is {type(flag).__name__}, "
-                f"expected bool"
-            )
+            assert isinstance(
+                flag, bool
+            ), f"_ENGINE_FLAGS['{name}'] is {type(flag).__name__}, expected bool"
 
     def test_engine_availability_consistent_with_import(self) -> None:
         """DRAKE_AVAILABLE must be consistent with pydrake.all import."""

@@ -81,9 +81,9 @@ class TestEngineAvailabilityInfrastructure:
         from src.shared.python.engine_core import engine_availability
 
         source = inspect.getsource(engine_availability)
-        assert "import pyopenpose" in source, (
-            "engine_availability.py should check for 'pyopenpose', not 'openpose'"
-        )
+        assert (
+            "import pyopenpose" in source
+        ), "engine_availability.py should check for 'pyopenpose', not 'openpose'"
 
     def test_skip_if_unavailable_returns_marker(self) -> None:
         """skip_if_unavailable must return a pytest marker."""
@@ -190,9 +190,9 @@ class TestMuJoCoIntegrationAudit:
         conftest_path = Path(__file__).parent.parent.parent / "conftest.py"
         if conftest_path.exists():
             content = conftest_path.read_text(encoding="utf-8")
-            assert "mujoco" in content, (
-                "conftest.py should import mujoco early to avoid DLL conflicts"
-            )
+            assert (
+                "mujoco" in content
+            ), "conftest.py should import mujoco early to avoid DLL conflicts"
 
     @skip_if_unavailable("mujoco")
     def test_mujoco_gl_environment(self) -> None:
@@ -202,9 +202,9 @@ class TestMuJoCoIntegrationAudit:
 
         if sys.platform == "win32":
             gl = os.environ.get("MUJOCO_GL", "")
-            assert gl != "egl", (
-                "MUJOCO_GL=egl is invalid on Windows; use osmesa or glfw"
-            )
+            assert (
+                gl != "egl"
+            ), "MUJOCO_GL=egl is invalid on Windows; use osmesa or glfw"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -576,9 +576,9 @@ class TestOpenPoseIntegrationAudit:
 
         source = inspect.getsource(OpenPoseEstimator.load_model)
         # Verify cross-platform support
-        assert "/usr/local" in source or "OPENPOSE_MODELS_DIR" in source, (
-            "OpenPose load_model must support cross-platform model paths"
-        )
+        assert (
+            "/usr/local" in source or "OPENPOSE_MODELS_DIR" in source
+        ), "OpenPose load_model must support cross-platform model paths"
 
     def test_openpose_supports_env_var(self) -> None:
         """OpenPose must support OPENPOSE_MODELS_DIR environment variable."""
@@ -589,9 +589,9 @@ class TestOpenPoseIntegrationAudit:
         )
 
         source = inspect.getsource(OpenPoseEstimator.load_model)
-        assert "OPENPOSE_MODELS_DIR" in source, (
-            "OpenPose load_model must support OPENPOSE_MODELS_DIR env var"
-        )
+        assert (
+            "OPENPOSE_MODELS_DIR" in source
+        ), "OpenPose load_model must support OPENPOSE_MODELS_DIR env var"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -801,9 +801,9 @@ class TestCrossEngineProtocolCompliance:
         cls = getattr(mod, engine_class)
 
         for method in self.PHYSICS_ENGINE_METHODS:
-            assert hasattr(cls, method), (
-                f"{engine_class} missing protocol method: {method}"
-            )
+            assert hasattr(
+                cls, method
+            ), f"{engine_class} missing protocol method: {method}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

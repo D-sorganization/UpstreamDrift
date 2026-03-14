@@ -38,6 +38,7 @@ class MockWindowFix:
         self.spinbox_calls = 0
 
     def on_actuator_slider_changed(self, actuator_index: int, value: int) -> None:
+        assert actuator_index is not None, "actuator_index must be provided"
         self.slider_calls += 1
         print(f"Slider changed to {value}")
 
@@ -51,6 +52,7 @@ class MockWindowFix:
         self.control_system_calls += 1
 
     def on_constant_value_changed(self, actuator_index: int, value: float) -> None:
+        assert actuator_index is not None, "actuator_index must be provided"
         self.spinbox_calls += 1
         print(f"Spinbox changed to {value}")
 

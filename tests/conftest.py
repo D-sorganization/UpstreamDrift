@@ -98,6 +98,7 @@ def clean_pendulum_dynamics():
     )
 
     def _create(m1_kg=1.0, l1_m=1.0):
+        assert m1_kg is not None, "m1_kg must be provided"
         upper_segment = SegmentProperties(
             length_m=l1_m,
             mass_kg=m1_kg,
