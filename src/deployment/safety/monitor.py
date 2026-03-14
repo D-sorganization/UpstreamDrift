@@ -84,6 +84,7 @@ class SafetyLimits:
             Safety limits instance.
         """
         assert robot_config is not None, "robot_config must be provided"
+        assert robot_config is not None, "robot_config must be provided"
         n_joints = robot_config.n_joints
 
         # Default limits
@@ -130,6 +131,7 @@ class SafetyMonitor:
             limits: Safety limits (derived from config if None).
         """
         assert robot_config is not None, "robot_config must be provided"
+        assert robot_config is not None, "robot_config must be provided"
         self.config = robot_config
         self.limits = limits or SafetyLimits.from_config(robot_config)
         self._speed_override = 1.0
@@ -145,6 +147,7 @@ class SafetyMonitor:
         Returns:
             Safety status.
         """
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         violations = []
         warnings = []
@@ -215,6 +218,7 @@ class SafetyMonitor:
             Safety status.
         """
         assert command is not None, "command must be provided"
+        assert command is not None, "command must be provided"
         violations: list[str] = []
         warnings: list[str] = []
 
@@ -278,6 +282,7 @@ class SafetyMonitor:
         Returns:
             Safe control command.
         """
+        assert desired is not None, "desired must be provided"
         assert desired is not None, "desired must be provided"
         from src.deployment.realtime import ControlCommand
 
@@ -356,6 +361,7 @@ class SafetyMonitor:
         # Simplified: estimate from maximum velocity
         # Full implementation would use dynamics model
         assert state is not None, "state must be provided"
+        assert state is not None, "state must be provided"
         max_vel = float(np.max(np.abs(state.joint_velocities)))
         max_decel = 2.0  # m/s² typical deceleration
 
@@ -378,6 +384,7 @@ class SafetyMonitor:
         Args:
             nearby: True if human is within safety distance.
         """
+        assert nearby is not None, "nearby must be provided"
         assert nearby is not None, "nearby must be provided"
         self._human_nearby = nearby
         if nearby:
