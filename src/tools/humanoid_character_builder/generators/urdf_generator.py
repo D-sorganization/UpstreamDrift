@@ -157,6 +157,7 @@ class HumanoidURDFGenerator:
         """
         # Validate parameters
         assert params is not None, "params must be provided"
+        assert params is not None, "params must be provided"
         errors = params.validate()
         if errors:
             logger.warning(f"Parameter validation warnings: {errors}")
@@ -214,6 +215,7 @@ class HumanoidURDFGenerator:
     ) -> dict[str, dict[str, float]]:
         """Apply proportion factors to segment dimensions."""
         assert dimensions is not None, "dimensions must be provided"
+        assert dimensions is not None, "dimensions must be provided"
         scaled = {}
 
         for seg_name, dims in dimensions.items():
@@ -257,6 +259,7 @@ class HumanoidURDFGenerator:
         """Generate material definitions."""
         # Skin material
         assert params is not None, "params must be provided"
+        assert params is not None, "params must be provided"
         skin = params.appearance.skin_tone
         self._materials["skin"] = skin.as_tuple()
 
@@ -274,6 +277,7 @@ class HumanoidURDFGenerator:
         mesh_dir: Path | str | None,
     ) -> None:
         """Generate a single URDF link."""
+        assert segment_name is not None, "segment_name must be provided"
         assert segment_name is not None, "segment_name must be provided"
         seg_params = params.get_segment_params(segment_name)
 
@@ -328,6 +332,7 @@ class HumanoidURDFGenerator:
         """Compute inertia for a segment."""
         # Check for manual override
         assert segment_name is not None, "segment_name must be provided"
+        assert segment_name is not None, "segment_name must be provided"
         if seg_params.has_inertia_override():
             override = seg_params.inertia_override
             return MeshInertiaCalculator.create_manual_inertia(
@@ -376,6 +381,7 @@ class HumanoidURDFGenerator:
         is_collision: bool,
     ) -> dict[str, Any]:
         """Create geometry specification dictionary."""
+        assert segment_def is not None, "segment_def must be provided"
         assert segment_def is not None, "segment_def must be provided"
         geom_spec = (
             segment_def.get_collision_geometry()
@@ -446,6 +452,7 @@ class HumanoidURDFGenerator:
         """Generate a single URDF joint."""
         # Map joint type
         assert joint_name is not None, "joint_name must be provided"
+        assert joint_name is not None, "joint_name must be provided"
         urdf_type = self._map_joint_type(joint_def.joint_type)
 
         # Get limits for non-fixed joints
@@ -477,6 +484,7 @@ class HumanoidURDFGenerator:
         dimensions: dict[str, dict[str, float]],
     ) -> None:
         """Expand composite joint into multiple revolute joints."""
+        assert joint_name is not None, "joint_name must be provided"
         assert joint_name is not None, "joint_name must be provided"
         if joint_def.joint_type == JointType.GIMBAL:
             axes = [
@@ -541,6 +549,7 @@ class HumanoidURDFGenerator:
     def _map_joint_type(self, joint_type: JointType) -> str:
         """Map internal joint type to URDF joint type string."""
         assert joint_type is not None, "joint_type must be provided"
+        assert joint_type is not None, "joint_type must be provided"
         mapping = {
             JointType.FIXED: "fixed",
             JointType.REVOLUTE: "revolute",
@@ -556,6 +565,7 @@ class HumanoidURDFGenerator:
 
     def _build_urdf_xml(self, robot_name: str) -> str:
         """Build the complete URDF XML."""
+        assert robot_name is not None, "robot_name must be provided"
         assert robot_name is not None, "robot_name must be provided"
         root = ET.Element("robot", name=robot_name)
 
@@ -588,6 +598,7 @@ class HumanoidURDFGenerator:
 
     def _add_link_element(self, root: ET.Element, link: GeneratedLink) -> None:
         """Add a link element to the URDF."""
+        assert root is not None, "root must be provided"
         assert root is not None, "root must be provided"
         link_elem = ET.SubElement(root, "link", name=link.name)
 
@@ -628,6 +639,7 @@ class HumanoidURDFGenerator:
     def _add_geometry_element(self, parent: ET.Element, geom: dict[str, Any]) -> None:
         """Add geometry element."""
         assert parent is not None, "parent must be provided"
+        assert parent is not None, "parent must be provided"
         geometry = ET.SubElement(parent, "geometry")
 
         geom_type = geom["type"]
@@ -656,6 +668,7 @@ class HumanoidURDFGenerator:
 
     def _add_joint_element(self, root: ET.Element, joint: GeneratedJoint) -> None:
         """Add a joint element to the URDF."""
+        assert root is not None, "root must be provided"
         assert root is not None, "root must be provided"
         joint_elem = ET.SubElement(
             root, "joint", name=joint.name, type=joint.joint_type
@@ -712,6 +725,7 @@ def generate_humanoid_urdf(
     Returns:
         URDF XML string
     """
+    assert params is not None, "params must be provided"
     assert params is not None, "params must be provided"
     generator = HumanoidURDFGenerator(config)
     return generator.generate(params, output_path)

@@ -81,6 +81,7 @@ def _build_segment_result(
     submesh: Any, segment_name: str, output_path: Path
 ) -> MeshSegmentResult:
     assert segment_name is not None, "segment_name must be provided"
+    assert segment_name is not None, "segment_name must be provided"
     bbox = submesh.bounding_box.bounds
     com = submesh.center_mass if submesh.is_watertight else submesh.centroid
     return MeshSegmentResult(
@@ -225,6 +226,7 @@ class MeshProcessor:
         config: MeshExportConfig,
     ) -> MeshSegmentResult:
         assert segment_name is not None, "segment_name must be provided"
+        assert segment_name is not None, "segment_name must be provided"
         import trimesh
 
         vertex_set = set(vertex_indices)
@@ -248,6 +250,7 @@ class MeshProcessor:
     def _apply_mesh_processing(
         self, submesh: Any, config: MeshExportConfig, trimesh: Any
     ) -> Any:
+        assert config is not None, "config must be provided"
         assert config is not None, "config must be provided"
         if config.repair:
             trimesh.repair.fill_holes(submesh)
@@ -356,6 +359,7 @@ class MeshProcessor:
     def _simplify_mesh(self, mesh: Any, target_faces: int) -> Any:
         """Internal mesh simplification."""
         assert target_faces is not None, "target_faces must be provided"
+        assert target_faces is not None, "target_faces must be provided"
         import trimesh
 
         # Try quadric decimation if available
@@ -420,6 +424,7 @@ class MeshProcessor:
         Returns:
             Path to exported file
         """
+        assert output_path is not None, "output_path must be provided"
         assert output_path is not None, "output_path must be provided"
         config = config or MeshExportConfig()
         output_path = Path(output_path)
@@ -581,6 +586,7 @@ class LODGenerator:
             LODGenerationResult with all generated levels
         """
         assert mesh_path is not None, "mesh_path must be provided"
+        assert mesh_path is not None, "mesh_path must be provided"
         if not self._processor._trimesh_available:
             return LODGenerationResult(
                 success=False,
@@ -678,6 +684,7 @@ class LODGenerator:
             levels: List to append the new LODLevel to.
         """
         assert original_faces is not None, "original_faces must be provided"
+        assert original_faces is not None, "original_faces must be provided"
         simplified = self._processor.simplify_mesh(mesh, ratio=ratio)
         self._processor.export_mesh(
             simplified, output_path, MeshExportConfig(format=output_format)
@@ -713,6 +720,7 @@ class LODGenerator:
         Returns:
             LODGenerationResult with collision-optimized LODs
         """
+        assert mesh_path is not None, "mesh_path must be provided"
         assert mesh_path is not None, "mesh_path must be provided"
         if not self._processor._trimesh_available:
             return LODGenerationResult(
@@ -786,6 +794,7 @@ class LODGenerator:
         Returns:
             Dict with memory estimation details
         """
+        assert lod_result is not None, "lod_result must be provided"
         assert lod_result is not None, "lod_result must be provided"
         if not lod_result.success or not lod_result.levels:
             return {"error": "No LOD data available"}

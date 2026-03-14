@@ -65,6 +65,7 @@ class PrimitiveInertiaCalculator:
         # I_yy = (1/12) * m * (x^2 + z^2)
         # I_zz = (1/12) * m * (x^2 + y^2)
         assert mass is not None, "mass must be provided"
+        assert mass is not None, "mass must be provided"
         factor = mass / 12.0
 
         ixx = factor * (size_y**2 + size_z**2)
@@ -106,6 +107,7 @@ class PrimitiveInertiaCalculator:
         # I_zz = (1/2) * m * r^2
 
         assert mass is not None, "mass must be provided"
+        assert mass is not None, "mass must be provided"
         r2 = radius**2
         h2 = length**2
 
@@ -145,6 +147,7 @@ class PrimitiveInertiaCalculator:
         """
         # I = (2/5) * m * r^2 for all axes
         assert mass is not None, "mass must be provided"
+        assert mass is not None, "mass must be provided"
         i_sphere = 0.4 * mass * radius**2
         volume = (4.0 / 3.0) * math.pi * radius**3
 
@@ -176,6 +179,7 @@ class PrimitiveInertiaCalculator:
         Returns:
             InertiaResult for the capsule
         """
+        assert mass is not None, "mass must be provided"
         assert mass is not None, "mass must be provided"
         r = max(float(radius), MIN_CAPSULE_DIMENSION_M)
         h = max(float(length), MIN_CAPSULE_DIMENSION_M)  # Cylinder length
@@ -248,6 +252,7 @@ class PrimitiveInertiaCalculator:
         # I_xx = (1/5) * m * (b^2 + c^2)
         # I_yy = (1/5) * m * (a^2 + c^2)
         # I_zz = (1/5) * m * (a^2 + b^2)
+        assert mass is not None, "mass must be provided"
         assert mass is not None, "mass must be provided"
         factor = mass / 5.0
 
@@ -336,6 +341,7 @@ class PrimitiveInertiaCalculator:
     ) -> dict[str, float]:
         """Convert dimension tuple to dictionary."""
         assert shape is not None, "shape must be provided"
+        assert shape is not None, "shape must be provided"
         if shape == PrimitiveShape.BOX:
             if len(dims) >= 3:
                 return {"x": dims[0], "y": dims[1], "z": dims[2]}
@@ -377,6 +383,7 @@ def estimate_segment_primitive(
         Tuple of (PrimitiveShape, dimension_dict)
     """
     # Default width/depth as fractions of length if not specified
+    assert segment_type is not None, "segment_type must be provided"
     assert segment_type is not None, "segment_type must be provided"
     if width is None:
         width = length * 0.2

@@ -83,12 +83,14 @@ class DiffMixin:
             DiffResult with changes
         """
         assert other_content is not None, "other_content must be provided"
+        assert other_content is not None, "other_content must be provided"
         host = cast("EditorProtocol", self)
         return self._compute_diff(host._content, other_content)
 
     @staticmethod
     def _compute_diff(original: str, modified: str) -> DiffResult:
         """Compute diff between two strings."""
+        assert original is not None, "original must be provided"
         assert original is not None, "original must be provided"
         original_lines = original.splitlines(keepends=True)
         modified_lines = modified.splitlines(keepends=True)
@@ -185,6 +187,7 @@ class DiffMixin:
             List of (left_line, right_line, change_type) tuples.
             change_type is one of: 'equal', 'insert', 'delete', 'replace'
         """
+        assert context_lines is not None, "context_lines must be provided"
         assert context_lines is not None, "context_lines must be provided"
         host = cast("EditorProtocol", self)
         if original is None:

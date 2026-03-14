@@ -74,6 +74,7 @@ class MeshReference:
             urdf_dir: Directory containing the URDF file
         """
         assert mesh_elem is not None, "mesh_elem must be provided"
+        assert mesh_elem is not None, "mesh_elem must be provided"
         filename = mesh_elem.get("filename", "")
 
         # Parse scale
@@ -162,6 +163,7 @@ class MeshExtractor:
             List of MeshReference objects
         """
         assert urdf_content is not None, "urdf_content must be provided"
+        assert urdf_content is not None, "urdf_content must be provided"
         try:
             root = DefusedET.fromstring(urdf_content)
         except ET.ParseError:
@@ -217,6 +219,7 @@ class MeshBrowserPanel(QWidget):
 
     def __init__(self, title: str, parent: QWidget | None = None) -> None:
         """Initialize the mesh browser panel."""
+        assert title is not None, "title must be provided"
         assert title is not None, "title must be provided"
         super().__init__(parent)
         self.title = title
@@ -307,6 +310,7 @@ class MeshBrowserPanel(QWidget):
 
     def load_content(self, content: str, file_path: Path | None = None) -> None:
         """Load URDF content directly."""
+        assert content is not None, "content must be provided"
         assert content is not None, "content must be provided"
         self.urdf_content = content
         self.urdf_path = file_path
@@ -407,6 +411,7 @@ class CopyMeshDialog(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
+        assert mesh is not None, "mesh must be provided"
         assert mesh is not None, "mesh must be provided"
         super().__init__(parent)
         self.mesh = mesh
@@ -563,6 +568,7 @@ class MeshBrowserWidget(QWidget):
     def _on_mesh_selected(self, mesh: MeshReference) -> None:
         """Handle mesh selection."""
         assert mesh is not None, "mesh must be provided"
+        assert mesh is not None, "mesh must be provided"
         details = f"File: {mesh.filename}\n"
         details += f"Link: {mesh.link_name}\n"
         details += f"Type: {mesh.context}\n"
@@ -585,6 +591,7 @@ class MeshBrowserWidget(QWidget):
 
     def _on_copy_mesh(self, mesh: MeshReference) -> None:
         """Copy a mesh reference to the target URDF."""
+        assert mesh is not None, "mesh must be provided"
         assert mesh is not None, "mesh must be provided"
         target_content = self.right_panel.get_urdf_content()
         if not target_content:
@@ -616,6 +623,7 @@ class MeshBrowserWidget(QWidget):
 
     def _apply_mesh_copy(self, mesh: MeshReference, config: dict[str, Any]) -> None:
         """Apply the mesh copy to the target URDF."""
+        assert mesh is not None, "mesh must be provided"
         assert mesh is not None, "mesh must be provided"
         target_content = self.right_panel.get_urdf_content()
         target_path = self.right_panel.get_urdf_path()
