@@ -64,6 +64,7 @@ class VideoExporter(QObject):
     error = pyqtSignal(str)  # error_message
 
     def __init__(self, renderer, frame_processor) -> None:
+        assert renderer is not None, "renderer must be provided"
         super().__init__()
         self.renderer = renderer
         self.frame_processor = frame_processor
@@ -145,6 +146,7 @@ class VideoExporter(QObject):
     def _start_ffmpeg_process(self, config: VideoExportConfig) -> subprocess.Popen:
         """Start ffmpeg process with appropriate settings"""
 
+        assert config is not None, "config must be provided"
         width, height = config.resolution
 
         # Quality presets
@@ -213,6 +215,7 @@ class VideoExporter(QObject):
         Returns:
             RGB buffer as numpy array (height, width, 3)
         """
+        assert frame_data is not None, "frame_data must be provided"
         width, height = resolution
 
         # Setup render config
@@ -264,6 +267,7 @@ class VideoExporter(QObject):
 
     def _create_offscreen_framebuffer(self, width: int, height: int) -> None:
         """Create offscreen framebuffer for rendering"""
+        assert width is not None, "width must be provided"
         ctx = self.renderer.ctx
 
         self._fbo_texture = ctx.texture((width, height), 3)
@@ -299,6 +303,7 @@ class VideoExporter(QObject):
 
     def _calculate_projection_matrix(self, width: int, height: int) -> np.ndarray:
         """Calculate projection matrix"""
+        assert width is not None, "width must be provided"
         aspect = width / height
         fov = 45.0
         near = 0.1
@@ -353,6 +358,7 @@ class VideoExportThread(QThread):
     error = pyqtSignal(str)
 
     def __init__(self, renderer, frame_processor, config: VideoExportConfig) -> None:
+        assert renderer is not None, "renderer must be provided"
         super().__init__()
         self.renderer = renderer
         self.frame_processor = frame_processor
@@ -385,6 +391,7 @@ class VideoExportDialog(QDialog):
     """
 
     def __init__(self, parent, renderer, frame_processor) -> None:
+        assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.renderer = renderer
         self.frame_processor = frame_processor
@@ -549,6 +556,7 @@ class VideoExportDialog(QDialog):
 
     def _on_export_finished(self, progress_dialog, output_path) -> None:
         """Handle export completion"""
+        assert progress_dialog is not None, "progress_dialog must be provided"
         progress_dialog.close()
 
         QMessageBox.information(
@@ -560,6 +568,7 @@ class VideoExportDialog(QDialog):
 
     def _on_export_error(self, progress_dialog, error_msg) -> None:
         """Handle export error"""
+        assert progress_dialog is not None, "progress_dialog must be provided"
         progress_dialog.close()
 
         QMessageBox.critical(

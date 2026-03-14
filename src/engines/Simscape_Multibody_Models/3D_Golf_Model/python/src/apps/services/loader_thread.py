@@ -27,6 +27,7 @@ class C3DLoaderThread(QThread):
         Args:
             filepath: Absolute path to the C3D file.
         """
+        assert filepath is not None, "filepath must be provided"
         super().__init__()
         self.filepath = filepath
 

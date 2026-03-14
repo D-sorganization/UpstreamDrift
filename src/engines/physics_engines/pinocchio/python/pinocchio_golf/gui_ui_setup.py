@@ -76,6 +76,7 @@ class UISetupMixin:
 
     def _setup_toolbar(self: Any, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the top bar with model selector, load button, and mode selector."""
+        assert layout is not None, "layout must be provided"
         top_layout = QtWidgets.QHBoxLayout()
 
         self.model_combo = QtWidgets.QComboBox()
@@ -124,6 +125,7 @@ class UISetupMixin:
         self: Any, sim_layout: QtWidgets.QVBoxLayout
     ) -> None:
         """Build the visualization group box."""
+        assert sim_layout is not None, "sim_layout must be provided"
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
 
@@ -153,6 +155,7 @@ class UISetupMixin:
 
     def _setup_overlay_checkboxes(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the frame/COM/force/torque overlay checkboxes."""
+        assert vis_layout is not None, "vis_layout must be provided"
         chk_layout = QtWidgets.QHBoxLayout()
         self.chk_frames = QtWidgets.QCheckBox("Show Frames")
         self.chk_frames.toggled.connect(self._toggle_frames)
@@ -173,6 +176,7 @@ class UISetupMixin:
 
     def _setup_ellipsoid_controls(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the manipulability ellipsoid toggles and body selection grid."""
+        assert vis_layout is not None, "vis_layout must be provided"
         ellip_group = QtWidgets.QGroupBox("Manipulability Analysis")
         ellip_layout = QtWidgets.QVBoxLayout()
 
@@ -199,6 +203,7 @@ class UISetupMixin:
 
     def _setup_advanced_vectors(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the induced acceleration and counterfactual vector controls."""
+        assert vis_layout is not None, "vis_layout must be provided"
         adv_vec_layout = QtWidgets.QHBoxLayout()
         self.chk_induced = QtWidgets.QCheckBox("Induced Accel")
         self.chk_induced.toggled.connect(self._update_viewer)
@@ -231,6 +236,7 @@ class UISetupMixin:
 
     def _setup_vector_scales(self: Any, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the force and torque scale spinboxes."""
+        assert vis_layout is not None, "vis_layout must be provided"
         scale_layout = QtWidgets.QHBoxLayout()
         self.spin_force_scale = QtWidgets.QDoubleSpinBox()
         self.spin_force_scale.setRange(0.01, 10.0)
@@ -253,6 +259,7 @@ class UISetupMixin:
         self: Any, sim_layout: QtWidgets.QVBoxLayout
     ) -> None:
         """Build the matrix analysis group box."""
+        assert sim_layout is not None, "sim_layout must be provided"
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)
         self.lbl_cond = QtWidgets.QLabel("--")
@@ -336,6 +343,7 @@ class UISetupMixin:
             self._add_joint_control_widget(i)
 
     def _add_joint_control_widget(self: Any, i: int) -> None:
+        assert i is not None, "i must be provided"
         if self.model is None:
             return
 
@@ -413,6 +421,7 @@ class UISetupMixin:
     def _on_slider(
         self: Any, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
     ) -> None:
+        assert val is not None, "val must be provided"
         angle = val / SLIDER_SCALE
         with SignalBlocker(spin):
             spin.setValue(angle)
@@ -451,6 +460,7 @@ class UISetupMixin:
 
     def _on_model_combo_changed(self: Any, index: int) -> None:
         """Handle model selection."""
+        assert index is not None, "index must be provided"
         if index < 0 or index >= len(self.available_models):
             return
 

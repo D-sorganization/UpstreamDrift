@@ -152,6 +152,7 @@ class PinocchioAnalysisMixin:
 
     def _plot_swing_profile(self: Any, plotter: GolfSwingPlotter) -> None:
         """Plot the Swing Profile radar chart."""
+        assert plotter is not None, "plotter must be provided"
         times, positions = self.recorder.get_time_series("joint_positions")
         _, velocities = self.recorder.get_time_series("joint_velocities")
         _, torques = self.recorder.get_time_series("joint_torques")

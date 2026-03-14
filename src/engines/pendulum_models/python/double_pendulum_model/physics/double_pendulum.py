@@ -111,6 +111,7 @@ class ExpressionFunction:
     )
 
     def __init__(self, expression: str) -> None:
+        assert expression is not None, "expression must be provided"
         self.expression = expression.strip()
         # Validate the AST before accepting the expression
         self._validate_ast(self.expression)
@@ -121,6 +122,7 @@ class ExpressionFunction:
 
     def _validate_ast(self, expression: str) -> None:
         """Walk the AST and raise ValueError for any disallowed constructs."""
+        assert expression is not None, "expression must be provided"
         try:
             tree = ast.parse(expression, mode="eval")
         except SyntaxError as exc:
@@ -157,6 +159,7 @@ class ExpressionFunction:
                     raise ValueError(f"Use of unknown variable '{name}'")
 
     def __call__(self, t: float, state: DoublePendulumState) -> float:
+        assert t is not None, "t must be provided"
         context: dict[str, float] = {
             "t": t,
             "theta1": state.theta1,
@@ -340,6 +343,7 @@ class DoublePendulumDynamics:
     def mass_matrix(self, theta2: float) -> Matrix2x2:
         """Compute the 2x2 mass matrix for the given relative angle."""
         # Use cached values
+        assert theta2 is not None, "theta2 must be provided"
         m2 = self._m2
         l1 = self._l1
         lc2 = self._lc2
@@ -356,6 +360,7 @@ class DoublePendulumDynamics:
         self, theta2: float, omega1: float, omega2: float
     ) -> tuple[float, float]:
         """Compute Coriolis and centripetal force vector."""
+        assert theta2 is not None, "theta2 must be provided"
         m2 = self._m2
         l1 = self._l1
         lc2 = self._lc2
@@ -367,6 +372,7 @@ class DoublePendulumDynamics:
 
     def gravity_vector(self, theta1: float, theta2: float) -> tuple[float, float]:
         """Compute gravitational torque vector for both joints."""
+        assert theta1 is not None, "theta1 must be provided"
         m1 = self._m1
         m2 = self._m2
         l1 = self._l1
@@ -382,6 +388,7 @@ class DoublePendulumDynamics:
 
     def damping_vector(self, omega1: float, omega2: float) -> tuple[float, float]:
         """Compute viscous damping torques for both joints."""
+        assert omega1 is not None, "omega1 must be provided"
         d1 = self._d1 * omega1
         d2 = self._d2 * omega2
         return d1, d2
@@ -402,6 +409,7 @@ class DoublePendulumDynamics:
         self, state: DoublePendulumState
     ) -> tuple[tuple[float, ...], tuple[tuple[float, ...], ...]]:
         """Decompose dynamics into drift and control-input matrices."""
+        assert state is not None, "state must be provided"
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
         d1, d2 = self.damping_vector(state.omega1, state.omega2)
@@ -427,6 +435,7 @@ class DoublePendulumDynamics:
         self, t: float, state: DoublePendulumState
     ) -> tuple[float, float]:
         """Evaluate user-defined forcing functions at the given state."""
+        assert t is not None, "t must be provided"
         tau1 = self.forcing_functions[0](t, state)
         tau2 = self.forcing_functions[1](t, state)
         return tau1, tau2
@@ -436,6 +445,7 @@ class DoublePendulumDynamics:
     ) -> tuple[float, float]:
         """Compute joint torques required to realize the provided accelerations."""
 
+        assert state is not None, "state must be provided"
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
         d1, d2 = self.damping_vector(state.omega1, state.omega2)
@@ -450,6 +460,7 @@ class DoublePendulumDynamics:
         self, state: DoublePendulumState, control: tuple[float, float]
     ) -> JointTorques:
         """Decompose joint torques into applied, gravity, damping, and Coriolis."""
+        assert state is not None, "state must be provided"
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
         d1, d2 = self.damping_vector(state.omega1, state.omega2)
@@ -464,6 +475,7 @@ class DoublePendulumDynamics:
         self, t: float, state: DoublePendulumState
     ) -> tuple[float, float, float, float]:
         """Compute state derivatives (velocities and accelerations)."""
+        assert t is not None, "t must be provided"
         tau1, tau2 = self.applied_torques(t, state)
         c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
         g1, g2 = self.gravity_vector(state.theta1, state.theta2)
@@ -478,10 +490,13 @@ class DoublePendulumDynamics:
     ) -> DoublePendulumState:
         """Advance the state by one RK4 integration step."""
 
+        assert t is not None, "t must be provided"
+
         def rk4_increment(
             current_state: DoublePendulumState, scale: float, derivs: Iterable[float]
         ) -> DoublePendulumState:
             """Apply a scaled RK4 derivative increment to the state."""
+            assert current_state is not None, "current_state must be provided"
             dtheta1, dtheta2, domega1, domega2 = derivs
             # Preserve phi and omega_phi (out-of-plane motion not yet in dynamics)
             phi = getattr(current_state, "phi", 0.0)
@@ -519,9 +534,7 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(
-    shoulder_expression: str, wrist_expression: str
-) -> tuple[
+def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:

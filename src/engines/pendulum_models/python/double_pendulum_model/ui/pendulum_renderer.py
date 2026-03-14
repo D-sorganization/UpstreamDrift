@@ -94,6 +94,7 @@ class PendulumRendererMixin:
         npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
     ]:
         """Calculate the 3D positions of pendulum joints."""
+        assert pivot is not None, "pivot must be provided"
         import numpy as np
 
         host = typing.cast("RendererProtocol", self)
@@ -147,6 +148,7 @@ class PendulumRendererMixin:
         point: npt.NDArray[np.float64], phi: float
     ) -> npt.NDArray[np.float64]:
         """Rotate point around Z axis by phi."""
+        assert point is not None, "point must be provided"
         import numpy as np
 
         x, y, z = point[0], point[1], point[2]
@@ -161,6 +163,7 @@ class PendulumRendererMixin:
         point: npt.NDArray[np.float64], angle: float
     ) -> npt.NDArray[np.float64]:
         """Rotate point around X axis by angle."""
+        assert point is not None, "point must be provided"
         import numpy as np
 
         y, z = point[1], point[2]
@@ -177,6 +180,7 @@ class PendulumRendererMixin:
         theta1: float,
     ) -> None:
         """Draw reference lines and gravity."""
+        assert pivot is not None, "pivot must be provided"
         import numpy as np
 
         host = typing.cast("RendererProtocol", self)
@@ -215,6 +219,7 @@ class PendulumRendererMixin:
         self, pivot: npt.NDArray[np.float64], max_range: float
     ) -> None:
         """Draw the gravity vector and label."""
+        assert pivot is not None, "pivot must be provided"
         import numpy as np
 
         host = typing.cast("RendererProtocol", self)
@@ -261,6 +266,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw the pendulum segments and joints."""
+        assert pivot is not None, "pivot must be provided"
         self._draw_upper_segment(pivot, elbow)
         self._draw_lower_segment(elbow, wrist)
         self._draw_joint_markers(pivot, elbow, wrist)
@@ -272,6 +278,7 @@ class PendulumRendererMixin:
         elbow: npt.NDArray[np.float64],
     ) -> None:
         """Draw the upper pendulum segment."""
+        assert pivot is not None, "pivot must be provided"
         host = typing.cast("RendererProtocol", self)
         host.ax.plot(
             [pivot[0], elbow[0]],
@@ -290,6 +297,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw the lower pendulum segment."""
+        assert elbow is not None, "elbow must be provided"
         host = typing.cast("RendererProtocol", self)
         host.ax.plot(
             [elbow[0], wrist[0]],
@@ -309,6 +317,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw the joint markers at pivot, elbow, and wrist."""
+        assert pivot is not None, "pivot must be provided"
         host = typing.cast("RendererProtocol", self)
         ax3d = typing.cast(typing.Any, host.ax)
         ax3d.scatter(
@@ -348,6 +357,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw labels at midpoints of segments."""
+        assert pivot is not None, "pivot must be provided"
         host = typing.cast("RendererProtocol", self)
         ax3d = typing.cast(typing.Any, host.ax)
         upper_mid = (pivot + elbow) / 2
@@ -388,6 +398,7 @@ class PendulumRendererMixin:
 
     def _draw_plane(self, size: float) -> None:
         """Draw the inclined plane surface."""
+        assert size is not None, "size must be provided"
         import numpy as np
 
         host = typing.cast("RendererProtocol", self)

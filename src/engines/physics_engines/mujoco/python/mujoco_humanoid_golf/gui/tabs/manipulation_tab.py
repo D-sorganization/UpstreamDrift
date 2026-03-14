@@ -33,6 +33,7 @@ class ManipulationTab(QtWidgets.QWidget):
         main_window: AdvancedGolfAnalysisWindow,
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
+        assert sim_widget is not None, "sim_widget must be provided"
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.main_window = main_window
@@ -385,6 +386,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_drag_enabled_changed(self, state: int) -> None:
         """Handle drag manipulation setting."""
+        assert state is not None, "state must be provided"
         enabled = state == QtCore.Qt.CheckState.Checked.value
         manipulator = self.sim_widget.get_manipulator()
         if manipulator:
@@ -392,6 +394,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_maintain_orientation_changed(self, state: int) -> None:
         """Handle maintain orientation setting."""
+        assert state is not None, "state must be provided"
         enabled = state == QtCore.Qt.CheckState.Checked.value
         manipulator = self.sim_widget.get_manipulator()
         if manipulator:
@@ -399,6 +402,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_nullspace_posture_changed(self, state: int) -> None:
         """Handle nullspace posture optimization setting."""
+        assert state is not None, "state must be provided"
         enabled = state == QtCore.Qt.CheckState.Checked.value
         manipulator = self.sim_widget.get_manipulator()
         if manipulator:
@@ -406,6 +410,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_manip_body_selected(self, index: int) -> None:
         """Handle body selection from combo box."""
+        assert index is not None, "index must be provided"
         if index < 0:
             return
 
@@ -424,6 +429,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_manual_transform(self, type_: str, axis: int, value: float) -> None:
         """Handle manual transform changes."""
+        assert type_ is not None, "type_ must be provided"
         manipulator = self.sim_widget.get_manipulator()
         if not manipulator or manipulator.selected_body_id is None:
             return
@@ -710,6 +716,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_interpolate_poses(self, value: int) -> None:
         """Interpolate between two selected poses."""
+        assert value is not None, "value must be provided"
         manipulator = self.sim_widget.get_manipulator()
         if not manipulator:
             return
@@ -727,6 +734,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_ik_damping_changed(self, value: int) -> None:
         """Handle IK damping slider change."""
+        assert value is not None, "value must be provided"
         manipulator = self.sim_widget.get_manipulator()
         if not manipulator:
             return
@@ -736,6 +744,7 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_ik_step_changed(self, value: int) -> None:
         """Handle IK step size slider change."""
+        assert value is not None, "value must be provided"
         manipulator = self.sim_widget.get_manipulator()
         if not manipulator:
             return

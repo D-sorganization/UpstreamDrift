@@ -53,6 +53,7 @@ class PhysicsTab(QtWidgets.QWidget):
         main_window: AdvancedGolfAnalysisWindow,
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
+        assert sim_widget is not None, "sim_widget must be provided"
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.main_window = main_window
@@ -399,6 +400,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def on_model_changed(self, index: int) -> None:
         """Handle model selection change."""
+        assert index is not None, "index must be provided"
         self.load_current_model()
         self._update_model_description(index)
 
@@ -411,6 +413,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _on_loading_finished(self, success: bool) -> None:
         """Handle completion of model loading."""
+        assert success is not None, "success must be provided"
         self.model_combo.setEnabled(True)
         self.mode_combo.setEnabled(True)
 
@@ -490,6 +493,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _on_operating_mode_changed(self, index: int) -> None:
         """Handle operating mode change (Dynamic vs Kinematic)."""
+        assert index is not None, "index must be provided"
         mode = "dynamic" if index == 0 else "kinematic"
         self.sim_widget.set_operating_mode(mode)
         self.mode_changed.emit(mode)

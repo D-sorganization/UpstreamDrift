@@ -118,6 +118,7 @@ class RobNealDataViewer:
             show_velocity: Whether to show velocity vectors
             show_acceleration: Whether to show acceleration vectors
         """
+        assert frame is not None, "frame must be provided"
         if self.data is None:
             logger.warning("No data loaded")
             return

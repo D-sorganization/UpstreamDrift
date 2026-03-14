@@ -55,6 +55,7 @@ class PressureVisualizationWidget(QtWidgets.QWidget):
         Args:
             data: New pressure visualization data
         """
+        assert data is not None, "data must be provided"
         self.pressure_data = data
         self.update()
 
@@ -65,6 +66,7 @@ class PressureVisualizationWidget(QtWidgets.QWidget):
 
     def _get_color_for_value(self, normalized_value: float) -> QtGui.QColor:
         """Get color from gradient for normalized value [0, 1]."""
+        assert normalized_value is not None, "normalized_value must be provided"
         normalized_value = max(0.0, min(1.0, normalized_value))
 
         # Find surrounding color stops
@@ -192,6 +194,7 @@ class ContactMetricsWidget(QtWidgets.QWidget):
         equilibrium: bool,
     ) -> None:
         """Update displayed metrics."""
+        assert normal_force is not None, "normal_force must be provided"
         self.lbl_normal_force.setText(f"{normal_force:.1f} N")
         self.lbl_tangent_force.setText(f"{tangent_force:.1f} N")
         self.lbl_num_contacts.setText(str(num_contacts))
@@ -225,6 +228,7 @@ class GripModellingTab(QtWidgets.QWidget):
         # For now, we just store the reference, but we maintain our own internal widget
         # for independent visualization of the hand models.
         # Future work: Unify visualization if possible.
+        assert sim_widget is not None, "sim_widget must be provided"
         self.external_sim_widget = sim_widget
         logger.info("Connected GripModellingTab to external sim widget")
 
@@ -394,6 +398,7 @@ class GripModellingTab(QtWidgets.QWidget):
         self, scene_path: Path, folder_path: Path, is_both: bool = False
     ) -> str:
         """Read scene file and inject absolute paths and cylinder object."""
+        assert scene_path is not None, "scene_path must be provided"
         xml_content = scene_path.read_text("utf-8")
 
         # 1. Inline hand XML includes and extract worldbodies
@@ -423,6 +428,7 @@ class GripModellingTab(QtWidgets.QWidget):
         is_both: bool,
     ) -> str:
         """Read a hand XML file, inject freejoint, and strip mujoco tags."""
+        assert folder_path is not None, "folder_path must be provided"
         full_path = folder_path / filename
         if not full_path.exists():
             return ""
@@ -474,10 +480,12 @@ class GripModellingTab(QtWidgets.QWidget):
         is_both: bool,
     ) -> str:
         """Inline hand XML includes and inject extracted bodies into worldbody."""
+        assert xml_content is not None, "xml_content must be provided"
         extracted_bodies: list[str] = []
 
         def extract_worldbody_content(filename: str, body_pattern: str) -> str:
             """Extract worldbody XML content from a hand model file."""
+            assert filename is not None, "filename must be provided"
             content = self._get_hand_content(
                 folder_path, filename, body_pattern, is_both
             )
@@ -590,6 +598,7 @@ class GripModellingTab(QtWidgets.QWidget):
     @staticmethod
     def _inject_mocap_bodies(xml_content: str, scene_path: Path, is_both: bool) -> str:
         """Inject mocap bodies and weld constraints for hand positioning."""
+        assert xml_content is not None, "xml_content must be provided"
         mocap_xml = ""
         equality_xml = "<equality>\n"
 
@@ -672,8 +681,11 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(
+        self, i: int, model: mujoco.MjModel
+    ) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
+        assert i is not None, "i must be provided"
         if self.sim_widget.data is None:
             return
 
@@ -748,16 +760,19 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _val_to_slider(self, val: float, min_v: float, max_v: float) -> int:
         """Convert float value to slider integer position."""
+        assert val is not None, "val must be provided"
         ratio = (val - min_v) / (max_v - min_v) if max_v > min_v else 0.5
         return int(ratio * 1000)
 
     def _slider_to_val(self, slider_val: int, min_v: float, max_v: float) -> float:
         """Convert slider integer position to float value."""
+        assert slider_val is not None, "slider_val must be provided"
         ratio = slider_val / 1000.0
         return min_v + ratio * (max_v - min_v)
 
     def _update_joint(self, q_idx: int, val: float) -> None:
         """Update joint value in simulation."""
+        assert q_idx is not None, "q_idx must be provided"
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
         state = self.sim_widget.get_state()
@@ -775,6 +790,7 @@ class GripModellingTab(QtWidgets.QWidget):
         q_idx: int,
     ) -> None:
         """Handle slider value change."""
+        assert val_int is not None, "val_int must be provided"
         val = self._slider_to_val(val_int, min_v, max_v)
         spin.blockSignals(True)  # noqa: FBT003
         spin.setValue(val)
@@ -790,6 +806,7 @@ class GripModellingTab(QtWidgets.QWidget):
         q_idx: int,
     ) -> None:
         """Handle spinbox value change."""
+        assert val is not None, "val must be provided"
         slider_val = self._val_to_slider(val, min_v, max_v)
         slider.blockSignals(True)  # noqa: FBT003
         slider.setValue(slider_val)
@@ -798,6 +815,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _get_joint_range(self, i: int, model: mujoco.MjModel) -> tuple[float, float]:
         """Get valid joint range, providing defaults if undefined."""
+        assert i is not None, "i must be provided"
         range_min, range_max = (
             model.jnt_range[i] if model.jnt_range is not None else (-np.pi, np.pi)
         )
@@ -835,6 +853,7 @@ class GripModellingTab(QtWidgets.QWidget):
     def _extract_hand_contacts(
         self, model: mujoco.MjModel, data: mujoco.MjData
     ) -> tuple[list, list, list, list, list]:
+        assert model is not None, "model must be provided"
         positions = []
         normals = []
         forces = []
@@ -876,6 +895,7 @@ class GripModellingTab(QtWidgets.QWidget):
     def _update_contact_visualizations(
         self, positions_arr: np.ndarray, state: Any
     ) -> None:
+        assert positions_arr is not None, "positions_arr must be provided"
         if len(positions_arr) > 0:
             grip_center = np.mean(positions_arr, axis=0)
         else:
