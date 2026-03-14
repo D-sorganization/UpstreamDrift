@@ -63,6 +63,7 @@ class CentroidalMPC(ModelPredictiveController):
             dt: Timestep.
             n_contacts: Number of contact points (feet).
         """
+        assert model is not None, "model must be provided"
         super().__init__(model, horizon, dt)
 
         # Centroidal state dimension: 9 (com pos, vel, ang momentum)
@@ -146,6 +147,7 @@ class CentroidalMPC(ModelPredictiveController):
         Returns:
             Next state.
         """
+        assert x is not None, "x must be provided"
         com = x[:3]
         com_vel = x[3:6]
         L = x[6:9]
@@ -255,6 +257,7 @@ class WholeBodyMPC(ModelPredictiveController):
             horizon: Prediction horizon.
             dt: Timestep.
         """
+        assert model is not None, "model must be provided"
         super().__init__(model, horizon, dt)
 
         # Setup default costs for whole-body control
@@ -327,6 +330,7 @@ class WholeBodyMPC(ModelPredictiveController):
             lower_limits: Lower joint limits.
             upper_limits: Upper joint limits.
         """
+        assert lower_limits is not None, "lower_limits must be provided"
         from src.research.mpc.controller import Constraint
 
         n_q = self._n_x // 2
@@ -352,6 +356,7 @@ class WholeBodyMPC(ModelPredictiveController):
         Args:
             torque_limits: Maximum torque magnitudes.
         """
+        assert torque_limits is not None, "torque_limits must be provided"
         from src.research.mpc.controller import Constraint
 
         B = np.eye(self._n_u)
@@ -377,6 +382,7 @@ class WholeBodyMPC(ModelPredictiveController):
             MPC solution result.
         """
         # Convert EE targets to joint targets via IK
+        assert initial_state is not None, "initial_state must be provided"
         if self._end_effector_targets and hasattr(self.model, "solve_ik"):
             # Use first EE target
             ee_name = list(self._end_effector_targets.keys())[0]

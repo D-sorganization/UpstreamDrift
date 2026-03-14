@@ -45,12 +45,15 @@ def create_png(
     This is a minimal PNG encoder that doesn't require PIL.
     """
 
+    assert width is not None, "width must be provided"
+
     def crc32(data: bytes) -> int:
         """Compute CRC-32 checksum for the given bytes."""
         return zlib.crc32(data) & 0xFFFFFFFF
 
     def make_chunk(chunk_type: bytes, data: bytes) -> bytes:
         """Build a PNG chunk with type, data, length, and CRC."""
+        assert chunk_type is not None, "chunk_type must be provided"
         chunk = chunk_type + data
         return struct.pack(">I", len(data)) + chunk + struct.pack(">I", crc32(chunk))
 
@@ -82,6 +85,7 @@ def draw_rounded_rect_with_text(
     width: int, height: int, bg_color: tuple[int, int, int], text: str, radius: int = 20
 ) -> list[tuple[int, int, int, int]]:
     """Create a rounded rectangle with centered text."""
+    assert width is not None, "width must be provided"
     pixels = []
 
     # Background color with full alpha
@@ -148,6 +152,7 @@ def draw_rounded_rect_with_text(
 
 def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str) -> None:
     """Draw a simple blocky letter representation."""
+    assert pixels is not None, "pixels must be provided"
     white = (255, 255, 255, 255)
     thickness = max(3, size // 6)
 

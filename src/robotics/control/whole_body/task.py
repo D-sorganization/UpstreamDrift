@@ -173,6 +173,7 @@ def create_com_task(
     Returns:
         Task configured for CoM tracking.
     """
+    assert jacobian_com is not None, "jacobian_com must be provided"
     if gains is None:
         gains = TaskGains(weight=1.0, priority=2, gain_p=100.0, gain_d=20.0)
 
@@ -225,6 +226,7 @@ def create_posture_task(
     Returns:
         Task configured for posture regularization.
     """
+    assert n_v is not None, "n_v must be provided"
     if gains is None:
         gains = TaskGains(weight=0.1, priority=4, gain_p=50.0, gain_d=10.0)
 
@@ -289,6 +291,7 @@ def create_ee_task(
     Returns:
         Task configured for end-effector tracking.
     """
+    assert jacobian_ee is not None, "jacobian_ee must be provided"
     if gains is None:
         gains = TaskGains(weight=1.0, priority=3, gain_p=100.0, gain_d=20.0)
 
@@ -348,6 +351,7 @@ def create_contact_constraint(
     Returns:
         Task configured as equality constraint for contact.
     """
+    assert jacobian_contact is not None, "jacobian_contact must be provided"
     jacobian_contact = np.asarray(jacobian_contact, dtype=np.float64)
     task_dim = jacobian_contact.shape[0]
 
@@ -394,6 +398,7 @@ def create_joint_limit_task(
     Returns:
         Task for limit avoidance, or None if not near limits.
     """
+    assert n_v is not None, "n_v must be provided"
     q_current = np.asarray(q_current, dtype=np.float64)[:n_v]
     v_current = np.asarray(v_current, dtype=np.float64)[:n_v]
     q_min = np.asarray(q_min, dtype=np.float64)[:n_v]

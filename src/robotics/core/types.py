@@ -169,6 +169,7 @@ class ContactState:
         Returns:
             True if friction force magnitude equals friction limit.
         """
+        assert tolerance is not None, "tolerance must be provided"
         friction_limit = self.friction_coefficient * self.normal_force
         friction_mag = float(np.linalg.norm(self.friction_force))
         return friction_mag >= friction_limit - tolerance

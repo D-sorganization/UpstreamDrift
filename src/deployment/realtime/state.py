@@ -98,6 +98,7 @@ class RobotState:
         Returns:
             Wrench [fx, fy, fz, tx, ty, tz] or None if not available.
         """
+        assert sensor_name is not None, "sensor_name must be provided"
         if self.ft_wrenches is None:
             return None
         return self.ft_wrenches.get(sensor_name)
@@ -147,6 +148,7 @@ class ControlCommand:
         Raises:
             ValueError: If command is invalid.
         """
+        assert n_joints is not None, "n_joints must be provided"
         if self.mode == ControlMode.POSITION:
             if self.position_targets is None:
                 raise ValueError("Position mode requires position_targets")

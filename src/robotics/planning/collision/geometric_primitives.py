@@ -100,11 +100,13 @@ class Sphere(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside sphere."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point)
         return float(np.linalg.norm(point - self.center)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
+        assert direction is not None, "direction must be provided"
         direction = np.asarray(direction)
         norm = np.linalg.norm(direction)
         if norm < 1e-10:
@@ -168,6 +170,7 @@ class Box(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside box."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point)
         # Transform to local frame
         local_point = self.rotation.T @ (point - self.center)
@@ -175,6 +178,7 @@ class Box(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
+        assert direction is not None, "direction must be provided"
         direction = np.asarray(direction)
         # Transform direction to local frame
         local_dir = self.rotation.T @ direction
@@ -246,6 +250,7 @@ class Capsule(GeometricPrimitive):
 
     def _closest_point_on_segment(self, point: np.ndarray) -> np.ndarray:
         """Get closest point on capsule's central line segment."""
+        assert point is not None, "point must be provided"
         ab = self.point_b - self.point_a
         t = np.dot(point - self.point_a, ab) / (np.dot(ab, ab) + 1e-10)
         t = np.clip(t, 0.0, 1.0)
@@ -253,12 +258,14 @@ class Capsule(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside capsule."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
         return float(np.linalg.norm(point - closest)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
+        assert direction is not None, "direction must be provided"
         direction = np.asarray(direction)
         norm = np.linalg.norm(direction)
         if norm < 1e-10:
@@ -336,6 +343,7 @@ class Cylinder(GeometricPrimitive):
 
     def contains_point(self, point: np.ndarray) -> bool:
         """Check if point is inside cylinder."""
+        assert point is not None, "point must be provided"
         point = np.asarray(point)
         # Project onto axis
         to_point = point - self.center
@@ -351,6 +359,7 @@ class Cylinder(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
+        assert direction is not None, "direction must be provided"
         direction = np.asarray(direction)
         norm = np.linalg.norm(direction)
         if norm < 1e-10:
@@ -416,6 +425,7 @@ class ConvexHull(GeometricPrimitive):
         Uses a simple heuristic - point should be on the "inside"
         of all faces. For exact test, use proper convex hull algorithm.
         """
+        assert point is not None, "point must be provided"
         point = np.asarray(point)
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
@@ -431,6 +441,7 @@ class ConvexHull(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
+        assert direction is not None, "direction must be provided"
         direction = np.asarray(direction)
         # Find vertex with maximum dot product
         dots = self.vertices @ direction
@@ -462,6 +473,7 @@ def compute_primitive_distance(
         Tuple of (signed_distance, closest_point_a, closest_point_b).
     """
     # Dispatch based on primitive types for specialized algorithms
+    assert prim_a is not None, "prim_a must be provided"
     if isinstance(prim_a, Sphere) and isinstance(prim_b, Sphere):
         return _sphere_sphere_distance(prim_a, prim_b)
     if isinstance(prim_a, Sphere) and isinstance(prim_b, Capsule):
@@ -481,6 +493,7 @@ def _sphere_sphere_distance(
     sphere_b: Sphere,
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between two spheres."""
+    assert sphere_a is not None, "sphere_a must be provided"
     diff = sphere_b.center - sphere_a.center
     center_dist = np.linalg.norm(diff)
 
@@ -503,6 +516,7 @@ def _sphere_capsule_distance(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between sphere and capsule."""
     # Closest point on capsule axis to sphere center
+    assert sphere is not None, "sphere must be provided"
     closest_on_axis = capsule._closest_point_on_segment(sphere.center)
 
     # Now it's sphere-sphere distance
@@ -530,6 +544,7 @@ def _capsule_capsule_distance(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between two capsules."""
     # Find closest points between line segments
+    assert cap_a is not None, "cap_a must be provided"
     closest_a, closest_b = _closest_points_segments(
         cap_a.point_a, cap_a.point_b, cap_b.point_a, cap_b.point_b
     )
@@ -558,6 +573,7 @@ def _closest_points_segments(
     b1: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Find closest points between two line segments."""
+    assert a0 is not None, "a0 must be provided"
     d1 = a1 - a0  # Direction of segment 1
     d2 = b1 - b0  # Direction of segment 2
     r = a0 - b0
@@ -610,6 +626,7 @@ def _gjk_distance(
     consider using a proper GJK library.
     """
     # Initial direction from A to B
+    assert prim_a is not None, "prim_a must be provided"
     direction = prim_b.compute_support(np.array([1, 0, 0])) - prim_a.compute_support(
         np.array([-1, 0, 0])
     )

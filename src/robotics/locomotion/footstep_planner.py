@@ -71,6 +71,7 @@ class Footstep:
 
     def _quat_to_rot(self, q: NDArray[np.float64]) -> NDArray[np.float64]:
         """Convert quaternion to rotation matrix."""
+        assert q is not None, "q must be provided"
         w, x, y, z = q
         return np.array(
             [
@@ -145,6 +146,7 @@ class FootstepPlan:
         Returns:
             Active footstep or None if time is out of range.
         """
+        assert t is not None, "t must be provided"
         for fs in self.footsteps:
             if fs.timing <= t < fs.timing + fs.duration:
                 return fs
@@ -194,6 +196,7 @@ class FootstepPlanner(ContractChecker):
             max_step_width: Maximum lateral step width [m].
             max_step_rotation: Maximum step rotation [rad].
         """
+        assert parameters is not None, "parameters must be provided"
         self._parameters = parameters
         self._max_step_length = max_step_length
         self._max_step_width = max_step_width
@@ -228,16 +231,13 @@ class FootstepPlanner(ContractChecker):
 
     def set_parameters(self, parameters: GaitParameters) -> None:
         """Set new gait parameters."""
+        assert parameters is not None, "parameters must be provided"
         self._parameters = parameters
         self._nominal_width = parameters.step_width
 
     @precondition(
-        lambda self,
-        start,
-        goal,
-        start_yaw=0.0,
-        goal_yaw=None,
-        start_foot="left": start_foot in ("left", "right"),
+        lambda self, start, goal, start_yaw=0.0, goal_yaw=None, start_foot="left": start_foot
+        in ("left", "right"),
         "start_foot must be 'left' or 'right'",
     )
     def plan_to_goal(
@@ -260,6 +260,7 @@ class FootstepPlanner(ContractChecker):
         Returns:
             FootstepPlan to reach goal.
         """
+        assert start is not None, "start must be provided"
         start = np.asarray(start, dtype=np.float64)
         goal = np.asarray(goal, dtype=np.float64)
 
@@ -301,21 +302,13 @@ class FootstepPlanner(ContractChecker):
         )
 
     @precondition(
-        lambda self,
-        current_position,
-        current_yaw,
-        velocity_command,
-        n_steps=4,
-        start_foot="left": n_steps > 0,
+        lambda self, current_position, current_yaw, velocity_command, n_steps=4, start_foot="left": n_steps
+        > 0,
         "Number of steps must be positive",
     )
     @precondition(
-        lambda self,
-        current_position,
-        current_yaw,
-        velocity_command,
-        n_steps=4,
-        start_foot="left": start_foot in ("left", "right"),
+        lambda self, current_position, current_yaw, velocity_command, n_steps=4, start_foot="left": start_foot
+        in ("left", "right"),
         "start_foot must be 'left' or 'right'",
     )
     def plan_from_velocity(
@@ -338,6 +331,7 @@ class FootstepPlanner(ContractChecker):
         Returns:
             FootstepPlan following velocity command.
         """
+        assert current_position is not None, "current_position must be provided"
         current_position = np.asarray(current_position, dtype=np.float64)
         velocity_command = np.asarray(velocity_command, dtype=np.float64)
 
@@ -382,6 +376,7 @@ class FootstepPlanner(ContractChecker):
         )
 
     def _compute_clamped_step(self, vx, vy, omega):
+        assert vx is not None, "vx must be provided"
         dt = self._parameters.step_duration
         step_x = np.clip(vx * dt, -self._max_step_length, self._max_step_length)
         step_y = np.clip(vy * dt, -self._max_step_width, self._max_step_width)
@@ -391,6 +386,7 @@ class FootstepPlanner(ContractChecker):
         return step_x, step_y, step_yaw
 
     def _advance_position(self, pos, yaw, step_x, step_y):
+        assert pos is not None, "pos must be provided"
         cos_yaw = np.cos(yaw)
         sin_yaw = np.sin(yaw)
         pos[0] += cos_yaw * step_x - sin_yaw * step_y
@@ -398,6 +394,7 @@ class FootstepPlanner(ContractChecker):
         return pos
 
     def _compute_foot_position(self, pos, yaw, foot):
+        assert pos is not None, "pos must be provided"
         cos_yaw = np.cos(yaw)
         sin_yaw = np.sin(yaw)
         lateral_offset = self._nominal_width / 2
@@ -411,11 +408,8 @@ class FootstepPlanner(ContractChecker):
         return np.array([pos[0] + offset_x, pos[1] + offset_y, pos[2]])
 
     @precondition(
-        lambda self,
-        current_position,
-        current_yaw,
-        target_yaw,
-        start_foot="left": start_foot in ("left", "right"),
+        lambda self, current_position, current_yaw, target_yaw, start_foot="left": start_foot
+        in ("left", "right"),
         "start_foot must be 'left' or 'right'",
     )
     def plan_in_place_turn(
@@ -436,6 +430,7 @@ class FootstepPlanner(ContractChecker):
         Returns:
             FootstepPlan for rotation.
         """
+        assert current_position is not None, "current_position must be provided"
         current_position = np.asarray(current_position, dtype=np.float64)
 
         # Compute rotation needed
@@ -504,6 +499,7 @@ class FootstepPlanner(ContractChecker):
         start_foot: str,
     ) -> list[Footstep]:
         """Generate footsteps along straight path."""
+        assert start is not None, "start must be provided"
         direction = goal - start
         distance = float(np.linalg.norm(direction[:2]))
         path_yaw = float(np.arctan2(direction[1], direction[0]))
@@ -570,6 +566,7 @@ class FootstepPlanner(ContractChecker):
 
     def _normalize_angle(self, angle: float) -> float:
         """Normalize angle to [-pi, pi]."""
+        assert angle is not None, "angle must be provided"
         while angle > np.pi:
             angle -= 2 * np.pi
         while angle < -np.pi:

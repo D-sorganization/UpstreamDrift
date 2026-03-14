@@ -40,9 +40,7 @@ class LauncherThemeMixin:
             border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
-            self.setStyleSheet(
-                manager.get_current_stylesheet()
-                + f"""
+            self.setStyleSheet(manager.get_current_stylesheet() + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -60,8 +58,7 @@ class LauncherThemeMixin:
                 QLabel#CardDescription {{
                     color: {text_sec};
                 }}
-            """
-            )
+            """)
         except (ImportError, AttributeError):
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
@@ -90,6 +87,7 @@ class LauncherThemeMixin:
 
     def _on_theme_changed(self, colors: object) -> None:
         """Handle dynamic theme change -- reapply stylesheet and update menu."""
+        assert colors is not None, "colors must be provided"
         self.apply_styles()
 
         # Refresh all model card inline styles
@@ -117,6 +115,7 @@ class LauncherThemeMixin:
         Includes core presets (Dark, Light, High Contrast), fleet-wide themes,
         custom themes, a "Manage Themes..." dialog, and a Plot Theme submenu.
         """
+        assert theme_menu is not None, "theme_menu must be provided"
         from PyQt6.QtGui import QActionGroup
 
         try:
@@ -212,6 +211,7 @@ class LauncherThemeMixin:
         Plot themes affect matplotlib styling used by submodules.
         The setting is saved to QSettings so launched modules inherit it.
         """
+        assert plot_menu is not None, "plot_menu must be provided"
         from PyQt6.QtCore import QSettings
         from PyQt6.QtGui import QActionGroup
 
@@ -253,6 +253,7 @@ class LauncherThemeMixin:
 
     def _set_plot_theme(self, theme_name: str) -> None:
         """Save plot theme preference to QSettings."""
+        assert theme_name is not None, "theme_name must be provided"
         from PyQt6.QtCore import QSettings
 
         settings = QSettings("UpstreamDrift", "GolfModelingSuite")
