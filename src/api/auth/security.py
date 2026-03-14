@@ -101,7 +101,6 @@ class SecurityManager:
             secret_key: JWT signing secret key
         """
         assert secret_key is not None, "secret_key must be provided"
-        assert secret_key is not None, "secret_key must be provided"
         self.secret_key = secret_key
         self.algorithm = ALGORITHM
         self.pwd_context = bcrypt
@@ -119,7 +118,6 @@ class SecurityManager:
         Returns:
             Hashed password
         """
-        assert password is not None, "password must be provided"
         assert password is not None, "password must be provided"
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
@@ -169,7 +167,6 @@ class SecurityManager:
             Encoded JWT token
         """
         assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
         to_encode = data.copy()
 
         # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
@@ -190,7 +187,6 @@ class SecurityManager:
         Returns:
             Encoded JWT refresh token
         """
-        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         to_encode = data.copy()
         # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
@@ -269,7 +265,6 @@ class SecurityManager:
             SHA256 is fast and unsuitable for key storage; bcrypt is slow by design.
         """
         assert api_key is not None, "api_key must be provided"
-        assert api_key is not None, "api_key must be provided"
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
         return hashed.decode("utf-8")  # type: ignore[no-any-return]
@@ -302,7 +297,6 @@ class RoleChecker:
             required_role: Minimum required role
         """
         assert required_role is not None, "required_role must be provided"
-        assert required_role is not None, "required_role must be provided"
         self.required_role = required_role
         self.role_hierarchy = {
             UserRole.FREE: 0,
@@ -320,7 +314,6 @@ class RoleChecker:
         Returns:
             True if user has sufficient role
         """
-        assert user is not None, "user must be provided"
         assert user is not None, "user must be provided"
         user_role_level = self.role_hierarchy.get(UserRole(user.role), 0)
         required_role_level = self.role_hierarchy.get(self.required_role, 0)
@@ -349,7 +342,6 @@ class UsageTracker:
         Returns:
             True if user has quota remaining
         """
-        assert user is not None, "user must be provided"
         assert user is not None, "user must be provided"
         from .models import SUBSCRIPTION_QUOTAS
 
@@ -388,7 +380,6 @@ class UsageTracker:
         Returns:
             Usage summary dictionary
         """
-        assert user is not None, "user must be provided"
         assert user is not None, "user must be provided"
         from .models import SUBSCRIPTION_QUOTAS
 
@@ -448,7 +439,6 @@ class AuthCache:
         # Generate a fast lookup token for the cache
         # (We don't store the key, just a derived token for lookup)
         assert api_key is not None, "api_key must be provided"
-        assert api_key is not None, "api_key must be provided"
         cache_key = self._cache_lookup_token(api_key)
 
         with self._lock:
@@ -461,7 +451,6 @@ class AuthCache:
 
     def set(self, api_key: str, result: Any) -> None:
         """Cache auth result."""
-        assert api_key is not None, "api_key must be provided"
         assert api_key is not None, "api_key must be provided"
         cache_key = self._cache_lookup_token(api_key)
         with self._lock:
@@ -490,7 +479,6 @@ class AuthCache:
         2. bcrypt verification on cache miss
         3. The token_value itself is never stored, only this derived lookup key
         """
-        assert token_value is not None, "token_value must be provided"
         assert token_value is not None, "token_value must be provided"
         import hashlib
 

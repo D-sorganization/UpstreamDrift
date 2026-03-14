@@ -94,7 +94,6 @@ async def handle_rpc(
     """
     # Parse request body
     assert request is not None, "request must be provided"
-    assert request is not None, "request must be provided"
     try:
         body = await request.json()
     except (RuntimeError, ValueError, OSError) as exc:

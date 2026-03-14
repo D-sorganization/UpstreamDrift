@@ -296,7 +296,6 @@ def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str
         Name of the root link, or "base" if none can be determined.
     """
     assert links is not None, "links must be provided"
-    assert links is not None, "links must be provided"
     all_link_names = {link.link_name for link in links}
     root_candidates = all_link_names - child_links
     return (

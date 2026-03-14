@@ -205,7 +205,6 @@ class SimulationService:
             Dictionary containing simulation data
         """
         assert recorder is not None, "recorder must be provided"
-        assert recorder is not None, "recorder must be provided"
         data = {}
 
         try:
@@ -254,7 +253,6 @@ class SimulationService:
         Returns:
             Analysis results
         """
-        assert recorder is not None, "recorder must be provided"
         assert recorder is not None, "recorder must be provided"
         results = {}
 

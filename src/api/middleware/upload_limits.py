@@ -17,7 +17,6 @@ async def validate_upload_size(
 ) -> Response:
     """Reject requests exceeding upload size limits."""
     assert request is not None, "request must be provided"
-    assert request is not None, "request must be provided"
     content_length = request.headers.get("content-length")
 
     if content_length:

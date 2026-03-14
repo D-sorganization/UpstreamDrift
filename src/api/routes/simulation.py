@@ -95,7 +95,6 @@ async def run_simulation_async(
         Task ID and initial status.
     """
     assert request is not None, "request must be provided"
-    assert request is not None, "request must be provided"
     task_id = str(uuid.uuid4())
 
     task_manager[task_id] = {

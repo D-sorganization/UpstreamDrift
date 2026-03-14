@@ -406,7 +406,6 @@ class ForceOverlayRequest(BaseModel):
     def validate_force_types(cls, v: list[str]) -> list[str]:
         """Precondition: all force types must be recognized."""
         assert v is not None, "v must be provided"
-        assert v is not None, "v must be provided"
         normalized = [ft.lower().strip() for ft in v]
         for ft in normalized:
             if ft not in VALID_FORCE_TYPES:
