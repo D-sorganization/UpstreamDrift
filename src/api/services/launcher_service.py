@@ -101,6 +101,8 @@ class LauncherService:
         Returns:
             True if process was found and stopped, False if not found.
         """
+        assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         from src.shared.python.security.subprocess_utils import kill_process_tree
 
         running = self.process_manager.running_processes

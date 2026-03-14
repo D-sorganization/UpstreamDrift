@@ -31,6 +31,8 @@ def make_error(code: int, message: str, data: Any = None) -> dict[str, Any]:
     Returns:
         Error dictionary.
     """
+    assert code is not None, "code must be provided"
+    assert code is not None, "code must be provided"
     error: dict[str, Any] = {"code": code, "message": message}
     if data is not None:
         error["data"] = data
@@ -52,6 +54,7 @@ def make_response(
     Returns:
         Response dictionary.
     """
+    assert result is not None, "result must be provided"
     resp: dict[str, Any] = {"jsonrpc": "2.0", "id": request_id}
     if error is not None:
         resp["error"] = error
@@ -84,6 +87,8 @@ class MethodRegistry:
             handler: Callable that implements the method.
             description: Human-readable description.
         """
+        assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         self._methods[name] = handler
         self._descriptions[name] = description
 
@@ -149,6 +154,8 @@ async def dispatch(
     Returns:
         JSON-RPC response object, or None for notifications.
     """
+    assert registry is not None, "registry must be provided"
+    assert registry is not None, "registry must be provided"
     request_id = request.get("id")
 
     # Validate JSON-RPC version

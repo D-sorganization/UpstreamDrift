@@ -307,6 +307,8 @@ async def get_green_contours(
 
     See issue #1206
     """
+    assert width is not None, "width must be provided"
+    assert width is not None, "width must be provided"
     from src.engines.physics_engines.putting_green.python.green_surface import (
         GreenSurface,
     )
