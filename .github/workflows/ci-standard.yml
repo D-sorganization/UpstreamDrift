@@ -144,18 +144,30 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - run: pip install -e ".[dev,gui-test]"
-      - name: Run Tests
+      - name: Install Core Test Dependencies
+        run: pip install -e ".[dev,gui-test]"
+
+      - name: Document Native Engine Coverage In Core Lane
+        run: |
+          echo "## Core CI Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run Core Test Suite
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
-          # Dependencies are now installed via pyproject.toml optional deps
-          # Run tests with:
+          # Run the default, dependency-light CI lane:
           # - Parallel execution (-n auto)
           # - 60 second timeout per test
           # - Skip slow tests in CI for faster feedback
           # - Coverage measurement on src/ (pytest-cov)
+          # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
+          # are intentionally not provisioned here.
           xvfb-run --auto-servernum pytest \
             -n auto \
             --timeout=60 \
@@ -169,23 +181,26 @@ jobs:
             --tb=short \
             -v
 
-      # Cross-Engine Validator Unit Tests (C-001 Remediation)
-      # These run on every PR to catch framework issues immediately
-      - name: Cross-Engine Validation (Unit Tests)
+      # Dependency-free validator coverage that supports future native-engine jobs.
+      - name: Cross-Engine Validator Core Unit Tests
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
-          echo "## Cross-Engine Validation (Unit Tests)" >> $GITHUB_STEP_SUMMARY
+          set -o pipefail
+          echo "## Cross-Engine Validator Core Unit Tests" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
+          echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
           xvfb-run --auto-servernum pytest tests/integration/test_cross_engine_validation.py::TestCrossEngineValidator \
             --timeout=60 \
             --timeout-method=thread \
-            -v --tb=short 2>&1 | tee cross-engine-results.txt || true
+            -v --tb=short 2>&1 | tee cross-engine-results.txt
 
           # Report to summary
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
-          echo "✅ Passed: $passed | ❌ Failed: $failed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
       - uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
