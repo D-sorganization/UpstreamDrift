@@ -260,6 +260,7 @@ class DisplayPreviewPanel(QGroupBox):
 
     def __init__(self, preferences: UserPreferences, parent: QWidget | None = None):
         assert preferences is not None, "preferences must be provided"
+        assert preferences is not None, "preferences must be provided"
         super().__init__("Display Preview", parent)
         self._preferences = preferences
         self._checkboxes: dict[str, QCheckBox] = {}
@@ -286,6 +287,7 @@ class DisplayPreviewPanel(QGroupBox):
 
     def _on_toggle(self, key: str, checked: bool) -> None:
         """Handle checkbox toggle and update preferences."""
+        assert key is not None, "key must be provided"
         assert key is not None, "key must be provided"
         attr_name = f"show_{key}"
         if hasattr(self._preferences, attr_name):
@@ -464,6 +466,7 @@ class ModelExplorerWindow(QMainWindow):
     def _populate_model_list(self, category_filter: str = "") -> None:
         """Populate the model list from bundled library."""
         assert category_filter is not None, "category_filter must be provided"
+        assert category_filter is not None, "category_filter must be provided"
         self.model_list.clear()
         for entry in self._loader.list_bundled_models():
             if category_filter and entry.get("category") != category_filter:
@@ -592,6 +595,7 @@ class ModelExplorerWindow(QMainWindow):
     def _on_model_selected(self, item: QListWidgetItem) -> None:
         """Handle single click: show model info."""
         assert item is not None, "item must be provided"
+        assert item is not None, "item must be provided"
         model_id = item.data(Qt.ItemDataRole.UserRole)
         if model_id:
             result = self._loader.load_bundled(model_id)
@@ -609,6 +613,7 @@ class ModelExplorerWindow(QMainWindow):
     def _on_display_changed(self, key: str, checked: bool) -> None:
         """Handle display checkbox change."""
         assert key is not None, "key must be provided"
+        assert key is not None, "key must be provided"
         self._loader.save_preferences()
         self._status_label.setText(
             f"Display: {key} {'enabled' if checked else 'disabled'}"
@@ -618,6 +623,7 @@ class ModelExplorerWindow(QMainWindow):
 
     def _show_load_result(self, result: LoadResult) -> None:
         """Update all panels with a load result."""
+        assert result is not None, "result must be provided"
         assert result is not None, "result must be provided"
         self._current_result = result
 

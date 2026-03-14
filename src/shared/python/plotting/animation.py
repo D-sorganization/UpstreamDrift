@@ -153,6 +153,7 @@ class SwingAnimator:
 
     def _gather_trajectory_data(self, body_names):
         assert body_names is not None, "body_names must be provided"
+        assert body_names is not None, "body_names must be provided"
         body_data: dict[str, np.ndarray] = {}
         times = np.empty(0)
         for name in body_names:
@@ -181,6 +182,7 @@ class SwingAnimator:
 
     def _create_body_artists(self, ax, body_data, cfg):
         assert ax is not None, "ax must be provided"
+        assert ax is not None, "ax must be provided"
         lines: dict[str, Any] = {}
         points: dict[str, Any] = {}
         for name in body_data:
@@ -193,6 +195,7 @@ class SwingAnimator:
         return lines, points
 
     def _set_axis_limits_from_data(self, ax, body_data):
+        assert ax is not None, "ax must be provided"
         assert ax is not None, "ax must be provided"
         all_pts = np.vstack(list(body_data.values()))
         margin = 0.1
@@ -219,6 +222,7 @@ class SwingAnimator:
         Returns:
             ``FuncAnimation`` for skeleton playback.
         """
+        assert body_positions is not None, "body_positions must be provided"
         assert body_positions is not None, "body_positions must be provided"
         cfg = self.config
         links = links or cfg.skeleton_links
@@ -284,6 +288,7 @@ class SwingAnimator:
         Returns:
             ``FuncAnimation`` for vector evolution.
         """
+        assert positions is not None, "positions must be provided"
         assert positions is not None, "positions must be provided"
         cfg = self.config
         fig = plt.figure(figsize=cfg.figsize, dpi=cfg.dpi)
@@ -369,6 +374,7 @@ class SwingAnimator:
         Returns:
             Resolved ``Path`` of the saved file.
         """
+        assert anim is not None, "anim must be provided"
         assert anim is not None, "anim must be provided"
         out = Path(path)
         out.parent.mkdir(parents=True, exist_ok=True)

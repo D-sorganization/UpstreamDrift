@@ -40,6 +40,7 @@ class SwingMetricsMixin:
             (min_angle, max_angle, rom) in degrees
         """
         assert joint_idx is not None, "joint_idx must be provided"
+        assert joint_idx is not None, "joint_idx must be provided"
         if joint_idx >= self.joint_positions.shape[1]:
             return (0.0, 0.0, 0.0)
 
@@ -131,6 +132,7 @@ class SwingMetricsMixin:
             X-Factor time series (degrees) or None
         """
         assert shoulder_joint_idx is not None, "shoulder_joint_idx must be provided"
+        assert shoulder_joint_idx is not None, "shoulder_joint_idx must be provided"
         if (
             shoulder_joint_idx >= self.joint_positions.shape[1]
             or hip_joint_idx >= self.joint_positions.shape[1]
@@ -160,6 +162,7 @@ class SwingMetricsMixin:
         Returns:
             Tuple of (x_factor_velocity_array, peak_stretch_rate) or None
         """
+        assert shoulder_joint_idx is not None, "shoulder_joint_idx must be provided"
         assert shoulder_joint_idx is not None, "shoulder_joint_idx must be provided"
         x_factor = self.compute_x_factor(shoulder_joint_idx, hip_joint_idx)
         if x_factor is None:

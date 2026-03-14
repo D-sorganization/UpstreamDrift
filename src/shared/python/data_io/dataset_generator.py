@@ -96,6 +96,7 @@ class ParameterRange:
             Sampled value within the defined range.
         """
         assert rng is not None, "rng must be provided"
+        assert rng is not None, "rng must be provided"
         if self.distribution == "uniform":
             return float(rng.uniform(self.min_val, self.max_val))
         if self.distribution == "normal":
@@ -144,6 +145,7 @@ class ControlProfile:
         Returns:
             Control array of shape (n_steps, n_actuators).
         """
+        assert n_actuators is not None, "n_actuators must be provided"
         assert n_actuators is not None, "n_actuators must be provided"
         if self.profile_type == "zero":
             return np.zeros((n_steps, n_actuators))
@@ -329,6 +331,7 @@ class DatasetGenerator:
             ValueError: If engine has no model loaded.
         """
         assert engine is not None, "engine must be provided"
+        assert engine is not None, "engine must be provided"
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
 
@@ -365,6 +368,7 @@ class DatasetGenerator:
         Raises:
             RuntimeError: If simulation fails for all samples.
         """
+        assert config is not None, "config must be provided"
         assert config is not None, "config must be provided"
         rng = np.random.default_rng(config.seed)
 
@@ -631,6 +635,7 @@ class DatasetGenerator:
             buffers: Pre-allocated recording buffers (modified in-place).
         """
         assert config is not None, "config must be provided"
+        assert config is not None, "config must be provided"
         if config.record_mass_matrix and buffers["mass_matrices"] is not None:
             with contextlib.suppress(ValueError, RuntimeError, AttributeError):
                 buffers["mass_matrices"][step] = self.engine.compute_mass_matrix()
@@ -686,6 +691,7 @@ class DatasetGenerator:
         Returns:
             Tuple of (initial_positions, initial_velocities).
         """
+        assert config is not None, "config must be provided"
         assert config is not None, "config must be provided"
         if config.vary_initial_positions and config.position_ranges:
             q0 = np.zeros(n_q)
@@ -773,6 +779,7 @@ class DatasetGenerator:
             ImportError: If h5py is not available.
         """
         assert dataset is not None, "dataset must be provided"
+        assert dataset is not None, "dataset must be provided"
         try:
             import h5py
         except ImportError:
@@ -799,6 +806,7 @@ class DatasetGenerator:
     def _write_hdf5_metadata(f: Any, dataset: TrainingDataset) -> None:
         """Write dataset-level metadata to an HDF5 file."""
         assert dataset is not None, "dataset must be provided"
+        assert dataset is not None, "dataset must be provided"
         meta = f.create_group("metadata")
         meta.attrs["model_name"] = dataset.model_name
         meta.attrs["engine_name"] = dataset.engine_name
@@ -818,6 +826,7 @@ class DatasetGenerator:
     @staticmethod
     def _write_hdf5_sample(samples_grp: Any, sample: SimulationSample) -> None:
         """Write a single sample's data to an HDF5 samples group."""
+        assert sample is not None, "sample must be provided"
         assert sample is not None, "sample must be provided"
         s_grp = samples_grp.create_group(f"sample_{sample.sample_id:06d}")
         s_grp.create_dataset("times", data=sample.times, compression="gzip")
@@ -859,6 +868,7 @@ class DatasetGenerator:
         Returns:
             Path to the created SQLite database.
         """
+        assert dataset is not None, "dataset must be provided"
         assert dataset is not None, "dataset must be provided"
         output_path = Path(output_path)
         if not output_path.suffix:
@@ -919,6 +929,7 @@ class DatasetGenerator:
     ) -> None:
         """Insert dataset-level metadata into the SQLite database."""
         assert cursor is not None, "cursor must be provided"
+        assert cursor is not None, "cursor must be provided"
         meta_items = [
             ("model_name", dataset.model_name),
             ("engine_name", dataset.engine_name),
@@ -938,6 +949,7 @@ class DatasetGenerator:
     @staticmethod
     def _insert_sqlite_sample(cursor: sqlite3.Cursor, sample: SimulationSample) -> None:
         """Insert a single sample and its frames into the SQLite database."""
+        assert cursor is not None, "cursor must be provided"
         assert cursor is not None, "cursor must be provided"
         n_steps = len(sample.times)
         n_q = sample.positions.shape[1] if sample.positions.ndim > 1 else 0
@@ -987,6 +999,7 @@ class DatasetGenerator:
         Returns:
             Path to the output directory.
         """
+        assert dataset is not None, "dataset must be provided"
         assert dataset is not None, "dataset must be provided"
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

@@ -79,6 +79,7 @@ def check_python_dependencies(
         DependencyStatus with results
     """
     assert packages is not None, "packages must be provided"
+    assert packages is not None, "packages must be provided"
     install_hints = {
         "PyQt6": "pip install PyQt6",
         "numpy": "pip install numpy",
@@ -299,6 +300,7 @@ class GUILauncher:
     def _print_missing_deps(self, status: DependencyStatus) -> None:
         """Print missing dependency information."""
         assert status is not None, "status must be provided"
+        assert status is not None, "status must be provided"
         logger.info("Missing dependencies detected:")
         for pkg in status.missing:
             hint = status.guidance.get(pkg, "")
@@ -327,6 +329,7 @@ def create_launcher(
     Returns:
         Configured GUILauncher instance
     """
+    assert tool_name is not None, "tool_name must be provided"
     assert tool_name is not None, "tool_name must be provided"
     config = LaunchConfig(tool_name=tool_name, gui_type=gui_type, **kwargs)
     return GUILauncher(config=config)
@@ -487,6 +490,7 @@ def launch_web_app(
     """
     # Check Node.js / npm
     assert tool_name is not None, "tool_name must be provided"
+    assert tool_name is not None, "tool_name must be provided"
     for cmd_name in ("node", "npm"):
         try:
             subprocess.run(
@@ -568,6 +572,7 @@ def launch_web_from_gui_info(gui_info: dict[str, Any], caller_file: str) -> int:
     Returns:
         Application exit code.
     """
+    assert gui_info is not None, "gui_info must be provided"
     assert gui_info is not None, "gui_info must be provided"
     web_cfg = gui_info.get("web", {})
     tool_name = gui_info.get("name", gui_info.get("tool_name", "Unknown"))

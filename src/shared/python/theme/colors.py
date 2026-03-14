@@ -467,6 +467,7 @@ def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[float, float, float, f
         Tuple of (r, g, b, a) with values 0-1 for matplotlib
     """
     assert hex_color is not None, "hex_color must be provided"
+    assert hex_color is not None, "hex_color must be provided"
     hex_color = hex_color.lstrip("#")
 
     if len(hex_color) == 8:  # Has alpha component

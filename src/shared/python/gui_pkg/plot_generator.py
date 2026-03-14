@@ -181,6 +181,7 @@ class PlotGenerator:
             List of paths to generated plot files.
         """
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         if not MATPLOTLIB_AVAILABLE:
             logger.warning("matplotlib not available, skipping plot generation")
             return []
@@ -223,6 +224,7 @@ class PlotGenerator:
         Returns:
             Matplotlib Figure, or None if matplotlib unavailable.
         """
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         if not MATPLOTLIB_AVAILABLE:
             return None
@@ -304,6 +306,7 @@ class PlotGenerator:
             Path to the saved plot, or None.
         """
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         fig = self._create_plot(data, plot_type)
         if fig is None:
             return None
@@ -324,6 +327,7 @@ class PlotGenerator:
         Returns:
             Matplotlib Figure, or None if data insufficient.
         """
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         if plot_type == PlotType.JOINT_POSITIONS:
             return self._plot_joint_data(
@@ -397,6 +401,7 @@ class PlotGenerator:
             Matplotlib Figure.
         """
         assert times is not None, "times must be provided"
+        assert times is not None, "times must be provided"
         n_joints = data.shape[1]
         indices = self.config.joint_indices or list(range(n_joints))
         indices = indices[: self.config.max_joints_per_plot]
@@ -419,6 +424,7 @@ class PlotGenerator:
 
     def _plot_energy(self, data: SimulationData) -> Figure | None:
         """Plot energy analysis."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         if not data.energies:
             return None
@@ -443,6 +449,7 @@ class PlotGenerator:
 
     def _plot_phase_portrait(self, data: SimulationData) -> Figure:
         """Plot phase portrait (position vs velocity) for each joint."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         n_joints = min(data.positions.shape[1], data.velocities.shape[1])
         indices = self.config.joint_indices or list(range(n_joints))
@@ -499,6 +506,7 @@ class PlotGenerator:
     def _plot_contact_forces(self, data: SimulationData) -> Figure | None:
         """Plot contact / ground reaction forces."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         if data.contact_forces is None:
             return None
 
@@ -532,6 +540,7 @@ class PlotGenerator:
 
     def _plot_drift_vs_control(self, data: SimulationData) -> Figure | None:
         """Plot drift vs control acceleration decomposition."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         if data.drift_accelerations is None or data.control_accelerations is None:
             return None
@@ -577,6 +586,7 @@ class PlotGenerator:
     def _plot_power(self, data: SimulationData) -> Figure | None:
         """Plot joint power (torque × velocity)."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         if data.torques is None:
             return None
 
@@ -606,6 +616,7 @@ class PlotGenerator:
 
     def _plot_mass_matrix_condition(self, data: SimulationData) -> Figure | None:
         """Plot mass matrix condition number over time."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         if data.mass_matrices is None:
             return None

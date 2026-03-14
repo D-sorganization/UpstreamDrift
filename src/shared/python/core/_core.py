@@ -39,6 +39,7 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
         setup_structured_logging() and get_logger() for better observability.
     """
     assert name is not None, "name must be provided"
+    assert name is not None, "name must be provided"
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
@@ -74,6 +75,7 @@ def _build_base_processors() -> list[Any]:
 
 
 def _build_output_processors(json_output: bool, dev_mode: bool) -> list[Any]:
+    assert json_output is not None, "json_output must be provided"
     assert json_output is not None, "json_output must be provided"
     if dev_mode and not json_output:
         return [
@@ -128,6 +130,7 @@ def setup_structured_logging(
         >>> logger = get_logger(__name__)
         >>> logger.info("simulation_started", engine="mujoco", duration=2.5)
     """
+    assert level is not None, "level must be provided"
     assert level is not None, "level must be provided"
     import threading
 

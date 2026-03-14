@@ -37,6 +37,7 @@ def _evaluate_single_point(
 ) -> tuple[int, int, float]:
     """Evaluate single point in parameter grid (for parallel execution)."""
     assert i is not None, "i must be provided"
+    assert i is not None, "i must be provided"
     overrides = {param1_name: p1, param2_name: p2}
     output, _, _ = evaluate_output(engine, base, manual_hhv, output_variable, overrides)
     return (i, j, output)
@@ -81,6 +82,7 @@ def run_multi_parameter_analysis_parallel(
     PicklingError
         If engine contains unpicklable objects (Qt, database connections, etc.)
     """
+    assert analysis_params is not None, "analysis_params must be provided"
     assert analysis_params is not None, "analysis_params must be provided"
     base = analysis_params["base_params"]
     param1_name = analysis_params["param1_name"]
@@ -167,6 +169,7 @@ def run_multi_parameter_analysis(
     dict
         Analysis results with parameter values and output data.
     """
+    assert analysis_params is not None, "analysis_params must be provided"
     assert analysis_params is not None, "analysis_params must be provided"
     base = analysis_params["base_params"]
 

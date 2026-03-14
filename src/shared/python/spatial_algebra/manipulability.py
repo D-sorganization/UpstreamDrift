@@ -143,6 +143,7 @@ def get_jacobian_conditioning(
         >>> print(f"Clubhead Jacobian condition: {kappa:.2e}")
     """
     assert engine is not None, "engine must be provided"
+    assert engine is not None, "engine must be provided"
     jac_dict = engine.compute_jacobian(body_name)
 
     if jac_dict is None:

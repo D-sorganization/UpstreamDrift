@@ -167,6 +167,7 @@ def compute_indexed_acceleration_from_engine(
     """
     # Get drift and control components
     assert tau is not None, "tau must be provided"
+    assert tau is not None, "tau must be provided"
     a_drift = engine.compute_drift_acceleration()
     a_control = engine.compute_control_acceleration(tau)
 

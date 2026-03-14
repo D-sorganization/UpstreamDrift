@@ -406,6 +406,7 @@ class SwingOptimizationBridge:
             speed of the last joint at the terminal time-step.
         """
         assert controls is not None, "controls must be provided"
+        assert controls is not None, "controls must be provided"
         n = self._config.n_joints
         dt = self._config.dt
         trajectory: list[np.ndarray] = [initial_state.copy()]

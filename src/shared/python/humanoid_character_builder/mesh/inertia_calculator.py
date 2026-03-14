@@ -145,6 +145,7 @@ class InertiaResult:
         """
         # Default to 0.1 kg*m^2 (reasonable for small-medium rigid body)
         assert mass is not None, "mass must be provided"
+        assert mass is not None, "mass must be provided"
         i_default = 0.1 * mass
         # Use volume of a sphere with 1 cm radius as minimum (~4.2e-6 m³)
         _min_volume = (4.0 / 3.0) * 3.14159265358979 * (0.01**3)
@@ -180,6 +181,7 @@ class MeshInertiaCalculator:
         Args:
             default_density: Default density in kg/m^3 for uniform density mode
         """
+        assert default_density is not None, "default_density must be provided"
         assert default_density is not None, "default_density must be provided"
         self.default_density = default_density
         self._trimesh_available = self._check_trimesh()
@@ -291,6 +293,7 @@ class MeshInertiaCalculator:
     ) -> tuple[Any, bool]:
         """Validate mesh watertightness and optionally repair."""
         assert repair_mesh is not None, "repair_mesh must be provided"
+        assert repair_mesh is not None, "repair_mesh must be provided"
         was_watertight = mesh.is_watertight
 
         if not was_watertight and repair_mesh:
@@ -335,6 +338,7 @@ class MeshInertiaCalculator:
     ) -> InertiaResult:
         """Create InertiaResult from mesh properties."""
         assert mesh_props is not None, "mesh_props must be provided"
+        assert mesh_props is not None, "mesh_props must be provided"
         volume = mesh_props["volume"]
         center_mass = mesh_props["center_mass"]
         inertia_unit = mesh_props["inertia_unit"]
@@ -369,6 +373,7 @@ class MeshInertiaCalculator:
         effective_density: float,
     ) -> tuple[np.ndarray, float, InertiaMode]:
         """Scale inertia based on mass or density."""
+        assert inertia_unit is not None, "inertia_unit must be provided"
         assert inertia_unit is not None, "inertia_unit must be provided"
         if mass is not None:
             scale_factor = mass / volume if volume > 0 else 1.0
@@ -463,6 +468,7 @@ class MeshInertiaCalculator:
             New InertiaResult in transformed frame
         """
         assert inertia is not None, "inertia must be provided"
+        assert inertia is not None, "inertia must be provided"
         I_original = inertia.as_matrix()
         mass = inertia.mass
         com = np.array(inertia.center_of_mass)
@@ -480,6 +486,7 @@ class MeshInertiaCalculator:
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Apply rotation transformation to inertia matrix and COM."""
         assert inertia_matrix is not None, "inertia_matrix must be provided"
+        assert inertia_matrix is not None, "inertia_matrix must be provided"
         if rotation is not None:
             R = np.asarray(rotation)
             return R @ inertia_matrix @ R.T, R @ com
@@ -493,6 +500,7 @@ class MeshInertiaCalculator:
         translation: NDArray[np.float64] | None,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Apply parallel axis theorem for translation."""
+        assert inertia_matrix is not None, "inertia_matrix must be provided"
         assert inertia_matrix is not None, "inertia_matrix must be provided"
         if translation is not None:
             d = np.asarray(translation)

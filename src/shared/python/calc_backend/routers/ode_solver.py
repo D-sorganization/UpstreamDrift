@@ -59,6 +59,7 @@ def _safe_eval(
     """
     # Build the evaluation namespace with math functions exposed directly
     assert expr is not None, "expr must be provided"
+    assert expr is not None, "expr must be provided"
     namespace: dict[str, object] = {
         "sin": math.sin,
         "cos": math.cos,
@@ -91,6 +92,7 @@ def _rk4_solve(
     num_points: int,
 ) -> ODESolverResponse:
     """RK4 integration of the ODE system."""
+    assert var_names is not None, "var_names must be provided"
     assert var_names is not None, "var_names must be provided"
     dt = (t_end - t_start) / (num_points - 1)
     state = {v: initial[v] for v in var_names}

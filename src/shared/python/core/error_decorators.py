@@ -53,6 +53,7 @@ def log_errors(
     """
 
     assert message is not None, "message must be provided"
+    assert message is not None, "message must be provided"
 
     def decorator(func: F) -> F:
         """Wrap the function with error logging."""
@@ -96,6 +97,7 @@ def handle_import_error(
     """
 
     assert log_warning is not None, "log_warning must be provided"
+    assert log_warning is not None, "log_warning must be provided"
 
     def decorator(func: F) -> F:
         """Wrap the function with import error handling."""
@@ -136,6 +138,7 @@ def retry_on_error(
         def read_file(path):
             return open(path).read()
     """
+    assert max_attempts is not None, "max_attempts must be provided"
     assert max_attempts is not None, "max_attempts must be provided"
     import time
 
@@ -189,6 +192,7 @@ class ErrorContext:
             reraise: Whether to reraise exceptions
             log_success: Whether to log successful completion
         """
+        assert operation is not None, "operation must be provided"
         assert operation is not None, "operation must be provided"
         self.operation = operation
         self.reraise = reraise

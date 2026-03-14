@@ -19,6 +19,7 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot jerk (rate of change of acceleration) over time."""
         assert fig is not None, "fig must be provided"
+        assert fig is not None, "fig must be provided"
         times, velocities = self.data.get_series("joint_velocities")
         _, accelerations = self.data.get_series("joint_accelerations")
 
@@ -78,6 +79,7 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot frequency content (PSD) of a joint signal."""
         assert fig is not None, "fig must be provided"
+        assert fig is not None, "fig must be provided"
         if signal_type == "position":
             _, data = self.data.get_series("joint_positions")
             ylabel = "PSD (rad²/Hz)"
@@ -134,6 +136,7 @@ class SignalRenderer(BaseRenderer):
         signal_type: str = "velocity",
     ) -> None:
         """Plot spectrogram of a joint signal."""
+        assert fig is not None, "fig must be provided"
         assert fig is not None, "fig must be provided"
         if signal_type == "position":
             _, data = self.data.get_series("joint_positions")
@@ -192,6 +195,7 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot Multiscale Entropy (MSE) curves."""
         assert fig is not None, "fig must be provided"
+        assert fig is not None, "fig must be provided"
         try:
             from src.shared.python.validation_pkg.statistical_analysis import (
                 StatisticalAnalyzer,
@@ -246,6 +250,7 @@ class SignalRenderer(BaseRenderer):
         dim: int = 3,
     ) -> None:
         """Plot divergence of nearest neighbors over time to estimate Lyapunov Exponent."""
+        assert fig is not None, "fig must be provided"
         assert fig is not None, "fig must be provided"
         try:
             from src.shared.python.validation_pkg.statistical_analysis import (
@@ -339,6 +344,7 @@ class SignalRenderer(BaseRenderer):
     ) -> None:
         """Plot Continuous Wavelet Transform (CWT) scalogram."""
         assert fig is not None, "fig must be provided"
+        assert fig is not None, "fig must be provided"
         try:
             from src.shared.python.signal_toolkit import signal_processing
         except ImportError:
@@ -410,6 +416,7 @@ class SignalRenderer(BaseRenderer):
         freq_range: tuple[float, float] = (1.0, 50.0),
     ) -> None:
         """Plot Cross Wavelet Transform (XWT) between two signals."""
+        assert fig is not None, "fig must be provided"
         assert fig is not None, "fig must be provided"
         try:
             from src.shared.python.signal_toolkit import signal_processing

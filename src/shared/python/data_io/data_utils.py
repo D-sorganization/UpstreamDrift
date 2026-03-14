@@ -81,6 +81,7 @@ def save_csv_data(
         save_csv_data(results, "output.csv", index=False)
     """
     assert data is not None, "data must be provided"
+    assert data is not None, "data must be provided"
     path_obj = Path(path)
     path_obj.parent.mkdir(parents=True, exist_ok=True)
 
@@ -135,6 +136,7 @@ def save_json_data(
     Example:
         save_json_data(results, "output.json")
     """
+    assert data is not None, "data must be provided"
     assert data is not None, "data must be provided"
     path_obj = Path(path)
     path_obj.parent.mkdir(parents=True, exist_ok=True)
@@ -197,6 +199,7 @@ def save_numpy_data(
         save_numpy_data(large_data, "output.npz", compressed=True)
     """
     assert data is not None, "data must be provided"
+    assert data is not None, "data must be provided"
     path_obj = Path(path)
     path_obj.parent.mkdir(parents=True, exist_ok=True)
 
@@ -228,6 +231,7 @@ class DataLoader:
         Args:
             path: Path to data file
         """
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         self.path = Path(path)
         self._cache: Any = None
@@ -262,6 +266,7 @@ class DataLoader:
         Raises:
             ValueError: If format is unknown
         """
+        assert use_cache is not None, "use_cache must be provided"
         assert use_cache is not None, "use_cache must be provided"
         if use_cache and self._cache is not None:
             logger.debug(f"Using cached data for {self.path}")
@@ -366,6 +371,7 @@ def convert_to_dataframe(
         df = convert_to_dataframe(data, time=time_array)
     """
     assert data is not None, "data must be provided"
+    assert data is not None, "data must be provided"
     df = pd.DataFrame(data)
 
     if time is not None:
@@ -393,6 +399,7 @@ def resample_data(
     Example:
         resampled = resample_data(data, target_rate=100.0)
     """
+    assert data is not None, "data must be provided"
     assert data is not None, "data must be provided"
     if not isinstance(data.index, pd.DatetimeIndex):
         # Assume index is time in seconds

@@ -165,6 +165,7 @@ def launch_app(
         - Returns an integer exit code
     """
     assert config is not None, "config must be provided"
+    assert config is not None, "config must be provided"
     validate_launcher_config(config)
 
     try:

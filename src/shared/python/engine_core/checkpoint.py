@@ -99,6 +99,7 @@ class StateCheckpoint:
             New StateCheckpoint instance
         """
         assert engine_type is not None, "engine_type must be provided"
+        assert engine_type is not None, "engine_type must be provided"
         checkpoint_id = f"cp_{int(time.time() * 1000)}_{id(engine_state) % 10000:04d}"
 
         # Create checksum for integrity
@@ -160,6 +161,7 @@ class StateCheckpoint:
 
     def __contains__(self, key: object) -> bool:
         """Support `in` checks for common checkpoint fields."""
+        assert key is not None, "key must be provided"
         assert key is not None, "key must be provided"
         if not isinstance(key, str):
             return False
@@ -258,6 +260,7 @@ class CheckpointManager(ContractChecker):
             storage_path: Optional path for disk persistence
         """
         assert max_checkpoints is not None, "max_checkpoints must be provided"
+        assert max_checkpoints is not None, "max_checkpoints must be provided"
         self.max_checkpoints = max_checkpoints
         self.storage_path = storage_path
 
@@ -325,6 +328,7 @@ class CheckpointManager(ContractChecker):
             interval_time: Create checkpoint every T seconds (0 = disabled)
         """
         assert interval_steps is not None, "interval_steps must be provided"
+        assert interval_steps is not None, "interval_steps must be provided"
         self._auto_enabled = True
         self._auto_interval_steps = interval_steps
         self._auto_interval_time = interval_time
@@ -370,6 +374,7 @@ class CheckpointManager(ContractChecker):
     def _add_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Add checkpoint to buffer."""
         # Remove oldest if at capacity
+        assert checkpoint is not None, "checkpoint must be provided"
         assert checkpoint is not None, "checkpoint must be provided"
         if len(self._checkpoints) >= self.max_checkpoints:
             oldest = self._checkpoints[0]
@@ -462,6 +467,7 @@ class CheckpointManager(ContractChecker):
             ID of restored checkpoint, or None if not enough history
         """
         assert engine is not None, "engine must be provided"
+        assert engine is not None, "engine must be provided"
         if len(self._checkpoints) < 2:
             return None
 
@@ -480,6 +486,7 @@ class CheckpointManager(ContractChecker):
         """
         # Search deque directly (small enough for linear search)
         assert checkpoint_id is not None, "checkpoint_id must be provided"
+        assert checkpoint_id is not None, "checkpoint_id must be provided"
         for checkpoint in self._checkpoints:
             if checkpoint.id == checkpoint_id:
                 return checkpoint
@@ -494,6 +501,7 @@ class CheckpointManager(ContractChecker):
         Returns:
             Checkpoint or None if not found
         """
+        assert tag is not None, "tag must be provided"
         assert tag is not None, "tag must be provided"
         if tag not in self._tags:
             return None
@@ -534,6 +542,7 @@ class CheckpointManager(ContractChecker):
         Returns:
             True if a checkpoint was created
         """
+        assert engine is not None, "engine must be provided"
         assert engine is not None, "engine must be provided"
         if not self._auto_enabled:
             return False

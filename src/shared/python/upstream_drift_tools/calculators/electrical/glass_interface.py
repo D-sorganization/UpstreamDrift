@@ -44,6 +44,7 @@ class GlassPropertiesInterface:
             cache_max_size: Maximum cache entries (default 1000)
         """
         assert cache_max_size is not None, "cache_max_size must be provided"
+        assert cache_max_size is not None, "cache_max_size must be provided"
         self.external_calculator = external_calculator
         self._cache_max_size = cache_max_size
         self._default_properties = {
@@ -75,6 +76,7 @@ class GlassPropertiesInterface:
 
         Performance: Uses LRU cache with bounded size to prevent memory bloat.
         """
+        assert temperature_celsius is not None, "temperature_celsius must be provided"
         assert temperature_celsius is not None, "temperature_celsius must be provided"
         if is_metal:
             # Metal has very high conductivity, relatively constant with temperature
@@ -122,6 +124,7 @@ class GlassPropertiesInterface:
     def set_external_calculator(self, calculator: Callable) -> None:
         """Set external calculator function"""
         assert calculator is not None, "calculator must be provided"
+        assert calculator is not None, "calculator must be provided"
         self.external_calculator = calculator
         # Clear cache when calculator changes
         self._temperature_dependent_data.clear()
@@ -148,6 +151,7 @@ class GlassPropertiesInterface:
         """
         # Apply power density heating effect upfront
         assert temperature_celsius is not None, "temperature_celsius must be provided"
+        assert temperature_celsius is not None, "temperature_celsius must be provided"
         temp_kelvin = temperature_celsius + 273.15
         if power_density > 0:
             # Local heating from power density
@@ -170,6 +174,7 @@ class GlassPropertiesInterface:
         is_metal: bool = False,
     ) -> float:
         """Get electrical resistivity (1/conductivity)"""
+        assert temperature_celsius is not None, "temperature_celsius must be provided"
         assert temperature_celsius is not None, "temperature_celsius must be provided"
         conductivity = self.get_conductivity(
             temperature_celsius,

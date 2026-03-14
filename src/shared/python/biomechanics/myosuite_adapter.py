@@ -72,6 +72,7 @@ class MuscleDrivenEnv:
             dt: Simulation timestep [s]
         """
         assert muscle_system is not None, "muscle_system must be provided"
+        assert muscle_system is not None, "muscle_system must be provided"
         self.muscle_system = muscle_system
         self.task = task
         self.dt = dt
@@ -122,6 +123,7 @@ class MuscleDrivenEnv:
             (observation, reward, done, info)
         """
         # Convert action to muscle excitations
+        assert action is not None, "action must be provided"
         assert action is not None, "action must be provided"
         excitations = self._action_to_excitations(action)
 
@@ -230,6 +232,7 @@ class MuscleDrivenEnv:
             Excitation dict {muscle_name: excitation}
         """
         assert action is not None, "action must be provided"
+        assert action is not None, "action must be provided"
         muscle_names = sorted(self._get_muscle_names())
         excitations = {}
         for i, name in enumerate(muscle_names):
@@ -273,6 +276,7 @@ def train_muscle_policy(env: MuscleDrivenEnv, total_timesteps: int = 100000) -> 
         >>> policy = train_muscle_policy(env, total_timesteps=50000)
         >>> # Policy can now control muscles via neural network
     """
+    assert env is not None, "env must be provided"
     assert env is not None, "env must be provided"
     if not MYOSUITE_AVAILABLE:
         logger.error("Cannot train policy: MyoSuite/gym not installed")

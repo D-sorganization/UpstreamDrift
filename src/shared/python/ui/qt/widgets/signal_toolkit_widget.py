@@ -146,6 +146,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
         ) -> None:
             """Initialize the canvas."""
             assert width is not None, "width must be provided"
+            assert width is not None, "width must be provided"
             self.fig = Figure(figsize=(width, height), dpi=dpi)
             self.axes = self.fig.add_subplot(111)
             super().__init__(self.fig)

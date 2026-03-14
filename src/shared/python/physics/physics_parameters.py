@@ -323,6 +323,7 @@ class PhysicsParameterRegistry:
             Tuple of (success, error_message)
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         param = self.parameters.get(name)
         if param is None:
             return False, f"Parameter {name} not found"
@@ -381,6 +382,7 @@ class PhysicsParameterRegistry:
         Returns:
             Number of parameters imported
         """
+        assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         with open(filepath) as f:
             data = json.load(f)

@@ -82,6 +82,7 @@ class ColorFieldEditor(QWidget):
 
     def __init__(self, initial_colour: str, parent: QWidget | None = None) -> None:
         assert initial_colour is not None, "initial_colour must be provided"
+        assert initial_colour is not None, "initial_colour must be provided"
         super().__init__(parent)
 
         self._current_colour = "#000000"
@@ -133,6 +134,7 @@ class ColorFieldEditor(QWidget):
     def _handle_text_changed(self, text: str) -> None:
         """Update preview when text changes."""
         assert text is not None, "text must be provided"
+        assert text is not None, "text must be provided"
         colour = _colour_from_text(text)
         if colour is None:
             self._update_button_style(self._current_colour)
@@ -155,6 +157,7 @@ class ColorFieldEditor(QWidget):
 
     def _update_button_style(self, hex_colour: str) -> None:
         """Update button background and text colour for contrast."""
+        assert hex_colour is not None, "hex_colour must be provided"
         assert hex_colour is not None, "hex_colour must be provided"
         try:
             r, g, b = (int(hex_colour[i : i + 2], 16) for i in (1, 3, 5))
@@ -193,6 +196,7 @@ class CustomThemeDialog(QDialog):
         theme_manager: ThemeManager,
         parent: QWidget | None = None,
     ) -> None:
+        assert theme_manager is not None, "theme_manager must be provided"
         assert theme_manager is not None, "theme_manager must be provided"
         super().__init__(parent)
 
@@ -286,6 +290,7 @@ class CustomThemeDialog(QDialog):
 
     def _initialise_default_name(self, current_theme: str) -> None:
         """Suggest a unique name for the new theme."""
+        assert current_theme is not None, "current_theme must be provided"
         assert current_theme is not None, "current_theme must be provided"
         suggestion = f"{current_theme} Custom"
         reserved = set(self.theme_manager.get_builtin_themes())

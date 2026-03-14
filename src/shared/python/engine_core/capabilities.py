@@ -138,6 +138,7 @@ class EngineCapabilities:
             EngineCapabilities instance.
         """
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         level_map = {
             "full": CapabilityLevel.FULL,
             "partial": CapabilityLevel.PARTIAL,

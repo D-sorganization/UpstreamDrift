@@ -99,6 +99,7 @@ def setup_window_geometry(
         center: Whether to center window on screen
     """
     assert window is not None, "window must be provided"
+    assert window is not None, "window must be provided"
     window.resize(*size)
 
     if center:
@@ -146,6 +147,7 @@ class BaseApplicationWindow(QMainWindow):
             icon_path: Optional custom icon path
         """
         assert title is not None, "title must be provided"
+        assert title is not None, "title must be provided"
         super().__init__()
 
         # Set title
@@ -177,6 +179,7 @@ class BaseApplicationWindow(QMainWindow):
             timeout: Timeout in milliseconds (0 = no timeout)
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         status_bar = self.statusBar()
         if status_bar:
             status_bar.showMessage(message, timeout)
@@ -189,6 +192,7 @@ class BaseApplicationWindow(QMainWindow):
             message: Error message
         """
         assert title is not None, "title must be provided"
+        assert title is not None, "title must be provided"
         QMessageBox.critical(self, title, message)
         logger.error(f"{title}: {message}")
 
@@ -200,6 +204,7 @@ class BaseApplicationWindow(QMainWindow):
             message: Warning message
         """
         assert title is not None, "title must be provided"
+        assert title is not None, "title must be provided"
         QMessageBox.warning(self, title, message)
         logger.warning(f"{title}: {message}")
 
@@ -210,6 +215,7 @@ class BaseApplicationWindow(QMainWindow):
             title: Dialog title
             message: Information message
         """
+        assert title is not None, "title must be provided"
         assert title is not None, "title must be provided"
         QMessageBox.information(self, title, message)
         logger.info(f"{title}: {message}")
@@ -224,6 +230,7 @@ class BaseApplicationWindow(QMainWindow):
         Returns:
             True if user confirmed, False otherwise
         """
+        assert title is not None, "title must be provided"
         assert title is not None, "title must be provided"
         reply = QMessageBox.question(
             self,
@@ -263,6 +270,7 @@ def create_dialog(
             # User clicked Yes
             pass
     """
+    assert title is not None, "title must be provided"
     assert title is not None, "title must be provided"
     dialog = QDialog(parent)
     dialog.setWindowTitle(title)
@@ -310,6 +318,7 @@ def create_button(
         )
     """
     assert text is not None, "text must be provided"
+    assert text is not None, "text must be provided"
     button = QPushButton(text)
 
     if callback:
@@ -345,6 +354,7 @@ def create_label(
     Example:
         label = create_label("Model Name:", bold=True)
     """
+    assert text is not None, "text must be provided"
     assert text is not None, "text must be provided"
     label = QLabel(text)
     label.setAlignment(alignment)
@@ -387,6 +397,7 @@ class LayoutBuilder:
             Self for chaining
         """
         assert widget is not None, "widget must be provided"
+        assert widget is not None, "widget must be provided"
         self.layout.addWidget(widget, stretch)
         return self
 
@@ -401,6 +412,7 @@ class LayoutBuilder:
             Self for chaining
         """
         assert stretch is not None, "stretch must be provided"
+        assert stretch is not None, "stretch must be provided"
         self.layout.addLayout(layout, stretch)
         return self
 
@@ -414,6 +426,7 @@ class LayoutBuilder:
             Self for chaining
         """
         assert stretch is not None, "stretch must be provided"
+        assert stretch is not None, "stretch must be provided"
         self.layout.addStretch(stretch)
         return self
 
@@ -426,6 +439,7 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
+        assert spacing is not None, "spacing must be provided"
         assert spacing is not None, "spacing must be provided"
         self.layout.addSpacing(spacing)
         return self
@@ -445,6 +459,7 @@ class LayoutBuilder:
             Self for chaining
         """
         assert left is not None, "left must be provided"
+        assert left is not None, "left must be provided"
         self.layout.setContentsMargins(left, top, right, bottom)
         return self
 
@@ -457,6 +472,7 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
+        assert spacing is not None, "spacing must be provided"
         assert spacing is not None, "spacing must be provided"
         self.layout.setSpacing(spacing)
         return self

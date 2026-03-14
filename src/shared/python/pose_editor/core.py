@@ -321,6 +321,7 @@ class BasePoseEditor(ABC):
             joint_index: Index of the joint to select
         """
         assert joint_index is not None, "joint_index must be provided"
+        assert joint_index is not None, "joint_index must be provided"
         self._state.selected_joint_index = joint_index
         self._notify("selection_changed", joint_index)
 
@@ -377,6 +378,7 @@ class BasePoseEditor(ABC):
         Returns:
             JointInfo or None if not found
         """
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         for joint in self._joint_info:
             if joint.name.lower() == name.lower():

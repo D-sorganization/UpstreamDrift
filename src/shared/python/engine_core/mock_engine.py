@@ -68,6 +68,7 @@ class MockPhysicsEngine:
             model_path: Path to model file (ignored in mock)
         """
         assert model_path is not None, "model_path must be provided"
+        assert model_path is not None, "model_path must be provided"
         logger.info("MockPhysicsEngine: Loading model from %s", model_path)
         self._is_loaded = True
         self.model_name = model_path
@@ -135,6 +136,7 @@ class MockPhysicsEngine:
             velocities: Joint velocities array
         """
         assert positions is not None, "positions must be provided"
+        assert positions is not None, "positions must be provided"
         self._positions = np.array(positions)
         self._velocities = np.array(velocities)
         logger.debug("State set: pos=%s, vel=%s", positions, velocities)
@@ -178,6 +180,7 @@ class MockPhysicsEngine:
         Args:
             torques: Array of torque values
         """
+        assert torques is not None, "torques must be provided"
         assert torques is not None, "torques must be provided"
         self._torques = np.array(torques)[: self.num_joints]
         # Pad with zeros if not enough values
@@ -288,6 +291,7 @@ class MockPhysicsEngine:
             extension: Optional format hint.
         """
         assert content is not None, "content must be provided"
+        assert content is not None, "content must be provided"
         self._is_loaded = True
         self.model_name = "mock_model"
 
@@ -327,6 +331,7 @@ class MockPhysicsEngine:
             Required torques.
         """
         assert qacc is not None, "qacc must be provided"
+        assert qacc is not None, "qacc must be provided"
         M = self.compute_mass_matrix()
         bias = self.compute_bias_forces()
         return M @ qacc + bias
@@ -353,6 +358,7 @@ class MockPhysicsEngine:
             Control acceleration vector.
         """
         assert tau is not None, "tau must be provided"
+        assert tau is not None, "tau must be provided"
         M = self.compute_mass_matrix()
         return np.linalg.solve(M, tau)
 
@@ -377,6 +383,7 @@ class MockPhysicsEngine:
         Returns:
             Acceleration with zero velocity.
         """
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         M = self.compute_mass_matrix()
         gravity = self.compute_gravity_forces()

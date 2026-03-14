@@ -159,6 +159,7 @@ class OllamaAdapter(BaseAgentAdapter):
             AIProviderError: For other Ollama errors.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         client = self._get_client()
 
         # Format messages for Ollama
@@ -219,6 +220,7 @@ class OllamaAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         client = self._get_client()
         messages = self._format_messages(context, message, tools)
@@ -354,6 +356,7 @@ class OllamaAdapter(BaseAgentAdapter):
             List of message dicts for Ollama.
         """
         assert context is not None, "context must be provided"
+        assert context is not None, "context must be provided"
         messages: list[dict[str, str]] = []
 
         # Add system prompt
@@ -396,6 +399,7 @@ class OllamaAdapter(BaseAgentAdapter):
         Returns:
             Parsed AgentResponse.
         """
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         message = data.get("message", {})
         content = message.get("content", "")

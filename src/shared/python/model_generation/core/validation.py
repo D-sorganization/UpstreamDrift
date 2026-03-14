@@ -73,6 +73,7 @@ class ValidationResult:
     ) -> None:
         """Add an error to the result."""
         assert code is not None, "code must be provided"
+        assert code is not None, "code must be provided"
         self.errors.append(ValidationError(code, message, component, details))
         self.is_valid = False
 
@@ -88,6 +89,7 @@ class ValidationResult:
 
     def merge(self, other: ValidationResult) -> None:
         """Merge another validation result into this one."""
+        assert other is not None, "other must be provided"
         assert other is not None, "other must be provided"
         self.errors.extend(other.errors)
         self.warnings.extend(other.warnings)
@@ -149,6 +151,7 @@ class Validator:
             ValidationResult
         """
         assert mass is not None, "mass must be provided"
+        assert mass is not None, "mass must be provided"
         result = ValidationResult(is_valid=True)
 
         if mass <= 0:
@@ -183,6 +186,7 @@ class Validator:
         Returns:
             ValidationResult
         """
+        assert inertia is not None, "inertia must be provided"
         assert inertia is not None, "inertia must be provided"
         result = ValidationResult(is_valid=True)
 
@@ -247,6 +251,7 @@ class Validator:
             ValidationResult
         """
         assert link is not None, "link must be provided"
+        assert link is not None, "link must be provided"
         result = ValidationResult(is_valid=True)
 
         # Validate inertia
@@ -276,6 +281,7 @@ class Validator:
         Returns:
             ValidationResult
         """
+        assert joint is not None, "joint must be provided"
         assert joint is not None, "joint must be provided"
         result = ValidationResult(is_valid=True)
 
@@ -358,6 +364,7 @@ class Validator:
             ValidationResult
         """
         assert links is not None, "links must be provided"
+        assert links is not None, "links must be provided"
         result = ValidationResult(is_valid=True)
 
         link_names = [link.name for link in links]
@@ -373,6 +380,7 @@ class Validator:
         cls, result: ValidationResult, names: list[str], entity_type: str
     ) -> None:
         """Check for duplicate names in a list."""
+        assert result is not None, "result must be provided"
         assert result is not None, "result must be provided"
         seen: set[str] = set()
         for name in names:
@@ -391,6 +399,7 @@ class Validator:
         joints: list[Joint],
     ) -> None:
         """Check for valid root link configuration."""
+        assert result is not None, "result must be provided"
         assert result is not None, "result must be provided"
         children = {j.child for j in joints}
         roots = link_name_set - children
@@ -415,6 +424,7 @@ class Validator:
     ) -> None:
         """Check for circular dependencies using DFS."""
         assert result is not None, "result must be provided"
+        assert result is not None, "result must be provided"
         visited: set[str] = set()
 
         for link_name in link_names:
@@ -434,6 +444,7 @@ class Validator:
         joints: list[Joint],
     ) -> bool:
         """Detect if there's a cycle starting from the given node."""
+        assert start is not None, "start must be provided"
         assert start is not None, "start must be provided"
         if start in path:
             return True
@@ -473,6 +484,7 @@ class Validator:
         Returns:
             ValidationResult
         """
+        assert links is not None, "links must be provided"
         assert links is not None, "links must be provided"
         result = ValidationResult(is_valid=True)
 

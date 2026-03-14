@@ -80,6 +80,7 @@ class ChatMessageBubble(QFrame):
         parent: QWidget | None = None,
     ) -> None:
         assert role is not None, "role must be provided"
+        assert role is not None, "role must be provided"
         super().__init__(parent)
         self._role = role
         self._content = content
@@ -110,11 +111,13 @@ class ChatMessageBubble(QFrame):
     def set_content(self, text: str) -> None:
         """Replace the content text."""
         assert text is not None, "text must be provided"
+        assert text is not None, "text must be provided"
         self._content = text
         self._content_label.setText(text)
 
     def append_content(self, text: str) -> None:
         """Append text to existing content."""
+        assert text is not None, "text must be provided"
         assert text is not None, "text must be provided"
         self._content += text
         self._content_label.setText(self._content)
@@ -151,6 +154,7 @@ class ChatDockWidget(QDockWidget):
         accent_color: str = "#FF8800",
         parent: QWidget | None = None,
     ) -> None:
+        assert app_context is not None, "app_context must be provided"
         assert app_context is not None, "app_context must be provided"
         super().__init__("AI Chat", parent)
         self._app_context = app_context
@@ -281,6 +285,7 @@ class ChatDockWidget(QDockWidget):
     def _on_message(self, raw: str) -> None:
         """Handle incoming WebSocket message."""
         assert raw is not None, "raw must be provided"
+        assert raw is not None, "raw must be provided"
         try:
             data = json.loads(raw)
         except (json.JSONDecodeError, TypeError):
@@ -354,6 +359,7 @@ class ChatDockWidget(QDockWidget):
     def _add_bubble(self, role: str, content: str) -> ChatMessageBubble:
         """Add a message bubble to the scroll area."""
         assert role is not None, "role must be provided"
+        assert role is not None, "role must be provided"
         bubble = ChatMessageBubble(role, content, accent_color=self._accent_color)
         # Insert before the stretch item at the end
         count = self._message_layout.count()
@@ -364,6 +370,7 @@ class ChatDockWidget(QDockWidget):
     def _populate_history(self, messages: list[dict]) -> None:
         """Clear and rebuild message bubbles from history."""
         # Remove existing bubbles (keep the stretch)
+        assert messages is not None, "messages must be provided"
         assert messages is not None, "messages must be provided"
         while self._message_layout.count() > 1:
             item = self._message_layout.takeAt(0)

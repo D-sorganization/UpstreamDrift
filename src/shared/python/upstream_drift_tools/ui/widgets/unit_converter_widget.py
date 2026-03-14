@@ -58,6 +58,7 @@ class ConversionRow:
         last_used: str | None = None,
     ) -> None:
         assert row_id is not None, "row_id must be provided"
+        assert row_id is not None, "row_id must be provided"
         self.row_id = row_id
         self.from_unit = from_unit
         self.to_unit = to_unit
@@ -133,6 +134,7 @@ class CaseInsensitiveCompleter(QCompleter):
     def updateModel(self, units: list[str]) -> None:
         """Update the completer model with new units."""
         assert units is not None, "units must be provided"
+        assert units is not None, "units must be provided"
         model = QStringListModel(units)
         self.setModel(model)
 
@@ -191,6 +193,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
 
     def _get_compatible_units(self, from_unit: str) -> list[str]:
         """Get all units compatible with the given unit."""
+        assert from_unit is not None, "from_unit must be provided"
         assert from_unit is not None, "from_unit must be provided"
         if not from_unit:
             return self.all_units
@@ -260,6 +263,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
         self, index: int, conv: ConversionRow, is_saved: bool
     ) -> TypedConverterWidget:
         """Create a single-line conversion widget: VALUE UNIT <> VALUE UNIT."""
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         row_widget = cast(TypedConverterWidget, QWidget())
         row_layout = QHBoxLayout(row_widget)
@@ -343,12 +347,14 @@ class UnitConverterWidget(BaseCalculatorWindow):
 
     def _on_value_changed(self, index: int, direction: str, text: str) -> None:
         assert index is not None, "index must be provided"
+        assert index is not None, "index must be provided"
         self.last_edited[index] = direction
         self.pending_conversion = (index, direction)
         self.debounce_timer.stop()
         self.debounce_timer.start()
 
     def _on_unit_changed(self, index: int, direction: str, unit: str) -> None:
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         conv = self._get_row_by_index(index)
         if not conv:
@@ -381,6 +387,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
             self.pending_conversion = None
 
     def _convert_row(self, index: int, direction: str) -> None:
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         widget = self._find_widget_by_index(index)
         conv = self._get_row_by_index(index)
@@ -422,6 +429,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
 
     def _swap_values(self, index: int) -> None:
         assert index is not None, "index must be provided"
+        assert index is not None, "index must be provided"
         widget = self._find_widget_by_index(index)
         if not widget:
             return
@@ -446,6 +454,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
 
     def _find_widget_by_index(self, index: int) -> TypedConverterWidget | None:
         assert index is not None, "index must be provided"
+        assert index is not None, "index must be provided"
         all_widgets = self.recent_widgets + self.saved_widgets
         for w in all_widgets:
             if w.index == index:
@@ -455,6 +464,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
     def _get_row_by_index(self, index: int) -> ConversionRow | None:
         """Get the ConversionRow object associated with a widget index (0-2: recent, 3-5: saved)."""
         assert index is not None, "index must be provided"
+        assert index is not None, "index must be provided"
         recent = self.recent_conversions
         saved = self.saved_conversions
         if index < 3:
@@ -463,6 +473,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
         return saved[idx] if idx < len(saved) else None
 
     def _save_conversion(self, index: int) -> None:
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         if index >= len(self.rows):
             return
@@ -477,6 +488,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
         self._rebuild_ui_and_save()
 
     def _delete_saved_conversion(self, index: int) -> None:
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         if index >= len(self.rows):
             return

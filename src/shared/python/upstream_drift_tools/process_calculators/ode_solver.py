@@ -31,6 +31,7 @@ class ODESolver:
 
         """
         assert derivatives is not None, "derivatives must be provided"
+        assert derivatives is not None, "derivatives must be provided"
         self.derivatives = derivatives
         self.parameters = parameters
 
@@ -64,6 +65,7 @@ class ODESolver:
         Returns:
             List of derivatives for each variable.
         """
+        assert t is not None, "t must be provided"
         assert t is not None, "t must be provided"
         args = [t] + list(y) + [self.parameters[p] for p in self.parameters]
         return [func(*args) for func in self._functions]
