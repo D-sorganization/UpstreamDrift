@@ -119,6 +119,7 @@ class RealTimeController:
             communication_type: Communication protocol.
         """
         assert control_frequency is not None, "control_frequency must be provided"
+        assert control_frequency is not None, "control_frequency must be provided"
         self.control_frequency = control_frequency
         self.dt = 1.0 / control_frequency
         self.comm_type = CommunicationType(communication_type)
@@ -167,6 +168,7 @@ class RealTimeController:
         Returns:
             True if connection successful.
         """
+        assert robot_config is not None, "robot_config must be provided"
         assert robot_config is not None, "robot_config must be provided"
         self._config = robot_config
 
@@ -382,6 +384,7 @@ class RealTimeController:
             command: Control command to send.
         """
         assert command is not None, "command must be provided"
+        assert command is not None, "command must be provided"
         if self.comm_type == CommunicationType.SIMULATION:
             # Simulated: command is "sent"
             return
@@ -493,6 +496,7 @@ class RealTimeController:
         Returns:
             Robot state or None if timeout.
         """
+        assert timeout is not None, "timeout must be provided"
         assert timeout is not None, "timeout must be provided"
         start = time.perf_counter()
         initial_state = self._last_state
