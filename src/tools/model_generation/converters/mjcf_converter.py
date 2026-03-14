@@ -111,6 +111,7 @@ class MJCFConverter:
             MJCF XML string
         """
         # Parse URDF if needed
+        assert source is not None, "source must be provided"
         if isinstance(source, ParsedModel):
             model = source
         else:
@@ -144,6 +145,7 @@ class MJCFConverter:
             URDF XML string
         """
         # Load MJCF
+        assert source is not None, "source must be provided"
         if isinstance(source, Path) or (
             isinstance(source, str) and not source.strip().startswith("<")
         ):
@@ -165,6 +167,7 @@ class MJCFConverter:
 
     def _build_mjcf(self, model: ParsedModel) -> str:
         """Build MJCF XML from parsed model."""
+        assert model is not None, "model must be provided"
         lines = []
         lines.append(f'<mujoco model="{model.name}">')
 
@@ -247,6 +250,7 @@ class MJCFConverter:
         indent_level: int,
     ) -> list[str]:
         """Recursively build body element."""
+        assert model is not None, "model must be provided"
         lines: list[str] = []
         indent = "  " * indent_level
 
@@ -344,6 +348,7 @@ class MJCFConverter:
         indent: str,
     ) -> str:
         """Build geometry element."""
+        assert geometry is not None, "geometry must be provided"
         pos = origin.xyz
         pos_str = f"{pos[0]:.6g} {pos[1]:.6g} {pos[2]:.6g}"
 
@@ -382,6 +387,7 @@ class MJCFConverter:
 
     def _parse_mjcf(self, root: ET.Element) -> ParsedModel:
         """Parse MJCF into ParsedModel."""
+        assert root is not None, "root must be provided"
         model_name = root.get("model", "mjcf_model")
 
         links: list[Link] = []
@@ -443,6 +449,7 @@ class MJCFConverter:
             self._parse_mjcf_body(body_elem, body_name, links, joints)
 
     def _parse_mjcf_position(self, body_elem: ET.Element) -> tuple[float, float, float]:
+        assert body_elem is not None, "body_elem must be provided"
         pos_str = body_elem.get("pos", "0 0 0")
         pos_parts = [float(v) for v in pos_str.split()]
         return (
@@ -452,6 +459,7 @@ class MJCFConverter:
         )
 
     def _parse_mjcf_inertial(self, body_elem: ET.Element) -> Inertia:
+        assert body_elem is not None, "body_elem must be provided"
         inertial_elem = body_elem.find("inertial")
         if inertial_elem is None:
             return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=1.0)

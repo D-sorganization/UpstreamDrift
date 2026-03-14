@@ -81,6 +81,7 @@ class TerrainMixin:
             terrain: Terrain configuration
             use_compressible_turf: Whether to use compressible turf model
         """
+        assert terrain is not None, "terrain must be provided"
         self._terrain = terrain
         self._use_compressible_turf = use_compressible_turf
 
@@ -111,6 +112,7 @@ class TerrainMixin:
         Returns:
             Ground height (meters), or 0.0 if no terrain
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None:
             return 0.0
 
@@ -129,6 +131,7 @@ class TerrainMixin:
         Returns:
             Unit normal vector (3,)
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None:
             return np.array([0.0, 0.0, 1.0])
 
@@ -147,6 +150,7 @@ class TerrainMixin:
         Returns:
             Terrain type at the position
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None:
             return TerrainType.FAIRWAY
 
@@ -162,6 +166,7 @@ class TerrainMixin:
         Returns:
             Friction coefficient
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None:
             return 0.5
 
@@ -178,6 +183,7 @@ class TerrainMixin:
         Returns:
             Coefficient of restitution
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None:
             return 0.6
 
@@ -207,6 +213,7 @@ class TerrainMixin:
         Returns:
             Contact force vector (3,) [N]
         """
+        assert x is not None, "x must be provided"
         if not self._terrain_enabled or self._terrain is None:
             return np.zeros(3)
 
@@ -239,6 +246,7 @@ class TerrainMixin:
         Returns:
             Friction force vector (3,) [N]
         """
+        assert x is not None, "x must be provided"
         if not self._terrain_enabled or self._contact_model is None:
             return np.zeros(3)
 
@@ -262,6 +270,7 @@ class TerrainMixin:
         Returns:
             True if in contact with terrain
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None or self._contact_model is None:
             return False
 
@@ -283,6 +292,7 @@ class TerrainMixin:
         Returns:
             Dictionary with lie quality metrics
         """
+        assert x is not None, "x must be provided"
         if self._turf_model is None:
             return {
                 "lie_type": "unknown",
@@ -307,6 +317,7 @@ class TerrainMixin:
         Returns:
             Dictionary with friction, restitution, stiffness, damping
         """
+        assert x is not None, "x must be provided"
         if self._terrain is None:
             return {
                 "friction": 0.5,
@@ -326,6 +337,7 @@ class TerrainMixin:
         Returns:
             XML string for MuJoCo model
         """
+        assert name is not None, "name must be provided"
         if self._terrain is None:
             return ""
 
@@ -363,6 +375,7 @@ class TerrainAwareSimulation:
             terrain: Terrain configuration
             use_compressible_turf: Whether to use compressible turf model
         """
+        assert terrain is not None, "terrain must be provided"
         self.terrain = terrain
         self.contact_model = TerrainContactModel(terrain)
         self.turf_model = (
@@ -387,6 +400,7 @@ class TerrainAwareSimulation:
         Returns:
             Total force vector (3,) [N]
         """
+        assert position is not None, "position must be provided"
         x, y, z = position
 
         # Contact force (normal)
@@ -426,6 +440,7 @@ class TerrainAwareSimulation:
         Returns:
             Dictionary with landing results
         """
+        assert impact_position is not None, "impact_position must be provided"
         x, y, z = impact_position
 
         # Get terrain properties

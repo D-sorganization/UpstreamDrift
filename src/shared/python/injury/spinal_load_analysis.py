@@ -172,6 +172,7 @@ class SpinalLoadAnalyzer:
             trunk_length: Trunk length in m (optional, overrides height estimate)
             lumbar_segments: List of segment names to analyze (default: L3-L4 to L5-S1)
         """
+        assert body_weight is not None, "body_weight must be provided"
         self.body_weight = body_weight
         self.body_weight_N = body_weight * GRAVITY_M_S2  # Convert to Newtons
 
@@ -212,6 +213,7 @@ class SpinalLoadAnalyzer:
         Returns:
             SpinalLoadResult containing all computed metrics and risk assessments
         """
+        assert joint_angles is not None, "joint_angles must be provided"
         result = SpinalLoadResult(time=time)
         n_frames = len(time)
 
@@ -272,6 +274,7 @@ class SpinalLoadAnalyzer:
         time: np.ndarray,
     ) -> SpinalSegment:
         """Compute forces on a single spinal segment."""
+        assert segment_name is not None, "segment_name must be provided"
         segment = SpinalSegment(name=segment_name)
         n_frames = len(time)
 
@@ -354,6 +357,7 @@ class SpinalLoadAnalyzer:
         during the transition from backswing to downswing.
         """
         # Assuming angles are [roll, pitch, yaw] where yaw is rotation
+        assert pelvis_angles is not None, "pelvis_angles must be provided"
         pelvis_rotation = (
             pelvis_angles[:, 2] if pelvis_angles.ndim > 1 else pelvis_angles
         )
@@ -402,6 +406,7 @@ class SpinalLoadAnalyzer:
         and rotation, which creates asymmetric loading on the spine. This
         is associated with increased injury risk in the modern golf swing.
         """
+        assert lateral_bend is not None, "lateral_bend must be provided"
         lateral_deg = np.degrees(lateral_bend)
         rotation_deg = np.degrees(rotation)
 
@@ -430,6 +435,7 @@ class SpinalLoadAnalyzer:
 
     def _compute_peak_values(self, result: SpinalLoadResult) -> SpinalLoadResult:
         """Extract peak values normalized to body weight."""
+        assert result is not None, "result must be provided"
         max_compression = 0.0
         max_ap_shear = 0.0
         max_lateral_shear = 0.0
@@ -457,6 +463,7 @@ class SpinalLoadAnalyzer:
     def _assess_risk(self, result: SpinalLoadResult) -> SpinalLoadResult:
         """Assess risk levels based on computed values."""
         # Compression risk
+        assert result is not None, "result must be provided"
         if result.peak_compression_bw >= self.COMPRESSION_HIGH:
             result.compression_risk = SpinalRiskLevel.CRITICAL
         elif result.peak_compression_bw >= self.COMPRESSION_CAUTION:
@@ -515,6 +522,7 @@ class SpinalLoadAnalyzer:
         self, result: SpinalLoadResult, time: np.ndarray
     ) -> SpinalLoadResult:
         """Compute cumulative load impulses for tracking over time."""
+        assert result is not None, "result must be provided"
         dt = np.mean(np.diff(time)) if len(time) > 1 else 0.001
 
         total_compression_impulse = 0.0
@@ -559,6 +567,7 @@ class SpinalLoadAnalyzer:
         Returns:
             List of recommendation strings
         """
+        assert result is not None, "result must be provided"
         recommendations = []
 
         if result.overall_risk == SpinalRiskLevel.SAFE:

@@ -23,6 +23,7 @@ class KinematicsRenderer(BaseRenderer):
             fig: Matplotlib figure to plot on
             joint_indices: List of joint indices to plot (None = all)
         """
+        assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("joint_positions")
 
         if len(times) == 0 or len(positions) == 0:
@@ -63,6 +64,7 @@ class KinematicsRenderer(BaseRenderer):
             fig: Matplotlib figure to plot on
             joint_indices: List of joint indices to plot (None = all)
         """
+        assert fig is not None, "fig must be provided"
         times, velocities = self.data.get_series("joint_velocities")
 
         if len(times) == 0 or len(velocities) == 0:
@@ -101,6 +103,7 @@ class KinematicsRenderer(BaseRenderer):
         ax: Axes | None = None,
     ) -> None:
         """Plot Angle-Angle diagram (Cyclogram) for two joints."""
+        assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("joint_positions")
         positions = np.asarray(positions)
 
@@ -158,6 +161,7 @@ class KinematicsRenderer(BaseRenderer):
 
     def plot_phase_diagram(self, fig: Figure, joint_idx: int = 0) -> None:
         """Plot phase diagram (angle vs angular velocity) for a joint."""
+        assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("joint_positions")
         _, velocities = self.data.get_series("joint_velocities")
 
@@ -216,6 +220,7 @@ class KinematicsRenderer(BaseRenderer):
 
     def plot_3d_phase_space(self, fig: Figure, joint_idx: int = 0) -> None:
         """Plot 3D phase space (Position vs Velocity vs Acceleration)."""
+        assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("joint_positions")
         _, velocities = self.data.get_series("joint_velocities")
         _, accelerations = self.data.get_series("joint_accelerations")
@@ -272,6 +277,7 @@ class KinematicsRenderer(BaseRenderer):
         title: str | None = None,
     ) -> None:
         """Plot 3D Poincaré Map (Poincaré Section)."""
+        assert fig is not None, "fig must be provided"
         if len(dimensions) != 3:
             ax = fig.add_subplot(111)
             ax.text(
@@ -318,6 +324,7 @@ class KinematicsRenderer(BaseRenderer):
 
     def _get_poincare_data(self, dtype: str, idx: int) -> np.ndarray | None:
         """Retrieve a single data column for Poincare section computation."""
+        assert dtype is not None, "dtype must be provided"
         series_map = {
             "position": "joint_positions",
             "velocity": "joint_velocities",
@@ -338,6 +345,7 @@ class KinematicsRenderer(BaseRenderer):
         cond_data: np.ndarray, cond_val: float, direction: str
     ) -> list[int]:
         """Find zero-crossing indices in (cond_data - cond_val)."""
+        assert cond_data is not None, "cond_data must be provided"
         diff = cond_data - cond_val
         crossings = []
         for i in range(len(diff) - 1):
@@ -359,6 +367,7 @@ class KinematicsRenderer(BaseRenderer):
         dimensions: list[tuple[str, int]],
     ) -> tuple[np.ndarray, list[float]]:
         """Interpolate crossing points in the requested dimensions."""
+        assert crossings is not None, "crossings must be provided"
         diff = cond_data - cond_val
         points = []
         point_times: list[float] = []
@@ -396,6 +405,7 @@ class KinematicsRenderer(BaseRenderer):
         title: str | None,
     ) -> None:
         """Render the 3D scatter plot for the Poincare section."""
+        assert fig is not None, "fig must be provided"
         ax = fig.add_subplot(111, projection="3d")
 
         sc = ax.scatter(
@@ -445,6 +455,7 @@ class KinematicsRenderer(BaseRenderer):
         Returns:
             Tuple of (times, data_full) arrays.
         """
+        assert data is not None, "data must be provided"
         if signal_type == "position":
             times, data_full = data.get_series("joint_positions")
             return times, np.rad2deg(np.asarray(data_full))
@@ -468,6 +479,7 @@ class KinematicsRenderer(BaseRenderer):
         Returns:
             Array of shape (valid_len, embedding_dim).
         """
+        assert x is not None, "x must be provided"
         valid_len = len(x) - delay * (embedding_dim - 1)
         vectors = np.zeros((valid_len, embedding_dim))
         for d in range(embedding_dim):
@@ -484,6 +496,7 @@ class KinematicsRenderer(BaseRenderer):
         signal_type: str = "position",
     ) -> None:
         """Plot Phase Space Reconstruction using Time-Delay Embedding."""
+        assert fig is not None, "fig must be provided"
         times, data_full = self._get_embedding_signal(self.data, signal_type)
 
         if len(times) == 0 or data_full.ndim < 2 or joint_idx >= data_full.shape[1]:
@@ -560,6 +573,7 @@ class KinematicsRenderer(BaseRenderer):
         bins: int = 50,
     ) -> None:
         """Plot 2D Phase Space Density (Histogram)."""
+        assert fig is not None, "fig must be provided"
         times, positions = self.data.get_series("joint_positions")
         _, velocities = self.data.get_series("joint_velocities")
 

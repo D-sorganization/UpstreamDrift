@@ -222,6 +222,7 @@ class ThemeManager(QObject):
         Returns:
             Color dictionary or None if theme doesn't exist
         """
+        assert theme_name is not None, "theme_name must be provided"
         if theme_name in BUILTIN_THEMES:
             return dict(BUILTIN_THEMES[theme_name])
         if theme_name in self.custom_themes:
@@ -240,6 +241,7 @@ class ThemeManager(QObject):
         Returns:
             QSS stylesheet string
         """
+        assert theme_name is not None, "theme_name must be provided"
         if not self._theme_exists(theme_name):
             theme_name = "Light"
 
@@ -265,6 +267,7 @@ class ThemeManager(QObject):
             theme_name: Name of the theme to apply, or "Inherit" for sub-apps
         """
         # Handle 'Inherit' case
+        assert theme_name is not None, "theme_name must be provided"
         if theme_name == "Inherit":
             if not self.app_context:
                 logger.warning("Cannot set Global preference to Inherit")
@@ -313,6 +316,7 @@ class ThemeManager(QObject):
         Args:
             window: Window to apply theme to
         """
+        assert window is not None, "window must be provided"
         stylesheet = self.get_current_stylesheet()
         window.setStyleSheet(stylesheet)
         self._register_window(window)
@@ -327,6 +331,7 @@ class ThemeManager(QObject):
             window: Window to apply theme to
             theme_name: Name of the theme to apply
         """
+        assert window is not None, "window must be provided"
         if not self._theme_exists(theme_name):
             logger.warning("Theme '%s' not found, ignoring", theme_name)
             return
@@ -389,6 +394,7 @@ class ThemeManager(QObject):
         Raises:
             ValueError: If the name is invalid
         """
+        assert theme_name is not None, "theme_name must be provided"
         current_colors = self.get_current_colors()
         colors_only = {k: v for k, v in current_colors.items() if k in THEME_COLOR_KEYS}
         return self.save_custom_theme(theme_name, colors_only, apply_immediately=False)
@@ -402,6 +408,7 @@ class ThemeManager(QObject):
         Returns:
             True if deleted, False if not found
         """
+        assert theme_name is not None, "theme_name must be provided"
         if theme_name not in self.custom_themes:
             return False
 
@@ -424,6 +431,7 @@ class ThemeManager(QObject):
 
     def _get_theme_dict(self, theme_name: str) -> dict[str, str]:
         """Get the color dictionary for a theme."""
+        assert theme_name is not None, "theme_name must be provided"
         if theme_name in BUILTIN_THEMES:
             return BUILTIN_THEMES[theme_name]
         return self.custom_themes.get(theme_name, BUILTIN_THEMES["Light"])
@@ -485,6 +493,7 @@ class ThemeManager(QObject):
     def _register_window(self, window: QWidget) -> None:
         """Register a window for theme updates."""
         # Clean up dead references
+        assert window is not None, "window must be provided"
         for ref in list(self._registered_windows):
             obj = ref()
             if obj is None:
@@ -496,6 +505,7 @@ class ThemeManager(QObject):
 
     def _apply_theme_to_registered_windows(self, stylesheet: str) -> None:
         """Apply stylesheet to all registered windows."""
+        assert stylesheet is not None, "stylesheet must be provided"
         alive_refs: list[weakref.ReferenceType[QWidget]] = []
         for ref in self._registered_windows:
             window = ref()

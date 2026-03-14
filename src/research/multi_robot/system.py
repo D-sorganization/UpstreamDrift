@@ -107,6 +107,7 @@ class TaskCoordinator:
         Returns:
             True if task was found and removed.
         """
+        assert task_id is not None, "task_id must be provided"
         if task_id in self._tasks:
             del self._tasks[task_id]
             return True
@@ -136,6 +137,7 @@ class TaskCoordinator:
         Returns:
             True if assignment was successful.
         """
+        assert task_id is not None, "task_id must be provided"
         if task_id not in self._tasks:
             return False
 
@@ -157,6 +159,7 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
+        assert task_id is not None, "task_id must be provided"
         if task_id not in self._tasks:
             return False
 
@@ -176,6 +179,7 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
+        assert task_id is not None, "task_id must be provided"
         if task_id not in self._tasks:
             return False
 
@@ -197,6 +201,7 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
+        assert task_id is not None, "task_id must be provided"
         if task_id not in self._tasks:
             return False
 
@@ -217,6 +222,7 @@ class TaskCoordinator:
         Returns:
             Assigned task or None.
         """
+        assert robot_id is not None, "robot_id must be provided"
         task_id = self._robot_tasks.get(robot_id)
         if task_id:
             return self._tasks.get(task_id)
@@ -273,6 +279,7 @@ class MultiRobotSystem:
             engine: Physics engine for this robot.
             base_pose: Initial base pose (7D: xyz + quaternion).
         """
+        assert robot_id is not None, "robot_id must be provided"
         self._robots[robot_id] = engine
         self._robot_poses[robot_id] = base_pose.copy()
 
@@ -285,6 +292,7 @@ class MultiRobotSystem:
         Returns:
             True if robot was found and removed.
         """
+        assert robot_id is not None, "robot_id must be provided"
         if robot_id in self._robots:
             del self._robots[robot_id]
             del self._robot_poses[robot_id]
@@ -351,6 +359,7 @@ class MultiRobotSystem:
         Returns:
             List of colliding robot pairs.
         """
+        assert safety_distance is not None, "safety_distance must be provided"
         collisions = []
         robot_ids = list(self._robots.keys())
 
@@ -379,6 +388,7 @@ class MultiRobotSystem:
         Returns:
             Dictionary mapping robot IDs to assigned tasks.
         """
+        assert tasks is not None, "tasks must be provided"
         allocation: dict[str, list[Task]] = {robot_id: [] for robot_id in self._robots}
 
         # Add tasks to coordinator

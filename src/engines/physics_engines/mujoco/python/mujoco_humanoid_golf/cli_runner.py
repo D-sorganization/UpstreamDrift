@@ -121,6 +121,7 @@ def run_simulation(
     control_system: ControlSystem,
 ) -> SwingRecorder:
     """Simulate the provided model for the requested duration."""
+    assert model is not None, "model must be provided"
     analyzer = BiomechanicalAnalyzer(model, data)
     recorder = SwingRecorder()
     recorder.start_recording()
@@ -158,6 +159,7 @@ def summarize_run(recorder: SwingRecorder) -> MutableMapping[str, float]:
 
 def export_json(path: Path, payload: Mapping[str, Any]) -> None:
     """Persist telemetry to a JSON file with provenance metadata."""
+    assert path is not None, "path must be provided"
     from src.shared.python.data_io.provenance import ProvenanceInfo
 
     provenance = ProvenanceInfo.capture()
@@ -178,6 +180,7 @@ def export_json(path: Path, payload: Mapping[str, Any]) -> None:
 
 def export_csv(path: Path, payload: Mapping[str, Any]) -> None:
     """Persist telemetry to a CSV file with provenance header."""
+    assert path is not None, "path must be provided"
     from src.shared.python.data_io.provenance import (
         ProvenanceInfo,
         add_provenance_header_file,
@@ -242,6 +245,7 @@ def execute_run(
 
 def run_batch(batch_path: Path, base_args: argparse.Namespace) -> None:
     """Execute every entry described in a batch configuration file."""
+    assert batch_path is not None, "batch_path must be provided"
     spec = json.loads(batch_path.read_text(encoding="utf-8"))
     runs: Iterable[Mapping[str, Any]]
     if isinstance(spec, Mapping) and "runs" in spec:

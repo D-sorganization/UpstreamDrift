@@ -1,9 +1,9 @@
 """Custom build hooks to bundle UI into Python package."""
 
 import logging
-import os
 import subprocess
 import sys
+from os import environ
 from pathlib import Path
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
@@ -16,12 +16,15 @@ class UIBuildHook(BuildHookInterface):
 
     def initialize(self, version: str, build_data: dict) -> None:
         """Initialize build hook."""
+        assert version, "Version parameter must not be empty"
+        assert build_data is not None, "Build data dictionary must be provided"
+
         ui_dir = Path(self.root) / "ui"
         dist_dir = ui_dir / "dist"
 
         # Check if we should skip UI build
         # Always skip UI build in CI environment or if explicitly requested
-        if os.environ.get("CI") or os.environ.get("SKIP_UI_BUILD"):
+        if environ.get("CI") or environ.get("SKIP_UI_BUILD"):
             logger.warning("Skipping UI build (CI environment or SKIP_UI_BUILD set)")
             if not dist_dir.exists():
                 logger.warning("Warning: UI dist directory does not exist!")

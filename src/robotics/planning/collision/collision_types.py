@@ -47,6 +47,7 @@ class CollisionPair:
 
     def __eq__(self, other: object) -> bool:
         """Equality based on sorted body names."""
+        assert other is not None, "other must be provided"
         if not isinstance(other, CollisionPair):
             return NotImplemented
         return {self.body_a, self.body_b} == {other.body_a, other.body_b}
@@ -162,6 +163,7 @@ class CollisionQuery:
             True if pair should be included in query.
         """
         # Check exclusion list first
+        assert pair is not None, "pair must be provided"
         if pair in self.exclude_pairs:
             return False
         # If inclusion list specified, pair must be in it

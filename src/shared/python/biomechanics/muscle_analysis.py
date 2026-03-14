@@ -53,6 +53,7 @@ class MuscleSynergyAnalyzer:
                              Must be non-negative.
             muscle_names: Optional list of muscle names.
         """
+        assert activation_data is not None, "activation_data must be provided"
         self.data = np.asarray(activation_data)
         require(
             self.data.ndim == 2,

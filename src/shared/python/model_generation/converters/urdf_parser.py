@@ -62,6 +62,7 @@ class ParsedModel:
 
     def get_link(self, name: str) -> Link | None:
         """Get link by name."""
+        assert name is not None, "name must be provided"
         for link in self.links:
             if link.name == name:
                 return link
@@ -69,6 +70,7 @@ class ParsedModel:
 
     def get_joint(self, name: str) -> Joint | None:
         """Get joint by name."""
+        assert name is not None, "name must be provided"
         for joint in self.joints:
             if joint.name == name:
                 return joint
@@ -88,6 +90,7 @@ class ParsedModel:
 
     def get_parent(self, link_name: str) -> str | None:
         """Get parent link name."""
+        assert link_name is not None, "link_name must be provided"
         for j in self.joints:
             if j.child == link_name:
                 return j.parent
@@ -95,6 +98,7 @@ class ParsedModel:
 
     def get_subtree(self, link_name: str) -> list[str]:
         """Get all links in subtree rooted at link_name."""
+        assert link_name is not None, "link_name must be provided"
         result = [link_name]
         queue = [link_name]
         while queue:
@@ -106,6 +110,7 @@ class ParsedModel:
 
     def to_urdf(self, pretty_print: bool = True) -> str:
         """Convert back to URDF XML."""
+        assert pretty_print is not None, "pretty_print must be provided"
         from model_generation.builders.urdf_writer import URDFWriter
 
         writer = URDFWriter(pretty_print=pretty_print)
@@ -241,6 +246,7 @@ class URDFParser:
 
     def _is_xacro(self, path: Path) -> bool:
         """Check if a file is a xacro file based on extension."""
+        assert path is not None, "path must be provided"
         suffixes = path.suffixes
         return ".xacro" in suffixes
 
@@ -309,6 +315,7 @@ class URDFParser:
 
     def _parse_link_inertial(self, elem: ET.Element) -> Inertia:
         """Parse the inertial element of a link."""
+        assert elem is not None, "elem must be provided"
         inertial_elem = elem.find("inertial")
         if inertial_elem is not None:
             return self._parse_inertial(inertial_elem)
@@ -321,6 +328,7 @@ class URDFParser:
         base_path: Path | None,
     ) -> tuple[Geometry | None, Origin, Material | None]:
         """Parse the visual element of a link."""
+        assert elem is not None, "elem must be provided"
         visual_elem = elem.find("visual")
         if visual_elem is None:
             return None, Origin(), None
@@ -343,6 +351,7 @@ class URDFParser:
         self, visual_elem: ET.Element, materials: dict[str, Material]
     ) -> Material | None:
         """Parse material from visual element."""
+        assert visual_elem is not None, "visual_elem must be provided"
         mat_elem = visual_elem.find("material")
         if mat_elem is None:
             return None
@@ -356,6 +365,7 @@ class URDFParser:
         self, elem: ET.Element, base_path: Path | None
     ) -> tuple[Geometry | None, Origin]:
         """Parse the collision element of a link."""
+        assert elem is not None, "elem must be provided"
         collision_elem = elem.find("collision")
         if collision_elem is None:
             return None, Origin()
@@ -398,6 +408,7 @@ class URDFParser:
 
     def _parse_joint_type(self, elem: ET.Element) -> JointType:
         """Parse joint type from element."""
+        assert elem is not None, "elem must be provided"
         joint_type_str = elem.get("type", "fixed")
         try:
             return JointType(joint_type_str)
@@ -419,6 +430,7 @@ class URDFParser:
 
     def _parse_joint_origin(self, elem: ET.Element) -> Origin:
         """Parse origin from joint element."""
+        assert elem is not None, "elem must be provided"
         origin_elem = elem.find("origin")
         if origin_elem is not None:
             return self._parse_origin(origin_elem)
@@ -426,6 +438,7 @@ class URDFParser:
 
     def _parse_joint_axis(self, elem: ET.Element) -> tuple[float, ...]:
         """Parse axis from joint element."""
+        assert elem is not None, "elem must be provided"
         axis_elem = elem.find("axis")
         if axis_elem is not None:
             xyz_str = axis_elem.get("xyz", "0 0 1")
@@ -434,6 +447,7 @@ class URDFParser:
 
     def _parse_joint_limits(self, elem: ET.Element) -> JointLimits | None:
         """Parse limits from joint element."""
+        assert elem is not None, "elem must be provided"
         limit_elem = elem.find("limit")
         if limit_elem is not None:
             return JointLimits(
@@ -446,6 +460,7 @@ class URDFParser:
 
     def _parse_joint_dynamics(self, elem: ET.Element) -> JointDynamics:
         """Parse dynamics from joint element."""
+        assert elem is not None, "elem must be provided"
         dynamics_elem = elem.find("dynamics")
         if dynamics_elem is not None:
             return JointDynamics(
@@ -457,6 +472,7 @@ class URDFParser:
     def _parse_inertial(self, elem: ET.Element) -> Inertia:
         """Parse inertial element."""
         # Origin (COM)
+        assert elem is not None, "elem must be provided"
         com = (0.0, 0.0, 0.0)
         origin_elem = elem.find("origin")
         if origin_elem is not None:
@@ -486,6 +502,7 @@ class URDFParser:
 
     def _parse_origin(self, elem: ET.Element) -> Origin:
         """Parse origin element."""
+        assert elem is not None, "elem must be provided"
         xyz_str = elem.get("xyz", "0 0 0")
         rpy_str = elem.get("rpy", "0 0 0")
 
@@ -497,6 +514,7 @@ class URDFParser:
     def _parse_geometry(self, elem: ET.Element, base_path: Path | None) -> Geometry:
         """Parse geometry element."""
         # Box
+        assert elem is not None, "elem must be provided"
         box_elem = elem.find("box")
         if box_elem is not None:
             size_str = box_elem.get("size", "0.1 0.1 0.1")
@@ -542,6 +560,7 @@ class URDFParser:
 
     def _parse_material(self, elem: ET.Element) -> Material | None:
         """Parse material element."""
+        assert elem is not None, "elem must be provided"
         name = elem.get("name")
         if not name:
             return None
@@ -569,6 +588,7 @@ class URDFParser:
         - Absolute paths
         """
         # Handle package:// URLs
+        assert filename is not None, "filename must be provided"
         if filename.startswith("package://"):
             package_path = filename[10:]  # e.g. "my_robot/meshes/body.stl"
 

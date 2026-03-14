@@ -53,7 +53,12 @@ class TestHumanoidPresetsConstant:
         import model_generation
 
         presets = model_generation._HUMANOID_PRESETS
-        assert set(presets.keys()) == {"athletic", "average", "heavy", "lean"}, (
+        assert set(presets.keys()) == {
+            "athletic",
+            "average",
+            "heavy",
+            "lean",
+        }, (
             f"Expected keys {{athletic, average, heavy, lean}}, got {set(presets.keys())}"
         )
 

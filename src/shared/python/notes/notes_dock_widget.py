@@ -27,6 +27,7 @@ class NotesDockWidget(QDockWidget):
         title: str = "Notes",
         parent: QWidget | None = None,
     ) -> None:
+        assert project_dir is not None, "project_dir must be provided"
         super().__init__(title, parent)
         self.storage = NotesStorage(project_dir=project_dir)
         self._status_label: QLabel | None = None

@@ -178,6 +178,7 @@ class EndEffectorLibrary:
 
     def get_builtin(self, key: str) -> EndEffector | None:
         """Get a built-in end effector definition."""
+        assert key is not None, "key must be provided"
         if key not in self._builtin_definitions:
             return None
 
@@ -210,6 +211,7 @@ class EndEffectorLibrary:
 
     def get_builtin_info(self, key: str) -> dict[str, str] | None:
         """Get info about a built-in end effector."""
+        assert key is not None, "key must be provided"
         if key in self._builtin_definitions:
             return {
                 "name": self._builtin_definitions[key]["name"],
@@ -233,6 +235,7 @@ class EndEffectorLibrary:
         Returns:
             Extracted end effector, or None if not found
         """
+        assert urdf_content is not None, "urdf_content must be provided"
         try:
             root = DefusedET.fromstring(urdf_content)
         except ET.ParseError:
@@ -293,6 +296,7 @@ class EndEffectorLibrary:
 
     def remove_from_library(self, key: str) -> bool:
         """Remove an end effector from the library."""
+        assert key is not None, "key must be provided"
         if key in self.end_effectors:
             del self.end_effectors[key]
             return True
@@ -308,6 +312,7 @@ class AttachmentPointSelector(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
+        assert available_links is not None, "available_links must be provided"
         super().__init__(parent)
         self.setWindowTitle("Select Attachment Point")
         self.setMinimumWidth(400)
@@ -329,6 +334,7 @@ class AttachmentPointSelector(QDialog):
 
     def _create_attachment_config(self, available_links: list[str]) -> QGroupBox:
         """Create attachment configuration group."""
+        assert available_links is not None, "available_links must be provided"
         attach_group = QGroupBox("Attachment Configuration")
         attach_layout = QFormLayout(attach_group)
 
@@ -552,6 +558,7 @@ class EndEffectorManagerWidget(QWidget):
 
     def load_urdf(self, content: str) -> None:
         """Load URDF content."""
+        assert content is not None, "content must be provided"
         self.urdf_content = content
         self._on_identify_end_effectors()
 
@@ -769,6 +776,7 @@ class EndEffectorManagerWidget(QWidget):
         self, title: str, label: str, items: list[str]
     ) -> tuple[str, bool]:
         """Show a simple selection dialog."""
+        assert title is not None, "title must be provided"
         from PyQt6.QtWidgets import QInputDialog
 
         item, ok = QInputDialog.getItem(self, title, label, items, 0, False)
@@ -819,6 +827,7 @@ class EndEffectorManagerWidget(QWidget):
 
     def _attach_end_effector(self, ee: EndEffector, config: dict[str, Any]) -> None:
         """Attach an end effector to the model."""
+        assert ee is not None, "ee must be provided"
         try:
             root = DefusedET.fromstring(self.urdf_content)
         except ET.ParseError:

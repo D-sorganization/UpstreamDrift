@@ -45,6 +45,7 @@ class URDFExporter:
         Args:
             yaml_path: Path to canonical YAML specification
         """
+        assert yaml_path is not None, "yaml_path must be provided"
         self.yaml_path = Path(yaml_path)
         with self.yaml_path.open() as f:
             self.spec = yaml.safe_load(f)
@@ -55,6 +56,7 @@ class URDFExporter:
         Args:
             output_path: Path to output URDF file
         """
+        assert output_path is not None, "output_path must be provided"
         output = Path(output_path)
         urdf_content = self._generate_urdf()
         output.write_text(urdf_content, encoding="utf-8")
@@ -108,6 +110,7 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
+        assert segment is not None, "segment must be provided"
         lines = []
         seg_name = segment["name"]
         joint = segment.get("joint", {})
@@ -175,6 +178,7 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
+        assert parent_name is not None, "parent_name must be provided"
         lines = []
         joint_name = f"{parent_name}_to_{seg_name}"
 
@@ -224,6 +228,7 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
+        assert parent_name is not None, "parent_name must be provided"
         lines = []
         intermediate_link = f"{seg_name}_intermediate"
 
@@ -297,6 +302,7 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
+        assert parent_name is not None, "parent_name must be provided"
         lines = []
         intermediate1 = f"{seg_name}_gimbal_z"
         intermediate2 = f"{seg_name}_gimbal_y"
@@ -380,6 +386,7 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
+        assert body is not None, "body must be provided"
         lines = ["    <inertial>"]
         lines.append(f'      <mass value="{body["mass"]}"/>')
         lines.append("      <inertia")
@@ -419,6 +426,7 @@ class URDFExporter:
     ) -> list[str]:
         """Generate URDF for a joint block."""
 
+        assert name is not None, "name must be provided"
         origin_xyz, origin_rpy = self._parse_origin(origin)
         lines = [
             f'  <joint name="{name}" type="{joint_type}">',
@@ -454,6 +462,7 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
+        assert body is not None, "body must be provided"
         lines = ["    <visual>"]
         geom_origin = body.get("geometry", {}).get("origin")
         origin_xyz, origin_rpy = self._parse_origin(geom_origin)

@@ -57,6 +57,7 @@ def create_integrator_config(dt: float = 0.001, max_steps: int = 10000) -> Any:
     Returns:
         IntegratorConfig (Rust) or dict fallback.
     """
+    assert dt is not None, "dt must be provided"
     if _RUST_AVAILABLE:
         return _rust.IntegratorConfig(dt=dt, max_steps=max_steps)
     return {"dt": dt, "max_steps": max_steps}
@@ -75,6 +76,7 @@ def create_contact_parameters(cor: float = 0.82, friction: float = 0.4) -> Any:
     Returns:
         ContactParameters (Rust) or dict fallback.
     """
+    assert cor is not None, "cor must be provided"
     if _RUST_AVAILABLE:
         return _rust.ContactParameters(cor=cor, friction=friction)
     return {"cor": cor, "friction": friction}
@@ -88,6 +90,7 @@ def clamp(value: float, min_val: float, max_val: float) -> float:
 
     Uses Rust tools_core::clamp when available, pure Python otherwise.
     """
+    assert value is not None, "value must be provided"
     if _RUST_AVAILABLE and hasattr(_rust, "clamp"):
         return float(_rust.clamp(value, min_val, max_val))
     return max(min_val, min(max_val, value))
@@ -98,6 +101,7 @@ def lerp(a: float, b: float, t: float) -> float:
 
     Uses Rust tools_core::lerp when available, pure Python otherwise.
     """
+    assert a is not None, "a must be provided"
     if _RUST_AVAILABLE and hasattr(_rust, "lerp"):
         return float(_rust.lerp(a, b, t))
     return a + t * (b - a)
@@ -129,6 +133,7 @@ def create_air_properties(
     Returns:
         AirProperties (Rust) or dict fallback.
     """
+    assert density is not None, "density must be provided"
     if _RUST_AVAILABLE:
         return _rust.AirProperties(
             density=density,
@@ -166,6 +171,7 @@ def create_ball_properties(
     Returns:
         BallProperties (Rust) or dict fallback.
     """
+    assert mass is not None, "mass must be provided"
     import math
 
     if _RUST_AVAILABLE:
@@ -194,6 +200,7 @@ def mark_legacy(func_name: str, module: str) -> None:
 
     Call this at the top of legacy functions that have Rust replacements.
     """
+    assert func_name is not None, "func_name must be provided"
     import warnings
 
     key = f"{module}.{func_name}"

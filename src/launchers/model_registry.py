@@ -26,6 +26,7 @@ class ModelRegistry:
     """Registry for managing available models."""
 
     def __init__(self, config_path: str = "config/models.yaml") -> None:
+        assert config_path is not None, "config_path must be provided"
         self.config_path = Path(config_path)
         self.models: list[ModelSpec] = []
         self._loaded = False
@@ -36,6 +37,7 @@ class ModelRegistry:
         Args:
             root_path: Root directory of the repository to resolve relative paths.
         """
+        assert root_path is not None, "root_path must be provided"
         full_config_path = root_path / self.config_path
         if not full_config_path.exists():
             logger.warning(f"Model config not found at {full_config_path}")
@@ -67,6 +69,7 @@ class ModelRegistry:
 
     def get_model_by_id(self, model_id: str) -> ModelSpec | None:
         """Get a specific model by ID."""
+        assert model_id is not None, "model_id must be provided"
         for model in self.models:
             if model.id == model_id:
                 return model

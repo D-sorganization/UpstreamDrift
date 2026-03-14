@@ -92,6 +92,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Args:
             path: Validated path to URDF model file.
         """
+        assert path is not None, "path must be provided"
         if not path.endswith(".urdf"):
             logger.warning("Pinocchio loader expects URDF, got: %s", path)
 
@@ -113,6 +114,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             content: Model definition string (URDF/XML).
             extension: File extension hint.
         """
+        assert content is not None, "content must be provided"
         if extension != "urdf":
             logger.warning("Pinocchio load_from_string mostly supports URDF.")
 
@@ -174,6 +176,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state."""
+        assert q is not None, "q must be provided"
         if self.model is None:
             return
 
@@ -184,6 +187,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
+        assert u is not None, "u must be provided"
         if self.model is None:
             return
         if len(u) == self.model.nv:
@@ -280,6 +284,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     )
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
+        assert qacc is not None, "qacc must be provided"
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -306,6 +311,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
+        assert body_name is not None, "body_name must be provided"
         if self.model is None or self.data is None:
             return None
 
@@ -369,6 +375,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_control: Control acceleration vector (nv,)
         """
+        assert tau is not None, "tau must be provided"
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -395,6 +402,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZTCF: Acceleration under zero torque (n_v,)
         """
+        assert q is not None, "q must be provided"
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -417,6 +425,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZVCF: Acceleration with v=0 (n_v,)
         """
+        assert q is not None, "q must be provided"
         if self.model is None or self.data is None:
             return np.array([])
 

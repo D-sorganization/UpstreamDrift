@@ -106,6 +106,7 @@ class JointSliderWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _on_slider_changed(self, value: int) -> None:
         """Handle slider value change."""
+        assert value is not None, "value must be provided"
         float_value = value / self.SLIDER_SCALE
         with SignalBlocker(self.spinbox):
             self.spinbox.setValue(float_value)
@@ -113,6 +114,7 @@ class JointSliderWidget(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _on_spinbox_changed(self, value: float) -> None:
         """Handle spinbox value change."""
+        assert value is not None, "value must be provided"
         int_value = int(value * self.SLIDER_SCALE)
         with SignalBlocker(self.slider):
             self.slider.setValue(int_value)
@@ -193,6 +195,7 @@ class GravityControlWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
 
     def _on_gravity_toggled(self, enabled: bool) -> None:
         """Handle gravity checkbox toggle."""
+        assert enabled is not None, "enabled must be provided"
         self._update_status(enabled)
         self.gravity_changed.emit(enabled)
 
@@ -215,6 +218,7 @@ class GravityControlWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         Args:
             enabled: True to enable gravity
         """
+        assert enabled is not None, "enabled must be provided"
         with SignalBlocker(self.chk_gravity):
             self.chk_gravity.setChecked(enabled)
         self._update_status(enabled)
@@ -282,6 +286,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
 
     def _build_pose_list(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the description field and saved poses list."""
+        assert parent_layout is not None, "parent_layout must be provided"
         self.txt_description = QtWidgets.QLineEdit()
         self.txt_description.setPlaceholderText("Description (optional)...")
         parent_layout.addWidget(self.txt_description)
@@ -436,6 +441,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
 
     def _on_pose_double_clicked(self, item: QtWidgets.QListWidgetItem) -> None:
         """Handle double-click on pose item."""
+        assert item is not None, "item must be provided"
         pose = item.data(QtCore.Qt.ItemDataRole.UserRole)
         if pose:
             self.pose_loaded.emit(pose)
@@ -510,6 +516,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
 
     def _on_interpolation_changed(self, value: int) -> None:
         """Handle interpolation slider change."""
+        assert value is not None, "value must be provided"
         alpha = value / 100.0
         self.lbl_interp.setText(f"{value}%")
 
@@ -644,6 +651,7 @@ class PoseEditorWidget(QtWidgets.QWidget):  # type: ignore[misc]
         Args:
             editor: Pose editor implementation
         """
+        assert editor is not None, "editor must be provided"
         self._editor = editor
         self._build_joint_sliders()
 

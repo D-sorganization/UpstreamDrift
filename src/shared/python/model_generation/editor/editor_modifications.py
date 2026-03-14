@@ -62,6 +62,7 @@ class ModificationMixin:
         Returns the model if it exists and is not read-only, otherwise logs
         an error and returns ``None``.
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
@@ -102,6 +103,7 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -178,6 +180,7 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -236,6 +239,7 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
+        assert model_id is not None, "model_id must be provided"
         if old_name == new_name:
             return True  # No-op
 
@@ -301,6 +305,7 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
+        assert model_id is not None, "model_id must be provided"
         if old_name == new_name:
             return True  # No-op
 
@@ -349,6 +354,7 @@ class ModificationMixin:
         Returns:
             True if modified
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -435,6 +441,7 @@ class ModificationMixin:
         Returns:
             True if attached
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -498,6 +505,7 @@ class ModificationMixin:
         Returns:
             True if detached
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -546,6 +554,7 @@ class ModificationMixin:
         Returns:
             True if applied
         """
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -607,6 +616,7 @@ class ModificationMixin:
         Returns:
             List of created link names.
         """
+        assert links is not None, "links must be provided"
         created_links: list[str] = []
         for link in links:
             new_link = Link.from_dict(link.to_dict())

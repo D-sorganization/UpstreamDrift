@@ -47,6 +47,7 @@ class ImpedanceParameters:
             Tuple of (K_matrix, D_matrix, M_matrix)
         """
         # Stiffness
+        assert dim is not None, "dim must be provided"
         k_matrix = (
             np.diag(self.stiffness) if self.stiffness.ndim == 1 else self.stiffness
         )
@@ -101,6 +102,7 @@ class AdvancedController:
             model: MuJoCo model
             data: MuJoCo data
         """
+        assert model is not None, "model must be provided"
         self.model = model
         self.data = data
 
@@ -131,6 +133,7 @@ class AdvancedController:
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern."""
+        assert name_pattern is not None, "name_pattern must be provided"
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
             if body_name and name_pattern.lower() in body_name.lower():
@@ -522,6 +525,7 @@ class AdvancedController:
         """
         # Compute Jacobian
         # MuJoCo 3.3+ may require reshaped arrays - try both approaches
+        assert target_position is not None, "target_position must be provided"
         try:
             jacp = np.zeros((3, self.model.nv))
             jacr = np.zeros((3, self.model.nv))
@@ -607,6 +611,7 @@ class TrajectoryGenerator:
             Tuple of (positions, velocities, accelerations)
             Each is [num_steps x n]
         """
+        assert start is not None, "start must be provided"
         num_steps = int(duration / dt)
         t = np.linspace(0, duration, num_steps)
 
@@ -647,6 +652,7 @@ class TrajectoryGenerator:
             Tuple of (positions, velocities, accelerations)
         """
         # Simplified: use minimum jerk between consecutive waypoints
+        assert waypoints is not None, "waypoints must be provided"
         all_positions = []
         all_velocities = []
         all_accelerations = []

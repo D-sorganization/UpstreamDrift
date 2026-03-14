@@ -180,6 +180,7 @@ class JointStressAnalyzer:
             handedness: 'right' or 'left' handed golfer
             height: Height in m (optional)
         """
+        assert body_weight is not None, "body_weight must be provided"
         self.body_weight = body_weight
         self.body_weight_N = body_weight * GRAVITY_M_S2
         self.handedness = handedness
@@ -208,6 +209,7 @@ class JointStressAnalyzer:
         Returns:
             Dictionary mapping joint names to JointStressResult
         """
+        assert joint_angles is not None, "joint_angles must be provided"
         results = {}
 
         # Analyze each joint pair
@@ -250,6 +252,7 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze hip joint stress."""
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="hip", side=side, time=time)
         n_frames = len(time)
 
@@ -295,6 +298,7 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze shoulder joint stress."""
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="shoulder", side=side, time=time)
         n_frames = len(time)
 
@@ -339,6 +343,7 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze elbow joint stress (golfer's elbow risk)."""
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="elbow", side=side, time=time)
         n_frames = len(time)
 
@@ -379,6 +384,7 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze wrist joint stress (TFCC and hamate risk)."""
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="wrist", side=side, time=time)
         n_frames = len(time)
 
@@ -428,6 +434,7 @@ class JointStressAnalyzer:
 
     def get_summary(self, results: dict[str, JointStressResult]) -> dict[str, object]:
         """Get a summary of all joint stress results."""
+        assert results is not None, "results must be provided"
         summary: dict[str, object] = {
             "highest_risk_joint": "",
             "highest_risk_score": 0.0,

@@ -138,6 +138,7 @@ class ControlMessage:
         Returns:
             New ControlMessage instance.
         """
+        assert json_str is not None, "json_str must be provided"
         d = json.loads(json_str)
         return cls(
             action=ControlAction.from_string(d["action"]),
@@ -248,6 +249,7 @@ class FrameBuffer:
         Args:
             max_size: Maximum number of frames to store.
         """
+        assert max_size is not None, "max_size must be provided"
         self.max_size = max_size
         self._buffer: deque[UnrealDataFrame] = deque(maxlen=max_size)
         self._lock = asyncio.Lock() if asyncio.get_event_loop().is_running() else None
@@ -277,6 +279,7 @@ class FrameBuffer:
         Returns:
             True if frame was added (oldest may have been dropped).
         """
+        assert frame is not None, "frame must be provided"
         self._buffer.append(frame)
         return True
 
@@ -376,6 +379,7 @@ class StreamingProtocol:
         Returns:
             Protocol-compliant error message.
         """
+        assert error_code is not None, "error_code must be provided"
         msg: dict[str, Any] = {
             "type": "error",
             "error_code": error_code,
@@ -576,6 +580,7 @@ class UnrealStreamingServer:
         Args:
             frame: Frame to broadcast.
         """
+        assert frame is not None, "frame must be provided"
         if self._state != StreamingState.RUNNING:
             return
 
@@ -632,6 +637,7 @@ class UnrealStreamingServer:
         Args:
             message: Control message to handle.
         """
+        assert message is not None, "message must be provided"
         if self._on_control_message:
             self._on_control_message(message)
 
@@ -707,6 +713,7 @@ class SimulationStreamer:
         Args:
             server: Streaming server instance.
         """
+        assert server is not None, "server must be provided"
         self.server = server
         self._frame_number = 0
         self._last_send_time = 0.0
@@ -717,6 +724,7 @@ class SimulationStreamer:
         Args:
             frame: Frame to send.
         """
+        assert frame is not None, "frame must be provided"
         await self.server.broadcast(frame)
         self._frame_number = frame.frame_number + 1
 
@@ -738,6 +746,7 @@ class SimulationStreamer:
             forces: Optional list of force vectors.
             metrics: Optional swing metrics.
         """
+        assert joints is not None, "joints must be provided"
         from src.unreal_integration.data_models import JointState
 
         # Convert raw joints to JointState objects if needed

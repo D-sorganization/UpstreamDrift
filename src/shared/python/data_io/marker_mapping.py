@@ -100,6 +100,7 @@ class MarkerToModelMapper:
         Args:
             model: MuJoCo model
         """
+        assert model is not None, "model must be provided"
         self.model = model
         self._mappings: dict[str, list[MarkerMapping]] = {}
 
@@ -114,6 +115,7 @@ class MarkerToModelMapper:
         Args:
             mapping: Marker-to-body mapping
         """
+        assert mapping is not None, "mapping must be provided"
         if mapping.body_name not in self._mappings:
             self._mappings[mapping.body_name] = []
 
@@ -153,6 +155,7 @@ class MarkerToModelMapper:
         Returns:
             RegistrationResult with transformation and diagnostics
         """
+        assert body_name is not None, "body_name must be provided"
         if body_name not in self._mappings:
             return self._failed_registration()
 
@@ -201,6 +204,7 @@ class MarkerToModelMapper:
         Returns:
             Tuple of (inlier_mask, transformation, residuals).
         """
+        assert mappings is not None, "mappings must be provided"
         inlier_mask = np.ones(len(marker_positions), dtype=bool)
         transformation = np.eye(4)
         residuals = np.zeros(len(marker_positions))
@@ -243,6 +247,7 @@ class MarkerToModelMapper:
         inlier_observed: np.ndarray,
     ) -> RegistrationResult:
         """Compute final metrics and build a successful RegistrationResult."""
+        assert inlier_mask is not None, "inlier_mask must be provided"
         final_residuals = residuals[inlier_mask]
         rms = (
             float(np.sqrt(np.mean(final_residuals**2)))
@@ -290,6 +295,7 @@ class MarkerToModelMapper:
             4×4 SE(3) transformation matrix
         """
         # Center point clouds
+        assert source_points is not None, "source_points must be provided"
         source_center = np.mean(source_points, axis=0)
         target_center = np.mean(target_points, axis=0)
 
@@ -332,6 +338,7 @@ class MarkerToModelMapper:
             Transformed points [N × 3]
         """
         # Convert to homogeneous coordinates
+        assert transformation is not None, "transformation must be provided"
         points_h = np.hstack([points, np.ones((len(points), 1))])
 
         # Apply transformation
@@ -350,6 +357,7 @@ class MarkerToModelMapper:
             result: Registration result
             marker_names: Optional marker names for labeling
         """
+        assert result is not None, "result must be provided"
         try:
             import matplotlib.pyplot as plt
         except ImportError:

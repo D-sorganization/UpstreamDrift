@@ -42,6 +42,7 @@ class ValidationResult:
 
     def add_error(self, msg: str) -> None:
         """Append an error message and mark the result as invalid."""
+        assert msg is not None, "msg must be provided"
         self.is_valid = False
         self.messages.append(f"ERROR: {msg}")
 
@@ -71,6 +72,7 @@ class PhysicsValidator:
         - Positive definiteness
         - Triangle inequality
         """
+        assert link is not None, "link must be provided"
         result = ValidationResult.ok()
 
         try:
@@ -109,6 +111,7 @@ class PhysicsValidator:
         Assumes the model is in its default configuration (usually T-pose or A-pose).
         Checks if the global Center of Mass (COM) projects into the support polygon.
         """
+        assert model is not None, "model must be provided"
         com = model.compute_center_of_mass()
         support = model.compute_support_polygon()
 
@@ -142,6 +145,7 @@ class PhysicsValidator:
         Returns:
             List of messages describing detected collisions.
         """
+        assert model is not None, "model must be provided"
         messages = []
 
         transforms = model.get_global_transforms()
@@ -228,6 +232,7 @@ class PhysicsValidator:
     def _are_connected(self, model: HumanoidModel, name1: str, name2: str) -> bool:
         """Check if two links are directly connected by a joint."""
         # Check child map
+        assert model is not None, "model must be provided"
         for joint in model.children_map.get(name1, []):
             if joint.child == name2:
                 return True

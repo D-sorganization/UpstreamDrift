@@ -67,6 +67,7 @@ MAGIC_NUMBERS = [
 
 def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:
     """Check if a pass statement is in a legitimate context."""
+    assert lines is not None, "lines must be provided"
     from src.shared.python.contracts import require
 
     require(isinstance(lines, list), "lines must be a list")
@@ -119,6 +120,7 @@ def check_banned_patterns(
     filepath: Path,
 ) -> list[tuple[int, str, str]]:
     """Check for banned patterns in lines."""
+    assert lines is not None, "lines must be provided"
     from src.shared.python.contracts import require
 
     require(isinstance(lines, list), "lines must be a list")
@@ -159,6 +161,7 @@ def check_banned_patterns(
 
 def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str, str]]:
     """Check for magic numbers in lines."""
+    assert lines is not None, "lines must be provided"
     from src.shared.python.contracts import require
 
     require(isinstance(lines, list), "lines must be a list")
@@ -185,6 +188,7 @@ def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str
 
 def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]:
     """Check AST for quality issues."""
+    assert content is not None, "content must be provided"
     from src.shared.python.contracts import require
 
     require(isinstance(content, str), "content must be a string")

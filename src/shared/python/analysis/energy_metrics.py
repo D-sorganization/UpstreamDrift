@@ -35,6 +35,7 @@ class EnergyMetricsMixin:
         Returns:
             Dictionary of energy metrics
         """
+        assert kinetic_energy is not None, "kinetic_energy must be provided"
         require(len(kinetic_energy) > 0, "kinetic_energy must be non-empty")
         require(len(potential_energy) > 0, "potential_energy must be non-empty")
         require(

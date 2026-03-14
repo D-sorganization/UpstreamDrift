@@ -47,6 +47,7 @@ class MeshLoadError(Exception):
     def __init__(
         self, message: str, path: str | None = None, cause: Exception | None = None
     ) -> None:
+        assert message is not None, "message must be provided"
         super().__init__(message)
         self.path = path
         self.cause = cause
@@ -56,6 +57,7 @@ class UnsupportedFormatError(MeshLoadError):
     """Exception raised when mesh format is not supported."""
 
     def __init__(self, extension: str, path: str | None = None) -> None:
+        assert extension is not None, "extension must be provided"
         super().__init__(f"Unsupported mesh format: {extension}", path)
         self.extension = extension
 
@@ -232,6 +234,7 @@ class MeshSkeleton:
         Returns:
             MeshBone if found, None otherwise.
         """
+        assert name is not None, "name must be provided"
         for bone in self.bones:
             if bone.name == name:
                 return bone
@@ -246,6 +249,7 @@ class MeshSkeleton:
         Returns:
             MeshBone if found, None otherwise.
         """
+        assert index is not None, "index must be provided"
         for bone in self.bones:
             if bone.index == index:
                 return bone
@@ -383,6 +387,7 @@ class MeshLoader:
         Args:
             enable_cache: Whether to cache loaded meshes.
         """
+        assert enable_cache is not None, "enable_cache must be provided"
         self.enable_cache = enable_cache
         self._cache: dict[str, tuple[float, LoadedMesh]] = {}
 
@@ -494,6 +499,7 @@ class MeshLoader:
         Returns:
             Loaded mesh data.
         """
+        assert path is not None, "path must be provided"
         vertices: list[MeshVertex] = []
         faces: list[MeshFace] = []
         positions: list[np.ndarray] = []
@@ -568,6 +574,7 @@ class MeshLoader:
         Returns:
             Loaded mesh data.
         """
+        assert path is not None, "path must be provided"
         vertices: list[MeshVertex] = []
         faces: list[MeshFace] = []
 

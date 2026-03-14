@@ -46,6 +46,7 @@ MAGIC_NUMBERS = [
 
 def _is_in_class_definition(lines: list[str], line_num: int) -> bool:
     """Check if pass is in a class definition context."""
+    assert lines is not None, "lines must be provided"
     result = False
     for i in range(line_num - 1, max(0, line_num - 10), -1):
         prev_line = lines[i - 1].strip()
@@ -66,6 +67,7 @@ def _is_in_class_definition(lines: list[str], line_num: int) -> bool:
 
 def _is_in_try_except_block(lines: list[str], line_num: int) -> bool:
     """Check if pass is in a try/except block context."""
+    assert lines is not None, "lines must be provided"
     for i in range(line_num - 1, max(0, line_num - 5), -1):
         prev_line = lines[i - 1].strip()
         if "try:" in prev_line or "except" in prev_line:
@@ -75,6 +77,7 @@ def _is_in_try_except_block(lines: list[str], line_num: int) -> bool:
 
 def _is_in_context_manager(lines: list[str], line_num: int) -> bool:
     """Check if pass is in a context manager context."""
+    assert lines is not None, "lines must be provided"
     for i in range(line_num - 1, max(0, line_num - 3), -1):
         prev_line = lines[i - 1].strip()
         if prev_line.startswith("with "):
@@ -84,6 +87,7 @@ def _is_in_context_manager(lines: list[str], line_num: int) -> bool:
 
 def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:
     """Check if a pass statement is in a legitimate context."""
+    assert lines is not None, "lines must be provided"
     if line_num <= 0 or line_num > len(lines):
         return False
 
@@ -112,6 +116,7 @@ def check_banned_patterns(
     filepath: Path,
 ) -> list[tuple[int, str, str]]:
     """Check for banned patterns in lines."""
+    assert lines is not None, "lines must be provided"
     issues: list[tuple[int, str, str]] = []
     # Skip checking this file for its own patterns
     if is_quality_check_script(filepath):
@@ -141,6 +146,7 @@ def check_banned_patterns(
 
 def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str, str]]:
     """Check for magic numbers in lines."""
+    assert lines is not None, "lines must be provided"
     issues: list[tuple[int, str, str]] = []
     # Skip checking this file for magic numbers
     if is_quality_check_script(filepath):

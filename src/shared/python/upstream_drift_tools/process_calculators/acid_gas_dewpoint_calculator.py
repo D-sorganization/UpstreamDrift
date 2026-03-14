@@ -477,6 +477,7 @@ class AcidGasDewpointCalculator:
         self, partial_pressures: dict[str, float], total_pressure_pa: float
     ) -> dict[str, float]:
         """Calculate dewpoints for each component in the mixture."""
+        assert partial_pressures is not None, "partial_pressures must be provided"
         dewpoints = {}
         for component, partial_pa in partial_pressures.items():
             if partial_pa > 0:
@@ -489,6 +490,7 @@ class AcidGasDewpointCalculator:
 
     def _assess_condensation_risk(self, margin: float) -> str:
         """Categorize condensation risk based on safety margin."""
+        assert margin is not None, "margin must be provided"
         if np.isnan(margin):
             return "Unknown"
         if margin < 0:
@@ -621,6 +623,7 @@ class AcidGasDewpointCalculator:
         Returns:
             DataFrame with temperature and dewpoint data
         """
+        assert pressure_bar is not None, "pressure_bar must be provided"
         temperatures = np.linspace(temp_range[0], temp_range[1], num_points)
         results = []
 
@@ -689,6 +692,7 @@ def quick_dewpoint_calculation(
     Returns:
         Dictionary with key results
     """
+    assert temperature_c is not None, "temperature_c must be provided"
     calc = AcidGasDewpointCalculator()
     composition = AcidGasComposition(
         h2o=h2o_fraction, hf=hf_fraction, hcl=hcl_fraction, h2s=h2s_fraction
@@ -726,6 +730,7 @@ def estimate_condensation_risk(
     Returns:
         Risk assessment dictionary
     """
+    assert temperature_c is not None, "temperature_c must be provided"
     calc = AcidGasDewpointCalculator()
     result = calc.calculate_dewpoint_mixture(
         temperature_c, pressure_bar, composition, method
@@ -888,6 +893,7 @@ if GUI_AVAILABLE:
 
         def display_result(self, result: DewpointResult) -> None:
             """Format and display results in the UI."""
+            assert result is not None, "result must be provided"
             text = (
                 f"<b>Input:</b> T = {result.temperature_c:.2f} °C, "
                 f"P = {result.pressure_bar:.2f} bar<br>"

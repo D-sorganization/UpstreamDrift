@@ -500,6 +500,8 @@ async def set_simulation_speed(
     Returns:
         Applied speed factor and status.
     """
+    assert request is not None, "request must be provided"
+    assert request is not None, "request must be provided"
     engine_manager._speed_factor = request.speed_factor  # type: ignore[attr-defined]
 
     return SpeedControlResponse(

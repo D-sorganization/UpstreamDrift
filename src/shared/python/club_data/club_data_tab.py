@@ -537,6 +537,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
             velocity_error: Velocity error in m/s (optional)
             phase: Current swing phase name (optional)
         """
+        assert position_error is not None, "position_error must be provided"
         self.lbl_position_error.setText(f"{position_error:.4f} m")
 
         if velocity_error is not None:

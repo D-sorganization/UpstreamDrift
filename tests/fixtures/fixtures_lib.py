@@ -201,6 +201,7 @@ def all_available_pendulum_engines(
     Returns:
         List of EngineInstance objects that are available and loaded.
     """
+    assert mujoco_pendulum is not None, "mujoco_pendulum must be provided"
     engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
     available = [e for e in engines if e.available]
 
@@ -293,6 +294,7 @@ def skip_if_insufficient_engines(
     Raises:
         pytest.skip: If fewer than min_count engines are available.
     """
+    assert engines is not None, "engines must be provided"
     available = [e for e in engines if e.available]
     if len(available) < min_count:
         pytest.skip(

@@ -93,6 +93,7 @@ class ContractChecker:
         Raises:
             InvariantError: If any invariant is violated.
         """
+        assert method_name is not None, "method_name must be provided"
         from .level import DBC_LEVEL  # re-import to capture runtime changes
 
         if DBC_LEVEL == ContractLevel.OFF:
@@ -186,6 +187,7 @@ def invariant(
                 self.timestep = timestep
                 self.model = model
     """
+    assert condition is not None, "condition must be provided"
     from .level import DBC_LEVEL  # defer to capture runtime changes
 
     def decorator(cls: type[T]) -> type[T]:

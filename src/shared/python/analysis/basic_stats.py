@@ -38,6 +38,7 @@ class BasicStatsMixin:
         Returns:
             SummaryStatistics object
         """
+        assert data is not None, "data must be provided"
         require(len(data) > 0, "data must be non-empty")
 
         min_idx = np.argmin(data)
@@ -81,6 +82,7 @@ class BasicStatsMixin:
         Returns:
             List of PeakInfo objects
         """
+        assert data is not None, "data must be provided"
         peaks, properties = find_peaks(
             data,
             height=height,

@@ -7,6 +7,7 @@ from scipy.interpolate import UnivariateSpline
 
 def butter_lowpass_filter(data, cutoff, fs, order=4) -> np.ndarray:
     """Apply a Butterworth low-pass filter."""
+    assert data is not None, "data must be provided"
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
     b, a = signal.butter(order, normal_cutoff, btype="low", analog=False)
@@ -16,6 +17,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=4) -> np.ndarray:
 
 def savitzky_golay_filter(data, window_length=9, polyorder=3) -> np.ndarray:
     """Apply a Savitzky-Golay filter."""
+    assert data is not None, "data must be provided"
     if window_length % 2 == 0:
         window_length += 1  # Must be odd
     return signal.savgol_filter(data, window_length, polyorder)
@@ -28,6 +30,7 @@ def moving_average_filter(data, window_size=5) -> np.ndarray:
 
 def calculate_derivatives(data, time) -> tuple:
     """Calculate velocity and acceleration using splines for accuracy."""
+    assert data is not None, "data must be provided"
     spline = UnivariateSpline(time, data, s=0)
     velocity = spline.derivative(n=1)(time)
     acceleration = spline.derivative(n=2)(time)
@@ -50,6 +53,7 @@ def calculate_inverse_dynamics(
     Returns:
         dict: A dictionary containing forces and torques.
     """
+    assert position_data is not None, "position_data must be provided"
     num_frames = position_data.shape[0]
 
     # Convert offset from inches to meters

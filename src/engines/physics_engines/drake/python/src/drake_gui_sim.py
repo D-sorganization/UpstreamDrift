@@ -168,6 +168,7 @@ class SimulationMixin:
     def _on_slider_change(  # type: ignore[no-any-unimported]
         self, val: int, spin: QtWidgets.QDoubleSpinBox, joint_idx: int
     ) -> None:
+        assert val is not None, "val must be provided"
         radian = val * SLIDER_TO_RADIAN
         with QtCore.QSignalBlocker(spin):
             spin.setValue(radian)
@@ -182,6 +183,7 @@ class SimulationMixin:
 
     def _update_joint_pos(self, joint_idx: int, angle: float) -> None:
         """Update joint position in plant context."""
+        assert joint_idx is not None, "joint_idx must be provided"
         if self.operating_mode != "kinematic":  # type: ignore[attr-defined]
             return
 

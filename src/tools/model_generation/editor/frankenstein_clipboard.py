@@ -67,6 +67,7 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
+        assert model_id is not None, "model_id must be provided"
         host = cast("ClipboardProtocol", self)
         model = host._models.get(model_id)
         if not model:
@@ -112,6 +113,7 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
+        assert model_id is not None, "model_id must be provided"
         host = cast("ClipboardProtocol", self)
         model = host._models.get(model_id)
         if not model:
@@ -166,6 +168,7 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
+        assert model_id is not None, "model_id must be provided"
         host = cast("ClipboardProtocol", self)
         model = host._models.get(model_id)
         if not model:
@@ -230,6 +233,7 @@ class ClipboardMixin:
         Returns:
             List of created link names
         """
+        assert target_model_id is not None, "target_model_id must be provided"
         host = cast("ClipboardProtocol", self)
         if not host._clipboard:
             logger.error("Clipboard is empty")
@@ -281,6 +285,7 @@ class ClipboardMixin:
         prefix: str,
         suffix: str,
     ) -> dict[str, str]:
+        assert model is not None, "model must be provided"
         host = cast("ClipboardProtocol", self)
         name_map: dict[str, str] = {}
         existing_links = {link.name for link in model.links}
@@ -324,6 +329,7 @@ class ClipboardMixin:
         prefix: str,
         suffix: str,
     ) -> list[str]:
+        assert model is not None, "model must be provided"
         created_links = []
         for link in links:
             new_link = Link.from_dict(link.to_dict())
@@ -346,6 +352,7 @@ class ClipboardMixin:
         attachment_origin: Origin | None,
         joint_type: JointType,
     ) -> bool:
+        assert model is not None, "model must be provided"
         attachment_created = False
         for joint in joints:
             new_joint = Joint.from_dict(joint.to_dict())

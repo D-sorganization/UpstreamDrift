@@ -176,6 +176,7 @@ except ImportError:
             Handles phase notations like "H2O_g" (gas) by stripping the suffix.
             """
             # Strip phase suffix (_g, _l, _s) if present
+            assert species is not None, "species must be provided"
             base_species = species.split("_")[0]
 
             h_f = self.get_formation_enthalpy(base_species)
@@ -240,6 +241,7 @@ class WGSReactorEngine:
         # CO + H2O ⇌ CO2 + H2
         # ΔH° = -41.2 kJ/mol, ΔS° = -42.1 J/(mol·K)
 
+        assert temperature is not None, "temperature must be provided"
         delta_H = WGS_DELTA_H  # J/mol
         delta_S = WGS_DELTA_S  # J/(mol·K)
 
@@ -259,6 +261,7 @@ class WGSReactorEngine:
         Returns:
             (n_CO_0, n_H2O_0, n_CO2_0, n_H2_0, n_total_0)
         """
+        assert inlet_composition is not None, "inlet_composition must be provided"
         n_CO_0 = inlet_composition.get("CO", 0)
         n_H2O_0 = inlet_composition.get("H2O", 0) + n_CO_0 * steam_ratio
         n_CO2_0 = inlet_composition.get("CO2", 0)
@@ -276,6 +279,7 @@ class WGSReactorEngine:
         K_eq: float,
     ) -> dict[str, Any]:
         """Assemble the equilibrium result dictionary from the solved extent."""
+        assert x_eq is not None, "x_eq must be provided"
         n_CO_eq = n_CO_0 - x_eq
         n_H2O_eq = n_H2O_0 - x_eq
         n_CO2_eq = n_CO2_0 + x_eq
@@ -315,6 +319,7 @@ class WGSReactorEngine:
         """Calculate equilibrium composition for WGS reaction
         using Gibbs free energy minimization."""
 
+        assert inlet_composition is not None, "inlet_composition must be provided"
         n_CO_0, n_H2O_0, n_CO2_0, n_H2_0, n_total_0 = self._prepare_initial_moles(
             inlet_composition, steam_ratio
         )
@@ -412,6 +417,7 @@ class WGSReactorEngine:
     ) -> dict[str, Any]:
         """Size WGS reactor based on throughput and conversion"""
         # Space velocity (GHSV)
+        assert feed_rate is not None, "feed_rate must be provided"
         ghsv = WGS_TYPICAL_GHSV  # h^-1 (typical for WGS)
 
         # Reactor volume
@@ -688,6 +694,7 @@ if BASE_CALCULATOR_AVAILABLE:
             self, inlet: dict[str, float], outlet: dict[str, float]
         ) -> None:
             """Create composition comparison plot"""
+            assert inlet is not None, "inlet must be provided"
             self.figure.clear()
 
             ax = self.figure.add_subplot(111)
