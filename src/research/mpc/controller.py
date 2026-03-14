@@ -59,6 +59,7 @@ class CostFunction:
         """
         # State cost
         assert x is not None, "x must be provided"
+        assert x is not None, "x must be provided"
         x_err = x
         if self.x_ref is not None:
             if self.x_ref.ndim == 1:
@@ -95,6 +96,7 @@ class CostFunction:
         Returns:
             Terminal cost value.
         """
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         if self.P is None:
             return 0.0
@@ -183,6 +185,7 @@ class ModelPredictiveController:
             dt: Timestep in seconds.
         """
         assert model is not None, "model must be provided"
+        assert model is not None, "model must be provided"
         self.model = model
         self.horizon = horizon
         self.dt = dt
@@ -260,6 +263,7 @@ class ModelPredictiveController:
             Next state.
         """
         assert x is not None, "x must be provided"
+        assert x is not None, "x must be provided"
         n_q = self._n_x // 2
         q = x[:n_q]
         v = x[n_q:]
@@ -303,6 +307,7 @@ class ModelPredictiveController:
         Returns:
             Tuple of (A, B) matrices.
         """
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         eps = 1e-5
         A = np.zeros((self._n_x, self._n_x))
@@ -415,6 +420,7 @@ class ModelPredictiveController:
             Tuple of (gains K, feedforward d).
         """
         assert X is not None, "X must be provided"
+        assert X is not None, "X must be provided"
         K: list[NDArray[np.floating]] = []
         d: list[NDArray[np.floating]] = []
 
@@ -488,6 +494,7 @@ class ModelPredictiveController:
             Tuple of (new states, new controls, cost).
         """
         assert X is not None, "X must be provided"
+        assert X is not None, "X must be provided"
         alpha = 1.0
         best_cost = float("inf")
         best_X = X.copy()
@@ -533,6 +540,7 @@ class ModelPredictiveController:
             Maximum violation.
         """
         assert X is not None, "X must be provided"
+        assert X is not None, "X must be provided"
         max_violation = 0.0
 
         for constraint in self._constraints:
@@ -563,6 +571,7 @@ class ModelPredictiveController:
         Returns:
             First control input u_0.
         """
+        assert result is not None, "result must be provided"
         assert result is not None, "result must be provided"
         if result.optimal_controls is None:
             return np.zeros(self._n_u)
