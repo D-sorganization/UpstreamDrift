@@ -2,7 +2,7 @@ name: Agent Metrics Dashboard
 
 on:
   # schedule: DISABLED to reduce CI cost (see #1751)
-    # Every Monday at 10am UTC (after CI failure digest)
+  # Every Monday at 10am UTC (after CI failure digest)
   workflow_dispatch: # Allow manual trigger
 
 permissions:
@@ -15,7 +15,7 @@ jobs:
   generate-metrics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Collect Agent Metrics
         id: metrics
