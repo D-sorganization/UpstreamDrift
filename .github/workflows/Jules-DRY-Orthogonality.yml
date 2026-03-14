@@ -11,7 +11,7 @@ name: Jules DRY & Orthogonality
 
 on:
   # schedule: DISABLED to reduce CI cost (see #1751)
-    # Daily at 4 AM PST (12 UTC)
+  # Daily at 4 AM PST (12 UTC)
   workflow_dispatch:
     inputs:
       target_category:
@@ -39,7 +39,7 @@ jobs:
       violations_found: ${{ steps.analyze.outputs.violations_found }}
       summary: ${{ steps.analyze.outputs.summary }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 20
 
@@ -64,7 +64,7 @@ jobs:
 
       - name: Setup Python
         if: steps.check-loop.outputs.skip != 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -190,7 +190,7 @@ jobs:
         category: [path, logging, imports, datetime, config, exceptions, env]
       max-parallel: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Create/Update Issue for ${{ matrix.category }}
         env:

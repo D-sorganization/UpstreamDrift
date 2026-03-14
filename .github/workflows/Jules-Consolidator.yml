@@ -33,7 +33,7 @@ jobs:
       pr_list: ${{ steps.list.outputs.prs }}
       should_consolidate: ${{ steps.list.outputs.should_consolidate }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -68,7 +68,7 @@ jobs:
     if: needs.discover.outputs.should_consolidate == 'true' && inputs.dry_run != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
