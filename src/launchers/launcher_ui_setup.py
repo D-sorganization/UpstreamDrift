@@ -111,6 +111,7 @@ class LauncherUISetupMixin:
         self._setup_help_menu(menubar)
 
     def _setup_file_menu(self, menubar) -> None:
+        assert menubar is not None, 'menubar must be provided'
         assert menubar is not None, "menubar must be provided"
         file_menu = menubar.addMenu("&File")
 
@@ -127,6 +128,7 @@ class LauncherUISetupMixin:
         file_menu.addAction(action_exit)
 
     def _setup_view_menu(self, menubar) -> None:
+        assert menubar is not None, 'menubar must be provided'
         assert menubar is not None, "menubar must be provided"
         view_menu = menubar.addMenu("&View")
 
@@ -159,6 +161,7 @@ class LauncherUISetupMixin:
         self._setup_theme_menu(theme_menu)
 
     def _setup_tools_menu(self, menubar) -> None:
+        assert menubar is not None, 'menubar must be provided'
         assert menubar is not None, "menubar must be provided"
         tools_menu = menubar.addMenu("&Tools")
 
@@ -171,6 +174,7 @@ class LauncherUISetupMixin:
         tools_menu.addAction(action_diag)
 
     def _setup_help_menu(self, menubar) -> None:
+        assert menubar is not None, 'menubar must be provided'
         assert menubar is not None, "menubar must be provided"
         help_menu = menubar.addMenu("&Help")
 
@@ -212,6 +216,7 @@ class LauncherUISetupMixin:
     def _setup_top_bar_status_and_search(self, top_bar: QHBoxLayout) -> None:
         """Add status indicator, execution mode label, and search bar to top bar."""
         # Status Indicator
+        assert top_bar is not None, 'top_bar must be provided'
         assert top_bar is not None, "top_bar must be provided"
         self.lbl_status = QLabel("Checking Docker...")
         self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE_BOLD)
@@ -266,6 +271,7 @@ class LauncherUISetupMixin:
 
     def _setup_top_bar_action_buttons(self, top_bar: QHBoxLayout) -> None:
         """Add Help, Settings, and AI Assistant buttons to top bar."""
+        assert top_bar is not None, 'top_bar must be provided'
         assert top_bar is not None, "top_bar must be provided"
         from src.launchers.launcher_constants import AI_AVAILABLE
 
@@ -342,6 +348,7 @@ class LauncherUISetupMixin:
 
     def _setup_grid_area(self, layout: QVBoxLayout) -> None:
         """Set up the scrollable grid area."""
+        assert layout is not None, 'layout must be provided'
         assert layout is not None, "layout must be provided"
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -437,6 +444,7 @@ class LauncherUISetupMixin:
 
     def _append_console_line(self, engine_name: str, line: str) -> None:
         """Append a formatted line to the console widget (GUI thread only)."""
+        assert engine_name is not None, 'engine_name must be provided'
         assert engine_name is not None, "engine_name must be provided"
         if not self._console_dock.isVisible():
             self._console_dock.show()

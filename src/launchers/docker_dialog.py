@@ -110,6 +110,7 @@ class EnvironmentDialog(QDialog):
         self.build_thread.start()
 
     def _on_build_log(self, line: str) -> None:
+        assert line is not None, 'line must be provided'
         assert line is not None, "line must be provided"
         self.console.append(line)
         # Auto-scroll to bottom
@@ -118,6 +119,7 @@ class EnvironmentDialog(QDialog):
             sb.setValue(sb.maximum())
 
     def _on_build_finished(self, success: bool, message: str) -> None:
+        assert success is not None, 'success must be provided'
         assert success is not None, "success must be provided"
         self.btn_build.setEnabled(True)
         self.btn_cancel.setEnabled(False)

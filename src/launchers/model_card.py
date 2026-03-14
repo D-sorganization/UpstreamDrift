@@ -132,6 +132,7 @@ class DraggableModelCard(QFrame):
 
     def _create_image_widget(self, layout: QVBoxLayout) -> None:
         """Create and add the model image label to the layout."""
+        assert layout is not None, 'layout must be provided'
         assert layout is not None, "layout must be provided"
         img_name = self._resolve_image_name()
         img_path = self._find_image_path(img_name)
@@ -167,6 +168,7 @@ class DraggableModelCard(QFrame):
 
     def _create_status_chip(self, layout: QVBoxLayout) -> None:
         """Create and add the status chip to the layout."""
+        assert layout is not None, 'layout must be provided'
         assert layout is not None, "layout must be provided"
         status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
