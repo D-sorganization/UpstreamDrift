@@ -28,6 +28,7 @@ class TrajectoryFunnelBenchmark:
         Ignores path geometry, heavily penalizes phase asynchrony.
         """
         assert current_state is not None, "current_state must be provided"
+        assert current_state is not None, "current_state must be provided"
         error = current_state - target_state
         return -np.sum(error**2)
 
@@ -39,6 +40,7 @@ class TrajectoryFunnelBenchmark:
         Uses transverse deviations and allows phase slippage.
         """
         # Find the geometrically closest point on the reference trajectory manifold
+        assert current_state is not None, "current_state must be provided"
         assert current_state is not None, "current_state must be provided"
         distances = np.linalg.norm(reference_trajectory - current_state, axis=1)
         transverse_distance = np.min(distances)
