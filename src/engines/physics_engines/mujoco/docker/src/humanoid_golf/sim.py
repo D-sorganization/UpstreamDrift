@@ -67,7 +67,7 @@ def np_encoder(object) -> int | float | list:
 class BaseController:
     def get_action(self, physics) -> np.ndarray:
         """Get the control action."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         return np.zeros(physics.model.nu)
 
@@ -75,7 +75,7 @@ class BaseController:
 class PDController(BaseController):
     def __init__(self, actuators, target_pose, kp=60.0, kd=6.0) -> None:
         """Initialize PD Controller."""
-        assert actuators is not None, 'actuators must be provided'
+        assert actuators is not None, "actuators must be provided"
         assert actuators is not None, "actuators must be provided"
         self.actuators = actuators
         self.target_pose = target_pose
@@ -84,7 +84,7 @@ class PDController(BaseController):
 
     def get_action(self, physics) -> np.ndarray:
         """Calculate PD control action."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         action = np.zeros(physics.model.nu)
         for joint_name, target_angle in self.target_pose.items():
@@ -108,7 +108,7 @@ class PDController(BaseController):
 class PolynomialController(BaseController):
     def __init__(self, physics) -> None:
         """Initialize Polynomial Controller."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         self.nu = physics.model.nu
         # 6th order coeffs: c0 + c1*t + ... + c6*t^6
@@ -141,7 +141,7 @@ class PolynomialController(BaseController):
 
     def get_action(self, physics) -> np.ndarray:
         """Calculate polynomial control action."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         t = physics.data.time
         action = np.zeros(self.nu)
@@ -154,7 +154,7 @@ class PolynomialController(BaseController):
 class LQRController(BaseController):
     def __init__(self, physics, target_pose, actuators, height_scale=1.0) -> None:
         """Initialize LQR Controller."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         self.actuators = actuators
         self.target_pose = target_pose
@@ -187,7 +187,7 @@ class LQRController(BaseController):
     def _compute_gains(self, physics, fallback=False) -> np.ndarray:
         """Compute LQR gain matrix."""
         # Fallback: Diagonal PD matrix embedded in K
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         nu = physics.model.nu
         nq = physics.model.nq
@@ -215,7 +215,7 @@ class LQRController(BaseController):
 
     def get_action(self, physics) -> np.ndarray:
         """Calculate LQR control action."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         if self.K is None:
             return np.zeros(physics.model.nu)
@@ -250,7 +250,7 @@ class TimeStep:
         discount=1.0,
         observation: dict[str, typing.Any] | None = None,
     ) -> None:
-        assert step_type is not None, 'step_type must be provided'
+        assert step_type is not None, "step_type must be provided"
         assert step_type is not None, "step_type must be provided"
         self.step_type = step_type
         self.reward = reward
@@ -278,7 +278,7 @@ class PhysicsEnvWrapper:
 
     def __init__(self, physics, initializer=None) -> None:
         """Initialize PhysicsEnvWrapper."""
-        assert physics is not None, 'physics must be provided'
+        assert physics is not None, "physics must be provided"
         assert physics is not None, "physics must be provided"
         self._physics = physics
         self._initializer = initializer
@@ -295,7 +295,7 @@ class PhysicsEnvWrapper:
         class Spec:
             def __init__(self, shape) -> None:
                 """Initialize Spec."""
-                assert shape is not None, 'shape must be provided'
+                assert shape is not None, "shape must be provided"
                 assert shape is not None, "shape must be provided"
                 self.shape = shape
                 self.dtype = np.float64
@@ -306,7 +306,7 @@ class PhysicsEnvWrapper:
 
     def step(self, action) -> TimeStep:
         """Advance the environment by one step."""
-        assert action is not None, 'action must be provided'
+        assert action is not None, "action must be provided"
         assert action is not None, "action must be provided"
         self._physics.set_control(action)
         self._physics.step()
@@ -323,7 +323,7 @@ class PhysicsEnvWrapper:
 def save_state(physics, filename) -> None:
     """Save simulation state to file."""
     # Get state as numpy array
-    assert physics is not None, 'physics must be provided'
+    assert physics is not None, "physics must be provided"
     assert physics is not None, "physics must be provided"
     state = physics.get_state()
     # Convert to list for JSON serialization
@@ -368,7 +368,7 @@ def _extract_simulation_params(config, duration) -> dict:
 
     Returns a dict with all extracted parameters.
     """
-    assert config is not None, 'config must be provided'
+    assert config is not None, "config must be provided"
     assert config is not None, "config must be provided"
     control_mode = config.get("control_mode", "pd")
     use_viewer = config.get("live_view", False)
@@ -420,7 +420,7 @@ def _setup_controller(
     control_mode, physics, actuators, target_height
 ) -> BaseController:
     """Create and return the appropriate controller based on mode."""
-    assert control_mode is not None, 'control_mode must be provided'
+    assert control_mode is not None, "control_mode must be provided"
     assert control_mode is not None, "control_mode must be provided"
     controller: BaseController
     if control_mode == "lqr":
@@ -440,7 +440,7 @@ def _setup_controller(
 
 def _run_viewer_loop(physics, controller, initialize_episode, save_path) -> None:
     """Run the simulation in live viewer mode."""
-    assert physics is not None, 'physics must be provided'
+    assert physics is not None, "physics must be provided"
     assert physics is not None, "physics must be provided"
     logger.info("Launching Live Viewer...")
     try:
@@ -481,7 +481,7 @@ def _build_csv_header(actuator_names) -> list[str]:
 
 def _collect_step_data(physics, actuators, actuator_names, iaa) -> list:
     """Collect one row of CSV data for the current simulation step."""
-    assert physics is not None, 'physics must be provided'
+    assert physics is not None, "physics must be provided"
     assert physics is not None, "physics must be provided"
     row = [physics.data.time]
     for j in TARGET_POSE:
@@ -525,7 +525,7 @@ def _run_headless_loop(
     physics, controller, actuators, duration, output_video, output_data, save_path
 ) -> None:
     """Run the simulation in headless mode, recording video and CSV data."""
-    assert physics is not None, 'physics must be provided'
+    assert physics is not None, "physics must be provided"
     assert physics is not None, "physics must be provided"
     logger.info("Simulating (Headless) for %ss...", duration)
     fps = 30
@@ -596,7 +596,7 @@ def run_simulation(
 ) -> None:
     """Run the golf simulation."""
     # 1. Load Config
-    assert output_video is not None, 'output_video must be provided'
+    assert output_video is not None, "output_video must be provided"
     assert output_video is not None, "output_video must be provided"
     logger.info("Loading configuration...")
     config = _load_simulation_config()

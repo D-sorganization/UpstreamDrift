@@ -80,7 +80,7 @@ class UISetupMixin:
 
     def _setup_model_selector(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the model selection group box."""
-        assert layout is not None, 'layout must be provided'
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         model_group = QtWidgets.QGroupBox("Model Selection")
         model_layout = QtWidgets.QHBoxLayout()
@@ -95,7 +95,7 @@ class UISetupMixin:
 
     def _setup_mode_selector(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the operating mode group box."""
-        assert layout is not None, 'layout must be provided'
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         mode_group = QtWidgets.QGroupBox("Operating Mode")
         mode_layout = QtWidgets.QHBoxLayout()
@@ -115,7 +115,7 @@ class UISetupMixin:
 
     def _setup_controls_tabs(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the main tab widget with simulation controls and live analysis."""
-        assert layout is not None, 'layout must be provided'
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         self.main_tab_widget = QtWidgets.QTabWidget()
         layout.addWidget(self.main_tab_widget)
@@ -173,7 +173,7 @@ class UISetupMixin:
 
     def _setup_analysis_group(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the recording and post-hoc analysis group box."""
-        assert parent_layout is not None, 'parent_layout must be provided'
+        assert parent_layout is not None, "parent_layout must be provided"
         assert parent_layout is not None, "parent_layout must be provided"
         analysis_group = QtWidgets.QGroupBox("Recording & Post-Hoc Analysis")
         analysis_layout = QtWidgets.QVBoxLayout()
@@ -247,7 +247,7 @@ class UISetupMixin:
 
     def _setup_visualization_panel(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the visualization toggles group box."""
-        assert layout is not None, 'layout must be provided'
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
@@ -302,7 +302,7 @@ class UISetupMixin:
 
     def _setup_advanced_vectors(self, vis_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the advanced vector controls (induced accel, counterfactual combos)."""
-        assert vis_layout is not None, 'vis_layout must be provided'
+        assert vis_layout is not None, "vis_layout must be provided"
         assert vis_layout is not None, "vis_layout must be provided"
         vec_grid = QtWidgets.QGridLayout()
 
@@ -339,7 +339,7 @@ class UISetupMixin:
 
     def _setup_matrix_analysis_panel(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the matrix analysis group box (Jacobian condition, constraint rank)."""
-        assert layout is not None, 'layout must be provided'
+        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
         matrix_layout = QtWidgets.QFormLayout(matrix_group)

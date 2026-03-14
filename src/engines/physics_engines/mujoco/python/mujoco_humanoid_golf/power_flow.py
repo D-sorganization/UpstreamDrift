@@ -111,7 +111,7 @@ class PowerFlowAnalyzer:
         Args:
             model: MuJoCo model
         """
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
 
@@ -128,7 +128,7 @@ class PowerFlowAnalyzer:
         tau_drift: np.ndarray | None,
         tau_control: np.ndarray | None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        assert tau is not None, 'tau must be provided'
+        assert tau is not None, "tau must be provided"
         assert tau is not None, "tau must be provided"
         if tau_drift is not None:
             joint_work_drift = tau_drift * qvel * dt
@@ -146,7 +146,7 @@ class PowerFlowAnalyzer:
     def _compute_segment_energies(
         self, qvel: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
-        assert qvel is not None, 'qvel must be provided'
+        assert qvel is not None, "qvel must be provided"
         assert qvel is not None, "qvel must be provided"
         import mujoco
 
@@ -178,7 +178,7 @@ class PowerFlowAnalyzer:
         return segment_ke, segment_pe
 
     def _compute_power_dissipation(self, qvel: np.ndarray) -> float:
-        assert qvel is not None, 'qvel must be provided'
+        assert qvel is not None, "qvel must be provided"
         assert qvel is not None, "qvel must be provided"
         power_diss = 0.0
         for i in range(self.model.njnt):
@@ -224,7 +224,7 @@ class PowerFlowAnalyzer:
         Returns:
             PowerFlowResult with complete power flow analysis
         """
-        assert qpos is not None, 'qpos must be provided'
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         import mujoco
 
@@ -290,7 +290,7 @@ class PowerFlowAnalyzer:
         Returns:
             List of PowerFlowResult for each timestep
         """
-        assert times is not None, 'times must be provided'
+        assert times is not None, "times must be provided"
         assert times is not None, "times must be provided"
         results = []
 
@@ -327,7 +327,7 @@ class PowerFlowAnalyzer:
         Returns:
             List of InterSegmentTransfer for each body
         """
-        assert qpos is not None, 'qpos must be provided'
+        assert qpos is not None, "qpos must be provided"
         assert qpos is not None, "qpos must be provided"
         import mujoco
 
@@ -381,7 +381,7 @@ class PowerFlowAnalyzer:
         Returns:
             Tuple of (power_from_parent, power_generation).
         """
-        assert body_id is not None, 'body_id must be provided'
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         power_from_parent = 0.0
         power_generation = 0.0
@@ -409,7 +409,7 @@ class PowerFlowAnalyzer:
         Returns:
             Total power flowing to children.
         """
-        assert body_id is not None, 'body_id must be provided'
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         power_to_children = 0.0
         for j in range(self.model.njnt):
@@ -433,7 +433,7 @@ class PowerFlowAnalyzer:
         Returns:
             Total dissipated power at this body's joints.
         """
-        assert body_id is not None, 'body_id must be provided'
+        assert body_id is not None, "body_id must be provided"
         assert body_id is not None, "body_id must be provided"
         power_diss = 0.0
         for j in range(self.model.njnt):
@@ -465,7 +465,7 @@ class PowerFlowAnalyzer:
             results: Power flow results for trajectory
             joint_idx: Joint index to plot
         """
-        assert times is not None, 'times must be provided'
+        assert times is not None, "times must be provided"
         assert times is not None, "times must be provided"
         try:
             import matplotlib.pyplot as plt

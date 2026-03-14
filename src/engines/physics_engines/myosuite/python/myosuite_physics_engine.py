@@ -209,7 +209,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set joint positions and velocities on the simulation."""
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if not self.sim:
             return
@@ -270,7 +270,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control (ctrl)."""
-        assert u is not None, 'u must be provided'
+        assert u is not None, "u must be provided"
         assert u is not None, "u must be provided"
         self._last_action = np.array(u, copy=True)
 
@@ -373,7 +373,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         """Compute inverse dynamics torques for the given acceleration."""
         # Requires calling mj_inverse
 
-        assert qacc is not None, 'qacc must be provided'
+        assert qacc is not None, "qacc must be provided"
         assert qacc is not None, "qacc must be provided"
         if not self.sim:
             return np.array([])
@@ -394,7 +394,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute linear and angular Jacobian for a named body."""
-        assert body_name is not None, 'body_name must be provided'
+        assert body_name is not None, "body_name must be provided"
         assert body_name is not None, "body_name must be provided"
         if not self.sim:
             return None
@@ -503,7 +503,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         """
 
-        assert tau is not None, 'tau must be provided'
+        assert tau is not None, "tau must be provided"
         assert tau is not None, "tau must be provided"
         if not self.sim:
             logger.warning("Simulation not initialized")
@@ -608,7 +608,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         """
 
-        assert activations is not None, 'activations must be provided'
+        assert activations is not None, "activations must be provided"
         assert activations is not None, "activations must be provided"
         analyzer = self.get_muscle_analyzer()
 
@@ -754,7 +754,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         """
 
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if not self.sim:
             return np.array([])
@@ -817,7 +817,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         """
 
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if not self.sim:
             return np.array([])

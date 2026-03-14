@@ -20,7 +20,7 @@ class DynamicsEngine:
             model: Pinocchio model
             data: Pinocchio data
         """
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -42,7 +42,7 @@ class DynamicsEngine:
         Returns:
             Joint acceleration 'a'
         """
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if f_ext is None:
             result = pin.aba(self.model, self.data, q, v, tau)
@@ -57,7 +57,7 @@ class DynamicsEngine:
 
         Returns: tau (torque)
         """
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if f_ext is None:
             result = pin.rnea(self.model, self.data, q, v, a)
@@ -76,7 +76,7 @@ class DynamicsEngine:
         Returns:
             (q_next, v_next)
         """
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         tau_zero = np.zeros(self.model.nv)
         a = self.forward_dynamics(q, v, tau_zero)
@@ -97,7 +97,7 @@ class DynamicsEngine:
         Returns:
             (q_next, v_next) starting from v=0
         """
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         v_zero = np.zeros(self.model.nv)
         a = self.forward_dynamics(q, v_zero, tau)
@@ -122,7 +122,7 @@ class DynamicsEngine:
             Induced acceleration vector
         """
         # Compute Mass Matrix Inverse
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         pin.computeMinverse(self.model, self.data, q)
         M_inv = self.data.Minv

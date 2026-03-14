@@ -23,7 +23,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
     """OpenGL widget for 3D golf swing visualization."""
 
     def __init__(self, parent=None) -> None:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         super().__init__(parent)
         self.renderer = None
@@ -215,7 +215,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def update_frame(self, frame_data: FrameData, render_config: RenderConfig) -> None:
         """Update the current frame data and render config."""
-        assert frame_data is not None, 'frame_data must be provided'
+        assert frame_data is not None, "frame_data must be provided"
         assert frame_data is not None, "frame_data must be provided"
         self.current_frame_data = frame_data
         self.current_render_config = render_config
@@ -294,7 +294,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def mousePressEvent(self, event) -> None:
         """Handle mouse press events."""
-        assert event is not None, 'event must be provided'
+        assert event is not None, "event must be provided"
         assert event is not None, "event must be provided"
         self.last_mouse_pos = event.pos()
         self.mouse_pressed = True
@@ -305,7 +305,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def mouseMoveEvent(self, event) -> None:
         """Handle mouse move events."""
-        assert event is not None, 'event must be provided'
+        assert event is not None, "event must be provided"
         assert event is not None, "event must be provided"
         if not self.mouse_pressed or not self.last_mouse_pos:
             return
@@ -338,7 +338,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def wheelEvent(self, event) -> None:
         """Handle mouse wheel events."""
-        assert event is not None, 'event must be provided'
+        assert event is not None, "event must be provided"
         assert event is not None, "event must be provided"
         zoom_factor = 1.1 if event.angleDelta().y() > 0 else 0.9
         self.camera_distance *= zoom_factor
@@ -347,7 +347,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
     def keyPressEvent(self, event) -> None:
         """Handle keyboard shortcuts."""
-        assert event is not None, 'event must be provided'
+        assert event is not None, "event must be provided"
         assert event is not None, "event must be provided"
         key = event.key()
 

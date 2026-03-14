@@ -33,7 +33,7 @@ class SmoothPlaybackController(QObject):
     positionChanged = pyqtSignal(float)  # Emits current position (0.0 to total_frames)
 
     def __init__(self, parent=None) -> None:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         super().__init__(parent)
 
@@ -54,7 +54,7 @@ class SmoothPlaybackController(QObject):
 
     def load_frame_processor(self, frame_processor: FrameProcessor) -> None:
         """Load frame processor with motion data."""
-        assert frame_processor is not None, 'frame_processor must be provided'
+        assert frame_processor is not None, "frame_processor must be provided"
         assert frame_processor is not None, "frame_processor must be provided"
         self.frame_processor = frame_processor
         self.stop()
@@ -72,7 +72,7 @@ class SmoothPlaybackController(QObject):
     @position.setter
     def position(self, value: float) -> None:
         """Set playback position with interpolation."""
-        assert value is not None, 'value must be provided'
+        assert value is not None, "value must be provided"
         assert value is not None, "value must be provided"
         if self.frame_processor is None:
             return
@@ -142,7 +142,7 @@ class SmoothPlaybackController(QObject):
 
     def seek(self, position: float) -> None:
         """Seek to specific frame position."""
-        assert position is not None, 'position must be provided'
+        assert position is not None, "position must be provided"
         assert position is not None, "position must be provided"
         if self.frame_processor is None:
             return
@@ -159,7 +159,7 @@ class SmoothPlaybackController(QObject):
 
     def set_playback_speed(self, speed: float) -> None:
         """Set playback speed multiplier (0.5 = half speed, 2.0 = double speed)."""
-        assert speed is not None, 'speed must be provided'
+        assert speed is not None, "speed must be provided"
         assert speed is not None, "speed must be provided"
         self._playback_speed = np.clip(speed, 0.1, 10.0)
 
@@ -217,7 +217,7 @@ class SmoothPlaybackController(QObject):
         Returns:
             Interpolated frame data
         """
-        assert frame_a is not None, 'frame_a must be provided'
+        assert frame_a is not None, "frame_a must be provided"
         assert frame_a is not None, "frame_a must be provided"
         result = copy(frame_a)
 

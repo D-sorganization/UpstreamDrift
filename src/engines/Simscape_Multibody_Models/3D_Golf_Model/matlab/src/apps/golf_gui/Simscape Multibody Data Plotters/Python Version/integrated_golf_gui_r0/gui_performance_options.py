@@ -17,7 +17,7 @@ class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
     def __init__(self, parent):
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self.parent = parent
         self.result = None

@@ -23,7 +23,7 @@ class GuiRecorder(RecorderInterface):
     """Recorder adapter for the GUI data."""
 
     def __init__(self, data_store: list[BiomechanicalData]) -> None:
-        assert data_store is not None, 'data_store must be provided'
+        assert data_store is not None, "data_store must be provided"
         assert data_store is not None, "data_store must be provided"
         self.data_store = data_store
         self.engine: Any = None
@@ -35,7 +35,7 @@ class GuiRecorder(RecorderInterface):
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Extract a named time series from recorded biomechanical data."""
-        assert field_name is not None, 'field_name must be provided'
+        assert field_name is not None, "field_name must be provided"
         assert field_name is not None, "field_name must be provided"
         if not self.data_store:
             return np.array([]), np.array([])
@@ -71,7 +71,7 @@ class GuiRecorder(RecorderInterface):
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Extract induced acceleration time series for a named source."""
-        assert source_name is not None, 'source_name must be provided'
+        assert source_name is not None, "source_name must be provided"
         assert source_name is not None, "source_name must be provided"
         if not self.data_store:
             return np.array([]), np.array([])
@@ -94,7 +94,7 @@ class GuiRecorder(RecorderInterface):
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Extract counterfactual time series by name."""
-        assert cf_name is not None, 'cf_name must be provided'
+        assert cf_name is not None, "cf_name must be provided"
         assert cf_name is not None, "cf_name must be provided"
         if not self.data_store:
             return np.array([]), np.array([])
@@ -376,7 +376,7 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
 
     def _run_counterfactual(self, cf_type: str) -> None:
         """Run counterfactual analysis."""
-        assert cf_type is not None, 'cf_type must be provided'
+        assert cf_type is not None, "cf_type must be provided"
         assert cf_type is not None, "cf_type must be provided"
         logger.info(f"Running {cf_type} counterfactual...")
 

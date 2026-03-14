@@ -64,7 +64,7 @@ class ManipulabilityAnalyzer:
             model: MuJoCo model
             data: MuJoCo data (Thread-local/private data recommended)
         """
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -73,7 +73,7 @@ class ManipulabilityAnalyzer:
     def _compute_ellipsoid_decomposition(
         self, M_v: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
-        assert M_v is not None, 'M_v must be provided'
+        assert M_v is not None, "M_v must be provided"
         assert M_v is not None, "M_v must be provided"
         try:
             eig_val_v, eig_vec_v = np.linalg.eigh(M_v)
@@ -127,7 +127,7 @@ class ManipulabilityAnalyzer:
         Returns:
             ManipulabilityResult or None if body not found.
         """
-        assert body_name is not None, 'body_name must be provided'
+        assert body_name is not None, "body_name must be provided"
         assert body_name is not None, "body_name must be provided"
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:

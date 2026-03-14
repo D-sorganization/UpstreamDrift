@@ -129,7 +129,7 @@ class HumanoidConfigTab(QWidget):
         self.sub_tabs.addTab(scroll, "Docker Simulation")
 
     def _create_sim_settings_group(self, tab_layout: QVBoxLayout) -> None:
-        assert tab_layout is not None, 'tab_layout must be provided'
+        assert tab_layout is not None, "tab_layout must be provided"
         assert tab_layout is not None, "tab_layout must be provided"
         settings_group = QGroupBox("Simulation Settings")
         settings_layout = QGridLayout()
@@ -166,7 +166,7 @@ class HumanoidConfigTab(QWidget):
         tab_layout.addWidget(settings_group)
 
     def _create_state_management_group(self, tab_layout: QVBoxLayout) -> None:
-        assert tab_layout is not None, 'tab_layout must be provided'
+        assert tab_layout is not None, "tab_layout must be provided"
         assert tab_layout is not None, "tab_layout must be provided"
         state_group = QGroupBox("State Management")
         state_layout = QGridLayout()
@@ -191,7 +191,7 @@ class HumanoidConfigTab(QWidget):
         tab_layout.addWidget(state_group)
 
     def _create_docker_action_buttons(self, tab_layout: QVBoxLayout) -> None:
-        assert tab_layout is not None, 'tab_layout must be provided'
+        assert tab_layout is not None, "tab_layout must be provided"
         assert tab_layout is not None, "tab_layout must be provided"
         btn_layout = QHBoxLayout()
 
@@ -214,7 +214,7 @@ class HumanoidConfigTab(QWidget):
         tab_layout.addLayout(btn_layout)
 
     def _create_results_section(self, tab_layout: QVBoxLayout) -> None:
-        assert tab_layout is not None, 'tab_layout must be provided'
+        assert tab_layout is not None, "tab_layout must be provided"
         assert tab_layout is not None, "tab_layout must be provided"
         results_layout = QHBoxLayout()
         results_layout.addWidget(QLabel("Results:"))
@@ -233,7 +233,7 @@ class HumanoidConfigTab(QWidget):
         tab_layout.addLayout(results_layout)
 
     def _create_simulation_log(self, tab_layout: QVBoxLayout) -> None:
-        assert tab_layout is not None, 'tab_layout must be provided'
+        assert tab_layout is not None, "tab_layout must be provided"
         assert tab_layout is not None, "tab_layout must be provided"
         log_group = QGroupBox("Simulation Log")
         log_layout = QVBoxLayout()
@@ -418,7 +418,7 @@ class HumanoidConfigTab(QWidget):
     # ------------------------------------------------------------------
 
     def _on_control_mode_changed(self, mode: str) -> None:
-        assert mode is not None, 'mode must be provided'
+        assert mode is not None, "mode must be provided"
         assert mode is not None, "mode must be provided"
         descriptions = {
             "pd": "Proportional-Derivative control (Target Pose tracking).",
@@ -462,7 +462,7 @@ class HumanoidConfigTab(QWidget):
         log_prefix: str,
     ) -> None:
         """Helper to show a generator dialog."""
-        assert title is not None, 'title must be provided'
+        assert title is not None, "title must be provided"
         assert title is not None, "title must be provided"
         from PyQt6.QtWidgets import QDialog
 
@@ -475,7 +475,7 @@ class HumanoidConfigTab(QWidget):
             widget.set_joints(self._HUMANOID_JOINTS)
 
         def on_generated(joint_name: str, coefficients: list[float]) -> None:
-            assert joint_name is not None, 'joint_name must be provided'
+            assert joint_name is not None, "joint_name must be provided"
             assert joint_name is not None, "joint_name must be provided"
             self.config.polynomial_coefficients[joint_name] = coefficients
             self._save_config()
@@ -625,7 +625,7 @@ class HumanoidConfigTab(QWidget):
             self.simulation_thread.stop()
 
     def _on_simulation_finished(self, code: int, stderr: str) -> None:
-        assert code is not None, 'code must be provided'
+        assert code is not None, "code must be provided"
         assert code is not None, "code must be provided"
         if code == 0:
             self._log("Simulation finished successfully.")
@@ -710,7 +710,7 @@ class HumanoidConfigTab(QWidget):
         btn.setStyleSheet(Styles.color_swatch(r, g, b))
 
     def _pick_color(self, key: str, btn: QPushButton) -> None:
-        assert key is not None, 'key must be provided'
+        assert key is not None, "key must be provided"
         assert key is not None, "key must be provided"
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])
         initial = QColor(
@@ -726,7 +726,7 @@ class HumanoidConfigTab(QWidget):
             self._save_config()
 
     def _log(self, msg: str) -> None:
-        assert msg is not None, 'msg must be provided'
+        assert msg is not None, "msg must be provided"
         assert msg is not None, "msg must be provided"
         import datetime
 

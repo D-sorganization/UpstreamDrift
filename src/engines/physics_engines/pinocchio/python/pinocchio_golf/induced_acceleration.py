@@ -21,7 +21,7 @@ class InducedAccelerationAnalyzer:
     """
 
     def __init__(self, model: pin.Model, data: pin.Data) -> None:
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -51,7 +51,7 @@ class InducedAccelerationAnalyzer:
         # We can use ABA with v=0, tau=0, and gravity enabled.
         # equation: M*a + 0 + G = 0 => M*a = -G
         # Pinocchio ABA: a = aba(model, data, q, v, tau)
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         q_ddot_g = pin.aba(
             self.model, self._temp_data, q, np.zeros(self.nv), np.zeros(self.nv)
@@ -120,7 +120,7 @@ class InducedAccelerationAnalyzer:
         # And ABA(q, 0, 0) = M^-1 * (-G(q)).
         # So ABA(q, 0, tau) - ABA(q, 0, 0) = M^-1 * tau.
 
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         a_tau_G: np.ndarray = pin.aba(
             self.model, self._temp_data, q, np.zeros(self.nv), specific_tau
@@ -152,7 +152,7 @@ class InducedAccelerationAnalyzer:
         # ZTCF: Acceleration if tau=0.
         # M*a + C*v + G = 0  => a = -M^-1 * (C*v + G)
         # This is just ABA with tau=0.
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         ztcf_accel = pin.aba(self.model, self._temp_data, q, v, np.zeros(self.nv))
 

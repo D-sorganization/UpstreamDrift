@@ -304,7 +304,7 @@ def run_motion_training(
     Returns:
         PipelineResult with trajectory and IK results
     """
-    assert trajectory_file is not None, 'trajectory_file must be provided'
+    assert trajectory_file is not None, "trajectory_file must be provided"
     assert trajectory_file is not None, "trajectory_file must be provided"
     config = PipelineConfig(
         trajectory_file=trajectory_file,

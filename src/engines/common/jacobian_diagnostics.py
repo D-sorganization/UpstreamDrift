@@ -132,7 +132,7 @@ def compute_jacobian_diagnostics(
     Returns:
         JacobianDiagnostics with rank, nullspace, conditioning info
     """
-    assert J is not None, 'J must be provided'
+    assert J is not None, "J must be provided"
     assert J is not None, "J must be provided"
     if J.size == 0:
         return JacobianDiagnostics(
@@ -199,7 +199,7 @@ def compute_constraint_diagnostics(
     Returns:
         ConstraintDiagnostics with rank, nullspace basis, and flags
     """
-    assert J_constraint is not None, 'J_constraint must be provided'
+    assert J_constraint is not None, "J_constraint must be provided"
     assert J_constraint is not None, "J_constraint must be provided"
     if J_constraint.size == 0:
         return ConstraintDiagnostics(
@@ -277,7 +277,7 @@ def validate_jacobians_cross_engine(
     Returns:
         CrossEngineJacobianReport with comparison results
     """
-    assert jacobians is not None, 'jacobians must be provided'
+    assert jacobians is not None, "jacobians must be provided"
     assert jacobians is not None, "jacobians must be provided"
     engines = list(jacobians.keys())
     matrices = list(jacobians.values())
@@ -345,7 +345,9 @@ def diagnose_task_points(
     Returns:
         Map of body_name -> JacobianDiagnostics
     """
-    assert engine_compute_jacobian is not None, 'engine_compute_jacobian must be provided'
+    assert engine_compute_jacobian is not None, (
+        "engine_compute_jacobian must be provided"
+    )
     assert engine_compute_jacobian is not None, (
         "engine_compute_jacobian must be provided"
     )

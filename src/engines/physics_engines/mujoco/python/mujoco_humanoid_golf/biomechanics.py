@@ -37,7 +37,7 @@ class BiomechanicalAnalyzer:
             model: MuJoCo model structure
             data: MuJoCo data structure (will be read, not modified)
         """
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -83,7 +83,7 @@ class BiomechanicalAnalyzer:
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
-        assert name_pattern is not None, 'name_pattern must be provided'
+        assert name_pattern is not None, "name_pattern must be provided"
         assert name_pattern is not None, "name_pattern must be provided"
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
@@ -93,7 +93,7 @@ class BiomechanicalAnalyzer:
 
     def _find_geom_id(self, name_pattern: str) -> int | None:
         """Find geom ID by name pattern (case-insensitive, partial match)."""
-        assert name_pattern is not None, 'name_pattern must be provided'
+        assert name_pattern is not None, "name_pattern must be provided"
         assert name_pattern is not None, "name_pattern must be provided"
         for i in range(self.model.ngeom):
             geom_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_GEOM, i)
@@ -141,7 +141,7 @@ class BiomechanicalAnalyzer:
         Returns:
             Acceleration array
         """
-        assert source_name is not None, 'source_name must be provided'
+        assert source_name is not None, "source_name must be provided"
         assert source_name is not None, "source_name must be provided"
         comps = self.induced_analyzer.compute_components()
         if source_name == "gravity":
@@ -371,7 +371,9 @@ class BiomechanicalAnalyzer:
         Returns:
             BiomechanicalData object
         """
-        assert compute_advanced_metrics is not None, 'compute_advanced_metrics must be provided'
+        assert compute_advanced_metrics is not None, (
+            "compute_advanced_metrics must be provided"
+        )
         assert compute_advanced_metrics is not None, (
             "compute_advanced_metrics must be provided"
         )
@@ -462,7 +464,7 @@ class SwingRecorder:
     )
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Return time-aligned arrays for a named data field."""
-        assert field_name is not None, 'field_name must be provided'
+        assert field_name is not None, "field_name must be provided"
         assert field_name is not None, "field_name must be provided"
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
@@ -495,7 +497,7 @@ class SwingRecorder:
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Return induced acceleration time series for a source."""
-        assert source_name is not None, 'source_name must be provided'
+        assert source_name is not None, "source_name must be provided"
         assert source_name is not None, "source_name must be provided"
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
@@ -544,7 +546,7 @@ class SwingRecorder:
 
     def _export_scalar_fields(self, export_data: dict) -> None:
         """Export scalar time-series fields into export_data."""
-        assert export_data is not None, 'export_data must be provided'
+        assert export_data is not None, "export_data must be provided"
         assert export_data is not None, "export_data must be provided"
         scalar_fields = [
             "time",
@@ -563,7 +565,7 @@ class SwingRecorder:
 
     def _export_array_fields(self, export_data: dict) -> None:
         """Export vector/array time-series fields into export_data."""
-        assert export_data is not None, 'export_data must be provided'
+        assert export_data is not None, "export_data must be provided"
         assert export_data is not None, "export_data must be provided"
         array_fields = [
             "joint_positions",
@@ -599,7 +601,7 @@ class SwingRecorder:
 
     def _export_induced_accelerations(self, export_data: dict) -> None:
         """Export induced and club-induced acceleration series."""
-        assert export_data is not None, 'export_data must be provided'
+        assert export_data is not None, "export_data must be provided"
         assert export_data is not None, "export_data must be provided"
         if self.frames and self.frames[0].induced_accelerations:
             all_keys: set[str] = set()
@@ -662,7 +664,7 @@ class SwingRecorder:
         Args:
             component_name: 'gravity', 'velocity', 'control', 'constraint', 'total'
         """
-        assert component_name is not None, 'component_name must be provided'
+        assert component_name is not None, "component_name must be provided"
         assert component_name is not None, "component_name must be provided"
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
@@ -685,7 +687,7 @@ class SwingRecorder:
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Return counterfactual analysis time series by name."""
-        assert cf_name is not None, 'cf_name must be provided'
+        assert cf_name is not None, "cf_name must be provided"
         assert cf_name is not None, "cf_name must be provided"
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)

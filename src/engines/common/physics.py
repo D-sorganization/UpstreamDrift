@@ -62,7 +62,7 @@ class AirProperties:
             AirProperties at the specified altitude
         """
         # International Standard Atmosphere model
-        assert altitude_m is not None, 'altitude_m must be provided'
+        assert altitude_m is not None, "altitude_m must be provided"
         assert altitude_m is not None, "altitude_m must be provided"
         T0 = 288.15  # K
         P0 = 101325.0  # Pa
@@ -167,7 +167,7 @@ class AerodynamicsCalculator:
         Returns:
             Tuple of (drag, lift, magnus) force vectors [N]
         """
-        assert velocity is not None, 'velocity must be provided'
+        assert velocity is not None, "velocity must be provided"
         assert velocity is not None, "velocity must be provided"
         drag = self.compute_drag(velocity)
         lift = self.compute_lift(velocity, spin)
@@ -186,7 +186,7 @@ class AerodynamicsCalculator:
         Returns:
             Drag force vector [N] (opposes velocity)
         """
-        assert velocity is not None, 'velocity must be provided'
+        assert velocity is not None, "velocity must be provided"
         assert velocity is not None, "velocity must be provided"
         speed = float(np.linalg.norm(velocity))
         if speed < 1e-6:
@@ -214,7 +214,7 @@ class AerodynamicsCalculator:
         Returns:
             Lift force vector [N]
         """
-        assert velocity is not None, 'velocity must be provided'
+        assert velocity is not None, "velocity must be provided"
         assert velocity is not None, "velocity must be provided"
         speed = float(np.linalg.norm(velocity))
         if speed < 1e-6:
@@ -255,7 +255,7 @@ class AerodynamicsCalculator:
         Returns:
             Magnus force vector [N]
         """
-        assert velocity is not None, 'velocity must be provided'
+        assert velocity is not None, "velocity must be provided"
         assert velocity is not None, "velocity must be provided"
         speed = float(np.linalg.norm(velocity))
         spin_mag = float(np.linalg.norm(spin))
@@ -293,7 +293,7 @@ class AerodynamicsCalculator:
         Returns:
             Drag coefficient (dimensionless)
         """
-        assert speed is not None, 'speed must be provided'
+        assert speed is not None, "speed must be provided"
         assert speed is not None, "speed must be provided"
         speed = float(speed)
         # Reynolds number
@@ -318,7 +318,7 @@ class AerodynamicsCalculator:
         Returns:
             Lift coefficient (dimensionless)
         """
-        assert spin_ratio is not None, 'spin_ratio must be provided'
+        assert spin_ratio is not None, "spin_ratio must be provided"
         assert spin_ratio is not None, "spin_ratio must be provided"
         spin_ratio = float(spin_ratio)
         # Empirical relationship (Smits & Ogg)
@@ -335,7 +335,7 @@ class AerodynamicsCalculator:
         Returns:
             Magnus coefficient (dimensionless)
         """
-        assert spin_param is not None, 'spin_param must be provided'
+        assert spin_param is not None, "spin_param must be provided"
         assert spin_param is not None, "spin_param must be provided"
         spin_param = float(spin_param)
         # Robins-Magnus effect coefficient
@@ -352,7 +352,7 @@ class AerodynamicsCalculator:
         Returns:
             Spin ratio = ωR/v
         """
-        assert speed is not None, 'speed must be provided'
+        assert speed is not None, "speed must be provided"
         assert speed is not None, "speed must be provided"
         speed = float(speed)
         spin_mag = float(np.linalg.norm(spin))
@@ -415,7 +415,7 @@ class BallPhysics:
             Total force vector [N]
         """
         # Gravity
-        assert velocity is not None, 'velocity must be provided'
+        assert velocity is not None, "velocity must be provided"
         assert velocity is not None, "velocity must be provided"
         F_gravity = self.ball.mass * self.gravity
 
@@ -445,7 +445,7 @@ class BallPhysics:
         Returns:
             Updated spin after decay [rad/s]
         """
-        assert spin is not None, 'spin must be provided'
+        assert spin is not None, "spin must be provided"
         assert spin is not None, "spin must be provided"
         decay_factor = np.exp(-self.ball.spin_decay_rate * dt)
         return spin * decay_factor
@@ -487,7 +487,7 @@ class BallPhysics:
             Tuple of (new_position, new_velocity, new_spin)
         """
         # Compute forces
-        assert position is not None, 'position must be provided'
+        assert position is not None, "position must be provided"
         assert position is not None, "position must be provided"
         force = self.compute_total_force(velocity, spin)
         acceleration = force / self.ball.mass

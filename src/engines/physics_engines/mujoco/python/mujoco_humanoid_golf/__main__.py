@@ -66,7 +66,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _setup_model_selector(self, control_layout: QtWidgets.QVBoxLayout) -> None:
         """Create the model selection combo box group."""
-        assert control_layout is not None, 'control_layout must be provided'
+        assert control_layout is not None, "control_layout must be provided"
         assert control_layout is not None, "control_layout must be provided"
         model_group = QtWidgets.QGroupBox("Golf Swing Model")
         model_layout = QtWidgets.QVBoxLayout(model_group)
@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _setup_sim_buttons(self, control_layout: QtWidgets.QVBoxLayout) -> None:
         """Create the play/pause and reset buttons."""
-        assert control_layout is not None, 'control_layout must be provided'
+        assert control_layout is not None, "control_layout must be provided"
         assert control_layout is not None, "control_layout must be provided"
         buttons_group = QtWidgets.QGroupBox("Simulation Control")
         buttons_layout = QtWidgets.QHBoxLayout(buttons_group)
@@ -103,7 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self, control_layout: QtWidgets.QVBoxLayout
     ) -> None:
         """Create the scrollable area for actuator control sliders."""
-        assert control_layout is not None, 'control_layout must be provided'
+        assert control_layout is not None, "control_layout must be provided"
         assert control_layout is not None, "control_layout must be provided"
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setWidgetResizable(True)
@@ -240,7 +240,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def _create_actuator_controls(self, actuator_names: list[str]) -> None:
         """Create sliders for all actuators with logical grouping."""
         # Group actuators by body part
-        assert actuator_names is not None, 'actuator_names must be provided'
+        assert actuator_names is not None, "actuator_names must be provided"
         assert actuator_names is not None, "actuator_names must be provided"
         groups = self._group_actuators(actuator_names)
 
@@ -266,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _group_actuators(self, actuator_names: list[str]) -> dict[str, list[str]]:
         """Group actuators by body part for organized display."""
-        assert actuator_names is not None, 'actuator_names must be provided'
+        assert actuator_names is not None, "actuator_names must be provided"
         assert actuator_names is not None, "actuator_names must be provided"
         groups: dict[str, list[str]] = {
             "Control Inputs": [],
@@ -317,7 +317,7 @@ class MainWindow(QtWidgets.QMainWindow):
         actuator_name: str,  # Reserved for future use
     ) -> tuple[QtWidgets.QSlider, QtWidgets.QLabel]:
         """Create a slider and label for a single actuator."""
-        assert actuator_name is not None, 'actuator_name must be provided'
+        assert actuator_name is not None, "actuator_name must be provided"
         assert actuator_name is not None, "actuator_name must be provided"
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         slider.setMinimum(-100)
@@ -338,7 +338,7 @@ class MainWindow(QtWidgets.QMainWindow):
         index: int,
     ) -> None:  # Required by Qt signal
         """Handle model selection change."""
-        assert index is not None, 'index must be provided'
+        assert index is not None, "index must be provided"
         assert index is not None, "index must be provided"
         self.load_current_model()
         self.sim_widget.reset_state()

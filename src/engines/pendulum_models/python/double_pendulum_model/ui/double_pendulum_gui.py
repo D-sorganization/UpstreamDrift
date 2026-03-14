@@ -94,7 +94,7 @@ class UserInputs:
 
 class DoublePendulumApp(PendulumRendererMixin):
     def __init__(self, root: tk.Tk) -> None:
-        assert root is not None, 'root must be provided'
+        assert root is not None, "root must be provided"
         assert root is not None, "root must be provided"
         self.root = root
         self.root.title("Driven Double Pendulum — 3D Control Affine Model")
@@ -131,7 +131,7 @@ class DoublePendulumApp(PendulumRendererMixin):
 
     def _setup_visualization(self, parent: tk.Widget) -> None:
         """Setup 3D visualization area."""
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self.fig = Figure(figsize=(9, 9), dpi=100, facecolor="white")
         self.ax: Axes3D = typing.cast(
@@ -154,7 +154,7 @@ class DoublePendulumApp(PendulumRendererMixin):
 
     def _setup_controls(self, parent: tk.Widget) -> None:
         """Setup control panel."""
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         panel_frame = tk.Frame(parent, bg="#f0f0f0", width=350)
         panel_frame.pack(side=tk.RIGHT, fill=tk.BOTH, padx=5)
@@ -204,7 +204,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         self, parent: tk.Widget, row: int, config: UIEntryConfig
     ) -> tk.Entry:
         """Add a labeled entry row to the control panel."""
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         frame = tk.Frame(parent, bg="white")
         frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=2)
@@ -226,7 +226,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return entry
 
     def _setup_initial_conditions(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Initial Conditions", row)
         row += 1
@@ -263,7 +263,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return row
 
     def _setup_physical_parameters(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Physical Parameters", row)
         row += 1
@@ -320,7 +320,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return row
 
     def _setup_damping_parameters(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Damping Parameters", row)
         row += 1
@@ -347,7 +347,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return row
 
     def _setup_control_inputs(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Control Inputs", row)
         row += 1
@@ -366,7 +366,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return row
 
     def _setup_simulation_options(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Simulation Options", row)
         row += 1
@@ -440,7 +440,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return row
 
     def _setup_data_logging(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Data Logging", row)
         row += 1
@@ -475,7 +475,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         return row
 
     def _setup_status(self, parent: tk.Widget, row: int) -> int:
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         self._create_section_header(parent, "Status", row)
         row += 1
@@ -498,7 +498,7 @@ class DoublePendulumApp(PendulumRendererMixin):
 
     def _create_section_header(self, parent: tk.Widget, text: str, row: int) -> None:
         """Create a styled section header."""
-        assert parent is not None, 'parent must be provided'
+        assert parent is not None, "parent must be provided"
         assert parent is not None, "parent must be provided"
         header_frame = tk.Frame(parent, bg="#e0e0e0", height=30)
         header_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(10, 5))
@@ -516,7 +516,7 @@ class DoublePendulumApp(PendulumRendererMixin):
     def _create_tooltip(self, widget: tk.Widget, text: str) -> None:
         """Create a simple tooltip."""
 
-        assert widget is not None, 'widget must be provided'
+        assert widget is not None, "widget must be provided"
         assert widget is not None, "widget must be provided"
 
         def on_enter(event: tk.Event) -> None:
@@ -686,7 +686,7 @@ class DoublePendulumApp(PendulumRendererMixin):
 
     def _calculate_upper_inertia(self, user_inputs: UserInputs) -> float:
         """Calculate inertia of upper segment."""
-        assert user_inputs is not None, 'user_inputs must be provided'
+        assert user_inputs is not None, "user_inputs must be provided"
         assert user_inputs is not None, "user_inputs must be provided"
         com_ratio = user_inputs.upper_com_ratio
         if abs(com_ratio - 0.5) < COM_TOLERANCE:

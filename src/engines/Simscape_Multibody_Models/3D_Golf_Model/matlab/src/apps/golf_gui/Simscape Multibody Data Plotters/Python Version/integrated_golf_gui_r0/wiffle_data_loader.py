@@ -206,7 +206,7 @@ class MotionDataLoader:
 
         Returns a pandas Series for the time column.
         """
-        assert data_df is not None, 'data_df must be provided'
+        assert data_df is not None, "data_df must be provided"
         assert data_df is not None, "data_df must be provided"
         if len(data_df.columns) >= 2:
             logger.info("[OK] Extracted time data from column 1 for %s", sheet_name)
@@ -270,7 +270,7 @@ class MotionDataLoader:
         Returns the post-processed DataFrame.
         """
         # Convert to numeric and handle errors
-        assert processed_data is not None, 'processed_data must be provided'
+        assert processed_data is not None, "processed_data must be provided"
         assert processed_data is not None, "processed_data must be provided"
         numeric_columns = [col for col in processed_data.columns if col != "time"]
         for col in numeric_columns:
@@ -294,7 +294,7 @@ class MotionDataLoader:
 
     def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         """Process and clean sheet data"""
-        assert df is not None, 'df must be provided'
+        assert df is not None, "df must be provided"
         assert df is not None, "df must be provided"
         logger.info("[PROC] Processing %s data...", sheet_name)
 
@@ -346,7 +346,7 @@ class MotionDataLoader:
         # based on actual motion capture data
 
         # Get clubhead position
-        assert processed_data is not None, 'processed_data must be provided'
+        assert processed_data is not None, "processed_data must be provided"
         assert processed_data is not None, "processed_data must be provided"
         ch_x = processed_data["clubhead_x"].values
         ch_y = processed_data["clubhead_y"].values
@@ -412,7 +412,7 @@ class MotionDataLoader:
 
     def _create_dummy_data(self, num_frames: int) -> pd.DataFrame:
         """Create dummy data for testing purposes"""
-        assert num_frames is not None, 'num_frames must be provided'
+        assert num_frames is not None, "num_frames must be provided"
         assert num_frames is not None, "num_frames must be provided"
         processed_data = pd.DataFrame()
         processed_data["time"] = np.linspace(0, 1, num_frames)
@@ -449,7 +449,7 @@ class MotionDataLoader:
 
     def _apply_noise_filtering(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply noise filtering to position data"""
-        assert df is not None, 'df must be provided'
+        assert df is not None, "df must be provided"
         assert df is not None, "df must be provided"
         from scipy.signal import savgol_filter
 
@@ -476,7 +476,7 @@ class MotionDataLoader:
     def _interpolate_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
         """Interpolate missing values in the dataset"""
         # Interpolate missing values for position columns
-        assert df is not None, 'df must be provided'
+        assert df is not None, "df must be provided"
         assert df is not None, "df must be provided"
         position_columns = [
             col for col in df.columns if any(axis in col for axis in ["_x", "_y", "_z"])
@@ -501,7 +501,7 @@ class MotionDataLoader:
         Returns:
             Tuple of (BASEQ, ZTCFQ, DELTAQ) DataFrames for GUI compatibility
         """
-        assert excel_data is not None, 'excel_data must be provided'
+        assert excel_data is not None, "excel_data must be provided"
         assert excel_data is not None, "excel_data must be provided"
         logger.info("[CONV] Converting to GUI format...")
 
@@ -528,7 +528,7 @@ class MotionDataLoader:
     def _create_baseq_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """Create BASEQ format DataFrame from position data"""
         # Create a DataFrame with the structure expected by the GUI
-        assert df is not None, 'df must be provided'
+        assert df is not None, "df must be provided"
         assert df is not None, "df must be provided"
         baseq_data = pd.DataFrame()
 
@@ -582,7 +582,7 @@ class MotionDataLoader:
     ) -> pd.DataFrame:
         """Create DELTAQ format showing differences between ProV1 and Wiffle"""
         # Align the dataframes by time
-        assert prov1_df is not None, 'prov1_df must be provided'
+        assert prov1_df is not None, "prov1_df must be provided"
         assert prov1_df is not None, "prov1_df must be provided"
         common_time = _to_numpy(prov1_df["time"])
 

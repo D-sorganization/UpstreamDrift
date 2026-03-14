@@ -25,7 +25,7 @@ class DrakeVisualizer:
     """Helper class to manage advanced visualizations in Meshcat."""
 
     def __init__(self, meshcat: Meshcat, plant: MultibodyPlant) -> None:  # type: ignore[no-any-unimported]
-        assert meshcat is not None, 'meshcat must be provided'
+        assert meshcat is not None, "meshcat must be provided"
         assert meshcat is not None, "meshcat must be provided"
         self.meshcat = meshcat
         self.plant = plant
@@ -38,7 +38,7 @@ class DrakeVisualizer:
 
     def toggle_frame(self, body_name: str, visible: bool) -> None:  # noqa: FBT001
         """Toggle coordinate frame visualization for a body."""
-        assert body_name is not None, 'body_name must be provided'
+        assert body_name is not None, "body_name must be provided"
         assert body_name is not None, "body_name must be provided"
         from numpy import pi
 
@@ -82,7 +82,7 @@ class DrakeVisualizer:
 
     def update_frame_transforms(self, context: Context) -> None:  # type: ignore[no-any-unimported]
         """Update transforms of visible frames."""
-        assert context is not None, 'context must be provided'
+        assert context is not None, "context must be provided"
         assert context is not None, "context must be provided"
         plant_context = self.plant.GetMyContextFromRoot(context)
         for body_name in self.visible_frames:
@@ -93,7 +93,7 @@ class DrakeVisualizer:
 
     def toggle_com(self, body_name: str, visible: bool) -> None:  # noqa: FBT001
         """Toggle Center of Mass visualization for a body."""
-        assert body_name is not None, 'body_name must be provided'
+        assert body_name is not None, "body_name must be provided"
         assert body_name is not None, "body_name must be provided"
         path = f"{self.prefix}/coms/{body_name}"
         if visible:
@@ -108,7 +108,7 @@ class DrakeVisualizer:
 
     def update_com_transforms(self, context: Context) -> None:  # type: ignore[no-any-unimported]
         """Update transforms of visible COMs."""
-        assert context is not None, 'context must be provided'
+        assert context is not None, "context must be provided"
         assert context is not None, "context must be provided"
         plant_context = self.plant.GetMyContextFromRoot(context)
         for body_name in self.visible_coms:
@@ -145,7 +145,7 @@ class DrakeVisualizer:
             position: Center position.
             color: (r, g, b, alpha)
         """
-        assert name is not None, 'name must be provided'
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         path = f"{self.prefix}/ellipsoids/{name}"
 

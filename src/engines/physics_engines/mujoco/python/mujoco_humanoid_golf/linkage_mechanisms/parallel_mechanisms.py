@@ -102,7 +102,7 @@ def _delta_robot_arm_xml(
     arm_length: float,
     forearm_length: float,
 ) -> str:
-    assert arm_num is not None, 'arm_num must be provided'
+    assert arm_num is not None, "arm_num must be provided"
     assert arm_num is not None, "arm_num must be provided"
     angle_rad = np.radians(angle_deg)
     bx = base_radius * np.cos(angle_rad)
@@ -165,7 +165,7 @@ def generate_delta_robot_xml(
     platform_radius : float
         Radius of the moving platform triangle
     """
-    assert base_radius is not None, 'base_radius must be provided'
+    assert base_radius is not None, "base_radius must be provided"
     assert base_radius is not None, "base_radius must be provided"
     arm_length = 2.0
     forearm_length = 3.0
@@ -338,7 +338,7 @@ def _stewart_leg_xml(
     leg_num: int, base_radius: float, angle: float, leg_min: float, leg_max: float
 ) -> str:
     """Generate XML for a single Stewart platform leg (lower + upper)."""
-    assert leg_num is not None, 'leg_num must be provided'
+    assert leg_num is not None, "leg_num must be provided"
     assert leg_num is not None, "leg_num must be provided"
     x = base_radius * np.cos(angle)
     y = base_radius * np.sin(angle)
@@ -423,7 +423,7 @@ def generate_stewart_platform_xml(
     platform_radius : float
         Radius of the platform hexagon
     """
-    assert base_radius is not None, 'base_radius must be provided'
+    assert base_radius is not None, "base_radius must be provided"
     assert base_radius is not None, "base_radius must be provided"
     leg_min = 1.5
     leg_max = 3.0

@@ -189,7 +189,7 @@ class GolfURDFGenerator:
 
     def __init__(self, params: GolfModelParams) -> None:
         """Initialize the generator with parameters."""
-        assert params is not None, 'params must be provided'
+        assert params is not None, "params must be provided"
         assert params is not None, "params must be provided"
         self.params = params
         self.root = ET.Element("robot", name="golf_swing_model")
@@ -212,7 +212,7 @@ class GolfURDFGenerator:
 
     def _transform_to_origin_xml(self, X: RigidTransform) -> ET.Element:  # noqa: N803
         """Convert RigidTransform to XML origin element."""
-        assert X is not None, 'X must be provided'
+        assert X is not None, "X must be provided"
         assert X is not None, "X must be provided"
         origin = ET.Element("origin")
         p = X.translation()
@@ -225,7 +225,7 @@ class GolfURDFGenerator:
         self, mass: float, unit_inertia: UnitInertia, com: npt.ArrayLike
     ) -> ET.Element:
         """Create inertial XML element."""
-        assert mass is not None, 'mass must be provided'
+        assert mass is not None, "mass must be provided"
         assert mass is not None, "mass must be provided"
         inertial = ET.Element("inertial")
         ET.SubElement(inertial, "mass", value=f"{mass:.6g}")
@@ -259,7 +259,7 @@ class GolfURDFGenerator:
         com_offset: npt.ArrayLike | None = None,
     ) -> ET.Element:
         """Add a link to the model."""
-        assert name is not None, 'name must be provided'
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         if com_offset is None:
             com_offset = np.zeros(3)
@@ -308,7 +308,7 @@ class GolfURDFGenerator:
         axis: npt.ArrayLike | None = None,
     ) -> None:
         """Add a joint to the model."""
-        assert name is not None, 'name must be provided'
+        assert name is not None, "name must be provided"
         assert name is not None, "name must be provided"
         joint = ET.SubElement(self.root, "joint", name=name, type=joint_type)
         ET.SubElement(joint, "parent", link=parent)
@@ -408,7 +408,7 @@ class GolfURDFGenerator:
         Args:
             side: 'left' or 'right'.
         """
-        assert side is not None, 'side must be provided'
+        assert side is not None, "side must be provided"
         assert side is not None, "side must be provided"
         sign = 1.0 if side == "right" else -1.0
 
@@ -419,7 +419,7 @@ class GolfURDFGenerator:
 
     def _add_scapula(self, side: str, sign: float) -> None:
         """Add scapula links and joints for one arm side."""
-        assert side is not None, 'side must be provided'
+        assert side is not None, "side must be provided"
         assert side is not None, "side must be provided"
         p = self.params
         scap_offset = np.array([0.0, sign * 0.18, 0.10], dtype=np.float64)  # type: ignore[arg-type]
@@ -463,7 +463,7 @@ class GolfURDFGenerator:
 
     def _add_shoulder(self, side: str) -> None:
         """Add shoulder gimbal (yaw, pitch, roll) links and joints for one arm side."""
-        assert side is not None, 'side must be provided'
+        assert side is not None, "side must be provided"
         assert side is not None, "side must be provided"
         p = self.params
         scap_len = p.scapula_rod.length
@@ -520,7 +520,7 @@ class GolfURDFGenerator:
 
     def _add_upper_arm_and_elbow(self, side: str) -> None:
         """Add upper arm link, weld, and elbow joint for one arm side."""
-        assert side is not None, 'side must be provided'
+        assert side is not None, "side must be provided"
         assert side is not None, "side must be provided"
         p = self.params
         ua_len = p.upper_arm.length
@@ -562,7 +562,7 @@ class GolfURDFGenerator:
 
     def _add_forearm_and_wrist(self, side: str) -> None:
         """Add forearm, wrist dummy, and hand links/joints for one arm side."""
-        assert side is not None, 'side must be provided'
+        assert side is not None, "side must be provided"
         assert side is not None, "side must be provided"
         p = self.params
 
@@ -686,7 +686,7 @@ def add_ground_and_club_contact(
     params: GolfModelParams,
 ) -> None:
     """Add ground and club contact geometry to the plant."""
-    assert plant is not None, 'plant must be provided'
+    assert plant is not None, "plant must be provided"
     assert plant is not None, "plant must be provided"
     world_body = plant.world_body()
     X_WG = RigidTransform()

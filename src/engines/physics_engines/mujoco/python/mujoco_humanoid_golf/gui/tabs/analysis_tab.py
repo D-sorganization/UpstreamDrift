@@ -35,7 +35,7 @@ class AnalysisTab(QtWidgets.QWidget):
         main_window: AdvancedGolfAnalysisWindow,
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
-        assert sim_widget is not None, 'sim_widget must be provided'
+        assert sim_widget is not None, "sim_widget must be provided"
         assert sim_widget is not None, "sim_widget must be provided"
         super().__init__(parent)
         self.sim_widget = sim_widget

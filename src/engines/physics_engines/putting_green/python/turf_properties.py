@@ -199,7 +199,7 @@ class TurfProperties:
         Returns:
             Multiplier for friction adjustment (-1 to +1)
         """
-        assert velocity_direction is not None, 'velocity_direction must be provided'
+        assert velocity_direction is not None, "velocity_direction must be provided"
         assert velocity_direction is not None, "velocity_direction must be provided"
         if np.linalg.norm(velocity_direction) < 1e-10:
             return 0.0
@@ -220,7 +220,7 @@ class TurfProperties:
         Returns:
             Deceleration vector [m/s²] (opposing motion)
         """
-        assert velocity is not None, 'velocity must be provided'
+        assert velocity is not None, "velocity must be provided"
         assert velocity is not None, "velocity must be provided"
         speed = np.linalg.norm(velocity)
         if speed < 1e-10:

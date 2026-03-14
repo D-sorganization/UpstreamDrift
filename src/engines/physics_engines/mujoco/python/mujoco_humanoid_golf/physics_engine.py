@@ -116,7 +116,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
     def set_model_data(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         """Set model and data manually (e.g. from async loader)."""
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -328,7 +328,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         Returns:
             q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
         """
-        assert tau is not None, 'tau must be provided'
+        assert tau is not None, "tau must be provided"
         assert tau is not None, "tau must be provided"
         if self.model is None or self.data is None:
             return np.array([])
@@ -371,7 +371,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
-        assert body_name is not None, 'body_name must be provided'
+        assert body_name is not None, "body_name must be provided"
         assert body_name is not None, "body_name must be provided"
         if self.model is None or self.data is None:
             return None
@@ -464,7 +464,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         Returns:
             q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
         """
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if self.model is None or self.data is None:
             return np.array([])
@@ -517,7 +517,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         Returns:
             q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
         """
-        assert q is not None, 'q must be provided'
+        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if self.model is None or self.data is None:
             return np.array([])
@@ -570,7 +570,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             True if successfully configured.
         """
         # Store shaft configuration
-        assert length is not None, 'length must be provided'
+        assert length is not None, "length must be provided"
         assert length is not None, "length must be provided"
         self._shaft_config = {
             "length": length,
@@ -625,7 +625,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             Tuple of (frequencies [Hz], mode_shapes (n_modes, n_stations))
         """
         # Use average properties for simple analytical solution
-        assert length is not None, 'length must be provided'
+        assert length is not None, "length must be provided"
         assert length is not None, "length must be provided"
         EI_avg = np.mean(EI_profile)
         mu_avg = np.mean(mass_profile)  # Linear mass density [kg/m]
