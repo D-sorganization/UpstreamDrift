@@ -173,6 +173,7 @@ class PinocchioVisualizationMixin:
         color: int,
     ) -> None:
         """Draw ellipsoid using Meshcat."""
+        assert name is not None, 'name must be provided'
         assert name is not None, "name must be provided"
         if self.viewer is None:
             return
@@ -335,6 +336,7 @@ class PinocchioVisualizationMixin:
         self: Any, path: str, start: np.ndarray, vector: np.ndarray, color: int
     ) -> None:
         """Helper to draw an arrow in Meshcat."""
+        assert path is not None, 'path must be provided'
         assert path is not None, "path must be provided"
         if self.viewer is None:
             return
@@ -404,6 +406,7 @@ class PinocchioVisualizationMixin:
             self._update_viewer()
 
     def _toggle_forces(self: Any, checked: bool) -> None:  # noqa: FBT001
+        assert checked is not None, 'checked must be provided'
         assert checked is not None, "checked must be provided"
         if self.viewer is None:
             return
@@ -412,6 +415,7 @@ class PinocchioVisualizationMixin:
         self._update_viewer()
 
     def _toggle_torques(self: Any, checked: bool) -> None:  # noqa: FBT001
+        assert checked is not None, 'checked must be provided'
         assert checked is not None, "checked must be provided"
         if self.viewer is None:
             return

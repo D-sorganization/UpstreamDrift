@@ -27,6 +27,7 @@ class UniversalJointAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
+        assert model is not None, 'model must be provided'
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -110,6 +111,7 @@ class UniversalJointAnalyzer:
         # Classic universal joint velocity relationship
         # ω_out/ω_in = cos(β) / (1 - sin²(β)sin²(θ))
         # where β is the joint angle and θ is the input rotation
+        assert input_angle is not None, 'input_angle must be provided'
         assert input_angle is not None, "input_angle must be provided"
         if abs(joint_angle) < 1e-6:
             return 1.0
@@ -189,6 +191,7 @@ class GimbalJointAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
+        assert model is not None, 'model must be provided'
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -243,6 +246,7 @@ class GimbalJointAnalyzer:
         Returns:
             Tuple of (is_near_lock, distance_to_lock)
         """
+        assert joint_x is not None, 'joint_x must be provided'
         assert joint_x is not None, "joint_x must be provided"
         _, angle_y, _ = self.get_gimbal_angles(joint_x, joint_y, joint_z)
 
@@ -264,6 +268,7 @@ def plot_torque_wobble(
         analysis_results: Results from UniversalJointAnalyzer.analyze_torque_trans
         save_path: Optional path to save the plot
     """
+    assert analysis_results is not None, 'analysis_results must be provided'
     assert analysis_results is not None, "analysis_results must be provided"
     _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))  # type: ignore[misc]
 
@@ -314,6 +319,7 @@ def analyze_constraint_forces_over_time(
     Returns:
         Dictionary mapping joint names to force time series
     """
+    assert model is not None, 'model must be provided'
     assert model is not None, "model must be provided"
     if timestep is None:
         timestep = model.opt.timestep
@@ -367,6 +373,7 @@ def plot_constraint_forces(
         joint_names: List of joint names to plot
         save_path: Optional path to save the plot
     """
+    assert force_data is not None, 'force_data must be provided'
     assert force_data is not None, "force_data must be provided"
     num_joints = len(joint_names)
     _fig, axes = plt.subplots(num_joints, 1, figsize=(12, 4 * num_joints))

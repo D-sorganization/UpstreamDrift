@@ -79,6 +79,7 @@ class VideoExporter:
             fps: Frames per second
             format: Output video format
         """
+        assert model is not None, 'model must be provided'
         assert model is not None, "model must be provided"
         self.model = model
         self.data = data
@@ -105,6 +106,7 @@ class VideoExporter:
         Returns:
             True if recording started successfully
         """
+        assert output_path is not None, 'output_path must be provided'
         assert output_path is not None, "output_path must be provided"
         output_path_obj = Path(output_path)
 
@@ -225,6 +227,7 @@ class VideoExporter:
             True if export successful
         """
         # Reset to initial state
+        assert output_path is not None, 'output_path must be provided'
         assert output_path is not None, "output_path must be provided"
         nq = self.model.nq
         self.data.qpos[:] = initial_state[:nq]
@@ -303,6 +306,7 @@ def create_metrics_overlay(
     Returns:
         Frame with overlaid metrics
     """
+    assert frame is not None, 'frame must be provided'
     assert frame is not None, "frame must be provided"
     if not CV2_AVAILABLE:
         return frame
@@ -361,6 +365,7 @@ def _build_frame_metrics(
     data: mj.MjData,
     frame_idx: int,
 ) -> dict[str, Any]:
+    assert model is not None, 'model must be provided'
     assert model is not None, "model must be provided"
     metrics: dict[str, Any] = {
         "Frame": lambda d, frame_num=frame_idx: frame_num,
@@ -414,6 +419,7 @@ def export_simulation_video(  # noqa: PLR0913
     Returns:
         True if successful
     """
+    assert model is not None, 'model must be provided'
     assert model is not None, "model must be provided"
     format = _detect_video_format(output_path)
     exporter = VideoExporter(model, data, width, height, fps, format)

@@ -99,6 +99,7 @@ def screw_to_transform(
         ...     np.array([1, 0, 0]), np.array([0, 0, 0]), np.inf, 1.0
         ... )
     """
+    assert axis is not None, 'axis must be provided'
     assert axis is not None, "axis must be provided"
     s_screw = screw_axis(axis, point, pitch)
     return exponential_map(s_screw, theta)

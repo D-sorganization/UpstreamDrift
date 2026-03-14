@@ -192,6 +192,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def _categorize_joint(self, name: str) -> str:
         """Categorize a joint into a group based on its name."""
+        assert name is not None, 'name must be provided'
         assert name is not None, "name must be provided"
         name_lower = name.lower()
 
@@ -232,6 +233,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def get_joint_position(self, joint_index: int) -> float | np.ndarray:
         """Get the current position of a joint."""
+        assert joint_index is not None, 'joint_index must be provided'
         assert joint_index is not None, "joint_index must be provided"
         if self._model is None or self._q is None:
             return 0.0
@@ -249,6 +251,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def set_joint_position(self, joint_index: int, value: float | np.ndarray) -> None:
         """Set the position of a joint."""
+        assert joint_index is not None, 'joint_index must be provided'
         assert joint_index is not None, "joint_index must be provided"
         if self._model is None or self._q is None:
             return
@@ -274,6 +277,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def set_all_positions(self, positions: np.ndarray) -> None:
         """Set all joint positions."""
+        assert positions is not None, 'positions must be provided'
         assert positions is not None, "positions must be provided"
         if self._model is None:
             return
@@ -290,6 +294,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def set_all_velocities(self, velocities: np.ndarray) -> None:
         """Set all joint velocities."""
+        assert velocities is not None, 'velocities must be provided'
         assert velocities is not None, "velocities must be provided"
         if self._model is None:
             return
@@ -299,6 +304,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def set_gravity_enabled(self, enabled: bool) -> None:
         """Enable or disable gravity."""
+        assert enabled is not None, 'enabled must be provided'
         assert enabled is not None, "enabled must be provided"
         if self._model is None:
             return
@@ -346,6 +352,7 @@ class PinocchioPoseEditor(BasePoseEditor):
 
     def get_body_position(self, body_name: str) -> np.ndarray | None:
         """Get world position of a body."""
+        assert body_name is not None, 'body_name must be provided'
         assert body_name is not None, "body_name must be provided"
         if self._model is None or self._data is None or self._q is None:
             return None
@@ -549,6 +556,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
             q: Position configuration array
             v: Velocity configuration array
         """
+        assert q is not None, 'q must be provided'
         assert q is not None, "q must be provided"
         self._editor._q = q
         self._editor._v = v
@@ -618,6 +626,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _filter_joints(self, text: str = "") -> None:
         """Filter displayed joints."""
+        assert text is not None, 'text must be provided'
         assert text is not None, "text must be provided"
         search_text = self.txt_filter.text().lower()
         selected_group = self.combo_group.currentText()
@@ -646,6 +655,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _on_joint_changed(self, joint_index: int, value: float) -> None:
         """Handle joint value change."""
+        assert joint_index is not None, 'joint_index must be provided'
         assert joint_index is not None, "joint_index must be provided"
         self._editor.set_joint_position(joint_index, value)
         self._editor.update_visualization()
@@ -653,6 +663,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _on_gravity_changed(self, enabled: bool) -> None:
         """Handle gravity toggle."""
+        assert enabled is not None, 'enabled must be provided'
         assert enabled is not None, "enabled must be provided"
         self._editor.set_gravity_enabled(enabled)
         self.gravity_changed.emit(enabled)
@@ -681,6 +692,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _on_interpolation(self, pose_a: str, pose_b: str, alpha: float) -> None:
         """Handle interpolation request."""
+        assert pose_a is not None, 'pose_a must be provided'
         assert pose_a is not None, "pose_a must be provided"
         positions = self._library.interpolate(pose_a, pose_b, alpha)
         if positions is not None:
@@ -690,6 +702,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _save_current_pose(self, name: str, description: str) -> None:
         """Save current pose to library."""
+        assert name is not None, 'name must be provided'
         assert name is not None, "name must be provided"
         positions = self._editor.get_all_positions()
         velocities = self._editor.get_all_velocities()
@@ -710,6 +723,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _load_preset(self, preset_name: str) -> None:
         """Load a preset pose by name."""
+        assert preset_name is not None, 'preset_name must be provided'
         assert preset_name is not None, "preset_name must be provided"
         from src.shared.python.pose_editor.library import get_preset_pose
 
@@ -719,6 +733,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _load_preset_from_data(self, name: str, data: dict[str, Any]) -> None:
         """Load preset pose from data dictionary."""
+        assert name is not None, 'name must be provided'
         assert name is not None, "name must be provided"
         joints = self._editor.get_joint_info()
         positions = self._editor.get_all_positions()

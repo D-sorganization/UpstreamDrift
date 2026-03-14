@@ -100,6 +100,7 @@ def _load_cmu_mjcf() -> mjcf.RootElement:
 
 
 def _scale_model_positions(root, height_scale) -> None:
+    assert root is not None, 'root must be provided'
     assert root is not None, "root must be provided"
     for body in root.find_all("body"):
         pos = getattr(body, "pos", None)
@@ -160,6 +161,7 @@ def load_humanoid_with_props(
     """
     Load the CMU humanoid with updated props and features.
     """
+    assert target_height is not None, 'target_height must be provided'
     assert target_height is not None, "target_height must be provided"
     root = _load_cmu_mjcf()
 
@@ -189,6 +191,7 @@ def load_humanoid_with_props(
 
 def _add_face_features(root, h_scale, w_scale) -> None:
     """Add facial features like nose and mouth."""
+    assert root is not None, 'root must be provided'
     assert root is not None, "root must be provided"
     head = root.find("body", "head")
     if not head:
@@ -271,6 +274,7 @@ def _add_articulated_fingers(root, h_scale, w_scale) -> None:
 
 def _attach_club(root, h_scale, w_scale, params, two_handed) -> None:
     """Attach the golf club to the model."""
+    assert root is not None, 'root must be provided'
     assert root is not None, "root must be provided"
     rhand = root.find("body", "rhand")
     if not rhand:
@@ -331,6 +335,7 @@ def _attach_club(root, h_scale, w_scale, params, two_handed) -> None:
 def customize_visuals(physics, config=None) -> None:
     """Apply colors and visual tweaks."""
     # Defaults
+    assert physics is not None, 'physics must be provided'
     assert physics is not None, "physics must be provided"
     colors = {
         "shirt": [0.6, 0.6, 0.6, 1.0],

@@ -137,6 +137,7 @@ class StrokeParameters:
             StrokeParameters instance
         """
         # Empirical relationship: speed ≈ 4 * backstroke_length * tempo
+        assert backstroke_length is not None, 'backstroke_length must be provided'
         assert backstroke_length is not None, "backstroke_length must be provided"
         speed = 4.0 * backstroke_length * tempo
         return cls(
@@ -170,6 +171,7 @@ class StrokeParameters:
         """
         # Physics-based estimation:
         # Distance ≈ v₀² / (2 * μ * g) where μ ≈ 0.196/stimp
+        assert distance is not None, 'distance must be provided'
         assert distance is not None, "distance must be provided"
         mu = 0.196 / stimp_rating
 
@@ -248,6 +250,7 @@ class PutterStroke:
             coefficient_of_restitution: COR for impact
             insert_type: Face insert material ("metal", "polymer", "milled")
         """
+        assert putter_type is not None, 'putter_type must be provided'
         assert putter_type is not None, "putter_type must be provided"
         self.putter_type = putter_type
         self.loft = loft_deg or self.DEFAULT_LOFT_DEG
@@ -291,6 +294,7 @@ class PutterStroke:
             Initial ball state after impact
         """
         # Compute launch velocity
+        assert ball_position is not None, 'ball_position must be provided'
         assert ball_position is not None, "ball_position must be provided"
         launch_velocity = self.compute_launch_velocity(params)
 
@@ -315,6 +319,7 @@ class PutterStroke:
             Launch velocity [m/s] as 2D vector
         """
         # Mass ratio
+        assert params is not None, 'params must be provided'
         assert params is not None, "params must be provided"
         m1 = self.mass  # Putter head
         m2 = GOLF_BALL_MASS_KG  # Ball
@@ -350,6 +355,7 @@ class PutterStroke:
             Spin vector [rad/s] as 3D (around x, y, z axes)
         """
         # Effective loft at impact
+        assert params is not None, 'params must be provided'
         assert params is not None, "params must be provided"
         effective_loft = self.loft - params.attack_angle  # Descending adds loft
 
@@ -386,6 +392,7 @@ class PutterStroke:
         Returns:
             Efficiency factor (0-1)
         """
+        assert offset is not None, 'offset must be provided'
         assert offset is not None, "offset must be provided"
         if offset <= 0:
             return 1.0
@@ -414,6 +421,7 @@ class PutterStroke:
             Required clubhead speed [m/s]
         """
         # Friction coefficient from stimp
+        assert distance is not None, 'distance must be provided'
         assert distance is not None, "distance must be provided"
         mu = 0.196 / stimp_rating
 
@@ -450,6 +458,7 @@ class PutterStroke:
             Aim point to start ball toward
         """
         # Direction to target
+        assert ball_position is not None, 'ball_position must be provided'
         assert ball_position is not None, "ball_position must be provided"
         to_target = target - ball_position
         distance = np.linalg.norm(to_target)

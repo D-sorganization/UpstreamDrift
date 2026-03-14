@@ -445,6 +445,7 @@ class DrakeUIMixin:
     def _on_slider_change(  # type: ignore[no-any-unimported]
         self: Any, val: int, spin: QtWidgets.QDoubleSpinBox, joint_idx: int
     ) -> None:
+        assert val is not None, 'val must be provided'
         assert val is not None, "val must be provided"
         radian = val * SLIDER_TO_RADIAN
         with QtCore.QSignalBlocker(spin):
@@ -460,6 +461,7 @@ class DrakeUIMixin:
 
     def _update_joint_pos(self: Any, joint_idx: int, angle: float) -> None:
         """Update joint position in plant context."""
+        assert joint_idx is not None, 'joint_idx must be provided'
         assert joint_idx is not None, "joint_idx must be provided"
         if self.operating_mode != "kinematic":
             return
@@ -508,6 +510,7 @@ class DrakeUIMixin:
 
     def _update_status(self: Any, message: str) -> None:
         """Update status bar message safely."""
+        assert message is not None, 'message must be provided'
         assert message is not None, "message must be provided"
         status_bar = self.statusBar()
         if status_bar:

@@ -94,6 +94,7 @@ class ClubTrajectory:
 
     def get_frame_at_time(self, t: float) -> ClubFrame:
         """Interpolate to get frame at specific time."""
+        assert t is not None, 't must be provided'
         assert t is not None, "t must be provided"
         times = self.times
         if t <= times[0]:
@@ -128,6 +129,7 @@ class ClubTrajectory:
 
     def get_event_frame(self, event: str) -> ClubFrame | None:
         """Get frame at a specific swing event (address, top, impact, finish)."""
+        assert event is not None, 'event must be provided'
         assert event is not None, "event must be provided"
         event_map = {
             "address": self.events.address,
@@ -217,6 +219,7 @@ class ClubTrajectoryParser:
 
     def _parse_with_pandas(self, sheet_name: str) -> ClubTrajectory:
         """Parse using pandas."""
+        assert sheet_name is not None, 'sheet_name must be provided'
         assert sheet_name is not None, "sheet_name must be provided"
         df = pd.read_excel(self.file_path, sheet_name=sheet_name, header=None)
 
@@ -236,6 +239,7 @@ class ClubTrajectoryParser:
 
     def _parse_with_openpyxl(self, sheet_name: str) -> ClubTrajectory:
         """Parse using openpyxl."""
+        assert sheet_name is not None, 'sheet_name must be provided'
         assert sheet_name is not None, "sheet_name must be provided"
         wb = load_workbook(self.file_path, data_only=True)
         sheet = wb[sheet_name]
@@ -262,6 +266,7 @@ class ClubTrajectoryParser:
 
     def _parse_events_list(self, row: list) -> SwingEventMarkers:
         """Parse event markers from list."""
+        assert row is not None, 'row must be provided'
         assert row is not None, "row must be provided"
         events = SwingEventMarkers()
 
@@ -297,6 +302,7 @@ class ClubTrajectoryParser:
 
     @staticmethod
     def _orthogonalize_axes(x_axis, y_axis):
+        assert x_axis is not None, 'x_axis must be provided'
         assert x_axis is not None, "x_axis must be provided"
         x_axis = x_axis / (np.linalg.norm(x_axis) + 1e-8)
         y_axis = y_axis - np.dot(y_axis, x_axis) * x_axis
@@ -305,6 +311,7 @@ class ClubTrajectoryParser:
         return np.column_stack([x_axis, y_axis, z_axis])
 
     def _parse_grip_data(self, get):
+        assert get is not None, 'get must be provided'
         assert get is not None, "get must be provided"
         grip_pos = np.array(
             [
@@ -333,6 +340,7 @@ class ClubTrajectoryParser:
         return grip_pos, grip_rot
 
     def _parse_club_face_data(self, get, grip_pos, grip_rot):
+        assert get is not None, 'get must be provided'
         assert get is not None, "get must be provided"
         face_x = get(self.FACE_X_COL)
         face_y = get(self.FACE_Y_COL)
@@ -370,6 +378,7 @@ class ClubTrajectoryParser:
 
     def _parse_row(self, row) -> ClubFrame | None:
         """Parse a single data row into ClubFrame."""
+        assert row is not None, 'row must be provided'
         assert row is not None, "row must be provided"
         get = self._make_row_accessor(row)
 
@@ -426,6 +435,7 @@ def compute_hand_positions(
         Tuple of (left_hand_position, right_hand_position)
     """
     # Get the grip Z-axis (along the shaft)
+    assert frame is not None, 'frame must be provided'
     assert frame is not None, "frame must be provided"
     grip_z = frame.grip_rotation[:, 2]
 

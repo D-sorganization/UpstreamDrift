@@ -188,6 +188,7 @@ class DualHandIKSolver:
         Returns:
             Tuple of (left_hand_target, right_hand_target) as SE3 transforms
         """
+        assert frame is not None, 'frame must be provided'
         assert frame is not None, "frame must be provided"
         s = self.settings
 
@@ -222,6 +223,7 @@ class DualHandIKSolver:
         Returns:
             IKResult with solved configuration and error metrics
         """
+        assert frame is not None, 'frame must be provided'
         assert frame is not None, "frame must be provided"
         if q_init is None:
             q_init = self.q_ref.copy()
@@ -307,6 +309,7 @@ class DualHandIKSolver:
         Returns:
             TrajectoryIKResult with all solved configurations
         """
+        assert trajectory is not None, 'trajectory must be provided'
         assert trajectory is not None, "trajectory must be provided"
         result = TrajectoryIKResult()
 
@@ -360,6 +363,7 @@ class DualHandIKSolver:
         Returns:
             Tuple of (left_hand_pos, right_hand_pos)
         """
+        assert q is not None, 'q must be provided'
         assert q is not None, "q must be provided"
         pin.forwardKinematics(self.model, self.data, q)
         pin.updateFramePlacements(self.model, self.data)
@@ -408,6 +412,7 @@ class DualHandIKSolverFallback:
         q_init: NDArray[np.float64] | None = None,
     ) -> IKResult:
         """Solve IK using damped least-squares."""
+        assert frame is not None, 'frame must be provided'
         assert frame is not None, "frame must be provided"
         if q_init is None:
             q_init = self.q_ref.copy()
@@ -489,6 +494,7 @@ class DualHandIKSolverFallback:
         verbose: bool = False,
     ) -> TrajectoryIKResult:
         """Solve IK for entire trajectory."""
+        assert trajectory is not None, 'trajectory must be provided'
         assert trajectory is not None, "trajectory must be provided"
         result = TrajectoryIKResult()
 

@@ -317,6 +317,7 @@ class UISetupMixin:
 
     def enable_results(self, enabled: bool) -> None:
         """Enable or disable the result viewing buttons."""
+        assert enabled is not None, 'enabled must be provided'
         assert enabled is not None, "enabled must be provided"
         from src.shared.python.engine_core.engine_availability import (
             MATPLOTLIB_AVAILABLE,
@@ -504,6 +505,7 @@ class UISetupMixin:
 
     def setup_log_area(self, parent_layout: QVBoxLayout) -> None:
         """Build the simulation log output area."""
+        assert parent_layout is not None, 'parent_layout must be provided'
         assert parent_layout is not None, "parent_layout must be provided"
         log_group = QGroupBox("Simulation Log")
 

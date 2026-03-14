@@ -57,6 +57,7 @@ class DrakeManipulabilityAnalyzer:
 
     def __init__(self, plant: MultibodyPlant) -> None:
         """Initialize with a Drake MultibodyPlant."""
+        assert plant is not None, 'plant must be provided'
         assert plant is not None, "plant must be provided"
         self.plant = plant
         if DRAKE_AVAILABLE:
@@ -98,6 +99,7 @@ class DrakeManipulabilityAnalyzer:
         )
 
     def _decompose_mobility_matrix(self, mobility_matrix):
+        assert mobility_matrix is not None, 'mobility_matrix must be provided'
         assert mobility_matrix is not None, "mobility_matrix must be provided"
         eigvals_v, eigvecs_v = np.linalg.eigh(mobility_matrix)
         idx = np.argsort(eigvals_v)[::-1]
@@ -107,6 +109,7 @@ class DrakeManipulabilityAnalyzer:
         return radii_v, eigvecs_v
 
     def _check_condition_number(self, name, cond):
+        assert name is not None, 'name must be provided'
         assert name is not None, "name must be provided"
         if cond > 1e6:
             logger.warning(
@@ -126,6 +129,7 @@ class DrakeManipulabilityAnalyzer:
     def _build_result_for_body(
         self, context: Context, name, body, radii_v, eigvecs_v, cond
     ):
+        assert context is not None, 'context must be provided'
         assert context is not None, "context must be provided"
         isotropy = 1.0 / cond if cond > 0 else 0.0
         manip_index = np.prod(radii_v)
@@ -156,6 +160,7 @@ class DrakeManipulabilityAnalyzer:
         Returns:
             List of ManipulabilityResult.
         """
+        assert context is not None, 'context must be provided'
         assert context is not None, "context must be provided"
         if not DRAKE_AVAILABLE:
             return []
