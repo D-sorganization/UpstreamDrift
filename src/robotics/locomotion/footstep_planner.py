@@ -72,6 +72,7 @@ class Footstep:
     def _quat_to_rot(self, q: NDArray[np.float64]) -> NDArray[np.float64]:
         """Convert quaternion to rotation matrix."""
         assert q is not None, "q must be provided"
+        assert q is not None, "q must be provided"
         w, x, y, z = q
         return np.array(
             [
@@ -147,6 +148,7 @@ class FootstepPlan:
             Active footstep or None if time is out of range.
         """
         assert t is not None, "t must be provided"
+        assert t is not None, "t must be provided"
         for fs in self.footsteps:
             if fs.timing <= t < fs.timing + fs.duration:
                 return fs
@@ -197,6 +199,7 @@ class FootstepPlanner(ContractChecker):
             max_step_rotation: Maximum step rotation [rad].
         """
         assert parameters is not None, "parameters must be provided"
+        assert parameters is not None, "parameters must be provided"
         self._parameters = parameters
         self._max_step_length = max_step_length
         self._max_step_width = max_step_width
@@ -232,6 +235,7 @@ class FootstepPlanner(ContractChecker):
     def set_parameters(self, parameters: GaitParameters) -> None:
         """Set new gait parameters."""
         assert parameters is not None, "parameters must be provided"
+        assert parameters is not None, "parameters must be provided"
         self._parameters = parameters
         self._nominal_width = parameters.step_width
 
@@ -264,6 +268,7 @@ class FootstepPlanner(ContractChecker):
         Returns:
             FootstepPlan to reach goal.
         """
+        assert start is not None, "start must be provided"
         assert start is not None, "start must be provided"
         start = np.asarray(start, dtype=np.float64)
         goal = np.asarray(goal, dtype=np.float64)
@@ -344,6 +349,7 @@ class FootstepPlanner(ContractChecker):
             FootstepPlan following velocity command.
         """
         assert current_position is not None, "current_position must be provided"
+        assert current_position is not None, "current_position must be provided"
         current_position = np.asarray(current_position, dtype=np.float64)
         velocity_command = np.asarray(velocity_command, dtype=np.float64)
 
@@ -389,6 +395,7 @@ class FootstepPlanner(ContractChecker):
 
     def _compute_clamped_step(self, vx, vy, omega):
         assert vx is not None, "vx must be provided"
+        assert vx is not None, "vx must be provided"
         dt = self._parameters.step_duration
         step_x = np.clip(vx * dt, -self._max_step_length, self._max_step_length)
         step_y = np.clip(vy * dt, -self._max_step_width, self._max_step_width)
@@ -399,6 +406,7 @@ class FootstepPlanner(ContractChecker):
 
     def _advance_position(self, pos, yaw, step_x, step_y):
         assert pos is not None, "pos must be provided"
+        assert pos is not None, "pos must be provided"
         cos_yaw = np.cos(yaw)
         sin_yaw = np.sin(yaw)
         pos[0] += cos_yaw * step_x - sin_yaw * step_y
@@ -406,6 +414,7 @@ class FootstepPlanner(ContractChecker):
         return pos
 
     def _compute_foot_position(self, pos, yaw, foot):
+        assert pos is not None, "pos must be provided"
         assert pos is not None, "pos must be provided"
         cos_yaw = np.cos(yaw)
         sin_yaw = np.sin(yaw)
@@ -445,6 +454,7 @@ class FootstepPlanner(ContractChecker):
         Returns:
             FootstepPlan for rotation.
         """
+        assert current_position is not None, "current_position must be provided"
         assert current_position is not None, "current_position must be provided"
         current_position = np.asarray(current_position, dtype=np.float64)
 
@@ -515,6 +525,7 @@ class FootstepPlanner(ContractChecker):
     ) -> list[Footstep]:
         """Generate footsteps along straight path."""
         assert start is not None, "start must be provided"
+        assert start is not None, "start must be provided"
         direction = goal - start
         distance = float(np.linalg.norm(direction[:2]))
         path_yaw = float(np.arctan2(direction[1], direction[0]))
@@ -581,6 +592,7 @@ class FootstepPlanner(ContractChecker):
 
     def _normalize_angle(self, angle: float) -> float:
         """Normalize angle to [-pi, pi]."""
+        assert angle is not None, "angle must be provided"
         assert angle is not None, "angle must be provided"
         while angle > np.pi:
             angle -= 2 * np.pi

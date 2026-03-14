@@ -30,6 +30,7 @@ class RoboticsError(Exception):
             details: Additional context for debugging.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         self.message = message
         self.details = details or {}
         super().__init__(self._format_message())
@@ -68,6 +69,7 @@ class ContactError(RoboticsError):
             details: Additional context.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         details = details or {}
         if contact_id is not None:
             details["contact_id"] = contact_id
@@ -103,6 +105,7 @@ class ControlError(RoboticsError):
             control_values: Control values that caused error.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         details = details or {}
         if joint_indices is not None:
@@ -140,6 +143,7 @@ class SolverError(RoboticsError):
             iterations: Number of iterations before failure.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         details = details or {}
         if solver_name is not None:
@@ -179,6 +183,7 @@ class LocomotionError(RoboticsError):
             details: Additional context.
         """
         assert message is not None, "message must be provided"
+        assert message is not None, "message must be provided"
         details = details or {}
         if gait_phase is not None:
             details["gait_phase"] = gait_phase
@@ -213,6 +218,7 @@ class KinematicsError(RoboticsError):
             configuration: Configuration where error occurred.
             details: Additional context.
         """
+        assert message is not None, "message must be provided"
         assert message is not None, "message must be provided"
         details = details or {}
         if body_name is not None:
