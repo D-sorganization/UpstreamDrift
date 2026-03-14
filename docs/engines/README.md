@@ -1,6 +1,12 @@
 # Physics Engines
 
-The Golf Modeling Suite integrates multiple physics engines to allow for cross-validation and specialized analysis.
+The Golf Modeling Suite integrates multiple physics engines to allow for
+cross-validation and specialized analysis.
+
+Start with:
+
+- [Supported Engine Tiers](support_tiers.md) for the install and validation contract
+- [Physics Engine Capability Matrix](engine_capabilities.md) for feature-level support
 
 ## Available Engines
 
@@ -9,6 +15,6 @@ The Golf Modeling Suite integrates multiple physics engines to allow for cross-v
 - **[Pinocchio](pinocchio.md)**: Efficient rigid body dynamics algorithms, excellent for kinematic and dynamic analysis.
 - **[Simscape Multibody](simscape.md)**: High-fidelity biomechanical modeling using MATLAB/Simulink.
 - **[Pendulum Models](pendulum.md)**: Simplified 2D models for fundamental swing mechanics.
-- **[OpenSim](opensim.md)**: Musculoskeletal modeling and simulation for detailed biomechanics.
-- **[MyoSim](myosim.md)**: Muscle physiology simulator for cross-bridge kinetics and force generation.
+- **[OpenSim](opensim.md)**: Experimental biomechanics integration.
+- **[MyoSim](myosim.md)**: Experimental muscle-modeling integration.
 - **[OpenPose](openpose.md)**: Computer vision pipeline for extracting kinematics from video.

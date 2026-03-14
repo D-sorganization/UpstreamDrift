@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dieterolson/UpstreamDrift/actions/workflows/ci-standard.yml"><img src="https://github.com/dieterolson/UpstreamDrift/actions/workflows/ci-standard.yml/badge.svg" alt="CI Standard"></a>
+  <a href="https://github.com/D-sorganization/UpstreamDrift/actions/workflows/ci-standard.yml"><img src="https://github.com/D-sorganization/UpstreamDrift/actions/workflows/ci-standard.yml/badge.svg" alt="CI Standard"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
   <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
   <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
@@ -21,7 +21,7 @@
 
 UpstreamDrift (formerly Golf Modeling Suite) consolidates multiple golf swing modeling implementations into a single, cohesive platform. This repository provides comprehensive biomechanical analysis capabilities through:
 
-- **5 Physics Engines**: MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite
+- **Tiered Engine Support**: MuJoCo as the supported default, Drake/Pinocchio for extended cross-engine work, OpenSim/MyoSuite as experimental integrations
 - **Multiple Model Complexities**: From 2-DOF educational pendulums to 290-muscle musculoskeletal models
 - **Advanced Biomechanics**: Muscle dynamics, inverse kinematics/dynamics, motion capture integration
 - **Cross-Engine Validation**: Compare results across different physics engines
@@ -34,10 +34,10 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 
 ### Musculoskeletal Modeling
 
-- **MyoSuite Integration**: Hill-type muscle models with 290 muscles (full body)
-- **OpenSim Integration**: Biomechanical model validation and analysis
+- **MyoSuite Integration**: Experimental muscle-modeling surface for future biomechanics work
+- **OpenSim Integration**: Experimental biomechanics validation surface
 - **Muscle Dynamics**: Force-length-velocity relationships, activation dynamics
-- **Research-Grade**: Converted from validated OpenSim models (MoBL-ARMS, Rajagopal)
+- **Research Lineage**: Includes conversions from established OpenSim model sources where integrations remain under active development
 
 ### Advanced Analysis
 
@@ -75,7 +75,7 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 **Recommended: Conda** (handles binary dependencies like MuJoCo)
 
 ```bash
-git clone https://github.com/dieterolson/UpstreamDrift.git
+git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
 git lfs install && git lfs pull
 
@@ -90,7 +90,14 @@ python scripts/verify_installation.py
 **Alternative: Pip**
 
 ```bash
-pip install -e ".[dev,engines]"
+# Matches the required PR CI surface (MuJoCo + dev tooling)
+pip install -e ".[dev]"
+
+# Adds Drake and Pinocchio for cross-engine work
+pip install -e ".[dev,all-engines]"
+
+# Adds OpenSim and MyoSuite integrations on a best-effort basis
+pip install -e ".[dev,biomechanics]"
 ```
 
 **Light Installation** (for UI development without heavy physics engines)
@@ -101,6 +108,18 @@ export GOLF_USE_MOCK_ENGINE=1
 ```
 
 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
+
+### Supported Engine Tiers
+
+| Tier         | Engines           | Install Profile                        | Validation                                              |
+| ------------ | ----------------- | -------------------------------------- | ------------------------------------------------------- |
+| Supported    | MuJoCo            | `pip install -e ".[dev]"`              | Required PR CI                                          |
+| Extended     | Drake, Pinocchio  | `pip install -e ".[dev,all-engines]"`  | Nightly cross-engine validation and targeted local runs |
+| Experimental | OpenSim, MyoSuite | `pip install -e ".[dev,biomechanics]"` | Best-effort local validation                            |
+
+See [docs/engines/support_tiers.md](docs/engines/support_tiers.md) for the
+full contract and [docs/engines/engine_capabilities.md](docs/engines/engine_capabilities.md)
+for feature-level support.
 
 ### Development Setup
 
@@ -130,7 +149,7 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 
 ### MuJoCo (Recommended for Biomechanics)
 
-- Full musculoskeletal models (MyoSuite integration)
+- Default simulation stack for contact-rich dynamics and day-to-day development
 - Contact dynamics (ground, ball)
 - 2-28 DOF models with flexible shafts
 - Advanced robotics features
@@ -153,26 +172,28 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 - PINK inverse kinematics
 - **See**: [src/engines/physics_engines/pinocchio/README.md](src/engines/physics_engines/pinocchio/README.md)
 
-### OpenSim (Biomechanical Validation)
+### OpenSim (Experimental Biomechanics)
 
-- Model validation against OpenSim
-- Biomechanical analysis
-- Integration with established workflows
+- Stub-oriented integration surface for future biomechanics validation
+- Not part of the required PR CI contract today
+- Use when explicitly working on biomechanics integration tasks
 - **See**: [src/engines/physics_engines/opensim/README.md](src/engines/physics_engines/opensim/README.md)
 
-### MyoSuite (Muscle Modeling)
+### MyoSuite (Experimental Muscle Modeling)
 
-- Realistic muscle dynamics
-- 290-muscle full body models
-- MuJoCo-based simulation
+- Stub-oriented integration surface for future muscle-modeling work
+- Not part of the required PR CI contract today
+- Use when explicitly working on biomechanics integration tasks
 - **See**: [src/engines/physics_engines/myosuite/README.md](src/engines/physics_engines/myosuite/README.md)
 
-**See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and use cases**.
+**See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and use cases.**
+**See [Supported Engine Tiers](docs/engines/support_tiers.md) for the support and validation contract.**
 
 ## Documentation
 
 - **[User Guide](docs/user_guide/README.md)**: Installation, running simulations, and using the GUI
 - **[Engines](docs/engines/README.md)**: Detailed engine documentation and comparison
+- **[Supported Engine Tiers](docs/engines/support_tiers.md)**: Install profiles and CI coverage expectations
 - **[Development](docs/development/README.md)**: Contributing, architecture, and testing
 - **[API Reference](docs/api/README.md)**: Code documentation and interfaces
 - **[Plans & Roadmap](docs/plans/README.md)**: Implementation plans and future development
@@ -230,7 +251,7 @@ If you use this software in your research, please cite:
   title = {UpstreamDrift: A Unified Platform for Biomechanical Golf Swing Analysis},
   author = {Dieter Olson},
   year = {2026},
-  url = {https://github.com/dieterolson/UpstreamDrift}
+  url = {https://github.com/D-sorganization/UpstreamDrift}
 }
 ```
 

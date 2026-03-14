@@ -16,16 +16,22 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 ```bash
 # Clone the repository
-git clone https://github.com/dieterolson/UpstreamDrift.git
-cd Golf_Modeling_Suite
+git clone https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
 
 # Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install in development mode
+# Install the supported default surface
 pip install -e ".[dev]"
+
+# Optional: add Drake + Pinocchio for cross-engine work
+pip install -e ".[dev,all-engines]"
 ```
+
+See `docs/engines/support_tiers.md` before enabling heavier or experimental
+engine combinations.
 
 ## ✅ Code Standards
 
@@ -63,13 +69,14 @@ python3 -m pytest
 
 ## 🎯 Physics Engine Guidelines
 
-The suite supports 5 physics engines:
+Current support tiers:
 
-- **MuJoCo**: Primary engine for dynamics
-- **Drake**: Multi-body dynamics
-- **Pinocchio**: Rigid body algorithms
-- **OpenSim**: Musculoskeletal modeling
-- **MyoSuite**: Muscle-actuated control
+- **Supported default**: MuJoCo
+- **Extended cross-engine**: Drake, Pinocchio
+- **Experimental / stub**: OpenSim, MyoSuite
+
+See `docs/engines/support_tiers.md` and
+`docs/engines/engine_capabilities.md` before widening an engine-facing change.
 
 When adding engine-specific code:
 
