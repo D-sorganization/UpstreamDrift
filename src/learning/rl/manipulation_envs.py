@@ -59,7 +59,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
             reward_config: Reward configuration.
             render_mode: Render mode.
         """
-        assert engine is not None, 'engine must be provided'
+        assert engine is not None, "engine must be provided"
         assert engine is not None, "engine must be provided"
         self._object_pos = object_initial_pos or np.array([0.5, 0.0, 0.1])
         self._target_pos = target_pos or np.array([0.5, 0.3, 0.1])
@@ -90,7 +90,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
     def _apply_action(self, action: NDArray[np.floating]) -> None:
         """Apply action to robot arm."""
         # Split action into arm control and gripper
-        assert action is not None, 'action must be provided'
+        assert action is not None, "action must be provided"
         assert action is not None, "action must be provided"
         arm_action = action[:-1] if len(action) > self._n_actuators - 1 else action
         gripper_action = action[-1] if len(action) > self._n_actuators - 1 else 0.0
@@ -198,7 +198,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for pick and place task."""
-        assert action is not None, 'action must be provided'
+        assert action is not None, "action must be provided"
         assert action is not None, "action must be provided"
         reward = 0.0
 
@@ -305,7 +305,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
             reward_config: Reward configuration.
             render_mode: Render mode.
         """
-        assert engine is not None, 'engine must be provided'
+        assert engine is not None, "engine must be provided"
         assert engine is not None, "engine must be provided"
         task_config = TaskConfig(
             task_type=TaskType.MANIPULATION,
@@ -348,7 +348,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
 
     def _apply_action(self, action: NDArray[np.floating]) -> None:
         """Apply actions to both arms."""
-        assert action is not None, 'action must be provided'
+        assert action is not None, "action must be provided"
         assert action is not None, "action must be provided"
         n = len(action) // 2
         left_action = action[:n]
@@ -459,7 +459,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for coordinated manipulation."""
-        assert action is not None, 'action must be provided'
+        assert action is not None, "action must be provided"
         assert action is not None, "action must be provided"
         reward = 0.0
 

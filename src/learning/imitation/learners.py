@@ -77,7 +77,7 @@ class ImitationLearner(ABC):
             config: Training configuration.
             device: Compute device.
         """
-        assert observation_dim is not None, 'observation_dim must be provided'
+        assert observation_dim is not None, "observation_dim must be provided"
         assert observation_dim is not None, "observation_dim must be provided"
         self.observation_dim = observation_dim
         self.action_dim = action_dim
@@ -105,7 +105,7 @@ class ImitationLearner(ABC):
         Returns:
             Imitation learner instance.
         """
-        assert observation_space is not None, 'observation_space must be provided'
+        assert observation_space is not None, "observation_space must be provided"
         assert observation_space is not None, "observation_space must be provided"
         obs_dim = int(np.prod(observation_space.shape))
         act_dim = int(np.prod(action_space.shape))
@@ -184,7 +184,7 @@ class BehaviorCloning(ImitationLearner):
         device: str = "cpu",
     ) -> None:
         """Initialize behavior cloning learner."""
-        assert observation_dim is not None, 'observation_dim must be provided'
+        assert observation_dim is not None, "observation_dim must be provided"
         assert observation_dim is not None, "observation_dim must be provided"
         super().__init__(observation_dim, action_dim, config, device)
         self._build_policy()
@@ -225,7 +225,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             Predicted actions.
         """
-        assert x is not None, 'x must be provided'
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         for i, layer in enumerate(self._policy):
             x = x @ layer["W"] + layer["b"]
@@ -248,7 +248,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             Mean squared error loss.
         """
-        assert observations is not None, 'observations must be provided'
+        assert observations is not None, "observations must be provided"
         assert observations is not None, "observations must be provided"
         predictions = self._forward(observations)
         return float(np.mean((predictions - actions) ** 2))
@@ -267,7 +267,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             List of gradient dictionaries for each layer.
         """
-        assert observations is not None, 'observations must be provided'
+        assert observations is not None, "observations must be provided"
         assert observations is not None, "observations must be provided"
         batch_size = len(observations)
 
@@ -314,7 +314,7 @@ class BehaviorCloning(ImitationLearner):
             Training history.
         """
         # Get training data
-        assert dataset is not None, 'dataset must be provided'
+        assert dataset is not None, "dataset must be provided"
         assert dataset is not None, "dataset must be provided"
         observations, actions = dataset.to_state_action_pairs()
 
@@ -389,7 +389,7 @@ class BehaviorCloning(ImitationLearner):
         Returns:
             Predicted action.
         """
-        assert observation is not None, 'observation must be provided'
+        assert observation is not None, "observation must be provided"
         assert observation is not None, "observation must be provided"
         if observation.ndim == 1:
             observation = observation.reshape(1, -1)
@@ -407,7 +407,7 @@ class BehaviorCloning(ImitationLearner):
         Args:
             path: Path to save file.
         """
-        assert path is not None, 'path must be provided'
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         path = Path(path)
         data = {
@@ -433,7 +433,7 @@ class BehaviorCloning(ImitationLearner):
         Args:
             path: Path to load file.
         """
-        assert path is not None, 'path must be provided'
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         path = Path(path)
         data = np.load(path, allow_pickle=True)
@@ -465,7 +465,7 @@ class DAgger(ImitationLearner):
         device: str = "cpu",
     ) -> None:
         """Initialize DAgger learner."""
-        assert observation_dim is not None, 'observation_dim must be provided'
+        assert observation_dim is not None, "observation_dim must be provided"
         assert observation_dim is not None, "observation_dim must be provided"
         super().__init__(observation_dim, action_dim, config, device)
         self._bc = BehaviorCloning(observation_dim, action_dim, config, device)
@@ -487,7 +487,7 @@ class DAgger(ImitationLearner):
         Returns:
             Training history.
         """
-        assert dataset is not None, 'dataset must be provided'
+        assert dataset is not None, "dataset must be provided"
         assert dataset is not None, "dataset must be provided"
         self._aggregated_dataset = dataset
         return self._bc.train(dataset, validation_split)
@@ -495,7 +495,7 @@ class DAgger(ImitationLearner):
     @staticmethod
     def _compute_beta(iteration: int, iterations: int, schedule: str) -> float:
         """Compute the expert-mixing probability for a DAgger iteration."""
-        assert iteration is not None, 'iteration must be provided'
+        assert iteration is not None, "iteration must be provided"
         assert iteration is not None, "iteration must be provided"
         if schedule == "linear":
             return 1.0 - iteration / iterations
@@ -509,7 +509,7 @@ class DAgger(ImitationLearner):
         max_steps: int,
     ) -> tuple[Demonstration, float]:
         """Roll out one trajectory, mixing policy and expert actions."""
-        assert expert is not None, 'expert must be provided'
+        assert expert is not None, "expert must be provided"
         assert expert is not None, "expert must be provided"
         obs, info = env.reset()
         demo_timestamps = [0.0]
@@ -612,19 +612,19 @@ class DAgger(ImitationLearner):
         Returns:
             Predicted action.
         """
-        assert observation is not None, 'observation must be provided'
+        assert observation is not None, "observation must be provided"
         assert observation is not None, "observation must be provided"
         return self._bc.predict(observation, deterministic)
 
     def save(self, path: str | Path) -> None:
         """Save policy."""
-        assert path is not None, 'path must be provided'
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         self._bc.save(path)
 
     def load(self, path: str | Path) -> None:
         """Load policy."""
-        assert path is not None, 'path must be provided'
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         self._bc.load(path)
 
@@ -647,7 +647,7 @@ class GAIL(ImitationLearner):
         device: str = "cpu",
     ) -> None:
         """Initialize GAIL learner."""
-        assert observation_dim is not None, 'observation_dim must be provided'
+        assert observation_dim is not None, "observation_dim must be provided"
         assert observation_dim is not None, "observation_dim must be provided"
         super().__init__(observation_dim, action_dim, config, device)
         self._policy: list[dict[str, NDArray[np.floating]]] = []
@@ -700,7 +700,7 @@ class GAIL(ImitationLearner):
 
     def _forward_policy(self, x: NDArray[np.floating]) -> NDArray[np.floating]:
         """Forward pass through policy network."""
-        assert x is not None, 'x must be provided'
+        assert x is not None, "x must be provided"
         assert x is not None, "x must be provided"
         for i, layer in enumerate(self._policy):
             x = x @ layer["W"] + layer["b"]
@@ -712,7 +712,7 @@ class GAIL(ImitationLearner):
         self, state: NDArray[np.floating], action: NDArray[np.floating]
     ) -> NDArray[np.floating]:
         """Forward pass through discriminator."""
-        assert state is not None, 'state must be provided'
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         x = np.concatenate([state, action], axis=-1)
         for i, layer in enumerate(self._discriminator):
@@ -741,7 +741,7 @@ class GAIL(ImitationLearner):
             Training history.
         """
         # Get expert data
-        assert dataset is not None, 'dataset must be provided'
+        assert dataset is not None, "dataset must be provided"
         assert dataset is not None, "dataset must be provided"
         expert_states, expert_actions = dataset.to_state_action_pairs()
 
@@ -801,7 +801,7 @@ class GAIL(ImitationLearner):
         Returns:
             Predicted action.
         """
-        assert observation is not None, 'observation must be provided'
+        assert observation is not None, "observation must be provided"
         assert observation is not None, "observation must be provided"
         if observation.ndim == 1:
             observation = observation.reshape(1, -1)
@@ -830,7 +830,7 @@ class GAIL(ImitationLearner):
         Returns:
             GAIL reward value.
         """
-        assert state is not None, 'state must be provided'
+        assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         if state.ndim == 1:
             state = state.reshape(1, -1)
@@ -843,7 +843,7 @@ class GAIL(ImitationLearner):
 
     def save(self, path: str | Path) -> None:
         """Save GAIL networks."""
-        assert path is not None, 'path must be provided'
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         path = Path(path)
         data = {
@@ -862,7 +862,7 @@ class GAIL(ImitationLearner):
 
     def load(self, path: str | Path) -> None:
         """Load GAIL networks."""
-        assert path is not None, 'path must be provided'
+        assert path is not None, "path must be provided"
         assert path is not None, "path must be provided"
         path = Path(path)
         data = np.load(path, allow_pickle=True)

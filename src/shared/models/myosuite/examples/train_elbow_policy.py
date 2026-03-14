@@ -31,7 +31,9 @@ try:
     from stable_baselines3 import SAC
     from stable_baselines3.common.callbacks import EvalCallback
 except ImportError:
-    logger.error("stable-baselines3 not installed. Installation: pip install stable-baselines3")
+    logger.error(
+        "stable-baselines3 not installed. Installation: pip install stable-baselines3"
+    )
     sys.exit(1)
 
 
@@ -62,8 +64,8 @@ def train_policy(
     Returns:
         Trained SAC model.
     """
-    assert env is not None, 'env must be provided'
-    assert env is not None, 'env must be provided'
+    assert env is not None, "env must be provided"
+    assert env is not None, "env must be provided"
     logger.info("Training SAC policy for %d timesteps...", total_timesteps)
     logger.info("=" * 60)
 
@@ -111,8 +113,8 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
         env: Gym environment.
         n_episodes: Number of evaluation episodes.
     """
-    assert model is not None, 'model must be provided'
-    assert model is not None, 'model must be provided'
+    assert model is not None, "model must be provided"
+    assert model is not None, "model must be provided"
     logger.info("Evaluating policy for %d episodes...", n_episodes)
     logger.info("=" * 60)
 
@@ -137,7 +139,9 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             except (RuntimeError, OSError, AttributeError):
                 pass
 
-        logger.info("Episode %d: Steps=%d, Reward=%.2f", episode + 1, step, total_reward)
+        logger.info(
+            "Episode %d: Steps=%d, Reward=%.2f", episode + 1, step, total_reward
+        )
 
     env.close()
 

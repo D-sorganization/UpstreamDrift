@@ -53,7 +53,7 @@ class SystemIdentifier:
             model: Physics engine to tune.
             param_bounds: Bounds for each parameter.
         """
-        assert model is not None, 'model must be provided'
+        assert model is not None, "model must be provided"
         assert model is not None, "model must be provided"
         self.model = model
         self.param_bounds = param_bounds or self._default_bounds()
@@ -103,7 +103,7 @@ class SystemIdentifier:
         Args:
             param_vector: Flattened parameter vector.
         """
-        assert param_vector is not None, 'param_vector must be provided'
+        assert param_vector is not None, "param_vector must be provided"
         assert param_vector is not None, "param_vector must be provided"
         idx = 0
         param_names = list(self.param_bounds.keys())
@@ -160,7 +160,7 @@ class SystemIdentifier:
         Returns:
             Simulated state trajectory.
         """
-        assert initial_state is not None, 'initial_state must be provided'
+        assert initial_state is not None, "initial_state must be provided"
         assert initial_state is not None, "initial_state must be provided"
         n_steps = len(actions)
         n_q = len(initial_state) // 2
@@ -216,7 +216,7 @@ class SystemIdentifier:
             Weighted mean squared error.
         """
         # Ensure same length
-        assert sim_trajectory is not None, 'sim_trajectory must be provided'
+        assert sim_trajectory is not None, "sim_trajectory must be provided"
         assert sim_trajectory is not None, "sim_trajectory must be provided"
         n = min(len(sim_trajectory), len(real_trajectory))
         sim = sim_trajectory[:n]
@@ -250,7 +250,7 @@ class SystemIdentifier:
         Returns:
             Identification result.
         """
-        assert trajectories is not None, 'trajectories must be provided'
+        assert trajectories is not None, "trajectories must be provided"
         assert trajectories is not None, "trajectories must be provided"
         if params_to_identify is None:
             params_to_identify = list(self.param_bounds.keys())
@@ -295,7 +295,7 @@ class SystemIdentifier:
         params: NDArray[np.floating],
         trajectories: list[Demonstration],
     ) -> float:
-        assert params is not None, 'params must be provided'
+        assert params is not None, "params must be provided"
         assert params is not None, "params must be provided"
         self._apply_params(params)
         total_error = 0.0
@@ -336,7 +336,7 @@ class SystemIdentifier:
         max_iterations: int,
         tolerance: float,
     ) -> tuple[NDArray[np.floating], float, bool, int]:
-        assert objective is not None, 'objective must be provided'
+        assert objective is not None, "objective must be provided"
         assert objective is not None, "objective must be provided"
         converged = False
         _iteration = 0
@@ -379,7 +379,7 @@ class SystemIdentifier:
         Returns:
             Dictionary of gap metrics.
         """
-        assert sim_trajectory is not None, 'sim_trajectory must be provided'
+        assert sim_trajectory is not None, "sim_trajectory must be provided"
         assert sim_trajectory is not None, "sim_trajectory must be provided"
         n = min(len(sim_trajectory), len(real_trajectory))
         sim = sim_trajectory[:n]
@@ -421,7 +421,7 @@ class SystemIdentifier:
             Validation metrics.
         """
         # Apply identified parameters
-        assert test_trajectories is not None, 'test_trajectories must be provided'
+        assert test_trajectories is not None, "test_trajectories must be provided"
         assert test_trajectories is not None, "test_trajectories must be provided"
         param_vector = np.array(
             [identified_params.get(name, 1.0) for name in self.param_bounds],

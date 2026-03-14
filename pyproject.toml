@@ -258,7 +258,7 @@ pythonpath = [
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --strict-markers --strict-config"
+addopts = "-ra -q --strict-markers --strict-config --durations=20 --benchmark-disable -n auto --dist loadscope"
 asyncio_mode = "auto"
 # Prevent ImportPathMismatchError from conftest.py files in engine subdirectories
 norecursedirs = [
