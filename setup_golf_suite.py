@@ -40,6 +40,9 @@ def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
     Returns:
         Optimized PIL Image.
     """
+    assert img is not None, "Image cannot be None"
+    assert size > 0, "Size must be strictly positive"
+
     from PIL import ImageEnhance, ImageFilter
 
     if size <= 32:
@@ -59,12 +62,16 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
 
     Orthogonality: Decouples image processing from file system management.
     """
+    assert source_path is not None, "Source path must not be None"
+    assert output_path is not None, "Output path must not be None"
+
     if not source_path.exists():
         logger.error(f"Source image not found: {source_path}")
         return False
 
     try:
         from PIL import Image
+        from PIL.Image import Resampling
 
         img = Image.open(source_path)
         if img.mode != "RGBA":
@@ -75,7 +82,7 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
         icon_images = []
 
         for size in sizes:
-            resized = img.resize((size, size), Image.Resampling.LANCZOS)
+            resized = img.resize((size, size), Resampling.LANCZOS)
             optimized = _apply_icon_optimizations(resized, size)
             icon_images.append(optimized)
 
@@ -83,7 +90,8 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
         icon_images.sort(key=lambda x: x.width, reverse=True)
 
         # Ensure output directory exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        out_dir = output_path.parent
+        out_dir.mkdir(parents=True, exist_ok=True)
 
         icon_images[0].save(
             output_path,
@@ -107,6 +115,10 @@ def create_shortcut_windows(
     description: str,
 ) -> bool:
     """Create a desktop shortcut using PowerShell interaction."""
+    assert target_script, "Target script must not be empty"
+    assert working_dir is not None, "Working directory must be provided"
+    assert icon_path is not None, "Icon path must be provided"
+
     python_exe = sys.executable
 
     # PowerShell script to create shortcut
@@ -132,9 +144,8 @@ def create_shortcut_windows(
         logger.info("Desktop shortcut created successfully.")
         return True
     except subprocess.CalledProcessError as e:
-        error_msg = (
-            e.stderr.decode("utf-8", errors="replace") if e.stderr else "Unknown error"
-        )
+        err = e.stderr
+        error_msg = err.decode("utf-8", errors="replace") if err else "Unknown error"
         logger.error(f"Failed to create shortcut: {e}\n{error_msg}")
         return False
 
