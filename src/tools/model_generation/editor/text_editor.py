@@ -87,6 +87,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             max_history: Maximum number of undo states to keep
         """
         assert max_history is not None, "max_history must be provided"
+        assert max_history is not None, "max_history must be provided"
         self._content: str = ""
         self._original_content: str = ""
         self._file_path: Path | None = None
@@ -133,6 +134,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             content: URDF XML content
             description: Description for history
         """
+        assert content is not None, "content must be provided"
         assert content is not None, "content must be provided"
         self._content = content
         self._original_content = content
@@ -196,6 +198,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             List of validation messages
         """
         assert content is not None, "content must be provided"
+        assert content is not None, "content must be provided"
         if content == self._content:
             return []
 
@@ -232,6 +235,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             Validation messages
         """
         assert position is not None, "position must be provided"
+        assert position is not None, "position must be provided"
         new_content = self._content[:position] + text + self._content[position:]
         return self.set_content(new_content, description)
 
@@ -252,6 +256,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
         Returns:
             Validation messages
         """
+        assert start is not None, "start must be provided"
         assert start is not None, "start must be provided"
         new_content = self._content[:start] + self._content[end:]
         return self.set_content(new_content, description)
@@ -276,6 +281,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             Validation messages
         """
         assert start is not None, "start must be provided"
+        assert start is not None, "start must be provided"
         new_content = self._content[:start] + text + self._content[end:]
         return self.set_content(new_content, description)
 
@@ -296,6 +302,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
         Returns:
             Validation messages
         """
+        assert element_name is not None, "element_name must be provided"
         assert element_name is not None, "element_name must be provided"
         if old_content not in self._content:
             logger.warning(f"Content not found: {old_content[:50]}...")
@@ -379,6 +386,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             True if successful
         """
         assert index is not None, "index must be provided"
+        assert index is not None, "index must be provided"
         if index < 0 or index >= len(self._history):
             logger.error(f"Invalid version index: {index}")
             return False
@@ -390,6 +398,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
 
     def _add_to_history(self, description: str) -> None:
         """Add current content to history."""
+        assert description is not None, "description must be provided"
         assert description is not None, "description must be provided"
         checksum = hashlib.md5(self._content.encode()).hexdigest()
 
@@ -449,6 +458,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
             Line content or None
         """
         assert line_number is not None, "line_number must be provided"
+        assert line_number is not None, "line_number must be provided"
         lines = self._content.splitlines()
         if 1 <= line_number <= len(lines):
             return lines[line_number - 1]
@@ -467,6 +477,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
         Returns:
             List of (line, column, matched_text) tuples
         """
+        assert pattern is not None, "pattern must be provided"
         assert pattern is not None, "pattern must be provided"
         results = []
         lines = self._content.splitlines()
@@ -503,6 +514,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
         Returns:
             Number of replacements made
         """
+        assert search is not None, "search must be provided"
         assert search is not None, "search must be provided"
         if regex:
             new_content, count = re.subn(search, replace, self._content)
@@ -552,6 +564,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
     ) -> None:
         """Recursively add indentation to XML element."""
         assert elem is not None, "elem must be provided"
+        assert elem is not None, "elem must be provided"
         i = "\n" + level * indent
         if len(elem):
             if not elem.text or not elem.text.strip():
@@ -577,6 +590,7 @@ class URDFTextEditor(ValidationMixin, DiffMixin):
         Returns:
             Dict with element info or None
         """
+        assert line is not None, "line must be provided"
         assert line is not None, "line must be provided"
         lines = self._content.splitlines()
         if line < 1 or line > len(lines):

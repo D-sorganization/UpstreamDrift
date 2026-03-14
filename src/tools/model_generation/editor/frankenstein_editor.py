@@ -112,6 +112,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             The loaded ParsedModel
         """
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         self._save_state()
 
         model = self._parser.parse(source, read_only=read_only)
@@ -137,6 +138,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             The created ParsedModel
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         self._save_state()
 
@@ -171,6 +173,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             True if unloaded
         """
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         if model_id in self._models:
             self._save_state()
             del self._models[model_id]
@@ -197,6 +200,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             The copied model
         """
+        assert source_id is not None, "source_id must be provided"
         assert source_id is not None, "source_id must be provided"
         source = self._models.get(source_id)
         if not source:
@@ -227,6 +231,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             Dict with link names and children
         """
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
             return {}
@@ -256,6 +261,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             List of link names in the subtree
         """
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
             return []
@@ -272,6 +278,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             The connecting Joint or None
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
@@ -295,6 +302,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             The model if found and writable, otherwise None.
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
@@ -326,6 +334,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if deleted
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
@@ -386,6 +395,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             True if deleted
         """
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -432,6 +442,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if renamed
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
@@ -484,6 +495,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             True if renamed
         """
         assert model_id is not None, "model_id must be provided"
+        assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
             return False
@@ -521,6 +533,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if modified
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._get_writable_model(model_id)
         if not model:
@@ -571,6 +584,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if attached
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
@@ -632,6 +646,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
         Returns:
             True if detached
         """
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:
@@ -704,6 +719,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
             Comparison results
         """
         assert model_id_a is not None, "model_id_a must be provided"
+        assert model_id_a is not None, "model_id_a must be provided"
         model_a = self._models.get(model_id_a)
         model_b = self._models.get(model_id_b)
 
@@ -746,6 +762,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
     ) -> str:
         """Generate a unique name by appending a number if needed."""
         assert base_name is not None, "base_name must be provided"
+        assert base_name is not None, "base_name must be provided"
         if base_name not in existing_names:
             return base_name
 
@@ -769,6 +786,7 @@ class FrankensteinEditor(ClipboardMixin, HistoryMixin, TransformMixin):
 
     def get_model_statistics(self, model_id: str) -> dict[str, Any]:
         """Get statistics about a model."""
+        assert model_id is not None, "model_id must be provided"
         assert model_id is not None, "model_id must be provided"
         model = self._models.get(model_id)
         if not model:

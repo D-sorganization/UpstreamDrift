@@ -139,6 +139,7 @@ class InertiaResult:
         """Create default inertia (small sphere approximation)."""
         # Default to 0.1 kg*m^2 (reasonable for small-medium rigid body)
         assert mass is not None, "mass must be provided"
+        assert mass is not None, "mass must be provided"
         i_default = 0.1 * mass
         return cls(
             ixx=i_default,
@@ -171,6 +172,7 @@ class MeshInertiaCalculator:
         Args:
             default_density: Default density in kg/m^3 for uniform density mode
         """
+        assert default_density is not None, "default_density must be provided"
         assert default_density is not None, "default_density must be provided"
         self.default_density = default_density
         self._trimesh_available = self._check_trimesh()
@@ -408,6 +410,7 @@ class MeshInertiaCalculator:
         Returns:
             New InertiaResult in transformed frame
         """
+        assert inertia is not None, "inertia must be provided"
         assert inertia is not None, "inertia must be provided"
         I_original = inertia.as_matrix()
         mass = inertia.mass

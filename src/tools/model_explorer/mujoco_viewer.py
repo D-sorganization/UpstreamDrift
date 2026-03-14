@@ -217,6 +217,7 @@ class MuJoCoOffscreenRenderer:
             height: Render height in pixels.
         """
         assert width is not None, "width must be provided"
+        assert width is not None, "width must be provided"
         self.width = width
         self.height = height
         self._model: Any | None = None
@@ -248,6 +249,7 @@ class MuJoCoOffscreenRenderer:
         Returns:
             True if loaded successfully.
         """
+        assert urdf_path is not None, "urdf_path must be provided"
         assert urdf_path is not None, "urdf_path must be provided"
         if not MUJOCO_AVAILABLE:
             logger.warning("MuJoCo not available")
@@ -318,6 +320,7 @@ class MuJoCoOffscreenRenderer:
             Fixed URDF content.
         """
         assert urdf_content is not None, "urdf_content must be provided"
+        assert urdf_content is not None, "urdf_content must be provided"
         import re
 
         min_mass = 0.001  # 1 gram minimum
@@ -333,6 +336,7 @@ class MuJoCoOffscreenRenderer:
         # Fix zero inertia values
         def fix_inertia_attr(attr: str, content: str) -> str:
             """Replace near-zero diagonal inertia values with the minimum."""
+            assert attr is not None, "attr must be provided"
             assert attr is not None, "attr must be provided"
             pattern = rf'{attr}="([^"]+)"'
 
@@ -377,6 +381,7 @@ class MuJoCoOffscreenRenderer:
         Returns:
             True if loaded successfully.
         """
+        assert mjcf_content is not None, "mjcf_content must be provided"
         assert mjcf_content is not None, "mjcf_content must be provided"
         if not MUJOCO_AVAILABLE:
             logger.warning("MuJoCo not available")
@@ -462,6 +467,7 @@ class MuJoCoOffscreenRenderer:
             flags: New visualization flags configuration.
         """
         assert flags is not None, "flags must be provided"
+        assert flags is not None, "flags must be provided"
         self.vis_flags = flags
         self._apply_visualization_flags()
 
@@ -505,11 +511,13 @@ class MuJoCoOffscreenRenderer:
     def rotate_camera(self, d_azimuth: float, d_elevation: float) -> None:
         """Rotate camera by delta angles."""
         assert d_azimuth is not None, "d_azimuth must be provided"
+        assert d_azimuth is not None, "d_azimuth must be provided"
         self.azimuth += d_azimuth
         self.elevation = max(-89, min(89, self.elevation + d_elevation))
 
     def zoom_camera(self, factor: float) -> None:
         """Zoom camera by factor."""
+        assert factor is not None, "factor must be provided"
         assert factor is not None, "factor must be provided"
         self.distance *= factor
         self.distance = max(0.5, min(20.0, self.distance))
@@ -699,6 +707,7 @@ class MuJoCoViewerWidget(QWidget):
             urdf_path: Optional path to URDF file for mesh resolution.
         """
         assert urdf_content is not None, "urdf_content must be provided"
+        assert urdf_content is not None, "urdf_content must be provided"
         self._urdf_content = urdf_content
         self._urdf_path = urdf_path
 
@@ -749,6 +758,7 @@ class MuJoCoViewerWidget(QWidget):
         Returns:
             List of validation error messages.
         """
+        assert urdf_content is not None, "urdf_content must be provided"
         assert urdf_content is not None, "urdf_content must be provided"
         errors = []
 
@@ -856,6 +866,7 @@ class MuJoCoViewerWidget(QWidget):
             checked: Whether collision geometry should be shown.
         """
         assert checked is not None, "checked must be provided"
+        assert checked is not None, "checked must be provided"
         self._vis_flags.show_collision = checked
         self._update_renderer_flags()
         logger.info(f"Collision visualization: {checked}")
@@ -866,6 +877,7 @@ class MuJoCoViewerWidget(QWidget):
         Args:
             checked: Whether coordinate frames should be shown.
         """
+        assert checked is not None, "checked must be provided"
         assert checked is not None, "checked must be provided"
         self._vis_flags.show_frames = checked
         self._update_renderer_flags()
@@ -878,6 +890,7 @@ class MuJoCoViewerWidget(QWidget):
             checked: Whether joint axes and limits should be shown.
         """
         assert checked is not None, "checked must be provided"
+        assert checked is not None, "checked must be provided"
         self._vis_flags.show_joint_limits = checked
         self._update_renderer_flags()
         logger.info(f"Joint limits visualization: {checked}")
@@ -888,6 +901,7 @@ class MuJoCoViewerWidget(QWidget):
         Args:
             checked: Whether contact points and forces should be shown.
         """
+        assert checked is not None, "checked must be provided"
         assert checked is not None, "checked must be provided"
         self._vis_flags.show_contacts = checked
         self._update_renderer_flags()
@@ -957,6 +971,7 @@ class MuJoCoViewerWidget(QWidget):
         Args:
             flags: New visualization configuration.
         """
+        assert flags is not None, "flags must be provided"
         assert flags is not None, "flags must be provided"
         self._vis_flags = flags
 

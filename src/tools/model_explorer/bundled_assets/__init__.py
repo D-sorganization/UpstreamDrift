@@ -265,6 +265,7 @@ class BundledAssets:
         """
 
         assert model_category is not None, "model_category must be provided"
+        assert model_category is not None, "model_category must be provided"
         if model_category == "human_models":
             metadata_path = self.human_models_dir / model_name / "metadata.json"
 

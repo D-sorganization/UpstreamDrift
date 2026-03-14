@@ -77,6 +77,7 @@ class ManualBuilder(BaseURDFBuilder):
             validate_on_add: If True, validate each addition immediately
         """
         assert robot_name is not None, "robot_name must be provided"
+        assert robot_name is not None, "robot_name must be provided"
         super().__init__(robot_name)
         self._handedness = handedness
         self._validate_on_add = validate_on_add
@@ -174,6 +175,7 @@ class ManualBuilder(BaseURDFBuilder):
             Self for method chaining
         """
         assert segment_data is not None, "segment_data must be provided"
+        assert segment_data is not None, "segment_data must be provided"
         link = self._link_from_dict(segment_data)
         self.add_link(link)
 
@@ -245,6 +247,7 @@ class ManualBuilder(BaseURDFBuilder):
             Self for method chaining
         """
         assert name is not None, "name must be provided"
+        assert name is not None, "name must be provided"
         self._joints = [j for j in self._joints if j.name != name]
         return self
 
@@ -303,6 +306,7 @@ class ManualBuilder(BaseURDFBuilder):
         Returns:
             Self for method chaining
         """
+        assert axis is not None, "axis must be provided"
         assert axis is not None, "axis must be provided"
         axis_idx = {"x": 0, "y": 1, "z": 2}[axis.lower()]
 
@@ -370,6 +374,7 @@ class ManualBuilder(BaseURDFBuilder):
         """
         # Create copy
         assert axis is not None, "axis must be provided"
+        assert axis is not None, "axis must be provided"
         new_builder = ManualBuilder(
             robot_name=self._robot_name,
             handedness=self._handedness,
@@ -435,6 +440,7 @@ class ManualBuilder(BaseURDFBuilder):
     def _get_descendants(self, link_name: str) -> set[str]:
         """Get all descendant link names."""
         assert link_name is not None, "link_name must be provided"
+        assert link_name is not None, "link_name must be provided"
         descendants: set[str] = set()
         queue = [link_name]
 
@@ -449,6 +455,7 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _link_from_dict(self, data: dict[str, Any]) -> Link:
         """Create Link from dictionary data."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         name = data["name"]
 
@@ -517,6 +524,7 @@ class ManualBuilder(BaseURDFBuilder):
     def _joint_from_dict(self, data: dict[str, Any]) -> Joint:
         """Create Joint from dictionary data."""
         assert data is not None, "data must be provided"
+        assert data is not None, "data must be provided"
         name = f"{data['parent']}_to_{data['name']}"
         joint_data = data.get("joint", {})
         geom_data = data.get("geometry", {})
@@ -566,6 +574,7 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _geometry_from_dict(self, data: dict[str, Any]) -> Geometry:
         """Create Geometry from dictionary data."""
+        assert data is not None, "data must be provided"
         assert data is not None, "data must be provided"
         shape = data.get("shape", "box").lower()
         dims = data.get("dimensions", {})

@@ -286,6 +286,7 @@ def quick_build(
         result = quick_build(height_m=1.80, output_path="./humanoid.urdf")
     """
     assert height_m is not None, "height_m must be provided"
+    assert height_m is not None, "height_m must be provided"
     builder = ParametricBuilder("humanoid")
 
     if preset:

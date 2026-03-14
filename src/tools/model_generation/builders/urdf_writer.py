@@ -64,6 +64,7 @@ class URDFWriter:
             URDF XML string
         """
         assert robot_name is not None, "robot_name must be provided"
+        assert robot_name is not None, "robot_name must be provided"
         lines: list[str] = []
 
         # XML declaration
@@ -102,6 +103,7 @@ class URDFWriter:
 
     def _write_link(self, link: Link, level: int) -> list[str]:
         """Generate XML for a link."""
+        assert link is not None, "link must be provided"
         assert link is not None, "link must be provided"
         lines: list[str] = []
         indent = self.indent * level
@@ -161,6 +163,7 @@ class URDFWriter:
     def _write_joint(self, joint: Joint, level: int) -> list[str]:
         """Generate XML for a joint."""
         assert joint is not None, "joint must be provided"
+        assert joint is not None, "joint must be provided"
         lines: list[str] = []
         indent = self.indent * level
         indent2 = self.indent * (level + 1)
@@ -219,6 +222,7 @@ class URDFWriter:
     def _write_geometry(self, geometry: Geometry, level: int) -> list[str]:
         """Generate XML for geometry."""
         assert geometry is not None, "geometry must be provided"
+        assert geometry is not None, "geometry must be provided"
         lines: list[str] = []
         indent = self.indent * level
         indent2 = self.indent * (level + 1)
@@ -259,6 +263,7 @@ class URDFWriter:
     def _write_material_definition(self, material: Material, level: int) -> list[str]:
         """Generate XML for material definition."""
         assert material is not None, "material must be provided"
+        assert material is not None, "material must be provided"
         lines: list[str] = []
         indent = self.indent * level
         indent2 = self.indent * (level + 1)
@@ -282,6 +287,7 @@ class URDFWriter:
     ) -> dict[str, Material]:
         """Collect all unique materials from links."""
         assert links is not None, "links must be provided"
+        assert links is not None, "links must be provided"
         materials: dict[str, Material] = {}
 
         # Add materials from links
@@ -304,6 +310,7 @@ class URDFWriter:
     ) -> list[Link]:
         """Sort links so parents come before children."""
         # Build parent map
+        assert links is not None, "links must be provided"
         assert links is not None, "links must be provided"
         parent_map: dict[str, str | None] = {}
         for joint in joints:
@@ -346,6 +353,7 @@ class URDFWriter:
         Delegates to the shared utilities in
         ``model_generation.core.composite_joints``.
         """
+        assert links is not None, "links must be provided"
         assert links is not None, "links must be provided"
         if not self.expand_composite_joints:
             return links, joints

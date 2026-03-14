@@ -454,6 +454,7 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
             ValueError: If parameters are invalid
         """
         assert arm_length_m is not None, "arm_length_m must be provided"
+        assert arm_length_m is not None, "arm_length_m must be provided"
         super().__init__(robot_name="pendulum_putter")
 
         # Validate parameters
@@ -487,6 +488,7 @@ class PendulumPutterModelBuilder(BaseURDFBuilder):
 
     def _create_stand_config(self, shoulder_height: float) -> StandConfig:
         """Create stand configuration for given shoulder height."""
+        assert shoulder_height is not None, "shoulder_height must be provided"
         assert shoulder_height is not None, "shoulder_height must be provided"
         base_height = 0.05
         post_height = shoulder_height - base_height
