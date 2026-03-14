@@ -205,31 +205,32 @@ jobs:
                       if len(issue_title) > 100:
                           issue_title = issue_title[:97] + "..."
 
-                      issue_body = f"""## Review Comment from {source}
-
-          Source PR: #{pr_num} - {pr_title}
-          File: `{file_path}` (line {line})
-          Original Comment: {html_url}
-
-          ---
-
-          ### Feedback
-
-          {body}
-
-          ---
-
-          ### Context
-
-          - PR Author: @{pr_author}
-          - Branch: `{pr_branch}`
-          - Reviewed by: {author}
-          - Date: {created_at}
-
-          ---
-
-          This issue was auto-generated from a PR review comment.
-          """
+                      issue_body = "\n".join([
+                          f"## Review Comment from {source}",
+                          "",
+                          f"**Source PR:** #{pr_num} - {pr_title}",
+                          f"**File:** `{file_path}` (line {line})",
+                          f"**Original Comment:** {html_url}",
+                          "",
+                          "---",
+                          "",
+                          "### Feedback",
+                          "",
+                          body,
+                          "",
+                          "---",
+                          "",
+                          "### Context",
+                          "",
+                          f"- **PR Author:** @{pr_author}",
+                          f"- **Branch:** `{pr_branch}`",
+                          f"- **Reviewed by:** {author}",
+                          f"- **Date:** {created_at}",
+                          "",
+                          "---",
+                          "",
+                          "*This issue was auto-generated from a PR review comment.*",
+                      ])
 
                       # Create the issue
                       try:

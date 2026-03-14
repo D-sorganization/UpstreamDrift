@@ -24,7 +24,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install radon
         run: pip install radon
@@ -102,7 +102,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install jscpd
         run: npm install -g jscpd
@@ -141,35 +141,20 @@ jobs:
 
           if [ -f "./jscpd-report/jscpd-report.json" ]; then
             # Parse JSON report
-            total_lines=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('statistics',{}).get('total',{}).get('lines',0))" 2>/dev/null || echo "0")
-            dup_lines=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('statistics',{}).get('total',{}).get('duplicatedLines',0))" 2>/dev/null || echo "0")
-            dup_percent=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(f\"{d.get('statistics',{}).get('total',{}).get('percentage',0):.2f}\")" 2>/dev/null || echo "0")
-            clones=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('duplicates',[])))" 2>/dev/null || echo "0")
-
-            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Total Lines Analyzed | $total_lines |" >> $GITHUB_STEP_SUMMARY
-            echo "| Duplicated Lines | $dup_lines |" >> $GITHUB_STEP_SUMMARY
-            echo "| Duplication Percentage | ${dup_percent}% |" >> $GITHUB_STEP_SUMMARY
-            echo "| Clone Instances | $clones |" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-
-            # Show top clones if any
-            if [ "$clones" != "0" ]; then
-              echo "### Top Duplications" >> $GITHUB_STEP_SUMMARY
-              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-              cat ./jscpd-report/jscpd-report.json | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-for i, dup in enumerate(d.get('duplicates', [])[:10]):
-    first = dup.get('firstFile', {})
-    second = dup.get('secondFile', {})
-    lines = dup.get('lines', 0)
-    print(f\"{i+1}. {lines} lines duplicated:\")
-    print(f\"   {first.get('name','')}:{first.get('startLoc',{}).get('line','')}\")
-    print(f\"   {second.get('name','')}:{second.get('startLoc',{}).get('line','')}\")
-    print()
-" 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Could not parse duplicates" >> $GITHUB_STEP_SUMMARY
+              python3 <<'PYCODE' 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Could not parse duplicates" >> $GITHUB_STEP_SUMMARY
+              import json
+              from pathlib import Path
+                            report = Path('./jscpd-report/jscpd-report.json')
+              data = json.loads(report.read_text())
+              for i, dup in enumerate(data.get('duplicates', [])[:10], start=1):
+              first = dup.get('firstFile', {})
+              second = dup.get('secondFile', {})
+              lines = dup.get('lines', 0)
+              print(f"{i}. {lines} lines duplicated:")
+              print(f"   {first.get('name', '')}:{first.get('startLoc', {}).get('line', '')}")
+              print(f"   {second.get('name', '')}:{second.get('startLoc', {}).get('line', '')}")
+              print()
+              PYCODE
               echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             fi
           else
