@@ -184,7 +184,6 @@ async def generate_dataset(
     Requires a loaded engine (POST /engines/{type}/load first).
     """
     assert request is not None, "request must be provided"
-    assert request is not None, "request must be provided"
     engine = _require_active_engine(engine_manager)
 
     try:
@@ -244,7 +243,6 @@ async def import_swing_capture(
     capture data and converts it to joint-space trajectories.
     """
     assert request is not None, "request must be provided"
-    assert request is not None, "request must be provided"
     from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
 
     importer = SwingCaptureImporter(target_frame_rate=request.target_frame_rate)
@@ -294,7 +292,6 @@ async def get_control_state(
     for the currently loaded engine.
     """
     assert engine_manager is not None, "engine_manager must be provided"
-    assert engine_manager is not None, "engine_manager must be provided"
     engine = _require_active_engine(engine_manager)
 
     try:
@@ -315,7 +312,6 @@ async def configure_control(
     logger: Any = Depends(get_logger),
 ) -> dict[str, Any]:
     """Configure control strategy and parameters on the active engine."""
-    assert request is not None, "request must be provided"
     assert request is not None, "request must be provided"
     engine = _require_active_engine(engine_manager)
 
@@ -411,7 +407,6 @@ async def execute_feature(
     logger: Any = Depends(get_logger),
 ) -> dict[str, Any]:
     """Execute a specific engine feature by name on the active engine."""
-    assert request is not None, "request must be provided"
     assert request is not None, "request must be provided"
     engine = _require_active_engine(engine_manager)
 

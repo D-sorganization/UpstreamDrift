@@ -146,7 +146,6 @@ def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
 
 def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:
     assert api_key_record is not None, "api_key_record must be provided"
-    assert api_key_record is not None, "api_key_record must be provided"
     from datetime import datetime
 
     api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
@@ -164,7 +163,6 @@ async def get_current_user_from_api_key(
     reducing O(n) bcrypt calls to O(1) average case.
     """
 
-    assert credentials is not None, "credentials must be provided"
     assert credentials is not None, "credentials must be provided"
     api_key = credentials.credentials
     _validate_api_key_format(api_key)
@@ -189,7 +187,6 @@ async def get_current_user_flexible(
 ) -> User:
     """Get current user from either JWT token or API key."""
 
-    assert credentials is not None, "credentials must be provided"
     assert credentials is not None, "credentials must be provided"
     token = credentials.credentials
 

@@ -367,7 +367,6 @@ class APIError:
             APIError instance
         """
         assert code is not None, "code must be provided"
-        assert code is not None, "code must be provided"
         metadata = ERROR_METADATA.get(code, {})
         return cls(
             code=code,
@@ -421,7 +420,6 @@ class APIException(HTTPException):
             message: Optional custom message
             details: Additional error details
         """
-        assert code is not None, "code must be provided"
         assert code is not None, "code must be provided"
         self.error = APIError.from_code(code, message, details)
         metadata = ERROR_METADATA.get(code, {})

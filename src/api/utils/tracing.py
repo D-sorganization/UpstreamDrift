@@ -247,7 +247,6 @@ def traced_log(
         **kwargs: Additional fields to include in log
     """
     assert level is not None, "level must be provided"
-    assert level is not None, "level must be provided"
     extra = dict(kwargs)
 
     # Inject trace context
