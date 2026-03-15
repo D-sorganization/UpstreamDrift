@@ -11,11 +11,14 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.scrubber import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -23,19 +26,19 @@ def mock_tools():
     """Mock the scrubber calculators securely from Tools."""
     with (
         patch(
-            "src.shared.python.calc_backend.routers.scrubber.calculate_gas_density"
+            "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_gas_density"
         ) as mdensity,
         patch(
-            "src.shared.python.calc_backend.routers.scrubber.calculate_gas_viscosity"
+            "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_gas_viscosity"
         ) as mviscosity,
         patch(
-            "src.shared.python.calc_backend.routers.scrubber.calculate_flooding_velocity"
+            "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_flooding_velocity"
         ) as mflood,
         patch(
-            "src.shared.python.calc_backend.routers.scrubber.calculate_column_diameter"
+            "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_column_diameter"
         ) as mdiameter,
         patch(
-            "src.shared.python.calc_backend.routers.scrubber.calculate_caustic_requirement"
+            "upstream_drift_tools.process_calculators.scrubber_calculator.calculate_caustic_requirement"
         ) as mcaustic,
     ):
         yield mdensity, mviscosity, mflood, mdiameter, mcaustic
@@ -72,7 +75,7 @@ def test_calculate_scrubber_success(mock_tools) -> None:
         "caustic_concentration_pct": 20.0,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/scrubber", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -110,7 +113,7 @@ def test_calculate_scrubber_error_handling(mock_tools) -> None:
         "caustic_concentration_pct": 20.0,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/scrubber", json=payload)
     assert response.status_code == 422
     assert response.json() == {"detail": "division by zero gas density test"}
 
@@ -129,6 +132,6 @@ def test_calculate_scrubber_invalid_packing(mock_tools) -> None:
         "caustic_concentration_pct": 20.0,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/scrubber", json=payload)
     assert response.status_code == 422
-    assert "Unknown packing type" in response.json()["detail"]
+    assert "Unknown packing type" in str(response.json()["detail"])

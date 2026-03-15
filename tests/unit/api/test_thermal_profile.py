@@ -10,11 +10,14 @@ from __future__ import annotations
 import math
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.thermal_profile import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -42,7 +45,7 @@ class TestThermalProfilePhysics:
         self, constant_power_payload: dict
     ) -> None:
         """With heating power > heat loss, temperature must rise."""
-        response = client.post("/", json=constant_power_payload)
+        response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
         data = response.json()
         assert data["final_temp_c"] > constant_power_payload["initial_temp_c"]
@@ -52,7 +55,7 @@ class TestThermalProfilePhysics:
         self, constant_power_payload: dict
     ) -> None:
         """Steady state T = P/h + T_amb; reported value should match."""
-        response = client.post("/", json=constant_power_payload)
+        response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
         data = response.json()
         # Analytical: T_ss = 1000/10 + 20 = 120°C
@@ -62,7 +65,7 @@ class TestThermalProfilePhysics:
         self, constant_power_payload: dict
     ) -> None:
         """Time constant τ = C_th / h; reported value should match."""
-        response = client.post("/", json=constant_power_payload)
+        response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
         data = response.json()
         # τ = 5000 / 10 = 500s
@@ -70,14 +73,14 @@ class TestThermalProfilePhysics:
 
     def test_correct_number_of_data_points(self, constant_power_payload: dict) -> None:
         """Response should contain exactly `num_points` data entries."""
-        response = client.post("/", json=constant_power_payload)
+        response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
         assert len(response.json()["data"]) == 100
 
     def test_no_power_no_temperature_change(self, constant_power_payload: dict) -> None:
         """With zero power and no temperature delta, temperature should be constant."""
         payload = {**constant_power_payload, "power_w": 0.0}
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/thermal-profile", json=payload)
         assert response.status_code == 200
         data = response.json()
         assert data["temp_change_c"] == pytest.approx(0.0, abs=0.01)
@@ -89,8 +92,10 @@ class TestThermalProfilePhysics:
             "power_profile": "linear_ramp",
             "ramp_rate_w_per_s": 0.5,
         }
-        r_const = client.post("/", json=constant_power_payload).json()
-        r_ramp = client.post("/", json=ramp_payload).json()
+        r_const = client.post(
+            "/api/calc/thermal-profile", json=constant_power_payload
+        ).json()
+        r_ramp = client.post("/api/calc/thermal-profile", json=ramp_payload).json()
         assert r_ramp["final_temp_c"] > r_const["final_temp_c"]
 
     def test_step_profile_drops_to_ambient_over_time(self) -> None:
@@ -108,14 +113,14 @@ class TestThermalProfilePhysics:
             "ramp_rate_w_per_s": 0.0,
             "step_time_s": 0.0,  # step off immediately
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/thermal-profile", json=payload)
         assert response.status_code == 200
         data = response.json()
         assert data["final_temp_c"] < payload["initial_temp_c"]
 
     def test_all_outputs_finite(self, constant_power_payload: dict) -> None:
         """All numeric outputs must be finite."""
-        response = client.post("/", json=constant_power_payload)
+        response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
         data = response.json()
         for field in ["final_temp_c", "max_temp_c", "min_temp_c", "temp_change_c"]:

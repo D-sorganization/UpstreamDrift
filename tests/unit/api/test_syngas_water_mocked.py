@@ -11,11 +11,14 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.syngas_water import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -65,7 +68,7 @@ def test_calculate_syngas_water_success(mock_calculator, mock_estimate_risk) -> 
         "method": "auto",
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/syngas-water", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -96,7 +99,7 @@ def test_calculate_syngas_water_fallback() -> None:
             "method": "auto",
         }
 
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/syngas-water", json=payload)
         assert response.status_code == 200
         data = response.json()
         assert "water_content" in data

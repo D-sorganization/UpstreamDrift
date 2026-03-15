@@ -10,11 +10,14 @@ from __future__ import annotations
 import math
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.pressure_drop import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -50,7 +53,7 @@ class TestPressureDropPhysics:
 
     def test_turbulent_regime_identified(self, turbulent_payload: dict) -> None:
         """High Re flow should be classified as Turbulent."""
-        response = client.post("/", json=turbulent_payload)
+        response = client.post("/api/calc/pressure-drop", json=turbulent_payload)
         assert response.status_code == 200
         data = response.json()
         assert data["flow_regime"] == "Turbulent"
@@ -58,7 +61,7 @@ class TestPressureDropPhysics:
 
     def test_laminar_regime_identified(self, laminar_payload: dict) -> None:
         """Very slow flow should be classified as Laminar."""
-        response = client.post("/", json=laminar_payload)
+        response = client.post("/api/calc/pressure-drop", json=laminar_payload)
         assert response.status_code == 200
         data = response.json()
         assert data["flow_regime"] == "Laminar"
@@ -66,7 +69,7 @@ class TestPressureDropPhysics:
 
     def test_pressure_drop_positive(self, turbulent_payload: dict) -> None:
         """Pressure drop should always be non-negative for valid inputs."""
-        response = client.post("/", json=turbulent_payload)
+        response = client.post("/api/calc/pressure-drop", json=turbulent_payload)
         assert response.status_code == 200
         assert response.json()["pressure_drop_pa"] >= 0
 
@@ -82,15 +85,15 @@ class TestPressureDropPhysics:
             "roughness_m": 0.000045,
         }
         double = {**base, "pipe_length_m": 100.0}
-        r1 = client.post("/", json=base).json()
-        r2 = client.post("/", json=double).json()
+        r1 = client.post("/api/calc/pressure-drop", json=base).json()
+        r2 = client.post("/api/calc/pressure-drop", json=double).json()
         assert r2["pressure_drop_pa"] == pytest.approx(
             r1["pressure_drop_pa"] * 2, rel=1e-3
         )
 
     def test_all_outputs_finite(self, turbulent_payload: dict) -> None:
         """All output fields must be finite, not NaN or inf."""
-        response = client.post("/", json=turbulent_payload)
+        response = client.post("/api/calc/pressure-drop", json=turbulent_payload)
         assert response.status_code == 200
         data = response.json()
         for field in [
@@ -105,14 +108,14 @@ class TestPressureDropPhysics:
 
     def test_density_uses_ideal_gas_law(self, turbulent_payload: dict) -> None:
         """Verify density output matches ideal gas: rho = P*M / (R*T)."""
-        response = client.post("/", json=turbulent_payload)
+        response = client.post("/api/calc/pressure-drop", json=turbulent_payload)
         expected = (200000.0 * 0.029) / (8.314462618 * 350.0)
         assert response.status_code == 200
         assert response.json()["density_kg_m3"] == pytest.approx(expected, rel=1e-4)
 
     def test_laminar_friction_factor(self, laminar_payload: dict) -> None:
         """In laminar regime, friction factor = 64 / Re."""
-        response = client.post("/", json=laminar_payload)
+        response = client.post("/api/calc/pressure-drop", json=laminar_payload)
         assert response.status_code == 200
         data = response.json()
         re = data["reynolds_number"]

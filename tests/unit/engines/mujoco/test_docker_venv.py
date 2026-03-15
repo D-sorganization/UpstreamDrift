@@ -148,7 +148,7 @@ def _check_module_import() -> bool:
         return False
 
 
-def test_docker_venv() -> bool:
+def check_docker_venv() -> bool:
     """Test if Docker container properly uses the virtual environment."""
     logger.info("🐳 Testing Docker Container Virtual Environment")
     logger.info("=" * 60)
@@ -175,7 +175,7 @@ def test_docker_venv() -> bool:
 
 def main() -> int:
     """Main function."""
-    success = test_docker_venv()
+    success = check_docker_venv()
 
     if not success:
         logger.info("\n💡 Troubleshooting steps:")

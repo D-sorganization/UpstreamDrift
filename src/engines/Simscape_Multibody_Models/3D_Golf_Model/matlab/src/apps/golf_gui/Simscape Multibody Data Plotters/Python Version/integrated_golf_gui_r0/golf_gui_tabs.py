@@ -54,7 +54,7 @@ class MotionCaptureTab(QWidget):
         layout.addWidget(control_panel)
 
         # 3D visualization area
-        self.opengl_widget = GolfVisualizerWidget()
+        self.opengl_widget = GolfVisualizerWidget(parent=self)
         layout.addWidget(self.opengl_widget)
 
         # Status bar
@@ -251,7 +251,7 @@ class SimulinkModelTab(QWidget):
         layout.addWidget(control_panel)
 
         # 3D visualization area
-        self.opengl_widget = GolfVisualizerWidget()
+        self.opengl_widget = GolfVisualizerWidget(parent=self)
         layout.addWidget(self.opengl_widget)
 
         # Status bar
@@ -440,12 +440,12 @@ class ComparisonTab(QWidget):
         split_layout = QGridLayout()
 
         # Left: Motion Capture
-        self.mocap_widget = GolfVisualizerWidget()
+        self.mocap_widget = GolfVisualizerWidget(parent=self)
         split_layout.addWidget(QLabel("Reference (Motion Capture)"), 0, 0)
         split_layout.addWidget(self.mocap_widget, 1, 0)
 
         # Right: Model
-        self.model_widget = GolfVisualizerWidget()
+        self.model_widget = GolfVisualizerWidget(parent=self)
         split_layout.addWidget(QLabel("Simulation (Model)"), 0, 1)
         split_layout.addWidget(self.model_widget, 1, 1)
 

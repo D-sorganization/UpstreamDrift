@@ -34,11 +34,10 @@ dependencies = [
     # Structured logging (OBS-001: required for observability)
     "structlog>=24.1.0",
     
-    # Rust native physics integration (Core computational source of truth)
-    "upstream-physics>=0.1.0",
 ]
 
 [project.optional-dependencies]
+rust = ["upstream-physics>=0.1.0"]
 drake = ["drake>=1.22.0"]
 pinocchio = ["pinocchio>=2.6.0", "meshcat>=0.3.0"]
 
@@ -64,6 +63,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.0.0",
+    "pytest-benchmark>=4.0.0",
     "pytest-timeout>=2.0.0",
     "pytest-xdist>=3.0.0",
     "ruff>=0.1.0",
@@ -107,7 +107,7 @@ gui-test = [
 ]
 
 # Everything
-all = ["upstream-drift[all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
+all = ["upstream-drift[rust,all-engines,analysis,pose,biomechanics,rl,urdf,dev]"]
 
 [project.scripts]
 upstream-drift = "launch_golf_suite:main"

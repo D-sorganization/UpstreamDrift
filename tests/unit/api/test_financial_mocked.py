@@ -11,11 +11,14 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.financial import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -81,7 +84,7 @@ def test_calculate_financial_success(mock_calculator) -> None:
         "projection_years": 2,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/financial", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -129,6 +132,6 @@ def test_calculate_financial_error_handling(mock_calculator) -> None:
         "projection_years": 0,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/financial", json=payload)
     assert response.status_code == 422
     assert response.json() == {"detail": "Invalid tax rate"}

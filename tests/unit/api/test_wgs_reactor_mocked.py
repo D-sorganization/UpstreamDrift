@@ -11,11 +11,14 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.wgs_reactor import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -57,7 +60,7 @@ def test_calculate_wgs_success(mock_engine) -> None:
         "catalyst_type": "high_temp",
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/wgs-reactor", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -93,6 +96,6 @@ def test_calculate_wgs_error_handling(mock_engine) -> None:
         "catalyst_type": "high_temp",
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/wgs-reactor", json=payload)
     assert response.status_code == 422
     assert response.json() == {"detail": "Invalid input"}

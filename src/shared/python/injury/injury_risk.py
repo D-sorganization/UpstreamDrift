@@ -135,8 +135,7 @@ class InjuryRiskScorer:
         Returns:
             InjuryRiskReport with scores and recommendations
         """
-        assert spinal_result is not None, "spinal_result must be provided"
-        assert spinal_result is not None, "spinal_result must be provided"
+
         report = InjuryRiskReport()
         self.risk_factors = []
 
@@ -171,8 +170,7 @@ class InjuryRiskScorer:
     ) -> None:
         """Score spinal-related risk factors."""
         # Compression risk
-        assert spinal_result is not None, "spinal_result must be provided"
-        assert spinal_result is not None, "spinal_result must be provided"
+
         compression_bw = getattr(spinal_result, "peak_compression_bw", 0)
         self.risk_factors.append(
             RiskFactor(

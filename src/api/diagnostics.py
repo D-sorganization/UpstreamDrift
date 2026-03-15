@@ -53,7 +53,6 @@ class APIDiagnostics:
         Args:
             app: FastAPI application instance for route inspection
         """
-        assert app is not None, "app must be provided"
         self.app = app
         self.results: list[DiagnosticResult] = []
         self._start_time = time.time()

@@ -19,6 +19,13 @@ import numpy as np
 
 os.environ["DBC_LEVEL"] = "enforce"
 
+from src.shared.python.physics.rust_kernel import is_rust_available  # noqa: E402
+
+_RUST_SKIP = unittest.skipIf(
+    not is_rust_available(),
+    "upstream-physics Rust kernel not installed (pip install upstream-drift[rust])",
+)
+
 
 def _make_pre_state(
     clubhead_vel: float = 45.0,
@@ -291,8 +298,9 @@ class TestBallFlightSimulatorInvariants(unittest.TestCase):
         self.assertGreater(sim.ball.mass, 0.0)
 
 
+@_RUST_SKIP
 class TestSimulateTrajectoryPreconditions(unittest.TestCase):
-    """simulate_trajectory preconditions."""
+    """simulate_trajectory preconditions (requires Rust kernel)."""
 
     def test_none_launch_raises(self) -> None:
         from src.shared.python.core.contracts import ContractViolationError
@@ -339,8 +347,9 @@ class TestSimulateTrajectoryPreconditions(unittest.TestCase):
             sim.simulate_trajectory(launch, max_time=-1.0)
 
 
+@_RUST_SKIP
 class TestTrajectoryPostconditions(unittest.TestCase):
-    """Physical postconditions for trajectory simulation."""
+    """Physical postconditions for trajectory simulation (requires Rust kernel)."""
 
     def _simulate(self, velocity: float = 50.0, angle: float = 0.2):  # type: ignore[no-untyped-def]
         from src.shared.python.physics.ball_flight_physics import (

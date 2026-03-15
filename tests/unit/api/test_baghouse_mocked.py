@@ -11,11 +11,14 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.baghouse import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 @pytest.fixture
@@ -64,7 +67,7 @@ def test_calculate_baghouse_success(mock_calculator) -> None:
         "bag_area_ft2": 1000.0,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/baghouse", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -102,6 +105,6 @@ def test_calculate_baghouse_error_handling(mock_calculator) -> None:
         "bag_area_ft2": 1000.0,
     }
 
-    response = client.post("/", json=payload)
+    response = client.post("/api/calc/baghouse", json=payload)
     assert response.status_code == 422
     assert response.json() == {"detail": "Flow must be positive"}

@@ -6,7 +6,7 @@ import math
 
 from fastapi import APIRouter, HTTPException
 
-from shared.python.safe_eval import safe_eval
+from src.shared.python.safe_eval import safe_eval
 
 from ..contracts.ode_solver import (
     ODESolverRequest,

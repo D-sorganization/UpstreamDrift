@@ -122,7 +122,7 @@ class WiffleGolfMainWindow(QMainWindow):
         main_layout.setSpacing(0)
 
         # Create visualizer widget
-        self.visualizer_widget = GolfVisualizerWidget()
+        self.visualizer_widget = GolfVisualizerWidget(parent=central_widget)
         main_layout.addWidget(self.visualizer_widget, 1)
 
         # Create control panels

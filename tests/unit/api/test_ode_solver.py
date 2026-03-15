@@ -10,11 +10,14 @@ from __future__ import annotations
 import math
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.shared.python.calc_backend.routers.ode_solver import router
 
-client = TestClient(router)
+_app = FastAPI()
+_app.include_router(router)
+client = TestClient(_app)
 
 
 class TestODESolverPhysics:
@@ -33,7 +36,7 @@ class TestODESolverPhysics:
             "t_end": 1.0,
             "num_points": 1001,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 200
         data = response.json()
         final_x = data["solutions"]["x"][-1]
@@ -50,7 +53,7 @@ class TestODESolverPhysics:
             "t_end": 3.0,
             "num_points": 100,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 200
         final_x = response.json()["solutions"]["x"][-1]
         assert final_x == pytest.approx(5.0 + 2.0 * 3.0, rel=1e-3)
@@ -70,7 +73,7 @@ class TestODESolverPhysics:
             "t_end": half_pi,
             "num_points": 1001,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 200
         final_x = response.json()["solutions"]["x"][-1]
         assert final_x == pytest.approx(0.0, abs=1e-3)
@@ -85,7 +88,7 @@ class TestODESolverPhysics:
             "t_end": 5.0,
             "num_points": 100,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 200
         data = response.json()
         summary = next(s for s in data["variable_summaries"] if s["name"] == "x")
@@ -104,9 +107,9 @@ class TestODESolverPhysics:
             "t_end": 1.0,
             "num_points": 10,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 422
-        assert "y" in response.json()["detail"]
+        assert "y" in str(response.json()["detail"])
 
     def test_correct_number_of_timepoints(self) -> None:
         """Solver must return exactly the requested number of time points."""
@@ -118,7 +121,7 @@ class TestODESolverPhysics:
             "t_end": 2.0,
             "num_points": 50,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 200
         data = response.json()
         assert len(data["times"]) == 50
@@ -134,7 +137,7 @@ class TestODESolverPhysics:
             "t_end": 2.0,
             "num_points": 200,
         }
-        response = client.post("/", json=payload)
+        response = client.post("/api/calc/ode-solver", json=payload)
         assert response.status_code == 200
         data = response.json()
         assert "a" in data["solutions"]

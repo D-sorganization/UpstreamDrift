@@ -26,7 +26,14 @@ from src.shared.python.physics.aerodynamics import (
     RandomizationConfig,
     WindConfig,
 )
-from src.shared.python.physics.ball_flight_physics import (
+from src.shared.python.physics.rust_kernel import is_rust_available
+
+pytestmark = pytest.mark.skipif(
+    not is_rust_available(),
+    reason="upstream-physics Rust kernel not installed (pip install upstream-drift[rust])",
+)
+
+from src.shared.python.physics.ball_flight_physics import (  # noqa: E402
     BallProperties,
     EnhancedBallFlightSimulator,
     EnvironmentalConditions,

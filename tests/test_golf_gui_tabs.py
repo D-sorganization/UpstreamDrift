@@ -228,7 +228,7 @@ with _patch.dict("sys.modules", _MOCK_MODULES):
 class TestGolfGuiTabs(unittest.TestCase):
     def test_simulink_model_tab_structure(self):
         # Instantiate the tab
-        tab = golf_gui_application.SimulinkModelTab()
+        tab = golf_gui_application.SimulinkModelTab(parent=MockQWidget())
 
         # Check layout
         self.assertTrue(hasattr(tab, "layout"))
@@ -245,7 +245,7 @@ class TestGolfGuiTabs(unittest.TestCase):
 
     def test_comparison_tab_structure(self):
         # Instantiate the tab
-        tab = golf_gui_application.ComparisonTab()
+        tab = golf_gui_application.ComparisonTab(parent=MockQWidget())
 
         # Check layout
         self.assertTrue(hasattr(tab, "layout"))

@@ -427,7 +427,7 @@ class MultiModelShotTracerWindow(QMainWindow):
         self.setMinimumSize(1300, 900)
 
         # Central widget
-        self.central_widget = MultiModelShotTracerWidget()
+        self.central_widget = MultiModelShotTracerWidget(parent=self)
         self.setCentralWidget(self.central_widget)
 
         # Status bar
