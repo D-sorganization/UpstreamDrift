@@ -64,14 +64,14 @@ def test_calculate_scrubber_success(mock_tools) -> None:
     }
 
     payload = {
-        "packing_type": "pall_ring_1_inch_ceramic",
+        "packing_type": "Metal Pall Rings",
         "gas_flow_kg_hr": 1000.0,
         "gas_temperature_k": 300.0,
         "gas_pressure_pa": 101325.0,
         "gas_molecular_weight": 29.0,
         "liquid_flow_kg_hr": 500.0,
         "percent_of_flood": 70.0,
-        "acid_gas_removed_kg_hr": 10.0,
+        "acid_gas_removed_kg_hr": {"H2S": 10.0},
         "caustic_concentration_pct": 20.0,
     }
 
@@ -102,14 +102,14 @@ def test_calculate_scrubber_error_handling(mock_tools) -> None:
     mdensity.side_effect = ZeroDivisionError("division by zero gas density test")
 
     payload = {
-        "packing_type": "pall_ring_1_inch_ceramic",
+        "packing_type": "Metal Pall Rings",
         "gas_flow_kg_hr": 1000.0,
         "gas_temperature_k": 300.0,
         "gas_pressure_pa": 101325.0,
         "gas_molecular_weight": 29.0,
         "liquid_flow_kg_hr": 500.0,
         "percent_of_flood": 70.0,
-        "acid_gas_removed_kg_hr": 10.0,
+        "acid_gas_removed_kg_hr": {"H2S": 10.0},
         "caustic_concentration_pct": 20.0,
     }
 
@@ -128,7 +128,7 @@ def test_calculate_scrubber_invalid_packing(mock_tools) -> None:
         "gas_molecular_weight": 29.0,
         "liquid_flow_kg_hr": 500.0,
         "percent_of_flood": 70.0,
-        "acid_gas_removed_kg_hr": 10.0,
+        "acid_gas_removed_kg_hr": {"H2S": 10.0},
         "caustic_concentration_pct": 20.0,
     }
 

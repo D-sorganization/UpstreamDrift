@@ -91,7 +91,7 @@ def test_calculate_baghouse_error_handling(mock_calculator) -> None:
     mock_calculator.calculate.side_effect = ValueError("Flow must be positive")
 
     payload = {
-        "gas_flow_kg_s": -1.5,
+        "gas_flow_kg_s": 1.5,
         "inlet_temp_k": 450.0,
         "pressure_pa": 105000.0,
         "composition": {"N2": 1.0},

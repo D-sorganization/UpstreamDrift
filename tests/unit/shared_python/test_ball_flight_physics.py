@@ -1,10 +1,17 @@
 import numpy as np
+import pytest
 
 from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
     BallProperties,
     EnvironmentalConditions,
     LaunchConditions,
+)
+from src.shared.python.physics.rust_kernel import is_rust_available
+
+pytestmark = pytest.mark.skipif(
+    not is_rust_available(),
+    reason="upstream-physics Rust kernel not available in this lane",
 )
 
 

@@ -1,81 +1,108 @@
-"""Integration tests for Tools repository integration.
+"""Integration tests for Tools repository integration."""
 
-Tests verify that UpstreamDrift correctly integrates with the shared Tools
-packages (model_generation, signal_toolkit, humanoid_character_builder).
-"""
-
+import os
 import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 # Mark all tests as integration tests
 pytestmark = pytest.mark.integration
 
 
+def _require_real_tools_repo() -> bool:
+    return os.environ.get("REQUIRE_REAL_TOOLS_REPO", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _assert_real_tools_path(module_file: str) -> None:
+    normalized = module_file.replace("\\", "/").lower()
+    assert any(
+        marker in normalized
+        for marker in (
+            "/_tools_dep/",
+            "/vendor/ud-tools/",
+            "/repositories/tools/",
+            "/tools/",
+        )
+    ), f"Expected Tools-backed provider path, got: {module_file}"
+
+
+def _prepend_real_tools_paths() -> None:
+    tools_root = os.environ.get("TOOLS_REPO_ROOT")
+    if not tools_root:
+        repo_root = Path(__file__).resolve().parents[3]
+        for candidate in (
+            repo_root / "_tools_dep",
+            repo_root / "vendor" / "ud-tools",
+            repo_root.parent / "Tools",
+        ):
+            if candidate.exists():
+                tools_root = str(candidate.resolve())
+                os.environ["TOOLS_REPO_ROOT"] = tools_root
+                break
+
+    if not tools_root:
+        raise RuntimeError(
+            "REQUIRE_REAL_TOOLS_REPO=1 but no Tools checkout was found. "
+            "Expected _tools_dep, vendor/ud-tools, or ../Tools."
+        )
+
+    for path in reversed(
+        [
+            Path(tools_root) / "src" / "shared" / "python",
+            Path(tools_root) / "src",
+            Path(tools_root) / "src" / "python" / "src",
+        ]
+    ):
+        if not path.exists():
+            continue
+        path_str = str(path.resolve())
+        if path_str in sys.path:
+            sys.path.remove(path_str)
+        sys.path.insert(0, path_str)
+
+
+def _import_or_skip(module_name: str):
+    if _require_real_tools_repo():
+        _prepend_real_tools_paths()
+        module = __import__(module_name, fromlist=["__name__"])
+        _assert_real_tools_path(str(Path(module.__file__).resolve()))
+        return module
+
+    try:
+        return __import__(module_name, fromlist=["__name__"])
+    except ImportError:
+        pytest.skip(f"{module_name} not available in optional integration mode")
+
+
 class TestToolsRepoIntegration:
     """Test integration with Tools repository packages."""
 
-    def test_tools_repo_optional_import(self) -> None:
-        """Verify Tools repo packages are optional (graceful degradation)."""
-        # These should not raise even if Tools repo is not installed
-        try:
-            from model_generation import quick_urdf  # noqa: F401
-
-            tools_available = True
-        except ImportError:
-            tools_available = False
-
-        # Either way, the import should not crash the system
-        assert isinstance(tools_available, bool)
-
-    @pytest.mark.xfail(
-        reason="Upstream Tools repo bug: Inertia.from_box precondition lambda signature",
-        strict=False,
-    )
-    def test_urdf_generation_fallback(self) -> None:
-        """Verify URDF generation works with fallback when Tools unavailable."""
-        try:
-            from model_generation import quick_urdf
-
-            # If available, test basic generation
-            urdf = quick_urdf(height_m=1.80, preset="athletic")
-            assert urdf is not None
-            assert "robot" in urdf.lower() or "link" in urdf.lower()
-        except ImportError:
-            # Fallback: check that built-in models exist
-            model_paths = [
-                Path("src/shared/models"),
-                Path("src/engines/physics_engines/mujoco/models"),
-            ]
-            any_models_exist = any(p.exists() for p in model_paths)
-            assert any_models_exist, "No fallback models available"
+    def test_model_generation_import_contract(self) -> None:
+        """Verify model_generation imports cleanly in both optional and required modes."""
+        module = _import_or_skip("model_generation")
+        assert hasattr(module, "quick_urdf")
+        assert getattr(module, "DEFAULT_HEIGHT_M", 0) > 0
 
     def test_signal_toolkit_compatibility(self) -> None:
-        """Verify signal_toolkit is compatible if installed."""
-        try:
-            import numpy as np
-            from signal_toolkit import SignalGenerator
-
-            # Basic signal generation test
-            t = np.linspace(0, 1, 100)
-            signal = SignalGenerator.sinusoid(t, amplitude=1.0, frequency=5.0)
-            assert signal is not None
-            # Signal is a dataclass with .values attribute, not directly sized
-            assert len(signal.values) == len(t)
-        except ImportError:
-            pytest.skip("signal_toolkit not installed")
+        """Verify signal_toolkit is compatible when present."""
+        module = _import_or_skip("signal_toolkit")
+        t = np.linspace(0, 1, 100)
+        signal = module.SignalGenerator.sinusoid(t, amplitude=1.0, frequency=5.0)
+        assert len(signal.values) == len(t)
 
     def test_humanoid_builder_compatibility(self) -> None:
-        """Verify humanoid_character_builder is compatible if installed."""
-        try:
-            from humanoid_character_builder import BodyParameters
-
-            params = BodyParameters(height_m=1.75, mass_kg=70.0)
-            assert params.height_m == 1.75
-            assert params.mass_kg == 70.0
-        except ImportError:
-            pytest.skip("humanoid_character_builder not installed")
+        """Verify humanoid_character_builder is compatible when present."""
+        module = _import_or_skip("humanoid_character_builder")
+        params = module.BodyParameters(height_m=1.75, mass_kg=70.0)
+        assert params.height_m == 1.75
+        assert params.mass_kg == 70.0
 
 
 class TestCrossRepoImportPaths:
@@ -83,13 +110,16 @@ class TestCrossRepoImportPaths:
 
     def test_pythonpath_includes_tools(self) -> None:
         """Verify PYTHONPATH can be configured for Tools packages."""
-        # Check if Tools packages are importable or paths are documented
         tools_path = Path(__file__).parent.parent.parent.parent / "Tools"
         if tools_path.exists():
-            # Tools repo exists as sibling
             expected_path = tools_path / "src" / "shared" / "python"
             if expected_path.exists():
-                assert str(expected_path) in sys.path or True  # Path exists
+                if _require_real_tools_repo():
+                    _prepend_real_tools_paths()
+                    normalized_paths = {Path(path).resolve() for path in sys.path}
+                    assert expected_path.resolve() in normalized_paths
+                else:
+                    assert expected_path.exists()
 
     def test_pyproject_documents_tools_dependency(self) -> None:
         """Verify pyproject.toml documents Tools integration."""

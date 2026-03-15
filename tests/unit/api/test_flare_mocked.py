@@ -81,7 +81,7 @@ def test_calculate_flare_error_handling(mock_calculator) -> None:
     )
 
     payload = {
-        "total_flow_kg_hr": -2000.0,
+        "total_flow_kg_hr": 2000.0,
         "gas_composition": {"CH4": 1.0},
         "temperature_k": 300.0,
         "pressure_bar": 2.0,

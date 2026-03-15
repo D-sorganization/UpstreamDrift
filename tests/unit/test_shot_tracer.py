@@ -18,19 +18,19 @@ pytestmark = pytest.mark.skipif(
 # Mock flight_models using patch.dict (auto-cleans) before importing shot_tracer
 with patch.dict(sys.modules, {"flight_models": MagicMock()}):
     if PYQT6_AVAILABLE:
-        from src.launchers.shot_tracer import (
-            MultiModelShotTracerWidget,
-            MultiModelShotTracerWindow,
-        )
+        import src.launchers.shot_tracer as shot_tracer_module
+
+        MultiModelShotTracerWidget = shot_tracer_module.MultiModelShotTracerWidget
+        MultiModelShotTracerWindow = shot_tracer_module.MultiModelShotTracerWindow
 
 
 @pytest.fixture
 def mock_flight_models():
     with (
-        patch("src.launchers.shot_tracer.FlightModelRegistry") as mock_registry,
-        patch("src.launchers.shot_tracer.UnifiedLaunchConditions") as mock_launch,
-        patch("src.launchers.shot_tracer.compare_models") as mock_compare,
-        patch("src.launchers.shot_tracer.FlightModelType") as mock_type,
+        patch.object(shot_tracer_module, "FlightModelRegistry") as mock_registry,
+        patch.object(shot_tracer_module, "UnifiedLaunchConditions") as mock_launch,
+        patch.object(shot_tracer_module, "compare_models") as mock_compare,
+        patch.object(shot_tracer_module, "FlightModelType") as mock_type,
     ):
         # Setup FlightModelType enum-like behavior
         mock_type.WATERLOO_PENNER.value = "waterloo_penner"
@@ -60,8 +60,9 @@ def widget(qtbot, mock_flight_models):
         parent = QWidget()
         qtbot.addWidget(parent)
         widget = MultiModelShotTracerWidget(parent=parent)
+        widget._test_parent = parent
     else:
-        widget = MultiModelShotTracerWidget()
+        pytest.skip("PyQt6 not available")
     qtbot.addWidget(widget)
     return widget
 

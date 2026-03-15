@@ -19,6 +19,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
+    CV2_AVAILABLE,
     DRAKE_AVAILABLE,
     MEDIAPIPE_AVAILABLE,
     MUJOCO_AVAILABLE,
@@ -222,6 +223,11 @@ class TestMyoSuiteGymnasiumCompatibility:
 class TestVideoPosePipelineAudit:
     """Verify video pose pipeline integration."""
 
+    pytestmark = pytest.mark.skipif(
+        not CV2_AVAILABLE,
+        reason="cv2 not installed",
+    )
+
     def test_pipeline_importable(self) -> None:
         """VideoPosePipeline must be importable."""
         from src.shared.python.gui_pkg.video_pose_pipeline import (
@@ -374,7 +380,7 @@ class TestEngineAvailabilityDeep:
             import pydrake.all  # noqa: F401
 
             assert DRAKE_AVAILABLE
-        except ImportError:
+        except Exception:
             assert not DRAKE_AVAILABLE
 
     def test_mujoco_availability_consistent_with_import(self) -> None:

@@ -25,7 +25,7 @@ client = TestClient(_app)
 def mock_calculator():
     """Mock the SyngasWaterCalculator securely from Tools."""
     with patch(
-        "src.shared.python.calc_backend.routers.syngas_water.SyngasWaterCalculator"
+        "upstream_drift_tools.process_calculators.syngas_water_calculator.SyngasWaterCalculator"
     ) as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -36,7 +36,7 @@ def mock_calculator():
 def mock_estimate_risk():
     """Mock the estimate_condensation_risk function."""
     with patch(
-        "src.shared.python.calc_backend.routers.syngas_water.estimate_condensation_risk"
+        "upstream_drift_tools.process_calculators.syngas_water_calculator.estimate_condensation_risk"
     ) as mock_func:
         yield mock_func
 

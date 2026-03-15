@@ -26,8 +26,14 @@ from src.shared.python.physics.ball_flight_physics import (
     EnvironmentalConditions,
     LaunchConditions,
 )
+from src.shared.python.physics.rust_kernel import is_rust_available
 
 logger = logging.getLogger(__name__)
+
+pytestmark = pytest.mark.skipif(
+    not is_rust_available(),
+    reason="upstream-physics Rust kernel not available in this lane",
+)
 
 # Tolerance for Rust/Python parity (RK4 with same dt should agree closely)
 POSITION_TOLERANCE_M = 0.5  # meters — allow small drift from implementation differences

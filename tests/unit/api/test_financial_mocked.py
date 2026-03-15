@@ -125,11 +125,11 @@ def test_calculate_financial_error_handling(mock_calculator) -> None:
         "debt_ratio": 0.6,
         "interest_rate": 0.05,
         "depreciation_years": 10.0,
-        "tax_rate": -0.5,  # Invalid param
+        "tax_rate": 0.21,
         "baghouse_operating_cost_per_ton": 1.0,
         "scrubber_operating_cost_per_ton": 2.0,
         "glass_raw_material_cost_per_ton": 0.0,
-        "projection_years": 0,
+        "projection_years": 1,
     }
 
     response = client.post("/api/calc/financial", json=payload)
