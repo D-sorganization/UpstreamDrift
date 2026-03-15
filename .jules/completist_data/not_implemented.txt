@@ -1,14 +1,14 @@
 ./src/api/middleware/error_handler.py:27:    - NotImplementedError -> 501 Not Implemented
 ./src/api/middleware/error_handler.py:47:            except NotImplementedError as e:
 ./src/api/middleware/error_handler.py:69:        except NotImplementedError as e:
-./src/launchers/base.py:94:    NotImplementedError at runtime.
-./src/shared/python/engine_core/base_physics_engine.py:400:            except (NotImplementedError, AttributeError):
+./src/launchers/base.py:96:    NotImplementedError at runtime.
+./src/shared/python/engine_core/base_physics_engine.py:404:            except (NotImplementedError, AttributeError):
 ./src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
-./src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py:297:            NotImplementedError: To prevent silent simulation failures from
-./src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py:300:        raise NotImplementedError(
-./src/engines/physics_engines/opensim/python/opensim_gui.py:269:        except NotImplementedError as e:
+./src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py:307:            NotImplementedError: To prevent silent simulation failures from
+./src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py:310:        raise NotImplementedError(
+./src/engines/physics_engines/opensim/python/opensim_gui.py:271:        except NotImplementedError as e:
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./src/tools/model_generation/converters/format_utils.py:159:    raise NotImplementedError(
+./src/tools/model_generation/converters/format_utils.py:163:    raise NotImplementedError(
 ./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:13654:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
