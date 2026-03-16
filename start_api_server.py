@@ -11,14 +11,14 @@ from __future__ import annotations
 import os
 
 import uvicorn
-from src.shared.python.launcher_utils import (
+
+from api.server import app
+from src.shared.python.gui_pkg.launcher_utils import (
     check_python_dependencies,
     ensure_environment_var,
     get_repo_root,
     invoke_main,
 )
-
-from api.server import app
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_logging(use_simple_format=True)
@@ -32,7 +32,7 @@ def _validate_security() -> bool:
         True if environment is secure enough to proceed.
     """
     try:
-        from shared.python.env_validator import validate_environment
+        from src.shared.python.security.env_validator import validate_environment
 
         logger.info("🔒 Validating security configuration...")
         results = validate_environment(raise_on_error=False)
@@ -40,7 +40,7 @@ def _validate_security() -> bool:
         if results["critical_issues"]:
             logger.error("❌ CRITICAL SECURITY ISSUES FOUND:")
             for issue in results["critical_issues"]:
-                logger.error(f"   - {issue}")
+                logger.error("   - %s", issue)
 
             if os.getenv("ENVIRONMENT", "development").lower() == "production":
                 return False
@@ -48,7 +48,7 @@ def _validate_security() -> bool:
 
         if results["warnings"]:
             for warning in results["warnings"][:3]:
-                logger.warning(f"⚠️  {warning}")
+                logger.warning("⚠️  %s", warning)
 
         return True
     except ImportError:
