@@ -292,7 +292,7 @@ def generate_mermaid_charts(
 
     # Breakdown by Top Modules (Bar Chart equivalent using pie or just text for now as mermaid bar is verbose)
     # Let's do a simple count by top-level dir
-    counts = {}
+    counts: dict[str, int] = {}
     for item in criticals + todos + fixmes:
         path_parts = item["file"].split("/")
         root = path_parts[0] if path_parts else "unknown"

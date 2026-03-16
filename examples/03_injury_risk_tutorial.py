@@ -13,14 +13,13 @@ We will:
 """
 
 # Setup logger for tutorial
-from src.shared.python.logging_config import get_logger, setup_logging
-
 from src.shared.python.injury.injury_risk import (
     InjuryRiskScorer,
 )
 from src.shared.python.injury.spinal_load_analysis import (
     create_example_analysis,
 )
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_logging(use_simple_format=True)
 logger = get_logger("tutorial")

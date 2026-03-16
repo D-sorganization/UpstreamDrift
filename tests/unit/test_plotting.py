@@ -41,21 +41,20 @@ def mock_recorder():
     pe = GRAVITY_M_S2 * club_pos[:, 2]
     te = ke + pe
 
-    _field_map = {
-        "joint_positions": positions,
-        "joint_velocities": velocities,
-        "joint_accelerations": accelerations,
-        "joint_torques": torques,
-        "actuator_powers": powers,
-        "club_head_position": club_pos,
-        "club_head_speed": club_speed,
-        "kinetic_energy": ke,
-        "potential_energy": pe,
-        "total_energy": te,
-    }
-
     def get_data(field_name):
-        return times, _field_map.get(field_name, [])
+        field_map = {
+            "joint_positions": positions,
+            "joint_velocities": velocities,
+            "joint_accelerations": accelerations,
+            "joint_torques": torques,
+            "actuator_powers": powers,
+            "club_head_position": club_pos,
+            "club_head_speed": club_speed,
+            "kinetic_energy": ke,
+            "potential_energy": pe,
+            "total_energy": te,
+        }
+        return times, field_map.get(field_name, [])
 
     recorder.get_time_series.side_effect = get_data
     return recorder

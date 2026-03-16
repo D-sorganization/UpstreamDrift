@@ -15,7 +15,7 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 # sklearn/muscle_analysis is optional - check actual sklearn availability
 try:
-    from shared.python.muscle_analysis import (
+    from shared.python.biomechanics.muscle_analysis import (
         SKLEARN_AVAILABLE,
         MuscleSynergyAnalyzer,
     )
@@ -57,15 +57,13 @@ class MockRecorder:
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Return time and data arrays for the requested field."""
-        if field_name == "joint_positions":  # noqa: SIM116
-            return self.times, self.joint_positions
-        if field_name == "joint_velocities":
-            return self.times, self.joint_velocities
-        if field_name == "joint_accelerations":
-            return self.times, self.joint_accelerations
-        if field_name == "joint_torques":
-            return self.times, self.joint_torques
-        return self.times, np.zeros_like(self.times)
+        fields = {
+            "joint_positions": self.joint_positions,
+            "joint_velocities": self.joint_velocities,
+            "joint_accelerations": self.joint_accelerations,
+            "joint_torques": self.joint_torques,
+        }
+        return self.times, fields.get(field_name, np.zeros_like(self.times))
 
 
 def test_poincare_map_3d() -> None:

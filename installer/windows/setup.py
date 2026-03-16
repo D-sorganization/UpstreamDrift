@@ -11,12 +11,15 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from cx_Freeze import Executable, setup
+from cx_Freeze import Executable, setup  # type: ignore[import-not-found]
 
 project_root = Path(__file__).parent.parent.parent
 # Import version and metadata
 try:
-    from shared.python.version import __description__, __version__
+    from shared.python.version import (  # type: ignore[import-not-found]
+        __description__,
+        __version__,
+    )
 except ImportError:
     __version__ = "1.0.0"
     __description__ = "UpstreamDrift - Professional Biomechanical Analysis"

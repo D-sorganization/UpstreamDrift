@@ -57,15 +57,6 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
         with patch.object(real_status_bar, "showMessage") as mock_show_message:
             # Mock the file dialog
             test_path = "/path/to/test.c3d"
-            # Mock ezc3d
-            # Since ezc3d is mocked in sys.modules, patch("ezc3d.c3d")
-            # should work if we target the mock
-            # But cleaner is to mock the return value of ezc3d.c3d
-            # if we knew the structure.
-            # Since we don't know if patch("ezc3d.c3d") works when ezc3d
-            # is a MagicMock in sys.modules
-            # (it should work if the mock has attributes), let's try.
-            # Actually, patch string imports the module. sys.modules has it.
             with (
                 patch(
                     "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
@@ -73,7 +64,6 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
                 ),
                 patch("ezc3d.c3d") as mock_c3d,
             ):
-                # Minimal mock data
                 mock_data = MagicMock()
                 mock_data.__getitem__.side_effect = lambda k: {
                     "data": {

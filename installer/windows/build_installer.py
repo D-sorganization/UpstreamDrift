@@ -25,7 +25,7 @@ def check_prerequisites() -> bool:
 
     # Check cx_Freeze
     try:
-        import cx_Freeze
+        import cx_Freeze  # type: ignore[import-not-found]
 
         print(f"✓ cx_Freeze {cx_Freeze.version}")  # noqa: T201
     except ImportError:

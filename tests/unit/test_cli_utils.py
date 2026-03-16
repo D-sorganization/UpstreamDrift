@@ -33,7 +33,7 @@ class TestCreateBaseParser:
     def test_creates_parser_with_description(self) -> None:
         """Parser should have the provided description."""
         parser = create_base_parser("Test program description")
-        assert True
+        assert parser.description is not None
         # ArgumentParser stores description, checking it created successfully
         assert isinstance(parser, argparse.ArgumentParser)
 

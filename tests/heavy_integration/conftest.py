@@ -9,14 +9,13 @@ display, temp directories, and shared expensive resources.
 from __future__ import annotations
 
 import os
-import subprocess
 import tempfile
 from pathlib import Path
 
 import pytest
 
-
 # ── Display Fixture ───────────────────────────────────────────────────────────
+
 
 @pytest.fixture(scope="session")
 def headless_display() -> None:
@@ -29,6 +28,7 @@ def headless_display() -> None:
     if not display:
         # Warn but don't fail — some tests don't need display
         import warnings
+
         warnings.warn(
             "DISPLAY not set. GUI tests may fail. "
             "Run via: xvfb-run pytest ... or wsl bash run_local_heavy_tests.sh",
@@ -37,6 +37,7 @@ def headless_display() -> None:
 
 
 # ── Temp Directory ────────────────────────────────────────────────────────────
+
 
 @pytest.fixture()
 def temp_test_dir() -> Path:
@@ -47,6 +48,7 @@ def temp_test_dir() -> Path:
 
 # ── Physics Engine Fixtures ───────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session")
 def mujoco_model():
     """
@@ -55,6 +57,7 @@ def mujoco_model():
     """
     try:
         import mujoco
+
         xml = """
         <mujoco>
           <worldbody>
@@ -79,13 +82,11 @@ def pinocchio_model():
     Returns a simple 1-DOF pendulum model for FK testing.
     """
     try:
-        import pinocchio as pin
         import numpy as np
+        import pinocchio as pin
+
         model = pin.Model()
-        geom_model = pin.GeometryModel()
-        joint_id = model.addJoint(
-            0, pin.JointModelRY(), pin.SE3.Identity(), "joint1"
-        )
+        joint_id = model.addJoint(0, pin.JointModelRY(), pin.SE3.Identity(), "joint1")
         model.appendBodyToJoint(
             joint_id,
             pin.Inertia(1.0, np.zeros(3), np.eye(3)),

@@ -244,15 +244,13 @@ class MockRecorderNew(RecorderInterface):
 
     def get_time_series(self, field_name) -> tuple:  # noqa: ANN001
         """Return time series data for the given field."""
-        if field_name == "joint_positions":  # noqa: SIM116
-            return self.times, self.positions
-        if field_name == "joint_velocities":
-            return self.times, self.velocities
-        if field_name == "joint_accelerations":
-            return self.times, self.accelerations
-        if field_name == "joint_torques":
-            return self.times, self.torques
-        return [], []
+        fields = {
+            "joint_positions": self.positions,
+            "joint_velocities": self.velocities,
+            "joint_accelerations": self.accelerations,
+            "joint_torques": self.torques,
+        }
+        return (self.times, fields[field_name]) if field_name in fields else ([], [])
 
     def get_induced_acceleration_series(self, source_name: str | int) -> tuple:
         """Return empty induced acceleration series."""

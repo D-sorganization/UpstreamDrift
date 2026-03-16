@@ -223,6 +223,11 @@ exclude = [
     # Test stubs with pre-existing issues
     "src/engines/physics_engines/drake/python/tests/",
     "src/engines/physics_engines/pinocchio/python/tests/",
+    # Root/example scripts use runtime src. prefixed imports
+    "examples/",
+    "installer/",
+    "start_api_server.py",
+    "setup_golf_suite.py",
 ]
 
 # Mypy overrides for modules with pre-existing type issues
